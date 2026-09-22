@@ -1,0 +1,101 @@
+name: CSS media render publication qualification
+on:
+  push:
+    branches: [audit/css-media-assembly-20260921-more]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 319d5224be1465f41711113e2ee826c07d8d54b2
+          fetch-depth: 1
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Prove replaced-render publication failures
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/css-publication"
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/css-publication/source.txt"
+          set +e
+          npx vitest run test/display-css-media-publication.test.js --reporter=json --outputFile="$RUNNER_TEMP/css-publication/red.json" > "$RUNNER_TEMP/css-publication/red.log" 2>&1
+          status=$?
+          set -e
+          test "$status" -ne 0
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads(Path(os.environ['RUNNER_TEMP'], 'css-publication/red.json').read_text())
+          cases = [case for result in report['testResults'] for case in result.get('assertionResults', [])]
+          assert len(cases) == 2, cases
+          for case in cases:
+              assert case['status'] == 'failed', case
+              assert 'current render applies cached CSS' in case['fullName'], case
+              failures = '\n'.join(case.get('failureMessages', []))
+              assert 'AssertionError' in failures and 'called' in failures.lower(), failures
+          print('Both warm-cache and overlapping-render cases reach the intended missing-publication assertion.')
+          PY
+      - name: Apply only the current-render publication correction
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('ext/js/display/display.js')
+          text = path.read_text()
+          old = '            if (changed) {\n                this._setTheme(this._options);\n            }'
+          new = '''            // An obsolete render may have filled the cache without applying CSS.
+                      // The current render must publish those URLs even on a cache hit.
+                      if (changed || targets.some(({dictionary}) => dictionaryStyles.has(dictionary))) {
+                          this._setTheme(this._options);
+                      }'''
+          new = '\n'.join(line[10:] if i > 0 else line for i, line in enumerate(new.splitlines()))
+          assert text.count(old) == 1, text.count(old)
+          path.write_text(text.replace(old, new))
+          PY
+          npx eslint --fix ext/js/display/display.js test/display-css-media-publication.test.js 2>&1 | tee "$RUNNER_TEMP/css-publication/lint.log"
+          git diff --check
+          git diff > "$RUNNER_TEMP/css-publication/source.patch"
+      - name: Run focused behavior and complete type projects
+        run: |
+          set -euo pipefail
+          npx vitest run test/dictionary-css-media-resolver.test.js test/dictionary-css-media-lifecycle.test.js test/display-css-media-identity.test.js test/display-css-media-publication.test.js 2>&1 | tee "$RUNNER_TEMP/css-publication/green.log"
+          npm run test:ts:main 2>&1 | tee "$RUNNER_TEMP/css-publication/types-main.log"
+          npm run test:ts:test 2>&1 | tee "$RUNNER_TEMP/css-publication/types-test.log"
+      - name: Publish reviewed source separately from this workflow
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import subprocess
+          allowed = {'ext/js/display/display.js', 'test/display-css-media-publication.test.js'}
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines())
+          assert changed and changed <= allowed, changed
+          PY
+          git add ext/js/display/display.js test/display-css-media-publication.test.js
+          git -c user.name='Manabi PR audit' -c user.email='noreply@github.com' commit -m 'Publish cached dictionary CSS for the current render'
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/css-publication/prepared.txt"
+          git push origin HEAD:refs/heads/audit/css-media-publication-prepared-20260921-more
+      - name: Build the exact prepared Chromium extension
+        run: |
+          set -euo pipefail
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Exercise unchanged MDict browser acceptance
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        run: |
+          set -euo pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-inline-style.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep MDX 2>&1 | tee "$RUNNER_TEMP/css-publication/browser.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: css-media-publication-evidence
+          path: |
+            ${{ runner.temp }}/css-publication/
+            test-results/
+          retention-days: 7
