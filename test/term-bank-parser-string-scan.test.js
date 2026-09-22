@@ -75,6 +75,20 @@ function readScore(result) {
 }
 
 /**
+ * Sequence metadata is also a source offset so values wider than int32 remain
+ * recoverable by the JavaScript projection layer.
+ * @param {ReturnType<typeof parse>} result
+ * @returns {unknown}
+ */
+function readSequence(result) {
+    const start = result.spans[11]
+    if (start === 0xffffffff) { return null }
+    let end = start
+    while (end < result.bytes.length && result.bytes[end] !== 0x2c && result.bytes[end] !== 0x5d) { ++end }
+    return JSON.parse(decoder.decode(result.bytes.subarray(start, end)))
+}
+
+/**
  * @param {ReturnType<typeof parse>} result
  * @returns {unknown[]}
  */
@@ -86,7 +100,7 @@ function readRow(result) {
         readSpan(result, 6),
         readScore(result),
         readSpan(result, 9),
-        result.spans[11] | 0,
+        readSequence(result),
         readSpan(result, 12),
     ]
 }

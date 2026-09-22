@@ -348,7 +348,7 @@ export function getValidatedStringOffsets(plan) {
  * @param {PreinternedTermRecordPlan} plan
  * @param {Uint32Array} scratch
  * @param {boolean[]|Uint8Array|undefined} readingEqualsExpressionList
- * @param {(number|undefined)[]|Int32Array} [sequenceList]
+ * @param {(number|undefined)[]|Int32Array|Float64Array} [sequenceList]
  * @returns {Uint32Array}
  * @throws {RangeError} If the writable scratch prefix overlaps a source view.
  */
