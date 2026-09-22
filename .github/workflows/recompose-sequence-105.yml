@@ -51,6 +51,30 @@ jobs:
                 git show ":3:$p" > "$RUNNER_TEMP/sequence-105/stages/$p.theirs" || true
                 git diff -- "$p" > "$RUNNER_TEMP/sequence-105/stages/$p.diff" || true
               done
+              if test "$c" = 1cffceb0936e213c144ac9f5f8d3aeb380b5b008 && test "$(cat "$RUNNER_TEMP/sequence-105/conflicts.txt")" = "ext/js/dictionary/dictionary-importer.js"; then
+                git checkout --ours ext/js/dictionary/dictionary-importer.js
+                python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ext/js/dictionary/dictionary-importer.js'); s=p.read_text()
+          replacements=[
+              ('sequenceList: (number|undefined)[]|Int32Array,','sequenceList: (number|undefined)[]|Int32Array|Float64Array,'),
+              ('/** @type {(number|undefined)[]|Int32Array} */\n        let chunkSequences = [];','/** @type {(number|undefined)[]|Int32Array|Float64Array} */\n        let chunkSequences = [];'),
+              ('chunkSequences = new Int32Array(chunkSize);','chunkSequences = new Float64Array(chunkSize);'),
+              ('sequenceList: /** @type {Int32Array} */ (\n                    useFullChunkArrays ? chunkSequences : /** @type {Int32Array} */ (chunkSequences).subarray(0, streamedRowCount)\n                ),',
+               'sequenceList: /** @type {Int32Array|Float64Array} */ (\n                    useFullChunkArrays ? chunkSequences : /** @type {Int32Array|Float64Array} */ (chunkSequences).subarray(0, streamedRowCount)\n                ),'),
+              ('sequenceList: (number|undefined)[]|Int32Array, contentBytesList:', 'sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList:')
+          ]
+          for before,after in replacements:
+              count=s.count(before)
+              assert count>0,(before,count)
+              s=s.replace(before,after)
+          p.write_text(s)
+          PY
+                git add ext/js/dictionary/dictionary-importer.js
+                git cherry-pick --continue
+                echo "RESOLVED_COMBINED_FLOAT_SCORE_AND_SEQUENCE $c" | tee -a "$RUNNER_TEMP/sequence-105/sequence.txt"
+                continue
+              fi
               exit 42
             fi
           done
