@@ -18,43 +18,135 @@
 import {base64ToArrayBuffer} from '../data/array-buffer-util.js';
 
 const MDICT_MEDIA_PREFIX = 'mdict-media/';
-const CSS_URL_PATTERN = /url\(\s*(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|([^\s)"'][^)]*?))\s*\)/giu;
 
 /**
  * @param {string} value
- * @returns {string}
+ * @param {number} startIndex
+ * @returns {{value: string, endIndex: number}|null}
  */
-function decodeCssString(value) {
-    let result = '';
-    for (let index = 0; index < value.length;) {
+function readCssEscape(value, startIndex) {
+    let index = startIndex + 1;
+    if (index >= value.length) { return null; }
+    const character = value[index];
+    if (/[\n\r\f]/u.test(character)) {
+        return {value: '', endIndex: index + (character === '\r' && value[index + 1] === '\n' ? 2 : 1)};
+    }
+    const hex = /^[0-9a-f]{1,6}/iu.exec(value.slice(index));
+    if (hex === null) { return {value: character, endIndex: index + 1}; }
+    const codePoint = Number.parseInt(hex[0], 16);
+    index += hex[0].length;
+    if (/[\t\n\f\r ]/u.test(value[index] ?? '')) {
+        index += value[index] === '\r' && value[index + 1] === '\n' ? 2 : 1;
+    }
+    return {
+        value: String.fromCodePoint(
+            codePoint === 0 || codePoint > 0x10ffff || (codePoint >= 0xd800 && codePoint <= 0xdfff) ? 0xfffd : codePoint,
+        ),
+        endIndex: index,
+    };
+}
+
+/**
+ * @param {string} value
+ * @param {number} startIndex
+ * @returns {{path: string, endIndex: number}|null}
+ */
+function readCssUrl(value, startIndex) {
+    let index = startIndex + 4;
+    while (index < value.length && /[\t\n\f\r ]/u.test(value[index])) { index += 1; }
+    const quote = value[index] === '"' || value[index] === "'" ? value[index++] : '';
+    let path = '';
+    while (index < value.length) {
         const character = value[index];
-        if (character !== '\\') {
-            result += character;
-            index += character.length;
+        if (quote.length > 0) {
+            if (character === quote) {
+                index += 1;
+                while (index < value.length && /[\t\n\f\r ]/u.test(value[index])) { index += 1; }
+                return value[index] === ')' ? {path, endIndex: index + 1} : null;
+            }
+            if (/[\n\r\f]/u.test(character)) { return null; }
+        } else {
+            if (character === ')') { return {path, endIndex: index + 1}; }
+            if (/[\t\n\f\r ]/u.test(character)) {
+                while (index < value.length && /[\t\n\f\r ]/u.test(value[index])) { index += 1; }
+                return value[index] === ')' ? {path, endIndex: index + 1} : null;
+            }
+            const codePoint = character.charCodeAt(0);
+            if (
+                character === '"' || character === "'" || character === '(' ||
+                codePoint <= 8 || codePoint === 11 || (codePoint >= 14 && codePoint <= 31) || codePoint === 127
+            ) { return null; }
+        }
+        if (character === '\\') {
+            if (quote.length === 0 && /[\n\r\f]/u.test(value[index + 1] ?? '')) { return null; }
+            const escape = readCssEscape(value, index);
+            if (escape === null) { return null; }
+            path += escape.value;
+            index = escape.endIndex;
+        } else {
+            path += character;
+            index += 1;
+        }
+    }
+    return null;
+}
+
+/**
+ * Discover literal url() functions without rewriting quoted content, comments,
+ * or identifier suffixes. Converted dictionary styles use this function spelling.
+ * @param {string} css
+ * @returns {Array<{path: string, startIndex: number, endIndex: number}>}
+ */
+function getCssUrlTokens(css) {
+    const tokens = [];
+    for (let index = 0; index < css.length;) {
+        if (css.startsWith('/*', index)) {
+            const end = css.indexOf('*/', index + 2);
+            index = end < 0 ? css.length : end + 2;
             continue;
         }
-        index += 1;
-        if (index >= value.length) { break; }
-        const next = value[index];
-        if (next === '\n' || next === '\r' || next === '\f') {
-            if (next === '\r' && value[index + 1] === '\n') { index += 1; }
+        const character = css[index];
+        if (character === '\\') {
+            index = readCssEscape(css, index)?.endIndex ?? css.length;
+            continue;
+        }
+        if (character === '"' || character === "'") {
+            const quote = character;
+            index += 1;
+            while (index < css.length) {
+                if (css[index] === '\\') {
+                    index = readCssEscape(css, index)?.endIndex ?? css.length;
+                } else if (css[index++] === quote) {
+                    break;
+                }
+            }
+            continue;
+        }
+        const previous = index > 0 ? css[index - 1] : '';
+        if (
+            css.slice(index, index + 4).toLowerCase() !== 'url(' ||
+            /[A-Za-z0-9_-]/u.test(previous) || (previous.codePointAt(0) ?? 0) >= 0x80
+        ) {
             index += 1;
             continue;
         }
-        const hexMatch = /^[0-9a-f]{1,6}/iu.exec(value.slice(index));
-        if (hexMatch !== null) {
-            const codePoint = Number.parseInt(hexMatch[0], 16);
-            result += String.fromCodePoint(
-                codePoint === 0 || codePoint > 0x10ffff ? 0xfffd : codePoint,
-            );
-            index += hexMatch[0].length;
-            if (/\s/u.test(value[index] ?? '')) { index += 1; }
+        const token = readCssUrl(css, index);
+        if (token !== null) {
+            tokens.push({...token, startIndex: index});
+            index = token.endIndex;
             continue;
         }
-        result += next;
-        index += next.length;
+        // Do not discover another function inside a malformed URL token.
+        index += 4;
+        while (index < css.length) {
+            if (css[index] === '\\') {
+                index = readCssEscape(css, index)?.endIndex ?? css.length;
+            } else if (css[index++] === ')') {
+                break;
+            }
+        }
     }
-    return result;
+    return tokens;
 }
 
 /**
@@ -62,16 +154,7 @@ function decodeCssString(value) {
  * @returns {string[]}
  */
 export function getMdictMediaPathsFromCss(css) {
-    const result = [];
-    CSS_URL_PATTERN.lastIndex = 0;
-    for (const match of css.matchAll(CSS_URL_PATTERN)) {
-        const raw = match[1] ?? match[2] ?? match[3] ?? '';
-        const path = decodeCssString(raw.trim());
-        if (path.startsWith(MDICT_MEDIA_PREFIX)) {
-            result.push(path);
-        }
-    }
-    return result;
+    return getCssUrlTokens(css).map(({path}) => path).filter((path) => path.startsWith(MDICT_MEDIA_PREFIX));
 }
 
 /**
@@ -98,13 +181,9 @@ export function getMdictMediaPathFromComputedUrl(value, baseUrl) {
  */
 export function getMdictMediaPathsFromComputedCss(css, baseUrl) {
     const result = [];
-    CSS_URL_PATTERN.lastIndex = 0;
-    for (const match of css.matchAll(CSS_URL_PATTERN)) {
-        const raw = match[1] ?? match[2] ?? match[3] ?? '';
-        const path = getMdictMediaPathFromComputedUrl(decodeCssString(raw.trim()), baseUrl);
-        if (path !== null) {
-            result.push(path);
-        }
+    for (const {path: value} of getCssUrlTokens(css)) {
+        const path = getMdictMediaPathFromComputedUrl(value, baseUrl);
+        if (path !== null) { result.push(path); }
     }
     return result;
 }
@@ -115,7 +194,7 @@ export function getMdictMediaPathsFromComputedCss(css, baseUrl) {
  * @returns {string}
  */
 function getCacheKey(dictionary, path) {
-    return `${dictionary}\u001f${path}`;
+    return JSON.stringify([dictionary, path]);
 }
 
 /**
@@ -139,6 +218,8 @@ export class DictionaryCssMediaResolver {
         this._cache = new Map();
         /** @type {number} */
         this._generation = 0;
+        /** @type {Set<string>|null} */
+        this._enabledDictionaries = null;
     }
 
     /** */
@@ -154,7 +235,7 @@ export class DictionaryCssMediaResolver {
      * Revoke cached objects belonging only to dictionaries which are no longer
      * enabled. A database refresh uses clear() because bytes can change while
      * retaining the same dictionary title and path.
-     * @param {Array<{name: string, enabled: boolean}>} dictionaries
+     * @param {Array<{name: string, enabled: boolean, styles?: string}>} dictionaries
      */
     prune(dictionaries) {
         const enabled = new Set(
@@ -162,14 +243,18 @@ export class DictionaryCssMediaResolver {
                 .filter(({enabled: value}) => value)
                 .map(({name}) => name),
         );
-        let changed = false;
+        const previous = this._enabledDictionaries;
+        if (previous === null || previous.size !== enabled.size || [...previous].some((name) => !enabled.has(name))) {
+            // Revoke in-flight results even when no URL has reached the cache.
+            // Disable/re-enable must not revive work admitted before disabling.
+            this._generation += 1;
+        }
+        this._enabledDictionaries = enabled;
         for (const [key, value] of this._cache) {
             if (enabled.has(value.dictionary)) { continue; }
             this._revokeObjectURL(value.url);
             this._cache.delete(key);
-            changed = true;
         }
-        if (changed) { this._generation += 1; }
     }
 
     /**
@@ -181,6 +266,7 @@ export class DictionaryCssMediaResolver {
         const seen = new Set();
         for (const {dictionary, path} of targets) {
             if (!path.startsWith(MDICT_MEDIA_PREFIX)) { continue; }
+            if (this._enabledDictionaries !== null && !this._enabledDictionaries.has(dictionary)) { continue; }
             const key = getCacheKey(dictionary, path);
             if (this._cache.has(key) || seen.has(key)) { continue; }
             seen.add(key);
@@ -211,15 +297,16 @@ export class DictionaryCssMediaResolver {
      * @returns {string}
      */
     rewriteStyles(dictionary, css) {
-        CSS_URL_PATTERN.lastIndex = 0;
-        return css.replace(CSS_URL_PATTERN, (match, doubleQuoted, singleQuoted, unquoted) => {
-            const raw = typeof doubleQuoted === 'string' ?
-                doubleQuoted :
-                (typeof singleQuoted === 'string' ? singleQuoted : (typeof unquoted === 'string' ? unquoted : ''));
-            const path = decodeCssString(raw.trim());
-            if (!path.startsWith(MDICT_MEDIA_PREFIX)) { return match; }
+        const output = [];
+        let lastIndex = 0;
+        for (const {path, startIndex, endIndex} of getCssUrlTokens(css)) {
+            if (!path.startsWith(MDICT_MEDIA_PREFIX)) { continue; }
             const cached = this._cache.get(getCacheKey(dictionary, path));
-            return typeof cached === 'undefined' ? match : `url("${cached.url}")`;
-        });
+            if (typeof cached === 'undefined') { continue; }
+            output.push(css.slice(lastIndex, startIndex), `url("${cached.url}")`);
+            lastIndex = endIndex;
+        }
+        output.push(css.slice(lastIndex));
+        return output.join('');
     }
 }
