@@ -1231,7 +1231,6 @@ function createNativeLookupIndexScratch(wasm, rowCapacity, keyCapacity, keyBytes
 function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, sequenceList, rowCount, scratch) {
     const memory = wasm.memory.buffer;
     if (
-        !(sequenceList instanceof Int32Array) ||
         plan.stringLengths.buffer !== memory ||
         plan.stringOffsets.buffer !== memory ||
         plan.stringHashes?.buffer !== memory ||
@@ -1250,9 +1249,20 @@ function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, se
         );
         readingEqualsPtr = scratch.readingEqualsPtr;
     }
-    let sequenceValuesPtr = sequenceList.byteOffset;
-    if (sequenceList.buffer !== memory) {
-        new Int32Array(memory, scratch.sequenceValuesPtr, rowCount).set(sequenceList.subarray(0, rowCount));
+    let sequenceValuesPtr;
+    if (sequenceList instanceof Int32Array) {
+        sequenceValuesPtr = sequenceList.byteOffset;
+        if (sequenceList.buffer !== memory) {
+            new Int32Array(memory, scratch.sequenceValuesPtr, rowCount).set(sequenceList.subarray(0, rowCount));
+            sequenceValuesPtr = scratch.sequenceValuesPtr;
+        }
+    } else {
+        const nativeSequences = new Int32Array(memory, scratch.sequenceValuesPtr, rowCount);
+        for (let i = 0; i < rowCount; ++i) {
+            const value = sequenceList[i];
+            if (!Number.isSafeInteger(value) || value > 0x7fffffff) { return null; }
+            nativeSequences[i] = value < 0 ? -1 : value;
+        }
         sequenceValuesPtr = scratch.sequenceValuesPtr;
     }
     const length = wasm.encode_term_lookup_index(
@@ -1317,7 +1327,7 @@ allocator(n, 'segmented lookup compaction'));
 function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, indexScratch, scratch) {
     const compact = wasm.compact_term_lookup_keys;
     const memory = wasm.memory.buffer;
-    if (!(sequences instanceof Int32Array) || typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
+    if (typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
     plan.stringsBuffer.buffer !== memory || plan.stringLengths.buffer !== memory ||
     plan.stringOffsets.buffer !== memory || plan.expressionIndexes.buffer !== memory ||
     plan.readingIndexes.buffer !== memory || equals.buffer !== memory) { return null; }
