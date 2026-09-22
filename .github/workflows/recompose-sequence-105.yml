@@ -1,0 +1,83 @@
+name: Wide sequence current-develop recompose
+on:
+  push:
+    branches: [codex/recompose-sequence-105-20260921]
+permissions:
+  contents: write
+jobs:
+  recompose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Replay unique wide-sequence commits onto recomposed score stack
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sequence-105"
+          git config user.name 'ManabiTan correctness recompose'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch --detach 03712ff99031d37a6b4411f15d408d4d576212a7
+          commits=(
+            c4b9c19ef42bb4b7405035143a57f74ebdff1ff2
+            08284a3864c95976b10632923dd27a9704eed4ae
+            72359feb59531521dbbff4f7529a2d405a395816
+            b5ae969916429b21feb329556ab0ce659ea6fa1c
+            d4ad4a26c15c2cfce72552ab2d3e5eb3d86e5054
+            a1f2e539b86aa3932d805d18ea934f11929e9d37
+            f215c8dcbe83b458e6b941cdfc22a1ff630700db
+            1cffceb0936e213c144ac9f5f8d3aeb380b5b008
+            e2cbd387509ab27b4edd077989b5fc5032c5b270
+            256043967e9c6e1ec55cbdc5e9f7a5a1704eee3a
+          )
+          for c in "${commits[@]}"; do
+            echo "CHERRY_PICK $c" | tee -a "$RUNNER_TEMP/sequence-105/sequence.txt"
+            if ! git cherry-pick "$c" >"$RUNNER_TEMP/sequence-105/$c.log" 2>&1; then
+              git diff --name-only --diff-filter=U > "$RUNNER_TEMP/sequence-105/conflicts.txt"
+              if test ! -s "$RUNNER_TEMP/sequence-105/conflicts.txt" && git diff --quiet && git diff --cached --quiet; then
+                echo "SKIP_ALREADY_INTEGRATED $c" | tee -a "$RUNNER_TEMP/sequence-105/sequence.txt"
+                git cherry-pick --skip
+                continue
+              fi
+              git status --short > "$RUNNER_TEMP/sequence-105/conflict-status.txt"
+              for p in $(cat "$RUNNER_TEMP/sequence-105/conflicts.txt"); do
+                mkdir -p "$RUNNER_TEMP/sequence-105/stages/$(dirname "$p")"
+                git show ":1:$p" > "$RUNNER_TEMP/sequence-105/stages/$p.base" || true
+                git show ":2:$p" > "$RUNNER_TEMP/sequence-105/stages/$p.ours" || true
+                git show ":3:$p" > "$RUNNER_TEMP/sequence-105/stages/$p.theirs" || true
+                git diff -- "$p" > "$RUNNER_TEMP/sequence-105/stages/$p.diff" || true
+              done
+              exit 42
+            fi
+          done
+          git rev-parse HEAD > "$RUNNER_TEMP/sequence-105/recomposed-head.txt"
+          git diff --stat 03712ff99031d37a6b4411f15d408d4d576212a7 HEAD > "$RUNNER_TEMP/sequence-105/stat.txt"
+          git diff 03712ff99031d37a6b4411f15d408d4d576212a7 HEAD > "$RUNNER_TEMP/sequence-105/product.patch"
+          git push origin HEAD:refs/heads/codex/recomposed-sequence-105-20260921
+      - uses: ./.github/actions/setup
+        if: success()
+      - name: Rebuild production libraries
+        if: success()
+        run: |
+          set -euo pipefail
+          npm run build:libs 2>&1 | tee "$RUNNER_TEMP/sequence-105/build-libs.log"
+      - name: Strict qualification
+        if: success()
+        run: |
+          set -euo pipefail
+          npm run test:js 2>&1 | tee "$RUNNER_TEMP/sequence-105/lint.log"
+          npm run test:ts:main 2>&1 | tee "$RUNNER_TEMP/sequence-105/ts-main.log"
+          npm run test:ts:test 2>&1 | tee "$RUNNER_TEMP/sequence-105/ts-test.log"
+          npx vitest run test/term-bank-wasm-parser.test.js test/term-record-opfs-store.test.js --reporter=json --outputFile="$RUNNER_TEMP/sequence-105/tests.json" 2>&1 | tee "$RUNNER_TEMP/sequence-105/tests.log"
+          git diff --check
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sequence-105-current-develop-recompose
+          path: ${{ runner.temp }}/sequence-105/
+          retention-days: 14
