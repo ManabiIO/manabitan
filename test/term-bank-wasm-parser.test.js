@@ -2263,14 +2263,17 @@ describe('term-bank WASM parser', () => {
         expect(chunkCount).toBe(0);
     });
 
-    maybeTest.each([2147483648, -2147483649])('rejects out-of-range native sequence %i before dispatch', async (sequence) => {
-        let chunkCount = 0;
-        await expect(parseTermBankWithWasmColumnChunks(
-            textEncoder.encode(JSON.stringify([['overflow', 'overflow', '', '', 0, ['definition'], sequence, '']])),
+    maybeTest.each([
+        [2147483648, 2147483648],
+        [-2147483649, -1],
+    ])('preserves the safe-integer sequence domain beyond int32: %i', async (sequence, expected) => {
+        let actual = null;
+        await parseTermBankWithWasmColumnChunks(
+            textEncoder.encode(JSON.stringify([['wide', 'wide', '', '', 0, ['definition'], sequence, '']])),
             3,
-            () => { ++chunkCount; },
-        )).rejects.toThrow(/term-bank parser failed/);
-        expect(chunkCount).toBe(0);
+            (chunk) => { actual = chunk.sequenceList[0]; },
+        );
+        expect(actual).toBe(expected);
     });
 
     maybeTest.each([2147483648, -2147483649])('preserves finite score %i outside int32', async (score) => {
