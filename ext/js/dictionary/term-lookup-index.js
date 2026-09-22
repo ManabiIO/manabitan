@@ -30,6 +30,7 @@ const U32_NULL = 0xffffffff;
 const U16_NULL = 0xffff;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
 const COMPACT_INDEX_FORMAT_VERSION = 7;
+const WIDE_SEQUENCE_INDEX_FORMAT_VERSION = 8;
 const HASH_SLOT_TARGET_LOAD = 4;
 
 /**
@@ -40,7 +41,7 @@ const HASH_SLOT_TARGET_LOAD = 4;
  * @property {Uint16Array} keyNext
  * @property {Uint16Array} expressionKeys
  * @property {Uint16Array} readingKeys
- * @property {Int32Array} sequenceKeys
+ * @property {Int32Array|Float64Array} sequenceKeys
  * @property {Uint16Array} expressionPostingOffsets
  * @property {Uint16Array} expressionPostingRows
  * @property {Uint16Array} readingPostingOffsets
@@ -68,7 +69,7 @@ const HASH_SLOT_TARGET_LOAD = 4;
  * Builds the lookup index directly from the parser's interned record plan.
  * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
  * @param {boolean[]|Uint8Array} readingEqualsExpressionList
- * @param {(number|undefined)[]|Int32Array} sequenceList
+ * @param {(number|undefined)[]|Int32Array|Float64Array} sequenceList
  * @param {number} rowCount
  * @param {boolean} [directArena=false]
  * @returns {Uint8Array}
@@ -96,7 +97,7 @@ export function encodePersistedTermLookupIndexFromPreinternedPlan(
  * counted non-expression reading postings in the same traversal.
  * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
  * @param {boolean[]|Uint8Array} readingEqualsExpressionList
- * @param {(number|undefined)[]|Int32Array} sequenceList
+ * @param {(number|undefined)[]|Int32Array|Float64Array} sequenceList
  * @param {number} rowCount
  * @param {number} readingPostingCount
  * @param {boolean} [directArena=false]
@@ -131,7 +132,7 @@ export function encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
 /**
  * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
  * @param {boolean[]|Uint8Array} readingEqualsExpressionList
- * @param {(number|undefined)[]|Int32Array} sequenceList
+ * @param {(number|undefined)[]|Int32Array|Float64Array} sequenceList
  * @param {number} rowCount
  * @param {number|null} validatedReadingPostingCount
  * @param {boolean} directArena
@@ -172,9 +173,7 @@ function encodePersistedTermLookupIndexFromPreinternedPlanInternal(
     }
     const expressionKeys = expressionIndexes.subarray(0, rowCount);
     const readingKeys = readingIndexes.subarray(0, rowCount);
-    const sequenceValues = sequenceList instanceof Int32Array ?
-        sequenceList.subarray(0, rowCount) :
-        Int32Array.from(sequenceList.slice(0, rowCount), (value) => value ?? -1);
+    const sequenceValues = normalizeSequenceValues(sequenceList, rowCount);
     let readingPostingCount = validatedReadingPostingCount;
     if (readingPostingCount === null) {
         readingPostingCount = 0;
@@ -225,7 +224,7 @@ export function encodePersistedTermLookupIndex(rows) {
     const keyIndexesByHash = new Map();
     const expressionKeys = new Uint32Array(rows.length);
     const readingKeys = new Uint32Array(rows.length);
-    const sequenceValues = new Int32Array(rows.length);
+    const sequenceInput = new Array(rows.length);
     let readingPostingCount = 0;
     /**
      * @param {Uint8Array} bytes
@@ -261,8 +260,9 @@ export function encodePersistedTermLookupIndex(rows) {
             readingKeys[row] = intern(value.readingBytes);
             ++readingPostingCount;
         }
-        sequenceValues[row] = value.sequence ?? -1;
+        sequenceInput[row] = value.sequence ?? -1;
     }
+    const sequenceValues = normalizeSequenceValues(sequenceInput, rows.length);
     const keyOffsets = new Uint32Array(keys.length + 1);
     let totalKeyBytes = 0;
     for (let i = 0; i < keys.length; ++i) {
@@ -283,7 +283,7 @@ export function encodePersistedTermLookupIndex(rows) {
 }
 
 /**
- * @param {{keyBytes: Uint8Array, keyOffsets: Uint32Array, keyCount?: number, expressionKeys: Uint32Array, readingKeys: Uint32Array, readingEqualsExpressionList?: boolean[]|Uint8Array, sequenceValues: Int32Array, readingPostingCount: number, keyHashes?: Uint32Array}} plan
+ * @param {{keyBytes: Uint8Array, keyOffsets: Uint32Array, keyCount?: number, expressionKeys: Uint32Array, readingKeys: Uint32Array, readingEqualsExpressionList?: boolean[]|Uint8Array, sequenceValues: Int32Array|Float64Array, readingPostingCount: number, keyHashes?: Uint32Array}} plan
  * @param {boolean} [directArena=false]
  * @returns {Uint8Array}
  * @throws {RangeError} If one chunk cannot represent all interned keys.
@@ -294,6 +294,10 @@ function encodeIndexPlan(plan, directArena = false) {
     const keyCount = typeof plan.keyCount === 'number' ? plan.keyCount : keyOffsets.length - 1;
     const sequencePlan = createSequencePlan(sequenceValues);
     const sequenceKeyCount = sequencePlan.keys.length;
+    const formatVersion = sequencePlan.keys instanceof Float64Array ?
+        WIDE_SEQUENCE_INDEX_FORMAT_VERSION :
+        COMPACT_INDEX_FORMAT_VERSION;
+    const sequenceKeyBytes = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ? 8 : 4;
     const sequencePostingCount = sequencePlan.postingCount;
     if (
         !Number.isSafeInteger(keyCount) ||
@@ -325,7 +329,10 @@ function encodeIndexPlan(plan, directArena = false) {
     const alignedKeyBytesLength = align4(keyBytes.byteLength);
     const baseU16Count = keyCount + (rowCount * 3);
     const baseU16BytesLength = align4(baseU16Count * 2);
-    const baseByteLength = BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength + (sequenceKeyCount * 4);
+    const sequenceKeysOffset = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ?
+        align8(BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength) :
+        BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength;
+    const baseByteLength = sequenceKeysOffset + (sequenceKeyCount * sequenceKeyBytes);
     const derivedU16Count =
         keySlotCount +
         keyCount +
@@ -346,7 +353,7 @@ function encodeIndexPlan(plan, directArena = false) {
     baseHeader[0] = rowCount;
     baseHeader[1] = keyCount;
     baseHeader[2] = keyBytes.byteLength;
-    baseHeader[3] = COMPACT_INDEX_FORMAT_VERSION;
+    baseHeader[3] = formatVersion;
     baseHeader[4] = sequenceKeyCount;
     baseHeader[5] = readingPostingCount;
     base.set(keyBytes, BASE_HEADER_BYTES);
@@ -364,8 +371,10 @@ function encodeIndexPlan(plan, directArena = false) {
     const persistedExpressionKeys = takeBaseU16(rowCount);
     const persistedReadingKeys = takeBaseU16(rowCount);
     const persistedSequenceRowKeys = takeBaseU16(rowCount);
-    baseCursor = align4(baseCursor);
-    const persistedSequenceKeys = new Int32Array(base.buffer, base.byteOffset + baseCursor, sequenceKeyCount);
+    baseCursor = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ? align8(baseCursor) : align4(baseCursor);
+    const persistedSequenceKeys = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ?
+        new Float64Array(base.buffer, base.byteOffset + baseCursor, sequenceKeyCount) :
+        new Int32Array(base.buffer, base.byteOffset + baseCursor, sequenceKeyCount);
     persistedSequenceKeys.set(sequencePlan.keys);
     let expectedKeyStart = 0;
     for (let key = 0; key < keyCount; ++key) {
@@ -408,7 +417,7 @@ function encodeIndexPlan(plan, directArena = false) {
     derivedHeader[4] = readingPostingCount;
     derivedHeader[5] = sequenceKeyCount;
     derivedHeader[6] = sequencePostingCount;
-    derivedHeader[7] = COMPACT_INDEX_FORMAT_VERSION;
+    derivedHeader[7] = formatVersion;
     let cursor = DERIVED_HEADER_BYTES;
     /**
      * @param {number} length
@@ -464,7 +473,7 @@ function encodeIndexPlan(plan, directArena = false) {
     const output = directOutput ?? new Uint8Array(CONTAINER_HEADER_BYTES + base.byteLength + derived.byteLength);
     const containerHeader = new Uint32Array(output.buffer, output.byteOffset, CONTAINER_HEADER_U32_COUNT);
     containerHeader[0] = CONTAINER_MAGIC;
-    containerHeader[1] = COMPACT_INDEX_FORMAT_VERSION;
+    containerHeader[1] = formatVersion;
     containerHeader[2] = base.byteLength;
     containerHeader[3] = derived.byteLength;
     if (directOutput === null) {
@@ -476,12 +485,12 @@ function encodeIndexPlan(plan, directArena = false) {
 
 /**
  * Interns non-negative row sequences with typed chained metadata.
- * @param {Int32Array} sequenceValues
- * @returns {{keys: Int32Array, keyByRow: Uint16Array, postingCount: number}}
+ * @param {Int32Array|Float64Array} sequenceValues
+ * @returns {{keys: Int32Array|Float64Array, keyByRow: Uint16Array, postingCount: number}}
  */
 function createSequencePlan(sequenceValues) {
     const rowCount = sequenceValues.length;
-    const keys = new Int32Array(rowCount);
+    const keys = sequenceValues instanceof Float64Array ? new Float64Array(rowCount) : new Int32Array(rowCount);
     const keyByRow = new Uint16Array(rowCount);
     const slots = new Uint16Array(getSequenceInternSlotCount(rowCount));
     const slotMask = slots.length - 1;
@@ -528,7 +537,7 @@ export function splitPersistedTermLookupIndex(bytes) {
     const derivedLength = header[3];
     if (
         header[0] !== CONTAINER_MAGIC ||
-        header[1] !== COMPACT_INDEX_FORMAT_VERSION ||
+        !isSupportedIndexFormat(header[1]) ||
         baseLength < BASE_HEADER_BYTES ||
         derivedLength < DERIVED_HEADER_BYTES ||
         CONTAINER_HEADER_BYTES + baseLength + derivedLength !== bytes.byteLength
@@ -586,7 +595,7 @@ export function rebuildPersistedTermLookupIndexFromBase(base) {
 
 /**
  * @param {Uint8Array} base
- * @returns {{keyBytes: Uint8Array, keyOffsets: Uint32Array, expressionKeys: Uint16Array, readingKeys: Uint16Array, sequenceKeys: Int32Array, sequenceRowKeys: Uint16Array}}
+ * @returns {{keyBytes: Uint8Array, keyOffsets: Uint32Array, expressionKeys: Uint16Array, readingKeys: Uint16Array, sequenceKeys: Int32Array|Float64Array, sequenceRowKeys: Uint16Array}}
  * @throws {Error} If the authoritative base is malformed.
  */
 function parsePersistedTermLookupBase(base) {
@@ -597,10 +606,15 @@ function parsePersistedTermLookupBase(base) {
     const rowCount = header[0];
     const keyCount = header[1];
     const keyBytesLength = header[2];
+    const formatVersion = header[3];
     const sequenceKeyCount = header[4];
     const readingPostingCount = header[5];
     const alignedKeyBytesLength = align4(keyBytesLength);
     const baseU16BytesLength = align4((keyCount + (rowCount * 3)) * 2);
+    const sequenceKeysOffset = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ?
+        align8(BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength) :
+        BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength;
+    const sequenceKeyBytes = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ? 8 : 4;
     if (
         rowCount === 0 ||
         rowCount >= U16_NULL ||
@@ -608,8 +622,8 @@ function parsePersistedTermLookupBase(base) {
         keyCount >= U16_NULL ||
         sequenceKeyCount >= U16_NULL ||
         readingPostingCount > rowCount ||
-        header[3] !== COMPACT_INDEX_FORMAT_VERSION ||
-        base.byteLength !== BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength + (sequenceKeyCount * 4)
+        !isSupportedIndexFormat(formatVersion) ||
+        base.byteLength !== sequenceKeysOffset + (sequenceKeyCount * sequenceKeyBytes)
     ) {
         throw new Error('Invalid persisted term lookup base dimensions');
     }
@@ -628,8 +642,10 @@ function parsePersistedTermLookupBase(base) {
     const expressionKeys = takeU16(rowCount);
     const readingKeys = takeU16(rowCount);
     const sequenceRowKeys = takeU16(rowCount);
-    cursor = align4(cursor);
-    const sequenceKeys = new Int32Array(base.buffer, base.byteOffset + cursor, sequenceKeyCount);
+    cursor = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ? align8(cursor) : align4(cursor);
+    const sequenceKeys = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ?
+        readFloat64Values(base.buffer, base.byteOffset + cursor, sequenceKeyCount) :
+        new Int32Array(base.buffer, base.byteOffset + cursor, sequenceKeyCount);
     const keyOffsets = reconstructKeyOffsets(keyLengths, keyBytesLength);
     let actualReadingPostingCount = 0;
     const usedSequenceKeys = new Uint8Array(sequenceKeyCount);
@@ -650,7 +666,7 @@ function parsePersistedTermLookupBase(base) {
     const seenSequences = new Set();
     for (let key = 0; key < sequenceKeyCount; ++key) {
         const value = sequenceKeys[key];
-        if (value < 0 || usedSequenceKeys[key] === 0 || seenSequences.has(value)) {
+        if (!Number.isSafeInteger(value) || value < 0 || usedSequenceKeys[key] === 0 || seenSequences.has(value)) {
             throw new Error('Invalid persisted term lookup base sequence key');
         }
         seenSequences.add(value);
@@ -694,7 +710,7 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     const derivedLength = containerHeader[3];
     if (
         containerHeader[0] !== CONTAINER_MAGIC ||
-        containerHeader[1] !== COMPACT_INDEX_FORMAT_VERSION ||
+        !isSupportedIndexFormat(containerHeader[1]) ||
         baseLength < BASE_HEADER_BYTES ||
         derivedLength < DERIVED_HEADER_BYTES ||
         CONTAINER_HEADER_BYTES + baseLength + derivedLength !== bytes.byteLength
@@ -705,6 +721,7 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     const derivedOffset = baseOffset + baseLength;
     const baseHeader = new Uint32Array(bytes.buffer, bytes.byteOffset + baseOffset, BASE_HEADER_U32_COUNT);
     const derivedHeader = new Uint32Array(bytes.buffer, bytes.byteOffset + derivedOffset, DERIVED_HEADER_U32_COUNT);
+    const formatVersion = containerHeader[1];
     const rowCount = baseHeader[0];
     const keyCount = baseHeader[1];
     const keyBytesLength = baseHeader[2];
@@ -721,12 +738,12 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         sequenceKeyCount >= U16_NULL ||
         sequencePostingCount > rowCount ||
         sequenceKeyCount > sequencePostingCount ||
-        baseHeader[3] !== COMPACT_INDEX_FORMAT_VERSION ||
+        baseHeader[3] !== formatVersion ||
         derivedHeader[0] !== rowCount ||
         derivedHeader[1] !== keyCount ||
         derivedHeader[4] !== readingPostingCount ||
         derivedHeader[5] !== sequenceKeyCount ||
-        derivedHeader[7] !== COMPACT_INDEX_FORMAT_VERSION ||
+        derivedHeader[7] !== formatVersion ||
         keyCount >= U16_NULL ||
         !isPowerOfTwo(keySlotCount) ||
         !isPowerOfTwo(sequenceSlotCount)
@@ -735,9 +752,11 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     }
     const alignedKeyBytesLength = align4(keyBytesLength);
     const baseU16BytesLength = align4((keyCount + (rowCount * 3)) * 2);
-    if (
-        baseLength !== BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength + (sequenceKeyCount * 4)
-    ) {
+    const sequenceKeysRelativeOffset = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ?
+        align8(BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength) :
+        BASE_HEADER_BYTES + alignedKeyBytesLength + baseU16BytesLength;
+    const sequenceKeyBytes = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ? 8 : 4;
+    if (baseLength !== sequenceKeysRelativeOffset + (sequenceKeyCount * sequenceKeyBytes)) {
         throw new Error('Invalid persisted term lookup base length');
     }
     const derivedU16Count =
@@ -769,8 +788,10 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     const expressionKeys = takeBaseU16(rowCount);
     const readingKeys = takeBaseU16(rowCount);
     const sequenceRowKeys = takeBaseU16(rowCount);
-    baseCursor = align4(baseCursor);
-    const sequenceKeys = new Int32Array(bytes.buffer, bytes.byteOffset + baseCursor, sequenceKeyCount);
+    baseCursor = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ? align8(baseCursor) : align4(baseCursor);
+    const sequenceKeys = formatVersion === WIDE_SEQUENCE_INDEX_FORMAT_VERSION ?
+        readFloat64Values(bytes.buffer, bytes.byteOffset + baseCursor, sequenceKeyCount) :
+        new Int32Array(bytes.buffer, bytes.byteOffset + baseCursor, sequenceKeyCount);
     const keyOffsets = reconstructKeyOffsets(keyLengths, keyBytesLength);
     let cursor = derivedOffset + DERIVED_HEADER_BYTES;
     /**
@@ -1236,7 +1257,7 @@ function validatePostingRows(offsets, rows, keys, skipKey, seen, marker) {
 /**
  * @param {Uint16Array} heads
  * @param {Uint16Array} next
- * @param {Int32Array} keys
+ * @param {Int32Array|Float64Array} keys
  * @param {Uint16Array} postingOffsets
  * @param {Uint16Array} postingRows
  * @param {Uint16Array} rowKeys
@@ -1255,6 +1276,7 @@ function validateSequenceIndex(heads, next, keys, postingOffsets, postingRows, r
             }
             const value = keys[key];
             if (
+                !Number.isSafeInteger(value) ||
                 value < 0 ||
                 keySeen[key] !== 0 ||
                 (hashSequence(value) & (heads.length - 1)) !== slot
@@ -1401,7 +1423,7 @@ function validateOffsets(offsets, end) {
  * @param {boolean[]|Uint8Array|undefined} readingEqualsExpressionList
  * @param {Uint16Array} heads
  * @param {Uint16Array} next
- * @param {Int32Array} keys
+ * @param {Int32Array|Float64Array} keys
  * @param {Uint16Array} postingOffsets
  * @param {Uint16Array} postingRows
  * @param {Uint16Array} keyByRow
@@ -1473,6 +1495,63 @@ function fillPostingAndSequenceTables(
  */
 function isReadingEqualToExpression(values, row) {
     return typeof values !== 'undefined' && (values[row] === true || values[row] === 1);
+}
+
+/**
+ * @param {ArrayBufferLike} buffer
+ * @param {number} byteOffset
+ * @param {number} count
+ * @returns {Float64Array}
+ */
+function readFloat64Values(buffer, byteOffset, count) {
+    if ((byteOffset & 7) === 0) {
+        return new Float64Array(buffer, byteOffset, count);
+    }
+    const values = new Float64Array(count);
+    const view = new DataView(buffer, byteOffset, count * 8);
+    for (let i = 0; i < count; ++i) {
+        values[i] = view.getFloat64(i * 8, true);
+    }
+    return values;
+}
+
+/**
+ * @param {(number|undefined)[]|Int32Array|Float64Array} values
+ * @param {number} rowCount
+ * @returns {Int32Array|Float64Array}
+ * @throws {RangeError} If a sequence is not a safe integer.
+ */
+function normalizeSequenceValues(values, rowCount) {
+    if (values instanceof Int32Array) { return values.subarray(0, rowCount); }
+    let wide = false;
+    const normalized = new Array(rowCount);
+    for (let row = 0; row < rowCount; ++row) {
+        const raw = values[row];
+        const value = typeof raw === 'number' ? raw : -1;
+        if (!Number.isSafeInteger(value)) {
+            throw new RangeError('Term lookup sequence must be a safe integer');
+        }
+        const normalizedValue = value < 0 ? -1 : value;
+        if (normalizedValue > 0x7fffffff) { wide = true; }
+        normalized[row] = normalizedValue;
+    }
+    return wide ? Float64Array.from(normalized) : Int32Array.from(normalized);
+}
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+function isSupportedIndexFormat(value) {
+    return value === COMPACT_INDEX_FORMAT_VERSION || value === WIDE_SEQUENCE_INDEX_FORMAT_VERSION;
+}
+
+/**
+ * @param {number} value
+ * @returns {number}
+ */
+function align8(value) {
+    return (value + 7) & ~7;
 }
 
 /**
@@ -1550,6 +1629,13 @@ function hashSequence(value) {
     let hash = 0x811c9dc5;
     for (let shift = 0; shift < 32; shift += 8) {
         hash = Math.imul(hash ^ ((value >>> shift) & 0xff), 0x01000193);
+    }
+    if (value > 0x7fffffff) {
+        let high = Math.floor(value / 0x100000000);
+        for (let i = 0; i < 3; ++i) {
+            hash = Math.imul(hash ^ (high & 0xff), 0x01000193);
+            high = Math.floor(high / 0x100);
+        }
     }
     return hash >>> 0;
 }

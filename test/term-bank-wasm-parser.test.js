@@ -209,21 +209,21 @@ async function parseColumnSnapshot(sources, preloadedSource = null) {
     };
 }
 
+beforeAll(() => {
+    vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
+        const url = resource instanceof URL ? resource : new URL(String(resource));
+        if (url.protocol === 'file:') {
+            return new Response(await readFile(fileURLToPath(url)));
+        }
+        return await nativeFetch(resource);
+    });
+});
+
+afterAll(() => {
+    vi.unstubAllGlobals();
+});
+
 describe('term-bank WASM parser', () => {
-    beforeAll(() => {
-        vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
-            const url = resource instanceof URL ? resource : new URL(String(resource));
-            if (url.protocol === 'file:') {
-                return new Response(await readFile(fileURLToPath(url)));
-            }
-            return await nativeFetch(resource);
-        });
-    });
-
-    afterAll(() => {
-        vi.unstubAllGlobals();
-    });
-
     maybeTest('inflates, validates, and joins mixed raw ZIP term-bank payloads', async () => {
         const sources = [
             createCompressedTermBankSource(' \n [["a","", "", "", 1, ["one"], 10, ""]] \r', 8),
@@ -2263,14 +2263,17 @@ describe('term-bank WASM parser', () => {
         expect(chunkCount).toBe(0);
     });
 
-    maybeTest.each([2147483648, -2147483649])('rejects out-of-range native sequence %i before dispatch', async (sequence) => {
-        let chunkCount = 0;
-        await expect(parseTermBankWithWasmColumnChunks(
-            textEncoder.encode(JSON.stringify([['overflow', 'overflow', '', '', 0, ['definition'], sequence, '']])),
+    maybeTest.each([
+        [2147483648, 2147483648],
+        [-2147483649, -1],
+    ])('preserves the safe-integer sequence domain beyond int32: %i', async (sequence, expected) => {
+        let actual = null;
+        await parseTermBankWithWasmColumnChunks(
+            textEncoder.encode(JSON.stringify([['wide', 'wide', '', '', 0, ['definition'], sequence, '']])),
             3,
-            () => { ++chunkCount; },
-        )).rejects.toThrow(/term-bank parser failed/);
-        expect(chunkCount).toBe(0);
+            (chunk) => { actual = chunk.sequenceList[0]; },
+        );
+        expect(actual).toBe(expected);
     });
 
     maybeTest.each([2147483648, -2147483649])('preserves finite score %i outside int32', async (score) => {
@@ -3079,6 +3082,118 @@ describe('term bank score number parity', () => {
                 `[["bad","","","",${scoreToken},["g"],1,""]]`,
             );
             await expect(parseTermBankWithWasmChunks(sourceBytes, 3, () => {})).rejects.toThrow();
+        },
+    );
+});
+
+
+describe('term bank wide sequence parity', () => {
+    const wideSequences = [0x80000000, 0x100000001, 2 ** 40, Number.MAX_SAFE_INTEGER];
+    const sequenceRows = wideSequences.map((sequence, index) => (
+        `["sequence-${String(index)}","","","",1,["g"],${String(sequence)},""]`
+    ));
+    const sequenceBank = () => textEncoder.encode(`[${sequenceRows.join(',')}]`);
+
+    maybeTest('preserves safe sequences beyond int32 in row parsing', async () => {
+        /** @type {(number|null)[]} */
+        const actual = [];
+        await parseTermBankWithWasmChunks(
+            sequenceBank(),
+            3,
+            (chunk) => { actual.push(...chunk.map(({sequence}) => sequence)); },
+            64,
+            {},
+        );
+        expect(actual).toStrictEqual(wideSequences);
+    });
+
+    maybeTest('preserves safe sequences beyond int32 in column parsing', async () => {
+        /** @type {number[]} */
+        const actual = [];
+        await parseTermBankWithWasmColumnChunks(
+            sequenceBank(),
+            3,
+            (chunk) => {
+                expect(chunk.sequenceList).toBeInstanceOf(Float64Array);
+                actual.push(...chunk.sequenceList);
+            },
+            64,
+            {prepareLookupIndexes: true},
+        );
+        expect(actual).toStrictEqual(wideSequences);
+    });
+
+    maybeTest('falls back from fused parsing only for sequences outside int32', async () => {
+        const wideBanks = [
+            textEncoder.encode(`[${sequenceRows.slice(0, 2).join(',')}]`),
+            textEncoder.encode(`[${sequenceRows.slice(2).join(',')}]`),
+        ];
+        /** @type {number[]} */
+        const actual = [];
+        await parseTermBankWithWasmColumnChunks(
+            wideBanks,
+            3,
+            (chunk) => { actual.push(...chunk.sequenceList); },
+            64,
+            {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                prepareLookupIndexes: true,
+            },
+        );
+        expect(actual).toStrictEqual(wideSequences);
+        const wideProfile = consumeLastTermBankWasmParseProfile();
+        expect(wideProfile?.fusedParseAttempts).toBe(1);
+        expect(wideProfile?.fusedParseFallbacks).toBe(1);
+
+        const int32Banks = [
+            textEncoder.encode('[["a","","","",1,["g"],1,""]]'),
+            textEncoder.encode('[["b","","","",1,["g"],2,""]]'),
+        ];
+        await parseTermBankWithWasmColumnChunks(
+            int32Banks,
+            3,
+            () => {},
+            64,
+            {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                prepareLookupIndexes: true,
+            },
+        );
+        const int32Profile = consumeLastTermBankWasmParseProfile();
+        expect(int32Profile?.fusedParseAttempts).toBe(1);
+        expect(int32Profile?.fusedParseFallbacks).toBe(0);
+    });
+
+    maybeTest.each(['1.5', String(Number.MAX_SAFE_INTEGER + 1), '01', '-01', '0x10', '1.', '1e', '--1'])(
+        'rejects invalid JSON or unsafe sequence values across parser routes: %s',
+        async (sequenceToken) => {
+            const sourceBytes = textEncoder.encode(
+                `[["bad","","","",1,["g"],${sequenceToken},""]]`,
+            );
+            await expect(parseTermBankWithWasmChunks(sourceBytes, 3, () => {})).rejects.toThrow();
+            await expect(parseTermBankWithWasmColumnChunks(sourceBytes, 3, () => {})).rejects.toThrow();
+            await expect(parseTermBankWithWasmColumnChunks(
+                [textEncoder.encode('[["ok","","","",1,["g"],1,""]]'), sourceBytes],
+                3,
+                () => {},
+                64,
+                {emitContentSlab: true, emitTokenBinaryContent: true, prepareLookupIndexes: true},
+            )).rejects.toThrow();
+        },
+    );
+
+    maybeTest.each(['1e2', '100.0', '1E+2'])(
+        'preserves valid JSON integer-valued sequence syntax: %s',
+        async (sequenceToken) => {
+            const sourceBytes = textEncoder.encode(`[["ok","","","",1,["g"],${sequenceToken},""]]`);
+            /** @type {number[]} */
+            const actual = [];
+            await parseTermBankWithWasmColumnChunks(sourceBytes, 3, (chunk) => {
+                actual.push(...chunk.sequenceList);
+            });
+            expect(actual).toStrictEqual([100]);
         },
     );
 });
