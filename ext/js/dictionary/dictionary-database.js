@@ -3711,8 +3711,18 @@ null;
                     },
                 };
                 const resvgJS = new Resvg(new Uint8Array(m.content), opts);
-                const render = resvgJS.render();
-                source.postMessage({action: 'drawBufferToCanvases', params: {buffer: render.pixels.buffer, width: render.width, height: render.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [render.pixels.buffer]);
+                try {
+                    const render = resvgJS.render();
+                    try {
+                        // The getter copies pixels; transfer the same copy carried by the message.
+                        const buffer = render.pixels.buffer;
+                        source.postMessage({action: 'drawBufferToCanvases', params: {buffer, width: render.width, height: render.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [buffer]);
+                    } finally {
+                        render.free();
+                    }
+                } finally {
+                    resvgJS.free();
+                }
                 safePerformance.mark('drawMedia:draw:svg:end');
                 safePerformance.measure('drawMedia:draw:svg', 'drawMedia:draw:svg:start', 'drawMedia:draw:svg:end');
             } else {
@@ -3720,18 +3730,30 @@ null;
 
                 if ('serviceWorker' in navigator) {
                     const imageDecoder = new ImageDecoder({type: m.mediaType, data: m.content});
-                    await imageDecoder.decode().then((decodedImageResult) => {
-                        source.postMessage({action: 'drawDecodedImageToCanvases', params: {decodedImage: decodedImageResult.image, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [decodedImageResult.image]);
-                    });
+                    try {
+                        const {image} = await imageDecoder.decode();
+                        try {
+                            source.postMessage({action: 'drawDecodedImageToCanvases', params: {decodedImage: image, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [image]);
+                        } finally {
+                            // Successful transfer detaches this handle; failed transfer leaves it owned here.
+                            image.close();
+                        }
+                    } finally {
+                        imageDecoder.close();
+                    }
                 } else {
                     const image = new Blob([m.content], {type: m.mediaType});
                     await createImageBitmap(image, {resizeWidth: m.canvasWidth, resizeHeight: m.canvasHeight, resizeQuality: 'high'}).then((decodedImage) => {
-                        const canvas = new OffscreenCanvas(decodedImage.width, decodedImage.height);
-                        const ctx = canvas.getContext('2d');
-                        if (ctx !== null) {
-                            ctx.drawImage(decodedImage, 0, 0);
-                            const imageData = ctx.getImageData(0, 0, decodedImage.width, decodedImage.height);
-                            source.postMessage({action: 'drawBufferToCanvases', params: {buffer: imageData.data.buffer, width: decodedImage.width, height: decodedImage.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [imageData.data.buffer]);
+                        try {
+                            const canvas = new OffscreenCanvas(decodedImage.width, decodedImage.height);
+                            const ctx = canvas.getContext('2d');
+                            if (ctx !== null) {
+                                ctx.drawImage(decodedImage, 0, 0);
+                                const imageData = ctx.getImageData(0, 0, decodedImage.width, decodedImage.height);
+                                source.postMessage({action: 'drawBufferToCanvases', params: {buffer: imageData.data.buffer, width: decodedImage.width, height: decodedImage.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [imageData.data.buffer]);
+                            }
+                        } finally {
+                            decodedImage.close();
                         }
                     });
                 }

@@ -115,6 +115,8 @@ export class MediaDrawingWorker {
             }
         } catch (e) {
             log.error(e);
+        } finally {
+            decodedImage.close();
         }
     }
 
