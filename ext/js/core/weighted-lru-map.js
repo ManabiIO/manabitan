@@ -46,7 +46,7 @@ export class WeightedLruMap extends Map {
      */
     get(key) {
         const value = /** @type {unknown} */ (super.get(key));
-        if (typeof value === 'undefined' || !super.has(key)) { return void 0; }
+        if (typeof value === 'undefined' && !super.has(key)) { return void 0; }
         super.delete(key);
         super.set(key, value);
         return value;
@@ -58,8 +58,9 @@ export class WeightedLruMap extends Map {
      * @returns {this}
      */
     set(key, value) {
-        if (super.has(key)) { this.delete(key); }
+        // Evaluate caller code before mutating cache state. It can throw or reenter.
         const weight = Math.max(0, Math.trunc(this._getWeight(value, key)) || 0);
+        if (super.has(key)) { this.delete(key); }
         if (weight > this._maxWeight) { return this; }
         super.set(key, value);
         this._weights.set(key, weight);

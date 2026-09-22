@@ -129,7 +129,7 @@ export function writeRawTermContentCompactBlockReference(
         !Number.isSafeInteger(blockOffset) || blockOffset < 0 ||
         !Number.isSafeInteger(blockCompressedLength) || blockCompressedLength <= 0 || blockCompressedLength >= U32_RANGE ||
         !Number.isSafeInteger(blockUncompressedLength) || blockUncompressedLength <= 0 || blockUncompressedLength >= U32_RANGE ||
-        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= U32_RANGE ||
+        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength ||
         !Number.isSafeInteger(offset) || offset < 0 || offset + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES > view.byteLength ||
         !Number.isSafeInteger(blockOffset + blockCompressedLength)
     ) {
@@ -193,6 +193,8 @@ export function encodeRawTermContentBlockReference(blockOffset, blockCompressedL
 
 /**
  * Writes a reference into an existing slab without allocating a per-reference view.
+ * Validates the complete reference before the first write to avoid narrowing
+ * invalid numbers or leaving a partially written reference in the slab.
  * @param {DataView} view
  * @param {number} offset
  * @param {number} blockOffset
@@ -200,6 +202,7 @@ export function encodeRawTermContentBlockReference(blockOffset, blockCompressedL
  * @param {number} blockUncompressedLength
  * @param {number} entryOffset
  * @param {number} entryLength
+ * @throws {RangeError} When a reference field or its destination lies outside the supported bounds.
  */
 export function writeRawTermContentBlockReference(
     view,
@@ -210,6 +213,17 @@ export function writeRawTermContentBlockReference(
     entryOffset,
     entryLength,
 ) {
+    if (
+        !Number.isSafeInteger(blockOffset) || blockOffset < 0 ||
+        !Number.isSafeInteger(blockCompressedLength) || blockCompressedLength <= 0 || blockCompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(blockUncompressedLength) || blockUncompressedLength <= 0 || blockUncompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength ||
+        !Number.isSafeInteger(entryLength) || entryLength <= 0 || entryLength > blockUncompressedLength - entryOffset ||
+        !Number.isSafeInteger(offset) || offset < 0 || offset > view.byteLength - RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength)
+    ) {
+        throw new RangeError('Invalid term-content block reference');
+    }
     view.setUint32(offset, RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32, true);
     view.setUint32(offset + 4, blockOffset, true);
     view.setUint32(offset + 8, Math.floor(blockOffset / U32_RANGE), true);
@@ -363,8 +377,12 @@ export function encodeRawTermContentBinary(rules, definitionTags, termTags, glos
  * @param {number} glossaryLength
  * @param {TextEncoder} textEncoder
  * @returns {Uint8Array}
+ * @throws {RangeError} When the glossary range cannot be represented exactly.
  */
 export function encodeRawTermContentSharedGlossaryBinary(rules, definitionTags, termTags, glossaryOffset, glossaryLength, textEncoder) {
+    if (!isValidSharedGlossaryRange(glossaryOffset, glossaryLength)) {
+        throw new RangeError('Invalid shared term-content glossary range');
+    }
     const rulesBytes = textEncoder.encode(rules);
     const definitionTagsBytes = textEncoder.encode(definitionTags);
     const termTagsBytes = textEncoder.encode(termTags);
@@ -395,6 +413,7 @@ export function encodeRawTermContentSharedGlossaryBinary(rules, definitionTags, 
  * @param {Uint8Array} bytes
  * @param {number} baseOffset
  * @returns {Uint8Array}
+ * @throws {RangeError} When a nonzero rebase uses an invalid original or resulting range.
  */
 export function rebaseRawTermContentSharedGlossaryBinary(bytes, baseOffset) {
     if (!isRawTermContentSharedGlossaryBinary(bytes) || baseOffset === 0) {
@@ -408,10 +427,19 @@ export function rebaseRawTermContentSharedGlossaryBinary(bytes, baseOffset) {
     if (totalLength !== bytes.byteLength) {
         return bytes;
     }
+    const glossaryOffset = Number(view.getBigUint64(16, true));
+    const glossaryLength = view.getUint32(24, true);
+    const rebasedOffset = glossaryOffset + baseOffset;
+    if (
+        !isValidSharedGlossaryRange(glossaryOffset, glossaryLength) ||
+        !Number.isSafeInteger(baseOffset) ||
+        !isValidSharedGlossaryRange(rebasedOffset, glossaryLength)
+    ) {
+        throw new RangeError('Invalid rebased shared term-content glossary range');
+    }
     const rebasedBytes = Uint8Array.from(bytes);
     const rebasedView = new DataView(rebasedBytes.buffer, rebasedBytes.byteOffset, rebasedBytes.byteLength);
-    const glossaryOffset = Number(rebasedView.getBigUint64(16, true));
-    rebasedView.setBigUint64(16, BigInt(glossaryOffset + baseOffset), true);
+    rebasedView.setBigUint64(16, BigInt(rebasedOffset), true);
     return rebasedBytes;
 }
 
@@ -431,7 +459,7 @@ export function decodeRawTermContentSharedGlossaryHeader(bytes, textDecoder) {
     const glossaryOffset = Number(view.getBigUint64(16, true));
     const glossaryLength = view.getUint32(24, true);
     const totalLength = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES + rulesLength + definitionTagsLength + termTagsLength;
-    if (totalLength !== bytes.byteLength) {
+    if (totalLength !== bytes.byteLength || !isValidSharedGlossaryRange(glossaryOffset, glossaryLength)) {
         return null;
     }
     let offset = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES;
@@ -513,6 +541,21 @@ export function decodeRawTermContentTokenBinary(bytes, textDecoder) {
         header.glossaryJsonOffset + header.glossaryJsonLength,
     ));
     return {rules: header.rules, definitionTags: header.definitionTags, termTags: header.termTags, glossaryJson};
+}
+
+/**
+ * OPFS range arithmetic uses JavaScript numbers even though offsets are stored
+ * as uint64. Reject values that would be rounded or narrowed by that boundary.
+ * @param {number} offset
+ * @param {number} length
+ * @returns {boolean}
+ */
+function isValidSharedGlossaryRange(offset, length) {
+    return (
+        Number.isSafeInteger(offset) && offset >= 0 &&
+        Number.isSafeInteger(length) && length >= 0 && length < U32_RANGE &&
+        Number.isSafeInteger(offset + length)
+    );
 }
 
 /**

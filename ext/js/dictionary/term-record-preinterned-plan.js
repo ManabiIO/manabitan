@@ -342,6 +342,39 @@ export function getValidatedStringOffsets(plan) {
 }
 
 /**
+ * Scratch writes must not change source metadata while rows are being remapped.
+ * Only the prefix indexed by string IDs is writable; disjoint views of the
+ * same buffer, including views in the unused scratch suffix, remain valid.
+ * @param {PreinternedTermRecordPlan} plan
+ * @param {Uint32Array} scratch
+ * @param {boolean[]|Uint8Array|undefined} readingEqualsExpressionList
+ * @returns {Uint32Array}
+ * @throws {RangeError} If the writable scratch prefix overlaps a source view.
+ */
+function getOwnedCompactionScratch(plan, scratch, readingEqualsExpressionList) {
+    if (plan.stringLengths.length === 0) { return scratch; }
+    const scratchEnd = scratch.byteOffset + plan.stringLengths.length * Uint32Array.BYTES_PER_ELEMENT;
+    /**
+     * @param {unknown} view
+     * @returns {boolean}
+     */
+    const overlaps = (view) => (
+        ArrayBuffer.isView(view) && view.buffer === scratch.buffer && view.byteLength > 0 &&
+        scratch.byteOffset < view.byteOffset + view.byteLength && view.byteOffset < scratchEnd
+    );
+    if (
+        overlaps(plan.stringLengths) || overlaps(plan.stringOffsets) || overlaps(plan.stringHashes) ||
+        overlaps(plan.stringsBuffer) || overlaps(plan.expressionIndexes) || overlaps(plan.readingIndexes) ||
+        overlaps(readingEqualsExpressionList)
+    ) {
+        throw new RangeError('Preinterned plan compaction scratch overlaps source storage');
+    }
+    // Cloned SharedArrayBuffer wrappers can alias without buffer identity.
+    // Snapshot shared scratch into private storage; ordinary scratch is reused.
+    return scratch.buffer instanceof ArrayBuffer ? scratch : new Uint32Array(scratch.subarray(0, plan.stringLengths.length));
+}
+
+/**
  * Copies and remaps only the strings referenced by a row slice.
  * @param {PreinternedTermRecordPlan|null} plan
  * @param {number} start
@@ -361,6 +394,7 @@ export function compactTermRecordPreinternedPlan(plan, start, count, remapScratc
         throw new RangeError('Invalid preinterned plan reading-equality range');
     }
     const sourceStringOffsets = getValidatedStringOffsets(plan);
+    if (count > 0) { remapScratch = getOwnedCompactionScratch(plan, remapScratch, readingEqualsExpressionList); }
     return compactValidatedTermRecordPlan(plan, start, count, remapScratch, readingEqualsExpressionList, sourceStringOffsets);
 }
 
@@ -387,6 +421,7 @@ export function compactTermRecordPreinternedPlanRuns(plan, count, runRowLimit, r
         throw new RangeError('Invalid preinterned plan reading-equality range');
     }
     const sourceStringOffsets = getValidatedStringOffsets(plan);
+    if (count > 0) { remapScratch = getOwnedCompactionScratch(plan, remapScratch, readingEqualsExpressionList); }
     const runs = [];
     for (let start = 0; start < count; start += runRowLimit) {
         runs.push(compactValidatedTermRecordPlan(

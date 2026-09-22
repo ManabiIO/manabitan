@@ -193,6 +193,9 @@ test('MDX inline styles preserve functional roots, cascade and pseudo-elements w
     await expect(entries.locator('[data-sc-class~="where-root"]').first()).toHaveCSS('color', 'rgb(22, 33, 44)');
     await expect(entries.locator('[data-sc-class~="cascade"]').first()).toHaveCSS('color', 'rgb(33, 44, 55)');
     await expect(entries.locator('[data-sc-class~="nested"]').first()).toHaveCSS('font-weight', '700');
+    await expect(entries.locator('[title="two  gaps"]').first()).toHaveCSS('color', 'rgb(12, 34, 56)');
+    await expect(entries.locator('[title="two  gaps"]').first()).toHaveCSS('font-weight', '700');
+    await expect(entries.locator('[title="tab\tgap"]').first()).toHaveCSS('color', 'rgb(23, 45, 67)');
     const scoped = entries.locator('[data-sc-class~="shared"]:not([data-sc-class~="outside"])').first();
     const outside = entries.locator('[data-sc-class~="outside"]').first();
     await expect(scoped).toHaveCSS('border-top-width', '3px');
