@@ -2453,10 +2453,7 @@ null;
      * @returns {string}
      */
     _getDictionaryCacheKey(dictionaryNames) {
-        if (dictionaryNames.length <= 1) {
-            return dictionaryNames[0] ?? '';
-        }
-        return [...dictionaryNames].sort().join('\u001f');
+        return JSON.stringify(dictionaryNames.length <= 1 ? dictionaryNames : [...dictionaryNames].sort());
     }
 
     /** */
@@ -2557,7 +2554,18 @@ null;
      * @returns {string}
      */
     _createTermExactPresenceCacheKey(dictionaryCacheKey, term) {
-        return `${dictionaryCacheKey}\u001f${term}`;
+        return this._createDictionaryQueryKey(dictionaryCacheKey, term);
+    }
+
+    /**
+     * Length framing preserves field boundaries without reserving characters.
+     * The dictionary argument can also be an encoded dictionary-set identity.
+     * @param {string} dictionary
+     * @param {string} query
+     * @returns {string}
+     */
+    _createDictionaryQueryKey(dictionary, query) {
+        return `${dictionary.length}:${dictionary}${query}`;
     }
 
     /**
@@ -2568,7 +2576,7 @@ null;
      * @returns {string}
      */
     _createTermExactMatchCacheKey(dictionaryNames, term) {
-        return `${dictionaryNames.join('\u001f')}\u001e${term}`;
+        return JSON.stringify([dictionaryNames, term]);
     }
 
     /**
@@ -3205,7 +3213,7 @@ null;
             }
         }
         const dictionaryCacheKey = this._getDictionaryCacheKey(dictionaryNames);
-        const negativeCachePrefix = `${matchType}\u001f${dictionaryCacheKey}\u001f`;
+        const negativeCachePrefix = `${matchType}:${dictionaryCacheKey.length}:${dictionaryCacheKey}`;
         const queriesToCheck = [...uniqueQueryMap.values()].filter(({query}) => !this._termPrefixNegativeCache.has(`${negativeCachePrefix}${query}`));
         /** @type {Set<string>} */
         const foundQueries = new Set();
@@ -3526,26 +3534,27 @@ null;
             return [];
         }
         const results = new Array(items.length);
-        /** @type {Map<string, number[]>} */
+        /** @type {Map<string, {dictionary: string, query: string, indexes: number[]}>} */
         const requestIndexes = new Map();
         for (let i = 0; i < items.length; ++i) {
             const item = items[i];
-            const key = `${item.dictionary}\u001f${this._asString(item.query)}`;
+            const query = this._asString(item.query);
+            const key = this._createDictionaryQueryKey(item.dictionary, query);
             const itemIndexes = requestIndexes.get(key);
             if (typeof itemIndexes === 'undefined') {
-                requestIndexes.set(key, [i]);
+                requestIndexes.set(key, {dictionary: item.dictionary, query, indexes: [i]});
             } else {
-                itemIndexes.push(i);
+                itemIndexes.indexes.push(i);
             }
         }
 
-        const uniqueRequests = [...requestIndexes.keys()];
+        const uniqueRequests = [...requestIndexes.values()];
         for (const requestChunk of this._chunkValues(uniqueRequests, 256)) {
             /** @type {Record<string, string>} */
             const bind = {};
             const conditions = [];
             for (let i = 0; i < requestChunk.length; ++i) {
-                const [dictionary, query] = requestChunk[i].split('\u001f');
+                const {dictionary, query} = requestChunk[i];
                 const dictionaryKey = `$dictionary${i}`;
                 const queryKey = `$query${i}`;
                 bind[dictionaryKey] = dictionary;
@@ -3559,9 +3568,9 @@ null;
             while (stmt.step()) {
                 const row = /** @type {import('core').SafeAny} */ (stmt.get({}));
                 const tag = this._deserializeTagRow(row);
-                const itemIndexes = requestIndexes.get(`${tag.dictionary}\u001f${tag.name}`);
+                const itemIndexes = requestIndexes.get(this._createDictionaryQueryKey(tag.dictionary, tag.name));
                 if (typeof itemIndexes === 'undefined') { continue; }
-                for (const itemIndex of itemIndexes) {
+                for (const itemIndex of itemIndexes.indexes) {
                     if (typeof results[itemIndex] === 'undefined') {
                         results[itemIndex] = tag;
                     }
@@ -3596,25 +3605,26 @@ null;
         }
         /** @type {import('dictionary-database').Media[]} */
         const results = [];
-        /** @type {Map<string, number[]>} */
+        /** @type {Map<string, {dictionary: string, path: string, indexes: number[]}>} */
         const mediaRequestIndexes = new Map();
         for (let itemIndex = 0; itemIndex < items.length; ++itemIndex) {
             const item = items[itemIndex];
-            const key = `${item.dictionary}\u001f${item.path}`;
+            const path = item.path;
+            const key = this._createDictionaryQueryKey(item.dictionary, path);
             const itemIndexes = mediaRequestIndexes.get(key);
             if (typeof itemIndexes === 'undefined') {
-                mediaRequestIndexes.set(key, [itemIndex]);
+                mediaRequestIndexes.set(key, {dictionary: item.dictionary, path, indexes: [itemIndex]});
             } else {
-                itemIndexes.push(itemIndex);
+                itemIndexes.indexes.push(itemIndex);
             }
         }
-        const uniqueRequests = [...mediaRequestIndexes.keys()];
+        const uniqueRequests = [...mediaRequestIndexes.values()];
         for (const requestChunk of this._chunkValues(uniqueRequests, 128)) {
             /** @type {Record<string, string>} */
             const bind = {};
             const conditions = [];
             for (let i = 0; i < requestChunk.length; ++i) {
-                const [dictionary, path] = requestChunk[i].split('\u001f');
+                const {dictionary, path} = requestChunk[i];
                 const dictionaryKey = `$dictionary${i}`;
                 const pathKey = `$path${i}`;
                 bind[dictionaryKey] = dictionary;
@@ -3624,13 +3634,23 @@ null;
             const sql = `SELECT dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength FROM media WHERE ${conditions.join(' OR ')}`;
             const stmt = this._getCachedStatement(sql);
             stmt.reset(true);
-            stmt.bind(bind);
-            while (stmt.step()) {
-                const row = /** @type {import('core').SafeAny} */ (stmt.get({}));
+            // A cached cursor cannot remain active across asynchronous content
+            // reads: another media request can rebind it or evict/finalize it.
+            // Snapshot this bounded request chunk and release its SQL read lock
+            // before yielding. SQLite's object rows own their BLOB values.
+            /** @type {import('core').SafeAny[]} */
+            const rows = [];
+            try {
+                stmt.bind(bind);
+                while (stmt.step()) { rows.push(stmt.get({})); }
+            } finally {
+                stmt.reset(true);
+            }
+            for (const row of rows) {
                 const converted = await this._deserializeMediaRow(row);
-                const itemIndexes = mediaRequestIndexes.get(`${converted.dictionary}\u001f${converted.path}`);
+                const itemIndexes = mediaRequestIndexes.get(this._createDictionaryQueryKey(converted.dictionary, converted.path));
                 if (typeof itemIndexes === 'undefined') { continue; }
-                for (const itemIndex of itemIndexes) {
+                for (const itemIndex of itemIndexes.indexes) {
                     results.push(this._createMedia(converted, {itemIndex, indexIndex: 0, item: items[itemIndex]}));
                 }
             }
