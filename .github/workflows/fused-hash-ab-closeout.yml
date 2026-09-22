@@ -1,0 +1,101 @@
+name: Fused hash real-corpus A/B closeout
+on:
+  push:
+    branches: [codex/qualify-fused-hash-20260921]
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        repeat: [1, 2]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Pin compared sources
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/hash-ab"
+          git show 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50:ext/js/dictionary/term-entry-content-hash.js > "$RUNNER_TEMP/hash-ab/A.js"
+          git show 80703bb33680043d0edd714b2ad9beeaf15a0cdf:ext/js/dictionary/term-entry-content-hash.js > "$RUNNER_TEMP/hash-ab/B.js"
+          sha256sum "$RUNNER_TEMP/hash-ab/A.js" "$RUNNER_TEMP/hash-ab/B.js" > "$RUNNER_TEMP/hash-ab/source-fingerprints.txt"
+          git show 80703bb33680043d0edd714b2ad9beeaf15a0cdf:test/data/content-hash-native-vectors.json > "$RUNNER_TEMP/hash-ab/vectors.json"
+          git show 80703bb33680043d0edd714b2ad9beeaf15a0cdf:test/util/content-hash-compatibility-cases.js > "$RUNNER_TEMP/hash-ab/cases.js"
+          git show 80703bb33680043d0edd714b2ad9beeaf15a0cdf:test/content-hash-compatibility.test.js > "$RUNNER_TEMP/hash-ab/wrapper.js"
+          cp test/perf/dictionaries.lock.json "$RUNNER_TEMP/hash-ab/dictionaries.lock.json"
+      - uses: ./.github/actions/setup
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: chromium-e2e-dictionaries-${{ runner.os }}-v1
+      - name: Build exact A and B packages
+        run: |
+          set -euo pipefail
+          for variant in A B; do
+            git switch --detach 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50
+            cp "$RUNNER_TEMP/hash-ab/$variant.js" ext/js/dictionary/term-entry-content-hash.js
+            git diff --check
+            node dev/bin/build.js --target chrome-dev > "$RUNNER_TEMP/hash-ab/$variant-build.log" 2>&1
+            cp builds/manabitan-chrome-dev.zip "$RUNNER_TEMP/$variant-hash.zip"
+          done
+          git switch --detach 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50
+      - name: Alternating paired real imports
+        env:
+          REPEAT_INDEX: ${{ matrix.repeat }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,pathlib,json,subprocess,shutil,statistics
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'hash-ab'
+          repeat=int(os.environ['REPEAT_INDEX'])
+          rows=[]
+          def run(dictionary,variant,role,pair,position):
+              subprocess.run(['git','switch','--detach','90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50'],check=True,stdout=subprocess.DEVNULL)
+              shutil.copyfile(pathlib.Path(os.environ['RUNNER_TEMP'])/f'{variant}-hash.zip','builds/manabitan-chrome-dev.zip')
+              label=f'{dictionary}-{role}-{pair}-{position}-{variant}'
+              output=root/label
+              env={k:v for k,v in os.environ.items() if not k.startswith('MANABITAN_')}
+              env['MANABITAN_E2E_STRICT_RUNTIME']='1'
+              with (root/f'{label}.log').open('w') as log:
+                  subprocess.run(['xvfb-run','-a','node','dev/perf/import-benchmark.js',dictionary,'--runs','1','--no-build','--output',str(output)],env=env,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=240)
+              data=json.loads((output/'summary.json').read_text())
+              assert data['authoritativeTiming'] is True
+              row={'repeat':repeat,'dictionary':dictionary,'variant':variant,'role':role,'pair':pair,'position':position,'totalImportMs':data['runs'][0]['totalImportMs'],'workerImportMs':data['runs'][0]['workerImportMs'],'browserVersion':data['browserVersion']}
+              rows.append(row)
+              (root/'ledger.json').write_text(json.dumps(rows,indent=2))
+              print(json.dumps(row),flush=True)
+          for dictionary in ['jmdict','jitendex']:
+              for i,v in enumerate(['A','B']): run(dictionary,v,'warmup',0,i)
+              for pair in range(1,6):
+                  order=['A','B'] if (pair+repeat)%2==0 else ['B','A']
+                  for i,v in enumerate(order): run(dictionary,v,'paired',pair,i)
+              for pair in range(1,3):
+                  for i in range(2): run(dictionary,'A','AA',pair,i)
+          summary={}
+          for dictionary in ['jmdict','jitendex']:
+              pairs=[]
+              for pair in range(1,6):
+                  q=[x for x in rows if x['dictionary']==dictionary and x['role']=='paired' and x['pair']==pair]
+                  a=next(x['totalImportMs'] for x in q if x['variant']=='A')
+                  b=next(x['totalImportMs'] for x in q if x['variant']=='B')
+                  pairs.append((b/a-1)*100)
+              summary[dictionary]={'pairedDeltasPct':pairs,'medianPct':statistics.median(pairs)}
+          (root/'summary.json').write_text(json.dumps(summary,indent=2))
+          print(json.dumps(summary,indent=2))
+          PY
+      - name: Preserve raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fused-hash-ab-repeat-${{ matrix.repeat }}
+          path: ${{ runner.temp }}/hash-ab/
+          retention-days: 14
