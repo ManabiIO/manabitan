@@ -1,0 +1,27 @@
+name: Manabitan pinned review corpora
+on:
+  push:
+    branches: [internal/wide-review-workspace-20260921]
+    paths: [.github/workflows/wide-review-corpora.yml]
+permissions:
+  contents: read
+jobs:
+  corpora:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.16.0'
+      - name: Fetch locked dictionary fixtures
+        run: node dev/perf/prepare-dictionaries.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabitan-pinned-review-corpora
+          path: builds/e2e-dictionary-cache/*.zip
+          retention-days: 3
+          compression-level: 0
