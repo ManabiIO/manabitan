@@ -140,8 +140,8 @@ describe('DictionaryCssMediaResolver', () => {
             {dictionary: 'B', path: 'mdict-media/b.png'},
         ]);
         resolver.prune([
-            {name: 'A', enabled: true, styles: '.a { background: url("mdict-media/a.png"); }'},
-            {name: 'B', enabled: false, styles: '.b { background: url("mdict-media/b.png"); }'},
+            {name: 'A', enabled: true},
+            {name: 'B', enabled: false},
         ]);
 
         expect(revokeObjectURL).toHaveBeenCalledWith('blob:b');
