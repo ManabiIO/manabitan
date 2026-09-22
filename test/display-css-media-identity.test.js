@@ -20,9 +20,10 @@ test('display preserves distinct dictionary/path pairs before resolver batching'
             closest: () => ({dataset: {dictionary: second.dictionary}}),
         },
     ];
+    const querySelectorAll = vi.fn().mockReturnValue(elements);
     Reflect.set(display, '_options', {dictionaries: []});
     Reflect.set(display, '_setContentToken', token);
-    Reflect.set(display, '_container', {querySelectorAll: () => elements});
+    Reflect.set(display, '_container', {querySelectorAll});
     Reflect.set(display, '_dictionaryCssMediaResolver', {
         resolve,
         /**
@@ -35,6 +36,7 @@ test('display preserves distinct dictionary/path pairs before resolver batching'
     vi.stubGlobal('window', {location: {href: 'chrome-extension://example/search.html'}});
     try {
         await Display.prototype._resolveDictionaryCssMedia.call(display, token);
+        expect(querySelectorAll).toHaveBeenCalledExactlyOnceWith('[data-sc-class], [style*="mdict-media/"]');
         expect(resolve).toHaveBeenCalledExactlyOnceWith([first, second]);
     } finally {
         vi.unstubAllGlobals();
