@@ -1,0 +1,35 @@
+name: Manabitan pinned review workspace
+on:
+  push:
+    branches: [internal/wide-review-workspace-20260921]
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.16.0'
+      - name: Archive tracked source and installed test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/review-workspace
+          git rev-parse HEAD > /tmp/review-workspace/source-commit.txt
+          git ls-tree -r HEAD > /tmp/review-workspace/source-tree.txt
+          git archive --format=tar HEAD | gzip -1 > /tmp/review-workspace/source.tar.gz
+          tar -czf /tmp/review-workspace/dependencies.tar.gz node_modules ext/lib
+          node --version > /tmp/review-workspace/node-version.txt
+          sha256sum /tmp/review-workspace/*.tar.gz > /tmp/review-workspace/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabitan-pinned-review-workspace
+          path: /tmp/review-workspace
+          retention-days: 3
+          compression-level: 0
