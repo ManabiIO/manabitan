@@ -63,11 +63,11 @@ jobs:
           git push origin HEAD:refs/heads/codex/recomposed-score-102-20260921
       - uses: ./.github/actions/setup
         if: success()
-      - name: Rebuild native parser
+      - name: Rebuild production libraries including native parser
         if: success()
         run: |
           set -euo pipefail
-          npm run build:wasm 2>&1 | tee "$RUNNER_TEMP/score-102/build-wasm.log"
+          npm run build:libs 2>&1 | tee "$RUNNER_TEMP/score-102/build-libs.log"
       - name: Strict focused and repository validation
         if: success()
         run: |
