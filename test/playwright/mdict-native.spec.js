@@ -108,6 +108,32 @@ async function assertStoredMedia(page, title, path, expected) {
     expect(Buffer.from(media[0].content, 'base64')).toStrictEqual(Buffer.from(expected));
 }
 
+test('MDX imports every key from many small blocks and retains boundary lookups after reload', async ({page, extensionId}) => {
+    test.setTimeout(180_000);
+    const title = 'MDict many-key-block regression';
+    const entries = Array.from({length: 4096}, (_, index) => ({
+        key: `\u9805\u76ee${String(index).padStart(4, '0')}`,
+        value: `complete definition ${index}`,
+    }));
+    const {bytes} = makeMdictFixture(entries, {title, keysPerBlock: 4, recordBlockSize: 32768});
+    await importFiles(page, `chrome-extension://${extensionId}`, [
+        {name: 'many-key-blocks.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(bytes)},
+    ], title);
+    const counts = /** @type {import('dictionary-database').DictionaryCounts} */ (await api(page, 'getDictionaryCounts', {
+        dictionaryNames: [title], getTotal: false,
+    }));
+    expect(counts.counts).toHaveLength(1);
+    expect(counts.counts[0].terms).toBe(entries.length);
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+    for (const index of [0, 3, 4, entries.length - 1]) {
+        const entry = entries[index];
+        await expect(async () => {
+            expect(JSON.stringify(await lookup(page, entry.key))).toContain(entry.value);
+        }).toPass({timeout: 30_000});
+    }
+});
+
 test('MDX native cross-block import preserves aliases, senses and media through reload and reimport', async ({page, context, extensionId}) => {
     test.setTimeout(180_000);
     const extensionBaseUrl = `chrome-extension://${extensionId}`;

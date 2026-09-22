@@ -772,7 +772,13 @@ class MDictBase {
             if (keyBlockList.length > 0 && keyBlockList[keyBlockList.length - 1].recordEndOffset == -1) {
                 keyBlockList[keyBlockList.length - 1].recordEndOffset = splitKeyBlock[0].recordStartOffset;
             }
-            keyBlockList = keyBlockList.concat(splitKeyBlock);
+            // Keep the first owned block, then append only new keys instead of
+            // recopying the accumulated list. Spread can exceed argument limits.
+            if (keyBlockList.length === 0) {
+                keyBlockList = splitKeyBlock;
+            } else {
+                for (const item of splitKeyBlock) { keyBlockList.push(item); }
+            }
             kbStartOffset += packSize;
         }
         if (keyBlockList.length > 0 && keyBlockList[keyBlockList.length - 1].recordEndOffset === -1) {
