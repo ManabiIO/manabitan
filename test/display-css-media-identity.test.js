@@ -6,7 +6,7 @@ import {Display} from '../ext/js/display/display.js';
 
 test('display preserves distinct dictionary/path pairs before resolver batching', async () => {
     const display = /** @type {Display} */ (Object.create(Display.prototype));
-    const token = {};
+    const token = /** @type {import('core').TokenObject} */ ({});
     const first = {dictionary: 'A', path: 'mdict-media/x\u001fmdict-media/a.png'};
     const second = {dictionary: 'A\u001fmdict-media/x', path: 'mdict-media/a.png'};
     const resolve = vi.fn().mockResolvedValue(false);
