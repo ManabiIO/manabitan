@@ -62,7 +62,6 @@ jobs:
               ('chunkSequences = new Int32Array(chunkSize);','chunkSequences = new Float64Array(chunkSize);'),
               ('sequenceList: /** @type {Int32Array} */ (\n                    useFullChunkArrays ? chunkSequences : /** @type {Int32Array} */ (chunkSequences).subarray(0, streamedRowCount)\n                ),',
                'sequenceList: /** @type {Int32Array|Float64Array} */ (\n                    useFullChunkArrays ? chunkSequences : /** @type {Int32Array|Float64Array} */ (chunkSequences).subarray(0, streamedRowCount)\n                ),'),
-              ('sequenceList: (number|undefined)[]|Int32Array, contentBytesList:', 'sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList:')
           ]
           for before,after in replacements:
               count=s.count(before)
