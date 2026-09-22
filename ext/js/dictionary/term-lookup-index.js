@@ -1518,6 +1518,7 @@ function readFloat64Values(buffer, byteOffset, count) {
  * @param {(number|undefined)[]|Int32Array|Float64Array} values
  * @param {number} rowCount
  * @returns {Int32Array|Float64Array}
+ * @throws {RangeError} If a sequence is not a safe integer.
  */
 function normalizeSequenceValues(values, rowCount) {
     let wide = false;
