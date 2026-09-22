@@ -34,6 +34,7 @@
         {"path": "dev/perf/native-lookup-qualification-20260918.json", "ignore": true},
         {"path": "dev/perf/mdict-checksum-overhead-abba-20260920.json", "ignore": true},
         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
+        {"path": "test/data/content-hash-native-vectors.json", "ignore": true},
 
         {
             "path": "test/perf/dictionaries.lock.json",
