@@ -15,87 +15,16 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Replay unique wide-sequence commits onto recomposed score stack
+      - name: Check out the composed product branch
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/sequence-105"
-          git config user.name 'ManabiTan correctness recompose'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git switch --detach 03712ff99031d37a6b4411f15d408d4d576212a7
-          commits=(
-            c4b9c19ef42bb4b7405035143a57f74ebdff1ff2
-            08284a3864c95976b10632923dd27a9704eed4ae
-            72359feb59531521dbbff4f7529a2d405a395816
-            b5ae969916429b21feb329556ab0ce659ea6fa1c
-            d4ad4a26c15c2cfce72552ab2d3e5eb3d86e5054
-            a1f2e539b86aa3932d805d18ea934f11929e9d37
-            f215c8dcbe83b458e6b941cdfc22a1ff630700db
-            1cffceb0936e213c144ac9f5f8d3aeb380b5b008
-            e2cbd387509ab27b4edd077989b5fc5032c5b270
-            256043967e9c6e1ec55cbdc5e9f7a5a1704eee3a
-          )
-          for c in "${commits[@]}"; do
-            echo "CHERRY_PICK $c" | tee -a "$RUNNER_TEMP/sequence-105/sequence.txt"
-            if ! git cherry-pick "$c" >"$RUNNER_TEMP/sequence-105/$c.log" 2>&1; then
-              git diff --name-only --diff-filter=U > "$RUNNER_TEMP/sequence-105/conflicts.txt"
-              if test ! -s "$RUNNER_TEMP/sequence-105/conflicts.txt" && git diff --quiet && git diff --cached --quiet; then
-                echo "SKIP_ALREADY_INTEGRATED $c" | tee -a "$RUNNER_TEMP/sequence-105/sequence.txt"
-                git cherry-pick --skip
-                continue
-              fi
-              git status --short > "$RUNNER_TEMP/sequence-105/conflict-status.txt"
-              for p in $(cat "$RUNNER_TEMP/sequence-105/conflicts.txt"); do
-                mkdir -p "$RUNNER_TEMP/sequence-105/stages/$(dirname "$p")"
-                git show ":1:$p" > "$RUNNER_TEMP/sequence-105/stages/$p.base" || true
-                git show ":2:$p" > "$RUNNER_TEMP/sequence-105/stages/$p.ours" || true
-                git show ":3:$p" > "$RUNNER_TEMP/sequence-105/stages/$p.theirs" || true
-                git diff -- "$p" > "$RUNNER_TEMP/sequence-105/stages/$p.diff" || true
-              done
-              if test "$c" = 1cffceb0936e213c144ac9f5f8d3aeb380b5b008 && test "$(cat "$RUNNER_TEMP/sequence-105/conflicts.txt")" = "ext/js/dictionary/dictionary-importer.js"; then
-                git checkout --ours ext/js/dictionary/dictionary-importer.js
-                python3 - <<'PY'
-          from pathlib import Path
-          p=Path('ext/js/dictionary/dictionary-importer.js'); s=p.read_text()
-          replacements=[
-              ('sequenceList: (number|undefined)[]|Int32Array,','sequenceList: (number|undefined)[]|Int32Array|Float64Array,'),
-              ('/** @type {(number|undefined)[]|Int32Array} */\n        let chunkSequences = [];','/** @type {(number|undefined)[]|Int32Array|Float64Array} */\n        let chunkSequences = [];'),
-              ('chunkSequences = new Int32Array(chunkSize);','chunkSequences = new Float64Array(chunkSize);'),
-              ('sequenceList: /** @type {Int32Array} */ (\n                    useFullChunkArrays ? chunkSequences : /** @type {Int32Array} */ (chunkSequences).subarray(0, streamedRowCount)\n                ),',
-               'sequenceList: /** @type {Int32Array|Float64Array} */ (\n                    useFullChunkArrays ? chunkSequences : /** @type {Int32Array|Float64Array} */ (chunkSequences).subarray(0, streamedRowCount)\n                ),'),
-          ]
-          for before,after in replacements:
-              count=s.count(before)
-              assert count>0,(before,count)
-              s=s.replace(before,after)
-          p.write_text(s)
-          PY
-                git add ext/js/dictionary/dictionary-importer.js
-                git cherry-pick --continue
-                echo "RESOLVED_COMBINED_FLOAT_SCORE_AND_SEQUENCE $c" | tee -a "$RUNNER_TEMP/sequence-105/sequence.txt"
-                continue
-              fi
-              if test "$c" = e2cbd387509ab27b4edd077989b5fc5032c5b270 && test "$(cat "$RUNNER_TEMP/sequence-105/conflicts.txt")" = "ext/js/dictionary/dictionary-database.js"; then
-                git checkout --ours ext/js/dictionary/dictionary-database.js
-                python3 - <<'PY'
-          from pathlib import Path
-          p=Path('ext/js/dictionary/dictionary-database.js'); s=p.read_text()
-          before='sequenceList: (number|undefined)[]|Int32Array, contentBytesList:'
-          after='sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList:'
-          assert s.count(before)>0,s.count(before)
-          p.write_text(s.replace(before,after))
-          PY
-                git add ext/js/dictionary/dictionary-database.js
-                git cherry-pick --continue
-                echo "RESOLVED_DATABASE_FLOAT_SCORE_AND_SEQUENCE $c" | tee -a "$RUNNER_TEMP/sequence-105/sequence.txt"
-                continue
-              fi
-              exit 42
-            fi
-          done
+          git switch --detach origin/codex/recomposed-sequence-105-20260921
           git rev-parse HEAD > "$RUNNER_TEMP/sequence-105/recomposed-head.txt"
+          git merge-base HEAD 03712ff99031d37a6b4411f15d408d4d576212a7 > "$RUNNER_TEMP/sequence-105/merge-base.txt"
+          test "$(cat "$RUNNER_TEMP/sequence-105/merge-base.txt")" = "03712ff99031d37a6b4411f15d408d4d576212a7"
           git diff --stat 03712ff99031d37a6b4411f15d408d4d576212a7 HEAD > "$RUNNER_TEMP/sequence-105/stat.txt"
           git diff 03712ff99031d37a6b4411f15d408d4d576212a7 HEAD > "$RUNNER_TEMP/sequence-105/product.patch"
-          git push origin HEAD:refs/heads/codex/recomposed-sequence-105-20260921
       - uses: ./.github/actions/setup
         if: success()
       - name: Rebuild production libraries
