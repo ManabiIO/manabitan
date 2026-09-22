@@ -638,6 +638,21 @@ describe('persisted term lookup index', () => {
 describe('wide persisted term sequences', () => {
     const wideSequences = [0x80000000, 0x100000001, 2 ** 40, Number.MAX_SAFE_INTEGER];
 
+    test.each([Number.NaN, 0.5, Infinity, Number.MAX_SAFE_INTEGER + 1])(
+        'rejects corrupted Float64 sequence keys: %s',
+        (invalid) => {
+            const encoded = encodePersistedTermLookupIndex([
+                {expressionBytes: bytes('zero'), readingBytes: null, sequence: 0},
+                {expressionBytes: bytes('wide'), readingBytes: null, sequence: 2 ** 40},
+            ]);
+            const parsed = parsePersistedTermLookupIndex(encoded);
+            parsed.sequenceKeys[0] = invalid;
+            expect(() => parsePersistedTermLookupIndex(encoded)).toThrow();
+            const {base} = splitPersistedTermLookupIndex(encoded);
+            expect(() => rebuildPersistedTermLookupIndexFromBase(base)).toThrow();
+        },
+    );
+
     test('round-trips and indexes safe integers beyond int32', () => {
         const encoded = encodePersistedTermLookupIndex(wideSequences.map((sequence, index) => ({
             expressionBytes: bytes(`wide-${String(index)}`),

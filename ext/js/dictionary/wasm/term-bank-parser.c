@@ -717,7 +717,7 @@ static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index
         case 5: meta->glossary_start = start; meta->glossary_length = length; break;
         case 6:
             if (is_null_token(src, start, length)) { meta->sequence_start = 0xffffffffu; break; }
-            if (start >= end || (src[start] != '-' && (src[start] < '0' || src[start] > '9'))) { return 0; }
+            if (!is_valid_json_number(src, start, end)) { return 0; }
             meta->sequence_start = start; break;
         case 7: meta->term_tags_start = start; meta->term_tags_length = length; break;
         default: break;

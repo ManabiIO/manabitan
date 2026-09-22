@@ -1276,6 +1276,7 @@ function validateSequenceIndex(heads, next, keys, postingOffsets, postingRows, r
             }
             const value = keys[key];
             if (
+                !Number.isSafeInteger(value) ||
                 value < 0 ||
                 keySeen[key] !== 0 ||
                 (hashSequence(value) & (heads.length - 1)) !== slot
@@ -1521,6 +1522,7 @@ function readFloat64Values(buffer, byteOffset, count) {
  * @throws {RangeError} If a sequence is not a safe integer.
  */
 function normalizeSequenceValues(values, rowCount) {
+    if (values instanceof Int32Array) { return values.subarray(0, rowCount); }
     let wide = false;
     const normalized = new Array(rowCount);
     for (let row = 0; row < rowCount; ++row) {

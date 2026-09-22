@@ -209,21 +209,21 @@ async function parseColumnSnapshot(sources, preloadedSource = null) {
     };
 }
 
+beforeAll(() => {
+    vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
+        const url = resource instanceof URL ? resource : new URL(String(resource));
+        if (url.protocol === 'file:') {
+            return new Response(await readFile(fileURLToPath(url)));
+        }
+        return await nativeFetch(resource);
+    });
+});
+
+afterAll(() => {
+    vi.unstubAllGlobals();
+});
+
 describe('term-bank WASM parser', () => {
-    beforeAll(() => {
-        vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
-            const url = resource instanceof URL ? resource : new URL(String(resource));
-            if (url.protocol === 'file:') {
-                return new Response(await readFile(fileURLToPath(url)));
-            }
-            return await nativeFetch(resource);
-        });
-    });
-
-    afterAll(() => {
-        vi.unstubAllGlobals();
-    });
-
     maybeTest('inflates, validates, and joins mixed raw ZIP term-bank payloads', async () => {
         const sources = [
             createCompressedTermBankSource(' \n [["a","", "", "", 1, ["one"], 10, ""]] \r', 8),
@@ -3166,13 +3166,34 @@ describe('term bank wide sequence parity', () => {
         expect(int32Profile?.fusedParseFallbacks).toBe(0);
     });
 
-    maybeTest.each(['1.5', String(Number.MAX_SAFE_INTEGER + 1)])(
-        'rejects sequence value outside the safe integer domain: %s',
+    maybeTest.each(['1.5', String(Number.MAX_SAFE_INTEGER + 1), '01', '-01', '0x10', '1.', '1e', '--1'])(
+        'rejects invalid JSON or unsafe sequence values across parser routes: %s',
         async (sequenceToken) => {
             const sourceBytes = textEncoder.encode(
                 `[["bad","","","",1,["g"],${sequenceToken},""]]`,
             );
             await expect(parseTermBankWithWasmChunks(sourceBytes, 3, () => {})).rejects.toThrow();
+            await expect(parseTermBankWithWasmColumnChunks(sourceBytes, 3, () => {})).rejects.toThrow();
+            await expect(parseTermBankWithWasmColumnChunks(
+                [textEncoder.encode('[["ok","","","",1,["g"],1,""]]'), sourceBytes],
+                3,
+                () => {},
+                64,
+                {emitContentSlab: true, emitTokenBinaryContent: true, prepareLookupIndexes: true},
+            )).rejects.toThrow();
+        },
+    );
+
+    maybeTest.each(['1e2', '100.0', '1E+2'])(
+        'preserves valid JSON integer-valued sequence syntax: %s',
+        async (sequenceToken) => {
+            const sourceBytes = textEncoder.encode(`[["ok","","","",1,["g"],${sequenceToken},""]]`);
+            /** @type {number[]} */
+            const actual = [];
+            await parseTermBankWithWasmColumnChunks(sourceBytes, 3, (chunk) => {
+                actual.push(...chunk.sequenceList);
+            });
+            expect(actual).toStrictEqual([100]);
         },
     );
 });
