@@ -43,7 +43,11 @@ function resolveEncoding(value) {
             return {encoding: BIG5, decoder: BIG5_DECODER};
     }
     try {
-        return {encoding: label.toUpperCase(), decoder: new TextDecoder(label)};
+        const decoder = new TextDecoder(label);
+        // Key lengths and terminators use code units, regardless of which
+        // accepted UTF-16 label selected the decoder or its byte order.
+        const encoding = decoder.encoding === 'utf-16le' || decoder.encoding === 'utf-16be' ? UTF16 : label.toUpperCase();
+        return {encoding, decoder};
     } catch (_error) {
         throw new Error(`Unsupported MDict encoding: ${label}`);
     }
