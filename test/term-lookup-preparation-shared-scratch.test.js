@@ -24,9 +24,8 @@ test('cloned shared scratch preserves nonzero sequences and its original values'
     }
     const scratch = new Uint32Array(structuredClone(buffer))
     expect(scratch.buffer).not.toBe(buffer)
-    const before = structuredClone(chunk)
     // structuredClone shares SharedArrayBuffer storage, so snapshot values.
-    before.sequenceList = Int32Array.from(sequenceList)
+    const before = {...structuredClone(chunk), sequenceList: Int32Array.from(sequenceList)}
     // Match dirty-scratch state: it can legitimately select compaction.
     const expected = prepareTermLookupIndexesFromPreinternedPlan(structuredClone(chunk), Uint32Array.from(scratch))
     const actual = prepareTermLookupIndexesFromPreinternedPlan(chunk, scratch)
