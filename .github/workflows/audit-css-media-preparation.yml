@@ -1,0 +1,96 @@
+name: CSS media review preparation
+on:
+  push:
+    branches: [audit/css-media-assembly-20260921-more]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 97bfda86bee3f2d887ba37bd4c9579891d46cbc9
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install exact repository dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/css-review"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/css-review/source.txt"
+          npm ci
+          npm run build:libs
+      - name: Prove the real display caller regression before repair
+        run: |
+          set -euo pipefail
+          set +e
+          npx vitest run test/display-css-media-identity.test.js --reporter=json --outputFile="$RUNNER_TEMP/css-review/red.json" > "$RUNNER_TEMP/css-review/red.log" 2>&1
+          status=$?
+          set -e
+          test "$status" -ne 0
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads(Path(os.environ['RUNNER_TEMP'], 'css-review/red.json').read_text())
+          cases = [a for r in report['testResults'] for a in r.get('assertionResults', [])]
+          assert len(cases) == 1, cases
+          assert cases[0]['status'] == 'failed', cases
+          assert 'display preserves distinct dictionary/path pairs' in cases[0]['fullName'], cases
+          failures = '\n'.join(cases[0].get('failureMessages', []))
+          assert 'AssertionError' in failures and 'called' in failures.lower(), failures
+          print('Confirmed the actual display caller loses one distinct target before resolver batching.')
+          PY
+      - name: Apply the bounded caller repair and format affected source
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('ext/js/display/display.js')
+          text = path.read_text()
+          old = r'const key = `${dictionary}\u001f${path}`;'
+          assert text.count(old) == 1, text.count(old)
+          path.write_text(text.replace(old, 'const key = JSON.stringify([dictionary, path]);'))
+          PY
+          npx eslint --fix ext/js/display/display.js ext/js/display/dictionary-css-media-resolver.js test/dictionary-css-media-resolver.test.js test/dictionary-css-media-lifecycle.test.js test/display-css-media-identity.test.js test/util/search-refresh-cases.js 2>&1 | tee "$RUNNER_TEMP/css-review/lint.log"
+          git diff --check
+          git diff > "$RUNNER_TEMP/css-review/source.patch"
+      - name: Run repository tests and types without weakening gates
+        run: |
+          set -euo pipefail
+          npx vitest run test/dictionary-css-media-resolver.test.js test/dictionary-css-media-lifecycle.test.js test/display-css-media-identity.test.js 2>&1 | tee "$RUNNER_TEMP/css-review/focused.log"
+          node --test test/util/search-refresh-cases.js 2>&1 | tee "$RUNNER_TEMP/css-review/search-refresh.log"
+          npm run test:ts:main 2>&1 | tee "$RUNNER_TEMP/css-review/types-main.log"
+          npm run test:ts:test 2>&1 | tee "$RUNNER_TEMP/css-review/types-test.log"
+      - name: Publish only reviewed source on a separate preparation branch
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import subprocess
+          allowed = {
+              'ext/js/display/display.js',
+              'ext/js/display/dictionary-css-media-resolver.js',
+              'test/dictionary-css-media-resolver.test.js',
+              'test/dictionary-css-media-lifecycle.test.js',
+              'test/display-css-media-identity.test.js',
+              'test/util/search-refresh-cases.js',
+          }
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines())
+          assert changed and changed <= allowed, changed
+          assert not subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).strip()
+          PY
+          git add ext/js/display/display.js ext/js/display/dictionary-css-media-resolver.js test/dictionary-css-media-resolver.test.js test/dictionary-css-media-lifecycle.test.js test/display-css-media-identity.test.js test/util/search-refresh-cases.js
+          git -c user.name='Manabi PR audit' -c user.email='noreply@github.com' commit -m 'Preserve CSS media identities through display batching'
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/css-review/prepared.txt"
+          git push origin HEAD:refs/heads/audit/css-media-prepared-20260921-more
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: css-media-review-evidence
+          path: ${{ runner.temp }}/css-review/
+          retention-days: 7
