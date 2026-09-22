@@ -1,0 +1,81 @@
+name: Fractional score current-develop recompose
+on:
+  push:
+    branches: [codex/recompose-score-102-20260921]
+permissions:
+  contents: write
+jobs:
+  recompose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Recompose the semantic stack
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/score-102"
+          git config user.name 'ManabiTan correctness recompose'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch --detach 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50
+          commits=(
+            40d656f9644816c50d1c22f43b5a57ae55b6cd58
+            e6142d387cd043ba739dd1f46c873c5010c51410
+            0aceaedd8e7324e8535fed084ef2a1bd7f0c49c6
+            ba2bc1b97948302985964ca5501186f32e50bd98
+            ab789b37b75ec2c47efccfefcc0c7f4dc26fee4c
+            e78102bc624dda048ec00d376635281dab25178a
+            d917441222d36eb6b7c3ce5b9f6be7dcfc9702e1
+            e460fd3f511488a97485d840dda3578def410705
+            4cec9f710f127143410e7b99ddb4bb97c5dd561d
+            d4676372104c513c339363ee96a36d0b1c185953
+            a26f10e645e8f3c104b2d8fc1c19a07d3d4bac2e
+            5a42365f06477135c1d28c0801526960393537e1
+            36fdc75864859a2ab4405bda2d33f2cba9af036e
+          )
+          for c in "${commits[@]}"; do
+            echo "CHERRY_PICK $c" | tee -a "$RUNNER_TEMP/score-102/sequence.txt"
+            if ! git cherry-pick "$c" >"$RUNNER_TEMP/score-102/$c.log" 2>&1; then
+              git status --short > "$RUNNER_TEMP/score-102/conflict-status.txt"
+              git diff --name-only --diff-filter=U > "$RUNNER_TEMP/score-102/conflicts.txt"
+              for p in $(cat "$RUNNER_TEMP/score-102/conflicts.txt"); do
+                mkdir -p "$RUNNER_TEMP/score-102/stages/$(dirname "$p")"
+                git show ":1:$p" > "$RUNNER_TEMP/score-102/stages/$p.base" || true
+                git show ":2:$p" > "$RUNNER_TEMP/score-102/stages/$p.ours" || true
+                git show ":3:$p" > "$RUNNER_TEMP/score-102/stages/$p.theirs" || true
+                git diff -- "$p" > "$RUNNER_TEMP/score-102/stages/$p.diff" || true
+              done
+              exit 42
+            fi
+          done
+          git rev-parse HEAD > "$RUNNER_TEMP/score-102/recomposed-head.txt"
+          git diff --stat 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50 HEAD > "$RUNNER_TEMP/score-102/stat.txt"
+          git diff 90344f6e8cd04783d0e3a6d98a7f7ea8eb26af50 HEAD > "$RUNNER_TEMP/score-102/product.patch"
+          git push origin HEAD:refs/heads/codex/recomposed-score-102-20260921
+      - uses: ./.github/actions/setup
+        if: success()
+      - name: Rebuild native parser
+        if: success()
+        run: |
+          set -euo pipefail
+          npm run build:wasm 2>&1 | tee "$RUNNER_TEMP/score-102/build-wasm.log"
+      - name: Strict focused and repository validation
+        if: success()
+        run: |
+          set -euo pipefail
+          npm run test:js 2>&1 | tee "$RUNNER_TEMP/score-102/lint.log"
+          npm run test:ts:main 2>&1 | tee "$RUNNER_TEMP/score-102/ts-main.log"
+          npm run test:ts:test 2>&1 | tee "$RUNNER_TEMP/score-102/ts-test.log"
+          npx vitest run test/term-bank-wasm-parser.test.js test/term-bank-score-fused-zero.test.js test/term-record-opfs-store.test.js --reporter=json --outputFile="$RUNNER_TEMP/score-102/tests.json" 2>&1 | tee "$RUNNER_TEMP/score-102/tests.log"
+          git diff --check
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: score-102-current-develop-recompose
+          path: ${{ runner.temp }}/score-102/
+          retention-days: 14
