@@ -238,7 +238,7 @@ typedef struct {
     uint32_t definition_tags_length;
     uint32_t rules_start;
     uint32_t rules_length;
-    int32_t score;
+    uint32_t score_start;
     uint32_t glossary_start;
     uint32_t glossary_length;
     int32_t sequence;
@@ -711,7 +711,9 @@ static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index
         case 1: meta->reading_start = start; meta->reading_length = length; break;
         case 2: meta->definition_tags_start = start; meta->definition_tags_length = length; break;
         case 3: meta->rules_start = start; meta->rules_length = length; break;
-        case 4: return parse_int32_token(src, start, end, 0, &meta->score);
+        case 4:
+            if (!is_valid_json_number(src, start, end)) { return 0; }
+            meta->score_start = start; break;
         case 5: meta->glossary_start = start; meta->glossary_length = length; break;
         case 6: return parse_int32_token(src, start, end, -1, &meta->sequence);
         case 7: meta->term_tags_start = start; meta->term_tags_length = length; break;
@@ -725,7 +727,7 @@ static void clear_term_row_meta(TermRowMeta* meta) {
     meta->reading_start = 0u; meta->reading_length = 0u;
     meta->definition_tags_start = 0u; meta->definition_tags_length = 0u;
     meta->rules_start = 0u; meta->rules_length = 0u;
-    meta->score = 0;
+    meta->score_start = 0u;
     meta->glossary_start = 0u; meta->glossary_length = 0u;
     meta->sequence = -1;
     meta->term_tags_start = 0u; meta->term_tags_length = 0u;
@@ -2593,7 +2595,19 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         expression_indexes[row_count] = string_indexes[0];
         reading_indexes[row_count] = string_indexes[1];
         reading_equals[row_count] = reading_equals_expression ? 1u : 0u;
-        scores[row_count] = parsed_row->score;
+        uint32_t score_end = 0u;
+        int32_t score = 0;
+        if (
+            !parse_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
+            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||
+            // Integer storage cannot preserve a negative zero score. Use the
+            // ordinary number-preserving path, even in otherwise integer banks.
+            (score == 0 && src[parsed_row->score_start] == '-')
+        ) {
+            *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
+            return -5;
+        }
+        scores[row_count] = score;
         sequences[row_count] = parsed_row->sequence;
 
         const uint32_t row_offset = row_count * 4u;
