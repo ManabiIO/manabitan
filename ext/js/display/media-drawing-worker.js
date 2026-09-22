@@ -94,8 +94,12 @@ export class MediaDrawingWorker {
             }
             const imageData = new ImageData(new Uint8ClampedArray(buffer), width, height);
             for (const ci of canvasIndexes) {
-                const c = canvases[ci];
-                c.getContext('2d')?.putImageData(imageData, 0, 0);
+                try {
+                    const c = canvases[ci];
+                    c.getContext('2d')?.putImageData(imageData, 0, 0);
+                } catch (error) {
+                    log.error(error);
+                }
             }
         } catch (e) {
             log.error(e);
@@ -110,8 +114,12 @@ export class MediaDrawingWorker {
                 return;
             }
             for (const ci of canvasIndexes) {
-                const c = canvases[ci];
-                c.getContext('2d')?.drawImage(decodedImage, 0, 0, c.width, c.height);
+                try {
+                    const c = canvases[ci];
+                    c.getContext('2d')?.drawImage(decodedImage, 0, 0, c.width, c.height);
+                } catch (error) {
+                    log.error(error);
+                }
             }
         } catch (e) {
             log.error(e);
