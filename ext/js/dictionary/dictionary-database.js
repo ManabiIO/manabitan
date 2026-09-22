@@ -3662,6 +3662,7 @@ null;
     /**
      * @param {import('dictionary-database').DrawMediaRequest[]} items
      * @param {MessagePort} source
+     * @throws {Error|AggregateError} After attempting all images if rendering fails.
      */
     async drawMedia(items, source) {
         if (this._worker !== null) {
@@ -3697,68 +3698,74 @@ null;
         results.sort((a, _b) => (a.mediaType === 'image/svg+xml' ? -1 : 1));
 
         safePerformance.mark('drawMedia:draw:start');
+        const errors = [];
         for (const m of results) {
-            if (m.mediaType === 'image/svg+xml') {
-                safePerformance.mark('drawMedia:draw:svg:start');
-                /** @type {import('@resvg/resvg-wasm').ResvgRenderOptions} */
-                const opts = {
-                    fitTo: {
-                        mode: 'width',
-                        value: m.canvasWidth,
-                    },
-                    font: {
-                        fontBuffers: this._resvgFontBuffer !== null ? [this._resvgFontBuffer] : [],
-                    },
-                };
-                const resvgJS = new Resvg(new Uint8Array(m.content), opts);
-                try {
-                    const render = resvgJS.render();
+            try {
+                if (m.mediaType === 'image/svg+xml') {
+                    safePerformance.mark('drawMedia:draw:svg:start');
+                    /** @type {import('@resvg/resvg-wasm').ResvgRenderOptions} */
+                    const opts = {
+                        fitTo: {
+                            mode: 'width',
+                            value: m.canvasWidth,
+                        },
+                        font: {
+                            fontBuffers: this._resvgFontBuffer !== null ? [this._resvgFontBuffer] : [],
+                        },
+                    };
+                    const resvgJS = new Resvg(new Uint8Array(m.content), opts);
                     try {
-                        // The getter copies pixels; transfer the same copy carried by the message.
-                        const buffer = render.pixels.buffer;
-                        source.postMessage({action: 'drawBufferToCanvases', params: {buffer, width: render.width, height: render.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [buffer]);
-                    } finally {
-                        render.free();
-                    }
-                } finally {
-                    resvgJS.free();
-                }
-                safePerformance.mark('drawMedia:draw:svg:end');
-                safePerformance.measure('drawMedia:draw:svg', 'drawMedia:draw:svg:start', 'drawMedia:draw:svg:end');
-            } else {
-                safePerformance.mark('drawMedia:draw:raster:start');
-
-                if ('serviceWorker' in navigator) {
-                    const imageDecoder = new ImageDecoder({type: m.mediaType, data: m.content});
-                    try {
-                        const {image} = await imageDecoder.decode();
+                        const render = resvgJS.render();
                         try {
-                            source.postMessage({action: 'drawDecodedImageToCanvases', params: {decodedImage: image, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [image]);
+                        // The getter copies pixels; transfer the same copy carried by the message.
+                            const buffer = render.pixels.buffer;
+                            source.postMessage({action: 'drawBufferToCanvases', params: {buffer, width: render.width, height: render.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [buffer]);
                         } finally {
-                            // Successful transfer detaches this handle; failed transfer leaves it owned here.
-                            image.close();
+                            render.free();
                         }
                     } finally {
-                        imageDecoder.close();
+                        resvgJS.free();
                     }
+                    safePerformance.mark('drawMedia:draw:svg:end');
+                    safePerformance.measure('drawMedia:draw:svg', 'drawMedia:draw:svg:start', 'drawMedia:draw:svg:end');
                 } else {
-                    const image = new Blob([m.content], {type: m.mediaType});
-                    await createImageBitmap(image, {resizeWidth: m.canvasWidth, resizeHeight: m.canvasHeight, resizeQuality: 'high'}).then((decodedImage) => {
+                    safePerformance.mark('drawMedia:draw:raster:start');
+
+                    if ('serviceWorker' in navigator) {
+                        const imageDecoder = new ImageDecoder({type: m.mediaType, data: m.content});
                         try {
-                            const canvas = new OffscreenCanvas(decodedImage.width, decodedImage.height);
-                            const ctx = canvas.getContext('2d');
-                            if (ctx !== null) {
-                                ctx.drawImage(decodedImage, 0, 0);
-                                const imageData = ctx.getImageData(0, 0, decodedImage.width, decodedImage.height);
-                                source.postMessage({action: 'drawBufferToCanvases', params: {buffer: imageData.data.buffer, width: decodedImage.width, height: decodedImage.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [imageData.data.buffer]);
+                            const {image} = await imageDecoder.decode();
+                            try {
+                                source.postMessage({action: 'drawDecodedImageToCanvases', params: {decodedImage: image, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [image]);
+                            } finally {
+                            // Successful transfer detaches this handle; failed transfer leaves it owned here.
+                                image.close();
                             }
                         } finally {
-                            decodedImage.close();
+                            imageDecoder.close();
                         }
-                    });
+                    } else {
+                        const image = new Blob([m.content], {type: m.mediaType});
+                        await createImageBitmap(image, {resizeWidth: m.canvasWidth, resizeHeight: m.canvasHeight, resizeQuality: 'high'}).then((decodedImage) => {
+                            try {
+                                const canvas = new OffscreenCanvas(decodedImage.width, decodedImage.height);
+                                const ctx = canvas.getContext('2d');
+                                if (ctx !== null) {
+                                    ctx.drawImage(decodedImage, 0, 0);
+                                    const imageData = ctx.getImageData(0, 0, decodedImage.width, decodedImage.height);
+                                    source.postMessage({action: 'drawBufferToCanvases', params: {buffer: imageData.data.buffer, width: decodedImage.width, height: decodedImage.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [imageData.data.buffer]);
+                                }
+                            } finally {
+                                decodedImage.close();
+                            }
+                        });
+                    }
+                    safePerformance.mark('drawMedia:draw:raster:end');
+                    safePerformance.measure('drawMedia:draw:raster', 'drawMedia:draw:raster:start', 'drawMedia:draw:raster:end');
                 }
-                safePerformance.mark('drawMedia:draw:raster:end');
-                safePerformance.measure('drawMedia:draw:raster', 'drawMedia:draw:raster:start', 'drawMedia:draw:raster:end');
+            } catch (error) {
+                // A broken image must not prevent independent images from rendering.
+                errors.push(error);
             }
         }
         safePerformance.mark('drawMedia:draw:end');
@@ -3766,6 +3773,8 @@ null;
 
         safePerformance.mark('drawMedia:end');
         safePerformance.measure('drawMedia', 'drawMedia:start', 'drawMedia:end');
+        if (errors.length === 1) { throw errors[0]; }
+        if (errors.length > 1) { throw new AggregateError(errors, 'Failed to render dictionary media'); }
     }
 
     /**
@@ -8999,7 +9008,7 @@ null :
 
     /** @type {import('dictionary-database').ApiHandler<'drawMedia'>} */
     _onDrawMedia(params, port) {
-        void this.drawMedia(params.requests, port);
+        return this.drawMedia(params.requests, port).catch((error) => { log.error(error); });
     }
 
     // Private
