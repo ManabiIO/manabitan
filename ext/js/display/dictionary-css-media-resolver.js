@@ -129,11 +129,15 @@ export class DictionaryCssMediaResolver {
      * @param {{createObjectURL?: typeof URL.createObjectURL, revokeObjectURL?: typeof URL.revokeObjectURL}} [urlApi]
      */
     constructor(api, urlApi = {}) {
+        /** @type {{getMedia: (targets: Array<{dictionary: string, path: string}>) => Promise<Array<{dictionary: string, path: string, mediaType: string, content: string}>>}} */
         this._api = api;
-        this._createObjectURL = urlApi.createObjectURL ?? URL.createObjectURL.bind(URL);
-        this._revokeObjectURL = urlApi.revokeObjectURL ?? URL.revokeObjectURL.bind(URL);
+        /** @type {typeof URL.createObjectURL} */
+        this._createObjectURL = urlApi.createObjectURL ?? ((blob) => URL.createObjectURL(blob));
+        /** @type {typeof URL.revokeObjectURL} */
+        this._revokeObjectURL = urlApi.revokeObjectURL ?? ((url) => { URL.revokeObjectURL(url); });
         /** @type {Map<string, {dictionary: string, path: string, url: string}>} */
         this._cache = new Map();
+        /** @type {number} */
         this._generation = 0;
     }
 
@@ -209,8 +213,10 @@ export class DictionaryCssMediaResolver {
     rewriteStyles(dictionary, css) {
         CSS_URL_PATTERN.lastIndex = 0;
         return css.replace(CSS_URL_PATTERN, (match, doubleQuoted, singleQuoted, unquoted) => {
-            const raw = doubleQuoted ?? singleQuoted ?? unquoted ?? '';
-            const path = decodeCssString(String(raw).trim());
+            const raw = typeof doubleQuoted === 'string' ?
+                doubleQuoted :
+                (typeof singleQuoted === 'string' ? singleQuoted : (typeof unquoted === 'string' ? unquoted : ''));
+            const path = decodeCssString(raw.trim());
             if (!path.startsWith(MDICT_MEDIA_PREFIX)) { return match; }
             const cached = this._cache.get(getCacheKey(dictionary, path));
             return typeof cached === 'undefined' ? match : `url("${cached.url}")`;
