@@ -3675,7 +3675,7 @@ null;
         const groupedItems = new Map();
         for (const item of items) {
             const {path, dictionary, canvasIndex, canvasWidth, canvasHeight, generation} = item;
-            const key = `${path}:::${dictionary}`;
+            const key = JSON.stringify([path, dictionary, canvasWidth, canvasHeight, generation]);
             if (!groupedItems.has(key)) {
                 groupedItems.set(key, {path, dictionary, canvasIndexes: [], canvasWidth, canvasHeight, generation});
             }
