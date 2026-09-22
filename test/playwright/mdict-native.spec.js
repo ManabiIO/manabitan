@@ -122,11 +122,11 @@ test('MDX native cross-block import preserves aliases, senses and media through 
         {key: '別名', value: '@@@LINK=ねこ'},
         {key: '青', value: `<div>blue entry<img src="data:image/png;base64,${Buffer.from(blue).toString('base64')}"></div>`},
         {key: '緑', value: '<div>green MDD entry<img src="styles/images/green.png"></div>'},
-    ], {title, recordBlockSize: 7, keysPerBlock: 1});
+    ], {title, recordBlockSize: 7, keysPerBlock: 1, headerQuote: "'", spacedHeaderAttributes: true});
     const mdd = makeMdictFixture([
         {key: '\\styles\\theme.css', value: '.native-sense { color: rgb(12, 34, 56); background-image: url(images/green.png); }'},
         {key: '\\styles\\images\\green.png', value: green},
-    ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1});
+    ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1, headerQuote: "'", spacedHeaderAttributes: true});
     const files = [
         {name: 'native.MDX', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
         {name: 'native.MDD', mimeType: 'application/octet-stream', buffer: Buffer.from(mdd.bytes)},

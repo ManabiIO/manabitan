@@ -90,9 +90,11 @@ function levenshteinDistance(a, b) {
  */
 function parseHeader(header_text) {
     const headerAttr = {};
-    Array.from(header_text.matchAll(/(\w+)="((.|\r|\n)*?)"/g)).forEach((tag) => {
-        headerAttr[tag[1]] = unescapeEntities(tag[2]);
-    });
+    // XML permits either quote and whitespace around '='. Match whole names
+    // so an extension attribute cannot be mistaken for its unqualified suffix.
+    for (const tag of header_text.matchAll(/(?:^|[ \t\r\n])([A-Za-z_][A-Za-z0-9_.:-]*)[ \t\r\n]*=[ \t\r\n]*(?:"([^"]*)"|'([^']*)')/gu)) {
+        headerAttr[tag[1]] = unescapeEntities(tag[2] ?? tag[3]);
+    }
     // Styles are encoded as strict triplets: id, opening markup, closing markup.
     // Empty opening/closing fields are meaningful and must not be collapsed.
     if (headerAttr['StyleSheet'] && typeof headerAttr['StyleSheet'] == 'string') {
