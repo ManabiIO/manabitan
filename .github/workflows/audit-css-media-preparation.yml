@@ -23,7 +23,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/css-review"
-          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/css-review/source.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/css-review/source.txt"
           npm ci
           npm run build:libs
       - name: Prove the real display caller regression before repair
@@ -56,6 +56,11 @@ jobs:
           old = r'const key = `${dictionary}\u001f${path}`;'
           assert text.count(old) == 1, text.count(old)
           path.write_text(text.replace(old, 'const key = JSON.stringify([dictionary, path]);'))
+          test = Path('test/display-css-media-identity.test.js')
+          text = test.read_text()
+          old = '    const token = {};'
+          assert text.count(old) == 1
+          test.write_text(text.replace(old, "    const token = /** @type {import('core').TokenObject} */ ({});"))
           PY
           npx eslint --fix ext/js/display/display.js ext/js/display/dictionary-css-media-resolver.js test/dictionary-css-media-resolver.test.js test/dictionary-css-media-lifecycle.test.js test/display-css-media-identity.test.js test/util/search-refresh-cases.js 2>&1 | tee "$RUNNER_TEMP/css-review/lint.log"
           git diff --check
@@ -86,7 +91,7 @@ jobs:
           PY
           git add ext/js/display/display.js ext/js/display/dictionary-css-media-resolver.js test/dictionary-css-media-resolver.test.js test/dictionary-css-media-lifecycle.test.js test/display-css-media-identity.test.js test/util/search-refresh-cases.js
           git -c user.name='Manabi PR audit' -c user.email='noreply@github.com' commit -m 'Preserve CSS media identities through display batching'
-          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/css-review/prepared.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/css-review/prepared.txt"
           git push origin HEAD:refs/heads/audit/css-media-prepared-20260921-more
       - uses: actions/upload-artifact@v4
         if: always()
