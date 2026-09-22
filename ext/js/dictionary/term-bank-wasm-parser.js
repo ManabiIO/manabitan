@@ -460,6 +460,7 @@ function decodeJsonNumberToken(source, start) {
  * @param {Uint8Array} source
  * @param {number} start
  * @returns {number}
+ * @throws {RangeError} If the sequence is not a safe integer.
  */
 function decodeJsonSequenceToken(source, start) {
     const value = decodeJsonNumberToken(source, start);
