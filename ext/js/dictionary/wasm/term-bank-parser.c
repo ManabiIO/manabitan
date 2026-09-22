@@ -712,7 +712,7 @@ static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index
         case 2: meta->definition_tags_start = start; meta->definition_tags_length = length; break;
         case 3: meta->rules_start = start; meta->rules_length = length; break;
         case 4:
-            if (start >= end || (src[start] != '-' && (src[start] < '0' || src[start] > '9'))) { return 0; }
+            if (!is_valid_json_number(src, start, end)) { return 0; }
             meta->score_start = start; break;
         case 5: meta->glossary_start = start; meta->glossary_length = length; break;
         case 6:
@@ -2602,7 +2602,10 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         int32_t score = 0;
         if (
             !parse_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
-            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score)
+            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||
+            // Integer storage cannot preserve a negative zero score. Use the
+            // ordinary number-preserving path, even in otherwise integer banks.
+            (score == 0 && src[parsed_row->score_start] == '-')
         ) {
             *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
             return -5;

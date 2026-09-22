@@ -420,7 +420,7 @@ function packContentChunksIntoSlabs(chunks, targetBytes) {
  * @returns {{stage: string, token: string}|null}
  */
 function parseTransientUpdateTitleInfo(title) {
-    const match = `${title}`.trim().match(/\[(update-staging|cutover|replaced) ([^\]]+)\]$/);
+    const match = `${title}`.match(/\[(update-staging|cutover|replaced) ([^\]]+)\]$/);
     if (match === null) { return null; }
     const [, stage, token] = match;
     if (typeof stage !== 'string' || typeof token !== 'string' || token.length === 0) {
@@ -1965,9 +1965,9 @@ export class DictionaryDatabase {
      * @returns {Promise<void>}
      */
     async replaceDictionaryTitle(fromDictionaryTitle, toDictionaryTitle, summaryOverride = null, replacedDictionaryTitle = null) {
-        const fromTitle = `${fromDictionaryTitle}`.trim();
-        const toTitle = `${toDictionaryTitle}`.trim();
-        const replacedTitle = typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle.trim() : null;
+        const fromTitle = `${fromDictionaryTitle}`;
+        const toTitle = `${toDictionaryTitle}`;
+        const replacedTitle = typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle : null;
         const explicitTransientSessionToken = (
             summaryOverride &&
             typeof summaryOverride === 'object' &&
@@ -2126,7 +2126,7 @@ null;
          * @returns {Promise<void>}
          */
         const forceCleanupTransientDictionaryTitle = async (dictionaryTitle) => {
-            const title = `${dictionaryTitle}`.trim();
+            const title = `${dictionaryTitle}`;
             if (title.length === 0) { return; }
             const summaryRow = getSummaryRowByTitle(title);
             const parsedSummary = (() => {
@@ -2163,7 +2163,7 @@ null;
                     },
                 };
                 await this._termRecordStore.deleteByDictionary(this._getTermRecordStorageName(title));
-                await this.cleanupTransientTermRecordShards((dictionaryName) => String(dictionaryName || '').trim() === title);
+                await this.cleanupTransientTermRecordShards((dictionaryName) => String(dictionaryName || '') === title);
                 await this._beginImmediateTransaction(db);
                 try {
                     for (const [table, keyColumn] of [
@@ -2453,10 +2453,7 @@ null;
      * @returns {string}
      */
     _getDictionaryCacheKey(dictionaryNames) {
-        if (dictionaryNames.length <= 1) {
-            return dictionaryNames[0] ?? '';
-        }
-        return [...dictionaryNames].sort().join('\u001f');
+        return JSON.stringify(dictionaryNames.length <= 1 ? dictionaryNames : [...dictionaryNames].sort());
     }
 
     /** */
@@ -2478,8 +2475,8 @@ null;
     _getSummaryTermRecordStorageName(summary, fallbackTitle) {
         if (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) {
             const value = /** @type {unknown} */ (Reflect.get(summary, 'termRecordStorageName'));
-            if (typeof value === 'string' && value.trim().length > 0) {
-                return value.trim();
+            if (typeof value === 'string' && value.length > 0) {
+                return value;
             }
         }
         return fallbackTitle;
@@ -2491,8 +2488,9 @@ null;
      * @throws {Error} If a physical storage name is already owned by another dictionary.
      */
     _registerTermRecordStorageName(dictionaryName, storageName) {
-        const logicalName = `${dictionaryName}`.trim();
-        const physicalName = `${storageName}`.trim();
+        // UI input normalization must not rewrite logical or physical storage identity.
+        const logicalName = `${dictionaryName}`;
+        const physicalName = `${storageName}`;
         if (logicalName.length === 0 || physicalName.length === 0) { return; }
         const previousLogicalName = this._dictionaryNameByTermRecordStorage.get(physicalName);
         if (typeof previousLogicalName !== 'undefined' && previousLogicalName !== logicalName) {
@@ -2524,7 +2522,7 @@ null;
         this._termRecordStorageNameByDictionary.clear();
         this._dictionaryNameByTermRecordStorage.clear();
         for (const row of rows) {
-            const title = this._asString(row.title).trim();
+            const title = this._asString(row.title);
             if (title.length === 0) { continue; }
             const summary = this._safeParseJson(this._asString(row.summaryJson), null);
             this._registerTermRecordStorageName(
@@ -2556,7 +2554,18 @@ null;
      * @returns {string}
      */
     _createTermExactPresenceCacheKey(dictionaryCacheKey, term) {
-        return `${dictionaryCacheKey}\u001f${term}`;
+        return this._createDictionaryQueryKey(dictionaryCacheKey, term);
+    }
+
+    /**
+     * Length framing preserves field boundaries without reserving characters.
+     * The dictionary argument can also be an encoded dictionary-set identity.
+     * @param {string} dictionary
+     * @param {string} query
+     * @returns {string}
+     */
+    _createDictionaryQueryKey(dictionary, query) {
+        return `${dictionary.length}:${dictionary}${query}`;
     }
 
     /**
@@ -2567,7 +2576,7 @@ null;
      * @returns {string}
      */
     _createTermExactMatchCacheKey(dictionaryNames, term) {
-        return `${dictionaryNames.join('\u001f')}\u001e${term}`;
+        return JSON.stringify([dictionaryNames, term]);
     }
 
     /**
@@ -2890,7 +2899,7 @@ null;
                 // Probe warming is best-effort; lookup correctness does not depend on it.
             }
         }
-        const uniqueTerms = [...new Set(terms.map((term) => `${term}`.trim()).filter((term) => term.length > 0))];
+        const uniqueTerms = [...new Set(terms.map((term) => `${term}`).filter((term) => term.length > 0))];
         if (uniqueTerms.length === 0) { return; }
         const startedAt = safePerformance.now();
         try {
@@ -3204,7 +3213,7 @@ null;
             }
         }
         const dictionaryCacheKey = this._getDictionaryCacheKey(dictionaryNames);
-        const negativeCachePrefix = `${matchType}\u001f${dictionaryCacheKey}\u001f`;
+        const negativeCachePrefix = `${matchType}:${dictionaryCacheKey.length}:${dictionaryCacheKey}`;
         const queriesToCheck = [...uniqueQueryMap.values()].filter(({query}) => !this._termPrefixNegativeCache.has(`${negativeCachePrefix}${query}`));
         /** @type {Set<string>} */
         const foundQueries = new Set();
@@ -3525,26 +3534,27 @@ null;
             return [];
         }
         const results = new Array(items.length);
-        /** @type {Map<string, number[]>} */
+        /** @type {Map<string, {dictionary: string, query: string, indexes: number[]}>} */
         const requestIndexes = new Map();
         for (let i = 0; i < items.length; ++i) {
             const item = items[i];
-            const key = `${item.dictionary}\u001f${this._asString(item.query)}`;
+            const query = this._asString(item.query);
+            const key = this._createDictionaryQueryKey(item.dictionary, query);
             const itemIndexes = requestIndexes.get(key);
             if (typeof itemIndexes === 'undefined') {
-                requestIndexes.set(key, [i]);
+                requestIndexes.set(key, {dictionary: item.dictionary, query, indexes: [i]});
             } else {
-                itemIndexes.push(i);
+                itemIndexes.indexes.push(i);
             }
         }
 
-        const uniqueRequests = [...requestIndexes.keys()];
+        const uniqueRequests = [...requestIndexes.values()];
         for (const requestChunk of this._chunkValues(uniqueRequests, 256)) {
             /** @type {Record<string, string>} */
             const bind = {};
             const conditions = [];
             for (let i = 0; i < requestChunk.length; ++i) {
-                const [dictionary, query] = requestChunk[i].split('\u001f');
+                const {dictionary, query} = requestChunk[i];
                 const dictionaryKey = `$dictionary${i}`;
                 const queryKey = `$query${i}`;
                 bind[dictionaryKey] = dictionary;
@@ -3558,9 +3568,9 @@ null;
             while (stmt.step()) {
                 const row = /** @type {import('core').SafeAny} */ (stmt.get({}));
                 const tag = this._deserializeTagRow(row);
-                const itemIndexes = requestIndexes.get(`${tag.dictionary}\u001f${tag.name}`);
+                const itemIndexes = requestIndexes.get(this._createDictionaryQueryKey(tag.dictionary, tag.name));
                 if (typeof itemIndexes === 'undefined') { continue; }
-                for (const itemIndex of itemIndexes) {
+                for (const itemIndex of itemIndexes.indexes) {
                     if (typeof results[itemIndex] === 'undefined') {
                         results[itemIndex] = tag;
                     }
@@ -3595,25 +3605,26 @@ null;
         }
         /** @type {import('dictionary-database').Media[]} */
         const results = [];
-        /** @type {Map<string, number[]>} */
+        /** @type {Map<string, {dictionary: string, path: string, indexes: number[]}>} */
         const mediaRequestIndexes = new Map();
         for (let itemIndex = 0; itemIndex < items.length; ++itemIndex) {
             const item = items[itemIndex];
-            const key = `${item.dictionary}\u001f${item.path}`;
+            const path = item.path;
+            const key = this._createDictionaryQueryKey(item.dictionary, path);
             const itemIndexes = mediaRequestIndexes.get(key);
             if (typeof itemIndexes === 'undefined') {
-                mediaRequestIndexes.set(key, [itemIndex]);
+                mediaRequestIndexes.set(key, {dictionary: item.dictionary, path, indexes: [itemIndex]});
             } else {
-                itemIndexes.push(itemIndex);
+                itemIndexes.indexes.push(itemIndex);
             }
         }
-        const uniqueRequests = [...mediaRequestIndexes.keys()];
+        const uniqueRequests = [...mediaRequestIndexes.values()];
         for (const requestChunk of this._chunkValues(uniqueRequests, 128)) {
             /** @type {Record<string, string>} */
             const bind = {};
             const conditions = [];
             for (let i = 0; i < requestChunk.length; ++i) {
-                const [dictionary, path] = requestChunk[i].split('\u001f');
+                const {dictionary, path} = requestChunk[i];
                 const dictionaryKey = `$dictionary${i}`;
                 const pathKey = `$path${i}`;
                 bind[dictionaryKey] = dictionary;
@@ -3623,13 +3634,23 @@ null;
             const sql = `SELECT dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength FROM media WHERE ${conditions.join(' OR ')}`;
             const stmt = this._getCachedStatement(sql);
             stmt.reset(true);
-            stmt.bind(bind);
-            while (stmt.step()) {
-                const row = /** @type {import('core').SafeAny} */ (stmt.get({}));
+            // A cached cursor cannot remain active across asynchronous content
+            // reads: another media request can rebind it or evict/finalize it.
+            // Snapshot this bounded request chunk and release its SQL read lock
+            // before yielding. SQLite's object rows own their BLOB values.
+            /** @type {import('core').SafeAny[]} */
+            const rows = [];
+            try {
+                stmt.bind(bind);
+                while (stmt.step()) { rows.push(stmt.get({})); }
+            } finally {
+                stmt.reset(true);
+            }
+            for (const row of rows) {
                 const converted = await this._deserializeMediaRow(row);
-                const itemIndexes = mediaRequestIndexes.get(`${converted.dictionary}\u001f${converted.path}`);
+                const itemIndexes = mediaRequestIndexes.get(this._createDictionaryQueryKey(converted.dictionary, converted.path));
                 if (typeof itemIndexes === 'undefined') { continue; }
-                for (const itemIndex of itemIndexes) {
+                for (const itemIndex of itemIndexes.indexes) {
                     results.push(this._createMedia(converted, {itemIndex, indexIndex: 0, item: items[itemIndex]}));
                 }
             }
@@ -3654,7 +3675,7 @@ null;
         const groupedItems = new Map();
         for (const item of items) {
             const {path, dictionary, canvasIndex, canvasWidth, canvasHeight, generation} = item;
-            const key = `${path}:::${dictionary}`;
+            const key = JSON.stringify([path, dictionary, canvasWidth, canvasHeight, generation]);
             if (!groupedItems.has(key)) {
                 groupedItems.set(key, {path, dictionary, canvasIndexes: [], canvasWidth, canvasHeight, generation});
             }
@@ -3690,8 +3711,18 @@ null;
                     },
                 };
                 const resvgJS = new Resvg(new Uint8Array(m.content), opts);
-                const render = resvgJS.render();
-                source.postMessage({action: 'drawBufferToCanvases', params: {buffer: render.pixels.buffer, width: render.width, height: render.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [render.pixels.buffer]);
+                try {
+                    const render = resvgJS.render();
+                    try {
+                        // The getter copies pixels; transfer the same copy carried by the message.
+                        const buffer = render.pixels.buffer;
+                        source.postMessage({action: 'drawBufferToCanvases', params: {buffer, width: render.width, height: render.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [buffer]);
+                    } finally {
+                        render.free();
+                    }
+                } finally {
+                    resvgJS.free();
+                }
                 safePerformance.mark('drawMedia:draw:svg:end');
                 safePerformance.measure('drawMedia:draw:svg', 'drawMedia:draw:svg:start', 'drawMedia:draw:svg:end');
             } else {
@@ -3699,18 +3730,30 @@ null;
 
                 if ('serviceWorker' in navigator) {
                     const imageDecoder = new ImageDecoder({type: m.mediaType, data: m.content});
-                    await imageDecoder.decode().then((decodedImageResult) => {
-                        source.postMessage({action: 'drawDecodedImageToCanvases', params: {decodedImage: decodedImageResult.image, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [decodedImageResult.image]);
-                    });
+                    try {
+                        const {image} = await imageDecoder.decode();
+                        try {
+                            source.postMessage({action: 'drawDecodedImageToCanvases', params: {decodedImage: image, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [image]);
+                        } finally {
+                            // Successful transfer detaches this handle; failed transfer leaves it owned here.
+                            image.close();
+                        }
+                    } finally {
+                        imageDecoder.close();
+                    }
                 } else {
                     const image = new Blob([m.content], {type: m.mediaType});
                     await createImageBitmap(image, {resizeWidth: m.canvasWidth, resizeHeight: m.canvasHeight, resizeQuality: 'high'}).then((decodedImage) => {
-                        const canvas = new OffscreenCanvas(decodedImage.width, decodedImage.height);
-                        const ctx = canvas.getContext('2d');
-                        if (ctx !== null) {
-                            ctx.drawImage(decodedImage, 0, 0);
-                            const imageData = ctx.getImageData(0, 0, decodedImage.width, decodedImage.height);
-                            source.postMessage({action: 'drawBufferToCanvases', params: {buffer: imageData.data.buffer, width: decodedImage.width, height: decodedImage.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [imageData.data.buffer]);
+                        try {
+                            const canvas = new OffscreenCanvas(decodedImage.width, decodedImage.height);
+                            const ctx = canvas.getContext('2d');
+                            if (ctx !== null) {
+                                ctx.drawImage(decodedImage, 0, 0);
+                                const imageData = ctx.getImageData(0, 0, decodedImage.width, decodedImage.height);
+                                source.postMessage({action: 'drawBufferToCanvases', params: {buffer: imageData.data.buffer, width: decodedImage.width, height: decodedImage.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [imageData.data.buffer]);
+                            }
+                        } finally {
+                            decodedImage.close();
                         }
                     });
                 }
@@ -3801,7 +3844,7 @@ null;
             ORDER BY d.id ASC
         `);
         for (const row of rows) {
-            const title = this._asString(row.title).trim();
+            const title = this._asString(row.title);
             if (title.length === 0) { continue; }
             const reason = this._asString(row.reason).trim() || 'Dictionary record data is damaged';
             this._termRecordStore.markDictionaryReimportRequired(this._getTermRecordStorageName(title), reason);
@@ -3818,8 +3861,8 @@ null;
         if (probeId === null) { return null; }
         const record = (await this._termRecordStore.getByIdsAsync([probeId])).get(probeId);
         if (typeof record === 'undefined') { return null; }
-        const expression = this._asString(record.expression).trim();
-        const reading = this._asString(record.reading).trim();
+        const expression = this._asString(record.expression);
+        const reading = this._asString(record.reading);
         return expression.length === 0 && reading.length === 0 ? null : {expression, reading};
     }
 
@@ -3917,7 +3960,7 @@ null;
         let parseErrorCount = 0;
         for (const row of rows) {
             const id = this._asNumber(row.id, 0);
-            const title = this._asString(row.title).trim();
+            const title = this._asString(row.title);
             const summaryJson = this._asString(row.summaryJson);
             let summaryParseFailed = false;
             /** @type {unknown} */
@@ -3943,7 +3986,7 @@ null;
             }
             if (title.length > 0 && isRecognizedTransientUpdateTitle(title, summary)) {
                 const transientInfo = parseTransientUpdateTitleInfo(title);
-                const originalTitle = title.replace(/\s+\[(?:update-staging|cutover|replaced) [^\]]+\]$/, '').trim();
+                const originalTitle = title.replace(/ \[(?:update-staging|cutover|replaced) [^\]]+\]$/, '');
                 if (
                     transientInfo !== null &&
                     transientInfo.stage === 'replaced' &&
@@ -4063,7 +4106,7 @@ null;
         const expectedTermDictionaryNames = [];
         let parseErrorCount = 0;
         for (const row of rows) {
-            const title = this._asString(row.title).trim();
+            const title = this._asString(row.title);
             if (title.length === 0) { continue; }
             let summary;
             try {
@@ -4266,7 +4309,7 @@ null;
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {

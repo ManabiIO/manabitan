@@ -1594,6 +1594,9 @@ describe('term-bank WASM parser', () => {
         vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
         const workerCount = getParallelTermBankParserWorkerCount();
         let workerIndex = 0;
+        let firstSinkStarted = false;
+        /** @type {() => void} */
+        let reportFailure = () => {};
         /** @implements {WorkerMock} */
         class LaterFailingWorker {
             constructor() {
@@ -1619,11 +1622,15 @@ describe('term-bank WASM parser', () => {
                     }
                     ++this.parseCount;
                     if (message.id === 2) {
-                        emitWorkerMessage(this.listeners, {
-                            type: 'parse-error',
-                            id: message.id,
-                            error: {name: 'Error', message: 'injected later pipeline failure'},
-                        });
+                        reportFailure = () => {
+                            reportFailure = () => {};
+                            emitWorkerMessage(this.listeners, {
+                                type: 'parse-error',
+                                id: message.id,
+                                error: {name: 'Error', message: 'injected later pipeline failure'},
+                            });
+                        };
+                        if (firstSinkStarted) { reportFailure(); }
                         return;
                     }
                     emitWorkerMessage(this.listeners, {
@@ -1649,9 +1656,16 @@ describe('term-bank WASM parser', () => {
             await expect(parseTermBankWithWasmColumnChunksParallel(
                 sourceBanks,
                 3,
-                (_chunk, progress) => { sinkIndexes.push(progress.chunkIndex); },
+                (_chunk, progress) => {
+                    sinkIndexes.push(progress.chunkIndex);
+                    // Make the failure genuinely later than the first sink,
+                    // rather than requiring work after an already-known error.
+                    firstSinkStarted = true;
+                    reportFailure();
+                },
                 {emitContentSlab: true},
             )).rejects.toThrow('injected later pipeline failure');
+            expect(sinkIndexes).toStrictEqual([1]);
             expect(sinkIndexes.length).toBeGreaterThan(0);
             expect(sinkIndexes.length).toBeLessThanOrEqual(workerCount);
             expect(sinkIndexes).toStrictEqual(
@@ -2249,14 +2263,23 @@ describe('term-bank WASM parser', () => {
         expect(chunkCount).toBe(0);
     });
 
-    maybeTest('rejects out-of-range integer metadata before dispatch', async () => {
-        let chunkCount = 0;
-        await expect(parseTermBankWithWasmColumnChunks(
-            textEncoder.encode('[["overflow","overflow","","",2147483648,["definition"],1,""]]'),
+    maybeTest.each([2147483648, -2147483649])('preserves safe sequence %i outside int32 before dispatch', async (sequence) => {
+        /** @type {TermBankColumnChunk|null} */
+        let result = null;
+        await parseTermBankWithWasmColumnChunks(
+            textEncoder.encode(JSON.stringify([['wide-sequence', 'wide-sequence', '', '', 0, ['definition'], sequence, '']])),
             3,
-            () => { ++chunkCount; },
-        )).rejects.toThrow(/term-bank parser failed/);
-        expect(chunkCount).toBe(0);
+            (chunk) => { result = chunk; },
+        );
+        const chunk = /** @type {TermBankColumnChunk} */ (/** @type {unknown} */ (result));
+        expect(chunk.sequenceList).toBeInstanceOf(Float64Array);
+        expect(chunk.sequenceList[0]).toBe(sequence);
+    });
+
+    maybeTest.each([2147483648, -2147483649])('preserves finite score %i outside int32', async (score) => {
+        const rows = await parseRows([['wide-score', '', '', '', score, ['definition'], 1, '']]);
+        expect(rows).toHaveLength(1);
+        expect(rows[0].score).toBe(score);
     });
 
     maybeTest('bounds and serializes pipelined chunk dispatch', async () => {
@@ -2826,8 +2849,8 @@ describe('term-bank WASM parser', () => {
         );
 
         expect(chunk.rowCount).toBe(4);
-        expect(chunk.scoreList).toStrictEqual(new Int32Array([-2, 7, -2147483648, 2147483647]));
-        expect(chunk.sequenceList).toStrictEqual(new Int32Array([-1, 8, 9, 2147483647]));
+        expect(chunk.scoreList).toStrictEqual(new Float64Array([-2, 7, -2147483648, 2147483647]));
+        expect(chunk.sequenceList).toStrictEqual(new Float64Array([-1, 8, 9, 2147483647]));
         expect(getPlanString(plan.expressionIndexes[0])).toBe('escaped\\value');
         expect(getPlanString(plan.readingIndexes[0])).toBe('reading');
         expect(getPlanString(plan.expressionIndexes[1])).toBe('image');

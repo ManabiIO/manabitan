@@ -5,6 +5,16 @@ on:
     paths:
       - 'ext/js/dictionary/mdx/**'
       - 'ext/js/comm/mdx.js'
+      - 'ext/js/dictionary/mdict-import-sources.js'
+      - 'ext/js/pages/settings/mdict-import-feedback.js'
+      - 'ext/js/pages/settings/dictionary-import-controller.js'
+      - 'ext/js/display/display.js'
+      - 'ext/js/display/search-display-controller.js'
+      - 'ext/templates-modals.html'
+      - 'ext/css/settings.css'
+      - 'types/ext/display.d.ts'
+      - 'test/util/search-refresh-cases.js'
+      - 'test/mdict-import-ui-regressions.test.js'
       - 'ext/mdict.html'
       - 'ext/quick-start-guide.html'
       - 'test/mdict-binary-regressions.test.js'
@@ -39,7 +49,7 @@ jobs:
       - name: Exercise native parsers, converter and client lifecycle
         run: |
           set -o pipefail
-          node --test --test-reporter=tap test/util/mdict-native-cases.js test/util/mdict-client-cases.js test/util/mdict-client-edge-cases.js 2>&1 | tee builds/mdict-native/tests.tap
+          node --test --test-reporter=tap test/util/mdict-native-cases.js test/util/mdict-lookup-cases.js test/util/mdict-client-cases.js test/util/mdict-client-edge-cases.js test/util/search-refresh-cases.js test/util/mdict-import-source-cases.js test/util/mdict-import-feedback-cases.js test/util/mdict-import-integration-cases.js test/util/mdict-import-cache-cases.js test/util/mdict-checksum-cases.js test/util/mdict-decompression-limit-cases.js test/util/mdict-lzo-validation-cases.js 2>&1 | tee builds/mdict-native/tests.tap
       - name: Retain reproducible source and test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -68,7 +78,8 @@ jobs:
           set -o pipefail
           mkdir -p builds/mdict-browser
           git rev-parse HEAD > builds/mdict-browser/commit.txt
-          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-help.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep MDX 2>&1 | tee builds/mdict-browser/tests.log
+          tar -czf builds/mdict-browser/extension.tar.gz ext
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-inline-style.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep MDX 2>&1 | tee builds/mdict-browser/tests.log
       - name: Retain MDict browser results
         if: always()
         uses: actions/upload-artifact@v4

@@ -394,12 +394,15 @@ export class Display extends EventDispatcher {
         };
     }
 
-    /** */
+    /**
+     * @returns {Promise<void>}
+     */
     initializeState() {
-        void this._onStateChanged();
+        const promise = this._onStateChanged();
         if (this._frameEndpoint !== null) {
             this._frameEndpoint.signal();
         }
+        return promise;
     }
 
     /**

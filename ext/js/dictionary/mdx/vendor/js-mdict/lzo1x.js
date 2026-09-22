@@ -30,6 +30,7 @@ const lzo1x = function lzo1x() {
     function _lzo1x() { }
     _lzo1x.prototype = {
         blockSize: 4096,
+        maxOutputSize: 0,
         OK: 0,
         INPUT_OVERRUN: -4,
         OUTPUT_OVERRUN: -5,
@@ -85,41 +86,93 @@ const lzo1x = function lzo1x() {
             return c;
         },
         extendBuffer() {
-            const newBuffer = new Uint8Array(this.cbl + this.blockSize);
+            if (this.cbl >= this.maxOutputSize) {
+                throw new RangeError(`MDict LZO output exceeds declared size of ${this.maxOutputSize} bytes`);
+            }
+            const doubled = this.cbl > 0 ? this.cbl * 2 : this.blockSize;
+            const nextSize = Math.min(
+                this.maxOutputSize,
+                Math.max(this.cbl + this.blockSize, doubled),
+            );
+            if (!Number.isSafeInteger(nextSize) || nextSize <= this.cbl) {
+                throw new RangeError('Invalid MDict LZO output growth');
+            }
+            const newBuffer = new Uint8Array(nextSize);
             newBuffer.set(this.out);
             this.out = newBuffer;
-            this.out32 = new Uint32Array(this.out.buffer);
+            this.out32 = new Uint32Array(this.out.buffer, 0, Math.floor(this.out.byteLength / 4));
             this.state.outputBuffer = this.out;
             this.cbl = this.out.length;
+            this.op_end = this.cbl;
         },
         eof_found() {
             // *out_len = ((lzo_uint) ((op)-(out)));
             return this.ip === this.ip_end ? 0 : this.ip < this.ip_end ? -8 : -4;
         },
-        match_next() {
-            // if (op_end - op < t) return OUTPUT_OVERRUN;
-            // if (ip_end - ip < t+3) return INPUT_OVERRUN;
-            while (this.op + 3 > this.cbl) {
+        ensureInput(count) {
+            if (!Number.isSafeInteger(count) || count < 0 || this.ip > this.ip_end - count) {
+                throw new RangeError('MDict LZO input overrun');
+            }
+        },
+        readByte() {
+            this.ensureInput(1);
+            return this.buf[this.ip++];
+        },
+        peekByte() {
+            this.ensureInput(1);
+            return this.buf[this.ip];
+        },
+        ensureOutput(count) {
+            if (!Number.isSafeInteger(count) || count < 0 ||
+                this.op > this.maxOutputSize - count) {
+                throw new RangeError(`MDict LZO output exceeds declared size of ${this.maxOutputSize} bytes`);
+            }
+            while (this.op + count > this.cbl) {
                 this.extendBuffer();
             }
-            this.out[this.op++] = this.buf[this.ip++];
-            if (this.t > 1) {
-                this.out[this.op++] = this.buf[this.ip++];
-                if (this.t > 2) {
-                    this.out[this.op++] = this.buf[this.ip++];
+        },
+        ensureLookbehind(position = this.m_pos) {
+            if (!Number.isSafeInteger(position) || position < 0 || position >= this.op) {
+                throw new RangeError('MDict LZO lookbehind overrun');
+            }
+        },
+        readLengthExtension(base) {
+            let extension = 0;
+            for (;;) {
+                const value = this.readByte();
+                if (value !== 0) {
+                    const result = base + extension + value;
+                    if (!Number.isSafeInteger(result)) {
+                        throw new RangeError('MDict LZO length exceeds safe integer range');
+                    }
+                    return result;
+                }
+                extension += 255;
+                if (!Number.isSafeInteger(extension)) {
+                    throw new RangeError('MDict LZO length exceeds safe integer range');
                 }
             }
-            this.t = this.buf[this.ip++];
+        },
+        match_next() {
+            const literalCount = this.t;
+            this.ensureInput(literalCount + 1);
+            this.ensureOutput(literalCount);
+            for (let i = 0; i < literalCount; ++i) {
+                this.out[this.op++] = this.buf[this.ip++];
+            }
+            this.t = this.readByte();
         },
         match_done() {
+            if (this.ip < 2) {
+                throw new RangeError('MDict LZO input overrun');
+            }
             this.t = this.buf[this.ip - 2] & 3;
             return this.t;
         },
         copy_match() {
             this.t += 2;
-            while (this.op + this.t > this.cbl) {
-                this.extendBuffer();
-            }
+            this.ensureLookbehind();
+            this.ensureOutput(this.t);
             if (this.t > 4 && this.op % 4 === this.m_pos % 4) {
                 while (this.op % 4 > 0) {
                     this.out[this.op++] = this.out[this.m_pos++];
@@ -137,9 +190,8 @@ const lzo1x = function lzo1x() {
             } while (--this.t > 0);
         },
         copy_from_buf() {
-            while (this.op + this.t > this.cbl) {
-                this.extendBuffer();
-            }
+            this.ensureInput(this.t);
+            this.ensureOutput(this.t);
             if (this.t > 4 && this.op % 4 === this.ip % 4) {
                 while (this.op % 4 > 0) {
                     this.out[this.op++] = this.buf[this.ip++];
@@ -161,7 +213,7 @@ const lzo1x = function lzo1x() {
                 if (this.t >= 64) {
                     this.m_pos = this.op - 1;
                     this.m_pos -= (this.t >> 2) & 7;
-                    this.m_pos -= this.buf[this.ip++] << 3;
+                    this.m_pos -= this.readByte() << 3;
                     this.t = (this.t >> 5) - 1;
                     // if ( m_pos < out || m_pos >= op) return LOOKBEHIND_OVERRUN;
                     // if (op_end - op < t+3-1) return OUTPUT_OVERRUN;
@@ -177,35 +229,25 @@ const lzo1x = function lzo1x() {
                 else if (this.t >= 32) {
                     this.t &= 31;
                     if (this.t === 0) {
-                        while (this.buf[this.ip] === 0) {
-                            this.t += 255;
-                            this.ip++;
-                            // if (t > -511) return OUTPUT_OVERRUN;
-                            // if (ip_end - ip < 1) return INPUT_OVERRUN;
-                        }
-                        this.t += 31 + this.buf[this.ip++];
-                        // if (ip_end - ip < 2) return INPUT_OVERRUN;
+                        this.t = this.readLengthExtension(31);
                     }
+                    this.ensureInput(2);
+                    const offset0 = this.readByte();
+                    const offset1 = this.readByte();
                     this.m_pos = this.op - 1;
-                    this.m_pos -= (this.buf[this.ip] >> 2) + (this.buf[this.ip + 1] << 6);
-                    this.ip += 2;
+                    this.m_pos -= (offset0 >> 2) + (offset1 << 6);
                 }
                 else if (this.t >= 16) {
                     this.m_pos = this.op;
                     this.m_pos -= (this.t & 8) << 11;
                     this.t &= 7;
                     if (this.t === 0) {
-                        while (this.buf[this.ip] === 0) {
-                            this.t += 255;
-                            this.ip++;
-                            // if (t > -511) return OUTPUT_OVERRUN;
-                            // if (ip_end - ip < 1) return INPUT_OVERRUN;
-                        }
-                        this.t += 7 + this.buf[this.ip++];
-                        // if (ip_end - ip < 2) return INPUT_OVERRUN;
+                        this.t = this.readLengthExtension(7);
                     }
-                    this.m_pos -= (this.buf[this.ip] >> 2) + (this.buf[this.ip + 1] << 6);
-                    this.ip += 2;
+                    this.ensureInput(2);
+                    const offset0 = this.readByte();
+                    const offset1 = this.readByte();
+                    this.m_pos -= (offset0 >> 2) + (offset1 << 6);
                     if (this.m_pos === this.op) {
                         this.state.outputBuffer = this.state.outputBuffer.subarray(0, this.op);
                         return this.EOF_FOUND;
@@ -215,12 +257,9 @@ const lzo1x = function lzo1x() {
                 else {
                     this.m_pos = this.op - 1;
                     this.m_pos -= this.t >> 2;
-                    this.m_pos -= this.buf[this.ip++] << 2;
-                    // if (m_pos < out || m_pos >= op) return LOOKBEHIND_OVERRUN;
-                    // if (op_end - op < 2) return OUTPUT_OVERRUN;
-                    while (this.op + 2 > this.cbl) {
-                        this.extendBuffer();
-                    }
+                    this.m_pos -= this.readByte() << 2;
+                    this.ensureLookbehind();
+                    this.ensureOutput(2);
                     this.out[this.op++] = this.out[this.m_pos++];
                     this.out[this.op++] = this.out[this.m_pos];
                     if (this.match_done() === 0) {
@@ -244,11 +283,21 @@ const lzo1x = function lzo1x() {
         decompress(state) {
             this.state = state;
             this.buf = this.state.inputBuffer;
+            const {initSize, blockSize, maxOutputSize} = state;
+            if (!(this.buf instanceof Uint8Array) ||
+                !Number.isSafeInteger(initSize) || initSize < 0 ||
+                !Number.isSafeInteger(blockSize) || blockSize <= 0 ||
+                !Number.isSafeInteger(maxOutputSize) || maxOutputSize < 0) {
+                throw new RangeError('Invalid MDict LZO decompression bounds');
+            }
+            this.blockSize = blockSize;
+            this.maxOutputSize = maxOutputSize;
             const buf_4b = new Uint8Array(this.buf.length + (4 - (this.buf.length % 4)));
             buf_4b.set(this.buf);
             this.buf32 = new Uint32Array(buf_4b.buffer);
-            this.out = new Uint8Array(this.buf.length + (this.blockSize - (this.buf.length % this.blockSize)));
-            this.out32 = new Uint32Array(this.out.buffer);
+            const initialSize = Math.min(initSize, maxOutputSize);
+            this.out = new Uint8Array(initialSize);
+            this.out32 = new Uint32Array(this.out.buffer, 0, Math.floor(this.out.byteLength / 4));
             this.cbl = this.out.length;
             this.state.outputBuffer = this.out;
             this.ip_end = this.buf.length;
@@ -258,9 +307,8 @@ const lzo1x = function lzo1x() {
             this.op = 0;
             this.m_pos = 0;
             this.skipToFirstLiteralFun = false;
-            // if (ip_end - ip < 1) return INPUT_OVERRUN;
-            if (this.buf[this.ip] > 17) {
-                this.t = this.buf[this.ip++] - 17;
+            if (this.peekByte() > 17) {
+                this.t = this.readByte() - 17;
                 if (this.t < 4) {
                     this.match_next();
                     const ret = this.match();
@@ -277,8 +325,7 @@ const lzo1x = function lzo1x() {
             }
             for (;;) {
                 if (!this.skipToFirstLiteralFun) {
-                    // if (ip_end - ip < 3) return INPUT_OVERRUN;
-                    this.t = this.buf[this.ip++];
+                    this.t = this.readByte();
                     if (this.t >= 16) {
                         const ret = this.match();
                         if (ret !== this.OK) {
@@ -287,13 +334,7 @@ const lzo1x = function lzo1x() {
                         continue;
                     }
                     if (this.t === 0) {
-                        while (this.buf[this.ip] === 0) {
-                            this.t += 255;
-                            this.ip++;
-                            // if (t > 511) return INPUT_OVERRUN;
-                            // if (ip_end - ip < 1) return INPUT_OVERRUN;
-                        }
-                        this.t += 15 + this.buf[this.ip++];
+                        this.t = this.readLengthExtension(15);
                     }
                     // if (op_end - op < t+3) return OUTPUT_OVERRUN;
                     // if (ip_end - ip < t+6) return INPUT_OVERRUN;
@@ -303,16 +344,13 @@ const lzo1x = function lzo1x() {
                 else {
                     this.skipToFirstLiteralFun = false;
                 }
-                this.t = this.buf[this.ip++];
+                this.t = this.readByte();
                 if (this.t < 16) {
                     this.m_pos = this.op - (1 + 0x0800);
                     this.m_pos -= this.t >> 2;
-                    this.m_pos -= this.buf[this.ip++] << 2;
-                    // if ( m_pos <  out || m_pos >= op) return LOOKBEHIND_OVERRUN;
-                    // if (op_end - op < 3) return OUTPUT_OVERRUN;
-                    while (this.op + 3 > this.cbl) {
-                        this.extendBuffer();
-                    }
+                    this.m_pos -= this.readByte() << 2;
+                    this.ensureLookbehind();
+                    this.ensureOutput(3);
                     this.out[this.op++] = this.out[this.m_pos++];
                     this.out[this.op++] = this.out[this.m_pos++];
                     this.out[this.op++] = this.out[this.m_pos];

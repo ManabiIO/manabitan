@@ -43,6 +43,13 @@ Dictionary.2.mdd</pre>
         <p>With Advanced settings enabled, dictionaries added through <em>Import from URLs</em> stay in the pending list until you click <em>Import</em>. Downloading files locally is an alternative when a hosting page cannot be imported directly.</p>
     </div></div></div></div>
 
+    <h2>File matching and conversion notes</h2>
+    <div class="settings-group"><div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left">
+        <p>Numeric dictionary names are preserved: <code>Book.2024.mdx</code> pairs with <code>Book.2024.mdd</code> and split resources such as <code>Book.2024.1.mdd</code>. Conflicting duplicate files are not silently selected. Distinct folders stay separate.</p>
+        <p>URL directory discovery uses links in the same origin and directory. Download cross-folder or CDN-hosted sets locally and select their files together.</p>
+        <p>Conversion notes distinguish skipped definitions, unresolved aliases, missing referenced resources, and failed resource reads. A missing-resource count is not a count of missing definitions or MDD volumes. Installation status is shown separately.</p>
+    </div></div></div></div>
+
     <h2>Compatibility and troubleshooting</h2>
     <div class="settings-group"><div class="settings-item"><div class="settings-item-inner"><div class="settings-item-left">
         <p>Some compression, encryption, and format variants are unsupported. Scripts and interactive dictionary widgets are not preserved, and layout or styling can differ. Successful import is not a guarantee that every source feature survived conversion.</p>

@@ -440,6 +440,7 @@ function decodeRawToken(source, start, length) {
  * @param {Uint8Array} source
  * @param {number} start
  * @returns {number}
+ * @throws {RangeError} If the validated JSON number is not finite.
  */
 function decodeJsonNumberToken(source, start) {
     let end = start;
@@ -459,6 +460,7 @@ function decodeJsonNumberToken(source, start) {
  * @param {Uint8Array} source
  * @param {number} start
  * @returns {number}
+ * @throws {RangeError} If the sequence is not a safe integer.
  */
 function decodeJsonSequenceToken(source, start) {
     const value = decodeJsonNumberToken(source, start);
@@ -1229,7 +1231,6 @@ function createNativeLookupIndexScratch(wasm, rowCapacity, keyCapacity, keyBytes
 function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, sequenceList, rowCount, scratch) {
     const memory = wasm.memory.buffer;
     if (
-        !(sequenceList instanceof Int32Array) ||
         plan.stringLengths.buffer !== memory ||
         plan.stringOffsets.buffer !== memory ||
         plan.stringHashes?.buffer !== memory ||
@@ -1248,9 +1249,20 @@ function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, se
         );
         readingEqualsPtr = scratch.readingEqualsPtr;
     }
-    let sequenceValuesPtr = sequenceList.byteOffset;
-    if (sequenceList.buffer !== memory) {
-        new Int32Array(memory, scratch.sequenceValuesPtr, rowCount).set(sequenceList.subarray(0, rowCount));
+    let sequenceValuesPtr;
+    if (sequenceList instanceof Int32Array) {
+        sequenceValuesPtr = sequenceList.byteOffset;
+        if (sequenceList.buffer !== memory) {
+            new Int32Array(memory, scratch.sequenceValuesPtr, rowCount).set(sequenceList.subarray(0, rowCount));
+            sequenceValuesPtr = scratch.sequenceValuesPtr;
+        }
+    } else {
+        const nativeSequences = new Int32Array(memory, scratch.sequenceValuesPtr, rowCount);
+        for (let i = 0; i < rowCount; ++i) {
+            const value = sequenceList[i];
+            if (!Number.isSafeInteger(value) || value > 0x7fffffff) { return null; }
+            nativeSequences[i] = value < 0 ? -1 : value;
+        }
         sequenceValuesPtr = scratch.sequenceValuesPtr;
     }
     const length = wasm.encode_term_lookup_index(
@@ -1315,7 +1327,7 @@ allocator(n, 'segmented lookup compaction'));
 function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, indexScratch, scratch) {
     const compact = wasm.compact_term_lookup_keys;
     const memory = wasm.memory.buffer;
-    if (!(sequences instanceof Int32Array) || typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
+    if (typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
     plan.stringsBuffer.buffer !== memory || plan.stringLengths.buffer !== memory ||
     plan.stringOffsets.buffer !== memory || plan.expressionIndexes.buffer !== memory ||
     plan.readingIndexes.buffer !== memory || equals.buffer !== memory) { return null; }
@@ -1494,6 +1506,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const glossaryStart = metas[o + 9];
     const glossaryLength = metas[o + 10];
     const glossaryJsonBytes = lazyGlossaryDecode ? source.subarray(glossaryStart, glossaryStart + glossaryLength) : void 0;
+    const glossaryJson = lazyGlossaryDecode ? '' : decodeRawToken(source, glossaryStart, glossaryLength);
     const glossaryMayContainMedia = mediaHintFastScan ? metas[o + 14] === 1 : void 0;
     const sequenceStart = metas[o + 11];
     const sequenceValue = sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart);
@@ -1522,7 +1535,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
         definitionTags: '',
         rules: '',
         score,
-        glossaryJson: '[]',
+        glossaryJson,
         glossaryJsonBytes,
         glossaryMayContainMedia,
         sequence,
@@ -2488,7 +2501,7 @@ class ParallelTermBankPipelineRun {
             if (initialResult.error !== null) {
                 throw createParallelParserError(initialResult.error);
             }
-            this._throwIfCancelled();
+            this._throwIfStopped();
             const initialRows = initialResult.rowCount;
             const initialBytes = initialResult.sourceBytes;
             const estimatedTotalRows = initialBytes > 0 ?
@@ -2500,38 +2513,45 @@ class ParallelTermBankPipelineRun {
             let processedRows = 0;
             let workersFinishedAt = this._startedAt;
             for (let i = 0; i < this._resultSlots.length; ++i) {
-                this._throwIfCancelled();
+                this._throwIfStopped();
                 const result = await this._resultSlots[i].promise;
+                this._throwIfStopped();
                 if (result.error !== null) { throw createParallelParserError(result.error); }
-                if (result.chunk === null || result.profile === null) {
+                if (result.profile === null) {
                     throw new Error('Parallel term-bank parser returned an incomplete result');
                 }
                 const chunk = result.chunk;
-                if (result.consume !== null) { chunk.releaseBorrowedContent = result.consume; }
-                if (result.profile !== null) {
-                    result.profile.orderedSinkWaitMs = Math.max(0, safePerformance.now() - result.finishedAt);
-                }
+                if (chunk !== null && result.consume !== null) { chunk.releaseBorrowedContent = result.consume; }
+                result.profile.orderedSinkWaitMs = Math.max(0, safePerformance.now() - result.finishedAt);
                 profiles.push(result.profile);
                 workersFinishedAt = Math.max(workersFinishedAt, result.finishedAt);
-                processedRows += chunk.rowCount;
-                exactTotalRows += chunk.rowCount;
-                try {
-                    await this._onChunk(chunk, {
-                        processedRows,
-                        totalRows: i + 1 === this._resultSlots.length ? processedRows : Math.max(processedRows, estimatedTotalRows),
-                        chunkIndex: i + 1,
-                        chunkCount: this._resultSlots.length,
-                    });
-                } finally {
-                    result.consume?.();
-                    delete chunk.releaseBorrowedContent;
+                processedRows += result.rowCount;
+                exactTotalRows += result.rowCount;
+                if (chunk !== null) {
+                    try {
+                        await this._onChunk(chunk, {
+                            processedRows,
+                            totalRows: i + 1 === this._resultSlots.length ? processedRows : Math.max(processedRows, estimatedTotalRows),
+                            chunkIndex: i + 1,
+                            chunkCount: this._resultSlots.length,
+                        });
+                    } finally {
+                        result.consume?.();
+                        delete chunk.releaseBorrowedContent;
+                    }
                 }
+                this._throwIfStopped();
+                // Empty groups still advance the bounded lead and wake peers,
+                // but must not invent a row or an empty storage operation.
                 this._nextSinkGroupIndex = i + 1;
                 this._activateLeadSources();
                 this._wakeLeadWaiters();
             }
             await Promise.all(this._workerLoops);
             if (this._error !== null) { throw this._error; }
+            // The final sink can outlive every worker job. Cancellation during
+            // that await must not be reported as successful parsing.
+            this._throwIfStopped();
             lastTermBankWasmParseProfile = {
                 ...aggregateSequentialParseProfiles(
                     profiles,
@@ -2598,10 +2618,13 @@ class ParallelTermBankPipelineRun {
                     () => this._pipelineShouldCancel(),
                 );
                 if (result.error !== null) { throw createParallelParserError(result.error); }
-                if (result.chunk === null || result.profile === null) {
+                if (
+                    result.profile === null ||
+                    (result.chunk === null && (result.rowCount !== 0 || result.profile.rowCount !== 0 || result.borrowsWorkerMemory))
+                ) {
                     throw new Error('Parallel term-bank parser returned an incomplete result');
                 }
-                if (result.chunk.rowCount !== result.rowCount) {
+                if (result.chunk !== null && result.chunk.rowCount !== result.rowCount) {
                     throw new Error('Parallel term-bank parser row count changed during result transfer');
                 }
                 /** @type {(() => void)|null} */
@@ -2636,8 +2659,9 @@ class ParallelTermBankPipelineRun {
         return this._failed || this._shouldCancel();
     }
 
-    /** @throws {Error} If cancellation was requested. */
-    _throwIfCancelled() {
+    /** @throws {Error} If the run failed or cancellation was requested. */
+    _throwIfStopped() {
+        if (this._error !== null) { throw this._error; }
         if (this._shouldCancel()) { throw createParallelParserCancellationError(); }
     }
 
