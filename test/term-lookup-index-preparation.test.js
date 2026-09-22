@@ -157,3 +157,58 @@ describe('lookup string arena validation', () => {
         expect(() => prepareTermLookupIndexesFromPreinternedPlan(chunk)).toThrow();
     });
 });
+
+
+describe('lookup preparation scratch ownership', () => {
+    test.each(['expressionIndexes', 'readingIndexes', 'stringHashes'])('does not modify source %s before whole-plan admission', (field) => {
+        const chunk = createChunk(4);
+        chunk.termRecordPreinternedPlan.stringHashes = new Uint32Array(4);
+        const scratch = /** @type {Uint32Array} */ (Reflect.get(chunk.termRecordPreinternedPlan, field));
+        const before = structuredClone(chunk);
+        expect(() => prepareTermLookupIndexesFromPreinternedPlan(chunk, scratch)).toThrow(/scratch overlaps source storage/);
+        expect(chunk).toEqual(before);
+    });
+
+    test.each([false, true])('protects sequences on whole/fallback preparation (singlePass=%s)', (singlePass) => {
+        const chunk = createChunk(4);
+        // Reference every key while scratch aliases real sequence storage.
+        chunk.termRecordPreinternedPlan.expressionIndexes.set([0, 1, 0, 1]);
+        chunk.termRecordPreinternedPlan.readingIndexes.set([2, 3, 2, 3]);
+        chunk.sequenceList.set([0, 42, 0, 43]);
+        const scratch = new Uint32Array(chunk.sequenceList.buffer);
+        const before = structuredClone(chunk);
+        expect(() => prepareTermLookupIndexesFromPreinternedPlan(chunk, scratch, {experimentalSinglePassLookupCompaction: singlePass})).toThrow(/scratch overlaps source storage/);
+        expect(chunk).toEqual(before);
+    });
+
+    test('protects packed equality flags from the earlier whole-plan probe', () => {
+        const chunk = createChunk(4);
+        const buffer = new ArrayBuffer(16);
+        chunk.readingEqualsExpressionList = new Uint8Array(buffer, 1, 4);
+        const before = structuredClone(chunk);
+        expect(() => prepareTermLookupIndexesFromPreinternedPlan(chunk, new Uint32Array(buffer))).toThrow(/scratch overlaps source storage/);
+        expect(chunk).toEqual(before);
+    });
+
+    test('cloned shared-buffer wrappers cannot overwrite sequence storage', () => {
+        const chunk = createChunk(4);
+        const buffer = new SharedArrayBuffer(16);
+        chunk.sequenceList = new Int32Array(buffer);
+        const before = structuredClone(chunk);
+        const expected = prepareTermLookupIndexesFromPreinternedPlan(structuredClone(chunk));
+        const prepared = prepareTermLookupIndexesFromPreinternedPlan(chunk, new Uint32Array(structuredClone(buffer)));
+        expect(prepared?.indexes).toEqual(expected?.indexes);
+        expect(chunk).toEqual(before);
+    });
+
+    test('disjoint source in unused scratch suffix remains supported', () => {
+        const chunk = createChunk(4);
+        const buffer = new ArrayBuffer(64);
+        const flags = new Uint8Array(buffer, 32, 4);
+        flags.set(chunk.readingEqualsExpressionList);
+        chunk.readingEqualsExpressionList = flags;
+        const expected = prepareTermLookupIndexesFromPreinternedPlan(structuredClone(chunk));
+        const prepared = prepareTermLookupIndexesFromPreinternedPlan(chunk, new Uint32Array(buffer));
+        expect(prepared?.indexes).toEqual(expected?.indexes);
+    });
+});
