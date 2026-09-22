@@ -1392,7 +1392,7 @@ export class Display extends EventDispatcher {
          * @param {string} path
          */
         const addTarget = (dictionary, path) => {
-            const key = `${dictionary}\u001f${path}`;
+            const key = JSON.stringify([dictionary, path]);
             if (targetKeys.has(key)) { return; }
             targetKeys.add(key);
             targets.push({dictionary, path});

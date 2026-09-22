@@ -51,7 +51,7 @@ test('disable and reenable cannot revive old delivery; fresh work succeeds', asy
     /** @type {PromiseWithResolvers<MediaResult[]>} */
     const deferred = Promise.withResolvers();
     let calls = 0;
-    const {resolver, created} = harness(() => ++calls === 1 ? deferred.promise : Promise.resolve([item()]));
+    const {resolver, created} = harness(() => (++calls === 1 ? deferred.promise : Promise.resolve([item()])));
     resolver.prune([{name: 'A', enabled: true}]);
     const old = resolver.resolve([item()]);
     resolver.prune([{name: 'A', enabled: false}]);
@@ -94,7 +94,7 @@ test('cache identities cannot collide through delimiter-bearing names and paths'
 });
 
 test('CSS quoted text and comments are not image URLs', () => {
-    const css = `.a {content: 'url("mdict-media/text.png")'; /* url(mdict-media/comment.png) */ background:url(mdict-media/real.png)}`;
+    const css = '.a {content: \'url("mdict-media/text.png")\'; /* url(mdict-media/comment.png) */ background:url(mdict-media/real.png)}';
     assert.deepEqual(getMdictMediaPathsFromCss(css), ['mdict-media/real.png']);
 });
 
@@ -124,7 +124,7 @@ test('clear still rejects pending delivery', async () => {
 test('rewriting changes only genuine URL tokens, not identical quoted text or comments', async () => {
     const {resolver} = harness(async () => [item()]);
     await resolver.resolve([item()]);
-    const prefix = `.a {content: 'url("mdict-media/a.png")'; /* url(mdict-media/a.png) */ background:`;
+    const prefix = '.a {content: \'url("mdict-media/a.png")\'; /* url(mdict-media/a.png) */ background:';
     assert.equal(resolver.rewriteStyles('A', `${prefix}url(mdict-media/a.png)}`), `${prefix}url("blob:media-1")}`);
 });
 
