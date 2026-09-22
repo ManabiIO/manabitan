@@ -180,7 +180,27 @@ export class OffscreenDictionaryWorkerHandler {
         } catch (e) {
             response.error = ExtensionError.serialize(e);
         }
-        self.postMessage(response);
+        try {
+            self.postMessage(response);
+        } catch (error) {
+            // Retry only delivery, never the action: a mutation may already
+            // have committed. A second transport failure reaches the owner.
+            self.postMessage({id, error: this._serializeTransportSafeError(error)});
+        }
+    }
+
+    /**
+     * @param {unknown} error
+     * @returns {import('core').SerializedError1}
+     */
+    _serializeTransportSafeError(error) {
+        const serialized = ExtensionError.serialize(error);
+        if (serialized.hasValue) {
+            return {name: 'Error', message: 'Dictionary worker encountered an unserializable error', stack: ''};
+        }
+        const {name, message, stack} = serialized;
+        // Diagnostic data and arbitrary thrown values need not be cloneable.
+        return {name, message, stack};
     }
 
     /**
@@ -226,9 +246,15 @@ export class OffscreenDictionaryWorkerHandler {
      * @returns {boolean}
      */
     _postImportError(port, error) {
-        return this._postImportPortMessage(port, {
+        if (this._postImportPortMessage(port, {
             type: 'error',
             error: ExtensionError.serialize(error),
+        })) { return true; }
+        // Preserve rich errors when possible, but do not strand the caller
+        // because diagnostic data cannot cross the message-port boundary.
+        return this._postImportPortMessage(port, {
+            type: 'error',
+            error: this._serializeTransportSafeError(error),
         });
     }
 
@@ -311,7 +337,7 @@ export class OffscreenDictionaryWorkerHandler {
                     importerDebug: debug ?? null,
                 },
             });
-            if (!completionDelivered && responsePortAvailable) {
+            if (!completionDelivered) {
                 this._postImportError(port, new Error('Dictionary import completed but its result could not be delivered'));
             }
         } catch (error) {
@@ -338,7 +364,9 @@ export class OffscreenDictionaryWorkerHandler {
      * @returns {Promise<unknown>}
      */
     async _invokeAction(action, params, ports) {
-        if (getDictionaryRuntimeActionPolicy(action).requiresDatabase) {
+        // Streamed imports own rejection, queue accounting, and port closure
+        // inside _importDictionaryOffscreen, including suspension failures.
+        if (action !== 'importDictionaryOffscreen' && getDictionaryRuntimeActionPolicy(action).requiresDatabase) {
             this._assertDatabaseAvailable(action);
         }
         switch (action) {
@@ -577,7 +605,7 @@ export class OffscreenDictionaryWorkerHandler {
             try {
                 const db = requireDb.call(this._dictionaryDatabase);
                 for (const dictionaryNameRaw of dictionaryNames) {
-                    const dictionaryName = String(dictionaryNameRaw || '').trim();
+                    const dictionaryName = String(dictionaryNameRaw || '');
                     if (dictionaryName.length === 0) { continue; }
                     const rows = /** @type {Array<Record<string, unknown>>} */ (db.selectObjects(
                         `
@@ -613,7 +641,7 @@ export class OffscreenDictionaryWorkerHandler {
             }
         }
         for (const dictionaryNameRaw of dictionaryNames) {
-            const dictionaryName = String(dictionaryNameRaw || '').trim();
+            const dictionaryName = String(dictionaryNameRaw || '');
             if (dictionaryName.length === 0) { continue; }
             const expressionIds = /** @type {number[]} */ (
                 findDirectTermIds.call(this._dictionaryDatabase, dictionaryName, text, 'expression')

@@ -420,7 +420,7 @@ function packContentChunksIntoSlabs(chunks, targetBytes) {
  * @returns {{stage: string, token: string}|null}
  */
 function parseTransientUpdateTitleInfo(title) {
-    const match = `${title}`.trim().match(/\[(update-staging|cutover|replaced) ([^\]]+)\]$/);
+    const match = `${title}`.match(/\[(update-staging|cutover|replaced) ([^\]]+)\]$/);
     if (match === null) { return null; }
     const [, stage, token] = match;
     if (typeof stage !== 'string' || typeof token !== 'string' || token.length === 0) {
@@ -1965,9 +1965,9 @@ export class DictionaryDatabase {
      * @returns {Promise<void>}
      */
     async replaceDictionaryTitle(fromDictionaryTitle, toDictionaryTitle, summaryOverride = null, replacedDictionaryTitle = null) {
-        const fromTitle = `${fromDictionaryTitle}`.trim();
-        const toTitle = `${toDictionaryTitle}`.trim();
-        const replacedTitle = typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle.trim() : null;
+        const fromTitle = `${fromDictionaryTitle}`;
+        const toTitle = `${toDictionaryTitle}`;
+        const replacedTitle = typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle : null;
         const explicitTransientSessionToken = (
             summaryOverride &&
             typeof summaryOverride === 'object' &&
@@ -2126,7 +2126,7 @@ null;
          * @returns {Promise<void>}
          */
         const forceCleanupTransientDictionaryTitle = async (dictionaryTitle) => {
-            const title = `${dictionaryTitle}`.trim();
+            const title = `${dictionaryTitle}`;
             if (title.length === 0) { return; }
             const summaryRow = getSummaryRowByTitle(title);
             const parsedSummary = (() => {
@@ -2163,7 +2163,7 @@ null;
                     },
                 };
                 await this._termRecordStore.deleteByDictionary(this._getTermRecordStorageName(title));
-                await this.cleanupTransientTermRecordShards((dictionaryName) => String(dictionaryName || '').trim() === title);
+                await this.cleanupTransientTermRecordShards((dictionaryName) => String(dictionaryName || '') === title);
                 await this._beginImmediateTransaction(db);
                 try {
                     for (const [table, keyColumn] of [
@@ -2478,8 +2478,8 @@ null;
     _getSummaryTermRecordStorageName(summary, fallbackTitle) {
         if (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) {
             const value = /** @type {unknown} */ (Reflect.get(summary, 'termRecordStorageName'));
-            if (typeof value === 'string' && value.trim().length > 0) {
-                return value.trim();
+            if (typeof value === 'string' && value.length > 0) {
+                return value;
             }
         }
         return fallbackTitle;
@@ -2491,8 +2491,9 @@ null;
      * @throws {Error} If a physical storage name is already owned by another dictionary.
      */
     _registerTermRecordStorageName(dictionaryName, storageName) {
-        const logicalName = `${dictionaryName}`.trim();
-        const physicalName = `${storageName}`.trim();
+        // UI input normalization must not rewrite logical or physical storage identity.
+        const logicalName = `${dictionaryName}`;
+        const physicalName = `${storageName}`;
         if (logicalName.length === 0 || physicalName.length === 0) { return; }
         const previousLogicalName = this._dictionaryNameByTermRecordStorage.get(physicalName);
         if (typeof previousLogicalName !== 'undefined' && previousLogicalName !== logicalName) {
@@ -2524,7 +2525,7 @@ null;
         this._termRecordStorageNameByDictionary.clear();
         this._dictionaryNameByTermRecordStorage.clear();
         for (const row of rows) {
-            const title = this._asString(row.title).trim();
+            const title = this._asString(row.title);
             if (title.length === 0) { continue; }
             const summary = this._safeParseJson(this._asString(row.summaryJson), null);
             this._registerTermRecordStorageName(
@@ -2890,7 +2891,7 @@ null;
                 // Probe warming is best-effort; lookup correctness does not depend on it.
             }
         }
-        const uniqueTerms = [...new Set(terms.map((term) => `${term}`.trim()).filter((term) => term.length > 0))];
+        const uniqueTerms = [...new Set(terms.map((term) => `${term}`).filter((term) => term.length > 0))];
         if (uniqueTerms.length === 0) { return; }
         const startedAt = safePerformance.now();
         try {
@@ -3801,7 +3802,7 @@ null;
             ORDER BY d.id ASC
         `);
         for (const row of rows) {
-            const title = this._asString(row.title).trim();
+            const title = this._asString(row.title);
             if (title.length === 0) { continue; }
             const reason = this._asString(row.reason).trim() || 'Dictionary record data is damaged';
             this._termRecordStore.markDictionaryReimportRequired(this._getTermRecordStorageName(title), reason);
@@ -3818,8 +3819,8 @@ null;
         if (probeId === null) { return null; }
         const record = (await this._termRecordStore.getByIdsAsync([probeId])).get(probeId);
         if (typeof record === 'undefined') { return null; }
-        const expression = this._asString(record.expression).trim();
-        const reading = this._asString(record.reading).trim();
+        const expression = this._asString(record.expression);
+        const reading = this._asString(record.reading);
         return expression.length === 0 && reading.length === 0 ? null : {expression, reading};
     }
 
@@ -3917,7 +3918,7 @@ null;
         let parseErrorCount = 0;
         for (const row of rows) {
             const id = this._asNumber(row.id, 0);
-            const title = this._asString(row.title).trim();
+            const title = this._asString(row.title);
             const summaryJson = this._asString(row.summaryJson);
             let summaryParseFailed = false;
             /** @type {unknown} */
@@ -3943,7 +3944,7 @@ null;
             }
             if (title.length > 0 && isRecognizedTransientUpdateTitle(title, summary)) {
                 const transientInfo = parseTransientUpdateTitleInfo(title);
-                const originalTitle = title.replace(/\s+\[(?:update-staging|cutover|replaced) [^\]]+\]$/, '').trim();
+                const originalTitle = title.replace(/ \[(?:update-staging|cutover|replaced) [^\]]+\]$/, '');
                 if (
                     transientInfo !== null &&
                     transientInfo.stage === 'replaced' &&
@@ -4063,7 +4064,7 @@ null;
         const expectedTermDictionaryNames = [];
         let parseErrorCount = 0;
         for (const row of rows) {
-            const title = this._asString(row.title).trim();
+            const title = this._asString(row.title);
             if (title.length === 0) { continue; }
             let summary;
             try {

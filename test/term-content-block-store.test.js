@@ -924,6 +924,20 @@ describe('TermContentBlockStore', () => {
         });
     });
 
+    test('classifies an unsafe legacy block address as corrupt instead of transiently unavailable', async () => {
+        const contentStore = new TermContentOpfsStore();
+        // Corrupt valid bytes so this exercises the reader, not encoder validation.
+        const reference = encodeRawTermContentBlockReference(Number.MAX_SAFE_INTEGER - 1, 1, 2, 0, 1);
+        new DataView(reference.buffer).setBigUint64(4, BigInt(Number.MAX_SAFE_INTEGER), true);
+        const [{offset: referenceOffset}] = await contentStore.appendBatch([reference]);
+        const blockStore = new TermContentBlockStore(contentStore);
+
+        await expect(blockStore.readDetailed(referenceOffset, 1, 'raw-block-v1')).resolves.toMatchObject({
+            status: 'corrupt',
+            reason: expect.stringContaining('reference'),
+        });
+    });
+
     test('rejects corrupted compressed block bytes before decompression', async () => {
         vi.mocked(decompressTermContentZstd).mockClear();
         const contentStore = new TermContentOpfsStore();
@@ -949,9 +963,9 @@ describe('TermContentBlockStore', () => {
         const contentStore = new TermContentOpfsStore();
         const block = wrapCompressedTermContentBlock(new Uint8Array([1, 2, 3]));
         await contentStore.appendBatch([block]);
-        const [{offset: referenceOffset}] = await contentStore.appendBatch([
-            encodeRawTermContentBlockReference(0, block.byteLength, 3, 2, 2),
-        ]);
+        const reference = encodeRawTermContentBlockReference(0, block.byteLength, 3, 2, 1);
+        new DataView(reference.buffer).setUint32(24, 2, true);
+        const [{offset: referenceOffset}] = await contentStore.appendBatch([reference]);
         const blockStore = new TermContentBlockStore(contentStore);
 
         expect(await blockStore.read(referenceOffset, 2, 'raw-block-v1')).toBeNull();

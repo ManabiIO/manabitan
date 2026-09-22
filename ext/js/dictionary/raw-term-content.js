@@ -26,6 +26,7 @@ const RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32 = 0x3552424d;
 const RAW_TERM_CONTENT_TOKEN_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x36]);
 const RAW_TERM_CONTENT_TOKEN_HEADER_BYTES = 4;
 const U32_RANGE = 0x100000000;
+const JSON_TOKEN_INLINE_SCAN_MAX_BYTES = 64;
 
 export const RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES = 28;
 
@@ -128,7 +129,7 @@ export function writeRawTermContentCompactBlockReference(
         !Number.isSafeInteger(blockOffset) || blockOffset < 0 ||
         !Number.isSafeInteger(blockCompressedLength) || blockCompressedLength <= 0 || blockCompressedLength >= U32_RANGE ||
         !Number.isSafeInteger(blockUncompressedLength) || blockUncompressedLength <= 0 || blockUncompressedLength >= U32_RANGE ||
-        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= U32_RANGE ||
+        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength ||
         !Number.isSafeInteger(offset) || offset < 0 || offset + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES > view.byteLength ||
         !Number.isSafeInteger(blockOffset + blockCompressedLength)
     ) {
@@ -192,6 +193,8 @@ export function encodeRawTermContentBlockReference(blockOffset, blockCompressedL
 
 /**
  * Writes a reference into an existing slab without allocating a per-reference view.
+ * Validates the complete reference before the first write to avoid narrowing
+ * invalid numbers or leaving a partially written reference in the slab.
  * @param {DataView} view
  * @param {number} offset
  * @param {number} blockOffset
@@ -199,6 +202,7 @@ export function encodeRawTermContentBlockReference(blockOffset, blockCompressedL
  * @param {number} blockUncompressedLength
  * @param {number} entryOffset
  * @param {number} entryLength
+ * @throws {RangeError} When a reference field or its destination lies outside the supported bounds.
  */
 export function writeRawTermContentBlockReference(
     view,
@@ -209,6 +213,17 @@ export function writeRawTermContentBlockReference(
     entryOffset,
     entryLength,
 ) {
+    if (
+        !Number.isSafeInteger(blockOffset) || blockOffset < 0 ||
+        !Number.isSafeInteger(blockCompressedLength) || blockCompressedLength <= 0 || blockCompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(blockUncompressedLength) || blockUncompressedLength <= 0 || blockUncompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength ||
+        !Number.isSafeInteger(entryLength) || entryLength <= 0 || entryLength > blockUncompressedLength - entryOffset ||
+        !Number.isSafeInteger(offset) || offset < 0 || offset > view.byteLength - RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength)
+    ) {
+        throw new RangeError('Invalid term-content block reference');
+    }
     view.setUint32(offset, RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32, true);
     view.setUint32(offset + 4, blockOffset, true);
     view.setUint32(offset + 8, Math.floor(blockOffset / U32_RANGE), true);
@@ -243,6 +258,7 @@ export function decodeRawTermContentBlockReference(bytes) {
         blockCompressedLength <= 0 ||
         blockUncompressedLength <= 0 ||
         entryLength <= 0 ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength) ||
         entryOffset + entryLength > blockUncompressedLength
     ) {
         return null;
@@ -269,11 +285,11 @@ export function decodeRawTermContentHeader(bytes, textDecoder) {
         return null;
     }
     let offset = RAW_TERM_CONTENT_HEADER_BYTES;
-    const rules = textDecoder.decode(bytes.subarray(offset, offset + rulesLength));
+    const rules = decodeRawTermString(bytes, offset, rulesLength, textDecoder);
     offset += rulesLength;
-    const definitionTags = textDecoder.decode(bytes.subarray(offset, offset + definitionTagsLength));
+    const definitionTags = decodeRawTermString(bytes, offset, definitionTagsLength, textDecoder);
     offset += definitionTagsLength;
-    const termTags = textDecoder.decode(bytes.subarray(offset, offset + termTagsLength));
+    const termTags = decodeRawTermString(bytes, offset, termTagsLength, textDecoder);
     offset += termTagsLength;
     return {rules, definitionTags, termTags, glossaryJsonOffset: offset, glossaryJsonLength};
 }
@@ -361,8 +377,12 @@ export function encodeRawTermContentBinary(rules, definitionTags, termTags, glos
  * @param {number} glossaryLength
  * @param {TextEncoder} textEncoder
  * @returns {Uint8Array}
+ * @throws {RangeError} When the glossary range cannot be represented exactly.
  */
 export function encodeRawTermContentSharedGlossaryBinary(rules, definitionTags, termTags, glossaryOffset, glossaryLength, textEncoder) {
+    if (!isValidSharedGlossaryRange(glossaryOffset, glossaryLength)) {
+        throw new RangeError('Invalid shared term-content glossary range');
+    }
     const rulesBytes = textEncoder.encode(rules);
     const definitionTagsBytes = textEncoder.encode(definitionTags);
     const termTagsBytes = textEncoder.encode(termTags);
@@ -393,6 +413,7 @@ export function encodeRawTermContentSharedGlossaryBinary(rules, definitionTags, 
  * @param {Uint8Array} bytes
  * @param {number} baseOffset
  * @returns {Uint8Array}
+ * @throws {RangeError} When a nonzero rebase uses an invalid original or resulting range.
  */
 export function rebaseRawTermContentSharedGlossaryBinary(bytes, baseOffset) {
     if (!isRawTermContentSharedGlossaryBinary(bytes) || baseOffset === 0) {
@@ -406,10 +427,19 @@ export function rebaseRawTermContentSharedGlossaryBinary(bytes, baseOffset) {
     if (totalLength !== bytes.byteLength) {
         return bytes;
     }
+    const glossaryOffset = Number(view.getBigUint64(16, true));
+    const glossaryLength = view.getUint32(24, true);
+    const rebasedOffset = glossaryOffset + baseOffset;
+    if (
+        !isValidSharedGlossaryRange(glossaryOffset, glossaryLength) ||
+        !Number.isSafeInteger(baseOffset) ||
+        !isValidSharedGlossaryRange(rebasedOffset, glossaryLength)
+    ) {
+        throw new RangeError('Invalid rebased shared term-content glossary range');
+    }
     const rebasedBytes = Uint8Array.from(bytes);
     const rebasedView = new DataView(rebasedBytes.buffer, rebasedBytes.byteOffset, rebasedBytes.byteLength);
-    const glossaryOffset = Number(rebasedView.getBigUint64(16, true));
-    rebasedView.setBigUint64(16, BigInt(glossaryOffset + baseOffset), true);
+    rebasedView.setBigUint64(16, BigInt(rebasedOffset), true);
     return rebasedBytes;
 }
 
@@ -429,15 +459,15 @@ export function decodeRawTermContentSharedGlossaryHeader(bytes, textDecoder) {
     const glossaryOffset = Number(view.getBigUint64(16, true));
     const glossaryLength = view.getUint32(24, true);
     const totalLength = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES + rulesLength + definitionTagsLength + termTagsLength;
-    if (totalLength !== bytes.byteLength) {
+    if (totalLength !== bytes.byteLength || !isValidSharedGlossaryRange(glossaryOffset, glossaryLength)) {
         return null;
     }
     let offset = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES;
-    const rules = textDecoder.decode(bytes.subarray(offset, offset + rulesLength));
+    const rules = decodeRawTermString(bytes, offset, rulesLength, textDecoder);
     offset += rulesLength;
-    const definitionTags = textDecoder.decode(bytes.subarray(offset, offset + definitionTagsLength));
+    const definitionTags = decodeRawTermString(bytes, offset, definitionTagsLength, textDecoder);
     offset += definitionTagsLength;
-    const termTags = textDecoder.decode(bytes.subarray(offset, offset + termTagsLength));
+    const termTags = decodeRawTermString(bytes, offset, termTagsLength, textDecoder);
     return {rules, definitionTags, termTags, glossaryOffset, glossaryLength};
 }
 
@@ -472,8 +502,7 @@ export function decodeRawTermContentTokenHeader(bytes, textDecoder) {
         offset = end + 1;
         if (end - start >= 2 && bytes[start] === 0x22 && bytes[end - 1] === 0x22) {
             if (end - start === 2) { return ''; }
-            const escapeIndex = bytes.indexOf(0x5c, start + 1);
-            if (escapeIndex < 0 || escapeIndex >= end - 1) {
+            if (isSimpleJsonStringContent(bytes, start + 1, end - 1)) {
                 return textDecoder.decode(bytes.subarray(start + 1, end - 1));
             }
         }
@@ -512,4 +541,70 @@ export function decodeRawTermContentTokenBinary(bytes, textDecoder) {
         header.glossaryJsonOffset + header.glossaryJsonLength,
     ));
     return {rules: header.rules, definitionTags: header.definitionTags, termTags: header.termTags, glossaryJson};
+}
+
+/**
+ * OPFS range arithmetic uses JavaScript numbers even though offsets are stored
+ * as uint64. Reject values that would be rounded or narrowed by that boundary.
+ * @param {number} offset
+ * @param {number} length
+ * @returns {boolean}
+ */
+function isValidSharedGlossaryRange(offset, length) {
+    return (
+        Number.isSafeInteger(offset) && offset >= 0 &&
+        Number.isSafeInteger(length) && length >= 0 && length < U32_RANGE &&
+        Number.isSafeInteger(offset + length)
+    );
+}
+
+/**
+ * Length-delimited tag strings preserve a leading U+FEFF as content. Respect
+ * the caller's decoding/error policy and restore only a BOM it actually strips.
+ * @param {Uint8Array} bytes
+ * @param {number} offset
+ * @param {number} length
+ * @param {TextDecoder} textDecoder
+ * @returns {string}
+ */
+function decodeRawTermString(bytes, offset, length, textDecoder) {
+    const value = textDecoder.decode(bytes.subarray(offset, offset + length));
+    if (
+        length >= 3 &&
+        bytes[offset] === 0xef &&
+        bytes[offset + 1] === 0xbb &&
+        bytes[offset + 2] === 0xbf &&
+        textDecoder.encoding === 'utf-8' &&
+        !textDecoder.ignoreBOM
+    ) {
+        return `\ufeff${value}`;
+    }
+    return value;
+}
+
+/**
+ * Scans only short token contents, never subsequent fields or the glossary.
+ * Long, escaped, or malformed tokens use JSON parsing instead.
+ * @param {Uint8Array} bytes
+ * @param {number} start
+ * @param {number} end
+ * @returns {boolean}
+ */
+function isSimpleJsonStringContent(bytes, start, end) {
+    if (
+        end - start > JSON_TOKEN_INLINE_SCAN_MAX_BYTES ||
+        (
+            end - start >= 3 &&
+            bytes[start] === 0xef &&
+            bytes[start + 1] === 0xbb &&
+            bytes[start + 2] === 0xbf
+        )
+    ) {
+        return false;
+    }
+    for (let i = start; i < end; ++i) {
+        const value = bytes[i];
+        if (value === 0x5c || value === 0x22 || value < 0x20) { return false; }
+    }
+    return true;
 }

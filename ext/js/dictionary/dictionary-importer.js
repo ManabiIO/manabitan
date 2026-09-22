@@ -136,6 +136,8 @@ const EMPTY_TERM_GLOSSARY = [];
  */
 const EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
 const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
+// A leading U+FEFF is data inside a term or asset path, not a document BOM.
+const UTF8_FIELD_TEXT_DECODER = new TextDecoder('utf-8', {ignoreBOM: true});
 Object.freeze(EMPTY_TERM_GLOSSARY);
 
 /**
@@ -147,12 +149,8 @@ Object.freeze(EMPTY_TERM_GLOSSARY);
  * @returns {string}
  */
 function decodeUtf8Bytes(decoder, bytes) {
-    const buffer = bytes?.buffer;
-    return (
-        typeof SharedArrayBuffer === 'function' &&
-        bytes instanceof Uint8Array &&
-        buffer instanceof SharedArrayBuffer
-    ) ?
+    // Shared WASM memory can exist even when its global constructor is hidden.
+    return typeof bytes !== 'undefined' && !(bytes.buffer instanceof ArrayBuffer) ?
         decoder.decode(Uint8Array.from(bytes)) :
         decoder.decode(bytes);
 }
@@ -2753,7 +2751,7 @@ export class DictionaryImporter {
                     return null;
                 }
             } else {
-                path = decodeUtf8Bytes(this._textDecoder, tokenBytes);
+                path = decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, tokenBytes);
             }
             if (getImageMediaTypeFromFileName(path) !== null) {
                 paths.push(path);
@@ -3880,10 +3878,10 @@ export class DictionaryImporter {
                     const {mediaRows, ...columnPayload} = columnChunk;
                     if (requirementsForChunk !== null) {
                         for (const {index, row} of mediaRows) {
-                            const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(this._textDecoder, row.expressionBytes ?? columnChunk.expressionBytesList[index]);
+                            const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes ?? columnChunk.expressionBytesList[index]);
                             let reading = expression;
                             if (columnChunk.readingEqualsExpressionList[index] !== 1) {
-                                reading = row.reading.length > 0 ? row.reading : decodeUtf8Bytes(this._textDecoder, row.readingBytes ?? columnChunk.readingBytesList[index]);
+                                reading = row.reading.length > 0 ? row.reading : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.readingBytes ?? columnChunk.readingBytesList[index]);
                             }
                             /** @type {import('dictionary-database').DatabaseTermEntry} */
                             const entry = {
@@ -3942,8 +3940,15 @@ export class DictionaryImporter {
                 const tMaterializationStart = Date.now();
                 for (let i = 0, ii = decodedRows.length; i < ii; ++i) {
                     const row = decodedRows[i];
-                    const expression = row.expression;
-                    const reading = row.reading.length > 0 ? row.reading : expression;
+                    const requirementStart = requirementsForChunk?.length ?? 0;
+                    const expression = row.expression.length > 0 ?
+                        row.expression :
+                        decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes);
+                    const reading = row.reading.length > 0 ?
+                        row.reading :
+                        (row.readingEqualsExpression === true ?
+                            expression :
+                            (decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.readingBytes) || expression));
                     const hasPrecomputedTermContent = hasPrecomputedTermEntryContent(row);
                     let usePrecomputedTermContent = false;
                     let hasMaterializedGlossary = false;
@@ -4043,17 +4048,23 @@ export class DictionaryImporter {
                             entry.termEntryContentHash2 = /** @type {number} */ (row.termEntryContentHash2);
                         }
                         entry.termEntryContentBytes = row.termEntryContentBytes;
+                        if (!enableTermEntryContentDedup && requirementsForChunk !== null) {
+                            // Non-deduplicated writes also consume glossaryJson.
+                            // Preserve the parser's canonical glossary instead of
+                            // reconstructing it from an unmaterialized empty array.
+                            entry.glossaryJson = JSON.stringify(this._parseTermEntryContentFromFastRow(row, termFile.filename).glossary);
+                        }
                     }
-                    // Keep serialization canonical with the runtime deserializer.
-                    // A conservative media hint may produce no requirements; preserve
-                    // the formatted glossary even when no later media pass will run.
+                    // Media targets remain mutable until requirement resolution. Do
+                    // not cache placeholder paths/metadata as authoritative bytes.
+                    // Rows without new requirements can still serialize immediately,
+                    // including formatted glossaries with conservative media hints.
                     if (
                         requirementsForChunk === null ||
                         (
                             requirementsForChunk !== null &&
-                            (
-                                !hasPrecomputedTermEntryContent(entry)
-                            )
+                            requirementsForChunk.length === requirementStart &&
+                            !hasPrecomputedTermEntryContent(entry)
                         )
                     ) {
                         if (
@@ -4072,6 +4083,7 @@ export class DictionaryImporter {
                             null,
                         );
                     }
+                    this._assignPrefixReverseFields(entry, prefixWildcardsSupported);
                     termListChunk[i] = entry;
                 }
                 importerMaterializationMs += Math.max(0, Date.now() - tMaterializationStart);

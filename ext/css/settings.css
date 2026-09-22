@@ -2587,6 +2587,22 @@ button.hotkey-list-item-enabled-button[data-scope-count='0'] {
     max-height: min(720px, calc(100vh - 1.5rem));
 }
 
+/* Keep one scroll region so help and conversion notes do not squeeze the
+   drop target into a separate clipped viewport. Header/footer stay reachable. */
+.dictionary-import-scroll-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.dictionary-import-scroll-body>.modal-body {
+    overflow: visible;
+}
+
+.mdict-import-warnings {
+    overflow-wrap: anywhere;
+}
+
 .dictionary-import-drop-section {
     display: flex;
 }
