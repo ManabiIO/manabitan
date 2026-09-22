@@ -71,6 +71,9 @@ function fixture(type = 'terms') {
         _contentManager: {
             async executeMediaRequests() {},
         },
+        // This harness supplies visual/media services while exercising the real
+        // search refresh and content-render sequencing.
+        async _resolveDictionaryCssMedia() {},
         updateOptions: () => {
             ++refreshes;
             return optionsGate.promise;
