@@ -18,7 +18,7 @@ async function draw(requests) {
         index, dictionary, path, mediaType: 'image/png', width: 1, height: 1, content: new ArrayBuffer(4),
     })));
     vi.stubGlobal('navigator', {});
-    vi.stubGlobal('createImageBitmap', vi.fn(async (_blob, options) => ({width: options.resizeWidth, height: options.resizeHeight})));
+    vi.stubGlobal('createImageBitmap', vi.fn(async (_blob, options) => ({width: options.resizeWidth, height: options.resizeHeight, close() {}})));
     vi.stubGlobal('OffscreenCanvas', class {
         /** @returns {object} */
         getContext() {
