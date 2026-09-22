@@ -74,6 +74,21 @@ jobs:
                 echo "RESOLVED_COMBINED_FLOAT_SCORE_AND_SEQUENCE $c" | tee -a "$RUNNER_TEMP/sequence-105/sequence.txt"
                 continue
               fi
+              if test "$c" = e2cbd387509ab27b4edd077989b5fc5032c5b270 && test "$(cat "$RUNNER_TEMP/sequence-105/conflicts.txt")" = "ext/js/dictionary/dictionary-database.js"; then
+                git checkout --ours ext/js/dictionary/dictionary-database.js
+                python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ext/js/dictionary/dictionary-database.js'); s=p.read_text()
+          before='sequenceList: (number|undefined)[]|Int32Array, contentBytesList:'
+          after='sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList:'
+          assert s.count(before)>0,s.count(before)
+          p.write_text(s.replace(before,after))
+          PY
+                git add ext/js/dictionary/dictionary-database.js
+                git cherry-pick --continue
+                echo "RESOLVED_DATABASE_FLOAT_SCORE_AND_SEQUENCE $c" | tee -a "$RUNNER_TEMP/sequence-105/sequence.txt"
+                continue
+              fi
               exit 42
             fi
           done
