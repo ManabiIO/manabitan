@@ -241,7 +241,7 @@ typedef struct {
     uint32_t score_start;
     uint32_t glossary_start;
     uint32_t glossary_length;
-    int32_t sequence;
+    uint32_t sequence_start;
     uint32_t term_tags_start;
     uint32_t term_tags_length;
     uint32_t glossary_may_contain_media;
@@ -715,7 +715,10 @@ static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index
             if (!is_valid_json_number(src, start, end)) { return 0; }
             meta->score_start = start; break;
         case 5: meta->glossary_start = start; meta->glossary_length = length; break;
-        case 6: return parse_int32_token(src, start, end, -1, &meta->sequence);
+        case 6:
+            if (is_null_token(src, start, length)) { meta->sequence_start = 0xffffffffu; break; }
+            if (start >= end || (src[start] != '-' && (src[start] < '0' || src[start] > '9'))) { return 0; }
+            meta->sequence_start = start; break;
         case 7: meta->term_tags_start = start; meta->term_tags_length = length; break;
         default: break;
     }
@@ -729,7 +732,7 @@ static void clear_term_row_meta(TermRowMeta* meta) {
     meta->rules_start = 0u; meta->rules_length = 0u;
     meta->score_start = 0u;
     meta->glossary_start = 0u; meta->glossary_length = 0u;
-    meta->sequence = -1;
+    meta->sequence_start = 0xffffffffu;
     meta->term_tags_start = 0u; meta->term_tags_length = 0u;
     meta->glossary_may_contain_media = 0u;
     meta->glossary_requires_normalization = 0u;
@@ -2608,7 +2611,18 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             return -5;
         }
         scores[row_count] = score;
-        sequences[row_count] = parsed_row->sequence;
+        int32_t sequence = -1;
+        if (parsed_row->sequence_start != 0xffffffffu) {
+            uint32_t sequence_end = 0u;
+            if (
+                !parse_scalar_span(src, source.end, parsed_row->sequence_start, &sequence_end) ||
+                !parse_int32_token(src, parsed_row->sequence_start, sequence_end, -1, &sequence)
+            ) {
+                *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
+                return -5;
+            }
+        }
+        sequences[row_count] = sequence;
 
         const uint32_t row_offset = row_count * 4u;
         uint32_t recent_match = 0xffffffffu;

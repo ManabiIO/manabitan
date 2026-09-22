@@ -39,7 +39,7 @@ const MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS = 0xffff - 1;
  * Builds offset-independent lookup sidecars from a parser-owned string plan.
  * The same helper runs in parser workers and remains available to the storage
  * owner as a fallback.
- * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, sequenceList: (number|undefined)[]|Int32Array, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk
+ * @param {{rowCount: number, readingEqualsExpressionList: boolean[]|Uint8Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null}} chunk
  * @param {Uint32Array|null} [remapScratch=null]
  * @param {import('dictionary-importer').ImportExperiments} [experiments={}]
  * @returns {{indexes: Map<string, PreparedTermLookupIndex>, compactMs: number, indexEncodeMs: number, totalMs: number, directArenaSegments: number, directArenaCopiedBytesAvoided: number, compactionSourceValidationPasses: number}|null}

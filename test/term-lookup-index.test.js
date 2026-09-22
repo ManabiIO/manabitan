@@ -633,3 +633,73 @@ describe('persisted term lookup index', () => {
         );
     });
 });
+
+
+describe('wide persisted term sequences', () => {
+    const wideSequences = [0x80000000, 0x100000001, 2 ** 40, Number.MAX_SAFE_INTEGER];
+
+    test('round-trips and indexes safe integers beyond int32', () => {
+        const encoded = encodePersistedTermLookupIndex(wideSequences.map((sequence, index) => ({
+            expressionBytes: bytes(`wide-${String(index)}`),
+            readingBytes: null,
+            sequence,
+        })));
+        expect(new Uint32Array(encoded.buffer, encoded.byteOffset, 4)[1]).toBe(8);
+
+        const index = parsePersistedTermLookupIndex(encoded);
+        expect(index.sequenceKeys).toBeInstanceOf(Float64Array);
+        for (let row = 0; row < wideSequences.length; ++row) {
+            expect(getPersistedTermSequence(index, row)).toBe(wideSequences[row]);
+            expect(findSequenceRows(index, wideSequences[row])).toEqual([row]);
+        }
+    });
+
+    test('keeps sequences with identical low 32 bits distinct', () => {
+        const sequences = [1, 0x100000001, 0x200000001];
+        const index = createIndex(sequences.map((sequence, index) => ({
+            expression: `collision-${String(index)}`,
+            sequence,
+        })));
+        for (let row = 0; row < sequences.length; ++row) {
+            expect(findSequenceRows(index, sequences[row])).toEqual([row]);
+        }
+    });
+
+    test('rebuilds wide derived postings without changing the authoritative base', () => {
+        const encoded = encodePersistedTermLookupIndex(wideSequences.map((sequence, index) => ({
+            expressionBytes: bytes(`repair-${String(index)}`),
+            readingBytes: null,
+            sequence,
+        })));
+        const {base, derived} = splitPersistedTermLookupIndex(encoded);
+        const rebuilt = splitPersistedTermLookupIndex(rebuildPersistedTermLookupIndexFromBase(base));
+
+        expect(rebuilt.base).toStrictEqual(base);
+        expect(rebuilt.derived).toStrictEqual(derived);
+    });
+
+    test('parses wide indexes from four-byte-aligned views', () => {
+        const encoded = encodePersistedTermLookupIndex([{
+            expressionBytes: bytes('misaligned'),
+            readingBytes: null,
+            sequence: 2 ** 40,
+        }]);
+        const holder = new Uint8Array(encoded.byteLength + 4);
+        holder.set(encoded, 4);
+        const index = parsePersistedTermLookupIndex(holder.subarray(4));
+
+        expect(getPersistedTermSequence(index, 0)).toBe(2 ** 40);
+        expect(findSequenceRows(index, 2 ** 40)).toEqual([0]);
+    });
+
+    test.each([1.5, Number.MAX_SAFE_INTEGER + 1])(
+        'rejects an unrepresentable sequence %s rather than truncating it',
+        (sequence) => {
+            expect(() => encodePersistedTermLookupIndex([{
+                expressionBytes: bytes('invalid'),
+                readingBytes: null,
+                sequence,
+            }])).toThrow(RangeError);
+        },
+    );
+});

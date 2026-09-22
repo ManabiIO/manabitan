@@ -50,10 +50,11 @@ const PARALLEL_WORKER_PARSE_TIMEOUT_MS = 300_000;
 const PARALLEL_WORKER_CANCELLATION_POLL_MS = 25;
 const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
+const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -451,6 +452,19 @@ function decodeJsonNumberToken(source, start) {
     const value = Number(decodeParserText(source.subarray(start, end)));
     if (!Number.isFinite(value)) {
         throw new RangeError('Term-bank number must be finite');
+    }
+    return value;
+}
+
+/**
+ * @param {Uint8Array} source
+ * @param {number} start
+ * @returns {number}
+ */
+function decodeJsonSequenceToken(source, start) {
+    const value = decodeJsonNumberToken(source, start);
+    if (!Number.isSafeInteger(value)) {
+        throw new RangeError('Term-bank sequence must be a safe integer');
     }
     return value;
 }
@@ -1208,7 +1222,7 @@ function createNativeLookupIndexScratch(wasm, rowCapacity, keyCapacity, keyBytes
  * @param {Awaited<ReturnType<typeof getWasm>>} wasm
  * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array}} plan
  * @param {Uint8Array} readingEqualsExpressionList
- * @param {Int32Array} sequenceList
+ * @param {Int32Array|Float64Array} sequenceList
  * @param {number} rowCount
  * @param {ReturnType<typeof createNativeLookupIndexScratch>} scratch
  * @returns {Uint8Array|null}
@@ -1216,6 +1230,7 @@ function createNativeLookupIndexScratch(wasm, rowCapacity, keyCapacity, keyBytes
 function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, sequenceList, rowCount, scratch) {
     const memory = wasm.memory.buffer;
     if (
+        !(sequenceList instanceof Int32Array) ||
         plan.stringLengths.buffer !== memory ||
         plan.stringOffsets.buffer !== memory ||
         plan.stringHashes?.buffer !== memory ||
@@ -1292,7 +1307,7 @@ allocator(n, 'segmented lookup compaction'));
  * @param {Awaited<ReturnType<typeof getWasm>>} wasm
  * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array}} plan
  * @param {Uint8Array} equals
- * @param {Int32Array} sequences
+ * @param {Int32Array|Float64Array} sequences
  * @param {number} count
  * @param {ReturnType<typeof createNativeLookupIndexScratch>} indexScratch
  * @param {ReturnType<typeof createNativeLookupCompactionScratch>} scratch
@@ -1301,7 +1316,7 @@ allocator(n, 'segmented lookup compaction'));
 function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, indexScratch, scratch) {
     const compact = wasm.compact_term_lookup_keys;
     const memory = wasm.memory.buffer;
-    if (typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
+    if (!(sequences instanceof Int32Array) || typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
     plan.stringsBuffer.buffer !== memory || plan.stringLengths.buffer !== memory ||
     plan.stringOffsets.buffer !== memory || plan.expressionIndexes.buffer !== memory ||
     plan.readingIndexes.buffer !== memory || equals.buffer !== memory) { return null; }
@@ -1403,7 +1418,8 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
     const glossaryJsonBytes = source.subarray(glossaryStart, glossaryStart + glossaryLength);
     const glossaryJson = lazyGlossaryDecode ? '' : decodeRawToken(source, glossaryStart, glossaryLength);
     const glossaryMayContainMedia = mediaHintFastScan ? metas[o + 14] === 1 : void 0;
-    const sequenceValue = metas[o + 11] | 0;
+    const sequenceStart = metas[o + 11];
+    const sequenceValue = sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart);
     const sequence = version >= 3 && sequenceValue >= 0 ? sequenceValue : null;
     const termTags = skipTagRuleDecode ? '' : (version >= 3 ? (decodeNullableJsonStringToken(source, metas[o + 12], metas[o + 13]) ?? '') : '');
     let termEntryContentHash1;
@@ -1481,7 +1497,8 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const glossaryJsonBytes = lazyGlossaryDecode ? source.subarray(glossaryStart, glossaryStart + glossaryLength) : void 0;
     const glossaryJson = lazyGlossaryDecode ? '' : decodeRawToken(source, glossaryStart, glossaryLength);
     const glossaryMayContainMedia = mediaHintFastScan ? metas[o + 14] === 1 : void 0;
-    const sequenceValue = metas[o + 11] | 0;
+    const sequenceStart = metas[o + 11];
+    const sequenceValue = sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart);
     const sequence = version >= 3 && sequenceValue >= 0 ? sequenceValue : null;
     let termEntryContentHash1;
     let termEntryContentHash2;
@@ -1703,7 +1720,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
  * Only rows which may contain media receive a compatibility row object.
  * @param {Uint8Array|Uint8Array[]} contentBytes
  * @param {number} version
- * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
  * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean, preloadedSource?: PreloadedTermBankSource}} [options]
  * @returns {Promise<void>}
@@ -1924,9 +1941,11 @@ null :
         const scoreList = fusedStringPlan === null ?
             new Float64Array(count) :
             /** @type {Int32Array} */ (fusedStringPlan.scoreList).subarray(start, end);
-        const sequenceList = fusedStringPlan === null || version < 3 ?
-            new Int32Array(count) :
-            /** @type {Int32Array} */ (fusedStringPlan.sequenceList).subarray(start, end);
+        const sequenceList = fusedStringPlan === null && version >= 3 ?
+            new Float64Array(count) :
+            (fusedStringPlan === null ?
+                new Int32Array(count) :
+                /** @type {Int32Array} */ (fusedStringPlan.sequenceList).subarray(start, end));
         if (fusedStringPlan !== null && version < 3) { sequenceList.fill(-1); }
         /** @type {Uint8Array[]} */
         const contentBytesList = emitContentSlab ? [] : new Array(count);
@@ -2040,7 +2059,12 @@ null :
             }
             if (fusedStringPlan === null) {
                 scoreList[i] = decodeJsonNumberToken(source, metas[o + 8]);
-                sequenceList[i] = version >= 3 ? (metas[o + 11] | 0) : -1;
+                if (version >= 3) {
+                    const sequenceStart = metas[o + 11];
+                    sequenceList[i] = sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart);
+                } else {
+                    sequenceList[i] = -1;
+                }
             }
             if (!emitContentSlab) {
                 const contentOffset = contentMetas[c + 0];
@@ -3540,7 +3564,9 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
         scoreList: chunk.scoreList instanceof Float64Array ?
             Float64Array.from(chunk.scoreList) :
             Int32Array.from(chunk.scoreList),
-        sequenceList: Int32Array.from(chunk.sequenceList),
+        sequenceList: chunk.sequenceList instanceof Float64Array ?
+            Float64Array.from(chunk.sequenceList) :
+            Int32Array.from(chunk.sequenceList),
         contentBytesList: chunk.contentBytesList.map((bytes) => Uint8Array.from(bytes)),
         contentHash1List: Uint32Array.from(chunk.contentHash1List),
         contentHash2List: Uint32Array.from(chunk.contentHash2List),
