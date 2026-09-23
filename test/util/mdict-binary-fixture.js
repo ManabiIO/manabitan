@@ -68,7 +68,11 @@ function packBlock(bytes, compression) {
  * @returns {string}
  */
 function xmlAttribute(value) {
-    return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')
+    return value
+        .replaceAll('&', '&amp;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&apos;')
+        .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;');
 }
 
@@ -91,7 +95,7 @@ function createFixtureTextEncoder(encoding) {
  * Does not import the parser under test. Record blocks may split Unicode scalars.
  * Optional metadata overrides are only for negative regression cases.
  * @param {Array<{key: string, value: string|Uint8Array}>} entries
- * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', encodingLabel?: string, textEncoder?: ((value: string) => Uint8Array), encrypted?: string|number, format?: string, styleSheet?: string, keyCaseSensitive?: 'Yes'|'No', stripKey?: 'Yes'|'No', compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array, keyInfoTerminatorByte?: number}} [options]
+ * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', encodingLabel?: string, textEncoder?: ((value: string) => Uint8Array), encrypted?: string|number, format?: string, styleSheet?: string, keyCaseSensitive?: 'Yes'|'No', stripKey?: 'Yes'|'No', compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, headerQuote?: '"'|"'", spacedHeaderAttributes?: boolean, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array, keyInfoTerminatorByte?: number}} [options]
  * @returns {{bytes: Uint8Array, records: Uint8Array[], recordDataOffset: number}}
  */
 export function makeMdictFixture(entries, options = {}) {
@@ -110,6 +114,8 @@ export function makeMdictFixture(entries, options = {}) {
         keysPerBlock = 2,
         title = 'MDict binary regression fixture',
         version = '2.0',
+        headerQuote = '"',
+        spacedHeaderAttributes = false,
         keyBlockUnpackSizeDelta = 0,
         keyBlockEntryCounts = [],
         keyInfoTrailer = new Uint8Array(0),
@@ -191,11 +197,17 @@ export function makeMdictFixture(entries, options = {}) {
         integer(packedKeyInfo.length, numWidth),
         integer(keyBytes.length, numWidth),
     ]);
-    const encodingAttribute = mdd ? '' : ` Encoding="${xmlAttribute(encodingLabel)}"`;
-    const formatAttribute = format.length > 0 ? ` Format="${xmlAttribute(format)}"` : '';
-    const styleSheetAttribute = styleSheet.length > 0 ? ` StyleSheet="${xmlAttribute(styleSheet)}"` : '';
+    /**
+     * @param {string} name
+     * @param {string} value
+     * @returns {string}
+     */
+    const attribute = (name, value) => ` ${name}${spacedHeaderAttributes ? ' \t=\n' : '='}${headerQuote}${xmlAttribute(value)}${headerQuote}`;
+    const encodingAttribute = mdd ? '' : attribute('Encoding', encodingLabel);
+    const formatAttribute = format.length > 0 ? attribute('Format', format) : '';
+    const styleSheetAttribute = styleSheet.length > 0 ? attribute('StyleSheet', styleSheet) : '';
     const tag = mdd ? 'Library_Data' : 'Dictionary';
-    const header = Buffer.from(`<${tag} GeneratedByEngineVersion="${version}" RequiredEngineVersion="${version}" Encrypted="${xmlAttribute(String(encrypted))}" KeyCaseSensitive="${xmlAttribute(keyCaseSensitive)}" StripKey="${xmlAttribute(stripKey)}"${encodingAttribute}${formatAttribute}${styleSheetAttribute} Title="${xmlAttribute(title)}" Description="Generated regression fixture"/>\0`, 'utf16le');
+    const header = Buffer.from(`<${tag}${attribute('GeneratedByEngineVersion', version)}${attribute('RequiredEngineVersion', version)}${attribute('Encrypted', String(encrypted))}${attribute('KeyCaseSensitive', keyCaseSensitive)}${attribute('StripKey', stripKey)}${encodingAttribute}${formatAttribute}${styleSheetAttribute}${attribute('Title', title)}${attribute('Description', 'Generated regression fixture')}/>\0`, 'utf16le');
     const recordInfoBytes = Buffer.concat(recordInfo);
     const packedRecordBytes = Buffer.concat(packedRecords);
     const beforeRecordData = Buffer.concat([
