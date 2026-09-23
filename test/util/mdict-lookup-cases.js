@@ -31,6 +31,34 @@ function makeLookupDictionary() {
     return new MDX('lookup-lifetime.mdx', bytes);
 }
 
+for (const [entryCount, keysPerBlock] of [[4096, 4], [131072, 131072]]) {
+    test(`MDict key assembly preserves ${entryCount} records in ${keysPerBlock}-key blocks`, () => {
+        const entries = Array.from({length: entryCount}, (_, index) => ({
+            key: `key-${String(index).padStart(6, '0')}`,
+            value: `definition-${index}`,
+        }));
+        const {bytes} = makeMdictFixture(entries, {keysPerBlock, recordBlockSize: 32768});
+        const mdx = new MDX('key-assembly.mdx', bytes, {recordBlockCacheBytes: 65536});
+        try {
+            assert.equal(mdx.keywordList.length, entries.length);
+            let offset = 0;
+            for (let index = 0; index < entries.length; ++index) {
+                const item = mdx.keywordList[index];
+                assert.equal(item.keyText, entries[index].key);
+                assert.equal(item.keyBlockIdx, Math.floor(index / keysPerBlock));
+                assert.equal(item.recordStartOffset, offset);
+                offset += entries[index].value.length + 1;
+                assert.equal(item.recordEndOffset, offset);
+            }
+            for (const index of [0, keysPerBlock - 1, Math.min(keysPerBlock, entryCount - 1), entryCount - 1]) {
+                assert.equal(mdx.lookup(entries[index].key).definition, `${entries[index].value}\0`);
+            }
+        } finally {
+            mdx.close();
+        }
+    });
+}
+
 test('MDict normalized lookup index stays lazy and preserves the import iterator', () => {
     const mdx = makeLookupDictionary();
     try {
