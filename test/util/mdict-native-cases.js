@@ -899,6 +899,46 @@ describe('MDict header XML attribute syntax', () => {
 });
 
 describe('MDict header encoding and encryption metadata', () => {
+    for (const version of ['1.2', '2.0']) {
+        for (const encodingLabel of ['unicode', 'ucs-2', 'utf-16be', 'unicodefffe']) {
+            test(`${version}/${encodingLabel} preserves two-byte keys and complete imported definitions`, async () => {
+                const bigEndian = encodingLabel === 'utf-16be' || encodingLabel === 'unicodefffe';
+                const entries = [
+                    {key: 'apple', value: '<p>ASCII and \u732b</p>'},
+                    {key: '\u732b', value: '<p>\u306d\u3053 \ud83d\ude00</p>'},
+                ];
+                const fixture = makeMdictFixture(entries, {
+                    version,
+                    encoding: 'utf16le',
+                    encodingLabel,
+                    textEncoder: (value) => {
+                        const bytes = Buffer.from(value, 'utf16le');
+                        return bigEndian ? bytes.swap16() : bytes;
+                    },
+                    keysPerBlock: 1,
+                    recordBlockSize: 7,
+                });
+                const mdx = new MDX('utf16-alias.mdx', fixture.bytes);
+                try {
+                    for (const {key, value} of entries) {
+                        assert.equal(mdx.lookup(key).definition, `${value}\0`);
+                    }
+                } finally {
+                    mdx.close();
+                }
+                const {files} = await createMdxImportData('utf16-alias.mdx', {}, fixture.bytes, []);
+                const rows = readRows(files);
+                assert.deepEqual(rows.map((row) => row[0]).sort(), entries.map(({key}) => key).sort());
+                for (const {key, value} of entries) {
+                    const row = rows.find((item) => item[0] === key);
+                    assert.ok(row);
+                    assert.ok(JSON.stringify(row[5]).includes(value.slice(3, -4)));
+                }
+            });
+        }
+    }
+
+
     const gb18030Bytes = new Map([
         ['😀', '9439fc36'],
         ['<p>定义😀</p>', '3c703eb6a8d2e59439fc363c2f703e'],
