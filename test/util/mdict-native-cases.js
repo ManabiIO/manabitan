@@ -859,6 +859,45 @@ describe('native parser controls and key metadata', () => {
 });
 
 
+describe('MDict header XML attribute syntax', () => {
+    for (const version of ['1.2', '2.0']) {
+        for (const headerQuote of /** @type {const} */ (['"', "'"])) {
+            for (const spacedHeaderAttributes of [false, true]) {
+                test(`${version}/${headerQuote}/${spacedHeaderAttributes} XML attribute syntax preserves imports`, async () => {
+                    const title = 'Header "double" and \'single\' & XML';
+                    const fixture = makeMdictFixture([{key: 'word', value: '<p>complete definition</p>'}], {
+                        version, headerQuote, spacedHeaderAttributes, title,
+                    });
+                    const {files} = await createMdxImportData('xml-header.mdx', {}, fixture.bytes, []);
+                    const index = JSON.parse(new TextDecoder().decode(files.get('index.json')));
+                    assert.equal(index.title, title);
+                    const rows = readRows(files);
+                    assert.equal(rows.length, 1);
+                    assert.equal(rows[0][0], 'word');
+                    assert.ok(JSON.stringify(rows[0][5]).includes('complete definition'));
+                });
+            }
+        }
+    }
+
+    test('header attributes retain opposite quotes and XML attribute-name boundaries', () => {
+        const parsed = /** @type {Record<string, string>} */ (mdictCommon.parseHeader('<Dictionary Description=\'Literal Encoding="UTF-16"\' Encoding="UTF-8" x:Encrypted="3" data-StripKey="No"/>'));
+        assert.equal(parsed.Description, 'Literal Encoding="UTF-16"');
+        assert.equal(parsed.Encoding, 'UTF-8');
+        assert.equal(parsed['x:Encrypted'], '3');
+        assert.equal(parsed['data-StripKey'], 'No');
+        assert.equal(Object.hasOwn(parsed, 'Encrypted'), false);
+        assert.equal(Object.hasOwn(parsed, 'StripKey'), false);
+    });
+
+    test('large valid header attributes do not overflow the regex stack', () => {
+        const description = 'definition &amp; text\n'.repeat(50000);
+        const parsed = /** @type {Record<string, string>} */ (mdictCommon.parseHeader(`<Dictionary Description="${description}" Encoding="UTF-8"/>`));
+        assert.equal(parsed.Description, 'definition & text\n'.repeat(50000));
+        assert.equal(parsed.Encoding, 'UTF-8');
+    });
+});
+
 describe('MDict header encoding and encryption metadata', () => {
     for (const version of ['1.2', '2.0']) {
         for (const encodingLabel of ['unicode', 'ucs-2', 'utf-16be', 'unicodefffe']) {
@@ -898,6 +937,7 @@ describe('MDict header encoding and encryption metadata', () => {
             });
         }
     }
+
 
     const gb18030Bytes = new Map([
         ['😀', '9439fc36'],
