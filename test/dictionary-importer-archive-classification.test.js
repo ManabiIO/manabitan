@@ -31,9 +31,11 @@ const queryDetails = [
 
 /**
  * @param {boolean} prefilter
+ * @returns {import('dictionary-importer').QueryResult}
  */
 function classify(prefilter) {
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+    /** @type {Array<[string, {filename: string}]>} */
     const entries = [
         ['term_bank_2.json', {filename: 'term_bank_2.json'}],
         ['term_bank_1.json', {filename: 'term_bank_1.json'}],
