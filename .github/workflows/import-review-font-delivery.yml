@@ -1,0 +1,50 @@
+name: Qualify MDict font correction c92e
+on:
+  push:
+    branches: [verify/import-review-runtime-20260924-c92e]
+    paths: [.github/workflows/import-review-font-delivery.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Preserve review patch
+        run: sed 's/^ diff --git /diff --git /' .review-patches/mdict-font.patch > /tmp/mdict-font.patch
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.16.0'
+      - name: Apply and verify locally tested source identity
+        run: |
+          git apply --check /tmp/mdict-font.patch
+          git apply /tmp/mdict-font.patch
+          test "$(git hash-object ext/js/dictionary/mdx/mdx-converter.js)" = 5a8ae0a879895753c5f39b44ddf37bc4738ba5dc
+          test "$(git hash-object test/mdict-binary-regressions.test.js)" = 7e8d0f41db11bf526e6cc8069c5e06285950ce39
+          test "$(git hash-object test/util/mdict-font-cases.js)" = 8b4a332e812dec1f7850b9d931d3f0dddc586aa8
+          git diff --check
+      - name: Focused lint and complete type checks
+        run: |
+          npx eslint ext/js/dictionary/mdx/mdx-converter.js test/mdict-binary-regressions.test.js test/util/mdict-font-cases.js
+          npm run test:ts
+      - name: Full unit and build gates
+        run: |
+          npx vitest run --minWorkers=1 --maxWorkers=2
+          npm run license-report:html
+          npm run test:build
+      - name: Publish only tested product files on a new review branch
+        run: |
+          git config user.name 'Alex Ehlke'
+          git config user.email 'alex.ehlke@gmail.com'
+          git switch -c fix/mdict-legacy-font-20260924-c92e
+          git add ext/js/dictionary/mdx/mdx-converter.js test/mdict-binary-regressions.test.js test/util/mdict-font-cases.js
+          test "$(git diff --cached --name-only | wc -l)" -eq 3
+          git commit -m 'fix(mdict): preserve legacy font sizes and inline style precedence'
+          git push origin HEAD:refs/heads/fix/mdict-legacy-font-20260924-c92e
+          git rev-parse HEAD
