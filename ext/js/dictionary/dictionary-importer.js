@@ -157,6 +157,21 @@ async function joinArchiveReads(reads) {
 }
 
 /**
+ * Compares non-negative decimal integers without converting them to Number.
+ * Leading zeroes do not affect numeric ordering.
+ * @param {string} a
+ * @param {string} b
+ * @returns {number}
+ */
+function compareDecimalIntegerStrings(a, b) {
+    const aIndex = a.replace(/^0+/u, '') || '0';
+    const bIndex = b.replace(/^0+/u, '') || '0';
+    if (aIndex.length !== bIndex.length) { return aIndex.length - bIndex.length; }
+    if (aIndex === bIndex) { return 0; }
+    return aIndex < bIndex ? -1 : 1;
+}
+
+/**
  * Chromium rejects SharedArrayBuffer-backed views passed to TextDecoder.
  * Parser WASM memory may be shared, so copy only shared-backed views while
  * preserving the zero-copy path for normal archive and worker buffers.
@@ -3454,11 +3469,7 @@ export class DictionaryImporter {
                 const bMatch = fileNameFormat.exec(bFileName);
                 if (aMatch === null) { return bMatch === null ? 0 : 1; }
                 if (bMatch === null) { return -1; }
-                const aIndex = aMatch[1].replace(/^0+/u, '') || '0';
-                const bIndex = bMatch[1].replace(/^0+/u, '') || '0';
-                if (aIndex.length !== bIndex.length) { return aIndex.length - bIndex.length; }
-                if (aIndex === bIndex) { return 0; }
-                return aIndex < bIndex ? -1 : 1;
+                return compareDecimalIntegerStrings(aMatch[1], bMatch[1]);
             });
         }
         return results;
@@ -3662,9 +3673,9 @@ export class DictionaryImporter {
             .sort((a, b) => {
                 const aMatch = /term_bank_(\d+)\.mbtb$/i.exec(a);
                 const bMatch = /term_bank_(\d+)\.mbtb$/i.exec(b);
-                const aIndex = aMatch !== null ? Number.parseInt(aMatch[1], 10) : Number.MAX_SAFE_INTEGER;
-                const bIndex = bMatch !== null ? Number.parseInt(bMatch[1], 10) : Number.MAX_SAFE_INTEGER;
-                return aIndex - bIndex;
+                if (aMatch === null) { return bMatch === null ? 0 : 1; }
+                if (bMatch === null) { return -1; }
+                return compareDecimalIntegerStrings(aMatch[1], bMatch[1]);
             })
             .map((filename) => ({filename}));
     }
