@@ -1,0 +1,55 @@
+name: Import review image ownership 20260924
+on:
+  push:
+    branches: [verify/import-review-20260924]
+    paths: [.github/workflows/import-review-image-20260924.yml]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2335c78a0530629bfc75d9cc262d9aace9f4117f
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci && npm run build:libs
+      - name: Require regressions to fail on original code
+        run: |
+          cp ext/js/dictionary/dictionary-worker-media-loader.js /tmp/media-loader-fixed.js
+          git fetch --depth=1 origin 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          git show 2185eeaac05efa0fd60eea49e3f00ce3e048aabe:ext/js/dictionary/dictionary-worker-media-loader.js > ext/js/dictionary/dictionary-worker-media-loader.js
+          set +e
+          npx vitest run test/dictionary-worker-media-ownership.test.js --minWorkers=1 --maxWorkers=2 > media-before.log 2>&1
+          status=$?
+          set -e
+          cp /tmp/media-loader-fixed.js ext/js/dictionary/dictionary-worker-media-loader.js
+          cat media-before.log
+          test "$status" -ne 0
+          grep -q '5 failed' media-before.log
+          grep -q 'detached ArrayBuffer' media-before.log
+      - name: Verify fixed regressions and existing media tests
+        run: npx vitest run test/dictionary-worker-media-ownership.test.js test/dictionary-worker-media-loader.test.js test/dictionary-importer-media-loader.test.js --minWorkers=1 --maxWorkers=2
+      - name: Full unit suite
+        run: |
+          npx vitest run --minWorkers=1 --maxWorkers=2 > media-unit.log 2>&1
+          tail -n 15 media-unit.log
+      - name: Lint and type checking
+        run: |
+          npx eslint ext/js/dictionary/dictionary-worker-media-loader.js test/dictionary-worker-media-ownership.test.js
+          npm run test:ts > media-types.log 2>&1 || { cat media-types.log; exit 1; }
+      - name: Build variants
+        run: |
+          npm run test:build > media-build.log 2>&1 || { cat media-build.log; exit 1; }
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-review-image-evidence
+          path: media-*.log
+          retention-days: 7
