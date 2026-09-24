@@ -1,0 +1,129 @@
+diff --git a/ext/js/dictionary/mdx/mdx-converter.js b/ext/js/dictionary/mdx/mdx-converter.js
+index 863a877..5a8ae0a 100644
+--- a/ext/js/dictionary/mdx/mdx-converter.js
++++ b/ext/js/dictionary/mdx/mdx-converter.js
+@@ -1560,6 +1560,23 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
+     return Object.keys(style).length > 0 ? style : null;
+ }
+ 
++/**
++ * HTML legacy sizes are presentational hints, not unitless CSS lengths.
++ * https://html.spec.whatwg.org/multipage/rendering.html#rules-for-parsing-a-legacy-font-size
++ * @param {string|undefined} value
++ * @returns {string|null}
++ */
++function convertLegacyFontSize(value) {
++    if (typeof value !== 'string') { return null; }
++    const match = /^[\t\n\f\r ]*([+-]?)(\d+)/u.exec(value);
++    if (match === null) { return null; }
++    let size = Number.parseInt(match[2], 10);
++    if (match[1] === '+') { size += 3; }
++    if (match[1] === '-') { size = 3 - size; }
++    const sizes = ['x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'xxx-large'];
++    return sizes[Math.max(1, Math.min(7, size)) - 1];
++}
++
+ /**
+  * @param {string} href
+  * @param {{assetPrefix: string, enableAudio: boolean, embeddedAssets: EmbeddedAssetCollector, assetReferences: Set<string>}} details
+@@ -1739,12 +1756,14 @@ function appendStructuredContent(parent, content, details) {
+             /** @type {StructuredStyle} */
+             const fontStyle = {};
+             if (typeof attrs.color === 'string' && attrs.color.length > 0) { fontStyle.color = attrs.color; }
+-            if (typeof attrs.size === 'string' && attrs.size.length > 0) { fontStyle.fontSize = attrs.size; }
++            const fontSize = convertLegacyFontSize(attrs.size);
++            if (fontSize !== null) { fontStyle.fontSize = fontSize; }
+             if (typeof attrs.face === 'string' && attrs.face.length > 0) { fontStyle.fontFamily = attrs.face; }
+             if (Object.keys(fontStyle).length > 0) {
+                 /** @type {StructuredStyle} */
+                 const existingStyle = isStructuredStyleRecord(element.style) ? element.style : {};
+-                element.style = {...existingStyle, ...fontStyle};
++                // Author inline CSS takes precedence over legacy attributes.
++                element.style = {...fontStyle, ...existingStyle};
+             }
+         }
+ 
+ diff --git a/test/mdict-binary-regressions.test.js b/test/mdict-binary-regressions.test.js
+index 5998716..7e8d0f4 100644
+--- a/test/mdict-binary-regressions.test.js
++++ b/test/mdict-binary-regressions.test.js
+@@ -23,7 +23,7 @@ import {expect, test} from 'vitest';
+ // in the extension worker. Vite's injected CommonJS bindings select a different
+ // UMD branch. Use a native subprocess instead of mocking or replacing the codec.
+ test('native MDict parser, converter and client lifecycle regressions', () => {
+-    const files = ['mdict-native-cases.js', 'mdict-lookup-cases.js', 'mdict-client-cases.js', 'mdict-client-edge-cases.js']
++    const files = ['mdict-native-cases.js', 'mdict-lookup-cases.js', 'mdict-client-cases.js', 'mdict-client-edge-cases.js', 'mdict-font-cases.js']
+         .map((name) => fileURLToPath(new URL(`util/${name}`, import.meta.url)));
+     const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...files], {
+         encoding: 'utf8',
+diff --git a/test/util/mdict-font-cases.js b/test/util/mdict-font-cases.js
+new file mode 100644
+index 0000000..8b4a332
+--- /dev/null
++++ b/test/util/mdict-font-cases.js
+@@ -0,0 +1,65 @@
++/* Copyright (C) 2026 Manabitan Authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {createMdxImportData} from '../../ext/js/dictionary/mdx/mdx-converter.js';
++import {makeMdictFixture} from './mdict-binary-fixture.js';
++
++/**
++ * @param {string} attributes
++ * @returns {Promise<Record<string, unknown>>}
++ */
++async function convertedFontStyle(attributes) {
++    const fixture = makeMdictFixture([{key: 'font', value: `<font ${attributes}>sample</font>`}], {compression: 'zlib'});
++    const {files} = await createMdxImportData('font.mdx', {}, fixture.bytes, []);
++    const rows = JSON.parse(new TextDecoder().decode(files.get('term_bank_1.json')));
++    const font = rows[0][5][0].content.content[0];
++    assert.equal(font.tag, 'span');
++    assert.deepEqual(font.content, ['sample']);
++    return font.style ?? {};
++}
++
++const sizes = ['x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'xxx-large'];
++for (let size = 1; size <= 7; ++size) {
++    test(`MDict font size ${size} becomes a valid CSS keyword`, async () => {
++        assert.deepEqual(await convertedFontStyle(`size="${size}"`), {fontSize: sizes[size - 1]});
++    });
++}
++for (const [input, expected] of [
++    ['0', 'x-small'],
++    ['8', 'xxx-large'],
++    ['+0', 'medium'],
++    ['-0', 'medium'],
++    ['+1', 'large'],
++    ['+4', 'xxx-large'],
++    ['-1', 'small'],
++    ['-2', 'x-small'],
++    ['-999', 'x-small'],
++    ['999', 'xxx-large'],
++    ['0004', 'large'],
++    ['  \t\n\f\r+2trailing', 'x-large'],
++    ['3.5', 'medium'],
++    ['0x7', 'x-small'],
++    ['9'.repeat(400), 'xxx-large'],
++    [`-${'9'.repeat(400)}`, 'x-small'],
++]) {
++    test(`MDict legacy font size parsing: ${input.slice(0, 30)}`, async () => {
++        assert.equal((await convertedFontStyle(`size="${input}"`)).fontSize, expected);
++    });
++}
++for (const value of ['', ' ', '+', '-', '+ 2', 'large', '.5', '\u00a03', '\u20033']) {
++    test(`invalid legacy font size is ignored: ${JSON.stringify(value)}`, async () => {
++        assert.deepEqual(await convertedFontStyle(`size="${value}"`), {});
++    });
++}
++test('MDict inline font styles override legacy presentational attributes', async () => {
++    assert.deepEqual(await convertedFontStyle('size="3" color="red" face="serif" style="font-size: 24px; color: blue; font-family: monospace"'), {
++        fontSize: '24px', color: 'blue', fontFamily: 'monospace',
++    });
++});
++test('unoverridden font attributes survive a partial inline style', async () => {
++    assert.deepEqual(await convertedFontStyle('size="+2" color="red" face="serif" style="color: blue"'), {
++        fontSize: 'x-large', color: 'blue', fontFamily: 'serif',
++    });
++});
