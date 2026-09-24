@@ -1,5 +1,6 @@
 name: Export pinned import review source
-on:\  push:
+on:
+  push:
     branches: [audit/import-review-source-20260924-c9fa57e]
     paths: [.github/workflows/audit-import-source.yml]
 permissions:
