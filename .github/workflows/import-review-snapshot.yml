@@ -1,0 +1,38 @@
+name: Import review snapshot
+
+on:
+  push:
+    branches:
+      - audit/import-review-20260924
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.16.0'
+      - name: Install the pinned dependencies
+        run: npm ci
+      - name: Package the review checkout and dependencies
+        run: tar --exclude='./.git' -czf "$RUNNER_TEMP/manabitan-review.tar.gz" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabitan-review-2185eea
+          path: ${{ runner.temp }}/manabitan-review.tar.gz
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+      - name: Baseline unit tests
+        run: npm run test:unit
+      - name: Baseline build validation
+        if: always()
+        run: npm run test:build
