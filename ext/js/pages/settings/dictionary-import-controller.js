@@ -464,6 +464,8 @@ export class DictionaryImportController {
         this._recommendedDictionariesRenderPending = false;
         /** @type {boolean} */
         this._recommendedDictionariesPrimed = false;
+        /** @type {boolean} */
+        this._readerInstallJitendex = false;
         /** @type {{queueLength: number, activeImport: boolean, currentUrl: string|null, lastError: string|null}} */
         this._recommendedImportDebugState = {
             queueLength: 0,
@@ -520,6 +522,12 @@ export class DictionaryImportController {
             hasRecommendedModal: this._recommendedDictionariesModal !== null,
             href: globalThis.location?.href ?? null,
         });
+    }
+
+    /** Use the normal recommended-dictionaries modal and import path. */
+    openReaderJitendexSetup() {
+        this._readerInstallJitendex = true;
+        this._recommendedDictionariesModal?.setVisible(true);
     }
 
     // Private
@@ -876,6 +884,10 @@ export class DictionaryImportController {
         }
 
         if (typeof resolvedLanguage !== 'string') {
+            if (this._readerInstallJitendex) {
+                this._readerInstallJitendex = false;
+                this._setRecommendedError('Select Japanese as the active language, then choose Jitendex.');
+            }
             diagnostics.push(`requestedLanguage="${language}" resolvedLanguage=none`);
             this._setRecommendedDiagnostics(diagnostics.join('\n'));
             for (const {element} of recommendedDictionaryCategories) {
@@ -950,6 +962,21 @@ export class DictionaryImportController {
         const buttons = document.querySelectorAll('.action-button[data-action=import-recommended-dictionary]');
         for (const button of buttons) {
             button.addEventListener('click', this._onRecommendedImportClick.bind(this), false);
+        }
+        this._installReaderJitendexIfRequested();
+    }
+
+    /** Reuse the same button and progress UI as a normal Yomitan-style install. */
+    _installReaderJitendexIfRequested() {
+        if (!this._readerInstallJitendex) { return; }
+        this._readerInstallJitendex = false;
+        const row = [...document.querySelectorAll('#recommended-term-dictionaries .settings-item')]
+            .find((item) => item.querySelector('.settings-item-label')?.textContent === 'Jitendex');
+        const button = row?.querySelector('.action-button[data-action=import-recommended-dictionary]');
+        if (button instanceof HTMLButtonElement && !button.disabled) {
+            button.click();
+        } else if (!(button instanceof HTMLButtonElement)) {
+            this._setRecommendedError('Select Japanese as the active language, then choose Jitendex.');
         }
     }
 
