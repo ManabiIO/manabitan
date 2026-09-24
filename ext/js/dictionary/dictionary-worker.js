@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {generateId} from '../core/utilities.js';
 import {toError} from '../core/to-error.js';
 import {DictionaryImporterMediaLoader} from './dictionary-importer-media-loader.js';
 
@@ -33,6 +34,8 @@ export class DictionaryWorker {
         this._worker = null;
         /** @type {Set<import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>>} */
         this._activeInvocations = new Set();
+        /** @type {WeakMap<Worker, Set<string>>} */
+        this._activeImageDetailRequests = new WeakMap();
     }
 
     /**
@@ -125,6 +128,7 @@ export class DictionaryWorker {
      */
     _invoke(action, params, transfer, onProgress, formatResult) {
         return new Promise((resolve, reject) => {
+            const id = generateId(16);
             const worker = this._worker ?? new Worker(new URL('dictionary-worker-main.js', import.meta.url), {type: 'module'});
             if (this._reuseWorker && this._worker === null) {
                 this._worker = worker;
@@ -156,6 +160,7 @@ export class DictionaryWorker {
             };
             /** @type {import('dictionary-worker').InvokeDetails<TResponseRaw, TResponse>} */
             const details = {
+                id,
                 complete: false,
                 worker,
                 resolve,
@@ -178,7 +183,7 @@ export class DictionaryWorker {
             worker.addEventListener('error', onError);
             worker.addEventListener('messageerror', onMessageError);
             try {
-                worker.postMessage({action, params}, transfer);
+                worker.postMessage({action, id, params}, transfer);
             } catch (e) {
                 fail(toError(e));
             }
@@ -194,6 +199,12 @@ export class DictionaryWorker {
     _onMessage(details, event) {
         if (details.complete) { return; }
         const {action, params} = event.data;
+        if (
+            (action === 'complete' || action === 'progress') &&
+            event.data.id !== details.id
+        ) {
+            return;
+        }
         switch (action) {
             case 'complete':
                 {
@@ -226,7 +237,16 @@ export class DictionaryWorker {
                 {
                     const {worker} = details;
                     if (worker === null) { return; }
-                    void this._onMessageGetImageDetails(params, worker);
+                    let activeRequestIds = this._activeImageDetailRequests.get(worker);
+                    if (typeof activeRequestIds === 'undefined') {
+                        activeRequestIds = new Set();
+                        this._activeImageDetailRequests.set(worker, activeRequestIds);
+                    }
+                    if (activeRequestIds.has(params.id)) { return; }
+                    activeRequestIds.add(params.id);
+                    void this._onMessageGetImageDetails(params, worker).finally(() => {
+                        activeRequestIds.delete(params.id);
+                    });
                 }
                 break;
         }
