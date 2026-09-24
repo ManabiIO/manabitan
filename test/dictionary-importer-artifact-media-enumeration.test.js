@@ -27,13 +27,13 @@ describe('DictionaryImporter artifact media enumeration', () => {
         const jpeg = {filename: 'images/b.JPEG'};
         const css = {filename: 'styles.css'};
         const webp = {filename: 'images/c.webp'};
-        const fileMap = new Map([
+        const fileMap = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (new Map([
             [png.filename, png],
             [json.filename, json],
             [jpeg.filename, jpeg],
             [css.filename, css],
             [webp.filename, webp],
-        ]);
+        ])));
 
         const rows = Reflect.get(importer, '_getArchiveImageMediaFiles').call(importer, fileMap);
 
@@ -49,11 +49,11 @@ describe('DictionaryImporter artifact media enumeration', () => {
 
     test('returns an empty list when the archive has no image media', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
-        const fileMap = new Map([
+        const fileMap = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (new Map([
             ['index.json', {filename: 'index.json'}],
             ['term_bank_1.json', {filename: 'term_bank_1.json'}],
             ['styles.css', {filename: 'styles.css'}],
-        ]);
+        ])));
 
         expect(Reflect.get(importer, '_getArchiveImageMediaFiles').call(importer, fileMap)).toEqual([]);
     });
