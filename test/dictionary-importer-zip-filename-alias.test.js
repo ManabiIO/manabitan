@@ -87,6 +87,16 @@ describe('DictionaryImporter archive bank discovery', () => {
     });
 });
 
+    test('keeps exact ASCII raw filenames on the no-alias path', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const entry = makeEntry('media/images/000001.webp', 'media/images/000001.webp');
+
+        const map = Reflect.get(importer, '_createArchiveFileMap').call(importer, [entry]);
+
+        expect(map.size).toBe(1);
+        expect(map.get('media/images/000001.webp')).toBe(entry);
+    });
+
 describe('DictionaryImporter archive filename validation', () => {
     test('rejects duplicate ZIP entry filenames', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
