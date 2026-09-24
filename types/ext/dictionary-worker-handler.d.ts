@@ -30,6 +30,7 @@ export type Message = (
 );
 
 export type ImportDictionaryMessage = {
+    id: string;
     action: 'importDictionary';
     params: ImportDictionaryMessageParams;
 };
@@ -40,6 +41,7 @@ export type ImportDictionaryMessageParams = {
 };
 
 export type ImportMdxDictionaryMessage = {
+    id: string;
     action: 'importMdxDictionary';
     params: ImportMdxDictionaryMessageParams;
 };
@@ -53,6 +55,7 @@ export type ImportMdxDictionaryMessageParams = {
 };
 
 export type DeleteDictionaryMessage = {
+    id: string;
     action: 'deleteDictionary';
     params: DeleteDictionaryMessageParams;
 };
@@ -62,6 +65,7 @@ export type DeleteDictionaryMessageParams = {
 };
 
 export type GetDictionaryCountsMessage = {
+    id: string;
     action: 'getDictionaryCounts';
     params: GetDictionaryCountsMessageParams;
 };
@@ -72,6 +76,7 @@ export type GetDictionaryCountsMessageParams = {
 };
 
 export type GetMdxVersionMessage = {
+    id: string;
     action: 'getMdxVersion';
     params: Record<string, never>;
 };
