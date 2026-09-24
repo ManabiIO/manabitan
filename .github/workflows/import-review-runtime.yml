@@ -1,0 +1,35 @@
+name: Import review runtime c92e
+on:
+  push:
+    branches: [verify/import-review-runtime-20260924-c92e]
+    paths: [.github/workflows/import-review-runtime.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.16.0'
+      - name: Prepare locked dictionaries and browser
+        run: |
+          node dev/perf/prepare-dictionaries.js
+          npx playwright install chromium
+          mkdir -p /tmp/import-review-runtime
+          cp -a builds/e2e-dictionary-cache /tmp/import-review-runtime/
+          cp -a "$HOME/.cache/ms-playwright" /tmp/import-review-runtime/
+          git rev-parse HEAD > /tmp/import-review-runtime/source-head.txt
+          node --version > /tmp/import-review-runtime/node-version.txt
+          tar -C /tmp/import-review-runtime -czf /tmp/import-review-runtime.tgz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-runtime-c92e
+          path: /tmp/import-review-runtime.tgz
+          compression-level: 0
+          retention-days: 3
