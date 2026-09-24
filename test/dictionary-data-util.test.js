@@ -27,6 +27,22 @@ describe('compareRevisions', () => {
         ['4.8', '4.8', false],
         ['version1', 'version2', true],
         ['version2', 'version100', false],
+        ['9007199254740992', '9007199254740993', true],
+        ['9007199254740993', '9007199254740992', false],
+        ['1.9007199254740992', '1.9007199254740993', true],
+        ['9007199254740992.999', '9007199254740993.0', true],
+        ['9007199254740993.0', '9007199254740992.999', false],
+        ['01.0002', '1.2', false],
+        ['000.000', '0.0', false],
+        ['9'.repeat(400), '1' + '0'.repeat(400), true],
+        ['1' + '0'.repeat(400), '9'.repeat(400), false],
+        ['9'.repeat(400) + '.2', '8'.repeat(400) + '.3', false],
+        ['1.9', '1.10', true],
+        ['1.10', '1.9', false],
+        ['1', '1.0', true],
+        ['2', '10.0', false],
+        ['1.0.0-alpha', '1.0.0-beta', true],
+        ['0001\n', '2', true],
     ];
 
     test.each(data)('compare revisions %s -> %s', (current, latest, hasUpdate) => {
