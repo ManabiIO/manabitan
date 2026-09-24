@@ -1,0 +1,55 @@
+name: Import round record qualification
+on:
+  push:
+    branches: [verify/import-round-20260924-b73d]
+    paths: [.github/workflows/import-round-record-qualification.yml]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: source
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: transport
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci && npm run build:libs
+      - name: Apply candidate and check source fingerprint
+        run: |
+          mkdir -p ../record-results
+          git apply --check ../transport/review-payload/record-views.patch
+          git apply ../transport/review-payload/record-views.patch
+          sha256sum ext/js/dictionary/term-record-opfs-store.js test/term-record-opfs-store.test.js | tee ../record-results/source-sha256.txt
+      - name: Focused tests
+        run: node node_modules/vitest/vitest.mjs run test/term-record-opfs-store.test.js test/dictionary-database-content-dedup.test.js --minWorkers=1 --maxWorkers=1 2>&1 | tee ../record-results/focused.log
+      - name: Lint
+        if: always()
+        run: npx eslint ext/js/dictionary/term-record-opfs-store.js test/term-record-opfs-store.test.js 2>&1 | tee ../record-results/lint.log
+      - name: All types
+        if: always()
+        run: npm run test:ts 2>&1 | tee ../record-results/types.log
+      - name: Full unit suite
+        run: npm run test:unit -- --minWorkers=1 --maxWorkers=2 2>&1 | tee ../record-results/unit.log
+      - name: All build targets
+        run: npm run test:build 2>&1 | tee ../record-results/build.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-round-record-qualification-b73d
+          path: record-results/
+          retention-days: 7
