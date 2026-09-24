@@ -31,6 +31,7 @@ async function run(concurrency) {
         importer,
         [0, 1, 2, 3],
         concurrency,
+        /** @param {number} value */
         async (value) => {
             processed.push(value);
         },
