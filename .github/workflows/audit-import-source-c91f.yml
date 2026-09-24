@@ -1,0 +1,35 @@
+name: Import review source c91f
+on:
+  push:
+    branches: [audit/import-review-source-20260924-c91f]
+    paths: [.github/workflows/audit-import-source-c91f.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Package tracked source and dependencies without credentials
+        run: |
+          set -eu
+          mkdir -p /tmp/manabitan-review-source
+          git archive HEAD | tar -x -C /tmp/manabitan-review-source
+          cp -a node_modules /tmp/manabitan-review-source/
+          git rev-parse HEAD > /tmp/manabitan-review-source/SOURCE_COMMIT
+          tar -czf /tmp/manabitan-review-source.tar.gz -C /tmp/manabitan-review-source .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabitan-review-source-c91f
+          path: /tmp/manabitan-review-source.tar.gz
+          retention-days: 2
+          compression-level: 0
