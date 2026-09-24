@@ -269,8 +269,8 @@ class MddAssetResolver {
         this._dictionaries = [];
         /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}>} */
         this._records = new Map();
-        /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}|null>} */
-        this._recordsLowercase = new Map();
+        /** @type {Map<string, {dictionaryIndex: number, item: MdictKeyword}|null>|null} */
+        this._recordsLowercase = null;
         /** @type {string[]} */
         this._cssKeys = [];
         /** @type {number} */
@@ -286,18 +286,6 @@ class MddAssetResolver {
                     if (key.length === 0 || this._records.has(key)) { continue; }
                     const record = {dictionaryIndex, item};
                     this._records.set(key, record);
-                    const lowercaseKey = key.toLowerCase();
-                    const lowercaseRecord = this._recordsLowercase.get(lowercaseKey);
-                    if (typeof lowercaseRecord === 'undefined') {
-                        this._recordsLowercase.set(lowercaseKey, record);
-                    } else if (
-                        lowercaseRecord !== null &&
-                        normalizeAssetKey(lowercaseRecord.item.keyText) !== key
-                    ) {
-                        // An exact reference can still choose either record. A
-                        // case-insensitive fallback cannot choose safely.
-                        this._recordsLowercase.set(lowercaseKey, null);
-                    }
                     if (key.toLowerCase().endsWith('.css')) {
                         this._cssKeys.push(key);
                     }
@@ -337,7 +325,7 @@ class MddAssetResolver {
     getBytes(key) {
         let entry = this._records.get(key);
         if (typeof entry === 'undefined') {
-            entry = this._recordsLowercase.get(key.toLowerCase()) ?? void 0;
+            entry = this._getRecordsLowercase().get(key.toLowerCase()) ?? void 0;
         }
         if (typeof entry === 'undefined' || entry === null) { return null; }
         try {
@@ -348,6 +336,33 @@ class MddAssetResolver {
         }
     }
 
+    /**
+     * Build case-insensitive aliases only after an exact lookup misses. Most
+     * resource references use the dictionary's exact key spelling, so eager
+     * construction adds a second dictionary-sized Map to every MDD import.
+     * @returns {Map<string, {dictionaryIndex: number, item: MdictKeyword}|null>}
+     */
+    _getRecordsLowercase() {
+        if (this._recordsLowercase !== null) { return this._recordsLowercase; }
+        const recordsLowercase = new Map();
+        for (const [key, record] of this._records) {
+            const lowercaseKey = key.toLowerCase();
+            const lowercaseRecord = recordsLowercase.get(lowercaseKey);
+            if (typeof lowercaseRecord === 'undefined') {
+                recordsLowercase.set(lowercaseKey, record);
+            } else if (
+                lowercaseRecord !== null &&
+                normalizeAssetKey(lowercaseRecord.item.keyText) !== key
+            ) {
+                // An exact reference can still choose either record. A
+                // case-insensitive fallback cannot choose safely.
+                recordsLowercase.set(lowercaseKey, null);
+            }
+        }
+        this._recordsLowercase = recordsLowercase;
+        return recordsLowercase;
+    }
+
     /** */
     close() {
         for (const dictionary of this._dictionaries) {
@@ -355,7 +370,8 @@ class MddAssetResolver {
         }
         this._dictionaries = [];
         this._records.clear();
-        this._recordsLowercase.clear();
+        this._recordsLowercase?.clear();
+        this._recordsLowercase = null;
         this._cssKeys = [];
         this._lookupErrorCount = 0;
     }
