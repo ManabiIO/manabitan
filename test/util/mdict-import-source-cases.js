@@ -262,3 +262,60 @@ test('directory case is preserved rather than silently mixing different folders'
         'books/Book.mdd',
     );
 });
+
+for (const prefix of [' ', '\t', '\u00a0', '\u3000']) {
+    test(`directory prefix ${JSON.stringify(prefix)} cannot donate media to another folder`, () => {
+        const result = plan('Books/Book.mdx', `${prefix}Books/Book.mdd`);
+        assert.equal(result.errors.length, 1);
+        assert.equal(result.sources.length, 1);
+        assert.deepEqual(media(result), []);
+    });
+
+    test(`directory prefix ${JSON.stringify(prefix)} preserves two independent dictionaries`, () => {
+        const paths = [
+            'Books/Book.mdx',
+            `${prefix}Books/Book.mdx`,
+            'Books/Book.mdd',
+            `${prefix}Books/Book.mdd`,
+        ];
+        const result = plan(...paths);
+        assert.deepEqual(result.errors, []);
+        assert.equal(result.sources.length, 2);
+        assert.equal(result.sources[0].mddFiles[0].webkitRelativePath, paths[2]);
+        assert.equal(result.sources[1].mddFiles[0].webkitRelativePath, paths[3]);
+    });
+
+    test(`filename prefix ${JSON.stringify(prefix)} is part of the dictionary stem`, () => {
+        const result = plan('Book.mdx', `${prefix}Book.mdd`);
+        assert.equal(result.errors.length, 1);
+        assert.deepEqual(media(result), []);
+    });
+
+    test(`matching prefix ${JSON.stringify(prefix)} retains case and multipart behavior`, () => {
+        const result = plan(
+            `${prefix}BOOK.MDX`,
+            `${prefix}book.10.mdd`,
+            `${prefix}Book.2.MDD`,
+            `${prefix}Book.mdd`,
+        );
+        assert.deepEqual(result.errors, []);
+        assert.deepEqual(media(result), [
+            `${prefix}Book.mdd`,
+            `${prefix}Book.2.MDD`,
+            `${prefix}book.10.mdd`,
+        ]);
+    });
+}
+
+test('trailing filename whitespace is not silently removed to recognize an extension', () => {
+    const result = plan('Book.mdx', 'Book.mdd ', 'Other.zip ');
+    assert.equal(result.errors.length, 2);
+    assert.equal(result.sources.length, 1);
+    assert.deepEqual(media(result), []);
+});
+
+test('URL discovery resolver preserves whitespace in decoded path identities', () => {
+    const keys = new Set(['Books/book', ' Books/book']);
+    assert.equal(resolveMddImportKey(' Books/Book.2.MDD', keys), ' Books/book');
+    assert.equal(resolveMddImportKey(' Books/Book.mdd', new Set(['Books/book'])), null);
+});
