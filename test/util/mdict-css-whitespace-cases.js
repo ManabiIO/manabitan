@@ -60,16 +60,18 @@ test('MDict CSS keeps NBSP inside selector and HTML class tokens', async () => {
 
 test('MDict CSS rewrites escaped class and id attribute names', async () => {
     const result = await convertCss(
-        String.raw`[cl\61 ss~="before"]{color:red}[\69 d="entry"]{font-weight:bold}`,
+        String.raw`[cl\61 ss~="before"]{color:red}[\69 d="${nbsp}entry${nbsp}"]{font-weight:bold}`,
     );
     const stylesheetBytes = result.files.get('styles.css');
     assert.ok(stylesheetBytes instanceof Uint8Array);
     const stylesheet = new TextDecoder().decode(stylesheetBytes);
 
-    assert.ok(stylesheet.includes('[data-sc-class~="before"]{color:red}'), stylesheet);
-    assert.ok(stylesheet.includes('[data-sc-id="entry"]{font-weight:bold}'), stylesheet);
+    const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
+    const guard = `:where(${root}, ${root} *)`;
+    assert.ok(stylesheet.includes(`[data-sc-class~="before"]${guard}{color:red}`), stylesheet);
+    assert.ok(stylesheet.includes(`[data-sc-id="${nbsp}entry${nbsp}"]${guard}{font-weight:bold}`), stylesheet);
     assert.ok(!stylesheet.includes(String.raw`[cl\61 ss~="before"]`), stylesheet);
-    assert.ok(!stylesheet.includes(String.raw`[\69 d="entry"]`), stylesheet);
+    assert.ok(!stylesheet.includes(String.raw`[\69 d="${nbsp}entry${nbsp}"]`), stylesheet);
 });
 
 test('MDict CSS resolves NBSP inside an unquoted url token', async () => {
