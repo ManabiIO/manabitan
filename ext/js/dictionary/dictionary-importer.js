@@ -3452,11 +3452,13 @@ export class DictionaryImporter {
                 const bFileName = typeof b.filename === 'string' ? b.filename : '';
                 const aMatch = fileNameFormat.exec(aFileName);
                 const bMatch = fileNameFormat.exec(bFileName);
-                const aParsedIndex = aMatch !== null ? Number.parseInt(aMatch[1], 10) : Number.NaN;
-                const bParsedIndex = bMatch !== null ? Number.parseInt(bMatch[1], 10) : Number.NaN;
-                const aIndex = Number.isFinite(aParsedIndex) ? aParsedIndex : Number.MAX_SAFE_INTEGER;
-                const bIndex = Number.isFinite(bParsedIndex) ? bParsedIndex : Number.MAX_SAFE_INTEGER;
-                return aIndex - bIndex;
+                if (aMatch === null) { return bMatch === null ? 0 : 1; }
+                if (bMatch === null) { return -1; }
+                const aIndex = aMatch[1].replace(/^0+/u, '') || '0';
+                const bIndex = bMatch[1].replace(/^0+/u, '') || '0';
+                if (aIndex.length !== bIndex.length) { return aIndex.length - bIndex.length; }
+                if (aIndex === bIndex) { return 0; }
+                return aIndex < bIndex ? -1 : 1;
             });
         }
         return results;
