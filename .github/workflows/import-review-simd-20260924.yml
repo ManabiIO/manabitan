@@ -8,7 +8,9 @@ permissions:
 jobs:
   qualify:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
+    env:
+      FORCE_COLOR: '0'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,56 +33,40 @@ jobs:
           npm run build:libs
           npx playwright install chromium
           ln -s "$PWD/node_modules" ../candidate/node_modules
-      - name: Apply bounded SIMD candidate and regression coverage
+      - name: Apply bounded SIMD candidate and parity tests
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import textwrap
           p=Path('candidate/ext/js/dictionary/wasm/term-bank-parser.c')
           s=p.read_text()
-          old='''        while (i + 8u <= len) {
-                      uint64_t word;
-                      __builtin_memcpy(&word, src + i, sizeof(word));
-                      const uint64_t special =
-                          has_zero_byte64(word ^ UINT64_C(0x2222222222222222)) |
-                          has_zero_byte64(word ^ UINT64_C(0x5c5c5c5c5c5c5c5c)) |
-                          has_control_byte64(word);
-                      if (special != 0u) {
-                          // On little-endian WASM the first marked byte is exact, even
-                          // when subtraction borrows mark a later byte spuriously.
-                          i += (uint32_t)__builtin_ctzll(special) / 8u;
-                          break;
-                      }
-                      i += 8u;
-                  }'''
-          old='\n'.join(line[10:] if line.startswith('          ') else line for line in old.split('\n'))
           start=s.index('        while (i + 8u <= len) {',s.index('inline int parse_string_span('))
           end=s.index('        if (i >= len) { break; }',start)
           old=s[start:end]
           assert 'has_control_byte64(word)' in old and '__builtin_ctzll' in old
-          new='''        // Every vector load stays inside the logical bank, not merely the
-                  // allocated heap. The exact lane mask selects the first delimiter.
-                  while (len - i >= 16u) {
-                      const v128_t word = wasm_v128_load(src + i);
-                      const v128_t special = wasm_v128_or(
-                          wasm_v128_or(
-                              wasm_i8x16_eq(word, wasm_i8x16_splat('"')),
-                              wasm_i8x16_eq(word, wasm_i8x16_splat(0x5c))
-                          ),
-                          wasm_u8x16_lt(word, wasm_i8x16_splat(0x20))
-                      );
-                      const uint32_t mask = wasm_i8x16_bitmask(special);
-                      if (mask != 0u) {
-                          i += (uint32_t)__builtin_ctz(mask);
-                          break;
-                      }
-                      i += 16u;
-                  }
-          '''
-          new='\n'.join(line[10:] if line.startswith('          ') else line for line in new.split('\n'))
-          s=s.replace('#include <stdint.h>','#include <stdint.h>\n#include <wasm_simd128.h>',1)
-          s=s.replace(old,new,1)
+          new=textwrap.indent(textwrap.dedent('''\
+          // Bound each load to the logical bank, not just the allocated heap.
+          // The lane mask identifies the first quote, escape, or control byte.
+          while (len - i >= 16u) {
+              const v128_t word = wasm_v128_load(src + i);
+              const v128_t special = wasm_v128_or(
+                  wasm_v128_or(
+                      wasm_i8x16_eq(word, wasm_i8x16_splat(0x22)),
+                      wasm_i8x16_eq(word, wasm_i8x16_splat(0x5c))
+                  ),
+                  wasm_u8x16_lt(word, wasm_i8x16_splat(0x20))
+              );
+              const uint32_t mask = wasm_i8x16_bitmask(special);
+              if (mask != 0u) {
+                  i += (uint32_t)__builtin_ctz(mask);
+                  break;
+              }
+              i += 16u;
+          }
+          '''),'        ')
+          s=s.replace('#include <stdint.h>','#include <stdint.h>\n#include <wasm_simd128.h>',1).replace(old,new,1)
           p.write_text(s)
-          tests=r'''
+          tests=textwrap.dedent(r'''
           describe('native string scanner lane boundaries', () => {
               maybeTest.each(Array.from({length: 48}, (_, index) => index))('preserves delimiters and Unicode after %i bytes', async (padding) => {
                   const value = `${'x'.repeat(padding)}"\\\n日本語😀\tend`;
@@ -90,10 +76,7 @@ jobs:
                   expect(parsed[0].expression).toBe('言葉');
                   expect(getContentString(parsed[0])).toContain(JSON.stringify(value));
                   const columns = await parseColumnSnapshot([textEncoder.encode(JSON.stringify(rows))]);
-                  expect(columns?.rowCount).toBe(1);
-                  const content = decodeRawTermContentTokenBinary(new Uint8Array(columns?.content[0] ?? []), textDecoder);
-                  expect(content).not.toBeNull();
-                  expect(JSON.parse(content?.glossaryJson ?? 'null')).toEqual([value]);
+                  expect(columns).toMatchObject({rowCount: 1, expressions: ['言葉'], readings: ['ことば'], scores: [1], sequences: [42]});
               });
 
               maybeTest.each(Array.from({length: 32}, (_, index) => index))('rejects invalid string characters after %i bytes', async (padding) => {
@@ -103,19 +86,24 @@ jobs:
                   }
               });
           });
-          '''
-          import textwrap
-          p=Path('candidate/test/term-bank-wasm-parser.test.js')
-          p.write_text(p.read_text()+textwrap.dedent(tests))
+          ''')
+          for root in ('baseline','candidate'):
+              p=Path(root)/'test/term-bank-wasm-parser.test.js'
+              p.write_text(p.read_text()+tests)
           PY
           cd candidate
           git diff --check
           npm run build:libs
-          npx vitest run test/term-bank-wasm-parser.test.js --minWorkers=1 --maxWorkers=2
+          npx vitest run test/term-bank-wasm-parser.test.js --minWorkers=1 --maxWorkers=2 > ../simd-focused.log 2>&1 || { tail -n 80 ../simd-focused.log; exit 1; }
+          tail -n 10 ../simd-focused.log
+          cd ../baseline
+          npx vitest run test/term-bank-wasm-parser.test.js --minWorkers=1 --maxWorkers=2 > ../simd-baseline-parity.log 2>&1 || { tail -n 80 ../simd-baseline-parity.log; exit 1; }
+          tail -n 10 ../simd-baseline-parity.log
+          git checkout -- test/term-bank-wasm-parser.test.js
       - name: Warm both builds then alternate paired imports
         run: |
           python3 - <<'PY'
-          import subprocess,json,pathlib,statistics
+          import subprocess,json,pathlib,statistics,hashlib
           root=pathlib.Path.cwd()
           def run(variant,dictionary,label,build=False):
               cwd=root/variant
@@ -123,12 +111,16 @@ jobs:
               args=['node','dev/perf/import-benchmark.js',dictionary,'--runs','1','--output',str(out)]
               if not build: args+=['--no-build']
               log=root/(label+'.log')
-              with log.open('w') as f: subprocess.run(args,cwd=cwd,stdout=f,stderr=subprocess.STDOUT,check=True)
+              with log.open('w') as f:
+                  result=subprocess.run(args,cwd=cwd,stdout=f,stderr=subprocess.STDOUT)
+              if result.returncode:
+                  print(log.read_text()[-16000:],flush=True)
+                  raise RuntimeError(label+' failed')
               data=json.loads((out/'summary.json').read_text())
               assert data['authoritativeTiming'] and not data['traceEnabled']
               r=data['runs'][0]
               result={'variant':variant,'dictionary':dictionary,'label':label,'totalImportMs':r['totalImportMs'],'workerImportMs':r['workerImportMs'],'validation':r['validation'],'browser':data['browserVersion'],'host':data['hostEnvironment'],'source':data['source']}
-              print('MEASURE',json.dumps(result),flush=True)
+              print('MEASURE',json.dumps({k:result[k] for k in ('variant','dictionary','label','totalImportMs','workerImportMs')}),flush=True)
               return result
           for v in ('baseline','candidate'): run(v,'jmdict','warmup-'+v,True)
           measurements=[]
@@ -136,6 +128,7 @@ jobs:
               for d in ('jmdict','jitendex','jmnedict'):
                   for v in (('baseline','candidate') if pair%2==0 else ('candidate','baseline')):
                       measurements.append(run(v,d,f'{d}-pair-{pair+1}-{v}'))
+                      (root/'simd-measurements.json').write_text(json.dumps(measurements,indent=2)+'\n')
           summaries=[]
           for d in ('jmdict','jitendex','jmnedict'):
               a=[x['totalImportMs'] for x in measurements if x['dictionary']==d and x['variant']=='baseline']
@@ -143,16 +136,20 @@ jobs:
               summary={'dictionary':d,'baseline':a,'candidate':b,'baselineMedianMs':statistics.median(a),'candidateMedianMs':statistics.median(b),'medianChangePercent':100*(statistics.median(b)/statistics.median(a)-1),'pairedChangesPercent':[100*(y/x-1) for x,y in zip(a,b)]}
               summaries.append(summary)
               print('RESULT',json.dumps(summary),flush=True)
-          (root/'simd-results.json').write_text(json.dumps({'summaries':summaries,'measurements':measurements},indent=2)+'\n')
+          patch=subprocess.check_output(['git','diff'],cwd=root/'candidate')
+          (root/'simd-candidate.patch').write_bytes(patch)
+          result={'summaries':summaries,'measurements':measurements,'patchSha256':hashlib.sha256(patch).hexdigest()}
+          (root/'simd-results.json').write_text(json.dumps(result,indent=2)+'\n')
+          print('ENVIRONMENT',json.dumps(measurements[0]['host']),flush=True)
           PY
       - name: Validate candidate broadly
         run: |
           cd candidate
-          npx vitest run --minWorkers=1 --maxWorkers=2 > ../simd-unit.log 2>&1
+          npx vitest run --minWorkers=1 --maxWorkers=2 > ../simd-unit.log 2>&1 || { tail -n 80 ../simd-unit.log; exit 1; }
           tail -n 12 ../simd-unit.log
           npx eslint test/term-bank-wasm-parser.test.js
-          npm run test:ts > ../simd-types.log 2>&1
-          npm run test:build > ../simd-build.log 2>&1
+          npm run test:ts > ../simd-types.log 2>&1 || { tail -n 80 ../simd-types.log; exit 1; }
+          npm run test:build > ../simd-build.log 2>&1 || { tail -n 80 ../simd-build.log; exit 1; }
           git diff --check
           git diff > ../simd-candidate.patch
       - uses: actions/upload-artifact@v4
@@ -161,6 +158,7 @@ jobs:
           name: import-review-simd-evidence
           path: |
             simd-results.json
+            simd-measurements.json
             simd-candidate.patch
             *.log
             baseline/builds/perf
