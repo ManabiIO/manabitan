@@ -1,0 +1,36 @@
+name: MDict deeper qualification
+on:
+  push:
+    branches: [research/mdict-deeper-qualification-20260924]
+    paths:
+      - .github/workflows/mdict-deeper-qualification.yml
+permissions:
+  contents: read
+jobs:
+  source-kit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Package tracked source and built runtime libraries
+        run: |
+          mkdir -p "$RUNNER_TEMP/mdict-source-kit"
+          git archive HEAD | tar -xf - -C "$RUNNER_TEMP/mdict-source-kit"
+          cp -a ext/lib/. "$RUNNER_TEMP/mdict-source-kit/ext/lib/"
+          git rev-parse HEAD > "$RUNNER_TEMP/mdict-source-kit/BASE_COMMIT"
+          tar -czf "$RUNNER_TEMP/mdict-source-kit.tar.gz" -C "$RUNNER_TEMP/mdict-source-kit" .
+          sha256sum "$RUNNER_TEMP/mdict-source-kit.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mdict-source-kit
+          path: ${{ runner.temp }}/mdict-source-kit.tar.gz
+          retention-days: 1
