@@ -35,7 +35,7 @@ function file(path) {
 
 /**
  * @param {ReturnType<typeof createMdictImportSources>} result
- * @returns {Array<Extract<import('../ext/js/dictionary/mdict-import-sources.js').DictionaryImportSource, {type: 'mdx'}>>}
+ * @returns {ReturnType<typeof createMdictImportSources>['sources']}
  */
 function dictionaries(result) {
     return result.sources.filter((source) => source.type === 'mdx');
