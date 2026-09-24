@@ -80,5 +80,4 @@ describe('media headwords with omitted native byte columns', () => {
         expect(result.termList).toHaveLength(1)
         expect(result.requirements).toHaveLength(requirementCount)
     }, 60000)
-
 })
