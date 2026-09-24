@@ -1745,11 +1745,13 @@ function appendStructuredContent(parent, content, details) {
         if (mappedTag === 'a') {
             const sourceHref = attrs.href ?? attrs.src ?? '';
             element.href = convertLinkHref(sourceHref, details);
-        } else if ((mappedTag === 'td' || mappedTag === 'th') && typeof attrs.colspan === 'string' && /^\d+$/u.test(attrs.colspan)) {
-            element.colSpan = Number.parseInt(attrs.colspan, 10);
+        } else if (mappedTag === 'td' || mappedTag === 'th') {
+            const colSpan = typeof attrs.colspan === 'string' && /^\d+$/u.test(attrs.colspan) ? Number.parseInt(attrs.colspan, 10) : Number.NaN;
+            if (Number.isFinite(colSpan) && colSpan >= 1) { element.colSpan = colSpan; }
         }
-        if ((mappedTag === 'td' || mappedTag === 'th') && typeof attrs.rowspan === 'string' && /^\d+$/u.test(attrs.rowspan)) {
-            element.rowSpan = Number.parseInt(attrs.rowspan, 10);
+        if (mappedTag === 'td' || mappedTag === 'th') {
+            const rowSpan = typeof attrs.rowspan === 'string' && /^\d+$/u.test(attrs.rowspan) ? Number.parseInt(attrs.rowspan, 10) : Number.NaN;
+            if (Number.isFinite(rowSpan) && rowSpan >= 1) { element.rowSpan = rowSpan; }
         }
         if (mappedTag === 'details' && Object.hasOwn(attrs, 'open')) {
             element.open = true;
