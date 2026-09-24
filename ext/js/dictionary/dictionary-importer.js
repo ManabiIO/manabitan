@@ -76,6 +76,7 @@ const Uint8ArrayWriter = /** @type {typeof import('@zip.js/zip.js').Uint8ArrayWr
 const ZipReader = /** @type {typeof import('@zip.js/zip.js').ZipReader} */ (/** @type {unknown} */ (ZipReader0));
 
 const INDEX_FILE_NAME = 'index.json';
+const ARCHIVE_FILE_QUERY_EXTENSION_PREFILTER_THRESHOLD = 512;
 const SUPPORTED_INDEX_VERSIONS = new Set([1, 3]);
 const JSON_QUOTED_STRING_CACHE_MAX_ENTRIES = 8192;
 const TERM_BANK_WASM_ROW_CHUNK_SIZE = 12000;
@@ -829,7 +830,11 @@ export class DictionaryImporter {
                 ['tagFiles', /^tag_bank_(\d+)\.json$/],
             );
         }
-        const archiveFiles = Object.fromEntries(this._getArchiveFiles(fileMap, queryDetails));
+        const archiveFiles = Object.fromEntries(this._getArchiveFiles(
+            fileMap,
+            queryDetails,
+            fileMap.size >= ARCHIVE_FILE_QUERY_EXTENSION_PREFILTER_THRESHOLD,
+        ));
         const termFiles = archiveFiles.termFiles ?? [];
         const termArtifactFiles = archiveFiles.termArtifactFiles ?? [];
         const termMetaFiles = archiveFiles.termMetaFiles ?? [];
@@ -3423,9 +3428,10 @@ export class DictionaryImporter {
     /**
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
      * @param {import('dictionary-importer').QueryDetails} queryDetails
+     * @param {boolean} [prefilterBankExtensions]
      * @returns {import('dictionary-importer').QueryResult}
      */
-    _getArchiveFiles(fileMap, queryDetails) {
+    _getArchiveFiles(fileMap, queryDetails, prefilterBankExtensions = false) {
         /** @type {import('dictionary-importer').QueryResult} */
         const results = new Map();
 
@@ -3434,6 +3440,13 @@ export class DictionaryImporter {
         }
 
         for (const [fileName, fileEntry] of fileMap.entries()) {
+            if (
+                prefilterBankExtensions &&
+                !fileName.endsWith('.json') &&
+                !fileName.endsWith('.mbtb')
+            ) {
+                continue;
+            }
             for (const [fileType, fileNameFormat] of queryDetails) {
                 if (!fileNameFormat.test(fileName)) { continue; }
                 const entries = results.get(fileType);
