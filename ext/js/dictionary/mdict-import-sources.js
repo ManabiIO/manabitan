@@ -33,7 +33,8 @@ function getPath(file) {
  * @returns {string}
  */
 export function normalizeMdictImportPath(path) {
-    const normalized = path.trim().replaceAll('\\', '/');
+    // File names and relative paths are identities, not user-entered text.
+    const normalized = path.replaceAll('\\', '/');
     const split = normalized.lastIndexOf('/') + 1;
     return normalized.slice(0, split) + normalized.slice(split).toLowerCase();
 }
