@@ -131,19 +131,46 @@ export class DictionaryWorker {
      * @param {Transferable[]} transfer
      * @param {?(arg: import('core').SafeAny) => void} onProgress
      * @param {?(result: TResponseRaw) => TResponse} formatResult
+     * @returns {Promise<TResponse>}
      */
     _invoke(action, params, transfer, onProgress, formatResult) {
         if (!this._reuseWorker) {
             return this._invokeDirect(action, params, transfer, onProgress, formatResult);
         }
+
+        const start = () => this._invokeDirect(action, params, transfer, onProgress, formatResult);
+        if (this._reuseInvocationToken === null && this._reuseInvocationQueue.length === 0) {
+            return this._startReuseInvocation(start);
+        }
+
         return new Promise((resolve, reject) => {
-            this._reuseInvocationQueue.push({
-                start: () => this._invokeDirect(action, params, transfer, onProgress, formatResult),
-                resolve,
-                reject,
-            });
-            this._startNextReuseInvocation();
+            this._reuseInvocationQueue.push({start, resolve, reject});
         });
+    }
+
+    /**
+     * @template T
+     * @param {() => Promise<T>} start
+     * @returns {Promise<T>}
+     */
+    _startReuseInvocation(start) {
+        const token = {};
+        this._reuseInvocationToken = token;
+        let promise;
+        try {
+            promise = start();
+        } catch (error) {
+            if (this._reuseInvocationToken === token) {
+                this._reuseInvocationToken = null;
+            }
+            this._startNextReuseInvocation();
+            throw error;
+        }
+        void promise.then(
+            () => this._finishReuseInvocation(token),
+            () => this._finishReuseInvocation(token),
+        );
+        return promise;
     }
 
     /** */
@@ -152,23 +179,15 @@ export class DictionaryWorker {
         const queued = this._reuseInvocationQueue.shift();
         if (typeof queued === 'undefined') { return; }
 
-        const token = {};
-        this._reuseInvocationToken = token;
         let promise;
         try {
-            promise = queued.start();
+            promise = this._startReuseInvocation(queued.start);
         } catch (error) {
             queued.reject(error);
-            if (this._reuseInvocationToken === token) {
-                this._reuseInvocationToken = null;
-                this._startNextReuseInvocation();
-            }
+            this._startNextReuseInvocation();
             return;
         }
-        void promise.then(queued.resolve, queued.reject).then(
-            () => this._finishReuseInvocation(token),
-            () => this._finishReuseInvocation(token),
-        );
+        void promise.then(queued.resolve, queued.reject);
     }
 
     /**
@@ -189,6 +208,7 @@ export class DictionaryWorker {
      * @param {Transferable[]} transfer
      * @param {?(arg: import('core').SafeAny) => void} onProgress
      * @param {?(result: TResponseRaw) => TResponse} formatResult
+     * @returns {Promise<TResponse>}
      */
     _invokeDirect(action, params, transfer, onProgress, formatResult) {
         return new Promise((resolve, reject) => {
