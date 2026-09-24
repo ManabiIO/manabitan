@@ -46,7 +46,15 @@ export function normalizeMdictImportPath(path) {
  * @returns {string|null}
  */
 export function resolveMddImportKey(fileName, mdxKeys) {
-    const path = normalizeMdictImportPath(fileName);
+    return resolveNormalizedMddImportKey(normalizeMdictImportPath(fileName), mdxKeys);
+}
+
+/**
+ * @param {string} path
+ * @param {ReadonlySet<string>} mdxKeys
+ * @returns {string|null}
+ */
+function resolveNormalizedMddImportKey(path, mdxKeys) {
     if (!path.endsWith('.mdd')) { return null; }
     const stem = path.slice(0, -4);
     if (mdxKeys.has(stem)) { return stem; }
@@ -63,8 +71,16 @@ export function resolveMddImportKey(fileName, mdxKeys) {
  * @returns {number}
  */
 export function compareMddImportPaths(nameA, nameB, mdxKey) {
-    const a = normalizeMdictImportPath(nameA);
-    const b = normalizeMdictImportPath(nameB);
+    return compareNormalizedMddImportPaths(normalizeMdictImportPath(nameA), normalizeMdictImportPath(nameB), mdxKey);
+}
+
+/**
+ * @param {string} a
+ * @param {string} b
+ * @param {string} mdxKey
+ * @returns {number}
+ */
+function compareNormalizedMddImportPaths(a, b, mdxKey) {
     if (a === b) { return 0; }
     if (a === `${mdxKey}.mdd`) { return -1; }
     if (b === `${mdxKey}.mdd`) { return 1; }
@@ -83,12 +99,14 @@ export function compareMddImportPaths(nameA, nameB, mdxKey) {
  * @returns {{sources: DictionaryImportSource[], errors: Error[]}}
  */
 export function createMdictImportSources(files) {
-    /** @type {Map<string, {file: File, firstIndex: number, resources: File[], resourcePaths: Set<string>, invalid: boolean}>} */
+    /** @type {Map<string, {file: File, firstIndex: number, resources: Array<{file: File, path: string}>, resourcePaths: Set<string>, invalid: boolean}>} */
     const groups = new Map();
     /** @type {Array<{firstIndex: number, source: DictionaryImportSource}>} */
     const pending = [];
     /** @type {Error[]} */
     const errors = [];
+    /** @type {Array<{file: File, path: string, index: number}>} */
+    const resourceFiles = [];
     // Index MDX paths first so file-picker/drop order cannot affect pairing.
     for (const [index, file] of files.entries()) {
         const path = getPath(file);
@@ -105,15 +123,15 @@ export function createMdictImportSources(files) {
             } else {
                 groups.set(key, {file, firstIndex: index, resources: [], resourcePaths: new Set(), invalid: false});
             }
-        } else if (!path.endsWith('.mdd')) {
+        } else if (path.endsWith('.mdd')) {
+            resourceFiles.push({file, path, index});
+        } else {
             errors.push(new Error(`Unsupported dictionary file: ${file.name}. Select a Yomitan .zip archive or an .mdx file with its optional matching .mdd files.`));
         }
     }
     const mdxKeys = new Set(groups.keys());
-    for (const [index, file] of files.entries()) {
-        const path = getPath(file);
-        if (!path.endsWith('.mdd')) { continue; }
-        const key = resolveMddImportKey(path, mdxKeys);
+    for (const {index, file, path} of resourceFiles) {
+        const key = resolveNormalizedMddImportKey(path, mdxKeys);
         if (key === null) {
             errors.push(new Error(`Found MDD resources without a matching MDX file: ${file.name}. Select the matching .mdx and all its .mdd files together, using the original filenames and folder. An .mdd file cannot be imported on its own.`));
             continue;
@@ -126,13 +144,13 @@ export function createMdictImportSources(files) {
             continue;
         }
         group.resourcePaths.add(path);
-        group.resources.push(file);
+        group.resources.push({file, path});
         group.firstIndex = Math.min(group.firstIndex, index);
     }
     for (const [key, group] of groups) {
         if (group.invalid) { continue; }
-        group.resources.sort((a, b) => compareMddImportPaths(getPath(a), getPath(b), key));
-        pending.push({firstIndex: group.firstIndex, source: {type: 'mdx', mdxFile: group.file, mddFiles: group.resources}});
+        group.resources.sort((a, b) => compareNormalizedMddImportPaths(a.path, b.path, key));
+        pending.push({firstIndex: group.firstIndex, source: {type: 'mdx', mdxFile: group.file, mddFiles: group.resources.map(({file}) => file)}});
     }
     pending.sort((a, b) => a.firstIndex - b.firstIndex);
     return {sources: pending.map(({source}) => source), errors};
