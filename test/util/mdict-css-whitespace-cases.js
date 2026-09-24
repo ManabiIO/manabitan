@@ -58,6 +58,20 @@ test('MDict CSS keeps NBSP inside selector and HTML class tokens', async () => {
     assert.ok(termBankJson.includes(`"id":"${nbsp}entry${nbsp}"`), termBankJson);
 });
 
+test('MDict CSS rewrites escaped class and id attribute names', async () => {
+    const result = await convertCss(
+        String.raw`[cl\61 ss~="before"]{color:red}[\69 d="entry"]{font-weight:bold}`,
+    );
+    const stylesheetBytes = result.files.get('styles.css');
+    assert.ok(stylesheetBytes instanceof Uint8Array);
+    const stylesheet = new TextDecoder().decode(stylesheetBytes);
+
+    assert.ok(stylesheet.includes('[data-sc-class~="before"]{color:red}'), stylesheet);
+    assert.ok(stylesheet.includes('[data-sc-id="entry"]{font-weight:bold}'), stylesheet);
+    assert.ok(!stylesheet.includes(String.raw`[cl\61 ss~="before"]`), stylesheet);
+    assert.ok(!stylesheet.includes(String.raw`[\69 d="entry"]`), stylesheet);
+});
+
 test('MDict CSS resolves NBSP inside an unquoted url token', async () => {
     const assetKey = `images/a${nbsp}b.png`;
     const result = await convertCss(
