@@ -1026,7 +1026,10 @@ function rewriteCssAttributeSelector(attributeSelector) {
         nameStart += 1;
     }
     const {value: rawName, endIndex} = readCssIdentifier(attributeSelector, nameStart);
-    if (rawName === null || attributeSelector[endIndex] === '|') { return attributeSelector; }
+    if (
+        rawName === null ||
+        (attributeSelector[endIndex] === '|' && attributeSelector[endIndex + 1] !== '=')
+    ) { return attributeSelector; }
     const name = rawName.toLowerCase();
     const replacement = name === 'class' ? STRUCTURED_CLASS_ATTR : (name === 'id' ? STRUCTURED_ID_ATTR : null);
     return replacement === null ? attributeSelector : `[${replacement}${attributeSelector.slice(endIndex)}`;
