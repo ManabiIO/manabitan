@@ -247,7 +247,7 @@ function getArchiveEntryUtf8Alias(entry) {
     }
     let decoded;
     try {
-        decoded = UTF8_TEXT_DECODER.decode(rawFilename);
+        decoded = UTF8_FIELD_TEXT_DECODER.decode(rawFilename);
     } catch {
         return null;
     }
