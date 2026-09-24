@@ -23,14 +23,20 @@ import {
     resolveMddImportKey,
 } from '../ext/js/dictionary/mdict-import-sources.js';
 
-/** @param {string} path @returns {File} */
+/**
+ * @param {string} path
+ * @returns {File}
+ */
 function file(path) {
     const result = new File([], path.slice(path.lastIndexOf('/') + 1));
     if (path.includes('/')) { Object.defineProperty(result, 'webkitRelativePath', {value: path}); }
     return result;
 }
 
-/** @param {ReturnType<typeof createMdictImportSources>} result */
+/**
+ * @param {ReturnType<typeof createMdictImportSources>} result
+ * @returns {Array<Extract<import('../ext/js/dictionary/mdict-import-sources.js').DictionaryImportSource, {type: 'mdx'}>>}
+ */
 function dictionaries(result) {
     return result.sources.filter((source) => source.type === 'mdx');
 }
