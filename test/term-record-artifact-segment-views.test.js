@@ -48,9 +48,12 @@ describe('artifact record segment ownership', () => {
         Reflect.set(store, '_encodeArtifactChunkRecords', encodeArtifactChunkRecords)
         Reflect.set(store, '_appendEncodedChunk', async () => {})
 
+        const state = /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ (
+            /** @type {unknown} */ ({})
+        )
         await Reflect.get(store, '_encodeAndAppendArtifactChunkForState').call(
             store,
-            {},
+            state,
             {
                 dictionary: 'test',
                 rowCount: count,
