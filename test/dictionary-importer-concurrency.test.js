@@ -25,6 +25,7 @@ import {DictionaryImporterMediaLoader} from '../ext/js/dictionary/dictionary-imp
  */
 async function run(concurrency) {
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+    /** @type {number[]} */
     const processed = [];
     await Reflect.get(importer, '_runWithConcurrencyLimit').call(
         importer,
