@@ -1,0 +1,52 @@
+name: Import round record replication
+on:
+  push:
+    branches: [verify/import-round-20260924-b73d]
+    paths: [.github/workflows/import-round-record-repeat.yml]
+permissions:
+  contents: read
+jobs:
+  repeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        corpus: [jmdict, jmnedict, jitendex]
+    defaults:
+      run:
+        working-directory: source
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: transport
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci && npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Prepare locked source archives
+        run: node dev/perf/prepare-dictionaries.js
+      - name: Apply measured candidate
+        run: |
+          git apply --check ../transport/review-payload/record-views.patch
+          git apply ../transport/review-payload/record-views.patch
+      - name: Paired full imports and controls
+        env:
+          CORPUS: ${{ matrix.corpus }}
+        run: python3 ../transport/review-payload/record-import-repeat.py "$CORPUS"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: record-repeat-${{ matrix.corpus }}-b73d
+          path: repeat-results/
+          retention-days: 7
