@@ -13,6 +13,7 @@ import {DictionaryImporterMediaLoader} from '../ext/js/dictionary/dictionary-imp
 import {RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
 
 /**
+ * @param {Uint8Array} [content]
  * @returns {Uint8Array}
  */
 function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0)) {
