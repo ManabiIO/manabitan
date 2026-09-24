@@ -2110,7 +2110,6 @@ export class DictionaryImporter {
             for (const tagFile of tagFiles) {
                 const tTagFile = Date.now();
                 let tagList = /** @type {import('dictionary-database').Tag[]} */ (await this._readFileSequence([tagFile], this._convertTagBankEntry.bind(this), dictionaryTitle));
-                this._addOldIndexTags(index, tagList, dictionaryTitle);
                 step4TimingBreakdown.tagReadMs += Math.max(0, Date.now() - tTagFile);
 
                 const tTagWriteStart = Date.now();
@@ -2122,6 +2121,17 @@ export class DictionaryImporter {
                 this._logImport(`tag file ${tagFile.filename}: entries=${tagList.length} elapsed=${Date.now() - tTagFile}ms`);
 
                 tagList = [];
+            }
+            // Legacy index tags belong to the dictionary, not to each bank.
+            // Keep them after modern bank tags, including when no banks exist.
+            /** @type {import('dictionary-database').Tag[]} */
+            const oldIndexTags = [];
+            this._addOldIndexTags(index, oldIndexTags, dictionaryTitle);
+            if (oldIndexTags.length > 0) {
+                const tTagWriteStart = Date.now();
+                await bulkAdd('tagMeta', oldIndexTags, {trackProgress: false});
+                step4TimingBreakdown.bulkAddTagsMetaMs += Math.max(0, Date.now() - tTagWriteStart);
+                counts.tagMeta.total += oldIndexTags.length;
             }
             const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);
             const fastPathProfile = lastFastTermBankReadProfile?.parserProfile ?? null;

@@ -1,0 +1,108 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js';
+import {describe, expect, test, vi} from 'vitest';
+import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
+import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
+
+const legacyTag = {category: 'partOfSpeech', order: 2, notes: 'Legacy noun', score: 1};
+
+/**
+ * Build actual ZIP bytes and use the public importer; only the persistence sink
+ * is mocked, so archive discovery and both tag conversion paths remain real.
+ * @param {number} version
+ * @param {unknown} tagMeta
+ * @param {import('dictionary-data').Tag[][]} banks
+ * @returns {Promise<ArrayBuffer>}
+ */
+async function createArchive(version, tagMeta, banks) {
+    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+    await writer.add('index.json', new TextReader(JSON.stringify({
+        title: 'Legacy tags', revision: 'test', format: version, tagMeta,
+    })));
+    for (let i = 0; i < banks.length; ++i) {
+        await writer.add(`tag_bank_${i + 1}.json`, new TextReader(JSON.stringify(banks[i])));
+    }
+    return new Uint8Array(await writer.close()).buffer;
+}
+
+function createSink() {
+    const database = new DictionaryDatabase();
+    /** @type {import('dictionary-database').Tag[]} */
+    const tags = [];
+    vi.spyOn(database, 'isPrepared').mockReturnValue(true);
+    vi.spyOn(database, 'dictionaryExists').mockResolvedValue(false);
+    vi.spyOn(database, 'addWithResult').mockResolvedValue(1);
+    vi.spyOn(database, 'startBulkImport').mockResolvedValue('legacy-tags-test');
+    const finish = vi.spyOn(database, 'finishBulkImport').mockResolvedValue(null);
+    const abort = vi.spyOn(database, 'abortBulkImport').mockResolvedValue();
+    const cleanup = vi.spyOn(database, 'deleteDictionaryImportPlaceholder').mockResolvedValue();
+    vi.spyOn(database, 'queuePendingTermContentImportWrites').mockResolvedValue();
+    const bulkAdd = vi.spyOn(database, 'bulkAdd').mockImplementation(async (store, rows, start, count) => {
+        expect(store).toBe('tagMeta');
+        const tagRows = /** @type {import('dictionary-database').Tag[]} */ (rows.slice(start, start + count));
+        tags.push(...tagRows);
+    });
+    return {database, tags, finish, abort, cleanup, bulkAdd};
+}
+
+describe('legacy index tag import', () => {
+    test.each([1, 3])('imports index-only tags without tag banks in format %i', async (version) => {
+        const sink = createSink();
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const result = await importer.importDictionary(sink.database, await createArchive(version, {noun: legacyTag}, []), {});
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.tagMeta.total).toBe(1);
+        expect(sink.tags).toEqual([{name: 'noun', ...legacyTag, dictionary: 'Legacy tags'}]);
+        expect(sink.finish).toHaveBeenCalledOnce();
+        expect(sink.abort).not.toHaveBeenCalled();
+    });
+
+    test.each([1, 2, 3])('adds index tags exactly once after %i tag banks', async (bankCount) => {
+        const banks = Array.from({length: bankCount}, (_, i) => /** @type {import('dictionary-data').Tag[]} */ ([
+            [`bank-${i + 1}`, 'test', i, `Bank ${i + 1}`, 0],
+        ]));
+        const sink = createSink();
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const result = await importer.importDictionary(sink.database, await createArchive(3, {noun: legacyTag}, banks), {});
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.tagMeta.total).toBe(bankCount + 1);
+        expect(sink.tags.map(({name}) => name)).toEqual([...banks.map(([row]) => row[0]), 'noun']);
+        expect(sink.tags.at(-1)).toEqual({name: 'noun', ...legacyTag, dictionary: 'Legacy tags'});
+    });
+
+    test('empty banks do not duplicate index tags', async () => {
+        const sink = createSink();
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const result = await importer.importDictionary(sink.database, await createArchive(1, {noun: legacyTag}, [[], []]), {});
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.tagMeta.total).toBe(1);
+        expect(sink.tags).toHaveLength(1);
+    });
+
+    test.each([undefined, null, {}])('does not add a write for an empty index tag set: %j', async (tagMeta) => {
+        const sink = createSink();
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const result = await importer.importDictionary(sink.database, await createArchive(3, tagMeta, []), {});
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.tagMeta.total).toBe(0);
+        expect(sink.bulkAdd).not.toHaveBeenCalled();
+    });
+
+    test('a failed index-tag write aborts without publishing a successful summary', async () => {
+        const sink = createSink();
+        const error = new Error('injected tag write failure');
+        sink.bulkAdd.mockRejectedValueOnce(error);
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const result = await importer.importDictionary(sink.database, await createArchive(1, {noun: legacyTag}, []), {});
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(error);
+        expect(sink.finish).not.toHaveBeenCalled();
+        expect(sink.abort).toHaveBeenCalledWith('legacy-tags-test');
+        expect(sink.cleanup).toHaveBeenCalledWith(1);
+    });
+});
