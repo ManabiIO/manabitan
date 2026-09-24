@@ -1,0 +1,82 @@
+name: Qualify MDict plain-text import c92e
+on:
+  push:
+    branches: [verify/import-review-runtime-20260924-c92e]
+    paths: [.github/workflows/import-review-plain-qualification.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Preserve candidate and benchmark
+        run: |
+          cp .review-patches/mdict-plain.patch /tmp/mdict-plain.patch
+          cp .review-patches/mdict-browser-qualification.mjs /tmp/mdict-browser-qualification.mjs
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.16.0'
+      - name: Verify candidate identity
+        run: |
+          mkdir -p builds/mdict-qualification
+          cp ext/js/dictionary/mdx/mdx-converter.js builds/mdict-qualification/baseline-converter.js
+          git apply --check /tmp/mdict-plain.patch
+          git apply /tmp/mdict-plain.patch
+          test "$(git hash-object ext/js/dictionary/mdx/mdx-converter.js)" = e5f10adba33e6d75dee63786d2bee4e34b2d8e32
+          test "$(git hash-object test/mdict-plain-text.test.js)" = 698fbc0c8f31cb6fa7ac6b8cc12ac0c847ae360f
+          test "$(git hash-object test/util/mdict-plain-text-cases.js)" = 8bb776178ac39a73e1edaee4bb8d606f2fdcb8e1
+          git diff --check
+      - name: Lint and full TypeScript
+        run: |
+          npx eslint ext/js/dictionary/mdx/mdx-converter.js test/mdict-plain-text.test.js test/util/mdict-plain-text-cases.js
+          npm run test:ts
+      - name: Complete unit and build gates before timing
+        run: |
+          npx vitest run --minWorkers=1 --maxWorkers=2
+          npm run test:unit:options
+          npm run license-report:html
+          npm run test:build
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Measure independent fixed-origin A/A and A/B cohorts
+        run: |
+          mkdir -p .local-review builds/mdict-qualification/extension
+          cp /tmp/mdict-browser-qualification.mjs .local-review/mdict-browser-qualification.mjs
+          cp /tmp/mdict-browser-qualification.mjs builds/mdict-qualification/benchmark.mjs
+          cp /tmp/mdict-plain.patch builds/mdict-qualification/candidate.patch
+          unzip -q builds/manabitan-chrome-dev.zip -d builds/mdict-qualification/extension
+          node --input-type=module -e "import {chromium} from 'playwright'; import {execFileSync} from 'node:child_process'; console.log(execFileSync(chromium.executablePath(), ['--version'], {encoding:'utf8'}));" | tee builds/mdict-qualification/browser-version.txt
+          node .local-review/mdict-browser-qualification.mjs | tee builds/mdict-qualification/measurements.log
+      - name: Publish candidate branch only when prespecified measurement gate passes
+        run: |
+          if ! node --input-type=module -e "import fs from 'node:fs'; process.exit(JSON.parse(fs.readFileSync('builds/mdict-qualification/eligible.json')).eligible ? 0 : 1)"; then
+            echo 'Candidate not eligible; evidence retained without publishing a product branch.'
+            exit 0
+          fi
+          git config user.name 'Alex Ehlke'
+          git config user.email 'alex.ehlke@gmail.com'
+          git switch -c perf/mdict-plain-text-20260924-c92e
+          git add ext/js/dictionary/mdx/mdx-converter.js test/mdict-plain-text.test.js test/util/mdict-plain-text-cases.js
+          test "$(git diff --cached --name-only | wc -l)" -eq 3
+          git commit -m 'perf(mdict): skip HTML parsing for unchanged plain text'
+          git push origin HEAD:refs/heads/perf/mdict-plain-text-20260924-c92e
+          git rev-parse HEAD > builds/mdict-qualification/published-head.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mdict-plain-qualification-c92e
+          path: |
+            builds/mdict-qualification/*.json
+            builds/mdict-qualification/*.txt
+            builds/mdict-qualification/*.log
+            builds/mdict-qualification/*.mjs
+            builds/mdict-qualification/*.patch
+            builds/mdict-qualification/*.mdx
+          retention-days: 14
