@@ -1,0 +1,173 @@
+name: Qualify PR 170 first-observed errors
+
+on:
+  push:
+    branches: [qualification/pr170-drain-review-20260924]
+    paths: [.github/workflows/qualify-pr170-drain-review.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: a775a38ee7c5e22c352ed8218d907009b116c46f
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Add deterministic rejection-order regressions
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('test/zstd-term-content-pool-drain.test.js')
+          source = path.read_text()
+          assert source.endswith('});\n')
+          tests = '''
+              test.each([false, true])('preserves the first observed failure after draining, acknowledged=%s', async (acknowledged) => {
+                  const workers = [new ControlledWorker(), new ControlledWorker()];
+                  const {pool, operation} = start(workers);
+                  let sourceSettled = false;
+                  let completionSettled = false;
+                  void operation.sourceConsumed.finally(() => { sourceSettled = true; }).catch(() => {});
+                  void operation.completion.finally(() => { completionSettled = true; }).catch(() => {});
+                  try {
+                      if (acknowledged) {
+                          for (const worker of workers) { worker.reply(0, {type: 'source-consumed'}); }
+                          await expect(operation.sourceConsumed).resolves.toBeUndefined();
+                      }
+                      workers[1].reply(0, {error: 'higher-index job failed first'});
+                      await flush();
+                      expect(sourceSettled).toBe(acknowledged);
+                      expect(completionSettled).toBe(false);
+                      workers[0].reply(0, {error: 'lower-index job failed later'});
+                      if (!acknowledged) {
+                          await expect(operation.sourceConsumed).rejects.toThrow('higher-index job failed first');
+                      }
+                      await expect(operation.completion).rejects.toThrow('higher-index job failed first');
+                      expect(Reflect.get(pool, '_pending').size).toBe(0);
+                  } finally { pool.close(); }
+              });
+
+              test('preserves the first observed failure independently for each barrier', async () => {
+                  const workers = [new ControlledWorker(), new ControlledWorker()];
+                  const {pool, operation} = start(workers);
+                  let sourceSettled = false;
+                  let completionSettled = false;
+                  void operation.sourceConsumed.finally(() => { sourceSettled = true; }).catch(() => {});
+                  void operation.completion.finally(() => { completionSettled = true; }).catch(() => {});
+                  try {
+                      workers[1].reply(0, {type: 'source-consumed'});
+                      workers[1].reply(0, {error: 'first completion failure'});
+                      await flush();
+                      expect(sourceSettled).toBe(false);
+                      expect(completionSettled).toBe(false);
+                      workers[0].reply(0, {error: 'first source failure'});
+                      await expect(operation.sourceConsumed).rejects.toThrow('first source failure');
+                      await expect(operation.completion).rejects.toThrow('first completion failure');
+                      expect(Reflect.get(pool, '_pending').size).toBe(0);
+                  } finally { pool.close(); }
+              });
+          '''
+          path.write_text(source[:-4] + tests + '});\n')
+          PY
+      - name: Require all three new regressions to fail on the old implementation
+        run: |
+          set +e
+          npx vitest run test/zstd-term-content-pool-drain.test.js --reporter=json --outputFile=/tmp/pr170-red.json
+          result=$?
+          set -e
+          test "$result" -eq 1
+          python3 - <<'PY'
+          import json
+          data = json.load(open('/tmp/pr170-red.json'))
+          failures = [test for suite in data['testResults'] for test in suite['assertionResults'] if test['status'] == 'failed']
+          assert data['numFailedTests'] == 3, data
+          assert data['numPassedTests'] == 7, data
+          assert all('first observed failure' in test['fullName'] for test in failures), failures
+          print('Verified control: 3 new rejection-order regressions fail; all 7 existing lifetime cases pass.')
+          PY
+      - name: Preserve Promise.all rejection selection while draining failed batches
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('ext/js/dictionary/zstd-term-content.js')
+          source = path.read_text()
+          anchor = 'export class TermContentCompressionPool {'
+          helper = '''/**
+           * Keep Promise.all's first-observed rejection, but do not expose it until
+           * every job has settled and released its borrowed inputs.
+           * @template T
+           * @param {Promise<T>[]} promises
+           * @returns {Promise<T[]>}
+           */
+          async function allWithDrainOnFailure(promises) {
+              try {
+                  return await Promise.all(promises);
+              } catch (error) {
+                  await Promise.allSettled(promises);
+                  throw error;
+              }
+          }
+
+          '''
+          old = '''        const sourceConsumed = Promise.allSettled(jobs.map(({sourceConsumed: promise}) => promise)).then((results) => {
+                      for (const result of results) {
+                          if (result.status === 'rejected') { throw result.reason; }
+                      }
+                  });
+                  const completion = Promise.allSettled(jobs.map(({completion: promise}) => promise)).then((results) => {
+                      const chunks = results.map((result, blockIndex) => {
+                          if (result.status === 'rejected') { throw result.reason; }
+                          envelopeMsByWorker[blockIndex % this._workers.length] += result.value.envelopeMs;
+                          return result.value.bytes;
+                      });
+                      return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};
+                  });'''
+          new = '''        const sourceConsumed = allWithDrainOnFailure(jobs.map(({sourceConsumed: promise}) => promise)).then(() => {});
+                  const completion = allWithDrainOnFailure(jobs.map(({completion: promise}) => promise)).then((results) => {
+                      const chunks = results.map((result, blockIndex) => {
+                          envelopeMsByWorker[blockIndex % this._workers.length] += result.envelopeMs;
+                          return result.bytes;
+                      });
+                      return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};
+                  });'''
+          # The heredoc indentation is removed by YAML; retain JS's eight-space method indentation.
+          old = old.replace('\n          ', '\n')
+          new = new.replace('\n          ', '\n')
+          assert source.count(anchor) == 1
+          assert source.count(old) == 1, 'Expected pinned PR 170 aggregation block'
+          source = source.replace(anchor, helper + anchor).replace(old, new)
+          path.write_text(source)
+          PY
+      - name: Run focused lifetime coverage
+        run: npx vitest run test/zstd-term-content-pool-drain.test.js test/zstd-term-content-pool.test.js
+      - name: Lint changed files and validate all four TypeScript projects
+        run: |
+          npx eslint ext/js/dictionary/zstd-term-content.js test/zstd-term-content-pool-drain.test.js
+          npm run test:ts
+      - name: Run full unit suite and all-target dry build
+        run: |
+          npm run test:unit
+          npm run test:build
+      - name: Publish only qualified source and tests to an isolated result branch
+        env:
+          HUSKY: '0'
+        run: |
+          git diff --check
+          git add ext/js/dictionary/zstd-term-content.js test/zstd-term-content-pool-drain.test.js
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -s -m 'fix(import): preserve first-observed compression errors while draining'
+          git push origin HEAD:refs/heads/qualification/pr170-first-error-result-20260924
+          git rev-parse HEAD
+      - name: Retain red-control evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr170-first-error-red-control
+          path: /tmp/pr170-red.json
+          if-no-files-found: warn
+          retention-days: 7
