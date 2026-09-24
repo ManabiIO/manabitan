@@ -3492,6 +3492,9 @@ export class DictionaryImporter {
             const packedLength = Number.isInteger(termBank.packedLength) ? /** @type {number} */ (termBank.packedLength) : -1;
             const rows = Number.isInteger(termBank.rows) ? /** @type {number} */ (termBank.rows) : null;
             if (artifact === null || packedOffset < 0 || packedLength <= 0) { continue; }
+            if (termBanksByArtifact.has(artifact)) {
+                throw new Error(`Duplicate term artifact manifest entry: ${JSON.stringify(artifact)}`);
+            }
             termBanksByArtifact.set(artifact, {packedOffset, packedLength, rows});
         }
         const packedFileName = (
@@ -3510,6 +3513,7 @@ export class DictionaryImporter {
             null;
         /** @type {Array<{path: string, packedOffset: number, packedLength: number, mediaType: string, compressionMethod: number, uncompressedLength: number}>} */
         const packedMediaEntries = [];
+        const packedMediaPaths = new Set();
         const mediaEntries = (
             typeof manifest.mediaArtifact === 'object' &&
             manifest.mediaArtifact !== null &&
@@ -3526,6 +3530,10 @@ export class DictionaryImporter {
             const compressionMethod = Number.isInteger(mediaEntry.compressionMethod) ? /** @type {number} */ (mediaEntry.compressionMethod) : ZIP_COMPRESSION_METHOD_STORE;
             const uncompressedLength = Number.isInteger(mediaEntry.uncompressedLength) ? /** @type {number} */ (mediaEntry.uncompressedLength) : packedLength;
             if (path === null || mediaType === null || packedOffset < 0 || packedLength <= 0 || uncompressedLength <= 0) { continue; }
+            if (packedMediaPaths.has(path)) {
+                throw new Error(`Duplicate packed media manifest path: ${JSON.stringify(path)}`);
+            }
+            packedMediaPaths.add(path);
             packedMediaEntries.push({path, packedOffset, packedLength, mediaType, compressionMethod, uncompressedLength});
         }
         const sharedGlossaryFileName = (
