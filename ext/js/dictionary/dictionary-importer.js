@@ -4312,7 +4312,7 @@ export class DictionaryImporter {
                     cursor += 2;
                 }
             }
-            const stringsBuffer = bytes.slice(cursor, cursor + stringsBufferLength);
+            // Direct streamed imports retain the source bytes until every awaited chunk sink\n            // returns, so the immutable string arena can borrow that storage instead of copying it.\n            const stringsBuffer = directArtifactChunkImport && typeof onChunk === 'function' ?\n                bytes.subarray(cursor, cursor + stringsBufferLength) :\n                bytes.slice(cursor, cursor + stringsBufferLength);
             cursor += stringsBufferLength;
             if (artifactVersion >= 5) {
                 cursor += (-cursor) & 3;
