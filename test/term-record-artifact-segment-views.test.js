@@ -32,6 +32,7 @@ describe('artifact record segment ownership', () => {
          * @param {import('core').SafeAny} chunk
          * @param {import('core').SafeAny} offsets
          * @param {import('core').SafeAny} lengths
+         * @returns {Promise<import('core').SafeAny>}
          */
         const encodeArtifactChunkRecords = async (chunk, offsets, lengths) => {
             observed.push({chunk, offsets, lengths})
