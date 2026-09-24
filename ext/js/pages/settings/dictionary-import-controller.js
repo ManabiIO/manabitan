@@ -87,7 +87,7 @@ const MDX_UPLOAD_PROGRESS_RATIO = 0.45;
  * @returns {string}
  */
 function getLowercaseFileName(fileName) {
-    return fileName.trim().replaceAll('\\', '/').toLowerCase();
+    return fileName.replaceAll('\\', '/').toLowerCase();
 }
 
 /**
@@ -115,7 +115,7 @@ function getDictionaryFileNameFromUrl(url) {
         const parsed = new URL(url);
         const pathName = decodeURIComponent(parsed.pathname);
         const segments = pathName.split('/');
-        const fileName = segments.length > 0 ? segments[segments.length - 1].trim() : '';
+        const fileName = segments.length > 0 ? segments[segments.length - 1] : '';
         return fileName.length > 0 ? fileName : null;
     } catch (_error) {
         return null;
