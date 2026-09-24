@@ -87,6 +87,30 @@ describe('DictionaryImporter archive bank discovery', () => {
     });
 });
 
+    test('prefix hints preserve generic query order and skip unrelated archive entries', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const getArchiveFiles = /** @type {(this: DictionaryImporter, fileMap: Map<string, {filename: string}>, queryDetails: import('dictionary-importer').QueryDetails) => Map<string, {filename: string}[]>} */ (
+            /** @type {unknown} */ (Reflect.get(importer, '_getArchiveFiles'))
+        );
+        const fileMap = new Map([
+            ['media/image.webp', {filename: 'media/image.webp'}],
+            ['x12', {filename: 'x12'}],
+            ['x123', {filename: 'x123'}],
+            ['z4', {filename: 'z4'}],
+        ]);
+        const queryDetails = [
+            ['fallback', /^x(\d+)$/],
+            ['prefixed', /^x1(\d+)$/, 'x1'],
+            ['z', /^z(\d+)$/, 'z'],
+        ];
+
+        const results = getArchiveFiles.call(importer, fileMap, queryDetails);
+
+        expect(results.get('fallback')?.map(({filename}) => filename)).toEqual(['x12', 'x123']);
+        expect(results.get('prefixed')).toEqual([]);
+        expect(results.get('z')?.map(({filename}) => filename)).toEqual(['z4']);
+    });
+
 describe('DictionaryImporter archive filename validation', () => {
     test('rejects duplicate ZIP entry filenames', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
