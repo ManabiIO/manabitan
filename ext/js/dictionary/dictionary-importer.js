@@ -135,7 +135,6 @@ const EMPTY_TERM_GLOSSARY = [];
  * }} DirectTermChunk
  */
 const EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
-const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
 // A leading U+FEFF is data inside a term or asset path, not a document BOM.
 const UTF8_FIELD_TEXT_DECODER = new TextDecoder('utf-8', {ignoreBOM: true});
 Object.freeze(EMPTY_TERM_GLOSSARY);
