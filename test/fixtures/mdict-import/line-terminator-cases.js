@@ -65,7 +65,8 @@ export function createLineTerminatorCases(api, assert) {
         run: () => {
             const mdx = file('Dir/Book.MDX');
             const resources = ['', '.0', '.2', '.10', '.9007199254740992', '.9007199254740993'].map((number) => file(`Dir/book${number}.MDD`));
-            const result = api.createMdictImportSources([...([...resources].reverse()), mdx]);
+            const reversedResources = [...resources].reverse();
+            const result = api.createMdictImportSources([...reversedResources, mdx]);
             assert.deepEqual(result.errors, []);
             assert.equal(result.sources.length, 1);
             const source = result.sources[0];
