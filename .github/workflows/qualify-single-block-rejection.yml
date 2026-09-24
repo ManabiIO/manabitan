@@ -1,0 +1,81 @@
+name: Qualify single-block compression rejection
+
+on:
+  push:
+    branches:
+      - audit/legacy-index-tags-20260924-1609
+    paths:
+      - .github/workflows/qualify-single-block-rejection.yml
+
+permissions:
+  contents: write
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: transport
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          path: qualified
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.16.0'
+      - name: Verify and apply the reviewed patch
+        working-directory: qualified
+        run: |
+          echo '33f317d234adf919c5be82fede971181f2b4324a61f8f4e1725b4868698c488f  ../transport/review/single-block-rejection.patch' | sha256sum -c -
+          git apply --check ../transport/review/single-block-rejection.patch
+          git apply ../transport/review/single-block-rejection.patch
+          echo 'c2f5cdc876039f64b2829e23815215e6b3189bf02ce878c940441f63644b5bc8  ext/js/dictionary/zstd-term-content.js' | sha256sum -c -
+          echo '0e7eebdf819ca97f749ad3698bab9b46fd6b5054c06c5b11a1a847fa09aaeefc  test/zstd-term-content-single-block-rejection.test.js' | sha256sum -c -
+          npm ci
+          npm run build:libs
+      - name: Reproduce both unhandled sibling rejections on the original code
+        working-directory: qualified
+        run: |
+          cp ext/js/dictionary/zstd-term-content.js "$RUNNER_TEMP/fixed-single-block.js"
+          git restore ext/js/dictionary/zstd-term-content.js
+          set +e
+          node node_modules/vitest/vitest.mjs run test/zstd-term-content-single-block-rejection.test.js --reporter=json --outputFile="$RUNNER_TEMP/single-before.json"
+          result=$?
+          set -e
+          test "$result" -ne 0
+          node -e 'const r=require(process.argv[1]); if(r.numFailedTests!==2 || r.numPassedTests!==0) throw Error(JSON.stringify(r));' "$RUNNER_TEMP/single-before.json"
+          cp "$RUNNER_TEMP/fixed-single-block.js" ext/js/dictionary/zstd-term-content.js
+      - name: Focused regressions, lint and types
+        working-directory: qualified
+        run: |
+          node node_modules/vitest/vitest.mjs run test/zstd-term-content-single-block-rejection.test.js test/zstd-term-content-pool.test.js test/term-content-block-store.test.js --reporter=json --outputFile="$RUNNER_TEMP/single-after.json"
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/zstd-term-content.js test/zstd-term-content-single-block-rejection.test.js
+          npm run test:ts
+      - name: Complete unit suite
+        working-directory: qualified
+        run: npm run test:unit
+      - name: All-target dry build
+        working-directory: qualified
+        run: npm run test:build
+      - name: Publish only the qualified source and tests
+        working-directory: qualified
+        run: |
+          echo 'c2f5cdc876039f64b2829e23815215e6b3189bf02ce878c940441f63644b5bc8  ext/js/dictionary/zstd-term-content.js' | sha256sum -c -
+          echo '0e7eebdf819ca97f749ad3698bab9b46fd6b5054c06c5b11a1a847fa09aaeefc  test/zstd-term-content-single-block-rejection.test.js' | sha256sum -c -
+          git checkout -b fix/import-single-block-rejection-20260924-1628
+          git config user.name 'Manabitan review'
+          git config user.email 'review@users.noreply.github.com'
+          git add ext/js/dictionary/zstd-term-content.js test/zstd-term-content-single-block-rejection.test.js
+          git -c core.hooksPath=/dev/null commit -m 'fix(import): observe single-block source-consumed rejection'
+          git push origin HEAD:refs/heads/fix/import-single-block-rejection-20260924-1628
+          git rev-parse HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: single-block-rejection-regressions
+          path: ${{ runner.temp }}/single-*.json
+          retention-days: 7
+          if-no-files-found: warn
