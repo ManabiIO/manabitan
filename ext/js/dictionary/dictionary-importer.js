@@ -2742,7 +2742,7 @@ export class DictionaryImporter {
     _extractImagePathsFromGlossaryJsonBytes(bytes) {
         /** @type {string[]} */
         const paths = [];
-        for (let i = 0, ii = bytes.length - JSON_PATH_KEY_BYTES.length; i <= ii; ++i) {
+        for (let i = 0, ii = bytes.length - 6; i <= ii; ++i) {
             // No caller-visible requirements have been added yet; discard partial results.
             if (bytes[i] === 0x5c && bytes[i + 1] === 0x75) { return null; }
             if (
