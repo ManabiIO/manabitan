@@ -98,6 +98,7 @@ describe('DictionaryImporter archive bank discovery', () => {
             ['x123', {filename: 'x123'}],
             ['z4', {filename: 'z4'}],
         ]);
+        /** @type {import('dictionary-importer').QueryDetails} */
         const queryDetails = [
             ['fallback', /^x(\d+)$/],
             ['prefixed', /^x1(\d+)$/, 'x1'],
