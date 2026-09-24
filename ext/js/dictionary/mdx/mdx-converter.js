@@ -1265,7 +1265,7 @@ function findMatchingCssBrace(stylesheet, blockStartIndex) {
     let quote = '';
     for (let index = blockStartIndex; index < stylesheet.length; index += 1) {
         const character = stylesheet[index];
-        if (stylesheet.startsWith('/*', index)) {
+        if (stylesheet.startsWith('/*', index) && quote.length === 0) {
             const commentEnd = stylesheet.indexOf('*/', index + 2);
             if (commentEnd < 0) {
                 return stylesheet.length - 1;
@@ -1330,7 +1330,7 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelector
         let bracketDepth = 0;
         while (cursor < stylesheet.length) {
             const character = stylesheet[cursor];
-            if (stylesheet.startsWith('/*', cursor)) {
+            if (stylesheet.startsWith('/*', cursor) && quote.length === 0) {
                 const commentEnd = stylesheet.indexOf('*/', cursor + 2);
                 if (commentEnd < 0) {
                     output.push(stylesheet.slice(preludeStart));
