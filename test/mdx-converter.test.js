@@ -250,6 +250,37 @@ describe('convertMdxToArchive', () => {
         expect(images[1]).not.toHaveProperty('height');
     });
 
+    test('omits invalid table spans while preserving positive finite spans', async () => {
+        const hugeDigits = '9'.repeat(400);
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Table spans',
+                Description: '',
+            },
+            entries: [
+                {
+                    keyText: 'Table',
+                    definition: `<table><tbody><tr><td colspan="2" rowspan="3">valid</td><td colspan="0" rowspan="${hugeDigits}">invalid</td></tr></tbody></table>`,
+                },
+            ],
+        });
+
+        const result = await convertMdxToArchive(
+            'table-spans.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = await readJson(zip, 'term_bank_1.json');
+        const serialized = JSON.stringify(termBank);
+
+        expect(serialized).toContain('"colSpan":2');
+        expect(serialized).toContain('"rowSpan":3');
+        expect(serialized).not.toContain('"colSpan":0');
+        expect(serialized).not.toContain('"rowSpan":null');
+    });
+
     test('records direct MDX preparation subphase timings', async () => {
         mockState.mdxFactory = () => ({
             header: {
