@@ -3293,9 +3293,12 @@ export class DictionaryImporter {
     _quoteJsonStringCached(value) {
         const cached = this._jsonQuotedStringCache.get(value);
         if (typeof cached !== 'undefined') {
-            // Promote to keep eviction order LRU-like.
-            this._jsonQuotedStringCache.delete(value);
-            this._jsonQuotedStringCache.set(value, cached);
+            // Before the cache can evict anything, reordering hits only adds
+            // Map mutations. Start maintaining LRU-like order once it is full.
+            if (this._jsonQuotedStringCache.size >= JSON_QUOTED_STRING_CACHE_MAX_ENTRIES) {
+                this._jsonQuotedStringCache.delete(value);
+                this._jsonQuotedStringCache.set(value, cached);
+            }
             return cached;
         }
         const quoted = JSON.stringify(value);
