@@ -1900,7 +1900,7 @@ function getFallbackRedirectTargets(redirects, keywords, normalizeRedirectKey) {
     if (redirects.size === 0) { return fallbacks; }
     const exactTargets = new Set();
     for (const {keyText} of keywords) {
-        const term = trimNullSuffix(keyText).trim();
+        const term = trimNullSuffix(keyText);
         if (redirects.has(term)) { exactTargets.add(term); }
     }
     for (const target of redirects.keys()) {
@@ -2027,7 +2027,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
 
         const tConvertEntriesStart = Date.now();
         for (const item of mdx.keywordList) {
-            const term = trimNullSuffix(item.keyText).trim();
+            const term = trimNullSuffix(item.keyText);
             processedEntries += 1;
             if (term.length === 0) {
                 if (typeof onProgress === 'function') {
