@@ -135,7 +135,8 @@ const EMPTY_TERM_GLOSSARY = [];
  * }} DirectTermChunk
  */
 const EMPTY_ARRAY_BUFFER = new ArrayBuffer(0);
-const UTF8_TEXT_DECODER = new TextDecoder('utf-8', {fatal: true});
+// Archive filenames are fields; a leading U+FEFF is part of their identity.
+const UTF8_ARCHIVE_FILENAME_DECODER = new TextDecoder('utf-8', {fatal: true, ignoreBOM: true});
 // A leading U+FEFF is data inside a term or asset path, not a document BOM.
 const UTF8_FIELD_TEXT_DECODER = new TextDecoder('utf-8', {ignoreBOM: true});
 Object.freeze(EMPTY_TERM_GLOSSARY);
@@ -247,7 +248,7 @@ function getArchiveEntryUtf8Alias(entry) {
     }
     let decoded;
     try {
-        decoded = UTF8_TEXT_DECODER.decode(rawFilename);
+        decoded = UTF8_ARCHIVE_FILENAME_DECODER.decode(rawFilename);
     } catch {
         return null;
     }
