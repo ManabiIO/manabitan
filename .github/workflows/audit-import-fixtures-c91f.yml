@@ -1,0 +1,40 @@
+name: Import review fixtures c91f
+on:
+  push:
+    branches: [audit/import-review-source-20260924-c91f]
+    paths: [.github/workflows/audit-import-fixtures-c91f.yml]
+permissions:
+  contents: read
+jobs:
+  fixtures:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node dev/perf/prepare-dictionaries.js
+      - run: npx playwright install chromium
+      - name: Package verified fixtures and browser
+        run: |
+          set -eu
+          tar -czf /tmp/manabitan-review-fixtures.tar.gz builds/e2e-dictionary-cache
+          tar -czf /tmp/manabitan-review-browser.tar.gz -C "$HOME/.cache" ms-playwright
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabitan-review-fixtures-c91f
+          path: /tmp/manabitan-review-fixtures.tar.gz
+          retention-days: 2
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabitan-review-browser-c91f
+          path: /tmp/manabitan-review-browser.tar.gz
+          retention-days: 2
+          compression-level: 0
