@@ -54,19 +54,19 @@ export class DictionaryWorkerHandler {
         const {action, params} = event.data;
         switch (action) {
             case 'importDictionary':
-                void this._onMessageWithProgress(params, this._importDictionary.bind(this));
+                void this._onMessageWithProgress(event.data.id, params, this._importDictionary.bind(this));
                 break;
             case 'importMdxDictionary':
-                void this._onMessageWithProgress(params, this._importMdxDictionary.bind(this));
+                void this._onMessageWithProgress(event.data.id, params, this._importMdxDictionary.bind(this));
                 break;
             case 'deleteDictionary':
-                void this._onMessageWithProgress(params, this._deleteDictionary.bind(this));
+                void this._onMessageWithProgress(event.data.id, params, this._deleteDictionary.bind(this));
                 break;
             case 'getDictionaryCounts':
-                void this._onMessageWithProgress(params, this._getDictionaryCounts.bind(this));
+                void this._onMessageWithProgress(event.data.id, params, this._getDictionaryCounts.bind(this));
                 break;
             case 'getMdxVersion':
-                void this._onMessageWithProgress(params, this._getMdxVersion.bind(this));
+                void this._onMessageWithProgress(event.data.id, params, this._getMdxVersion.bind(this));
                 break;
             case 'getImageDetails.response':
                 this._mediaLoader.handleMessage(params);
@@ -76,16 +76,18 @@ export class DictionaryWorkerHandler {
 
     /**
      * @template [T=unknown]
+     * @param {string} id
      * @param {T} params
      * @param {(details: T, onProgress: import('dictionary-worker-handler').OnProgressCallback) => Promise<unknown>} handler
      */
-    async _onMessageWithProgress(params, handler) {
+    async _onMessageWithProgress(id, params, handler) {
         /**
          * @param {...unknown} args
          */
         const onProgress = (...args) => {
             self.postMessage({
                 action: 'progress',
+                id,
                 params: {args},
             });
         };
@@ -96,7 +98,7 @@ export class DictionaryWorkerHandler {
         } catch (e) {
             response = {error: ExtensionError.serialize(e)};
         }
-        self.postMessage({action: 'complete', params: response});
+        self.postMessage({action: 'complete', id, params: response});
     }
 
     /**
