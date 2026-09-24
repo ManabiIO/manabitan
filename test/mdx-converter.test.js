@@ -214,6 +214,42 @@ describe('convertMdxToArchive', () => {
         expect(await zip.file('mdict-media/images/read.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
     });
 
+    test('omits non-finite image dimensions while preserving finite dimensions', async () => {
+        const hugeDigits = '9'.repeat(400);
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Image dimensions',
+                Description: '',
+            },
+            entries: [
+                {
+                    keyText: 'Images',
+                    definition: `<div><img src="images/normal.png" width="640" height="480"><img src="images/huge.png" width="${hugeDigits}" height="${hugeDigits}"></div>`,
+                },
+            ],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images/normal.png', value: Uint8Array.of(1)},
+            {keyText: 'images/huge.png', value: Uint8Array.of(2)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'image-dimensions.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'image-dimensions.mdd', bytes: new Uint8Array([2])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<{content: Array<Record<string, unknown>>}>}}} */ (termBank[0][5][0]);
+        const images = glossary.content.content[0].content;
+
+        expect(images[0]).toMatchObject({tag: 'img', width: 640, height: 480});
+        expect(images[1]).toMatchObject({tag: 'img'});
+        expect(images[1]).not.toHaveProperty('width');
+        expect(images[1]).not.toHaveProperty('height');
+    });
+
     test('records direct MDX preparation subphase timings', async () => {
         mockState.mdxFactory = () => ({
             header: {
