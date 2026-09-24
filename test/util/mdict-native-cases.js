@@ -1094,9 +1094,9 @@ describe('MDict literal key whitespace identity', () => {
         ], {keyCaseSensitive: 'Yes', stripKey: 'No', keysPerBlock: 1});
         const mdx = new MDX('literal-whitespace.mdx', fixture.bytes);
         try {
-            assert.equal(mdx.lookup(' word').definition, 'leading\\0');
-            assert.equal(mdx.lookup('word').definition, 'plain\\0');
-            assert.equal(mdx.lookup('word ').definition, 'trailing\\0');
+            assert.equal(mdx.lookup(' word').definition, 'leading\0');
+            assert.equal(mdx.lookup('word').definition, 'plain\0');
+            assert.equal(mdx.lookup('word ').definition, 'trailing\0');
             assert.deepEqual(mdx.prefix(' ').map(({keyText}) => keyText), [' word']);
             assert.deepEqual(mdx.prefix('word').map(({keyText}) => keyText), ['word', 'word ']);
         } finally {
