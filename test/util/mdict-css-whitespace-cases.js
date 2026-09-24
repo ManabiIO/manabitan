@@ -31,7 +31,7 @@ async function convertCss(css, assets = []) {
     const mdx = makeMdictFixture([
         {
             key: 'Entry',
-            value: `<style>${css}</style><div class="a${nbsp}b before">content</div>`,
+            value: `<style>${css}</style><div class="a${nbsp}b before" id="${nbsp}entry${nbsp}">content</div>`,
         },
     ], {compression: 'zlib'});
     const mddSources = assets.length === 0 ?
@@ -55,6 +55,7 @@ test('MDict CSS keeps NBSP inside selector and HTML class tokens', async () => {
     assert.ok(stylesheet.includes(`[data-sc-class~="a${nbsp}b"]`), stylesheet);
     assert.ok(!stylesheet.includes('[data-sc-class~="a"] [data-sc-tag="b"]'), stylesheet);
     assert.ok(termBankJson.includes(`"class":"a${nbsp}b before"`), termBankJson);
+    assert.ok(termBankJson.includes(`"id":"${nbsp}entry${nbsp}"`), termBankJson);
 });
 
 test('MDict CSS resolves NBSP inside an unquoted url token', async () => {
