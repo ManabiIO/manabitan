@@ -13,9 +13,10 @@ import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.j
 test('queued shard retry keeps its original offset when later rows are admitted', async () => {
     const store = new TermRecordOpfsStore();
     let resolveWriteStarted = () => {};
-    let rejectFirstWrite = (/** @type {unknown} */ _error) => {};
+    /** @type {(error?: unknown) => void} */
+    let rejectFirstWrite = () => {};
     const writeStarted = new Promise((resolve) => {
-        resolveWriteStarted = resolve;
+        resolveWriteStarted = () => resolve(void 0);
     });
     let reopenedSeekOffset = -1;
     /** @type {number[][]} */
@@ -23,10 +24,10 @@ test('queued shard retry keeps its original offset when later rows are admitted'
     const fileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
         async createWritable() {
             return {
-                async seek(position) {
+                async seek(/** @type {number} */ position) {
                     reopenedSeekOffset = position;
                 },
-                async write(value) {
+                async write(/** @type {Uint8Array} */ value) {
                     if (!ArrayBuffer.isView(value)) { throw new Error('Expected typed write'); }
                     retriedWrites.push([...new Uint8Array(value.buffer, value.byteOffset, value.byteLength)]);
                 },
@@ -38,7 +39,7 @@ test('queued shard retry keeps its original offset when later rows are admitted'
         write() {
             resolveWriteStarted();
             return new Promise((_resolve, reject) => {
-                rejectFirstWrite = reject;
+                rejectFirstWrite = (error) => reject(error);
             });
         },
     }));
