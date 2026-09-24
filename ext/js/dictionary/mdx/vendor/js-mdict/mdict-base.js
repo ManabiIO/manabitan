@@ -247,7 +247,8 @@ class MDictBase {
             key = key.replace(common.REGEXP_STRIPKEY[this.meta.ext], '$1');
             key = key.replace(/_/g, '!');
         }
-        return key.trim();
+        // Whitespace is part of key identity unless the dictionary's StripKey rule removes it.
+        return key;
     }
     comp(word1, word2) {
         return word1.localeCompare(word2);
