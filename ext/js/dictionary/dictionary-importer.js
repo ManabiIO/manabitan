@@ -3511,12 +3511,10 @@ export class DictionaryImporter {
             }
         }
 
-        const hasSharedGlossaryOffset = sharedGlossaryPackedOffset !== null
-        const hasSharedGlossaryLength = sharedGlossaryPackedLength !== null
-        if (hasSharedGlossaryOffset !== hasSharedGlossaryLength) {
-            throw new Error('Packed shared glossary range is incomplete')
-        }
-        if (!hasSharedGlossaryOffset) {
+        if (sharedGlossaryPackedOffset === null || sharedGlossaryPackedLength === null) {
+            if (sharedGlossaryPackedOffset !== sharedGlossaryPackedLength) {
+                throw new Error('Packed shared glossary range is incomplete')
+            }
             return
         }
         if (
