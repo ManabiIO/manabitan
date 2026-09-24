@@ -364,6 +364,27 @@ describe('TermContentBlockStore', () => {
         }
     });
 
+    test('plans exact and oversized shared-span blocks in one pass', async () => {
+        vi.mocked(compressWrappedTermContentZstdSpansBatch).mockClear();
+        const blockStore = new TermContentBlockStore(new TermContentOpfsStore(), {
+            blockTargetBytes: 5,
+            referencePackTargetBytes: 64,
+            minInputBytes: 0,
+        });
+        const source = new Uint8Array(new SharedArrayBuffer(16));
+        source.set(Array.from({length: 16}, (_value, index) => index + 1));
+        const offsets = new Uint32Array([0, 3, 5, 11, 12]);
+        const lengths = new Uint32Array([3, 2, 6, 1, 4]);
+
+        const result = await blockStore.tryAppendSpans(source, offsets, lengths, 'jmdict', true);
+
+        expect(result).not.toBeNull();
+        expect(compressWrappedTermContentZstdSpansBatch).toHaveBeenCalledOnce();
+        const call = vi.mocked(compressWrappedTermContentZstdSpansBatch).mock.calls[0];
+        expect(call[3]).toStrictEqual(new Uint32Array([0, 2, 3, 5]));
+        expect(call[4]).toStrictEqual(new Uint32Array([5, 6, 5]));
+    });
+
     test('reserves the first sufficiently compressible shared slab', async () => {
         const blockStore = new TermContentBlockStore(new TermContentOpfsStore(), {
             blockTargetBytes: 512,
