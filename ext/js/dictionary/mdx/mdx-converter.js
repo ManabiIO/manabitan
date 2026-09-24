@@ -1699,7 +1699,7 @@ function appendStructuredContent(parent, content, details) {
             }
             continue;
         }
-        if (tagName === 'link' && (attrs.rel || '').toLowerCase().includes('stylesheet')) {
+        if (tagName === 'link' && (attrs.rel || '').split(/[\t\n\f\r ]+/u).some((token) => token.toLowerCase() === 'stylesheet')) {
             const assetKey = normalizeReferencedAssetKey(attrs.href ?? '', details.assetPrefix, null);
             if (assetKey !== null) {
                 details.assetReferences.add(assetKey);
