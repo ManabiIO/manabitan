@@ -353,8 +353,10 @@ export function compareRevisions(current, latest) {
         return current < latest;
     }
 
-    const currentParts = current.split('.').map((part) => Number.parseInt(part, 10));
-    const latestParts = latest.split('.').map((part) => Number.parseInt(part, 10));
+    // Revision components can exceed Number's exact integer range.
+    // Compare their full integer values instead of silently rounding them.
+    const currentParts = current.split('.').map((part) => BigInt(part));
+    const latestParts = latest.split('.').map((part) => BigInt(part));
 
     if (currentParts.length !== latestParts.length) {
         return current < latest;
