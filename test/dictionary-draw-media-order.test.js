@@ -52,6 +52,7 @@ test('drawMedia keeps stable order within SVG/raster priority groups', async () 
         }
     });
 
+    /** @type {number[][]} */
     const postedCanvasIndexes = [];
     await database.drawMedia([
         {dictionary: 'D', path: 'svg-a', canvasIndex: 0, canvasWidth: 1, canvasHeight: 1, generation: 1},
@@ -59,7 +60,7 @@ test('drawMedia keeps stable order within SVG/raster priority groups', async () 
         {dictionary: 'D', path: 'svg-b', canvasIndex: 2, canvasWidth: 1, canvasHeight: 1, generation: 1},
         {dictionary: 'D', path: 'png-b', canvasIndex: 3, canvasWidth: 1, canvasHeight: 1, generation: 1},
     ], /** @type {MessagePort} */ (/** @type {unknown} */ ({
-        postMessage(message) {
+        postMessage(/** @type {{params: {canvasIndexes: number[]}}} */ message) {
             postedCanvasIndexes.push(message.params.canvasIndexes);
         },
     })));
