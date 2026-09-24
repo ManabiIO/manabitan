@@ -12,20 +12,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - name: Apply exact locally validated patch
-        env:
-          PATCH: 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
+      - name: Apply exact locally validated changes to pinned baseline
         run: |
+          cp .review/artifact-preload.test.txt "$RUNNER_TEMP/artifact-preload.test.js"
+          git switch -c fix/artifact-preload-drain-20260924 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          cp "$RUNNER_TEMP/artifact-preload.test.js" test/dictionary-importer-artifact-preload.test.js
           python3 - <<'PY'
-          import os,base64,zlib,subprocess
-          patch=zlib.decompress(base64.b64decode(os.environ['PATCH']))
-          subprocess.run(['git','apply','--check','-'],input=patch,check=True)
-          subprocess.run(['git','apply','-'],input=patch,check=True)
+          from pathlib import Path
+          p=Path('ext/js/dictionary/dictionary-importer.js')
+          s=p.read_text()
+          anchor='/**\n * Chromium rejects SharedArrayBuffer-backed views passed to TextDecoder.'
+          helper='''/**
+           * Keep the archive alive until every admitted read settles, including when
+           * one read fails early. Preserve Promise.all's first rejection and tuple types.
+           * @template {unknown[]|[]} T
+           * @param {T} reads
+           * @returns {Promise<{[K in keyof T]: Awaited<T[K]>}>}
+           */
+          async function joinArchiveReads(reads) {
+              try {
+                  return await Promise.all(reads);
+              } catch (error) {
+                  await Promise.allSettled(reads);
+                  throw error;
+              }
+          }
+
+          '''
+          assert s.count(anchor)==1
+          s=s.replace(anchor,helper+anchor)
+          a='const [parallelPackedTermArtifactBytes, parallelPackedMediaArtifact] = await Promise.all(['
+          b='const batchResults = await Promise.all(batch.map(async (termFile) => {'
+          assert s.count(a)==1 and s.count(b)==1
+          s=s.replace(a,a.replace('Promise.all','joinArchiveReads')).replace(b,b.replace('Promise.all','joinArchiveReads'))
+          p.write_text(s)
           PY
           echo '89e51d0651219b9247190ed57def2f881debcb0a2e7cc0e4f2605f166cdc2b4a  ext/js/dictionary/dictionary-importer.js' | sha256sum -c -
           echo '18f4d2cef2a294576c6ac6971b63926b0a6b91fa814bf9d6fbaddae1ad2c0db5  test/dictionary-importer-artifact-preload.test.js' | sha256sum -c -
@@ -34,9 +59,8 @@ jobs:
       - run: npm run test:ts && npm run test:unit && npm run test:build
       - name: Publish clean source branch
         run: |
-          git switch -c fix/artifact-preload-drain-20260924
           git config user.name 'Alex Ehlke'
           git config user.email 'alex.ehlke@gmail.com'
           git add ext/js/dictionary/dictionary-importer.js test/dictionary-importer-artifact-preload.test.js
-          git commit -m 'fix(import): drain artifact preloads before closing the archive'
+          git -c core.hooksPath=/dev/null commit -m 'fix(import): drain artifact preloads before closing the archive'
           git push origin HEAD:refs/heads/fix/artifact-preload-drain-20260924
