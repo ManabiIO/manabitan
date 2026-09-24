@@ -1,0 +1,180 @@
+name: Import review empty scanner 20260924
+on:
+  push:
+    branches: [verify/import-review-20260924]
+    paths: [.github/workflows/import-review-empty-scan-20260924.yml]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+          cache-dependency-path: baseline/package-lock.json
+      - run: |
+          cd baseline
+          npm ci
+          npm run build:libs
+          npx playwright install chromium
+          ln -s "$PWD/node_modules" ../candidate/node_modules
+      - name: Apply empty-string candidate and content parity tests
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import textwrap
+          p=Path('candidate/ext/js/dictionary/wasm/term-bank-parser.c')
+          s=p.read_text()
+          start=s.index('static __attribute__((always_inline)) inline int parse_string_span(')
+          old='    uint32_t i = start + 1u;\n'
+          at=s.index(old,start)
+          extra=textwrap.indent(textwrap.dedent('''\
+          // Empty metadata strings are common; avoid a word scan whose first
+          // byte is already the closing quote. Keep the logical-bank bound.
+          if (i < len && src[i] == '"') {
+              *out_end = i + 1u;
+              return 1;
+          }
+          '''),'    ')
+          s=s[:at]+s[at:].replace(old,old+extra,1)
+          p.write_text(s)
+          tests=textwrap.dedent(r'''
+          describe('native string scanner fast-path parity', () => {
+              maybeTest.each(Array.from({length: 48}, (_, index) => index))('preserves delimiters and Unicode after %i bytes', async (padding) => {
+                  const value = `${'x'.repeat(padding)}"\\\n日本語😀\tend`;
+                  const rows = [['言葉', 'ことば', '', '', 1, [value], 42, '']];
+                  const parsed = await parseRows(rows);
+                  expect(parsed).toHaveLength(1);
+                  expect(parsed[0].expression).toBe('言葉');
+                  expect(getContentString(parsed[0])).toContain(JSON.stringify(value));
+                  const columns = await parseColumnSnapshot([textEncoder.encode(JSON.stringify(rows))]);
+                  expect(columns).toMatchObject({rowCount: 1, expressions: ['言葉'], readings: ['ことば'], scores: [1], sequences: [42]});
+              });
+
+              maybeTest.each(Array.from({length: 32}, (_, index) => index))('rejects invalid string characters after %i bytes', async (padding) => {
+                  for (const invalid of ['\\q', '\n', '\t']) {
+                      const json = `[["a","","","",0,["${'x'.repeat(padding)}${invalid}end"],1,""]]`;
+                      await expect(parseRowsJson(json)).rejects.toThrow();
+                  }
+              });
+
+              maybeTest.each(Array.from({length: 8}, (_, index) => index))('round-trips empty metadata mask %i through native content slabs', async (mask) => {
+                  const definitionTags = (mask & 1) === 0 ? '' : 'tag';
+                  const rules = (mask & 2) === 0 ? '' : 'rule';
+                  const termTags = (mask & 4) === 0 ? '' : 'term-tag';
+                  const glossary = ['', '日本語', {type: 'text', text: ''}, '"\\\t'];
+                  const source = textEncoder.encode(JSON.stringify([['言葉', '', definitionTags, rules, 0, glossary, 42, termTags]]));
+                  /** @type {TermBankColumnChunk[]} */
+                  const chunks = [];
+                  await parseTermBankWithWasmColumnChunks(source, 3, (chunk) => { chunks.push(copyWasmBackedColumnChunk(chunk)); }, 8, {
+                      computeContentHashes: true,
+                      emitContentSlab: true,
+                      emitTokenBinaryContent: true,
+                  });
+                  expect(chunks).toHaveLength(1);
+                  const {contentBytesBaseOffset, contentMetaList, contentBytesBuffer} = chunks[0];
+                  if (typeof contentBytesBaseOffset !== 'number' || !(contentMetaList instanceof Uint32Array) || !(contentBytesBuffer instanceof Uint8Array)) {
+                      throw new Error('Expected native content slab');
+                  }
+                  const offset = contentBytesBaseOffset + contentMetaList[0];
+                  const bytes = contentBytesBuffer.subarray(offset, offset + contentMetaList[1]);
+                  const decoded = decodeRawTermContentTokenBinary(bytes, textDecoder);
+                  expect(decoded).toMatchObject({rules, definitionTags, termTags});
+                  expect(JSON.parse(decoded?.glossaryJson ?? 'null')).toEqual(['', '日本語', '', '"\\\t']);
+                  expect(hashTermEntryContentBytesPair(bytes)).toEqual([contentMetaList[2], contentMetaList[3]]);
+              });
+          });
+          ''')
+          for root in ('baseline','candidate'):
+              p=Path(root)/'test/term-bank-wasm-parser.test.js'
+              p.write_text(p.read_text()+tests)
+          PY
+          cd candidate
+          git diff --check
+          npm run build:libs
+          npx vitest run test/term-bank-wasm-parser.test.js --minWorkers=1 --maxWorkers=2 > ../empty-focused.log 2>&1 || { tail -n 100 ../empty-focused.log; exit 1; }
+          tail -n 10 ../empty-focused.log
+          cd ../baseline
+          npx vitest run test/term-bank-wasm-parser.test.js --minWorkers=1 --maxWorkers=2 > ../empty-baseline-parity.log 2>&1 || { tail -n 100 ../empty-baseline-parity.log; exit 1; }
+          tail -n 10 ../empty-baseline-parity.log
+          git checkout -- test/term-bank-wasm-parser.test.js
+      - name: Warm every corpus and alternate paired default imports
+        run: |
+          python3 - <<'PY'
+          import subprocess,json,pathlib,statistics,hashlib,random,math
+          root=pathlib.Path.cwd()
+          def run(variant,dictionary,label,build=False):
+              cwd=root/variant
+              out=cwd/'builds/perf'/label
+              args=['node','dev/perf/import-benchmark.js',dictionary,'--runs','1','--output',str(out)]
+              if not build: args+=['--no-build']
+              log=root/(label+'.log')
+              with log.open('w') as f: result=subprocess.run(args,cwd=cwd,stdout=f,stderr=subprocess.STDOUT)
+              if result.returncode:
+                  print(log.read_text()[-16000:],flush=True)
+                  raise RuntimeError(label+' failed')
+              data=json.loads((out/'summary.json').read_text())
+              assert data['authoritativeTiming'] and not data['traceEnabled']
+              r=data['runs'][0]
+              result={'variant':variant,'dictionary':dictionary,'label':label,'totalImportMs':r['totalImportMs'],'workerImportMs':r['workerImportMs'],'validation':r['validation'],'browser':data['browserVersion'],'host':data['hostEnvironment'],'source':data['source']}
+              print('MEASURE',json.dumps({k:result[k] for k in ('variant','dictionary','label','totalImportMs','workerImportMs')}),flush=True)
+              return result
+          for d in ('jmdict','jitendex','jmnedict'):
+              for v in ('baseline','candidate'): run(v,d,'warmup-'+d+'-'+v,d=='jmdict')
+          measurements=[]
+          for pair in range(7):
+              for d in ('jmdict','jitendex','jmnedict'):
+                  for v in (('baseline','candidate') if pair%2==0 else ('candidate','baseline')):
+                      measurements.append(run(v,d,f'{d}-pair-{pair+1}-{v}'))
+                      (root/'empty-measurements.json').write_text(json.dumps(measurements,indent=2)+'\n')
+          summaries=[]
+          rng=random.Random(20260924)
+          for d in ('jmdict','jitendex','jmnedict'):
+              a=[x['totalImportMs'] for x in measurements if x['dictionary']==d and x['variant']=='baseline']
+              b=[x['totalImportMs'] for x in measurements if x['dictionary']==d and x['variant']=='candidate']
+              changes=[100*(y/x-1) for x,y in zip(a,b)]
+              logs=[math.log(y/x) for x,y in zip(a,b)]
+              boot=sorted(100*(math.exp(statistics.mean(rng.choices(logs,k=len(logs))))-1) for _ in range(10000))
+              summary={'dictionary':d,'baseline':a,'candidate':b,'baselineMedianMs':statistics.median(a),'candidateMedianMs':statistics.median(b),'medianChangePercent':100*(statistics.median(b)/statistics.median(a)-1),'pairedChangesPercent':changes,'pairedGeometricMeanChangePercent':100*(math.exp(statistics.mean(logs))-1),'pairedBootstrap95Percent':[boot[250],boot[9749]]}
+              summaries.append(summary)
+              print('RESULT',json.dumps(summary),flush=True)
+          patch=subprocess.check_output(['git','diff'],cwd=root/'candidate')
+          (root/'empty-candidate.patch').write_bytes(patch)
+          result={'summaries':summaries,'measurements':measurements,'patchSha256':hashlib.sha256(patch).hexdigest()}
+          (root/'empty-results.json').write_text(json.dumps(result,indent=2)+'\n')
+          print('ENVIRONMENT',json.dumps(measurements[0]['host']),flush=True)
+          PY
+      - name: Validate candidate broadly
+        run: |
+          cd candidate
+          npx vitest run --minWorkers=1 --maxWorkers=2 > ../empty-unit.log 2>&1 || { tail -n 100 ../empty-unit.log; exit 1; }
+          tail -n 12 ../empty-unit.log
+          npx eslint test/term-bank-wasm-parser.test.js
+          npm run test:ts > ../empty-types.log 2>&1 || { tail -n 100 ../empty-types.log; exit 1; }
+          npm run test:build > ../empty-build.log 2>&1 || { tail -n 100 ../empty-build.log; exit 1; }
+          git diff --check
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-review-empty-evidence
+          path: |
+            empty-results.json
+            empty-measurements.json
+            empty-candidate.patch
+            *.log
+            baseline/builds/perf
+            candidate/builds/perf
+          retention-days: 14
