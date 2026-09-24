@@ -836,6 +836,9 @@ export class DictionaryImporter {
         const kanjiFiles = archiveFiles.kanjiFiles ?? [];
         const kanjiMetaFiles = archiveFiles.kanjiMetaFiles ?? [];
         const tagFiles = archiveFiles.tagFiles ?? [];
+        /** @type {import('dictionary-database').Tag[]} */
+        const indexTags = [];
+        if (!usePrunedArtifactAuxFastPath) { this._addOldIndexTags(index, indexTags, dictionaryTitle); }
         const useTermArtifactFiles = termArtifactFiles.length > 0;
         const defaultEnableTermEntryContentDedup = true;
         const enableTermEntryContentDedup = requestedTermEntryContentDedup ?? defaultEnableTermEntryContentDedup;
@@ -1070,7 +1073,7 @@ export class DictionaryImporter {
 
         // Term files are doubled due to media importing.
         // This transition enters "Importing data".
-        this._progressNextStep((activeTermFiles.length * 2 + termMetaFiles.length + kanjiFiles.length + kanjiMetaFiles.length + tagFiles.length) * bulkAddProgressAllowance);
+        this._progressNextStep((activeTermFiles.length * 2 + termMetaFiles.length + kanjiFiles.length + kanjiMetaFiles.length + tagFiles.length + (indexTags.length > 0 ? 1 : 0)) * bulkAddProgressAllowance);
         const previousProgressInterval = this._progressMinIntervalMs;
         this._setProgressInterval(IMPORT_DATA_PROGRESS_MIN_INTERVAL_MS);
 
@@ -2126,7 +2129,6 @@ export class DictionaryImporter {
             for (const tagFile of tagFiles) {
                 const tTagFile = Date.now();
                 let tagList = /** @type {import('dictionary-database').Tag[]} */ (await this._readFileSequence([tagFile], this._convertTagBankEntry.bind(this), dictionaryTitle));
-                this._addOldIndexTags(index, tagList, dictionaryTitle);
                 step4TimingBreakdown.tagReadMs += Math.max(0, Date.now() - tTagFile);
 
                 const tTagWriteStart = Date.now();
@@ -2138,6 +2140,14 @@ export class DictionaryImporter {
                 this._logImport(`tag file ${tagFile.filename}: entries=${tagList.length} elapsed=${Date.now() - tTagFile}ms`);
 
                 tagList = [];
+            }
+            if (indexTags.length > 0) {
+                // Embedded legacy tags belong to the dictionary, not each tag bank.
+                const tIndexTagWriteStart = Date.now();
+                await bulkAdd('tagMeta', indexTags);
+                step4TimingBreakdown.bulkAddTagsMetaMs += Math.max(0, Date.now() - tIndexTagWriteStart);
+                counts.tagMeta.total += indexTags.length;
+                this._progress();
             }
             const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);
             const fastPathProfile = lastFastTermBankReadProfile?.parserProfile ?? null;
