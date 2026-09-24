@@ -23,9 +23,10 @@ describe('DictionaryImporter media concurrency', () => {
     test('scheduler still processes every item when given NaN concurrency', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const run = Reflect.get(importer, '_runWithConcurrencyLimit');
+        /** @type {number[]} */
         const processed = [];
 
-        await run.call(importer, [1, 2, 3], Number.NaN, async (value) => {
+        await run.call(importer, [1, 2, 3], Number.NaN, async (/** @type {number} */ value) => {
             processed.push(value);
         });
 
