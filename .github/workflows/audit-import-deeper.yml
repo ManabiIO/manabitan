@@ -1,0 +1,35 @@
+name: Import deeper qualification
+on:
+  push:
+    branches: [audit/import-deeper-20260924-1835]
+    paths: [.github/workflows/audit-import-deeper.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c9fa57e20f08442953299485e053d0f8601674fa
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install pinned dependencies and build libraries
+        run: npm ci && npm run build:libs
+      - name: Package review workspace
+        run: |
+          git archive HEAD | gzip > "$RUNNER_TEMP/source.tar.gz"
+          tar -czf "$RUNNER_TEMP/dependencies.tar.gz" node_modules ext/lib
+          git rev-parse HEAD
+          sha256sum "$RUNNER_TEMP/source.tar.gz" "$RUNNER_TEMP/dependencies.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-import-review-workspace
+          path: |
+            ${{ runner.temp }}/source.tar.gz
+            ${{ runner.temp }}/dependencies.tar.gz
+          retention-days: 3
+          compression-level: 0
