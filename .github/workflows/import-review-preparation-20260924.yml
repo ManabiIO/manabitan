@@ -1,0 +1,34 @@
+name: Import review preparation 20260924
+on:
+  push:
+    branches: [verify/import-review-20260924]
+    paths: [.github/workflows/import-review-preparation-20260924.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Package source and installed dependencies
+        run: |
+          git rev-parse HEAD > /tmp/import-review-source-sha.txt
+          tar --exclude=.git -czf /tmp/import-review-workspace.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-workspace
+          path: |
+            /tmp/import-review-workspace.tar.gz
+            /tmp/import-review-source-sha.txt
+          retention-days: 3
+          compression-level: 0
