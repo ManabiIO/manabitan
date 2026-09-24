@@ -108,7 +108,6 @@ const TERM_BANK_SHARED_GLOSSARY_ARTIFACT_FILE = 'manabitan-term-glossary-shared.
 const TERM_ARTIFACT_PRELOAD_CONCURRENCY = 4;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const GLOSSARY_IMAGE_PATH_PATTERN = /"path"\s*:\s*"((?:\\.|[^"\\])*)"/g;
-const JSON_PATH_KEY_BYTES = new Uint8Array([0x22, 0x70, 0x61, 0x74, 0x68, 0x22]);
 /** @type {import('dictionary-data').TermGlossary[]} */
 const EMPTY_TERM_GLOSSARY = [];
 /** @typedef {import('dictionary-importer').ImportFileEntry} ImportFileEntry */
@@ -2743,11 +2742,14 @@ export class DictionaryImporter {
     _extractImagePathsFromGlossaryJsonBytes(bytes) {
         /** @type {string[]} */
         const paths = [];
-        for (let i = 0, ii = bytes.length - JSON_PATH_KEY_BYTES.length; i <= ii; ++i) {
+        for (let i = 0, ii = bytes.length - 6; i <= ii; ++i) {
             // No caller-visible requirements have been added yet; discard partial results.
             if (bytes[i] === 0x5c && bytes[i + 1] === 0x75) { return null; }
-            if (!this._bytesMatch(bytes, i, JSON_PATH_KEY_BYTES)) { continue; }
-            let cursor = i + JSON_PATH_KEY_BYTES.length;
+            if (
+                bytes[i] !== 0x22 || bytes[i + 1] !== 0x70 || bytes[i + 2] !== 0x61 ||
+                bytes[i + 3] !== 0x74 || bytes[i + 4] !== 0x68 || bytes[i + 5] !== 0x22
+            ) { continue; }
+            let cursor = i + 6;
             cursor = this._skipJsonWhitespaceBytes(bytes, cursor);
             if (bytes[cursor] !== 0x3a) { continue; }
             cursor = this._skipJsonWhitespaceBytes(bytes, cursor + 1);
@@ -2785,21 +2787,6 @@ export class DictionaryImporter {
             i = cursor;
         }
         return paths;
-    }
-
-    /**
-     * @param {Uint8Array} bytes
-     * @param {number} offset
-     * @param {Uint8Array} needle
-     * @returns {boolean}
-     */
-    _bytesMatch(bytes, offset, needle) {
-        for (let i = 0, ii = needle.length; i < ii; ++i) {
-            if (bytes[offset + i] !== needle[i]) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
