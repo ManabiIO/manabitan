@@ -353,16 +353,23 @@ export function compareRevisions(current, latest) {
         return current < latest;
     }
 
-    const currentParts = current.split('.').map((part) => Number.parseInt(part, 10));
-    const latestParts = latest.split('.').map((part) => Number.parseInt(part, 10));
+    const currentParts = current.split('.');
+    const latestParts = latest.split('.');
 
     if (currentParts.length !== latestParts.length) {
         return current < latest;
     }
 
     for (let i = 0; i < currentParts.length; i++) {
-        if (currentParts[i] !== latestParts[i]) {
-            return currentParts[i] < latestParts[i];
+        // Revision components have no numeric size limit. Comparing canonical
+        // decimal strings avoids rounding wide integers or overflowing to Infinity.
+        const currentPart = currentParts[i].replace(/^0+/, '');
+        const latestPart = latestParts[i].replace(/^0+/, '');
+        if (currentPart.length !== latestPart.length) {
+            return currentPart.length < latestPart.length;
+        }
+        if (currentPart !== latestPart) {
+            return currentPart < latestPart;
         }
     }
 
