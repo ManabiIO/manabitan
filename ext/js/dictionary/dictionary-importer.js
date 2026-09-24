@@ -4846,6 +4846,7 @@ null;
      * @param {Uint8Array} termEntryContentBytes
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
      * @returns {Uint8Array}
+     * @throws {Error} If shared-glossary term content is malformed.
      */
     _normalizeArtifactTermContentBytes(termEntryContentBytes, termContentStorageMode) {
         if (termContentStorageMode !== 'raw-bytes' || termEntryContentBytes.byteLength === 0) {
@@ -4886,6 +4887,7 @@ null;
      * @param {Uint8Array} termEntryContentBytes
      * @param {number} sharedGlossaryBaseOffset
      * @returns {{contentBytes: Uint8Array, contentDictName: string|null}}
+     * @throws {Error} If shared-glossary term content is malformed or cannot be rebased.
      */
     _normalizeArtifactTermContent(termEntryContentBytes, sharedGlossaryBaseOffset = 0) {
         let contentBytes = termEntryContentBytes;
