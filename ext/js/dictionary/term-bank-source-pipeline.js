@@ -378,7 +378,6 @@ export class TermBankSourcePipeline {
         for (const candidate of batch) {
             const candidateBytes = this._getEstimatedBytes(candidate);
             if (
-                prefetchedCount > 0 &&
                 candidateBytes > 0 &&
                 estimatedBytes + candidateBytes > this._prefetchMaxBytes
             ) {
