@@ -286,7 +286,7 @@ class MddAssetResolver {
                     if (key.length === 0 || this._records.has(key)) { continue; }
                     const record = {dictionaryIndex, item};
                     this._records.set(key, record);
-                    if (key.toLowerCase().endsWith('.css')) {
+                    if (hasCssFileExtension(key)) {
                         this._cssKeys.push(key);
                     }
                 }
@@ -416,6 +416,20 @@ function prepareDefinitionMarkup(definition, header) {
  */
 function normalizeAssetKey(rawKey) {
     return rawKey.replaceAll('\\', '/').replace(/^\/+/u, '');
+}
+
+/**
+ * @param {string} value
+ * @returns {boolean}
+ */
+function hasCssFileExtension(value) {
+    const length = value.length;
+    if (length < 4 || value.charCodeAt(length - 4) !== 0x2e) { return false; }
+    return (
+        (value.charCodeAt(length - 3) | 0x20) === 0x63 &&
+        (value.charCodeAt(length - 2) | 0x20) === 0x73 &&
+        (value.charCodeAt(length - 1) | 0x20) === 0x73
+    );
 }
 
 /**
