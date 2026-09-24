@@ -1,0 +1,79 @@
+name: Validate legacy tags c91f
+on:
+  push:
+    branches: [audit/import-review-source-20260924-c91f]
+    paths: [.github/workflows/audit-legacy-tags-c91f.yml]
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: source
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          path: source
+      - uses: actions/checkout@v4
+        with:
+          path: transport
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci && npm run build:libs
+      - name: Reproduce baseline failures using full import regressions
+        run: |
+          cp ../transport/dev/perf/audit-c91f-legacy-tags.test.js test/dictionary-importer-legacy-tags.test.js
+          set +e
+          ./node_modules/.bin/vitest run test/dictionary-importer-legacy-tags.test.js
+          status=$?
+          set -e
+          test "$status" -eq 1
+      - name: Apply exact reviewed repair and verify source hashes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          p = Path('ext/js/dictionary/dictionary-importer.js')
+          source = p.read_text()
+          replacements = [
+              ('        const tagFiles = archiveFiles.tagFiles ?? [];',
+               "        const tagFiles = archiveFiles.tagFiles ?? [];\n        /** @type {import('dictionary-database').Tag[]} */\n        const indexTags = [];\n        if (!usePrunedArtifactAuxFastPath) { this._addOldIndexTags(index, indexTags, dictionaryTitle); }"),
+              ('+ tagFiles.length) * bulkAddProgressAllowance);',
+               '+ tagFiles.length + (indexTags.length > 0 ? 1 : 0)) * bulkAddProgressAllowance);'),
+              ('                this._addOldIndexTags(index, tagList, dictionaryTitle);\n', ''),
+              ('            const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);',
+               "            if (indexTags.length > 0) {\n                // Embedded legacy tags belong to the dictionary, not each tag bank.\n                const tIndexTagWriteStart = Date.now();\n                await bulkAdd('tagMeta', indexTags);\n                step4TimingBreakdown.bulkAddTagsMetaMs += Math.max(0, Date.now() - tIndexTagWriteStart);\n                counts.tagMeta.total += indexTags.length;\n                this._progress();\n            }\n            const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);"),
+          ]
+          for old, new in replacements:
+              assert source.count(old) == 1, old
+              source = source.replace(old, new)
+          p.write_text(source)
+          expected = {
+              str(p): '6f080a14217951f63f6be25c126c2e2b6f8477c1',
+              'test/dictionary-importer-legacy-tags.test.js': 'a1e2f6f14b70be9911d1b71e3041d1fbc989c354',
+          }
+          for path, sha in expected.items():
+              actual = subprocess.check_output(['git', 'hash-object', path], text=True).strip()
+              assert actual == sha, (path, actual, sha)
+              print('Verified', path, actual)
+          PY
+      - name: Validate production source and regressions
+        run: |
+          ./node_modules/.bin/eslint ext/js/dictionary/dictionary-importer.js test/dictionary-importer-legacy-tags.test.js
+          npm run test:ts
+          npm run test:unit
+          npm run test:build
+          git diff --check
+      - name: Publish only source and regression tests
+        run: |
+          git switch -c fix/import-legacy-index-tags-20260924-c91f
+          git add ext/js/dictionary/dictionary-importer.js test/dictionary-importer-legacy-tags.test.js
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(import): import embedded legacy index tags exactly once'
+          git push origin HEAD:refs/heads/fix/import-legacy-index-tags-20260924-c91f
