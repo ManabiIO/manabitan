@@ -87,6 +87,34 @@ function getUrlImportSteps() {
     return /** @type {import('dictionary-importer').ImportSteps} */ (getUrlImportStepsMethod.call(context));
 }
 
+describe('Reader Jitendex handoff', () => {
+    test('uses the existing recommendation button once and skips an installed dictionary', () => {
+        document.body.innerHTML = `<div id="recommended-term-dictionaries">
+            <div class="settings-item"><span class="settings-item-label">JMnedict</span>
+                <button class="action-button" data-action="import-recommended-dictionary"></button></div>
+            <div class="settings-item"><span class="settings-item-label">Jitendex</span>
+                <button class="action-button" data-action="import-recommended-dictionary"></button></div>
+        </div>`;
+        const controller = Object.create(DictionaryImportController.prototype);
+        Reflect.set(controller, '_readerInstallJitendex', true);
+        const [otherButton, jitendexButton] = document.querySelectorAll('button');
+        const otherClick = vi.fn();
+        const jitendexClick = vi.fn();
+        otherButton.addEventListener('click', otherClick);
+        jitendexButton.addEventListener('click', jitendexClick);
+
+        Reflect.get(controller, '_installReaderJitendexIfRequested').call(controller);
+        Reflect.get(controller, '_installReaderJitendexIfRequested').call(controller);
+        expect(otherClick).not.toHaveBeenCalled();
+        expect(jitendexClick).toHaveBeenCalledTimes(1);
+
+        jitendexButton.disabled = true;
+        Reflect.set(controller, '_readerInstallJitendex', true);
+        Reflect.get(controller, '_installReaderJitendexIfRequested').call(controller);
+        expect(jitendexClick).toHaveBeenCalledTimes(1);
+    });
+});
+
 describe('Dictionary import progress steps', () => {
     const {window} = testEnv;
 

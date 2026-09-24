@@ -50,4 +50,30 @@ await Application.main(false, async (application) => {
     if (documentElement !== null) {
         documentElement.dataset.manabitanContentScriptPrepared = 'true';
     }
+
+    // A reader click can open the existing recommended-dictionary UI with one
+    // fixed dictionary selected. Keep this bridge narrow: no page-supplied URL,
+    // dictionary name, or extension command is accepted.
+    if (window === window.top && (
+        window.location.origin === 'https://reader.manabi.io' ||
+        window.location.origin === 'https://manabi.io'
+    )) {
+        document.addEventListener('click', (event) => {
+            if (!event.isTrusted || !(event.target instanceof Element)) { return; }
+            if (event.target.closest('[data-manabitan-install-jitendex="true"]') === null) { return; }
+            void application.api.commandExec('openReaderJitendexSetup');
+        }, true);
+        const markReaderBridge = () => {
+            const root = document.documentElement;
+            if (root === null) { return false; }
+            root.dataset.manabitanReaderJitendexBridge = 'true';
+            return true;
+        };
+        if (!markReaderBridge()) {
+            const observer = new MutationObserver(() => {
+                if (markReaderBridge()) { observer.disconnect(); }
+            });
+            observer.observe(document, {childList: true});
+        }
+    }
 });

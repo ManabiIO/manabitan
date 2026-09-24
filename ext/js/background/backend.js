@@ -253,6 +253,7 @@ export class Backend {
             ['toggleTextScanning', this._onCommandToggleTextScanning.bind(this)],
             ['openInfoPage', this._onCommandOpenInfoPage.bind(this)],
             ['openSettingsPage', this._onCommandOpenSettingsPage.bind(this)],
+            ['openReaderJitendexSetup', this._onCommandOpenReaderJitendexSetup.bind(this)],
             ['openSearchPage', this._onCommandOpenSearchPage.bind(this)],
             ['openPopupWindow', this._onCommandOpenPopupWindow.bind(this)],
         ]));
@@ -2266,6 +2267,11 @@ export class Backend {
             mode = this._normalizeOpenSettingsPageMode(params.mode, mode);
         }
         await this._openSettingsPage(mode);
+    }
+
+    /** Open the normal Settings page and its existing dictionary installer. */
+    async _onCommandOpenReaderJitendexSetup() {
+        await this._createTab(chrome.runtime.getURL('/settings.html?readerInstall=jitendex'));
     }
 
     /**
