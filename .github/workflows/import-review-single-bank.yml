@@ -36,14 +36,39 @@ jobs:
         run: |
           set -euo pipefail
           node dev/perf/import-ab.js "$DICTIONARY" --pairs 3 --flags '{"experimentalFusedSingleBank":true}' --label single-bank-fusion | tee builds/single-bank-benchmark.log
+      - name: Separate whole-process memory controls, not authoritative timing
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+          MANABITAN_CHROMIUM_BROWSER: chromium
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_IMPORT_BENCH_QUICK: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+        run: |
+          set -euo pipefail
+          export MANABITAN_E2E_IMPORT_BENCH_DICTIONARY="$DICTIONARY"
+          for arm in baseline candidate; do
+            flags='{}'
+            if [[ "$arm" == candidate ]]; then flags='{"experimentalFusedSingleBank":true}'; fi
+            MANABITAN_E2E_IMPORT_FLAGS_JSON="$flags" MANABITAN_CHROMIUM_E2E_REPORT="$PWD/builds/single-bank-memory-$arm.html" node test/chromium/extension-two-dictionary-import.e2e.js
+          done
       - name: Preserve measured reports, including failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: single-bank-fusion-${{ matrix.dictionary }}
           path: |
-            builds/*flags-ab*.json
-            builds/*flags-ab*.html
+            builds/chromium-e2e-import-report-iso-*.json
+            builds/chromium-e2e-import-report-iso-*.html
+            builds/chromium-e2e-import-flags-isolated-summary-*.json
+            builds/single-bank-memory-*.json
+            builds/single-bank-memory-*.html
             builds/single-bank-benchmark.log
           if-no-files-found: error
           retention-days: 7
