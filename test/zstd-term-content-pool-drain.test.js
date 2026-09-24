@@ -115,6 +115,25 @@ describe('shared compression job draining', () => {
         } finally { pool.close(); }
     });
 
+    test('preserves the first rejection observed while draining later failures', async () => {
+        const workers = [new ControlledWorker(), new ControlledWorker()];
+        const {pool, operation} = start(workers);
+        let sourceSettled = false;
+        let completionSettled = false;
+        void operation.sourceConsumed.finally(() => { sourceSettled = true; }).catch(() => {});
+        void operation.completion.finally(() => { completionSettled = true; }).catch(() => {});
+        try {
+            workers[1].reply(0, {error: 'second job failed first'});
+            await flush();
+            expect(sourceSettled).toBe(false);
+            expect(completionSettled).toBe(false);
+
+            workers[0].reply(0, {error: 'first job failed later'});
+            await expect(operation.sourceConsumed).rejects.toThrow('second job failed first');
+            await expect(operation.completion).rejects.toThrow('second job failed first');
+        } finally { pool.close(); }
+    });
+
     test('acknowledged sources remain reusable before a delayed compression result', async () => {
         const workers = [new ControlledWorker(), new ControlledWorker()];
         const {pool, source, operation} = start(workers);
