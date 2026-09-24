@@ -1,0 +1,81 @@
+name: Qualify shared compression source draining
+
+on:
+  push:
+    branches:
+      - audit/legacy-index-tags-20260924-1609
+    paths:
+      - .github/workflows/qualify-compression-drain.yml
+
+permissions:
+  contents: write
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: transport
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          path: qualified
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.16.0'
+      - name: Verify and apply the reviewed patch
+        working-directory: qualified
+        run: |
+          echo '0aa1ba819c09a8faf22c97f8cc6cc73b3cc7769b22224e8ac24cb38ded2ba97f  ../transport/review/compression-drain.patch' | sha256sum -c -
+          git apply --check ../transport/review/compression-drain.patch
+          git apply ../transport/review/compression-drain.patch
+          echo '004d9ad300da79b319a4f26bdf61b6db9fb5842f5606dc7b289e512a9283f671  ext/js/dictionary/zstd-term-content.js' | sha256sum -c -
+          echo '003895bf02b6123b9abb50d8e8453f1e01857c4e251f6796d9ecd9d117fcb5af  test/zstd-term-content-pool-drain.test.js' | sha256sum -c -
+          npm ci
+          npm run build:libs
+      - name: Reproduce five premature-settlement failures on the original pool
+        working-directory: qualified
+        run: |
+          cp ext/js/dictionary/zstd-term-content.js "$RUNNER_TEMP/fixed-pool.js"
+          git restore ext/js/dictionary/zstd-term-content.js
+          set +e
+          node node_modules/vitest/vitest.mjs run test/zstd-term-content-pool-drain.test.js --reporter=json --outputFile="$RUNNER_TEMP/drain-before.json"
+          result=$?
+          set -e
+          test "$result" -ne 0
+          node -e 'const r=require(process.argv[1]); if(r.numFailedTests!==5 || r.numPassedTests!==2) throw Error(JSON.stringify(r));' "$RUNNER_TEMP/drain-before.json"
+          cp "$RUNNER_TEMP/fixed-pool.js" ext/js/dictionary/zstd-term-content.js
+      - name: Focused regressions, lint and types
+        working-directory: qualified
+        run: |
+          node node_modules/vitest/vitest.mjs run test/zstd-term-content-pool-drain.test.js test/zstd-term-content-pool.test.js test/term-content-block-store.test.js test/dictionary-database-content-dedup.test.js --reporter=json --outputFile="$RUNNER_TEMP/drain-after.json"
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/zstd-term-content.js test/zstd-term-content-pool-drain.test.js
+          npm run test:ts
+      - name: Complete unit suite
+        working-directory: qualified
+        run: npm run test:unit
+      - name: All-target dry build
+        working-directory: qualified
+        run: npm run test:build
+      - name: Publish only the qualified source and tests
+        working-directory: qualified
+        run: |
+          echo '004d9ad300da79b319a4f26bdf61b6db9fb5842f5606dc7b289e512a9283f671  ext/js/dictionary/zstd-term-content.js' | sha256sum -c -
+          echo '003895bf02b6123b9abb50d8e8453f1e01857c4e251f6796d9ecd9d117fcb5af  test/zstd-term-content-pool-drain.test.js' | sha256sum -c -
+          git checkout -b fix/import-compression-source-drain-20260924-1617
+          git config user.name 'Manabitan review'
+          git config user.email 'review@users.noreply.github.com'
+          git add ext/js/dictionary/zstd-term-content.js test/zstd-term-content-pool-drain.test.js
+          git -c core.hooksPath=/dev/null commit -m 'fix(import): drain shared compression readers before rejecting'
+          git push origin HEAD:refs/heads/fix/import-compression-source-drain-20260924-1617
+          git rev-parse HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shared-compression-drain-regressions
+          path: ${{ runner.temp }}/drain-*.json
+          retention-days: 7
+          if-no-files-found: warn
