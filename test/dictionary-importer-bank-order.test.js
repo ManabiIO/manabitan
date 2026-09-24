@@ -35,6 +35,17 @@ function sortBanks(filenames) {
         .map(({filename}) => filename);
 }
 
+/**
+ * @param {string[]} filenames
+ * @returns {string[]}
+ */
+function sortPackedArtifacts(filenames) {
+    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+    const manifest = new Map(filenames.map((filename) => [filename, {packedOffset: 0, packedLength: 1, rows: 1}]));
+    return Reflect.get(importer, '_createPackedTermArtifactFiles').call(importer, manifest)
+        .map(({filename}) => filename);
+}
+
 describe('DictionaryImporter archive bank ordering', () => {
     test('sorts bank indexes exactly beyond Number.MAX_SAFE_INTEGER', () => {
         expect(sortBanks([
@@ -75,6 +86,22 @@ describe('DictionaryImporter archive bank ordering', () => {
             'term_bank_3.json',
             'term_bank_9999999999999999999999999999999999999999.json',
             'term_bank_10000000000000000000000000000000000000000.json',
+        ]);
+    });
+
+    test('sorts packed artifact manifest banks without precision loss', () => {
+        expect(sortPackedArtifacts([
+            'term_bank_9007199254740993.mbtb',
+            'term_bank_9007199254740992.mbtb',
+            'term_bank_10000000000000000000000000000000000000000.mbtb',
+            'term_bank_9999999999999999999999999999999999999999.mbtb',
+            'metadata.mbtb',
+        ])).toEqual([
+            'term_bank_9007199254740992.mbtb',
+            'term_bank_9007199254740993.mbtb',
+            'term_bank_9999999999999999999999999999999999999999.mbtb',
+            'term_bank_10000000000000000000000000000000000000000.mbtb',
+            'metadata.mbtb',
         ]);
     });
 });
