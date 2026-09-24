@@ -1,0 +1,141 @@
+diff --git a/ext/js/dictionary/mdx/mdx-converter.js b/ext/js/dictionary/mdx/mdx-converter.js
+index 863a877..e5f10ad 100644
+--- a/ext/js/dictionary/mdx/mdx-converter.js
++++ b/ext/js/dictionary/mdx/mdx-converter.js
+@@ -1774,17 +1774,23 @@ function convertDefinitionToStructuredContent(definition, options) {
+     const assetReferences = new Set();
+     /** @type {Array<[string, string]>} */
+     const inlineStylesheets = [];
+-    const fragmentResult = /** @type {unknown} */ (parse5.parseFragment(definition));
+-    const fragment = /** @type {Parse5ParentNode} */ (fragmentResult);
+     /** @type {unknown[]} */
+     const content = [];
+-    appendStructuredContent(fragment, content, {
+-        assetPrefix: options.assetPrefix,
+-        enableAudio: options.enableAudio,
+-        embeddedAssets,
+-        inlineStylesheets,
+-        assetReferences,
+-    });
++    // Plain HTML text needs neither tokenization nor a temporary DOM. Keep
++    // entities, markup, CR normalization and NUL handling on the parser path.
++    if (!/[<&\r]/u.test(definition) && !definition.includes(NULL_CHARACTER)) {
++        if (definition.length > 0) { content.push(definition); }
++    } else {
++        const fragmentResult = /** @type {unknown} */ (parse5.parseFragment(definition));
++        const fragment = /** @type {Parse5ParentNode} */ (fragmentResult);
++        appendStructuredContent(fragment, content, {
++            assetPrefix: options.assetPrefix,
++            enableAudio: options.enableAudio,
++            embeddedAssets,
++            inlineStylesheets,
++            assetReferences,
++        });
++    }
+     const rootClass = inlineStylesheets.length > 0 ? `${MDX_GLOSSARY_ROOT_CLASS} ${options.entryScopeClass}` : MDX_GLOSSARY_ROOT_CLASS;
+     return {
+         glossary: {
+diff --git a/test/mdict-plain-text.test.js b/test/mdict-plain-text.test.js
+new file mode 100644
+index 0000000..698fbc0
+--- /dev/null
++++ b/test/mdict-plain-text.test.js
+@@ -0,0 +1,35 @@
++/*
++ * Copyright (C) 2026  Yomitan Authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++import {spawnSync} from 'node:child_process';
++import {fileURLToPath} from 'node:url';
++import {expect, test} from 'vitest';
++
++// The vendored pako UMD bundle must execute as a native ES module, as it does
++// in the extension worker. Vite's injected CommonJS bindings select a different
++// UMD branch. Use a native subprocess instead of mocking or replacing the codec.
++test('native MDict plain-text conversion regressions', () => {
++    const files = [fileURLToPath(new URL('util/mdict-plain-text-cases.js', import.meta.url))];
++    const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...files], {
++        encoding: 'utf8',
++        timeout: 30000,
++        maxBuffer: 8 * 1024 * 1024,
++    });
++    expect(result.error).toBeUndefined();
++    expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(0);
++    expect(result.stdout).toMatch(/# fail 0\b/u);
++}, 35000);
+diff --git a/test/util/mdict-plain-text-cases.js b/test/util/mdict-plain-text-cases.js
+new file mode 100644
+index 0000000..8bb7761
+--- /dev/null
++++ b/test/util/mdict-plain-text-cases.js
+@@ -0,0 +1,57 @@
++/* Copyright (C) 2026 Manabitan Authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++import assert from 'node:assert/strict';
++import {test} from 'node:test';
++import {createMdxImportData} from '../../ext/js/dictionary/mdx/mdx-converter.js';
++import {makeMdictFixture} from './mdict-binary-fixture.js';
++
++/**
++ * @param {string} definition
++ * @param {string} [format]
++ * @returns {Promise<{tag: string, data: {tag: string, class: string}, content: unknown[]}>}
++ */
++async function convert(definition, format = 'Html') {
++    const fixture = makeMdictFixture([{key: 'plain', value: definition}], {compression: 'zlib', format, recordBlockSize: 37});
++    const {files} = await createMdxImportData('plain.mdx', {}, fixture.bytes, []);
++    const rows = JSON.parse(new TextDecoder().decode(files.get('term_bank_1.json')));
++    assert.equal(rows.length, 1);
++    return rows[0][5][0].content;
++}
++
++for (const text of [
++    '',
++    'ordinary text',
++    '日本語 😀 𠮷 カタカナ',
++    ' \t\n\v\f whitespace \n ',
++    'quotes " and \' and a > b',
++    'a\ufeffb',
++    'long日本語'.repeat(10000),
++]) {
++    test(`plain MDict definition preserves text: ${JSON.stringify(text.slice(0, 40))}`, async () => {
++        assert.deepEqual(await convert(text), {
++            tag: 'div',
++            data: {tag: 'div', class: 'mdict-yomitan-content'},
++            content: text.length === 0 ? [] : [text],
++        });
++    });
++}
++for (const [definition, expected] of [
++    ['a &amp; b &#x41; &#65; &lt; c', 'a & b A A < c'],
++    ['a\r\nb\rc', 'a\nb\nc'],
++    ['a\0b', 'ab'],
++    ['<!-- comment -->text', 'text'],
++    ['a < b', 'a < b'],
++]) {
++    test(`parser-only MDict normalization: ${JSON.stringify(definition)}`, async () => {
++        assert.deepEqual((await convert(definition)).content, [expected]);
++    });
++}
++test('HTML elements are still converted into structured nodes', async () => {
++    const root = await convert('<b>bold</b>tail');
++    assert.deepEqual(root.content, [{tag: 'span', style: {fontWeight: 'bold'}, content: ['bold']}, 'tail']);
++});
++test('Format=Text keeps literal markup in a preformatted element', async () => {
++    const root = await convert('<b> &amp; literal', 'Text');
++    assert.deepEqual(root.content, [{tag: 'div', style: {whiteSpace: 'pre-wrap'}, content: ['<b> &amp; literal']}]);
++});
