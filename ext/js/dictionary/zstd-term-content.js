@@ -66,6 +66,22 @@ function requireCompressedBytes(value) {
     return value;
 }
 
+/**
+ * Keep Promise.all's first-observed rejection, but do not expose it until
+ * every job has settled and released its borrowed inputs.
+ * @template T
+ * @param {Promise<T>[]} promises
+ * @returns {Promise<T[]>}
+ */
+async function allWithDrainOnFailure(promises) {
+    try {
+        return await Promise.all(promises);
+    } catch (error) {
+        await Promise.allSettled(promises);
+        throw error;
+    }
+}
+
 export class TermContentCompressionPool {
     /** @param {Worker[]} workers */
     constructor(workers) {
@@ -193,16 +209,11 @@ export class TermContentCompressionPool {
         // A failed job does not stop other workers from reading the borrowed
         // source. Drain both barriers before rejection can trigger a fallback
         // or allow the caller to release/reuse that source.
-        const sourceConsumed = Promise.allSettled(jobs.map(({sourceConsumed: promise}) => promise)).then((results) => {
-            for (const result of results) {
-                if (result.status === 'rejected') { throw result.reason; }
-            }
-        });
-        const completion = Promise.allSettled(jobs.map(({completion: promise}) => promise)).then((results) => {
+        const sourceConsumed = allWithDrainOnFailure(jobs.map(({sourceConsumed: promise}) => promise)).then(() => {});
+        const completion = allWithDrainOnFailure(jobs.map(({completion: promise}) => promise)).then((results) => {
             const chunks = results.map((result, blockIndex) => {
-                if (result.status === 'rejected') { throw result.reason; }
-                envelopeMsByWorker[blockIndex % this._workers.length] += result.value.envelopeMs;
-                return result.value.bytes;
+                envelopeMsByWorker[blockIndex % this._workers.length] += result.envelopeMs;
+                return result.bytes;
             });
             return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};
         });

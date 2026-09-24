@@ -161,4 +161,49 @@ describe('shared compression job draining', () => {
         expect(workers.map(({terminateCount}) => terminateCount)).toEqual([1, 1]);
         expect(Reflect.get(pool, '_pending').size).toBe(0);
     });
+
+    test.each([false, true])('preserves the first observed failure after draining, acknowledged=%s', async (acknowledged) => {
+        const workers = [new ControlledWorker(), new ControlledWorker()];
+        const {pool, operation} = start(workers);
+        let sourceSettled = false;
+        let completionSettled = false;
+        void operation.sourceConsumed.finally(() => { sourceSettled = true; }).catch(() => {});
+        void operation.completion.finally(() => { completionSettled = true; }).catch(() => {});
+        try {
+            if (acknowledged) {
+                for (const worker of workers) { worker.reply(0, {type: 'source-consumed'}); }
+                await expect(operation.sourceConsumed).resolves.toBeUndefined();
+            }
+            workers[1].reply(0, {error: 'higher-index job failed first'});
+            await flush();
+            expect(sourceSettled).toBe(acknowledged);
+            expect(completionSettled).toBe(false);
+            workers[0].reply(0, {error: 'lower-index job failed later'});
+            if (!acknowledged) {
+                await expect(operation.sourceConsumed).rejects.toThrow('higher-index job failed first');
+            }
+            await expect(operation.completion).rejects.toThrow('higher-index job failed first');
+            expect(Reflect.get(pool, '_pending').size).toBe(0);
+        } finally { pool.close(); }
+    });
+
+    test('preserves the first observed failure independently for each barrier', async () => {
+        const workers = [new ControlledWorker(), new ControlledWorker()];
+        const {pool, operation} = start(workers);
+        let sourceSettled = false;
+        let completionSettled = false;
+        void operation.sourceConsumed.finally(() => { sourceSettled = true; }).catch(() => {});
+        void operation.completion.finally(() => { completionSettled = true; }).catch(() => {});
+        try {
+            workers[1].reply(0, {type: 'source-consumed'});
+            workers[1].reply(0, {error: 'first completion failure'});
+            await flush();
+            expect(sourceSettled).toBe(false);
+            expect(completionSettled).toBe(false);
+            workers[0].reply(0, {error: 'first source failure'});
+            await expect(operation.sourceConsumed).rejects.toThrow('first source failure');
+            await expect(operation.completion).rejects.toThrow('first completion failure');
+            expect(Reflect.get(pool, '_pending').size).toBe(0);
+        } finally { pool.close(); }
+    });
 });
