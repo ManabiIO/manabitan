@@ -1018,12 +1018,18 @@ function readCssIdentifier(selector, startIndex) {
  * @returns {string}
  */
 function rewriteCssAttributeSelector(attributeSelector) {
-    const match = attributeSelector.match(/^\[[\t\n\f\r ]*(?<name>[-\w]+)(?<rest>[\s\S]*)\]$/u);
-    const groups = match?.groups;
-    if (typeof groups?.name !== 'string' || typeof groups.rest !== 'string') { return attributeSelector; }
-    const name = groups.name.toLowerCase();
+    if (!attributeSelector.startsWith('[') || !attributeSelector.endsWith(']')) {
+        return attributeSelector;
+    }
+    let nameStart = 1;
+    while (nameStart < attributeSelector.length && isCssWhitespace(attributeSelector[nameStart])) {
+        nameStart += 1;
+    }
+    const {value: rawName, endIndex} = readCssIdentifier(attributeSelector, nameStart);
+    if (rawName === null || attributeSelector[endIndex] === '|') { return attributeSelector; }
+    const name = rawName.toLowerCase();
     const replacement = name === 'class' ? STRUCTURED_CLASS_ATTR : (name === 'id' ? STRUCTURED_ID_ATTR : null);
-    return replacement === null ? attributeSelector : `[${replacement}${groups.rest}]`;
+    return replacement === null ? attributeSelector : `[${replacement}${attributeSelector.slice(endIndex)}`;
 }
 
 /**
