@@ -57,9 +57,9 @@ describe('DictionaryDatabase generic term dedup content descriptors', () => {
         const newRow = createRow(3, 2, 22, 'custom-content-dict');
 
         Reflect.set(database, '_findMatchingTermEntryContentMeta', vi.fn(
-            (_hash1, _hash2, contentBytes) => contentBytes[0] === 1 ?
+            (_hash1, _hash2, contentBytes) => (contentBytes[0] === 1 ?
                 {id: 0, offset: 100, length: contentBytes.byteLength, dictName: 'cached-content-dict'} :
-                void 0,
+                void 0),
         ));
         Reflect.set(database, '_ensureTermEntryContentMetaHashPairCapacity', vi.fn());
         Reflect.set(database, '_cacheTermEntryContentMeta', vi.fn());
