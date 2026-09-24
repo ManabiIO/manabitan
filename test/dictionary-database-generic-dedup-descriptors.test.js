@@ -26,12 +26,10 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
  * @returns {import('dictionary-database').DatabaseTermEntry}
  */
 function createRow(byte, hash1, hash2, dictName) {
-    return /** @type {import('dictionary-database').DatabaseTermEntry} */ ({
+    return /** @type {import('dictionary-database').DatabaseTermEntry} */ (/** @type {unknown} */ ({
         dictionary: 'Test',
         expression: `term-${byte}`,
         reading: `term-${byte}`,
-        expressionReverse: null,
-        readingReverse: null,
         rules: '',
         definitionTags: '',
         termTags: '',
@@ -43,7 +41,7 @@ function createRow(byte, hash1, hash2, dictName) {
         termEntryContentHash2: hash2,
         termEntryContentBytes: new Uint8Array([byte, byte + 1]),
         termEntryContentDictName: dictName,
-    });
+    }));
 }
 
 describe('DictionaryDatabase generic term dedup content descriptors', () => {
@@ -66,7 +64,7 @@ describe('DictionaryDatabase generic term dedup content descriptors', () => {
         Reflect.set(database, '_ensureTermEntryContentMetaHashPairCapacity', vi.fn());
         Reflect.set(database, '_cacheTermEntryContentMeta', vi.fn());
         Reflect.set(database, '_termContentStore', {
-            appendBatch: vi.fn(async (chunks) => chunks.map((chunk, index) => ({
+            appendBatch: vi.fn(async (/** @type {Uint8Array[]} */ chunks) => chunks.map((chunk, index) => ({
                 offset: 200 + index * 100,
                 length: chunk.byteLength,
             }))),
@@ -102,7 +100,7 @@ describe('DictionaryDatabase generic term dedup content descriptors', () => {
         Reflect.set(database, '_ensureTermEntryContentMetaHashPairCapacity', vi.fn());
         Reflect.set(database, '_cacheTermEntryContentMeta', vi.fn());
         Reflect.set(database, '_termContentStore', {
-            appendBatch: vi.fn(async (chunks) => chunks.map((chunk, index) => ({
+            appendBatch: vi.fn(async (/** @type {Uint8Array[]} */ chunks) => chunks.map((chunk, index) => ({
                 offset: 300 + index * 100,
                 length: chunk.byteLength,
             }))),
