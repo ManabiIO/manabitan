@@ -19,9 +19,10 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {expect, test} from 'vitest';
 
-test('native MDict CSS whitespace regressions', () => {
-    const file = fileURLToPath(new URL('util/mdict-css-whitespace-cases.js', import.meta.url));
-    const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', file], {
+test('native MDict CSS whitespace and attribute operator regressions', () => {
+    const files = ['util/mdict-css-whitespace-cases.js', 'util/mdict-css-attribute-operator-cases.js']
+        .map((file) => fileURLToPath(new URL(file, import.meta.url)));
+    const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...files], {
         encoding: 'utf8',
         timeout: 30000,
         maxBuffer: 8 * 1024 * 1024,
