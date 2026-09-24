@@ -48,8 +48,8 @@ describe('DictionaryImporter fast media path scan', () => {
         ]))).toEqual(['media/"quoted".png', 'media/back\\slash.jpg']);
     });
 
-    test('returns null for unicode escapes so semantic parsing handles them', () => {
-        expect(scan(String.raw`[{"tag":"img","path":"media/\u3042.png"}]`)).toBeNull();
+    test('decodes unicode escapes inside image paths', () => {
+        expect(scan(String.raw`[{"tag":"img","path":"media/\u3042.png"}]`)).toEqual(['media/あ.png']);
     });
 
     test('does not treat path-like text as a property', () => {
