@@ -1,0 +1,39 @@
+name: Import round runtime
+on:
+  push:
+    branches: [verify/import-round-20260924-b73d]
+    paths: [.github/workflows/import-round-runtime.yml]
+permissions:
+  contents: read
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - run: npm ci
+      - run: node dev/perf/prepare-dictionaries.js
+      - run: npx playwright install chromium
+      - name: Pack runtime and fixtures
+        run: |
+          tar -C builds -czf /tmp/import-round-fixtures.tgz e2e-dictionary-cache
+          tar -C "$HOME/.cache" -czf /tmp/import-round-chromium.tgz ms-playwright
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-round-fixtures-b73d
+          path: /tmp/import-round-fixtures.tgz
+          retention-days: 3
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-round-chromium-b73d
+          path: /tmp/import-round-chromium.tgz
+          retention-days: 3
+          compression-level: 0
