@@ -939,6 +939,14 @@ export class DictionaryImporter {
                 this._logImport(`term artifact preload ${termArtifactPreloadMs}ms files=${preloadedTermArtifactBytes.size}`);
             }
         }
+        if (packedTermArtifactBytes instanceof Uint8Array && termArtifactManifest !== null) {
+            this._validatePackedTermArtifactRanges(
+                termArtifactManifest.termBanksByArtifact,
+                packedTermArtifactBytes.byteLength,
+                sharedGlossaryPackedOffset,
+                sharedGlossaryPackedLength,
+            )
+        }
         if (
             packedTermArtifactBytes instanceof Uint8Array &&
             Number.isInteger(sharedGlossaryPackedOffset) &&
@@ -3472,6 +3480,52 @@ export class DictionaryImporter {
             });
         }
         return results;
+    }
+
+    /**
+     * @param {Map<string, {packedOffset: number, packedLength: number, rows: number|null}>} termBanksByArtifact
+     * @param {number} payloadLength
+     * @param {number|null} sharedGlossaryPackedOffset
+     * @param {number|null} sharedGlossaryPackedLength
+     * @throws {Error} If a packed term or shared-glossary range is invalid.
+     */
+    _validatePackedTermArtifactRanges(
+        termBanksByArtifact,
+        payloadLength,
+        sharedGlossaryPackedOffset,
+        sharedGlossaryPackedLength,
+    ) {
+        if (!Number.isSafeInteger(payloadLength) || payloadLength < 0) {
+            throw new Error('Packed term artifact length is invalid')
+        }
+        for (const [artifact, {packedOffset, packedLength, rows}] of termBanksByArtifact) {
+            if (
+                !Number.isSafeInteger(packedOffset) || packedOffset < 0 ||
+                !Number.isSafeInteger(packedLength) || packedLength <= 0 ||
+                packedOffset > payloadLength - packedLength
+            ) {
+                throw new Error(`Packed term range is out of bounds for ${JSON.stringify(artifact)}`)
+            }
+            if (rows !== null && (!Number.isSafeInteger(rows) || rows < 0)) {
+                throw new Error(`Packed term row count is invalid for ${JSON.stringify(artifact)}`)
+            }
+        }
+
+        const hasSharedGlossaryOffset = sharedGlossaryPackedOffset !== null
+        const hasSharedGlossaryLength = sharedGlossaryPackedLength !== null
+        if (hasSharedGlossaryOffset !== hasSharedGlossaryLength) {
+            throw new Error('Packed shared glossary range is incomplete')
+        }
+        if (!hasSharedGlossaryOffset) {
+            return
+        }
+        if (
+            !Number.isSafeInteger(sharedGlossaryPackedOffset) || sharedGlossaryPackedOffset < 0 ||
+            !Number.isSafeInteger(sharedGlossaryPackedLength) || sharedGlossaryPackedLength <= 0 ||
+            sharedGlossaryPackedOffset > payloadLength - sharedGlossaryPackedLength
+        ) {
+            throw new Error('Packed shared glossary range is out of bounds')
+        }
     }
 
     /**
