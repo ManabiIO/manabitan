@@ -1,0 +1,30 @@
+name: Prepare isolated import review
+on:
+  push:
+    branches: [bench/import-review-20260924-1558]
+    paths: [.github/workflows/import-review-prepare.yml]
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Pack baseline workspace without credentials
+        run: |
+          git rev-parse HEAD HEAD^{tree} > REVIEW_BASELINE.txt
+          tar --exclude=.git -czf "$RUNNER_TEMP/import-review-workspace.tar.gz" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-workspace
+          path: ${{ runner.temp }}/import-review-workspace.tar.gz
+          retention-days: 2
