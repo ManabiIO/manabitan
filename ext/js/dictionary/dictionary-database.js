@@ -1301,10 +1301,21 @@ export class DictionaryDatabase {
             let termContentSessionStartAttempted = false;
             let termRecordSessionStartAttempted = false;
             try {
-                const [contentCheckpoint, recordCheckpoint] = await Promise.all([
+                const checkpointReads = [
                     this._termContentStore.createImportCheckpoint(),
                     this._termRecordStore.createImportCheckpoint(),
-                ]);
+                ];
+                let contentCheckpoint;
+                let recordCheckpoint;
+                try {
+                    [contentCheckpoint, recordCheckpoint] = await Promise.all(checkpointReads);
+                } catch (error) {
+                    // Keep bulk-import ownership until both stores finish their checkpoint work.
+                    // A late checkpoint can close storage resources, so it must not overlap the
+                    // next import after its sibling fails early.
+                    await Promise.allSettled(checkpointReads);
+                    throw error;
+                }
                 this._bulkImportJournalRecord = {
                     version: 1,
                     sessionId: createDictionaryImportSessionId(),
