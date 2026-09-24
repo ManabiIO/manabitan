@@ -1,0 +1,39 @@
+name: Import review fixtures 20260924
+on:
+  push:
+    branches: [verify/import-review-20260924]
+    paths: [.github/workflows/import-review-fixtures-20260924.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - name: Prepare locked corpora
+        run: node --input-type=module -e "import {ensurePinnedDictionaryCache} from './dev/perf/dictionary-fixtures.js'; await ensurePinnedDictionaryCache('/tmp/import-review-fixtures');"
+      - run: npx playwright install chromium
+      - name: Package benchmark inputs and runtime
+        run: |
+          mkdir -p /tmp/import-review-runtime/node/bin
+          cp "$(command -v node)" /tmp/import-review-runtime/node/bin/node
+          cp -a "$HOME/.cache/ms-playwright" /tmp/import-review-runtime/ms-playwright
+          tar -czf /tmp/import-review-fixtures.tar.gz -C /tmp import-review-fixtures
+          tar -czf /tmp/import-review-runtime.tar.gz -C /tmp import-review-runtime
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-review-fixtures-runtime
+          path: |
+            /tmp/import-review-fixtures.tar.gz
+            /tmp/import-review-runtime.tar.gz
+          retention-days: 3
+          compression-level: 0
