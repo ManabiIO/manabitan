@@ -1117,6 +1117,10 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
                     }
                     if (inner === quote) { quote = ''; }
                 } else {
+                    if (inner === '\\') {
+                        endIndex += 2;
+                        continue;
+                    }
                     switch (inner) {
                         case '"':
                         case "'":
@@ -1281,6 +1285,10 @@ function findMatchingCssBrace(stylesheet, blockStartIndex) {
             }
             continue;
         }
+        if (character === '\\') {
+            index += 1;
+            continue;
+        }
         if (character === '"' || character === "'") {
             quote = character;
         } else if (character === '{') {
@@ -1346,6 +1354,10 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelector
                 }
                 if (character === quote) { quote = ''; }
                 cursor += 1;
+                continue;
+            }
+            if (character === '\\') {
+                cursor += 2;
                 continue;
             }
             // The delimiter cases below intentionally share cursor state.
