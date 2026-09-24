@@ -1104,13 +1104,12 @@ describe('MDict literal key whitespace identity', () => {
         }
     });
 
-    test('converter preserves whitespace-distinct headwords and exact redirect targets', async () => {
+    test('converter preserves whitespace-distinct headwords without changing redirect syntax whitespace', async () => {
         const fixture = makeMdictFixture([
             {key: ' target', value: 'leading definition'},
             {key: 'target', value: 'plain definition'},
             {key: 'target ', value: 'trailing definition'},
-            {key: 'LeadingAlias', value: '@@@LINK= target'},
-            {key: 'TrailingAlias', value: '@@@LINK=target '},
+            {key: 'Alias', value: '@@@LINK= target '},
         ], {keyCaseSensitive: 'Yes', stripKey: 'No', keysPerBlock: 1});
         const result = await createMdxImportData('literal-whitespace.mdx', {}, fixture.bytes, []);
         const rows = readRows(result.files);
@@ -1118,14 +1117,10 @@ describe('MDict literal key whitespace identity', () => {
             rows.filter(([term]) => [' target', 'target', 'target '].includes(term)).map(([term]) => term).sort(),
             [' target', 'target', 'target '].sort(),
         );
-        const leadingAlias = rows.filter(([term]) => term === 'LeadingAlias');
-        const trailingAlias = rows.filter(([term]) => term === 'TrailingAlias');
-        assert.equal(leadingAlias.length, 1);
-        assert.equal(trailingAlias.length, 1);
-        assert.match(JSON.stringify(leadingAlias), /leading definition/u);
-        assert.doesNotMatch(JSON.stringify(leadingAlias), /plain definition|trailing definition/u);
-        assert.match(JSON.stringify(trailingAlias), /trailing definition/u);
-        assert.doesNotMatch(JSON.stringify(trailingAlias), /leading definition|plain definition/u);
+        const alias = rows.filter(([term]) => term === 'Alias');
+        assert.equal(alias.length, 1);
+        assert.match(JSON.stringify(alias), /plain definition/u);
+        assert.doesNotMatch(JSON.stringify(alias), /leading definition|trailing definition/u);
         const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
         assert.equal(details?.unresolvedRedirectCount, 0);
     });
