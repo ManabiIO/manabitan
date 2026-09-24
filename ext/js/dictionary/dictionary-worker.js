@@ -98,9 +98,17 @@ export class DictionaryWorker {
 
     /** */
     destroy() {
-        const {_worker: worker} = this;
-        if (worker === null) { return; }
-        this._rejectInvocationsForWorker(worker, new Error('Dictionary worker destroyed'), true);
+        // Non-reused workers are owned by their invocations, not _worker.
+        /** @type {Set<Worker>} */
+        const workers = new Set();
+        if (this._worker !== null) { workers.add(this._worker); }
+        for (const {worker} of this._activeInvocations) {
+            if (worker !== null) { workers.add(worker); }
+        }
+        const error = new Error('Dictionary worker destroyed');
+        for (const worker of workers) {
+            this._rejectInvocationsForWorker(worker, error, true);
+        }
     }
 
     // Private
@@ -233,26 +241,25 @@ export class DictionaryWorker {
      * @param {?(result: TResponseRaw) => TResponse} formatResult
      */
     _onMessageComplete(params, resolve, reject, formatResult) {
-        const {error} = params;
-        if (typeof error !== 'undefined') {
-            reject(ExtensionError.deserialize(error));
-        } else {
-            const {result} = params;
-            if (typeof formatResult === 'function') {
-                let result2;
-                try {
-                    result2 = formatResult(result);
-                } catch (e) {
-                    reject(e);
-                    return;
-                }
-                resolve(result2);
+        // Completion has already released invocation ownership. Decode and
+        // format within one guard so a malformed reply still settles its caller.
+        try {
+            const {error} = params;
+            if (typeof error !== 'undefined') {
+                reject(ExtensionError.deserialize(error));
             } else {
-                // If formatResult is not provided, the response is assumed to be the same type
-                // For some reason, eslint thinks the TResponse type is undefined
-                // eslint-disable-next-line jsdoc/no-undefined-types
-                resolve(/** @type {TResponse} */ (/** @type {unknown} */ (result)));
+                const {result} = params;
+                if (typeof formatResult === 'function') {
+                    resolve(formatResult(result));
+                } else {
+                    // If formatResult is not provided, the response is assumed to be the same type
+                    // For some reason, eslint thinks the TResponse type is undefined
+                    // eslint-disable-next-line jsdoc/no-undefined-types
+                    resolve(/** @type {TResponse} */ (/** @type {unknown} */ (result)));
+                }
             }
+        } catch (e) {
+            reject(e);
         }
     }
 
