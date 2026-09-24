@@ -50,7 +50,7 @@ export function resolveMddImportKey(fileName, mdxKeys) {
     if (!path.endsWith('.mdd')) { return null; }
     const stem = path.slice(0, -4);
     if (mdxKeys.has(stem)) { return stem; }
-    const match = /^(.*)\.([0-9]+)$/u.exec(stem);
+    const match = /^(.*)\.([0-9]+)$/su.exec(stem);
     return match !== null && mdxKeys.has(match[1]) ? match[1] : null;
 }
 
