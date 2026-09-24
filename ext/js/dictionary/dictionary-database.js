@@ -618,6 +618,8 @@ export class DictionaryDatabase {
         this._textEncoder = new TextEncoder();
         /** @type {TextDecoder} */
         this._textDecoder = new TextDecoder();
+        /** @type {TextDecoder} */
+        this._termFieldTextDecoder = new TextDecoder('utf-8', {ignoreBOM: true});
         /** @type {boolean} */
         this._termContentZstdInitialized = false;
         /** @type {'baseline'|'raw-bytes'} */
@@ -4372,8 +4374,8 @@ null;
             const expressionBytes = chunk.expressionBytesList[i];
             const readingEqualsExpression = chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1;
             const readingBytes = readingEqualsExpression ? expressionBytes : chunk.readingBytesList[i];
-            const expression = this._textDecoder.decode(expressionBytes);
-            const reading = readingEqualsExpression ? expression : this._textDecoder.decode(readingBytes);
+            const expression = this._decodeArtifactTermField(expressionBytes);
+            const reading = readingEqualsExpression ? expression : this._decodeArtifactTermField(readingBytes);
             const sequenceValue = chunk.sequenceList[i];
             rows[i] = {
                 dictionary: chunk.dictionary,
@@ -4395,6 +4397,16 @@ null;
             };
         }
         return rows;
+    }
+
+    /**
+     * Field-leading U+FEFF is data, not a document BOM. Browser decoders reject
+     * shared WASM views; copy just the bounded field while the chunk is owned.
+     * @param {Uint8Array} bytes
+     * @returns {string}
+     */
+    _decodeArtifactTermField(bytes) {
+        return this._termFieldTextDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : Uint8Array.from(bytes));
     }
 
     /**
