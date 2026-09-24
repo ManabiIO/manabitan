@@ -1,0 +1,42 @@
+name: Import boundary qualification (audit only)
+on:
+  push:
+    branches: [audit/import-boundary-qualification-20260924-r3]
+    paths: ['.audit/**', '.github/workflows/audit-import-boundaries.yml']
+permissions:
+  contents: read
+jobs:
+  qualify:
+    name: Qualify ${{ matrix.kind }} independently
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [css, zip]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Install repository dependencies
+        run: npm ci
+      - name: Build required libraries
+        run: npm run build:libs
+      - name: Reproduce, qualify, and publish only the clean product commit
+        env:
+          HUSKY: '0'
+        run: node .audit/qualify-import-boundaries.mjs '${{ matrix.kind }}'
+      - name: Retain complete qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-boundaries-${{ matrix.kind }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/manabitan-boundary-${{ matrix.kind }}/
+          if-no-files-found: warn
+          retention-days: 7
