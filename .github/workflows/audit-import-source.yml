@@ -1,0 +1,39 @@
+name: Export pinned import review source
+on:\  push:
+    branches: [audit/import-review-source-20260924-c9fa57e]
+    paths: [.github/workflows/audit-import-source.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c9fa57e20f08442953299485e053d0f8601674fa
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Export verified source and installed dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD > /tmp/source-head.txt
+          test "$(cat /tmp/source-head.txt)" = c9fa57e20f08442953299485e053d0f8601674fa
+          git status --porcelain > /tmp/source-status.txt
+          tar --exclude=./.git --exclude=./.husky/_ -czf /tmp/manabitan-c9fa57e-source.tgz .
+          sha256sum /tmp/manabitan-c9fa57e-source.tgz > /tmp/source-sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabitan-c9fa57e-source
+          path: |
+            /tmp/manabitan-c9fa57e-source.tgz
+            /tmp/source-head.txt
+            /tmp/source-status.txt
+            /tmp/source-sha256.txt
+          retention-days: 7
