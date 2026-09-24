@@ -33,7 +33,8 @@ function getPath(file) {
  * @returns {string}
  */
 export function normalizeMdictImportPath(path) {
-    const normalized = path.trim().replaceAll('\\', '/');
+    // These are File paths, not user-entered text: whitespace is part of their identity.
+    const normalized = path.replaceAll('\\', '/');
     const split = normalized.lastIndexOf('/') + 1;
     return normalized.slice(0, split) + normalized.slice(split).toLowerCase();
 }
@@ -50,7 +51,8 @@ export function resolveMddImportKey(fileName, mdxKeys) {
     if (!path.endsWith('.mdd')) { return null; }
     const stem = path.slice(0, -4);
     if (mdxKeys.has(stem)) { return stem; }
-    const match = /^(.*)\.([0-9]+)$/u.exec(stem);
+    // Directory and filename characters may include line separators.
+    const match = /^(.*)\.([0-9]+)$/su.exec(stem);
     return match !== null && mdxKeys.has(match[1]) ? match[1] : null;
 }
 
