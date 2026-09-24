@@ -221,6 +221,13 @@ export class DictionaryWorker {
                     }
                     break;
                 case 'progress':
+                    if (
+                        typeof params !== 'object' ||
+                        params === null ||
+                        !Array.isArray(Reflect.get(params, 'args'))
+                    ) {
+                        throw new Error('Dictionary worker returned invalid progress parameters');
+                    }
                     this._onMessageProgress(params, details.onProgress);
                     break;
                 case 'getImageDetails':
