@@ -20,6 +20,7 @@ import type * as DictionaryDatabase from './dictionary-database';
 import type * as DictionaryImporter from './dictionary-importer';
 
 export type InvokeDetails<TResponseRaw = unknown, TResponse = unknown> = {
+    id: string;
     complete: boolean;
     worker: Worker | null;
     resolve: ((result: TResponse) => void) | null;
@@ -33,11 +34,13 @@ export type InvokeDetails<TResponseRaw = unknown, TResponse = unknown> = {
 
 export type MessageCompleteData<TResponseRaw = unknown> = {
     action: 'complete';
+    id: string;
     params: MessageCompleteParams<TResponseRaw>;
 };
 
 export type MessageProgressData = {
     action: 'progress';
+    id: string;
     params: MessageProgressParams;
 };
 
