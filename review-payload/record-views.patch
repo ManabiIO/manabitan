@@ -1,0 +1,147 @@
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -1903,10 +1903,15 @@
+             this._allShardContentsLoaded = false;
+         } else {
+             this._recordsById.ensureCapacity(firstId + count - 1);
++            // Reuse immutable byte views for repeated interned keys in this chunk.
++            /** @type {Uint8Array[]} */
++            const stableStringViews = [];
++            if (hasStableStringSlices) { stableStringViews.length = stableStringLengths.length; }
+             const existingIndex = this._deferIndexBuild ? void 0 : this._indexByDictionary.get(chunk.dictionary);
+             for (let i = 0; i < count; ++i) {
+                 const id = this._nextId++;
+                 const sequenceValue = chunk.sequenceList[i];
++                const readingEqualsExpression = chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1;
+                 const entryContentDictName = uniformContentDictName ?? (contentDictNames[i] ?? 'raw');
+                 const expressionIndex = stableExpressionIndexes?.[i] ?? -1;
+                 const readingIndex = stableReadingIndexes?.[i] ?? -1;
+@@ -1915,18 +1920,20 @@
+                 const expressionOffset = hasStableExpression ? stableStringOffsets[expressionIndex] : 0;
+                 const readingOffset = hasStableReading ? stableStringOffsets[readingIndex] : 0;
+                 const expressionBytes = hasStableExpression ?
+-                    stableStringsBuffer.subarray(expressionOffset, expressionOffset + stableStringLengths[expressionIndex]) :
++                    (stableStringViews[expressionIndex] ??= stableStringsBuffer.subarray(expressionOffset, expressionOffset + stableStringLengths[expressionIndex])) :
+                     chunk.expressionBytesList[i];
+-                const readingBytes = hasStableReading ?
+-                    stableStringsBuffer.subarray(readingOffset, readingOffset + stableStringLengths[readingIndex]) :
+-                    chunk.readingBytesList[i];
++                const readingBytes = readingEqualsExpression ?
++                    void 0 :
++                    (hasStableReading ?
++                        (stableStringViews[readingIndex] ??= stableStringsBuffer.subarray(readingOffset, readingOffset + stableStringLengths[readingIndex])) :
++                        chunk.readingBytesList[i]);
+                 /** @type {TermRecord} */
+                 const record = {
+                     id,
+                     dictionary: chunk.dictionary,
+-                    readingEqualsExpression: chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1,
++                    readingEqualsExpression,
+                     expressionBytes,
+-                    readingBytes: (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ? void 0 : readingBytes,
++                    readingBytes,
+                     entryContentOffset: getArtifactContentOffset(chunk, contentOffsets, i),
+                     entryContentLength: getArtifactContentLength(chunk, contentLengths, i),
+                     entryContentDictName,
+diff --git a/test/term-record-opfs-store.test.js b/test/term-record-opfs-store.test.js
+index 81c3d67..224b8a9 100644
+--- a/test/term-record-opfs-store.test.js
++++ b/test/term-record-opfs-store.test.js
+@@ -4613,3 +4613,97 @@ describe('TermRecordOpfsStore exact dictionary identity', () => {
+         assert.equal(reader.getDictionaryHealth('Dictionary').status, 'available');
+     });
+ });
++
++
++describe('TermRecordOpfsStore interned view reuse', () => {
++    /**
++     * @param {string[]} expressions
++     * @param {string[]} readings
++     * @param {boolean} [withPlan]
++     * @returns {Parameters<TermRecordOpfsStore['appendBatchFromArtifactChunkResolvedContent']>[0]}
++     */
++    function chunk(expressions, readings, withPlan = true) {
++        const encoder = new TextEncoder();
++        const builder = createTermRecordPreinternedPlanBuilder();
++        const expressionBytesList = expressions.map((value) => encoder.encode(value));
++        const readingBytesList = readings.map((value) => encoder.encode(value));
++        const expressionIndexes = expressionBytesList.map((bytes) => builder.internStringBytes(bytes));
++        const readingIndexes = readingBytesList.map((bytes) => builder.internStringBytes(bytes));
++        return {
++            dictionary: 'Interned views',
++            rowCount: expressions.length,
++            expressionBytesList,
++            readingBytesList,
++            readingEqualsExpressionList: readings.map((value, index) => value === expressions[index]),
++            scoreList: Float64Array.from(expressions, (_, index) => index + 0.5),
++            sequenceList: Float64Array.from(expressions, (_, index) => 0x80000000 + index),
++            termRecordPreinternedPlan: withPlan ? builder.buildPlan(expressionIndexes, readingIndexes) : null,
++        };
++    }
++
++    test('reuses one view per referenced key without allocating equal-reading views', async () => {
++        const store = new TermRecordOpfsStore();
++        const source = chunk(['猫', '猫', 'ねこ', '犬'], ['ねこ', 'ねこ', 'ねこ', '犬']);
++        const bytes = source.termRecordPreinternedPlan?.stringsBuffer;
++        if (!bytes) { throw new Error('Expected string plan'); }
++        const slice = vi.spyOn(bytes, 'subarray');
++        await store.appendBatchFromArtifactChunkResolvedContent(source, [0, 8, 16, 24], [8, 8, 8, 8], 'raw');
++        const records = store.getByIds([1, 2, 3, 4]);
++        expect(records.get(1)?.expressionBytes).toBe(records.get(2)?.expressionBytes);
++        expect(records.get(1)?.readingBytes).toBe(records.get(2)?.readingBytes);
++        expect(records.get(1)?.readingBytes).toBe(records.get(3)?.expressionBytes);
++        expect(records.get(3)?.readingBytes).toBeUndefined();
++        expect(records.get(4)?.readingBytes).toBeUndefined();
++        expect(slice).toHaveBeenCalledTimes(3);
++    });
++
++    test.each([false, true])('keeps exact persisted rows and indexes, withPlan=%s', async (withPlan) => {
++        /** @type {Map<string, Uint8Array>} */
++        const files = new Map();
++        const directory = createFakeDirectoryHandle(files);
++        const store = new TermRecordOpfsStore();
++        store._recordsDirectoryHandle = directory;
++        const expressions = ['猫', '猫', 'ねこ', '\ufeff猫', '𠮷', 'e\u0301', 'é', '犬'];
++        const readings = ['ねこ', 'ネコ', 'ねこ', '\ufeffねこ', 'よし', 'e\u0301', 'é', 'いぬ'];
++        const source = chunk(expressions, readings, withPlan);
++        const offsets = expressions.map((_, index) => index * 16);
++        await store.beginImportSession();
++        await store.appendBatchFromArtifactChunkResolvedContent(source, offsets, offsets.map(() => 8), 'raw');
++        await store.endImportSession();
++        const original = new Map([...files].map(([name, bytes]) => [name, Uint8Array.from(bytes)]));
++        const reader = new TermRecordOpfsStore();
++        reader._recordsDirectoryHandle = directory;
++        await reader._loadShardFiles(false);
++        await reader.ensureDictionariesLoaded(['Interned views']);
++        const ids = expressions.map((_, index) => index + 1);
++        const records = await reader.getByIdsAsync(ids);
++        expect(records.size).toBe(expressions.length);
++        for (const [index, id] of ids.entries()) {
++            expect(records.get(id)).toMatchObject({
++                dictionary: 'Interned views',
++                expression: expressions[index],
++                reading: readings[index],
++                entryContentOffset: offsets[index],
++                entryContentLength: 8,
++                score: index + 0.5,
++                sequence: 0x80000000 + index,
++            });
++            expect(reader.findTermIds('Interned views', expressions[index], 'expression')).toContain(id);
++        }
++        expect(reader.findTermIds('Interned views', '猫', 'expression')).toEqual([1, 2]);
++        expect(files).toEqual(original);
++    });
++
++    test('does not reuse a string-index view across independent chunks', async () => {
++        const store = new TermRecordOpfsStore();
++        const first = chunk(['猫', '猫'], ['ねこ', 'ねこ']);
++        const second = chunk(['犬', '犬'], ['いぬ', 'いぬ']);
++        await store.appendBatchFromArtifactChunkResolvedContent(first, [0, 8], [8, 8], 'raw');
++        const firstBytes = store.getById(1)?.expressionBytes;
++        await store.appendBatchFromArtifactChunkResolvedContent(second, [16, 24], [8, 8], 'raw');
++        expect(store.getById(1)?.expressionBytes).toBe(firstBytes);
++        expect(store.getById(3)?.expressionBytes).not.toBe(firstBytes);
++        const decoder = new TextDecoder();
++        expect([1, 2, 3, 4].map((id) => decoder.decode(store.getById(id)?.expressionBytes))).toEqual(['猫', '猫', '犬', '犬']);
++    });
++});
