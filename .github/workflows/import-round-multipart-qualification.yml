@@ -1,0 +1,79 @@
+name: Import round multipart qualification
+on:
+  push:
+    branches: [verify/import-round-20260924-b73d]
+    paths: [.github/workflows/import-round-multipart-qualification.yml]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: source
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: transport
+          persist-credentials: false
+      - uses: actions/checkout@v6
+        with:
+          ref: e8f3ec3788349e4250419b8d54d25d0e26ef9608
+          path: source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci && npm run build:libs
+      - name: Prove eight further regressions on the published head
+        run: |
+          mkdir -p ../multipart-results
+          cp ../transport/review-payload/mdict-multipart-path.test.js test/
+          set +e
+          node node_modules/vitest/vitest.mjs run test/mdict-multipart-path.test.js --minWorkers=1 --maxWorkers=1 --reporter=json --outputFile=../multipart-results/baseline.json
+          status=$?
+          set -e
+          test "$status" -eq 1
+          node --input-type=module -e 'import fs from "node:fs"; const r=JSON.parse(fs.readFileSync("../multipart-results/baseline.json")); if(r.numFailedTests!==8 || r.numPassedTests!==0) process.exit(1);'
+          git switch -c fix/mdict-filename-identity-20260924-b73d
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test/mdict-multipart-path.test.js
+          git commit -m 'test(mdict): reproduce multiline multipart path failures'
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('ext/js/dictionary/mdict-import-sources.js')
+          s = p.read_text()
+          before = '/^(.*)\\.([0-9]+)$/u'
+          assert s.count(before) == 1
+          p.write_text(s.replace(before, '/^(.*)\\.([0-9]+)$/su'))
+          PY
+      - name: Focused tests and lint
+        run: |
+          npx eslint ext/js/dictionary/mdict-import-sources.js ext/js/pages/settings/dictionary-import-controller.js test/mdict-import-path-identity.test.js test/mdict-multipart-path.test.js 2>&1 | tee ../multipart-results/lint.log
+          node node_modules/vitest/vitest.mjs run test/mdict-import-path-identity.test.js test/mdict-multipart-path.test.js test/mdict-import-ui-regressions.test.js --minWorkers=1 --maxWorkers=1 2>&1 | tee ../multipart-results/focused.log
+      - name: All types
+        run: npm run test:ts 2>&1 | tee ../multipart-results/types.log
+      - name: Full unit suite
+        run: npm run test:unit -- --minWorkers=1 --maxWorkers=2 2>&1 | tee ../multipart-results/unit.log
+      - name: All build targets
+        run: npm run test:build 2>&1 | tee ../multipart-results/build.log
+      - name: Publish tested refinement without force-pushing
+        run: |
+          git add ext/js/dictionary/mdict-import-sources.js
+          git commit -m 'fix(mdict): match multipart paths containing line separators'
+          git diff --name-only e8f3ec3788349e4250419b8d54d25d0e26ef9608 | tee ../multipart-results/changed-files.txt
+          node --input-type=module -e 'import fs from "node:fs"; const a=fs.readFileSync("../multipart-results/changed-files.txt","utf8").trim().split("\n"); const b=["ext/js/dictionary/mdict-import-sources.js","test/mdict-multipart-path.test.js"]; if(JSON.stringify(a)!==JSON.stringify(b)) process.exit(1);'
+          git rev-parse HEAD | tee ../multipart-results/published-head.txt
+          git push origin HEAD:refs/heads/fix/mdict-filename-identity-20260924-b73d
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-round-multipart-qualification-b73d
+          path: multipart-results/
+          retention-days: 7
