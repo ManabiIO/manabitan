@@ -4098,7 +4098,9 @@ export class DictionaryImporter {
                 } else {
                     termList.push(...termListChunk);
                     if (requirements !== null && requirementsForChunk !== null) {
-                        requirements.push(...requirementsForChunk);
+                        for (const requirement of requirementsForChunk) {
+                            requirements.push(requirement);
+                        }
                     }
                 }
                 importerChunkSinkMs += Math.max(0, Date.now() - tChunkSinkStart);
