@@ -2,6 +2,7 @@
  * Copyright (C) 2026 Manabitan authors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+/* eslint @stylistic/semi: ["error", "never"] */
 
 import {describe, expect, test} from 'vitest'
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js'
@@ -27,7 +28,12 @@ describe('artifact record segment ownership', () => {
         const store = new TermRecordOpfsStore()
         /** @type {Array<{chunk: import('core').SafeAny, offsets: import('core').SafeAny, lengths: import('core').SafeAny}>} */
         const observed = []
-        Reflect.set(store, '_encodeArtifactChunkRecords', async (chunk, offsets, lengths) => {
+        /**
+         * @param {import('core').SafeAny} chunk
+         * @param {import('core').SafeAny} offsets
+         * @param {import('core').SafeAny} lengths
+         */
+        const encodeArtifactChunkRecords = async (chunk, offsets, lengths) => {
             observed.push({chunk, offsets, lengths})
             return {
                 contentOffsetBase: offsets[0] ?? 0,
@@ -38,7 +44,8 @@ describe('artifact record segment ownership', () => {
                 recordFieldEncodeMs: 0,
                 lookupIndexEncodeMs: 0,
             }
-        })
+        }
+        Reflect.set(store, '_encodeArtifactChunkRecords', encodeArtifactChunkRecords)
         Reflect.set(store, '_appendEncodedChunk', async () => {})
 
         await Reflect.get(store, '_encodeAndAppendArtifactChunkForState').call(
