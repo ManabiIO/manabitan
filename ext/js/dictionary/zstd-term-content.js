@@ -557,7 +557,11 @@ export function beginCompressWrappedTermContentZstdSpansBatch(
             );
             return {chunks: [result.bytes], envelopeMs: result.envelopeMs, wrapped: /** @type {true} */ (true)};
         });
-        return {sourceConsumed: completion.then(() => {}), completion};
+        const sourceConsumed = completion.then(() => {});
+        // Completion-only callers must not leave a rejected sibling promise
+        // unobserved when synchronous compression fails.
+        void sourceConsumed.catch(() => {});
+        return {sourceConsumed, completion};
     }
     const operation = (async () => {
         const pool = await initializeCompressionPool();
