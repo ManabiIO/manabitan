@@ -818,15 +818,15 @@ export class DictionaryImporter {
         // Files
         /** @type {import('dictionary-importer').QueryDetails} */
         const queryDetails = [
-            ['termFiles', /^term_bank_(\d+)\.json$/],
-            ['termArtifactFiles', /^term_bank_(\d+)\.mbtb$/],
+            ['termFiles', /^term_bank_(\d+)\.json$/, 'term_bank_'],
+            ['termArtifactFiles', /^term_bank_(\d+)\.mbtb$/, 'term_bank_'],
         ];
         if (!usePrunedArtifactAuxFastPath) {
             queryDetails.push(
-                ['termMetaFiles', /^term_meta_bank_(\d+)\.json$/],
-                ['kanjiFiles', /^kanji_bank_(\d+)\.json$/],
-                ['kanjiMetaFiles', /^kanji_meta_bank_(\d+)\.json$/],
-                ['tagFiles', /^tag_bank_(\d+)\.json$/],
+                ['termMetaFiles', /^term_meta_bank_(\d+)\.json$/, 'term_meta_bank_'],
+                ['kanjiFiles', /^kanji_bank_(\d+)\.json$/, 'kanji_bank_'],
+                ['kanjiMetaFiles', /^kanji_meta_bank_(\d+)\.json$/, 'kanji_meta_bank_'],
+                ['tagFiles', /^tag_bank_(\d+)\.json$/, 'tag_bank_'],
             );
         }
         const archiveFiles = Object.fromEntries(this._getArchiveFiles(fileMap, queryDetails));
@@ -3428,13 +3428,33 @@ export class DictionaryImporter {
     _getArchiveFiles(fileMap, queryDetails) {
         /** @type {import('dictionary-importer').QueryResult} */
         const results = new Map();
+        /** @type {Set<string>} */
+        const prefixInitials = new Set();
+        /** @type {import('dictionary-importer').QueryDetails} */
+        const unprefixedQueryDetails = [];
 
-        for (const [fileType] of queryDetails) {
+        for (const detail of queryDetails) {
+            const [fileType, , fileNamePrefix = ''] = detail;
             results.set(fileType, []);
+            if (fileNamePrefix.length > 0) {
+                prefixInitials.add(fileNamePrefix[0]);
+            } else {
+                unprefixedQueryDetails.push(detail);
+            }
+        }
+
+        /** @type {Map<string, import('dictionary-importer').QueryDetails>} */
+        const queryDetailsByInitial = new Map();
+        for (const initial of prefixInitials) {
+            queryDetailsByInitial.set(initial, queryDetails.filter(([, , fileNamePrefix = '']) => (
+                fileNamePrefix.length === 0 || fileNamePrefix[0] === initial
+            )));
         }
 
         for (const [fileName, fileEntry] of fileMap.entries()) {
-            for (const [fileType, fileNameFormat] of queryDetails) {
+            const candidateQueryDetails = queryDetailsByInitial.get(fileName[0] ?? '') ?? unprefixedQueryDetails;
+            for (const [fileType, fileNameFormat, fileNamePrefix = ''] of candidateQueryDetails) {
+                if (fileNamePrefix.length > 0 && !fileName.startsWith(fileNamePrefix)) { continue; }
                 if (!fileNameFormat.test(fileName)) { continue; }
                 const entries = results.get(fileType);
 
