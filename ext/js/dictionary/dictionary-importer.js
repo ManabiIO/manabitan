@@ -4491,7 +4491,18 @@ null;
                 if (readingMatchesExpression) {
                     readingLength = expressionLength;
                     readingBytes = expressionBytes;
-                    artifactTermRecordPreinternedPlan.readingIndexes[i] = expressionIndex;
+                    if (readingIndex !== expressionIndex) {
+                        // Aligned v3+ artifacts borrow their index arrays directly
+                        // from the caller-owned payload. Normalize the first empty
+                        // reading sentinel with copy-on-write instead of changing
+                        // the source .mbtb bytes.
+                        if (artifactTermRecordPreinternedPlan.readingIndexes.buffer === bytes.buffer) {
+                            artifactTermRecordPreinternedPlan.readingIndexes = Uint32Array.from(
+                                artifactTermRecordPreinternedPlan.readingIndexes,
+                            );
+                        }
+                        artifactTermRecordPreinternedPlan.readingIndexes[i] = expressionIndex;
+                    }
                 } else {
                     const readingStart = artifactTermRecordStringOffsets[readingIndex];
                     readingLength = stringLengths[readingIndex];
