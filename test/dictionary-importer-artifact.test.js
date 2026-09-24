@@ -73,4 +73,35 @@ describe('DictionaryImporter term artifacts', () => {
         expect(chunk.termRecordPreinternedPlan.readingIndexes[0])
             .toBe(chunk.termRecordPreinternedPlan.expressionIndexes[0]);
     });
+
+    test('borrows the preinterned string arena during direct streamed decoding', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const bytes = createArtifactWithEmptyReadingSentinel();
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            bytes,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            0,
+            true,
+            1,
+            'raw-v4',
+        );
+
+        expect(capturedChunk).not.toBeNull();
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        const stringsBuffer = /** @type {Uint8Array} */ (chunk.termRecordPreinternedPlan.stringsBuffer);
+        expect(stringsBuffer.buffer).toBe(bytes.buffer);
+        expect(new TextDecoder().decode(stringsBuffer)).toBe('term');
+    });
 });
