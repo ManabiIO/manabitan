@@ -1561,6 +1561,23 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
 }
 
 /**
+ * HTML legacy sizes are presentational hints, not unitless CSS lengths.
+ * https://html.spec.whatwg.org/multipage/rendering.html#rules-for-parsing-a-legacy-font-size
+ * @param {string|undefined} value
+ * @returns {string|null}
+ */
+function convertLegacyFontSize(value) {
+    if (typeof value !== 'string') { return null; }
+    const match = /^[\t\n\f\r ]*([+-]?)(\d+)/u.exec(value);
+    if (match === null) { return null; }
+    let size = Number.parseInt(match[2], 10);
+    if (match[1] === '+') { size += 3; }
+    if (match[1] === '-') { size = 3 - size; }
+    const sizes = ['x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'xxx-large'];
+    return sizes[Math.max(1, Math.min(7, size)) - 1];
+}
+
+/**
  * @param {string} href
  * @param {{assetPrefix: string, enableAudio: boolean, embeddedAssets: EmbeddedAssetCollector, assetReferences: Set<string>}} details
  * @returns {string}
@@ -1739,12 +1756,14 @@ function appendStructuredContent(parent, content, details) {
             /** @type {StructuredStyle} */
             const fontStyle = {};
             if (typeof attrs.color === 'string' && attrs.color.length > 0) { fontStyle.color = attrs.color; }
-            if (typeof attrs.size === 'string' && attrs.size.length > 0) { fontStyle.fontSize = attrs.size; }
+            const fontSize = convertLegacyFontSize(attrs.size);
+            if (fontSize !== null) { fontStyle.fontSize = fontSize; }
             if (typeof attrs.face === 'string' && attrs.face.length > 0) { fontStyle.fontFamily = attrs.face; }
             if (Object.keys(fontStyle).length > 0) {
                 /** @type {StructuredStyle} */
                 const existingStyle = isStructuredStyleRecord(element.style) ? element.style : {};
-                element.style = {...existingStyle, ...fontStyle};
+                // Author inline CSS takes precedence over legacy attributes.
+                element.style = {...fontStyle, ...existingStyle};
             }
         }
 
