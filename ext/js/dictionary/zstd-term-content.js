@@ -190,11 +190,19 @@ export class TermContentCompressionPool {
                 [blockOffsets.buffer, blockSourceLengths.buffer],
             );
         });
-        const sourceConsumed = Promise.all(jobs.map(({sourceConsumed: promise}) => promise)).then(() => {});
-        const completion = Promise.all(jobs.map(({completion: promise}) => promise)).then((results) => {
+        // A failed job does not stop other workers from reading the borrowed
+        // source. Drain both barriers before rejection can trigger a fallback
+        // or allow the caller to release/reuse that source.
+        const sourceConsumed = Promise.allSettled(jobs.map(({sourceConsumed: promise}) => promise)).then((results) => {
+            for (const result of results) {
+                if (result.status === 'rejected') { throw result.reason; }
+            }
+        });
+        const completion = Promise.allSettled(jobs.map(({completion: promise}) => promise)).then((results) => {
             const chunks = results.map((result, blockIndex) => {
-                envelopeMsByWorker[blockIndex % this._workers.length] += result.envelopeMs;
-                return result.bytes;
+                if (result.status === 'rejected') { throw result.reason; }
+                envelopeMsByWorker[blockIndex % this._workers.length] += result.value.envelopeMs;
+                return result.value.bytes;
             });
             return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};
         });
