@@ -214,6 +214,36 @@ describe('convertMdxToArchive', () => {
         expect(await zip.file('mdict-media/images/read.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
     });
 
+    test('matches link stylesheet relations as tokens instead of substrings', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Link rel tokens',
+                Description: '',
+            },
+            entries: [
+                {
+                    keyText: 'Links',
+                    definition: '<div><link rel="notstylesheet" href="assets/false.bin"><link rel="alternate\tSTYLEsheet" href="assets/true.bin"></div>',
+                },
+            ],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'assets/false.bin', value: Uint8Array.of(1, 2, 3)},
+            {keyText: 'assets/true.bin', value: Uint8Array.of(4, 5, 6)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'link-rel-tokens.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'link-rel-tokens.mdd', bytes: new Uint8Array([2])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+
+        expect(zip.file('mdict-media/assets/false.bin')).toBeNull();
+        expect(await zip.file('mdict-media/assets/true.bin')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
+    });
+
     test('records direct MDX preparation subphase timings', async () => {
         mockState.mdxFactory = () => ({
             header: {
