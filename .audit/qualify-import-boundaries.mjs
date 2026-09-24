@@ -31,8 +31,7 @@ try {
     assert.equal(git(['rev-parse', `${payload.base}^{commit}`]), payload.base)
     assert.equal(git(['hash-object', spec.source]), spec.sourceBlob, 'Source baseline changed')
     const patchPath = join(out, 'candidate.patch')
-    // Repair two transport transcription errors, then verify the original
-    // local artifact's SHA-256 before applying any test or production change.
+    // Verify the original artifact after repairing two transcription errors.
     const encoded = spec.patch.replace('X3kf8vrG328', 'X3kf8vrGfr328').replace('PReIPmSr1efIP242', 'PReIPmSr1ef4v242')
     const patch = gunzipSync(Buffer.from(encoded, 'base64'))
     const expected = kind === 'css' ? 'ecf61022212c2a45bffe011a5d8da693ce900f96636914b9734e9a7e25a54ace' : '4022eba8f60ab5b855ead8890835ad4984c15fe0cf21d81fa6d3a7a1408b0a4d'
@@ -50,6 +49,7 @@ try {
         assert.equal(baseline.status, 1)
         assert.match(baseline.text, new RegExp(`# tests ${spec.total}\\b`, 'u'))
         assert.match(baseline.text, /# fail [1-9][0-9]*\b/u)
+        console.log(baseline.text.split('\n').filter((line) => /^# (tests|pass|fail) /u.test(line)).join('\n'))
     } else {
         const resultFile = join(out, 'baseline.json')
         const baseline = run('baseline', 'npx', ['vitest', 'run', spec.tests[0], '--reporter=json', `--outputFile=${resultFile}`, '--maxWorkers=1', '--no-file-parallelism'], {allowFailure: true})
@@ -57,16 +57,36 @@ try {
         const result = JSON.parse(readFileSync(resultFile, 'utf8'))
         assert.equal(result.numTotalTests, spec.total)
         assert.ok(result.numFailedTests > 0)
-        assert.equal(result.numRuntimeErrorTestSuites, 0)
+        const assertions = result.testResults.flatMap((suite) => suite.assertionResults)
+        assert.equal(assertions.length, spec.total, 'Every regression must execute, not fail during module loading')
+        assert.equal(assertions.filter((test) => test.status === 'failed').length, result.numFailedTests)
+        assert.equal(assertions.filter((test) => test.status === 'passed').length, result.numPassedTests)
+        console.log(`BASELINE ${result.numPassedTests} pass / ${result.numFailedTests} fail`)
     }
     git(['apply', '--include=ext/**', patchPath])
     if (kind === 'css') {
-        run('candidate-native', process.execPath, ['--test', '--test-reporter=tap', spec.tests[1]])
+        // End the escape branch immediately rather than extending an else-if
+        // chain past the repository's lint threshold. The loop increment still
+        // skips exactly the escaped character.
+        const old = String.raw`        if (character === '\\') {
+            index += 1;
+        } else if (character === '"' || character === "'") {`
+        const replacement = String.raw`        if (character === '\\') {
+            index += 1;
+            continue;
+        }
+        if (character === '"' || character === "'") {`
+        const text = readFileSync(spec.source, 'utf8')
+        assert.equal(text.split(old).length, 2, 'Expected one block scanner escape branch')
+        writeFileSync(spec.source, text.replace(old, replacement))
+        const native = run('candidate-native', process.execPath, ['--test', '--test-reporter=tap', spec.tests[1]])
+        console.log(native.text.split('\n').filter((line) => /^# (tests|pass|fail) /u.test(line)).join('\n'))
     }
     run('candidate-vitest', 'npx', ['vitest', 'run', spec.tests[0], '--maxWorkers=1', '--no-file-parallelism'])
     run('changed-eslint', 'npx', ['eslint', spec.source, ...spec.tests])
     run('typescript', 'npm', ['run', 'test:ts'])
-    run('unit', 'npm', ['run', 'test:unit', '--', '--maxWorkers=1', '--no-file-parallelism'])
+    const unit = run('unit', 'npm', ['run', 'test:unit', '--', '--maxWorkers=1', '--no-file-parallelism'])
+    console.log(unit.text.slice(-2000))
     run('license-report', 'npm', ['run', 'license-report:html'])
     run('build', 'npm', ['run', 'test:build'])
     git(['diff', '--check'])
