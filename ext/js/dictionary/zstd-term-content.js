@@ -193,16 +193,27 @@ export class TermContentCompressionPool {
         // A failed job does not stop other workers from reading the borrowed
         // source. Drain both barriers before rejection can trigger a fallback
         // or allow the caller to release/reuse that source.
-        const sourceConsumed = Promise.allSettled(jobs.map(({sourceConsumed: promise}) => promise)).then((results) => {
-            for (const result of results) {
-                if (result.status === 'rejected') { throw result.reason; }
-            }
+        const noFailure = Symbol();
+        /** @type {unknown} */
+        let firstSourceFailure = noFailure;
+        const sourceConsumed = Promise.all(jobs.map(({sourceConsumed: promise}) => promise.catch((error) => {
+            if (firstSourceFailure === noFailure) { firstSourceFailure = error; }
+        }))).then(() => {
+            if (firstSourceFailure !== noFailure) { throw firstSourceFailure; }
         });
-        const completion = Promise.allSettled(jobs.map(({completion: promise}) => promise)).then((results) => {
-            const chunks = results.map((result, blockIndex) => {
-                if (result.status === 'rejected') { throw result.reason; }
-                envelopeMsByWorker[blockIndex % this._workers.length] += result.value.envelopeMs;
-                return result.value.bytes;
+        /** @type {unknown} */
+        let firstCompletionFailure = noFailure;
+        const completion = Promise.all(jobs.map(({completion: promise}) => promise.catch((error) => {
+            if (firstCompletionFailure === noFailure) { firstCompletionFailure = error; }
+            return null;
+        }))).then((results) => {
+            if (firstCompletionFailure !== noFailure) { throw firstCompletionFailure; }
+            const successfulResults = /** @type {Array<{bytes: Uint8Array, envelopeMs: number}>} */ (
+                /** @type {unknown} */ (results)
+            );
+            const chunks = successfulResults.map((result, blockIndex) => {
+                envelopeMsByWorker[blockIndex % this._workers.length] += result.envelopeMs;
+                return result.bytes;
             });
             return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};
         });
