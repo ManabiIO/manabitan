@@ -4351,6 +4351,11 @@ export class DictionaryImporter {
                 if (stringOffset !== stringsBuffer.byteLength) {
                     throw new Error(`Invalid term artifact payload in '${filename}': preinterned string table length mismatch`);
                 }
+                // This table is already required to decode artifact rows. Keep
+                // it on the preinterned plan so storage/lookup validation can
+                // reuse it instead of allocating and rebuilding the same table.
+                artifactTermRecordPreinternedPlan.stringOffsets =
+                    artifactTermRecordStringOffsets.subarray(0, stringCount);
             }
         }
         const streamToChunkHandler = typeof onChunk === 'function';
