@@ -1,0 +1,28 @@
+diff --git a/test/dictionary-database-artifact-fields.test.js b/test/dictionary-database-artifact-fields.test.js
+--- a/test/dictionary-database-artifact-fields.test.js
++++ b/test/dictionary-database-artifact-fields.test.js
+@@ -90,7 +90,13 @@ describe('hashless artifact term-field decoding', () => {
+         const originalDecode = TextDecoder.prototype.decode;
+         /** @type {ArrayBufferView[]} */
+         const inputs = [];
+-        vi.spyOn(TextDecoder.prototype, 'decode').mockImplementation(function decode(input, options) {
++        /**
++         * @this {TextDecoder}
++         * @param {Parameters<TextDecoder['decode']>[0]} input
++         * @param {TextDecodeOptions|undefined} options
++         * @returns {string}
++         */
++        function decode(input, options) {
+             if (ArrayBuffer.isView(input)) {
+                 // Chromium rejects shared views even though Node accepts them.
+                 if (!(input.buffer instanceof ArrayBuffer)) { throw new TypeError('Shared view not accepted'); }
+@@ -98,7 +104,8 @@ describe('hashless artifact term-field decoding', () => {
+                 inputs.push(input);
+             }
+             return originalDecode.call(this, input, options);
+-        });
++        }
++        vi.spyOn(TextDecoder.prototype, 'decode').mockImplementation(decode);
+         const row = await materialize(expressionBytes, readingBytes);
+         expect(row.expression).toBe('\ufeff語');
+         expect(row.reading).toBe('\ufeffご');

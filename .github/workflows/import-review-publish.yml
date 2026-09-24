@@ -14,10 +14,6 @@ jobs:
   publish:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        fix: [revision, artifact]
     steps:
       - uses: actions/checkout@v6
         with:
@@ -32,53 +28,34 @@ jobs:
           node-version: '22.16.0'
       - name: Apply only the reviewed product patch
         working-directory: product
-        env:
-          FIX: ${{ matrix.fix }}
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
-          git apply --check --whitespace=error "../delivery/dev/review-20260924/${FIX}.patch"
-          git apply --whitespace=error "../delivery/dev/review-20260924/${FIX}.patch"
-          if [[ "$FIX" == artifact ]]; then
-            cp ../delivery/dev/review-20260924/artifact-fields.test.js test/dictionary-database-artifact-fields.test.js
-          fi
+          git apply --check --whitespace=error ../delivery/dev/review-20260924/artifact.patch
+          git apply --whitespace=error ../delivery/dev/review-20260924/artifact.patch
+          cp ../delivery/dev/review-20260924/artifact-fields.test.js test/dictionary-database-artifact-fields.test.js
+          git apply --whitespace=error ../delivery/dev/review-20260924/artifact-test-types.patch
           npm ci
           npm run build:libs
       - name: Validate the changed behavior
         working-directory: product
-        env:
-          FIX: ${{ matrix.fix }}
         run: |
           set -euo pipefail
-          if [[ "$FIX" == revision ]]; then
-            npx vitest run test/dictionary-data-util.test.js
-            npx eslint ext/js/dictionary/dictionary-data-util.js test/dictionary-data-util.test.js
-          else
-            npx vitest run test/dictionary-database-artifact-fields.test.js test/dictionary-database-content-dedup.test.js
-            npx eslint ext/js/dictionary/dictionary-database.js test/dictionary-database-artifact-fields.test.js
-          fi
+          npx vitest run test/dictionary-database-artifact-fields.test.js test/dictionary-database-content-dedup.test.js
+          npx eslint ext/js/dictionary/dictionary-database.js test/dictionary-database-artifact-fields.test.js
           npm run test:ts
           npm run test:build
       - name: Publish an independent review branch without force
         working-directory: product
-        env:
-          FIX: ${{ matrix.fix }}
         run: |
           set -euo pipefail
-          if [[ "$FIX" == revision ]]; then
-            branch=fix/dictionary-revision-precision-20260924
-            message='fix(dictionary): compare numeric revisions without precision loss'
-            git add ext/js/dictionary/dictionary-data-util.js test/dictionary-data-util.test.js
-          else
-            branch=fix/artifact-term-field-decoding-20260924
-            message='fix(import): preserve artifact term fields and decode shared views'
-            git add ext/js/dictionary/dictionary-database.js test/dictionary-database-artifact-fields.test.js
-          fi
+          branch=fix/artifact-term-field-decoding-20260924
+          git add ext/js/dictionary/dictionary-database.js test/dictionary-database-artifact-fields.test.js
           test "$(git diff --cached --name-only | wc -l)" -eq 2
           git diff --cached --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m "$message"
+          git commit -m 'fix(import): preserve artifact term fields and decode shared views'
           if [[ -n "$(git ls-remote --heads origin "refs/heads/$branch")" ]]; then
             echo "Review branch already exists; refusing to overwrite $branch" >&2
             exit 1
