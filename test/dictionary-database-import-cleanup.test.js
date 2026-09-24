@@ -351,6 +351,7 @@ describe('DictionaryDatabase import cleanup', () => {
         const database = new DictionaryDatabase();
         /** @type {() => void} */
         let releaseRecordCheckpoint = () => {};
+        /** @type {Promise<void>} */
         const recordCheckpointGate = new Promise((resolve) => {
             releaseRecordCheckpoint = resolve;
         });
