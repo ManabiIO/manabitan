@@ -135,9 +135,6 @@ jobs:
                       });
                       return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: /** @type {true} */ (true)};
                   });'''
-          # The heredoc indentation is removed by YAML; retain JS's eight-space method indentation.
-          old = old.replace('\n          ', '\n')
-          new = new.replace('\n          ', '\n')
           assert source.count(anchor) == 1
           assert source.count(old) == 1, 'Expected pinned PR 170 aggregation block'
           source = source.replace(anchor, helper + anchor).replace(old, new)
