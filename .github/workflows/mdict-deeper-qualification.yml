@@ -20,17 +20,12 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npm run build:libs
-      - name: Package tracked source and built runtime libraries
+      - name: Package exact installed dependencies
         run: |
-          mkdir -p "$RUNNER_TEMP/mdict-source-kit"
-          git archive HEAD | tar -xf - -C "$RUNNER_TEMP/mdict-source-kit"
-          cp -a ext/lib/. "$RUNNER_TEMP/mdict-source-kit/ext/lib/"
-          git rev-parse HEAD > "$RUNNER_TEMP/mdict-source-kit/BASE_COMMIT"
-          tar -czf "$RUNNER_TEMP/mdict-source-kit.tar.gz" -C "$RUNNER_TEMP/mdict-source-kit" .
-          sha256sum "$RUNNER_TEMP/mdict-source-kit.tar.gz"
+          tar -czf "$RUNNER_TEMP/mdict-node-modules.tar.gz" node_modules
+          sha256sum "$RUNNER_TEMP/mdict-node-modules.tar.gz"
       - uses: actions/upload-artifact@v4
         with:
-          name: mdict-source-kit
-          path: ${{ runner.temp }}/mdict-source-kit.tar.gz
+          name: mdict-node-modules
+          path: ${{ runner.temp }}/mdict-node-modules.tar.gz
           retention-days: 1
