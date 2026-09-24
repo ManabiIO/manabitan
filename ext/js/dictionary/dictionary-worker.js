@@ -193,42 +193,54 @@ export class DictionaryWorker {
      */
     _onMessage(details, event) {
         if (details.complete) { return; }
-        const {action, params} = event.data;
-        switch (action) {
-            case 'complete':
-                {
-                    const {worker, resolve, reject, onMessage, onError, onMessageError, formatResult} = details;
-                    if (worker === null || onMessage === null || resolve === null || reject === null) { return; }
-                    details.complete = true;
-                    this._activeInvocations.delete(/** @type {import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>} */ (details));
-                    details.worker = null;
-                    details.resolve = null;
-                    details.reject = null;
-                    details.onMessage = null;
-                    details.onError = null;
-                    details.onMessageError = null;
-                    details.onProgress = null;
-                    details.formatResult = null;
-                    worker.removeEventListener('message', onMessage);
-                    if (this._reuseWorker) {
-                        if (onError !== null) { worker.removeEventListener('error', onError); }
-                        if (onMessageError !== null) { worker.removeEventListener('messageerror', onMessageError); }
-                    } else {
-                        worker.terminate();
+        try {
+            const {action, params} = event.data;
+            switch (action) {
+                case 'complete':
+                    {
+                        const {worker, resolve, reject, onMessage, onError, onMessageError, formatResult} = details;
+                        if (worker === null || onMessage === null || resolve === null || reject === null) { return; }
+                        details.complete = true;
+                        this._activeInvocations.delete(/** @type {import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>} */ (details));
+                        details.worker = null;
+                        details.resolve = null;
+                        details.reject = null;
+                        details.onMessage = null;
+                        details.onError = null;
+                        details.onMessageError = null;
+                        details.onProgress = null;
+                        details.formatResult = null;
+                        worker.removeEventListener('message', onMessage);
+                        if (this._reuseWorker) {
+                            if (onError !== null) { worker.removeEventListener('error', onError); }
+                            if (onMessageError !== null) { worker.removeEventListener('messageerror', onMessageError); }
+                        } else {
+                            worker.terminate();
+                        }
+                        this._onMessageComplete(params, resolve, reject, formatResult);
                     }
-                    this._onMessageComplete(params, resolve, reject, formatResult);
-                }
-                break;
-            case 'progress':
-                this._onMessageProgress(params, details.onProgress);
-                break;
-            case 'getImageDetails':
-                {
-                    const {worker} = details;
-                    if (worker === null) { return; }
-                    void this._onMessageGetImageDetails(params, worker);
-                }
-                break;
+                    break;
+                case 'progress':
+                    this._onMessageProgress(params, details.onProgress);
+                    break;
+                case 'getImageDetails':
+                    {
+                        const {worker} = details;
+                        if (worker === null) { return; }
+                        if (typeof params !== 'object' || params === null) {
+                            throw new Error('Dictionary worker returned invalid image-details parameters');
+                        }
+                        void this._onMessageGetImageDetails(params, worker);
+                    }
+                    break;
+                default:
+                    throw new Error(`Dictionary worker returned an unknown action: ${String(action)}`);
+            }
+        } catch (error) {
+            const {worker} = details;
+            if (worker !== null) {
+                this._rejectInvocationsForWorker(worker, toError(error), true);
+            }
         }
     }
 
