@@ -39,6 +39,7 @@ test('mixed artifact content descriptor runs borrow typed numeric columns', asyn
         _preinternedPlan,
         contentDictName,
     ) => {
+        if (typeof contentDictName !== 'string') { throw new TypeError('Expected content dictionary name') }
         observed.push({chunk, offsets, lengths, contentDictName})
         return {
             encodeMs: 0,
@@ -67,7 +68,7 @@ test('mixed artifact content descriptor runs borrow typed numeric columns', asyn
 
     expect(observed).toHaveLength(2)
     expect(observed.map(({chunk}) => chunk.rowCount)).toEqual([split, count - split])
-    expect(observed.map(({contentDictName}) => contentDictName).toEqual(['raw-v2', 'raw-v6']))
+    expect(observed.map(({contentDictName}) => contentDictName)).toEqual(['raw-v2', 'raw-v6'])
 
     for (const {chunk, offsets, lengths} of observed) {
         expect(chunk.expressionBytesList).not.toBe(expressionBytesList)
