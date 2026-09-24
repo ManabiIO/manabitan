@@ -2018,9 +2018,15 @@ export class TermRecordOpfsStore {
                 rowCount: runCount,
                 expressionBytesList: chunk.expressionBytesList.slice(runStart, runEnd),
                 readingBytesList: chunk.readingBytesList.slice(runStart, runEnd),
-                readingEqualsExpressionList: chunk.readingEqualsExpressionList.slice(runStart, runEnd),
-                scoreList: chunk.scoreList.slice(runStart, runEnd),
-                sequenceList: chunk.sequenceList.slice(runStart, runEnd),
+                readingEqualsExpressionList: chunk.readingEqualsExpressionList instanceof Uint8Array ?
+                    chunk.readingEqualsExpressionList.subarray(runStart, runEnd) :
+                    chunk.readingEqualsExpressionList.slice(runStart, runEnd),
+                scoreList: chunk.scoreList instanceof Int32Array || chunk.scoreList instanceof Float64Array ?
+                    chunk.scoreList.subarray(runStart, runEnd) :
+                    chunk.scoreList.slice(runStart, runEnd),
+                sequenceList: chunk.sequenceList instanceof Int32Array || chunk.sequenceList instanceof Float64Array ?
+                    chunk.sequenceList.subarray(runStart, runEnd) :
+                    chunk.sequenceList.slice(runStart, runEnd),
                 termRecordPreinternedPlan: sliceTermRecordPreinternedPlan(chunk.termRecordPreinternedPlan ?? null, runStart, runCount),
                 resolvedContentReferences: sliceResolvedContentReferences(chunk, runStart, runEnd),
             };
@@ -2028,8 +2034,12 @@ export class TermRecordOpfsStore {
                 state,
                 chunkSlice,
                 firstId + runStart,
-                contentOffsets.slice(runStart, runEnd),
-                contentLengths.slice(runStart, runEnd),
+                contentOffsets instanceof Uint32Array || contentOffsets instanceof Float64Array ?
+                    contentOffsets.subarray(runStart, runEnd) :
+                    contentOffsets.slice(runStart, runEnd),
+                contentLengths instanceof Uint32Array ?
+                    contentLengths.subarray(runStart, runEnd) :
+                    contentLengths.slice(runStart, runEnd),
                 chunkSlice.termRecordPreinternedPlan ?? null,
                 contentDictName,
             );
