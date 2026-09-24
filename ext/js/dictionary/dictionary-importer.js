@@ -988,6 +988,17 @@ export class DictionaryImporter {
                 }`,
             );
         }
+        if (
+            termArtifactManifest !== null &&
+            termArtifactManifest.packedMediaEntries.length > 0 &&
+            (packedMediaArtifactBytes instanceof Uint8Array || packedMediaArtifactBlob instanceof Blob)
+        ) {
+            this._validatePackedMediaArtifactEntries(
+                termArtifactManifest.packedMediaEntries,
+                packedMediaArtifactBytes instanceof Uint8Array ? packedMediaArtifactBytes.byteLength : /** @type {Blob} */ (packedMediaArtifactBlob).size,
+                preserveCompressedMedia,
+            );
+        }
         const useCompressedSharedGlossaryArtifact = termArtifactManifest?.termContentMode === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME;
         if (
             sharedGlossaryArtifactBytes instanceof Uint8Array &&
@@ -3460,6 +3471,37 @@ export class DictionaryImporter {
             });
         }
         return results;
+    }
+
+    /**
+     * @param {Array<{path: string, packedOffset: number, packedLength: number, compressionMethod: number, uncompressedLength: number}>} entries
+     * @param {number} payloadLength
+     * @param {boolean} preserveCompressedMedia
+     * @throws {Error} If a packed media range or preserved compression descriptor is invalid.
+     */
+    _validatePackedMediaArtifactEntries(entries, payloadLength, preserveCompressedMedia) {
+        if (!Number.isSafeInteger(payloadLength) || payloadLength < 0) {
+            throw new Error('Packed media artifact length is invalid');
+        }
+        for (const {path, packedOffset, packedLength, compressionMethod, uncompressedLength} of entries) {
+            if (
+                !Number.isSafeInteger(packedOffset) || packedOffset < 0 ||
+                !Number.isSafeInteger(packedLength) || packedLength <= 0 ||
+                packedOffset > payloadLength - packedLength
+            ) {
+                throw new Error(`Packed media range is out of bounds for ${JSON.stringify(path)}`);
+            }
+            if (!preserveCompressedMedia) { continue; }
+            if (compressionMethod !== ZIP_COMPRESSION_METHOD_STORE && compressionMethod !== ZIP_COMPRESSION_METHOD_DEFLATE) {
+                throw new Error(`Unsupported packed media compression method for ${JSON.stringify(path)}: ${compressionMethod}`);
+            }
+            if (!Number.isSafeInteger(uncompressedLength) || uncompressedLength <= 0) {
+                throw new Error(`Packed media uncompressed length is invalid for ${JSON.stringify(path)}`);
+            }
+            if (compressionMethod === ZIP_COMPRESSION_METHOD_STORE && uncompressedLength !== packedLength) {
+                throw new Error(`Stored packed media length mismatch for ${JSON.stringify(path)}`);
+            }
+        }
     }
 
     /**
