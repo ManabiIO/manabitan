@@ -314,9 +314,6 @@ export function getValidatedStringOffsets(plan) {
         for (let i = 0; i < stringLengths.length; ++i) {
             offsets[i] = offset;
             offset += stringLengths[i];
-            if (offset > stringsBuffer.byteLength) {
-                throw new RangeError('Preinterned plan string arena is out of bounds');
-            }
         }
         if (offset !== stringsBuffer.byteLength) {
             throw new RangeError('Preinterned plan string arena length does not match its strings');
@@ -329,8 +326,7 @@ export function getValidatedStringOffsets(plan) {
     offsets = stringOffsets;
     let expectedOffset = 0;
     for (let i = 0; i < stringLengths.length; ++i) {
-        const offset = offsets[i];
-        if (offset !== expectedOffset || offset > stringsBuffer.byteLength - stringLengths[i]) {
+        if (offsets[i] !== expectedOffset) {
             throw new RangeError('Preinterned plan string arena is out of bounds');
         }
         expectedOffset += stringLengths[i];
