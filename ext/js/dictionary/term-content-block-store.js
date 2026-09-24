@@ -1297,19 +1297,27 @@ function createTermContentReferenceSlabs(
  * @throws {RangeError} If a reserved slab offset is invalid.
  */
 function createTermContentReferenceOffsets(entryCount, slabOffsets, entriesPerSlab) {
+    if (!Number.isSafeInteger(entriesPerSlab) || entriesPerSlab <= 0) {
+        throw new RangeError(`Invalid term content reference slab size: ${entriesPerSlab}`);
+    }
     const contentOffsets = new Float64Array(entryCount);
-    for (let i = 0; i < entryCount; ++i) {
-        const slabIndex = Math.floor(i / entriesPerSlab);
+    let index = 0;
+    for (let slabIndex = 0; index < entryCount; ++slabIndex) {
         const slabOffset = slabOffsets[slabIndex];
         if (!Number.isSafeInteger(slabOffset) || slabOffset < 0) {
             throw new RangeError(`Invalid term content reference slab offset: ${slabOffset}`);
         }
-        const contentOffset = slabOffset +
-        (i % entriesPerSlab) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
-        if (!Number.isSafeInteger(contentOffset)) {
-            throw new RangeError(`Term content reference offset exceeds the safe integer range: ${contentOffset}`);
+        const count = Math.min(entriesPerSlab, entryCount - index);
+        const lastOffset = slabOffset +
+            (count - 1) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+        if (!Number.isSafeInteger(lastOffset)) {
+            throw new RangeError(`Term content reference offset exceeds the safe integer range: ${lastOffset}`);
         }
-        contentOffsets[i] = contentOffset;
+        let contentOffset = slabOffset;
+        for (let localIndex = 0; localIndex < count; ++localIndex) {
+            contentOffsets[index++] = contentOffset;
+            contentOffset += RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+        }
     }
     return contentOffsets;
 }
