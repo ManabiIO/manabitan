@@ -10,30 +10,24 @@ import {
     prepareTermLookupIndexesFromPreinternedPlan,
 } from '../ext/js/dictionary/term-lookup-index-preparation.js'
 
-class SliceForbiddenUint8Array extends Uint8Array {
-    slice() {
-        throw new Error('segmented lookup flags must not be copied')
-    }
-}
-
-class SliceForbiddenInt32Array extends Int32Array {
-    slice() {
-        throw new Error('segmented lookup sequences must not be copied')
-    }
-}
-
 test('segmented lookup preparation borrows typed row columns', () => {
     const rowCount = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1
     const flagsBacking = new ArrayBuffer(rowCount + 8)
-    const readingEqualsExpressionList = new SliceForbiddenUint8Array(flagsBacking, 4, rowCount)
+    const readingEqualsExpressionList = new Uint8Array(flagsBacking, 4, rowCount)
+    Object.defineProperty(readingEqualsExpressionList, 'slice', {
+        value: () => { throw new Error('segmented lookup flags must not be copied') },
+    })
     readingEqualsExpressionList.fill(1)
 
     const sequenceBacking = new ArrayBuffer((rowCount + 4) * Int32Array.BYTES_PER_ELEMENT)
-    const sequenceList = new SliceForbiddenInt32Array(
+    const sequenceList = new Int32Array(
         sequenceBacking,
         2 * Int32Array.BYTES_PER_ELEMENT,
         rowCount,
     )
+    Object.defineProperty(sequenceList, 'slice', {
+        value: () => { throw new Error('segmented lookup sequences must not be copied') },
+    })
     sequenceList.fill(-1)
     sequenceList[rowCount - 1] = 42
 
