@@ -65,10 +65,13 @@ export class DictionaryWorkerMediaLoader {
             this._requests.set(id, {resolve, reject, timer});
             // This is executed in a Worker context, so the self needs to be force cast
             try {
+                // Metadata is optional: retain the importer's original payload if
+                // decoding fails or the host never replies. Structured clone gives
+                // the host its own buffer without detaching the fallback bytes.
                 /** @type {Worker} */ (/** @type {unknown} */ (self)).postMessage({
                     action: 'getImageDetails',
                     params: {id, content, mediaType},
-                }, [content]);
+                });
             } catch (error) {
                 this._requests.delete(id);
                 clearTimeout(timer);
