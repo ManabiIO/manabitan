@@ -246,6 +246,17 @@ function getArchiveEntryUtf8Alias(entry) {
     if (!(rawFilename instanceof Uint8Array) || rawFilename.byteLength === 0) {
         return null;
     }
+    if (rawFilename.byteLength === filename.length) {
+        let exactAsciiMatch = true;
+        for (let i = 0; i < rawFilename.byteLength; ++i) {
+            const charCode = filename.charCodeAt(i);
+            if (charCode > 0x7f || rawFilename[i] !== charCode) {
+                exactAsciiMatch = false;
+                break;
+            }
+        }
+        if (exactAsciiMatch) { return null; }
+    }
     let decoded;
     try {
         decoded = UTF8_ARCHIVE_FILENAME_DECODER.decode(rawFilename);
