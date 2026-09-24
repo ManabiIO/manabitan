@@ -141,6 +141,22 @@ const UTF8_FIELD_TEXT_DECODER = new TextDecoder('utf-8', {ignoreBOM: true});
 Object.freeze(EMPTY_TERM_GLOSSARY);
 
 /**
+ * Keep the archive alive until every admitted read settles, including when
+ * one read fails early. Preserve Promise.all's first rejection and tuple types.
+ * @template {unknown[]|[]} T
+ * @param {T} reads
+ * @returns {Promise<{[K in keyof T]: Awaited<T[K]>}>}
+ */
+async function joinArchiveReads(reads) {
+    try {
+        return await Promise.all(reads);
+    } catch (error) {
+        await Promise.allSettled(reads);
+        throw error;
+    }
+}
+
+/**
  * Chromium rejects SharedArrayBuffer-backed views passed to TextDecoder.
  * Parser WASM memory may be shared, so copy only shared-backed views while
  * preserving the zero-copy path for normal archive and worker buffers.
@@ -883,7 +899,7 @@ export class DictionaryImporter {
         );
         if (useParallelPackedArtifactPreload) {
             const tParallelPackedArtifactReadStart = Date.now();
-            const [parallelPackedTermArtifactBytes, parallelPackedMediaArtifact] = await Promise.all([
+            const [parallelPackedTermArtifactBytes, parallelPackedMediaArtifact] = await joinArchiveReads([
                 this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (packedTermArtifactEntry), new Uint8ArrayWriter()),
                 this._skipImageMetadata ?
                     this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (packedMediaArtifactEntry), new BlobWriter()) :
@@ -3566,7 +3582,7 @@ export class DictionaryImporter {
         const results = new Map();
         for (let i = 0; i < termArtifactFiles.length; i += TERM_ARTIFACT_PRELOAD_CONCURRENCY) {
             const batch = termArtifactFiles.slice(i, i + TERM_ARTIFACT_PRELOAD_CONCURRENCY);
-            const batchResults = await Promise.all(batch.map(async (termFile) => {
+            const batchResults = await joinArchiveReads(batch.map(async (termFile) => {
                 const bytes = await this._getData(termFile, new Uint8ArrayWriter());
                 return [termFile.filename, bytes];
             }));
