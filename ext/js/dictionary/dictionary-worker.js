@@ -33,6 +33,10 @@ export class DictionaryWorker {
         this._worker = null;
         /** @type {Set<import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>>} */
         this._activeInvocations = new Set();
+        /** @type {Array<{start: () => Promise<unknown>, resolve: (value: unknown) => void, reject: (reason?: import('core').RejectionReason) => void}>} */
+        this._reuseInvocationQueue = [];
+        /** @type {object|null} */
+        this._reuseInvocationToken = null;
     }
 
     /**
@@ -98,6 +102,12 @@ export class DictionaryWorker {
 
     /** */
     destroy() {
+        const error = new Error('Dictionary worker destroyed');
+        for (const {reject} of this._reuseInvocationQueue.splice(0)) {
+            reject(error);
+        }
+        this._reuseInvocationToken = null;
+
         // Non-reused workers are owned by their invocations, not _worker.
         /** @type {Set<Worker>} */
         const workers = new Set();
@@ -105,7 +115,6 @@ export class DictionaryWorker {
         for (const {worker} of this._activeInvocations) {
             if (worker !== null) { workers.add(worker); }
         }
-        const error = new Error('Dictionary worker destroyed');
         for (const worker of workers) {
             this._rejectInvocationsForWorker(worker, error, true);
         }
@@ -124,6 +133,64 @@ export class DictionaryWorker {
      * @param {?(result: TResponseRaw) => TResponse} formatResult
      */
     _invoke(action, params, transfer, onProgress, formatResult) {
+        if (!this._reuseWorker) {
+            return this._invokeDirect(action, params, transfer, onProgress, formatResult);
+        }
+        return new Promise((resolve, reject) => {
+            this._reuseInvocationQueue.push({
+                start: () => this._invokeDirect(action, params, transfer, onProgress, formatResult),
+                resolve,
+                reject,
+            });
+            this._startNextReuseInvocation();
+        });
+    }
+
+    /** */
+    _startNextReuseInvocation() {
+        if (this._reuseInvocationToken !== null) { return; }
+        const queued = this._reuseInvocationQueue.shift();
+        if (typeof queued === 'undefined') { return; }
+
+        const token = {};
+        this._reuseInvocationToken = token;
+        let promise;
+        try {
+            promise = queued.start();
+        } catch (error) {
+            queued.reject(error);
+            if (this._reuseInvocationToken === token) {
+                this._reuseInvocationToken = null;
+                this._startNextReuseInvocation();
+            }
+            return;
+        }
+        void promise.then(queued.resolve, queued.reject).then(
+            () => this._finishReuseInvocation(token),
+            () => this._finishReuseInvocation(token),
+        );
+    }
+
+    /**
+     * @param {object} token
+     */
+    _finishReuseInvocation(token) {
+        if (this._reuseInvocationToken !== token) { return; }
+        this._reuseInvocationToken = null;
+        this._startNextReuseInvocation();
+    }
+
+    /**
+     * @template [TParams=import('core').SerializableObject]
+     * @template [TResponseRaw=unknown]
+     * @template [TResponse=unknown]
+     * @param {string} action
+     * @param {TParams} params
+     * @param {Transferable[]} transfer
+     * @param {?(arg: import('core').SafeAny) => void} onProgress
+     * @param {?(result: TResponseRaw) => TResponse} formatResult
+     */
+    _invokeDirect(action, params, transfer, onProgress, formatResult) {
         return new Promise((resolve, reject) => {
             const worker = this._worker ?? new Worker(new URL('dictionary-worker-main.js', import.meta.url), {type: 'module'});
             if (this._reuseWorker && this._worker === null) {
