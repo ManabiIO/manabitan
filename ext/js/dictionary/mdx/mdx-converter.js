@@ -1632,8 +1632,10 @@ function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferen
     const image = {tag: 'img', path};
     const data = buildStructuredData(attrs);
     if (data !== null) { image.data = {tag: 'img', ...data}; }
-    if (typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width)) { image.width = Number.parseInt(attrs.width, 10); }
-    if (typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height)) { image.height = Number.parseInt(attrs.height, 10); }
+    const width = typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width) ? Number.parseInt(attrs.width, 10) : Number.NaN;
+    const height = typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height) ? Number.parseInt(attrs.height, 10) : Number.NaN;
+    if (Number.isFinite(width)) { image.width = width; }
+    if (Number.isFinite(height)) { image.height = height; }
     if (typeof attrs.title === 'string' && attrs.title.length > 0) { image.title = attrs.title; }
     if (typeof attrs.alt === 'string' && attrs.alt.length > 0) { image.alt = attrs.alt; }
     return image;
