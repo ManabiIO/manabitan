@@ -1,0 +1,77 @@
+name: Import review baseline 20260924
+on:
+  push:
+    branches: [verify/import-review-20260924]
+    paths: [.github/workflows/import-review-baseline-20260924.yml]
+permissions:
+  contents: read
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci && npm run build:libs
+      - run: npx playwright install --with-deps chromium
+      - name: Profile production-default imports
+        run: |
+          node dev/perf/import-benchmark.js jmdict --trace --output builds/perf/review-jmdict-trace
+          node dev/perf/import-benchmark.js jitendex --trace --no-build --output builds/perf/review-jitendex-trace
+      - name: Print profile attribution
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, collections
+          for f in pathlib.Path('builds/perf').rglob('*.json'):
+              try: data=json.loads(f.read_text())
+              except Exception: continue
+              if 'traceEvents' not in data:
+                  if f.name in ('summary.json','environment.json') or 'summary' in f.name:
+                      print('SUMMARY',str(f),json.dumps(data)[:25000])
+                  continue
+              profiles={}
+              for e in data['traceEvents']:
+                  if e.get('name') not in ('Profile','ProfileChunk'): continue
+                  k=(e.get('pid'),e.get('tid'),str(e.get('id')))
+                  p=profiles.setdefault(k,{'nodes':{},'samples':[],'times':[]})
+                  d=e.get('args',{}).get('data',{})
+                  cp=d.get('cpuProfile',{})
+                  for n in cp.get('nodes',[]): p['nodes'][n['id']]=n
+                  p['samples']+=cp.get('samples',[])
+                  p['times']+=d.get('timeDeltas',cp.get('timeDeltas',[]))
+              totals=collections.Counter()
+              for p in profiles.values():
+                  for n,t in zip(p['samples'],p['times']):
+                      cf=p['nodes'].get(n,{}).get('callFrame',{})
+                      key=(cf.get('functionName','?'),cf.get('url',''),cf.get('lineNumber',-1)+1)
+                      totals[key]+=t
+              print('PROFILE',str(f),'profiles',len(profiles),'samples',sum(len(p['samples']) for p in profiles.values()))
+              for k,t in totals.most_common(60): print(round(t/1000,3),k)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: import-review-baseline-evidence
+          path: builds/perf
+          retention-days: 7
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci && npm run build:libs
+      - run: npx vitest run --minWorkers=1 --maxWorkers=2
