@@ -20,14 +20,28 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22.16.0'
-      - name: Install the pinned dependencies
-        run: npm ci
-      - name: Package the review checkout and dependencies
-        run: tar --exclude='./.git' -czf "$RUNNER_TEMP/manabitan-review.tar.gz" .
+      - name: Install the pinned dependencies and build libraries
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Prepare the pinned dictionaries and browser
+        run: |
+          node dev/perf/prepare-dictionaries.js
+          npx playwright install chromium
+          node -p 'JSON.stringify({node: process.version, v8: process.versions.v8})' > builds/review-runtime.json
+          tar -czf "$RUNNER_TEMP/manabitan-review-fixtures.tar.gz" builds/e2e-dictionary-cache builds/review-runtime.json
+          tar -C "$HOME/.cache" -czf "$RUNNER_TEMP/manabitan-review-browser.tar.gz" ms-playwright
       - uses: actions/upload-artifact@v4
         with:
-          name: manabitan-review-2185eea
-          path: ${{ runner.temp }}/manabitan-review.tar.gz
+          name: manabitan-review-fixtures
+          path: ${{ runner.temp }}/manabitan-review-fixtures.tar.gz
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabitan-review-browser
+          path: ${{ runner.temp }}/manabitan-review-browser.tar.gz
           compression-level: 0
           retention-days: 1
           if-no-files-found: error
