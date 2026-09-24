@@ -509,7 +509,15 @@ function compactValidatedTermRecordPlan(plan, start, count, remapScratch, readin
     for (const oldIndex of referencedOldIndexes) {
         const oldOffset = sourceStringOffsets[oldIndex];
         const length = plan.stringLengths[oldIndex];
-        stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
+        // Short dictionary keys cost less to copy directly than to allocate
+        // one temporary subarray per key. Keep the bulk-copy path for long keys.
+        if (length <= 32) {
+            for (let i = 0; i < length; ++i) {
+                stringsBuffer[cursor + i] = plan.stringsBuffer[oldOffset + i];
+            }
+        } else {
+            stringsBuffer.set(plan.stringsBuffer.subarray(oldOffset, oldOffset + length), cursor);
+        }
         cursor += length;
     }
     return {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes};
