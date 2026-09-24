@@ -55,6 +55,7 @@ jobs:
           echo '89e51d0651219b9247190ed57def2f881debcb0a2e7cc0e4f2605f166cdc2b4a  ext/js/dictionary/dictionary-importer.js' | sha256sum -c -
           echo '18f4d2cef2a294576c6ac6971b63926b0a6b91fa814bf9d6fbaddae1ad2c0db5  test/dictionary-importer-artifact-preload.test.js' | sha256sum -c -
       - run: npm ci
+      - run: npm run build:libs
       - run: npx eslint ext/js/dictionary/dictionary-importer.js test/dictionary-importer-artifact-preload.test.js
       - run: npm run test:ts && npm run test:unit && npm run test:build
       - name: Publish clean source branch
