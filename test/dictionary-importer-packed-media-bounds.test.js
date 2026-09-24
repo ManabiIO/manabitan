@@ -26,6 +26,7 @@ const validate = /** @type {(entries: Array<{path: string, packedOffset: number,
 
 /**
  * @param {Partial<{path: string, packedOffset: number, packedLength: number, compressionMethod: number, uncompressedLength: number}>} overrides
+ * @returns {{path: string, packedOffset: number, packedLength: number, compressionMethod: number, uncompressedLength: number}}
  */
 function entry(overrides = {}) {
     return {
