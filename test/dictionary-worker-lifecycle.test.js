@@ -43,12 +43,27 @@ class MockWorker {
 
     /** @param {unknown} data */
     emitMessage(data) {
+        let message = data;
+        if (
+            typeof message === 'object' &&
+            message !== null &&
+            !Array.isArray(message) &&
+            (Reflect.get(message, 'action') === 'complete' || Reflect.get(message, 'action') === 'progress') &&
+            typeof Reflect.get(message, 'id') !== 'string'
+        ) {
+            const calls = this.postMessage.mock.calls;
+            const request = calls.length > 0 ? calls[calls.length - 1][0] : null;
+            const id = typeof request === 'object' && request !== null ? Reflect.get(request, 'id') : null;
+            if (typeof id === 'string') {
+                message = {...message, id};
+            }
+        }
         const listeners = this.listeners.get('message');
         // Snapshot additions while respecting removals during dispatch, as DOM
         // events do. Iterating a live array skips listeners after a removal.
         const snapshot = [...(listeners ?? [])];
         for (const listener of snapshot) {
-            if (listeners?.has(listener)) { listener(new MessageEvent('message', {data})); }
+            if (listeners?.has(listener)) { listener(new MessageEvent('message', {data: message})); }
         }
     }
 }
@@ -116,6 +131,71 @@ describe('DictionaryWorker lifecycle', () => {
         client.destroy();
         expect(workers[0].terminate).toHaveBeenCalledTimes(1);
         expect(workers[1].terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('routes overlapping reusable completions to the matching invocation', async () => {
+        const workers = installWorkerMock();
+        const client = new DictionaryWorker({reuseWorker: true});
+        const first = client.getMdxVersion();
+        const second = client.getMdxVersion();
+
+        expect(workers).toHaveLength(1);
+        expect(workers[0].postMessage).toHaveBeenCalledTimes(2);
+        const firstRequest = workers[0].postMessage.mock.calls[0][0];
+        const secondRequest = workers[0].postMessage.mock.calls[1][0];
+        expect(firstRequest.id).not.toBe(secondRequest.id);
+
+        workers[0].emitMessage({
+            action: 'complete',
+            id: secondRequest.id,
+            params: {result: 2},
+        });
+        await expect(second).resolves.toBe(2);
+
+        let firstSettled = false;
+        void first.finally(() => { firstSettled = true; });
+        await Promise.resolve();
+        expect(firstSettled).toBe(false);
+
+        workers[0].emitMessage({
+            action: 'complete',
+            id: firstRequest.id,
+            params: {result: 1},
+        });
+        await expect(first).resolves.toBe(1);
+        client.destroy();
+    });
+
+    test('handles one shared image-detail request once across overlapping reusable listeners', async () => {
+        const workers = installWorkerMock();
+        const client = new DictionaryWorker({reuseWorker: true});
+        const mediaLoader = /** @type {import('../ext/js/dictionary/dictionary-importer-media-loader.js').DictionaryImporterMediaLoader} */ (
+            Reflect.get(client, '_dictionaryImporterMediaLoader')
+        );
+        const getImageDetails = vi.spyOn(mediaLoader, 'getImageDetails').mockResolvedValue({width: 10, height: 20});
+        const first = client.getMdxVersion();
+        const second = client.getMdxVersion();
+
+        workers[0].emitMessage({
+            action: 'getImageDetails',
+            params: {id: 'image-request', content: new ArrayBuffer(0), mediaType: 'image/png'},
+        });
+        await vi.waitFor(() => {
+            expect(getImageDetails).toHaveBeenCalledTimes(1);
+            expect(workers[0].postMessage).toHaveBeenCalledTimes(3);
+        });
+        expect(workers[0].postMessage.mock.calls[2][0]).toMatchObject({
+            action: 'getImageDetails.response',
+            params: {id: 'image-request', result: {width: 10, height: 20}},
+        });
+
+        const firstRequest = workers[0].postMessage.mock.calls[0][0];
+        const secondRequest = workers[0].postMessage.mock.calls[1][0];
+        workers[0].emitMessage({action: 'complete', id: firstRequest.id, params: {result: 1}});
+        workers[0].emitMessage({action: 'complete', id: secondRequest.id, params: {result: 2}});
+        await expect(first).resolves.toBe(1);
+        await expect(second).resolves.toBe(2);
+        client.destroy();
     });
 
     test('destroys an idle reusable worker only once', async () => {
