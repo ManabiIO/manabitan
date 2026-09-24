@@ -2027,9 +2027,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 }
                 continue;
             }
-            const redirectDefinition = trimNullSuffix(definition).trimStart();
+            const redirectDefinition = definition.trim();
             if (redirectDefinition.startsWith('@@@LINK=')) {
-                const target = redirectDefinition.slice(8);
+                const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
                 if (target.length > 0) {
                     const aliases = redirects.get(target) ?? new Set();
                     if (!aliases.has(term)) {
