@@ -27,11 +27,12 @@ async function run(concurrency) {
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
     /** @type {number[]} */
     const processed = [];
-    await Reflect.get(importer, '_runWithConcurrencyLimit').call(
-        importer,
+    const runWithConcurrencyLimit = /** @type {(items: number[], concurrency: number, fn: (item: number) => Promise<void>) => Promise<void>} */ (
+        Reflect.get(importer, '_runWithConcurrencyLimit').bind(importer)
+    );
+    await runWithConcurrencyLimit(
         [0, 1, 2, 3],
         concurrency,
-        /** @param {number} value */
         async (value) => {
             processed.push(value);
         },
