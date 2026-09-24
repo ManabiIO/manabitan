@@ -102,8 +102,9 @@ describe('image metadata request buffer ownership', () => {
         Reflect.set(importer, '_getData', read);
         Reflect.set(importer, '_skipImageMetadata', false);
         const media = new Map();
-        const context = {fileMap: new Map([['picture.svg', {}]]), media};
-        const entry = {dictionary: 'Image ownership fixture', expression: 'a', reading: ''};
+        // Archive reads are stubbed; only the path and media map are used here.
+        const context = /** @type {import('dictionary-importer').ImportRequirementContext} */ (/** @type {unknown} */ ({fileMap: new Map([['picture.svg', {}]]), media}));
+        const entry = /** @type {import('dictionary-database').DatabaseTermEntry} */ (/** @type {unknown} */ ({dictionary: 'Image ownership fixture', expression: 'a', reading: ''}));
         const promise = Reflect.get(importer, '_getImageMedia').call(importer, context, 'picture.svg', entry);
         await vi.advanceTimersByTimeAsync(0);
         const {params} = host.mock.results[0].value;
