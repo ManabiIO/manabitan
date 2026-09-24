@@ -43,14 +43,16 @@ function createArtifactWithEmptyReadingSentinel() {
 }
 
 describe('DictionaryImporter term artifacts', () => {
-    test('normalizes an empty reading sentinel to the expression key', async () => {
+    test('normalizes an empty reading sentinel without mutating the source artifact', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         /** @type {Record<string, import('core').SafeAny>|null} */
         let capturedChunk = null;
+        const bytes = createArtifactWithEmptyReadingSentinel();
+        const originalBytes = Uint8Array.from(bytes);
 
         await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
             importer,
-            createArtifactWithEmptyReadingSentinel(),
+            bytes,
             'term_bank_1.mbtb',
             'Test dictionary',
             false,
@@ -72,5 +74,7 @@ describe('DictionaryImporter term artifacts', () => {
         expect(chunk.readingBytesList[0]).toBe(chunk.expressionBytesList[0]);
         expect(chunk.termRecordPreinternedPlan.readingIndexes[0])
             .toBe(chunk.termRecordPreinternedPlan.expressionIndexes[0]);
+        expect(bytes).toStrictEqual(originalBytes);
+        expect(chunk.termRecordPreinternedPlan.readingIndexes.buffer).not.toBe(bytes.buffer);
     });
 });
