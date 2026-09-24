@@ -1,0 +1,49 @@
+name: Qualify single-bank import fusion
+
+on:
+  push:
+    branches: [audit/import-review-20260924]
+    paths: [.github/workflows/import-review-single-bank.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 2185eeaac05efa0fd60eea49e3f00ce3e048aabe
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.16.0'
+      - name: Prepare the exact baseline and pinned fixtures
+        run: |
+          npm ci
+          npm run build:libs
+          node dev/perf/prepare-dictionaries.js
+          npx playwright install --with-deps chromium
+      - name: Compare the existing opt-in implementation with production defaults
+        env:
+          DICTIONARY: ${{ matrix.dictionary }}
+        run: |
+          set -euo pipefail
+          node dev/perf/import-ab.js "$DICTIONARY" --pairs 3 --flags '{"experimentalFusedSingleBank":true}' --label single-bank-fusion | tee builds/single-bank-benchmark.log
+      - name: Preserve measured reports, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: single-bank-fusion-${{ matrix.dictionary }}
+          path: |
+            builds/*flags-ab*.json
+            builds/*flags-ab*.html
+            builds/single-bank-benchmark.log
+          if-no-files-found: error
+          retention-days: 7
