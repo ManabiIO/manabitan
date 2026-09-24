@@ -1502,7 +1502,7 @@ function buildStructuredData(attrs) {
         trimCssWhitespace(attrs.class).replace(/[\t\n\f\r ]+/gu, ' ') :
         '';
     if (className.length > 0) { data.class = className; }
-    const id = attrs.id?.trim() || '';
+    const id = typeof attrs.id === 'string' ? trimCssWhitespace(attrs.id) : '';
     if (id.length > 0) { data.id = id; }
     return Object.keys(data).length > 0 ? data : null;
 }
