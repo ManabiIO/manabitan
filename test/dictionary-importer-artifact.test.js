@@ -10,17 +10,18 @@
 import {describe, expect, test} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionaryImporterMediaLoader} from '../ext/js/dictionary/dictionary-importer-media-loader.js';
+import {RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
 
 /**
  * @returns {Uint8Array}
  */
-function createArtifactWithEmptyReadingSentinel() {
+function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0)) {
     const expression = new TextEncoder().encode('term');
     const headerBytes = 8 + 4 + 8;
     const stringLengthsBytes = 4;
     const indexesStart = headerBytes + stringLengthsBytes + expression.byteLength;
     const indexPaddingBytes = (-indexesStart) & 3;
-    const rowBytes = 20;
+    const rowBytes = 20 + content.byteLength;
     const bytes = new Uint8Array(indexesStart + indexPaddingBytes + 8 + rowBytes);
     const view = new DataView(bytes.buffer);
     bytes.set(new TextEncoder().encode('MBTB0005'), 0);
@@ -38,7 +39,23 @@ function createArtifactWithEmptyReadingSentinel() {
     view.setInt32(cursor, -1, true); cursor += 4;
     view.setUint32(cursor, 0, true); cursor += 4;
     view.setUint32(cursor, 0, true); cursor += 4;
-    view.setUint32(cursor, 0, true);
+    view.setUint32(cursor, content.byteLength, true); cursor += 4;
+    bytes.set(content, cursor);
+    return bytes;
+}
+
+/**
+ * Starts with the raw-v3/shared-glossary magic but declares one tag byte
+ * without actually containing it.
+ * @returns {Uint8Array}
+ */
+function createMalformedSharedGlossaryContent() {
+    const bytes = new Uint8Array(28);
+    bytes.set([0x4d, 0x42, 0x52, 0x32]);
+    const view = new DataView(bytes.buffer);
+    view.setUint32(4, 1, true);
+    view.setBigUint64(16, 0n, true);
+    view.setUint32(24, 2, true);
     return bytes;
 }
 
@@ -72,5 +89,49 @@ describe('DictionaryImporter term artifacts', () => {
         expect(chunk.readingBytesList[0]).toBe(chunk.expressionBytesList[0]);
         expect(chunk.termRecordPreinternedPlan.readingIndexes[0])
             .toBe(chunk.termRecordPreinternedPlan.expressionIndexes[0]);
+    });
+
+    test('rejects malformed zero-base shared-glossary artifact rows before chunk delivery', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        let chunkDelivered = false;
+
+        await expect(Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            createArtifactWithEmptyReadingSentinel(createMalformedSharedGlossaryContent()),
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            () => { chunkDelivered = true; },
+            0,
+            0,
+            true,
+            1,
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        )).rejects.toThrow(/shared glossary/i);
+
+        expect(chunkDelivered).toBe(false);
+    });
+
+    test('rejects malformed shared-glossary artifact rows before rebasing', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        let chunkDelivered = false;
+
+        await expect(Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            createArtifactWithEmptyReadingSentinel(createMalformedSharedGlossaryContent()),
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            () => { chunkDelivered = true; },
+            0,
+            4096,
+            true,
+            1,
+            null,
+        )).rejects.toThrow(/shared glossary/i);
+
+        expect(chunkDelivered).toBe(false);
     });
 });
