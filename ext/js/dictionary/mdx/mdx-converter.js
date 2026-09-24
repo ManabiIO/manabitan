@@ -1285,14 +1285,20 @@ function findMatchingCssBrace(stylesheet, blockStartIndex) {
             }
             continue;
         }
-        if (character === '\\') {
-            index += 1;
-        } else if (character === '"' || character === "'") {
-            quote = character;
-        } else if (character === '{') {
-            depth += 1;
-        } else if (character === '}' && --depth === 0) {
-            return index;
+        switch (character) {
+            case '\\':
+                index += 1;
+                break;
+            case '"':
+            case "'":
+                quote = character;
+                break;
+            case '{':
+                depth += 1;
+                break;
+            case '}':
+                if (--depth === 0) { return index; }
+                break;
         }
     }
     return stylesheet.length - 1;
