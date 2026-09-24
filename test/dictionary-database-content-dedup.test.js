@@ -244,7 +244,7 @@ describe('DictionaryDatabase term content hash validation', () => {
         Reflect.set(database, '_enableTermEntryContentDedup', true);
         Reflect.set(database, '_termContentZstdInitialized', true);
         Reflect.set(database, '_termContentStore', {
-            appendBatch: vi.fn(async (chunks) => chunks.map((chunk, index) => ({
+            appendBatch: vi.fn(async (/** @type {Uint8Array[]} */ chunks) => chunks.map((chunk, index) => ({
                 offset: 100 + index * 100,
                 length: chunk.byteLength,
             }))),
