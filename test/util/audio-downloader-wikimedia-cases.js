@@ -37,6 +37,7 @@ function jsonResponse(data) {
  * @param {import('node:test').TestContext} context
  * @param {{title: string, user: string, url: string}[]} entries
  * @param {boolean} [throughRequestBuilder]
+ * @returns {{downloader: AudioDownloader, requests: URL[], builder: RequestBuilder}}
  */
 function fixture(context, entries, throughRequestBuilder = false) {
     const builder = new RequestBuilder()
