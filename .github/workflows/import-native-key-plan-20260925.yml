@@ -1,0 +1,119 @@
+name: Import native key plan 20260925
+on:
+  push:
+    branches: [bench/import-remaining-fastpaths-20260925]
+    paths: [.github/workflows/import-native-key-plan-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: jmdict
+            cohort: defaults
+            flags: '{}'
+          - dictionary: jmnedict
+            cohort: defaults
+            flags: '{}'
+          - dictionary: jitendex
+            cohort: defaults
+            flags: '{}'
+          - dictionary: wty-en-en
+            cohort: defaults
+            flags: '{}'
+          - dictionary: wty-en-en
+            cohort: generic-on
+            flags: '{"experimentalGenericSpanCompression":true}'
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      FLAGS: ${{ matrix.flags }}
+      PAIRS: '12'
+      REVERSE: '1'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Exact arms and retained source-paired driver
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/hash-round dev/perf/hash-round-20260925
+          git fetch --depth=1 origin 68a01320869e091a90344df7e9f992329b7e8eec
+          git show FETCH_HEAD:dev/perf/hash-round-20260925/ab.mjs > dev/perf/hash-round-20260925/ab.mjs
+          git show FETCH_HEAD:dev/perf/hash-round-20260925/prepare.py > /tmp/prior-prepare.py
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          p = Path('ext/js/dictionary/wasm/term-bank-parser.c')
+          assert hashlib.sha256(p.read_bytes()).hexdigest() == 'b65eebac1d7a83eeb6ae14969069afc376a0084ddb0f6ffa01a84d1266dde108'
+          fixture = Path('/tmp/prior-prepare.py').read_text().split("if os.environ.get('DICTIONARY') == 'wty-en-en':", 1)[1]
+          exec("from pathlib import Path\nimport json, os\nroot=Path('.')\nif os.environ.get('DICTIONARY') == 'wty-en-en':" + fixture)
+          PY
+          cp ext/js/dictionary/wasm/term-bank-parser.c builds/hash-round/base.c
+          cp ext/lib/term-bank-parser.wasm builds/hash-round/base.wasm
+          git apply dev/perf/remaining-20260925/native-key.patch
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          p=Path('ext/js/dictionary/wasm/term-bank-parser.c')
+          assert hashlib.sha256(p.read_bytes()).hexdigest() == 'bd9f6754dcaa861af3c674a444c42b701088b852e1e60760efa49834235bc525'
+          p=Path('test/term-bank-wasm-parser.test.js')
+          s=p.read_text()
+          old='expect(consumeLastTermBankWasmParseProfile()?.nativeStringPlanFallbackChunkCount).toBe(1);'
+          assert s.count(old)==1
+          p.write_text(s.replace(old, old.replace('toBe(1)', 'toBe(0)')))
+          PY
+          npm run build:libs > builds/hash-round/build.log 2>&1
+          cp ext/js/dictionary/wasm/term-bank-parser.c builds/hash-round/candidate.c
+          cp ext/lib/term-bank-parser.wasm builds/hash-round/candidate.wasm
+          git diff > builds/hash-round/source.patch
+          sha256sum builds/hash-round/*.c builds/hash-round/*.wasm ext/js/dictionary/term-bank-wasm-parser.js > builds/hash-round/SHA256SUMS
+      - name: Native key and parser regressions before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx vitest run test/term-bank-native-key-plan.test.js test/term-bank-wasm-parser.test.js test/term-bank-experiments.test.js test/term-bank-number-decode.test.js --no-file-parallelism 2>&1 | tee builds/hash-round/tests.log
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fixed twelve-pair complete imports
+        run: xvfb-run -a node dev/perf/hash-round-20260925/ab.mjs
+      - name: Full parser and lookup corpus equality off the clock
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/perf/import-lookup-screen.js')
+          s=p.read_text()
+          old='const filesPerGroup = {jmdict: 7, jmnedict: 9, jitendex: 10}'
+          assert s.count(old)==1
+          p.write_text(s.replace(old, "const filesPerGroup = {jmdict: 7, jmnedict: 9, jitendex: 10, 'wty-en-en': 1}"))
+          PY
+          for arm in base candidate; do
+            cp "builds/hash-round/$arm.c" ext/js/dictionary/wasm/term-bank-parser.c
+            cp "builds/hash-round/$arm.wasm" ext/lib/term-bank-parser.wasm
+            node --expose-gc dev/perf/import-lookup-screen.js "$DICTIONARY" --child --flags "$FLAGS" > "builds/hash-round/corpus-$arm.json"
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          out=Path('builds/hash-round')
+          a,b=[json.loads((out/('corpus-'+x+'.json')).read_text()) for x in ['base','candidate']]
+          for k in ['digest','rows','indexBytes','archiveSha256','lockSha256']:
+              assert a[k]==b[k], (k,a[k],b[k])
+          (out/'corpus-verification.json').write_text(json.dumps({'passed':True,'rows':a['rows'],'digest':a['digest']},indent=2)+'\n')
+          PY
+      - name: Preserve every outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-key-${{ matrix.dictionary }}-${{ matrix.cohort }}
+          path: builds/hash-round/
+          retention-days: 30
+          if-no-files-found: error
