@@ -2297,8 +2297,16 @@ export class DictionaryImporter {
             await mediaPrefetch;
             prefetchedNoMetadataMedia.length = 0;
             eventLoopYielder.close();
-            if (!importSession.failed && this._isCancelled()) {
-                importSession.recordFailure(new Error('Dictionary import was cancelled'));
+            if (!importSession.failed) {
+                try {
+                    if (this._isCancelled()) {
+                        importSession.recordFailure(new Error('Dictionary import was cancelled'));
+                    }
+                } catch (error) {
+                    // A failing cancellation predicate is itself an import
+                    // failure, but it must not bypass owned-session cleanup.
+                    importSession.recordFailure(error);
+                }
             }
             this._ignoreCancellation = true;
             await importSession.disposeImportResources();
