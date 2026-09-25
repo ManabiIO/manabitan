@@ -1,0 +1,13 @@
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -4911,7 +4911,9 @@
+             contentLengths,
+             contentOffsetBase,
+         );
+-        const recordFieldsFormat = chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0)) ?
++        // Non-empty float64 rows use 16 bytes each; legacy rows use 12,
++        // and compact fields are emitted only when smaller than legacy rows.
++        const recordFieldsFormat = recordFields.byteLength === chunk.rowCount * FLOAT64_SCORE_RECORD_FIELDS_BYTES ?
+             LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE :
+             (recordFields.byteLength === chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES ?
+                 LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY :
