@@ -1,0 +1,104 @@
+name: Import native key confirmation 20260925
+on:
+  push:
+    branches: [bench/import-remaining-fastpaths-20260925]
+    paths: [.github/workflows/import-native-key-confirmation-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: jmnedict
+            cohort: defaults
+            flags: '{}'
+          - dictionary: wty-en-en
+            cohort: defaults
+            flags: '{}'
+          - dictionary: wty-en-en
+            cohort: generic-on
+            flags: '{"experimentalGenericSpanCompression":true}'
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      FLAGS: ${{ matrix.flags }}
+      PAIRS: '12'
+      REVERSE: '0'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Preserve exact runtime and fixed measurement inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/hash-round dev/perf/hash-round-20260925
+          git fetch --depth=1 origin 68a01320869e091a90344df7e9f992329b7e8eec
+          git show FETCH_HEAD:dev/perf/hash-round-20260925/ab.mjs > dev/perf/hash-round-20260925/ab.mjs
+          git show FETCH_HEAD:dev/perf/hash-round-20260925/prepare.py > /tmp/prior-prepare.py
+          python3 - <<'PY'
+          from pathlib import Path
+          fixture=Path('/tmp/prior-prepare.py').read_text().split("if os.environ.get('DICTIONARY') == 'wty-en-en':",1)[1]
+          exec("from pathlib import Path\nimport json, os\nroot=Path('.')\nif os.environ.get('DICTIONARY') == 'wty-en-en':"+fixture)
+          PY
+          python3 dev/perf/remaining-20260925/prepare-key.py > builds/hash-round/build.log 2>&1
+          git diff > builds/hash-round/source.patch
+          sha256sum builds/hash-round/*.c builds/hash-round/*.wasm ext/js/dictionary/term-bank-wasm-parser.js > builds/hash-round/SHA256SUMS
+          echo 'Independent confirmation. Same exact C/Wasm sources as the first twelve-pair screen, opposite initial order, fixed warmup and A/A schedule. No observations from the first host are pooled or replaced.' > builds/hash-round/confirmation.txt
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Independent complete-import confirmation
+        run: xvfb-run -a node dev/perf/hash-round-20260925/ab.mjs
+      - name: Off-clock full-corpus and package identity checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/perf/import-lookup-screen.js')
+          s=p.read_text()
+          old='const filesPerGroup = {jmdict: 7, jmnedict: 9, jitendex: 10}'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,"const filesPerGroup = {jmdict: 7, jmnedict: 9, jitendex: 10, 'wty-en-en': 1}"))
+          PY
+          for arm in base candidate; do
+            cp "builds/hash-round/$arm.c" ext/js/dictionary/wasm/term-bank-parser.c
+            cp "builds/hash-round/$arm.wasm" ext/lib/term-bank-parser.wasm
+            node --expose-gc dev/perf/import-lookup-screen.js "$DICTIONARY" --child --flags "$FLAGS" > "builds/hash-round/corpus-$arm.json"
+            node dev/bin/build.js --target chrome-dev > "builds/hash-round/package-$arm.log" 2>&1
+            ARM="$arm" python3 - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('builds/manabitan-chrome-dev.zip') as z:
+              h={n:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if not n.endswith('/')}
+          Path('builds/hash-round/package-'+os.environ['ARM']+'.json').write_text(json.dumps(h,indent=2)+'\n')
+          PY
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          out=Path('builds/hash-round')
+          a,b=[json.loads((out/('corpus-'+x+'.json')).read_text()) for x in ['base','candidate']]
+          for k in ['digest','rows','indexBytes','archiveSha256','lockSha256']:
+              assert a[k]==b[k],(k,a[k],b[k])
+          proof={'passed':True,'rows':a['rows'],'digest':a['digest']}
+          a,b=[json.loads((out/('package-'+x+'.json')).read_text()) for x in ['base','candidate']]
+          assert a.keys()==b.keys()
+          changed=[k for k in a if a[k]!=b[k]]
+          assert changed and all(k.endswith('term-bank-parser.c') or k.endswith('term-bank-parser.wasm') for k in changed),changed
+          proof['changedPackageMembers']=changed
+          (out/'corpus-verification.json').write_text(json.dumps(proof,indent=2)+'\n')
+          PY
+      - name: Retain all observations and exact source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-key-confirm-${{ matrix.dictionary }}-${{ matrix.cohort }}
+          path: builds/hash-round/
+          retention-days: 30
+          if-no-files-found: error
