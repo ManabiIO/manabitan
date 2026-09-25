@@ -2095,9 +2095,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 }
                 continue;
             }
-            const redirectDefinition = definition.trim();
+            const redirectDefinition = trimCssWhitespace(definition);
             if (redirectDefinition.startsWith('@@@LINK=')) {
-                const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
+                const target = trimCssWhitespace(trimNullSuffix(redirectDefinition.slice(8)));
                 if (target.length > 0) {
                     const aliases = redirects.get(target) ?? new Set();
                     if (!aliases.has(term)) {
