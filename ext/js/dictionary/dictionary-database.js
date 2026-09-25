@@ -1966,11 +1966,28 @@ export class DictionaryDatabase {
         this._termsVirtualTableDirty = true;
         progressData.processed += deletedTerms;
         ++progressData.storesProcesed;
-        onProgress(progressData);
+        /**
+         * Progress delivery is not part of the durable deletion boundary. Once
+         * SQLite has committed, a callback failure must not skip required OPFS
+         * cleanup or leave the live worker's caches describing deleted data.
+         * @param {string} phase
+         */
+        const reportPostCommitProgress = (phase) => {
+            try {
+                onProgress(progressData);
+            } catch (error) {
+                reportDiagnostics('dictionary-delete-progress-failed', {
+                    dictionaryName,
+                    phase,
+                    error: toError(error).message,
+                });
+            }
+        };
+        reportPostCommitProgress('term-record-delete');
 
         await this._cleanupTermContentAfterDictionaryDelete();
 
-        onProgress(progressData);
+        reportPostCommitProgress('term-content-cleanup');
         this._termEntryContentCache.clear();
         this._termEntryContentIdByHash.clear();
         this._clearTermEntryContentMetaCaches();
