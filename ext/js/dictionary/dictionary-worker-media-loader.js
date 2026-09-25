@@ -54,7 +54,22 @@ export class DictionaryWorkerMediaLoader {
                 request.reject(toError(e));
             }
         } else {
-            request.resolve(params.result);
+            const result = params.result;
+            if (
+                typeof result !== 'object' ||
+                result === null ||
+                !(result.content instanceof ArrayBuffer) ||
+                typeof result.width !== 'number' ||
+                !Number.isSafeInteger(result.width) ||
+                result.width < 0 ||
+                typeof result.height !== 'number' ||
+                !Number.isSafeInteger(result.height) ||
+                result.height < 0
+            ) {
+                request.reject(new Error('Dictionary image-details response is invalid'));
+                return;
+            }
+            request.resolve(result);
         }
     }
 
