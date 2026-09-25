@@ -95,6 +95,26 @@ describe('DictionaryWorkerMediaLoader', () => {
         expect(Reflect.get(loader, '_requests').size).toBe(0);
     });
 
+    test.each([
+        ['missing result', void 0],
+        ['missing content', {width: 8, height: 9}],
+        ['invalid content', {content: new Uint8Array(2), width: 8, height: 9}],
+        ['negative width', {content: new ArrayBuffer(2), width: -1, height: 9}],
+        ['fractional width', {content: new ArrayBuffer(2), width: 8.5, height: 9}],
+        ['non-finite height', {content: new ArrayBuffer(2), width: 8, height: Infinity}],
+    ])('rejects malformed matching host success response: %s', async (_name, result) => {
+        const postMessage = vi.fn();
+        vi.stubGlobal('self', {postMessage});
+        const loader = new DictionaryWorkerMediaLoader();
+
+        const promise = loader.getImageDetails(new ArrayBuffer(4), 'image/png');
+        const [{params}] = postMessage.mock.calls[0];
+        loader.handleMessage({id: params.id, result});
+
+        await expect(promise).rejects.toThrow('Dictionary image-details response is invalid');
+        expect(Reflect.get(loader, '_requests').size).toBe(0);
+    });
+
     test('rejects matching host error responses', async () => {
         const postMessage = vi.fn();
         vi.stubGlobal('self', {postMessage});
