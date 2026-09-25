@@ -145,6 +145,45 @@ describe('DictionaryImporter term artifacts', () => {
         expect(rebasedHash).not.toStrictEqual(sourceHash);
     });
 
+    test('recomputes direct-chunk hashes when legacy JSON is converted to raw binary', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const sourceContent = new TextEncoder().encode(JSON.stringify({
+            rules: 'rule',
+            definitionTags: 'tag',
+            termTags: '',
+            glossary: ['definition'],
+        }));
+        const sourceHash = hashTermEntryContentBytesPair(sourceContent);
+        const artifact = createArtifactWithEmptyReadingSentinel(sourceContent, sourceHash);
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            0,
+            true,
+            1,
+            null,
+        );
+
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        const normalizedBytes = /** @type {Uint8Array} */ (chunk.contentBytesList[0]);
+        const normalizedHash = hashTermEntryContentBytesPair(normalizedBytes);
+        expect(normalizedBytes).not.toStrictEqual(sourceContent);
+        expect([chunk.contentHash1List[0], chunk.contentHash2List[0]]).toStrictEqual(normalizedHash);
+        expect(normalizedHash).not.toStrictEqual(sourceHash);
+    });
+
     test('recomputes materialized-row hashes after shared-glossary rebasing', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const sourceContent = encodeRawTermContentSharedGlossaryBinary(
