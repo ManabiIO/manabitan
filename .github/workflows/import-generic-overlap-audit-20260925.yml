@@ -1,0 +1,115 @@
+name: Import generic overlap activation 20260925
+on:
+  push:
+    branches: [bench/import-generic-overlap-20260925]
+    paths: [.github/workflows/import-generic-overlap-audit-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [wty-en-en, jmnedict]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
+      MANABITAN_E2E_IMPORT_FLAGS_JSON: '{"experimentalGenericSpanCompression":true}'
+      MANABITAN_E2E_IMPORT_BENCH_QUICK: '1'
+      MANABITAN_E2E_IMPORT_BENCH_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Prepare same pinned inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/overlap-round-20260925/prepare.py
+          mkdir -p builds/overlap-activation
+          git fetch --depth=1 origin 68a01320869e091a90344df7e9f992329b7e8eec
+          git show FETCH_HEAD:dev/perf/hash-round-20260925/prepare.py > /tmp/fixture.py
+          python3 - <<'PY'
+          from pathlib import Path
+          fixture=Path('/tmp/fixture.py').read_text().split("if os.environ.get('DICTIONARY') == 'wty-en-en':",1)[1]
+          exec("from pathlib import Path\nimport json, os\nroot=Path('.')\nif os.environ.get('DICTIONARY') == 'wty-en-en':"+fixture)
+          PY
+          cp ext/js/dictionary/dictionary-database.js builds/overlap-round/database.js
+          git diff > builds/overlap-activation/uninstrumented-source.patch
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Package identity and separately instrumented activation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for arm in base candidate; do
+            export ARM="$arm"
+            cp "builds/overlap-round/$arm.js" ext/js/dictionary/term-content-block-store.js
+            cp builds/overlap-round/database.js ext/js/dictionary/dictionary-database.js
+            node dev/bin/build.js --target chrome-dev > "builds/overlap-activation/package-$arm.log" 2>&1
+            python3 - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('builds/manabitan-chrome-dev.zip') as z:
+              members={n:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if not n.endswith('/')}
+          out=Path('builds/overlap-activation')
+          (out/('package-'+os.environ['ARM']+'.json')).write_text(json.dumps(members,indent=2)+'\n')
+          p=Path('ext/js/dictionary/term-content-block-store.js')
+          s=p.read_text()
+          def replace(old,new):
+              global s
+              assert s.count(old)==1,old
+              s=s.replace(old,new)
+          replace('        this._lastError = null;', '        this._lastError = null;\n        this._qualificationGenericReservations = 0;\n        this._qualificationUnexpectedInitialReservations = 0;')
+          replace('            compressionExperiments: this._compressionExperiments,', '            qualificationGenericReservations: this._qualificationGenericReservations,\n            qualificationUnexpectedInitialReservations: this._qualificationUnexpectedInitialReservations,\n            compressionExperiments: this._compressionExperiments,')
+          replace('        return this._beginAppendSharedSpans(', "        if (compressionDictName !== 'jmdict') {\n            ++this._qualificationGenericReservations;\n            if (!force) { ++this._qualificationUnexpectedInitialReservations; }\n        }\n        return this._beginAppendSharedSpans(")
+          p.write_text(s)
+          p=Path('ext/js/dictionary/dictionary-database.js')
+          s=p.read_text()
+          old='                    compressionExperiments: this._termContentBlockStore.getDiagnostics().compressionExperiments,'
+          assert s.count(old)==1
+          s=s.replace(old, '                    qualificationGenericReservations: this._termContentBlockStore.getDiagnostics().qualificationGenericReservations,\n                    qualificationUnexpectedInitialReservations: this._termContentBlockStore.getDiagnostics().qualificationUnexpectedInitialReservations,\n'+old)
+          p.write_text(s)
+          PY
+            git diff > "builds/overlap-activation/instrumented-$arm.patch"
+            MANABITAN_CHROMIUM_E2E_REPORT="builds/overlap-activation/activation-$arm.html" xvfb-run -a node test/chromium/extension-two-dictionary-import.e2e.js > "builds/overlap-activation/activation-$arm.log" 2>&1
+          done
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          out=Path('builds/overlap-activation')
+          a,b=[json.loads((out/('package-'+arm+'.json')).read_text()) for arm in ['base','candidate']]
+          assert a.keys()==b.keys()
+          changed=[k for k in a if a[k]!=b[k]]
+          assert changed==['js/dictionary/term-content-block-store.js'],changed
+          results={}
+          for arm in ['base','candidate']:
+              r=json.loads((out/('activation-'+arm+'.json')).read_text())
+              assert r['status']=='success' and r['skippedVerification'] is False
+              assert r['runtimeDiagnostics']['openStorageMode']=='opfs-sahpool'
+              phase=[p for p in r['phases'] if p['name'].endswith(': total import')][-1]
+              final=[p['details'] for p in phase['data']['importDebug']['importerPhaseTimings'] if p['phase']=='bulk-finalization'][0]
+              count=final['qualificationGenericReservations']
+              assert count==0 if arm=='base' else count>0
+              assert final['qualificationUnexpectedInitialReservations']==0
+              results[arm]={'genericReservations':count,'unexpectedInitialReservations':0,'validation':r['benchmark']['validation']}
+          (out/'audit.json').write_text(json.dumps({'passed':True,'dictionary':os.environ['DICTIONARY'],'timingExcluded':True,'changedPackageMembers':changed,'activation':results},indent=2)+'\n')
+          PY
+      - name: Preserve outcome without counting diagnostic timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generic-overlap-activation-${{ matrix.dictionary }}
+          path: builds/overlap-activation/
+          retention-days: 30
+          if-no-files-found: error
