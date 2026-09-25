@@ -63,6 +63,56 @@ describe('DictionaryImporter ZIP filename aliases', () => {
     });
 });
 
+describe('DictionaryImporter artifact bank admission', () => {
+    /**
+     * @param {string[]} termFileNames
+     * @param {string[]} artifactFileNames
+     * @returns {boolean}
+     */
+    const hasCompleteCoverage = (termFileNames, artifactFileNames) => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const check = /** @type {(termFiles: {filename: string}[], artifactFileNames: Iterable<string>) => boolean} */ (
+            Reflect.get(importer, '_hasCompleteTermArtifactCoverage')
+        );
+        return check.call(
+            importer,
+            termFileNames.map((filename) => ({filename})),
+            artifactFileNames,
+        );
+    };
+
+    test('rejects a partial standalone artifact replacement', () => {
+        expect(hasCompleteCoverage(
+            ['term_bank_1.json', 'term_bank_2.json'],
+            ['term_bank_1.mbtb'],
+        )).toBe(false);
+    });
+
+    test('accepts a complete standalone artifact replacement', () => {
+        expect(hasCompleteCoverage(
+            ['term_bank_1.json', 'term_bank_2.json'],
+            ['term_bank_1.mbtb', 'term_bank_2.mbtb'],
+        )).toBe(true);
+    });
+
+    test('rejects artifact banks which do not match the ordinary bank set', () => {
+        expect(hasCompleteCoverage(
+            ['term_bank_1.json', 'term_bank_2.json'],
+            ['term_bank_1.mbtb', 'term_bank_2.mbtb', 'term_bank_3.mbtb'],
+        )).toBe(false);
+    });
+
+    test('preserves exact bank index spelling when matching replacements', () => {
+        expect(hasCompleteCoverage(['term_bank_01.json'], ['term_bank_1.mbtb'])).toBe(false);
+        expect(hasCompleteCoverage(['term_bank_01.json'], ['term_bank_01.mbtb'])).toBe(true);
+    });
+
+    test('allows artifact-only dictionaries when no ordinary term banks exist', () => {
+        expect(hasCompleteCoverage([], ['term_bank_1.mbtb'])).toBe(true);
+        expect(hasCompleteCoverage([], [])).toBe(false);
+    });
+});
+
 describe('DictionaryImporter archive bank discovery', () => {
     test('sorts numbered bank files numerically regardless of ZIP entry order', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
