@@ -1578,6 +1578,42 @@ function splitInlineCssDeclarations(styleText) {
 }
 
 /**
+ * Remove CSS comments without treating comment markers inside quoted strings
+ * as syntax. Closed comments retain the previous removal behavior; an
+ * unterminated comment is left intact for the existing declaration handling.
+ * @param {string} value
+ * @returns {string}
+ */
+function stripCssCommentsOutsideStrings(value) {
+    let result = '';
+    let startIndex = 0;
+    let quote = '';
+    for (let index = 0; index < value.length; ++index) {
+        const character = value[index];
+        if (quote.length > 0) {
+            if (character === '\\') {
+                ++index;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        if (character === '"' || character === "'") {
+            quote = character;
+            continue;
+        }
+        if (value.startsWith('/*', index)) {
+            const commentEnd = value.indexOf('*/', index + 2);
+            if (commentEnd < 0) { break; }
+            result += value.slice(startIndex, index);
+            startIndex = commentEnd + 2;
+            index = commentEnd + 1;
+        }
+    }
+    return startIndex === 0 ? value : result + value.slice(startIndex);
+}
+
+/**
  * @param {string|null|undefined} styleText
  * @param {string} assetPrefix
  * @param {Set<string>} assetReferences
@@ -1588,7 +1624,7 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
     /** @type {Record<string, string|string[]>} */
     const style = {};
     for (const rawDeclaration of splitInlineCssDeclarations(styleText)) {
-        const declaration = rawDeclaration.replace(/\/\*[\s\S]*?\*\//gu, '');
+        const declaration = stripCssCommentsOutsideStrings(rawDeclaration);
         const separator = declaration.indexOf(':');
         if (separator < 0) { continue; }
         const propertyName = trimCssWhitespace(declaration.slice(0, separator)).toLowerCase();
