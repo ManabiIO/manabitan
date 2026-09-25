@@ -10,9 +10,15 @@ p = Path('ext/js/dictionary/term-bank-wasm-parser.js')
 base = p.read_bytes()
 assert hashlib.sha256(base).hexdigest() == '26f1eee368eaee1f68674beccc7f01737a3c64d4ae18d7c7a0c2a2453e2bfe4d'
 (out / 'base.js').write_bytes(base)
-subprocess.run(['git', 'apply', 'dev/perf/numeric-round-20260925/candidate.patch'], check=True)
+variant = os.environ.get('CANDIDATE', 'candidate')
+expected = {
+    'candidate': '3944437a38bf8711c43722bc29a15b2be22e9aa5c7cdbe3dc1e20e021d469834',
+    'length-first': 'f617cce1a6c253a86470d4dc0a38d0edc08a38b957c77390e64460da791014aa',
+}
+assert variant in expected
+subprocess.run(['git', 'apply', 'dev/perf/numeric-round-20260925/' + variant + '.patch'], check=True)
 candidate = p.read_bytes()
-assert hashlib.sha256(candidate).hexdigest() == '3944437a38bf8711c43722bc29a15b2be22e9aa5c7cdbe3dc1e20e021d469834'
+assert hashlib.sha256(candidate).hexdigest() == expected[variant]
 (out / 'candidate.js').write_bytes(candidate)
 
 if os.environ.get('DICTIONARY') == 'wty-en-en':
