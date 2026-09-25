@@ -1,0 +1,90 @@
+name: Record format qualification 20260925
+on:
+  push:
+    branches: [verify/import-benchmark-20260925-a392554]
+    paths: [.github/workflows/record-format-qualification-20260925.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HUSKY: '0'
+      BASE_ROOT: ${{ runner.temp }}/record-format-base
+      CANDIDATE_ROOT: ${{ runner.temp }}/record-format-candidate
+      EVIDENCE_ROOT: ${{ runner.temp }}/record-format-evidence
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Prepare pinned independent source trees
+        run: |
+          mkdir -p "$EVIDENCE_ROOT"
+          cp -a dev/perf/qualification-20260925 "$RUNNER_TEMP/record-format-input"
+          git worktree add --detach "$BASE_ROOT" a3925549826671bc1026035f43f0fde2e407077c
+          git worktree add --detach "$CANDIDATE_ROOT" a3925549826671bc1026035f43f0fde2e407077c
+          cd "$BASE_ROOT"
+          npm ci
+          npm run build:libs
+          ln -s "$BASE_ROOT/node_modules" "$CANDIDATE_ROOT/node_modules"
+          cp -a "$BASE_ROOT/ext/lib" "$CANDIDATE_ROOT/ext/lib"
+          cp "$RUNNER_TEMP/record-format-input/term-record-format-selection.test.js" "$BASE_ROOT/test/term-record-format-selection.test.js"
+          cp "$RUNNER_TEMP/record-format-input/term-record-format-selection.test.js" "$CANDIDATE_ROOT/test/term-record-format-selection.test.js"
+      - name: Require the parent to fail only the eliminated-work regression
+        run: |
+          cd "$BASE_ROOT"
+          set +e
+          node node_modules/vitest/vitest.mjs run test/term-record-format-selection.test.js --reporter=json > "$EVIDENCE_ROOT/parent-red.json" 2> "$EVIDENCE_ROOT/parent-red.log"
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads((Path(os.environ['EVIDENCE_ROOT']) / 'parent-red.json').read_text())
+          failed = [case for suite in data['testResults'] for case in suite['assertionResults'] if case['status'] == 'failed']
+          assert len(failed) == 1, failed
+          assert 'does not rescan the score column' in failed[0]['fullName'], failed
+          PY
+          rm test/term-record-format-selection.test.js
+      - name: Apply and validate candidate
+        run: |
+          cd "$CANDIDATE_ROOT"
+          git apply --check "$RUNNER_TEMP/record-format-input/record-format.patch"
+          git apply "$RUNNER_TEMP/record-format-input/record-format.patch"
+          git diff --check
+          node node_modules/vitest/vitest.mjs run test/term-record-format-selection.test.js test/term-record-opfs-store.test.js test/term-lookup-index.test.js > "$EVIDENCE_ROOT/focused.log" 2>&1
+          node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-record-opfs-store.js test/term-record-format-selection.test.js > "$EVIDENCE_ROOT/lint.log" 2>&1
+          npm run test:ts > "$EVIDENCE_ROOT/types.log" 2>&1
+          npm run test:unit -- --maxWorkers=2 > "$EVIDENCE_ROOT/unit.log" 2>&1
+          npm run test:build > "$EVIDENCE_ROOT/build-plans.log" 2>&1
+          git -c core.hooksPath=/dev/null -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' add ext/js/dictionary/term-record-opfs-store.js test/term-record-format-selection.test.js
+          git -c core.hooksPath=/dev/null -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'perf(import): recover artifact record format without rescanning scores'
+          git rev-parse HEAD > "$EVIDENCE_ROOT/candidate-commit.txt"
+          git rev-parse HEAD^{tree} > "$EVIDENCE_ROOT/candidate-tree.txt"
+          git diff HEAD^ HEAD > "$EVIDENCE_ROOT/candidate.patch"
+          git push origin HEAD:refs/heads/verify/record-format-length-candidate-20260925-a392554
+      - name: Build baseline and prepare real browser workloads
+        run: |
+          cd "$BASE_ROOT"
+          npm run build -- --target chrome-dev > "$EVIDENCE_ROOT/build.log" 2>&1
+          node dev/perf/prepare-dictionaries.js > "$EVIDENCE_ROOT/fixtures.log" 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium
+          mkdir -p "$CANDIDATE_ROOT/builds"
+          ln -s "$BASE_ROOT/builds/e2e-dictionary-cache" "$CANDIDATE_ROOT/builds/e2e-dictionary-cache"
+      - name: Run complete import comparisons and unchanged-code controls
+        run: |
+          python "$RUNNER_TEMP/record-format-input/compare.py" > "$EVIDENCE_ROOT/driver.log" 2>&1
+      - name: Preserve complete qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: record-format-qualification-a392554
+          path: ${{ env.EVIDENCE_ROOT }}/
+          retention-days: 30
+          if-no-files-found: error
