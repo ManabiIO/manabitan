@@ -234,6 +234,86 @@ function hasOnlyJsonKeys(value, allowedKeys) {
  * @param {unknown} value
  * @returns {boolean}
  */
+function isDictionaryIndexTagMeta(value) {
+    if (!isJsonObject(value)) { return false; }
+    for (const tag of Object.values(value)) {
+        if (!isJsonObject(tag)) { return false; }
+        if (!hasOnlyJsonKeys(tag, ['category', 'order', 'notes', 'score'])) { return false; }
+        if (Object.hasOwn(tag, 'category') && typeof tag.category !== 'string') { return false; }
+        if (Object.hasOwn(tag, 'order') && !isFiniteJsonNumber(tag.order)) { return false; }
+        if (Object.hasOwn(tag, 'notes') && typeof tag.notes !== 'string') { return false; }
+        if (Object.hasOwn(tag, 'score') && !isFiniteJsonNumber(tag.score)) { return false; }
+    }
+    return true;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is import('dictionary-data').Index}
+ */
+function isDictionaryIndex(value) {
+    if (!isJsonObject(value)) { return false; }
+    if (
+        typeof value.title !== 'string' ||
+        value.title.length === 0 ||
+        typeof value.revision !== 'string' ||
+        value.revision.length === 0
+    ) {
+        return false;
+    }
+    const formatPresent = Object.hasOwn(value, 'format');
+    const versionPresent = Object.hasOwn(value, 'version');
+    if (!formatPresent && !versionPresent) { return false; }
+    if (
+        (formatPresent && (!Number.isInteger(value.format) || ![1, 2, 3].includes(/** @type {number} */ (value.format)))) ||
+        (versionPresent && (!Number.isInteger(value.version) || ![1, 2, 3].includes(/** @type {number} */ (value.version))))
+    ) {
+        return false;
+    }
+    const optionalStrings = [
+        'minimumYomitanVersion',
+        'author',
+        'indexUrl',
+        'downloadUrl',
+        'url',
+        'description',
+        'attribution',
+    ];
+    for (const key of optionalStrings) {
+        if (Object.hasOwn(value, key) && typeof value[key] !== 'string') { return false; }
+    }
+    if (Object.hasOwn(value, 'sequenced') && typeof value.sequenced !== 'boolean') { return false; }
+    if (Object.hasOwn(value, 'isUpdatable') && value.isUpdatable !== true) { return false; }
+    if (
+        Object.hasOwn(value, 'frequencyMode') &&
+        value.frequencyMode !== 'occurrence-based' &&
+        value.frequencyMode !== 'rank-based'
+    ) {
+        return false;
+    }
+    for (const key of ['sourceLanguage', 'targetLanguage']) {
+        const language = value[key];
+        if (Object.hasOwn(value, key) && (typeof language !== 'string' || !/^[a-z]{2,3}$/u.test(language))) {
+            return false;
+        }
+    }
+    if (Object.hasOwn(value, 'tagMeta') && !isDictionaryIndexTagMeta(value.tagMeta)) { return false; }
+    if (
+        value.isUpdatable === true &&
+        (
+            typeof value.indexUrl !== 'string' ||
+            typeof value.downloadUrl !== 'string'
+        )
+    ) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
 function isFrequencyData(value) {
     if (typeof value === 'string' || isFiniteJsonNumber(value)) { return true; }
     if (!isJsonObject(value) || !hasOnlyJsonKeys(value, FREQUENCY_DATA_KEYS)) { return false; }
@@ -2646,19 +2726,15 @@ export class DictionaryImporter {
 
         const indexContent = await this._getData(indexFile2, new TextWriter());
         const index = /** @type {unknown} */ (parseJson(indexContent));
-        const validIndex = /** @type {import('dictionary-data').Index} */ (index);
-
-        const version = typeof validIndex.format === 'number' ? validIndex.format : validIndex.version;
-        validIndex.version = version;
-
-        const {title, revision} = validIndex;
-        if (typeof version !== 'number' || !title || !revision) {
-            throw new Error('Unrecognized dictionary format');
+        if (!isDictionaryIndex(index)) {
+            throw new Error('Invalid dictionary index');
         }
-        if (!SUPPORTED_INDEX_VERSIONS.has(version)) {
+        const validIndex = index;
+        const version = typeof validIndex.format === 'number' ? validIndex.format : validIndex.version;
+        if (!SUPPORTED_INDEX_VERSIONS.has(/** @type {number} */ (version))) {
             throw new Error(`Unsupported dictionary format version: ${String(version)}`);
         }
-
+        validIndex.version = version;
         return validIndex;
     }
 
