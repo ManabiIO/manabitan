@@ -3083,6 +3083,10 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
             cleanup();
             reject(new Error(event.message || 'Term-bank parser worker initialization failed'));
         };
+        const onMessageError = () => {
+            cleanup();
+            reject(new Error('Term-bank parser worker initialization returned an invalid message'));
+        };
         const onAbort = () => {
             cleanup();
             reject(createParallelParserCancellationError());
@@ -3091,10 +3095,12 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
             clearTimeout(timeoutId);
             worker.removeEventListener('message', onMessage);
             worker.removeEventListener('error', onError);
+            worker.removeEventListener('messageerror', onMessageError);
             signal.removeEventListener('abort', onAbort);
         };
         worker.addEventListener('message', onMessage);
         worker.addEventListener('error', onError);
+        worker.addEventListener('messageerror', onMessageError);
         signal.addEventListener('abort', onAbort, {once: true});
         try {
             if (signal.aborted) {
