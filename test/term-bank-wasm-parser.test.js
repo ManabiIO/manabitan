@@ -1927,6 +1927,56 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    maybeTest('fails parser prewarm promptly on initialization message errors', async () => {
+        let terminateCount = 0;
+        /** @implements {WorkerMock} */
+        class MessageErrorWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                const listeners = this.listeners.get(type) ?? new Set();
+                listeners.add(listener);
+                this.listeners.set(type, listeners);
+            }
+
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(/** @type {WorkerMessage} */ message) {
+                if (message.type !== 'initialize') { return; }
+                queueMicrotask(() => {
+                    for (const listener of this.listeners.get('messageerror') ?? []) {
+                        listener(/** @type {MessageEvent<unknown>} */ ({}));
+                    }
+                });
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', MessageErrorWorker);
+        try {
+            const prewarm = prewarmParallelTermBankParser();
+            let timeoutId;
+            const timeout = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Parser messageerror fallback timed out')), 250);
+            });
+            try {
+                await expect(Promise.race([prewarm, timeout])).resolves.toBe(false);
+            } finally {
+                clearTimeout(timeoutId);
+            }
+            expect(terminateCount).toBeGreaterThanOrEqual(2);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
     maybeTest('aborts a hung parser prewarm during import cleanup', async () => {
         let terminateCount = 0;
         /** @implements {WorkerMock} */
