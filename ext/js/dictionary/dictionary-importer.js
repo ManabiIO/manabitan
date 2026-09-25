@@ -3957,12 +3957,15 @@ export class DictionaryImporter {
             for (const termArtifactFile of termArtifactFiles) {
                 const artifactUncompressedSize = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'uncompressedSize'));
                 const artifactBytes = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'bytes'));
-                const uncompressedSize = typeof artifactUncompressedSize === 'number' ?
-                    artifactUncompressedSize :
-                    (artifactBytes instanceof Uint8Array ? artifactBytes.byteLength : 0);
-                const size = typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) ?
-                    Math.max(0, Math.trunc(uncompressedSize)) :
-                    0;
+                let size = 0;
+                if (typeof artifactUncompressedSize === 'number') {
+                    if (!Number.isSafeInteger(artifactUncompressedSize) || artifactUncompressedSize < 0) {
+                        return null;
+                    }
+                    size = artifactUncompressedSize;
+                } else if (artifactBytes instanceof Uint8Array) {
+                    size = artifactBytes.byteLength;
+                }
                 if (!addBytes(size)) { return null; }
             }
         }
