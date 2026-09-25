@@ -7184,7 +7184,6 @@ this._readTermContentSignature(
                     const contentJson = row.termEntryContentJson ?? this._serializeTermEntryContent(rules, definitionTags, termTags, row.glossary);
                     contentChunks[j] = this._textEncoder.encode(contentJson);
                 }
-                let chunksToAppend = contentChunks;
                 const tContentAppendStart = safePerformance.now();
                 if (this._importDebugLogging) {
                     const debugStateBeforeAppend = this._termContentStore.getDebugState();
@@ -7198,7 +7197,6 @@ this._readTermContentSignature(
                         contentChunks,
                         this._rawTermContentPackTargetBytes,
                     );
-                    chunksToAppend = packedChunks;
                     /** @type {number[]} */
                     const packedOffsets = new Array(packedChunks.length);
                     /** @type {number[]} */
@@ -7233,21 +7231,40 @@ this._readTermContentSignature(
                     }
                 }
                 contentAppendMs += safePerformance.now() - tContentAppendStart;
-                const explicitContentDictName = chunkCount > 0 ? (items[i].termEntryContentDictName ?? null) : null;
-                let contentDictName = 'raw';
-                if (
-                    this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                    typeof explicitContentDictName === 'string' &&
-                    explicitContentDictName.length > 0
-                ) {
-                    contentDictName = explicitContentDictName;
-                } else if (
-                    this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                    chunksToAppend.every((contentBytes) => isRawTermContentBinary(contentBytes))
-                ) {
-                    contentDictName = RAW_TERM_CONTENT_DICT_NAME;
+                /** @type {string} */
+                let uniformContentDictName = 'raw';
+                /** @type {(string|null)[]|null} */
+                let contentDictNames = null;
+                if (this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES) {
+                    for (let j = 0; j < chunkCount; ++j) {
+                        const explicitContentDictName = items[i + j].termEntryContentDictName ?? null;
+                        const resolvedContentDictName = (
+                            typeof explicitContentDictName === 'string' &&
+                            explicitContentDictName.length > 0
+                        ) ?
+                            explicitContentDictName :
+                            (isRawTermContentBinary(contentChunks[j]) ? RAW_TERM_CONTENT_DICT_NAME : 'raw');
+                        if (j === 0) {
+                            uniformContentDictName = resolvedContentDictName;
+                            continue;
+                        }
+                        if (contentDictNames === null && resolvedContentDictName !== uniformContentDictName) {
+                            contentDictNames = new Array(chunkCount);
+                            contentDictNames.fill(uniformContentDictName, 0, j);
+                        }
+                        if (contentDictNames !== null) {
+                            contentDictNames[j] = resolvedContentDictName;
+                        }
+                    }
                 }
-                const metrics = await this._termRecordStore.appendBatchFromImportTermEntriesResolvedContent(items, i, chunkCount, contentOffsets, contentLengths, contentDictName);
+                const metrics = await this._termRecordStore.appendBatchFromImportTermEntriesResolvedContent(
+                    items,
+                    i,
+                    chunkCount,
+                    contentOffsets,
+                    contentLengths,
+                    contentDictNames ?? uniformContentDictName,
+                );
                 termRecordBuildMs += metrics.buildRecordsMs;
                 termRecordEncodeMs += metrics.encodeMs;
                 termRecordWriteMs += metrics.appendWriteMs;

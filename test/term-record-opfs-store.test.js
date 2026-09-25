@@ -23,6 +23,7 @@ import {hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js'
 import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+    RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
 } from '../ext/js/dictionary/raw-term-content.js';
 
@@ -347,6 +348,43 @@ describe('TermRecordOpfsStore', () => {
         const records = await reader.getByIdsAsync([1, 2]);
         expect([...records.values()].map(({score}) => score)).toStrictEqual([0, 1.5]);
         expect([...records.values()].map(({entryContentLength}) => entryContentLength)).toStrictEqual([65535, 1]);
+    });
+
+    test('round-trips mixed resolved content dictionary labels through persisted shards', async () => {
+        const dictionary = 'Mixed resolved content labels';
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        const rows = [
+            {dictionary, expression: 'a', reading: 'a', score: 0, sequence: 1},
+            {dictionary, expression: 'b', reading: 'b', score: 0, sequence: 2},
+        ];
+        const labels = [RAW_TERM_CONTENT_DICT_NAME, RAW_TERM_CONTENT_TOKEN_DICT_NAME];
+
+        await writer.beginImportSession();
+        await writer.appendBatchFromImportTermEntriesResolvedContent(
+            rows,
+            0,
+            rows.length,
+            [0, 1],
+            [1, 1],
+            labels,
+        );
+
+        expect([writer.getById(1)?.entryContentDictName, writer.getById(2)?.entryContentDictName])
+            .toStrictEqual(labels);
+
+        await writer.endImportSession();
+
+        const reader = new TermRecordOpfsStore();
+        Reflect.set(reader, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await reader._loadShardFiles(true);
+        const records = await reader.getByIdsAsync([1, 2]);
+
+        expect([...records.values()].map(({entryContentDictName}) => entryContentDictName))
+            .toStrictEqual(labels);
     });
 
     test('round-trips wide sequences through persisted lookup indexes', async () => {
