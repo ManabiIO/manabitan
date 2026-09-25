@@ -1,0 +1,38 @@
+name: Import default browser validation 20260925
+on:
+  push:
+    branches: [bench/import-qualification-20260925]
+    paths: [.github/workflows/import-default-browser-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      PLAYWRIGHT_HARD_TIMEOUT_SECONDS: '900'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ba0a8bbd14f93f3b3c1ef7485117dc5d73435684
+      - uses: ./.github/actions/setup
+      - run: npx playwright install --with-deps chromium
+      - name: Chromium integration and storage lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/default-browser
+          git rev-parse HEAD > builds/default-browser/source.txt
+          xvfb-run -a npm run test:playwright:integration -- --retries=0 2>&1 | tee builds/default-browser/integration.log
+      - name: Retain exact outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-default-browser-validation
+          path: |
+            builds/default-browser/
+            test-results/
+          retention-days: 30
+          if-no-files-found: warn
