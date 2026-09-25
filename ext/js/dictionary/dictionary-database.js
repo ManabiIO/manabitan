@@ -5292,6 +5292,9 @@ null;
                     stagedContentOffsets.push(existingMeta.offset);
                     stagedContentLengths.push(existingMeta.length);
                     stagedContentDictNames.push(existingMeta.dictName);
+                    if (stagedRows.length >= stagingBatchSize) {
+                        await flushStagedRows();
+                    }
                     continue;
                 }
 
