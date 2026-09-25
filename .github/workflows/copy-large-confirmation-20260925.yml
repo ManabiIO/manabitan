@@ -1,0 +1,155 @@
+name: Large shared-cache copy confirmation 20260925
+on:
+  push:
+    branches: [verify/import-cache-large-20260925-763627]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HUSKY: '0'
+      CANDIDATE: cache-align
+      BASE_ROOT: /tmp/copy-base
+      CANDIDATE_ROOT: /tmp/copy-candidate
+      EVIDENCE_ROOT: /tmp/copy-evidence
+      INPUT_ROOT: /tmp/copy-input
+      SOURCE: ext/js/dictionary/dictionary-database.js
+      TEST_FILE: term-content-recent-source-copy.test.js
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Verify inputs and restrict the fast path to large copies
+        run: |
+          mkdir -p "$EVIDENCE_ROOT" "$INPUT_ROOT"
+          python - <<'PY'
+          import hashlib, os, zipfile
+          from pathlib import Path
+          path = Path('dev/perf/copy-large-20260925/input.zip')
+          assert hashlib.sha256(path.read_bytes()).hexdigest() == 'e429eff192b885305617c34cfc9b3e172309df86cae7177f2baba310a4ba14bb'
+          root = Path(os.environ['INPUT_ROOT'])
+          with zipfile.ZipFile(path) as archive:
+              assert set(archive.namelist()) == {'cache-align.patch', 'decoded-owned.patch', 'term-content-recent-source-copy.test.js', 'term-content-decoded-ownership.test.js', 'compare.py'}
+              archive.extractall(root)
+          patch = root / 'cache-align.patch'
+          text = patch.read_text()
+          assert text.count('byteLength >= 64 * 1024 && sourceAlignment !== 0') == 1
+          patch.write_text(text.replace('byteLength >= 64 * 1024 && sourceAlignment !== 0', 'byteLength >= 2 * 1024 * 1024 && sourceAlignment !== 0'))
+          test = root / 'term-content-recent-source-copy.test.js'
+          text = test.read_text()
+          replacements = {
+              'const length = 65536 + tail': 'const length = (2 * 1024 * 1024) + tail',
+              'sourceBytes(65536, 1)': 'sourceBytes(2 * 1024 * 1024, 1)',
+              '[[65535, true, 1], [65536, false, 1], [65536, true, 0]]': '[[1048576, true, 7], [2097151, true, 1], [2097152, false, 1], [2097152, true, 0]]',
+              'initial: 2, maximum: 4': 'initial: 33, maximum: 64',
+              'memory.buffer, 3, 65536': 'memory.buffer, 3, 2 * 1024 * 1024',
+          }
+          for old, new in replacements.items():
+              assert text.count(old) == 1, old
+              text = text.replace(old, new)
+          test.write_text(text)
+          assert hashlib.sha256(test.read_bytes()).hexdigest() == 'd40998ca21f301bab4f5c2373bffef5303225cf7713610c28eef8c4bd79ff04b'
+          driver = root / 'compare.py'
+          text = driver.read_text()
+          assert text.count('range(1, 9)') == 1
+          text = text.replace('range(1, 9)', 'range(1, 13)')
+          old = "[('jmdict', 'AB'), ('jmnedict', 'BA'), ('jitendex', 'BA')]"
+          assert text.count(old) == 1
+          text = text.replace(old, "[('jmdict', 'BA'), ('jmnedict', 'AB'), ('jitendex', 'AB')]")
+          driver.write_text(text)
+          PY
+          cp -a "$INPUT_ROOT" "$EVIDENCE_ROOT/inputs"
+          git worktree add --detach "$BASE_ROOT" 76362775484661b3cd8b9d2c84b228802c023a76
+          git worktree add --detach "$CANDIDATE_ROOT" 76362775484661b3cd8b9d2c84b228802c023a76
+          cd "$BASE_ROOT"
+          npm ci
+          npm run build:libs
+          cp -a "$BASE_ROOT/node_modules" "$CANDIDATE_ROOT/node_modules"
+          cp -a "$BASE_ROOT/ext/lib" "$CANDIDATE_ROOT/ext/lib"
+      - name: Repeat expected parent failure on the final boundary tests
+        run: |
+          cd "$BASE_ROOT"
+          cp "$INPUT_ROOT/$TEST_FILE" "test/$TEST_FILE"
+          set +e
+          node node_modules/vitest/vitest.mjs run "test/$TEST_FILE" --reporter=json > "$EVIDENCE_ROOT/parent-red.json" 2> "$EVIDENCE_ROOT/parent-red.log"
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads((Path(os.environ['EVIDENCE_ROOT']) / 'parent-red.json').read_text())
+          failed = [case for suite in data['testResults'] for case in suite['assertionResults'] if case['status'] == 'failed']
+          assert len(failed) == 1 and 'avoids the unaligned whole shared-byte slice' in failed[0]['fullName'], failed
+          assert data.get('numRuntimeErrorTestSuites', 0) == 0, data
+          PY
+          rm "test/$TEST_FILE"
+      - name: Validate the isolated final source
+        run: |
+          cd "$CANDIDATE_ROOT"
+          git apply --check "$INPUT_ROOT/cache-align.patch"
+          git apply "$INPUT_ROOT/cache-align.patch"
+          cp "$INPUT_ROOT/$TEST_FILE" "test/$TEST_FILE"
+          echo "165456eab75789ca760531ea2f0ab9a2f7fae6df3413f59788998312686de245  $SOURCE" | sha256sum --check
+          git diff --check
+          node node_modules/vitest/vitest.mjs run "test/$TEST_FILE" test/dictionary-database-content-dedup.test.js > "$EVIDENCE_ROOT/focused.log" 2>&1
+          node node_modules/eslint/bin/eslint.js "$SOURCE" "test/$TEST_FILE" > "$EVIDENCE_ROOT/lint.log" 2>&1
+          npm run test:ts > "$EVIDENCE_ROOT/types.log" 2>&1
+          npm run test:unit -- --minWorkers=1 --maxWorkers=2 > "$EVIDENCE_ROOT/unit.log" 2>&1
+          npm run test:unit:options > "$EVIDENCE_ROOT/options.log" 2>&1
+          npm run test:build > "$EVIDENCE_ROOT/build-plans.log" 2>&1
+          git -c core.hooksPath=/dev/null add "$SOURCE" "test/$TEST_FILE"
+          git -c core.hooksPath=/dev/null -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'perf(import): align large shared recent-source cache copies'
+          git rev-parse HEAD > "$EVIDENCE_ROOT/candidate-commit.txt"
+          git rev-parse 'HEAD^{tree}' > "$EVIDENCE_ROOT/candidate-tree.txt"
+          git diff HEAD^ HEAD > "$EVIDENCE_ROOT/candidate.patch"
+          sha256sum "$SOURCE" "test/$TEST_FILE" > "$EVIDENCE_ROOT/source-sha256.txt"
+          git push origin HEAD:refs/heads/verify/cache-large-candidate-20260925-763627
+      - name: Build both packages and prepare locked fixtures
+        run: |
+          cd "$BASE_ROOT"
+          npm run build -- --target chrome-dev > "$EVIDENCE_ROOT/build-base.log" 2>&1
+          cd "$CANDIDATE_ROOT"
+          npm run build -- --target chrome-dev > "$EVIDENCE_ROOT/build-candidate.log" 2>&1
+          cd "$BASE_ROOT"
+          node dev/perf/prepare-dictionaries.js > "$EVIDENCE_ROOT/fixtures.log" 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium
+          cp -a "$BASE_ROOT/builds/e2e-dictionary-cache" "$CANDIDATE_ROOT/builds/e2e-dictionary-cache"
+      - name: Complete the independent 12-pair plan with reversed initial order
+        run: python "$INPUT_ROOT/compare.py" > "$EVIDENCE_ROOT/driver.log" 2>&1
+      - name: Verify full Chromium lifecycle on the final source
+        env:
+          MANABITAN_CHROMIUM_BROWSER: chromium
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: /tmp/copy-evidence/lifecycle.html
+        run: |
+          cd "$CANDIDATE_ROOT"
+          npm run test:e2e:chromium-extension > "$EVIDENCE_ROOT/lifecycle.log" 2>&1
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads((Path(os.environ['EVIDENCE_ROOT']) / 'lifecycle.json').read_text())
+          assert report['status'] == 'success' and report['skippedVerification'] is False, report.get('failureReason')
+          PY
+      - name: Preserve every observation and validation result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cache-large-confirmation-763627
+          path: ${{ env.EVIDENCE_ROOT }}/
+          retention-days: 30
+          if-no-files-found: error
