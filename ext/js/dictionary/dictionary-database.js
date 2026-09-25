@@ -4783,15 +4783,33 @@ null;
      */
     async _bulkInsertWithDescriptor(descriptor, items, start, count) {
         const {table, columnsSql, rowPlaceholderSql, batchSize, bindRow} = descriptor;
-        const fullBatchSql = count > batchSize ?
-            `INSERT INTO ${table}(${columnsSql}) VALUES ${Array(batchSize).fill(rowPlaceholderSql).join(',')}` :
-            null;
+        if (count <= batchSize) {
+            /** @type {string[]} */
+            const valueRows = [];
+            /** @type {import('@sqlite.org/sqlite-wasm').Bindable[]} */
+            const bind = [];
+            for (let j = 0; j < count; ++j) {
+                valueRows.push(rowPlaceholderSql);
+                const rowBind = bindRow(items[start + j]);
+                for (const value of rowBind) {
+                    bind.push(value);
+                }
+            }
+            const sql = `INSERT INTO ${table}(${columnsSql}) VALUES ${valueRows.join(',')}`;
+            const stmt = this._getCachedStatement(sql);
+            stmt.reset(true);
+            stmt.bind(bind);
+            stmt.step();
+            return;
+        }
+
+        const fullBatchSql = `INSERT INTO ${table}(${columnsSql}) VALUES ${Array(batchSize).fill(rowPlaceholderSql).join(',')}`;
         for (let i = start, ii = start + count; i < ii; i += batchSize) {
             const chunkCount = Math.min(batchSize, ii - i);
             /** @type {import('@sqlite.org/sqlite-wasm').Bindable[]} */
             const bind = [];
             let sql;
-            if (fullBatchSql !== null && chunkCount === batchSize) {
+            if (chunkCount === batchSize) {
                 for (let j = 0; j < chunkCount; ++j) {
                     const rowBind = bindRow(items[i + j]);
                     for (const value of rowBind) {
