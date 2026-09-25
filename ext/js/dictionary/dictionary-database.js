@@ -3697,7 +3697,10 @@ null;
             };
         });
 
-        results.sort((a, _b) => (a.mediaType === 'image/svg+xml' ? -1 : 1));
+        results.sort((a, b) => (
+            Number(b.mediaType === 'image/svg+xml') -
+            Number(a.mediaType === 'image/svg+xml')
+        ));
 
         safePerformance.mark('drawMedia:draw:start');
         const errors = [];
