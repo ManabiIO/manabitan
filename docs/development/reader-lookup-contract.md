@@ -68,3 +68,5 @@ insufficient. Changing/reordering a context invalidates the pending presentation
 Pure projection and DOM receiver tests are not full packaged-extension or Anki tests.
 Run all prepared protocol suites with `node --test dev/tests/reader-*.mjs` as well
 as the existing project checks before enabling the source integration recipe.
+
+For the extension's general development and installation context, see the [project README](../../README.md).
