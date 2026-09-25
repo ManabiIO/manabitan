@@ -144,6 +144,71 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
 }
 
 describe('TermRecordOpfsStore', () => {
+
+    test('reset truncates shard storage when unlink fails', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Reset dictionary', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([
+            [descriptorFileName, new Uint8Array([1, 2, 3, 4])],
+            [indexFileName, new Uint8Array([5, 6, 7, 8])],
+        ]);
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            removeEntryFailures: new Map([
+                [descriptorFileName, 1],
+                [indexFileName, 1],
+            ]),
+        });
+        Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await expect(store.reset()).resolves.toBeUndefined();
+
+        expect(fileBytesByName.get(descriptorFileName)).toStrictEqual(new Uint8Array());
+        expect(fileBytesByName.get(indexFileName)).toStrictEqual(new Uint8Array());
+        expect(store.size).toBe(0);
+        expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0);
+    });
+
+    test('reset reports persistent cleanup failures after clearing runtime state and still attempts every file', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Reset failure', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([
+            [descriptorFileName, new Uint8Array([1])],
+            [indexFileName, new Uint8Array([2])],
+        ]);
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+        const cleanupError = new Error('Injected reset cleanup failure');
+        const removeOrTruncate = vi.spyOn(store, '_removeStorageFileOrTruncate')
+            .mockImplementation(async (name) => {
+                if (name === descriptorFileName) { throw cleanupError; }
+                fileBytesByName.delete(name);
+            });
+        Reflect.get(store, '_recordsById').set(1, {
+            id: 1,
+            dictionary: 'Reset failure',
+            expression: '失敗',
+            reading: 'しっぱい',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 1,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        await expect(store.reset()).rejects.toMatchObject({
+            name: 'AggregateError',
+            errors: [cleanupError],
+        });
+
+        expect(removeOrTruncate).toHaveBeenCalledWith(descriptorFileName, false);
+        expect(removeOrTruncate).toHaveBeenCalledWith(indexFileName, false);
+        expect(store.size).toBe(0);
+        expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0);
+    });
+
     test('uses compact artifact fields only when they reduce persisted bytes', () => {
         const store = new TermRecordOpfsStore();
         const encode = store._encodeArtifactRecordFields.bind(store);
