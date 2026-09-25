@@ -78,7 +78,13 @@ function createFixture(options = {}) {
         return {termRecordAppendMs: 0, termsVtabInsertMs: 0}
     })
     return {
-        database, stagedSizes, submitted, appended, lookup, exec, insertError,
+        database,
+        stagedSizes,
+        submitted,
+        appended,
+        lookup,
+        exec,
+        insertError,
         run: async (rows, start = 0, count = rows.length - start) => {
             await Reflect.get(database, '_bulkAddTerms').call(database, rows, start, count)
         },
@@ -92,10 +98,18 @@ function createFixture(options = {}) {
  */
 function createRow(index, hash = 1) {
     return {
-        dictionary: 'Cached staging fixture', expression: `term${index}`, reading: '',
-        definitionTags: '', termTags: '', rules: '', glossary: [], score: 0, sequence: -1,
+        dictionary: 'Cached staging fixture',
+        expression: `term${index}`,
+        reading: '',
+        definitionTags: '',
+        termTags: '',
+        rules: '',
+        glossary: [],
+        score: 0,
+        sequence: -1,
         termEntryContentBytes: Uint8Array.of(hash & 0xff),
-        termEntryContentHash1: hash, termEntryContentHash2: 17,
+        termEntryContentHash1: hash,
+        termEntryContentHash2: 17,
     }
 }
 
