@@ -69,7 +69,7 @@ describe('Anki duplicate search query escaping', () => {
         {name: 'space', value: 'a b', escaped: 'a b'},
         {name: 'parentheses', value: '(a)', escaped: '(a)'},
         {name: 'leading hyphen', value: '-a', escaped: '-a'},
-        {name: 'colon', value: 'a:b', escaped: 'a:b'},
+        {name: 'colon', value: 'a:b', escaped: 'a\\:b'},
         {name: 'unicode', value: '猫😀', escaped: '猫😀'},
     ])('preserves literal primary-field $name', ({value, escaped}) => {
         expect(createAnkiNoteDuplicateSearchDetails(createNote({field: value}))?.query)

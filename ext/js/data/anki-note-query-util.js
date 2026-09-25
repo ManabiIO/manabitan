@@ -22,7 +22,7 @@ import {getRootDeckName} from './anki-util.js';
  * @returns {string}
  */
 function escapeAnkiSearchValue(text) {
-    return text.replace(/[\\*"_]/g, '\\$&');
+    return text.replace(/[\\*"_:]/g, '\\$&');
 }
 
 /**
@@ -33,7 +33,7 @@ function escapeAnkiSearchValue(text) {
  * @returns {string}
  */
 function createAnkiSearchToken(key, value, negative = false, suffix = '') {
-    return `${negative ? '-' : ''}"${key}:${escapeAnkiSearchValue(value)}${suffix}"`;
+    return `${negative ? '-' : ''}"${escapeAnkiSearchValue(key)}:${escapeAnkiSearchValue(value)}${suffix}"`;
 }
 
 /**
