@@ -288,7 +288,7 @@ describe('DictionaryDatabase import cleanup', () => {
         const cleanupTermContent = vi.spyOn(
             database,
             /** @type {never} */ ('_cleanupTermContentAfterDictionaryDelete'),
-        ).mockResolvedValue();
+        ).mockResolvedValue(undefined);
         const clearDirectTermIndexCaches = vi.spyOn(
             database,
             /** @type {never} */ ('_clearDirectTermIndexCaches'),
