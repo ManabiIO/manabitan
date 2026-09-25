@@ -1,0 +1,67 @@
+name: Strict cached staging verification
+on:
+  push:
+    branches: [bench/cached-term-staging-20260925]
+    paths: [.github/workflows/cached-staging-strict-verification.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 88aa9e0448aefb906007a338c1f129079c01ec0b
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - name: Verify source identity and failure propagation
+        run: |
+          set -euo pipefail
+          mkdir -p builds/cached-staging-strict
+          test "$(git rev-parse HEAD)" = 88aa9e0448aefb906007a338c1f129079c01ec0b
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          expected = {
+              'ext/js/dictionary/dictionary-database.js': '9639e18f6cd7ceb8e75bb509ff4a515ffe28231aa548f59006b90318bc3f6b6a',
+              'test/dictionary-database-cached-staging.test.js': 'd3451ac25af48c0db353fd08fe40a03656b977ec13e95b0e0f279bfe20effb7f',
+          }
+          for path, digest in expected.items():
+              assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == digest, path
+          PY
+          if (exit 7) | tee builds/cached-staging-strict/failure-probe.log; then
+            echo 'Pipeline incorrectly hid a producer failure'
+            exit 1
+          else
+            test "$?" = 7
+          fi
+          printf 'Failing producer correctly propagates exit 7\n' > builds/cached-staging-strict/pipeline-control.txt
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Actual focused full and options tests
+        run: |
+          set -euo pipefail
+          npx vitest run test/dictionary-database-cached-staging.test.js test/dictionary-database-content-dedup.test.js --maxWorkers=1 --minWorkers=1 2>&1 | tee builds/cached-staging-strict/focused.log
+          npm run test:unit -- --maxWorkers=2 --minWorkers=2 2>&1 | tee builds/cached-staging-strict/unit.log
+          npm run test:unit:options -- --maxWorkers=2 --minWorkers=2 2>&1 | tee builds/cached-staging-strict/options.log
+      - name: Type lint and build gates
+        run: |
+          set -euo pipefail
+          npm run test:ts 2>&1 | tee builds/cached-staging-strict/types.log
+          npx eslint ext/js/dictionary/dictionary-database.js test/dictionary-database-cached-staging.test.js 2>&1 | tee builds/cached-staging-strict/lint.log
+          npm run test:build 2>&1 | tee builds/cached-staging-strict/build-plan.log
+          npm run build -- --target chrome-dev 2>&1 | tee builds/cached-staging-strict/build.log
+          git status --porcelain > builds/cached-staging-strict/status.txt
+          test ! -s builds/cached-staging-strict/status.txt
+          git rev-parse HEAD 'HEAD^{tree}' > builds/cached-staging-strict/identity.txt
+          printf 'All strict gates passed\n' > builds/cached-staging-strict/completed.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cached-staging-strict-final
+          path: builds/cached-staging-strict
+          retention-days: 30
