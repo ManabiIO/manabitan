@@ -5062,8 +5062,8 @@ null;
                     score,
                     glossary: EMPTY_TERM_GLOSSARY,
                     dictionary: dictionaryTitle,
-                    termEntryContentHash1: hash1,
-                    termEntryContentHash2: hash2,
+                    termEntryContentHash1: effectiveHash1,
+                    termEntryContentHash2: effectiveHash2,
                     termEntryContentBytes: contentBytes,
                     sequence,
                 };
