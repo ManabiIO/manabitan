@@ -70,7 +70,7 @@ jobs:
               global s
               assert s.count(old)==1,old
               s=s.replace(old,new)
-          replace('        this._lastError = null;', '        this._lastError = null;\n        this._qualificationGenericReservations = 0;\n        this._qualificationUnexpectedInitialReservations = 0;')
+          replace('        this._cacheGeneration = 0;', '        this._cacheGeneration = 0;\n        this._qualificationGenericReservations = 0;\n        this._qualificationUnexpectedInitialReservations = 0;')
           replace('            compressionExperiments: this._compressionExperiments,', '            qualificationGenericReservations: this._qualificationGenericReservations,\n            qualificationUnexpectedInitialReservations: this._qualificationUnexpectedInitialReservations,\n            compressionExperiments: this._compressionExperiments,')
           replace('        return this._beginAppendSharedSpans(', "        if (compressionDictName !== 'jmdict') {\n            ++this._qualificationGenericReservations;\n            if (!force) { ++this._qualificationUnexpectedInitialReservations; }\n        }\n        return this._beginAppendSharedSpans(")
           p.write_text(s)
