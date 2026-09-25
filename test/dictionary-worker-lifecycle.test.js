@@ -131,6 +131,37 @@ describe('DictionaryWorker lifecycle', () => {
     });
 });
 
+describe.each([false, true])('DictionaryWorker malformed protocol messages (reuse=%s)', (reuseWorker) => {
+    test.each([
+        ['null message body', null],
+        ['missing action', {}],
+        ['unknown action', {action: 'unexpected', params: {}}],
+        ['null progress parameters', {action: 'progress', params: null}],
+        ['missing progress arguments', {action: 'progress', params: {}}],
+    ])('rejects instead of stranding the caller for %s', async (_name, message) => {
+        const workers = installWorkerMock();
+        const client = new DictionaryWorker({reuseWorker});
+        const rejected = vi.fn();
+        const completed = vi.fn();
+        const pending = client.getMdxVersion().then(completed, rejected);
+
+        expect(() => workers[0].emitMessage(message)).not.toThrow();
+        await Promise.resolve();
+        expect(rejected).toHaveBeenCalledTimes(1);
+        expect(rejected.mock.calls[0][0]).toBeInstanceOf(Error);
+        expect(completed).not.toHaveBeenCalled();
+        expect(workers[0].terminate).toHaveBeenCalledExactlyOnceWith();
+        expect([...workers[0].listeners.values()].every((listeners) => listeners.size === 0)).toBe(true);
+        await pending;
+
+        const next = client.getMdxVersion();
+        expect(workers).toHaveLength(2);
+        workers[1].emitMessage({action: 'complete', params: {result: 7}});
+        await expect(next).resolves.toBe(7);
+        client.destroy();
+    });
+});
+
 describe.each([false, true])('DictionaryWorker completion decoding (reuse=%s)', (reuseWorker) => {
     test.each([
         ['null serialized error', {error: null}],
