@@ -47,6 +47,7 @@ import {
     isRawTermContentBinary,
     isRawTermContentSharedGlossaryBinary,
     isRawTermContentTokenBinary,
+    isValidRawTermContentSharedGlossaryBinary,
     getRawTermContentBlockCompressionDictName,
     RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
@@ -11181,7 +11182,7 @@ null :
                     }
                     return isRawTermContentBinary(contentBytes) ?
                         RAW_TERM_CONTENT_DICT_NAME :
-                        (isRawTermContentSharedGlossaryBinary(contentBytes) ? RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME : 'raw');
+                        (isValidRawTermContentSharedGlossaryBinary(contentBytes) ? RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME : 'raw');
                 }),
                 entryToStoredChunkIndexes,
                 entryToStoredChunkOffsets,

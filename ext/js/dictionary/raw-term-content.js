@@ -333,6 +333,37 @@ export function isRawTermContentSharedGlossaryBinary(bytes) {
 }
 
 /**
+ * @param {Uint8Array} bytes
+ * @returns {{rulesLength: number, definitionTagsLength: number, termTagsLength: number, glossaryOffset: number, glossaryLength: number}|null}
+ */
+function getRawTermContentSharedGlossaryFields(bytes) {
+    if (!isRawTermContentSharedGlossaryBinary(bytes)) {
+        return null;
+    }
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const rulesLength = view.getUint32(4, true);
+    const definitionTagsLength = view.getUint32(8, true);
+    const termTagsLength = view.getUint32(12, true);
+    const glossaryOffset = Number(view.getBigUint64(16, true));
+    const glossaryLength = view.getUint32(24, true);
+    const totalLength = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES + rulesLength + definitionTagsLength + termTagsLength;
+    if (totalLength !== bytes.byteLength || !isValidSharedGlossaryRange(glossaryOffset, glossaryLength)) {
+        return null;
+    }
+    return {rulesLength, definitionTagsLength, termTagsLength, glossaryOffset, glossaryLength};
+}
+
+/**
+ * Validates the complete length-delimited shared-glossary header without
+ * decoding its tag strings.
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+export function isValidRawTermContentSharedGlossaryBinary(bytes) {
+    return getRawTermContentSharedGlossaryFields(bytes) !== null;
+}
+
+/**
  * @param {string} rules
  * @param {string} definitionTags
  * @param {string} termTags
@@ -419,19 +450,13 @@ export function rebaseRawTermContentSharedGlossaryBinary(bytes, baseOffset) {
     if (!isRawTermContentSharedGlossaryBinary(bytes) || baseOffset === 0) {
         return bytes;
     }
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const rulesLength = view.getUint32(4, true);
-    const definitionTagsLength = view.getUint32(8, true);
-    const termTagsLength = view.getUint32(12, true);
-    const totalLength = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES + rulesLength + definitionTagsLength + termTagsLength;
-    if (totalLength !== bytes.byteLength) {
-        return bytes;
+    const fields = getRawTermContentSharedGlossaryFields(bytes);
+    if (fields === null) {
+        throw new RangeError('Invalid shared term-content glossary reference');
     }
-    const glossaryOffset = Number(view.getBigUint64(16, true));
-    const glossaryLength = view.getUint32(24, true);
+    const {glossaryOffset, glossaryLength} = fields;
     const rebasedOffset = glossaryOffset + baseOffset;
     if (
-        !isValidSharedGlossaryRange(glossaryOffset, glossaryLength) ||
         !Number.isSafeInteger(baseOffset) ||
         !isValidSharedGlossaryRange(rebasedOffset, glossaryLength)
     ) {
@@ -449,19 +474,11 @@ export function rebaseRawTermContentSharedGlossaryBinary(bytes, baseOffset) {
  * @returns {{rules: string, definitionTags: string, termTags: string, glossaryOffset: number, glossaryLength: number}|null}
  */
 export function decodeRawTermContentSharedGlossaryHeader(bytes, textDecoder) {
-    if (!isRawTermContentSharedGlossaryBinary(bytes)) {
+    const fields = getRawTermContentSharedGlossaryFields(bytes);
+    if (fields === null) {
         return null;
     }
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const rulesLength = view.getUint32(4, true);
-    const definitionTagsLength = view.getUint32(8, true);
-    const termTagsLength = view.getUint32(12, true);
-    const glossaryOffset = Number(view.getBigUint64(16, true));
-    const glossaryLength = view.getUint32(24, true);
-    const totalLength = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES + rulesLength + definitionTagsLength + termTagsLength;
-    if (totalLength !== bytes.byteLength || !isValidSharedGlossaryRange(glossaryOffset, glossaryLength)) {
-        return null;
-    }
+    const {rulesLength, definitionTagsLength, termTagsLength, glossaryOffset, glossaryLength} = fields;
     let offset = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES;
     const rules = decodeRawTermString(bytes, offset, rulesLength, textDecoder);
     offset += rulesLength;

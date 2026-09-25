@@ -39,6 +39,7 @@ import {
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
     isRawTermContentSharedGlossaryBinary,
     isRawTermContentTokenBinary,
+    isValidRawTermContentSharedGlossaryBinary,
     rebaseRawTermContentSharedGlossaryBinary,
 } from './raw-term-content.js';
 import {
@@ -4628,6 +4629,9 @@ null;
             /** @type {string|null} */
             let contentDictName = null;
             if (zeroBaseSharedGlossaryContentDictName !== null && contentBytes.byteLength > 0) {
+                if (!isValidRawTermContentSharedGlossaryBinary(contentBytes)) {
+                    throw new Error(`Invalid term artifact payload in '${filename}': malformed shared glossary content`);
+                }
                 contentDictName = zeroBaseSharedGlossaryContentDictName;
                 if (collectArtifactRowProfile) {
                     ++sharedGlossaryRowCount;
@@ -4873,14 +4877,19 @@ null;
      * @param {Uint8Array} termEntryContentBytes
      * @param {'baseline'|'raw-bytes'} termContentStorageMode
      * @returns {Uint8Array}
+     * @throws {Error} If shared-glossary term content is malformed.
      */
     _normalizeArtifactTermContentBytes(termEntryContentBytes, termContentStorageMode) {
         if (termContentStorageMode !== 'raw-bytes' || termEntryContentBytes.byteLength === 0) {
             return termEntryContentBytes;
         }
+        const sharedGlossary = isRawTermContentSharedGlossaryBinary(termEntryContentBytes);
+        if (sharedGlossary && !isValidRawTermContentSharedGlossaryBinary(termEntryContentBytes)) {
+            throw new Error('Malformed shared glossary term content');
+        }
         if (
             decodeRawTermContentBinary(termEntryContentBytes, this._textDecoder) !== null ||
-            isRawTermContentSharedGlossaryBinary(termEntryContentBytes) ||
+            sharedGlossary ||
             isRawTermContentTokenBinary(termEntryContentBytes)
         ) {
             return termEntryContentBytes;
@@ -4909,10 +4918,14 @@ null;
      * @param {Uint8Array} termEntryContentBytes
      * @param {number} sharedGlossaryBaseOffset
      * @returns {{contentBytes: Uint8Array, contentDictName: string|null}}
+     * @throws {Error} If shared-glossary term content is malformed or cannot be rebased.
      */
     _normalizeArtifactTermContent(termEntryContentBytes, sharedGlossaryBaseOffset = 0) {
         let contentBytes = termEntryContentBytes;
         const sharedGlossary = isRawTermContentSharedGlossaryBinary(contentBytes);
+        if (sharedGlossary && !isValidRawTermContentSharedGlossaryBinary(contentBytes)) {
+            throw new Error('Malformed shared glossary term content');
+        }
         if (sharedGlossary && sharedGlossaryBaseOffset > 0) {
             contentBytes = rebaseRawTermContentSharedGlossaryBinary(contentBytes, sharedGlossaryBaseOffset);
         }
