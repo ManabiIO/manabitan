@@ -1559,6 +1559,10 @@ function splitInlineCssDeclarations(styleText) {
             }
             continue;
         }
+        if (character === '\\') {
+            index += 1;
+            continue;
+        }
         switch (character) {
             case '"':
             case "'": {
