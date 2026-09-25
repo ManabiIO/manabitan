@@ -1,0 +1,108 @@
+name: Import default validation 20260925
+on:
+  push:
+    branches: [bench/import-qualification-20260925]
+    paths: [.github/workflows/import-default-validation-20260925.yml]
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [baseline, generic]
+    env:
+      VARIANT: ${{ matrix.variant }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: a3925549826671bc1026035f43f0fde2e407077c
+      - uses: ./.github/actions/setup
+      - name: Prepare isolated default promotion
+        if: matrix.variant == 'generic'
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          def replace(path, old, new):
+              p = Path(path)
+              s = p.read_text()
+              assert s.count(old) == 1, (path, old)
+              p.write_text(s.replace(old, new))
+          replace('ext/js/dictionary/term-bank-experiments.js',
+              'defaults on; the other experiments remain default-off.',
+              'and generic shared-span compression default on; other experiments remain off.')
+          replace('ext/js/dictionary/term-bank-experiments.js',
+              'experimentalGenericSpanCompression: options.experimentalGenericSpanCompression === true,',
+              "experimentalGenericSpanCompression: typeof options.experimentalGenericSpanCompression === 'undefined' || options.experimentalGenericSpanCompression === true,")
+          replace('test/term-bank-experiments.test.js',
+              "test.each(['experimentalGenericSpanCompression'])('requires literal true: %s', (key) => {",
+              "test.each(['experimentalGenericSpanCompression'])('defaults on and preserves explicit opt-out: %s', (key) => {")
+          replace('test/term-bank-experiments.test.js',
+              'expect(snapshotTermBankExperiments()[name]).toBe(false)',
+              'expect(snapshotTermBankExperiments()[name]).toBe(true)\n        expect(snapshotTermBankExperiments({[name]: undefined})[name]).toBe(true)')
+          replace('test/term-bank-experiments.test.js',
+              "for (const value of [false, 0, 1, null, undefined, 'true', {}]) {",
+              "for (const value of [false, 0, 1, null, 'true', {}]) {")
+          replace('test/generic-span-codec-integration.test.js',
+              'const baseline = new TermContentBlockStore(new TermContentOpfsStore(), {blockTargetBytes});',
+              'const baseline = new TermContentBlockStore(new TermContentOpfsStore(), {blockTargetBytes});\n        baseline.setCompressionExperiments({experimentalGenericSpanCompression: false});')
+          replace('test/generic-span-codec-integration.test.js',
+              "store.setCompressionExperiments(options);\n        store.setCompressionExperiments();\n        expect(store.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: false});",
+              "store.setCompressionExperiments({experimentalGenericSpanCompression: false});\n        expect(store.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: false});\n        store.setCompressionExperiments();\n        expect(store.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: true});")
+          replace('test/term-content-block-store.test.js',
+              "const options = {experimentalGenericSpanCompression: true};\n        db.setImportOptimizationFlags(options);\n        options.experimentalGenericSpanCompression = false;\n        expect(db._termContentBlockStore.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: true});\n        db.setImportOptimizationFlags();\n        expect(db._termContentBlockStore.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: false});",
+              "const options = {experimentalGenericSpanCompression: false};\n        db.setImportOptimizationFlags(options);\n        options.experimentalGenericSpanCompression = true;\n        expect(db._termContentBlockStore.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: false});\n        db.setImportOptimizationFlags();\n        expect(db._termContentBlockStore.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: true});")
+          PY
+      - name: Full validation with retained failures
+        shell: bash
+        run: |
+          mkdir -p builds/default-validation
+          git diff --check
+          git diff > builds/default-validation/source.patch
+          git rev-parse HEAD > builds/default-validation/base.txt
+          python3 - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          commands = {
+              'unit': ['npm', 'run', 'test:unit', '--', '--no-file-parallelism'],
+              'options': ['npm', 'run', 'test:unit:options'],
+              'types-main': ['npm', 'run', 'test:ts:main'],
+              'types-dev': ['npm', 'run', 'test:ts:dev'],
+              'types-test': ['npm', 'run', 'test:ts:test'],
+              'types-bench': ['npm', 'run', 'test:ts:bench'],
+              'build-plans': ['npm', 'run', 'test:build'],
+              'changed-lint': ['npx', 'eslint', 'ext/js/dictionary/term-bank-experiments.js', 'test/term-bank-experiments.test.js', 'test/generic-span-codec-integration.test.js', 'test/term-content-block-store.test.js'],
+          }
+          results = {}
+          for name, args in commands.items():
+              with open('builds/default-validation/' + name + '.log', 'w') as log:
+                  results[name] = subprocess.run(args, stdout=log, stderr=subprocess.STDOUT).returncode
+              print(name, results[name], flush=True)
+          Path('builds/default-validation/status.json').write_text(json.dumps(results, indent=2) + '\n')
+          PY
+      - name: Preserve isolated candidate without changing develop
+        if: matrix.variant == 'generic'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c perf/import-generic-span-default-20260925
+          git add ext/js/dictionary/term-bank-experiments.js test/term-bank-experiments.test.js test/generic-span-codec-integration.test.js test/term-content-block-store.test.js
+          git commit -m 'perf(import): default to qualified generic shared-span compression'
+          git push origin HEAD:refs/heads/perf/import-generic-span-default-20260925
+          git rev-parse HEAD > builds/default-validation/candidate.txt
+      - name: Publish validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-default-validation-${{ matrix.variant }}
+          path: builds/default-validation/
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Require every recorded check to pass
+        shell: bash
+        run: python3 -c "import json; s=json.load(open('builds/default-validation/status.json')); assert s and all(v == 0 for v in s.values()), s"
