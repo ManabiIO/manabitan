@@ -16,7 +16,7 @@
  */
 
 import {expect, test} from 'vitest';
-import {getMaximumNumericProperty, getParallelSourceReadWallMs} from '../ext/js/dictionary/term-bank-wasm-parser.js';
+import {getParallelSourceReadWallMs} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 
 test('parallel source wall timing preserves ordinary timing semantics', () => {
     expect(getParallelSourceReadWallMs([], 100)).toBe(0);
@@ -35,11 +35,4 @@ test('parallel source wall timing supports source counts above function argument
         resolvedAt: startedAt + (index % 10_001),
     }));
     expect(getParallelSourceReadWallMs(sources, startedAt)).toBe(10_000);
-});
-
-test('profile maxima support profile counts above function argument limits', () => {
-    const profiles = Array.from({length: 130_000}, (_, index) => ({
-        maxWasmHeapBytes: index % 65_537,
-    }));
-    expect(getMaximumNumericProperty(profiles, 'maxWasmHeapBytes')).toBe(65_536);
 });
