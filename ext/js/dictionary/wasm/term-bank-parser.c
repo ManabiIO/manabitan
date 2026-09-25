@@ -2595,6 +2595,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             strings_cursor += value_length;
             ++string_unique_count;
         }
+        if (!reading_equals_expression && string_indexes[0] == string_indexes[1]) {
+            reading_equals_expression = 1;
+        }
         expression_indexes[row_count] = string_indexes[0];
         reading_indexes[row_count] = string_indexes[1];
         reading_equals[row_count] = reading_equals_expression ? 1u : 0u;
