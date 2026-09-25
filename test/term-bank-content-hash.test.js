@@ -8,11 +8,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 /* eslint @stylistic/semi: ["error", "never"] */
 
@@ -34,6 +34,7 @@ beforeAll(async () => {
  * @param {unknown[][]} rows
  * @param {boolean} splitBanks
  * @returns {Promise<{bytes: Uint8Array, hash: number[]}[]>}
+ * @throws {Error} If native content metadata is absent.
  */
 async function hashRows(rows, splitBanks) {
     const split = Math.max(1, Math.floor(rows.length / 2))
@@ -75,13 +76,14 @@ function makeRow(content, index) {
 }
 
 describe('native content hash identity', () => {
-    test.each([false, true])('matches scalar hashes at every short tail and alignment; split banks=%s', async (splitBanks) => {
+    test.each([false, true])('matches scalar hashes at every vector-tail residue; split banks=%s', async (splitBanks) => {
         const lengths = [...Array.from({length: 257}, (_, i) => i), 511, 512, 513, 1023, 1024, 1025, 4095, 4096, 4097, 65535, 65536, 65537]
         const rows = lengths.map((length, i) => makeRow('x'.repeat(length), i))
         const contents = await hashRows(rows, splitBanks)
         const residues = new Set(contents.map(({bytes}) => bytes.byteLength % 16))
         expect(residues.size).toBe(16)
-        expect(contents.some(({bytes}) => bytes.byteLength < 16)).toBe(true)
+        // Even an empty glossary string has an encoded header and delimiters.
+        expect(contents[0].bytes.byteLength).toBe(18)
     })
 
     test.each([false, true])('preserves Unicode, escape and structured-content hashes; split banks=%s', async (splitBanks) => {
