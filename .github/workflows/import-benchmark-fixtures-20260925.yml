@@ -1,0 +1,30 @@
+name: Pinned import benchmark fixtures 20260925
+on:
+  push:
+    branches: [verify/import-benchmark-20260925-a392554]
+    paths: [.github/workflows/import-benchmark-fixtures-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: a3925549826671bc1026035f43f0fde2e407077c
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Fetch and verify locked dictionary archives
+        run: node dev/perf/prepare-dictionaries.js
+      - name: Record fixture identities
+        run: |
+          cp test/perf/dictionaries.lock.json builds/e2e-dictionary-cache/
+          sha256sum builds/e2e-dictionary-cache/*.zip > builds/e2e-dictionary-cache/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-import-fixtures-a392554
+          path: builds/e2e-dictionary-cache/
+          retention-days: 7
