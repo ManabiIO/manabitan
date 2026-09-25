@@ -14,10 +14,13 @@ test('database-worker connect event attaches rejection ownership', () => {
         connectToDatabaseWorker: vi.fn(() => task),
     });
 
-    Reflect.get(handler, '_onMessage').call(handler, {
-        data: {action: 'connectToDatabaseWorker'},
-        ports: [{}],
-    });
+    Reflect.get(handler, '_onMessage').call(
+        handler,
+        /** @type {import('core').SafeAny} */ ({
+            data: {action: 'connectToDatabaseWorker', params: {}},
+            ports: [{}],
+        }),
+    );
 
     expect(catchSpy).toHaveBeenCalledOnce();
 });
