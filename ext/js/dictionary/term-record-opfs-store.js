@@ -4733,7 +4733,7 @@ export class TermRecordOpfsStore {
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {number} contentOffsetBase
-     * @returns {Uint8Array}
+     * @returns {{recordFields: Uint8Array, recordFieldsFormat: number}}
      */
     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
         const count = chunk.rowCount;
@@ -4756,7 +4756,10 @@ export class TermRecordOpfsStore {
                 view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true);
                 view.setFloat64(fieldOffset + 8, chunk.scoreList[i] ?? 0, true);
             }
-            return output;
+            return {
+                recordFields: output,
+                recordFieldsFormat: LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE,
+            };
         }
         let compact = true;
         for (let i = 0; i < count; ++i) {
@@ -4800,7 +4803,10 @@ export class TermRecordOpfsStore {
                 legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
                 legacyI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
             }
-            return legacy;
+            return {
+                recordFields: legacy,
+                recordFieldsFormat: LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
+            };
         }
         const output = new Uint8Array(compactByteLength);
         const header = new Uint32Array(output.buffer, 0, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4);
@@ -4816,7 +4822,10 @@ export class TermRecordOpfsStore {
         new Uint16Array(output.buffer, cursor, count).set(lengths);
         cursor += count * 2;
         new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
-        return output;
+        return {
+            recordFields: output,
+            recordFieldsFormat: LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT,
+        };
     }
 
     /**
@@ -4860,17 +4869,12 @@ export class TermRecordOpfsStore {
         }
         const validationMs = safePerformance.now() - tValidationStart;
         const tRecordEncodeStart = safePerformance.now();
-        const recordFields = this._encodeArtifactRecordFields(
+        const {recordFields, recordFieldsFormat} = this._encodeArtifactRecordFields(
             chunk,
             contentOffsets,
             contentLengths,
             contentOffsetBase,
         );
-        const recordFieldsFormat = chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0)) ?
-            LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE :
-            (recordFields.byteLength === chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES ?
-                LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY :
-                LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT);
         const recordFieldEncodeMs = safePerformance.now() - tRecordEncodeStart;
         const tLookupIndexEncodeStart = safePerformance.now();
         let lookupIndexBytes = preparedLookupIndexBytes;
