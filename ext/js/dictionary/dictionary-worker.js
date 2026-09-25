@@ -152,6 +152,7 @@ export class DictionaryWorker {
      * @template T
      * @param {() => Promise<T>} start
      * @returns {Promise<T>}
+     * @throws {unknown} If starting the invocation throws synchronously.
      */
     _startReuseInvocation(start) {
         const token = {};
