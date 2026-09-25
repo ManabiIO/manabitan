@@ -40,6 +40,18 @@ test('bounded pako inflate returns exact bytes at the declared size', () => {
     assert.deepEqual(inflateSync(packed, expected.byteLength), expected);
 });
 
+test('bounded pako inflate rejects trailing bytes after a complete zlib stream', () => {
+    const expected = new TextEncoder().encode('bounded zlib payload');
+    const packed = new Uint8Array(deflateSync(expected));
+    const trailing = new Uint8Array(packed.byteLength + 3);
+    trailing.set(packed);
+    trailing.set([0xa5, 0x00, 0xff], packed.byteLength);
+    assert.throws(
+        () => inflateSync(trailing, expected.byteLength),
+        /trailing compressed input/u,
+    );
+});
+
 test('bounded pako inflate rejects output one byte beyond the declaration', () => {
     const expected = new Uint8Array(128 * 1024);
     expected.fill(65);
