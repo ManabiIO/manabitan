@@ -11,9 +11,9 @@ jobs:
     timeout-minutes: 30
     env:
       HUSKY: '0'
-      BASE_ROOT: ${{ runner.temp }}/record-format-base
-      CANDIDATE_ROOT: ${{ runner.temp }}/record-format-candidate
-      EVIDENCE_ROOT: ${{ runner.temp }}/record-format-evidence
+      BASE_ROOT: /tmp/record-format-base
+      CANDIDATE_ROOT: /tmp/record-format-candidate
+      EVIDENCE_ROOT: /tmp/record-format-evidence
     steps:
       - uses: actions/checkout@v6
         with:
