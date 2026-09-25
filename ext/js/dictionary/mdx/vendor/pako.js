@@ -24,6 +24,7 @@ import './pako-inflate.js';
  *     push: (bytes: Uint8Array, final: boolean) => boolean,
  *     err: number,
  *     msg: string,
+ *     strm: {avail_in: number},
  *     onData: (chunk: Uint8Array) => void
  *   }
  * }} PakoInflateApi
@@ -70,6 +71,9 @@ export function inflateSync(bytes, maxOutputSize = null) {
     const ok = inflator.push(bytes, true);
     if (!ok || inflator.err !== 0) {
         throw new Error(inflator.msg || 'MDict zlib decompression failed');
+    }
+    if (inflator.strm.avail_in !== 0) {
+        throw new Error('MDict zlib stream has trailing compressed input');
     }
     const result = new Uint8Array(outputSize);
     let offset = 0;
