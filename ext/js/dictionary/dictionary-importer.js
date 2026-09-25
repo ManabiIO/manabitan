@@ -2563,11 +2563,7 @@ export class DictionaryImporter {
      */
     _reportBulkFinalizationProgress(checkpointIndex, total) {
         this._progressData.index = Math.max(1, Math.floor((checkpointIndex / total) * this._progressData.count));
-        try {
-            this._progress();
-        } catch (_) {
-            // Progress delivery is outside the persistence boundary.
-        }
+        this._progress();
         this._logImport(`bulk finalization ${checkpointIndex}/${total}`);
     }
 
@@ -2743,7 +2739,11 @@ export class DictionaryImporter {
         this._lastProgressTimestamp = now;
         this._lastProgressIndex = index;
         this._lastProgressCount = count;
-        this._onProgress({...this._progressData, nextStep});
+        try {
+            this._onProgress({...this._progressData, nextStep});
+        } catch (_) {
+            // Progress delivery is best effort. Cancellation uses _isCancelled.
+        }
     }
 
     /**
