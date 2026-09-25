@@ -61,7 +61,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
 /** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
+/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, fusedParseCapacityFallbacks?: number, fusedParseUnsupportedFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
@@ -768,6 +768,8 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
             fallback.parseBankMs += parseBankMs;
             fallback.fusedParseAttempts = 1;
             fallback.fusedParseFallbacks = 1;
+            fallback.fusedParseCapacityFallbacks = encodedContentBytes === -4 ? 1 : 0;
+            fallback.fusedParseUnsupportedFallbacks = encodedContentBytes === -5 ? 1 : 0;
             fallback.discardedFusedParseMs = parseBankMs;
             fallback.discardedFusedRows = discardedFusedRows;
             fallback.escapedKeyDecodeCount = escapedKeyDecodeCount;
@@ -2196,6 +2198,8 @@ null;
         experiments,
         fusedParseAttempts: parsed.fusedParseAttempts ?? 0,
         fusedParseFallbacks: parsed.fusedParseFallbacks ?? 0,
+        fusedParseCapacityFallbacks: parsed.fusedParseCapacityFallbacks ?? 0,
+        fusedParseUnsupportedFallbacks: parsed.fusedParseUnsupportedFallbacks ?? 0,
         discardedFusedParseMs: parsed.discardedFusedParseMs ?? 0,
         discardedFusedRows: parsed.discardedFusedRows ?? 0,
         bankSpanCount: parsed.bankSpanCount ?? 0,
@@ -3633,6 +3637,8 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         experiments: profiles[0]?.experiments ?? snapshotTermBankExperiments(),
         fusedParseAttempts: sum('fusedParseAttempts'),
         fusedParseFallbacks: sum('fusedParseFallbacks'),
+        fusedParseCapacityFallbacks: sum('fusedParseCapacityFallbacks'),
+        fusedParseUnsupportedFallbacks: sum('fusedParseUnsupportedFallbacks'),
         discardedFusedParseMs: sum('discardedFusedParseMs'),
         discardedFusedRows: sum('discardedFusedRows'),
         bankSpanCount: sum('bankSpanCount'),
