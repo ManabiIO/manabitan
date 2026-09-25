@@ -190,9 +190,28 @@ export class TermContentCompressionPool {
                 [blockOffsets.buffer, blockSourceLengths.buffer],
             );
         });
-        const sourceConsumed = Promise.all(jobs.map(({sourceConsumed: promise}) => promise)).then(() => {});
-        const completion = Promise.all(jobs.map(({completion: promise}) => promise)).then((results) => {
-            const chunks = results.map((result, blockIndex) => {
+        // A failed job does not stop other workers from reading the borrowed
+        // source. Drain both barriers before rejection can trigger a fallback
+        // or allow the caller to release/reuse that source.
+        const noFailure = Symbol();
+        /** @type {unknown} */
+        let firstSourceFailure = noFailure;
+        const sourceConsumed = Promise.all(jobs.map(({sourceConsumed: promise}) => promise.catch((error) => {
+            if (firstSourceFailure === noFailure) { firstSourceFailure = error; }
+        }))).then(() => {
+            if (firstSourceFailure !== noFailure) { throw firstSourceFailure; }
+        });
+        /** @type {unknown} */
+        let firstCompletionFailure = noFailure;
+        const completion = Promise.all(jobs.map(({completion: promise}) => promise.catch((error) => {
+            if (firstCompletionFailure === noFailure) { firstCompletionFailure = error; }
+            return null;
+        }))).then((results) => {
+            if (firstCompletionFailure !== noFailure) { throw firstCompletionFailure; }
+            const successfulResults = /** @type {Array<{bytes: Uint8Array, envelopeMs: number}>} */ (
+                /** @type {unknown} */ (results)
+            );
+            const chunks = successfulResults.map((result, blockIndex) => {
                 envelopeMsByWorker[blockIndex % this._workers.length] += result.envelopeMs;
                 return result.bytes;
             });
