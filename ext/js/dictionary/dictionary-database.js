@@ -4816,9 +4816,8 @@ null;
             if (chunkCount === batchSize) {
                 for (let j = 0; j < chunkCount; ++j) {
                     const rowBind = bindRow(items[i + j]);
-                    for (const value of rowBind) {
-                        bind[bindIndex++] = /** @type {import('@sqlite.org/sqlite-wasm').Bindable} */ (value);
-                    }
+                    bind.splice(bindIndex, rowBind.length, ...rowBind);
+                    bindIndex += rowBind.length;
                 }
                 sql = fullBatchSql;
             } else {
@@ -4827,9 +4826,8 @@ null;
                 for (let j = 0; j < chunkCount; ++j) {
                     valueRows.push(rowPlaceholderSql);
                     const rowBind = bindRow(items[i + j]);
-                    for (const value of rowBind) {
-                        bind[bindIndex++] = /** @type {import('@sqlite.org/sqlite-wasm').Bindable} */ (value);
-                    }
+                    bind.splice(bindIndex, rowBind.length, ...rowBind);
+                    bindIndex += rowBind.length;
                 }
                 sql = `INSERT INTO ${table}(${columnsSql}) VALUES ${valueRows.join(',')}`;
             }
