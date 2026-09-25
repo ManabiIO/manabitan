@@ -4751,7 +4751,7 @@ export class DictionaryImporter {
             return {
                 dictionary: dictionaryTitle,
                 rowCount: streamedRowCount,
-                dictionaryTotalRows,
+                dictionaryTotalRows: dictionaryTotalRows ?? void 0,
                 expressionBytesList: useFullChunkArrays ? chunkExpressionBytes : chunkExpressionBytes.slice(0, streamedRowCount),
                 readingBytesList: useFullChunkArrays ? chunkReadingBytes : chunkReadingBytes.slice(0, streamedRowCount),
                 readingEqualsExpressionList: /** @type {Uint8Array} */ (
