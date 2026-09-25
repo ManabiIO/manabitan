@@ -1221,7 +1221,7 @@ export class DictionaryImporter {
                 termArtifactFiles,
             ) :
             null;
-        const expectedTermRecordImportBytes = typeof totalArtifactTermRows === 'number' && totalArtifactTermRows > 0 ? totalArtifactTermRows * 128 : null;
+        const expectedTermRecordImportBytes = this._getExpectedTermRecordImportBytes(totalArtifactTermRows);
         /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
             ...snapshotTermBankExperiments(details),
@@ -3918,6 +3918,21 @@ export class DictionaryImporter {
             }
         }
         return results;
+    }
+
+    /**
+     * @param {number|null} totalRows
+     * @returns {number|null}
+     */
+    _getExpectedTermRecordImportBytes(totalRows) {
+        const bytesPerRowEstimate = 128;
+        return (
+            Number.isSafeInteger(totalRows) &&
+            /** @type {number} */ (totalRows) > 0 &&
+            /** @type {number} */ (totalRows) <= Math.floor(Number.MAX_SAFE_INTEGER / bytesPerRowEstimate)
+        ) ?
+            /** @type {number} */ (totalRows) * bytesPerRowEstimate :
+            null;
     }
 
     /**
