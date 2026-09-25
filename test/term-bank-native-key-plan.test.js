@@ -47,14 +47,29 @@ async function parse(banks) {
             offset += length
             return start
         })
-        /** @param {number} index @returns {number[]} */
+        /**
+         * @param {number} index
+         * @returns {number[]}
+         */
         const key = (index) => [...plan.stringsBuffer.subarray(offsets[index], offsets[index] + plan.stringLengths[index])]
         for (let i = 0; i < chunk.rowCount; ++i) {
-            rows.push({expression: key(plan.expressionIndexes[i]), reading: key(plan.readingIndexes[i]),
-                equal: chunk.readingEqualsExpressionList[i], score: chunk.scoreList[i], sequence: chunk.sequenceList[i]})
+            rows.push({
+                expression: key(plan.expressionIndexes[i]),
+                reading: key(plan.readingIndexes[i]),
+                equal: chunk.readingEqualsExpressionList[i],
+                score: chunk.scoreList[i],
+                sequence: chunk.sequenceList[i],
+            })
         }
-    }, 2048, {singleChunk: true, experimentalSkipFusedParse: true, emitTermByteLists: false,
-        computeContentHashes: true, emitContentSlab: true, emitTokenBinaryContent: true, prepareLookupIndexes: true})
+    }, 2048, {
+        singleChunk: true,
+        experimentalSkipFusedParse: true,
+        emitTermByteLists: false,
+        computeContentHashes: true,
+        emitContentSlab: true,
+        emitTokenBinaryContent: true,
+        prepareLookupIndexes: true,
+    })
     return {rows, profile: consumeLastTermBankWasmParseProfile()}
 }
 
@@ -68,10 +83,19 @@ function row(expression, reading = '""') {
 }
 
 describe('standalone native escaped-key interning', () => {
-    const tokens = [String.raw`"back\\slash"`, String.raw`"quote\"here"`, String.raw`"slash\/here"`,
-        String.raw`"\b\f\n\r\t"`, String.raw`"\u0000"`, String.raw`"\u65e5本"`,
-        String.raw`"\ud83d\ude42"`, String.raw`"\ud800"`, String.raw`"\udfff"`,
-        String.raw`"\ud800x\udfff"`, String.raw`"é\n𠮷"`]
+    const tokens = [
+        String.raw`"back\\slash"`,
+        String.raw`"quote\"here"`,
+        String.raw`"slash\/here"`,
+        String.raw`"\b\f\n\r\t"`,
+        String.raw`"\u0000"`,
+        String.raw`"\u65e5本"`,
+        String.raw`"\ud83d\ude42"`,
+        String.raw`"\ud800"`,
+        String.raw`"\udfff"`,
+        String.raw`"\ud800x\udfff"`,
+        String.raw`"é\n𠮷"`,
+    ]
     test.each(tokens)('keeps the native plan for a valid escaped token: %s', async (token) => {
         const result = await parse([`[${row('"ordinary"')}]`, `[${row(token)},${row(token)}]`])
         const bytes = [...encoder.encode(/** @type {string} */ (JSON.parse(token)))]
