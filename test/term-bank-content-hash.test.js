@@ -91,8 +91,10 @@ describe('native content hash identity', () => {
         const rows = []
         for (let length = 0; length < 65; ++length) {
             for (const text of texts) {
-                rows.push(makeRow(`${'z'.repeat(length)}${text}`, rows.length))
-                rows.push(makeRow({type: 'structured-content', content: {tag: 'span', content: text.repeat(length)}}, rows.length))
+                rows.push(
+                    makeRow(`${'z'.repeat(length)}${text}`, rows.length),
+                    makeRow({type: 'structured-content', content: {tag: 'span', content: text.repeat(length)}}, rows.length + 1),
+                )
             }
         }
         await hashRows(rows, splitBanks)
