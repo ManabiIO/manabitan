@@ -31,6 +31,7 @@ export function snapshotTermBankExperiments(options = {}) {
         experimentalParserWorkers3: options.experimentalParserWorkers3 === true,
         experimentalLibdeflate: options.experimentalLibdeflate === true,
         experimentalSkipFusedParse: options.experimentalSkipFusedParse === true,
+        experimentalAdaptiveFusedFallback: options.experimentalAdaptiveFusedFallback === true,
         experimentalLookupScratchReuse: typeof options.experimentalLookupScratchReuse === 'undefined' || options.experimentalLookupScratchReuse === true,
         experimentalNativeSegmentedLookup: typeof options.experimentalNativeSegmentedLookup === 'undefined' || options.experimentalNativeSegmentedLookup === true,
         experimentalDirectLookupArena: options.experimentalDirectLookupArena === true,
