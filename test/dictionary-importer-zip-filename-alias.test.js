@@ -100,6 +100,33 @@ describe('DictionaryImporter archive filename validation', () => {
         );
     });
 
+    test('preserves a leading U+FEFF in raw UTF-8 filename aliases', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const prefixed = {filename: '\ufeffimage.png', rawFilename: new TextEncoder().encode('\ufeffimage.png')};
+        const plain = {filename: 'image.png', rawFilename: new TextEncoder().encode('image.png')};
+
+        const map = createArchiveFileMap.call(importer, [prefixed, plain]);
+        expect(map.get('\ufeffimage.png')).toBe(prefixed);
+        expect(map.get('image.png')).toBe(plain);
+        expect(map.size).toBe(2);
+    });
+
+    test('legacy-decoded raw alias retains every leading U+FEFF', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const file = {filename: 'legacy', rawFilename: new TextEncoder().encode('\ufeff\ufeffimage.png')};
+
+        const map = createArchiveFileMap.call(importer, [file]);
+        expect(map.get('\ufeff\ufeffimage.png')).toBe(file);
+        expect(map.has('\ufeffimage.png')).toBe(false);
+        expect(map.has('image.png')).toBe(false);
+    });
+
     test('rejects collisions between decoded filenames and UTF-8 aliases', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
