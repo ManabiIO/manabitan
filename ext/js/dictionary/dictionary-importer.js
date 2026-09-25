@@ -4920,7 +4920,8 @@ null;
             const contentStart = cursor;
             const contentEnd = contentStart + contentLength;
             const sequence = sequenceRaw >= 0 ? sequenceRaw : void 0;
-            let contentBytes = bytes.subarray(contentStart, contentEnd);
+            const artifactContentBytes = bytes.subarray(contentStart, contentEnd);
+            let contentBytes = artifactContentBytes;
             /** @type {string|null} */
             let contentDictName = null;
             if (zeroBaseSharedGlossaryContentDictName !== null && contentBytes.byteLength > 0) {
@@ -4944,6 +4945,11 @@ null;
             } else {
                 contentBytes = this._normalizeArtifactTermContentBytes(contentBytes, termContentStorageMode);
             }
+            let effectiveHash1 = hash1;
+            let effectiveHash2 = hash2;
+            if (contentBytes !== artifactContentBytes) {
+                [effectiveHash1, effectiveHash2] = this._hashEntryContentBytesPair(contentBytes);
+            }
             cursor = contentEnd;
             if (streamToChunkHandler) {
                 if (directArtifactChunkImport) {
@@ -4953,8 +4959,8 @@ null;
                     chunkScores[chunkRowCount] = score;
                     chunkSequences[chunkRowCount] = typeof sequence === 'number' ? sequence : -1;
                     chunkContentBytes[chunkRowCount] = contentBytes;
-                    chunkContentHash1[chunkRowCount] = hash1 >>> 0;
-                    chunkContentHash2[chunkRowCount] = hash2 >>> 0;
+                    chunkContentHash1[chunkRowCount] = effectiveHash1 >>> 0;
+                    chunkContentHash2[chunkRowCount] = effectiveHash2 >>> 0;
                     if (chunkRowCount === 0) {
                         chunkUniformContentDictName = contentDictName;
                     } else if (chunkUniformContentDictName !== void 0 && contentDictName !== chunkUniformContentDictName) {
@@ -4983,8 +4989,8 @@ null;
                         score,
                         glossary: EMPTY_TERM_GLOSSARY,
                         dictionary: dictionaryTitle,
-                        termEntryContentHash1: hash1,
-                        termEntryContentHash2: hash2,
+                        termEntryContentHash1: effectiveHash1,
+                        termEntryContentHash2: effectiveHash2,
                         termEntryContentBytes: contentBytes,
                         sequence,
                     };
