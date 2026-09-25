@@ -706,11 +706,20 @@ static int parse_int32_token(
 
 static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index, uint32_t start, uint32_t end) {
     uint32_t length = end > start ? (end - start) : 0u;
+    const int string_token = length >= 2u && src[start] == '"' && src[end - 1u] == '"';
     switch (field_index) {
-        case 0: meta->expression_start = start; meta->expression_length = length; break;
-        case 1: meta->reading_start = start; meta->reading_length = length; break;
-        case 2: meta->definition_tags_start = start; meta->definition_tags_length = length; break;
-        case 3: meta->rules_start = start; meta->rules_length = length; break;
+        case 0:
+            if (!string_token) { return 0; }
+            meta->expression_start = start; meta->expression_length = length; break;
+        case 1:
+            if (!string_token) { return 0; }
+            meta->reading_start = start; meta->reading_length = length; break;
+        case 2:
+            if (!string_token && !is_null_token(src, start, length)) { return 0; }
+            meta->definition_tags_start = start; meta->definition_tags_length = length; break;
+        case 3:
+            if (!string_token) { return 0; }
+            meta->rules_start = start; meta->rules_length = length; break;
         case 4:
             if (!is_valid_json_number(src, start, end)) { return 0; }
             meta->score_start = start; break;
@@ -719,7 +728,9 @@ static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index
             if (is_null_token(src, start, length)) { meta->sequence_start = 0xffffffffu; break; }
             if (!is_valid_json_number(src, start, end)) { return 0; }
             meta->sequence_start = start; break;
-        case 7: meta->term_tags_start = start; meta->term_tags_length = length; break;
+        case 7:
+            if (!string_token) { return 0; }
+            meta->term_tags_start = start; meta->term_tags_length = length; break;
         default: break;
     }
     return 1;
