@@ -66,7 +66,7 @@ export class ObjectPropertyAccessor {
             throw new Error(`Invalid path: ${ObjectPropertyAccessor.getPathString(pathArray)}`);
         }
 
-        /** @type {import('core').SerializableObject} */ (target)[key] = value;
+        ObjectPropertyAccessor._setProperty(target, key, value);
     }
 
     /**
@@ -114,13 +114,13 @@ export class ObjectPropertyAccessor {
         const value1 = /** @type {import('core').SerializableObject} */ (target1)[key1];
         const value2 = /** @type {import('core').SerializableObject} */ (target2)[key2];
 
-        /** @type {import('core').SerializableObject} */ (target1)[key1] = value2;
+        ObjectPropertyAccessor._setProperty(target1, key1, value2);
         try {
-            /** @type {import('core').SerializableObject} */ (target2)[key2] = value1;
+            ObjectPropertyAccessor._setProperty(target2, key2, value1);
         } catch (error) {
             // Revert
             try {
-                /** @type {import('core').SerializableObject} */ (target1)[key1] = value1;
+                ObjectPropertyAccessor._setProperty(target1, key1, value1);
             } catch (error2) {
                 // NOP
             }
@@ -295,6 +295,31 @@ export class ObjectPropertyAccessor {
                 throw new Error('Path not terminated correctly');
         }
         return pathArray;
+    }
+
+    /**
+     * Assigns a property without invoking Object.prototype.__proto__ for a new own key.
+     * @param {unknown} object The object to modify.
+     * @param {string|number} property The property to assign.
+     * @param {unknown} value The value to assign.
+     */
+    static _setProperty(object, property, value) {
+        if (
+            property === '__proto__' &&
+            typeof object === 'object' &&
+            object !== null &&
+            !Array.isArray(object) &&
+            !Object.prototype.hasOwnProperty.call(object, property)
+        ) {
+            Object.defineProperty(object, property, {
+                value,
+                writable: true,
+                enumerable: true,
+                configurable: true,
+            });
+            return;
+        }
+        /** @type {import('core').SerializableObject} */ (object)[property] = value;
     }
 
     /**
