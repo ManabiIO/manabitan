@@ -4705,8 +4705,8 @@ export class DictionaryImporter {
             chunkExpressionBytes = createSparseArray(chunkSize);
             chunkReadingBytes = createSparseArray(chunkSize);
             chunkReadingEqualsExpression = new Uint8Array(chunkSize);
-            chunkScores = new Float64Array(chunkSize);
-            chunkSequences = new Float64Array(chunkSize);
+            chunkScores = new Int32Array(chunkSize);
+            chunkSequences = new Int32Array(chunkSize);
             chunkSequences.fill(-1);
             chunkContentBytes = createSparseArray(chunkSize);
             chunkContentHash1 = new Uint32Array(chunkSize);
