@@ -1317,6 +1317,10 @@ function findMatchingCssBrace(stylesheet, blockStartIndex) {
             }
             continue;
         }
+        if (character === '\\') {
+            index += 1;
+            continue;
+        }
         switch (character) {
             case '\\':
                 index += 1;
