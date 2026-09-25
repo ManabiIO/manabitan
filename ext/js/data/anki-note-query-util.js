@@ -22,17 +22,18 @@ import {getRootDeckName} from './anki-util.js';
  * @returns {string}
  */
 function escapeAnkiSearchValue(text) {
-    return text.replace(/"/g, '');
+    return text.replace(/[\\*"_]/g, '\\$&');
 }
 
 /**
  * @param {string} key
  * @param {string} value
  * @param {boolean} [negative=false]
+ * @param {string} [suffix='']
  * @returns {string}
  */
-function createAnkiSearchToken(key, value, negative = false) {
-    return `"${negative ? '-' : ''}${key}:${escapeAnkiSearchValue(value)}"`;
+function createAnkiSearchToken(key, value, negative = false, suffix = '') {
+    return `${negative ? '-' : ''}"${key}:${escapeAnkiSearchValue(value)}${suffix}"`;
 }
 
 /**
@@ -143,7 +144,7 @@ export function createAnkiNoteDuplicateSearchDetails(note, fieldValueMode = 'exa
         if (typeof deckName !== 'string' || deckName.length === 0) { return null; }
         queryParts.push(createAnkiSearchToken('deck', deckName));
         if (!checkChildren) {
-            queryParts.push(createAnkiSearchToken('deck', `${deckName}::*`, true));
+            queryParts.push(createAnkiSearchToken('deck', deckName, true, '::*'));
         }
     }
 
@@ -152,7 +153,11 @@ export function createAnkiNoteDuplicateSearchDetails(note, fieldValueMode = 'exa
         queryParts.push(createAnkiSearchToken('note', modelName));
     }
 
-    queryParts.push(createAnkiSearchToken(primaryField.name.toLowerCase(), fieldValueMode === 'any' ? '*' : primaryField.value));
+    if (fieldValueMode === 'any') {
+        queryParts.push(createAnkiSearchToken(primaryField.name.toLowerCase(), '', false, '*'));
+    } else {
+        queryParts.push(createAnkiSearchToken(primaryField.name.toLowerCase(), primaryField.value));
+    }
 
     return {
         query: queryParts.join(' '),
