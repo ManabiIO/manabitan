@@ -433,10 +433,10 @@ class MDictBase {
      */
     _readHeader() {
         // [0:4], 4 bytes header length (header_byte_size), big-endian, 4 bytes, 16 bits
-        const headerByteSizeBuff = this.scanner.readBuffer(0, 4);
+        const headerByteSizeBuff = this.scanner.readBufferView(0, 4);
         const headerByteSize = common.b2n(headerByteSizeBuff);
         // [4:header_byte_size + 4] header_bytes
-        const headerBuffer = this.scanner.readBuffer(4, headerByteSize);
+        const headerBuffer = this.scanner.readBufferView(4, headerByteSize);
         const headerChecksum = this.scanner.readNumber(headerByteSize + 4, 4).getUint32(0, true);
         if (common.adler32(headerBuffer) !== headerChecksum) {
             throw new Error('MDict header checksum mismatch');
@@ -518,7 +518,7 @@ class MDictBase {
         // version >= 2.0, key_header bytes number is 5 * 8, otherwise, 4 * 4
         const headerMetaSize = this.meta.version >= 2.0 ? 8 * 5 : 4 * 4;
         // const keyHeaderBuff = this._readBuffer(this._keyHeaderStartOffset, bytesNum);
-        const keyHeaderBuff = this.scanner.readBuffer(this._keyHeaderStartOffset, headerMetaSize);
+        const keyHeaderBuff = this.scanner.readBufferView(this._keyHeaderStartOffset, headerMetaSize);
         // decrypt
         if (this.meta.encrypt & 1) {
             if (!this.meta.passcode || this.meta.passcode == '') {
@@ -563,7 +563,7 @@ class MDictBase {
         offset += this.meta.numWidth;
         this.keyHeader.keywordBlockPackedSize = keywordBlockPackedSize;
         if (this.meta.version >= 2.0) {
-            const checksum = common.b2n(this.scanner.readBuffer(this._keyHeaderStartOffset + headerMetaSize, 4));
+            const checksum = common.b2n(this.scanner.readBufferView(this._keyHeaderStartOffset + headerMetaSize, 4));
             if (common.adler32(keyHeaderBuff) !== checksum) {
                 throw new Error('MDict key header checksum mismatch');
             }
@@ -579,7 +579,7 @@ class MDictBase {
      */
     _readKeyInfos() {
         this._keyBlockInfoStartOffset = this._keyHeaderEndOffset;
-        const keyBlockInfoBuff = this.scanner.readBuffer(this._keyBlockInfoStartOffset, this.keyHeader.keyInfoPackedSize);
+        const keyBlockInfoBuff = this.scanner.readBufferView(this._keyBlockInfoStartOffset, this.keyHeader.keyInfoPackedSize);
         const keyBlockInfoList = this._decodeKeyInfo(keyBlockInfoBuff);
         this._keyBlockInfoEndOffset = this._keyBlockInfoStartOffset + this.keyHeader.keyInfoPackedSize;
         assert(this.keyHeader.keywordBlocksNum === keyBlockInfoList.length, 'the num_key_info_list should equals to key_block_info_list');
@@ -768,7 +768,7 @@ class MDictBase {
             const start = kbStartOffset;
             assert(start === this.keyInfoList[idx].keyBlockPackAccumulator + this._keyBlockStartOffset, 'should be equal');
             // const end = kbStartOffset + compSize;
-            const kbCompBuff = this.scanner.readBuffer(start, packSize);
+            const kbCompBuff = this.scanner.readBufferView(start, packSize);
             const keyBlock = this.unpackKeyBlock(kbCompBuff, unpackSize);
             const splitKeyBlock = this.splitKeyBlock(keyBlock, idx);
             if (splitKeyBlock.length !== this.keyInfoList[idx].keyBlockEntriesNum) {
@@ -807,7 +807,7 @@ class MDictBase {
         this._recordHeaderStartOffset = this._keyBlockInfoEndOffset + this.keyHeader.keywordBlockPackedSize;
         const recordHeaderLen = this.meta.version >= 2.0 ? 4 * 8 : 4 * 4;
         this._recordHeaderEndOffset = this._recordHeaderStartOffset + recordHeaderLen;
-        const recordHeaderBuffer = this.scanner.readBuffer(this._recordHeaderStartOffset, recordHeaderLen);
+        const recordHeaderBuffer = this.scanner.readBufferView(this._recordHeaderStartOffset, recordHeaderLen);
         let ofset = 0;
         const recordBlocksNum = readNumber(recordHeaderBuffer, ofset, this.meta.numWidth);
         ofset += this.meta.numWidth;
@@ -830,7 +830,7 @@ class MDictBase {
      */
     _readRecordInfos() {
         this._recordInfoStartOffset = this._recordHeaderEndOffset;
-        const recordInfoBuff = this.scanner.readBuffer(this._recordInfoStartOffset, this.recordHeader.recordInfoCompSize);
+        const recordInfoBuff = this.scanner.readBufferView(this._recordInfoStartOffset, this.recordHeader.recordInfoCompSize);
         assert(this.recordHeader.recordBlocksNum * this.meta.numWidth * 2 === recordInfoBuff.length, 'MDict record info size mismatch');
         assert(this.keywordList.length === 0 || this.recordHeader.recordBlocksNum > 0, 'MDict entries have no record blocks');
         /**
@@ -894,7 +894,7 @@ class MDictBase {
             let compressType = 'none';
             const packSize = this.recordInfoList[idx].packSize;
             const unpackSize = this.recordInfoList[idx].unpackSize;
-            const rbPackBuff = this.scanner.readBuffer(recordOffset, packSize);
+            const rbPackBuff = this.scanner.readBufferView(recordOffset, packSize);
             recordOffset += packSize;
             // 4 bytes: compression type
             const rbCompType = bytesToHex(rbPackBuff.slice(0, 4));
