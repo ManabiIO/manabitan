@@ -261,6 +261,16 @@ describe('term-bank WASM parser', () => {
     });
 
     maybeTest.each([
+        ['expression', '[123,"","","",0,["x"],1,""]'],
+        ['reading', '["x",123,"","",0,["x"],1,""]'],
+        ['definition tags', '["x","",123,"",0,["x"],1,""]'],
+        ['rules', '["x","","",123,0,["x"],1,""]'],
+        ['term tags', '["x","","","",0,["x"],1,123]'],
+    ])('rejects a non-string $0 field before row materialization', async (_field, rowJson) => {
+        await expect(parseRowsJson(`[${rowJson}]`)).rejects.toThrow();
+    });
+
+    maybeTest.each([
         {
             name: 'CRC mismatch',
             mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, signature: (source.signature + 1) >>> 0}),
