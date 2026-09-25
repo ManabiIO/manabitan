@@ -21,6 +21,7 @@ import {
     encodeRawTermContentSharedGlossaryBinary,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
 } from '../ext/js/dictionary/raw-term-content.js';
+import {hashTermEntryContentBytes} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 
 /**
@@ -220,6 +221,69 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
         run: async () => await bulkAdd(chunk),
     };
 }
+
+describe('DictionaryDatabase term content hash validation', () => {
+    test.each([
+        'deadbeeX0000000Y',
+        '0000000z00000000',
+    ])('does not index partially parsed hexadecimal hash %s', (contentHash) => {
+        const database = new DictionaryDatabase();
+        cacheMeta(database, contentHash, 10, 3, 'raw', -1, -1);
+
+        expect(getMeta(database, 0x0deadbee, 0)).toBeUndefined();
+        expect(getMeta(database, 0, 0)).toBeUndefined();
+    });
+
+    test.each([
+        'not-a-hash',
+        'deadbeeX0000000Y',
+    ])('canonicalizes malformed precomputed hash %s before publishing metadata', async (contentHash) => {
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_db', {});
+        Reflect.set(database, '_bulkImportTransactionOpen', true);
+        Reflect.set(database, '_enableTermEntryContentDedup', true);
+        Reflect.set(database, '_termContentZstdInitialized', true);
+        Reflect.set(database, '_termContentStore', {
+            appendBatch: vi.fn(async (/** @type {Uint8Array[]} */ chunks) => chunks.map((chunk, index) => ({
+                offset: 100 + index * 100,
+                length: chunk.byteLength,
+            }))),
+        });
+        Reflect.set(database, '_createTermContentStorageChunks', vi.fn((chunks) => ({
+            storedChunks: chunks,
+            entryToStoredChunkIndexes: new Uint32Array(chunks.length),
+            entryToStoredChunkOffsets: new Uint32Array(chunks.length),
+            contentDictNames: new Array(chunks.length).fill('raw'),
+        })));
+        Reflect.set(database, '_insertResolvedImportTermEntries', vi.fn(async () => ({
+            termRecordAppendMs: 0,
+            termRecordEncodeMs: 0,
+            termRecordWriteMs: 0,
+            termsVtabInsertMs: 0,
+        })));
+
+        const contentBytes = Uint8Array.of(1, 2, 3, 4, 5);
+        const expectedHash = hashTermEntryContentBytes(contentBytes);
+        const row = {
+            dictionary: 'hash-test',
+            expression: 'x',
+            reading: 'x',
+            definitionTags: '',
+            rules: '',
+            score: 0,
+            glossary: [],
+            termTags: '',
+            termEntryContentBytes: contentBytes,
+            termEntryContentHash: contentHash,
+        };
+        const bulkAddTerms = Reflect.get(database, '_bulkAddTerms').bind(database);
+
+        await bulkAddTerms([row], 0, 1);
+
+        expect(Reflect.get(database, '_termEntryContentMetaByHash').has(contentHash)).toBe(false);
+        expect(Reflect.get(database, '_termEntryContentMetaByHash').has(expectedHash)).toBe(true);
+    });
+});
 
 describe('DictionaryDatabase term content dedup metadata cache', () => {
     test('owns recent published source bytes across borrowed slab reuse', async () => {

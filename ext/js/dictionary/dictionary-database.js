@@ -365,10 +365,25 @@ async function inflateZipMediaContent(bytes, compressionMethod, uncompressedLeng
  */
 function parseContentHashHexPair(value) {
     if (value.length !== 16) { return null; }
-    const hash1 = Number.parseInt(value.slice(0, 8), 16);
-    const hash2 = Number.parseInt(value.slice(8, 16), 16);
-    if (!Number.isFinite(hash1) || !Number.isFinite(hash2)) { return null; }
-    return [hash1 >>> 0, hash2 >>> 0];
+    let hash1 = 0;
+    let hash2 = 0;
+    for (let i = 0; i < 16; ++i) {
+        const code = value.charCodeAt(i);
+        let nibble;
+        if (code >= 0x30 && code <= 0x39) {
+            nibble = code - 0x30;
+        } else {
+            const lower = code | 0x20;
+            if (lower < 0x61 || lower > 0x66) { return null; }
+            nibble = lower - 0x57;
+        }
+        if (i < 8) {
+            hash1 = ((hash1 * 16) + nibble) >>> 0;
+        } else {
+            hash2 = ((hash2 * 16) + nibble) >>> 0;
+        }
+    }
+    return [hash1, hash2];
 }
 
 /**
@@ -5220,15 +5235,22 @@ null;
                     const contentJson = row.termEntryContentJson ?? this._serializeTermEntryContent(rules, definitionTags, termTags, row.glossary);
                     contentBytes = this._textEncoder.encode(contentJson);
                 }
+                const parsedContentHash = contentHash !== null ? parseContentHashHexPair(contentHash) : null;
                 if (contentHash1 < 0 || contentHash2 < 0) {
-                    const hashPair = contentHash !== null ? parseContentHashHexPair(contentHash) : null;
-                    if (hashPair !== null) {
-                        [contentHash1, contentHash2] = hashPair;
+                    if (parsedContentHash !== null) {
+                        [contentHash1, contentHash2] = parsedContentHash;
                     } else {
                         [contentHash1, contentHash2] = hashTermEntryContentBytesPair(contentBytes);
                     }
                 }
-                contentHash = contentHash ?? hashPairToHex(contentHash1, contentHash2);
+                if (
+                    contentHash === null ||
+                    parsedContentHash === null ||
+                    parsedContentHash[0] !== contentHash1 ||
+                    parsedContentHash[1] !== contentHash2
+                ) {
+                    contentHash = hashPairToHex(contentHash1, contentHash2);
+                }
                 computeContentMs += safePerformance.now() - tComputeStart;
 
                 let existingMeta = this._findMatchingTermEntryContentMeta(contentHash1, contentHash2, contentBytes);
