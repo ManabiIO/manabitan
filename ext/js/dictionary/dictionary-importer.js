@@ -3807,7 +3807,7 @@ export class DictionaryImporter {
             const artifact = typeof termBank.artifact === 'string' ? termBank.artifact : null;
             const packedOffset = Number.isInteger(termBank.packedOffset) ? /** @type {number} */ (termBank.packedOffset) : -1;
             const packedLength = Number.isInteger(termBank.packedLength) ? /** @type {number} */ (termBank.packedLength) : -1;
-            const rows = Number.isSafeInteger(termBank.rows) && /** @type {number} */ (termBank.rows) >= 0 ? /** @type {number} */ (termBank.rows) : null;
+            const rows = this._getArtifactTermBankRowCount(termBank.rows);
             if (artifact === null || packedOffset < 0 || packedLength <= 0) { continue; }
             termBanksByArtifact.set(artifact, {packedOffset, packedLength, rows});
         }
@@ -3918,6 +3918,16 @@ export class DictionaryImporter {
             }
         }
         return results;
+    }
+
+    /**
+     * @param {unknown} value
+     * @returns {number|null}
+     */
+    _getArtifactTermBankRowCount(value) {
+        return Number.isSafeInteger(value) && /** @type {number} */ (value) >= 0 ?
+            /** @type {number} */ (value) :
+            null;
     }
 
     /**
@@ -4751,7 +4761,7 @@ export class DictionaryImporter {
             return {
                 dictionary: dictionaryTitle,
                 rowCount: streamedRowCount,
-                dictionaryTotalRows: dictionaryTotalRows ?? void 0,
+                dictionaryTotalRows: typeof dictionaryTotalRows === 'number' ? dictionaryTotalRows : void 0,
                 expressionBytesList: useFullChunkArrays ? chunkExpressionBytes : chunkExpressionBytes.slice(0, streamedRowCount),
                 readingBytesList: useFullChunkArrays ? chunkReadingBytes : chunkReadingBytes.slice(0, streamedRowCount),
                 readingEqualsExpressionList: /** @type {Uint8Array} */ (
