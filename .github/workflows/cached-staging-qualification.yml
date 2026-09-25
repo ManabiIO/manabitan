@@ -65,15 +65,15 @@ jobs:
           assert paths == ['ext/js/dictionary/dictionary-database.js', 'test/dictionary-database-cached-staging.test.js'], paths
           PY
           git diff --cached > "$RUNNER_TEMP/staging-evidence/product.patch"
-          git commit -m 'fix(import): bound cached term staging batches'
+          git commit -m 'fix(import): enforce the staging bound for cached terms'
           git status --porcelain > "$RUNNER_TEMP/staging-evidence/status.txt"
           test ! -s "$RUNNER_TEMP/staging-evidence/status.txt"
-          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/staging-evidence/product-identity.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/staging-evidence/product-identity.txt"
           sha256sum ext/js/dictionary/dictionary-database.js test/dictionary-database-cached-staging.test.js > "$RUNNER_TEMP/staging-evidence/product-hashes.txt"
-          git push origin HEAD:refs/heads/fix/import-bound-cached-term-staging-20260925
+          git push origin HEAD:refs/heads/fix/import-shared-staging-bound-20260925
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cached-term-staging-qualification
+          name: cached-term-staging-shared-check-qualification
           path: ${{ runner.temp }}/staging-evidence
           retention-days: 30
