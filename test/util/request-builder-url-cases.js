@@ -52,7 +52,7 @@ for (const {name, input, expected} of [
         assert.equal(request.mock.calls[0].arguments[0], expected)
         assert.equal(request.mock.calls[0].arguments[1], init)
         const [registration, cleanup] = operations.mock.calls
-        const rule = registration.arguments[0].addRules?.[0]
+        const rule = registration.arguments[0]?.addRules?.[0]
         assert.ok(rule)
         assert.equal(rule.condition.urlFilter, `|${expected}|`)
         assert.equal(rule.action.requestHeaders?.find(({header}) => header === 'Origin')?.value, new URL(expected).origin)

@@ -145,8 +145,7 @@ export class RequestBuilder {
             if (target === null) {
                 targets.push({array: value, length: value.length});
             } else if (targetPosition + value.length > target.length) {
-                targets.push({array: target.subarray(0, targetPosition), length: targetPosition});
-                targets.push({array: value, length: value.length});
+                targets.push({array: target.subarray(0, targetPosition), length: targetPosition}, {array: value, length: value.length});
                 target = null;
             } else {
                 target.set(value, targetPosition);
