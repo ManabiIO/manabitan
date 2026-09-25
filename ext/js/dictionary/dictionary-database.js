@@ -45,6 +45,7 @@ import {
     encodeRawTermContentBinary,
     getRawTermContentGlossaryJsonBytes,
     isRawTermContentBinary,
+    isValidRawTermContentBinary,
     isRawTermContentSharedGlossaryBinary,
     isRawTermContentTokenBinary,
     isValidRawTermContentSharedGlossaryBinary,
@@ -7243,7 +7244,7 @@ this._readTermContentSignature(
                             explicitContentDictName.length > 0
                         ) ?
                             explicitContentDictName :
-                            (isRawTermContentBinary(contentChunks[j]) ? RAW_TERM_CONTENT_DICT_NAME : 'raw');
+                            (isValidRawTermContentBinary(contentChunks[j]) ? RAW_TERM_CONTENT_DICT_NAME : 'raw');
                         if (j === 0) {
                             uniformContentDictName = resolvedContentDictName;
                             continue;
@@ -7441,7 +7442,7 @@ this._readTermContentSignature(
                         resolvedContentDictName = explicitContentDictName;
                     } else if (
                         this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                        isRawTermContentBinary(contentChunks[i])
+                        isValidRawTermContentBinary(contentChunks[i])
                     ) {
                         resolvedContentDictName = RAW_TERM_CONTENT_DICT_NAME;
                     } else {
@@ -11247,7 +11248,7 @@ null :
                     if (typeof override === 'string' && override.length > 0) {
                         return override;
                     }
-                    return isRawTermContentBinary(contentBytes) ?
+                    return isValidRawTermContentBinary(contentBytes) ?
                         RAW_TERM_CONTENT_DICT_NAME :
                         (isValidRawTermContentSharedGlossaryBinary(contentBytes) ? RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME : 'raw');
                 }),
