@@ -1,0 +1,159 @@
+name: PR 281 real import A/B
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    if: github.event.pull_request.number == 281
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      BASE_SHA: a3925549826671bc1026035f43f0fde2e407077c
+      HEAD_SHA: bbd0f81d691f8e859c87b7799ff23cb58f834465
+    steps:
+      - name: Checkout base
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.BASE_SHA }}
+          path: base
+          persist-credentials: false
+      - name: Checkout candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.21.0
+          cache: npm
+          cache-dependency-path: |
+            base/package-lock.json
+            candidate/package-lock.json
+      - name: Install base dependencies
+        working-directory: base
+        run: npm ci
+      - name: Install candidate dependencies
+        working-directory: candidate
+        run: npm ci
+      - name: Build base libraries and extension
+        working-directory: base
+        run: |
+          npm run build:libs
+          npm run build -- --target chrome-dev
+      - name: Build candidate libraries and extension
+        working-directory: candidate
+        run: |
+          npm run build:libs
+          npm run build -- --target chrome-dev
+      - name: Install Chromium
+        working-directory: candidate
+        run: npx playwright install --with-deps chromium
+      - name: Run counterbalanced real-import measurements
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_n=0
+          candidate_n=0
+          for side in base candidate candidate base base candidate candidate base base candidate; do
+            if [[ "$side" == "base" ]]; then
+              base_n=$((base_n + 1))
+              n="$base_n"
+            else
+              candidate_n=$((candidate_n + 1))
+              n="$candidate_n"
+            fi
+            echo "::group::${side} run ${n}"
+            (
+              cd "$side"
+              xvfb-run -a node dev/perf/import-benchmark.js jmdict \
+                --runs 1 \
+                --no-build \
+                --output "builds/perf/pr281/${side}-${n}"
+            )
+            echo "::endgroup::"
+          done
+      - name: Summarize A/B
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+
+          function read(side) {
+            const root = path.join(side, 'builds', 'perf', 'pr281')
+            return fs.readdirSync(root)
+              .filter((name) => name.startsWith(`${side}-`))
+              .sort((a, b) => Number(a.split('-').at(-1)) - Number(b.split('-').at(-1)))
+              .map((name) => {
+                const summary = JSON.parse(fs.readFileSync(path.join(root, name, 'summary.json'), 'utf8'))
+                const run = summary.runs[0]
+                return {
+                  totalImportMs: run.totalImportMs,
+                  workerImportMs: run.workerImportMs,
+                  validation: run.validation,
+                }
+              })
+          }
+
+          function median(values) {
+            const sorted = [...values].sort((a, b) => a - b)
+            const i = Math.floor(sorted.length / 2)
+            return sorted.length % 2 ? sorted[i] : (sorted[i - 1] + sorted[i]) / 2
+          }
+
+          const base = read('base')
+          const candidate = read('candidate')
+          const baseTimes = base.map((x) => x.totalImportMs)
+          const candidateTimes = candidate.map((x) => x.totalImportMs)
+          const baseMedian = median(baseTimes)
+          const candidateMedian = median(candidateTimes)
+          const deltaPercent = ((candidateMedian - baseMedian) / baseMedian) * 100
+          const baseWorker = base.map((x) => x.workerImportMs)
+          const candidateWorker = candidate.map((x) => x.workerImportMs)
+          const workerComparable = [...baseWorker, ...candidateWorker].every(Number.isFinite)
+          const result = {
+            baseSha: process.env.BASE_SHA,
+            candidateSha: process.env.HEAD_SHA,
+            baseTimes,
+            candidateTimes,
+            baseMedian,
+            candidateMedian,
+            deltaPercent,
+            baseWorkerMedian: workerComparable ? median(baseWorker) : null,
+            candidateWorkerMedian: workerComparable ? median(candidateWorker) : null,
+            allValidated: [...base, ...candidate].every((x) =>
+              x.validation &&
+              x.validation.contentReadable === true &&
+              Number.isFinite(x.validation.termRows)
+            ),
+          }
+          fs.writeFileSync('pr281-ab.json', JSON.stringify(result, null, 2))
+          console.log(JSON.stringify(result, null, 2))
+          const lines = [
+            '## PR #281 real JMdict import A/B',
+            '',
+            `- Base: \`${result.baseSha}\``,
+            `- Candidate: \`${result.candidateSha}\``,
+            `- Base total-import runs: ${result.baseTimes.map((x) => x.toFixed(1)).join(', ')} ms`,
+            `- Candidate total-import runs: ${result.candidateTimes.map((x) => x.toFixed(1)).join(', ')} ms`,
+            `- Base median: **${result.baseMedian.toFixed(1)} ms**`,
+            `- Candidate median: **${result.candidateMedian.toFixed(1)} ms**`,
+            `- Median delta: **${result.deltaPercent.toFixed(2)}%**`,
+            `- Post-import validation passed for every run: **${String(result.allValidated)}**`,
+          ]
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n')
+          NODE
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr281-real-import-ab
+          path: |
+            pr281-ab.json
+            base/builds/perf/pr281/**/summary.json
+            candidate/builds/perf/pr281/**/summary.json
+          retention-days: 7
