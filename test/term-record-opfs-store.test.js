@@ -1520,6 +1520,34 @@ describe('TermRecordOpfsStore', () => {
         expect(shardStateByFileName.has(newFileName)).toBe(false);
     });
 
+
+    test('cleanupShardFilesByDictionaryPredicate removes an index-only orphan', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Transient dictionary', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([[indexFileName, new Uint8Array([1, 2, 3, 4])]]);
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+
+        const removed = await store.cleanupShardFilesByDictionaryPredicate((name) => name === 'Transient dictionary');
+
+        expect(removed).toEqual([descriptorFileName]);
+        expect(fileBytesByName.has(descriptorFileName)).toBe(false);
+        expect(fileBytesByName.has(indexFileName)).toBe(false);
+    });
+
+    test('deleteByDictionary removes an index-only orphan without masking real descriptor failures', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Deleted dictionary', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([[indexFileName, new Uint8Array([9, 8, 7, 6])]]);
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+
+        await expect(store.deleteByDictionary('Deleted dictionary')).resolves.toBe(0);
+
+        expect(fileBytesByName.has(descriptorFileName)).toBe(false);
+        expect(fileBytesByName.has(indexFileName)).toBe(false);
+    });
+
     test('dictionary index construction uses maintained record ids without duplicate stale ids', () => {
         const store = new TermRecordOpfsStore();
         const storeRecord = /** @type {(record: unknown) => void} */ (Reflect.get(store, '_storeRecord').bind(store));

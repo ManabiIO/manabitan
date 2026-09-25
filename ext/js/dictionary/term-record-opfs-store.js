@@ -2639,8 +2639,8 @@ export class TermRecordOpfsStore {
         const removedFileNames = [];
         /** @type {Set<string>} */
         const removedDictionaryNames = new Set();
-        const fileNames = await this._listShardFileNames();
-        for (const fileName of fileNames) {
+        const shardFiles = await this._listShardStorageFiles();
+        for (const {descriptorFileName: fileName, hasDescriptor} of shardFiles) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(fileName);
             if (dictionaryName === null || !predicate(dictionaryName)) {
                 continue;
@@ -2650,7 +2650,9 @@ export class TermRecordOpfsStore {
                 await this._flushPendingWritesForShard(state);
                 await this._closeShardWritable(state);
             }
-            await this._removeStorageFileOrTruncate(fileName, true);
+            if (hasDescriptor) {
+                await this._removeStorageFileOrTruncate(fileName, true);
+            }
             if (typeof state !== 'undefined') {
                 this._shardStateByFileName.delete(fileName);
                 this._activeAppendShardStateByKey.delete(state.logicalKey);
@@ -5602,6 +5604,36 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Lists logical shard pairs, including an index-only orphan whose descriptor
+     * is currently missing. Startup can recover such a descriptor from the
+     * lookup index, so cleanup must treat the pair as live storage identity.
+     * @returns {Promise<Array<{descriptorFileName: string, hasDescriptor: boolean, hasIndex: boolean}>>}
+     */
+    async _listShardStorageFiles() {
+        const storageFileNames = await this._listTermRecordStorageFileNames();
+        /** @type {Map<string, {descriptorFileName: string, hasDescriptor: boolean, hasIndex: boolean}>} */
+        const byDescriptor = new Map();
+        for (const storageFileName of storageFileNames) {
+            const isIndex = storageFileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`);
+            const descriptorFileName = isIndex ?
+                storageFileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length) :
+                storageFileName;
+            if (!this._isShardFileName(descriptorFileName)) { continue; }
+            let pair = byDescriptor.get(descriptorFileName);
+            if (typeof pair === 'undefined') {
+                pair = {descriptorFileName, hasDescriptor: false, hasIndex: false};
+                byDescriptor.set(descriptorFileName, pair);
+            }
+            if (isIndex) {
+                pair.hasIndex = true;
+            } else {
+                pair.hasDescriptor = true;
+            }
+        }
+        return [...byDescriptor.values()];
+    }
+
+    /**
      * @returns {Promise<string[]>}
      */
     async _listShardFileNames() {
@@ -5916,8 +5948,8 @@ export class TermRecordOpfsStore {
         if (this._recordsDirectoryHandle === null) {
             return;
         }
-        const fileNames = await this._listShardFileNames();
-        for (const fileName of fileNames) {
+        const shardFiles = await this._listShardStorageFiles();
+        for (const {descriptorFileName: fileName, hasDescriptor} of shardFiles) {
             if (this._decodeDictionaryNameFromShardFileName(fileName) !== dictionaryName) {
                 continue;
             }
@@ -5926,7 +5958,9 @@ export class TermRecordOpfsStore {
                 await this._flushPendingWritesForShard(state);
                 await this._closeShardWritable(state);
             }
-            await this._removeStorageFileOrTruncate(fileName, false);
+            if (hasDescriptor) {
+                await this._removeStorageFileOrTruncate(fileName, false);
+            }
             await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
             if (typeof state !== 'undefined') {
                 this._shardStateByFileName.delete(fileName);
