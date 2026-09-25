@@ -2011,7 +2011,6 @@ describe('TermRecordOpfsStore', () => {
         expect(Reflect.get(store, '_activeAppendShardStateByKey').has(logicalKey)).toBe(false);
     });
 
-
     test('remove-or-truncate suppresses only a confirmed missing file', async () => {
         const store = new TermRecordOpfsStore();
         const removeError = new Error('unlink failed');
