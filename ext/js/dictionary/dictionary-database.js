@@ -4678,7 +4678,7 @@ null;
             await this._beginImmediateTransaction(db);
         }
         const fullBatchSql = items.length > EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE ?
-            'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + Array(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',') :
+            'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + new Array(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',') :
             null;
         try {
             for (let i = 0, ii = items.length; i < ii; i += EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE) {
@@ -4700,7 +4700,7 @@ null;
                 }
                 const sql = chunkCount === EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE && fullBatchSql !== null ?
                     fullBatchSql :
-                    'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + Array(chunkCount).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',');
+                    'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + new Array(chunkCount).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',');
                 const stmt = this._getCachedStatement(sql);
                 stmt.reset(true);
                 stmt.bind(bind);
@@ -4732,7 +4732,7 @@ null;
             await this._beginImmediateTransaction(db);
         }
         const fullBatchSql = items.length > EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE ?
-            'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + Array(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',') :
+            'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + new Array(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',') :
             null;
         try {
             for (let i = 0, ii = items.length; i < ii; i += EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE) {
@@ -4759,7 +4759,7 @@ null;
                 }
                 const sql = chunkCount === EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE && fullBatchSql !== null ?
                     fullBatchSql :
-                    'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + Array(chunkCount).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',');
+                    'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + new Array(chunkCount).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',');
                 const stmt = this._getCachedStatement(sql);
                 stmt.reset(true);
                 stmt.bind(bind);
@@ -4806,7 +4806,7 @@ null;
             return;
         }
 
-        const fullBatchSql = `INSERT INTO ${table}(${columnsSql}) VALUES ${Array(batchSize).fill(rowPlaceholderSql).join(',')}`;
+        const fullBatchSql = `INSERT INTO ${table}(${columnsSql}) VALUES ${new Array(batchSize).fill(rowPlaceholderSql).join(',')}`;
         for (let i = start, ii = start + count; i < ii; i += batchSize) {
             const chunkCount = Math.min(batchSize, ii - i);
             /** @type {import('@sqlite.org/sqlite-wasm').Bindable[]} */
@@ -4817,7 +4817,7 @@ null;
                 for (let j = 0; j < chunkCount; ++j) {
                     const rowBind = bindRow(items[i + j]);
                     for (const value of rowBind) {
-                        bind[bindIndex++] = value;
+                        bind[bindIndex++] = /** @type {import('@sqlite.org/sqlite-wasm').Bindable} */ (value);
                     }
                 }
                 sql = fullBatchSql;
@@ -4828,7 +4828,7 @@ null;
                     valueRows.push(rowPlaceholderSql);
                     const rowBind = bindRow(items[i + j]);
                     for (const value of rowBind) {
-                        bind[bindIndex++] = value;
+                        bind[bindIndex++] = /** @type {import('@sqlite.org/sqlite-wasm').Bindable} */ (value);
                     }
                 }
                 sql = `INSERT INTO ${table}(${columnsSql}) VALUES ${valueRows.join(',')}`;
