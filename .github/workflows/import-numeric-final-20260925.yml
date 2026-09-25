@@ -1,0 +1,170 @@
+name: Import numeric final 20260925
+on:
+  push:
+    branches: [bench/import-numeric-projection-20260925]
+    paths: [.github/workflows/import-numeric-final-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: jmdict
+            cohort: defaults
+            flags: '{}'
+          - dictionary: jitendex
+            cohort: defaults
+            flags: '{}'
+          - dictionary: jmnedict
+            cohort: defaults
+            flags: '{}'
+          - dictionary: wty-en-en
+            cohort: defaults
+            flags: '{}'
+          - dictionary: jmnedict
+            cohort: generic-on
+            flags: '{"experimentalGenericSpanCompression":true}'
+          - dictionary: wty-en-en
+            cohort: generic-on
+            flags: '{"experimentalGenericSpanCompression":true}'
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      FLAGS: ${{ matrix.flags }}
+      PAIRS: '12'
+      CANDIDATE: length-first
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Prepare exact source
+        run: |
+          python3 dev/perf/numeric-round-20260925/prepare.py
+          git diff > builds/numeric-round/source.patch
+          sha256sum builds/numeric-round/*.js ext/lib/term-bank-parser.wasm > builds/numeric-round/SHA256SUMS
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Independent fixed full-import pairs
+        run: xvfb-run -a node dev/perf/numeric-round-20260925/ab.mjs
+      - name: Full-corpus and package equality
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/perf/import-lookup-screen.js')
+          s=p.read_text()
+          old='const filesPerGroup = {jmdict: 7, jmnedict: 9, jitendex: 10}'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,"const filesPerGroup = {jmdict: 7, jmnedict: 9, jitendex: 10, 'wty-en-en': 1}"))
+          PY
+          for arm in base candidate; do
+            cp "builds/numeric-round/$arm.js" ext/js/dictionary/term-bank-wasm-parser.js
+            node --expose-gc dev/perf/import-lookup-screen.js "$DICTIONARY" --child --flags "$FLAGS" > "builds/numeric-round/corpus-$arm.json"
+            node dev/bin/build.js --target chrome-dev > "builds/numeric-round/package-$arm.log" 2>&1
+            ARM="$arm" python3 - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('builds/manabitan-chrome-dev.zip') as z:
+              hashes={n:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if not n.endswith('/')}
+          Path('builds/numeric-round/package-'+os.environ['ARM']+'.json').write_text(json.dumps(hashes,indent=2)+'\n')
+          PY
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          out=Path('builds/numeric-round')
+          a,b=[json.loads((out/('corpus-'+x+'.json')).read_text()) for x in ['base','candidate']]
+          for key in ['digest','rows','indexBytes','archiveSha256','lockSha256']:
+              assert a[key]==b[key], (key,a[key],b[key])
+          a,b=[json.loads((out/('package-'+x+'.json')).read_text()) for x in ['base','candidate']]
+          assert a.keys()==b.keys()
+          changed=[k for k in a if a[k]!=b[k]]
+          assert len(changed)==1 and changed[0].endswith('js/dictionary/term-bank-wasm-parser.js'),changed
+          (out/'verification.json').write_text(json.dumps({'passed':True,'changedPackageMembers':changed},indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: numeric-final-${{ matrix.dictionary }}-${{ matrix.cohort }}
+          path: builds/numeric-round/
+          retention-days: 30
+          if-no-files-found: error
+  validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Isolate final product patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/numeric-round-20260925/length-first.patch /tmp/numeric.patch
+          cp test/term-bank-number-decode.test.js /tmp/numeric.test.js
+          git fetch --depth=1 origin 76362775484661b3cd8b9d2c84b228802c023a76
+          git reset --hard FETCH_HEAD
+          git apply /tmp/numeric.patch
+          cp /tmp/numeric.test.js test/term-bank-number-decode.test.js
+      - uses: ./.github/actions/setup
+      - name: All checks with retained outcomes
+        shell: bash
+        run: |
+          mkdir -p builds/numeric-validation
+          git diff --check
+          git diff > builds/numeric-validation/source.patch
+          cp test/term-bank-number-decode.test.js builds/numeric-validation/
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          commands={
+              'unit':['npm','run','test:unit','--','--no-file-parallelism'],
+              'options':['npm','run','test:unit:options'],
+              'types-main':['npm','run','test:ts:main'],
+              'types-dev':['npm','run','test:ts:dev'],
+              'types-test':['npm','run','test:ts:test'],
+              'types-bench':['npm','run','test:ts:bench'],
+              'lint':['npx','eslint','ext/js/dictionary/term-bank-wasm-parser.js','test/term-bank-number-decode.test.js'],
+              'build':['npm','run','build'],
+          }
+          status={}
+          for name,args in commands.items():
+              with open('builds/numeric-validation/'+name+'.log','w') as log:
+                  status[name]=subprocess.run(args,stdout=log,stderr=subprocess.STDOUT).returncode
+              print(name,status[name],flush=True)
+          Path('builds/numeric-validation/status.json').write_text(json.dumps(status,indent=2)+'\n')
+          PY
+      - run: npx playwright install --with-deps chromium
+      - name: Both complete Chromium lifecycle configurations
+        shell: bash
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+        run: |
+          set -euo pipefail
+          for cohort in defaults generic-on; do
+            export MANABITAN_E2E_IMPORT_FLAGS_JSON='{}'
+            if [ "$cohort" = generic-on ]; then export MANABITAN_E2E_IMPORT_FLAGS_JSON='{"experimentalGenericSpanCompression":true}'; fi
+            xvfb-run -a npm run test:e2e:chromium-extension > "builds/numeric-validation/lifecycle-$cohort.log" 2>&1
+            cp builds/chromium-e2e-import-report.json "builds/numeric-validation/lifecycle-$cohort.json"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: numeric-final-product-validation
+          path: |
+            builds/numeric-validation/
+            builds/chromium-e2e-import-report.json
+          retention-days: 30
+          if-no-files-found: error
+      - name: Require all checks
+        run: python3 -c "import json; s=json.load(open('builds/numeric-validation/status.json')); assert s and all(v==0 for v in s.values()),s"
