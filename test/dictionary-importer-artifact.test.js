@@ -100,8 +100,8 @@ describe('DictionaryImporter term artifacts', () => {
     test('borrows the preinterned string arena only for awaited streaming chunks', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const streamedBytes = createArtifactWithEmptyReadingSentinel();
-        /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} */
-        let streamedPlan = null;
+        /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan[]} */
+        const streamedPlans = [];
 
         await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
             importer,
@@ -113,7 +113,7 @@ describe('DictionaryImporter term artifacts', () => {
             /** @param {Record<string, import('core').SafeAny>} chunk */
             async (chunk) => {
                 const plan = /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (chunk.termRecordPreinternedPlan);
-                streamedPlan = plan;
+                streamedPlans.push(plan);
                 await Promise.resolve();
                 expect(plan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
             },
@@ -124,9 +124,8 @@ describe('DictionaryImporter term artifacts', () => {
             'raw-v4',
         );
 
-        if (streamedPlan === null) {
-            throw new Error('Expected streamed preinterned plan');
-        }
+        expect(streamedPlans).toHaveLength(1);
+        const streamedPlan = streamedPlans[0];
         expect(streamedPlan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
 
         const retainedBytes = createArtifactWithEmptyReadingSentinel();
