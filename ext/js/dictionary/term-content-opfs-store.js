@@ -838,19 +838,20 @@ export class TermContentOpfsStore {
      */
     async _finalizeAppendBatch(chunks) {
         if (this._fileHandle !== null) {
-            let totalBytes = 0;
+            let hasPendingWrites = false;
             for (const chunk of chunks) {
-                totalBytes += chunk.byteLength;
+                const byteLength = chunk.byteLength;
+                if (byteLength <= 0) { continue; }
+                if (!hasPendingWrites) {
+                    hasPendingWrites = true;
+                    if (!this._importSessionActive) {
+                        this._invalidateReadState();
+                    }
+                }
+                this._pendingWriteBytes += byteLength;
+                this._pendingWriteChunks.push(chunk);
             }
-            if (totalBytes > 0) {
-                if (!this._importSessionActive) {
-                    this._invalidateReadState();
-                }
-                for (const chunk of chunks) {
-                    if (chunk.byteLength <= 0) { continue; }
-                    this._pendingWriteBytes += chunk.byteLength;
-                    this._pendingWriteChunks.push(chunk);
-                }
+            if (hasPendingWrites) {
                 if (
                     this._importSessionActive &&
                     (
