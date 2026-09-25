@@ -7,7 +7,7 @@
  * (at your option) any later version.
  */
 
-import {describe, expect, test, vi} from 'vitest';
+import {afterEach, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {ByteBoundedLruCache, TermContentBlockImportSession, TermContentBlockStore, wrapCompressedTermContentBlock} from '../ext/js/dictionary/term-content-block-store.js';
 import {TERM_CONTENT_BLOCK_ENVELOPE_BYTES, writeCompressedTermContentBlockEnvelope} from '../ext/js/dictionary/term-content-block-envelope.js';
@@ -65,6 +65,18 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
     }),
     decompressTermContentZstd: vi.fn((/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes)),
 }));
+
+const defaultBeginSharedCompression = vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).getMockImplementation();
+
+// A failed admission assertion must not leak an unused one-shot fault into
+// the next case. Preserve the mock factory's implementation after resetting.
+afterEach(() => {
+    const mock = vi.mocked(beginCompressWrappedTermContentZstdSpansBatch);
+    mock.mockReset();
+    if (typeof defaultBeginSharedCompression === 'function') {
+        mock.mockImplementation(defaultBeginSharedCompression);
+    }
+});
 
 /** @typedef {NonNullable<Awaited<ReturnType<TermContentBlockStore['_tryAppendPacked']>>>} TermContentBlockAppendResult */
 /** @typedef {NonNullable<ReturnType<TermContentBlockStore['tryBeginAppendSpans']>>} TermContentBlockAppendOperation */
