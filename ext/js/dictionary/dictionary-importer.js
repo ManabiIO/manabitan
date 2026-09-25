@@ -4360,7 +4360,7 @@ export class DictionaryImporter {
                     cursor += 2;
                 }
             }
-            const stringsBuffer = bytes.slice(cursor, cursor + stringsBufferLength);
+            const stringsBuffer = typeof onChunk === 'function' ? bytes.subarray(cursor, cursor + stringsBufferLength) : bytes.slice(cursor, cursor + stringsBufferLength);
             cursor += stringsBufferLength;
             if (artifactVersion >= 5) {
                 cursor += (-cursor) & 3;
