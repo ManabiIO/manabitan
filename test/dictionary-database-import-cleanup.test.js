@@ -288,7 +288,7 @@ describe('DictionaryDatabase import cleanup', () => {
         const cleanupTermContent = vi.spyOn(
             database,
             /** @type {never} */ ('_cleanupTermContentAfterDictionaryDelete'),
-        ).mockResolvedValue(undefined);
+        ).mockImplementation(resolveVoid);
         const clearDirectTermIndexCaches = vi.spyOn(
             database,
             /** @type {never} */ ('_clearDirectTermIndexCaches'),
@@ -304,8 +304,11 @@ describe('DictionaryDatabase import cleanup', () => {
         });
 
         const progressFailure = new Error('progress channel closed');
+        let postCommitProgressCalls = 0;
         const onProgress = vi.fn((progress) => {
-            if (progress.storesProcesed === 8) { throw progressFailure; }
+            if (progress.storesProcesed !== 8) { return; }
+            ++postCommitProgressCalls;
+            throw progressFailure;
         });
 
         await expect(database.deleteDictionary('JMdict', 1000, onProgress)).resolves.toBeUndefined();
@@ -313,7 +316,7 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(deleteByDictionary).toHaveBeenCalledWith('JMdict');
         expect(cleanupTermContent).toHaveBeenCalledOnce();
         expect(clearDirectTermIndexCaches).toHaveBeenCalledOnce();
-        expect(onProgress.mock.calls.filter(([progress]) => progress.storesProcesed === 8)).toHaveLength(2);
+        expect(postCommitProgressCalls).toBe(2);
     });
 
     test('resets the last dictionary content store only after metadata commits', async () => {
