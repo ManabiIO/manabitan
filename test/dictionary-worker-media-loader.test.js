@@ -109,7 +109,7 @@ describe('DictionaryWorkerMediaLoader', () => {
 
         const promise = loader.getImageDetails(new ArrayBuffer(4), 'image/png');
         const [{params}] = postMessage.mock.calls[0];
-        loader.handleMessage({id: params.id, result});
+        loader.handleMessage(/** @type {import('core').SafeAny} */ ({id: params.id, result}));
 
         await expect(promise).rejects.toThrow('Dictionary image-details response is invalid');
         expect(Reflect.get(loader, '_requests').size).toBe(0);
