@@ -48,7 +48,11 @@ def members(arm):
 a, b = members('base'), members('candidate')
 assert a.keys() == b.keys()
 changed = sorted(n for n in a if a[n] != b[n])
-assert changed == ['js/dictionary/term-bank-wasm-parser.js', 'lib/term-bank-parser.wasm'], changed
+assert changed == ['js/dictionary/term-bank-wasm-parser.js', 'js/dictionary/wasm/term-bank-parser.c', 'lib/term-bank-parser.wasm'], changed
+for arm, entries in [('base', a), ('candidate', b)]:
+    assert entries['js/dictionary/term-bank-wasm-parser.js'] == info['packages'][arm]['sourceJS']
+    assert entries['js/dictionary/wasm/term-bank-parser.c'] == info['packages'][arm]['sourceC']
+    assert entries['lib/term-bank-parser.wasm'] == info['packages'][arm]['wasm']
 info['changedMembers'] = changed
 info['memberHashes'] = {'base': a, 'candidate': b}
 (out / 'build-identities.json').write_text(json.dumps(info, indent=2) + '\n')
