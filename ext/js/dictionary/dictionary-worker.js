@@ -33,7 +33,7 @@ export class DictionaryWorker {
         this._worker = null;
         /** @type {Set<import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>>} */
         this._activeInvocations = new Set();
-        /** @type {Array<{start: () => Promise<unknown>, resolve: (value: unknown) => void, reject: (reason?: import('core').RejectionReason) => void}>} */
+        /** @type {Array<{start: () => Promise<import('core').SafeAny>, resolve: (value: import('core').SafeAny) => void, reject: (reason?: import('core').RejectionReason) => void}>} */
         this._reuseInvocationQueue = [];
         /** @type {object|null} */
         this._reuseInvocationToken = null;
@@ -131,7 +131,7 @@ export class DictionaryWorker {
      * @param {Transferable[]} transfer
      * @param {?(arg: import('core').SafeAny) => void} onProgress
      * @param {?(result: TResponseRaw) => TResponse} formatResult
-     * @returns {Promise<TResponse>}
+     * @returns {Promise<import('core').SafeAny>}
      */
     _invoke(action, params, transfer, onProgress, formatResult) {
         if (!this._reuseWorker) {
