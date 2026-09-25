@@ -466,7 +466,7 @@ function decodePercentEncodedPathSegments(path) {
  * @returns {string|null}
  */
 function normalizeRelativeAssetPath(path, sourceAssetPath = null, assetPrefix = '') {
-    let value = path.trim().replaceAll('\\', '/');
+    let value = trimCssWhitespace(path).replaceAll('\\', '/');
     if (value.length === 0) { return null; }
     const lowered = value.toLowerCase();
     if (
@@ -1633,7 +1633,7 @@ function convertLegacyFontSize(value) {
  * @returns {string}
  */
 function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetReferences}) {
-    const value = href.trim();
+    const value = trimCssWhitespace(href);
     const lowered = value.toLowerCase();
     if (lowered.startsWith('entry://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
     if (lowered.startsWith('bword://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
@@ -1668,7 +1668,7 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetR
  */
 function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferences}) {
     const src = attrs.src ?? '';
-    const lowerSrc = src.trim().toLowerCase();
+    const lowerSrc = trimCssWhitespace(src).toLowerCase();
     let path;
     if (lowerSrc.startsWith('data:')) {
         path = embeddedAssets.registerDataUrl(src);
