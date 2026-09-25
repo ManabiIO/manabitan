@@ -96,7 +96,16 @@ export class DictionaryWorkerHandler {
         } catch (e) {
             response = {error: ExtensionError.serialize(e)};
         }
-        self.postMessage({action: 'complete', params: response});
+        try {
+            self.postMessage({action: 'complete', params: response});
+        } catch (error) {
+            // A non-cloneable result/error must still settle the caller. The
+            // structured-clone failure itself is an ordinary serializable Error.
+            self.postMessage({
+                action: 'complete',
+                params: {error: ExtensionError.serialize(error)},
+            });
+        }
     }
 
     /**
