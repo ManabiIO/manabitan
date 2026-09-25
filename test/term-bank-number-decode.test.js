@@ -41,7 +41,7 @@ async function project(scores, sequences, splitBanks = false, chunkSize = 64) {
     const banks = splitBanks ? [rows.slice(0, split), rows.slice(split)] : [rows]
     const sources = banks.map((bank) => {
         const bytes = encoder.encode(`prefix[${bank.join(',')}]suffix`)
-        return bytes.subarray(6, bytes.length - 6)
+        return bytes.subarray(6, -6)
     })
     /** @type {{scores: number[], sequences: number[]}} */
     const result = {scores: [], sequences: []}
@@ -62,21 +62,60 @@ describe('term-bank numeric projection', () => {
     test.each([
         [false, 1], [false, 64], [true, 1], [true, 64],
     ])('preserves Number semantics across split banks=%s and chunk size=%s', async (splitBanks, chunkSize) => {
-        const tokens = ['0', '-0', '1', '-1', '37', '-97', '2147483647', '2147483648', '-2147483649',
-            '999999999999999', '-999999999999999', '1000000000000000', '9007199254740991', '9007199254740992',
-            '9007199254740993', '-9007199254740993', '9999999999999999', '1000000000000000100',
-            '0.0', '-0.0', '1.25', '-1.25', '1e4', '1E+4', '-0e10', '1.0000000000000001',
-            '1e-320', '5e-324', '2.2250738585072014e-308', '1.7976931348623157e308', '1e-999']
+        const tokens = [
+            '0',
+            '-0',
+            '1',
+            '-1',
+            '37',
+            '-97',
+            '2147483647',
+            '2147483648',
+            '-2147483649',
+            '999999999999999',
+            '-999999999999999',
+            '1000000000000000',
+            '9007199254740991',
+            '9007199254740992',
+            '9007199254740993',
+            '-9007199254740993',
+            '9999999999999999',
+            '1000000000000000100',
+            '0.0',
+            '-0.0',
+            '1.25',
+            '-1.25',
+            '1e4',
+            '1E+4',
+            '-0e10',
+            '1.0000000000000001',
+            '1e-320',
+            '5e-324',
+            '2.2250738585072014e-308',
+            '1.7976931348623157e308',
+            '1e-999',
+        ]
         const result = await project(tokens, tokens.map(() => '3'), Boolean(splitBanks), Number(chunkSize))
         expect(result.scores).toEqual(tokens.map(Number))
         expect(result.sequences).toEqual(tokens.map(() => 3))
     })
 
     test('preserves sequence sentinels and safe integers above int32', async () => {
-        const tokens = ['null', '-1', '-0', '0', '2147483647', '2147483648', '999999999999999',
-            '9007199254740991', '1e6', '1.0', '-2']
+        const tokens = [
+            'null',
+            '-1',
+            '-0',
+            '0',
+            '2147483647',
+            '2147483648',
+            '999999999999999',
+            '9007199254740991',
+            '1e6',
+            '1.0',
+            '-2',
+        ]
         const result = await project(tokens.map(() => '37'), tokens)
-        expect(result.sequences).toEqual(tokens.map((token) => token === 'null' || Number(token) < 0 ? -1 : Number(token)))
+        expect(result.sequences).toEqual(tokens.map((token) => (token === 'null' || Number(token) < 0 ? -1 : Number(token))))
     })
 
     test.each(['9007199254740992', '9007199254740993', '1.25', '1e309'])('still rejects unsafe sequence %s', async (token) => {
