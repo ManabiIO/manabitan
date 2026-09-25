@@ -76,6 +76,17 @@ function makeRow(content, index) {
 }
 
 describe('native content hash identity', () => {
+    test.each([false, true])('preserves the sub-vector empty payload; split banks=%s', async (splitBanks) => {
+        const contents = await hashRows([
+            ['empty', '', '', '', 0, [], 1, ''],
+            ['duplicate', '', '', '', 0, [], 2, ''],
+            ['empty-string', '', '', '', 0, [''], 3, ''],
+        ], splitBanks)
+        expect(contents[0].bytes.byteLength).toBe(15)
+        expect(contents[1]).toEqual(contents[0])
+        expect(contents[2].bytes.byteLength).toBe(17)
+    })
+
     test.each([false, true])('matches scalar hashes at every vector-tail residue; split banks=%s', async (splitBanks) => {
         const lengths = [...Array.from({length: 257}, (_, i) => i), 511, 512, 513, 1023, 1024, 1025, 4095, 4096, 4097, 65535, 65536, 65537]
         const rows = lengths.map((length, i) => makeRow('x'.repeat(length), i))
