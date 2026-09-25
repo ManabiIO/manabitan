@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
-      - name: Exact arms and retained source-paired driver
+      - name: Prepare exact arms and pinned source-paired driver
         shell: bash
         run: |
           set -euo pipefail
@@ -45,30 +45,11 @@ jobs:
           git show FETCH_HEAD:dev/perf/hash-round-20260925/ab.mjs > dev/perf/hash-round-20260925/ab.mjs
           git show FETCH_HEAD:dev/perf/hash-round-20260925/prepare.py > /tmp/prior-prepare.py
           python3 - <<'PY'
-          import hashlib
           from pathlib import Path
-          p = Path('ext/js/dictionary/wasm/term-bank-parser.c')
-          assert hashlib.sha256(p.read_bytes()).hexdigest() == 'b65eebac1d7a83eeb6ae14969069afc376a0084ddb0f6ffa01a84d1266dde108'
           fixture = Path('/tmp/prior-prepare.py').read_text().split("if os.environ.get('DICTIONARY') == 'wty-en-en':", 1)[1]
           exec("from pathlib import Path\nimport json, os\nroot=Path('.')\nif os.environ.get('DICTIONARY') == 'wty-en-en':" + fixture)
           PY
-          cp ext/js/dictionary/wasm/term-bank-parser.c builds/hash-round/base.c
-          cp ext/lib/term-bank-parser.wasm builds/hash-round/base.wasm
-          git apply dev/perf/remaining-20260925/native-key.patch
-          python3 - <<'PY'
-          import hashlib
-          from pathlib import Path
-          p=Path('ext/js/dictionary/wasm/term-bank-parser.c')
-          assert hashlib.sha256(p.read_bytes()).hexdigest() == 'bd9f6754dcaa861af3c674a444c42b701088b852e1e60760efa49834235bc525'
-          p=Path('test/term-bank-wasm-parser.test.js')
-          s=p.read_text()
-          old='expect(consumeLastTermBankWasmParseProfile()?.nativeStringPlanFallbackChunkCount).toBe(1);'
-          assert s.count(old)==1
-          p.write_text(s.replace(old, old.replace('toBe(1)', 'toBe(0)')))
-          PY
-          npm run build:libs > builds/hash-round/build.log 2>&1
-          cp ext/js/dictionary/wasm/term-bank-parser.c builds/hash-round/candidate.c
-          cp ext/lib/term-bank-parser.wasm builds/hash-round/candidate.wasm
+          python3 dev/perf/remaining-20260925/prepare-key.py > builds/hash-round/build.log 2>&1
           git diff > builds/hash-round/source.patch
           sha256sum builds/hash-round/*.c builds/hash-round/*.wasm ext/js/dictionary/term-bank-wasm-parser.js > builds/hash-round/SHA256SUMS
       - name: Native key and parser regressions before timing
@@ -99,6 +80,14 @@ jobs:
             cp "builds/hash-round/$arm.c" ext/js/dictionary/wasm/term-bank-parser.c
             cp "builds/hash-round/$arm.wasm" ext/lib/term-bank-parser.wasm
             node --expose-gc dev/perf/import-lookup-screen.js "$DICTIONARY" --child --flags "$FLAGS" > "builds/hash-round/corpus-$arm.json"
+            node dev/bin/build.js --target chrome-dev > "builds/hash-round/package-$arm.log" 2>&1
+            ARM="$arm" python3 - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('builds/manabitan-chrome-dev.zip') as z:
+              h={n:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if not n.endswith('/')}
+          Path('builds/hash-round/package-'+os.environ['ARM']+'.json').write_text(json.dumps(h,indent=2)+'\n')
+          PY
           done
           python3 - <<'PY'
           import json
@@ -107,7 +96,13 @@ jobs:
           a,b=[json.loads((out/('corpus-'+x+'.json')).read_text()) for x in ['base','candidate']]
           for k in ['digest','rows','indexBytes','archiveSha256','lockSha256']:
               assert a[k]==b[k], (k,a[k],b[k])
-          (out/'corpus-verification.json').write_text(json.dumps({'passed':True,'rows':a['rows'],'digest':a['digest']},indent=2)+'\n')
+          proof={'passed':True,'rows':a['rows'],'digest':a['digest']}
+          a,b=[json.loads((out/('package-'+x+'.json')).read_text()) for x in ['base','candidate']]
+          assert a.keys()==b.keys()
+          changed=[k for k in a if a[k]!=b[k]]
+          assert changed and all(k.endswith('term-bank-parser.c') or k.endswith('term-bank-parser.wasm') for k in changed),changed
+          proof['changedPackageMembers']=changed
+          (out/'corpus-verification.json').write_text(json.dumps(proof,indent=2)+'\n')
           PY
       - name: Preserve every outcome
         if: always()
