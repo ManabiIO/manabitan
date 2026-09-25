@@ -14,7 +14,7 @@ import {DictionaryImporterMediaLoader} from '../ext/js/dictionary/dictionary-imp
 function countModes(modes) {
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
     const rows = modes.map((mode) => ({mode}));
-    return Reflect.get(importer, '_getMetaCounts').call(importer, rows);
+    return Reflect.get(importer, '_getMetaCounts').call(importer, /** @type {import('core').SafeAny} */ (rows));
 }
 
 describe('dictionary import metadata summary counting', () => {
