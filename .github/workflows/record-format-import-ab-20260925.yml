@@ -1,0 +1,59 @@
+name: Record format complete import AB 20260925
+on:
+  push:
+    branches: [verify/import-benchmark-20260925-a392554]
+    paths: [.github/workflows/record-format-import-ab-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HUSKY: '0'
+      BASE_ROOT: /tmp/record-format-base
+      CANDIDATE_ROOT: /tmp/record-format-candidate
+      EVIDENCE_ROOT: /tmp/record-format-evidence
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Prepare validated independent source trees
+        run: |
+          mkdir -p "$EVIDENCE_ROOT"
+          cp dev/perf/qualification-20260925/compare.py "$RUNNER_TEMP/compare-record-format.py"
+          cp dev/perf/qualification-20260925/compare.py "$EVIDENCE_ROOT/compare.py"
+          git worktree add --detach "$BASE_ROOT" a3925549826671bc1026035f43f0fde2e407077c
+          git worktree add --detach "$CANDIDATE_ROOT" 268616223b202044e8d11d773bac0c9b6fff56f9
+          cd "$BASE_ROOT"
+          npm ci
+          npm run build:libs
+          cp -a "$BASE_ROOT/node_modules" "$CANDIDATE_ROOT/node_modules"
+          cp -a "$BASE_ROOT/ext/lib" "$CANDIDATE_ROOT/ext/lib"
+          git status --porcelain > "$EVIDENCE_ROOT/base-status.txt"
+          git -C "$CANDIDATE_ROOT" status --porcelain > "$EVIDENCE_ROOT/candidate-status.txt"
+          test ! -s "$EVIDENCE_ROOT/base-status.txt"
+          test ! -s "$EVIDENCE_ROOT/candidate-status.txt"
+      - name: Prepare real browser workloads
+        run: |
+          cd "$BASE_ROOT"
+          npm run build -- --target chrome-dev > "$EVIDENCE_ROOT/build.log" 2>&1
+          node dev/perf/prepare-dictionaries.js > "$EVIDENCE_ROOT/fixtures.log" 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium
+          mkdir -p "$CANDIDATE_ROOT/builds"
+          cp -a "$BASE_ROOT/builds/e2e-dictionary-cache" "$CANDIDATE_ROOT/builds/e2e-dictionary-cache"
+      - name: Run complete import comparisons and unchanged-code controls
+        run: python "$RUNNER_TEMP/compare-record-format.py" > "$EVIDENCE_ROOT/driver.log" 2>&1
+      - name: Preserve complete benchmark evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: record-format-complete-import-ab-a392554
+          path: ${{ env.EVIDENCE_ROOT }}/
+          retention-days: 30
+          if-no-files-found: error
