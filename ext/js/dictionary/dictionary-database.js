@@ -4684,20 +4684,19 @@ null;
             for (let i = 0, ii = items.length; i < ii; i += EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE) {
                 const chunkCount = Math.min(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE, ii - i);
                 /** @type {import('@sqlite.org/sqlite-wasm').Bindable[]} */
-                const bind = [];
+                const bind = new Array(chunkCount * 9);
+                let bindIndex = 0;
                 for (let j = 0; j < chunkCount; ++j) {
                     const row = items[i + j];
-                    bind.push(
-                        row.dictionary,
-                        row.path,
-                        row.mediaType,
-                        row.width,
-                        row.height,
-                        typeof row.contentOffset === 'number' ? row.contentOffset : 0,
-                        typeof row.contentLength === 'number' ? row.contentLength : 0,
-                        typeof row.contentCompressionMethod === 'number' ? row.contentCompressionMethod : ZIP_COMPRESSION_METHOD_STORE,
-                        typeof row.contentUncompressedLength === 'number' ? row.contentUncompressedLength : (typeof row.contentLength === 'number' ? row.contentLength : 0),
-                    );
+                    bind[bindIndex++] = row.dictionary;
+                    bind[bindIndex++] = row.path;
+                    bind[bindIndex++] = row.mediaType;
+                    bind[bindIndex++] = row.width;
+                    bind[bindIndex++] = row.height;
+                    bind[bindIndex++] = typeof row.contentOffset === 'number' ? row.contentOffset : 0;
+                    bind[bindIndex++] = typeof row.contentLength === 'number' ? row.contentLength : 0;
+                    bind[bindIndex++] = typeof row.contentCompressionMethod === 'number' ? row.contentCompressionMethod : ZIP_COMPRESSION_METHOD_STORE;
+                    bind[bindIndex++] = typeof row.contentUncompressedLength === 'number' ? row.contentUncompressedLength : (typeof row.contentLength === 'number' ? row.contentLength : 0);
                 }
                 const sql = chunkCount === EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE && fullBatchSql !== null ?
                     fullBatchSql :
@@ -4739,25 +4738,24 @@ null;
             for (let i = 0, ii = items.length; i < ii; i += EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE) {
                 const chunkCount = Math.min(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE, ii - i);
                 /** @type {import('@sqlite.org/sqlite-wasm').Bindable[]} */
-                const bind = [];
+                const bind = new Array(chunkCount * 9);
+                let bindIndex = 0;
                 for (let j = 0; j < chunkCount; ++j) {
                     const row = items[i + j];
                     const packedLength = row.packedLength;
-                    bind.push(
-                        dictionary,
-                        row.path,
-                        row.mediaType,
-                        0,
-                        0,
-                        baseOffset + row.packedOffset,
-                        packedLength,
-                        preserveCompressedMedia ?
-                            (typeof row.compressionMethod === 'number' ? row.compressionMethod : ZIP_COMPRESSION_METHOD_STORE) :
-                            ZIP_COMPRESSION_METHOD_STORE,
-                        preserveCompressedMedia ?
-                            (typeof row.uncompressedLength === 'number' ? row.uncompressedLength : packedLength) :
-                            packedLength,
-                    );
+                    bind[bindIndex++] = dictionary;
+                    bind[bindIndex++] = row.path;
+                    bind[bindIndex++] = row.mediaType;
+                    bind[bindIndex++] = 0;
+                    bind[bindIndex++] = 0;
+                    bind[bindIndex++] = baseOffset + row.packedOffset;
+                    bind[bindIndex++] = packedLength;
+                    bind[bindIndex++] = preserveCompressedMedia ?
+                        (typeof row.compressionMethod === 'number' ? row.compressionMethod : ZIP_COMPRESSION_METHOD_STORE) :
+                        ZIP_COMPRESSION_METHOD_STORE;
+                    bind[bindIndex++] = preserveCompressedMedia ?
+                        (typeof row.uncompressedLength === 'number' ? row.uncompressedLength : packedLength) :
+                        packedLength;
                 }
                 const sql = chunkCount === EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE && fullBatchSql !== null ?
                     fullBatchSql :
