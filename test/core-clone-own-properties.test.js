@@ -76,7 +76,11 @@ describe('clone own data properties', () => {
 
     test('keeps other prototype-related property names as ordinary data', () => {
         const source = {constructor: {prototype: {value: 1}}, toString: 'text', hasOwnProperty: 'data'};
-        expect(clone(source)).toStrictEqual(source);
+        const result = clone(source);
+        // Compare constructor as an own data entry rather than as the object's type.
+        expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
+        expect(Object.entries(result)).toStrictEqual(Object.entries(source));
+        expect(result.constructor).not.toBe(source.constructor);
     });
 
     test('continues ignoring inherited and non-enumerable keys', () => {
