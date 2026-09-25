@@ -79,6 +79,73 @@ describe('embedded legacy dictionary tags', () => {
         expect(result.result?.counts?.tagMeta.total).toBe(3);
     });
 
+
+    test('a finalization progress failure still aborts the owned import session', async () => {
+        const db = database();
+        const progressFailure = new Error('progress sink failed');
+        let now = 1_000;
+        const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => {
+            now += 2_000;
+            return now;
+        });
+        const importer = new DictionaryImporter(
+            new DictionaryImporterMediaLoader(),
+            (progress) => {
+                if (progress.count === 20) { throw progressFailure; }
+            },
+        );
+        try {
+            const result = await importer.importDictionary(
+                /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+                await archive(0, true, 3),
+                /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
+            );
+
+            expect(result.result).toBeNull();
+            expect(result.errors).toContain(progressFailure);
+            expect(db.finishBulkImport).not.toHaveBeenCalled();
+            expect(db.abortBulkImport).toHaveBeenCalledWith('legacy-tags-session');
+            expect(db.deleteDictionaryImportPlaceholder).toHaveBeenCalledWith(1);
+        } finally {
+            nowSpy.mockRestore();
+        }
+    });
+
+
+    test('a final cancellation predicate failure still aborts the owned import session', async () => {
+        const db = database();
+        const cancellationFailure = new Error('cancellation predicate failed');
+        let finalizationArmed = false;
+        const importer = new DictionaryImporter(
+            new DictionaryImporterMediaLoader(),
+            void 0,
+            () => {
+                if (finalizationArmed) { throw cancellationFailure; }
+                return false;
+            },
+        );
+        const createSummary = /** @type {(...args: import('core').SafeAny[]) => import('dictionary-importer').Summary} */ (
+            Reflect.get(importer, '_createSummary').bind(importer)
+        );
+        Reflect.set(importer, '_createSummary', (...args) => {
+            const summary = createSummary(...args);
+            finalizationArmed = true;
+            return summary;
+        });
+
+        const result = await importer.importDictionary(
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+            await archive(0, true, 3),
+            /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
+        );
+
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(cancellationFailure);
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(db.abortBulkImport).toHaveBeenCalledWith('legacy-tags-session');
+        expect(db.deleteDictionaryImportPlaceholder).toHaveBeenCalledWith(1);
+    });
+
     test('an embedded-tag write failure aborts rather than publishing a tagless dictionary', async () => {
         const db = database();
         const failure = new Error('tag storage failed');

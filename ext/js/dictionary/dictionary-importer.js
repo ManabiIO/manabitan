@@ -2317,23 +2317,46 @@ export class DictionaryImporter {
             await mediaPrefetch;
             prefetchedNoMetadataMedia.length = 0;
             eventLoopYielder.close();
-            if (!importSession.failed && this._isCancelled()) {
-                importSession.recordFailure(new Error('Dictionary import was cancelled'));
+            if (!importSession.failed) {
+                try {
+                    if (this._isCancelled()) {
+                        importSession.recordFailure(new Error('Dictionary import was cancelled'));
+                    }
+                } catch (error) {
+                    // A failing cancellation predicate is itself an import
+                    // failure, but it must not bypass owned-session cleanup.
+                    importSession.recordFailure(error);
+                }
             }
             this._ignoreCancellation = true;
             await importSession.disposeImportResources();
             this._setProgressInterval(previousProgressInterval);
             const tBulkFinalizationStart = Date.now();
-            this._progressNextStep(20, false);
-            this._progressData.index = 0;
-            this._progress();
+            try {
+                this._progressNextStep(20, false);
+                this._progressData.index = 0;
+                this._progress();
+            } catch (error) {
+                // Progress delivery is outside the persistence boundary. A sink
+                // failure must still drive the owned database session through
+                // abort/finalization instead of escaping this finally block.
+                importSession.recordFailure(error);
+            }
             const bulkFinalizationDetails = await importSession.finalizeBulkImport((checkpointIndex, total) => {
                 this._progressData.index = Math.max(1, Math.floor((checkpointIndex / total) * this._progressData.count));
                 this._progress();
                 this._logImport(`bulk finalization ${checkpointIndex}/${total}`);
             }, summary);
             this._progressData.index = this._progressData.count;
-            this._progress();
+            try {
+                this._progress();
+            } catch (error) {
+                // Once publication succeeded, a progress sink cannot turn the
+                // committed dictionary back into an import failure.
+                if (importSession.state !== 'published') {
+                    importSession.recordFailure(error);
+                }
+            }
             const bulkFinalizationPhaseDetails = {ok: !importSession.failed};
             if (bulkFinalizationDetails !== null) {
                 Object.assign(bulkFinalizationPhaseDetails, bulkFinalizationDetails);
@@ -2367,7 +2390,11 @@ export class DictionaryImporter {
 
         this._logImport(`import done ${Date.now() - tImportStart}ms terms=${counts.terms.total} media=${counts.media.total}`);
 
-        this._progress();
+        try {
+            this._progress();
+        } catch (_) {
+            // Publication is already durable; progress delivery is best effort.
+        }
         return {
             result: summary,
             errors,
