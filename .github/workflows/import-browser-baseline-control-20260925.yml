@@ -1,0 +1,44 @@
+name: Import browser baseline control 20260925
+on:
+  push:
+    branches: [bench/import-qualification-20260925]
+    paths: [.github/workflows/import-browser-baseline-control-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PLAYWRIGHT_HARD_TIMEOUT_SECONDS: '480'
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: a3925549826671bc1026035f43f0fde2e407077c
+      - uses: ./.github/actions/setup
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Same integration suite on unchanged baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/baseline-browser
+          git rev-parse HEAD > builds/baseline-browser/source.txt
+          xvfb-run -a npm run test:playwright:integration -- --retries=0 2>&1 | tee builds/baseline-browser/integration.log
+      - name: Preserve failure or success without changing assertions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-browser-baseline-control
+          path: |
+            builds/baseline-browser/
+            test-results/
+          retention-days: 30
+          if-no-files-found: warn
