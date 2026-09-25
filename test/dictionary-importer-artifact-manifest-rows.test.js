@@ -56,3 +56,28 @@ describe('DictionaryImporter artifact manifest row counts', () => {
         await expect(readManifestRows(rows)).resolves.toBe(rows);
     });
 });
+
+
+describe('DictionaryImporter artifact record byte estimate', () => {
+    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), () => {});
+    const maxSafeRows = Math.floor(Number.MAX_SAFE_INTEGER / 128);
+
+    test.each([
+        null,
+        0,
+        -1,
+        Number.MAX_SAFE_INTEGER,
+        maxSafeRows + 1,
+    ])('rejects unsafe or unusable row estimate %s', (rows) => {
+        expect(importer._getExpectedTermRecordImportBytes(rows)).toBeNull();
+    });
+
+    test.each([
+        [1, 128],
+        [250000, 32000000],
+        [maxSafeRows, maxSafeRows * 128],
+    ])('returns a safe byte estimate for %s rows', (rows, expectedBytes) => {
+        expect(importer._getExpectedTermRecordImportBytes(rows)).toBe(expectedBytes);
+        expect(Number.isSafeInteger(expectedBytes)).toBe(true);
+    });
+});
