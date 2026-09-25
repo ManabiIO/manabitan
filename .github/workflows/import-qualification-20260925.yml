@@ -1,0 +1,63 @@
+name: Import qualification 20260925
+
+on:
+  push:
+    branches: [bench/import-qualification-20260925]
+    paths: [.github/workflows/import-qualification-20260925.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-qualification-20260925-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict]
+    env:
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_AB_BULKADD_BYTES_METRICS: '0'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary cache
+        uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Counterbalanced complete imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds
+          bench() {
+            xvfb-run -a node test/chromium/import-flags-ab-benchmark.js '${{ matrix.dictionary }}' --pairs "$1" --flags "$2" --label "$3"
+          }
+          bench 1 '{}' 'warmup-baseline-exclude'
+          bench 2 '{}' 'aa-before'
+          bench 1 '{"experimentalLibdeflate":true}' 'warmup-libdeflate-exclude'
+          bench 4 '{"experimentalLibdeflate":true}' 'libdeflate'
+          bench 2 '{}' 'aa-between'
+          bench 1 '{"experimentalFastGlossaryNormalization":true}' 'warmup-fast-glossary-exclude'
+          bench 4 '{"experimentalFastGlossaryNormalization":true}' 'fast-glossary'
+          bench 2 '{}' 'aa-after'
+      - name: Preserve benchmark evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-qualification-${{ matrix.dictionary }}
+          path: |
+            builds/chromium-e2e-import-flags-isolated-summary-*.json
+            builds/chromium-e2e-import-report-iso-*.json
+            builds/chromium-e2e-import-report-iso-*.html
+          if-no-files-found: warn
+          retention-days: 7
