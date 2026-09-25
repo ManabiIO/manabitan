@@ -5,6 +5,7 @@ on:
     paths: [.github/workflows/import-hotpath-screen.yml]
 permissions:
   contents: read
+# Package verification includes the bundled C source as well as JS and WASM.
 jobs:
   fallback-interner:
     runs-on: ubuntu-24.04
