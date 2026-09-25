@@ -714,6 +714,8 @@ export class TermContentBlockStore {
      * Begins the reservation-capable path without waiting for compression.
      * Initial JMdict slabs are admitted only when sampled byte entropy leaves
      * a conservative margin beyond the normal measured-savings threshold.
+     * Generic spans require a prior measured block-storage selection and the
+     * existing generic-span option; never use the initial-selection estimate.
      * @param {Uint8Array} sourceBytes
      * @param {Uint32Array} sourceOffsets
      * @param {Uint32Array} sourceLengths
@@ -725,7 +727,7 @@ export class TermContentBlockStore {
         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
         if (
             sourceOffsets.length === 0 ||
-            compressionDictName !== 'jmdict' ||
+            (compressionDictName !== 'jmdict' && !(force && this._compressionExperiments.experimentalGenericSpanCompression)) ||
             typeof SharedArrayBuffer !== 'function' ||
             !(sourceBytes.buffer instanceof SharedArrayBuffer)
         ) {
@@ -758,7 +760,7 @@ export class TermContentBlockStore {
      * @param {Uint8Array} sourceBytes
      * @param {Uint32Array} sourceOffsets
      * @param {Uint32Array} sourceLengths
-     * @param {string} compressionDictName
+     * @param {string|null} compressionDictName
      * @param {number} uncompressedBytes
      * @param {boolean} initialSelection
      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}

@@ -424,7 +424,7 @@ describe('TermContentBlockStore', () => {
         )).toBeNull();
     });
 
-    test('publishes reserved references while shared compression is pending', async () => {
+    test.each(['jmdict', null])('publishes reserved references while shared compression is pending (%s)', async (dictName) => {
         /** @type {() => void} */
         let releaseCompression = () => {};
         vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(
@@ -458,12 +458,13 @@ describe('TermContentBlockStore', () => {
             referencePackTargetBytes: 56,
             minInputBytes: 0,
         });
+        blockStore.setCompressionExperiments({experimentalGenericSpanCompression: true});
         const source = new Uint8Array(new SharedArrayBuffer(12));
         source.set([99, 1, 2, 3, 88, 4, 5, 77, 6, 7, 8, 9]);
         const offsets = new Uint32Array([1, 5, 8]);
         const lengths = new Uint32Array([3, 2, 4]);
 
-        const operation = blockStore.tryBeginAppendSpans(source, offsets, lengths, 'jmdict', true);
+        const operation = blockStore.tryBeginAppendSpans(source, offsets, lengths, dictName, true);
         if (operation === null) { throw new Error('Expected an early block append operation'); }
         const storage = await operation.storage;
         expect(storage.contentOffsets).toStrictEqual(new Float64Array([0, 20, 40]));
@@ -480,7 +481,7 @@ describe('TermContentBlockStore', () => {
         releaseCompression();
         await expect(operation.completion).resolves.toMatchObject({
             contentOffsets: new Float64Array([0, 20, 40]),
-            contentDictName: 'raw-block-v2:jmdict',
+            contentDictName: dictName === null ? 'raw-block-v2' : 'raw-block-v2:jmdict',
         });
         await expect(competingAppend).resolves.toStrictEqual([{offset: 93, length: 1}]);
         for (let i = 0; i < lengths.length; ++i) {
@@ -492,7 +493,7 @@ describe('TermContentBlockStore', () => {
         }
     });
 
-    test('uses the reserved block plan after parallel shared compression fails', async () => {
+    test.each(['jmdict', null])('uses the reserved block plan after parallel shared compression fails (%s)', async (dictName) => {
         vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
             const error = new Error('injected reservation compression failure');
             return {sourceConsumed: Promise.reject(error), completion: Promise.reject(error)};
@@ -503,6 +504,7 @@ describe('TermContentBlockStore', () => {
             referencePackTargetBytes: 56,
             minInputBytes: 0,
         });
+        blockStore.setCompressionExperiments({experimentalGenericSpanCompression: true});
         const source = new Uint8Array(new SharedArrayBuffer(6));
         source.set([1, 2, 3, 4, 5, 6]);
 
@@ -510,7 +512,7 @@ describe('TermContentBlockStore', () => {
             source,
             new Uint32Array([0, 3]),
             new Uint32Array([3, 3]),
-            'jmdict',
+            dictName,
             true,
         );
         if (operation === null) { throw new Error('Expected an early block append operation'); }
@@ -525,7 +527,7 @@ describe('TermContentBlockStore', () => {
         )).toStrictEqual(new Uint8Array([4, 5, 6]));
     });
 
-    test('does not reread shared source after compression acknowledged consumption', async () => {
+    test.each(['jmdict', null])('does not reread shared source after compression acknowledged consumption (%s)', async (dictName) => {
         vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
             const error = new Error('injected failure after source consumption');
             return {sourceConsumed: Promise.resolve(), completion: Promise.reject(error)};
@@ -535,6 +537,7 @@ describe('TermContentBlockStore', () => {
             referencePackTargetBytes: 56,
             minInputBytes: 0,
         });
+        blockStore.setCompressionExperiments({experimentalGenericSpanCompression: true});
         const source = new Uint8Array(new SharedArrayBuffer(6));
         source.set([1, 2, 3, 4, 5, 6]);
 
@@ -542,7 +545,7 @@ describe('TermContentBlockStore', () => {
             source,
             new Uint32Array([0, 3]),
             new Uint32Array([3, 3]),
-            'jmdict',
+            dictName,
             true,
         );
         if (operation === null) { throw new Error('Expected an early block append operation'); }

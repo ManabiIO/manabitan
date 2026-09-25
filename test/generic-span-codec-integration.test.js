@@ -77,6 +77,48 @@ describe('generic span compression with the real codec', () => {
         }
     });
 
+    test.each([512, 4096, 1024 * 1024])('reserves generic spans only after measured selection (%i)', async (blockTargetBytes) => {
+        const {source, offsets, lengths, expected} = makeSource();
+        const late = new TermContentBlockStore(new TermContentOpfsStore(), {blockTargetBytes, minInputBytes: 0});
+        const early = new TermContentBlockStore(new TermContentOpfsStore(), {blockTargetBytes, minInputBytes: 0});
+        late.setCompressionExperiments(options);
+        early.setCompressionExperiments(options);
+        const lateSession = late.beginImportSession();
+        const earlySession = early.beginImportSession();
+        expect(earlySession.tryBeginAppendSpans('generic', source, offsets, lengths, null)).toBeNull();
+        const first = await earlySession.appendSpans('generic', source, offsets, lengths, null);
+        const firstLate = await lateSession.appendSpans('generic', source, offsets, lengths, null);
+        expect(first).not.toBeNull();
+        expect(firstLate).not.toBeNull();
+        expect(earlySession.tryBeginAppendSpans('other', source, offsets, lengths, null)).toBeNull();
+        const operation = earlySession.tryBeginAppendSpans('generic', source, offsets, lengths, null);
+        if (operation === null) { throw new Error('Expected prior measured selection to enable reservations'); }
+        expect(operation.initialSelection).toBe(false);
+        const a = await lateSession.appendSpans('generic', source, offsets, lengths, null);
+        const b = await operation.completion;
+        await operation.sourceConsumed;
+        if (a === null) { throw new Error('Expected compressed late append'); }
+        expect(b.initialSelectionSavingsMiss).toBe(false);
+        expect(b.compressedBytes).toBe(a.compressedBytes);
+        expect(b.uncompressedBytes).toBe(a.uncompressedBytes);
+        expect(b.contentDictName).toBe(a.contentDictName);
+        early.setCompressionExperiments({experimentalGenericSpanCompression: false});
+        expect(earlySession.tryBeginAppendSpans('generic', source, offsets, lengths, null)).toBeNull();
+        early.setCompressionExperiments(options);
+        const next = early.beginImportSession();
+        expect(next.tryBeginAppendSpans('generic', source, offsets, lengths, null)).toBeNull();
+        source.fill(255);
+        early.clearCache();
+        late.clearCache();
+        for (let i = 0; i < expected.length; ++i) {
+            expect(await early.read(b.contentOffsets[i], b.contentLengths[i], b.contentDictName)).toEqual(expected[i]);
+            expect(await late.read(a.contentOffsets[i], a.contentLengths[i], a.contentDictName)).toEqual(expected[i]);
+        }
+        earlySession.close();
+        lateSession.close();
+        next.close();
+    });
+
     test('consumes the shared source before finishing, without changing the frame or checksum', () => {
         const {source, offsets, lengths, packed} = makeSource();
         const baseline = compressWrappedTermContentZstd(packed, null).bytes;
