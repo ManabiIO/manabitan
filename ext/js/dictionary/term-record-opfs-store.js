@@ -1739,12 +1739,16 @@ export class TermRecordOpfsStore {
      * @param {number} count
      * @param {number[]} contentOffsets
      * @param {number[]} contentLengths
-     * @param {string|null} [contentDictName='raw']
+     * @param {string|(string|null)[]} [contentDictNames='raw']
      * @returns {Promise<{buildRecordsMs: number, encodeMs: number, appendWriteMs: number}>}
      */
-    async appendBatchFromImportTermEntriesResolvedContent(rows, start, count, contentOffsets, contentLengths, contentDictName = 'raw') {
+    async appendBatchFromImportTermEntriesResolvedContent(rows, start, count, contentOffsets, contentLengths, contentDictNames = 'raw') {
         if (count <= 0) { return {buildRecordsMs: 0, encodeMs: 0, appendWriteMs: 0}; }
-        if (contentOffsets.length < count || contentLengths.length < count) {
+        if (
+            contentOffsets.length < count ||
+            contentLengths.length < count ||
+            (Array.isArray(contentDictNames) && contentDictNames.length < count)
+        ) {
             throw new Error('appendBatchFromImportTermEntriesResolvedContent content arrays are smaller than row count');
         }
         await this._ensureNextIdReadyForAppend();
@@ -1752,17 +1756,19 @@ export class TermRecordOpfsStore {
         let buildRecordsMs = 0;
         let encodeMs = 0;
         let appendWriteMs = 0;
-        /** @type {Map<string, TermRecord[]>|null} */
+        /** @type {Map<string, {records: TermRecord[], indexes: number[]}>|null} */
         let recordsByShard = null;
         /** @type {TermRecord[]} */
         const singleDictionaryRecords = new Array(count);
         let singleDictionaryRecordCount = 0;
         let firstDictionaryName = '';
-        const normalizedContentDictName = contentDictName ?? 'raw';
+        let firstContentDictName = 'raw';
+        const uniformContentDictName = Array.isArray(contentDictNames) ? null : (contentDictNames ?? 'raw');
         for (let i = 0; i < count; ++i) {
             const row = /** @type {{dictionary: string, expression: string, reading: string, readingEqualsExpression?: boolean, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, expressionReverse?: string, readingReverse?: string, score: number, sequence?: number}} */ (rows[start + i]);
             const id = this._nextId++;
             const dictionary = row.dictionary;
+            const entryContentDictName = uniformContentDictName ?? (contentDictNames[i] ?? 'raw');
             /** @type {TermRecord} */
             const record = {
                 id,
@@ -1776,30 +1782,41 @@ export class TermRecordOpfsStore {
                 readingReverse: row.readingReverse ?? null,
                 entryContentOffset: contentOffsets[i],
                 entryContentLength: contentLengths[i],
-                entryContentDictName: normalizedContentDictName,
+                entryContentDictName,
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
             this._storeRecord(record);
             if (i === 0) {
                 firstDictionaryName = dictionary;
+                firstContentDictName = entryContentDictName;
             }
             if (recordsByShard === null) {
-                if (dictionary === firstDictionaryName) {
+                if (dictionary === firstDictionaryName && entryContentDictName === firstContentDictName) {
                     singleDictionaryRecords[singleDictionaryRecordCount++] = record;
                 } else {
                     recordsByShard = new Map();
-                    recordsByShard.set(this._getShardFileName(firstDictionaryName, normalizedContentDictName), singleDictionaryRecords.slice(0, singleDictionaryRecordCount));
-                    recordsByShard.set(this._getShardFileName(dictionary, normalizedContentDictName), [record]);
+                    recordsByShard.set(
+                        this._getShardFileName(firstDictionaryName, firstContentDictName),
+                        {
+                            records: singleDictionaryRecords.slice(0, singleDictionaryRecordCount),
+                            indexes: Array.from({length: singleDictionaryRecordCount}, (_value, index) => index),
+                        },
+                    );
+                    recordsByShard.set(
+                        this._getShardFileName(dictionary, entryContentDictName),
+                        {records: [record], indexes: [i]},
+                    );
                 }
             } else {
-                const shardFileName = this._getShardFileName(dictionary, normalizedContentDictName);
-                let dictionaryRecords = recordsByShard.get(shardFileName);
-                if (typeof dictionaryRecords === 'undefined') {
-                    dictionaryRecords = [];
-                    recordsByShard.set(shardFileName, dictionaryRecords);
+                const shardFileName = this._getShardFileName(dictionary, entryContentDictName);
+                let shardRecords = recordsByShard.get(shardFileName);
+                if (typeof shardRecords === 'undefined') {
+                    shardRecords = {records: [], indexes: []};
+                    recordsByShard.set(shardFileName, shardRecords);
                 }
-                dictionaryRecords.push(record);
+                shardRecords.records.push(record);
+                shardRecords.indexes.push(i);
             }
             if (!this._deferIndexBuild) {
                 const existingIndex = this._indexByDictionary.get(dictionary);
@@ -1822,7 +1839,7 @@ export class TermRecordOpfsStore {
             null;
         if (recordsByShard === null) {
             this._loadedDictionaryNames.add(firstDictionaryName);
-            const state = await this._getOrCreateShardState(firstDictionaryName, normalizedContentDictName);
+            const state = await this._getOrCreateShardState(firstDictionaryName, firstContentDictName);
             if (state !== null) {
                 const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
                 encodeMs += metrics.encodeMs;
@@ -1830,12 +1847,17 @@ export class TermRecordOpfsStore {
             }
             return {buildRecordsMs, encodeMs, appendWriteMs};
         }
-        for (const dictionaryRecords of recordsByShard.values()) {
+        for (const {records: dictionaryRecords, indexes} of recordsByShard.values()) {
             const firstRecord = dictionaryRecords[0];
             this._loadedDictionaryNames.add(firstRecord.dictionary);
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            const metrics = await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
+            const metrics = await this._encodeAndAppendChunkRunsForState(
+                state,
+                dictionaryRecords,
+                preinternedPlan,
+                indexes,
+            );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
         }
