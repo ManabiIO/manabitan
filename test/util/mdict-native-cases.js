@@ -120,6 +120,30 @@ describe('MDict v2 binary records', () => {
         }
     });
 
+    test('engine version rejects trailing or compound junk instead of accepting a numeric prefix', () => {
+        for (const version of ['2.0junk', '2.0.1', '2e0']) {
+            const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {version});
+            assert.throws(
+                () => new MDX('malformed-version.mdx', fixture.bytes),
+                /Unsupported MDict engine version/u,
+                version,
+            );
+        }
+    });
+
+    test('supported numeric engine versions remain accepted', () => {
+        for (const version of ['1.2', '2.0', ' 2.0 ']) {
+            const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {version});
+            const mdx = new MDX('numeric-version.mdx', fixture.bytes);
+            try {
+                assert.equal(mdx.meta.version, Number(version.trim()));
+                assert.equal(mdx.lookup('entry').definition, 'definition\0');
+            } finally {
+                mdx.close();
+            }
+        }
+    });
+
     test('a truncated final block is rejected rather than silently shortened', () => {
         const fixture = makeMdictFixture([{key: 'entry', value: 'nonempty final record'}], {compression: 'raw'});
         const mdx = new MDX('truncated.mdx', fixture.bytes.slice(0, -1));
