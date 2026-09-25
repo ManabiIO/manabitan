@@ -5039,6 +5039,8 @@ null;
         let pendingContentHash2s = [];
         /** @type {Uint8Array[]} */
         let pendingContentBytes = [];
+        /** @type {(string|null)[]} */
+        let pendingContentDictNames = [];
         /** @type {Map<string, number>|null} */
         let pendingContentRowIndexByHash = shouldDedupWithinBatch ? new Map() : null;
 
@@ -5056,6 +5058,7 @@ null;
                     pendingContentHash1s = [];
                     pendingContentHash2s = [];
                     pendingContentBytes = [];
+                    pendingContentDictNames = [];
                     if (pendingContentRowIndexByHash !== null) {
                         pendingContentRowIndexByHash.clear();
                     }
@@ -5068,10 +5071,7 @@ null;
                     const storageChunks = this._createTermContentStorageChunks(
                         pendingContentBytes,
                         compressionDictName,
-                        stagedRows.map((row, index) => {
-                            const pendingIndex = stagedPendingContentIndexes[index];
-                            return pendingIndex >= 0 ? (row.termEntryContentDictName ?? null) : null;
-                        }),
+                        pendingContentDictNames,
                     );
                     compressContentMs += safePerformance.now() - tCompressStart;
                     if (this._importDebugLogging) {
@@ -5193,6 +5193,7 @@ null;
                 pendingContentHash1s = [];
                 pendingContentHash2s = [];
                 pendingContentBytes = [];
+                pendingContentDictNames = [];
                 pendingContentRowIndexByHash = shouldDedupWithinBatch ? new Map() : null;
             };
 
@@ -5261,6 +5262,7 @@ null;
                     pendingContentHash1s.push(contentHash1);
                     pendingContentHash2s.push(contentHash2);
                     pendingContentBytes.push(contentBytes);
+                    pendingContentDictNames.push(row.termEntryContentDictName ?? null);
                 }
 
                 stagedRows.push(row);
