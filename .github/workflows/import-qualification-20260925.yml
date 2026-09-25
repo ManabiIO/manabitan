@@ -27,6 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
+      - name: Parser and experiment regressions
+        run: npx vitest run test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js test/lookup-construction-experiments.test.js --no-file-parallelism
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Restore pinned dictionary cache
@@ -44,17 +46,17 @@ jobs:
           }
           bench 1 '{}' 'warmup-baseline-exclude'
           bench 2 '{}' 'aa-before'
-          bench 1 '{"experimentalLibdeflate":true}' 'warmup-libdeflate-exclude'
-          bench 4 '{"experimentalLibdeflate":true}' 'libdeflate'
+          bench 1 '{"experimentalTermBankSpans":true}' 'warmup-bank-spans-exclude'
+          bench 6 '{"experimentalTermBankSpans":true}' 'bank-spans'
           bench 2 '{}' 'aa-between'
-          bench 1 '{"experimentalFastGlossaryNormalization":true}' 'warmup-fast-glossary-exclude'
-          bench 4 '{"experimentalFastGlossaryNormalization":true}' 'fast-glossary'
+          bench 1 '{"experimentalValidatedGlossaryReuse":true}' 'warmup-validated-glossary-exclude'
+          bench 6 '{"experimentalValidatedGlossaryReuse":true}' 'validated-glossary'
           bench 2 '{}' 'aa-after'
       - name: Preserve benchmark evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: import-qualification-${{ matrix.dictionary }}
+          name: import-qualification-active-${{ matrix.dictionary }}
           path: |
             builds/chromium-e2e-import-flags-isolated-summary-*.json
             builds/chromium-e2e-import-report-iso-*.json
