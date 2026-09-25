@@ -109,16 +109,76 @@ describe('AudioDownloader idle timeout cleanup', () => {
     });
 
     test('downloads without an idle timeout do not create a timer or signal', async () => {
-        /** @type {?RequestInit} */
-        let requestInit = null;
+        /** @type {RequestInit[]} */
+        const requests = [];
         const downloader = createDownloader(async (_url, init) => {
-            requestInit = init;
+            requests.push(init);
             return new Response(new Uint8Array([1]));
         });
 
         await downloader._downloadAudioFromUrl('https://example.test/audio.mp3', 'custom', null);
 
-        expect(requestInit?.signal).toBeUndefined();
+        expect(requests).toHaveLength(1);
+        expect(requests[0].signal).toBeUndefined();
         expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('a genuinely idle pending request still aborts at its deadline', async () => {
+        const {downloader, getSignal} = createSignalCapturingDownloader((signal) => new Promise((_resolve, reject) => {
+            signal.addEventListener('abort', () => { reject(signal.reason); }, {once: true});
+        }));
+        const result = downloader._downloadAudioFromUrl('https://example.test/audio.mp3', 'custom', 5000);
+        const rejected = expect(result).rejects.toBe('Idle timeout');
+
+        await vi.advanceTimersByTimeAsync(4999);
+        expect(getSignal().aborted).toBe(false);
+        await vi.advanceTimersByTimeAsync(1);
+        await rejected;
+        expect(getSignal().aborted).toBe(true);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('received bytes reset the idle deadline before a stalled stream aborts', async () => {
+        /** @type {ReadableStreamDefaultController<Uint8Array>[]} */
+        const controllers = [];
+        const {downloader, getSignal} = createSignalCapturingDownloader(async (signal) => new Response(new ReadableStream({
+            start(controller) {
+                controllers.push(controller);
+                signal.addEventListener('abort', () => { controller.error(signal.reason); }, {once: true});
+            },
+        })));
+        const result = downloader._downloadAudioFromUrl('https://example.test/audio.mp3', 'custom', 5000);
+        const rejected = expect(result).rejects.toBe('Idle timeout');
+
+        await vi.advanceTimersByTimeAsync(4000);
+        controllers[0].enqueue(new Uint8Array([1]));
+        await vi.advanceTimersByTimeAsync(0);
+        await vi.advanceTimersByTimeAsync(4999);
+        expect(getSignal().aborted).toBe(false);
+        await vi.advanceTimersByTimeAsync(1);
+        await rejected;
+        expect(getSignal().aborted).toBe(true);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('a stream failure after progress clears the replacement idle timer', async () => {
+        const error = new Error('stream failed after a chunk');
+        /** @type {ReadableStreamDefaultController<Uint8Array>[]} */
+        const controllers = [];
+        const {downloader, getSignal} = createSignalCapturingDownloader(async () => new Response(new ReadableStream({
+            start(controller) { controllers.push(controller); },
+        })));
+        const result = downloader._downloadAudioFromUrl('https://example.test/audio.mp3', 'custom', 5000);
+        const rejected = expect(result).rejects.toBe(error);
+
+        await vi.advanceTimersByTimeAsync(4000);
+        controllers[0].enqueue(new Uint8Array([1]));
+        await vi.advanceTimersByTimeAsync(0);
+        expect(vi.getTimerCount()).toBe(1);
+        controllers[0].error(error);
+        await rejected;
+        expect(vi.getTimerCount()).toBe(0);
+        await vi.advanceTimersByTimeAsync(5000);
+        expect(getSignal().aborted).toBe(false);
     });
 });
