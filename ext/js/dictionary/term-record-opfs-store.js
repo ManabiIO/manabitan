@@ -1821,6 +1821,7 @@ export class TermRecordOpfsStore {
             getTermRecordPreinternedPlan(rows) :
             null;
         if (recordsByShard === null) {
+            this._loadedDictionaryNames.add(firstDictionaryName);
             const state = await this._getOrCreateShardState(firstDictionaryName, normalizedContentDictName);
             if (state !== null) {
                 const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
@@ -1831,6 +1832,7 @@ export class TermRecordOpfsStore {
         }
         for (const dictionaryRecords of recordsByShard.values()) {
             const firstRecord = dictionaryRecords[0];
+            this._loadedDictionaryNames.add(firstRecord.dictionary);
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
             const metrics = await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
