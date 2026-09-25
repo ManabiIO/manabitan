@@ -174,11 +174,16 @@ function deepEqualInternal(value1, value2, visited1) {
             if (array !== Array.isArray(value2)) { return false; }
             if (visited1.has(value1)) { return false; }
             visited1.add(value1);
-            return (
-                    array ?
-                    areArraysEqual(/** @type {unknown[]} */ (value1), /** @type {unknown[]} */ (value2), visited1) :
-                    areObjectsEqual(/** @type {import('core').UnknownObject} */ (value1), /** @type {import('core').UnknownObject} */ (value2), visited1)
-            );
+            try {
+                return (
+                        array ?
+                        areArraysEqual(/** @type {unknown[]} */ (value1), /** @type {unknown[]} */ (value2), visited1) :
+                        areObjectsEqual(/** @type {import('core').UnknownObject} */ (value1), /** @type {import('core').UnknownObject} */ (value2), visited1)
+                );
+            } finally {
+                // Only ancestors form a cycle; siblings can share an object.
+                visited1.delete(value1);
+            }
         }
         default:
             return false;
