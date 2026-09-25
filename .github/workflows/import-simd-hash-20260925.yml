@@ -1,0 +1,55 @@
+name: Import SIMD hash screen 20260925
+on:
+  push:
+    branches: [bench/import-simd-hash-20260925]
+    paths: [.github/workflows/import-simd-hash-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, jmnedict, wty-en-en]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      PAIRS: '6'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Preserve exact baseline and prepare candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/hash-round
+          cp ext/lib/term-bank-parser.wasm builds/hash-round/base.wasm
+          python3 dev/perf/hash-round-20260925/prepare.py
+          git diff > builds/hash-round/source.patch
+          npm run build:libs > builds/hash-round/build.log 2>&1
+          cp ext/lib/term-bank-parser.wasm builds/hash-round/candidate.wasm
+          sha256sum builds/hash-round/*.c builds/hash-round/*.wasm > builds/hash-round/SHA256SUMS
+          clang --version > builds/hash-round/compiler.txt
+      - name: Actual-WASM hash and parser regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx vitest run test/term-bank-content-hash.test.js test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-parser-string-scan.test.js --no-file-parallelism 2>&1 | tee builds/hash-round/candidate-tests.log
+          cp builds/hash-round/base.wasm ext/lib/term-bank-parser.wasm
+          npx vitest run test/term-bank-content-hash.test.js --no-file-parallelism 2>&1 | tee builds/hash-round/baseline-tests.log
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fixed source A/B with same-binary controls
+        run: xvfb-run -a node dev/perf/hash-round-20260925/ab.mjs
+      - name: Preserve every observation including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hash-screen-${{ matrix.dictionary }}
+          path: builds/hash-round/
+          if-no-files-found: error
+          retention-days: 30
