@@ -847,14 +847,38 @@ describe('native parser controls and key metadata', () => {
         assert.throws(() => new MDX('key-trailer.mdx', fixture.bytes), /key.*info/iu);
     });
 
-    test('scanner rejects invalid sources and releases its input on close', () => {
+    test('scanner preserves owned reads while borrowed reads alias the source', () => {
         assert.throws(() => new FileScanner(/** @type {any} */ ({})), TypeError);
-        const scanner = new FileScanner(Uint8Array.of(1, 2, 3));
-        assert.deepEqual(scanner.readBuffer(0, 2), Uint8Array.of(1, 2));
+        const source = Uint8Array.of(1, 2, 3);
+        const scanner = new FileScanner(source);
+        const owned = scanner.readBuffer(0, 2);
+        const borrowed = scanner.readBufferView(0, 2);
+        source[0] = 9;
+        assert.deepEqual(owned, Uint8Array.of(1, 2));
+        assert.deepEqual(borrowed, Uint8Array.of(9, 2));
+        assert.throws(() => scanner.readBufferView(2, 2), /available file data/iu);
         scanner.close();
         assert.deepEqual(scanner.readBuffer(0, 0), new Uint8Array(0));
         assert.throws(() => scanner.readBuffer(0, 1), /available file data/iu);
         assert.throws(() => scanner.readBuffer(/** @type {any} */ ('0'), 0), /available file data/iu);
+    });
+
+    test('borrowed parser ranges never mutate the caller-owned MDict bytes', () => {
+        for (const compression of /** @type {const} */ (['raw', 'zlib'])) {
+            const fixture = makeMdictFixture([
+                {key: 'alpha', value: '<p>first definition</p>'},
+                {key: 'beta', value: '<p>second definition</p>'},
+            ], {compression, recordBlockSize: 7, keysPerBlock: 1});
+            const before = Uint8Array.from(fixture.bytes);
+            const mdx = new MDX('borrowed-source.mdx', fixture.bytes);
+            try {
+                assert.equal(mdx.lookup('alpha').definition, '<p>first definition</p>\0');
+                assert.equal(mdx.lookup('beta').definition, '<p>second definition</p>\0');
+                assert.deepEqual(fixture.bytes, before);
+            } finally {
+                mdx.close();
+            }
+        }
     });
 });
 
