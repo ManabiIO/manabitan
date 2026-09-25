@@ -1,0 +1,131 @@
+name: Import overlap clean qualification 20260925
+on:
+  push:
+    branches: [bench/import-generic-overlap-20260925]
+    paths: [.github/workflows/import-generic-overlap-clean-20260925.yml]
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Isolate published candidate and test-only cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/overlap-round-20260925/cleanup-tests.py /tmp/cleanup-tests.py
+          git fetch --depth=1 origin 4178eaf8ceb5011c1959f8b62fe9bb62f76fe7ef
+          git reset --hard FETCH_HEAD
+          python3 /tmp/cleanup-tests.py
+          git fetch --depth=1 origin 46c54d548c6d0739a9aed81f764c98ffb4d8fde8
+          mkdir -p builds/overlap-clean
+          git diff --check
+          git diff > builds/overlap-clean/test-cleanup.patch
+          git diff 46c54d548c6d0739a9aed81f764c98ffb4d8fde8 > builds/overlap-clean/product.patch
+          cp ext/js/dictionary/term-content-block-store.js builds/overlap-clean/candidate.js
+          sha256sum ext/js/dictionary/term-content-block-store.js test/term-content-block-store.test.js test/generic-span-codec-integration.test.js > builds/overlap-clean/SHA256SUMS
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          assert hashlib.sha256(Path('ext/js/dictionary/term-content-block-store.js').read_bytes()).hexdigest()=='8b64e9d63cee8c6587dfc408c865928f852341b27d0c2b54326d64a1aee2bece'
+          PY
+      - uses: ./.github/actions/setup
+      - name: Baseline fails only six new generic reservation cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show 46c54d548c6d0739a9aed81f764c98ffb4d8fde8:ext/js/dictionary/term-content-block-store.js > ext/js/dictionary/term-content-block-store.js
+          python3 - <<'PY'
+          import json,subprocess
+          args=['npx','vitest','run','test/generic-span-codec-integration.test.js','test/term-content-block-store.test.js','--no-file-parallelism','--reporter=json','--outputFile=builds/overlap-clean/baseline.json']
+          with open('builds/overlap-clean/baseline.log','w') as log:
+              result=subprocess.run(args,stdout=log,stderr=subprocess.STDOUT)
+          assert result.returncode!=0
+          r=json.load(open('builds/overlap-clean/baseline.json'))
+          failed=[a['fullName'] for t in r['testResults'] for a in t['assertionResults'] if a['status']=='failed']
+          expected=['reserves generic spans only after measured selection','publishes reserved references while shared compression is pending (null)','uses the reserved block plan after parallel shared compression fails (null)','does not reread shared source after compression acknowledged consumption (null)']
+          assert len(failed)==6 and all(any(s in name for s in expected) for name in failed),failed
+          print(json.dumps({'failedOnlyNewReservationCases':failed},indent=2))
+          PY
+          cp builds/overlap-clean/candidate.js ext/js/dictionary/term-content-block-store.js
+      - name: Full unit type lint and build checks
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          commands={
+            'unit':['npm','run','test:unit','--','--no-file-parallelism'],
+            'options':['npm','run','test:unit:options'],
+            'types-main':['npm','run','test:ts:main'],
+            'types-dev':['npm','run','test:ts:dev'],
+            'types-test':['npm','run','test:ts:test'],
+            'types-bench':['npm','run','test:ts:bench'],
+            'lint':['npx','eslint','ext/js/dictionary/term-content-block-store.js','test/term-content-block-store.test.js','test/generic-span-codec-integration.test.js'],
+            'build':['npm','run','build'],
+          }
+          status={}
+          for name,args in commands.items():
+            with open('builds/overlap-clean/'+name+'.log','w') as log:
+              status[name]=subprocess.run(args,stdout=log,stderr=subprocess.STDOUT).returncode
+            print(name,status[name],flush=True)
+          Path('builds/overlap-clean/status.json').write_text(json.dumps(status,indent=2)+'\n')
+          PY
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Both full lifecycle configurations on final files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for cohort in generic disabled; do
+            if [ "$cohort" = generic ]; then flags='{"experimentalGenericSpanCompression":true}'; else flags='{}'; fi
+            MANABITAN_E2E_IMPORT_FLAGS_JSON="$flags" xvfb-run -a npm run test:e2e:chromium-extension > "builds/overlap-clean/lifecycle-$cohort.log" 2>&1
+            cp builds/chromium-e2e-import-report.json "builds/overlap-clean/lifecycle-$cohort.json"
+          done
+          sha256sum -c builds/overlap-clean/SHA256SUMS
+          python3 - <<'PY'
+          import json
+          s=json.load(open('builds/overlap-clean/status.json'))
+          assert s and all(v==0 for v in s.values()),s
+          for cohort in ['generic','disabled']:
+              r=json.load(open('builds/overlap-clean/lifecycle-'+cohort+'.json'))
+              assert r['status']=='success' and r['skippedVerification'] is False
+              assert r['runtimeDiagnostics']['openStorageMode']=='opfs-sahpool'
+          PY
+      - name: Fast-forward only the test cleanup on our candidate branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch=perf/import-generic-overlap-20260925
+          git fetch --depth=1 origin "refs/heads/$branch"
+          test "$(git rev-parse FETCH_HEAD)" = 4178eaf8ceb5011c1959f8b62fe9bb62f76fe7ef
+          test "$(git diff --name-only)" = test/term-content-block-store.test.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test/term-content-block-store.test.js
+          git commit -m 'test(import): reset unconsumed compression faults between cases'
+          git push origin "HEAD:refs/heads/$branch"
+          git rev-parse HEAD > builds/overlap-clean/head.txt
+          git rev-parse 'HEAD^{tree}' > builds/overlap-clean/tree.txt
+          git diff 46c54d548c6d0739a9aed81f764c98ffb4d8fde8 --stat > builds/overlap-clean/diff-stat.txt
+      - name: Retain all outcomes including failed qualification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generic-overlap-clean-validation
+          path: builds/overlap-clean/
+          retention-days: 30
+          if-no-files-found: error
