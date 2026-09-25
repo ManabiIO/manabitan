@@ -545,6 +545,129 @@ describe('actual parser worker flag propagation', () => {
 })
 
 
+
+describe('adaptive fused parser fallback', () => {
+    test('defaults off and requires literal true', () => {
+        expect(snapshotTermBankExperiments().experimentalAdaptiveFusedFallback).toBe(false)
+        for (const value of [false, 0, 1, null, undefined, 'true', {}]) {
+            const options = /** @type {Experiments} */ (/** @type {unknown} */ ({experimentalAdaptiveFusedFallback: value}))
+            expect(snapshotTermBankExperiments(options).experimentalAdaptiveFusedFallback).toBe(false)
+        }
+        expect(snapshotTermBankExperiments({experimentalAdaptiveFusedFallback: true}).experimentalAdaptiveFusedFallback).toBe(true)
+    })
+
+    test('reports the fused fallback cause', async () => {
+        const fractional = '[["fractional","","","",1.5,["shared"],1,""]]'
+        const normal = JSON.stringify([row('normal')])
+        const result = await parse([fractional, normal])
+        expect(result.profile.fusedParseAttempts).toBe(1)
+        expect(result.profile.fusedParseFallbacks).toBe(1)
+        expect(result.profile.fusedParseCapacityFallbacks).toBe(0)
+        expect(result.profile.fusedParseUnsupportedFallbacks).toBe(1)
+    })
+
+    test('worker skips later fused attempts after a fallback and resets on initialize', async () => {
+        const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
+        const bridge = `import {parentPort} from 'node:worker_threads'
+            globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
+                postMessage: (data, transfer) => parentPort.postMessage(data, transfer)}
+            await import(${JSON.stringify(workerUrl)})
+            parentPort.postMessage({type: 'loaded'})`
+        const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(bridge)}`))
+        const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
+        const adaptiveOptions = {
+            experimentalAdaptiveFusedFallback: true,
+            computeContentHashes: true,
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            mediaHintFastScan: true,
+        }
+        const request = async (id, banks) => {
+            const sourceBuffers = banks.map((bank) => encoder.encode(bank).buffer)
+            return await requestWorker(worker, {
+                type: 'parse',
+                id,
+                version: 3,
+                sourceBuffers,
+                options: adaptiveOptions,
+            })
+        }
+        try {
+            expect((await requestWorker(worker, null)).type).toBe('loaded')
+            expect((await requestWorker(worker, {type: 'initialize', module})).type).toBe('ready')
+
+            const first = await request(1, [
+                '[["fractional","","","",1.5,["shared"],1,""]]',
+                JSON.stringify([row('fallback-tail')]),
+            ])
+            expect(first.type, JSON.stringify(first.error)).toBe('result')
+            expect(first.profile?.fusedParseAttempts).toBe(1)
+            expect(first.profile?.fusedParseFallbacks).toBe(1)
+            expect(first.profile?.fusedParseUnsupportedFallbacks).toBe(1)
+
+            const second = await request(2, [
+                JSON.stringify([row('second-a')]),
+                JSON.stringify([row('second-b')]),
+            ])
+            expect(second.type, JSON.stringify(second.error)).toBe('result')
+            expect(second.profile?.fusedParseAttempts).toBe(0)
+            expect(second.profile?.fusedParseFallbacks).toBe(0)
+            expect(second.profile?.experiments.experimentalAdaptiveFusedFallback).toBe(true)
+            expect(second.profile?.experiments.experimentalSkipFusedParse).toBe(true)
+
+            expect((await requestWorker(worker, {type: 'initialize', module})).type).toBe('ready')
+            const afterReset = await request(3, [
+                JSON.stringify([row('reset-a')]),
+                JSON.stringify([row('reset-b')]),
+            ])
+            expect(afterReset.type, JSON.stringify(afterReset.error)).toBe('result')
+            expect(afterReset.profile?.fusedParseAttempts).toBe(1)
+            expect(afterReset.profile?.fusedParseFallbacks).toBe(0)
+        } finally {
+            await worker.terminate()
+        }
+    })
+
+    test('worker keeps using fusion after a successful fused request', async () => {
+        const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
+        const bridge = `import {parentPort} from 'node:worker_threads'
+            globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
+                postMessage: (data, transfer) => parentPort.postMessage(data, transfer)}
+            await import(${JSON.stringify(workerUrl)})
+            parentPort.postMessage({type: 'loaded'})`
+        const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(bridge)}`))
+        const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
+        const options = {
+            experimentalAdaptiveFusedFallback: true,
+            computeContentHashes: true,
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            mediaHintFastScan: true,
+        }
+        try {
+            expect((await requestWorker(worker, null)).type).toBe('loaded')
+            expect((await requestWorker(worker, {type: 'initialize', module})).type).toBe('ready')
+            for (const id of [1, 2]) {
+                const reply = await requestWorker(worker, {
+                    type: 'parse',
+                    id,
+                    version: 3,
+                    sourceBuffers: [
+                        encoder.encode(JSON.stringify([row(`success-${id}-a`)])).buffer,
+                        encoder.encode(JSON.stringify([row(`success-${id}-b`)])).buffer,
+                    ],
+                    options,
+                })
+                expect(reply.type, JSON.stringify(reply.error)).toBe('result')
+                expect(reply.profile?.fusedParseAttempts).toBe(1)
+                expect(reply.profile?.fusedParseFallbacks).toBe(0)
+            }
+        } finally {
+            await worker.terminate()
+        }
+    })
+})
+
 describe('full-buffer inflation experiment', () => {
     test.each(['experimentalLibdeflate'])('defaults off and requires literal true: %s', (key) => {
         const name = /** @type {keyof Experiments} */ (key)
