@@ -2025,11 +2025,18 @@ null :
                     expressionBytesList[i] = expressionBytes;
                     readingBytesList[i] = readingBytes;
                 }
-                readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
                 expressionIndexes[i] = planBuilder.internStringBytes(expressionBytes);
                 readingIndexes[i] = readingEqualsExpression ?
                     expressionIndexes[i] :
                     planBuilder.internStringBytes(readingBytes);
+                const canonicalReadingEqualsExpression = (
+                    readingEqualsExpression ||
+                    readingIndexes[i] === expressionIndexes[i]
+                );
+                readingEqualsExpressionList[i] = canonicalReadingEqualsExpression ? 1 : 0;
+                if (canonicalReadingEqualsExpression && emitTermByteLists) {
+                    readingBytesList[i] = EMPTY_UINT8_ARRAY;
+                }
             } else {
                 const expressionIndex = expressionIndexes[i];
                 const readingIndex = readingIndexes[i];
