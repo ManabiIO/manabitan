@@ -1,0 +1,79 @@
+name: Import native key delivery 20260925
+on:
+  push:
+    branches: [bench/import-remaining-fastpaths-20260925]
+    paths: [.github/workflows/import-native-key-delivery-20260925.yml]
+permissions:
+  contents: write
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Preserve final inputs and isolate the qualified numeric baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/remaining-20260925/native-key.patch /tmp/native-key.patch
+          cp dev/perf/remaining-20260925/prepare-key.py /tmp/prepare-key.py
+          cp test/term-bank-native-key-plan.test.js /tmp/native-key.test.js
+          git fetch --depth=1 origin 74b09d33937448ae990e61752d6cb749c7c63317
+          git reset --hard FETCH_HEAD
+      - uses: ./.github/actions/setup
+      - name: Apply the measured C change and final tests only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dev/perf/remaining-20260925 builds/key-delivery
+          cp /tmp/native-key.patch dev/perf/remaining-20260925/native-key.patch
+          cp /tmp/native-key.test.js test/term-bank-native-key-plan.test.js
+          python3 /tmp/prepare-key.py > builds/key-delivery/prepare.log 2>&1
+          rm dev/perf/remaining-20260925/native-key.patch
+          rmdir dev/perf/remaining-20260925
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          expected={
+              'ext/js/dictionary/wasm/term-bank-parser.c':'bd9f6754dcaa861af3c674a444c42b701088b852e1e60760efa49834235bc525',
+              'ext/lib/term-bank-parser.wasm':'0cd848b78b51307a67a8e0e2bd7dee523de12fec2bc24c89e740445697558483',
+              'ext/js/dictionary/term-bank-wasm-parser.js':'f617cce1a6c253a86470d4dc0a38d0edc08a38b957c77390e64460da791014aa',
+          }
+          for path,digest in expected.items():
+              assert hashlib.sha256(Path(path).read_bytes()).hexdigest()==digest,path
+          PY
+          git diff --check
+          npx eslint test/term-bank-native-key-plan.test.js test/term-bank-wasm-parser.test.js > builds/key-delivery/lint.log 2>&1
+          npm run test:ts:main > builds/key-delivery/types-main.log 2>&1
+          npm run test:ts:test > builds/key-delivery/types-test.log 2>&1
+          npx vitest run test/term-bank-native-key-plan.test.js test/term-bank-wasm-parser.test.js test/term-bank-experiments.test.js test/term-bank-number-decode.test.js --no-file-parallelism > builds/key-delivery/tests.log 2>&1
+      - name: Publish only the three intended files without modifying develop or existing PRs
+        shell: bash
+        env:
+          HUSKY: '0'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c perf/import-native-key-plan-20260925
+          git add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-native-key-plan.test.js test/term-bank-wasm-parser.test.js
+          python3 - <<'PY'
+          import subprocess
+          expected={'ext/js/dictionary/wasm/term-bank-parser.c','test/term-bank-native-key-plan.test.js','test/term-bank-wasm-parser.test.js'}
+          actual=set(subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines())
+          assert actual==expected,actual
+          PY
+          git diff --cached > builds/key-delivery/product.patch
+          git diff --cached --stat > builds/key-delivery/stat.txt
+          git commit -m 'perf(import): retain native string plans for escaped dictionary keys'
+          git push origin HEAD:refs/heads/perf/import-native-key-plan-20260925
+          git rev-parse HEAD > builds/key-delivery/head.txt
+          git rev-parse HEAD^{tree} > builds/key-delivery/tree.txt
+      - name: Preserve delivery outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-key-delivery
+          path: builds/key-delivery/
+          retention-days: 30
+          if-no-files-found: error
