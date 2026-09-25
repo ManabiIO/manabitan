@@ -1,8 +1,8 @@
 name: Import native key delivery 20260925
+# The one-shot push delivery completed in run 36186997368. Keep manual
+# reproduction only; an existing product branch is never force-overwritten.
 on:
-  push:
-    branches: [bench/import-remaining-fastpaths-20260925]
-    paths: [.github/workflows/import-native-key-delivery-20260925.yml]
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -68,7 +68,7 @@ jobs:
           git commit -m 'perf(import): retain native string plans for escaped dictionary keys'
           git push origin HEAD:refs/heads/perf/import-native-key-plan-20260925
           git rev-parse HEAD > builds/key-delivery/head.txt
-          git rev-parse HEAD^{tree} > builds/key-delivery/tree.txt
+          git rev-parse 'HEAD^{tree}' > builds/key-delivery/tree.txt
       - name: Preserve delivery outcome
         if: always()
         uses: actions/upload-artifact@v4
