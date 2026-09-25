@@ -3928,15 +3928,30 @@ export class DictionaryImporter {
         termArtifactFiles,
     ) {
         let total = 0;
+        /**
+         * @param {number} value
+         * @returns {boolean}
+         */
+        const addBytes = (value) => {
+            if (
+                !Number.isSafeInteger(value) ||
+                value < 0 ||
+                value > Number.MAX_SAFE_INTEGER - total
+            ) {
+                return false;
+            }
+            total += value;
+            return true;
+        };
         if (packedTermArtifactBytes instanceof Uint8Array) {
-            total += packedTermArtifactBytes.byteLength;
+            if (!addBytes(packedTermArtifactBytes.byteLength)) { return null; }
         } else if (preloadedTermArtifactBytes !== null) {
             for (const bytes of preloadedTermArtifactBytes.values()) {
-                total += bytes.byteLength;
+                if (!addBytes(bytes.byteLength)) { return null; }
             }
         } else if (termArtifactManifest !== null) {
             for (const {packedLength} of termArtifactManifest.termBanksByArtifact.values()) {
-                total += packedLength;
+                if (!addBytes(packedLength)) { return null; }
             }
         } else {
             for (const termArtifactFile of termArtifactFiles) {
@@ -3948,14 +3963,15 @@ export class DictionaryImporter {
                 const size = typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) ?
                     Math.max(0, Math.trunc(uncompressedSize)) :
                     0;
-                total += size;
+                if (!addBytes(size)) { return null; }
             }
         }
         if (
             sharedGlossaryArtifactBytes instanceof Uint8Array &&
-            !(packedTermArtifactBytes instanceof Uint8Array)
+            !(packedTermArtifactBytes instanceof Uint8Array) &&
+            !addBytes(sharedGlossaryArtifactBytes.byteLength)
         ) {
-            total += sharedGlossaryArtifactBytes.byteLength;
+            return null;
         }
         return total > 0 ? total : null;
     }
