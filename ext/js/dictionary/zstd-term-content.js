@@ -675,13 +675,19 @@ function waitForCompressionWorkerReady(worker) {
             cleanup();
             reject(new Error(event.message || 'Compression worker initialization failed'));
         };
+        const onMessageError = () => {
+            cleanup();
+            reject(new Error('Compression worker initialization returned an invalid message'));
+        };
         const cleanup = () => {
             clearTimeout(timeoutId);
             worker.removeEventListener('message', onMessage);
             worker.removeEventListener('error', onError);
+            worker.removeEventListener('messageerror', onMessageError);
         };
         worker.addEventListener('message', onMessage);
         worker.addEventListener('error', onError);
+        worker.addEventListener('messageerror', onMessageError);
     });
 }
 
