@@ -3610,11 +3610,14 @@ describe('TermRecordOpfsStore', () => {
         }));
         vi.spyOn(store, '_isBinaryFormat').mockReturnValue(true);
         vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
-        Reflect.get(store, '_persistentRecordChunksByDictionary').set(dictionaryName, [{
-            fileName,
-            firstId: 1,
-            count: 250000,
-        }]);
+        Reflect.get(store, '_persistentRecordChunksByDictionary').set(
+            dictionaryName,
+            /** @type {import('core').SafeAny} */ ([{
+                fileName,
+                firstId: 1,
+                count: 250000,
+            }]),
+        );
         const materialize = vi.spyOn(store, 'getByIdsAsync').mockRejectedValue(
             new Error('threshold-sized shard should remain persisted-only'),
         );
