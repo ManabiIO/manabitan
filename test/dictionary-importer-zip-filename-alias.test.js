@@ -81,6 +81,49 @@ describe('DictionaryImporter artifact bank admission', () => {
         );
     };
 
+    test('falls back to ordinary term banks when standalone artifact coverage is partial', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const ordinaryFailure = new Error('ordinary term source selected');
+        const artifactFailure = new Error('partial artifact source selected');
+        const fileMap = new Map([
+            ['term_bank_1.json', {filename: 'term_bank_1.json'}],
+            ['term_bank_2.json', {filename: 'term_bank_2.json'}],
+            ['term_bank_1.mbtb', {filename: 'term_bank_1.mbtb', getData: async () => new Uint8Array(0)}],
+        ]);
+        Reflect.set(importer, '_getFilesFromArchive', async () => ({
+            fileMap,
+            zipReader: {close: async () => {}},
+        }));
+        Reflect.set(importer, '_readAndValidateIndex', async () => ({
+            title: 'Partial artifact coverage',
+            version: 3,
+            revision: '1',
+        }));
+        Reflect.set(importer, '_readTermBankFile', async () => { throw ordinaryFailure; });
+        Reflect.set(importer, '_readTermBankArtifactFile', async () => { throw artifactFailure; });
+        const database = /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ ({
+            isPrepared: () => true,
+            setImportOptimizationFlags() {},
+            dictionaryExists: async () => false,
+            setImportDebugLogging() {},
+            setTermEntryContentDedupEnabled() {},
+            addWithResult: async () => 1,
+            startBulkImport: async () => 'test-session',
+            abortBulkImport: async () => {},
+            deleteDictionaryImportPlaceholder: async () => {},
+        }));
+
+        const result = await importer.importDictionary(
+            database,
+            new ArrayBuffer(0),
+            /** @type {import('dictionary-importer').ImportDetails} */ ({}),
+        );
+
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(ordinaryFailure);
+        expect(result.errors).not.toContain(artifactFailure);
+    });
+
     test('rejects a partial standalone artifact replacement', () => {
         expect(hasCompleteCoverage(
             ['term_bank_1.json', 'term_bank_2.json'],
