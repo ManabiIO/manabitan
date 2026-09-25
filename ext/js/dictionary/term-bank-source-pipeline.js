@@ -390,7 +390,10 @@ export class TermBankSourcePipeline {
             ) {
                 break;
             }
-            void this._readPool.read(candidate);
+            // Prefetch owns no immediate consumer, so observe failures here to
+            // avoid a transient global unhandled rejection. The cached promise
+            // itself remains rejected and the eventual consumer still receives it.
+            void this._readPool.read(candidate).catch(() => {});
             ++prefetchedCount;
             if (candidateBytes > 0) {
                 estimatedBytes += candidateBytes;
