@@ -112,9 +112,10 @@ describe('DictionaryImporter term artifacts', () => {
             'raw-bytes',
             /** @param {Record<string, import('core').SafeAny>} chunk */
             async (chunk) => {
-                streamedPlan = chunk.termRecordPreinternedPlan;
+                const plan = /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (chunk.termRecordPreinternedPlan);
+                streamedPlan = plan;
                 await Promise.resolve();
-                expect(streamedPlan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
+                expect(plan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
             },
             0,
             0,
@@ -123,9 +124,10 @@ describe('DictionaryImporter term artifacts', () => {
             'raw-v4',
         );
 
-        expect(streamedPlan).not.toBeNull();
-        expect(/** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (streamedPlan).stringsBuffer.buffer)
-            .toBe(streamedBytes.buffer);
+        if (streamedPlan === null) {
+            throw new Error('Expected streamed preinterned plan');
+        }
+        expect(streamedPlan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
 
         const retainedBytes = createArtifactWithEmptyReadingSentinel();
         const result = await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
