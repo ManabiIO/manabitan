@@ -29,8 +29,12 @@ jobs:
           def replace(path, old, new):
               p = Path(path)
               s = p.read_text()
+              prefix = ''
+              if path == 'test/term-bank-experiments.test.js':
+                  index = s.index("describe('compression experiment admission'")
+                  prefix, s = s[:index], s[index:]
               assert s.count(old) == 1, (path, old)
-              p.write_text(s.replace(old, new))
+              p.write_text(prefix + s.replace(old, new))
           replace('ext/js/dictionary/term-bank-experiments.js',
               'defaults on; the other experiments remain default-off.',
               'and generic shared-span compression default on; other experiments remain off.')
