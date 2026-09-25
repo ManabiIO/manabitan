@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {toError} from '../core/to-error.js';
 import {generateId} from '../core/utilities.js';
 
 const imageDetailsResponseTimeoutMs = 60_000;
@@ -46,7 +47,12 @@ export class DictionaryWorkerMediaLoader {
         clearTimeout(request.timer);
         const {error} = params;
         if (typeof error !== 'undefined') {
-            request.reject(ExtensionError.deserialize(error));
+            try {
+                request.reject(ExtensionError.deserialize(error));
+            } catch (e) {
+                // The timeout is already cleared; decoding must not leave the request pending.
+                request.reject(toError(e));
+            }
         } else {
             request.resolve(params.result);
         }

@@ -1411,7 +1411,6 @@ describe('TermRecordOpfsStore', () => {
         expect(shardStateByFileName.has(oldFileName)).toBe(true);
     });
 
-
     test('replaceDictionaryName removes a copied destination shard when its index write fails', async () => {
         const store = new TermRecordOpfsStore();
         vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
