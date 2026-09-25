@@ -89,6 +89,7 @@ export class WebAudioLocalAudio {
     async play() {
         if (!this._decodedBuffer || !this._audioContext) { return; }
         this.pause();
+        /** @type {import('core').TokenObject} */
         const token = {};
         this._playToken = token;
         try {

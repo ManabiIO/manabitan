@@ -84,6 +84,8 @@ class FakeGain {
 
 class FakeAudioContext {
     constructor() {
+        // Capture the context constructed by the production class for assertions.
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         context = this
         /** @type {string} */
         this.state = 'running'
