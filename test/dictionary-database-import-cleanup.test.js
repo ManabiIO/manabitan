@@ -347,6 +347,50 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(Reflect.get(database, '_deferTermsVirtualTableSync')).toBe(false);
     });
 
+    test('keeps bulk-import ownership until all failed startup checkpoints settle', async () => {
+        const database = new DictionaryDatabase();
+        /** @type {() => void} */
+        let releaseRecordCheckpoint = () => {};
+        /** @type {Promise<void>} */
+        const recordCheckpointGate = new Promise((resolve) => {
+            releaseRecordCheckpoint = resolve;
+        });
+        const contentCheckpoint = vi.fn().mockRejectedValue(new Error('content checkpoint failed'));
+        const recordCheckpoint = vi.fn(async () => {
+            await recordCheckpointGate;
+            return {shards: []};
+        });
+        Reflect.set(database, '_db', {exec: vi.fn(), selectValue: vi.fn(() => 0)});
+        Reflect.set(database, '_termContentStore', {
+            createImportCheckpoint: contentCheckpoint,
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
+        });
+        Reflect.set(database, '_termRecordStore', {
+            createImportCheckpoint: recordCheckpoint,
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
+        });
+        Reflect.set(database, '_importJournal', {write: vi.fn(resolveVoid), clear: vi.fn(resolveVoid)});
+
+        let firstStartSettled = false;
+        const firstStart = database.startBulkImport();
+        void firstStart.then(
+            () => { firstStartSettled = true; },
+            () => { firstStartSettled = true; },
+        );
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
+
+        expect(firstStartSettled).toBe(false);
+        await expect(database.startBulkImport()).rejects.toThrow('A dictionary bulk import is already active');
+        expect(contentCheckpoint).toHaveBeenCalledOnce();
+        expect(recordCheckpoint).toHaveBeenCalledOnce();
+
+        releaseRecordCheckpoint();
+        await expect(firstStart).rejects.toThrow('content checkpoint failed');
+        expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
+    });
+
     test('reserves bulk-import ownership before awaiting storage checkpoints', async () => {
         const database = new DictionaryDatabase();
         /** @type {() => void} */
