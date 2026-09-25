@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [jmdict, jitendex, jmnedict]
+        dictionary: [jmdict, jitendex, jmnedict, wty-en-en]
     env:
       MANABITAN_CHROMIUM_HEADLESS: '1'
       MANABITAN_E2E_STRICT_RUNTIME: '1'
@@ -27,39 +27,75 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
-      - name: Parser and experiment regressions
-        run: npx vitest run test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js test/lookup-construction-experiments.test.js --no-file-parallelism
+      - name: Focused native and compression regressions
+        run: npx vitest run test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js test/lookup-construction-experiments.test.js test/generic-span-codec-integration.test.js test/zstd-term-content.test.js --no-file-parallelism
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+      - name: Add frozen benchmark-only WTY fixture support
+        if: matrix.dictionary == 'wty-en-en'
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('test/perf/dictionaries.lock.json')
+          lock = json.loads(p.read_text())
+          lock['dictionaries']['wty-en-en'] = {
+              'label': 'wty-en-en', 'cacheFile': 'wty-en-en.zip',
+              'release': '21b1b22cd655d7936d62b127e6404fbb8a88c7c3',
+              'url': 'https://huggingface.co/datasets/daxida/wty-release/resolve/21b1b22cd655d7936d62b127e6404fbb8a88c7c3/latest/dict/en/en/wty-en-en.zip',
+              'sha256': 'b9603db16dee82afd811386302ccd78bab591a6513b0d3194d937dc9110dd4a5',
+              'sizeBytes': 106918350, 'expectedTitle': 'wty-en-en',
+              'revision': '2026.08.29', 'termRows': 1643040,
+          }
+          p.write_text(json.dumps(lock, indent=4) + '\n')
+          p = Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          source = p.read_text()
+          replacements = [
+              ("new Set(['jmdict', 'jmnedict', 'jitendex'])", "new Set(['jmdict', 'jmnedict', 'jitendex', 'wty-en-en'])"),
+              ("jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},", "jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},\n            'wty-en-en': {label: 'wty-en-en', filePath: path.join(dictionaryCacheDir, 'wty-en-en.zip')},"),
+          ]
+          for old, new in replacements:
+              assert source.count(old) == 1, old
+              source = source.replace(old, new)
+          p.write_text(source)
+          PY
+      - name: Record exact harness and product source
+        shell: bash
+        run: |
+          mkdir -p builds
+          git diff > builds/qualification-harness.patch
+          git rev-parse HEAD > builds/qualification-source.txt
+          sha256sum builds/qualification-harness.patch ext/lib/term-bank-parser.wasm > builds/qualification-sha256.txt
       - name: Restore pinned dictionary cache
         uses: actions/cache@v5
         with:
           path: builds/e2e-dictionary-cache
           key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
-      - name: Counterbalanced complete imports
+      - name: Independent counterbalanced complete imports
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p builds
           bench() {
             xvfb-run -a node test/chromium/import-flags-ab-benchmark.js '${{ matrix.dictionary }}' --pairs "$1" --flags "$2" --label "$3"
           }
           bench 1 '{}' 'warmup-baseline-exclude'
           bench 2 '{}' 'aa-before'
-          bench 1 '{"experimentalTermBankSpans":true}' 'warmup-bank-spans-exclude'
-          bench 6 '{"experimentalTermBankSpans":true}' 'bank-spans'
-          bench 2 '{}' 'aa-between'
           bench 1 '{"experimentalValidatedGlossaryReuse":true}' 'warmup-validated-glossary-exclude'
-          bench 6 '{"experimentalValidatedGlossaryReuse":true}' 'validated-glossary'
+          bench 12 '{"experimentalValidatedGlossaryReuse":true}' 'validated-glossary-confirmation'
+          bench 2 '{}' 'aa-between'
+          bench 1 '{"experimentalGenericSpanCompression":true}' 'warmup-generic-span-exclude'
+          bench 12 '{"experimentalGenericSpanCompression":true}' 'generic-span-confirmation'
           bench 2 '{}' 'aa-after'
       - name: Preserve benchmark evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: import-qualification-active-${{ matrix.dictionary }}
+          name: import-qualification-confirmation-${{ matrix.dictionary }}
           path: |
             builds/chromium-e2e-import-flags-isolated-summary-*.json
             builds/chromium-e2e-import-report-iso-*.json
             builds/chromium-e2e-import-report-iso-*.html
+            builds/qualification-*
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 30
