@@ -555,6 +555,34 @@ function decodeDataUrl(value) {
 }
 
 /**
+ * CSS syntax whitespace is ASCII-only. JavaScript \s and trim() also
+ * consume NBSP and other non-ASCII characters that CSS permits in identifiers.
+ * @param {string} character
+ * @returns {boolean}
+ */
+function isCssWhitespace(character) {
+    return (
+        character === '\t' ||
+        character === '\n' ||
+        character === '\f' ||
+        character === '\r' ||
+        character === ' '
+    );
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function trimCssWhitespace(value) {
+    let start = 0;
+    let end = value.length;
+    while (start < end && isCssWhitespace(value[start])) { ++start; }
+    while (end > start && isCssWhitespace(value[end - 1])) { --end; }
+    return value.slice(start, end);
+}
+
+/**
  * @param {Uint8Array} bytes
  * @returns {string|null}
  */
@@ -567,7 +595,7 @@ function getDeclaredStylesheetEncoding(bytes) {
         prefix += String.fromCodePoint(byte);
         if (byte === 0x3b) { break; }
     }
-    const match = /^@charset\s+"([^"\r\n]+)"\s*;/iu.exec(prefix);
+    const match = /^@charset[\t\n\f\r ]+"([^"\r\n]+)"[\t\n\f\r ]*;/iu.exec(prefix);
     return match?.[1] ?? null;
 }
 
@@ -617,9 +645,9 @@ function getLikelyUtf16StylesheetEncoding(bytes) {
 function decodeStylesheetWithEncoding(bytes, encoding) {
     try {
         const decoded = new TextDecoder(encoding, {fatal: true}).decode(bytes);
-        const value = decoded
-            .replace(/^\ufeff?@charset\s+"[^"\r\n]+"\s*;\s*/iu, '')
-            .trim();
+        const value = trimCssWhitespace(
+            decoded.replace(/^\ufeff?@charset[\t\n\f\r ]+"[^"\r\n]+"[\t\n\f\r ]*;[\t\n\f\r ]*/iu, ''),
+        );
         return value.length > 0 && !value.includes('\u0000') ? value : null;
     } catch (_error) {
         return null;
@@ -658,7 +686,7 @@ function decodeStylesheetAsset(bytes) {
 function readCssUrlFunction(value, startIndex) {
     if (value.slice(startIndex, startIndex + 4).toLowerCase() !== 'url(') { return null; }
     let index = startIndex + 4;
-    while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+    while (index < value.length && isCssWhitespace(value[index])) { index += 1; }
     if (index >= value.length) { return null; }
 
     const quote = value[index] === '"' || value[index] === "'" ? value[index++] : '';
@@ -668,14 +696,14 @@ function readCssUrlFunction(value, startIndex) {
         if (quote.length > 0) {
             if (character === quote) {
                 index += 1;
-                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+                while (index < value.length && isCssWhitespace(value[index])) { index += 1; }
                 return value[index] === ')' ? {path, endIndex: index + 1} : null;
             }
             if (/[\n\r\f]/u.test(character)) { return null; }
         } else {
             if (character === ')') { return {path, endIndex: index + 1}; }
-            if (/\s/u.test(character)) {
-                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+            if (isCssWhitespace(character)) {
+                while (index < value.length && isCssWhitespace(value[index])) { index += 1; }
                 return value[index] === ')' ? {path, endIndex: index + 1} : null;
             }
             if (character === '"' || character === "'" || character === '(' || /[\n\r\f]/u.test(character)) {
@@ -782,8 +810,12 @@ function readCssEscape(value, startIndex) {
         ) ?
             '\ufffd' :
             String.fromCodePoint(codePoint);
-        if (endIndex < value.length && /\s/u.test(value[endIndex])) {
-            endIndex += 1;
+        if (endIndex < value.length) {
+            if (value[endIndex] === '\r' && value[endIndex + 1] === '\n') {
+                endIndex += 2;
+            } else if (isCssWhitespace(value[endIndex])) {
+                endIndex += 1;
+            }
         }
         return {value: decoded, endIndex};
     }
@@ -914,10 +946,10 @@ function splitSelectorByCombinators(selector) {
                 if (startIndex < index) { parts.push(selector.slice(startIndex, index)); }
                 parts.push(character);
                 startIndex = index + 1;
-            } else if (parenDepth === 0 && bracketDepth === 0 && /\s/u.test(character)) {
+            } else if (parenDepth === 0 && bracketDepth === 0 && isCssWhitespace(character)) {
                 if (startIndex < index) { parts.push(selector.slice(startIndex, index)); }
                 const whitespaceStart = index;
-                while (index + 1 < selector.length && /\s/u.test(selector[index + 1])) { index += 1; }
+                while (index + 1 < selector.length && isCssWhitespace(selector[index + 1])) { index += 1; }
                 parts.push(selector.slice(whitespaceStart, index + 1));
                 startIndex = index + 1;
             }
@@ -986,7 +1018,7 @@ function readCssIdentifier(selector, startIndex) {
  * @returns {string}
  */
 function rewriteCssAttributeSelector(attributeSelector) {
-    const match = attributeSelector.match(/^\[\s*(?<name>[-\w]+)(?<rest>[\s\S]*)\]$/u);
+    const match = attributeSelector.match(/^\[[\t\n\f\r ]*(?<name>[-\w]+)(?<rest>[\s\S]*)\]$/u);
     const groups = match?.groups;
     if (typeof groups?.name !== 'string' || typeof groups.rest !== 'string') { return attributeSelector; }
     const name = groups.name.toLowerCase();
@@ -1164,7 +1196,7 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
             }
         }
         parts.push(character);
-        if (!/\s/u.test(character)) {
+        if (!isCssWhitespace(character)) {
             expectTagName = false;
         }
         index += 1;
@@ -1178,12 +1210,12 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
  * @returns {string}
  */
 function migrateCssSelector(selector, glossaryRootSelector) {
-    const migrated = splitSelectorByCombinators(selector.trim()).map((part) => {
-        if (part.trim().length === 0 || ['>', '+', '~'].includes(part)) { return part; }
+    const migrated = splitSelectorByCombinators(trimCssWhitespace(selector)).map((part) => {
+        if (trimCssWhitespace(part).length === 0 || ['>', '+', '~'].includes(part)) { return part; }
         return migrateCssSelectorSegment(part, glossaryRootSelector);
     }).join('');
     // Quoted attribute values and whitespace after CSS hex escapes are significant.
-    return migrated.trim();
+    return trimCssWhitespace(migrated);
 }
 
 /**
@@ -1199,7 +1231,7 @@ function scopeCssSelectorSubject(selector, glossaryRootSelector) {
     let subjectIndex = parts.length - 1;
     while (subjectIndex >= 0) {
         const part = parts[subjectIndex];
-        if (part.trim().length > 0 && !['>', '+', '~'].includes(part)) { break; }
+        if (trimCssWhitespace(part).length > 0 && !['>', '+', '~'].includes(part)) { break; }
         subjectIndex -= 1;
     }
     if (subjectIndex < 0) { return selector; }
@@ -1327,7 +1359,7 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelector
                 preludeStart = commentEnd + 2;
                 continue;
             }
-            if (/\s/u.test(stylesheet[preludeStart])) {
+            if (isCssWhitespace(stylesheet[preludeStart])) {
                 preludeStart += 1;
                 continue;
             }
@@ -1385,9 +1417,9 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelector
                 const prelude = stylesheet.slice(preludeStart, cursor);
                 const blockEnd = findMatchingCssBrace(stylesheet, cursor);
                 let body = stylesheet.slice(cursor + 1, blockEnd);
-                const stripped = prelude.trim();
+                const stripped = trimCssWhitespace(prelude);
                 if (stripped.startsWith('@')) {
-                    const atRuleName = stripped.slice(1).split(/\s|\(/u, 1)[0].toLowerCase();
+                    const atRuleName = stripped.slice(1).split(/[\t\n\f\r (]/u, 1)[0].toLowerCase();
                     if (['media', 'supports', 'layer', 'container', 'document'].includes(atRuleName)) {
                         body = rewriteCssRuleSelectors(body, glossaryRootSelector, scopeSelectors);
                     }
@@ -1482,9 +1514,11 @@ function isStructuredStyleRecord(value) {
 function buildStructuredData(attrs) {
     /** @type {Record<string, string>} */
     const data = {};
-    const className = attrs.class?.trim().replace(/\s+/gu, ' ') || '';
+    const className = typeof attrs.class === 'string' ?
+        trimCssWhitespace(attrs.class).replace(/[\t\n\f\r ]+/gu, ' ') :
+        '';
     if (className.length > 0) { data.class = className; }
-    const id = attrs.id?.trim() || '';
+    const id = typeof attrs.id === 'string' ? trimCssWhitespace(attrs.id) : '';
     if (id.length > 0) { data.id = id; }
     return Object.keys(data).length > 0 ? data : null;
 }
@@ -1550,21 +1584,21 @@ function splitInlineCssDeclarations(styleText) {
  * @returns {Record<string, string|string[]>|null}
  */
 function convertInlineStyle(styleText, assetPrefix, assetReferences) {
-    if (typeof styleText !== 'string' || styleText.trim().length === 0) { return null; }
+    if (typeof styleText !== 'string' || trimCssWhitespace(styleText).length === 0) { return null; }
     /** @type {Record<string, string|string[]>} */
     const style = {};
     for (const rawDeclaration of splitInlineCssDeclarations(styleText)) {
         const declaration = rawDeclaration.replace(/\/\*[\s\S]*?\*\//gu, '');
         const separator = declaration.indexOf(':');
         if (separator < 0) { continue; }
-        const propertyName = declaration.slice(0, separator).trim().toLowerCase();
-        let value = declaration.slice(separator + 1).trim();
+        const propertyName = trimCssWhitespace(declaration.slice(0, separator)).toLowerCase();
+        let value = trimCssWhitespace(declaration.slice(separator + 1));
         if (propertyName.length === 0 || value.length === 0) { continue; }
         if (/url\(/iu.test(value)) {
             value = rewriteCssAssetUrls(value, assetPrefix, null, assetReferences);
         }
         if (propertyName === 'text-decoration' || propertyName === 'text-decoration-line') {
-            const parts = value.split(/\s+/u).filter((part) => ['underline', 'overline', 'line-through', 'none'].includes(part));
+            const parts = value.split(/[\t\n\f\r ]+/u).filter((part) => ['underline', 'overline', 'line-through', 'none'].includes(part));
             if (parts.length === 0) { continue; }
             style.textDecorationLine = parts.length === 1 ? parts[0] : parts;
             continue;
@@ -1708,8 +1742,7 @@ function appendStructuredContent(parent, content, details) {
         const attrs = getElementAttributes(elementNode);
         if (tagName === 'script' || tagName === 'noscript') { continue; }
         if (tagName === 'style') {
-            const stylesheet = getDirectTextContent(elementNode)
-                .trim();
+            const stylesheet = trimCssWhitespace(getDirectTextContent(elementNode));
             if (stylesheet.length > 0) {
                 details.inlineStylesheets.push([`inline/${details.inlineStylesheets.length + 1}.css`, stylesheet]);
             }
