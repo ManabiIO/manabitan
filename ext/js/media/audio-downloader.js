@@ -527,19 +527,24 @@ export class AudioDownloader {
             idleTimer = setTimeout(onIdleTimeout, idleTimeout);
         }
 
-        const response = await this._requestBuilder.fetchAnonymous(url, {
-            ...DEFAULT_REQUEST_INIT_PARAMS,
-            signal,
-        });
+        let response;
+        let arrayBuffer;
+        try {
+            response = await this._requestBuilder.fetchAnonymous(url, {
+                ...DEFAULT_REQUEST_INIT_PARAMS,
+                signal,
+            });
 
-        if (!response.ok) {
-            throw new Error(`Invalid response: ${response.status}`);
-        }
+            if (!response.ok) {
+                throw new Error(`Invalid response: ${response.status}`);
+            }
 
-        const arrayBuffer = await RequestBuilder.readFetchResponseArrayBuffer(response, onProgress);
-
-        if (idleTimer !== null) {
-            clearTimeout(idleTimer);
+            arrayBuffer = await RequestBuilder.readFetchResponseArrayBuffer(response, onProgress);
+        } finally {
+            if (idleTimer !== null) {
+                clearTimeout(idleTimer);
+                idleTimer = null;
+            }
         }
 
         if (!await this._isAudioBinaryValid(arrayBuffer, sourceType)) {
