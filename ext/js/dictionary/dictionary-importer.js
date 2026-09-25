@@ -5405,18 +5405,38 @@ null;
      * @returns {import('dictionary-importer').SummaryMetaCount}
      */
     _getMetaCounts(metaList) {
-        /** @type {Map<string, number>} */
-        const countsMap = new Map();
+        let frequencyCount = 0;
+        let pitchCount = 0;
+        let ipaCount = 0;
+        /** @type {Map<string, number>|null} */
+        let otherCounts = null;
         for (const {mode} of metaList) {
-            let count = countsMap.get(mode);
-            count = typeof count !== 'undefined' ? count + 1 : 1;
-            countsMap.set(mode, count);
+            switch (mode) {
+                case 'freq':
+                    ++frequencyCount;
+                    break;
+                case 'pitch':
+                    ++pitchCount;
+                    break;
+                case 'ipa':
+                    ++ipaCount;
+                    break;
+                default:
+                    otherCounts ??= new Map();
+                    otherCounts.set(mode, (otherCounts.get(mode) ?? 0) + 1);
+                    break;
+            }
         }
         /** @type {import('dictionary-importer').SummaryMetaCount} */
         const counts = {total: metaList.length};
-        for (const [key, value] of countsMap.entries()) {
-            if (Object.prototype.hasOwnProperty.call(counts, key)) { continue; }
-            counts[key] = value;
+        if (frequencyCount > 0) { counts.freq = frequencyCount; }
+        if (pitchCount > 0) { counts.pitch = pitchCount; }
+        if (ipaCount > 0) { counts.ipa = ipaCount; }
+        if (otherCounts !== null) {
+            for (const [key, value] of otherCounts) {
+                if (Object.prototype.hasOwnProperty.call(counts, key)) { continue; }
+                counts[key] = value;
+            }
         }
         return counts;
     }
