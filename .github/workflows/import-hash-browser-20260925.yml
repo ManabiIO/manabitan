@@ -1,0 +1,79 @@
+name: Import hash browser validation 20260925
+on:
+  push:
+    branches: [bench/import-simd-hash-20260925]
+    paths: [.github/workflows/import-hash-browser-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cohort: defaults
+            flags: '{}'
+          - cohort: generic-on
+            flags: '{"experimentalGenericSpanCompression":true}'
+    env:
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
+      MANABITAN_E2E_IMPORT_FLAGS_JSON: ${{ matrix.flags }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Isolate exact product tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/hash-round-20260925/prepare.py /tmp/hash-prepare.py
+          cp test/term-bank-content-hash.test.js /tmp/hash-test.js
+          git fetch --depth=1 origin 76362775484661b3cd8b9d2c84b228802c023a76
+          git reset --hard FETCH_HEAD
+          cp /tmp/hash-test.js test/term-bank-content-hash.test.js
+          python3 /tmp/hash-prepare.py
+          mkdir -p builds/hash-browser
+          cp test/term-bank-content-hash.test.js builds/hash-browser/
+          git diff > builds/hash-browser/source.patch
+      - uses: ./.github/actions/setup
+      - name: Check final tests and types
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx eslint test/term-bank-content-hash.test.js > builds/hash-browser/lint.log 2>&1
+          npm run test:ts:test > builds/hash-browser/types.log 2>&1
+          npx vitest run test/term-bank-content-hash.test.js test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-parser-string-scan.test.js --no-file-parallelism > builds/hash-browser/tests.log 2>&1
+          sha256sum ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm test/term-bank-content-hash.test.js > builds/hash-browser/SHA256SUMS
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Full Chromium import lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          xvfb-run -a npm run test:e2e:chromium-extension 2>&1 | tee builds/hash-browser/lifecycle.log
+          python3 - <<'PY'
+          import json
+          r=json.load(open('builds/chromium-e2e-import-report.json'))
+          assert r['status']=='success' and r['skippedVerification'] is False
+          assert r['runtimeDiagnostics']['openStorageMode']=='opfs-sahpool'
+          PY
+      - name: Preserve final sources and outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hash-browser-${{ matrix.cohort }}
+          path: |
+            builds/hash-browser/
+            builds/chromium-e2e-import-report.*
+          retention-days: 30
+          if-no-files-found: error
