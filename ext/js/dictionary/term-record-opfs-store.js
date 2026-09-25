@@ -2547,13 +2547,13 @@ export class TermRecordOpfsStore {
             }
             if (!preserveSourceFiles) {
                 for (const plan of renamePlans) {
-                    await this._recordsDirectoryHandle.removeEntry(plan.state.fileName);
-                    try {
-                        await this._recordsDirectoryHandle.removeEntry(`${plan.state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
-                    } catch (_) {
-                        // NOP
-                    }
+                    // Restoration owns the source before the first delete. An
+                    // index-only orphan is recoverable as a descriptor on
+                    // startup, so failing to remove the old index cannot be
+                    // treated as a successful rename.
                     removedPlans.push(plan);
+                    await this._recordsDirectoryHandle.removeEntry(plan.state.fileName);
+                    await this._recordsDirectoryHandle.removeEntry(`${plan.state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
                 }
             }
         } catch (e) {
