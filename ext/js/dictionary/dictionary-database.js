@@ -6060,7 +6060,23 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
+        // Borrowed parser sources stay immutable until this synchronous copy
+        // returns. Align the shared-source tail with the private destination;
+        // move only owned bytes to restore the original byte positions.
+        const sourceAlignment = (spans.buffer.byteOffset + minimumOffset) % 8;
+        let owned;
+        if (
+            byteLength >= 2 * 1024 * 1024 && sourceAlignment !== 0 &&
+            typeof SharedArrayBuffer !== 'undefined' && spans.buffer.buffer instanceof SharedArrayBuffer
+        ) {
+            const prefixLength = 8 - sourceAlignment;
+            owned = new Uint8Array(byteLength);
+            owned.set(spans.buffer.subarray(minimumOffset + prefixLength, maximumEnd));
+            owned.copyWithin(prefixLength, 0, byteLength - prefixLength);
+            owned.set(spans.buffer.subarray(minimumOffset, minimumOffset + prefixLength));
+        } else {
+            owned = spans.buffer.slice(minimumOffset, maximumEnd);
+        }
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.byteLength;
         for (let i = 0; i < staged.indexes.length; ++i) {
