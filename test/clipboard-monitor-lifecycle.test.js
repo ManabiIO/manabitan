@@ -122,7 +122,7 @@ test('an in-flight read completing after stop cannot notify or reschedule', asyn
 test('an old read completing after restart cannot replace the new baseline', async () => {
     const pending = deferredText()
     let reads = 0
-    const monitor = new ClipboardMonitor({getText: () => ++reads === 1 ? pending.promise : Promise.resolve('new')})
+    const monitor = new ClipboardMonitor({getText: () => (++reads === 1 ? pending.promise : Promise.resolve('new'))})
     monitor.start()
     monitor.start()
     await Promise.resolve()
