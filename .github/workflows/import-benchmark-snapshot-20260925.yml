@@ -1,0 +1,44 @@
+name: Pinned import benchmark source 20260925
+on:
+  push:
+    branches: [verify/import-benchmark-20260925-a392554]
+    paths: [.github/workflows/import-benchmark-snapshot-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: a3925549826671bc1026035f43f0fde2e407077c
+          persist-credentials: false
+      - name: Archive exact tracked baseline
+        run: |
+          mkdir -p /tmp/import-benchmark-source
+          git rev-parse HEAD > /tmp/import-benchmark-source/BASE_COMMIT
+          git archive --format=tar.gz HEAD > /tmp/import-benchmark-source/source.tar.gz
+          sha256sum /tmp/import-benchmark-source/source.tar.gz > /tmp/import-benchmark-source/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-import-source-a392554
+          path: /tmp/import-benchmark-source/
+          retention-days: 7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Archive local validation dependencies
+        run: |
+          mkdir -p /tmp/import-benchmark-runtime
+          tar -czf /tmp/import-benchmark-runtime/runtime.tar.gz node_modules ext/lib
+          node --version > /tmp/import-benchmark-runtime/NODE_VERSION
+          sha256sum /tmp/import-benchmark-runtime/runtime.tar.gz > /tmp/import-benchmark-runtime/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-import-runtime-a392554
+          path: /tmp/import-benchmark-runtime/
+          retention-days: 7
