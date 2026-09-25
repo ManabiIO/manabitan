@@ -144,6 +144,65 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
 }
 
 describe('TermRecordOpfsStore', () => {
+    test('does not publish available-to-available health changes during append', async () => {
+        const store = new TermRecordOpfsStore();
+        const healthChanges = vi.fn();
+        store.setDictionaryHealthChangeHandler(healthChanges);
+
+        await store.appendBatch([
+            {
+                dictionary: 'Healthy dictionary',
+                expression: 'one',
+                reading: 'one',
+                expressionReverse: null,
+                readingReverse: null,
+                entryContentOffset: 0,
+                entryContentLength: 1,
+                entryContentDictName: 'raw',
+                score: 0,
+                sequence: null,
+            },
+            {
+                dictionary: 'Healthy dictionary',
+                expression: 'two',
+                reading: 'two',
+                expressionReverse: null,
+                readingReverse: null,
+                entryContentOffset: 1,
+                entryContentLength: 1,
+                entryContentDictName: 'raw',
+                score: 0,
+                sequence: null,
+            },
+        ]);
+
+        expect(healthChanges).not.toHaveBeenCalled();
+
+        Reflect.get(store, '_setDictionaryHealth').call(
+            store,
+            'Healthy dictionary',
+            'temporarilyUnavailable',
+            'temporary failure',
+        );
+        Reflect.get(store, '_setDictionaryHealth').call(
+            store,
+            'Healthy dictionary',
+            'available',
+            null,
+        );
+        Reflect.get(store, '_setDictionaryHealth').call(
+            store,
+            'Healthy dictionary',
+            'available',
+            null,
+        );
+
+        expect(healthChanges.mock.calls).toEqual([
+            ['Healthy dictionary', 'temporarilyUnavailable', 'temporary failure'],
+            ['Healthy dictionary', 'available', null],
+        ]);
+    });
+
     test('uses compact artifact fields only when they reduce persisted bytes', () => {
         const store = new TermRecordOpfsStore();
         const encode = store._encodeArtifactRecordFields.bind(store);
