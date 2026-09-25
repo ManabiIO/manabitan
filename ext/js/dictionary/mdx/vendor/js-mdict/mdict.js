@@ -39,6 +39,12 @@ export class Mdict extends MdictBase {
         this._lookupKeywordList = null;
         this._recordBlockCache = new Map();
         this._recordBlockCacheSize = 0;
+        // Blocks larger than the normal cache budget are promoted only after
+        // two consecutive accesses. This avoids retaining one-off or alternating
+        // oversized blocks while stopping repeated import-time decompression.
+        this._oversizedRecordBlockCandidateIndex = -1;
+        this._oversizedRecordBlockIndex = -1;
+        this._oversizedRecordBlock = null;
     }
     // Build a lookup-only view; physical key order and record offsets remain
     // untouched for import iteration. Code-unit ordering keeps every normalized
@@ -147,6 +153,20 @@ export class Mdict extends MdictBase {
     }
 
     _readRecordBlock(blockIndex) {
+        if (
+            this._oversizedRecordBlockIndex === blockIndex &&
+            this._oversizedRecordBlock !== null
+        ) {
+            return this._oversizedRecordBlock;
+        }
+
+        const repeatedOversizedCandidate = this._oversizedRecordBlockCandidateIndex === blockIndex;
+        // A different request breaks the consecutive-access run. Release the
+        // transient oversized block before allocating/decompressing another.
+        this._oversizedRecordBlockCandidateIndex = -1;
+        this._oversizedRecordBlockIndex = -1;
+        this._oversizedRecordBlock = null;
+
         const cached = this._recordBlockCache.get(blockIndex);
         if (typeof cached !== 'undefined') {
             this._recordBlockCache.delete(blockIndex);
@@ -160,17 +180,25 @@ export class Mdict extends MdictBase {
         );
         const bytes = this.decompressBuff(packed, info.unpackSize);
         const budget = this.options.recordBlockCacheBytes;
-        if (budget > 0 && bytes.byteLength > 0 && bytes.byteLength <= budget) {
-            const owned = new Uint8Array(bytes);
-            while (this._recordBlockCache.size >= 64 || this._recordBlockCacheSize + owned.byteLength > budget) {
-                const oldest = this._recordBlockCache.keys().next().value;
-                const evicted = this._recordBlockCache.get(oldest);
-                this._recordBlockCache.delete(oldest);
-                this._recordBlockCacheSize -= evicted.byteLength;
+        if (budget > 0 && bytes.byteLength > 0) {
+            if (bytes.byteLength <= budget) {
+                const owned = new Uint8Array(bytes);
+                while (this._recordBlockCache.size >= 64 || this._recordBlockCacheSize + owned.byteLength > budget) {
+                    const oldest = this._recordBlockCache.keys().next().value;
+                    const evicted = this._recordBlockCache.get(oldest);
+                    this._recordBlockCache.delete(oldest);
+                    this._recordBlockCacheSize -= evicted.byteLength;
+                }
+                this._recordBlockCache.set(blockIndex, owned);
+                this._recordBlockCacheSize += owned.byteLength;
+                return owned;
             }
-            this._recordBlockCache.set(blockIndex, owned);
-            this._recordBlockCacheSize += owned.byteLength;
-            return owned;
+
+            this._oversizedRecordBlockCandidateIndex = blockIndex;
+            if (repeatedOversizedCandidate) {
+                this._oversizedRecordBlockIndex = blockIndex;
+                this._oversizedRecordBlock = bytes;
+            }
         }
         return bytes;
     }
@@ -289,6 +317,9 @@ export class Mdict extends MdictBase {
         this.recordInfoList = [];
         this._recordBlockCache.clear();
         this._recordBlockCacheSize = 0;
+        this._oversizedRecordBlockCandidateIndex = -1;
+        this._oversizedRecordBlockIndex = -1;
+        this._oversizedRecordBlock = null;
     }
 }
 /**
