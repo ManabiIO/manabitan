@@ -110,6 +110,12 @@ const TERM_ARTIFACT_PRELOAD_CONCURRENCY = 4;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const GLOSSARY_IMAGE_PATH_PATTERN = /"path"\s*:\s*"((?:\\.|[^"\\])*)"/g;
 const JSON_PATH_KEY_BYTES = new Uint8Array([0x22, 0x70, 0x61, 0x74, 0x68, 0x22]);
+const FREQUENCY_DATA_KEYS = ['value', 'displayValue'];
+const TERM_FREQUENCY_DATA_KEYS = ['reading', 'frequency'];
+const PITCH_DATA_KEYS = ['reading', 'pitches'];
+const PITCH_ITEM_KEYS = ['position', 'nasal', 'devoice', 'tags'];
+const IPA_DATA_KEYS = ['reading', 'transcriptions'];
+const IPA_TRANSCRIPTION_KEYS = ['ipa', 'tags'];
 /** @type {import('dictionary-data').TermGlossary[]} */
 const EMPTY_TERM_GLOSSARY = [];
 /** @typedef {import('dictionary-importer').ImportFileEntry} ImportFileEntry */
@@ -186,6 +192,143 @@ function decodeUtf8Bytes(decoder, bytes) {
     return typeof bytes !== 'undefined' && !(bytes.buffer instanceof ArrayBuffer) ?
         decoder.decode(Uint8Array.from(bytes)) :
         decoder.decode(bytes);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {value is Record<string, unknown>}
+ */
+function isJsonObject(value) {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isFiniteJsonNumber(value) {
+    return typeof value === 'number' && Number.isFinite(value);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isStringArray(value) {
+    return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+/**
+ * @param {Record<string, unknown>} value
+ * @param {string[]} allowedKeys
+ * @returns {boolean}
+ */
+function hasOnlyJsonKeys(value, allowedKeys) {
+    for (const key in value) {
+        if (Object.hasOwn(value, key) && !allowedKeys.includes(key)) { return false; }
+    }
+    return true;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isFrequencyData(value) {
+    if (typeof value === 'string' || isFiniteJsonNumber(value)) { return true; }
+    if (!isJsonObject(value) || !hasOnlyJsonKeys(value, FREQUENCY_DATA_KEYS)) { return false; }
+    return (
+        Object.hasOwn(value, 'value') &&
+        isFiniteJsonNumber(value.value) &&
+        (!Object.hasOwn(value, 'displayValue') || typeof value.displayValue === 'string')
+    );
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isTermFrequencyData(value) {
+    if (isFrequencyData(value)) { return true; }
+    if (!isJsonObject(value) || !hasOnlyJsonKeys(value, TERM_FREQUENCY_DATA_KEYS)) { return false; }
+    return (
+        typeof value.reading === 'string' &&
+        Object.hasOwn(value, 'frequency') &&
+        isFrequencyData(value.frequency)
+    );
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isNonNegativeIntegerOrIntegerArray(value) {
+    if (Number.isInteger(value) && /** @type {number} */ (value) >= 0) { return true; }
+    return Array.isArray(value) && value.every((item) => Number.isInteger(item) && item >= 0);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isPitchPosition(value) {
+    return (
+        (Number.isInteger(value) && /** @type {number} */ (value) >= 0) ||
+        (typeof value === 'string' && /^[HL]+$/u.test(value))
+    );
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isPitchData(value) {
+    if (!isJsonObject(value) || !hasOnlyJsonKeys(value, PITCH_DATA_KEYS)) { return false; }
+    if (typeof value.reading !== 'string' || !Array.isArray(value.pitches)) { return false; }
+    for (const pitch of value.pitches) {
+        if (!isJsonObject(pitch) || !hasOnlyJsonKeys(pitch, PITCH_ITEM_KEYS)) { return false; }
+        if (!Object.hasOwn(pitch, 'position') || !isPitchPosition(pitch.position)) { return false; }
+        if (Object.hasOwn(pitch, 'nasal') && !isNonNegativeIntegerOrIntegerArray(pitch.nasal)) { return false; }
+        if (Object.hasOwn(pitch, 'devoice') && !isNonNegativeIntegerOrIntegerArray(pitch.devoice)) { return false; }
+        if (Object.hasOwn(pitch, 'tags') && !isStringArray(pitch.tags)) { return false; }
+    }
+    return true;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isIpaData(value) {
+    if (!isJsonObject(value) || !hasOnlyJsonKeys(value, IPA_DATA_KEYS)) { return false; }
+    if (typeof value.reading !== 'string' || !Array.isArray(value.transcriptions)) { return false; }
+    for (const transcription of value.transcriptions) {
+        if (!isJsonObject(transcription) || !hasOnlyJsonKeys(transcription, IPA_TRANSCRIPTION_KEYS)) { return false; }
+        if (typeof transcription.ipa !== 'string') { return false; }
+        if (Object.hasOwn(transcription, 'tags') && !isStringArray(transcription.tags)) { return false; }
+    }
+    return true;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isKanjiStats(value) {
+    if (!isJsonObject(value)) { return false; }
+    for (const key in value) {
+        if (Object.hasOwn(value, key) && typeof value[key] !== 'string') { return false; }
+    }
+    return true;
+}
+
+/**
+ * @param {unknown} entry
+ * @param {number} length
+ * @returns {entry is unknown[]}
+ */
+function isExactBankRow(entry, length) {
+    return Array.isArray(entry) && entry.length === length;
 }
 
 /**
@@ -3420,18 +3563,46 @@ export class DictionaryImporter {
      * @param {import('dictionary-data').TermMeta} entry
      * @param {string} dictionary
      * @returns {import('dictionary-database').DatabaseTermMeta}
+     * @throws {Error} If the row does not match a supported term metadata shape.
      */
     _convertTermMetaBankEntry(entry, dictionary) {
+        if (!isExactBankRow(entry, 3)) {
+            throw new Error('Invalid term metadata bank row');
+        }
         const [expression, mode, data] = entry;
+        if (typeof expression !== 'string') {
+            throw new Error('Invalid term metadata expression');
+        }
+        if (
+            !(
+                (mode === 'freq' && isTermFrequencyData(data)) ||
+                (mode === 'pitch' && isPitchData(data)) ||
+                (mode === 'ipa' && isIpaData(data))
+            )
+        ) {
+            throw new Error('Invalid term metadata mode or data');
+        }
         return /** @type {import('dictionary-database').DatabaseTermMeta} */ ({expression, mode, data, dictionary});
     }
 
     /**
+     * Version 1 kanji rows intentionally preserve the converter's legacy contract:
+     * every trailing string after the first four fields is a meaning, even though
+     * the current bundled v1 schema declares a four-item maximum.
      * @param {import('dictionary-data').KanjiV1} entry
      * @param {string} dictionary
      * @returns {import('dictionary-database').DatabaseKanjiEntry}
+     * @throws {Error} If the row does not match the legacy version 1 kanji bank contract.
      */
     _convertKanjiBankEntryV1(entry, dictionary) {
+        if (
+            !Array.isArray(entry) ||
+            entry.length < 4 ||
+            !entry.every((value) => typeof value === 'string') ||
+            entry[0].length === 0
+        ) {
+            throw new Error('Invalid version 1 kanji bank row');
+        }
         const [character, onyomi, kunyomi, tags, ...meanings] = entry;
         return {character, onyomi, kunyomi, tags, meanings, dictionary};
     }
@@ -3440,9 +3611,24 @@ export class DictionaryImporter {
      * @param {import('dictionary-data').KanjiV3} entry
      * @param {string} dictionary
      * @returns {import('dictionary-database').DatabaseKanjiEntry}
+     * @throws {Error} If the row does not match the version 3 kanji bank schema.
      */
     _convertKanjiBankEntryV3(entry, dictionary) {
+        if (!isExactBankRow(entry, 6)) {
+            throw new Error('Invalid version 3 kanji bank row');
+        }
         const [character, onyomi, kunyomi, tags, meanings, stats] = entry;
+        if (
+            typeof character !== 'string' ||
+            character.length === 0 ||
+            typeof onyomi !== 'string' ||
+            typeof kunyomi !== 'string' ||
+            typeof tags !== 'string' ||
+            !isStringArray(meanings) ||
+            !isKanjiStats(stats)
+        ) {
+            throw new Error('Invalid version 3 kanji bank fields');
+        }
         return {character, onyomi, kunyomi, tags, meanings, stats, dictionary};
     }
 
@@ -3450,9 +3636,21 @@ export class DictionaryImporter {
      * @param {import('dictionary-data').KanjiMeta} entry
      * @param {string} dictionary
      * @returns {import('dictionary-database').DatabaseKanjiMeta}
+     * @throws {Error} If the row does not match the kanji metadata schema.
      */
     _convertKanjiMetaBankEntry(entry, dictionary) {
+        if (!isExactBankRow(entry, 3)) {
+            throw new Error('Invalid kanji metadata bank row');
+        }
         const [character, mode, data] = entry;
+        if (
+            typeof character !== 'string' ||
+            character.length === 0 ||
+            mode !== 'freq' ||
+            !isFrequencyData(data)
+        ) {
+            throw new Error('Invalid kanji metadata fields');
+        }
         return {character, mode, data, dictionary};
     }
 
@@ -3460,9 +3658,22 @@ export class DictionaryImporter {
      * @param {import('dictionary-data').Tag} entry
      * @param {string} dictionary
      * @returns {import('dictionary-database').Tag}
+     * @throws {Error} If the row does not match the tag bank schema.
      */
     _convertTagBankEntry(entry, dictionary) {
+        if (!isExactBankRow(entry, 5)) {
+            throw new Error('Invalid tag bank row');
+        }
         const [name, category, order, notes, score] = entry;
+        if (
+            typeof name !== 'string' ||
+            typeof category !== 'string' ||
+            !isFiniteJsonNumber(order) ||
+            typeof notes !== 'string' ||
+            !isFiniteJsonNumber(score)
+        ) {
+            throw new Error('Invalid tag bank fields');
+        }
         return {name, category, order, notes, score, dictionary};
     }
 
@@ -3792,7 +4003,12 @@ export class DictionaryImporter {
                 throw new Error(`Expected a JSON array in '${file.filename}'`);
             }
             for (const entry of /** @type {TEntry[]} */ (entries)) {
-                results.push(convertEntry(entry, dictionaryTitle));
+                try {
+                    results.push(convertEntry(entry, dictionaryTitle));
+                } catch (error) {
+                    const entryError = toError(error);
+                    throw new Error(`${entryError.message} in '${file.filename}'`, {cause: entryError});
+                }
             }
         }
         return results;
