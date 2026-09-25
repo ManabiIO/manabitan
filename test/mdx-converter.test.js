@@ -723,6 +723,98 @@ describe('convertMdxToArchive', () => {
         expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
     });
 
+    test('bounds all-unique embedded data URL caching without dropping assets', async () => {
+        const entries = Array.from({length: 65}, (_, index) => ({
+            keyText: `Unique ${String(index)}`,
+            definition: `<div><a href="data:text/plain,unique-${String(index)}">asset</a></div>`,
+        }));
+        entries.push(
+            {keyText: 'Overflow repeat', definition: '<div><a href="data:text/plain,unique-64">asset</a></div>'},
+            {keyText: 'Cached repeat', definition: '<div><a href="data:text/plain,unique-0">asset</a></div>'},
+        );
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Bounded data URL cache fixture',
+                Description: '',
+            },
+            entries,
+        });
+
+        const result = await convertMdxToArchive(
+            'bounded-data-url-cache.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPaths = Object.keys(zip.files)
+            .filter((path) => path.startsWith('mdict-media/embedded/text/'));
+
+        // 65 unique assets are always emitted. The first 64 are cacheable, so
+        // the cached repeat reuses its path while the overflow repeat decodes
+        // and emits once more after the entry budget is exhausted.
+        expect(embeddedPaths).toHaveLength(66);
+    });
+
+    test('does not alias distinct data URLs with the same sampled cache probe', async () => {
+        const prefix = 'data:text/plain,';
+        const payload1 = 'a'.repeat(120);
+        const chars = [...payload1];
+        chars[17] = 'b';
+        const payload2 = chars.join('');
+        const dataUrl1 = `${prefix}${payload1}`;
+        const dataUrl2 = `${prefix}${payload2}`;
+
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Data URL probe collision fixture',
+                Description: '',
+            },
+            entries: [
+                {keyText: 'First', definition: `<div><a href="${dataUrl1}">one</a></div>`},
+                {keyText: 'Second', definition: `<div><a href="${dataUrl2}">two</a></div>`},
+            ],
+        });
+
+        const result = await convertMdxToArchive(
+            'data-url-probe-collision.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPaths = Object.keys(zip.files)
+            .filter((path) => path.startsWith('mdict-media/embedded/text/'));
+
+        expect(embeddedPaths).toHaveLength(2);
+    });
+
+    test('does not retain oversized embedded data URL cache keys', async () => {
+        const dataUrl = `data:image/png;base64,${'A'.repeat(140000)}`;
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Oversized data URL cache fixture',
+                Description: '',
+            },
+            entries: [
+                {keyText: 'First', definition: `<div><img src="${dataUrl}"></div>`},
+                {keyText: 'Second', definition: `<div><img src="${dataUrl}"></div>`},
+            ],
+        });
+
+        const result = await convertMdxToArchive(
+            'oversized-data-url-cache-key.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const embeddedPaths = Object.keys(zip.files)
+            .filter((path) => path.startsWith('mdict-media/embedded/image/'));
+
+        expect(embeddedPaths).toHaveLength(2);
+    });
+
     test('decodes base64 data URLs when the media type is omitted', async () => {
         mockState.mdxFactory = () => ({
             header: {
