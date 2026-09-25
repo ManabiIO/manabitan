@@ -1,0 +1,105 @@
+name: Import native key validation 20260925
+on:
+  push:
+    branches: [bench/import-remaining-fastpaths-20260925]
+    paths: [.github/workflows/import-native-key-validation-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Isolate only runtime and tests after qualified numeric decoding
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/remaining-20260925/native-key.patch /tmp/native-key.patch
+          cp test/term-bank-native-key-plan.test.js /tmp/native-key.test.js
+          git fetch --depth=1 origin 74b09d33937448ae990e61752d6cb749c7c63317
+          git reset --hard FETCH_HEAD
+          git apply /tmp/native-key.patch
+          cp /tmp/native-key.test.js test/term-bank-native-key-plan.test.js
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          assert hashlib.sha256(Path('ext/js/dictionary/wasm/term-bank-parser.c').read_bytes()).hexdigest() == 'bd9f6754dcaa861af3c674a444c42b701088b852e1e60760efa49834235bc525'
+          p=Path('test/term-bank-wasm-parser.test.js')
+          s=p.read_text()
+          old='expect(consumeLastTermBankWasmParseProfile()?.nativeStringPlanFallbackChunkCount).toBe(1);'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,old.replace('toBe(1)','toBe(0)')))
+          PY
+      - uses: ./.github/actions/setup
+      - name: Retain all unit type lint and build outcomes
+        shell: bash
+        run: |
+          mkdir -p builds/key-validation
+          git diff --check
+          git diff > builds/key-validation/source.patch
+          cp test/term-bank-native-key-plan.test.js builds/key-validation/
+          sha256sum ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm ext/js/dictionary/term-bank-wasm-parser.js > builds/key-validation/SHA256SUMS
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          commands={
+              'unit':['npm','run','test:unit','--','--no-file-parallelism'],
+              'options':['npm','run','test:unit:options'],
+              'types-main':['npm','run','test:ts:main'],
+              'types-dev':['npm','run','test:ts:dev'],
+              'types-test':['npm','run','test:ts:test'],
+              'types-bench':['npm','run','test:ts:bench'],
+              'lint':['npx','eslint','test/term-bank-native-key-plan.test.js','test/term-bank-wasm-parser.test.js'],
+              'build':['npm','run','build'],
+          }
+          status={}
+          for name,args in commands.items():
+              with open('builds/key-validation/'+name+'.log','w') as f:
+                  status[name]=subprocess.run(args,stdout=f,stderr=subprocess.STDOUT).returncode
+              print(name,status[name],flush=True)
+          Path('builds/key-validation/status.json').write_text(json.dumps(status,indent=2)+'\n')
+          PY
+      - run: npx playwright install --with-deps chromium
+      - name: Full Chromium lifecycle in both compression configurations
+        shell: bash
+        run: |
+          set -uo pipefail
+          for cohort in defaults generic-on; do
+            export MANABITAN_E2E_IMPORT_FLAGS_JSON='{}'
+            if [ "$cohort" = generic-on ]; then export MANABITAN_E2E_IMPORT_FLAGS_JSON='{"experimentalGenericSpanCompression":true}'; fi
+            export MANABITAN_CHROMIUM_E2E_REPORT="$PWD/builds/key-validation/$cohort.html"
+            xvfb-run -a npm run test:e2e:chromium-extension > "builds/key-validation/$cohort.log" 2>&1
+            echo "$cohort $?" | tee -a builds/key-validation/browser-status.txt
+          done
+      - name: Preserve complete evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-key-product-validation
+          path: builds/key-validation/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Require every check
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('builds/key-validation')
+          s=json.loads((p/'status.json').read_text())
+          assert s and all(v==0 for v in s.values()),s
+          for cohort in ['defaults','generic-on']:
+              r=json.loads((p/(cohort+'.json')).read_text())
+              assert r['status']=='success' and r['skippedVerification'] is False
+              assert r['runtimeDiagnostics']['openStorageMode']=='opfs-sahpool'
+          PY
+          awk '$2 != 0 { bad = 1 } END { exit bad }' builds/key-validation/browser-status.txt
