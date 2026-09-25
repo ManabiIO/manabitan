@@ -1,0 +1,108 @@
+name: Native repeated-pass import screen 20260925
+on:
+  push:
+    branches: [verify/native-passes-20260925-763627]
+permissions:
+  contents: read
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [numeric-recheck, quote-first]
+        dictionary: [jmdict, jmnedict, jitendex]
+    env:
+      HUSKY: '0'
+      CANDIDATE: ${{ matrix.candidate }}
+      DICTIONARY: ${{ matrix.dictionary }}
+      PAIRS: '6'
+      INITIAL: AB
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Prepare isolated pinned sources and fixed-plan driver
+        run: |
+          mkdir -p /tmp/more-evidence /tmp/pass-input
+          cp dev/perf/native-passes-20260925/* /tmp/pass-input/
+          git show cb378693fd1a1f3af0e2c2bfc59e0d9c968055f5:dev/perf/literal-ascii-20260925/compare.py > /tmp/pass-input/compare.py
+          echo '4540c1e76bc0cf82501eef3b70aabb757f56229fe6ab7e95b90b6eee5d184b77  /tmp/pass-input/compare.py' | sha256sum --check
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('/tmp/pass-input/compare.py')
+          s = p.read_text().replace('literal-ascii', 'native-pass').replace('test/term-bank-native-hotpaths.test.js', 'test/term-bank-native-pass-equivalence.test.js')
+          s = s.replace("'candidate': kind,", "'candidate': os.environ['CANDIDATE'],")
+          p.write_text(s)
+          PY
+          cp -a /tmp/pass-input /tmp/more-evidence/inputs
+          git worktree add --detach /tmp/more-base 76362775484661b3cd8b9d2c84b228802c023a76
+          git worktree add --detach /tmp/more-candidate 76362775484661b3cd8b9d2c84b228802c023a76
+          cd /tmp/more-base
+          npm ci
+          npm run build:libs
+          cp -a node_modules /tmp/more-candidate/node_modules
+          cp -a ext/lib /tmp/more-candidate/ext/lib
+          cp /tmp/pass-input/term-bank-native-pass-equivalence.test.js test/
+          node node_modules/vitest/vitest.mjs run test/term-bank-native-pass-equivalence.test.js > /tmp/more-evidence/parent-tests.log 2>&1
+          rm test/term-bank-native-pass-equivalence.test.js
+      - name: Apply candidate and verify correctness
+        run: |
+          cd /tmp/more-candidate
+          git apply --check "/tmp/pass-input/$CANDIDATE.patch"
+          git apply "/tmp/pass-input/$CANDIDATE.patch"
+          cp /tmp/pass-input/term-bank-native-pass-equivalence.test.js test/
+          echo '4503c51a0194a42e852bc2ce097476f6eeb217b20983cd68bcf46773f0fa8207  test/term-bank-native-pass-equivalence.test.js' | sha256sum --check
+          case "$CANDIDATE" in
+            numeric-recheck) expected=d4b4007188b8436d76ec82468a2262806a7f09d2a5bcabeb1290db043549fd55 ;;
+            quote-first) expected=a9fa9f485928b09c42ab3c9385f5a6d7a42e5ea3af248eceacb3df7cff86a228 ;;
+            *) exit 1 ;;
+          esac
+          echo "$expected  ext/js/dictionary/wasm/term-bank-parser.c" | sha256sum --check
+          npm run build:libs > /tmp/more-evidence/build-libs.log 2>&1
+          git diff --check
+          node node_modules/vitest/vitest.mjs run test/term-bank-native-pass-equivalence.test.js test/term-bank-score-grammar.test.js test/term-bank-fused-score-closeout.test.js test/term-bank-composite-state.test.js test/term-bank-parser-string-scan.test.js --minWorkers=1 --maxWorkers=2 > /tmp/more-evidence/focused.log 2>&1
+          node node_modules/eslint/bin/eslint.js test/term-bank-native-pass-equivalence.test.js > /tmp/more-evidence/lint.log 2>&1
+          npm run test:ts > /tmp/more-evidence/types.log 2>&1
+          if test "$DICTIONARY" = jmdict; then
+            npm run test:unit -- --minWorkers=1 --maxWorkers=2 > /tmp/more-evidence/unit.log 2>&1
+            npm run test:unit:options > /tmp/more-evidence/options.log 2>&1
+            npm run test:build > /tmp/more-evidence/build-plans.log 2>&1
+          fi
+          git -c core.hooksPath=/dev/null add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-native-pass-equivalence.test.js
+          git -c core.hooksPath=/dev/null -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "perf(import): qualify $CANDIDATE native pass reduction"
+          git rev-parse HEAD > /tmp/more-evidence/candidate-commit.txt
+          git rev-parse 'HEAD^{tree}' > /tmp/more-evidence/candidate-tree.txt
+          git diff HEAD^ HEAD > /tmp/more-evidence/candidate.patch
+          if test "$DICTIONARY" = jmdict; then
+            git push origin "HEAD:refs/heads/verify/$CANDIDATE-source-20260925-763627"
+          fi
+      - name: Build actual packages and compare complete parser output
+        run: |
+          cd /tmp/more-base
+          npm run build -- --target chrome-dev > /tmp/more-evidence/build-base.log 2>&1
+          node dev/perf/prepare-dictionaries.js > /tmp/more-evidence/fixtures.log 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium
+          cd /tmp/more-candidate
+          npm run build -- --target chrome-dev > /tmp/more-evidence/build-candidate.log 2>&1
+          cp -a /tmp/more-base/builds/e2e-dictionary-cache builds/e2e-dictionary-cache
+          node dev/perf/import-lookup-screen.js "$DICTIONARY" --pairs 2 --flags '{}' --baseline-root /tmp/more-base --out /tmp/more-evidence/component.json > /tmp/more-evidence/component.log 2>&1
+          cp ext/lib/term-bank-parser.wasm /tmp/more-evidence/candidate.wasm
+          cp /tmp/more-base/ext/lib/term-bank-parser.wasm /tmp/more-evidence/baseline.wasm
+      - name: Complete the prespecified full-import comparison
+        run: python /tmp/pass-input/compare.py > /tmp/more-evidence/driver.log 2>&1
+      - name: Retain all observations and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-pass-${{ matrix.candidate }}-${{ matrix.dictionary }}-763627
+          path: /tmp/more-evidence/
+          retention-days: 30
+          if-no-files-found: error
