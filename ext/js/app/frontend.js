@@ -27,6 +27,7 @@ import {TextSourceElement} from '../dom/text-source-element.js';
 import {TextSourceGenerator} from '../dom/text-source-generator.js';
 import {TextSourceRange} from '../dom/text-source-range.js';
 import {TextScanner} from '../language/text-scanner.js';
+import {installReaderLookupIntegration} from './reader-lookup-integration.js';
 
 const JAPANESE_TEXT_PATTERN = /[\u3040-\u30ff\u3400-\u9fff]+/g;
 const JAPANESE_PARTICLE_BOUNDARY_PATTERN = /[はがをにへでとものや]/u;
@@ -109,6 +110,8 @@ export class Frontend {
         });
         /** @type {boolean} */
         this._textScannerHasBeenEnabled = false;
+        /** @type {import('./reader-lookup-bridge.js').ReaderLookupBridge|null} */
+        this._readerLookupBridge = null;
         /** @type {Map<'default'|'window'|'iframe'|'proxy', Promise<?import('popup').PopupAny>>} */
         this._popupCache = new Map();
         /** @type {EventListenerCollection} */
@@ -186,6 +189,7 @@ export class Frontend {
             // Ignore exceptions which may occur due to being on an unsupported page (e.g. about:blank)
         }
 
+        this._readerLookupBridge ??= installReaderLookupIntegration(this);
         this._textScanner.prepare();
         this._startPopupPrewarmForHover();
 
@@ -392,6 +396,7 @@ export class Frontend {
      * @returns {Promise<void>}
      */
     async _onOptionsUpdated() {
+        this._readerLookupBridge?.invalidate();
         this._updatePageDebugState({lastSearchState: 'options-updated'});
         try {
             this._optionsUpdateSearchActive = true;
@@ -413,6 +418,7 @@ export class Frontend {
      */
     async _onDatabaseUpdated({type}) {
         if (type !== 'dictionary') { return; }
+        this._readerLookupBridge?.invalidate();
         this._updatePageDebugState({lastSearchState: 'dictionary-updated'});
         try {
             this._dictionaryUpdateSearchActive = true;
@@ -458,6 +464,7 @@ export class Frontend {
      * @param {import('text-scanner').EventArgument<'searchSuccess'>} details
      */
     _onSearchSuccess({type, dictionaryEntries, sentence, inputInfo: {eventType, detail: inputInfoDetail}, textSource, optionsContext, detail, pageTheme}) {
+        this._readerLookupBridge?.invalidate();
         this._debugSearchSuccessCount += 1;
         const searchSuccessAt = safePerformance.now();
         this._updatePageDebugState({
@@ -534,6 +541,7 @@ export class Frontend {
      * @param {boolean} passive
      */
     _clearSelection(passive) {
+        this._readerLookupBridge?.invalidate();
         this._stopClearSelectionDelayed();
         if (this._popup !== null) {
             void this._popup.clearAutoPlayTimer();
@@ -1226,7 +1234,8 @@ export class Frontend {
      */
     async _ignorePoint(x, y) {
         try {
-            return this._popup !== null && await this._popup.containsPoint(x, y);
+            return this._readerLookupBridge?.ownsPoint(x, y) === true ||
+                (this._popup !== null && await this._popup.containsPoint(x, y));
         } catch (e) {
             if (!this._application.webExtension.unloaded) {
                 throw e;
