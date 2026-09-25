@@ -896,6 +896,7 @@ export class DictionaryImporter {
         let sharedGlossaryArtifactPreloadMs = 0;
         const useParallelPackedArtifactPreload = (
             termArtifactManifest !== null &&
+            termArtifactManifest.packedMediaEntriesComplete &&
             termArtifactManifest.packedMediaEntries.length >= 100000 &&
             typeof packedTermArtifactEntry !== 'undefined' &&
             typeof packedMediaArtifactEntry !== 'undefined'
@@ -967,6 +968,7 @@ export class DictionaryImporter {
             packedMediaArtifactBytes === null &&
             packedMediaArtifactBlob === null &&
             termArtifactManifest !== null &&
+            termArtifactManifest.packedMediaEntriesComplete &&
             termArtifactManifest.packedMediaEntries.length > 0 &&
             typeof packedMediaArtifactEntry !== 'undefined'
         ) {
@@ -1188,10 +1190,7 @@ export class DictionaryImporter {
                 sharedGlossaryArtifactAppendMs = Math.max(0, Date.now() - tSharedGlossaryAppendStart);
             }
             const hasArchiveImageMediaFiles = this._archiveHasImageMediaFiles(fileMap);
-            const hasUsableArtifactMediaFiles = (
-                termArtifactManifest?.includesMediaFiles === true &&
-                termArtifactManifest.packedMediaEntries.length > 0
-            );
+            const hasUsableArtifactMediaFiles = termArtifactManifest?.includesMediaFiles === true;
             const useMediaPipeline = (
                 !this._skipMediaImport &&
                 (hasArchiveImageMediaFiles || hasUsableArtifactMediaFiles)
@@ -1207,6 +1206,7 @@ export class DictionaryImporter {
                 }
                 if (
                     termArtifactManifest !== null &&
+                    termArtifactManifest.packedMediaEntriesComplete &&
                     termArtifactManifest.packedMediaEntries.length > 0 &&
                     (packedMediaArtifactBytes instanceof Uint8Array || packedMediaArtifactBlob instanceof Blob)
                 ) {
@@ -3464,7 +3464,7 @@ export class DictionaryImporter {
 
     /**
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
-     * @returns {Promise<{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, packedFileName: string|null, packedMediaFileName: string|null, packedMediaEntries: Array<{path: string, packedOffset: number, packedLength: number, mediaType: string, compressionMethod: number, uncompressedLength: number}>, sharedGlossaryFileName: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null, sharedGlossaryCompression: string|null, sharedGlossaryUncompressedLength: number|null, termContentMode: string|null, prunedAuxFiles: boolean, includesMediaFiles: boolean}|null>}
+     * @returns {Promise<{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, packedFileName: string|null, packedMediaFileName: string|null, packedMediaEntries: Array<{path: string, packedOffset: number, packedLength: number, mediaType: string, compressionMethod: number, uncompressedLength: number}>, packedMediaEntriesComplete: boolean, sharedGlossaryFileName: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null, sharedGlossaryCompression: string|null, sharedGlossaryUncompressedLength: number|null, termContentMode: string|null, prunedAuxFiles: boolean, includesMediaFiles: boolean}|null>}
      */
     async _readTermArtifactManifest(fileMap) {
         const manifestEntry = fileMap.get(TERM_BANK_ARTIFACT_MANIFEST_FILE);
@@ -3510,22 +3510,31 @@ export class DictionaryImporter {
             null;
         /** @type {Array<{path: string, packedOffset: number, packedLength: number, mediaType: string, compressionMethod: number, uncompressedLength: number}>} */
         const packedMediaEntries = [];
-        const mediaEntries = (
+        const mediaArtifact = (
             typeof manifest.mediaArtifact === 'object' &&
-            manifest.mediaArtifact !== null &&
-            Array.isArray(manifest.mediaArtifact.entries)
+            manifest.mediaArtifact !== null
         ) ?
-            manifest.mediaArtifact.entries :
+            manifest.mediaArtifact :
+            null;
+        let packedMediaEntriesComplete = mediaArtifact === null || typeof mediaArtifact.entries === 'undefined' || Array.isArray(mediaArtifact.entries);
+        const mediaEntries = mediaArtifact !== null && Array.isArray(mediaArtifact.entries) ?
+            mediaArtifact.entries :
             [];
         for (const mediaEntry of mediaEntries) {
-            if (!(typeof mediaEntry === 'object' && mediaEntry !== null)) { continue; }
+            if (!(typeof mediaEntry === 'object' && mediaEntry !== null)) {
+                packedMediaEntriesComplete = false;
+                continue;
+            }
             const path = typeof mediaEntry.path === 'string' ? mediaEntry.path : null;
             const packedOffset = Number.isInteger(mediaEntry.packedOffset) ? /** @type {number} */ (mediaEntry.packedOffset) : -1;
             const packedLength = Number.isInteger(mediaEntry.packedLength) ? /** @type {number} */ (mediaEntry.packedLength) : -1;
             const mediaType = typeof mediaEntry.mediaType === 'string' ? mediaEntry.mediaType : null;
             const compressionMethod = Number.isInteger(mediaEntry.compressionMethod) ? /** @type {number} */ (mediaEntry.compressionMethod) : ZIP_COMPRESSION_METHOD_STORE;
             const uncompressedLength = Number.isInteger(mediaEntry.uncompressedLength) ? /** @type {number} */ (mediaEntry.uncompressedLength) : packedLength;
-            if (path === null || mediaType === null || packedOffset < 0 || packedLength <= 0 || uncompressedLength <= 0) { continue; }
+            if (path === null || mediaType === null || packedOffset < 0 || packedLength <= 0 || uncompressedLength <= 0) {
+                packedMediaEntriesComplete = false;
+                continue;
+            }
             packedMediaEntries.push({path, packedOffset, packedLength, mediaType, compressionMethod, uncompressedLength});
         }
         const sharedGlossaryFileName = (
@@ -3572,6 +3581,7 @@ export class DictionaryImporter {
             packedFileName,
             packedMediaFileName,
             packedMediaEntries,
+            packedMediaEntriesComplete,
             sharedGlossaryFileName,
             sharedGlossaryPackedOffset,
             sharedGlossaryPackedLength,
