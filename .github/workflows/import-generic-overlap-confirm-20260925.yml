@@ -1,0 +1,95 @@
+name: Import generic overlap confirmation 20260925
+on:
+  push:
+    branches: [bench/import-generic-overlap-20260925]
+    paths: [.github/workflows/import-generic-overlap-confirm-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  confirm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [wty-en-en, jmnedict]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      FLAGS: '{"experimentalGenericSpanCompression":true}'
+      PAIRS: '12'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Exact formatted source and reversed fixed schedule
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/overlap-round-20260925/prepare.py
+          python3 dev/perf/overlap-round-20260925/format.py
+          git fetch --depth=1 origin da89ec3c9befdbd457ad66b47b5786a3243c7518
+          git show FETCH_HEAD:dev/perf/numeric-round-20260925/ab.mjs > /tmp/ab.mjs
+          git fetch --depth=1 origin 68a01320869e091a90344df7e9f992329b7e8eec
+          git show FETCH_HEAD:dev/perf/hash-round-20260925/prepare.py > /tmp/fixture.py
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('/tmp/ab.mjs').read_text().replace('builds/numeric-round','builds/overlap-round').replace('ext/js/dictionary/term-bank-wasm-parser.js','ext/js/dictionary/term-content-block-store.js')
+          old="i % 2 === 0 ? ['candidate', 'base'] : ['base', 'candidate']"
+          assert s.count(old)==1
+          s=s.replace(old,"i % 2 === 0 ? ['base', 'candidate'] : ['candidate', 'base']")
+          old="{kind: 'warmup', arms: ['candidate', 'base']}"
+          assert s.count(old)==1
+          s=s.replace(old,"{kind: 'warmup', arms: ['base', 'candidate']}")
+          Path('dev/perf/overlap-round-20260925/ab.mjs').write_text(s)
+          fixture=Path('/tmp/fixture.py').read_text().split("if os.environ.get('DICTIONARY') == 'wty-en-en':",1)[1]
+          exec("from pathlib import Path\nimport json, os\nroot=Path('.')\nif os.environ.get('DICTIONARY') == 'wty-en-en':"+fixture)
+          PY
+          git diff > builds/overlap-round/source.patch
+          cp dev/perf/overlap-round-20260925/ab.mjs builds/overlap-round/driver.mjs
+          sha256sum builds/overlap-round/base.js builds/overlap-round/candidate.js ext/lib/term-bank-parser.wasm > builds/overlap-round/SHA256SUMS
+          echo 'Runtime logic is identical to the initial cohort; only the two-line binary condition is joined to satisfy repository indentation rules. This complete independent cohort uses the final source hash and opposite initial order. No initial measurements are replaced or pooled.' > builds/overlap-round/source-note.txt
+      - name: Lint and focused reservation checks before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx eslint ext/js/dictionary/term-content-block-store.js test/term-content-block-store.test.js test/generic-span-codec-integration.test.js > builds/overlap-round/lint.log 2>&1
+          npx vitest run test/generic-span-codec-integration.test.js test/term-content-block-store.test.js test/dictionary-database-content-dedup.test.js test/term-content-opfs-store.test.js --no-file-parallelism > builds/overlap-round/tests.log 2>&1
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Twelve independent source pairs and seven A/A pairs
+        run: xvfb-run -a node dev/perf/overlap-round-20260925/ab.mjs
+      - name: Exact package member comparison outside timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          for arm in base candidate; do
+            cp "builds/overlap-round/$arm.js" ext/js/dictionary/term-content-block-store.js
+            node dev/bin/build.js --target chrome-dev > "builds/overlap-round/package-$arm.log" 2>&1
+            ARM="$arm" python3 - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('builds/manabitan-chrome-dev.zip') as z:
+              members={n:hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if not n.endswith('/')}
+          Path('builds/overlap-round/package-'+os.environ['ARM']+'.json').write_text(json.dumps(members,indent=2)+'\n')
+          PY
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          out=Path('builds/overlap-round')
+          a,b=[json.loads((out/('package-'+arm+'.json')).read_text()) for arm in ['base','candidate']]
+          assert a.keys()==b.keys()
+          changed=[k for k in a if a[k]!=b[k]]
+          assert changed==['js/dictionary/term-content-block-store.js'],changed
+          (out/'package-verification.json').write_text(json.dumps({'passed':True,'changedMembers':changed},indent=2)+'\n')
+          PY
+      - name: Retain complete outcomes including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generic-overlap-confirm-${{ matrix.dictionary }}
+          path: builds/overlap-round/
+          retention-days: 30
+          if-no-files-found: error
