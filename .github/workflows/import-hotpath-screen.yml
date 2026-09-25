@@ -6,17 +6,24 @@ on:
 permissions:
   contents: read
 jobs:
-  escaped-keys:
+  fallback-interner:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [jmdict, jmnedict, jitendex, wty-en-en]
+        include:
+          - {dictionary: jmdict, id: jmdict, numeric: '0', flags: '{}'}
+          - {dictionary: jmnedict, id: jmnedict, numeric: '0', flags: '{}'}
+          - {dictionary: jitendex, id: jitendex, numeric: '0', flags: '{}'}
+          - {dictionary: wty-en-en, id: wty, numeric: '0', flags: '{}'}
+          - {dictionary: wty-en-en, id: wty-numeric-span, numeric: '1', flags: '{"experimentalGenericSpanCompression":true}'}
     env:
       DICTIONARY: ${{ matrix.dictionary }}
       PAIRS: '6'
-      FLAG: experimentalNativeEscapedKeys
+      FLAG: native-fallback-interner
+      INCLUDE_NUMERIC: ${{ matrix.numeric }}
+      COMMON_FLAGS: ${{ matrix.flags }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,25 +33,21 @@ jobs:
           node-version: 22.16.0
           cache: npm
       - run: npm ci
-      - run: npm run build:libs
-      - run: npm run build -- --target chrome-dev
+      - name: Build and verify the two measured packages
+        run: python3 dev/perf/hotpath-round-20260925/prepare-source.py
       - run: npx playwright install --with-deps chromium
       - uses: actions/cache@v4
         with:
           path: builds/e2e-dictionary-cache
           key: hotpath-corpus-${{ runner.os }}-763627-${{ matrix.dictionary }}
       - name: Counterbalanced full imports with unchanged-code controls
-        run: node dev/perf/hotpath-round-20260925/run.mjs
+        run: node dev/perf/hotpath-round-20260925/run-source.generated.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: escaped-keys-${{ matrix.dictionary }}
-          path: builds/hotpath-round
+          name: fallback-interner-${{ matrix.id }}
+          path: |
+            builds/hotpath-round
+            builds/hotpath-source/build-identities.json
+            dev/perf/hotpath-round-20260925/run-source.generated.mjs
           retention-days: 30
-      - uses: actions/upload-artifact@v4
-        if: matrix.dictionary == 'wty-en-en' && success()
-        with:
-          name: hotpath-verified-corpora
-          path: builds/e2e-dictionary-cache/*.zip
-          compression-level: 0
-          retention-days: 2
