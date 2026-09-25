@@ -9,30 +9,53 @@ jobs:
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [integration, lifecycle]
     env:
       MANABITAN_CHROMIUM_HEADLESS: '1'
       MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
       PLAYWRIGHT_HARD_TIMEOUT_SECONDS: '900'
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ba0a8bbd14f93f3b3c1ef7485117dc5d73435684
       - uses: ./.github/actions/setup
+      - name: Build extension and manifest
+        run: npm run build
       - run: npx playwright install --with-deps chromium
-      - name: Chromium integration and storage lifecycle
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Chromium default-on validation
         shell: bash
+        env:
+          SUITE: ${{ matrix.suite }}
         run: |
           set -euo pipefail
           mkdir -p builds/default-browser
           git rev-parse HEAD > builds/default-browser/source.txt
-          xvfb-run -a npm run test:playwright:integration -- --retries=0 2>&1 | tee builds/default-browser/integration.log
+          echo 'The first integration attempt, run 36160188617, stopped in global setup because ext/manifest.json had not been built. No integration case reached application code. Its artifact is retained. This run includes the standard npm run build prerequisite; product code is unchanged.' > builds/default-browser/setup-note.txt
+          if [ "$SUITE" = integration ]; then
+            xvfb-run -a npm run test:playwright:integration -- --retries=0 2>&1 | tee builds/default-browser/integration.log
+          else
+            xvfb-run -a npm run test:e2e:chromium-extension 2>&1 | tee builds/default-browser/lifecycle.log
+          fi
       - name: Retain exact outcome
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: import-default-browser-validation
+          name: import-default-browser-${{ matrix.suite }}
           path: |
             builds/default-browser/
+            builds/chromium-e2e-import-report.*
             test-results/
           retention-days: 30
           if-no-files-found: warn
