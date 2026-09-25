@@ -1,0 +1,85 @@
+name: WTY import confirmation 20260925
+on:
+  push:
+    branches: [bench/import-qualification-20260925]
+    paths: [.github/workflows/import-wty-confirmation-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_AB_BULKADD_BYTES_METRICS: '0'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: npx playwright install --with-deps chromium
+      - name: Apply benchmark-only fixture and probe support
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('test/perf/dictionaries.lock.json')
+          lock = json.loads(p.read_text())
+          lock['dictionaries']['wty-en-en'] = {
+              'label': 'wty-en-en', 'cacheFile': 'wty-en-en.zip',
+              'release': '21b1b22cd655d7936d62b127e6404fbb8a88c7c3',
+              'url': 'https://huggingface.co/datasets/daxida/wty-release/resolve/21b1b22cd655d7936d62b127e6404fbb8a88c7c3/latest/dict/en/en/wty-en-en.zip',
+              'sha256': 'b9603db16dee82afd811386302ccd78bab591a6513b0d3194d937dc9110dd4a5',
+              'sizeBytes': 106918350, 'expectedTitle': 'wty-en-en',
+              'revision': '2026.08.29', 'termRows': 1643040,
+          }
+          p.write_text(json.dumps(lock, indent=4) + '\n')
+          p = Path('test/chromium/extension-two-dictionary-import.e2e.js')
+          source = p.read_text()
+          replacements = [
+              ("new Set(['jmdict', 'jmnedict', 'jitendex'])", "new Set(['jmdict', 'jmnedict', 'jitendex', 'wty-en-en'])"),
+              ("jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},", "jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},\n            'wty-en-en': {label: 'wty-en-en', filePath: path.join(dictionaryCacheDir, 'wty-en-en.zip')},"),
+          ]
+          for old, new in replacements:
+              assert source.count(old) == 1, old
+              source = source.replace(old, new)
+          assert source.count('maxBuffer: 32 * 1024 * 1024') == 2
+          source = source.replace('maxBuffer: 32 * 1024 * 1024', 'maxBuffer: 256 * 1024 * 1024')
+          p.write_text(source)
+          PY
+          mkdir -p builds
+          git diff > builds/qualification-harness.patch
+          git rev-parse HEAD > builds/qualification-source.txt
+          sha256sum builds/qualification-harness.patch ext/lib/term-bank-parser.wasm > builds/qualification-sha256.txt
+          echo 'Run 36158942267 stopped during the first excluded WTY baseline warmup: the post-import bank probe exceeded its 32 MiB child-process stdout buffer. No candidate or measured pair existed. That failed artifact is retained. Only the off-clock probe cap is raised to 256 MiB, as in the prior WTY qualification; import code is unchanged.' > builds/qualification-setup-note.txt
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Complete fixed WTY schedule
+        shell: bash
+        run: |
+          set -euo pipefail
+          bench() {
+            xvfb-run -a node test/chromium/import-flags-ab-benchmark.js wty-en-en --pairs "$1" --flags "$2" --label "$3"
+          }
+          bench 1 '{}' 'warmup-baseline-exclude'
+          bench 2 '{}' 'aa-before'
+          bench 1 '{"experimentalValidatedGlossaryReuse":true}' 'warmup-validated-glossary-exclude'
+          bench 12 '{"experimentalValidatedGlossaryReuse":true}' 'validated-glossary-confirmation'
+          bench 2 '{}' 'aa-between'
+          bench 1 '{"experimentalGenericSpanCompression":true}' 'warmup-generic-span-exclude'
+          bench 12 '{"experimentalGenericSpanCompression":true}' 'generic-span-confirmation'
+          bench 2 '{}' 'aa-after'
+      - name: Preserve all observations and exact source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: import-qualification-confirmation-wty-complete
+          path: |
+            builds/chromium-e2e-import-flags-isolated-summary-*.json
+            builds/chromium-e2e-import-report-iso-*.json
+            builds/chromium-e2e-import-report-iso-*.html
+            builds/qualification-*
+          retention-days: 30
+          if-no-files-found: warn
