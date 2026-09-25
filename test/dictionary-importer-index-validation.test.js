@@ -42,7 +42,7 @@ describe('DictionaryImporter index runtime validation', () => {
         [{title: 'Dictionary', revision: '1', format: 3, tagMeta: {common: null}}, 'tag metadata object'],
         [{title: 'Dictionary', revision: '1', format: 3, tagMeta: {common: {order: '1'}}}, 'tag metadata fields'],
         [{title: 'Dictionary', revision: '1', format: 3, tagMeta: {common: {unknown: 1}}}, 'tag metadata extra fields'],
-    ])('rejects malformed index metadata: %s (%s)', async (index) => {
+    ])('rejects malformed index metadata: %s (%s)', async (index, _label) => {
         await expect(readIndex(index)).rejects.toThrow('Invalid dictionary index');
     });
 
