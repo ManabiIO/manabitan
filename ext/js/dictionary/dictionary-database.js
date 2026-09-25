@@ -4677,16 +4677,16 @@ null;
         if (useLocalTransaction) {
             await this._beginImmediateTransaction(db);
         }
+        const fullBatchSql = items.length > EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE ?
+            'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + Array(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',') :
+            null;
         try {
             for (let i = 0, ii = items.length; i < ii; i += EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE) {
                 const chunkCount = Math.min(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE, ii - i);
-                /** @type {string[]} */
-                const valueRows = [];
                 /** @type {import('@sqlite.org/sqlite-wasm').Bindable[]} */
                 const bind = [];
                 for (let j = 0; j < chunkCount; ++j) {
                     const row = items[i + j];
-                    valueRows.push('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)');
                     bind.push(
                         row.dictionary,
                         row.path,
@@ -4699,7 +4699,9 @@ null;
                         typeof row.contentUncompressedLength === 'number' ? row.contentUncompressedLength : (typeof row.contentLength === 'number' ? row.contentLength : 0),
                     );
                 }
-                const sql = 'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + valueRows.join(',');
+                const sql = chunkCount === EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE && fullBatchSql !== null ?
+                    fullBatchSql :
+                    'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + Array(chunkCount).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',');
                 const stmt = this._getCachedStatement(sql);
                 stmt.reset(true);
                 stmt.bind(bind);
@@ -4730,16 +4732,16 @@ null;
         if (useLocalTransaction) {
             await this._beginImmediateTransaction(db);
         }
+        const fullBatchSql = items.length > EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE ?
+            'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + Array(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',') :
+            null;
         try {
             for (let i = 0, ii = items.length; i < ii; i += EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE) {
                 const chunkCount = Math.min(EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE, ii - i);
-                /** @type {string[]} */
-                const valueRows = [];
                 /** @type {import('@sqlite.org/sqlite-wasm').Bindable[]} */
                 const bind = [];
                 for (let j = 0; j < chunkCount; ++j) {
                     const row = items[i + j];
-                    valueRows.push('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)');
                     const packedLength = row.packedLength;
                     bind.push(
                         dictionary,
@@ -4757,7 +4759,9 @@ null;
                             packedLength,
                     );
                 }
-                const sql = 'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + valueRows.join(',');
+                const sql = chunkCount === EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE && fullBatchSql !== null ?
+                    fullBatchSql :
+                    'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES ' + Array(chunkCount).fill('(?, ?, ?, ?, ?, x\'\', ?, ?, ?, ?)').join(',');
                 const stmt = this._getCachedStatement(sql);
                 stmt.reset(true);
                 stmt.bind(bind);
