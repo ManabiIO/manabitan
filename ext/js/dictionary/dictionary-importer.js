@@ -3799,7 +3799,7 @@ export class DictionaryImporter {
             const artifact = typeof termBank.artifact === 'string' ? termBank.artifact : null;
             const packedOffset = Number.isInteger(termBank.packedOffset) ? /** @type {number} */ (termBank.packedOffset) : -1;
             const packedLength = Number.isInteger(termBank.packedLength) ? /** @type {number} */ (termBank.packedLength) : -1;
-            const rows = Number.isInteger(termBank.rows) ? /** @type {number} */ (termBank.rows) : null;
+            const rows = Number.isSafeInteger(termBank.rows) && /** @type {number} */ (termBank.rows) >= 0 ? /** @type {number} */ (termBank.rows) : null;
             if (artifact === null || packedOffset < 0 || packedLength <= 0) { continue; }
             termBanksByArtifact.set(artifact, {packedOffset, packedLength, rows});
         }
