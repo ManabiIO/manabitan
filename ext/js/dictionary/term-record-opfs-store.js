@@ -1422,8 +1422,6 @@ export class TermRecordOpfsStore {
                 sequence: row.sequence,
             };
             this._storeRecord(record);
-            this._loadedDictionaryNames.add(record.dictionary);
-            this._setDictionaryHealth(record.dictionary, 'available');
             const shardFileName = this._getShardFileName(record.dictionary, record.entryContentDictName);
             const shardRecords = recordsByShard.get(shardFileName);
             if (typeof shardRecords === 'undefined') {
@@ -1437,6 +1435,11 @@ export class TermRecordOpfsStore {
                     this._addRecordToDictionaryIndex(existingIndex, record);
                 }
             }
+        }
+        for (const dictionaryRecords of recordsByShard.values()) {
+            const dictionaryName = dictionaryRecords[0].dictionary;
+            this._loadedDictionaryNames.add(dictionaryName);
+            this._setDictionaryHealth(dictionaryName, 'available');
         }
         if (this._deferIndexBuild) {
             this._indexDirty = true;
@@ -1484,7 +1487,6 @@ export class TermRecordOpfsStore {
                 sequence: row[14],
             };
             this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
             if (i === start) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1511,6 +1513,13 @@ export class TermRecordOpfsStore {
                 if (typeof existingIndex !== 'undefined') {
                     this._addRecordToDictionaryIndex(existingIndex, record);
                 }
+            }
+        }
+        if (recordsByShard === null) {
+            this._loadedDictionaryNames.add(singleDictionaryName);
+        } else {
+            for (const dictionaryRecords of recordsByShard.values()) {
+                this._loadedDictionaryNames.add(dictionaryRecords[0].dictionary);
             }
         }
         if (this._deferIndexBuild) {
@@ -1583,7 +1592,6 @@ export class TermRecordOpfsStore {
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
             this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
             if (i === start) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1617,6 +1625,13 @@ export class TermRecordOpfsStore {
                 if (typeof existingIndex !== 'undefined') {
                     this._addRecordToDictionaryIndex(existingIndex, record);
                 }
+            }
+        }
+        if (recordsByShard === null) {
+            this._loadedDictionaryNames.add(singleDictionaryName);
+        } else {
+            for (const {records: dictionaryRecords} of recordsByShard.values()) {
+                this._loadedDictionaryNames.add(dictionaryRecords[0].dictionary);
             }
         }
         if (this._deferIndexBuild) {
@@ -1685,7 +1700,6 @@ export class TermRecordOpfsStore {
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
             this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
             if (i === 0) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1712,6 +1726,13 @@ export class TermRecordOpfsStore {
                 if (typeof existingIndex !== 'undefined') {
                     this._addRecordToDictionaryIndex(existingIndex, record);
                 }
+            }
+        }
+        if (recordsByShard === null) {
+            this._loadedDictionaryNames.add(singleDictionaryName);
+        } else {
+            for (const dictionaryRecords of recordsByShard.values()) {
+                this._loadedDictionaryNames.add(dictionaryRecords[0].dictionary);
             }
         }
         if (this._deferIndexBuild) {
@@ -1825,6 +1846,13 @@ export class TermRecordOpfsStore {
                 }
             }
         }
+        if (recordsByShard === null) {
+            this._loadedDictionaryNames.add(firstDictionaryName);
+        } else {
+            for (const {records: dictionaryRecords} of recordsByShard.values()) {
+                this._loadedDictionaryNames.add(dictionaryRecords[0].dictionary);
+            }
+        }
         if (this._deferIndexBuild) {
             this._indexDirty = true;
         }
@@ -1838,7 +1866,6 @@ export class TermRecordOpfsStore {
             getTermRecordPreinternedPlan(rows) :
             null;
         if (recordsByShard === null) {
-            this._loadedDictionaryNames.add(firstDictionaryName);
             const state = await this._getOrCreateShardState(firstDictionaryName, firstContentDictName);
             if (state !== null) {
                 const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
@@ -1849,7 +1876,6 @@ export class TermRecordOpfsStore {
         }
         for (const {records: dictionaryRecords, indexes} of recordsByShard.values()) {
             const firstRecord = dictionaryRecords[0];
-            this._loadedDictionaryNames.add(firstRecord.dictionary);
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
             const metrics = await this._encodeAndAppendChunkRunsForState(
@@ -1960,11 +1986,11 @@ export class TermRecordOpfsStore {
                     sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
                 };
                 this._storeRecord(record);
-                this._loadedDictionaryNames.add(chunk.dictionary);
                 if (typeof existingIndex !== 'undefined') {
                     this._addRecordToDictionaryIndex(existingIndex, record);
                 }
             }
+            this._loadedDictionaryNames.add(chunk.dictionary);
             if (this._deferIndexBuild) {
                 this._indexDirty = true;
             }
