@@ -7184,7 +7184,8 @@ this._readTermContentSignature(
                     const contentJson = row.termEntryContentJson ?? this._serializeTermEntryContent(rules, definitionTags, termTags, row.glossary);
                     contentChunks[j] = this._textEncoder.encode(contentJson);
                 }
-                let chunksToAppend = contentChunks;
+                /** @type {string|(string|null)[]} */
+                let contentDictNames = 'raw';
                 const tContentAppendStart = safePerformance.now();
                 if (this._importDebugLogging) {
                     const debugStateBeforeAppend = this._termContentStore.getDebugState();
@@ -7194,20 +7195,38 @@ this._readTermContentSignature(
                     );
                 }
                 if (this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES) {
-                    const {packedChunks, sourceChunkIndices, sourceChunkLocalOffsets} = packContentChunksIntoSlabs(
-                        contentChunks,
-                        this._rawTermContentPackTargetBytes,
-                    );
-                    chunksToAppend = packedChunks;
-                    /** @type {number[]} */
-                    const packedOffsets = new Array(packedChunks.length);
-                    /** @type {number[]} */
-                    const packedLengths = new Array(packedChunks.length);
-                    await this._termContentStore.appendBatchToArrays(packedChunks, packedOffsets, packedLengths);
+                    /** @type {(string|null)[]} */
+                    const contentDictNameOverrides = new Array(chunkCount);
                     for (let j = 0; j < chunkCount; ++j) {
-                        const packedIndex = sourceChunkIndices[j];
-                        contentOffsets[j] = packedOffsets[packedIndex] + sourceChunkLocalOffsets[j];
+                        contentDictNameOverrides[j] = items[i + j].termEntryContentDictName ?? null;
+                    }
+                    const storage = this._createTermContentStorageChunks(
+                        contentChunks,
+                        null,
+                        contentDictNameOverrides,
+                    );
+                    /** @type {number[]} */
+                    const packedOffsets = new Array(storage.storedChunks.length);
+                    /** @type {number[]} */
+                    const packedLengths = new Array(storage.storedChunks.length);
+                    await this._termContentStore.appendBatchToArrays(storage.storedChunks, packedOffsets, packedLengths);
+                    for (let j = 0; j < chunkCount; ++j) {
+                        const packedIndex = storage.entryToStoredChunkIndexes[j];
+                        contentOffsets[j] = packedOffsets[packedIndex] + storage.entryToStoredChunkOffsets[j];
                         contentLengths[j] = contentChunks[j].byteLength;
+                    }
+                    if (typeof storage.contentDictNames === 'string') {
+                        contentDictNames = storage.contentDictNames;
+                    } else {
+                        const firstContentDictName = storage.contentDictNames[0] ?? 'raw';
+                        let uniform = true;
+                        for (let j = 1; j < chunkCount; ++j) {
+                            if ((storage.contentDictNames[j] ?? 'raw') !== firstContentDictName) {
+                                uniform = false;
+                                break;
+                            }
+                        }
+                        contentDictNames = uniform ? firstContentDictName : storage.contentDictNames;
                     }
                 } else {
                     await this._termContentStore.appendBatchToArrays(contentChunks, contentOffsets, contentLengths);
@@ -7233,21 +7252,14 @@ this._readTermContentSignature(
                     }
                 }
                 contentAppendMs += safePerformance.now() - tContentAppendStart;
-                const explicitContentDictName = chunkCount > 0 ? (items[i].termEntryContentDictName ?? null) : null;
-                let contentDictName = 'raw';
-                if (
-                    this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                    typeof explicitContentDictName === 'string' &&
-                    explicitContentDictName.length > 0
-                ) {
-                    contentDictName = explicitContentDictName;
-                } else if (
-                    this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                    chunksToAppend.every((contentBytes) => isRawTermContentBinary(contentBytes))
-                ) {
-                    contentDictName = RAW_TERM_CONTENT_DICT_NAME;
-                }
-                const metrics = await this._termRecordStore.appendBatchFromImportTermEntriesResolvedContent(items, i, chunkCount, contentOffsets, contentLengths, contentDictName);
+                const metrics = await this._termRecordStore.appendBatchFromImportTermEntriesResolvedContent(
+                    items,
+                    i,
+                    chunkCount,
+                    contentOffsets,
+                    contentLengths,
+                    contentDictNames,
+                );
                 termRecordBuildMs += metrics.buildRecordsMs;
                 termRecordEncodeMs += metrics.encodeMs;
                 termRecordWriteMs += metrics.appendWriteMs;
