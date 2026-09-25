@@ -5741,6 +5741,7 @@ export class TermRecordOpfsStore {
             const seekOffset = state.fileLength - state.pendingWriteBytes;
             await state.writable.seek(Math.max(0, seekOffset));
         }
+        const writeStartOffset = state.fileLength - state.pendingWriteBytes;
         const chunks = this._coalescePendingChunks(state.pendingWriteChunks);
         state.pendingWriteChunks = [];
         state.pendingWriteBytes = 0;
@@ -5759,7 +5760,7 @@ export class TermRecordOpfsStore {
             await this._awaitQueuedWritesForShard(state);
             return;
         }
-        await this._writeChunksForShard(state, chunks);
+        await this._writeChunksForShard(state, chunks, writeStartOffset);
     }
 
     /**
@@ -5848,9 +5849,10 @@ export class TermRecordOpfsStore {
             ++this._writeDrainMetrics.drainCycleCount;
             while (state.queuedWriteChunks.length > 0) {
                 const chunks = state.queuedWriteChunks;
+                const writeStartOffset = state.fileLength - state.pendingWriteBytes - state.queuedWriteBytes;
                 state.queuedWriteChunks = [];
                 state.queuedWriteBytes = 0;
-                await this._writeChunksForShard(state, chunks);
+                await this._writeChunksForShard(state, chunks, writeStartOffset);
             }
         } catch (error) {
             state.queuedWriteError = error instanceof Error ? error : new Error(String(error));
@@ -5865,9 +5867,10 @@ export class TermRecordOpfsStore {
     /**
      * @param {TermRecordShardState} state
      * @param {Uint8Array[]} chunks
+     * @param {number} writeStartOffset Stable logical offset captured before queued writes can admit a later suffix.
      * @returns {Promise<void>}
      */
-    async _writeChunksForShard(state, chunks) {
+    async _writeChunksForShard(state, chunks, writeStartOffset) {
         if (state.writable === null) {
             return;
         }
@@ -5882,7 +5885,7 @@ export class TermRecordOpfsStore {
                     throw error;
                 }
                 state.writable = null;
-                const seekOffset = state.fileLength - this._sumChunkByteLength(chunks) + writtenBytes;
+                const seekOffset = writeStartOffset + writtenBytes;
                 await this._reopenShardWritable(state, seekOffset);
                 if (state.writable === null) {
                     throw error;
@@ -5891,18 +5894,6 @@ export class TermRecordOpfsStore {
                 writtenBytes += chunk.byteLength;
             }
         }
-    }
-
-    /**
-     * @param {Uint8Array[]} chunks
-     * @returns {number}
-     */
-    _sumChunkByteLength(chunks) {
-        let total = 0;
-        for (const chunk of chunks) {
-            total += chunk.byteLength;
-        }
-        return total;
     }
 
     /**
