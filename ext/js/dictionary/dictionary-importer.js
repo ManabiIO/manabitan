@@ -833,7 +833,10 @@ export class DictionaryImporter {
         if (fileMap.has(TERM_BANK_ARTIFACT_MANIFEST_FILE)) {
             termArtifactManifest = await this._readTermArtifactManifest(fileMap);
         }
-        const usePrunedArtifactAuxFastPath = termArtifactManifest?.prunedAuxFiles === true;
+        const usePrunedArtifactAuxFastPath = (
+            termArtifactManifest?.prunedAuxFiles === true &&
+            this._hasUsableArtifactTermSource(termArtifactManifest, fileMap)
+        );
 
         // Files
         /** @type {import('dictionary-importer').QueryDetails} */
@@ -3506,6 +3509,24 @@ export class DictionaryImporter {
             });
         }
         return results;
+    }
+
+    /**
+     * An artifact-only auxiliary-file shortcut is valid only when the manifest
+     * describes term artifacts which are actually present in this archive.
+     * Otherwise a stale or partial manifest must not suppress ordinary banks.
+     * @param {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, packedFileName: string|null}} manifest
+     * @param {import('dictionary-importer').ArchiveFileMap} fileMap
+     * @returns {boolean}
+     */
+    _hasUsableArtifactTermSource(manifest, fileMap) {
+        if (manifest.termBanksByArtifact.size === 0) { return false; }
+        const packedFileName = manifest.packedFileName ?? TERM_BANK_PACKED_ARTIFACT_FILE;
+        if (fileMap.has(packedFileName)) { return true; }
+        for (const artifact of manifest.termBanksByArtifact.keys()) {
+            if (fileMap.has(artifact)) { return true; }
+        }
+        return false;
     }
 
     /**
