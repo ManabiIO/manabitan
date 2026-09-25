@@ -1,0 +1,102 @@
+name: Owned decoded-block confirmation 20260925
+on:
+  push:
+    branches: [verify/import-decoded-confirmation-20260925-763627]
+permissions:
+  contents: read
+jobs:
+  confirm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HUSKY: '0'
+      CANDIDATE: decoded-owned
+      BASE_ROOT: /tmp/copy-base
+      CANDIDATE_ROOT: /tmp/copy-candidate
+      EVIDENCE_ROOT: /tmp/copy-evidence
+      INPUT_ROOT: /tmp/copy-input
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Pin previously qualified source and independent confirmation plan
+        run: |
+          mkdir -p "$EVIDENCE_ROOT" "$INPUT_ROOT"
+          python - <<'PY'
+          import hashlib, os, zipfile
+          from pathlib import Path
+          path = Path('dev/perf/decoded-copy-20260925/input.zip')
+          assert hashlib.sha256(path.read_bytes()).hexdigest() == 'e429eff192b885305617c34cfc9b3e172309df86cae7177f2baba310a4ba14bb'
+          root = Path(os.environ['INPUT_ROOT'])
+          with zipfile.ZipFile(path) as archive:
+              root.joinpath('compare.py').write_bytes(archive.read('compare.py'))
+          driver = root / 'compare.py'
+          text = driver.read_text()
+          assert text.count('range(1, 9)') == 1
+          text = text.replace('range(1, 9)', 'range(1, 13)')
+          old = "[('jmdict', 'AB'), ('jmnedict', 'BA'), ('jitendex', 'BA')]"
+          assert text.count(old) == 1
+          text = text.replace(old, "[('jmdict', 'BA'), ('jmnedict', 'AB'), ('jitendex', 'AB')]")
+          driver.write_text(text)
+          PY
+          cp -a "$INPUT_ROOT" "$EVIDENCE_ROOT/inputs"
+          git worktree add --detach "$BASE_ROOT" 76362775484661b3cd8b9d2c84b228802c023a76
+          git worktree add --detach "$CANDIDATE_ROOT" 9a3837b85777dbf254d944a9e2656e1a46bb303b
+          cd "$BASE_ROOT"
+          npm ci
+          npm run build:libs
+          cp -a "$BASE_ROOT/node_modules" "$CANDIDATE_ROOT/node_modules"
+          cp -a "$BASE_ROOT/ext/lib" "$CANDIDATE_ROOT/ext/lib"
+          cd "$CANDIDATE_ROOT"
+          echo '17fa99e37cf74aa51f448f1bd6e83e8231375bc6b01a06154a9330f5d41fe881  ext/js/dictionary/term-content-block-store.js' | sha256sum --check
+          git diff HEAD^ HEAD > "$EVIDENCE_ROOT/candidate.patch"
+          git rev-parse HEAD > "$EVIDENCE_ROOT/candidate-commit.txt"
+          git rev-parse 'HEAD^{tree}' > "$EVIDENCE_ROOT/candidate-tree.txt"
+          node node_modules/vitest/vitest.mjs run test/term-content-decoded-ownership.test.js test/term-content-block-store.test.js test/generic-span-codec-integration.test.js > "$EVIDENCE_ROOT/focused.log" 2>&1
+      - name: Build both actual packages and prepare locked fixtures
+        run: |
+          cd "$BASE_ROOT"
+          npm run build -- --target chrome-dev > "$EVIDENCE_ROOT/build-base.log" 2>&1
+          cd "$CANDIDATE_ROOT"
+          npm run build -- --target chrome-dev > "$EVIDENCE_ROOT/build-candidate.log" 2>&1
+          cd "$BASE_ROOT"
+          node dev/perf/prepare-dictionaries.js > "$EVIDENCE_ROOT/fixtures.log" 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium
+          cp -a "$BASE_ROOT/builds/e2e-dictionary-cache" "$CANDIDATE_ROOT/builds/e2e-dictionary-cache"
+      - name: Execute twelve complete-import pairs and six unchanged-code pairs per corpus
+        run: python "$INPUT_ROOT/compare.py" > "$EVIDENCE_ROOT/driver.log" 2>&1
+      - name: Verify complete Chromium lifecycle
+        env:
+          MANABITAN_CHROMIUM_BROWSER: chromium
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: /tmp/copy-evidence/lifecycle.html
+        run: |
+          cd "$CANDIDATE_ROOT"
+          npm run test:e2e:chromium-extension > "$EVIDENCE_ROOT/lifecycle.log" 2>&1
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads((Path(os.environ['EVIDENCE_ROOT']) / 'lifecycle.json').read_text())
+          assert report['status'] == 'success' and report['skippedVerification'] is False, report.get('failureReason')
+          PY
+      - name: Preserve complete confirmation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: decoded-owned-confirmation-763627
+          path: ${{ env.EVIDENCE_ROOT }}/
+          retention-days: 30
+          if-no-files-found: error
