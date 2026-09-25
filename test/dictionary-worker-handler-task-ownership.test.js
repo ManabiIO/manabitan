@@ -15,10 +15,10 @@ test.each([
 ])('event-dispatched %s attaches rejection ownership', (action) => {
     const handler = new DictionaryWorkerHandler();
     const catchSpy = vi.fn(() => Promise.resolve());
-    const task = /** @type {Promise<unknown>} */ (/** @type {unknown} */ ({catch: catchSpy}));
+    const task = /** @type {Promise<void>} */ (/** @type {unknown} */ ({catch: catchSpy}));
     vi.spyOn(handler, '_onMessageWithProgress').mockReturnValue(task);
 
-    Reflect.get(handler, '_onMessage').call(handler, {data: {action, params: {}}});
+    Reflect.get(handler, '_onMessage').call(handler, /** @type {import('core').SafeAny} */ ({data: {action, params: {}}}));
 
     expect(catchSpy).toHaveBeenCalledOnce();
 });
