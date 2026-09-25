@@ -619,7 +619,10 @@ export class DictionaryImporter {
             'raw-bytes';
         this._skipImageMetadata = details.skipImageMetadata === true;
         this._skipMediaImport = details.skipMediaImport === true;
-        this._mediaResolutionConcurrency = Math.max(1, Math.min(32, Math.trunc(details.mediaResolutionConcurrency ?? 16)));
+        const mediaResolutionConcurrency = Number.isFinite(details.mediaResolutionConcurrency) ?
+            Math.trunc(/** @type {number} */ (details.mediaResolutionConcurrency)) :
+            16;
+        this._mediaResolutionConcurrency = Math.max(1, Math.min(32, mediaResolutionConcurrency));
         this._debugImportLogging = details.debugImportLogging === true;
         const requestedZipMaxWorkers = Number.isFinite(details.zipMaxWorkers) ? Math.max(1, Math.min(32, Math.trunc(/** @type {number} */ (details.zipMaxWorkers)))) : null;
         let zipMaxWorkers = requestedZipMaxWorkers ?? DEFAULT_ZIP_MAX_WORKERS;
@@ -3168,7 +3171,8 @@ export class DictionaryImporter {
             return;
         }
         let nextIndex = 0;
-        const workerCount = Math.min(concurrency, items.length);
+        const normalizedConcurrency = Number.isFinite(concurrency) ? Math.max(1, Math.trunc(concurrency)) : 1;
+        const workerCount = Math.min(normalizedConcurrency, items.length);
         const noFailure = Symbol();
         /** @type {unknown} */
         let firstFailure = noFailure;
