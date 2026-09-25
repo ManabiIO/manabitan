@@ -1,0 +1,31 @@
+name: Import benchmark source 20260925
+
+on:
+  push:
+    branches: [bench/import-qualification-20260925]
+    paths: [.github/workflows/import-benchmark-source-20260925.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Preserve exact source and generated libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/qualification-source
+          git archive --format=tar HEAD | gzip > builds/qualification-source/source.tar.gz
+          tar -czf builds/qualification-source/libraries.tar.gz ext/lib
+          git rev-parse HEAD > builds/qualification-source/commit.txt
+          sha256sum builds/qualification-source/*.tar.gz > builds/qualification-source/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-qualification-source
+          path: builds/qualification-source/
+          retention-days: 7
