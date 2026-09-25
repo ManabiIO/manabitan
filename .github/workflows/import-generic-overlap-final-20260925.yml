@@ -1,0 +1,102 @@
+name: Import generic overlap final checks 20260925
+on:
+  push:
+    branches: [bench/import-generic-overlap-20260925]
+    paths: [.github/workflows/import-generic-overlap-final-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Isolate the exact product changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/overlap-round-20260925/prepare.py /tmp/prepare.py
+          cp dev/perf/overlap-round-20260925/format.py /tmp/format.py
+          git fetch --depth=1 origin 46c54d548c6d0739a9aed81f764c98ffb4d8fde8
+          git reset --hard FETCH_HEAD
+          python3 /tmp/prepare.py
+          python3 /tmp/format.py
+          mkdir -p builds/overlap-final
+          git diff --check
+          git diff > builds/overlap-final/product.patch
+          sha256sum ext/js/dictionary/term-content-block-store.js test/term-content-block-store.test.js test/generic-span-codec-integration.test.js > builds/overlap-final/SHA256SUMS
+      - uses: ./.github/actions/setup
+      - name: Confirm new generic reservations are absent on baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp builds/overlap-round/base.js ext/js/dictionary/term-content-block-store.js
+          python3 - <<'PY'
+          import json,subprocess
+          args=['npx','vitest','run','test/generic-span-codec-integration.test.js','test/term-content-block-store.test.js','--no-file-parallelism','--reporter=json','--outputFile=builds/overlap-final/baseline.json']
+          with open('builds/overlap-final/baseline.log','w') as log:
+              result=subprocess.run(args,stdout=log,stderr=subprocess.STDOUT)
+          assert result.returncode!=0
+          r=json.load(open('builds/overlap-final/baseline.json'))
+          failed=[a['fullName'] for t in r['testResults'] for a in t['assertionResults'] if a['status']=='failed']
+          expected=['reserves generic spans only after measured selection','publishes reserved references while shared compression is pending (null)','uses the reserved block plan after parallel shared compression fails (null)','does not reread shared source after compression acknowledged consumption (null)']
+          assert len(failed)==6 and all(any(s in name for s in expected) for name in failed),failed
+          print(json.dumps({'failedOnlyNewReservationCases':failed},indent=2))
+          PY
+          cp builds/overlap-round/candidate.js ext/js/dictionary/term-content-block-store.js
+      - name: Full unit type lint and build checks
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          commands={
+            'unit':['npm','run','test:unit','--','--no-file-parallelism'],
+            'options':['npm','run','test:unit:options'],
+            'types-main':['npm','run','test:ts:main'],
+            'types-dev':['npm','run','test:ts:dev'],
+            'types-test':['npm','run','test:ts:test'],
+            'types-bench':['npm','run','test:ts:bench'],
+            'lint':['npx','eslint','ext/js/dictionary/term-content-block-store.js','test/term-content-block-store.test.js','test/generic-span-codec-integration.test.js'],
+            'build':['npm','run','build'],
+          }
+          status={}
+          for name,args in commands.items():
+            with open('builds/overlap-final/'+name+'.log','w') as log:
+              status[name]=subprocess.run(args,stdout=log,stderr=subprocess.STDOUT).returncode
+            print(name,status[name],flush=True)
+          Path('builds/overlap-final/status.json').write_text(json.dumps(status,indent=2)+'\n')
+          PY
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Both full lifecycle configurations on exact final files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for cohort in generic disabled; do
+            if [ "$cohort" = generic ]; then flags='{"experimentalGenericSpanCompression":true}'; else flags='{}'; fi
+            MANABITAN_E2E_IMPORT_FLAGS_JSON="$flags" xvfb-run -a npm run test:e2e:chromium-extension > "builds/overlap-final/lifecycle-$cohort.log" 2>&1
+            cp builds/chromium-e2e-import-report.json "builds/overlap-final/lifecycle-$cohort.json"
+          done
+          sha256sum -c builds/overlap-final/SHA256SUMS
+      - name: Retain all outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generic-overlap-final-validation
+          path: builds/overlap-final/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Require all checks
+        run: python3 -c "import json; s=json.load(open('builds/overlap-final/status.json')); assert s and all(v==0 for v in s.values()),s"
