@@ -49,7 +49,9 @@ export class EventDispatcher {
         const callbacks = this._eventMap.get(eventName);
         if (typeof callbacks === 'undefined') { return false; }
 
-        for (const {callback, removed} of [...callbacks]) {
+        // Snapshot registrations so callbacks can safely change the live listener list.
+        const snapshot = [...callbacks];
+        for (const {callback, removed} of snapshot) {
             if (!removed) { callback(details); }
         }
         return true;
