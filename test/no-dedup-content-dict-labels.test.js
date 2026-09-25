@@ -64,7 +64,7 @@ describe('no-dedup content dictionary labels', () => {
         await bulkAdd(rows, 0, rows.length);
 
         expect(appendRecords).toHaveBeenCalledOnce();
-        expect(appendRecords.mock.calls[0][5]).toEqual([
+        expect(Reflect.get(appendRecords.mock.calls[0], 5)).toEqual([
             RAW_TERM_CONTENT_DICT_NAME,
             RAW_TERM_CONTENT_TOKEN_DICT_NAME,
         ]);
