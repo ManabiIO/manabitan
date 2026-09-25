@@ -1,0 +1,62 @@
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -1923,13 +1923,21 @@
+             }
+             const uint32_t token_start = token_starts[field];
+             const uint32_t token_length = token_lengths[field];
++            const uint8_t* value_source = src;
++            uint32_t value_start = token_start + 1u;
++            uint32_t value_length = token_length - 2u;
+             if (json_string_token_has_escape(src, token_start, token_length)) {
+-                return -4;
+-            }
+-            const uint32_t value_start = token_start + 1u;
+-            const uint32_t value_length = token_length - 2u;
++                const int32_t decoded_length = decode_escaped_key(
++                    src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
++                );
++                // Unsupported raw UTF-8 keeps the existing JS decoder fallback.
++                if (decoded_length < 0) { return -4; }
++                value_source = strings;
++                value_start = strings_cursor;
++                value_length = (uint32_t)decoded_length;
++            }
+             if (value_length > MAX_INTERNED_KEY_BYTES) { return -5; }
+-            const uint32_t hash = hash_content_xxh32(src + value_start, value_length, FNV1A_OFFSET);
++            const uint32_t hash = hash_content_xxh32(value_source + value_start, value_length, FNV1A_OFFSET);
+             uint32_t slot = mix_string_hash(hash, value_length) & table_mask;
+             uint32_t matched_index = 0xffffffffu;
+             for (uint32_t probes = 0u; probes < hash_table_size; ++probes) {
+@@ -1943,7 +1951,7 @@
+                     content_bytes_equal_between(
+                         strings,
+                         string_offsets[candidate],
+-                        src,
++                        value_source,
+                         value_start,
+                         value_length
+                     )
+@@ -1964,8 +1972,10 @@
+             ) {
+                 return -2;
+             }
+-            for (uint32_t i = 0u; i < value_length; ++i) {
+-                strings[strings_cursor + i] = src[value_start + i];
++            if (value_source != strings) {
++                for (uint32_t i = 0u; i < value_length; ++i) {
++                    strings[strings_cursor + i] = value_source[value_start + i];
++                }
+             }
+             string_lengths[unique_count] = (uint16_t)value_length;
+             string_offsets[unique_count] = strings_cursor;
+@@ -1975,6 +1985,10 @@
+             strings_cursor += value_length;
+             ++unique_count;
+         }
++        // The standalone projection infers equality from key indexes. Preserve
++        // the existing raw-token reading semantics when escaped spellings
++        // decode to one key by using the established JavaScript fallback.
++        if (!reading_equals_expression && indexes[0] == indexes[1]) { return -4; }
+         expression_indexes[local_row] = indexes[0];
+         reading_indexes[local_row] = indexes[1];
+     }
