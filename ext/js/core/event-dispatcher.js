@@ -32,12 +32,14 @@ export class EventDispatcher {
      * Creates a new instance.
      */
     constructor() {
-        /** @type {Map<import('core').EventNames<TSurface>, import('core').EventHandlerAny[]>} */
+        /** @type {Map<import('core').EventNames<TSurface>, {callback: import('core').EventHandlerAny, removed: boolean}[]>} */
         this._eventMap = new Map();
     }
 
     /**
      * Triggers an event with the given name and specified argument.
+     * Listeners added during dispatch wait for the next trigger. Listeners removed
+     * before their turn are skipped, including during a nested dispatch.
      * @template {import('core').EventNames<TSurface>} TName
      * @param {TName} eventName The string representing the event's name.
      * @param {import('core').EventArgument<TSurface, TName>} details The argument passed to the callback functions.
@@ -47,8 +49,8 @@ export class EventDispatcher {
         const callbacks = this._eventMap.get(eventName);
         if (typeof callbacks === 'undefined') { return false; }
 
-        for (const callback of callbacks) {
-            callback(details);
+        for (const {callback, removed} of callbacks.slice()) {
+            if (!removed) { callback(details); }
         }
         return true;
     }
@@ -65,7 +67,7 @@ export class EventDispatcher {
             callbacks = [];
             this._eventMap.set(eventName, callbacks);
         }
-        callbacks.push(callback);
+        callbacks.push({callback, removed: false});
     }
 
     /**
@@ -81,7 +83,8 @@ export class EventDispatcher {
 
         const ii = callbacks.length;
         for (let i = 0; i < ii; ++i) {
-            if (callbacks[i] === callback) {
+            if (callbacks[i].callback === callback) {
+                callbacks[i].removed = true;
                 callbacks.splice(i, 1);
                 if (callbacks.length === 0) {
                     this._eventMap.delete(eventName);
