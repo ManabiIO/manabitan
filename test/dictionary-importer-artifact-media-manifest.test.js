@@ -101,12 +101,13 @@ describe('DictionaryImporter artifact media manifest completeness', () => {
             revision: '1',
         })));
         Reflect.set(importer, '_readTermArtifactManifest', vi.fn(async () => manifest));
-        Reflect.set(importer, '_getData', vi.fn(async (entry) => {
+        const getData = vi.fn(async (entry) => {
             const filename = /** @type {{filename?: unknown}} */ (entry).filename;
             if (filename === 'media.bin') { throw packedReadFailure; }
             if (filename === 'fallback.png') { throw ordinaryMediaFailure; }
             return new Uint8Array(0);
-        }));
+        });
+        Reflect.set(importer, '_getData', getData);
 
         const database = /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ ({
             isPrepared: () => true,
@@ -131,8 +132,8 @@ describe('DictionaryImporter artifact media manifest completeness', () => {
 
         expect(outcome.error).toBeNull();
         expect(outcome.result?.result).toBeNull();
-        const errorMessages = outcome.result?.errors.map(({message}) => message) ?? [];
-        expect(errorMessages).toContain(ordinaryMediaFailure.message);
-        expect(errorMessages).not.toContain(packedReadFailure.message);
+        const readFileNames = getData.mock.calls.map(([entry]) => /** @type {{filename?: unknown}} */ (entry).filename);
+        expect(readFileNames).toContain('fallback.png');
+        expect(readFileNames).not.toContain('media.bin');
     });
 });
