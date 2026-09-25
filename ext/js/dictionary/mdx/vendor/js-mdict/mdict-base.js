@@ -356,6 +356,18 @@ class MDictBase {
         // STEP7: read record block
         // _readRecordBlock method is very slow, avoid invoke directly
         // this._readRecordBlock();
+        const recordEndOffset = this.recordInfoList.length > 0 ?
+            this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize :
+            0;
+        for (const {recordStartOffset} of this.keywordList) {
+            if (
+                !Number.isSafeInteger(recordStartOffset) ||
+                recordStartOffset < 0 ||
+                recordStartOffset > recordEndOffset
+            ) {
+                throw new RangeError(`Invalid MDict record start offset: ${String(recordStartOffset)}`);
+            }
+        }
         // Finally: resort the keyword list
         this.keywordList.sort((ki1, ki2) => {
             return ki1.keyText.localeCompare(ki2.keyText);
@@ -364,9 +376,6 @@ class MDictBase {
         // boundaries. Recompute them after sorting so dictionaries whose key
         // blocks are not in lexical order cannot return truncated records.
         if (this.keywordList.length > 0) {
-            const recordEndOffset = this.recordInfoList.length > 0 ?
-                this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize :
-                0;
             const starts = [...new Set(this.keywordList.map(({recordStartOffset}) => recordStartOffset))]
                 .sort((a, b) => a - b);
             const ends = new Map();

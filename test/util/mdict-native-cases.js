@@ -847,6 +847,14 @@ describe('native parser controls and key metadata', () => {
         assert.throws(() => new MDX('key-trailer.mdx', fixture.bytes), /key.*info/iu);
     });
 
+    test('record offsets must stay within the decoded record stream', () => {
+        const fixture = makeMdictFixture(
+            [{key: 'a', value: 'first'}, {key: 'b', value: 'second'}],
+            {keysPerBlock: 1, recordOffsets: [0, 1_000_000]},
+        );
+        assert.throws(() => new MDX('record-offset.mdx', fixture.bytes), /record.*offset/iu);
+    });
+
     test('scanner rejects invalid sources and releases its input on close', () => {
         assert.throws(() => new FileScanner(/** @type {any} */ ({})), TypeError);
         const scanner = new FileScanner(Uint8Array.of(1, 2, 3));
