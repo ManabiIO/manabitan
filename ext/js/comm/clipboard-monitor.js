@@ -54,6 +54,7 @@ export class ClipboardMonitor extends EventDispatcher {
          */
         const token = {};
         const intervalCallback = async () => {
+            if (this._timerToken !== token) { return; }
             this._timerId = null;
 
             let text = null;
@@ -75,6 +76,8 @@ export class ClipboardMonitor extends EventDispatcher {
                 }
             }
 
+            // A change listener can stop or restart the monitor synchronously.
+            if (this._timerToken !== token) { return; }
             canChange = true;
             this._timerId = setTimeout(intervalCallback, this._interval);
         };
