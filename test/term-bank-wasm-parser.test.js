@@ -262,6 +262,59 @@ describe('term-bank WASM parser', () => {
 
     maybeTest.each([
         {
+            name: 'JavaScript escaped-key fallback',
+            options: {},
+            expectFused: false,
+        },
+        {
+            name: 'fused native escaped-key parser',
+            options: {
+                experimentalFusedSingleBank: true,
+                experimentalNativeEscapedKeys: true,
+            },
+            expectFused: true,
+        },
+    ])('canonicalizes decoded expression/reading equality in $name', async ({options, expectFused}) => {
+        const source = textEncoder.encode(
+            '[["same","\\u0073ame","","",0,["one"],1,""],' +
+            '["\\u0073ame","same","","",0,["two"],2,""],' +
+            '["same","\\u0074ame","","",0,["three"],3,""]]',
+        );
+        /** @type {TermBankColumnChunk|null} */
+        let result = null;
+        await parseTermBankWithWasmColumnChunks(
+            source,
+            3,
+            (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
+            2048,
+            {
+                computeContentHashes: true,
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                singleChunk: true,
+                ...options,
+            },
+        );
+        if (result === null) { throw new Error('Expected parsed term-bank chunk'); }
+        const chunk = /** @type {TermBankColumnChunk} */ (result);
+        const plan = chunk.termRecordPreinternedPlan;
+        expect([...chunk.readingEqualsExpressionList]).toStrictEqual([1, 1, 0]);
+        expect(plan.readingIndexes[0]).toBe(plan.expressionIndexes[0]);
+        expect(plan.readingIndexes[1]).toBe(plan.expressionIndexes[1]);
+        expect(chunk.readingBytesList[0]).toHaveLength(0);
+        expect(chunk.readingBytesList[1]).toHaveLength(0);
+        expect(textDecoder.decode(chunk.readingBytesList[2])).toBe('tame');
+
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(profile?.fusedParseAttempts ?? 0).toBe(expectFused ? 1 : 0);
+        expect(profile?.fusedParseFallbacks ?? 0).toBe(0);
+        if (expectFused) {
+            expect(profile?.escapedKeyDecodeCount ?? 0).toBeGreaterThanOrEqual(2);
+        }
+    });
+
+    maybeTest.each([
+        {
             name: 'CRC mismatch',
             mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, signature: (source.signature + 1) >>> 0}),
             message: 'CRC32',
