@@ -2534,13 +2534,16 @@ export class TermRecordOpfsStore {
         const removedPlans = [];
         try {
             for (const plan of renamePlans) {
+                // Cleanup owns this destination before the first mutating write.
+                // If the shard copy succeeds but index creation/write fails, the
+                // partially-created destination must still be removed.
+                createdPlans.push(plan);
                 await writeShardFile(plan.nextFileHandle, plan.file);
                 const nextIndexHandle = await this._recordsDirectoryHandle.getFileHandle(
                     `${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
                     {create: true},
                 );
                 await writeShardFile(nextIndexHandle, plan.indexFile);
-                createdPlans.push(plan);
             }
             if (!preserveSourceFiles) {
                 for (const plan of renamePlans) {
