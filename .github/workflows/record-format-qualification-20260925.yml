@@ -61,12 +61,12 @@ jobs:
           node node_modules/vitest/vitest.mjs run test/term-record-format-selection.test.js test/term-record-opfs-store.test.js test/term-lookup-index.test.js > "$EVIDENCE_ROOT/focused.log" 2>&1
           node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-record-opfs-store.js test/term-record-format-selection.test.js > "$EVIDENCE_ROOT/lint.log" 2>&1
           npm run test:ts > "$EVIDENCE_ROOT/types.log" 2>&1
-          npm run test:unit -- --maxWorkers=2 > "$EVIDENCE_ROOT/unit.log" 2>&1
+          npm run test:unit -- --minWorkers=1 --maxWorkers=2 > "$EVIDENCE_ROOT/unit.log" 2>&1
           npm run test:build > "$EVIDENCE_ROOT/build-plans.log" 2>&1
           git -c core.hooksPath=/dev/null -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' add ext/js/dictionary/term-record-opfs-store.js test/term-record-format-selection.test.js
           git -c core.hooksPath=/dev/null -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'perf(import): recover artifact record format without rescanning scores'
           git rev-parse HEAD > "$EVIDENCE_ROOT/candidate-commit.txt"
-          git rev-parse HEAD^{tree} > "$EVIDENCE_ROOT/candidate-tree.txt"
+          git rev-parse 'HEAD^{tree}' > "$EVIDENCE_ROOT/candidate-tree.txt"
           git diff HEAD^ HEAD > "$EVIDENCE_ROOT/candidate.patch"
           git push origin HEAD:refs/heads/verify/record-format-length-candidate-20260925-a392554
       - name: Build baseline and prepare real browser workloads
