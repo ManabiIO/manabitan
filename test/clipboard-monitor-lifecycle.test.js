@@ -52,7 +52,7 @@ describe('ClipboardMonitor handler lifecycle', () => {
         });
 
         monitor.start();
-        await vi.runOnlyPendingTimersAsync();
+        await Promise.resolve();
         await vi.advanceTimersByTimeAsync(250);
 
         expect(changes).toStrictEqual(['changed']);
@@ -74,7 +74,7 @@ describe('ClipboardMonitor handler lifecycle', () => {
         });
 
         monitor.start();
-        await vi.runOnlyPendingTimersAsync();
+        await Promise.resolve();
         await vi.advanceTimersByTimeAsync(250);
         await Promise.resolve();
 
@@ -96,7 +96,7 @@ describe('ClipboardMonitor handler lifecycle', () => {
         monitor.on('change', ({text}) => { changes.push(text); });
 
         monitor.start();
-        await vi.runOnlyPendingTimersAsync();
+        await Promise.resolve();
         await vi.advanceTimersByTimeAsync(250);
 
         expect(changes).toStrictEqual(['changed']);
