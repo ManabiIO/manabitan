@@ -2536,26 +2536,31 @@ export class TermRecordOpfsStore {
         const removedPlans = [];
         try {
             for (const plan of renamePlans) {
+                // Cleanup owns this destination before the first mutating write.
+                // If the shard copy succeeds but index creation/write fails, the
+                // partially-created destination must still be removed.
+                createdPlans.push(plan);
                 await writeShardFile(plan.nextFileHandle, plan.file);
                 const nextIndexHandle = await this._recordsDirectoryHandle.getFileHandle(
                     `${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
                     {create: true},
                 );
                 await writeShardFile(nextIndexHandle, plan.indexFile);
-                createdPlans.push(plan);
             }
             if (!preserveSourceFiles) {
                 for (const plan of renamePlans) {
-                    await this._recordsDirectoryHandle.removeEntry(plan.state.fileName);
-                    try {
-                        await this._recordsDirectoryHandle.removeEntry(`${plan.state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
-                    } catch (_) {
-                        // NOP
-                    }
+                    // Restoration owns the source before the first delete. An
+                    // index-only orphan is recoverable as a descriptor on
+                    // startup, so failing to remove the old index cannot be
+                    // treated as a successful rename.
                     removedPlans.push(plan);
+                    await this._recordsDirectoryHandle.removeEntry(plan.state.fileName);
+                    await this._recordsDirectoryHandle.removeEntry(`${plan.state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
                 }
             }
         } catch (e) {
+            /** @type {Error[]} */
+            const cleanupErrors = [];
             for (const plan of [...removedPlans].reverse()) {
                 try {
                     const restoredHandle = await this._recordsDirectoryHandle.getFileHandle(plan.state.fileName, {create: true});
@@ -2565,21 +2570,33 @@ export class TermRecordOpfsStore {
                         {create: true},
                     );
                     await writeShardFile(restoredIndexHandle, plan.indexFile);
-                } catch (_) {
-                    // NOP - preserve original failure.
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
                 }
             }
             for (const plan of [...createdPlans].reverse()) {
+                // Remove/truncate the recoverable index first. If unlinking is
+                // blocked by another runtime, an empty index cannot recreate the
+                // destination descriptor on the next startup.
                 try {
-                    await this._recordsDirectoryHandle.removeEntry(plan.nextFileName);
-                    try {
-                        await this._recordsDirectoryHandle.removeEntry(`${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
-                    } catch (_) {
-                        // NOP
-                    }
-                } catch (_) {
-                    // NOP - preserve original failure.
+                    await this._removeStorageFileOrTruncate(
+                        `${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
+                        true,
+                    );
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
                 }
+                try {
+                    await this._removeStorageFileOrTruncate(plan.nextFileName, true);
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
+                }
+            }
+            if (cleanupErrors.length > 0) {
+                throw new AggregateError(
+                    [toError(e), ...cleanupErrors],
+                    `Dictionary rename and rollback cleanup failed for ${fromName} to ${toName}`,
+                );
             }
             throw e;
         }
@@ -2638,8 +2655,8 @@ export class TermRecordOpfsStore {
         const removedFileNames = [];
         /** @type {Set<string>} */
         const removedDictionaryNames = new Set();
-        const fileNames = await this._listShardFileNames();
-        for (const fileName of fileNames) {
+        const shardFiles = await this._listShardStorageFiles();
+        for (const {descriptorFileName: fileName, hasDescriptor} of shardFiles) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(fileName);
             if (dictionaryName === null || !predicate(dictionaryName)) {
                 continue;
@@ -2649,7 +2666,9 @@ export class TermRecordOpfsStore {
                 await this._flushPendingWritesForShard(state);
                 await this._closeShardWritable(state);
             }
-            await this._removeStorageFileOrTruncate(fileName, true);
+            if (hasDescriptor) {
+                await this._removeStorageFileOrTruncate(fileName, true);
+            }
             if (typeof state !== 'undefined') {
                 this._shardStateByFileName.delete(fileName);
                 this._activeAppendShardStateByKey.delete(state.logicalKey);
@@ -5601,6 +5620,36 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Lists logical shard pairs, including an index-only orphan whose descriptor
+     * is currently missing. Startup can recover such a descriptor from the
+     * lookup index, so cleanup must treat the pair as live storage identity.
+     * @returns {Promise<Array<{descriptorFileName: string, hasDescriptor: boolean, hasIndex: boolean}>>}
+     */
+    async _listShardStorageFiles() {
+        const storageFileNames = await this._listTermRecordStorageFileNames();
+        /** @type {Map<string, {descriptorFileName: string, hasDescriptor: boolean, hasIndex: boolean}>} */
+        const byDescriptor = new Map();
+        for (const storageFileName of storageFileNames) {
+            const isIndex = storageFileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`);
+            const descriptorFileName = isIndex ?
+                storageFileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length) :
+                storageFileName;
+            if (!this._isShardFileName(descriptorFileName)) { continue; }
+            let pair = byDescriptor.get(descriptorFileName);
+            if (typeof pair === 'undefined') {
+                pair = {descriptorFileName, hasDescriptor: false, hasIndex: false};
+                byDescriptor.set(descriptorFileName, pair);
+            }
+            if (isIndex) {
+                pair.hasIndex = true;
+            } else {
+                pair.hasDescriptor = true;
+            }
+        }
+        return [...byDescriptor.values()];
+    }
+
+    /**
      * @returns {Promise<string[]>}
      */
     async _listShardFileNames() {
@@ -5906,8 +5955,8 @@ export class TermRecordOpfsStore {
         if (this._recordsDirectoryHandle === null) {
             return;
         }
-        const fileNames = await this._listShardFileNames();
-        for (const fileName of fileNames) {
+        const shardFiles = await this._listShardStorageFiles();
+        for (const {descriptorFileName: fileName, hasDescriptor} of shardFiles) {
             if (this._decodeDictionaryNameFromShardFileName(fileName) !== dictionaryName) {
                 continue;
             }
@@ -5916,7 +5965,9 @@ export class TermRecordOpfsStore {
                 await this._flushPendingWritesForShard(state);
                 await this._closeShardWritable(state);
             }
-            await this._removeStorageFileOrTruncate(fileName, false);
+            if (hasDescriptor) {
+                await this._removeStorageFileOrTruncate(fileName, false);
+            }
             await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
             if (typeof state !== 'undefined') {
                 this._shardStateByFileName.delete(fileName);

@@ -1470,6 +1470,145 @@ describe('TermRecordOpfsStore', () => {
         expect(shardStateByFileName.has(oldFileName)).toBe(true);
     });
 
+    test('replaceDictionaryName removes a copied destination shard when its index write fails', async () => {
+        const store = new TermRecordOpfsStore();
+        vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
+        const recordsById = Reflect.get(store, '_recordsById');
+        const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
+        const oldFileName = store._getShardSegmentFileName('JMdict staging', 'raw', 0);
+        const oldLogicalKey = store._getShardFileName('JMdict staging', 'raw');
+        const newFileName = store._getShardSegmentFileName('JMdict', 'raw', 0);
+        const oldIndexFileName = `${oldFileName}.mbti`;
+        const newIndexFileName = `${newFileName}.mbti`;
+        const sourceBytes = new Uint8Array([1, 2, 3, 4]);
+        const sourceIndexBytes = new Uint8Array([5, 6, 7, 8]);
+        const fileBytesByName = new Map([
+            [oldFileName, sourceBytes],
+            [oldIndexFileName, sourceIndexBytes],
+        ]);
+        const writeFailure = new Error('Injected destination index write failure');
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            removeEntryFailures: new Map([[newIndexFileName, 1]]),
+            beforeWrite(name) {
+                if (name === newIndexFileName) { throw writeFailure; }
+            },
+        });
+        const fileHandle = await recordsDirectoryHandle.getFileHandle(oldFileName, {create: false});
+
+        Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        shardStateByFileName.set(
+            oldFileName,
+            store._createShardState(oldFileName, fileHandle, sourceBytes.byteLength, 'raw', 0, oldLogicalKey),
+        );
+        recordsById.set(1, {
+            id: 1,
+            dictionary: 'JMdict staging',
+            expression: '暗記',
+            reading: 'あんき',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        await expect(store.replaceDictionaryName('JMdict staging', 'JMdict', true)).rejects.toBe(writeFailure);
+
+        expect([...fileBytesByName.get(oldFileName) ?? []]).toStrictEqual([...sourceBytes]);
+        expect([...fileBytesByName.get(oldIndexFileName) ?? []]).toStrictEqual([...sourceIndexBytes]);
+        expect(fileBytesByName.has(newFileName)).toBe(false);
+        // The injected unlink failure falls back to truncation. A zero-byte
+        // index cannot recover the removed destination descriptor on startup.
+        expect(fileBytesByName.get(newIndexFileName)?.byteLength ?? 0).toBe(0);
+        expect(recordsById.get(1)?.dictionary).toBe('JMdict staging');
+        expect(shardStateByFileName.has(oldFileName)).toBe(true);
+        expect(shardStateByFileName.has(newFileName)).toBe(false);
+    });
+
+
+    test('replaceDictionaryName rolls back when the source lookup index cannot be removed', async () => {
+        const store = new TermRecordOpfsStore();
+        vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
+        const recordsById = Reflect.get(store, '_recordsById');
+        const shardStateByFileName = Reflect.get(store, '_shardStateByFileName');
+        const oldFileName = store._getShardSegmentFileName('JMdict staging', 'raw', 0);
+        const oldLogicalKey = store._getShardFileName('JMdict staging', 'raw');
+        const newFileName = store._getShardSegmentFileName('JMdict', 'raw', 0);
+        const oldIndexFileName = `${oldFileName}.mbti`;
+        const newIndexFileName = `${newFileName}.mbti`;
+        const sourceBytes = new Uint8Array([1, 2, 3, 4]);
+        const sourceIndexBytes = new Uint8Array([5, 6, 7, 8]);
+        const fileBytesByName = new Map([
+            [oldFileName, sourceBytes],
+            [oldIndexFileName, sourceIndexBytes],
+        ]);
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            removeEntryFailures: new Map([[oldIndexFileName, 1]]),
+        });
+        const fileHandle = await recordsDirectoryHandle.getFileHandle(oldFileName, {create: false});
+
+        Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        shardStateByFileName.set(
+            oldFileName,
+            store._createShardState(oldFileName, fileHandle, sourceBytes.byteLength, 'raw', 0, oldLogicalKey),
+        );
+        recordsById.set(1, {
+            id: 1,
+            dictionary: 'JMdict staging',
+            expression: '暗記',
+            reading: 'あんき',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        await expect(store.replaceDictionaryName('JMdict staging', 'JMdict')).rejects.toThrow(
+            `Injected removeEntry failure for ${oldIndexFileName}`,
+        );
+
+        expect([...fileBytesByName.get(oldFileName) ?? []]).toStrictEqual([...sourceBytes]);
+        expect([...fileBytesByName.get(oldIndexFileName) ?? []]).toStrictEqual([...sourceIndexBytes]);
+        expect(fileBytesByName.has(newFileName)).toBe(false);
+        expect(fileBytesByName.has(newIndexFileName)).toBe(false);
+        expect(recordsById.get(1)?.dictionary).toBe('JMdict staging');
+        expect(shardStateByFileName.has(oldFileName)).toBe(true);
+        expect(shardStateByFileName.has(newFileName)).toBe(false);
+    });
+
+
+    test('cleanupShardFilesByDictionaryPredicate removes an index-only orphan', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Transient dictionary', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([[indexFileName, new Uint8Array([1, 2, 3, 4])]]);
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+
+        const removed = await store.cleanupShardFilesByDictionaryPredicate((name) => name === 'Transient dictionary');
+
+        expect(removed).toEqual([descriptorFileName]);
+        expect(fileBytesByName.has(descriptorFileName)).toBe(false);
+        expect(fileBytesByName.has(indexFileName)).toBe(false);
+    });
+
+    test('deleteByDictionary removes an index-only orphan without masking real descriptor failures', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Deleted dictionary', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([[indexFileName, new Uint8Array([9, 8, 7, 6])]]);
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+
+        await expect(store.deleteByDictionary('Deleted dictionary')).resolves.toBe(0);
+
+        expect(fileBytesByName.has(descriptorFileName)).toBe(false);
+        expect(fileBytesByName.has(indexFileName)).toBe(false);
+    });
+
     test('dictionary index construction uses maintained record ids without duplicate stale ids', () => {
         const store = new TermRecordOpfsStore();
         const storeRecord = /** @type {(record: unknown) => void} */ (Reflect.get(store, '_storeRecord').bind(store));
