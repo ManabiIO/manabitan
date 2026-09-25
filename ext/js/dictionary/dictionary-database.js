@@ -4775,7 +4775,7 @@ null;
     }
 
     /**
-     * @param {{table: string, columnsSql: string, rowPlaceholderSql: string, batchSize: number, bindRow: (item: unknown) => import('@sqlite.org/sqlite-wasm').Bindable[]}} descriptor
+     * @param {{table: string, columnsSql: string, rowPlaceholderSql: string, batchSize: number, appendBindRow: (item: unknown, bind: import('@sqlite.org/sqlite-wasm').Bindable[]) => void}} descriptor
      * @param {unknown[]} items
      * @param {number} start
      * @param {number} count
@@ -4783,7 +4783,7 @@ null;
      */
     async _bulkInsertWithDescriptor(descriptor, items, start, count) {
         if (count <= 0) { return; }
-        const {table, columnsSql, rowPlaceholderSql, batchSize, bindRow} = descriptor;
+        const {table, columnsSql, rowPlaceholderSql, batchSize, appendBindRow} = descriptor;
         if (count <= batchSize) {
             /** @type {string[]} */
             const valueRows = [];
@@ -4791,10 +4791,7 @@ null;
             const bind = [];
             for (let j = 0; j < count; ++j) {
                 valueRows.push(rowPlaceholderSql);
-                const rowBind = bindRow(items[start + j]);
-                for (const value of rowBind) {
-                    bind.push(value);
-                }
+                appendBindRow(items[start + j], bind);
             }
             const sql = `INSERT INTO ${table}(${columnsSql}) VALUES ${valueRows.join(',')}`;
             const stmt = this._getCachedStatement(sql);
@@ -4812,10 +4809,7 @@ null;
             let sql;
             if (chunkCount === batchSize) {
                 for (let j = 0; j < chunkCount; ++j) {
-                    const rowBind = bindRow(items[i + j]);
-                    for (const value of rowBind) {
-                        bind.push(value);
-                    }
+                    appendBindRow(items[i + j], bind);
                 }
                 sql = fullBatchSql;
             } else {
@@ -4823,10 +4817,7 @@ null;
                 const valueRows = [];
                 for (let j = 0; j < chunkCount; ++j) {
                     valueRows.push(rowPlaceholderSql);
-                    const rowBind = bindRow(items[i + j]);
-                    for (const value of rowBind) {
-                        bind.push(value);
-                    }
+                    appendBindRow(items[i + j], bind);
                 }
                 sql = `INSERT INTO ${table}(${columnsSql}) VALUES ${valueRows.join(',')}`;
             }
@@ -4839,7 +4830,7 @@ null;
 
     /**
      * @param {import('dictionary-database').ObjectStoreName} objectStoreName
-     * @returns {{table: string, columnsSql: string, rowPlaceholderSql: string, batchSize: number, bindRow: (item: unknown) => import('@sqlite.org/sqlite-wasm').Bindable[]}}
+     * @returns {{table: string, columnsSql: string, rowPlaceholderSql: string, batchSize: number, appendBindRow: (item: unknown, bind: import('@sqlite.org/sqlite-wasm').Bindable[]) => void}}
      * @throws {Error}
      */
     _getBulkInsertDescriptor(objectStoreName) {
@@ -4850,9 +4841,9 @@ null;
                     columnsSql: 'title, version, summaryJson',
                     rowPlaceholderSql: '(?, ?, ?)',
                     batchSize: 256,
-                    bindRow: (item) => {
+                    appendBindRow: (item, bind) => {
                         const summary = /** @type {import('dictionary-importer').Summary} */ (item);
-                        return [summary.title, summary.version, JSON.stringify(summary)];
+                        bind.push(summary.title, summary.version, JSON.stringify(summary));
                     },
                 };
             case 'termMeta':
@@ -4861,9 +4852,9 @@ null;
                     columnsSql: 'dictionary, expression, mode, dataJson',
                     rowPlaceholderSql: '(?, ?, ?, ?)',
                     batchSize: 2048,
-                    bindRow: (item) => {
+                    appendBindRow: (item, bind) => {
                         const row = /** @type {import('dictionary-database').DatabaseTermMeta} */ (item);
-                        return [row.dictionary, row.expression, row.mode, JSON.stringify(row.data)];
+                        bind.push(row.dictionary, row.expression, row.mode, JSON.stringify(row.data));
                     },
                 };
             case 'kanji':
@@ -4872,9 +4863,9 @@ null;
                     columnsSql: 'dictionary, character, onyomi, kunyomi, tags, meaningsJson, statsJson',
                     rowPlaceholderSql: '(?, ?, ?, ?, ?, ?, ?)',
                     batchSize: 1024,
-                    bindRow: (item) => {
+                    appendBindRow: (item, bind) => {
                         const row = /** @type {import('dictionary-database').DatabaseKanjiEntry} */ (item);
-                        return [
+                        bind.push(
                             row.dictionary,
                             row.character,
                             row.onyomi,
@@ -4882,7 +4873,7 @@ null;
                             row.tags,
                             JSON.stringify(row.meanings),
                             typeof row.stats !== 'undefined' ? JSON.stringify(row.stats) : null,
-                        ];
+                        );
                     },
                 };
             case 'kanjiMeta':
@@ -4891,9 +4882,9 @@ null;
                     columnsSql: 'dictionary, character, mode, dataJson',
                     rowPlaceholderSql: '(?, ?, ?, ?)',
                     batchSize: 2048,
-                    bindRow: (item) => {
+                    appendBindRow: (item, bind) => {
                         const row = /** @type {import('dictionary-database').DatabaseKanjiMeta} */ (item);
-                        return [row.dictionary, row.character, row.mode, JSON.stringify(row.data)];
+                        bind.push(row.dictionary, row.character, row.mode, JSON.stringify(row.data));
                     },
                 };
             case 'tagMeta':
@@ -4902,9 +4893,9 @@ null;
                     columnsSql: 'dictionary, name, category, ord, notes, score',
                     rowPlaceholderSql: '(?, ?, ?, ?, ?, ?)',
                     batchSize: 2048,
-                    bindRow: (item) => {
+                    appendBindRow: (item, bind) => {
                         const row = /** @type {import('dictionary-database').Tag} */ (item);
-                        return [row.dictionary, row.name, row.category, row.order, row.notes, row.score];
+                        bind.push(row.dictionary, row.name, row.category, row.order, row.notes, row.score);
                     },
                 };
             case 'media':
@@ -4913,9 +4904,9 @@ null;
                     columnsSql: 'dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength',
                     rowPlaceholderSql: '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                     batchSize: 8,
-                    bindRow: (item) => {
+                    appendBindRow: (item, bind) => {
                         const row = /** @type {import('dictionary-database').MediaDataArrayBufferContent} */ (item);
-                        return [
+                        bind.push(
                             row.dictionary,
                             row.path,
                             row.mediaType,
@@ -4926,7 +4917,7 @@ null;
                             typeof row.contentLength === 'number' ? row.contentLength : 0,
                             typeof row.contentCompressionMethod === 'number' ? row.contentCompressionMethod : ZIP_COMPRESSION_METHOD_STORE,
                             typeof row.contentUncompressedLength === 'number' ? row.contentUncompressedLength : (typeof row.contentLength === 'number' ? row.contentLength : 0),
-                        ];
+                        );
                     },
                 };
             default:
