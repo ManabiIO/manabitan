@@ -145,6 +145,43 @@ describe('DictionaryImporter term artifacts', () => {
         expect(rebasedHash).not.toStrictEqual(sourceHash);
     });
 
+    test('recomputes materialized-row hashes after shared-glossary rebasing', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const sourceContent = encodeRawTermContentSharedGlossaryBinary(
+            '',
+            '',
+            '',
+            13,
+            5,
+            new TextEncoder(),
+        );
+        const sourceHash = hashTermEntryContentBytesPair(sourceContent);
+        const artifact = createArtifactWithEmptyReadingSentinel(sourceContent, sourceHash);
+
+        const result = await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            void 0,
+            0,
+            512,
+            false,
+            1,
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        );
+
+        expect(result.termList).toHaveLength(1);
+        const entry = result.termList[0];
+        const rebasedBytes = /** @type {Uint8Array} */ (entry.termEntryContentBytes);
+        const rebasedHash = hashTermEntryContentBytesPair(rebasedBytes);
+        expect([entry.termEntryContentHash1, entry.termEntryContentHash2]).toStrictEqual(rebasedHash);
+        expect(rebasedHash).not.toStrictEqual(sourceHash);
+        expect(decodeRawTermContentSharedGlossaryHeader(rebasedBytes, new TextDecoder())?.glossaryOffset).toBe(525);
+    });
+
     test('preserves artifact content hashes when normalization does not change bytes', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const contentBytes = encodeRawTermContentSharedGlossaryBinary(
