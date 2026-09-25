@@ -93,6 +93,60 @@ function readKeyInfoText(bytes, offset, size, terminatorWidth) {
     }
     return bytes.subarray(offset, end - terminatorWidth);
 }
+
+/**
+ * Finalize record boundaries while keys are still in physical record order,
+ * then retain the vendor API's lexically sorted keyword list. Valid MDict key
+ * blocks are already key-ordered, so the normal path avoids both sorts/maps.
+ * @param {Array<{keyText: string, recordStartOffset: number, recordEndOffset: number}>} keywordList
+ * @param {number} recordEndOffset
+ */
+export function finalizeMdictKeywordList(keywordList, recordEndOffset) {
+    if (keywordList.length === 0) { return; }
+
+    let recordOffsetsMonotonic = true;
+    for (let i = 1; i < keywordList.length; ++i) {
+        if (keywordList[i].recordStartOffset < keywordList[i - 1].recordStartOffset) {
+            recordOffsetsMonotonic = false;
+            break;
+        }
+    }
+
+    if (recordOffsetsMonotonic) {
+        let end = recordEndOffset;
+        for (let i = keywordList.length - 1; i >= 0; --i) {
+            const start = keywordList[i].recordStartOffset;
+            keywordList[i].recordEndOffset = end;
+            if (i === 0 || keywordList[i - 1].recordStartOffset !== start) {
+                end = start;
+            }
+        }
+    } else {
+        const starts = [...new Set(keywordList.map(({recordStartOffset}) => recordStartOffset))]
+            .sort((a, b) => a - b);
+        const ends = new Map();
+        let end = recordEndOffset;
+        for (let i = starts.length - 1; i >= 0; --i) {
+            const start = starts[i];
+            ends.set(start, end);
+            end = start;
+        }
+        for (const item of keywordList) {
+            item.recordEndOffset = ends.get(item.recordStartOffset) ?? recordEndOffset;
+        }
+    }
+
+    let keyOrderSorted = true;
+    for (let i = 1; i < keywordList.length; ++i) {
+        if (keywordList[i - 1].keyText.localeCompare(keywordList[i].keyText) > 0) {
+            keyOrderSorted = false;
+            break;
+        }
+    }
+    if (!keyOrderSorted) {
+        keywordList.sort((item1, item2) => item1.keyText.localeCompare(item2.keyText));
+    }
+}
 export class MdictMeta {
     constructor() {
         this.fname = '';
@@ -356,30 +410,12 @@ class MDictBase {
         // STEP7: read record block
         // _readRecordBlock method is very slow, avoid invoke directly
         // this._readRecordBlock();
-        // Finally: resort the keyword list
-        this.keywordList.sort((ki1, ki2) => {
-            return ki1.keyText.localeCompare(ki2.keyText);
-        });
-        // Record boundaries are offsets in the record stream, not key-order
-        // boundaries. Recompute them after sorting so dictionaries whose key
-        // blocks are not in lexical order cannot return truncated records.
-        if (this.keywordList.length > 0) {
-            const recordEndOffset = this.recordInfoList.length > 0 ?
-                this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize :
-                0;
-            const starts = [...new Set(this.keywordList.map(({recordStartOffset}) => recordStartOffset))]
-                .sort((a, b) => a - b);
-            const ends = new Map();
-            let end = recordEndOffset;
-            for (let i = starts.length - 1; i >= 0; --i) {
-                const start = starts[i];
-                ends.set(start, end);
-                end = start;
-            }
-            for (const item of this.keywordList) {
-                item.recordEndOffset = ends.get(item.recordStartOffset) ?? recordEndOffset;
-            }
-        }
+        // Finalize record boundaries before any fallback lexical sort.
+        // Valid MDict key blocks are already ordered, so this is linear-time.
+        const recordEndOffset = this.recordInfoList.length > 0 ?
+            this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize :
+            0;
+        finalizeMdictKeywordList(this.keywordList, recordEndOffset);
     }
     /**
      * STEP 4.2. split keys from key block
