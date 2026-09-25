@@ -55,4 +55,29 @@ describe('media headwords with omitted native byte columns', () => {
         expect(observed).toHaveLength(1)
         expect(observed[0].entry).toMatchObject({expression, reading: reading || expression, dictionary: 'media-fixture'})
     })
+
+    test('accumulates oversized media requirement chunks without spread overflow', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+        Reflect.set(importer, '_skipImageMetadata', true)
+        const requirementCount = 150000
+        const glossary = '{"type":"image","path":"image.png"},'.repeat(requirementCount).slice(0, -1)
+        const bytes = new TextEncoder().encode(`[["term","","","",0,[${glossary}],0,""]]`)
+        const entry = /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({filename: 'term_bank_1.json'}))
+
+        const result = await importer._readTermBankFileFast(
+            entry,
+            3,
+            'media-fixture',
+            false,
+            true,
+            true,
+            'raw-bytes',
+            void 0,
+            bytes,
+            1,
+        )
+
+        expect(result.termList).toHaveLength(1)
+        expect(result.requirements).toHaveLength(requirementCount)
+    }, 60000)
 })
