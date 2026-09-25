@@ -80,7 +80,12 @@ describe('DictionaryImporter expected term-content byte estimate', () => {
         expect(value).toBeNull();
     });
 
-    test('rejects unsafe source-file size estimates', () => {
+    test.each([
+        Number.MAX_SAFE_INTEGER + 1,
+        -1,
+        Number.POSITIVE_INFINITY,
+        1.5,
+    ])('rejects invalid source-file size estimate %s', (uncompressedSize) => {
         const value = importer._estimateExpectedTermContentImportBytes(
             null,
             null,
@@ -88,7 +93,7 @@ describe('DictionaryImporter expected term-content byte estimate', () => {
             null,
             [/** @type {import('dictionary-importer').ImportFileEntry} */ (/** @type {unknown} */ ({
                 filename: 'term_bank_1.mbtb',
-                uncompressedSize: Number.MAX_SAFE_INTEGER + 1,
+                uncompressedSize,
             }))],
         );
         expect(value).toBeNull();
