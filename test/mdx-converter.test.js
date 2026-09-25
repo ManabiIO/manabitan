@@ -280,6 +280,62 @@ describe('convertMdxToArchive', () => {
         expect(termBank.some(([expression]) => expression === 'MissingAlias')).toBe(false);
     });
 
+    test('drops case-insensitive redirect fallback when multiple spellings collide', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Ambiguous redirect fixture',
+                Description: '',
+                KeyCaseSensitive: 'No',
+                StripKey: 'No',
+            },
+            entries: [
+                {keyText: 'Alias', definition: '@@@LINK=target'},
+                {keyText: 'Target', definition: '<div>Mixed case target</div>'},
+                {keyText: 'TARGET', definition: '<div>Upper case target</div>'},
+            ],
+        });
+
+        const result = await convertMdxToArchive(
+            'ambiguous-redirect.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+
+        expect(termBank.map(([expression]) => expression)).toStrictEqual(['Target', 'TARGET']);
+        expect(termBank.some(([expression]) => expression === 'Alias')).toBe(false);
+    });
+
+    test('drops StripKey redirect fallback when multiple spellings collide', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Ambiguous StripKey redirect fixture',
+                Description: '',
+                KeyCaseSensitive: 'Yes',
+                StripKey: 'Yes',
+            },
+            entries: [
+                {keyText: 'Alias', definition: '@@@LINK=foo.bar'},
+                {keyText: 'foo-bar', definition: '<div>Hyphen target</div>'},
+                {keyText: 'foobar', definition: '<div>Plain target</div>'},
+            ],
+        });
+
+        const result = await convertMdxToArchive(
+            'ambiguous-stripkey-redirect.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+
+        expect(termBank.map(([expression]) => expression)).toStrictEqual(['foo-bar', 'foobar']);
+        expect(termBank.some(([expression]) => expression === 'Alias')).toBe(false);
+    });
+
     test('uses the first matching MDD asset and skips unreferenced non-CSS assets', async () => {
         /** @type {string[]} */
         const lookupKeys = [];
