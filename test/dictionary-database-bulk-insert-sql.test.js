@@ -13,7 +13,10 @@ describe('DictionaryDatabase bulk insert SQL reuse', () => {
         const sqls = [];
         /** @type {unknown[][]} */
         const binds = [];
-        const bindRow = vi.fn((/** @type {number} */ value) => [value, value * 10]);
+        const bindRow = vi.fn((/** @type {unknown} */ value) => {
+            const numberValue = /** @type {number} */ (value);
+            return [numberValue, numberValue * 10];
+        });
         Reflect.set(database, '_getCachedStatement', (/** @type {string} */ sql) => {
             sqls.push(sql);
             return {
