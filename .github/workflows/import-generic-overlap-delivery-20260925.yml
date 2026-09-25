@@ -1,0 +1,66 @@
+name: Import generic overlap delivery 20260925
+on:
+  push:
+    branches: [bench/import-generic-overlap-20260925]
+    paths: [.github/workflows/import-generic-overlap-delivery-20260925.yml]
+permissions:
+  contents: write
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Isolate only the final candidate and tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/overlap-round-20260925/prepare.py /tmp/prepare.py
+          cp dev/perf/overlap-round-20260925/format.py /tmp/format.py
+          git fetch --depth=1 origin 46c54d548c6d0739a9aed81f764c98ffb4d8fde8
+          git reset --hard FETCH_HEAD
+          python3 /tmp/prepare.py
+          python3 /tmp/format.py
+          mkdir -p builds/overlap-delivery
+          git diff --check
+          git diff > builds/overlap-delivery/product.patch
+          sha256sum ext/js/dictionary/term-content-block-store.js test/term-content-block-store.test.js test/generic-span-codec-integration.test.js > builds/overlap-delivery/SHA256SUMS
+      - uses: ./.github/actions/setup
+      - name: Final candidate checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx eslint ext/js/dictionary/term-content-block-store.js test/term-content-block-store.test.js test/generic-span-codec-integration.test.js > builds/overlap-delivery/lint.log 2>&1
+          npm run test:ts:main > builds/overlap-delivery/types-main.log 2>&1
+          npm run test:ts:test > builds/overlap-delivery/types-test.log 2>&1
+          npx vitest run test/generic-span-codec-integration.test.js test/term-content-block-store.test.js test/dictionary-database-content-dedup.test.js test/term-content-opfs-store.test.js --no-file-parallelism > builds/overlap-delivery/tests.log 2>&1
+          sha256sum -c builds/overlap-delivery/SHA256SUMS
+      - name: Create isolated three-file branch without changing parent PRs
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch=perf/import-generic-overlap-20260925
+          existing=$(git ls-remote --heads origin "refs/heads/$branch")
+          test -z "$existing"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git add ext/js/dictionary/term-content-block-store.js test/term-content-block-store.test.js test/generic-span-codec-integration.test.js
+          python3 - <<'PY'
+          import subprocess
+          changed=subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()
+          assert sorted(changed)==sorted(['ext/js/dictionary/term-content-block-store.js','test/term-content-block-store.test.js','test/generic-span-codec-integration.test.js']),changed
+          PY
+          git commit -m 'perf(import): overlap selected generic compression with record writes'
+          git push origin "HEAD:refs/heads/$branch"
+          git rev-parse HEAD > builds/overlap-delivery/head.txt
+          git rev-parse 'HEAD^{tree}' > builds/overlap-delivery/tree.txt
+          git show --stat --oneline HEAD > builds/overlap-delivery/diff-stat.txt
+      - name: Retain exact publication or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generic-overlap-delivery
+          path: builds/overlap-delivery/
+          retention-days: 30
+          if-no-files-found: error
