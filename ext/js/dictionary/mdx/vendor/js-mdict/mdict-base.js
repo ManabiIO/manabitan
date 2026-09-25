@@ -74,6 +74,23 @@ function parseEncryptionFlag(value) {
     return result;
 }
 
+/**
+ * Parse the declared file-format version without accepting parseFloat prefixes.
+ * @param {unknown} value
+ * @returns {number}
+ */
+function parseEngineVersion(value) {
+    const normalized = typeof value === 'string' ? value.trim() : '';
+    if (!/^\d+(?:\.\d+)?$/u.test(normalized)) {
+        throw new Error(`Unsupported MDict engine version: ${String(value)}`);
+    }
+    const result = Number(normalized);
+    if (!Number.isFinite(result) || result < 1 || result >= 3) {
+        throw new Error(`Unsupported MDict engine version: ${String(value)}`);
+    }
+    return result;
+}
+
 /** Read a declared integer without allowing a clipped slice to change its type. */
 function readNumber(bytes, offset, width) {
     if (!Number.isSafeInteger(offset) || offset < 0 || offset > bytes.length - width) {
@@ -476,10 +493,7 @@ class MDictBase {
         //        header_info['_stylesheet'][lines[i]] = (lines[i + 1], lines[i + 2])
         // before version 2.0, number is 4 bytes integer alias, int32
         // version 2.0 and above use 8 bytes, alias int64
-        this.meta.version = parseFloat(this.header['GeneratedByEngineVersion']);
-        if (!Number.isFinite(this.meta.version) || this.meta.version < 1 || this.meta.version >= 3) {
-            throw new Error(`Unsupported MDict engine version: ${this.header['GeneratedByEngineVersion']}`);
-        }
+        this.meta.version = parseEngineVersion(this.header['GeneratedByEngineVersion']);
         if (this.meta.version >= 2.0) {
             this.meta.numWidth = 8;
             this.meta.numFmt = common.NUMFMT_UINT64;
