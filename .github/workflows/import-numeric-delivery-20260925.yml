@@ -1,0 +1,93 @@
+name: Import numeric delivery 20260925
+on:
+  push:
+    branches: [bench/import-numeric-projection-20260925]
+    paths: [.github/workflows/import-numeric-delivery-20260925.yml]
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Preserve final tests on the unchanged baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/numeric-round-20260925/length-first.patch /tmp/numeric.patch
+          cp test/term-bank-number-decode.test.js /tmp/numeric.test.js
+          git fetch --depth=1 origin 76362775484661b3cd8b9d2c84b228802c023a76
+          git reset --hard FETCH_HEAD
+          cp /tmp/numeric.test.js test/term-bank-number-decode.test.js
+          mkdir -p builds/numeric-delivery
+      - uses: ./.github/actions/setup
+      - name: Confirm only the new allocation assertion fails on baseline
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, subprocess
+          with open('builds/numeric-delivery/baseline.log','w') as log:
+              r=subprocess.run(['npx','vitest','run','test/term-bank-number-decode.test.js','--no-file-parallelism','--reporter=json','--outputFile=builds/numeric-delivery/baseline.json'],stdout=log,stderr=subprocess.STDOUT)
+          assert r.returncode==1, r.returncode
+          report=json.load(open('builds/numeric-delivery/baseline.json'))
+          assert report['numTotalTests']==12 and report['numPassedTests']==11 and report['numFailedTests']==1, report
+          failed=[a for t in report['testResults'] for a in t['assertionResults'] if a['status']=='failed']
+          assert len(failed)==1 and failed[0]['title']=='decodes short integer columns without TextDecoder allocation',failed
+          assert any('not be called' in m or 'not to be called' in m for m in failed[0]['failureMessages']),failed
+          PY
+      - name: Apply exact benchmarked candidate and validate final files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply /tmp/numeric.patch
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          assert hashlib.sha256(Path('ext/js/dictionary/term-bank-wasm-parser.js').read_bytes()).hexdigest()=='f617cce1a6c253a86470d4dc0a38d0edc08a38b957c77390e64460da791014aa'
+          PY
+          git diff --check
+          git diff > builds/numeric-delivery/source.patch
+          cp test/term-bank-number-decode.test.js builds/numeric-delivery/
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          commands={
+              'unit':['npm','run','test:unit','--','--no-file-parallelism'],
+              'options':['npm','run','test:unit:options'],
+              'types-main':['npm','run','test:ts:main'],
+              'types-dev':['npm','run','test:ts:dev'],
+              'types-test':['npm','run','test:ts:test'],
+              'types-bench':['npm','run','test:ts:bench'],
+              'lint':['npx','eslint','ext/js/dictionary/term-bank-wasm-parser.js','test/term-bank-number-decode.test.js'],
+              'build':['npm','run','build'],
+          }
+          status={}
+          for name,args in commands.items():
+              with open('builds/numeric-delivery/'+name+'.log','w') as log:
+                  status[name]=subprocess.run(args,stdout=log,stderr=subprocess.STDOUT).returncode
+              print(name,status[name],flush=True)
+          Path('builds/numeric-delivery/status.json').write_text(json.dumps(status,indent=2)+'\n')
+          assert all(v==0 for v in status.values()),status
+          PY
+      - name: Publish only the two qualified files to an isolated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c perf/import-numeric-projection-20260925
+          git add ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-number-decode.test.js
+          git commit -m 'perf(import): decode exact short integer tokens without text allocation'
+          git push origin HEAD:refs/heads/perf/import-numeric-projection-20260925
+          git rev-parse HEAD > builds/numeric-delivery/commit.txt
+          git show --stat --oneline HEAD > builds/numeric-delivery/commit-stat.txt
+          git show --format= --binary HEAD > builds/numeric-delivery/product.patch
+          sha256sum ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-number-decode.test.js ext/lib/term-bank-parser.wasm > builds/numeric-delivery/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: numeric-final-delivery
+          path: builds/numeric-delivery/
+          retention-days: 30
+          if-no-files-found: error
