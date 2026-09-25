@@ -31,6 +31,7 @@ jobs:
           cp ext/lib/term-bank-parser.wasm builds/hash-round/candidate.wasm
           sha256sum builds/hash-round/*.c builds/hash-round/*.wasm > builds/hash-round/SHA256SUMS
           clang --version > builds/hash-round/compiler.txt
+          echo 'The first setup used an incorrect test assumption that an empty glossary encoded to fewer than 16 bytes. Its token-binary payload is actually 18 bytes. The test now asserts the correct header size; all scalar-oracle hash checks remain. The first failed run is retained, with no browser timings taken. Product source is byte-identical.' > builds/hash-round/setup-note.txt
       - name: Actual-WASM hash and parser regressions
         shell: bash
         run: |
