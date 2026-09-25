@@ -51,6 +51,8 @@ export class WebAudioLocalAudio {
         this._gainNode = null;
         /** @type {?AudioBuffer} */
         this._decodedBuffer = null;
+        /** @type {?import('core').TokenObject} */
+        this._playToken = null;
     }
 
     /** @type {number} */
@@ -86,29 +88,49 @@ export class WebAudioLocalAudio {
      */
     async play() {
         if (!this._decodedBuffer || !this._audioContext) { return; }
-        if (this._audioContext.state === 'suspended') {
-            await this._audioContext.resume();
-        }
         this.pause();
+        const token = {};
+        this._playToken = token;
+        try {
+            if (this._audioContext.state === 'suspended') {
+                await this._audioContext.resume();
+            }
+            // A pause or newer play request can supersede this one during resume.
+            if (this._playToken !== token) { return; }
 
-        this._bufferSource = this._audioContext.createBufferSource();
-        this._bufferSource.buffer = this._decodedBuffer;
+            const bufferSource = this._audioContext.createBufferSource();
+            this._bufferSource = bufferSource;
+            bufferSource.buffer = this._decodedBuffer;
 
-        this._gainNode = this._audioContext.createGain();
-        this._gainNode.gain.value = this._volume;
+            this._gainNode = this._audioContext.createGain();
+            this._gainNode.gain.value = this._volume;
 
-        this._bufferSource.connect(this._gainNode);
-        this._gainNode.connect(this._audioContext.destination);
-        this._bufferSource.start(0, this._currentTime);
+            bufferSource.connect(this._gainNode);
+            this._gainNode.connect(this._audioContext.destination);
+            bufferSource.onended = () => {
+                if (this._bufferSource === bufferSource) { this.pause(); }
+            };
+            bufferSource.start(0, this._currentTime);
+        } catch (e) {
+            if (this._playToken === token) { this.pause(); }
+            throw e;
+        }
     }
 
     /**
      * @returns {void}
      */
     pause() {
-        if (this._bufferSource) {
-            try { this._bufferSource.stop(); } catch (e) { /* NOP */ }
-            this._bufferSource = null;
+        this._playToken = null;
+        const bufferSource = this._bufferSource;
+        const gainNode = this._gainNode;
+        this._bufferSource = null;
+        this._gainNode = null;
+        if (bufferSource) {
+            bufferSource.onended = null;
+            try { bufferSource.stop(); } catch (e) { /* NOP */ }
+            bufferSource.disconnect();
         }
+        if (gainNode) { gainNode.disconnect(); }
     }
 }
