@@ -102,6 +102,7 @@ describe('artifact preload ownership', () => {
             packedFileName: 'term.bin',
             packedMediaFileName: 'media.bin',
             packedMediaEntries: new Array(100000).fill({}),
+            packedMediaEntriesComplete: true,
             termBanksByArtifact: new Map(),
         };
         const close = vi.fn(async () => { events.push('close'); });
