@@ -30,6 +30,7 @@ jobs:
           git diff > builds/hash-validation/source.patch
           cp test/term-bank-content-hash.test.js builds/hash-validation/
           cp ext/lib/term-bank-parser.wasm builds/hash-validation/candidate.wasm
+          sha256sum ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm test/term-bank-content-hash.test.js > builds/hash-validation/SHA256SUMS
           python3 - <<'PY'
           import json, subprocess
           from pathlib import Path
@@ -50,11 +51,18 @@ jobs:
               print(name, status[name], flush=True)
           Path('builds/hash-validation/status.json').write_text(json.dumps(status, indent=2) + '\n')
           PY
+      - name: Verify the new cases on unchanged scalar source too
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp builds/hash-round/base.c ext/js/dictionary/wasm/term-bank-parser.c
+          npm run build:libs > builds/hash-validation/baseline-build.log 2>&1
+          npx vitest run test/term-bank-content-hash.test.js --no-file-parallelism > builds/hash-validation/baseline-tests.log 2>&1
       - name: Preserve complete outcomes
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: hash-product-validation
+          name: hash-product-validation-final
           path: builds/hash-validation/
           retention-days: 30
           if-no-files-found: error
