@@ -21,7 +21,7 @@ import {applyMatchReplacement, applyTextReplacement} from '../ext/js/general/reg
 const replacementCases = [
     {name: 'literal dollar', text: 'abc', pattern: /b/, replacement: '$$'},
     {name: 'whole match', text: 'abc', pattern: /b/, replacement: '[$&]'},
-    {name: 'original prefix', text: 'abc', pattern: /b/, replacement: "$`"},
+    {name: 'original prefix', text: 'abc', pattern: /b/, replacement: '$`'},
     {name: 'original suffix', text: 'abcd', pattern: /bc/, replacement: "$'"},
     {name: 'participating capture', text: 'abc', pattern: /(b)/, replacement: '$1'},
     {name: 'unmatched capture', text: 'a', pattern: /(a)(b)?/, replacement: '$2'},
@@ -61,7 +61,7 @@ describe('whole-text replacement semantics', () => {
     test.each([
         {name: 'lookbehind sees the original input', text: 'aaa', pattern: /(?<=a)a/g, replacement: 'x'},
         {name: 'insertions cannot create later matches', text: 'ba', pattern: /b|(?<=x)a/g, replacement: 'x'},
-        {name: 'prefix tokens use original input for every match', text: 'aba', pattern: /a/g, replacement: "$`"},
+        {name: 'prefix tokens use original input for every match', text: 'aba', pattern: /a/g, replacement: '$`'},
         {name: 'suffix tokens use original input for every match', text: 'aba', pattern: /a/g, replacement: "$'"},
         {name: 'empty ASCII matches', text: 'ab', pattern: /(?:)/g, replacement: '-'},
         {name: 'no match', text: 'abc', pattern: /z/g, replacement: '$&'},
