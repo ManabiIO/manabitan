@@ -1898,19 +1898,49 @@ function getFallbackRedirectTargets(redirects, keywords, normalizeRedirectKey) {
     /** @type {Map<string, string[]>} */
     const fallbacks = new Map();
     if (redirects.size === 0) { return fallbacks; }
+
+    /** @type {Map<string, string[]>} */
+    const candidateTargets = new Map();
+    for (const target of redirects.keys()) {
+        const normalized = normalizeRedirectKey(target);
+        const targets = candidateTargets.get(normalized);
+        if (typeof targets === 'undefined') {
+            candidateTargets.set(normalized, [target]);
+        } else {
+            targets.push(target);
+        }
+    }
+
     const exactTargets = new Set();
+    /** @type {Map<string, string|null>} */
+    const normalizedMatches = new Map();
     for (const {keyText} of keywords) {
         const term = trimNullSuffix(keyText);
         if (redirects.has(term)) { exactTargets.add(term); }
+
+        const normalized = normalizeRedirectKey(term);
+        if (!candidateTargets.has(normalized)) { continue; }
+        const matchedTerm = normalizedMatches.get(normalized);
+        if (typeof matchedTerm === 'undefined') {
+            normalizedMatches.set(normalized, term);
+        } else if (matchedTerm !== term) {
+            normalizedMatches.set(normalized, null);
+        }
     }
-    for (const target of redirects.keys()) {
-        if (exactTargets.has(target)) { continue; }
-        const normalized = normalizeRedirectKey(target);
-        const targets = fallbacks.get(normalized);
-        if (typeof targets === 'undefined') {
-            fallbacks.set(normalized, [target]);
-        } else {
-            targets.push(target);
+
+    for (const [normalized, targets] of candidateTargets) {
+        // A normalized fallback is safe only when it identifies one distinct
+        // dictionary spelling. Exact targets never need fallback.
+        if (normalizedMatches.get(normalized) === null) { continue; }
+        for (const target of targets) {
+            if (!exactTargets.has(target) && normalizedMatches.has(normalized)) {
+                const fallbackTargets = fallbacks.get(normalized);
+                if (typeof fallbackTargets === 'undefined') {
+                    fallbacks.set(normalized, [target]);
+                } else {
+                    fallbackTargets.push(target);
+                }
+            }
         }
     }
     return fallbacks;
