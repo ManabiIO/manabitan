@@ -7,36 +7,13 @@
  * (at your option) any later version.
  */
 
-import {afterEach, describe, expect, test, vi} from 'vitest';
+import {describe, expect, test} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
-afterEach(() => {
-    vi.restoreAllMocks();
-});
-
-/**
- * @param {unknown} rows
- * @returns {Promise<number|null|undefined>}
- */
-async function readManifestRows(rows) {
-    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), () => {});
-    vi.spyOn(importer, '_getData').mockResolvedValue(JSON.stringify({
-        termBanks: [{
-            artifact: 'term_bank_1.mbtb',
-            packedOffset: 0,
-            packedLength: 16,
-            rows,
-        }],
-    }));
-    const fileMap = new Map([
-        ['manabitan-import-artifact.json', /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({}))],
-    ]);
-    const manifest = await importer._readTermArtifactManifest(fileMap);
-    return manifest?.termBanksByArtifact.get('term_bank_1.mbtb')?.rows;
-}
-
 describe('DictionaryImporter artifact manifest row counts', () => {
+    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), () => {});
+
     test.each([
         -1,
         -100,
@@ -44,8 +21,10 @@ describe('DictionaryImporter artifact manifest row counts', () => {
         Number.POSITIVE_INFINITY,
         1.5,
         '250000',
-    ])('treats invalid row count %s as unknown', async (rows) => {
-        await expect(readManifestRows(rows)).resolves.toBeNull();
+        null,
+        void 0,
+    ])('treats invalid row count %s as unknown', (rows) => {
+        expect(importer._getArtifactTermBankRowCount(rows)).toBeNull();
     });
 
     test.each([
@@ -53,8 +32,8 @@ describe('DictionaryImporter artifact manifest row counts', () => {
         1,
         250000,
         Number.MAX_SAFE_INTEGER,
-    ])('preserves safe non-negative row count %s', async (rows) => {
-        await expect(readManifestRows(rows)).resolves.toBe(rows);
+    ])('preserves safe non-negative row count %s', (rows) => {
+        expect(importer._getArtifactTermBankRowCount(rows)).toBe(rows);
     });
 });
 
