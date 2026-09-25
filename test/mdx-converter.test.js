@@ -109,6 +109,7 @@ vi.mock('../ext/js/dictionary/mdx/vendor/js-mdict/mdd.js', () => ({
 const {convertMdxToArchive, createMdxImportData} = await import('../ext/js/dictionary/mdx/mdx-converter.js');
 
 afterEach(() => {
+    vi.restoreAllMocks();
     mockState.mdxFactory = /** @type {(fileName: string) => MockMdxDictionary} */ ((fileName) => ({
         header: {
             Title: fileName.replace(/\.mdx$/u, ''),
