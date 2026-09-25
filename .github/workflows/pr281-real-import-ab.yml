@@ -1,6 +1,9 @@
 name: PR 281 real import A/B
 
 on:
+  push:
+    branches:
+      - perf/term-record-batch-loaded-publication-20260924
   pull_request:
 
 permissions:
@@ -8,7 +11,7 @@ permissions:
 
 jobs:
   benchmark:
-    if: github.event.pull_request.number == 281
+    if: github.event_name == 'push' || github.event.pull_request.number == 281
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
