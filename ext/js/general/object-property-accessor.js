@@ -117,7 +117,7 @@ export class ObjectPropertyAccessor {
     }
 
     /**
-     * Swaps two properties of an object or array.
+     * Swaps two existing properties of an object or array.
      * @param {(string|number)[]} pathArray1 The path to the first property on the target object.
      * @param {(string|number)[]} pathArray2 The path to the second property on the target object.
      * @throws An error is thrown if pathArray1 or pathArray2 is not valid for the target object,
@@ -128,13 +128,13 @@ export class ObjectPropertyAccessor {
         if (ii1 < 0) { throw new Error('Invalid path 1'); }
         const target1 = this.get(pathArray1, ii1);
         const key1 = pathArray1[ii1];
-        if (!ObjectPropertyAccessor.isValidPropertyType(target1, key1)) { throw new Error(`Invalid path 1: ${ObjectPropertyAccessor.getPathString(pathArray1)}`); }
+        if (!ObjectPropertyAccessor.hasProperty(target1, key1)) { throw new Error(`Invalid path 1: ${ObjectPropertyAccessor.getPathString(pathArray1)}`); }
 
         const ii2 = pathArray2.length - 1;
         if (ii2 < 0) { throw new Error('Invalid path 2'); }
         const target2 = this.get(pathArray2, ii2);
         const key2 = pathArray2[ii2];
-        if (!ObjectPropertyAccessor.isValidPropertyType(target2, key2)) { throw new Error(`Invalid path 2: ${ObjectPropertyAccessor.getPathString(pathArray2)}`); }
+        if (!ObjectPropertyAccessor.hasProperty(target2, key2)) { throw new Error(`Invalid path 2: ${ObjectPropertyAccessor.getPathString(pathArray2)}`); }
 
         const value1 = /** @type {import('core').SerializableObject} */ (target1)[key1];
         const value2 = /** @type {import('core').SerializableObject} */ (target2)[key2];
