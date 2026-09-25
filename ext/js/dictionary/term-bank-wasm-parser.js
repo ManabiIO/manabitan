@@ -2566,10 +2566,7 @@ class ParallelTermBankPipelineRun {
                 parallelPipelineGroupsPerWorker: this._pipelineGroupsPerWorker,
                 parallelGroupCount: this._groups.length,
                 parallelWorkerWallMs: Math.max(0, workersFinishedAt - this._startedAt),
-                parallelSourceReadWallMs: Math.max(
-                    0,
-                    Math.max(this._startedAt, ...this._sources.map(({resolvedAt}) => resolvedAt)) - this._startedAt,
-                ),
+                parallelSourceReadWallMs: getParallelSourceReadWallMs(this._sources, this._startedAt),
             };
         } catch (error) {
             this._fail(error);
@@ -3472,6 +3469,22 @@ function sumParallelSourceByteLengths(values) {
         total += value instanceof Uint8Array ? value.byteLength : value.uncompressedSize;
     }
     return total;
+}
+
+/**
+ * Computes the source-read wall time without spreading an import-wide source
+ * list into Math.max. Large valid dictionaries can contain more sources than
+ * the engine's function-argument limit.
+ * @param {Array<{resolvedAt: number}>} sources
+ * @param {number} startedAt
+ * @returns {number}
+ */
+export function getParallelSourceReadWallMs(sources, startedAt) {
+    let finishedAt = startedAt;
+    for (const {resolvedAt} of sources) {
+        finishedAt = Math.max(finishedAt, resolvedAt);
+    }
+    return Math.max(0, finishedAt - startedAt);
 }
 
 /**

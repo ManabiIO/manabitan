@@ -426,7 +426,6 @@ describe('TermContentOpfsStore', () => {
         expect(fileBytesByName.has('manabitan-term-content-2.bin')).toBe(false);
     });
 
-
     test('reset truncates a segment when unlink fails instead of leaving stale bytes', async () => {
         const fileName = 'manabitan-term-content.bin';
         const segmentName = 'manabitan-term-content^1.bin';
