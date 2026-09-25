@@ -82,6 +82,7 @@ describe('DictionaryDatabase raw-content descriptor inference', () => {
             getDebugState: () => null,
         });
 
+        /** @type {(string|(string|null)[])[]} */
         const descriptors = [];
         Reflect.set(database, '_termRecordStore', {
             appendBatchFromImportTermEntriesResolvedContent: vi.fn(async (
