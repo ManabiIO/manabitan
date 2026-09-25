@@ -110,6 +110,8 @@ export class MdictMeta {
         this.encoding = '';
         // decoder 解码器
         this.decoder = new TextDecoder();
+        // Keys are fields, not standalone documents with byte-order marks.
+        this.keyDecoder = null;
         // 是否加密
         this.encrypt = 0;
     }
@@ -416,7 +418,7 @@ class MDictBase {
                 throw new Error('Unterminated MDict key block entry');
             }
             const keyTextBuffer = keyBlock.slice(keyStartIndex + this.meta.numWidth, keyEndIndex);
-            const keyText = this.meta.decoder.decode(keyTextBuffer);
+            const keyText = this.meta.keyDecoder.decode(keyTextBuffer);
             if (keyList.length > 0) {
                 keyList[keyList.length - 1].recordEndOffset = meaningOffset;
             }
@@ -507,6 +509,9 @@ class MDictBase {
             this.meta.encoding = resolvedEncoding.encoding;
             this.meta.decoder = resolvedEncoding.decoder;
         }
+        // Preserve literal leading U+FEFF in keys and key-info boundaries.
+        // Header and definition decoding retain their existing BOM handling.
+        this.meta.keyDecoder = new TextDecoder(this.meta.decoder.encoding, {ignoreBOM: true});
     }
     /**
      * STEP 2. read key block header
@@ -519,8 +524,8 @@ class MDictBase {
         // [16:24]/[8:12] - key block info decompressed size (if version >= 2.0, else not exist)
         // [24:32]/null - key block info size
         // [32:40]/[12:16] - key block size
-        // note: if version <2.0, the key info buffer size is 4 * 4
-        //       otherwise, ths key info buffer size is 5 * 8
+        // note: if version <2.0, number of key blocks, entry count, info size and block size are all present
+        //       otherwise, ths key block header includes an unpacked key-info size too
         // <2.0  the order of number is same
         // set offset
         this._keyHeaderStartOffset = this._headerEndOffset;
@@ -534,7 +539,8 @@ class MDictBase {
                 // TODO: encrypted file not support yet
                 throw Error(' user identification is needed to read encrypted file');
             }
-            // regcode, userid = header_info['_passcode']
+            // regcode, userid = passcode
+            // if user_id is email, the regcode is encrypted with the email string
             if (this.header.RegisterBy == 'Email') {
                 // encrypted_key = _decrypt_regcode_by_email(regcode, userid);
                 throw Error('encrypted file not support yet');
@@ -697,12 +703,12 @@ class MDictBase {
             indexOffset += this.meta.numWidth;
             assert(unpackSize <= this.options.maxDecompressedBlockBytes, 'MDict key block exceeds decompressed block limit');
             if (this.meta.encoding === UTF16) {
-                firstKey = this.meta.decoder.decode(firstWordBuffer);
-                lastKey = this.meta.decoder.decode(lastWordBuffer);
+                firstKey = this.meta.keyDecoder.decode(firstWordBuffer);
+                lastKey = this.meta.keyDecoder.decode(lastWordBuffer);
             }
             else {
-                firstKey = this.meta.decoder.decode(firstWordBuffer);
-                lastKey = this.meta.decoder.decode(lastWordBuffer);
+                firstKey = this.meta.keyDecoder.decode(firstWordBuffer);
+                lastKey = this.meta.keyDecoder.decode(lastWordBuffer);
             }
             keyBlockInfoList.push({
                 firstKey,
