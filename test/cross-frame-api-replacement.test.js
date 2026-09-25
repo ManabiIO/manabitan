@@ -17,7 +17,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
-import {CrossFrameAPI} from '../ext/js/comm/cross-frame-api.js';
+import {CrossFrameAPI, CrossFrameAPIPort} from '../ext/js/comm/cross-frame-api.js';
 
 /**
  * @param {number} tabId
@@ -25,11 +25,9 @@ import {CrossFrameAPI} from '../ext/js/comm/cross-frame-api.js';
  * @returns {import('../ext/js/comm/cross-frame-api.js').CrossFrameAPIPort}
  */
 function createPort(tabId, frameId) {
-    return /** @type {import('../ext/js/comm/cross-frame-api.js').CrossFrameAPIPort} */ ({
-        otherTabId: tabId,
-        otherFrameId: frameId,
-        off: vi.fn(),
-    });
+    const port = new CrossFrameAPIPort(tabId, frameId, /** @type {chrome.runtime.Port} */ ({}), new Map());
+    vi.spyOn(port, 'off');
+    return port;
 }
 
 /**
@@ -105,5 +103,26 @@ describe('CrossFrameAPI connection replacement', () => {
 
         expect(api._commPorts.size).toBe(0);
         expect(stale.off).toHaveBeenCalledOnce();
+    });
+
+    test('real port disconnect events preserve replacement ownership and then prune the current port', () => {
+        const api = createApi();
+        const stale = createPort(2, 3);
+        const replacement = createPort(2, 3);
+        stale.on('disconnect', api._onDisconnectBind);
+        replacement.on('disconnect', api._onDisconnectBind);
+        api._commPorts.set(2, new Map([[3, replacement]]));
+
+        stale.disconnect();
+        expect(stale.hasListeners('disconnect')).toBe(false);
+        expect(api._commPorts.get(2)?.get(3)).toBe(replacement);
+        expect(replacement.hasListeners('disconnect')).toBe(true);
+        stale.disconnect();
+        expect(stale.off).toHaveBeenCalledOnce();
+
+        replacement.disconnect();
+        expect(replacement.hasListeners('disconnect')).toBe(false);
+        expect(api._commPorts.size).toBe(0);
+        expect(replacement.off).toHaveBeenCalledOnce();
     });
 });
