@@ -144,6 +144,42 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
 }
 
 describe('TermRecordOpfsStore', () => {
+    test('preserves per-dictionary record IDs when importer rows switch dictionaries', async () => {
+        const termRowsStore = new TermRecordOpfsStore();
+        const termRows = [
+            ['A', 'a1', 'a1', null, null, null, 0, 1, 'raw', null, null, null, 0, null, null],
+            ['A', 'a2', 'a2', null, null, null, 1, 1, 'raw', null, null, null, 0, null, null],
+            ['B', 'b1', 'b1', null, null, null, 2, 1, 'raw', null, null, null, 0, null, null],
+            ['A', 'a3', 'a3', null, null, null, 3, 1, 'raw', null, null, null, 0, null, null],
+        ];
+        await termRowsStore.appendBatchFromTermRows(termRows, 0, termRows.length);
+
+        const termRowsIds = /** @type {Map<string, number[]>} */ (Reflect.get(termRowsStore, '_recordIdsByDictionary'));
+        expect(termRowsIds.get('A')).toEqual([1, 2, 4]);
+        expect(termRowsIds.get('B')).toEqual([3]);
+
+        const resolvedStore = new TermRecordOpfsStore();
+        const resolvedRows = [
+            {dictionary: 'A', expression: 'a1', reading: 'a1', score: 0},
+            {dictionary: 'A', expression: 'a2', reading: 'a2', score: 0},
+            {dictionary: 'B', expression: 'b1', reading: 'b1', score: 0},
+            {dictionary: 'A', expression: 'a3', reading: 'a3', score: 0},
+        ];
+        await resolvedStore.appendBatchFromResolvedImportTermEntries(
+            resolvedRows,
+            0,
+            resolvedRows.length,
+            [0, 1, 2, 3],
+            [1, 1, 1, 1],
+            ['raw', 'raw', 'raw', 'raw'],
+        );
+
+        const resolvedIds = /** @type {Map<string, number[]>} */ (Reflect.get(resolvedStore, '_recordIdsByDictionary'));
+        expect(resolvedIds.get('A')).toEqual([1, 2, 4]);
+        expect(resolvedIds.get('B')).toEqual([3]);
+        expect([...resolvedStore.getByIds([1, 2, 3, 4]).values()].map(({dictionary}) => dictionary)).toEqual(['A', 'A', 'B', 'A']);
+    });
+
     test('uses compact artifact fields only when they reduce persisted bytes', () => {
         const store = new TermRecordOpfsStore();
         const encode = store._encodeArtifactRecordFields.bind(store);
