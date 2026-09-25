@@ -37,7 +37,7 @@ describe('DictionaryImporter artifact media manifest completeness', () => {
         });
 
         expect(manifest.packedMediaEntriesComplete).toBe(false);
-        expect(manifest.packedMediaEntries.map(({path}) => path)).toEqual(['ok.png']);
+        expect(manifest.packedMediaEntries.map((/** @type {{path: string}} */ {path}) => path)).toEqual(['ok.png']);
     });
 
     test.each([
@@ -131,7 +131,8 @@ describe('DictionaryImporter artifact media manifest completeness', () => {
 
         expect(outcome.error).toBeNull();
         expect(outcome.result?.result).toBeNull();
-        expect(outcome.result?.errors).toContain(ordinaryMediaFailure);
-        expect(outcome.result?.errors).not.toContain(packedReadFailure);
+        const errorMessages = outcome.result?.errors.map(({message}) => message) ?? [];
+        expect(errorMessages).toContain(ordinaryMediaFailure.message);
+        expect(errorMessages).not.toContain(packedReadFailure.message);
     });
 });
