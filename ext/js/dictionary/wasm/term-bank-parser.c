@@ -509,13 +509,6 @@ static int parse_composite_span_impl(
     uint32_t i = start + 1u;
     while (i < len) {
         const uint8_t c = src[i];
-        if (is_ws(c)) {
-            if (normalization_hint != 0 && *normalization_hint == 0u) {
-                *normalization_hint = 1u;
-            }
-            ++i;
-            continue;
-        }
         if (c == '"') {
             if (media_hint != 0 && *media_hint == 0u && is_media_marker_at(src, len, i)) {
                 *media_hint = 1u;
@@ -542,6 +535,13 @@ static int parse_composite_span_impl(
                 return 0;
             }
             i = s_end;
+            continue;
+        }
+        if (is_ws(c)) {
+            if (normalization_hint != 0 && *normalization_hint == 0u) {
+                *normalization_hint = 1u;
+            }
+            ++i;
             continue;
         }
         if (c == ']' || c == '}') {
