@@ -2557,6 +2557,8 @@ export class TermRecordOpfsStore {
                 }
             }
         } catch (e) {
+            /** @type {Error[]} */
+            const cleanupErrors = [];
             for (const plan of [...removedPlans].reverse()) {
                 try {
                     const restoredHandle = await this._recordsDirectoryHandle.getFileHandle(plan.state.fileName, {create: true});
@@ -2566,21 +2568,33 @@ export class TermRecordOpfsStore {
                         {create: true},
                     );
                     await writeShardFile(restoredIndexHandle, plan.indexFile);
-                } catch (_) {
-                    // NOP - preserve original failure.
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
                 }
             }
             for (const plan of [...createdPlans].reverse()) {
+                // Remove/truncate the recoverable index first. If unlinking is
+                // blocked by another runtime, an empty index cannot recreate the
+                // destination descriptor on the next startup.
                 try {
-                    await this._recordsDirectoryHandle.removeEntry(plan.nextFileName);
-                    try {
-                        await this._recordsDirectoryHandle.removeEntry(`${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
-                    } catch (_) {
-                        // NOP
-                    }
-                } catch (_) {
-                    // NOP - preserve original failure.
+                    await this._removeStorageFileOrTruncate(
+                        `${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
+                        true,
+                    );
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
                 }
+                try {
+                    await this._removeStorageFileOrTruncate(plan.nextFileName, true);
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
+                }
+            }
+            if (cleanupErrors.length > 0) {
+                throw new AggregateError(
+                    [toError(e), ...cleanupErrors],
+                    `Dictionary rename and rollback cleanup failed for ${fromName} to ${toName}`,
+                );
             }
             throw e;
         }

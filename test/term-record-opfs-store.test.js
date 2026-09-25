@@ -1429,6 +1429,7 @@ describe('TermRecordOpfsStore', () => {
         ]);
         const writeFailure = new Error('Injected destination index write failure');
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            removeEntryFailures: new Map([[newIndexFileName, 1]]),
             beforeWrite(name) {
                 if (name === newIndexFileName) { throw writeFailure; }
             },
@@ -1459,7 +1460,9 @@ describe('TermRecordOpfsStore', () => {
         expect([...fileBytesByName.get(oldFileName) ?? []]).toStrictEqual([...sourceBytes]);
         expect([...fileBytesByName.get(oldIndexFileName) ?? []]).toStrictEqual([...sourceIndexBytes]);
         expect(fileBytesByName.has(newFileName)).toBe(false);
-        expect(fileBytesByName.has(newIndexFileName)).toBe(false);
+        // The injected unlink failure falls back to truncation. A zero-byte
+        // index cannot recover the removed destination descriptor on startup.
+        expect(fileBytesByName.get(newIndexFileName)?.byteLength ?? 0).toBe(0);
         expect(recordsById.get(1)?.dictionary).toBe('JMdict staging');
         expect(shardStateByFileName.has(oldFileName)).toBe(true);
         expect(shardStateByFileName.has(newFileName)).toBe(false);
