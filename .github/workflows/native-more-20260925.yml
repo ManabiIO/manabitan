@@ -1,0 +1,120 @@
+name: Native import and compression screens 20260925
+on:
+  push:
+    branches: [verify/native-more-20260925-763627]
+permissions:
+  contents: read
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [bulk-memory, compression-two]
+    env:
+      HUSKY: '0'
+      CANDIDATE: ${{ matrix.candidate }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Prepare pinned sources
+        run: |
+          mkdir -p /tmp/more-evidence
+          cp dev/perf/native-more-20260925/compare.py /tmp/more-evidence/compare.py
+          git worktree add --detach /tmp/more-base 76362775484661b3cd8b9d2c84b228802c023a76
+          git worktree add --detach /tmp/more-candidate 76362775484661b3cd8b9d2c84b228802c023a76
+          cd /tmp/more-base
+          npm ci
+          npm run build:libs
+          cp -a node_modules /tmp/more-candidate/node_modules
+          cp -a ext/lib /tmp/more-candidate/ext/lib
+          node dev/perf/prepare-dictionaries.js > /tmp/more-evidence/fixtures.log 2>&1
+          mkdir -p /tmp/more-candidate/builds
+          cp -a builds/e2e-dictionary-cache /tmp/more-candidate/builds/e2e-dictionary-cache
+          node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Apply isolated exploratory change
+        run: |
+          cd /tmp/more-candidate
+          python - <<'PY'
+          import os, re
+          from pathlib import Path
+          if os.environ['CANDIDATE'] == 'bulk-memory':
+              p = Path('ext/js/dictionary/wasm/term-bank-parser.c')
+              s = p.read_text()
+              old = '''void* memset(void* dest, int value, unsigned long count) {
+              unsigned char* bytes = (unsigned char*)dest;
+              for (unsigned long i = 0u; i < count; ++i) {
+                  bytes[i] = (unsigned char)value;
+              }
+              return dest;
+          }
+
+          void* memcpy(void* dest, const void* source, unsigned long count) {
+              unsigned char* output = (unsigned char*)dest;
+              const unsigned char* input = (const unsigned char*)source;
+              for (unsigned long i = 0u; i < count; ++i) {
+                  output[i] = input[i];
+              }
+              return dest;
+          }'''
+              new = '''void* memset(void* dest, int value, unsigned long count) {
+              __builtin_memset(dest, value, count);
+              return dest;
+          }
+
+          void* memcpy(void* dest, const void* source, unsigned long count) {
+              __builtin_memcpy(dest, source, count);
+              return dest;
+          }'''
+              assert s.count(old) == 1
+              p.write_text(s.replace(old, new))
+          else:
+              p = Path('ext/js/dictionary/zstd-term-content.js')
+              s = p.read_text()
+              assert s.count('const COMPRESSION_WORKER_COUNT = 4;') == 1
+              p.write_text(s.replace('const COMPRESSION_WORKER_COUNT = 4;', 'const COMPRESSION_WORKER_COUNT = 2;'))
+          PY
+          git diff --check
+          git diff > /tmp/more-evidence/candidate.patch
+          git -c core.hooksPath=/dev/null add ext/js/dictionary
+          git -c core.hooksPath=/dev/null -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "test(perf): isolate $CANDIDATE on pinned develop"
+          git rev-parse HEAD > /tmp/more-evidence/candidate-commit.txt
+          npm run build:libs > /tmp/more-evidence/build-libs.log 2>&1
+          cp ext/lib/term-bank-parser.wasm /tmp/more-evidence/candidate-parser.wasm
+          cp /tmp/more-base/ext/lib/term-bank-parser.wasm /tmp/more-evidence/baseline-parser.wasm
+      - name: Inspect native lowering and validate correctness
+        run: |
+          cd /tmp/more-candidate
+          if [ "$CANDIDATE" = bulk-memory ]; then
+            clang --target=wasm32-freestanding -O3 -matomics -mbulk-memory -msimd128 -nostdlib -S ext/js/dictionary/wasm/term-bank-parser.c -o /tmp/more-evidence/candidate-parser.s
+            clang --target=wasm32-freestanding -O3 -matomics -mbulk-memory -msimd128 -nostdlib -S /tmp/more-base/ext/js/dictionary/wasm/term-bank-parser.c -o /tmp/more-evidence/baseline-parser.s
+            for dictionary in jmdict jmnedict jitendex; do
+              node --expose-gc dev/perf/import-lookup-screen.js "$dictionary" --pairs 2 --flags '{}' --baseline-root /tmp/more-base --out "/tmp/more-evidence/parity-$dictionary.json" > "/tmp/more-evidence/parity-$dictionary.log" 2>&1
+            done
+          fi
+          npm run test:unit -- --minWorkers=1 --maxWorkers=2 > /tmp/more-evidence/unit.log 2>&1
+          npm run test:ts > /tmp/more-evidence/types.log 2>&1
+          npm run test:build > /tmp/more-evidence/build-plans.log 2>&1
+      - name: Build actual packages
+        run: |
+          cd /tmp/more-base
+          npm run build -- --target chrome-dev > /tmp/more-evidence/build-base.log 2>&1
+          cd /tmp/more-candidate
+          npm run build -- --target chrome-dev > /tmp/more-evidence/build-candidate.log 2>&1
+      - name: Run fixed complete-import plan
+        run: python /tmp/more-evidence/compare.py > /tmp/more-evidence/driver.log 2>&1
+      - name: Retain all results and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-more-${{ matrix.candidate }}-763627
+          path: /tmp/more-evidence/
+          retention-days: 30
+          if-no-files-found: error
