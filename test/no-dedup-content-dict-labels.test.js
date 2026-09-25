@@ -5,6 +5,8 @@
 
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
+import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
+import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {
     RAW_TERM_CONTENT_DICT_NAME,
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
@@ -68,5 +70,40 @@ describe('no-dedup content dictionary labels', () => {
             RAW_TERM_CONTENT_DICT_NAME,
             RAW_TERM_CONTENT_TOKEN_DICT_NAME,
         ]);
+    });
+
+    test('slices a preinterned plan for partial resolved-content batches', async () => {
+        const store = new TermRecordOpfsStore();
+        const getOrCreateShardState = vi.spyOn(store, '_getOrCreateShardState')
+            .mockResolvedValue(/** @type {import('core').SafeAny} */ ({}));
+        const encodeAndAppend = vi.spyOn(store, '_encodeAndAppendChunkRunsForState')
+            .mockResolvedValue({encodeMs: 0, appendWriteMs: 0});
+
+        const rows = ['a', 'b', 'c', 'd'].map((expression) => ({
+            dictionary: 'Partial plan',
+            expression,
+            reading: expression,
+            score: 0,
+            sequence: -1,
+        }));
+        const encoder = new TextEncoder();
+        const builder = createTermRecordPreinternedPlanBuilder(rows.length);
+        const indexes = rows.map(({expression}) => builder.internStringBytes(encoder.encode(expression)));
+        Reflect.set(rows, 'termRecordPreinternedPlan', builder.buildPlan(indexes, indexes));
+
+        await store.appendBatchFromImportTermEntriesResolvedContent(
+            rows,
+            1,
+            2,
+            [10, 20],
+            [1, 1],
+            RAW_TERM_CONTENT_DICT_NAME,
+        );
+
+        expect(getOrCreateShardState).toHaveBeenCalledWith('Partial plan', RAW_TERM_CONTENT_DICT_NAME);
+        expect(encodeAndAppend).toHaveBeenCalledOnce();
+        const slicedPlan = Reflect.get(encodeAndAppend.mock.calls[0], 2);
+        expect([...slicedPlan.expressionIndexes]).toEqual([1, 2]);
+        expect([...slicedPlan.readingIndexes]).toEqual([1, 2]);
     });
 });

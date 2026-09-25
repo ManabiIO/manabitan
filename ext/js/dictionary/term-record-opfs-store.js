@@ -1829,14 +1829,11 @@ export class TermRecordOpfsStore {
             this._indexDirty = true;
         }
         buildRecordsMs = safePerformance.now() - tBuildStart;
-        const preinternedPlan = (
-            start === 0 &&
-            count === rows.length &&
-            rows !== null &&
-            typeof rows === 'object'
-        ) ?
-            getTermRecordPreinternedPlan(rows) :
-            null;
+        const preinternedPlan = sliceTermRecordPreinternedPlan(
+            getTermRecordPreinternedPlan(rows),
+            start,
+            count,
+        );
         if (recordsByShard === null) {
             this._loadedDictionaryNames.add(firstDictionaryName);
             const state = await this._getOrCreateShardState(firstDictionaryName, firstContentDictName);
