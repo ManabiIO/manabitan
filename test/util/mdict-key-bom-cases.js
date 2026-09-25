@@ -95,7 +95,7 @@ for (const encoding of encodings) {
         const dictionary = new MDX('record-bom.mdx', fixture.bytes);
         try {
             assert.equal(dictionary.lookup('ordinary').definition, 'record\0');
-            assert.equal(dictionary.header.Title, 'MDict binary regression fixture');
+            assert.equal(Reflect.get(dictionary.header, 'Title'), 'MDict binary regression fixture');
             assert.equal(dictionary.meta.decoder.ignoreBOM, false);
         } finally {
             dictionary.close();
