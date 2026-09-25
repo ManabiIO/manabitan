@@ -1,0 +1,62 @@
+name: Import hash validation 20260925
+on:
+  push:
+    branches: [bench/import-simd-hash-20260925]
+    paths: [.github/workflows/import-hash-validation-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Isolate product changes from research tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/hash-round-20260925/prepare.py /tmp/hash-prepare.py
+          cp test/term-bank-content-hash.test.js /tmp/hash-test.js
+          git fetch --depth=1 origin 76362775484661b3cd8b9d2c84b228802c023a76
+          git reset --hard FETCH_HEAD
+          cp /tmp/hash-test.js test/term-bank-content-hash.test.js
+          python3 /tmp/hash-prepare.py
+      - uses: ./.github/actions/setup
+      - name: Full unit type lint and package checks
+        shell: bash
+        run: |
+          mkdir -p builds/hash-validation
+          git diff --check
+          git diff > builds/hash-validation/source.patch
+          cp test/term-bank-content-hash.test.js builds/hash-validation/
+          cp ext/lib/term-bank-parser.wasm builds/hash-validation/candidate.wasm
+          python3 - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          commands = {
+              'unit': ['npm', 'run', 'test:unit', '--', '--no-file-parallelism'],
+              'options': ['npm', 'run', 'test:unit:options'],
+              'types-main': ['npm', 'run', 'test:ts:main'],
+              'types-dev': ['npm', 'run', 'test:ts:dev'],
+              'types-test': ['npm', 'run', 'test:ts:test'],
+              'types-bench': ['npm', 'run', 'test:ts:bench'],
+              'changed-lint': ['npx', 'eslint', 'test/term-bank-content-hash.test.js'],
+              'build': ['npm', 'run', 'build'],
+          }
+          status = {}
+          for name, args in commands.items():
+              with open('builds/hash-validation/' + name + '.log', 'w') as log:
+                  status[name] = subprocess.run(args, stdout=log, stderr=subprocess.STDOUT).returncode
+              print(name, status[name], flush=True)
+          Path('builds/hash-validation/status.json').write_text(json.dumps(status, indent=2) + '\n')
+          PY
+      - name: Preserve complete outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hash-product-validation
+          path: builds/hash-validation/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Require success
+        run: python3 -c "import json; s=json.load(open('builds/hash-validation/status.json')); assert s and all(v == 0 for v in s.values()), s"
