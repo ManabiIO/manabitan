@@ -5553,7 +5553,7 @@ export class TermRecordOpfsStore {
             const chunks = (this._persistentRecordChunksByDictionary.get(dictionaryName) ?? [])
                 .filter((chunk) => chunk.fileName === state.fileName);
             const recordCount = chunks.reduce((sum, chunk) => sum + chunk.count, 0);
-            if (recordCount === 0 || recordCount > PERSISTED_ONLY_IMPORT_ROW_THRESHOLD) { return recordCount > 0; }
+            if (recordCount === 0 || recordCount >= PERSISTED_ONLY_IMPORT_ROW_THRESHOLD) { return recordCount > 0; }
             const ids = new Array(recordCount);
             let cursor = 0;
             for (const chunk of chunks) {
