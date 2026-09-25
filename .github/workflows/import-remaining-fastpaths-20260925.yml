@@ -1,0 +1,98 @@
+name: Import remaining fast paths 20260925
+on:
+  push:
+    branches: [bench/import-remaining-fastpaths-20260925]
+    paths: [.github/workflows/import-remaining-fastpaths-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex, wty-en-en]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_AB_BULKADD_BYTES_METRICS: '0'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Existing fast-path correctness tests
+        run: npx vitest run test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-composite-state.test.js test/lookup-construction-experiments.test.js test/term-bank-number-decode.test.js --no-file-parallelism
+      - run: npx playwright install --with-deps chromium
+      - name: Frozen WTY fixture and off-clock probe support
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          if os.environ['DICTIONARY'] == 'wty-en-en':
+              p = Path('test/perf/dictionaries.lock.json')
+              lock = json.loads(p.read_text())
+              lock['dictionaries']['wty-en-en'] = {
+                  'label': 'wty-en-en', 'cacheFile': 'wty-en-en.zip',
+                  'release': '21b1b22cd655d7936d62b127e6404fbb8a88c7c3',
+                  'url': 'https://huggingface.co/datasets/daxida/wty-release/resolve/21b1b22cd655d7936d62b127e6404fbb8a88c7c3/latest/dict/en/en/wty-en-en.zip',
+                  'sha256': 'b9603db16dee82afd811386302ccd78bab591a6513b0d3194d937dc9110dd4a5',
+                  'sizeBytes': 106918350, 'expectedTitle': 'wty-en-en',
+                  'revision': '2026.08.29', 'termRows': 1643040,
+              }
+              p.write_text(json.dumps(lock, indent=4) + '\n')
+              p = Path('test/chromium/extension-two-dictionary-import.e2e.js')
+              s = p.read_text()
+              for old, new in [
+                  ("new Set(['jmdict', 'jmnedict', 'jitendex'])", "new Set(['jmdict', 'jmnedict', 'jitendex', 'wty-en-en'])"),
+                  ("jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},", "jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},\n            'wty-en-en': {label: 'wty-en-en', filePath: path.join(dictionaryCacheDir, 'wty-en-en.zip')},"),
+              ]:
+                  assert s.count(old) == 1, old
+                  s = s.replace(old, new)
+              assert s.count('maxBuffer: 32 * 1024 * 1024') == 2
+              p.write_text(s.replace('maxBuffer: 32 * 1024 * 1024', 'maxBuffer: 256 * 1024 * 1024'))
+          PY
+          mkdir -p builds/remaining
+          git rev-parse HEAD > builds/remaining/head.txt
+          git diff > builds/remaining/harness.patch
+          sha256sum ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm > builds/remaining/SHA256SUMS
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Four-pair source-identical screens with retained failures
+        shell: bash
+        run: |
+          set -uo pipefail
+          bench() {
+            local label="$3"
+            xvfb-run -a node test/chromium/import-flags-ab-benchmark.js "$DICTIONARY" --pairs "$1" --flags "$2" --label "$label" > "builds/remaining/$label.log" 2>&1
+            local result=$?
+            echo "$label $result" | tee -a builds/remaining/status.txt
+          }
+          bench 1 '{}' warmup-exclude
+          bench 2 '{}' aa-before
+          bench 1 '{"experimentalNativeEscapedKeys":true}' escaped-warmup-exclude
+          bench 4 '{"experimentalNativeEscapedKeys":true}' escaped
+          bench 1 '{"experimentalFusedSingleBank":true}' single-bank-warmup-exclude
+          bench 4 '{"experimentalFusedSingleBank":true}' single-bank
+          bench 2 '{}' aa-between
+          bench 1 '{"experimentalNativeEscapedKeys":true,"experimentalFusedSingleBank":true}' both-warmup-exclude
+          bench 4 '{"experimentalNativeEscapedKeys":true,"experimentalFusedSingleBank":true}' both
+          bench 1 '{"experimentalDirectLookupArena":true,"experimentalSinglePassLookupCompaction":true}' lookup-warmup-exclude
+          bench 4 '{"experimentalDirectLookupArena":true,"experimentalSinglePassLookupCompaction":true}' lookup
+          bench 2 '{}' aa-after
+      - name: Retain complete reports and exact source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: remaining-${{ matrix.dictionary }}
+          path: |
+            builds/remaining/
+            builds/chromium-e2e-import-flags-isolated-summary-*.json
+            builds/chromium-e2e-import-report-iso-*.json
+          retention-days: 30
+          if-no-files-found: error
+      - name: Require every screen to complete
+        run: awk '$2 != 0 { bad = 1 } END { exit bad }' builds/remaining/status.txt
