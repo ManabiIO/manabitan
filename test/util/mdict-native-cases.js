@@ -120,6 +120,30 @@ describe('MDict v2 binary records', () => {
         }
     });
 
+    test('engine version rejects trailing or compound junk instead of accepting a numeric prefix', () => {
+        for (const version of ['2.0junk', '2.0.1', '2e0']) {
+            const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {version});
+            assert.throws(
+                () => new MDX('malformed-version.mdx', fixture.bytes),
+                /Unsupported MDict engine version/u,
+                version,
+            );
+        }
+    });
+
+    test('supported numeric engine versions remain accepted', () => {
+        for (const version of ['1.2', '2.0', ' 2.0 ']) {
+            const fixture = makeMdictFixture([{key: 'entry', value: 'definition'}], {version});
+            const mdx = new MDX('numeric-version.mdx', fixture.bytes);
+            try {
+                assert.equal(mdx.meta.version, Number(version.trim()));
+                assert.equal(mdx.lookup('entry').definition, 'definition\0');
+            } finally {
+                mdx.close();
+            }
+        }
+    });
+
     test('a truncated final block is rejected rather than silently shortened', () => {
         const fixture = makeMdictFixture([{key: 'entry', value: 'nonempty final record'}], {compression: 'raw'});
         const mdx = new MDX('truncated.mdx', fixture.bytes.slice(0, -1));
@@ -1091,6 +1115,36 @@ describe('MDict selector literal preservation', () => {
             assert.ok(styles.includes(':is([title="two  gaps"])'));
         });
     }
+});
+
+describe('MDict redirect target non-ASCII whitespace identity', () => {
+    test('preserves NBSP in redirect targets while retaining ASCII syntax trimming', async () => {
+        const nbsp = '\u00a0';
+        const fixture = makeMdictFixture([
+            {key: `${nbsp}target`, value: 'leading NBSP definition'},
+            {key: 'target', value: 'plain definition'},
+            {key: `target${nbsp}`, value: 'trailing NBSP definition'},
+            {key: 'AliasLeading', value: `@@@LINK=${nbsp}target`},
+            {key: 'AliasPlain', value: '@@@LINK= target '},
+            {key: 'AliasTrailing', value: `@@@LINK=target${nbsp}`},
+        ], {keyCaseSensitive: 'Yes', stripKey: 'No', keysPerBlock: 1});
+        const result = await createMdxImportData('redirect-nonascii-whitespace.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        /**
+         * @param {string} term
+         * @returns {string}
+         */
+        const definitionsFor = (term) => JSON.stringify(rows.filter(([expression]) => expression === term));
+
+        assert.match(definitionsFor('AliasLeading'), /leading NBSP definition/u);
+        assert.doesNotMatch(definitionsFor('AliasLeading'), /plain definition|trailing NBSP definition/u);
+        assert.match(definitionsFor('AliasPlain'), /plain definition/u);
+        assert.doesNotMatch(definitionsFor('AliasPlain'), /leading NBSP definition|trailing NBSP definition/u);
+        assert.match(definitionsFor('AliasTrailing'), /trailing NBSP definition/u);
+        assert.doesNotMatch(definitionsFor('AliasTrailing'), /leading NBSP definition|plain definition/u);
+        const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+        assert.equal(details?.unresolvedRedirectCount, 0);
+    });
 });
 
 describe('MDict literal key whitespace identity', () => {

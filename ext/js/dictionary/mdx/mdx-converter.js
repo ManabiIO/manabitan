@@ -466,7 +466,7 @@ function decodePercentEncodedPathSegments(path) {
  * @returns {string|null}
  */
 function normalizeRelativeAssetPath(path, sourceAssetPath = null, assetPrefix = '') {
-    let value = path.trim().replaceAll('\\', '/');
+    let value = trimCssWhitespace(path).replaceAll('\\', '/');
     if (value.length === 0) { return null; }
     const lowered = value.toLowerCase();
     if (
@@ -1018,12 +1018,21 @@ function readCssIdentifier(selector, startIndex) {
  * @returns {string}
  */
 function rewriteCssAttributeSelector(attributeSelector) {
-    const match = attributeSelector.match(/^\[[\t\n\f\r ]*(?<name>[-\w]+)(?<rest>[\s\S]*)\]$/u);
-    const groups = match?.groups;
-    if (typeof groups?.name !== 'string' || typeof groups.rest !== 'string') { return attributeSelector; }
-    const name = groups.name.toLowerCase();
+    if (!attributeSelector.startsWith('[') || !attributeSelector.endsWith(']')) {
+        return attributeSelector;
+    }
+    let nameStart = 1;
+    while (nameStart < attributeSelector.length && isCssWhitespace(attributeSelector[nameStart])) {
+        nameStart += 1;
+    }
+    const {value: rawName, endIndex} = readCssIdentifier(attributeSelector, nameStart);
+    if (
+        rawName === null ||
+        (attributeSelector[endIndex] === '|' && attributeSelector[endIndex + 1] !== '=')
+    ) { return attributeSelector; }
+    const name = rawName.toLowerCase();
     const replacement = name === 'class' ? STRUCTURED_CLASS_ATTR : (name === 'id' ? STRUCTURED_ID_ATTR : null);
-    return replacement === null ? attributeSelector : `[${replacement}${groups.rest}]`;
+    return replacement === null ? attributeSelector : `[${replacement}${attributeSelector.slice(endIndex)}`;
 }
 
 /**
@@ -1550,6 +1559,10 @@ function splitInlineCssDeclarations(styleText) {
             }
             continue;
         }
+        if (character === '\\') {
+            index += 1;
+            continue;
+        }
         switch (character) {
             case '"':
             case "'": {
@@ -1578,6 +1591,42 @@ function splitInlineCssDeclarations(styleText) {
 }
 
 /**
+ * Remove CSS comments without treating comment markers inside quoted strings
+ * as syntax. Closed comments retain the previous removal behavior; an
+ * unterminated comment is left intact for the existing declaration handling.
+ * @param {string} value
+ * @returns {string}
+ */
+function stripCssCommentsOutsideStrings(value) {
+    let result = '';
+    let startIndex = 0;
+    let quote = '';
+    for (let index = 0; index < value.length; ++index) {
+        const character = value[index];
+        if (quote.length > 0) {
+            if (character === '\\') {
+                ++index;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        if (character === '"' || character === "'") {
+            quote = character;
+            continue;
+        }
+        if (value.startsWith('/*', index)) {
+            const commentEnd = value.indexOf('*/', index + 2);
+            if (commentEnd < 0) { break; }
+            result += value.slice(startIndex, index);
+            startIndex = commentEnd + 2;
+            index = commentEnd + 1;
+        }
+    }
+    return startIndex === 0 ? value : result + value.slice(startIndex);
+}
+
+/**
  * @param {string|null|undefined} styleText
  * @param {string} assetPrefix
  * @param {Set<string>} assetReferences
@@ -1588,7 +1637,7 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
     /** @type {Record<string, string|string[]>} */
     const style = {};
     for (const rawDeclaration of splitInlineCssDeclarations(styleText)) {
-        const declaration = rawDeclaration.replace(/\/\*[\s\S]*?\*\//gu, '');
+        const declaration = stripCssCommentsOutsideStrings(rawDeclaration);
         const separator = declaration.indexOf(':');
         if (separator < 0) { continue; }
         const propertyName = trimCssWhitespace(declaration.slice(0, separator)).toLowerCase();
@@ -1633,7 +1682,7 @@ function convertLegacyFontSize(value) {
  * @returns {string}
  */
 function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetReferences}) {
-    const value = href.trim();
+    const value = trimCssWhitespace(href);
     const lowered = value.toLowerCase();
     if (lowered.startsWith('entry://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
     if (lowered.startsWith('bword://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
@@ -1668,7 +1717,7 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetR
  */
 function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferences}) {
     const src = attrs.src ?? '';
-    const lowerSrc = src.trim().toLowerCase();
+    const lowerSrc = trimCssWhitespace(src).toLowerCase();
     let path;
     if (lowerSrc.startsWith('data:')) {
         path = embeddedAssets.registerDataUrl(src);
@@ -2095,9 +2144,9 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 }
                 continue;
             }
-            const redirectDefinition = definition.trim();
+            const redirectDefinition = trimCssWhitespace(definition);
             if (redirectDefinition.startsWith('@@@LINK=')) {
-                const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
+                const target = trimCssWhitespace(trimNullSuffix(redirectDefinition.slice(8)));
                 if (target.length > 0) {
                     const aliases = redirects.get(target) ?? new Set();
                     if (!aliases.has(term)) {

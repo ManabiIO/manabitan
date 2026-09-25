@@ -146,6 +146,35 @@ describe('embedded legacy dictionary tags', () => {
         expect(db.deleteDictionaryImportPlaceholder).toHaveBeenCalledWith(1);
     });
 
+    test('orphan pruned-artifact manifest does not suppress ordinary tag banks', async () => {
+        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Orphan artifact manifest', revision: '1', format: 3})));
+        await writer.add('manabitan-import-artifact.json', new TextReader(JSON.stringify({
+            termBanks: [],
+            prunedAuxFiles: true,
+        })));
+        await writer.add('tag_bank_1.json', new TextReader(JSON.stringify([
+            ['ordinary', 'misc', 0, 'Ordinary tag bank', 0],
+        ])));
+        const archiveContent = new Uint8Array(await writer.close()).buffer;
+
+        const db = database();
+        const result = await new DictionaryImporter(new DictionaryImporterMediaLoader()).importDictionary(
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+            archiveContent,
+            /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
+        );
+
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.tagMeta.total).toBe(1);
+        const tags = db.bulkAdd.mock.calls
+            .filter(([store]) => store === 'tagMeta')
+            .flatMap(([, entries, start, count]) => entries.slice(start, start + count));
+        expect(tags).toEqual([
+            {dictionary: 'Orphan artifact manifest', name: 'ordinary', category: 'misc', order: 0, notes: 'Ordinary tag bank', score: 0},
+        ]);
+    });
+
     test('an embedded-tag write failure aborts rather than publishing a tagless dictionary', async () => {
         const db = database();
         const failure = new Error('tag storage failed');

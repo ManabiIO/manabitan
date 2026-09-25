@@ -1280,4 +1280,62 @@ describe('convertMdxToArchive', () => {
         });
         expect(await zip.file('mdict-media/images/bg.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
     });
+
+    test('preserves CSS comment markers inside quoted inline-style values', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Quoted inline comment markers',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div style="font-family: &quot;A/*literal*/B&quot;; /* remove me */ color: rgb(1, 2, 3)">Value</div>',
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'quoted-inline-comments.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<{style?: Record<string, unknown>}>}}} */ (termBank[0][5][0]);
+        const [entry] = glossary.content.content;
+
+        expect(entry.style).toMatchObject({
+            fontFamily: '"A/*literal*/B"',
+            color: 'rgb(1, 2, 3)',
+        });
+    });
+
+    test('does not split inline CSS declarations at escaped semicolons', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Escaped inline delimiter',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Styled',
+                definition: String.raw`<div style="font-family: A\;B; color: rgb(1, 2, 3)">Value</div>`,
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'escaped-inline-delimiter.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<{style?: Record<string, unknown>}>}}} */ (termBank[0][5][0]);
+        const [entry] = glossary.content.content;
+
+        expect(entry.style).toMatchObject({
+            fontFamily: String.raw`A\;B`,
+            color: 'rgb(1, 2, 3)',
+        });
+    });
 });
