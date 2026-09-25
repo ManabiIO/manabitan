@@ -147,7 +147,7 @@ describe('TermRecordOpfsStore', () => {
     test('uses compact artifact fields only when they reduce persisted bytes', () => {
         const store = new TermRecordOpfsStore();
         const encode = store._encodeArtifactRecordFields.bind(store);
-        const compact = encode(
+        const {recordFields: compact, recordFieldsFormat: compactFormat} = encode(
             {rowCount: 8, scoreList: new Int32Array([7, 7, -3, 7, -3, 7, 7, -3])},
             new Uint32Array([0, 10, 20, 30, 40, 50, 60, 70]),
             new Uint32Array([1, 2, 3, 4, 5, 6, 7, 8]),
@@ -155,24 +155,27 @@ describe('TermRecordOpfsStore', () => {
         );
         const compactView = new DataView(compact.buffer, compact.byteOffset, compact.byteLength);
 
+        expect(compactFormat).toBe(2);
         expect(compact.byteLength).toBe(16 + (2 * 4) + (8 * 8));
         expect(compactView.getUint32(0, true)).toBe(0x3246524d);
         expect(compactView.getUint32(4, true)).toBe(8);
         expect(compactView.getUint32(8, true)).toBe(2);
         expect(compactView.getUint32(12, true)).toBe(2);
 
-        const small = encode(
+        const {recordFields: small, recordFieldsFormat: smallFormat} = encode(
             {rowCount: 2, scoreList: new Int32Array([7, 7])},
             new Uint32Array([0, 10]),
             new Uint32Array([1, 2]),
             0,
         );
-        const largeLength = encode(
+        const {recordFields: largeLength, recordFieldsFormat: largeLengthFormat} = encode(
             {rowCount: 8, scoreList: new Int32Array(8)},
             new Uint32Array(8),
             new Uint32Array([65535, 1, 1, 1, 1, 1, 1, 1]),
             0,
         );
+        expect(smallFormat).toBe(1);
+        expect(largeLengthFormat).toBe(1);
         expect(small.byteLength).toBe(2 * 12);
         expect(largeLength.byteLength).toBe(8 * 12);
     });
