@@ -1,0 +1,79 @@
+name: Cached staging qualification
+on:
+  push:
+    branches: [bench/cached-term-staging-20260925]
+    paths: [.github/workflows/cached-staging-qualification.yml]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare isolated product source
+        run: |
+          mkdir -p "$RUNNER_TEMP/staging-evidence"
+          cp dev/perf/cached-staging-20260925/candidate.patch "$RUNNER_TEMP/staging-evidence/candidate.patch"
+          cp dev/perf/cached-staging-20260925/regression.js "$RUNNER_TEMP/staging-evidence/regression.js"
+          git fetch --depth=1 origin 76362775484661b3cd8b9d2c84b228802c023a76
+          git checkout --detach 76362775484661b3cd8b9d2c84b228802c023a76
+          cp "$RUNNER_TEMP/staging-evidence/regression.js" test/dictionary-database-cached-staging.test.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - run: npm run build:libs
+      - name: Verify original failure and corrected regressions
+        run: |
+          set +e
+          npx vitest run test/dictionary-database-cached-staging.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile="$RUNNER_TEMP/staging-evidence/baseline.json" > "$RUNNER_TEMP/staging-evidence/baseline.log" 2>&1
+          result=$?
+          set -e
+          test "$result" = 1
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads((Path(os.environ['RUNNER_TEMP']) / 'staging-evidence/baseline.json').read_text())
+          assert data['numFailedTests'] == 8, data
+          assert data['numPassedTests'] == 2, data
+          PY
+          git apply --check "$RUNNER_TEMP/staging-evidence/candidate.patch"
+          git apply "$RUNNER_TEMP/staging-evidence/candidate.patch"
+          npx vitest run test/dictionary-database-cached-staging.test.js test/dictionary-database-content-dedup.test.js --maxWorkers=1 --minWorkers=1 2>&1 | tee "$RUNNER_TEMP/staging-evidence/focused.log"
+      - name: Full unit and options qualification
+        run: |
+          npm run test:unit -- --maxWorkers=2 --minWorkers=2 2>&1 | tee "$RUNNER_TEMP/staging-evidence/unit.log"
+          npm run test:unit:options -- --maxWorkers=2 --minWorkers=2 2>&1 | tee "$RUNNER_TEMP/staging-evidence/options.log"
+      - name: Types lint and builds
+        run: |
+          npm run test:ts 2>&1 | tee "$RUNNER_TEMP/staging-evidence/types.log"
+          npx eslint ext/js/dictionary/dictionary-database.js test/dictionary-database-cached-staging.test.js 2>&1 | tee "$RUNNER_TEMP/staging-evidence/lint.log"
+          npm run test:build 2>&1 | tee "$RUNNER_TEMP/staging-evidence/build-plan.log"
+          npm run build -- --target chrome-dev 2>&1 | tee "$RUNNER_TEMP/staging-evidence/build.log"
+      - name: Publish only the two qualified product files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/dictionary/dictionary-database.js test/dictionary-database-cached-staging.test.js
+          python3 - <<'PY'
+          import subprocess
+          paths = subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines()
+          assert paths == ['ext/js/dictionary/dictionary-database.js', 'test/dictionary-database-cached-staging.test.js'], paths
+          PY
+          git diff --cached > "$RUNNER_TEMP/staging-evidence/product.patch"
+          git commit -m 'fix(import): bound cached term staging batches'
+          git status --porcelain > "$RUNNER_TEMP/staging-evidence/status.txt"
+          test ! -s "$RUNNER_TEMP/staging-evidence/status.txt"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/staging-evidence/product-identity.txt"
+          sha256sum ext/js/dictionary/dictionary-database.js test/dictionary-database-cached-staging.test.js > "$RUNNER_TEMP/staging-evidence/product-hashes.txt"
+          git push origin HEAD:refs/heads/fix/import-bound-cached-term-staging-20260925
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cached-term-staging-qualification
+          path: ${{ runner.temp }}/staging-evidence
+          retention-days: 30
