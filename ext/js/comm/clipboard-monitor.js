@@ -75,6 +75,7 @@ export class ClipboardMonitor extends EventDispatcher {
                 }
             }
 
+            if (this._timerToken !== token) { return; }
             canChange = true;
             this._timerId = setTimeout(intervalCallback, this._interval);
         };
