@@ -1,0 +1,107 @@
+name: Import native key final 20260925
+on:
+  push:
+    branches: [bench/import-remaining-fastpaths-20260925]
+    paths: [.github/workflows/import-native-key-final-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Preserve final inputs and isolate the product baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dev/perf/remaining-20260925/native-key.patch /tmp/native-key.patch
+          cp dev/perf/remaining-20260925/prepare-key.py /tmp/prepare-key.py
+          cp test/term-bank-native-key-plan.test.js /tmp/native-key.test.js
+          git fetch --depth=1 origin 74b09d33937448ae990e61752d6cb749c7c63317
+          git reset --hard FETCH_HEAD
+      - uses: ./.github/actions/setup
+      - name: Apply only the exact measured runtime and final tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dev/perf/remaining-20260925 builds/key-final
+          cp /tmp/native-key.patch dev/perf/remaining-20260925/native-key.patch
+          cp /tmp/native-key.test.js test/term-bank-native-key-plan.test.js
+          python3 /tmp/prepare-key.py > builds/key-final/prepare.log 2>&1
+          rm dev/perf/remaining-20260925/native-key.patch
+          rmdir dev/perf/remaining-20260925
+          git diff --check
+          git diff > builds/key-final/source.patch
+          cp test/term-bank-native-key-plan.test.js builds/key-final/
+          cp ext/js/dictionary/wasm/term-bank-parser.c builds/key-final/candidate.c
+          cp ext/lib/term-bank-parser.wasm builds/key-final/candidate.wasm
+          sha256sum ext/js/dictionary/wasm/term-bank-parser.c ext/lib/term-bank-parser.wasm ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-native-key-plan.test.js test/term-bank-wasm-parser.test.js > builds/key-final/SHA256SUMS
+      - name: Full unit type lint and build validation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          commands={
+              'unit':['npm','run','test:unit','--','--no-file-parallelism'],
+              'options':['npm','run','test:unit:options'],
+              'types-main':['npm','run','test:ts:main'],
+              'types-dev':['npm','run','test:ts:dev'],
+              'types-test':['npm','run','test:ts:test'],
+              'types-bench':['npm','run','test:ts:bench'],
+              'lint':['npx','eslint','test/term-bank-native-key-plan.test.js','test/term-bank-wasm-parser.test.js'],
+              'build':['npm','run','build'],
+          }
+          status={}
+          for name,args in commands.items():
+              with open('builds/key-final/'+name+'.log','w') as f:
+                  status[name]=subprocess.run(args,stdout=f,stderr=subprocess.STDOUT).returncode
+              print(name,status[name],flush=True)
+          Path('builds/key-final/status.json').write_text(json.dumps(status,indent=2)+'\n')
+          PY
+      - run: npx playwright install --with-deps chromium
+      - name: Both complete Chromium lifecycles
+        shell: bash
+        run: |
+          set -uo pipefail
+          for cohort in defaults generic-on; do
+            export MANABITAN_E2E_IMPORT_FLAGS_JSON='{}'
+            if [ "$cohort" = generic-on ]; then export MANABITAN_E2E_IMPORT_FLAGS_JSON='{"experimentalGenericSpanCompression":true}'; fi
+            export MANABITAN_CHROMIUM_E2E_REPORT="$PWD/builds/key-final/$cohort.html"
+            xvfb-run -a npm run test:e2e:chromium-extension > "builds/key-final/$cohort.log" 2>&1
+            echo "$cohort $?" | tee -a builds/key-final/browser-status.txt
+          done
+      - name: Verify source identity after all checks
+        run: sha256sum --check builds/key-final/SHA256SUMS
+      - name: Retain every outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-key-final-validation
+          path: builds/key-final/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Require every validation to succeed
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('builds/key-final')
+          s=json.loads((p/'status.json').read_text())
+          assert s and all(v==0 for v in s.values()),s
+          for cohort in ['defaults','generic-on']:
+              r=json.loads((p/(cohort+'.json')).read_text())
+              assert r['status']=='success' and r['skippedVerification'] is False
+              assert r['runtimeDiagnostics']['openStorageMode']=='opfs-sahpool'
+          PY
+          awk '$2 != 0 { bad = 1 } END { exit bad }' builds/key-final/browser-status.txt
