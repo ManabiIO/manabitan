@@ -839,7 +839,10 @@ export class DictionaryImporter {
         /** @type {import('dictionary-database').Tag[]} */
         const indexTags = [];
         if (!usePrunedArtifactAuxFastPath) { this._addOldIndexTags(index, indexTags, dictionaryTitle); }
-        const useTermArtifactFiles = termArtifactFiles.length > 0;
+        const useTermArtifactFiles = this._hasCompleteTermArtifactCoverage(
+            termFiles,
+            termArtifactFiles.map(({filename}) => filename),
+        );
         const defaultEnableTermEntryContentDedup = true;
         const enableTermEntryContentDedup = requestedTermEntryContentDedup ?? defaultEnableTermEntryContentDedup;
         dictionaryDatabase.setTermEntryContentDedupEnabled(enableTermEntryContentDedup);
@@ -876,6 +879,11 @@ export class DictionaryImporter {
         ) ?
             fileMap.get(termArtifactManifest.sharedGlossaryFileName) :
             fileMap.get(TERM_BANK_SHARED_GLOSSARY_ARTIFACT_FILE);
+        const usePackedTermArtifactSource = (
+            termArtifactManifest !== null &&
+            typeof packedTermArtifactEntry !== 'undefined' &&
+            this._hasCompleteTermArtifactCoverage(termFiles, termArtifactManifest.termBanksByArtifact.keys())
+        );
         const sharedGlossaryPackedOffset = termArtifactManifest?.sharedGlossaryPackedOffset ?? null;
         const sharedGlossaryPackedLength = termArtifactManifest?.sharedGlossaryPackedLength ?? null;
         const sharedGlossaryCompression = termArtifactManifest?.sharedGlossaryCompression ?? null;
@@ -897,7 +905,7 @@ export class DictionaryImporter {
         const useParallelPackedArtifactPreload = (
             termArtifactManifest !== null &&
             termArtifactManifest.packedMediaEntries.length >= 100000 &&
-            typeof packedTermArtifactEntry !== 'undefined' &&
+            usePackedTermArtifactSource &&
             typeof packedMediaArtifactEntry !== 'undefined'
         );
         if (useParallelPackedArtifactPreload) {
@@ -925,8 +933,8 @@ export class DictionaryImporter {
                         (packedMediaArtifactBlob instanceof Blob ? packedMediaArtifactBlob.size : 0)
                 }`,
             );
-        } else if (useTermArtifactFiles || typeof packedTermArtifactEntry !== 'undefined') {
-            if (typeof packedTermArtifactEntry !== 'undefined') {
+        } else if (useTermArtifactFiles || usePackedTermArtifactSource) {
+            if (usePackedTermArtifactSource) {
                 const tPackedArtifactReadStart = Date.now();
                 packedTermArtifactBytes = await this._getData(/** @type {import('@zip.js/zip.js').Entry} */ (packedTermArtifactEntry), new Uint8ArrayWriter());
                 packedTermArtifactPreloadMs = Math.max(0, Date.now() - tPackedArtifactReadStart);
@@ -1017,7 +1025,7 @@ export class DictionaryImporter {
         const usePackedTermArtifact = (
             packedTermArtifactBytes !== null &&
             termArtifactManifest !== null &&
-            termArtifactManifest.termBanksByArtifact.size > 0
+            usePackedTermArtifactSource
         );
         const packedTermArtifactManifest = usePackedTermArtifact ? termArtifactManifest : null;
         const totalArtifactTermRows = (
@@ -3418,6 +3426,28 @@ export class DictionaryImporter {
             const {category, order, notes, score} = value;
             results.push({name, category, order, notes, score, dictionary});
         }
+    }
+
+    /**
+     * Artifact term banks replace ordinary JSON term banks only when they
+     * describe the same complete bank set. A stale or partially generated
+     * artifact set must not silently hide ordinary source banks.
+     * @param {ImportFileEntry[]} termFiles
+     * @param {Iterable<string>} artifactFileNames
+     * @returns {boolean}
+     */
+    _hasCompleteTermArtifactCoverage(termFiles, artifactFileNames) {
+        const artifactNames = new Set(artifactFileNames);
+        if (artifactNames.size === 0) { return false; }
+        if (termFiles.length === 0) { return true; }
+        if (artifactNames.size !== termFiles.length) { return false; }
+        for (const {filename} of termFiles) {
+            const match = /^term_bank_(\d+)\.json$/.exec(filename);
+            if (match === null || !artifactNames.has(`term_bank_${match[1]}.mbtb`)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
