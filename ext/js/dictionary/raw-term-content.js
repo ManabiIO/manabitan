@@ -319,6 +319,30 @@ export function isRawTermContentBinary(bytes) {
 }
 
 /**
+ * Validates the complete length-delimited ordinary raw-content header without
+ * decoding its strings or glossary JSON.
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+export function isValidRawTermContentBinary(bytes) {
+    if (!isRawTermContentBinary(bytes)) {
+        return false;
+    }
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const rulesLength = view.getUint32(4, true);
+    const definitionTagsLength = view.getUint32(8, true);
+    const termTagsLength = view.getUint32(12, true);
+    const glossaryJsonLength = view.getUint32(16, true);
+    return (
+        RAW_TERM_CONTENT_HEADER_BYTES +
+        rulesLength +
+        definitionTagsLength +
+        termTagsLength +
+        glossaryJsonLength
+    ) === bytes.byteLength;
+}
+
+/**
  * @param {Uint8Array} bytes
  * @returns {boolean}
  */
