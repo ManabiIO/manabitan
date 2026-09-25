@@ -631,8 +631,9 @@ export class DictionaryImporter {
         const bulkAddProgressAllowance = 1000;
         const requestedTermEntryContentDedup = typeof details.enableTermEntryContentDedup === 'boolean' ? details.enableTermEntryContentDedup : null;
         const preserveCompressedMedia = details.preserveCompressedMedia === true;
-        const termContentStorageMode = (details.termContentStorageMode === 'raw-bytes') ?
-            details.termContentStorageMode :
+        /** @type {'baseline'|'raw-bytes'} */
+        const termContentStorageMode = (details.termContentStorageMode === 'baseline') ?
+            'baseline' :
             'raw-bytes';
         this._skipImageMetadata = details.skipImageMetadata === true;
         this._skipMediaImport = details.skipMediaImport === true;
