@@ -32,17 +32,10 @@ jobs:
       - name: Prepare isolated pinned sources and fixed-plan driver
         run: |
           mkdir -p /tmp/more-evidence /tmp/pass-input
+          git rev-parse HEAD > /tmp/more-evidence/research-commit.txt
           cp dev/perf/native-passes-20260925/* /tmp/pass-input/
-          git show cb378693fd1a1f3af0e2c2bfc59e0d9c968055f5:dev/perf/literal-ascii-20260925/compare.py > /tmp/pass-input/compare.py
-          echo '4540c1e76bc0cf82501eef3b70aabb757f56229fe6ab7e95b90b6eee5d184b77  /tmp/pass-input/compare.py' | sha256sum --check
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('/tmp/pass-input/compare.py')
-          s = p.read_text().replace('literal-ascii', 'native-pass').replace('test/term-bank-native-hotpaths.test.js', 'test/term-bank-native-pass-equivalence.test.js')
-          s = s.replace("'candidate': kind,", "'candidate': os.environ['CANDIDATE'],")
-          p.write_text(s)
-          PY
           cp -a /tmp/pass-input /tmp/more-evidence/inputs
+          python -m py_compile /tmp/pass-input/compare.py
           git worktree add --detach /tmp/more-base 76362775484661b3cd8b9d2c84b228802c023a76
           git worktree add --detach /tmp/more-candidate 76362775484661b3cd8b9d2c84b228802c023a76
           cd /tmp/more-base
