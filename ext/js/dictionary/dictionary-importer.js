@@ -62,7 +62,7 @@ import {
     prewarmParallelTermBankParser,
     TermBankWasmResourceError,
 } from './term-bank-wasm-parser.js';
-import {hashPairToHex, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
+import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
@@ -3475,7 +3475,9 @@ export class DictionaryImporter {
         }
         entry.termEntryContentHash1 = hash1;
         entry.termEntryContentHash2 = hash2;
-        entry.termEntryContentHash = hashPairToHex(hash1, hash2);
+        if (typeof entry.termEntryContentHash !== 'undefined') {
+            entry.termEntryContentHash = void 0;
+        }
     }
 
     /**
@@ -3532,23 +3534,6 @@ export class DictionaryImporter {
         }
         this._utf8StringBytesCache.set(value, bytes);
         return bytes;
-    }
-
-    /**
-     * @param {string} contentJson
-     * @returns {string}
-     */
-    _hashEntryContent(contentJson) {
-        const [h1, h2] = this._hashEntryContentPair(contentJson);
-        return hashPairToHex(h1, h2);
-    }
-
-    /**
-     * @param {string} contentJson
-     * @returns {[number, number]}
-     */
-    _hashEntryContentPair(contentJson) {
-        return this._hashEntryContentBytesPair(this._textEncoder.encode(contentJson));
     }
 
     /**
@@ -5163,7 +5148,9 @@ null;
         const [hash1, hash2] = this._hashEntryContentBytesPair(normalizedBytes);
         entry.termEntryContentHash1 = hash1;
         entry.termEntryContentHash2 = hash2;
-        entry.termEntryContentHash = hashPairToHex(hash1, hash2);
+        if (typeof entry.termEntryContentHash !== 'undefined') {
+            entry.termEntryContentHash = void 0;
+        }
         entry.termEntryContentBytes = normalizedBytes;
         entry.termEntryContentRawGlossaryJsonBytes = void 0;
     }
