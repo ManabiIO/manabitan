@@ -4782,6 +4782,7 @@ null;
      * @returns {Promise<void>}
      */
     async _bulkInsertWithDescriptor(descriptor, items, start, count) {
+        if (count <= 0) { return; }
         const {table, columnsSql, rowPlaceholderSql, batchSize, bindRow} = descriptor;
         if (count <= batchSize) {
             /** @type {string[]} */
