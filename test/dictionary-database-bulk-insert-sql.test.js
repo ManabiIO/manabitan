@@ -52,6 +52,28 @@ describe('DictionaryDatabase bulk insert SQL reuse', () => {
         expect(bindRow).toHaveBeenCalledTimes(5);
     });
 
+    test('keeps an empty insert as a no-op', async () => {
+        const database = new DictionaryDatabase();
+        const getCachedStatement = vi.fn();
+        Reflect.set(database, '_getCachedStatement', getCachedStatement);
+
+        await Reflect.get(database, '_bulkInsertWithDescriptor').call(
+            database,
+            {
+                table: 'sample',
+                columnsSql: 'value',
+                rowPlaceholderSql: '(?)',
+                batchSize: 4,
+                bindRow: (value) => [value],
+            },
+            [],
+            0,
+            0,
+        );
+
+        expect(getCachedStatement).not.toHaveBeenCalled();
+    });
+
     test('keeps a single partial batch on the ordinary construction path', async () => {
         const database = new DictionaryDatabase();
         /** @type {string[]} */
