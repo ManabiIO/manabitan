@@ -1564,6 +1564,11 @@ export class TermRecordOpfsStore {
         let singleDictionaryRecordCount = 0;
         let singleDictionaryName = '';
         let singleContentDictName = 'raw';
+        let currentDictionaryName = '';
+        /** @type {number[]|null} */
+        let currentDictionaryRecordIds = null;
+        /** @type {{expression: Map<string, number[]>, reading: Map<string, number[]>, expressionReverse: Map<string, number[]>, readingReverse: Map<string, number[]>, sequence: Map<number, number[]>}|undefined} */
+        let currentDictionaryIndex;
         for (let i = start, ii = start + count; i < ii; ++i) {
             const row = /** @type {{dictionary: string, expression: string, reading: string, readingEqualsExpression?: boolean, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, expressionReverse?: string, readingReverse?: string, score: number, sequence?: number}} */ (rows[i]);
             const id = this._nextId++;
@@ -1587,8 +1592,13 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
+            if (dictionary !== currentDictionaryName || currentDictionaryRecordIds === null) {
+                currentDictionaryName = dictionary;
+                currentDictionaryRecordIds = this._getOrCreateRecordIdsForDictionary(dictionary);
+                currentDictionaryIndex = this._deferIndexBuild ? void 0 : this._indexByDictionary.get(dictionary);
+                this._loadedDictionaryNames.add(dictionary);
+            }
+            this._storeRecordWithKnownDictionaryIds(record, currentDictionaryRecordIds);
             if (i === start) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1617,11 +1627,8 @@ export class TermRecordOpfsStore {
                 shardRecords.records.push(record);
                 shardRecords.indexes.push(i - start);
             }
-            if (!this._deferIndexBuild) {
-                const existingIndex = this._indexByDictionary.get(dictionary);
-                if (typeof existingIndex !== 'undefined') {
-                    this._addRecordToDictionaryIndex(existingIndex, record);
-                }
+            if (typeof currentDictionaryIndex !== 'undefined') {
+                this._addRecordToDictionaryIndex(currentDictionaryIndex, record);
             }
         }
         if (this._deferIndexBuild) {
