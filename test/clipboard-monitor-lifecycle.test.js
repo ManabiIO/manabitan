@@ -18,6 +18,7 @@
 
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {ClipboardMonitor} from '../ext/js/comm/clipboard-monitor.js';
+import {deferPromise} from '../ext/js/core/utilities.js';
 
 /**
  * @param {string[]} values
@@ -45,6 +46,7 @@ describe('ClipboardMonitor handler lifecycle', () => {
 
     test('stop from a change handler does not schedule another poll', async () => {
         const {monitor, getText} = createMonitor(['initial', 'changed', 'unexpected']);
+        /** @type {string[]} */
         const changes = [];
         monitor.on('change', ({text}) => {
             changes.push(text);
@@ -92,6 +94,7 @@ describe('ClipboardMonitor handler lifecycle', () => {
 
     test('ordinary polling continues when the handler does not change lifecycle', async () => {
         const {monitor, getText} = createMonitor(['initial', 'changed', 'same']);
+        /** @type {string[]} */
         const changes = [];
         monitor.on('change', ({text}) => { changes.push(text); });
 
@@ -108,7 +111,7 @@ describe('ClipboardMonitor handler lifecycle', () => {
 
     test('stop while a clipboard read is pending still prevents rescheduling', async () => {
         /** @type {(value: string) => void} */
-        let resolveRead = () => { throw new Error('Read did not start'); };
+        let resolveRead = (_value) => { throw new Error('Read did not start'); };
         const getText = vi.fn(() => new Promise((resolve) => { resolveRead = resolve; }));
         const monitor = new ClipboardMonitor({getText});
 
@@ -120,5 +123,37 @@ describe('ClipboardMonitor handler lifecycle', () => {
         await Promise.resolve();
 
         expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test.each(['resolve', 'reject'])('late old read %s cannot replace the restarted monitor state', async (outcome) => {
+        const oldRead = /** @type {import('core').DeferredPromiseDetails<string>} */ (deferPromise());
+        const getText = vi.fn()
+            .mockImplementationOnce(() => oldRead.promise)
+            .mockResolvedValue('replacement');
+        const monitor = new ClipboardMonitor({getText});
+        const onChange = vi.fn();
+        monitor.on('change', onChange);
+
+        monitor.start();
+        monitor.start();
+        await Promise.resolve();
+        expect(getText).toHaveBeenCalledTimes(2);
+        expect(vi.getTimerCount()).toBe(1);
+
+        if (outcome === 'resolve') {
+            oldRead.resolve('stale');
+        } else {
+            oldRead.reject(new Error('obsolete read failed'));
+        }
+        await Promise.resolve();
+        await vi.advanceTimersByTimeAsync(250);
+
+        expect(getText).toHaveBeenCalledTimes(3);
+        expect(onChange).not.toHaveBeenCalled();
+        expect(vi.getTimerCount()).toBe(1);
+        monitor.stop();
+        expect(vi.getTimerCount()).toBe(0);
+        await vi.advanceTimersByTimeAsync(1000);
+        expect(getText).toHaveBeenCalledTimes(3);
     });
 });
