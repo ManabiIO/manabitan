@@ -1,0 +1,125 @@
+name: Literal ASCII complete-import screen 20260925
+on:
+  push:
+    branches: [verify/literal-ascii-20260925-763627]
+permissions:
+  contents: write
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    env:
+      HUSKY: '0'
+      MANABITAN_CLANG: clang-18
+      DICTIONARY: ${{ matrix.dictionary }}
+      PAIRS: '6'
+      INITIAL: AB
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Prepare exact source and fixed-plan driver
+        run: |
+          mkdir -p /tmp/more-evidence
+          cp -a dev/perf/literal-ascii-20260925 /tmp/literal-input
+          git worktree add --detach /tmp/more-base 76362775484661b3cd8b9d2c84b228802c023a76
+          git worktree add --detach /tmp/more-candidate 76362775484661b3cd8b9d2c84b228802c023a76
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          root = Path('/tmp/literal-input')
+          path = Path('/tmp/more-candidate/ext/js/dictionary/wasm/term-bank-parser.c')
+          assert hashlib.sha256(path.read_bytes()).hexdigest() == 'b65eebac1d7a83eeb6ae14969069afc376a0084ddb0f6ffa01a84d1266dde108'
+          text = path.read_text()
+          assert text.count('static int json_string_matches_ascii(') == 1
+          text = text.replace('static int json_string_matches_ascii(', 'static int json_string_matches_ascii_escaped(', 1)
+          position = text.index('\nstatic int is_media_marker_at')
+          path.write_text(text[:position] + (root / 'helper.c').read_text() + text[position:])
+          text = (root / 'compare-original.py').read_text()
+          text = text.replace("kind = os.environ['CANDIDATE']", "kind = 'literal-ascii'")
+          text = text.replace("kind == 'bulk-memory'", "kind == 'literal-ascii'")
+          old = "assert git(b, 'diff', '--name-only', 'HEAD^', 'HEAD') == source"
+          assert text.count(old) == 1
+          text = text.replace(old, "assert set(git(b, 'diff', '--name-only', 'HEAD^', 'HEAD').splitlines()) == {source, 'test/term-bank-native-hotpaths.test.js'}")
+          text = text.replace("for dictionary in ['jmdict', 'jmnedict', 'jitendex']:", "for dictionary in [os.environ['DICTIONARY']]:")
+          (root / 'compare.py').write_text(text)
+          PY
+          cp -a /tmp/literal-input /tmp/more-evidence/inputs
+          cd /tmp/more-base
+          npm ci
+          npm run build:libs
+          cp -a node_modules /tmp/more-candidate/node_modules
+          cp -a ext/lib /tmp/more-candidate/ext/lib
+      - name: Validate baseline and candidate without changing assertions
+        run: |
+          cp /tmp/literal-input/term-bank-native-hotpaths.test.js /tmp/more-base/test/
+          cp /tmp/literal-input/term-bank-native-hotpaths.test.js /tmp/more-candidate/test/
+          cd /tmp/more-base
+          node node_modules/vitest/vitest.mjs run test/term-bank-native-hotpaths.test.js > /tmp/more-evidence/parent-tests.log 2>&1
+          rm test/term-bank-native-hotpaths.test.js
+          cd /tmp/more-candidate
+          python - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+          text = Path('dev/build-libs.js').read_text()
+          exports = re.findall(r"'([^']+)'", re.search(r'exports: \[(.*?)\]', text).group(1))
+          command = ['clang-18', '--target=wasm32', '-O3', '-matomics', '-mbulk-memory', '-msimd128', '-nostdlib', '-Wl,--no-entry', '-Wl,--shared-memory', '-Wl,--max-memory=4294967296', '-Wl,--strip-all']
+          command += [f'-Wl,--export={name}' for name in exports]
+          command += ['-o', 'ext/lib/term-bank-parser.wasm', 'ext/js/dictionary/wasm/term-bank-parser.c', 'ext/js/dictionary/wasm/term-bank-inflate.c']
+          subprocess.run(command, check=True)
+          PY
+          node node_modules/vitest/vitest.mjs run test/term-bank-native-hotpaths.test.js test/term-bank-wasm-parser.test.js test/term-bank-glossary-semantics.test.js test/term-bank-composite-state.test.js > /tmp/more-evidence/focused.log 2>&1
+          node node_modules/eslint/bin/eslint.js test/term-bank-native-hotpaths.test.js > /tmp/more-evidence/lint.log 2>&1
+          npm run test:ts > /tmp/more-evidence/types.log 2>&1
+          if [ "$DICTIONARY" = jmdict ]; then
+            npm run test:unit -- --minWorkers=1 --maxWorkers=2 > /tmp/more-evidence/unit.log 2>&1
+            npm run test:unit:options > /tmp/more-evidence/options.log 2>&1
+            npm run test:build > /tmp/more-evidence/build-plans.log 2>&1
+          fi
+          git diff --check
+          git -c core.hooksPath=/dev/null add ext/js/dictionary/wasm/term-bank-parser.c test/term-bank-native-hotpaths.test.js
+          git -c core.hooksPath=/dev/null -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'perf(import): specialize literal ASCII field matching'
+          git rev-parse HEAD > /tmp/more-evidence/candidate-commit.txt
+          git rev-parse 'HEAD^{tree}' > /tmp/more-evidence/candidate-tree.txt
+          git diff HEAD^ HEAD > /tmp/more-evidence/candidate.patch
+          if [ "$DICTIONARY" = jmdict ]; then
+            git push origin HEAD:refs/heads/verify/literal-ascii-candidate-20260925-763627
+          fi
+      - name: Build actual packages and verify complete parser output
+        run: |
+          cd /tmp/more-base
+          npm run build -- --target chrome-dev > /tmp/more-evidence/build-base.log 2>&1
+          node dev/perf/prepare-dictionaries.js > /tmp/more-evidence/fixtures.log 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium
+          mkdir -p /tmp/more-candidate/builds
+          cp -a builds/e2e-dictionary-cache /tmp/more-candidate/builds/e2e-dictionary-cache
+          node dev/perf/import-lookup-screen.js "$DICTIONARY" --child --flags '{}' > /tmp/more-evidence/parser-a.json
+          cd /tmp/more-candidate
+          npm run build -- --target chrome-dev > /tmp/more-evidence/build-candidate.log 2>&1
+          node dev/perf/import-lookup-screen.js "$DICTIONARY" --child --flags '{}' > /tmp/more-evidence/parser-b.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/more-evidence')
+          a, b = [json.loads((root / name).read_text()) for name in ['parser-a.json', 'parser-b.json']]
+          for key in ['digest', 'rows', 'indexBytes', 'archiveSha256', 'lockSha256']:
+              assert a[key] == b[key], key
+          PY
+      - name: Complete the predeclared browser plan
+        run: python /tmp/literal-input/compare.py > /tmp/more-evidence/driver.log 2>&1
+      - name: Preserve every result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: literal-ascii-${{ matrix.dictionary }}-763627
+          path: /tmp/more-evidence/
+          retention-days: 30
+          if-no-files-found: error
