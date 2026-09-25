@@ -6,9 +6,17 @@ on:
 permissions:
   contents: read
 jobs:
-  prepare:
+  escaped-keys:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex, wty-en-en]
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      PAIRS: '6'
+      FLAG: experimentalNativeEscapedKeys
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,16 +27,24 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build:libs
-      - name: Export pinned source and built test dependencies
-        run: |
-          mkdir -p "$RUNNER_TEMP/hotpath-environment"
-          git rev-parse HEAD > "$RUNNER_TEMP/hotpath-environment/commit.txt"
-          git archive HEAD > "$RUNNER_TEMP/hotpath-environment/source.tar"
-          tar --exclude='*/.git' -czf "$RUNNER_TEMP/hotpath-environment/dependencies.tar.gz" node_modules ext/lib
-          sha256sum "$RUNNER_TEMP/hotpath-environment/"*.tar* > "$RUNNER_TEMP/hotpath-environment/sha256.txt"
-      - uses: actions/upload-artifact@v4
+      - run: npm run build -- --target chrome-dev
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v4
         with:
-          name: import-hotpath-pinned-environment
-          path: ${{ runner.temp }}/hotpath-environment
+          path: builds/e2e-dictionary-cache
+          key: hotpath-corpus-${{ runner.os }}-763627-${{ matrix.dictionary }}
+      - name: Counterbalanced full imports with unchanged-code controls
+        run: node dev/perf/hotpath-round-20260925/run.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: escaped-keys-${{ matrix.dictionary }}
+          path: builds/hotpath-round
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: matrix.dictionary == 'wty-en-en' && success()
+        with:
+          name: hotpath-verified-corpora
+          path: builds/e2e-dictionary-cache/*.zip
           compression-level: 0
           retention-days: 2
