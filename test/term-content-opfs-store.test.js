@@ -51,9 +51,10 @@ function createReadableFile(bytes) {
 
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
+ * @param {{removeEntryFailures?: Map<string, number>}} [options]
  * @returns {FileSystemDirectoryHandle}
  */
-function createMutableDirectory(fileBytesByName) {
+function createMutableDirectory(fileBytesByName, {removeEntryFailures = new Map()} = {}) {
     const getFileHandle = async (
         /** @type {string} */ name,
         /** @type {{create?: boolean}} */ options = {},
@@ -90,6 +91,11 @@ function createMutableDirectory(fileBytesByName) {
     return /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
         getFileHandle,
         async removeEntry(/** @type {string} */ name) {
+            const failuresRemaining = removeEntryFailures.get(name) ?? 0;
+            if (failuresRemaining > 0) {
+                removeEntryFailures.set(name, failuresRemaining - 1);
+                throw new Error(`Injected removeEntry failure for ${name}`);
+            }
             fileBytesByName.delete(name);
         },
         async *entries() {
@@ -418,6 +424,72 @@ describe('TermContentOpfsStore', () => {
             segments: [{fileName: 'manabitan-term-content-2.bin', fileLength: 12}],
         })).rejects.toThrow(/Failed to roll back term-content import storage/);
         expect(fileBytesByName.has('manabitan-term-content-2.bin')).toBe(false);
+    });
+
+
+    test('reset truncates a segment when unlink fails instead of leaving stale bytes', async () => {
+        const fileName = 'manabitan-term-content.bin';
+        const segmentName = 'manabitan-term-content^1.bin';
+        const fileBytesByName = new Map([
+            [fileName, new Uint8Array([1, 2, 3])],
+            [segmentName, new Uint8Array([4, 5, 6])],
+        ]);
+        const root = createMutableDirectory(fileBytesByName, {
+            removeEntryFailures: new Map([[segmentName, 1]]),
+        });
+        vi.stubGlobal('navigator', {storage: {getDirectory: vi.fn(async () => root)}});
+        const store = new TermContentOpfsStore();
+        await store.prepare();
+
+        await expect(store.reset()).resolves.toBeUndefined();
+
+        expect(fileBytesByName.get(fileName)).toStrictEqual(new Uint8Array());
+        expect(fileBytesByName.get(segmentName)).toStrictEqual(new Uint8Array());
+        expect(Reflect.get(store, '_length')).toBe(0);
+
+        const reopened = new TermContentOpfsStore();
+        await reopened.prepare();
+        expect(Reflect.get(reopened, '_length')).toBe(0);
+        expect(await reopened.readSlice(0, 1)).toBeNull();
+    });
+
+    test('reset fails closed when a stale segment cannot be removed or truncated', async () => {
+        const fileName = 'manabitan-term-content.bin';
+        const segmentName = 'manabitan-term-content^1.bin';
+        const fileBytesByName = new Map([
+            [fileName, new Uint8Array([1, 2, 3])],
+            [segmentName, new Uint8Array([4, 5, 6])],
+        ]);
+        const baseRoot = createMutableDirectory(fileBytesByName, {
+            removeEntryFailures: new Map([[segmentName, 1]]),
+        });
+        const segmentHandle = await baseRoot.getFileHandle(segmentName);
+        const root = /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+            getFileHandle: baseRoot.getFileHandle.bind(baseRoot),
+            removeEntry: baseRoot.removeEntry.bind(baseRoot),
+            async *entries() {
+                for await (const [name, handle] of baseRoot.entries()) {
+                    if (name === segmentName) {
+                        yield [name, {
+                            ...handle,
+                            async createWritable() {
+                                throw new Error('Injected truncate failure');
+                            },
+                            getFile: segmentHandle.getFile.bind(segmentHandle),
+                        }];
+                    } else {
+                        yield [name, handle];
+                    }
+                }
+            },
+        }));
+        vi.stubGlobal('navigator', {storage: {getDirectory: vi.fn(async () => root)}});
+        const store = new TermContentOpfsStore();
+        await store.prepare();
+
+        await expect(store.reset()).rejects.toThrow('Failed to reset term-content storage');
+
+        expect(fileBytesByName.get(segmentName)).toStrictEqual(new Uint8Array([4, 5, 6]));
     });
 
     test('appends primary and offset-derived chunks in one logical mutation', async () => {
