@@ -5951,7 +5951,12 @@ export class TermRecordOpfsStore {
             try {
                 fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: false});
             } catch (lookupError) {
-                if (allowMissing) { return; }
+                const lookupErrorName = (
+                    typeof lookupError === 'object' &&
+                    lookupError !== null &&
+                    typeof Reflect.get(lookupError, 'name') === 'string'
+                ) ? Reflect.get(lookupError, 'name') : '';
+                if (allowMissing && lookupErrorName === 'NotFoundError') { return; }
                 throw new AggregateError(
                     [removeError, lookupError],
                     `Failed to remove or open term-record storage file ${fileName}`,

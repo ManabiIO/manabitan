@@ -2011,6 +2011,36 @@ describe('TermRecordOpfsStore', () => {
         expect(Reflect.get(store, '_activeAppendShardStateByKey').has(logicalKey)).toBe(false);
     });
 
+
+    test('remove-or-truncate suppresses only a confirmed missing file', async () => {
+        const store = new TermRecordOpfsStore();
+        const removeError = new Error('unlink failed');
+        const notFoundError = new Error('missing');
+        notFoundError.name = 'NotFoundError';
+        Reflect.set(store, '_recordsDirectoryHandle', /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+            removeEntry: vi.fn(async () => { throw removeError; }),
+            getFileHandle: vi.fn(async () => { throw notFoundError; }),
+        })));
+
+        await expect(store._removeStorageFileOrTruncate('missing.mbtr', true)).resolves.toBeUndefined();
+    });
+
+    test('remove-or-truncate does not hide a transient lookup failure as missing', async () => {
+        const store = new TermRecordOpfsStore();
+        const removeError = new Error('unlink failed');
+        const lookupError = new Error('backend temporarily unreadable');
+        lookupError.name = 'NotReadableError';
+        Reflect.set(store, '_recordsDirectoryHandle', /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+            removeEntry: vi.fn(async () => { throw removeError; }),
+            getFileHandle: vi.fn(async () => { throw lookupError; }),
+        })));
+
+        await expect(store._removeStorageFileOrTruncate('still-there.mbtr', true)).rejects.toMatchObject({
+            name: 'AggregateError',
+            errors: [removeError, lookupError],
+        });
+    });
+
     test('round-trips artifact chunk records into the exact expression index', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Jitendex.org [2026-04-04]';
