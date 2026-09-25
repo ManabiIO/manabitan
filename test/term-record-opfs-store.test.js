@@ -2078,6 +2078,38 @@ describe('TermRecordOpfsStore', () => {
         expect(loadedRecord?.reading).toBe('くう');
     });
 
+
+    test('existing-shard finalization truncates a stale lookup sidecar when unlink is blocked', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Existing shard append', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([
+            [descriptorFileName, new Uint8Array([1, 2, 3, 4])],
+            [indexFileName, new Uint8Array([5, 6, 7, 8])],
+        ]);
+        const directory = createFakeDirectoryHandle(fileBytesByName, {
+            removeEntryFailures: new Map([[indexFileName, 1]]),
+        });
+        const descriptorHandle = await directory.getFileHandle(descriptorFileName, {create: false});
+        const state = store._createShardState(
+            descriptorFileName,
+            descriptorHandle,
+            fileBytesByName.get(descriptorFileName)?.byteLength ?? 0,
+            'raw',
+        );
+        state.pendingLookupIndexChunks = [new Uint8Array([9])];
+        state.pendingLookupIndexBytes = 1;
+        state.pendingLookupIndexRecordCount = 1;
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+
+        await expect(store._flushLookupIndexFile(state)).resolves.toBeUndefined();
+
+        expect(fileBytesByName.get(indexFileName)).toStrictEqual(new Uint8Array());
+        expect(state.pendingLookupIndexChunks).toEqual([]);
+        expect(state.pendingLookupIndexBytes).toBe(0);
+        expect(state.pendingLookupIndexRecordCount).toBe(0);
+    });
+
     test('streams lookup sidecar chunks before finalization without exposing a valid header', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Streamed lookup sidecar';
