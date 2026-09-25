@@ -1,0 +1,106 @@
+name: Import hash confirmation 20260925
+on:
+  push:
+    branches: [bench/import-simd-hash-20260925]
+    paths: [.github/workflows/import-hash-confirmation-20260925.yml]
+permissions:
+  contents: read
+jobs:
+  confirm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: jmdict
+            cohort: defaults
+            flags: '{}'
+          - dictionary: jitendex
+            cohort: defaults
+            flags: '{}'
+          - dictionary: jmnedict
+            cohort: defaults
+            flags: '{}'
+          - dictionary: wty-en-en
+            cohort: defaults
+            flags: '{}'
+          - dictionary: jmnedict
+            cohort: generic-on
+            flags: '{"experimentalGenericSpanCompression":true}'
+          - dictionary: wty-en-en
+            cohort: generic-on
+            flags: '{"experimentalGenericSpanCompression":true}'
+    env:
+      DICTIONARY: ${{ matrix.dictionary }}
+      FLAGS: ${{ matrix.flags }}
+      PAIRS: '12'
+      REVERSE: '1'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Build exact scalar and vector sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/hash-round
+          cp ext/lib/term-bank-parser.wasm builds/hash-round/base.wasm
+          python3 dev/perf/hash-round-20260925/prepare.py
+          npm run build:libs > builds/hash-round/build.log 2>&1
+          cp ext/lib/term-bank-parser.wasm builds/hash-round/candidate.wasm
+          git diff > builds/hash-round/source.patch
+          sha256sum builds/hash-round/*.c builds/hash-round/*.wasm > builds/hash-round/SHA256SUMS
+          clang --version > builds/hash-round/compiler.txt
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-qualification-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Independent fixed twelve-pair schedule
+        run: xvfb-run -a node dev/perf/hash-round-20260925/ab.mjs
+      - name: Verify every parsed corpus row and lookup byte off the clock
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('dev/perf/import-lookup-screen.js')
+          s = p.read_text()
+          old = 'const filesPerGroup = {jmdict: 7, jmnedict: 9, jitendex: 10}'
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, "const filesPerGroup = {jmdict: 7, jmnedict: 9, jitendex: 10, 'wty-en-en': 1}"))
+          PY
+          for arm in base candidate; do
+            cp "builds/hash-round/$arm.c" ext/js/dictionary/wasm/term-bank-parser.c
+            cp "builds/hash-round/$arm.wasm" ext/lib/term-bank-parser.wasm
+            node --expose-gc dev/perf/import-lookup-screen.js "$DICTIONARY" --child --flags "$FLAGS" > "builds/hash-round/corpus-$arm.json"
+            node dev/bin/build.js --target chrome-dev > "builds/hash-round/package-$arm.log" 2>&1
+            ARM="$arm" python3 - <<'PY'
+          import hashlib, json, os, zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('builds/manabitan-chrome-dev.zip') as z:
+              hashes = {n: hashlib.sha256(z.read(n)).hexdigest() for n in z.namelist() if not n.endswith('/')}
+          Path('builds/hash-round/package-' + os.environ['ARM'] + '.json').write_text(json.dumps(hashes, indent=2) + '\n')
+          PY
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          out = Path('builds/hash-round')
+          a, b = [json.loads((out / ('corpus-' + x + '.json')).read_text()) for x in ['base', 'candidate']]
+          for key in ['digest', 'rows', 'indexBytes', 'archiveSha256', 'lockSha256']:
+              assert a[key] == b[key], (key, a[key], b[key])
+          a, b = [json.loads((out / ('package-' + x + '.json')).read_text()) for x in ['base', 'candidate']]
+          assert a.keys() == b.keys()
+          changed = [k for k in a if a[k] != b[k]]
+          assert changed and all(k.endswith('term-bank-parser.c') or k.endswith('term-bank-parser.wasm') for k in changed), changed
+          (out / 'corpus-and-package-verification.json').write_text(json.dumps({'passed': True, 'changedPackageMembers': changed}, indent=2) + '\n')
+          PY
+      - name: Preserve complete evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hash-confirm-${{ matrix.dictionary }}-${{ matrix.cohort }}
+          path: builds/hash-round/
+          if-no-files-found: error
+          retention-days: 30
