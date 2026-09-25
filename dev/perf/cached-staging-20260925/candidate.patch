@@ -1,0 +1,12 @@
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -5292,6 +5292,9 @@
+                     stagedContentOffsets.push(existingMeta.offset);
+                     stagedContentLengths.push(existingMeta.length);
+                     stagedContentDictNames.push(existingMeta.dictName);
++                    if (stagedRows.length >= stagingBatchSize) {
++                        await flushStagedRows();
++                    }
+                     continue;
+                 }
+ 
