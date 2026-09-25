@@ -12,7 +12,11 @@ export function installReaderLookupIntegration(frontend) {
     return new ReaderLookupBridge({
         document,
         enabled: () => frontend._options?.general.enable === true && !frontend._disabledOverride,
-        invalidateSearch: () => frontend._textScanner.beginExternalLookup(),
+        invalidateSearch: () => {
+            frontend._textScanner.beginExternalLookup();
+            // A hover-hide timer belongs to the previous lookup, not this tap.
+            frontend._stopClearSelectionDelayed();
+        },
         report: (status) => { document.documentElement.dataset.readerLookupStatus = status; },
         show: async (request, anchor, isCurrent) => {
             const optionsContext = await frontend._getOptionsContext();

@@ -21,6 +21,8 @@ export function parseReaderLookup(raw, contextRaw = null) {
     if (typeof raw !== 'string' || raw.length > 32768) { return null; }
     let value;
     try { value = JSON.parse(raw); } catch { return null; }
+    // Generic document exchange: each source sentence can live once on its
+    // owning element instead of being copied into every word's attribute.
     if (typeof value?.contextID !== 'undefined') {
         if (typeof value.contextID !== 'string' || value.contextID.length === 0 || value.contextID.length > 512 ||
             typeof value.sentence !== 'undefined' || typeof contextRaw !== 'string' || contextRaw.length > 65536) { return null; }
@@ -35,6 +37,7 @@ export function parseReaderLookup(raw, contextRaw = null) {
         typeof value.sentence !== 'string' || value.sentence.length > 16384 ||
         !Number.isSafeInteger(value.offset) || value.offset < 0 ||
         value.sentence.slice(value.offset, value.offset + value.surface.length) !== value.surface) { return null; }
+    // Native sequence/namespace are provenance, NOT Manabitan database row IDs.
     if (typeof value.namespace !== 'undefined' && !['jmdict', 'jmnedict'].includes(value.namespace)) { return null; }
     if (typeof value.entryID !== 'undefined' && (typeof value.entryID !== 'string' || !/^[1-9][0-9]{0,19}$/.test(value.entryID))) { return null; }
     return {protocol: 1, term: value.term, reading: value.reading, surface: value.surface,
@@ -43,12 +46,21 @@ export function parseReaderLookup(raw, contextRaw = null) {
         ...(typeof value.entryID === 'string' ? {entryID: value.entryID} : {})};
 }
 
+/** Project exact lexical forms out of merged groups. Never pass unrelated
+ * first headwords to the popup/Anki builder. Native entry IDs remain provenance,
+ * not a universal cross-dictionary sense/row mapping.
+ * @param {import('dictionary').TermDictionaryEntry[]} entries
+ * @param {ReaderLookup} request
+ * @returns {import('dictionary').TermDictionaryEntry[]}
+ */
 export function exactReaderEntries(entries, request) {
     const output = [];
     for (const entry of entries) {
         const matches = entry.headwords.filter(({term, reading}) => term === request.term && reading === request.reading);
         if (matches.length === 0) { continue; }
         if (matches.length === entry.headwords.length) { output.push(entry); continue; }
+        // Indexes, not textual headword equality, own auxiliary relationships.
+        // Reject malformed or future shapes instead of guessing at that binding.
         if (!Array.isArray(entry.definitions) || !Array.isArray(entry.frequencies) || !Array.isArray(entry.pronunciations) ||
             new Set(entry.headwords.map(({index}) => index)).size !== entry.headwords.length ||
             entry.headwords.some(({index}, i) => index !== i)) { continue; }
@@ -72,11 +84,19 @@ export function exactReaderEntries(entries, request) {
             dictionaryIndex: firstDictionary.dictionaryIndex, dictionaryAlias: firstDictionary.dictionaryAlias,
             score: Math.max(...definitions.map((d) => d.score)),
             frequencyOrder: Math.min(...definitions.map((d) => d.frequencyOrder)),
+            // These chains describe the original group, not the selected subset.
+            // The request is already canonical; don't invent an inflection proof.
             textProcessorRuleChainCandidates: [], inflectionRuleChainCandidates: []});
     }
     return output;
 }
 
+/** Preserve the real inflected source span used by sentence/cloze templates.
+ * Queries use the canonical term, but that term may have a different length.
+ * @param {import('dictionary').TermDictionaryEntry[]} entries
+ * @param {ReaderLookup} request
+ * @returns {import('dictionary').TermDictionaryEntry[]}
+ */
 export function readerEntriesWithSurface(entries, request) {
     return entries.map((entry) => ({
         ...entry,
@@ -88,6 +108,11 @@ export function readerEntriesWithSurface(entries, request) {
     }));
 }
 
+/** One iterative base-text pass also establishes the ACTUAL UTF-16 offset.
+ * Repeated identical words are not interchangeable occurrences.
+ * @param {Node} root @param {Node|null} [anchor]
+ * @returns {{text: string, start: number|null, end: number|null}}
+ */
 function baseTextPosition(root, anchor = null) {
     const parts = [];
     let length = 0, start = null, end = null;
@@ -105,14 +130,17 @@ function baseTextPosition(root, anchor = null) {
     }
     return {text: parts.join(''), start, end};
 }
+/** @param {Node} node @returns {string} */
 function surfaceText(node) { return baseTextPosition(node).text; }
+/** @param {Element|null} context @param {Element} anchor @param {ReaderLookup} request @returns {boolean} */
 function contextMatches(context, anchor, request) {
-    if (context === null) { return true; }
+    if (context === null) { return true; } // Original full-sentence protocol.
     const actual = baseTextPosition(context, anchor);
     return actual.text === request.sentence && actual.start === request.offset && actual.end === request.offset + request.surface.length;
 }
 
 export class ReaderLookupBridge {
+    /** @param {{document: Document, enabled: () => boolean, show: (request: ReaderLookup, anchor: Element, isCurrent: () => boolean) => Promise<void>, invalidateSearch: () => void, report?: (status: string) => void}} options */
     constructor({document, enabled, show, invalidateSearch, report = () => {}}) {
         this._document = document;
         this._enabled = enabled;
@@ -121,6 +149,7 @@ export class ReaderLookupBridge {
         this._report = report;
         this._sequence = 0;
         this._disposed = false;
+        /** @type {{x: number, y: number, target: Element, time: number}|null} */
         this._down = null;
         this._onDown = this._pointerDown.bind(this);
         this._onClick = this._click.bind(this);
@@ -133,6 +162,7 @@ export class ReaderLookupBridge {
         document.addEventListener('pointermove', this._onMove, true);
         document.addEventListener('click', this._onClick, true);
     }
+    /** @param {Element|null} node @param {boolean} [verifyContext] @returns {{anchor: Element, request: ReaderLookup, context: Element|null, contextRaw: string|null}|null} */
     _target(node, verifyContext = true) {
         if (!this._enabled() || this._disposed || node?.closest(INTERACTIVE)) { return null; }
         const anchor = node?.closest(`[${ATTRIBUTE}]`);
@@ -141,19 +171,27 @@ export class ReaderLookupBridge {
         const contextRaw = context?.getAttribute(CONTEXT_ATTRIBUTE) ?? null;
         const request = parseReaderLookup(anchor.getAttribute(ATTRIBUTE) ?? '', contextRaw);
         if (!request || surfaceText(anchor) !== request.surface) { return null; }
+        // Context is data, not authority. Check it against the actual rendered
+        // base text before displaying/mining a user-activated lookup.
         if (verifyContext && !contextMatches(context, anchor, request)) { return null; }
         return {anchor, request, context, contextRaw};
     }
-    ownsPoint(x, y) { return this._target(this._document.elementFromPoint(x, y)) !== null; }
+    /** @param {number} x @param {number} y @returns {boolean} */
+    ownsPoint(x, y) {
+        return this._target(this._document.elementFromPoint(x, y)) !== null;
+    }
+    /** @param {PointerEvent} event */
     _pointerDown(event) {
         this._down = null;
         if (!event.isTrusted || event.button !== 0 || !event.isPrimary) { return; }
         const target = this._target(event.target instanceof Element ? event.target : null);
         if (target) { this._down = {x: event.clientX, y: event.clientY, target: target.anchor, time: event.timeStamp}; }
     }
+    /** @param {PointerEvent} event */
     _pointerMove(event) {
         if (this._down && event.isTrusted && Math.hypot(event.clientX - this._down.x, event.clientY - this._down.y) > 8) { this._down = null; }
     }
+    /** @param {MouseEvent} event */
     _click(event) {
         const down = this._down;
         this._down = null;
@@ -161,20 +199,27 @@ export class ReaderLookupBridge {
             this._document.getSelection()?.isCollapsed === false) { return; }
         const target = this._target(event.target instanceof Element ? event.target : null);
         if (!target) { this.invalidate(); return; }
+        // detail===0 allows real keyboard/assistive activation, never synthetic.
         if (event.detail !== 0 && (!down || down.target !== target.anchor ||
             Math.hypot(event.clientX - down.x, event.clientY - down.y) > 8 || event.timeStamp - down.time > 700)) { return; }
         const raw = target.anchor.getAttribute(ATTRIBUTE);
+        // Clearing an old selection may synchronously notify Frontend and
+        // invalidate this bridge. Acquire ownership only after that completes.
+        event.preventDefault(); event.stopImmediatePropagation();
+        try { this._invalidateSearch(); }
+        catch { this._reportFailure(); return; }
         const sequence = ++this._sequence;
         const isCurrent = () => !this._disposed && this._enabled() && sequence === this._sequence &&
             target.anchor.isConnected && target.anchor.getAttribute(ATTRIBUTE) === raw && surfaceText(target.anchor) === target.request.surface &&
             (target.context === null || (target.context.isConnected && target.context.contains(target.anchor) &&
                 target.context.getAttribute(CONTEXT_ATTRIBUTE) === target.contextRaw && contextMatches(target.context, target.anchor, target.request)));
-        event.preventDefault(); event.stopImmediatePropagation();
-        this._invalidateSearch();
-        void this._show(target.request, target.anchor, isCurrent).catch(() => {
-            if (isCurrent()) { try { this._report('lookup-failed'); } catch {} }
-        });
+        // Normalize both throwing callbacks and rejected asynchronous work.
+        void Promise.resolve().then(() => {
+            if (isCurrent()) { return this._show(target.request, target.anchor, isCurrent); }
+        }).catch(() => { if (isCurrent()) { this._reportFailure(); } });
     }
+    /** @returns {void} */
+    _reportFailure() { try { this._report('lookup-failed'); } catch { /* diagnostic only */ } }
     invalidate() { ++this._sequence; }
     dispose() {
         if (this._disposed) { return; }
