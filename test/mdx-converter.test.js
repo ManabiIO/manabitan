@@ -1309,4 +1309,33 @@ describe('convertMdxToArchive', () => {
             color: 'rgb(1, 2, 3)',
         });
     });
+
+    test('does not split inline CSS declarations at escaped semicolons', async () => {
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Escaped inline delimiter',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Styled',
+                definition: String.raw`<div style="font-family: A\;B; color: rgb(1, 2, 3)">Value</div>`,
+            }],
+        });
+
+        const result = await convertMdxToArchive(
+            'escaped-inline-delimiter.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<{style?: Record<string, unknown>}>}}} */ (termBank[0][5][0]);
+        const [entry] = glossary.content.content;
+
+        expect(entry.style).toMatchObject({
+            fontFamily: String.raw`A\;B`,
+            color: 'rgb(1, 2, 3)',
+        });
+    });
 });
