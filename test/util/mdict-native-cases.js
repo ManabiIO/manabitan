@@ -140,6 +140,65 @@ describe('MDict v2 binary records', () => {
             mdx.close();
         }
     });
+
+    test('repeated oversized record blocks are promoted after the second access', () => {
+        const fixture = makeMdictFixture(
+            Array.from({length: 6}, (_, index) => ({
+                key: `entry-${index}`,
+                value: `definition-${index}-${'x'.repeat(24)}`,
+            })),
+            {compression: 'zlib', recordBlockSize: 4096, keysPerBlock: 2},
+        );
+        const mdx = new MDX('oversized-record-cache.mdx', fixture.bytes, {recordBlockCacheBytes: 16});
+        let decompressions = 0;
+        const originalDecompress = mdx.decompressBuff.bind(mdx);
+        mdx.decompressBuff = (bytes, unpackSize) => {
+            decompressions += 1;
+            return originalDecompress(bytes, unpackSize);
+        };
+        try {
+            for (const item of mdx.keywordList) {
+                assert.match(mdx.fetch_definition(item).definition ?? '', /^definition-/u);
+            }
+            // First access establishes the candidate; the second promotes it.
+            // Every later definition in this oversized block reuses that result.
+            assert.equal(decompressions, 2);
+        } finally {
+            mdx.close();
+        }
+    });
+
+    test('alternating oversized record blocks are not retained', () => {
+        const entries = ['a', 'b', 'c', 'd'].map((key, index) => ({
+            key,
+            // 31 bytes plus the MDX NUL terminator => exactly two records per
+            // 64-byte record block.
+            value: String(index).repeat(31),
+        }));
+        const fixture = makeMdictFixture(entries, {
+            compression: 'zlib',
+            recordBlockSize: 64,
+            keysPerBlock: 2,
+        });
+        const mdx = new MDX('alternating-oversized-records.mdx', fixture.bytes, {recordBlockCacheBytes: 16});
+        let decompressions = 0;
+        const originalDecompress = mdx.decompressBuff.bind(mdx);
+        mdx.decompressBuff = (bytes, unpackSize) => {
+            decompressions += 1;
+            return originalDecompress(bytes, unpackSize);
+        };
+        try {
+            const first = mdx.keywordList[0];
+            const third = mdx.keywordList[2];
+            for (let i = 0; i < 3; ++i) {
+                assert.notEqual(mdx.fetch_definition(first).definition, null);
+                assert.notEqual(mdx.fetch_definition(third).definition, null);
+            }
+            assert.equal(decompressions, 6);
+        } finally {
+            mdx.close();
+        }
+    });
 });
 
 describe('MDict redirect key matching', () => {
