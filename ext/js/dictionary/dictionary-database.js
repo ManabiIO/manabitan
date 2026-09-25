@@ -58,7 +58,7 @@ import {TermContentOpfsStore} from './term-content-opfs-store.js';
 import {TermContentBlockStore} from './term-content-block-store.js';
 import {createTermImportMetrics} from './term-import-metrics.js';
 import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictionary-import-journal.js';
-import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
+import {hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {TermRecordOpfsStore} from './term-record-opfs-store.js';
 import {hasCompletePreparedTermLookupIndexes} from './term-lookup-index-preparation.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
@@ -5078,8 +5078,6 @@ null;
         let stagedContentLengths = [];
         /** @type {(string|null)[]} */
         let stagedContentDictNames = [];
-        /** @type {(string|null)[]} */
-        let pendingContentHashes = [];
         /** @type {number[]} */
         let pendingContentHash1s = [];
         /** @type {number[]} */
@@ -5088,8 +5086,72 @@ null;
         let pendingContentBytes = [];
         /** @type {(string|null)[]} */
         let pendingContentDictNames = [];
-        /** @type {Map<string, number>|null} */
-        let pendingContentRowIndexByHash = shouldDedupWithinBatch ? new Map() : null;
+        let pendingDedupTableSize = 0;
+        if (shouldDedupWithinBatch) {
+            pendingDedupTableSize = 1;
+            while (pendingDedupTableSize < stagingBatchSize * 2) {
+                pendingDedupTableSize *= 2;
+            }
+        }
+        const pendingDedupTableMask = pendingDedupTableSize - 1;
+        const pendingDedupScratch = shouldDedupWithinBatch ?
+            this._acquireArtifactTermContentDedupScratch(pendingDedupTableSize) :
+            null;
+        let pendingDedupInsertSlot = -1;
+
+        /** Clears occupancy while retaining typed storage for the next staging batch. */
+        const resetPendingDedupIndex = () => {
+            pendingDedupInsertSlot = -1;
+            pendingDedupScratch?.indexTable.fill(0, 0, pendingDedupTableSize);
+        };
+
+        /**
+         * @param {number} hash1
+         * @param {number} hash2
+         * @param {Uint8Array} contentBytes
+         * @returns {number}
+         */
+        const findPendingContentIndex = (hash1, hash2, contentBytes) => {
+            if (pendingDedupScratch === null) { return -1; }
+            let value = (hash1 ^ Math.imul(hash2, 0x9e3779b1)) >>> 0;
+            value ^= value >>> 16;
+            let slot = value & pendingDedupTableMask;
+            while (true) {
+                const storedIndex = pendingDedupScratch.indexTable[slot];
+                if (storedIndex === 0) {
+                    pendingDedupInsertSlot = slot;
+                    return -1;
+                }
+                if (
+                    pendingDedupScratch.hash1Table[slot] === hash1 &&
+                    pendingDedupScratch.hash2Table[slot] === hash2
+                ) {
+                    const pendingIndex = storedIndex - 1;
+                    if (this._termContentBytesEqual(pendingContentBytes[pendingIndex], contentBytes)) {
+                        return pendingIndex;
+                    }
+                }
+                slot = (slot + 1) & pendingDedupTableMask;
+            }
+        };
+
+        /**
+         * @param {number} hash1
+         * @param {number} hash2
+         * @param {number} pendingIndex
+         * @throws {Error} If the pending dedupe insertion slot is invalid.
+         */
+        const insertPendingContentIndex = (hash1, hash2, pendingIndex) => {
+            if (pendingDedupScratch === null) { return; }
+            const slot = pendingDedupInsertSlot;
+            if (slot < 0 || pendingDedupScratch.indexTable[slot] !== 0) {
+                throw new Error('Invalid pending term content insertion slot');
+            }
+            pendingDedupScratch.hash1Table[slot] = hash1;
+            pendingDedupScratch.hash2Table[slot] = hash2;
+            pendingDedupScratch.indexTable[slot] = pendingIndex + 1;
+            pendingDedupInsertSlot = -1;
+        };
 
         if (useLocalTransaction) {
             await this._beginImmediateTransaction(db);
@@ -5101,14 +5163,11 @@ null;
                     stagedContentOffsets = [];
                     stagedContentLengths = [];
                     stagedContentDictNames = [];
-                    pendingContentHashes = [];
                     pendingContentHash1s = [];
                     pendingContentHash2s = [];
                     pendingContentBytes = [];
                     pendingContentDictNames = [];
-                    if (pendingContentRowIndexByHash !== null) {
-                        pendingContentRowIndexByHash.clear();
-                    }
+                    resetPendingDedupIndex();
                     return;
                 }
 
@@ -5180,7 +5239,7 @@ null;
                                 storedChunk.subarray(localOffset, localOffset + pendingContentBytes[j].byteLength) :
                                 pendingContentBytes[j];
                             this._cacheTermEntryContentMeta(
-                                pendingContentHashes[j],
+                                null,
                                 span.offset + localOffset,
                                 pendingContentBytes[j].byteLength,
                                 contentDictName,
@@ -5236,12 +5295,11 @@ null;
                 stagedContentOffsets = [];
                 stagedContentLengths = [];
                 stagedContentDictNames = [];
-                pendingContentHashes = [];
                 pendingContentHash1s = [];
                 pendingContentHash2s = [];
                 pendingContentBytes = [];
                 pendingContentDictNames = [];
-                pendingContentRowIndexByHash = shouldDedupWithinBatch ? new Map() : null;
+                resetPendingDedupIndex();
             };
 
             for (let i = start, ii = start + count; i < ii; ++i) {
@@ -5252,7 +5310,6 @@ null;
                 const precomputedHash1 = Number.isInteger(row.termEntryContentHash1) ? (/** @type {number} */ (row.termEntryContentHash1) >>> 0) : -1;
                 const precomputedHash2 = Number.isInteger(row.termEntryContentHash2) ? (/** @type {number} */ (row.termEntryContentHash2) >>> 0) : -1;
                 const precomputedBytes = row.termEntryContentBytes instanceof Uint8Array ? row.termEntryContentBytes : this._getRawTermContentBytesIfAvailable(row);
-                let contentHash = precomputedHash;
                 let contentHash1 = precomputedHash1;
                 let contentHash2 = precomputedHash2;
                 let contentBytes = precomputedBytes;
@@ -5263,21 +5320,13 @@ null;
                     const contentJson = row.termEntryContentJson ?? this._serializeTermEntryContent(rules, definitionTags, termTags, row.glossary);
                     contentBytes = this._textEncoder.encode(contentJson);
                 }
-                const parsedContentHash = contentHash !== null ? parseContentHashHexPair(contentHash) : null;
                 if (contentHash1 < 0 || contentHash2 < 0) {
-                    if (parsedContentHash !== null) {
-                        [contentHash1, contentHash2] = parsedContentHash;
+                    const hashPair = precomputedHash !== null ? parseContentHashHexPair(precomputedHash) : null;
+                    if (hashPair !== null) {
+                        [contentHash1, contentHash2] = hashPair;
                     } else {
                         [contentHash1, contentHash2] = hashTermEntryContentBytesPair(contentBytes);
                     }
-                }
-                if (
-                    contentHash === null ||
-                    parsedContentHash === null ||
-                    parsedContentHash[0] !== contentHash1 ||
-                    parsedContentHash[1] !== contentHash2
-                ) {
-                    contentHash = hashPairToHex(contentHash1, contentHash2);
                 }
                 if (this._importDebugLogging) {
                     computeContentMs += safePerformance.now() - tComputeStart;
@@ -5297,22 +5346,10 @@ null;
                     continue;
                 }
 
-                let pendingContentIndex = -1;
-                if (pendingContentRowIndexByHash !== null && contentHash !== null) {
-                    const existingPendingContentIndex = pendingContentRowIndexByHash.get(contentHash);
-                    if (
-                        typeof existingPendingContentIndex === 'number' &&
-                        this._termContentBytesEqual(pendingContentBytes[existingPendingContentIndex], contentBytes)
-                    ) {
-                        pendingContentIndex = existingPendingContentIndex;
-                    }
-                }
+                let pendingContentIndex = findPendingContentIndex(contentHash1, contentHash2, contentBytes);
                 if (pendingContentIndex < 0) {
                     pendingContentIndex = pendingContentBytes.length;
-                    if (pendingContentRowIndexByHash !== null && contentHash !== null) {
-                        pendingContentRowIndexByHash.set(contentHash, pendingContentIndex);
-                    }
-                    pendingContentHashes.push(contentHash);
+                    insertPendingContentIndex(contentHash1, contentHash2, pendingContentIndex);
                     pendingContentHash1s.push(contentHash1);
                     pendingContentHash2s.push(contentHash2);
                     pendingContentBytes.push(contentBytes);
@@ -5378,6 +5415,10 @@ null;
                 try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
             }
             throw e;
+        } finally {
+            if (pendingDedupScratch !== null) {
+                this._releaseArtifactTermContentDedupScratch(pendingDedupScratch);
+            }
         }
     }
 
