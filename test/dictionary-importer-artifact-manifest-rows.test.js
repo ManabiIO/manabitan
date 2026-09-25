@@ -17,6 +17,7 @@ afterEach(() => {
 
 /**
  * @param {unknown} rows
+ * @returns {Promise<number|null|undefined>}
  */
 async function readManifestRows(rows) {
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), () => {});
@@ -29,7 +30,7 @@ async function readManifestRows(rows) {
         }],
     }));
     const fileMap = new Map([
-        ['term_bank_artifact_manifest.json', /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({}))],
+        ['manabitan-import-artifact.json', /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({}))],
     ]);
     const manifest = await importer._readTermArtifactManifest(fileMap);
     return manifest?.termBanksByArtifact.get('term_bank_1.mbtb')?.rows;
