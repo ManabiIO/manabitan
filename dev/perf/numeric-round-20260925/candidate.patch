@@ -1,0 +1,27 @@
+--- a/ext/js/dictionary/term-bank-wasm-parser.js
++++ b/ext/js/dictionary/term-bank-wasm-parser.js
+@@ -444,6 +444,24 @@
+  */
+ function decodeJsonNumberToken(source, start) {
+     let end = start;
++    const negative = source[end] === 0x2d;
++    if (negative) { ++end; }
++    const digitsStart = end;
++    let integer = 0;
++    // At most 15 decimal digits are exact throughout accumulation. Avoid a
++    // shared-heap copy, TextDecoder call and temporary string for these tokens.
++    // Longer integers, fractions and exponents retain Number's rounding.
++    while (end < source.length && end - digitsStart < 15) {
++        const digit = source[end] - 0x30;
++        if (digit < 0 || digit > 9) { break; }
++        integer = integer * 10 + digit;
++        ++end;
++    }
++    const terminator = source[end];
++    if (end > digitsStart && (end === source.length || terminator === U8_COMMA ||
++        terminator === 0x5d || terminator === 0x7d || isJsonWhitespace(terminator))) {
++        return negative ? -integer : integer;
++    }
+     while (end < source.length) {
+         const value = source[end];
+         if (value === U8_COMMA || value === 0x5d || value === 0x7d || isJsonWhitespace(value)) { break; }
