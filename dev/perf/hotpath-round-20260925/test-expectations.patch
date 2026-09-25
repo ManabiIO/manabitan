@@ -1,0 +1,31 @@
+diff --git a/test/term-bank-wasm-parser.test.js b/test/term-bank-wasm-parser.test.js
+index 715ec14..4ba22d5 100644
+--- a/test/term-bank-wasm-parser.test.js
++++ b/test/term-bank-wasm-parser.test.js
+@@ -2541,7 +2541,14 @@ describe('term-bank WASM parser', () => {
+         ));
+ 
+         const escapedChunk = await parsePrepared('escaped\\expression');
+-        expect(escapedChunk.preparedLookupIndexes).toBeUndefined();
++        expect(escapedChunk.preparedLookupIndexes?.get('0:2')?.bytes).toStrictEqual(
++            encodePersistedTermLookupIndexFromPreinternedPlan(
++                escapedChunk.termRecordPreinternedPlan,
++                escapedChunk.readingEqualsExpressionList,
++                escapedChunk.sequenceList,
++                escapedChunk.rowCount,
++            ),
++        );
+     });
+ 
+     maybeTest('keeps native lookup encoding byte-identical across dense mixed columns', async () => {
+@@ -2861,7 +2868,9 @@ describe('term-bank WASM parser', () => {
+         expect(getContentString({termEntryContentBytes: chunk.contentBytesList[0]})).toContain('"plain"');
+         expect(plan.stringHashes[plan.expressionIndexes[0]]).toBe(hashBytes(textEncoder.encode('escaped\\value')));
+         expect(plan.stringHashes[plan.expressionIndexes[1]]).toBe(hashBytes(textEncoder.encode('image')));
+-        expect(consumeLastTermBankWasmParseProfile()?.nativeStringPlanFallbackChunkCount).toBe(1);
++        const profile = consumeLastTermBankWasmParseProfile();
++        expect(profile?.nativeStringPlanChunkCount).toBe(1);
++        expect(profile?.nativeStringPlanFallbackChunkCount).toBe(0);
+     });
+ 
+     maybeTest('emits shared content slabs without allocating per-row content views', async () => {
