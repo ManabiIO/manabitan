@@ -3488,23 +3488,6 @@ export function getParallelSourceReadWallMs(sources, startedAt) {
 }
 
 /**
- * @template {object} T
- * @param {T[]} values
- * @param {keyof T} key
- * @returns {number}
- */
-export function getMaximumNumericProperty(values, key) {
-    let maximum = 0;
-    for (const value of values) {
-        const candidate = value[key];
-        if (typeof candidate === 'number') {
-            maximum = Math.max(maximum, candidate);
-        }
-    }
-    return maximum;
-}
-
-/**
  * @param {unknown} value
  * @returns {value is CompressedTermBankSource}
  */
@@ -3659,7 +3642,7 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         fastGlossaryNormalizationCount: sum('fastGlossaryNormalizationCount'),
         fastGlossaryNormalizationFallbackCount: sum('fastGlossaryNormalizationFallbackCount'),
         fusedSingleBankGroups: sum('fusedSingleBankGroups'),
-        maxWasmHeapBytes: getMaximumNumericProperty(profiles, 'maxWasmHeapBytes'),
+        maxWasmHeapBytes: Math.max(0, ...profiles.map((profile) => profile.maxWasmHeapBytes ?? 0)),
         bufferSetupMs: sum('bufferSetupMs'),
         allocationMs: sum('allocationMs'),
         nativeStringPlanAllocationMs: sum('nativeStringPlanAllocationMs'),
