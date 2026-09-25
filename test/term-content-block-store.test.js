@@ -1001,11 +1001,11 @@ describe('TermContentBlockStore', () => {
 describe('compression flag storage propagation', () => {
     test('resets storage-side compression flags on the next import', () => {
         const db = new DictionaryDatabase();
-        const options = {experimentalGenericSpanCompression: true};
+        const options = {experimentalGenericSpanCompression: false};
         db.setImportOptimizationFlags(options);
-        options.experimentalGenericSpanCompression = false;
-        expect(db._termContentBlockStore.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: true});
-        db.setImportOptimizationFlags();
+        options.experimentalGenericSpanCompression = true;
         expect(db._termContentBlockStore.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: false});
+        db.setImportOptimizationFlags();
+        expect(db._termContentBlockStore.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: true});
     });
 });
