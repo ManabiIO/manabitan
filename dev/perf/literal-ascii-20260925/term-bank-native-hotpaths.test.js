@@ -5,7 +5,7 @@
 import {readFile} from 'node:fs/promises'
 import {beforeAll, expect, test} from 'vitest'
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js'
-import {parseTermBankWithWasmChunks, setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js'
+import {parseTermBankWithWasmChunks, parseTermBankWithWasmColumnChunks, setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js'
 
 beforeAll(async () => {
     setTermBankWasmModule(await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))))
@@ -96,14 +96,15 @@ for (const tokenBinary of [false, true]) {
             'term'.repeat(index % 7),
         ])
         let count = 0
-        await parseTermBankWithWasmChunks(new TextEncoder().encode(JSON.stringify(rows)), 3, (chunk) => {
-            for (const row of chunk) {
-                expect(hashTermEntryContentBytesPair(row.termEntryContentBytes)).toEqual([
-                    row.termEntryContentHash1, row.termEntryContentHash2,
+        await parseTermBankWithWasmColumnChunks(new TextEncoder().encode(JSON.stringify(rows)), 3, (chunk) => {
+            expect(chunk.contentBytesList).toHaveLength(chunk.rowCount)
+            for (let index = 0; index < chunk.rowCount; ++index) {
+                expect(hashTermEntryContentBytesPair(chunk.contentBytesList[index])).toEqual([
+                    chunk.contentHash1List[index], chunk.contentHash2List[index],
                 ])
                 ++count
             }
-        }, 2048, {copyContentBytes: true, computeContentHashes: true, emitTokenBinaryContent: tokenBinary})
+        }, 2048, {computeContentHashes: true, emitTokenBinaryContent: tokenBinary})
         expect(count).toBe(lengths.length)
     })
 }
