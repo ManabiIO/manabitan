@@ -1,0 +1,132 @@
+name: Literal ASCII independent confirmation 20260925
+on:
+  push:
+    branches: [verify/literal-ascii-confirmation-20260925-763627]
+permissions:
+  contents: read
+jobs:
+  confirm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jmnedict, jitendex]
+    env:
+      HUSKY: '0'
+      MANABITAN_CLANG: clang-18
+      DICTIONARY: ${{ matrix.dictionary }}
+      PAIRS: '12'
+      INITIAL: BA
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Pin previously qualified source and independent measurement plan
+        run: |
+          mkdir -p /tmp/more-evidence
+          cp -a dev/perf/literal-ascii-20260925 /tmp/literal-input
+          git worktree add --detach /tmp/more-base 76362775484661b3cd8b9d2c84b228802c023a76
+          git worktree add --detach /tmp/more-candidate 53b7167d12a3466beb40d5f3244d103783d11071
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          root = Path('/tmp/literal-input')
+          path = Path('/tmp/more-candidate/ext/js/dictionary/wasm/term-bank-parser.c')
+          assert hashlib.sha256(path.read_bytes()).hexdigest() == 'a4a1b60521b783c5900e4123b78d06c4c2a22ee09cde5924fea189f27d8ef7ef'
+          test = Path('/tmp/more-candidate/test/term-bank-native-hotpaths.test.js')
+          assert hashlib.sha256(test.read_bytes()).hexdigest() == '878b788ad3dac5a2f7705e386d3ea1f8cf7f2fea7acb8e0868e93a16f536be10'
+          text = (root / 'compare-original.py').read_text()
+          text = text.replace("kind = os.environ['CANDIDATE']", "kind = 'literal-ascii'")
+          text = text.replace("kind == 'bulk-memory'", "kind == 'literal-ascii'")
+          old = "assert git(b, 'diff', '--name-only', 'HEAD^', 'HEAD') == source"
+          assert text.count(old) == 1
+          text = text.replace(old, "assert set(git(b, 'diff', '--name-only', 'HEAD^', 'HEAD').splitlines()) == {source, 'test/term-bank-native-hotpaths.test.js'}")
+          text = text.replace("for dictionary in ['jmdict', 'jmnedict', 'jitendex']:", "for dictionary in [os.environ['DICTIONARY']]:")
+          (root / 'compare.py').write_text(text)
+          PY
+          cp -a /tmp/literal-input /tmp/more-evidence/inputs
+          cd /tmp/more-base
+          npm ci
+          npm run build:libs
+          cp -a node_modules /tmp/more-candidate/node_modules
+          cp -a ext/lib /tmp/more-candidate/ext/lib
+      - name: Rebuild exact candidate and repeat focused correctness checks
+        run: |
+          cd /tmp/more-candidate
+          python - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+          text = Path('dev/build-libs.js').read_text()
+          exports = re.findall(r"'([^']+)'", re.search(r'exports: \[(.*?)\]', text).group(1))
+          command = ['clang-18', '--target=wasm32', '-O3', '-matomics', '-mbulk-memory', '-msimd128', '-nostdlib', '-Wl,--no-entry', '-Wl,--shared-memory', '-Wl,--max-memory=4294967296', '-Wl,--strip-all']
+          command += [f'-Wl,--export={name}' for name in exports]
+          command += ['-o', 'ext/lib/term-bank-parser.wasm', 'ext/js/dictionary/wasm/term-bank-parser.c', 'ext/js/dictionary/wasm/term-bank-inflate.c']
+          subprocess.run(command, check=True)
+          PY
+          node node_modules/vitest/vitest.mjs run test/term-bank-native-hotpaths.test.js test/term-bank-wasm-parser.test.js test/term-bank-glossary-semantics.test.js test/term-bank-composite-state.test.js > /tmp/more-evidence/focused.log 2>&1
+          npm run test:ts > /tmp/more-evidence/types.log 2>&1
+          git rev-parse HEAD > /tmp/more-evidence/candidate-commit.txt
+          git rev-parse 'HEAD^{tree}' > /tmp/more-evidence/candidate-tree.txt
+          git diff HEAD^ HEAD > /tmp/more-evidence/candidate.patch
+          cp /tmp/more-base/ext/lib/term-bank-parser.wasm /tmp/more-evidence/baseline-parser.wasm
+          cp ext/lib/term-bank-parser.wasm /tmp/more-evidence/candidate-parser.wasm
+          clang-18 --version > /tmp/more-evidence/compiler.txt
+      - name: Build both actual packages and compare complete native output
+        run: |
+          cd /tmp/more-base
+          npm run build -- --target chrome-dev > /tmp/more-evidence/build-base.log 2>&1
+          node dev/perf/prepare-dictionaries.js > /tmp/more-evidence/fixtures.log 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium
+          mkdir -p /tmp/more-candidate/builds
+          cp -a builds/e2e-dictionary-cache /tmp/more-candidate/builds/e2e-dictionary-cache
+          node dev/perf/import-lookup-screen.js "$DICTIONARY" --child --flags '{}' > /tmp/more-evidence/parser-a.json
+          cd /tmp/more-candidate
+          npm run build -- --target chrome-dev > /tmp/more-evidence/build-candidate.log 2>&1
+          node dev/perf/import-lookup-screen.js "$DICTIONARY" --child --flags '{}' > /tmp/more-evidence/parser-b.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('/tmp/more-evidence')
+          a, b = [json.loads((root / name).read_text()) for name in ['parser-a.json', 'parser-b.json']]
+          for key in ['digest', 'rows', 'indexBytes', 'archiveSha256', 'lockSha256']:
+              assert a[key] == b[key], key
+          PY
+      - name: Complete twelve reversed-start paired imports and six unchanged-code controls
+        run: python /tmp/literal-input/compare.py > /tmp/more-evidence/driver.log 2>&1
+      - name: Qualify complete Chromium lifecycle separately from timing
+        if: matrix.dictionary == 'jmdict'
+        env:
+          MANABITAN_CHROMIUM_BROWSER: chromium
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_E2E_REPORT: /tmp/more-evidence/lifecycle.html
+        run: |
+          cd /tmp/more-candidate
+          npm run test:e2e:chromium-extension > /tmp/more-evidence/lifecycle.log 2>&1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/more-evidence/lifecycle.json').read_text())
+          assert report['status'] == 'success' and report['skippedVerification'] is False, report.get('failureReason')
+          PY
+      - name: Preserve every observation and validation outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: literal-ascii-confirm-${{ matrix.dictionary }}-763627
+          path: /tmp/more-evidence/
+          retention-days: 30
+          if-no-files-found: error
