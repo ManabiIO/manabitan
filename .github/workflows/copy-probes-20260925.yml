@@ -1,0 +1,130 @@
+name: Import copy probes 20260925
+on:
+  push:
+    branches: [verify/import-copy-probes-20260925-763627]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [cache-align, decoded-owned]
+    env:
+      HUSKY: '0'
+      CANDIDATE: ${{ matrix.candidate }}
+      BASE_ROOT: /tmp/copy-base
+      CANDIDATE_ROOT: /tmp/copy-candidate
+      EVIDENCE_ROOT: /tmp/copy-evidence
+      INPUT_ROOT: /tmp/copy-input
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - name: Verify measurement inputs and prepare independent pinned trees
+        run: |
+          mkdir -p "$EVIDENCE_ROOT" "$INPUT_ROOT"
+          python - <<'PY'
+          import hashlib, os, zipfile
+          from pathlib import Path
+          path = Path('dev/perf/copy-probes-20260925/input.zip')
+          assert hashlib.sha256(path.read_bytes()).hexdigest() == 'e429eff192b885305617c34cfc9b3e172309df86cae7177f2baba310a4ba14bb'
+          with zipfile.ZipFile(path) as archive:
+              assert set(archive.namelist()) == {'cache-align.patch', 'decoded-owned.patch', 'term-content-recent-source-copy.test.js', 'term-content-decoded-ownership.test.js', 'compare.py'}
+              archive.extractall(os.environ['INPUT_ROOT'])
+          PY
+          cp -a "$INPUT_ROOT" "$EVIDENCE_ROOT/inputs"
+          case "$CANDIDATE" in
+            cache-align)
+              echo 'SOURCE=ext/js/dictionary/dictionary-database.js' >> "$GITHUB_ENV"
+              echo 'TEST_FILE=term-content-recent-source-copy.test.js' >> "$GITHUB_ENV"
+              ;;
+            decoded-owned)
+              echo 'SOURCE=ext/js/dictionary/term-content-block-store.js' >> "$GITHUB_ENV"
+              echo 'TEST_FILE=term-content-decoded-ownership.test.js' >> "$GITHUB_ENV"
+              ;;
+            *) exit 1 ;;
+          esac
+          git worktree add --detach "$BASE_ROOT" 76362775484661b3cd8b9d2c84b228802c023a76
+          git worktree add --detach "$CANDIDATE_ROOT" 76362775484661b3cd8b9d2c84b228802c023a76
+          cd "$BASE_ROOT"
+          npm ci
+          npm run build:libs
+          cp -a "$BASE_ROOT/node_modules" "$CANDIDATE_ROOT/node_modules"
+          cp -a "$BASE_ROOT/ext/lib" "$CANDIDATE_ROOT/ext/lib"
+      - name: Require only the expected parent work-elimination failures
+        run: |
+          cd "$BASE_ROOT"
+          cp "$INPUT_ROOT/$TEST_FILE" "test/$TEST_FILE"
+          set +e
+          node node_modules/vitest/vitest.mjs run "test/$TEST_FILE" --reporter=json > "$EVIDENCE_ROOT/parent-red.json" 2> "$EVIDENCE_ROOT/parent-red.log"
+          status=$?
+          set -e
+          test "$status" -eq 1
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads((Path(os.environ['EVIDENCE_ROOT']) / 'parent-red.json').read_text())
+          failed = [case for suite in data['testResults'] for case in suite['assertionResults'] if case['status'] == 'failed']
+          if os.environ['CANDIDATE'] == 'cache-align':
+              assert len(failed) == 1 and 'avoids the unaligned whole shared-byte slice' in failed[0]['fullName'], failed
+          else:
+              assert len(failed) == 2 and all('caches the already-owned decoded output' in case['fullName'] for case in failed), failed
+          assert data.get('numRuntimeErrorTestSuites', 0) == 0, data
+          PY
+          rm "test/$TEST_FILE"
+      - name: Apply isolated candidate and run correctness gates
+        run: |
+          cd "$CANDIDATE_ROOT"
+          git apply --check "$INPUT_ROOT/$CANDIDATE.patch"
+          git apply "$INPUT_ROOT/$CANDIDATE.patch"
+          cp "$INPUT_ROOT/$TEST_FILE" "test/$TEST_FILE"
+          git diff --check
+          case "$CANDIDATE" in
+            cache-align)
+              node node_modules/vitest/vitest.mjs run "test/$TEST_FILE" test/dictionary-database-content-dedup.test.js > "$EVIDENCE_ROOT/focused.log" 2>&1
+              ;;
+            decoded-owned)
+              node node_modules/vitest/vitest.mjs run "test/$TEST_FILE" test/term-content-block-store.test.js test/generic-span-codec-integration.test.js > "$EVIDENCE_ROOT/focused.log" 2>&1
+              ;;
+          esac
+          node node_modules/eslint/bin/eslint.js "$SOURCE" "test/$TEST_FILE" > "$EVIDENCE_ROOT/lint.log" 2>&1
+          npm run test:ts > "$EVIDENCE_ROOT/types.log" 2>&1
+          npm run test:unit -- --minWorkers=1 --maxWorkers=2 > "$EVIDENCE_ROOT/unit.log" 2>&1
+          npm run test:unit:options > "$EVIDENCE_ROOT/options.log" 2>&1
+          npm run test:build > "$EVIDENCE_ROOT/build-plans.log" 2>&1
+          git -c core.hooksPath=/dev/null add "$SOURCE" "test/$TEST_FILE"
+          git -c core.hooksPath=/dev/null -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "perf(import): qualify isolated $CANDIDATE copy reduction"
+          git rev-parse HEAD > "$EVIDENCE_ROOT/candidate-commit.txt"
+          git rev-parse 'HEAD^{tree}' > "$EVIDENCE_ROOT/candidate-tree.txt"
+          git diff HEAD^ HEAD > "$EVIDENCE_ROOT/candidate.patch"
+          sha256sum "$SOURCE" "test/$TEST_FILE" > "$EVIDENCE_ROOT/source-sha256.txt"
+          git push origin "HEAD:refs/heads/verify/$CANDIDATE-candidate-20260925-763627"
+      - name: Build both actual packages and prepare browser fixtures
+        run: |
+          cd "$BASE_ROOT"
+          npm run build -- --target chrome-dev > "$EVIDENCE_ROOT/build-base.log" 2>&1
+          cd "$CANDIDATE_ROOT"
+          npm run build -- --target chrome-dev > "$EVIDENCE_ROOT/build-candidate.log" 2>&1
+          cd "$BASE_ROOT"
+          node dev/perf/prepare-dictionaries.js > "$EVIDENCE_ROOT/fixtures.log" 2>&1
+          node node_modules/playwright/cli.js install --with-deps chromium
+          cp -a "$BASE_ROOT/builds/e2e-dictionary-cache" "$CANDIDATE_ROOT/builds/e2e-dictionary-cache"
+      - name: Execute fixed complete-import plan with unchanged-code controls
+        run: python "$INPUT_ROOT/compare.py" > "$EVIDENCE_ROOT/driver.log" 2>&1
+      - name: Preserve all qualification and timing evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: copy-probe-${{ matrix.candidate }}-763627
+          path: ${{ env.EVIDENCE_ROOT }}/
+          retention-days: 30
+          if-no-files-found: error
