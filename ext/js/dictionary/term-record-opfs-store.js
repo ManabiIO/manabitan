@@ -945,15 +945,17 @@ export class TermRecordOpfsStore {
      */
     _setDictionaryHealth(dictionaryName, status, reason = null) {
         const previous = this._dictionaryHealthByName.get(dictionaryName);
+        const previousStatus = previous?.status ?? 'available';
+        const previousReason = previous?.reason ?? null;
+        if (previousStatus === status && previousReason === reason) { return; }
         if (status === 'available') {
             this._dictionaryHealthByName.delete(dictionaryName);
         } else {
             this._dictionaryHealthByName.set(dictionaryName, {status, reason});
         }
-        if (previous?.status === status && previous.reason === reason) { return; }
         reportDiagnostics('term-record-dictionary-health-changed', {
             dictionaryName,
-            previousStatus: previous?.status ?? 'available',
+            previousStatus,
             status,
             reason,
         });
