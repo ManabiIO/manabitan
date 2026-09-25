@@ -49,7 +49,7 @@ export class EventDispatcher {
         const callbacks = this._eventMap.get(eventName);
         if (typeof callbacks === 'undefined') { return false; }
 
-        for (const {callback, removed} of callbacks.slice()) {
+        for (const {callback, removed} of [...callbacks]) {
             if (!removed) { callback(details); }
         }
         return true;
