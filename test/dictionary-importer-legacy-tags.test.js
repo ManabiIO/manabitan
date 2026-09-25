@@ -85,7 +85,7 @@ describe('embedded legacy dictionary tags', () => {
         const progressFailure = new Error('progress sink failed');
         let now = 1_000;
         const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => {
-            now += 100;
+            now += 2_000;
             return now;
         });
         const importer = new DictionaryImporter(
