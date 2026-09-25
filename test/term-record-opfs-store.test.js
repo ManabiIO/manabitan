@@ -3599,6 +3599,33 @@ describe('TermRecordOpfsStore', () => {
         expect(readerStore.getDictionaryHealth('Healthy').status).toBe('available');
     });
 
+    test('keeps the persisted-only threshold boundary unmaterialized on shard reload', async () => {
+        const store = new TermRecordOpfsStore();
+        const dictionaryName = 'Threshold dictionary';
+        const fileName = store._getShardSegmentFileName(dictionaryName, 'raw', 0);
+        const state = asShardState({fileName});
+        const file = /** @type {File} */ (/** @type {unknown} */ ({
+            size: 1,
+            arrayBuffer: vi.fn(async () => new ArrayBuffer(1)),
+        }));
+        vi.spyOn(store, '_isBinaryFormat').mockReturnValue(true);
+        vi.spyOn(store, '_tryLoadPersistentDictionaryIndex').mockResolvedValue(true);
+        Reflect.get(store, '_persistentRecordChunksByDictionary').set(
+            dictionaryName,
+            /** @type {import('core').SafeAny} */ ([{
+                fileName,
+                firstId: 1,
+                count: 250000,
+            }]),
+        );
+        const materialize = vi.spyOn(store, 'getByIdsAsync').mockRejectedValue(
+            new Error('threshold-sized shard should remain persisted-only'),
+        );
+
+        await expect(store._loadShardStateContents(state, file)).resolves.toBe(true);
+        expect(materialize).not.toHaveBeenCalled();
+    });
+
     test('ensureAllDictionariesLoaded keeps authoritative records persisted-only', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Persistent count';
