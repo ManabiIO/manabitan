@@ -754,6 +754,55 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['images/space name.png', 'images/bad%ZZname.png']);
     });
 
+    test('preserves percent-encoded separators as MDD asset key data', async () => {
+        /** @type {string[]} */
+        const lookupKeys = [];
+        mockState.onLookupRecord = (_fileName, keyText) => {
+            lookupKeys.push(keyText);
+        };
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Encoded separator asset fixture',
+                Description: '',
+            },
+            entries: [{
+                keyText: 'Encoded separators',
+                definition: '<div><img src="images%2Fslash.png"><img src="images%5Cbackslash.png"></div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images%2Fslash.png', value: Uint8Array.of(1, 2, 3)},
+            {keyText: 'images/slash.png', value: Uint8Array.of(9, 9, 9)},
+            {keyText: 'images%5Cbackslash.png', value: Uint8Array.of(4, 5, 6)},
+            {keyText: 'images/backslash.png', value: Uint8Array.of(8, 8, 8)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'encoded-separators.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'encoded-separators.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<unknown>}}} */ (termBank[0][5][0]);
+        const rootEntry = /** @type {{content: Array<unknown>}} */ (glossary.content.content[0]);
+
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({
+            tag: 'img',
+            path: 'mdict-media/images%2Fslash.png',
+        }));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({
+            tag: 'img',
+            path: 'mdict-media/images%5Cbackslash.png',
+        }));
+        expect(await zip.file('mdict-media/images%2Fslash.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
+        expect(await zip.file('mdict-media/images%5Cbackslash.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
+        expect(zip.file('mdict-media/images/slash.png')).toBeNull();
+        expect(zip.file('mdict-media/images/backslash.png')).toBeNull();
+        expect(lookupKeys).toStrictEqual(['images%2Fslash.png', 'images%5Cbackslash.png']);
+    });
+
     test('preserves binary data URL bytes and resolves root and prefixed CSS paths', async () => {
         mockState.mdxFactory = () => ({
             header: {

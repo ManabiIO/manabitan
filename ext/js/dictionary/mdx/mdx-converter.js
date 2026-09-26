@@ -447,11 +447,14 @@ function collapsePosixPath(path) {
  * @param {string} path
  * @returns {string}
  */
-function decodePercentEncodedPathSegments(path) {
+function decodePercentEncodedPathSegments(path, preserveEncodedSeparators = false) {
     const decodedParts = [];
     for (const part of path.split('/')) {
         try {
-            decodedParts.push(decodeURIComponent(part));
+            const encodedPart = preserveEncodedSeparators ?
+                part.replace(/%(?:2f|5c)/giu, (match) => `%25${match.slice(1)}`) :
+                part;
+            decodedParts.push(decodeURIComponent(encodedPart));
         } catch (_error) {
             decodedParts.push(part);
         }
@@ -492,7 +495,9 @@ function normalizeRelativeAssetPath(path, sourceAssetPath = null, assetPrefix = 
     if (lowered.startsWith('file://')) {
         value = value.slice(7);
     }
-    value = decodePercentEncodedPathSegments(value);
+    // Encoded slash/backslash are data within a URL path segment, not path
+    // separators. Preserve them while decoding ordinary percent escapes.
+    value = decodePercentEncodedPathSegments(value, true);
     value = value.replace(/^\/+/u, '');
     const alreadyPrefixed = assetPrefix.length > 0 && value.startsWith(assetPrefix);
     if (sourceAssetPath !== null && !fromRoot && !alreadyPrefixed) {
