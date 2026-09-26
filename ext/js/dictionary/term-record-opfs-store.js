@@ -4674,8 +4674,8 @@ export class TermRecordOpfsStore {
         const bytes = content.subarray(offset, offset + length);
         // Some browser TextDecoder implementations reject shared WASM views.
         // Copy only this string; ordinary buffers stay on the no-copy path.
-        const shared = typeof SharedArrayBuffer !== 'undefined' && bytes.buffer instanceof SharedArrayBuffer;
-        return this._textDecoder.decode(shared ? Uint8Array.from(bytes) : bytes);
+        // Shared memory can exist without an exposed same-realm constructor.
+        return this._textDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : Uint8Array.from(bytes));
     }
 
     /**
