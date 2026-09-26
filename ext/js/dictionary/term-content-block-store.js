@@ -1369,23 +1369,19 @@ function planContentSpansIntoSlabs(sourceLengths, targetBytes) {
     while (startIndex < sourceLengths.length) {
         let totalBytes = 0;
         let endIndex = startIndex;
+        const packedIndex = packedChunkLengths.length;
         while (endIndex < sourceLengths.length) {
             const nextBytes = sourceLengths[endIndex];
             if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes) {
                 break;
             }
+            sourceChunkIndices[endIndex] = packedIndex;
+            sourceChunkLocalOffsets[endIndex] = totalBytes;
             totalBytes += nextBytes;
             ++endIndex;
         }
         if (totalBytes > 0xffffffff) {
             throw new RangeError('Packed term content block exceeds the 32-bit storage format');
-        }
-        const packedIndex = packedChunkLengths.length;
-        let localOffset = 0;
-        for (let i = startIndex; i < endIndex; ++i) {
-            sourceChunkIndices[i] = packedIndex;
-            sourceChunkLocalOffsets[i] = localOffset;
-            localOffset += sourceLengths[i];
         }
         packedChunkLengths.push(totalBytes);
         blockStartIndexes.push(endIndex);
