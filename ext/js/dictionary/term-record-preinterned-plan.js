@@ -95,9 +95,12 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
         return value & (stringIndexTable.length - 1);
     };
 
-    /** @param {number} requiredCount */
+    /**
+     * @param {number} requiredCount
+     * @returns {boolean} Whether growth invalidated the previous probe slot.
+     */
     const ensureHashCapacity = (requiredCount) => {
-        if (requiredCount * 2 <= stringIndexTable.length) { return; }
+        if (requiredCount * 2 <= stringIndexTable.length) { return false; }
         const oldTable = stringIndexTable;
         stringIndexTable = new Uint32Array(oldTable.length * 2);
         for (let index = 0; index < stringCount; ++index) {
@@ -107,6 +110,7 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
             }
             stringIndexTable[slot] = index + 1;
         }
+        return true;
     };
 
     /**
@@ -137,10 +141,13 @@ export function createTermRecordPreinternedPlanBuilder(initialStringCapacity = D
 
         const index = stringCount;
         ensureCapacity(index + 1);
-        ensureHashCapacity(index + 1);
-        slot = getHashSlot(h1, bytes.byteLength);
-        while (stringIndexTable[slot] !== 0) {
-            slot = (slot + 1) & (stringIndexTable.length - 1);
+        // The initial miss already found an empty slot. Only table growth
+        // changes its position; avoid probing every new string twice.
+        if (ensureHashCapacity(index + 1)) {
+            slot = getHashSlot(h1, bytes.byteLength);
+            while (stringIndexTable[slot] !== 0) {
+                slot = (slot + 1) & (stringIndexTable.length - 1);
+            }
         }
         stringLengths[index] = bytes.byteLength;
         stringHashes[index] = h1;
