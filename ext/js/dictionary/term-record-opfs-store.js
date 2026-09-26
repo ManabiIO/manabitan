@@ -1338,6 +1338,22 @@ export class TermRecordOpfsStore {
      */
     async reset() {
         await this._closeAllWritables();
+        /** @type {Error[]} */
+        const resetErrors = [];
+        if (this._recordsDirectoryHandle !== null) {
+            const shardFileNames = await this._listTermRecordStorageFileNames();
+            for (const fileName of shardFileNames) {
+                try {
+                    await this._removeStorageFileOrTruncate(fileName, false);
+                } catch (error) {
+                    resetErrors.push(toError(error));
+                }
+            }
+        }
+
+        // Reset runtime ownership even when persistent cleanup fails. Some files
+        // may already have been removed/truncated, so retaining materialized
+        // records would expose state which no longer matches persistence.
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
         this._recordIdStaleDictionaryNames.clear();
@@ -1355,16 +1371,9 @@ export class TermRecordOpfsStore {
         this._preinternedCompactionRemap = new Uint32Array(0);
         this._loadedDictionaryNames.clear();
         this._allShardContentsLoaded = false;
-        if (this._recordsDirectoryHandle === null) {
-            return;
-        }
-        const shardFileNames = await this._listTermRecordStorageFileNames();
-        for (const fileName of shardFileNames) {
-            try {
-                await this._recordsDirectoryHandle.removeEntry(fileName);
-            } catch (_) {
-                // NOP
-            }
+
+        if (resetErrors.length > 0) {
+            throw new AggregateError(resetErrors, 'Failed to reset term-record storage');
         }
     }
 
