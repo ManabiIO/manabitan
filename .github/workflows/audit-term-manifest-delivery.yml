@@ -1,0 +1,105 @@
+name: Qualify term manifest completeness repair
+on:
+  push:
+    branches: [audit/current-import-hash-20260926]
+    paths: [.github/workflows/audit-term-manifest-delivery.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9567330288d964fc6f804f0a15f415cd026b7df6
+          path: audit
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 384d1c97dae6bd17555973b77ad415e038438499
+          path: source
+      - name: Verify transported patch before applying
+        shell: python
+        run: |
+          import base64, hashlib, json, pathlib, zlib
+          out = pathlib.Path('evidence')
+          out.mkdir(exist_ok=True)
+          data = pathlib.Path('audit/dev/perf/term-manifest.patch.zlib.b64').read_text().strip()
+          (out / 'received-payload.txt').write_text(data)
+          # Correct transcription errors in audit-only transport, never source.
+          repairs = {
+              'niuLaZZLF': 'niuLaZLF',
+              'E3ukS1+ukS1+4': 'E3ukS1+4',
+              'I5jJmdi0Rw0': 'I5jJzdRw0',
+              'ODVZZtd': 'ODVZtd',
+              'MGtPQi60MGtPQi60oom': 'MGtPQi60oom',
+          }
+          for before, after in repairs.items():
+              assert data.count(before) == 1, before
+              data = data.replace(before, after)
+          patch = zlib.decompress(base64.b64decode(data, validate=True))
+          assert hashlib.sha256(patch).hexdigest() == 'f545cba50f61122acf1d73ef8bdc768abd9901cc4cc1115feeb9cf20de6b77fe'
+          (out / 'term-manifest.patch').write_bytes(patch)
+          expected = {
+              'ext/js/dictionary/dictionary-importer.js': 'a39c1c97fc46274798adb9e71db962a1e8a412c241a57c241dd7619e4422dfd8',
+              'test/dictionary-importer-content-estimate.test.js': '619df3f919ef5133552f56f46a6ca8030e6998efc520d69473f356876bafd2fb',
+              'test/dictionary-importer-term-manifest-completeness.test.js': 'a24d5b4130f854eb4d206c7d7a7998cee026a401f1ff1fb390243a8f556a8547',
+          }
+          (out / 'expected.json').write_text(json.dumps(expected, indent=2))
+      - run: git apply --check ../evidence/term-manifest.patch && git apply ../evidence/term-manifest.patch
+        working-directory: source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci && npm run build:libs
+        working-directory: source
+      - name: Reproduce baseline failures and verify repair
+        working-directory: source
+        run: |
+          cp ext/js/dictionary/dictionary-importer.js /tmp/candidate-importer.js
+          git show HEAD:ext/js/dictionary/dictionary-importer.js > ext/js/dictionary/dictionary-importer.js
+          set +e
+          npx vitest run test/dictionary-importer-term-manifest-completeness.test.js --minWorkers=1 --maxWorkers=2 --reporter=json --outputFile=../evidence/baseline.json > ../evidence/baseline.log 2>&1
+          red=$?
+          set -e
+          cp /tmp/candidate-importer.js ext/js/dictionary/dictionary-importer.js
+          test "$red" -ne 0
+          python3 -c 'import json; d=json.load(open("../evidence/baseline.json")); assert (d["numFailedTests"],d["numPassedTests"]) == (13,4)'
+          npx vitest run test/dictionary-importer-term-manifest-completeness.test.js --minWorkers=1 --maxWorkers=2 --reporter=json --outputFile=../evidence/candidate.json > ../evidence/candidate.log 2>&1
+          python3 -c 'import json; d=json.load(open("../evidence/candidate.json")); assert (d["numFailedTests"],d["numPassedTests"]) == (0,17)'
+      - name: Full qualification
+        working-directory: source
+        run: |
+          npx eslint ext/js/dictionary/dictionary-importer.js test/dictionary-importer-content-estimate.test.js test/dictionary-importer-term-manifest-completeness.test.js > ../evidence/lint.log 2>&1
+          npm run test:ts > ../evidence/types.log 2>&1
+          npm run test:unit -- --minWorkers=1 --maxWorkers=2 > ../evidence/unit.log 2>&1
+          npm run test:unit:options -- --minWorkers=1 --maxWorkers=2 > ../evidence/options.log 2>&1
+          npm run test:build > ../evidence/build.log 2>&1
+      - name: Verify exact files and publish clean branch
+        working-directory: source
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+          for name, expected in json.load(open('../evidence/expected.json')).items():
+              assert hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest() == expected, name
+          PY
+          test "$(git rev-parse HEAD)" = 384d1c97dae6bd17555973b77ad415e038438499
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/dictionary/dictionary-importer.js test/dictionary-importer-content-estimate.test.js test/dictionary-importer-term-manifest-completeness.test.js
+          test "$(git diff --cached --name-only | wc -l)" -eq 3
+          git diff --cached --check
+          git commit -m 'fix(import): reject incomplete term artifact sources'
+          git rev-parse HEAD > ../evidence/published-head.txt
+          git diff HEAD^ HEAD > ../evidence/published.patch
+          git push origin HEAD:refs/heads/fix/import-incomplete-term-artifacts-20260926
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: term-manifest-qualification-384d1c9
+          path: evidence
+          retention-days: 30
+          if-no-files-found: error
