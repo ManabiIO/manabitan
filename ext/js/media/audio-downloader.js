@@ -19,7 +19,7 @@
 import {RequestBuilder} from '../background/request-builder.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {readResponseJson} from '../core/json.js';
-import {arrayBufferDigest} from '../core/utilities.js';
+import {arrayBufferDigest, escapeRegExp} from '../core/utilities.js';
 import {arrayBufferToBase64} from '../data/array-buffer-util.js';
 import {JsonSchema} from '../data/json-schema.js';
 import {NativeSimpleDOMParser} from '../dom/native-simple-dom-parser.js';
@@ -311,8 +311,10 @@ export class AudioDownloader {
         }
         const {iso639_3} = languageSummary;
         const searchCategory = `incategory:"Lingua_Libre_pronunciation-${iso639_3}"`;
-        const searchString = `-${term}.wav`;
-        const fetchUrl = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=intitle:/${searchString}/i+${searchCategory}&srnamespace=6&origin=*`;
+        const escapedTerm = escapeRegExp(term);
+        const searchString = `-${this._escapeWikimediaSearchTerm(term)}\\.wav`;
+        const searchQuery = `intitle:/${searchString}/i ${searchCategory}`;
+        const fetchUrl = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(searchQuery)}&srnamespace=6&origin=*`;
 
         /**
          * @param {string} filename
@@ -320,7 +322,7 @@ export class AudioDownloader {
          * @returns {boolean}
          */
         const validateFilename = (filename, fileUser) => {
-            const validFilenameTest = new RegExp(`^File:LL-Q\\d+\\s+\\(${iso639_3}\\)-${fileUser}-${term}\\.wav$`, 'i');
+            const validFilenameTest = new RegExp(`^File:LL-Q\\d+\\s+\\(${iso639_3}\\)-${escapeRegExp(fileUser)}-${escapedTerm}\\.wav$`, 'i');
             return validFilenameTest.test(filename);
         };
 
@@ -333,15 +335,17 @@ export class AudioDownloader {
             throw new Error('Invalid arguments');
         }
         const {iso} = languageSummary;
-        const searchString = `${iso}(-[a-zA-Z]{2})?-${term}[0123456789]*.ogg`;
-        const fetchUrl = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=intitle:/${searchString}/i&srnamespace=6&origin=*`;
+        const escapedTerm = escapeRegExp(term);
+        const searchString = `${iso}(-[a-zA-Z]{2})?-${this._escapeWikimediaSearchTerm(term)}[0123456789]*\\.ogg`;
+        const searchQuery = `intitle:/${searchString}/i`;
+        const fetchUrl = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(searchQuery)}&srnamespace=6&origin=*`;
 
         /**
          * @param {string} filename
          * @returns {boolean}
          */
         const validateFilename = (filename) => {
-            const validFilenameTest = new RegExp(`^File:${iso}(-\\w\\w)?-${term}\\d*\\.ogg$`, 'i');
+            const validFilenameTest = new RegExp(`^File:${iso}(-\\w\\w)?-${escapedTerm}\\d*\\.ogg$`, 'i');
             return validFilenameTest.test(filename);
         };
 
@@ -351,7 +355,7 @@ export class AudioDownloader {
          * @returns {string}
          */
         const displayName = (filename, fileUser) => {
-            const match = filename.match(new RegExp(`^File:${iso}(-\\w\\w)-${term}`, 'i'));
+            const match = filename.match(new RegExp(`^File:${iso}(-\\w\\w)-${escapedTerm}`, 'i'));
             if (match === null) {
                 return fileUser;
             }
@@ -361,6 +365,16 @@ export class AudioDownloader {
         };
 
         return await this._getInfoWikimediaCommons(fetchUrl, validateFilename, displayName);
+    }
+
+    /**
+     * Escapes literal data for CirrusSearch's slash-delimited Lucene regex syntax.
+     * @param {string} term
+     * @returns {string}
+     */
+    _escapeWikimediaSearchTerm(term) {
+        // Lucene operators and CirrusSearch delimiters extend JavaScript's regex syntax.
+        return escapeRegExp(term).replace(/[/"#@&<>~]/g, '\\$&');
     }
 
     /**
@@ -377,7 +391,7 @@ export class AudioDownloader {
         const lookupResults = lookupResponse.query.search;
 
         const fetchFileInfos = lookupResults.map(async ({title}) => {
-            const fileInfoURL = `https://commons.wikimedia.org/w/api.php?action=query&format=json&titles=${title}&prop=imageinfo&iiprop=user|url&origin=*`;
+            const fileInfoURL = `https://commons.wikimedia.org/w/api.php?action=query&format=json&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=user|url&origin=*`;
             const response2 = await this._requestBuilder.fetchAnonymous(fileInfoURL, DEFAULT_REQUEST_INIT_PARAMS);
             /** @type {import('audio-downloader').WikimediaCommonsFileResponse} */
             const fileResponse = await readResponseJson(response2);
@@ -527,19 +541,24 @@ export class AudioDownloader {
             idleTimer = setTimeout(onIdleTimeout, idleTimeout);
         }
 
-        const response = await this._requestBuilder.fetchAnonymous(url, {
-            ...DEFAULT_REQUEST_INIT_PARAMS,
-            signal,
-        });
+        let response;
+        let arrayBuffer;
+        try {
+            response = await this._requestBuilder.fetchAnonymous(url, {
+                ...DEFAULT_REQUEST_INIT_PARAMS,
+                signal,
+            });
 
-        if (!response.ok) {
-            throw new Error(`Invalid response: ${response.status}`);
-        }
+            if (!response.ok) {
+                throw new Error(`Invalid response: ${response.status}`);
+            }
 
-        const arrayBuffer = await RequestBuilder.readFetchResponseArrayBuffer(response, onProgress);
-
-        if (idleTimer !== null) {
-            clearTimeout(idleTimer);
+            arrayBuffer = await RequestBuilder.readFetchResponseArrayBuffer(response, onProgress);
+        } finally {
+            if (idleTimer !== null) {
+                clearTimeout(idleTimer);
+                idleTimer = null;
+            }
         }
 
         if (!await this._isAudioBinaryValid(arrayBuffer, sourceType)) {

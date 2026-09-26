@@ -1,0 +1,100 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+/* eslint @stylistic/semi: ["error", "never"] */
+import assert from 'node:assert/strict'
+import {describe, test} from 'node:test'
+import {MDX} from '../../ext/js/dictionary/mdx/vendor/js-mdict/mdx.js'
+import {MDD} from '../../ext/js/dictionary/mdx/vendor/js-mdict/mdd.js'
+import {makeMdictFixture} from './mdict-binary-fixture.js'
+
+for (const compression of /** @type {const} */ (['raw', 'zlib'])) {
+    for (const encoding of /** @type {const} */ (['utf8', 'utf16le'])) {
+        for (const budget of [0, 4096]) {
+            describe(`${compression}/${encoding}, cache budget ${budget}`, () => {
+                const value = 'definition 日本語 🐈 \uFEFF ' + 'content'.repeat(12)
+                for (const recordBlockSize of [32, 4096]) {
+                    test(`exact strings and independent byte lookups with ${recordBlockSize}-byte blocks`, () => {
+                        const fixture = makeMdictFixture([{key: 'alpha', value}, {key: 'beta', value: 'second'}], {compression, encoding, recordBlockSize})
+                        const parent = new Uint8Array(fixture.bytes.length + 19).fill(0xff)
+                        parent.set(fixture.bytes, 7)
+                        const before = Uint8Array.from(parent)
+                        const dict = new MDX('ownership.mdx', parent.subarray(7, 7 + fixture.bytes.length), {recordBlockCacheBytes: budget})
+                        try {
+                            const item = dict.keywordList[0]
+                            for (const text of [dict.lookup('alpha').definition, dict.fetch(item).definition, dict.fetch_definition(item).definition]) {
+                                assert.equal(text, `${value}\0`)
+                            }
+                            const first = dict.lookupRecordByKeyBlock(item)
+                            const second = dict.lookupRecordByKeyBlock(item)
+                            assert.deepEqual(first, fixture.records[0])
+                            assert.notEqual(first.buffer, second.buffer)
+                            assert.equal(first.buffer.byteLength, first.byteLength)
+                            first.fill(0)
+                            assert.deepEqual(second, fixture.records[0])
+                            assert.equal(dict.fetch_definition(item).definition, `${value}\0`)
+                            assert.deepEqual(parent, before)
+                            const retained = dict.fetch_definition(item).definition
+                            dict.close()
+                            assert.equal(retained, `${value}\0`)
+                        } finally { dict.close() }
+                    })
+                }
+                test('string decoders receive the bounded block view without a record copy', () => {
+                    const fixture = makeMdictFixture([{key: 'alpha', value}, {key: 'beta', value: 'second'}], {compression, encoding, recordBlockSize: 4096})
+                    const dict = new MDX('bounded-view.mdx', fixture.bytes, {recordBlockCacheBytes: budget})
+                    const originalRead = dict._readRecordBlock.bind(dict)
+                    const decoder = dict.meta.decoder
+                    const originalDecode = decoder.decode
+                    /** @type {Uint8Array|null} */
+                    let lastBlock = null
+                    /** @type {Uint8Array[]} */
+                    const views = []
+                    dict._readRecordBlock = (index) => {
+                        lastBlock = originalRead(index)
+                        return lastBlock
+                    }
+                    decoder.decode = function decodeRecord(input, options) {
+                        assert.ok(input instanceof Uint8Array)
+                        assert.ok(lastBlock !== null)
+                        assert.equal(input.buffer, lastBlock.buffer)
+                        assert.equal(input.byteLength, fixture.records[1].byteLength)
+                        assert.equal(input.byteOffset - lastBlock.byteOffset, fixture.records[0].byteLength)
+                        views.push(input)
+                        return originalDecode.call(this, input, options)
+                    }
+                    try {
+                        const item = dict.keywordList[1]
+                        assert.equal(dict.lookup('beta').definition, 'second\0')
+                        assert.equal(dict.fetch(item).definition, 'second\0')
+                        assert.equal(dict.fetch_definition(item).definition, 'second\0')
+                        assert.equal(views.length, 3)
+                    } finally {
+                        decoder.decode = originalDecode
+                        dict.close()
+                    }
+                })
+            })
+        }
+    }
+    test(`${compression} MDD public bytes remain independent`, () => {
+        const fixture = makeMdictFixture([{key: 'a.bin', value: Uint8Array.of(1, 0, 255)}, {key: 'b.bin', value: Uint8Array.of(2, 0, 254)}], {mdd: true, compression, recordBlockSize: 4096})
+        const dict = new MDD('owned.mdd', fixture.bytes, {recordBlockCacheBytes: 4096})
+        try {
+            const first = dict.lookupRecordByKeyBlock(dict.keywordList[0])
+            first.fill(0)
+            assert.deepEqual(dict.lookupRecordByKeyBlock(dict.keywordList[0]), fixture.records[0])
+        } finally { dict.close() }
+    })
+}
+
+test('corrupt compressed records still reject without entering the cache', () => {
+    const fixture = makeMdictFixture([{key: 'a', value: 'first'}], {compression: 'zlib', recordBlockSize: 4096})
+    fixture.bytes[fixture.recordDataOffset + 4] ^= 1
+    const dict = new MDX('corrupt.mdx', fixture.bytes, {recordBlockCacheBytes: 4096})
+    try {
+        assert.throws(() => dict.fetch_definition(dict.keywordList[0]), /checksum mismatch/u)
+        assert.equal(dict._recordBlockCache.size, 0)
+    } finally { dict.close() }
+})

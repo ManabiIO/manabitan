@@ -104,8 +104,8 @@ export class Mdict extends MdictBase {
         return this._lookupRecordByKeyBlock(item, true)
     }
     /**
-     * Internal record lookup which may return a borrowed view for a record
-     * wholly contained in one decompressed block.
+     * Internal string decoding consumes a borrowed single-block view immediately.
+     * Public byte lookups and records spanning blocks retain owned output.
      * @param item
      * @param {boolean} copyOutput
      */
@@ -146,7 +146,7 @@ export class Mdict extends MdictBase {
             const to = nextPosition - blockStart;
             if (position === start && nextPosition === end) {
                 const view = bytes.subarray(from, to)
-                return copyOutput ? new Uint8Array(view) : view;
+                return copyOutput ? new Uint8Array(view) : view
             }
             if (output === null) { output = new Uint8Array(end - start); }
             output.set(bytes.subarray(from, to), position - start);

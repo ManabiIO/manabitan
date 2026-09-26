@@ -24,6 +24,8 @@ async function check(name, run) {
 }
 const escapedMarker = '[{"type":"im\\u0061ge","path":"one.png"}]'
 const mixedPaths = '[{"type":"image","path":"one.png"},{"type":"image","pa\\u0074h":"two.png"}]'
+const nonImageDataPath = '[{"type":"structured-content","content":{"tag":"span","data":{"path":"missing.png"},"content":"text"}}]'
+const imageWithDataPath = '[{"type":"structured-content","content":{"tag":"img","path":"real.png","data":{"path":"noise.png"}}}]'
 for (const fast of [false, true]) {
     await check(`media predicate escaped marker; fast=${fast}`, () => {
         const importer = makeImporter()
@@ -47,12 +49,28 @@ for (const bytes of [false, true]) {
         assert.equal(importer._tryAddFastMediaRequirementsFromFastRow(row, {}, requirements), true)
         assert.deepEqual(requirements.map(({source}) => source.path), ['one.png'])
     })
+    await check(`non-image data.path does not become media; bytes=${bytes}`, () => {
+        const importer = makeImporter()
+        const requirements = []
+        const row = bytes ? {glossaryJsonBytes: encoder.encode(nonImageDataPath)} : {glossaryJson: nonImageDataPath}
+        assert.equal(importer._tryAddFastMediaRequirementsFromFastRow(row, {}, requirements), false)
+        assert.deepEqual(requirements, [])
+    })
+    await check(`image data.path does not shadow its real path; bytes=${bytes}`, () => {
+        const importer = makeImporter()
+        const requirements = []
+        const row = bytes ? {glossaryJsonBytes: encoder.encode(imageWithDataPath)} : {glossaryJson: imageWithDataPath}
+        assert.equal(importer._tryAddFastMediaRequirementsFromFastRow(row, {}, requirements), true)
+        assert.deepEqual(requirements.map(({source}) => source.path), ['real.png'])
+    })
 }
 for (const skipImageMetadata of [false, true]) {
     for (const [name, glossary, expected] of [
         ['escaped marker', escapedMarker, ['one.png']],
         ['mixed path spellings', mixedPaths, ['one.png', 'two.png']],
         ['escaped nested tag and path', '[{"type":"structured-content","content":{"tag":"i\\u006dg","pa\\u0074h":"nested.png"}}]', ['nested.png']],
+        ['non-image data path', nonImageDataPath, []],
+        ['image with unrelated data path', imageWithDataPath, ['real.png']],
         ['ordinary control', '[{"type":"image","path":"one.png"}]', ['one.png']],
     ]) {
         await check(`actual parser/importer: ${name}; skipMetadata=${skipImageMetadata}`, async () => {

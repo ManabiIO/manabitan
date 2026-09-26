@@ -462,7 +462,7 @@ describe('DictionaryWorker MDX import integration', () => {
         expect(worker?._listeners.messageerror).toHaveLength(0);
     });
 
-    test('rejects every active reusable worker invocation on worker failure', async () => {
+    test('worker failure rejects the active reusable request and admits queued work on a fresh worker', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
         vi.stubGlobal('Worker', vi.fn((url, options) => {
@@ -477,16 +477,23 @@ describe('DictionaryWorker MDX import integration', () => {
 
         await vi.waitFor(() => {
             expect(workerInstances).toHaveLength(1);
-            expect(workerInstances[0]?.postMessage).toHaveBeenCalledTimes(2);
+            expect(workerInstances[0]?.postMessage).toHaveBeenCalledTimes(1);
         });
 
         const versionExpectation = expect(versionPromise).rejects.toThrow('Dictionary worker failed: Dictionary worker exploded');
-        const countExpectation = expect(countPromise).rejects.toThrow('Dictionary worker failed: Dictionary worker exploded');
         workerInstances[0]?.emitError('Dictionary worker exploded');
-
         await versionExpectation;
-        await countExpectation;
         expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(2);
+            expect(workerInstances[1]?.postMessage).toHaveBeenCalledTimes(1);
+        });
+
+        const countExpectation = expect(countPromise).rejects.toThrow('Dictionary worker destroyed');
+        dictionaryWorker.destroy();
+        await countExpectation;
+        expect(workerInstances[1]?.terminate).toHaveBeenCalledTimes(1);
     });
 
     test('ignores stale image-details response delivery failures after async decode', async () => {

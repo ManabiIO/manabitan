@@ -54,24 +54,32 @@ export class DictionaryWorkerHandler {
         const {action, params} = event.data;
         switch (action) {
             case 'importDictionary':
-                void this._onMessageWithProgress(params, this._importDictionary.bind(this));
+                this._observeTask(this._onMessageWithProgress(params, this._importDictionary.bind(this)));
                 break;
             case 'importMdxDictionary':
-                void this._onMessageWithProgress(params, this._importMdxDictionary.bind(this));
+                this._observeTask(this._onMessageWithProgress(params, this._importMdxDictionary.bind(this)));
                 break;
             case 'deleteDictionary':
-                void this._onMessageWithProgress(params, this._deleteDictionary.bind(this));
+                this._observeTask(this._onMessageWithProgress(params, this._deleteDictionary.bind(this)));
                 break;
             case 'getDictionaryCounts':
-                void this._onMessageWithProgress(params, this._getDictionaryCounts.bind(this));
+                this._observeTask(this._onMessageWithProgress(params, this._getDictionaryCounts.bind(this)));
                 break;
             case 'getMdxVersion':
-                void this._onMessageWithProgress(params, this._getMdxVersion.bind(this));
+                this._observeTask(this._onMessageWithProgress(params, this._getMdxVersion.bind(this)));
                 break;
             case 'getImageDetails.response':
                 this._mediaLoader.handleMessage(params);
                 break;
         }
+    }
+
+    /**
+     * Owns promises launched from synchronous worker message callbacks.
+     * @param {Promise<unknown>} promise
+     */
+    _observeTask(promise) {
+        void promise.catch((error) => { log.error(error); });
     }
 
     /**
@@ -96,7 +104,16 @@ export class DictionaryWorkerHandler {
         } catch (e) {
             response = {error: ExtensionError.serialize(e)};
         }
-        self.postMessage({action: 'complete', params: response});
+        try {
+            self.postMessage({action: 'complete', params: response});
+        } catch (error) {
+            // A non-cloneable result/error must still settle the caller. The
+            // structured-clone failure itself is an ordinary serializable Error.
+            self.postMessage({
+                action: 'complete',
+                params: {error: ExtensionError.serialize(error)},
+            });
+        }
     }
 
     /**

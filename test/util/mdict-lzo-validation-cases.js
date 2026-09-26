@@ -109,6 +109,19 @@ test('all one-byte control inputs terminate with a bounded decoding error', () =
     }
 });
 
+test('valid LZO stream rejects trailing compressed bytes after the EOF marker', () => {
+    const vector = vectors[0];
+    const packed = fromHex(vector.packed);
+    const withTrailingByte = new Uint8Array(packed.byteLength + 1);
+    withTrailingByte.set(packed);
+    withTrailingByte[packed.byteLength] = 0x42;
+
+    assert.throws(
+        () => lzo1x.decompress(withTrailingByte, vector.unpacked.byteLength),
+        /decompression failed with status -8/u,
+    );
+});
+
 test('valid backreference output remains bounded to the exact decoded size', () => {
     const vector = vectors[0];
     assert.throws(
