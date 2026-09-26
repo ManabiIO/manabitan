@@ -1,0 +1,56 @@
+name: Zlib stream completion and recovery
+on:
+  push:
+    branches: [review/record-borrow-zlib-20260926]
+    paths: [.github/workflows/review-zlib-completion-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product source and retain the browser driver
+        run: |
+          cp dev/review/zlib-completion-browser.mjs /tmp/zlib-browser.mjs
+          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a c74d604d328f491a4924a0dbd375acfcac603edc
+          git checkout --detach c74d604d328f491a4924a0dbd375acfcac603edc
+          mkdir -p dev/review builds/zlib-completion
+          cp /tmp/zlib-browser.mjs dev/review/zlib-completion-browser.mjs
+          cp /tmp/zlib-browser.mjs builds/zlib-completion/executed-driver.mjs
+          git rev-parse HEAD > builds/zlib-completion/product-head.txt
+          node --check dev/review/zlib-completion-browser.mjs
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Require original-code reproduction and exact repaired results
+        run: |
+          git show 2d79cd1dec164caa3075884133d9d12204a4f48a:ext/js/dictionary/mdx/vendor/pako.js > ext/js/dictionary/mdx/vendor/pako.js
+          set +e
+          node --test --test-reporter=tap test/util/mdict-zlib-completion-cases.js > builds/zlib-completion/baseline.log 2>&1
+          result=$?
+          set -e
+          test "$result" -eq 1
+          grep '^# fail 97$' builds/zlib-completion/baseline.log
+          grep '^# pass 20$' builds/zlib-completion/baseline.log
+          git checkout c74d604d328f491a4924a0dbd375acfcac603edc -- ext/js/dictionary/mdx/vendor/pako.js
+          node --test --test-reporter=tap test/util/mdict-zlib-completion-cases.js > builds/zlib-completion/repaired.log 2>&1
+          grep '^# pass 117$' builds/zlib-completion/repaired.log
+          grep '^# fail 0$' builds/zlib-completion/repaired.log
+      - name: Build installed extension and browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Require malformed-import rejection and same-title persisted recovery
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/zlib-completion-browser.mjs 2>&1 | tee builds/zlib-completion/browser.log
+          git diff --exit-code -- ext/js/dictionary/mdx/vendor/pako.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zlib-completion-recovery
+          path: builds/zlib-completion/
+          retention-days: 14
