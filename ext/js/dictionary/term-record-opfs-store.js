@@ -5148,11 +5148,10 @@ export class TermRecordOpfsStore {
         }
         const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
         if (state.initialFileLength !== 0) {
-            try {
-                await this._recordsDirectoryHandle.removeEntry(indexFileName);
-            } catch (_) {
-                // Missing or stale sidecars are handled by the full-shard fallback.
-            }
+            // Appending to an existing descriptor invalidates the previous
+            // sidecar's descriptor-length metadata. Do not leave a stale
+            // authoritative container behind when unlink is blocked.
+            await this._removeStorageFileOrTruncate(indexFileName, true);
             state.pendingLookupIndexChunks = [];
             state.pendingLookupIndexBytes = 0;
             state.pendingLookupIndexRecordCount = 0;
@@ -6019,7 +6018,12 @@ export class TermRecordOpfsStore {
             try {
                 fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: false});
             } catch (lookupError) {
-                if (allowMissing) { return; }
+                const lookupErrorName = (
+                    typeof lookupError === 'object' &&
+                    lookupError !== null &&
+                    typeof Reflect.get(lookupError, 'name') === 'string'
+                ) ? Reflect.get(lookupError, 'name') : '';
+                if (allowMissing && lookupErrorName === 'NotFoundError') { return; }
                 throw new AggregateError(
                     [removeError, lookupError],
                     `Failed to remove or open term-record storage file ${fileName}`,
