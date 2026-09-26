@@ -3771,12 +3771,27 @@ export class DictionaryImporter {
      */
     _hasUsableArtifactTermSource(manifest, fileMap) {
         if (manifest.termBanksByArtifact.size === 0) { return false; }
-        const packedFileName = manifest.packedFileName ?? TERM_BANK_PACKED_ARTIFACT_FILE;
-        if (fileMap.has(packedFileName)) { return true; }
-        for (const artifact of manifest.termBanksByArtifact.keys()) {
-            if (fileMap.has(artifact)) { return true; }
+        /** @type {ImportFileEntry[]} */
+        const termFiles = [];
+        for (const [filename, fileEntry] of fileMap.entries()) {
+            if (/^term_bank_(\d+)\.json$/.test(filename)) {
+                termFiles.push(fileEntry);
+            }
         }
-        return false;
+
+        const packedFileName = manifest.packedFileName ?? TERM_BANK_PACKED_ARTIFACT_FILE;
+        if (
+            fileMap.has(packedFileName) &&
+            this._hasCompleteTermArtifactCoverage(termFiles, manifest.termBanksByArtifact.keys())
+        ) {
+            return true;
+        }
+
+        const availableArtifactNames = [];
+        for (const artifact of manifest.termBanksByArtifact.keys()) {
+            if (fileMap.has(artifact)) { availableArtifactNames.push(artifact); }
+        }
+        return this._hasCompleteTermArtifactCoverage(termFiles, availableArtifactNames);
     }
 
     /**
