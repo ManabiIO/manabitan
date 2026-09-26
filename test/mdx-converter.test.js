@@ -109,6 +109,7 @@ vi.mock('../ext/js/dictionary/mdx/vendor/js-mdict/mdd.js', () => ({
 const {convertMdxToArchive, createMdxImportData} = await import('../ext/js/dictionary/mdx/mdx-converter.js');
 
 afterEach(() => {
+    vi.restoreAllMocks();
     mockState.mdxFactory = /** @type {(fileName: string) => MockMdxDictionary} */ ((fileName) => ({
         header: {
             Title: fileName.replace(/\.mdx$/u, ''),
@@ -375,6 +376,42 @@ describe('convertMdxToArchive', () => {
         expect(termBank[0]?.[6]).toBe(termBank[1]?.[6]);
         expect(termBank[0]?.[6]).toBe(termBank[2]?.[6]);
         expect(termBank.some(([expression]) => expression === 'MissingAlias')).toBe(false);
+    });
+
+    test('coalesces large MDX conversion progress without losing endpoints', async () => {
+        vi.spyOn(Date, 'now').mockReturnValue(1000);
+        const aliasCount = 1000;
+        mockState.mdxFactory = () => ({
+            header: {
+                Title: 'Progress fixture',
+                Description: '',
+            },
+            entries: [
+                ...Array.from({length: aliasCount}, (_, index) => ({
+                    keyText: `Alias-${index}`,
+                    definition: '@@@LINK=Target',
+                })),
+                {keyText: 'Target', definition: '<div>Target</div>'},
+            ],
+        });
+        /** @type {Array<{stage: string, completed: number, total: number}>} */
+        const progress = [];
+
+        await createMdxImportData(
+            'progress-fixture.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [],
+            (details) => progress.push(details),
+        );
+
+        const total = aliasCount + 1;
+        expect(progress[0]).toStrictEqual({stage: 'convert', completed: 0, total});
+        expect(progress.at(-1)).toStrictEqual({stage: 'convert', completed: total, total});
+        expect(progress.length).toBeLessThanOrEqual(103);
+        for (let index = 1; index < progress.length; ++index) {
+            expect(progress[index].completed).toBeGreaterThan(progress[index - 1].completed);
+        }
     });
 
     test('uses the first matching MDD asset and skips unreferenced non-CSS assets', async () => {

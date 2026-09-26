@@ -2145,9 +2145,32 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         });
 
         const totalEntries = Math.max(1, mdx.keywordList.length);
-        if (typeof onProgress === 'function') {
-            onProgress({stage: 'convert', completed: 0, total: totalEntries});
-        }
+        const progressStep = Math.max(1, Math.ceil(totalEntries / 100));
+        let lastProgressCompleted = -1;
+        let lastProgressAt = 0;
+        /**
+         * Keep conversion progress responsive without sending one worker
+         * message per dictionary entry.
+         * @param {number} completed
+         * @param {boolean} [force]
+         */
+        const reportConvertProgress = (completed, force = false) => {
+            if (typeof onProgress !== 'function' || completed === lastProgressCompleted) { return; }
+            const now = Date.now();
+            if (
+                !force &&
+                lastProgressCompleted >= 0 &&
+                completed < totalEntries &&
+                completed - lastProgressCompleted < progressStep &&
+                now - lastProgressAt < 50
+            ) {
+                return;
+            }
+            onProgress({stage: 'convert', completed, total: totalEntries});
+            lastProgressCompleted = completed;
+            lastProgressAt = now;
+        };
+        reportConvertProgress(0, true);
 
         /** @type {Map<string, Uint8Array>} */
         const embeddedAssets = new Map();
@@ -2212,9 +2235,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             const term = trimNullSuffix(item.keyText);
             processedEntries += 1;
             if (term.length === 0) {
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
             let definition;
@@ -2223,9 +2244,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 definition = trimNullSuffix(result.definition ?? '');
             } catch (_error) {
                 skippedEntryErrorCount += 1;
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
             const redirectDefinition = trimCssWhitespace(definition);
@@ -2239,9 +2258,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                         redirectCount += 1;
                     }
                 }
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
 
@@ -2257,9 +2274,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 });
             } catch (_error) {
                 skippedEntryErrorCount += 1;
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
             for (const [path, bytes] of converted.embeddedAssets) {
@@ -2279,9 +2294,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             }
             convertedEntries.push({term, glossary: converted.glossary, sequence});
             sequence += 1;
-            if (typeof onProgress === 'function') {
-                onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-            }
+            reportConvertProgress(processedEntries);
         }
         recordPhaseTiming('prepare-mdx:convert-entries', tConvertEntriesStart, {
             entries: processedEntries,
@@ -2404,9 +2417,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             assetLookupErrorCount: assetResolver?.lookupErrorCount ?? 0,
             hasRootStylesheet: rootStylesheet !== null,
         });
-        if (typeof onProgress === 'function') {
-            onProgress({stage: 'convert', completed: totalEntries, total: totalEntries});
-        }
+        reportConvertProgress(totalEntries, true);
         return {
             files,
             archiveFileName: `${title}.zip`,
