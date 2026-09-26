@@ -1,0 +1,57 @@
+name: Progress coalescing complete imports
+on:
+  push:
+    branches: [review/import-followthrough-20260926]
+    paths: [.github/workflows/review-progress-completion-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [large, medium, small]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/progress-complete-import-20260926.mjs /tmp/progress-driver.mjs
+          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a 4ddfb5ee5f25b6bf084c4e586585c3f35b7eec46
+          git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
+          mkdir -p dev/review builds/progress-completion
+          cp /tmp/progress-driver.mjs dev/review/progress-complete-import-20260926.mjs
+          cp /tmp/progress-driver.mjs builds/progress-completion/executed-driver.mjs
+          git diff 2d79cd1dec164caa3075884133d9d12204a4f48a 4ddfb5ee5f25b6bf084c4e586585c3f35b7eec46 -- ext/ > builds/progress-completion/product.patch
+          test "$(git diff --name-only 2d79cd1dec164caa3075884133d9d12204a4f48a 4ddfb5ee5f25b6bf084c4e586585c3f35b7eec46 -- ext/)" = ext/js/dictionary/mdx/mdx-converter.js
+          git rev-parse HEAD > builds/progress-completion/product-head.txt
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Verify output parity and both complete-import arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/progress-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/progress-completion/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort with unchanged-code controls
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/progress-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/progress-completion/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: progress-complete-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/progress-completion/
+          retention-days: 14
