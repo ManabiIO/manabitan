@@ -24,6 +24,7 @@ import './pako-inflate.js';
  *     push: (bytes: Uint8Array, final: boolean) => boolean,
  *     err: number,
  *     msg: string,
+ *     ended: boolean,
  *     strm: {avail_in: number},
  *     onData: (chunk: Uint8Array) => void
  *   }
@@ -68,9 +69,17 @@ export function inflateSync(bytes, maxOutputSize = null) {
         outputSize = nextOutputSize;
     };
 
-    const ok = inflator.push(bytes, true);
+    // Do not force finalization. Pako's bundled Inflate implementation calls
+    // inflateEnd() successfully when Z_FINISH is requested even if the input
+    // ended before the zlib stream reached Z_STREAM_END. With a non-final push,
+    // complete streams still self-finalize on Z_STREAM_END while truncated
+    // streams remain open, which lets us distinguish the two states.
+    const ok = inflator.push(bytes, false);
     if (!ok || inflator.err !== 0) {
         throw new Error(inflator.msg || 'MDict zlib decompression failed');
+    }
+    if (!inflator.ended) {
+        throw new Error('MDict zlib stream is incomplete');
     }
     if (inflator.strm.avail_in !== 0) {
         throw new Error('MDict zlib stream has trailing compressed input');
