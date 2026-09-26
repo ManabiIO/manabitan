@@ -1,0 +1,88 @@
+name: Focus normally loaded document controls
+on:
+  push:
+    branches: [review/focus-cause-20260926]
+    paths: [.github/workflows/focus-http-controls-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  controls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [firefox, chromium]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Load exact tests and all controller versions
+        run: |
+          git fetch origin 384d1c97dae6bd17555973b77ad415e038438499 508e2e9c0e24102cbcb4d41fa448bfd80fb189e2 c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8
+          git checkout --detach c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('test/playwright/document-focus-ownership.spec.js')
+          s=p.read_text()
+          a=s.index("    await page.setContent(")
+          b=s.index("    await expect(page.frameLocator",a)
+          s=s[:a]+'''    await page.route('http://focus.test/**', async (route) => {
+                  const child = new URL(route.request().url()).pathname === '/child.html'
+                  await route.fulfill({contentType: 'text/html', body: child ?
+                      '<!doctype html><html><body><div id="content-scroll-focus" tabindex="-1">scroll target</div><input id="child-input"></body></html>' :
+                      '<!doctype html><html><body><input id="host-input"><iframe name="focus-child" src="/child.html"></iframe></body></html>'})
+              })
+              await page.goto('http://focus.test/host.html')
+              await page.locator('iframe').evaluate((node, frameStyle) => {
+                  node.style.cssText = frameStyle
+              }, style)
+          '''+s[b:]
+          s+='''
+          for (const action of ['click', 'explicit']) {
+              test(`native ${action} works with no controller prepared`, async ({page}) => {
+                  const frame = await createChild(page, '')
+                  // Constructor only: no prepare(), listener, or passive focus.
+                  if (action === 'click') await frame.locator('#child-input').click()
+                  else await frame.evaluate(() => document.querySelector('#child-input').focus())
+                  await expect(frame.locator('#child-input')).toBeFocused()
+                  await page.keyboard.insertText('native text')
+                  await expect(frame.locator('#child-input')).toHaveValue('native text')
+              })
+          }
+          '''
+          p.write_text(s)
+          PY
+          mkdir -p builds/focus-http
+          cp test/playwright/document-focus-ownership.spec.js builds/focus-http/tests.js
+          git diff > builds/focus-http/fixture-change.patch
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Install real engine and config
+        env:
+          ENGINE: ${{ matrix.engine }}
+        run: |
+          npx playwright install --with-deps "$ENGINE"
+          cat > focus-http.config.mjs <<'JS'
+          import {defineConfig} from '@playwright/test'
+          export default defineConfig({testDir:'./test/playwright',testMatch:'document-focus-ownership.spec.js',workers:1,retries:0,use:{browserName:process.env.ENGINE,headless:true}})
+          JS
+      - name: Compare original, guard and rejected deferral without retries
+        env:
+          ENGINE: ${{ matrix.engine }}
+        run: |
+          for pair in original:384d1c97dae6bd17555973b77ad415e038438499 guard:508e2e9c0e24102cbcb4d41fa448bfd80fb189e2 deferred:c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8; do
+            name=${pair%%:*}
+            ref=${pair#*:}
+            git show "$ref":ext/js/dom/document-focus-controller.js > ext/js/dom/document-focus-controller.js
+            set +e
+            PLAYWRIGHT_JSON_OUTPUT_NAME="builds/focus-http/$name.json" npx playwright test --config=focus-http.config.mjs --reporter=json > "builds/focus-http/$name.log" 2>&1
+            echo "$?" > "builds/focus-http/$name-exit.txt"
+            set -e
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focus-http-${{ matrix.engine }}
+          path: builds/focus-http/
+          retention-days: 14
