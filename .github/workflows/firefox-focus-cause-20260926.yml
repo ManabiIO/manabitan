@@ -1,0 +1,32 @@
+name: Firefox activation cause isolation
+on:
+  push:
+    branches: [review/focus-cause-20260926]
+    paths: [.github/workflows/firefox-focus-cause-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - name: Fetch the three exact controller versions
+        run: git fetch origin 384d1c97dae6bd17555973b77ad415e038438499 508e2e9c0e24102cbcb4d41fa448bfd80fb189e2 c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Install actual browsers
+        run: npx playwright install --with-deps chromium firefox
+      - name: Compare controller, disabled listener, and no-controller controls
+        run: |
+          set -o pipefail
+          mkdir -p builds/firefox-cause
+          node dev/review/firefox-focus-cause.mjs 2>&1 | tee builds/firefox-cause/run.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: firefox-activation-cause
+          path: builds/firefox-cause/
+          retention-days: 14
