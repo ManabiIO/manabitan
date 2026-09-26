@@ -1496,15 +1496,7 @@ export class DictionaryImporter {
                 ) {
                     return termArtifactManifest.packedMediaEntries;
                 }
-                return [...fileMap.entries()]
-                    .map(([path, fileEntry]) => {
-                        const mediaType = getImageMediaTypeFromFileName(path);
-                        if (mediaType === null) {
-                            return null;
-                        }
-                        return {path, mediaType, fileEntry};
-                    })
-                    .filter((value) => value !== null);
+                return this._getArchiveImageMediaFiles(fileMap);
             })();
             const artifactDirectMediaImport = artifactArchiveImageFileEntries.length > 0;
             const useTermMediaRequirements = useMediaPipeline && !artifactDirectMediaImport;
@@ -2788,6 +2780,21 @@ export class DictionaryImporter {
             }
         }
         return false;
+    }
+
+    /**
+     * @param {import('dictionary-importer').ArchiveFileMap} fileMap
+     * @returns {Array<{path: string, mediaType: string, fileEntry: ImportFileEntry}>}
+     */
+    _getArchiveImageMediaFiles(fileMap) {
+        const results = [];
+        for (const [path, fileEntry] of fileMap.entries()) {
+            const mediaType = getImageMediaTypeFromFileName(path);
+            if (mediaType !== null) {
+                results.push({path, mediaType, fileEntry});
+            }
+        }
+        return results;
     }
 
     /**
