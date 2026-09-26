@@ -445,6 +445,7 @@ function collapsePosixPath(path) {
 
 /**
  * @param {string} path
+ * @param {boolean} [preserveEncodedSeparators]
  * @returns {string}
  */
 function decodePercentEncodedPathSegments(path, preserveEncodedSeparators = false) {

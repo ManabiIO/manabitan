@@ -19,6 +19,8 @@
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 
+/** @typedef {FileSystemDirectoryHandle & {entries: () => AsyncIterableIterator<[string, FileSystemFileHandle]>}} MutableDirectory */
+
 /**
  * @param {string} message
  * @returns {Error}
@@ -52,7 +54,7 @@ function createReadableFile(bytes) {
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
  * @param {{removeEntryFailures?: Map<string, number>}} [options]
- * @returns {FileSystemDirectoryHandle}
+ * @returns {MutableDirectory}
  */
 function createMutableDirectory(fileBytesByName, {removeEntryFailures = new Map()} = {}) {
     const getFileHandle = async (
@@ -88,7 +90,7 @@ function createMutableDirectory(fileBytesByName, {removeEntryFailures = new Map(
             },
         };
     };
-    return /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+    return /** @type {MutableDirectory} */ (/** @type {unknown} */ ({
         getFileHandle,
         async removeEntry(/** @type {string} */ name) {
             const failuresRemaining = removeEntryFailures.get(name) ?? 0;
@@ -468,17 +470,15 @@ describe('TermContentOpfsStore', () => {
             removeEntry: baseRoot.removeEntry.bind(baseRoot),
             async *entries() {
                 for await (const [name, handle] of baseRoot.entries()) {
-                    if (name === segmentName) {
-                        yield [name, {
+                    yield name === segmentName ?
+                        [name, {
                             ...handle,
                             async createWritable() {
                                 throw new Error('Injected truncate failure');
                             },
                             getFile: segmentHandle.getFile.bind(segmentHandle),
-                        }];
-                    } else {
-                        yield [name, handle];
-                    }
+                        }] :
+                        [name, handle];
                 }
             },
         }));

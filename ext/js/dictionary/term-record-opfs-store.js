@@ -6027,11 +6027,9 @@ export class TermRecordOpfsStore {
             try {
                 fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: false});
             } catch (lookupError) {
-                const lookupErrorName = (
-                    typeof lookupError === 'object' &&
-                    lookupError !== null &&
-                    typeof Reflect.get(lookupError, 'name') === 'string'
-                ) ? Reflect.get(lookupError, 'name') : '';
+                const lookupErrorName = typeof lookupError === 'object' && lookupError !== null ?
+                    /** @type {unknown} */ (Reflect.get(lookupError, 'name')) :
+                    null;
                 if (allowMissing && lookupErrorName === 'NotFoundError') { return; }
                 throw new AggregateError(
                     [removeError, lookupError],

@@ -23,6 +23,7 @@ function manifest(termBanksByArtifact) {
         packedFileName: null,
         packedMediaFileName: null,
         packedMediaEntries: [],
+        packedMediaEntriesComplete: true,
         sharedGlossaryFileName: null,
         sharedGlossaryPackedOffset: null,
         sharedGlossaryPackedLength: null,

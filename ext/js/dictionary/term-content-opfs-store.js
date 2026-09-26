@@ -551,7 +551,7 @@ export class TermContentOpfsStore {
                         } finally {
                             await writable.close();
                         }
-                        if ((await state.fileHandle.getFile()).size !== 0) {
+                        if ((await state.fileHandle.getFile()).size > 0) {
                             throw new Error(`Failed to truncate term-content reset segment ${state.fileName}`);
                         }
                     } catch (truncateError) {

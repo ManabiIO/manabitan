@@ -437,4 +437,3 @@ describe('DictionaryImporter packed artifact validation', () => {
         await expect(read.call(importer, fileMap)).rejects.toThrow(/Duplicate packed term artifact descriptor/u);
     });
 });
-

@@ -3084,7 +3084,7 @@ export class DictionaryImporter {
         if (!Array.isArray(glossary)) { return paths; }
         for (const item of glossary) {
             if (!(typeof item === 'object' && item !== null) || Array.isArray(item)) { continue; }
-            const value = /** @type {import('core').SafeAny} */ (item);
+            const value = /** @type {Record<string, unknown>} */ (item);
             if (value.type === 'image') {
                 if (typeof value.path === 'string' && getImageMediaTypeFromFileName(value.path) !== null) {
                     paths.push(value.path);
@@ -3110,7 +3110,7 @@ export class DictionaryImporter {
             return;
         }
         if (!(typeof content === 'object' && content !== null)) { return; }
-        const value = /** @type {import('core').SafeAny} */ (content);
+        const value = /** @type {Record<string, unknown>} */ (content);
         if (value.tag === 'img') {
             if (typeof value.path === 'string' && getImageMediaTypeFromFileName(value.path) !== null) {
                 paths.push(value.path);
@@ -4070,9 +4070,13 @@ export class DictionaryImporter {
             const packedOffset = Number.isSafeInteger(mediaEntry.packedOffset) ? /** @type {number} */ (mediaEntry.packedOffset) : -1;
             const packedLength = Number.isSafeInteger(mediaEntry.packedLength) ? /** @type {number} */ (mediaEntry.packedLength) : -1;
             const mediaType = typeof mediaEntry.mediaType === 'string' ? mediaEntry.mediaType : null;
-            const compressionMethod = Number.isInteger(mediaEntry.compressionMethod) ? /** @type {number} */ (mediaEntry.compressionMethod) : ZIP_COMPRESSION_METHOD_STORE;
-            const uncompressedLength = Number.isSafeInteger(mediaEntry.uncompressedLength) ? /** @type {number} */ (mediaEntry.uncompressedLength) : packedLength;
-            if (path === null || mediaType === null || packedOffset < 0 || packedLength <= 0 || uncompressedLength <= 0) {
+            const compressionMethod = typeof mediaEntry.compressionMethod === 'undefined' ? ZIP_COMPRESSION_METHOD_STORE : mediaEntry.compressionMethod;
+            const uncompressedLength = typeof mediaEntry.uncompressedLength === 'undefined' ? packedLength : mediaEntry.uncompressedLength;
+            if (
+                path === null || mediaType === null || packedOffset < 0 || packedLength <= 0 ||
+                typeof compressionMethod !== 'number' || !Number.isInteger(compressionMethod) ||
+                typeof uncompressedLength !== 'number' || !Number.isSafeInteger(uncompressedLength) || uncompressedLength <= 0
+            ) {
                 packedMediaEntriesComplete = false;
                 continue;
             }

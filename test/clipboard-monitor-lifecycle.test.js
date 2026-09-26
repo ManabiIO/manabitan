@@ -42,13 +42,18 @@ async function tick() {
     await entry[1]()
 }
 
-/** @returns {{promise: Promise<string>, resolve: (value: string) => void}} */
+/** @returns {{promise: Promise<string>, resolve: (value: string) => void, reject: (error: Error) => void}} */
 function deferredText() {
     /** @type {(value: string) => void} */
     let resolve = () => { throw new Error('Uninitialized deferred') }
+    /** @type {(error: Error) => void} */
+    let reject = () => { throw new Error('Uninitialized deferred rejection') }
     /** @type {Promise<string>} */
-    const promise = new Promise((resolve2) => { resolve = resolve2 })
-    return {promise, resolve}
+    const promise = new Promise((resolve2, reject2) => {
+        resolve = resolve2
+        reject = reject2
+    })
+    return {promise, resolve, reject}
 }
 
 test('stop inside a change listener cannot schedule another poll', async () => {
@@ -119,7 +124,7 @@ test('an in-flight read completing after stop cannot notify or reschedule', asyn
     assert.equal(monitor._previousText, null)
 })
 
-test('an old read completing after restart cannot replace the new baseline', async () => {
+test.each(['resolve', 'reject'])('an old read settling with %s after restart cannot replace the new baseline', async (outcome) => {
     const pending = deferredText()
     let reads = 0
     const monitor = new ClipboardMonitor({getText: () => (++reads === 1 ? pending.promise : Promise.resolve('new'))})
@@ -127,7 +132,11 @@ test('an old read completing after restart cannot replace the new baseline', asy
     monitor.start()
     await Promise.resolve()
     const currentTimer = monitor._timerId
-    pending.resolve('old')
+    if (outcome === 'resolve') {
+        pending.resolve('old')
+    } else {
+        pending.reject(new Error('Obsolete read failed'))
+    }
     await Promise.resolve()
     assert.equal(monitor._previousText, 'new')
     assert.equal(monitor._timerId, currentTimer)

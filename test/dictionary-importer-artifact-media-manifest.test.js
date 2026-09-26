@@ -58,6 +58,25 @@ describe('DictionaryImporter artifact media manifest completeness', () => {
         expect(manifest.packedMediaEntries).toEqual([]);
     });
 
+    test.each([
+        {uncompressedLength: null},
+        {uncompressedLength: '4'},
+        {uncompressedLength: 1.5},
+        {uncompressedLength: Number.MAX_SAFE_INTEGER + 1},
+        {compressionMethod: null},
+        {compressionMethod: '0'},
+        {compressionMethod: 0.5},
+    ])('does not default explicitly malformed media metadata: %j', async (metadata) => {
+        const manifest = await readManifest({
+            mediaArtifact: {
+                file: 'media.bin',
+                entries: [{path: 'bad.png', packedOffset: 0, packedLength: 4, mediaType: 'image/png', ...metadata}],
+            },
+        });
+        expect(manifest.packedMediaEntriesComplete).toBe(false);
+        expect(manifest.packedMediaEntries).toEqual([]);
+    });
+
     test('falls back to ordinary archive media instead of using an incomplete packed source', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const packedReadFailure = new Error('packed media should not be read');
@@ -87,6 +106,7 @@ describe('DictionaryImporter artifact media manifest completeness', () => {
             includesMediaFiles: true,
         };
         const fileMap = new Map([
+            [MANIFEST_FILE, {filename: MANIFEST_FILE}],
             ['term_bank_1.mbtb', {filename: 'term_bank_1.mbtb'}],
             ['media.bin', {filename: 'media.bin'}],
             ['fallback.png', {filename: 'fallback.png'}],

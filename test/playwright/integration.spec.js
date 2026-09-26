@@ -619,6 +619,7 @@ async function configureAnkiCardViaUi(page, deckName, modelName) {
  */
 async function runSearch(page, query) {
     await waitForSearchPageReady(page);
+    await page.bringToFront();
     const searchTextbox = page.locator('#search-textbox');
     const searchButton = page.locator('#search-button');
     await page.evaluate(() => {
@@ -629,7 +630,7 @@ async function runSearch(page, query) {
         /** @type {Array<{type: string, value: string, trusted: boolean}>} */
         const events = [];
         Reflect.set(globalThis, '__manabitanSearchInputEvents', events);
-        for (const type of ['input', 'change']) {
+        for (const type of ['input', 'change', 'focus', 'blur']) {
             input.addEventListener(type, (event) => {
                 events.push({
                     type: event.type,
@@ -639,6 +640,8 @@ async function runSearch(page, query) {
             });
         }
     });
+    await searchTextbox.focus();
+    await expect(searchTextbox).toBeFocused();
     await searchTextbox.fill(query);
     try {
         await expect(searchTextbox).toHaveValue(query);
@@ -647,10 +650,12 @@ async function runSearch(page, query) {
             events: Reflect.get(globalThis, '__manabitanSearchInputEvents'),
             debug: Reflect.get(globalThis, '__manabitanSearchDebug'),
             activeElement: document.activeElement?.id ?? '',
+            documentFocused: document.hasFocus(),
+            url: location.href,
             loaded: document.documentElement.dataset.loaded ?? '',
         }));
         const message = error instanceof Error ? error.message : String(error);
-        throw new Error(`${message}\nSearch overwrite trace: ${JSON.stringify(trace)}`);
+        throw new Error(`${message}\nSearch input trace: ${JSON.stringify(trace)}`);
     }
     await searchButton.click();
 }
@@ -664,6 +669,16 @@ async function waitForSaveButtonEnabled(page) {
     await expect(saveButton).toBeVisible({timeout: 30_000});
     await expect(saveButton).toBeEnabled({timeout: 30_000});
 }
+
+test('search accepts typing immediately after visible initialization', async ({page, extensionId}) => {
+    await page.bringToFront();
+    await page.goto(`chrome-extension://${extensionId}/search.html`);
+    await waitForSearchPageReady(page);
+    const searchTextbox = page.locator('#search-textbox');
+    await expect(searchTextbox).toBeFocused();
+    await page.keyboard.insertText('initial query');
+    await expect(searchTextbox).toHaveValue('initial query');
+});
 
 test('search clipboard', async ({page, extensionId}) => {
     await page.goto(`chrome-extension://${extensionId}/search.html`);

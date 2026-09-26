@@ -122,12 +122,28 @@ describe('escaped keys in the non-fused native interner', () => {
         expect(result.profile?.nativeStringPlanFallbackChunkCount).toBe(0)
     })
 
-    test('retains the JavaScript fallback for replacement-decoded invalid UTF-8', async () => {
+    test.each([
+        '"\\/"',
+        '"\\u65e5本"',
+        '"\\ud83d\\ude42"',
+        '"\\ud800x\\udfff"',
+        '"é\\n𠮷"',
+    ])('matches decoded bytes for explicit JSON spelling %s', async (token) => {
+        const source = `[[${token},"","","",0,[],0,""]]`
+        const oracle = await project(source, false)
+        const result = await project(source, true)
+        const rows = snapshot(result.chunks)
+        expect(rows).toStrictEqual(snapshot(oracle.chunks))
+        expect(rows[0].expression).toStrictEqual(encoder.encode(/** @type {string} */ (JSON.parse(token))))
+        expect(result.profile?.nativeStringPlanFallbackChunkCount).toBe(0)
+    })
+
+    test.each([0xff, 0xc0, 0x80, 0xed, 0xf5])('retains the JavaScript fallback for invalid UTF-8 byte %i', async (invalidByte) => {
         const prefix = encoder.encode('[["\\u0061')
         const suffix = encoder.encode('","","","",0,[],0,""]]')
         const source = new Uint8Array(prefix.length + 1 + suffix.length)
         source.set(prefix)
-        source[prefix.length] = 0xff
+        source[prefix.length] = invalidByte
         source.set(suffix, prefix.length + 1)
         const oracle = await project(source, false)
         const result = await project(source, true)

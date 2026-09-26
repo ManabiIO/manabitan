@@ -30,12 +30,11 @@ function createProxy(frameWindow) {
 
 /**
  * @param {TemplateRendererProxy} proxy
- * @param {unknown} params
  * @param {number|null} [timeout]
  * @returns {Promise<unknown>}
  */
-function invoke(proxy, params, timeout = null) {
-    return Reflect.get(proxy, '_invoke').call(proxy, 'render', params, timeout);
+function invoke(proxy, timeout = null) {
+    return proxy._invoke('renderMulti', {items: []}, timeout);
 }
 
 /**
@@ -58,7 +57,7 @@ describe('TemplateRendererProxy transport settlement', () => {
         };
         const proxy = createProxy(frameWindow);
 
-        await expect(invoke(proxy, {}, 1000)).rejects.toThrow('postMessage failed');
+        await expect(invoke(proxy, 1000)).rejects.toThrow('postMessage failed');
         expect(Reflect.get(proxy, '_invocations').size).toBe(0);
     });
 
@@ -66,12 +65,12 @@ describe('TemplateRendererProxy transport settlement', () => {
         /** @type {unknown} */
         let request;
         const frameWindow = {
-            postMessage(message) {
+            postMessage(/** @type {unknown} */ message) {
                 request = message;
             },
         };
         const proxy = createProxy(frameWindow);
-        const promise = invoke(proxy, {}, 1000);
+        const promise = invoke(proxy, 1000);
         const id = Reflect.get(/** @type {object} */ (request), 'id');
 
         dispatchMessage(frameWindow, {
@@ -88,12 +87,12 @@ describe('TemplateRendererProxy transport settlement', () => {
         /** @type {unknown} */
         let request;
         const frameWindow = {
-            postMessage(message) {
+            postMessage(/** @type {unknown} */ message) {
                 request = message;
             },
         };
         const proxy = createProxy(frameWindow);
-        const promise = invoke(proxy, {}, 1000);
+        const promise = invoke(proxy, 1000);
         const id = Reflect.get(/** @type {object} */ (request), 'id');
         const error = new ExtensionError('render failed');
         error.data = {field: 'Front'};
@@ -116,12 +115,12 @@ describe('TemplateRendererProxy transport settlement', () => {
         /** @type {unknown} */
         let request;
         const frameWindow = {
-            postMessage(message) {
+            postMessage(/** @type {unknown} */ message) {
                 request = message;
             },
         };
         const proxy = createProxy(frameWindow);
-        const promise = invoke(proxy, {}, 1000);
+        const promise = invoke(proxy, 1000);
         const id = Reflect.get(/** @type {object} */ (request), 'id');
         const result = {result: 'ok'};
 
