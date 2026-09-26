@@ -1,0 +1,74 @@
+name: SQL reuse complete import qualification
+on:
+  push:
+    branches: [review/more-storage-sql-20260926]
+    paths: [.github/workflows/review-sql-completion-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [frequency, mixed, small]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Pin comparison and retain source identities
+        run: |
+          git fetch --no-tags --depth=1 origin 384d1c97dae6bd17555973b77ad415e038438499 67e03e925816d0b43cf321f3e89f198352cb1569
+          mkdir -p builds/sql-import
+          git rev-parse HEAD > builds/sql-import/research-head.txt
+          git diff --name-only 384d1c97dae6bd17555973b77ad415e038438499 67e03e925816d0b43cf321f3e89f198352cb1569 -- ext/ > builds/sql-import/product-diff.txt
+          test "$(cat builds/sql-import/product-diff.txt)" = ext/js/dictionary/dictionary-database.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('dev/review/sql-complete-import-20260926.mjs')
+          s = p.read_text()
+          old = 'ids.map((i) => [`term-${i}`, null])'
+          assert old in s
+          p.write_text(s.replace(old, 'ids.map((i) => ({term: `term-${i}`, reading: null}))'))
+          PY
+          cp dev/review/sql-complete-import-20260926.mjs builds/sql-import/driver.mjs
+          git show 384d1c97dae6bd17555973b77ad415e038438499:ext/js/dictionary/dictionary-database.js > builds/sql-import/database-baseline.js
+          git show 67e03e925816d0b43cf321f3e89f198352cb1569:ext/js/dictionary/dictionary-database.js > builds/sql-import/database-candidate.js
+          sha256sum builds/sql-import/database-*.js ext/js/dom/document-focus-controller.js package-lock.json > builds/sql-import/source.sha256
+      - name: Export local validation dependencies
+        if: matrix.workload == 'frequency'
+        run: |
+          mkdir -p builds/local-dependencies
+          tar -czf builds/local-dependencies/node-modules.tgz node_modules
+      - name: Build extension and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Require both arms to import and pass readback before timing
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/sql-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/sql-import/${WORKLOAD}-preflight.log"
+      - name: Fixed paired complete import schedule
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/sql-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/sql-import/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sql-complete-${{ matrix.workload }}
+          path: builds/sql-import/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.workload == 'frequency'
+        with:
+          name: local-validation-dependencies
+          path: builds/local-dependencies/
+          retention-days: 2
