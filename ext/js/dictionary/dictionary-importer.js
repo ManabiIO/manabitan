@@ -514,43 +514,20 @@ function reverseUtf16PreserveSurrogates(value) {
     if (ii <= 1) {
         return value;
     }
-    // Most dictionary terms are BMP-only; use a cheaper code-unit reversal when no surrogate code units are present.
-    let hasSurrogates = false;
-    for (let i = 0; i < ii; ++i) {
-        if ((value.charCodeAt(i) & 0xf800) === 0xd800) {
-            hasSurrogates = true;
-            break;
-        }
-    }
-    if (!hasSurrogates) {
-        /** @type {string[]} */
-        const parts = new Array(ii);
-        for (let i = 0; i < ii; ++i) {
-            parts[i] = value[ii - 1 - i];
-        }
-        return parts.join('');
-    }
-    /** @type {string[]} */
-    const parts = [];
-    parts.length = ii;
-    let outIndex = 0;
+    let result = '';
     for (let i = ii - 1; i >= 0; --i) {
         const c = value.charCodeAt(i);
-        if (
-            c >= 0xdc00 && c <= 0xdfff &&
-            i > 0
-        ) {
-            const prev = value.charCodeAt(i - 1);
-            if (prev >= 0xd800 && prev <= 0xdbff) {
-                parts[outIndex++] = value.slice(i - 1, i + 1);
+        if ((c & 0xfc00) === 0xdc00 && i > 0) {
+            const previous = value.charCodeAt(i - 1);
+            if ((previous & 0xfc00) === 0xd800) {
+                result += value[i - 1] + value[i];
                 --i;
                 continue;
             }
         }
-        parts[outIndex++] = value[i];
+        result += value[i];
     }
-    parts.length = outIndex;
-    return parts.join('');
+    return result;
 }
 
 /**
