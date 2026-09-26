@@ -1,0 +1,27 @@
+name: Import follow-through source
+on:
+  push:
+    branches: [review/import-followthrough-20260926]
+    paths: [.github/workflows/review-import-source-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 2d79cd1dec164caa3075884133d9d12204a4f48a
+      - run: |
+          mkdir -p /tmp/review-source
+          git rev-parse HEAD > /tmp/review-source/head.txt
+          git ls-files -s > /tmp/review-source/tracked-blobs.txt
+          git archive --format=tar.gz HEAD > /tmp/review-source/source.tgz
+          sha256sum /tmp/review-source/source.tgz > /tmp/review-source/sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: import-followthrough-source-2d79cd1
+          path: /tmp/review-source/
+          retention-days: 7
