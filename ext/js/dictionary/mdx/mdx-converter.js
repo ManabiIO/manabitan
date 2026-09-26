@@ -78,6 +78,8 @@ const MDX_GLOSSARY_ENTRY_CLASS_PREFIX = 'mdict-yomitan-entry-';
 // Conversion walks every definition, so cache decompressed MDX record blocks.
 // MDD resource lookup remains lazy and uncached.
 const MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES = 8 * 1024 * 1024;
+// One separately bounded slot for a repeatedly requested oversized block.
+const MDX_IMPORT_OVERSIZED_RECORD_BLOCK_CACHE_BYTES = 16 * 1024 * 1024;
 const STRUCTURED_CLASS_ATTR = 'data-sc-class';
 const STRUCTURED_ID_ATTR = 'data-sc-id';
 const STRUCTURED_TAG_ATTR = 'data-sc-tag';
@@ -2111,7 +2113,10 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         termBankSize = 10000,
     } = options;
 
-    const mdx = /** @type {MdxDictionaryLike} */ (new MDX(fileName, mdxBytes, {recordBlockCacheBytes: MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES}));
+    const mdx = /** @type {MdxDictionaryLike} */ (new MDX(fileName, mdxBytes, {
+        recordBlockCacheBytes: MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES,
+        oversizedRecordBlockCacheBytes: MDX_IMPORT_OVERSIZED_RECORD_BLOCK_CACHE_BYTES,
+    }));
     /** @type {MddAssetResolver|null} */
     let assetResolver = null;
     try {
@@ -2145,9 +2150,31 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         });
 
         const totalEntries = Math.max(1, mdx.keywordList.length);
-        if (typeof onProgress === 'function') {
-            onProgress({stage: 'convert', completed: 0, total: totalEntries});
-        }
+        const progressStep = Math.max(1, Math.ceil(totalEntries / 100));
+        let lastProgressCompleted = -1;
+        let lastProgressAt = 0;
+        /**
+         * Bound progress traffic while still reporting slow entries promptly.
+         * @param {number} completed
+         * @param {boolean} [force]
+         */
+        const reportConvertProgress = (completed, force = false) => {
+            if (typeof onProgress !== 'function' || completed === lastProgressCompleted) { return; }
+            const now = Date.now();
+            if (
+                !force &&
+                lastProgressCompleted >= 0 &&
+                completed < totalEntries &&
+                completed - lastProgressCompleted < progressStep &&
+                now - lastProgressAt < 50
+            ) {
+                return;
+            }
+            onProgress({stage: 'convert', completed, total: totalEntries});
+            lastProgressCompleted = completed;
+            lastProgressAt = now;
+        };
+        reportConvertProgress(0, true);
 
         /** @type {Map<string, Uint8Array>} */
         const embeddedAssets = new Map();
@@ -2212,9 +2239,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             const term = trimNullSuffix(item.keyText);
             processedEntries += 1;
             if (term.length === 0) {
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
             let definition;
@@ -2223,9 +2248,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 definition = trimNullSuffix(result.definition ?? '');
             } catch (_error) {
                 skippedEntryErrorCount += 1;
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
             const redirectDefinition = trimCssWhitespace(definition);
@@ -2239,9 +2262,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                         redirectCount += 1;
                     }
                 }
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
 
@@ -2257,9 +2278,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 });
             } catch (_error) {
                 skippedEntryErrorCount += 1;
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
             for (const [path, bytes] of converted.embeddedAssets) {
@@ -2279,9 +2298,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             }
             convertedEntries.push({term, glossary: converted.glossary, sequence});
             sequence += 1;
-            if (typeof onProgress === 'function') {
-                onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-            }
+            reportConvertProgress(processedEntries);
         }
         recordPhaseTiming('prepare-mdx:convert-entries', tConvertEntriesStart, {
             entries: processedEntries,
@@ -2404,9 +2421,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             assetLookupErrorCount: assetResolver?.lookupErrorCount ?? 0,
             hasRootStylesheet: rootStylesheet !== null,
         });
-        if (typeof onProgress === 'function') {
-            onProgress({stage: 'convert', completed: totalEntries, total: totalEntries});
-        }
+        reportConvertProgress(totalEntries, true);
         return {
             files,
             archiveFileName: `${title}.zip`,
