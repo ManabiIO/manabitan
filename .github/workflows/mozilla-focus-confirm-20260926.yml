@@ -1,0 +1,53 @@
+name: Mozilla Firefox deferred focus confirmation
+on:
+  push:
+    branches: [review/focus-cause-20260926]
+    paths: [.github/workflows/mozilla-focus-confirm-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  firefox:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin and extend native controls without changing assertions
+        run: |
+          git fetch origin 384d1c97dae6bd17555973b77ad415e038438499 9280a9fbd65bba7c8db73c2aec34fcd6b4afc915 c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/review/mozilla-focus-controls.mjs')
+          s=p.read_text()
+          s=s.replace("    guard: '9280a9fbd65bba7c8db73c2aec34fcd6b4afc915',", "    guard: '9280a9fbd65bba7c8db73c2aec34fcd6b4afc915',\n    deferred: 'c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8',")
+          s=s.replace("['original','guard','none']", "['original','guard','deferred','none']")
+          s=s.replace("for (const hostActivation of ['programmatic','pointer']) {", "for (let repeat = 0; repeat < (variant === 'deferred' ? 10 : 1); ++repeat) {\n        for (const hostActivation of ['programmatic','pointer']) {")
+          s=s.replace("const result = {variant,hostActivation,action,passed:false}", "const result = {variant,repeat,hostActivation,action,passed:false}")
+          s=s.replace("} finally {\n    await driver.quit()", "    }\n} finally {\n    await driver.quit()")
+          s=s.replace("x.variant!=='original'", "x.variant==='deferred'||x.variant==='none'")
+          p.write_text(s)
+          PY
+          mkdir -p builds/mozilla-focus
+          cp dev/review/mozilla-focus-controls.mjs builds/mozilla-focus/driver.mjs
+          printf '%s\n' c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8 > builds/mozilla-focus/deferred-source-ref.txt
+          git show c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8:ext/js/dom/document-focus-controller.js | sha256sum > builds/mozilla-focus/deferred-source-sha256.txt
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Install Mozilla Firefox as in normal CI
+        run: |
+          curl -fsSL "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US" -o /tmp/firefox-devedition.tar.bz2
+          mkdir -p "$HOME/firefox-devedition"
+          tar -xf /tmp/firefox-devedition.tar.bz2 -C "$HOME/firefox-devedition"
+          echo "MANABITAN_FIREFOX_BINARY=$HOME/firefox-devedition/firefox/firefox" >> "$GITHUB_ENV"
+      - name: Reproduce synchronous failure and require deferred/native success
+        run: |
+          set -o pipefail
+          node dev/review/mozilla-focus-controls.mjs 2>&1 | tee builds/mozilla-focus/run.log
+          node --input-type=module -e "import fs from 'node:fs';const r=JSON.parse(fs.readFileSync('builds/mozilla-focus/cases.json'));const d=r.cases.filter(c=>c.variant==='deferred');if(d.length!==120||!d.every(c=>c.passed))throw Error('Incomplete deferred qualification')"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mozilla-deferred-focus-confirmation
+          path: builds/mozilla-focus/
+          retention-days: 14
