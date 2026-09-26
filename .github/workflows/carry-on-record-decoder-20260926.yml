@@ -1,0 +1,74 @@
+name: Carry-on record decoder qualification
+on:
+  push:
+    branches: [review/carry-on-record-decoder-20260926]
+    paths: [.github/workflows/carry-on-record-decoder-20260926.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 384d1c97dae6bd17555973b77ad415e038438499
+      - uses: ./.github/actions/setup
+        with:
+          node-version: 22.16.0
+      - name: Verify and apply regression tests
+        shell: bash
+        run: |
+          mkdir -p /tmp/record-evidence
+          git rev-parse HEAD > /tmp/record-evidence/base.txt
+          python3 - <<'PY'
+          import base64,gzip,hashlib,pathlib
+          data=gzip.decompress(base64.b64decode('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'))
+          assert hashlib.sha256(data).hexdigest() == '9e9b1f1c378f3d0483e0a109d5686d3e2897b657dc919970e33e0eb9af5c19c1'
+          pathlib.Path('/tmp/record-evidence/repair.patch').write_bytes(data)
+          PY
+          test "$(git hash-object ext/js/dictionary/term-record-opfs-store.js)" = 866c26b34b21f2a9d3397114fbe9d928cb55f284
+          git apply --include=test/term-record-shared-decode.test.js /tmp/record-evidence/repair.patch
+      - name: Reproduce unchanged implementation failures
+        shell: bash
+        run: |
+          set +e
+          npx vitest run test/term-record-shared-decode.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/record-evidence/red.json > /tmp/record-evidence/red.log 2>&1
+          result=$?
+          set -e
+          test "$result" -ne 0
+          python3 - <<'PY'
+          import json
+          j=json.load(open('/tmp/record-evidence/red.json'))
+          assert j['numFailedTests']==14 and j['numPassedTests']==13, j
+          PY
+      - name: Qualify repair on complete current checkout
+        shell: bash
+        run: |
+          git apply --include=ext/js/dictionary/term-record-opfs-store.js /tmp/record-evidence/repair.patch
+          test "$(git hash-object ext/js/dictionary/term-record-opfs-store.js)" = 232f8c6359afe43b616355c5938cd3591bd825b2
+          test "$(git hash-object test/term-record-shared-decode.test.js)" = f4f2dc04c40d73adc85af7f7e51c58d59e80d16f
+          npx eslint ext/js/dictionary/term-record-opfs-store.js test/term-record-shared-decode.test.js
+          npm run test:ts
+          npm run test:unit -- --reporter=json --outputFile=/tmp/record-evidence/unit.json > /tmp/record-evidence/unit.log 2>&1
+          npm run test:unit:options
+          npm run test:build
+          git diff --check
+      - name: Publish clean product branch
+        shell: bash
+        run: |
+          git switch -c fix/record-shared-decoder-constructor-20260926
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/dictionary/term-record-opfs-store.js test/term-record-shared-decode.test.js
+          git commit -m 'fix(storage): decode shared record views without global constructor'
+          git diff HEAD^ --name-only > /tmp/record-evidence/changed-files.txt
+          test "$(wc -l < /tmp/record-evidence/changed-files.txt)" = 2
+          git rev-parse HEAD > /tmp/record-evidence/head.txt
+          git push origin HEAD:refs/heads/fix/record-shared-decoder-constructor-20260926
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: carry-on-record-decoder-qualification
+          path: /tmp/record-evidence
+          retention-days: 14
