@@ -1195,13 +1195,21 @@ export class DictionaryImporter {
             usePackedTermArtifactSource
         );
         const packedTermArtifactManifest = usePackedTermArtifact ? termArtifactManifest : null;
-        const totalArtifactTermRows = (
-            termArtifactManifest !== null
-        ) ?
-            [...termArtifactManifest.termBanksByArtifact.values()].reduce((sum, value) => (
-                sum + (Number.isInteger(value.rows) ? /** @type {number} */ (value.rows) : 0)
-            ), 0) :
-            0;
+        /** @type {number|null} */
+        let totalArtifactTermRows = termArtifactManifest === null ? null : 0;
+        if (termArtifactManifest !== null) {
+            for (const {rows} of termArtifactManifest.termBanksByArtifact.values()) {
+                if (
+                    rows === null ||
+                    totalArtifactTermRows === null ||
+                    rows > Number.MAX_SAFE_INTEGER - totalArtifactTermRows
+                ) {
+                    totalArtifactTermRows = null;
+                    break;
+                }
+                totalArtifactTermRows += rows;
+            }
+        }
         const expectedTermContentImportBytes = (
             effectiveTermContentStorageMode === 'raw-bytes'
         ) ?
@@ -1213,7 +1221,7 @@ export class DictionaryImporter {
                 termArtifactFiles,
             ) :
             null;
-        const expectedTermRecordImportBytes = totalArtifactTermRows > 0 ? totalArtifactTermRows * 128 : null;
+        const expectedTermRecordImportBytes = this._getExpectedTermRecordImportBytes(totalArtifactTermRows);
         /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
             ...snapshotTermBankExperiments(details),
@@ -3799,7 +3807,7 @@ export class DictionaryImporter {
             const artifact = typeof termBank.artifact === 'string' ? termBank.artifact : null;
             const packedOffset = Number.isInteger(termBank.packedOffset) ? /** @type {number} */ (termBank.packedOffset) : -1;
             const packedLength = Number.isInteger(termBank.packedLength) ? /** @type {number} */ (termBank.packedLength) : -1;
-            const rows = Number.isInteger(termBank.rows) ? /** @type {number} */ (termBank.rows) : null;
+            const rows = this._getArtifactTermBankRowCount(termBank.rows);
             if (artifact === null || packedOffset < 0 || packedLength <= 0) { continue; }
             termBanksByArtifact.set(artifact, {packedOffset, packedLength, rows});
         }
@@ -3910,6 +3918,31 @@ export class DictionaryImporter {
             }
         }
         return results;
+    }
+
+    /**
+     * @param {unknown} value
+     * @returns {number|null}
+     */
+    _getArtifactTermBankRowCount(value) {
+        return Number.isSafeInteger(value) && /** @type {number} */ (value) >= 0 ?
+            /** @type {number} */ (value) :
+            null;
+    }
+
+    /**
+     * @param {number|null} totalRows
+     * @returns {number|null}
+     */
+    _getExpectedTermRecordImportBytes(totalRows) {
+        const bytesPerRowEstimate = 128;
+        return (
+            Number.isSafeInteger(totalRows) &&
+            /** @type {number} */ (totalRows) > 0 &&
+            /** @type {number} */ (totalRows) <= Math.floor(Number.MAX_SAFE_INTEGER / bytesPerRowEstimate)
+        ) ?
+            /** @type {number} */ (totalRows) * bytesPerRowEstimate :
+            null;
     }
 
     /**
@@ -4551,11 +4584,11 @@ export class DictionaryImporter {
      * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
      * @param {number} [sharedGlossaryBaseOffset]
      * @param {boolean} [directArtifactChunkImport]
-     * @param {number} [dictionaryTotalRows]
+     * @param {number|null} [dictionaryTotalRows]
      * @param {string|null} [artifactTermContentMode]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
      */
-    async _readTermBankArtifactFile(termFile, dictionaryTitle, prefixWildcardsSupported, termContentStorageMode, onChunk = void 0, sharedGlossaryBaseOffset = 0, directArtifactChunkImport = false, dictionaryTotalRows = 0, artifactTermContentMode = null) {
+    async _readTermBankArtifactFile(termFile, dictionaryTitle, prefixWildcardsSupported, termContentStorageMode, onChunk = void 0, sharedGlossaryBaseOffset = 0, directArtifactChunkImport = false, dictionaryTotalRows = null, artifactTermContentMode = null) {
         this._lastArtifactTermBankReadProfile = null;
         const tReadBytesStart = Date.now();
         const bytes = await this._getData(termFile, new Uint8ArrayWriter());
@@ -4573,11 +4606,11 @@ export class DictionaryImporter {
      * @param {number} readBytesMs
      * @param {number} [sharedGlossaryBaseOffset]
      * @param {boolean} [directArtifactChunkImport]
-     * @param {number} [dictionaryTotalRows]
+     * @param {number|null} [dictionaryTotalRows]
      * @param {string|null} [artifactTermContentMode]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
      */
-    async _decodeTermBankArtifactBytes(bytes, filename, dictionaryTitle, prefixWildcardsSupported, termContentStorageMode, onChunk = void 0, readBytesMs = 0, sharedGlossaryBaseOffset = 0, directArtifactChunkImport = false, dictionaryTotalRows = 0, artifactTermContentMode = null) {
+    async _decodeTermBankArtifactBytes(bytes, filename, dictionaryTitle, prefixWildcardsSupported, termContentStorageMode, onChunk = void 0, readBytesMs = 0, sharedGlossaryBaseOffset = 0, directArtifactChunkImport = false, dictionaryTotalRows = null, artifactTermContentMode = null) {
         const textDecoder = this._textDecoder;
         if (bytes.byteLength < (TERM_BANK_ARTIFACT_MAGIC_BYTES + 4)) {
             throw new Error(`Invalid term artifact payload in '${filename}': too small`);
@@ -4728,7 +4761,7 @@ export class DictionaryImporter {
             return {
                 dictionary: dictionaryTitle,
                 rowCount: streamedRowCount,
-                dictionaryTotalRows,
+                dictionaryTotalRows: typeof dictionaryTotalRows === 'number' ? dictionaryTotalRows : void 0,
                 expressionBytesList: useFullChunkArrays ? chunkExpressionBytes : chunkExpressionBytes.slice(0, streamedRowCount),
                 readingBytesList: useFullChunkArrays ? chunkReadingBytes : chunkReadingBytes.slice(0, streamedRowCount),
                 readingEqualsExpressionList: /** @type {Uint8Array} */ (
