@@ -15,7 +15,7 @@ jobs:
       matrix:
         workload: [repeated, unique, none]
     env:
-      FIX: '508e2e9c0e24102cbcb4d41fa448bfd80fb189e2'
+      FIX: 'c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8'
       BASE: '384d1c97dae6bd17555973b77ad415e038438499'
       CACHE: '31431c90eab14421f9ecc70616cce984406bceec'
       RECIPE: 'b104e192d5efec5ee92e7f46a624b372f3dfeb46'
@@ -29,7 +29,7 @@ jobs:
           mkdir -p dev/review builds/cache-completion
           cp /tmp/import-driver.mjs dev/review/mdx-complete-import-20260926.mjs
           test "$(git diff --name-only "$BASE" "$CACHE" -- ext/)" = ext/js/dictionary/mdx/mdx-converter.js
-          test "$(git hash-object ext/js/dom/document-focus-controller.js)" = 8e8968fea22279fd0fd45cc2e3b8ef5b7b66361d
+          test "$(git hash-object ext/js/dom/document-focus-controller.js)" = 1932bb33dd152c722ea6f228ce27619a78b09a42
           python3 - <<'PY'
           from pathlib import Path
           p=Path('dev/review/mdx-complete-import-20260926.mjs')
@@ -47,6 +47,8 @@ jobs:
           """
           s=s.replace(anchor,check+anchor)
           s=s.replace('sourceHash:executedSourceHash,browser:', 'sourceHash:executedSourceHash,focusSourceHash:executedFocusHash,browser:')
+          s=s.replace("block % 2 ? 'BAAB' : 'ABBA'", "block % 2 ? 'ABBA' : 'BAAB'")
+          s=s.replace("const schedule = [{kind:'warmup',arm:'A'},{kind:'warmup',arm:'B'}]", "const schedule = [{kind:'warmup',arm:'B'},{kind:'warmup',arm:'A'}]")
           p.write_text(s)
           PY
           cp dev/review/mdx-complete-import-20260926.mjs builds/cache-completion/driver.mjs
@@ -76,6 +78,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cache-after-focus-${{ matrix.workload }}
+          name: cache-final-focus-${{ matrix.workload }}
           path: builds/cache-completion/
           retention-days: 14
