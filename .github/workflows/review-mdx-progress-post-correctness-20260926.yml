@@ -1,0 +1,53 @@
+name: MDX progress post-correctness benchmark
+on:
+  push:
+    branches: [review/mdx-progress-post-correctness-20260926]
+    paths: [.github/workflows/review-mdx-progress-post-correctness-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin current product sources and driver
+        run: |
+          cp dev/review/progress-post-correctness-20260926.mjs /tmp/driver.mjs
+          git fetch --no-tags --depth=1 origin 9fe19a57864653d84dc5f7c41b6277ccd6d2f7f0 a9acbf52263a0fdf6f3c87ac3590186fb684699f
+          git checkout --detach 9fe19a57864653d84dc5f7c41b6277ccd6d2f7f0
+          mkdir -p dev/review builds/progress-completion
+          cp /tmp/driver.mjs dev/review/progress-complete-import-20260926.mjs
+          cp /tmp/driver.mjs builds/progress-completion/executed-driver.mjs
+          git diff 9fe19a57864653d84dc5f7c41b6277ccd6d2f7f0 a9acbf52263a0fdf6f3c87ac3590186fb684699f -- ext/ > builds/progress-completion/product.patch
+          test "$(git diff --name-only 9fe19a57864653d84dc5f7c41b6277ccd6d2f7f0 a9acbf52263a0fdf6f3c87ac3590186fb684699f -- ext/)" = ext/js/dictionary/mdx/mdx-converter.js
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/progress-complete-import-20260926.mjs large 2>&1 | tee builds/progress-completion/large-preflight.log
+      - name: Counterbalanced 50k cohort
+        env:
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/progress-complete-import-20260926.mjs large 2>&1 | tee builds/progress-completion/large.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: progress-post-correctness-${{ matrix.cohort }}
+          path: builds/progress-completion/
+          retention-days: 14
