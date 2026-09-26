@@ -72,7 +72,9 @@ export class DocumentFocusController {
      */
     _updateFocusedElement(force) {
         const target = this._contentScrollFocusElement;
-        if (target === null) { return; }
+        // Passive scrollbar setup must not take focus from another frame/tab.
+        // Hidden popup frames can initialize after the host accepts input.
+        if (target === null || !document.hasFocus()) { return; }
 
         const {activeElement} = document;
         if (
