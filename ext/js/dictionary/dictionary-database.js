@@ -4364,10 +4364,6 @@ null;
                 try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
             }
             throw e;
-        } finally {
-            if (pendingDedupScratch !== null) {
-                this._releaseArtifactTermContentDedupScratch(pendingDedupScratch);
-            }
         }
     }
 
@@ -5145,6 +5141,7 @@ null;
          * @param {number} hash1
          * @param {number} hash2
          * @param {number} pendingIndex
+         * @throws {Error} If the insertion slot is unexpectedly occupied.
          */
         const insertPendingContentIndex = (hash1, hash2, pendingIndex) => {
             if (pendingDedupScratch === null) { return; }
@@ -5430,6 +5427,10 @@ null;
                 try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
             }
             throw e;
+        } finally {
+            if (pendingDedupScratch !== null) {
+                this._releaseArtifactTermContentDedupScratch(pendingDedupScratch);
+            }
         }
     }
 
