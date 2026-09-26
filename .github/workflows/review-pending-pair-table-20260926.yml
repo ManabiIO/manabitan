@@ -1,0 +1,20 @@
+name: Pending pair table qualification
+on:
+  push:
+    branches: [review/pending-pair-table-20260926]
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Focused correctness and compatibility
+        run: |
+          npx vitest run test/dictionary-database-pending-hash-collision.test.js test/dictionary-database-content-dedup.test.js
+          npm run test:ts:test
+          npx eslint ext/js/dictionary/dictionary-database.js test/dictionary-database-pending-hash-collision.test.js
