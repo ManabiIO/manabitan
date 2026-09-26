@@ -1,0 +1,23 @@
+name: Zstd frame consumption probe
+on:
+  push:
+    branches: [review/zstd-frame-consumption-20260926]
+    paths: [.github/workflows/review-zstd-frame-consumption-20260926.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Probe actual compiled Zstd
+        run: node dev/review/zstd-frame-consumption-20260926.mjs | tee zstd-frame-consumption.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zstd-frame-consumption
+          path: zstd-frame-consumption.json
+          retention-days: 7
