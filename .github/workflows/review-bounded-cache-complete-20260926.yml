@@ -20,13 +20,13 @@ jobs:
       - name: Pin product and retain exact executed driver
         run: |
           cp dev/review/bounded-cache-complete-import-20260926.mjs /tmp/bounded-cache-driver.mjs
-          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a 8a0ecf9f1a90a51c9482ad8f389a59c0a4fcc7c5
-          git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
+          git fetch --no-tags --depth=1 origin 9fe19a57864653d84dc5f7c41b6277ccd6d2f7f0 3997012b4fd04d0803f2ef39993da371ca00ee45
+          git checkout --detach 9fe19a57864653d84dc5f7c41b6277ccd6d2f7f0
           mkdir -p dev/review builds/bounded-cache-completion
           cp /tmp/bounded-cache-driver.mjs dev/review/bounded-cache-complete-import-20260926.mjs
           cp /tmp/bounded-cache-driver.mjs builds/bounded-cache-completion/executed-driver.mjs
-          git diff 2d79cd1dec164caa3075884133d9d12204a4f48a 8a0ecf9f1a90a51c9482ad8f389a59c0a4fcc7c5 -- ext/ > builds/bounded-cache-completion/product.patch
-          test "$(git diff --name-only 2d79cd1dec164caa3075884133d9d12204a4f48a 8a0ecf9f1a90a51c9482ad8f389a59c0a4fcc7c5 -- ext/ | tr '\n' ' ')" = "ext/js/dictionary/mdx/mdx-converter.js ext/js/dictionary/mdx/vendor/js-mdict/mdict.js "
+          git diff 9fe19a57864653d84dc5f7c41b6277ccd6d2f7f0 3997012b4fd04d0803f2ef39993da371ca00ee45 -- ext/ > builds/bounded-cache-completion/product.patch
+          test "$(git diff --name-only 9fe19a57864653d84dc5f7c41b6277ccd6d2f7f0 3997012b4fd04d0803f2ef39993da371ca00ee45 -- ext/ | tr '\n' ' ')" = "ext/js/dictionary/mdx/mdx-converter.js ext/js/dictionary/mdx/vendor/js-mdict/mdict.js "
           git rev-parse HEAD > builds/bounded-cache-completion/product-head.txt
       - uses: ./.github/actions/setup
         with:
