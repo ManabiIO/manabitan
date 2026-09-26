@@ -1,0 +1,72 @@
+name: Current MDX progress qualification
+on:
+  push:
+    branches: [review/import-followthrough-20260926]
+    paths: [.github/workflows/review-progress-qualification-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin source and materialize verified test source
+        run: |
+          cp dev/review/progress-source.json.zlib.b64 /tmp/progress-source.b64
+          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a
+          git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
+          mkdir -p builds/progress-qualification
+          python3 - <<'PY'
+          import base64,json,zlib
+          from pathlib import Path
+          p=json.loads(zlib.decompress(base64.b64decode(Path('/tmp/progress-source.b64').read_text())))
+          Path('test/mdx-progress-native.test.js').write_text(p['test'])
+          Path('/tmp/progress.patch').write_text(p['patch'])
+          PY
+          test "$(git hash-object test/mdx-progress-native.test.js)" = 7a29a17854dd2466f65fd7a6481f38f4bda61cf7
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Assert exact baseline failures
+        run: |
+          set +e
+          npx vitest run test/mdx-progress-native.test.js --reporter=json --outputFile=builds/progress-qualification/baseline.json > builds/progress-qualification/baseline.log 2>&1
+          result=$?
+          set -e
+          test "$result" -eq 1
+          node -e "const r=require('./builds/progress-qualification/baseline.json');require('node:assert/strict').equal(r.numFailedTests,16);require('node:assert/strict').equal(r.numPassedTests,2)"
+      - name: Apply only the locally tested runtime delta
+        run: |
+          git apply /tmp/progress.patch
+          test "$(git hash-object ext/js/dictionary/mdx/mdx-converter.js)" = e1e10ebb9fc5e7a5957ac8c8cc607d73c8e64b16
+          cp /tmp/progress.patch builds/progress-qualification/runtime.patch
+      - name: Full unit, type, lint and build qualification
+        run: |
+          npx vitest run --reporter=json --outputFile=builds/progress-qualification/unit.json > builds/progress-qualification/unit.log 2>&1
+          npm run test:ts > builds/progress-qualification/types.log 2>&1
+          npx eslint ext/js/dictionary/mdx/mdx-converter.js test/mdx-progress-native.test.js > builds/progress-qualification/lint.log 2>&1
+          npm run test:unit:options > builds/progress-qualification/options.log 2>&1
+          npm run test:build > builds/progress-qualification/build.log 2>&1
+          node --test test/util/mdict-native-cases.js > builds/progress-qualification/native.log 2>&1
+      - name: Retain isolated candidate branch, not a promoted PR
+        run: |
+          test "$(git hash-object ext/js/dictionary/mdx/mdx-converter.js)" = e1e10ebb9fc5e7a5957ac8c8cc607d73c8e64b16
+          test "$(git hash-object test/mdx-progress-native.test.js)" = 7a29a17854dd2466f65fd7a6481f38f4bda61cf7
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/dictionary/mdx/mdx-converter.js test/mdx-progress-native.test.js
+          git -c core.hooksPath=/dev/null commit -m 'perf(mdict): qualify coalesced progress on current source'
+          git push origin HEAD:refs/heads/review/progress-candidate-20260926-2140
+          git rev-parse HEAD > builds/progress-qualification/candidate-head.txt
+          git rev-parse HEAD^{tree} > builds/progress-qualification/candidate-tree.txt
+          git show --stat HEAD > builds/progress-qualification/commit.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: progress-current-qualification
+          path: builds/progress-qualification/
+          retention-days: 14
