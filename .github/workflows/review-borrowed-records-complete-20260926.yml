@@ -1,0 +1,55 @@
+name: Borrowed definition records complete imports
+on:
+  push:
+    branches: [review/mdict-borrowed-records-complete-20260926]
+    paths: [.github/workflows/review-borrowed-records-complete-20260926.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [large, medium, small]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/borrowed-records-complete-import-20260926.mjs /tmp/borrowed-records-driver.mjs
+          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a 406d396e6c8635eb8c841bbaad1b9b51b63c3647
+          git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
+          mkdir -p dev/review builds/borrowed-records-completion
+          cp /tmp/borrowed-records-driver.mjs dev/review/borrowed-records-complete-import-20260926.mjs
+          cp /tmp/borrowed-records-driver.mjs builds/borrowed-records-completion/executed-driver.mjs
+          git diff 2d79cd1dec164caa3075884133d9d12204a4f48a 406d396e6c8635eb8c841bbaad1b9b51b63c3647 -- ext/ > builds/borrowed-records-completion/product.patch
+          test "$(git diff --name-only 2d79cd1dec164caa3075884133d9d12204a4f48a 406d396e6c8635eb8c841bbaad1b9b51b63c3647 -- ext/ | tr '\n' ' ')" = "ext/js/dictionary/mdx/vendor/js-mdict/mdict.js ext/js/dictionary/mdx/vendor/js-mdict/mdx.js "
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/borrowed-records-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/borrowed-records-completion/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/borrowed-records-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/borrowed-records-completion/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: borrowed-records-complete-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/borrowed-records-completion/
+          retention-days: 14
