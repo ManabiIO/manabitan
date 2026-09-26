@@ -60,7 +60,7 @@ export class TextToSpeechAudio {
         try {
             if (this._utterance === null) {
                 this._utterance = new SpeechSynthesisUtterance(typeof this._text === 'string' ? this._text : '');
-                this._utterance.lang = 'ja-JP';
+                this._utterance.lang = this._voice.lang;
                 this._utterance.volume = this._volume;
                 this._utterance.voice = this._voice;
             }
