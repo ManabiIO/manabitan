@@ -1,0 +1,17 @@
+name: MDict zlib integrity reproduction
+on:
+  push:
+    branches: [review/mdict-zlib-integrity-20260926]
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Run native zlib integrity regression
+        run: node --test --test-reporter=tap test/util/mdict-zlib-integrity-cases.js
