@@ -5089,7 +5089,7 @@ null;
         let pendingContentBytes = [];
         /** @type {(string|null)[]} */
         let pendingContentDictNames = [];
-        /** @type {Map<string, number>|null} */
+        /** @type {Map<string, number|number[]>|null} */
         let pendingContentRowIndexByHash = shouldDedupWithinBatch ? new Map() : null;
 
         if (useLocalTransaction) {
@@ -5301,13 +5301,21 @@ null;
                 }
 
                 let pendingContentIndex = -1;
+                /** @type {number|number[]|undefined} */
+                let pendingHashCandidates;
                 if (pendingContentRowIndexByHash !== null && contentHash !== null) {
-                    const existingPendingContentIndex = pendingContentRowIndexByHash.get(contentHash);
-                    if (
-                        typeof existingPendingContentIndex === 'number' &&
-                        this._termContentBytesEqual(pendingContentBytes[existingPendingContentIndex], contentBytes)
-                    ) {
-                        pendingContentIndex = existingPendingContentIndex;
+                    pendingHashCandidates = /** @type {number|number[]|undefined} */ (pendingContentRowIndexByHash.get(contentHash));
+                    if (typeof pendingHashCandidates === 'number') {
+                        if (this._termContentBytesEqual(pendingContentBytes[pendingHashCandidates], contentBytes)) {
+                            pendingContentIndex = pendingHashCandidates;
+                        }
+                    } else if (Array.isArray(pendingHashCandidates)) {
+                        for (const candidateIndex of pendingHashCandidates) {
+                            if (this._termContentBytesEqual(pendingContentBytes[candidateIndex], contentBytes)) {
+                                pendingContentIndex = candidateIndex;
+                                break;
+                            }
+                        }
                     }
                 }
                 if (pendingContentIndex < 0) {
@@ -5315,7 +5323,13 @@ null;
                     compressContentMs += safePerformance.now() - tCompressStart;
                     pendingContentIndex = pendingContentBytes.length;
                     if (pendingContentRowIndexByHash !== null && contentHash !== null) {
-                        pendingContentRowIndexByHash.set(contentHash, pendingContentIndex);
+                        if (typeof pendingHashCandidates === 'number') {
+                            pendingContentRowIndexByHash.set(contentHash, [pendingHashCandidates, pendingContentIndex]);
+                        } else if (Array.isArray(pendingHashCandidates)) {
+                            pendingHashCandidates.push(pendingContentIndex);
+                        } else {
+                            pendingContentRowIndexByHash.set(contentHash, pendingContentIndex);
+                        }
                     }
                     pendingContentHashes.push(contentHash);
                     pendingContentHash1s.push(contentHash1);
