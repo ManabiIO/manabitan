@@ -15,6 +15,10 @@ import {makeMdictFixture} from './mdict-binary-fixture.js'
 const source = new Uint8Array(Buffer.from('complete zlib payload '.repeat(512), 'utf8'))
 const compressed = new Uint8Array(deflateSync(source))
 
+/**
+ * @param {Uint8Array} payload
+ * @returns {Uint8Array}
+ */
 function mdictZlibBlock(payload) {
     const result = new Uint8Array(8 + payload.length)
     result.set([2, 0, 0, 0], 0)
