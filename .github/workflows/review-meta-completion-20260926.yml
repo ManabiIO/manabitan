@@ -17,14 +17,21 @@ jobs:
         cohort: [initial, confirmation]
     steps:
       - uses: actions/checkout@v6
-      - name: Pin complete product source and retain driver
+      - name: Pin complete product source and retain corrected driver
         run: |
           cp dev/review/meta-complete-import-20260926.mjs /tmp/meta-driver.mjs
           git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a 6c7c690ccb3794c01941a536e7564907348cd83c
           git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
           mkdir -p dev/review builds/meta-completion
-          cp /tmp/meta-driver.mjs dev/review/meta-complete-import-20260926.mjs
-          cp /tmp/meta-driver.mjs builds/meta-completion/executed-driver.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          text=Path('/tmp/meta-driver.mjs').read_text()
+          old='termReadingList: ids.map((i) => [keys[i], null])'
+          new='termReadingList: ids.map((i) => ({term: keys[i], reading: null}))'
+          assert text.count(old)==1
+          Path('dev/review/meta-complete-import-20260926.mjs').write_text(text.replace(old,new))
+          PY
+          cp dev/review/meta-complete-import-20260926.mjs builds/meta-completion/executed-driver.mjs
           git diff 2d79cd1dec164caa3075884133d9d12204a4f48a 6c7c690ccb3794c01941a536e7564907348cd83c -- ext/ > builds/meta-completion/product.patch
           test "$(git diff --name-only 2d79cd1dec164caa3075884133d9d12204a4f48a 6c7c690ccb3794c01941a536e7564907348cd83c -- ext/)" = ext/js/dictionary/dictionary-importer.js
           git rev-parse HEAD > builds/meta-completion/product-head.txt
