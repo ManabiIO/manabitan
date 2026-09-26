@@ -1,0 +1,77 @@
+name: Carry-on raw decoder qualification
+on:
+  push:
+    branches: [review/carry-on-raw-decoder-20260926]
+    paths: [.github/workflows/carry-on-raw-decoder-20260926.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 384d1c97dae6bd17555973b77ad415e038438499
+      - uses: ./.github/actions/setup
+        with:
+          node-version: 22.16.0
+      - name: Retain exact current source and generated libraries for review
+        run: |
+          mkdir -p /tmp/carry-on-evidence
+          git rev-parse HEAD > /tmp/carry-on-evidence/base.txt
+          tar --exclude=.git --exclude=node_modules --exclude=builds -czf /tmp/carry-on-evidence/current-source.tgz .
+      - name: Decode and verify reviewed patch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64,gzip,hashlib,pathlib
+          data=gzip.decompress(base64.b64decode('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'))
+          assert hashlib.sha256(data).hexdigest() == 'ffe1bec5bb077c8ed6aed1a712ca6dc311743a40dc8004a9b5c81c0e48261a4b'
+          pathlib.Path('/tmp/carry-on-evidence/repair.patch').write_bytes(data)
+          PY
+          test "$(git hash-object ext/js/dictionary/raw-term-content.js)" = 4426169d6c8d25f739bcd16f621c338594d7a9b1
+          git apply --include=test/raw-term-content-shared.test.js /tmp/carry-on-evidence/repair.patch
+      - name: Reproduce original failures
+        shell: bash
+        run: |
+          set +e
+          npx vitest run test/raw-term-content-shared.test.js --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=/tmp/carry-on-evidence/red.json > /tmp/carry-on-evidence/red.log 2>&1
+          result=$?
+          set -e
+          test "$result" -ne 0
+          python3 - <<'PY'
+          import json
+          j=json.load(open('/tmp/carry-on-evidence/red.json'))
+          assert j['numFailedTests']==36 and j['numPassedTests']==38, j
+          PY
+      - name: Apply and qualify repair
+        shell: bash
+        run: |
+          git apply --include=ext/js/dictionary/raw-term-content.js /tmp/carry-on-evidence/repair.patch
+          test "$(git hash-object ext/js/dictionary/raw-term-content.js)" = 3c9c6112437146f702352ffafeada98186d573b3
+          test "$(git hash-object test/raw-term-content-shared.test.js)" = c3da7d14153525de73dd363c80447f17aa59330b
+          npx eslint ext/js/dictionary/raw-term-content.js test/raw-term-content-shared.test.js
+          npm run test:ts
+          npm run test:unit -- --reporter=json --outputFile=/tmp/carry-on-evidence/unit.json > /tmp/carry-on-evidence/unit.log 2>&1
+          npm run test:unit:options
+          npm run test:build
+          git diff --check
+      - name: Publish clean product branch
+        shell: bash
+        run: |
+          git switch -c fix/raw-term-shared-decode-20260926
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/dictionary/raw-term-content.js test/raw-term-content-shared.test.js
+          git commit -m 'fix(import): decode shared raw term-content views safely'
+          git diff HEAD^ --name-only > /tmp/carry-on-evidence/changed-files.txt
+          test "$(wc -l < /tmp/carry-on-evidence/changed-files.txt)" = 2
+          git rev-parse HEAD > /tmp/carry-on-evidence/head.txt
+          git push origin HEAD:refs/heads/fix/raw-term-shared-decode-20260926
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: carry-on-raw-decoder-qualification
+          path: /tmp/carry-on-evidence
+          retention-days: 14
