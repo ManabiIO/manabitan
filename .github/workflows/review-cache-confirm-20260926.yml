@@ -1,0 +1,61 @@
+name: Cache complete import independent confirmation
+on:
+  push:
+    branches: [review/focus-and-import-20260926]
+    paths: [.github/workflows/review-cache-confirm-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [repeated, unique, none]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Pin sources and reverse the fixed order, not the product code
+        run: |
+          git fetch --no-tags --depth=1 origin 384d1c97dae6bd17555973b77ad415e038438499 31431c90eab14421f9ecc70616cce984406bceec
+          mkdir -p builds/cache-completion
+          git rev-parse HEAD > builds/cache-completion/research-head.txt
+          git diff --name-only 384d1c97dae6bd17555973b77ad415e038438499 31431c90eab14421f9ecc70616cce984406bceec -- ext/ > builds/cache-completion/product-diff-files.txt
+          test "$(cat builds/cache-completion/product-diff-files.txt)" = ext/js/dictionary/mdx/mdx-converter.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/review/mdx-complete-import-20260926.mjs')
+          s=p.read_text()
+          assert "block % 2 ? 'BAAB' : 'ABBA'" in s
+          s=s.replace("block % 2 ? 'BAAB' : 'ABBA'", "block % 2 ? 'ABBA' : 'BAAB'")
+          s=s.replace("const schedule = [{kind:'warmup',arm:'A'},{kind:'warmup',arm:'B'}]", "const schedule = [{kind:'warmup',arm:'B'},{kind:'warmup',arm:'A'}]")
+          p.write_text(s)
+          PY
+          git diff -- dev/review/mdx-complete-import-20260926.mjs > builds/cache-completion/reversed-schedule.patch
+      - name: Build and install Chromium
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Verify both arms before timing
+        env:
+          REVIEW_PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/mdx-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/cache-completion/${WORKLOAD}-preflight.log"
+      - name: Independent reversed paired schedule
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/mdx-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/cache-completion/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cache-confirm-${{ matrix.workload }}
+          path: builds/cache-completion/
+          retention-days: 14
