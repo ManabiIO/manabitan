@@ -1,0 +1,56 @@
+name: Borrowed MDict ranges complete imports
+on:
+  push:
+    branches: [review/mdict-borrow-ranges-complete-20260926]
+    paths: [.github/workflows/review-mdict-borrow-ranges-complete-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        compression: [raw, zlib]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin exact product and driver
+        run: |
+          cp dev/review/mdict-borrow-ranges-complete-20260926.mjs /tmp/driver.mjs
+          git fetch --no-tags --depth=1 origin 61f0d596828ef141e099c0ed68d3a264e54441dc 58c5e79fa9bb493df871501f5d1572d0550b901b
+          git checkout --detach 61f0d596828ef141e099c0ed68d3a264e54441dc
+          mkdir -p dev/review builds/borrowed-ranges-completion
+          cp /tmp/driver.mjs dev/review/mdict-borrow-ranges-complete-20260926.mjs
+          cp /tmp/driver.mjs builds/borrowed-ranges-completion/executed-driver.mjs
+          git diff 61f0d596828ef141e099c0ed68d3a264e54441dc 58c5e79fa9bb493df871501f5d1572d0550b901b -- ext/ > builds/borrowed-ranges-completion/product.patch
+          test "$(git diff --name-only 61f0d596828ef141e099c0ed68d3a264e54441dc 58c5e79fa9bb493df871501f5d1572d0550b901b -- ext/ | tr '\n' ' ')" = "ext/js/dictionary/mdx/vendor/js-mdict/mdict-base.js ext/js/dictionary/mdx/vendor/js-mdict/mdict.js ext/js/dictionary/mdx/vendor/js-mdict/scanner.js "
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install Chromium
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms and output parity
+        env:
+          PREFLIGHT: '1'
+          COMPRESSION: ${{ matrix.compression }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/mdict-borrow-ranges-complete-20260926.mjs "$COMPRESSION" 2>&1 | tee "builds/borrowed-ranges-completion/${COMPRESSION}-preflight.log"
+      - name: Counterbalanced complete-import cohort
+        env:
+          COMPRESSION: ${{ matrix.compression }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/mdict-borrow-ranges-complete-20260926.mjs "$COMPRESSION" 2>&1 | tee "builds/borrowed-ranges-completion/${COMPRESSION}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: borrowed-ranges-complete-${{ matrix.compression }}-${{ matrix.cohort }}
+          path: builds/borrowed-ranges-completion/
+          retention-days: 14
