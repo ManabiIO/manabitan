@@ -1,0 +1,47 @@
+name: Exact retained hash candidate confirmation
+on:
+  push:
+    branches: [audit/current-import-hash-20260926]
+    paths: [.github/workflows/audit-hash-confirmation.yml]
+permissions:
+  contents: read
+jobs:
+  confirm:
+    strategy:
+      fail-fast: false
+      matrix:
+        corpus: [jmdict, jmnedict, jitendex]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2bd4d81a2e2f7a27296ae76929a516da4d2737eb
+          path: audit
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 384d1c97dae6bd17555973b77ad415e038438499
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci && npm run build:libs && npm run license-report:html
+        working-directory: source
+      - run: npx playwright install --with-deps chromium
+        working-directory: source
+      - name: Opposite-order complete-import pairs and controls
+        env:
+          CORPUS: ${{ matrix.corpus }}
+        run: python3 audit/dev/perf/audit-hash-confirmation.py source "$CORPUS" "results/$CORPUS"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hash-confirmation-${{ matrix.corpus }}-384d1c9
+          path: results/${{ matrix.corpus }}
+          retention-days: 30
+          compression-level: 6
+          if-no-files-found: error
