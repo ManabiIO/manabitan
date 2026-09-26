@@ -1,0 +1,78 @@
+name: Focus ownership repair qualification
+on:
+  push:
+    branches: [review/focus-cause-20260926]
+    paths: [.github/workflows/focus-owner-qualification-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [baseline, cache]
+        headless: ['0', '1']
+    env:
+      FIX: '508e2e9c0e24102cbcb4d41fa448bfd80fb189e2'
+      BASE: '384d1c97dae6bd17555973b77ad415e038438499'
+      CACHE: '31431c90eab14421f9ecc70616cce984406bceec'
+      MANABITAN_CHROMIUM_HEADLESS: ${{ matrix.headless }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Assemble pinned source without any test-helper changes
+        env:
+          ARM: ${{ matrix.arm }}
+        run: |
+          git fetch origin "$BASE" "$FIX" "$CACHE"
+          git diff "$BASE" "$FIX" > /tmp/focus-owner.patch
+          if [ "$ARM" = cache ]; then git checkout --detach "$CACHE"; else git checkout --detach "$BASE"; fi
+          git apply --check /tmp/focus-owner.patch
+          git apply /tmp/focus-owner.patch
+          mkdir -p builds/focus-owner
+          git rev-parse HEAD > builds/focus-owner/base.txt
+          git hash-object test/playwright/integration.spec.js test/playwright/playwright-util.js > builds/focus-owner/unchanged-test-blobs.txt
+          git diff > builds/focus-owner/production.patch
+          sha256sum ext/js/dom/document-focus-controller.js test/document-focus-controller.test.js test/playwright/document-focus-ownership.spec.js > builds/focus-owner/source-sha256.txt
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build browser and check changed sources
+        run: |
+          npx eslint ext/js/dom/document-focus-controller.js test/document-focus-controller.test.js test/playwright/document-focus-ownership.spec.js
+          npx vitest run test/document-focus-controller.test.js test/search-display-controller.test.js --maxWorkers=1 --minWorkers=1
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Reproduce deterministic original-code failures
+        if: matrix.arm == 'baseline' && matrix.headless == '1'
+        run: |
+          cp ext/js/dom/document-focus-controller.js /tmp/qualified-focus.js
+          git show "$BASE":ext/js/dom/document-focus-controller.js > ext/js/dom/document-focus-controller.js
+          set +e
+          PLAYWRIGHT_JSON_OUTPUT_NAME=builds/focus-owner/red-browser.json xvfb-run -a node dev/bin/run-playwright.js test document-focus-ownership.spec.js --project=chromium --workers=1 --retries=0 --reporter=json > builds/focus-owner/red-browser.log 2>&1
+          status=$?
+          set -e
+          cp /tmp/qualified-focus.js ext/js/dom/document-focus-controller.js
+          test "$status" -ne 0
+          node --input-type=module -e "import fs from 'node:fs';const r=JSON.parse(fs.readFileSync('builds/focus-owner/red-browser.json'));if(r.stats.unexpected!==4||r.stats.expected!==4)throw Error(JSON.stringify(r.stats))"
+      - name: Deterministic focus, selection and keyboard contracts
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test document-focus-ownership.spec.js --project=chromium --workers=1 --retries=0 --reporter=line 2>&1 | tee builds/focus-owner/focused-browser.log
+      - name: Thirty repetitions of each original import and startup contract
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js --project=chromium --workers=1 --retries=0 --repeat-each=30 --grep 'search accepts typing immediately|chromium settings drag and drop imports a local MDX fixture, updates preview, and supports lookup' --reporter=line 2>&1 | tee builds/focus-owner/repeated.log
+      - name: Complete installed MDict and startup suite
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-inline-style.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep 'MDX|search accepts typing immediately' 2>&1 | tee builds/focus-owner/mdict.log
+          sha256sum -c builds/focus-owner/source-sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focus-owner-${{ matrix.arm }}-${{ matrix.headless }}
+          path: builds/focus-owner/
+          retention-days: 14
