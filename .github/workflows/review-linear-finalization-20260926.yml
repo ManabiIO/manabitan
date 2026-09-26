@@ -1,0 +1,65 @@
+name: Current MDict linear finalization
+on:
+  push:
+    branches: [review/mdict-linear-finalization-current-20260926]
+    paths: [.github/workflows/review-linear-finalization-20260926.yml]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Focused, native, type and full unit
+        run: |
+          npx vitest run test/mdict-key-finalization-current.test.js
+          node --test test/util/mdict-native-cases.js
+          npm run test:ts:test
+          npx vitest run
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [large, medium]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and driver
+        run: |
+          cp dev/review/linear-finalization-complete-20260926.mjs /tmp/driver.mjs
+          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a b35dd3e4e0d53b04a6473dfea79228821b71a495
+          git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
+          mkdir -p dev/review builds/linear-finalization
+          cp /tmp/driver.mjs dev/review/linear-finalization-complete-20260926.mjs
+          cp /tmp/driver.mjs builds/linear-finalization/executed-driver.mjs
+          git diff 2d79cd1dec164caa3075884133d9d12204a4f48a b35dd3e4e0d53b04a6473dfea79228821b71a495 -- ext/ > builds/linear-finalization/product.patch
+          test "$(git diff --name-only 2d79cd1dec164caa3075884133d9d12204a4f48a b35dd3e4e0d53b04a6473dfea79228821b71a495 -- ext/)" = ext/js/dictionary/mdx/vendor/js-mdict/mdict-base.js
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build/browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: xvfb-run -a node dev/review/linear-finalization-complete-20260926.mjs "$WORKLOAD"
+      - name: Compare
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: xvfb-run -a node dev/review/linear-finalization-complete-20260926.mjs "$WORKLOAD"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linear-finalization-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/linear-finalization/
+          retention-days: 14
