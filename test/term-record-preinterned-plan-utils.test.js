@@ -12,6 +12,7 @@ import {
     compactTermRecordPreinternedPlan,
     createTermRecordPreinternedPlanBuilder,
     getTermRecordPreinternedPlan,
+    getValidatedStringOffsets,
     hasCompleteTermRecordPreinternedPlan,
     selectTermRecordPreinternedPlan,
     sliceTermRecordPreinternedPlan,
@@ -154,6 +155,28 @@ describe('term record preinterned plan helpers', () => {
         expect(compact?.stringHashes).toBeUndefined();
         expect(compact?.stringsBuffer).toStrictEqual(new Uint8Array(0));
         expect(hasCompleteTermRecordPreinternedPlan(compact, 0)).toBe(true);
+    });
+
+    test('fully validates string arena bounds from final prefix length', () => {
+        const plan = createPlan();
+        expect(getValidatedStringOffsets(plan)).toStrictEqual(Uint32Array.from([0, 1, 3]));
+        expect(getValidatedStringOffsets({
+            ...plan,
+            stringOffsets: Uint32Array.from([0, 1, 3]),
+        })).toStrictEqual(Uint32Array.from([0, 1, 3]));
+
+        expect(() => getValidatedStringOffsets({...plan, stringsBuffer: new Uint8Array(3)}))
+            .toThrow('Preinterned plan string arena length does not match its strings');
+        expect(() => getValidatedStringOffsets({...plan, stringsBuffer: new Uint8Array(5)}))
+            .toThrow('Preinterned plan string arena length does not match its strings');
+        expect(() => getValidatedStringOffsets({
+            ...plan,
+            stringOffsets: Uint32Array.from([0, 2, 3]),
+        })).toThrow('Preinterned plan string arena is out of bounds');
+        expect(() => getValidatedStringOffsets({
+            ...plan,
+            stringOffsets: Uint32Array.from([0, 1, 4]),
+        })).toThrow('Preinterned plan string arena is out of bounds');
     });
 
     test('rejects malformed structural metadata and fully validates compaction inputs', () => {
