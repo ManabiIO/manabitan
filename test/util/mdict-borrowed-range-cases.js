@@ -68,8 +68,9 @@ describe('MDict borrowed parser ranges', () => {
                         assert.deepEqual(dictionary.lookupRecordByKeyBlock(item), fixture.records[index])
                     }
                     if (!mdd) {
-                        assert.equal(dictionary.lookup('alpha').definition, '<div>first 日本語 definition</div>\0')
-                        assert.equal(dictionary.lookup('beta').definition, '<p>second 😀 definition</p>\0')
+                        const mdx = /** @type {MDX} */ (dictionary)
+                        assert.equal(mdx.lookup('alpha').definition, '<div>first 日本語 definition</div>\0')
+                        assert.equal(mdx.lookup('beta').definition, '<p>second 😀 definition</p>\0')
                     }
                     assert.deepEqual(parent, before)
                 } finally {
