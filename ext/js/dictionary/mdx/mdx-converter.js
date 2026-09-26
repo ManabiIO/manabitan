@@ -78,6 +78,8 @@ const MDX_GLOSSARY_ENTRY_CLASS_PREFIX = 'mdict-yomitan-entry-';
 // Conversion walks every definition, so cache decompressed MDX record blocks.
 // MDD resource lookup remains lazy and uncached.
 const MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES = 8 * 1024 * 1024;
+// One separately bounded slot for a repeatedly requested oversized block.
+const MDX_IMPORT_OVERSIZED_RECORD_BLOCK_CACHE_BYTES = 16 * 1024 * 1024;
 const STRUCTURED_CLASS_ATTR = 'data-sc-class';
 const STRUCTURED_ID_ATTR = 'data-sc-id';
 const STRUCTURED_TAG_ATTR = 'data-sc-tag';
@@ -2111,7 +2113,10 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         termBankSize = 10000,
     } = options;
 
-    const mdx = /** @type {MdxDictionaryLike} */ (new MDX(fileName, mdxBytes, {recordBlockCacheBytes: MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES}));
+    const mdx = /** @type {MdxDictionaryLike} */ (new MDX(fileName, mdxBytes, {
+        recordBlockCacheBytes: MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES,
+        oversizedRecordBlockCacheBytes: MDX_IMPORT_OVERSIZED_RECORD_BLOCK_CACHE_BYTES,
+    }));
     /** @type {MddAssetResolver|null} */
     let assetResolver = null;
     try {
