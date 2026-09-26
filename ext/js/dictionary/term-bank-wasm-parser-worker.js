@@ -36,6 +36,8 @@ Reflect.set(globalThis, '__manabitanTermBankParserWorker', true);
 
 /** @type {Promise<void>|null} */
 let initialization = null;
+/** @type {boolean} */
+let skipFusedParseAfterFallback = false;
 
 self.addEventListener('message', onMessage);
 
@@ -58,6 +60,7 @@ async function initialize(data) {
             throw new TypeError('Term-bank parser worker module is invalid');
         }
         setTermBankWasmModule(data.module);
+        skipFusedParseAfterFallback = false;
         initialization = initializeTermBankWasmParser();
         await initialization;
         self.postMessage({type: 'ready'});
@@ -96,6 +99,12 @@ async function parse(data) {
             typeof rawOptions === 'object' && rawOptions !== null ? rawOptions : {}
         );
         const experiments = snapshotTermBankExperiments(options);
+        const effectiveExperiments = (
+            experiments.experimentalAdaptiveFusedFallback &&
+            skipFusedParseAfterFallback
+        ) ?
+            snapshotTermBankExperiments({...experiments, experimentalSkipFusedParse: true}) :
+            experiments;
         const sourceBytes = sourceBuffers.map((buffer) => new Uint8Array(buffer));
         let preloadedSource;
         if (typeof data.sourceMetadata !== 'undefined') {
@@ -113,7 +122,7 @@ async function parse(data) {
                     signature: /** @type {number} */ (metadata.signature),
                     filename: typeof metadata.filename === 'string' ? metadata.filename : void 0,
                 };
-            }), experiments);
+            }), effectiveExperiments);
         }
         /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */
         let resultChunk = null;
@@ -141,9 +150,15 @@ async function parse(data) {
                 resultCopyMs = Math.max(0, safePerformance.now() - tResultCopyStart);
             },
             chunkSize,
-            {...options, ...experiments, maxPendingChunks: 1, singleChunk: true, preloadedSource},
+            {...options, ...effectiveExperiments, maxPendingChunks: 1, singleChunk: true, preloadedSource},
         );
         const profile = consumeLastTermBankWasmParseProfile();
+        if (
+            experiments.experimentalAdaptiveFusedFallback &&
+            (profile?.fusedParseFallbacks ?? 0) > 0
+        ) {
+            skipFusedParseAfterFallback = true;
+        }
         // A validated empty group emits no storage chunk. Keep that distinct
         // from a missing result for a nonempty group; parsing and CRC checks
         // above still run before this result is published.
