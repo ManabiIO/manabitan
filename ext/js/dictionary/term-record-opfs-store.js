@@ -393,20 +393,6 @@ function validateContentLength(value) {
 }
 
 /**
- * @param {number[]} offsets
- * @returns {number}
- * @throws {RangeError} If an offset is invalid.
- */
-function getContentOffsetBase(offsets) {
-    let base = Number.POSITIVE_INFINITY;
-    for (const offset of offsets) {
-        validateContentOffset(offset);
-        if (offset >= 0 && offset < base) { base = offset; }
-    }
-    return base === Number.POSITIVE_INFINITY ? 0 : base;
-}
-
-/**
  * @param {number} offset
  * @param {number} base
  * @returns {number}
@@ -4716,8 +4702,18 @@ export class TermRecordOpfsStore {
                 recordFieldsFormat: LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
             };
         }
-        const contentOffsetBase = getContentOffsetBase(records.map(({entryContentOffset}) => entryContentOffset));
-        const useFloat64Scores = records.some(({score}) => !isLosslessInt32Score(score));
+        let contentOffsetBase = Number.POSITIVE_INFINITY;
+        let useFloat64Scores = false;
+        for (const {entryContentOffset, score} of records) {
+            validateContentOffset(entryContentOffset);
+            if (entryContentOffset >= 0 && entryContentOffset < contentOffsetBase) {
+                contentOffsetBase = entryContentOffset;
+            }
+            if (!useFloat64Scores && !isLosslessInt32Score(score)) {
+                useFloat64Scores = true;
+            }
+        }
+        if (contentOffsetBase === Number.POSITIVE_INFINITY) { contentOffsetBase = 0; }
         const recordFieldsFormat = useFloat64Scores ?
             LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE :
             LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY;
