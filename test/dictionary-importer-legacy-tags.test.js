@@ -88,9 +88,11 @@ describe('embedded legacy dictionary tags', () => {
             now += 2_000;
             return now;
         });
-        const failingProgressSink = vi.fn((/** @type {import('dictionary-importer').ProgressData} */ progress) => {
+        /** @type {import('dictionary-importer').OnProgressCallback} */
+        const onProgress = (progress) => {
             if (progress.count === 20) { throw progressFailure; }
-        });
+        };
+        const failingProgressSink = vi.fn(onProgress);
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), failingProgressSink);
         try {
             const result = await importer.importDictionary(
@@ -105,7 +107,7 @@ describe('embedded legacy dictionary tags', () => {
             expect(db.finishBulkImport).toHaveBeenCalledOnce();
             expect(db.finishBulkImport).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({
                 summary: expect.objectContaining({title: 'Legacy tags', importSuccess: true}),
-            }));
+            }), 'legacy-tags-session');
             expect(db.abortBulkImport).not.toHaveBeenCalled();
             expect(db.deleteDictionaryImportPlaceholder).not.toHaveBeenCalled();
         } finally {

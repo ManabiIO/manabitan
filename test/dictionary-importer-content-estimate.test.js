@@ -92,10 +92,12 @@ describe('DictionaryImporter expected term-content byte estimate', () => {
             null,
             null,
             null,
-            [ /** @type {import('dictionary-importer').ImportFileEntry} */ (/** @type {unknown} */ ({
-                filename: 'term_bank_1.mbtb',
-                uncompressedSize,
-            }))],
+            [
+                /** @type {import('dictionary-importer').ImportFileEntry} */ (/** @type {unknown} */ ({
+                    filename: 'term_bank_1.mbtb',
+                    uncompressedSize,
+                })),
+            ],
         );
         expect(value).toBeNull();
     });
