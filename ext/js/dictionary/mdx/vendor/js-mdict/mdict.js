@@ -154,7 +154,7 @@ export class Mdict extends MdictBase {
             return cached;
         }
         const info = this.recordInfoList[blockIndex];
-        const packed = this.scanner.readBuffer(
+        const packed = this.scanner.readBufferView(
             this._recordBlockStartOffset + info.packAccumulateOffset,
             info.packSize,
         );
@@ -185,7 +185,7 @@ export class Mdict extends MdictBase {
         const packSize = this.keyInfoList[keyInfoId].keyBlockPackSize;
         const unpackSize = this.keyInfoList[keyInfoId].keyBlockUnpackSize;
         const startOffset = this.keyInfoList[keyInfoId].keyBlockPackAccumulator + this._keyBlockStartOffset;
-        const keyBlockPackedBuff = this.scanner.readBuffer(startOffset, packSize);
+        const keyBlockPackedBuff = this.scanner.readBufferView(startOffset, packSize);
         const keyBlock = this.unpackKeyBlock(keyBlockPackedBuff, unpackSize);
         return this.splitKeyBlock(keyBlock, keyInfoId);
     }
@@ -229,7 +229,7 @@ export class Mdict extends MdictBase {
         let unpackRecordBlockBuff = new Uint8Array(recordBuffer.length);
         const recordBlockChecksum = common.b2n(recordBuffer.subarray(4, 8));
         if (rbCompType === '00000000') {
-            unpackRecordBlockBuff = recordBuffer.slice(8);
+            unpackRecordBlockBuff = recordBuffer.subarray(8);
         }
         else {
             // decrypt
