@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 12
     env:
       BASE: '384d1c97dae6bd17555973b77ad415e038438499'
-      FIX: '508e2e9c0e24102cbcb4d41fa448bfd80fb189e2'
+      FIX: 'c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8'
     steps:
       - uses: actions/checkout@v6
       - name: Pin tested product source
@@ -40,13 +40,14 @@ jobs:
           echo "$?" > builds/focus-firefox/baseline-exit.txt
           set -e
           cp /tmp/focus-fixed.js ext/js/dom/document-focus-controller.js
-      - name: Require all fixed focus and keyboard contracts
+      - name: Require ten repetitions of all focus and keyboard contracts
         run: |
-          PLAYWRIGHT_JSON_OUTPUT_NAME=builds/focus-firefox/fixed.json npx playwright test --config=focus-firefox.config.mjs --reporter=json > builds/focus-firefox/fixed.log 2>&1
-          test "$(git hash-object ext/js/dom/document-focus-controller.js)" = 8e8968fea22279fd0fd45cc2e3b8ef5b7b66361d
+          PLAYWRIGHT_JSON_OUTPUT_NAME=builds/focus-firefox/fixed.json npx playwright test --config=focus-firefox.config.mjs --repeat-each=10 --reporter=json > builds/focus-firefox/fixed.log 2>&1
+          test "$(git hash-object ext/js/dom/document-focus-controller.js)" = 1932bb33dd152c722ea6f228ce27619a78b09a42
+          node --input-type=module -e "import fs from 'node:fs'; const d=JSON.parse(fs.readFileSync('builds/focus-firefox/fixed.json')); if(d.stats.expected!==60||d.stats.unexpected!==0||d.stats.skipped!==0)throw Error(JSON.stringify(d.stats))"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: focus-firefox-regression
+          name: focus-firefox-final
           path: builds/focus-firefox/
           retention-days: 14
