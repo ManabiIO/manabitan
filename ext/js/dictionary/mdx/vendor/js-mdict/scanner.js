@@ -28,13 +28,24 @@ export class FileScanner {
      * @returns {Uint8Array}
      */
     readBuffer(offset, length) {
+        return this.readBufferView(offset, length).slice();
+    }
+
+    /**
+     * Returns a borrowed view into the scanner source. Parser callers must not
+     * retain or mutate it.
+     * @param {number|bigint} offset
+     * @param {number} length
+     * @returns {Uint8Array}
+     */
+    readBufferView(offset, length) {
         const start = Number(offset);
         if ((typeof offset !== 'number' && typeof offset !== 'bigint') ||
             !Number.isSafeInteger(start) || !Number.isSafeInteger(length) || start < 0 || length < 0 ||
             start > this._buffer.byteLength || length > this._buffer.byteLength - start) {
             throw new RangeError('MDict read exceeds the available file data');
         }
-        return this._buffer.slice(start, start + length);
+        return this._buffer.subarray(start, start + length);
     }
 
     /**
