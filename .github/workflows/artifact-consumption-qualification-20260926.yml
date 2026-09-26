@@ -1,0 +1,93 @@
+name: Artifact payload consumption qualification
+on:
+  push:
+    branches: [review/more-storage-sql-20260926]
+    paths: [.github/workflows/artifact-consumption-qualification-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: 6992a31a9a8fee0564cb82586730552622161770
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Pin reproducer and verify exact baseline
+        run: |
+          git fetch --no-tags --depth=1 origin 8fc7505b41273a6ffa3d6c7d9a8e1c6607ac5339
+          mkdir -p dev/review builds/artifact-consumption
+          git show 8fc7505b41273a6ffa3d6c7d9a8e1c6607ac5339:dev/review/artifact-consumption-browser.mjs > dev/review/artifact-consumption-browser.mjs
+          test "$(git hash-object ext/js/dictionary/dictionary-importer.js)" = b0b7f0c262dc2fa801b564d6c05eeaffc28e4dd4
+          test "$(git hash-object test/dictionary-importer-artifact-consumption.test.js)" = a7c8aa3176e3b2dbb89b35d90326c2152269ea55
+          git rev-parse HEAD > builds/artifact-consumption/tests-head.txt
+          cp dev/review/artifact-consumption-browser.mjs builds/artifact-consumption/browser-driver.mjs
+      - name: Require exact baseline failures
+        run: |
+          set -o pipefail
+          set +e
+          npx vitest run test/dictionary-importer-artifact-consumption.test.js --reporter=json --outputFile=builds/artifact-consumption/red.json 2>&1 | tee builds/artifact-consumption/red.log
+          status=${PIPESTATUS[0]}
+          set -e
+          test "$status" -ne 0
+          python3 - <<'PY'
+          import json
+          j=json.load(open('builds/artifact-consumption/red.json'))
+          assert j['numFailedTests']==37 and j['numPassedTests']==30 and j['numTotalTests']==67, j
+          PY
+      - name: Build and reproduce malformed success in installed Chromium
+        env:
+          EXPECT_BASELINE: '1'
+        run: |
+          set -o pipefail
+          npm run build -- --target chrome-dev 2>&1 | tee builds/artifact-consumption/chrome-build.log
+          npx playwright install --with-deps chromium
+          xvfb-run -a node dev/review/artifact-consumption-browser.mjs 2>&1 | tee builds/artifact-consumption/browser-baseline.log
+      - name: Apply only the validated three-line guard
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('ext/js/dictionary/dictionary-importer.js')
+          s=p.read_text()
+          anchor='        decodeRowsMs = Math.max(0, Date.now() - tDecodeRowsStart);\n        if (streamToChunkHandler && (directArtifactChunkImport ? chunkRowCount > 0 : termList.length > 0)) {'
+          assert s.count(anchor)==1
+          fix="        if (cursor !== bytes.byteLength) {\n            throw new Error(`Invalid term artifact payload in '${filename}': trailing bytes after declared rows`);\n        }\n"
+          p.write_text(s.replace(anchor,fix+anchor))
+          PY
+          test "$(git hash-object ext/js/dictionary/dictionary-importer.js)" = 103d6289940c01314db4a8c77854522248f399d7
+          git diff -- ext/js/dictionary/dictionary-importer.js > builds/artifact-consumption/runtime.patch
+          sha256sum ext/js/dictionary/dictionary-importer.js test/dictionary-importer-artifact-consumption.test.js > builds/artifact-consumption/source.sha256
+      - name: Require full unit and static validation
+        run: |
+          set -o pipefail
+          npx vitest run --reporter=json --outputFile=builds/artifact-consumption/unit.json 2>&1 | tee builds/artifact-consumption/unit.log
+          npm run test:ts 2>&1 | tee builds/artifact-consumption/types.log
+          npx eslint ext/js/dictionary/dictionary-importer.js test/dictionary-importer-artifact-consumption.test.js 2>&1 | tee builds/artifact-consumption/lint.log
+          npm run test:unit:options 2>&1 | tee builds/artifact-consumption/options.log
+          npm run test:build 2>&1 | tee builds/artifact-consumption/build.log
+      - name: Require persisted rollback recovery and browser restart
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/artifact-consumption-browser.mjs 2>&1 | tee builds/artifact-consumption/browser-fixed.log
+      - name: Publish clean product commit without rewriting history
+        run: |
+          test "$(git hash-object ext/js/dictionary/dictionary-importer.js)" = 103d6289940c01314db4a8c77854522248f399d7
+          test "$(git hash-object test/dictionary-importer-artifact-consumption.test.js)" = a7c8aa3176e3b2dbb89b35d90326c2152269ea55
+          git config user.name 'Manabitan review'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/dictionary/dictionary-importer.js
+          test "$(git diff --cached --name-only)" = ext/js/dictionary/dictionary-importer.js
+          HUSKY=0 git commit -m 'fix(import): reject bytes left after declared artifact rows'
+          git push origin HEAD:refs/heads/fix/artifact-trailing-payload-20260926
+          git rev-parse HEAD > builds/artifact-consumption/published-head.txt
+          git rev-parse 'HEAD^{tree}' > builds/artifact-consumption/published-tree.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifact-consumption-qualification
+          path: builds/artifact-consumption/
+          retention-days: 14
