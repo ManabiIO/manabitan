@@ -5510,6 +5510,9 @@ null;
                 termList[i] = entry;
             }
         }
+        if (cursor !== bytes.byteLength) {
+            throw new Error(`Invalid term artifact payload in '${filename}': trailing bytes after declared rows`);
+        }
         decodeRowsMs = Math.max(0, Date.now() - tDecodeRowsStart);
         if (streamToChunkHandler && (directArtifactChunkImport ? chunkRowCount > 0 : termList.length > 0)) {
             const streamedRowCount = directArtifactChunkImport ? chunkRowCount : termList.length;

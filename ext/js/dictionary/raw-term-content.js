@@ -522,7 +522,7 @@ export function decodeRawTermContentBinary(bytes, textDecoder) {
     if (header === null) {
         return null;
     }
-    const glossaryJson = textDecoder.decode(getRawTermContentGlossaryJsonBytes(bytes, header.glossaryJsonOffset, header.glossaryJsonLength));
+    const glossaryJson = decodeRawTermBytes(getRawTermContentGlossaryJsonBytes(bytes, header.glossaryJsonOffset, header.glossaryJsonLength), textDecoder);
     return {rules: header.rules, definitionTags: header.definitionTags, termTags: header.termTags, glossaryJson};
 }
 
@@ -544,10 +544,10 @@ export function decodeRawTermContentTokenHeader(bytes, textDecoder) {
         if (end - start >= 2 && bytes[start] === 0x22 && bytes[end - 1] === 0x22) {
             if (end - start === 2) { return ''; }
             if (isSimpleJsonStringContent(bytes, start + 1, end - 1)) {
-                return textDecoder.decode(bytes.subarray(start + 1, end - 1));
+                return decodeRawTermBytes(bytes.subarray(start + 1, end - 1), textDecoder);
             }
         }
-        const token = textDecoder.decode(bytes.subarray(start, end));
+        const token = decodeRawTermBytes(bytes.subarray(start, end), textDecoder);
         try {
             const value = /** @type {unknown} */ (parseJson(token));
             return typeof value === 'string' ? value : null;
@@ -577,10 +577,10 @@ export function decodeRawTermContentTokenBinary(bytes, textDecoder) {
     if (header === null) {
         return null;
     }
-    const glossaryJson = textDecoder.decode(bytes.subarray(
+    const glossaryJson = decodeRawTermBytes(bytes.subarray(
         header.glossaryJsonOffset,
         header.glossaryJsonOffset + header.glossaryJsonLength,
-    ));
+    ), textDecoder);
     return {rules: header.rules, definitionTags: header.definitionTags, termTags: header.termTags, glossaryJson};
 }
 
@@ -600,6 +600,18 @@ function isValidSharedGlossaryRange(offset, length) {
 }
 
 /**
+ * TextDecoder rejects shared WASM views in Chromium. Copy only the selected
+ * field or glossary, retaining the zero-copy path for ordinary buffers.
+ * A shared buffer can exist even when its global constructor is hidden.
+ * @param {Uint8Array} bytes
+ * @param {TextDecoder} textDecoder
+ * @returns {string}
+ */
+function decodeRawTermBytes(bytes, textDecoder) {
+    return textDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : Uint8Array.from(bytes));
+}
+
+/**
  * Length-delimited tag strings preserve a leading U+FEFF as content. Respect
  * the caller's decoding/error policy and restore only a BOM it actually strips.
  * @param {Uint8Array} bytes
@@ -609,7 +621,7 @@ function isValidSharedGlossaryRange(offset, length) {
  * @returns {string}
  */
 function decodeRawTermString(bytes, offset, length, textDecoder) {
-    const value = textDecoder.decode(bytes.subarray(offset, offset + length));
+    const value = decodeRawTermBytes(bytes.subarray(offset, offset + length), textDecoder);
     if (
         length >= 3 &&
         bytes[offset] === 0xef &&
