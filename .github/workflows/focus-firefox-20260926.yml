@@ -1,0 +1,52 @@
+name: Firefox focus ownership regression
+on:
+  push:
+    branches: [review/focus-cause-20260926]
+    paths: [.github/workflows/focus-firefox-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  firefox:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      BASE: '384d1c97dae6bd17555973b77ad415e038438499'
+      FIX: '508e2e9c0e24102cbcb4d41fa448bfd80fb189e2'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin tested product source
+        run: |
+          git fetch origin "$BASE" "$FIX"
+          git checkout --detach "$FIX"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Set up real Firefox for the unchanged six browser tests
+        run: |
+          npx playwright install --with-deps firefox
+          cat > focus-firefox.config.mjs <<'JS'
+          import {defineConfig} from '@playwright/test'
+          export default defineConfig({testDir:'./test/playwright',testMatch:'document-focus-ownership.spec.js',workers:1,retries:0,use:{browserName:'firefox',headless:true}})
+          JS
+          mkdir -p builds/focus-firefox
+          git rev-parse HEAD > builds/focus-firefox/fix.txt
+          cp ext/js/dom/document-focus-controller.js /tmp/focus-fixed.js
+      - name: Retain original-code behavior
+        run: |
+          git show "$BASE":ext/js/dom/document-focus-controller.js > ext/js/dom/document-focus-controller.js
+          set +e
+          PLAYWRIGHT_JSON_OUTPUT_NAME=builds/focus-firefox/baseline.json npx playwright test --config=focus-firefox.config.mjs --reporter=json > builds/focus-firefox/baseline.log 2>&1
+          echo "$?" > builds/focus-firefox/baseline-exit.txt
+          set -e
+          cp /tmp/focus-fixed.js ext/js/dom/document-focus-controller.js
+      - name: Require all fixed focus and keyboard contracts
+        run: |
+          PLAYWRIGHT_JSON_OUTPUT_NAME=builds/focus-firefox/fixed.json npx playwright test --config=focus-firefox.config.mjs --reporter=json > builds/focus-firefox/fixed.log 2>&1
+          test "$(git hash-object ext/js/dom/document-focus-controller.js)" = 8e8968fea22279fd0fd45cc2e3b8ef5b7b66361d
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focus-firefox-regression
+          path: builds/focus-firefox/
+          retention-days: 14
