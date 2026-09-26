@@ -5246,6 +5246,10 @@ null;
             };
 
             for (let i = start, ii = start + count; i < ii; ++i) {
+                // Both cached and new content must honor the same staging bound.
+                if (stagedRows.length >= stagingBatchSize) {
+                    await flushStagedRows();
+                }
                 ++processedRowCount;
                 const row = /** @type {import('dictionary-database').DatabaseTermEntry} */ (items[i]);
                 const tComputeStart = safePerformance.now();
@@ -5333,10 +5337,6 @@ null;
                         `[manabitan-db-import] bulkAdd terms progress rows=${processedRowCount}/${count} ` +
                         `cached=${resolvedFromCacheCount} pendingUnique=${pendingContentBytes.length}`,
                     );
-                }
-
-                if (stagedRows.length >= stagingBatchSize) {
-                    await flushStagedRows();
                 }
             }
             await flushStagedRows();
