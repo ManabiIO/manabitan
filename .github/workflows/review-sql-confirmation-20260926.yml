@@ -1,0 +1,74 @@
+name: SQL complete import independent confirmation
+on:
+  push:
+    branches: [review/more-storage-sql-20260926]
+    paths: [.github/workflows/review-sql-confirmation-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [frequency, mixed, small]
+    env:
+      REVERSE_ORDER: '1'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Compose the same isolated SQL patch and retain the exact runner
+        run: |
+          git fetch --no-tags --depth=1 origin 384d1c97dae6bd17555973b77ad415e038438499 76362775484661b3cd8b9d2c84b228802c023a76 67e03e925816d0b43cf321f3e89f198352cb1569
+          mkdir -p builds/sql-import
+          git rev-parse HEAD > builds/sql-import/research-head.txt
+          git diff 76362775484661b3cd8b9d2c84b228802c023a76 67e03e925816d0b43cf321f3e89f198352cb1569 -- ext/js/dictionary/dictionary-database.js > builds/sql-import/qualified-delta.patch
+          git apply --check builds/sql-import/qualified-delta.patch
+          git apply builds/sql-import/qualified-delta.patch
+          git diff --name-only -- ext/ > builds/sql-import/product-diff.txt
+          test "$(cat builds/sql-import/product-diff.txt)" = ext/js/dictionary/dictionary-database.js
+          cp ext/js/dictionary/dictionary-database.js builds/sql-import/database-candidate.js
+          git show 384d1c97dae6bd17555973b77ad415e038438499:ext/js/dictionary/dictionary-database.js > builds/sql-import/database-baseline.js
+          git checkout -- ext/js/dictionary/dictionary-database.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/review/sql-complete-import-20260926.mjs')
+          s=p.read_text()
+          old='ids.map((i) => [`term-${i}`, null])'
+          assert old in s
+          s=s.replace(old,'ids.map((i) => ({term: `term-${i}`, reading: null}))')
+          old="const focusHash = sha(await readFile('ext/js/dom/document-focus-controller.js'))"
+          assert old in s
+          s=s.replace(old,"sources.B = await readFile('builds/sql-import/database-candidate.js')\n"+old)
+          s=s.replace('moduleHashes: {A:',"candidateComposition: 'current base plus isolated #266 SQL patch', moduleHashes: {A:")
+          p.write_text(s)
+          PY
+          cp dev/review/sql-complete-import-20260926.mjs builds/sql-import/driver.mjs
+          sha256sum builds/sql-import/database-*.js ext/js/dom/document-focus-controller.js package-lock.json > builds/sql-import/source.sha256
+      - name: Build and install Chromium
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms without timing promotion
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/sql-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/sql-import/${WORKLOAD}-preflight.log"
+      - name: Fixed reversed paired schedule
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/sql-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/sql-import/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sql-confirm-${{ matrix.workload }}
+          path: builds/sql-import/
+          retention-days: 14
