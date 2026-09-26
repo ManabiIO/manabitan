@@ -1,0 +1,51 @@
+name: Current archive classification prefilter
+on:
+  push:
+    branches: [review/archive-prefilter-current-20260926]
+    paths: [.github/workflows/review-archive-prefilter-current-20260926.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [large, medium]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and driver
+        run: |
+          cp dev/review/archive-prefilter-complete-20260926.mjs /tmp/driver.mjs
+          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a 8a1877ee8d7df36486150cbc4cf65bbcea592328
+          git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
+          mkdir -p dev/review builds/archive-prefilter
+          cp /tmp/driver.mjs dev/review/archive-prefilter-complete-20260926.mjs
+          cp /tmp/driver.mjs builds/archive-prefilter/executed-driver.mjs
+          git diff 2d79cd1dec164caa3075884133d9d12204a4f48a 8a1877ee8d7df36486150cbc4cf65bbcea592328 -- ext/ > builds/archive-prefilter/product.patch
+          test "$(git diff --name-only 2d79cd1dec164caa3075884133d9d12204a4f48a 8a1877ee8d7df36486150cbc4cf65bbcea592328 -- ext/)" = ext/js/dictionary/dictionary-importer.js
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build/browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: xvfb-run -a node dev/review/archive-prefilter-complete-20260926.mjs "$WORKLOAD"
+      - name: Compare
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: xvfb-run -a node dev/review/archive-prefilter-complete-20260926.mjs "$WORKLOAD"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: archive-prefilter-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/archive-prefilter/
+          retention-days: 14
