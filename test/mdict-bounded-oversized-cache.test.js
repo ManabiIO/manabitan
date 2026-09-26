@@ -14,6 +14,7 @@ import {makeMdictFixture} from './util/mdict-binary-fixture.js'
  * @param {'raw'|'zlib'} compression
  * @param {Record<string, unknown>} options
  * @param {number} [blockSize]
+ * @returns {{dictionary: MDD, decompress: ReturnType<typeof vi.spyOn>, read: (index: number) => Uint8Array, fixture: ReturnType<typeof makeMdictFixture>, entries: Array<{key: string, value: Uint8Array}>}}
  */
 function open(sizes, compression, options, blockSize = 64) {
     const entries = sizes.map((size, index) => ({
