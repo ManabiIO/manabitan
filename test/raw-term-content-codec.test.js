@@ -14,6 +14,8 @@ import {
     decodeRawTermContentTokenHeader,
     encodeRawTermContentBinary,
     encodeRawTermContentSharedGlossaryBinary,
+    isRawTermContentBinary,
+    isValidRawTermContentBinary,
 } from '../ext/js/dictionary/raw-term-content.js';
 
 const textEncoder = new TextEncoder();
@@ -93,5 +95,33 @@ describe('raw term content string identity', () => {
             tokens[field] = malformed;
             expect(decodeRawTermContentTokenHeader(createTokenWire(tokens), new TextDecoder())).toBeNull();
         }
+    });
+});
+
+
+describe('raw term content structural validation', () => {
+    test('accepts a complete ordinary raw-content payload', () => {
+        const bytes = encodeRawTermContentBinary('rule', 'definition', 'term', glossaryBytes, textEncoder);
+        expect(isRawTermContentBinary(bytes)).toBe(true);
+        expect(isValidRawTermContentBinary(bytes)).toBe(true);
+    });
+
+    test('rejects raw magic with inconsistent length metadata', () => {
+        const bytes = encodeRawTermContentBinary('rule', 'definition', 'term', glossaryBytes, textEncoder);
+        const malformed = Uint8Array.from(bytes);
+        const view = new DataView(malformed.buffer, malformed.byteOffset, malformed.byteLength);
+        view.setUint32(16, view.getUint32(16, true) + 1, true);
+
+        expect(isRawTermContentBinary(malformed)).toBe(true);
+        expect(isValidRawTermContentBinary(malformed)).toBe(false);
+        expect(decodeRawTermContentHeader(malformed, new TextDecoder())).toBeNull();
+    });
+
+    test('rejects truncated raw payloads even when the magic and header remain intact', () => {
+        const bytes = encodeRawTermContentBinary('rule', 'definition', 'term', glossaryBytes, textEncoder);
+        const malformed = bytes.subarray(0, bytes.byteLength - 1);
+
+        expect(isRawTermContentBinary(malformed)).toBe(true);
+        expect(isValidRawTermContentBinary(malformed)).toBe(false);
     });
 });
