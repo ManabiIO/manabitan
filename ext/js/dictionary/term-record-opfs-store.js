@@ -1338,6 +1338,22 @@ export class TermRecordOpfsStore {
      */
     async reset() {
         await this._closeAllWritables();
+        /** @type {Error[]} */
+        const resetErrors = [];
+        if (this._recordsDirectoryHandle !== null) {
+            const shardFileNames = await this._listTermRecordStorageFileNames();
+            for (const fileName of shardFileNames) {
+                try {
+                    await this._removeStorageFileOrTruncate(fileName, false);
+                } catch (error) {
+                    resetErrors.push(toError(error));
+                }
+            }
+        }
+
+        // Reset runtime ownership even when persistent cleanup fails. Some files
+        // may already have been removed/truncated, so retaining materialized
+        // records would expose state which no longer matches persistence.
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
         this._recordIdStaleDictionaryNames.clear();
@@ -1355,16 +1371,9 @@ export class TermRecordOpfsStore {
         this._preinternedCompactionRemap = new Uint32Array(0);
         this._loadedDictionaryNames.clear();
         this._allShardContentsLoaded = false;
-        if (this._recordsDirectoryHandle === null) {
-            return;
-        }
-        const shardFileNames = await this._listTermRecordStorageFileNames();
-        for (const fileName of shardFileNames) {
-            try {
-                await this._recordsDirectoryHandle.removeEntry(fileName);
-            } catch (_) {
-                // NOP
-            }
+
+        if (resetErrors.length > 0) {
+            throw new AggregateError(resetErrors, 'Failed to reset term-record storage');
         }
     }
 
@@ -4665,8 +4674,8 @@ export class TermRecordOpfsStore {
         const bytes = content.subarray(offset, offset + length);
         // Some browser TextDecoder implementations reject shared WASM views.
         // Copy only this string; ordinary buffers stay on the no-copy path.
-        const shared = typeof SharedArrayBuffer !== 'undefined' && bytes.buffer instanceof SharedArrayBuffer;
-        return this._textDecoder.decode(shared ? Uint8Array.from(bytes) : bytes);
+        // Shared memory can exist without an exposed same-realm constructor.
+        return this._textDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : Uint8Array.from(bytes));
     }
 
     /**
@@ -5148,11 +5157,10 @@ export class TermRecordOpfsStore {
         }
         const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
         if (state.initialFileLength !== 0) {
-            try {
-                await this._recordsDirectoryHandle.removeEntry(indexFileName);
-            } catch (_) {
-                // Missing or stale sidecars are handled by the full-shard fallback.
-            }
+            // Appending to an existing descriptor invalidates the previous
+            // sidecar's descriptor-length metadata. Do not leave a stale
+            // authoritative container behind when unlink is blocked.
+            await this._removeStorageFileOrTruncate(indexFileName, true);
             state.pendingLookupIndexChunks = [];
             state.pendingLookupIndexBytes = 0;
             state.pendingLookupIndexRecordCount = 0;
@@ -6019,7 +6027,10 @@ export class TermRecordOpfsStore {
             try {
                 fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: false});
             } catch (lookupError) {
-                if (allowMissing) { return; }
+                const lookupErrorName = typeof lookupError === 'object' && lookupError !== null ?
+                    /** @type {unknown} */ (Reflect.get(lookupError, 'name')) :
+                    null;
+                if (allowMissing && lookupErrorName === 'NotFoundError') { return; }
                 throw new AggregateError(
                     [removeError, lookupError],
                     `Failed to remove or open term-record storage file ${fileName}`,

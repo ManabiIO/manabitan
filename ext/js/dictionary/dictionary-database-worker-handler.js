@@ -50,9 +50,13 @@ export class DictionaryDatabaseWorkerHandler {
     _onMessage(event) {
         const {action} = event.data;
         switch (action) {
-            case 'connectToDatabaseWorker':
-                void this._dictionaryDatabase?.connectToDatabaseWorker(event.ports[0]);
+            case 'connectToDatabaseWorker': {
+                const task = this._dictionaryDatabase?.connectToDatabaseWorker(event.ports[0]);
+                if (typeof task !== 'undefined') {
+                    void task.catch((error) => { log.error(error); });
+                }
                 break;
+            }
             default:
                 log.error(`Unknown action: ${action}`);
         }

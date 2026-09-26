@@ -537,12 +537,37 @@ export class TermContentOpfsStore {
                 return;
             }
             const root = await navigator.storage.getDirectory();
+            /** @type {Error[]} */
+            const resetErrors = [];
             for (const state of await this._loadSegmentStates(root, true)) {
                 try {
                     await root.removeEntry(state.fileName);
-                } catch (_) {
-                    // NOP
+                    continue;
+                } catch (removeError) {
+                    try {
+                        const writable = await state.fileHandle.createWritable({keepExistingData: true});
+                        try {
+                            await writable.truncate(0);
+                        } finally {
+                            await writable.close();
+                        }
+                        if ((await state.fileHandle.getFile()).size > 0) {
+                            throw new Error(`Failed to truncate term-content reset segment ${state.fileName}`);
+                        }
+                    } catch (truncateError) {
+                        resetErrors.push(new AggregateError(
+                            [
+                                removeError instanceof Error ? removeError : new Error(String(removeError)),
+                                truncateError instanceof Error ? truncateError : new Error(String(truncateError)),
+                            ],
+                            `Failed to remove or truncate term-content reset segment ${state.fileName}`,
+                        ));
+                    }
                 }
+            }
+            if (resetErrors.length > 0) {
+                this._invalidateReadState();
+                throw new AggregateError(resetErrors, 'Failed to reset term-content storage');
             }
             const fileHandle = await root.getFileHandle(FILE_NAME, {create: true});
             const writable = await fileHandle.createWritable();

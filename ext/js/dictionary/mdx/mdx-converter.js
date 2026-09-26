@@ -220,19 +220,62 @@ const EMBEDDED_ASSET_EXTENSION_MAP = new Map([
     ['image/tiff', '.tiff'],
     ['image/webp', '.webp'],
 ]);
+const EMBEDDED_ASSET_DATA_URL_CACHE_MAX_ENTRIES = 64;
+const EMBEDDED_ASSET_DATA_URL_CACHE_MAX_KEY_BYTES = 256 * 1024;
 const NULL_CHARACTER = String.fromCodePoint(0);
 const SELECTOR_LIST_PSEUDO_CLASSES = new Set(['has', 'is', 'not', 'where']);
+
+/**
+ * @param {string} dataUrl
+ * @returns {number}
+ */
+function getEmbeddedAssetDataUrlProbe(dataUrl) {
+    const length = dataUrl.length;
+    if (length === 0) { return 0; }
+    const midpoint = length >> 1;
+    const quarter = length >> 2;
+    const threeQuarter = midpoint + quarter;
+    let probe = dataUrl.charCodeAt(quarter);
+    probe = Math.imul(probe ^ dataUrl.charCodeAt(midpoint), 0x45d9f3b);
+    probe ^= dataUrl.charCodeAt(threeQuarter);
+    return probe >>> 0;
+}
+
+/**
+ * The cache is hard-bounded, so a linear scan with a precomputed constant-time
+ * probe is cheaper on misses than hashing an entire (potentially very large)
+ * data URL. Exact string equality still guards probe collisions.
+ * @param {Array<{dataUrl: string, path: string, probe: number}>} entries
+ * @param {string} dataUrl
+ * @param {number} probe
+ * @returns {string|null}
+ */
+function findEmbeddedAssetDataUrlPath(entries, dataUrl, probe) {
+    const length = dataUrl.length;
+    for (const {dataUrl: candidate, path, probe: candidateProbe} of entries) {
+        if (candidate.length !== length || candidateProbe !== probe) { continue; }
+        if (candidate === dataUrl) { return path; }
+    }
+    return null;
+}
 
 class EmbeddedAssetCollector {
     /**
      * @param {string} assetPrefix
      * @param {{value: number}} counter
+     * @param {{entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}} sharedDataUrlCache
      */
-    constructor(assetPrefix, counter) {
+    constructor(assetPrefix, counter, sharedDataUrlCache) {
         /** @type {string} */
         this._assetPrefix = assetPrefix;
         /** @type {Map<string, Uint8Array>} */
         this._assets = new Map();
+        /** @type {Array<{dataUrl: string, path: string, probe: number}>} */
+        this._dataUrlCacheEntries = [];
+        /** @type {number} */
+        this._dataUrlRetainedKeyBytes = 0;
+        /** @type {{entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}} */
+        this._sharedDataUrlCache = sharedDataUrlCache;
         /** @type {{value: number}} */
         this._counter = counter;
     }
@@ -245,10 +288,26 @@ class EmbeddedAssetCollector {
     }
 
     /**
+     * Cache candidates remain local until the whole definition converts
+     * successfully. This keeps corrupt/skipped definitions from publishing
+     * paths whose asset bytes will never be committed.
+     * @returns {Array<{dataUrl: string, path: string, probe: number}>}
+     */
+    get dataUrlCacheEntries() {
+        return this._dataUrlCacheEntries;
+    }
+
+    /**
      * @param {string} dataUrl
      * @returns {string|null}
      */
     registerDataUrl(dataUrl) {
+        const probe = getEmbeddedAssetDataUrlProbe(dataUrl);
+        const localPath = findEmbeddedAssetDataUrlPath(this._dataUrlCacheEntries, dataUrl, probe);
+        if (typeof localPath === 'string') { return localPath; }
+        const sharedPath = findEmbeddedAssetDataUrlPath(this._sharedDataUrlCache.entries, dataUrl, probe);
+        if (typeof sharedPath === 'string') { return sharedPath; }
+
         const decoded = decodeDataUrl(dataUrl);
         if (decoded === null) { return null; }
         const {mediaType, data} = decoded;
@@ -256,6 +315,15 @@ class EmbeddedAssetCollector {
         const category = (mediaType.split('/', 1)[0] || 'asset').trim().toLowerCase();
         const path = `${this._assetPrefix}embedded/${category}/${String(++this._counter.value).padStart(6, '0')}${extension}`;
         this._assets.set(path, data);
+
+        const retainedKeyBytes = dataUrl.length * 2;
+        if (
+            this._sharedDataUrlCache.entries.length + this._dataUrlCacheEntries.length < EMBEDDED_ASSET_DATA_URL_CACHE_MAX_ENTRIES &&
+            this._sharedDataUrlCache.retainedKeyBytes + this._dataUrlRetainedKeyBytes + retainedKeyBytes <= EMBEDDED_ASSET_DATA_URL_CACHE_MAX_KEY_BYTES
+        ) {
+            this._dataUrlCacheEntries.push({dataUrl, path, probe});
+            this._dataUrlRetainedKeyBytes += retainedKeyBytes;
+        }
         return path;
     }
 }
@@ -445,13 +513,17 @@ function collapsePosixPath(path) {
 
 /**
  * @param {string} path
+ * @param {boolean} [preserveEncodedSeparators]
  * @returns {string}
  */
-function decodePercentEncodedPathSegments(path) {
+function decodePercentEncodedPathSegments(path, preserveEncodedSeparators = false) {
     const decodedParts = [];
     for (const part of path.split('/')) {
         try {
-            decodedParts.push(decodeURIComponent(part));
+            const encodedPart = preserveEncodedSeparators ?
+                part.replace(/%(?:2f|5c)/giu, (match) => `%25${match.slice(1)}`) :
+                part;
+            decodedParts.push(decodeURIComponent(encodedPart));
         } catch (_error) {
             decodedParts.push(part);
         }
@@ -492,7 +564,9 @@ function normalizeRelativeAssetPath(path, sourceAssetPath = null, assetPrefix = 
     if (lowered.startsWith('file://')) {
         value = value.slice(7);
     }
-    value = decodePercentEncodedPathSegments(value);
+    // Encoded slash/backslash are data within a URL path segment, not path
+    // separators. Preserve them while decoding ordinary percent escapes.
+    value = decodePercentEncodedPathSegments(value, true);
     value = value.replace(/^\/+/u, '');
     const alreadyPrefixed = assetPrefix.length > 0 && value.startsWith(assetPrefix);
     if (sourceAssetPath !== null && !fromRoot && !alreadyPrefixed) {
@@ -1731,8 +1805,10 @@ function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferen
     const image = {tag: 'img', path};
     const data = buildStructuredData(attrs);
     if (data !== null) { image.data = {tag: 'img', ...data}; }
-    if (typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width)) { image.width = Number.parseInt(attrs.width, 10); }
-    if (typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height)) { image.height = Number.parseInt(attrs.height, 10); }
+    const width = typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width) ? Number.parseInt(attrs.width, 10) : Number.NaN;
+    const height = typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height) ? Number.parseInt(attrs.height, 10) : Number.NaN;
+    if (Number.isFinite(width)) { image.width = width; }
+    if (Number.isFinite(height)) { image.height = height; }
     if (typeof attrs.title === 'string' && attrs.title.length > 0) { image.title = attrs.title; }
     if (typeof attrs.alt === 'string' && attrs.alt.length > 0) { image.alt = attrs.alt; }
     return image;
@@ -1841,11 +1917,13 @@ function appendStructuredContent(parent, content, details) {
         if (mappedTag === 'a') {
             const sourceHref = attrs.href ?? attrs.src ?? '';
             element.href = convertLinkHref(sourceHref, details);
-        } else if ((mappedTag === 'td' || mappedTag === 'th') && typeof attrs.colspan === 'string' && /^\d+$/u.test(attrs.colspan)) {
-            element.colSpan = Number.parseInt(attrs.colspan, 10);
+        } else if (mappedTag === 'td' || mappedTag === 'th') {
+            const colSpan = typeof attrs.colspan === 'string' && /^\d+$/u.test(attrs.colspan) ? Number.parseInt(attrs.colspan, 10) : Number.NaN;
+            if (Number.isFinite(colSpan) && colSpan >= 1) { element.colSpan = colSpan; }
         }
-        if ((mappedTag === 'td' || mappedTag === 'th') && typeof attrs.rowspan === 'string' && /^\d+$/u.test(attrs.rowspan)) {
-            element.rowSpan = Number.parseInt(attrs.rowspan, 10);
+        if (mappedTag === 'td' || mappedTag === 'th') {
+            const rowSpan = typeof attrs.rowspan === 'string' && /^\d+$/u.test(attrs.rowspan) ? Number.parseInt(attrs.rowspan, 10) : Number.NaN;
+            if (Number.isFinite(rowSpan) && rowSpan >= 1) { element.rowSpan = rowSpan; }
         }
         if (mappedTag === 'details' && Object.hasOwn(attrs, 'open')) {
             element.open = true;
@@ -1882,11 +1960,11 @@ function appendStructuredContent(parent, content, details) {
 
 /**
  * @param {string} definition
- * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}, entryScopeClass: string}} options
- * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, assetReferences: Set<string>}}
+ * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}, embeddedAssetDataUrlCache: {entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}, entryScopeClass: string}} options
+ * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, embeddedAssetDataUrlCacheEntries: Array<{dataUrl: string, path: string, probe: number}>, assetReferences: Set<string>}}
  */
 function convertDefinitionToStructuredContent(definition, options) {
-    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix, options.embeddedAssetCounter);
+    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix, options.embeddedAssetCounter, options.embeddedAssetDataUrlCache);
     /** @type {Set<string>} */
     const assetReferences = new Set();
     /** @type {Array<[string, string]>} */
@@ -1917,6 +1995,7 @@ function convertDefinitionToStructuredContent(definition, options) {
         },
         inlineStylesheets,
         embeddedAssets: embeddedAssets.assets,
+        embeddedAssetDataUrlCacheEntries: embeddedAssets.dataUrlCacheEntries,
         assetReferences,
     };
 }
@@ -2073,6 +2152,11 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         /** @type {Map<string, Uint8Array>} */
         const embeddedAssets = new Map();
         const embeddedAssetCounter = {value: 0};
+        const embeddedAssetDataUrlCache = {
+            /** @type {Array<{dataUrl: string, path: string, probe: number}>} */
+            entries: [],
+            retainedKeyBytes: 0,
+        };
         const encoder = new TextEncoder();
         /** @type {Map<string, Uint8Array>} */
         const files = new Map();
@@ -2168,6 +2252,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                     enableAudio,
                     assetPrefix,
                     embeddedAssetCounter,
+                    embeddedAssetDataUrlCache,
                     entryScopeClass: `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`,
                 });
             } catch (_error) {
@@ -2181,6 +2266,10 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 if (!embeddedAssets.has(path)) {
                     embeddedAssets.set(path, bytes);
                 }
+            }
+            for (const {dataUrl, path, probe} of converted.embeddedAssetDataUrlCacheEntries) {
+                embeddedAssetDataUrlCache.entries.push({dataUrl, path, probe});
+                embeddedAssetDataUrlCache.retainedKeyBytes += dataUrl.length * 2;
             }
             for (const [sourceName, stylesheet] of converted.inlineStylesheets) {
                 inlineStylesheets.push([`${term}/${sourceName}`, stylesheet, `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`]);
@@ -2201,6 +2290,8 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             referencedAssetCount: referencedAssetKeys.size,
             inlineStylesheetCount: inlineStylesheets.length,
             embeddedAssetCount: embeddedAssets.size,
+            embeddedAssetDataUrlCacheEntries: embeddedAssetDataUrlCache.entries.length,
+            embeddedAssetDataUrlRetainedKeyBytes: embeddedAssetDataUrlCache.retainedKeyBytes,
             skippedEntryErrorCount,
         });
         if (

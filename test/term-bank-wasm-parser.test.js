@@ -57,6 +57,17 @@ const nativeFetch = globalThis.fetch;
 /** @typedef {{addEventListener: (type: string, listener: (event: MessageEvent<unknown>) => void) => void, removeEventListener: (type: string, listener: (event: MessageEvent<unknown>) => void) => void, postMessage: (message: WorkerMessage, transfer?: Transferable[]) => void, terminate: () => void}} WorkerMock */
 
 /**
+ * @param {Map<string, Set<(event: MessageEvent<unknown>) => void>>} listenersByType
+ * @param {string} type
+ * @param {(event: MessageEvent<unknown>) => void} listener
+ */
+function addWorkerListener(listenersByType, type, listener) {
+    const listeners = listenersByType.get(type) ?? new Set();
+    listeners.add(listener);
+    listenersByType.set(type, listeners);
+}
+
+/**
  * @param {Map<string, Set<(event: MessageEvent<unknown>) => void>>} listeners
  * @param {unknown} data
  */
@@ -258,6 +269,16 @@ describe('term-bank WASM parser', () => {
         const actual = await parseColumnSnapshot([], preloaded);
 
         expect(actual).toEqual(expected);
+    });
+
+    maybeTest.each([
+        ['expression', '[123,"","","",0,["x"],1,""]'],
+        ['reading', '["x",123,"","",0,["x"],1,""]'],
+        ['definition tags', '["x","",123,"",0,["x"],1,""]'],
+        ['rules', '["x","","",123,0,["x"],1,""]'],
+        ['term tags', '["x","","","",0,["x"],1,123]'],
+    ])('rejects a non-string $0 field before row materialization', async (_field, rowJson) => {
+        await expect(parseRowsJson(`[${rowJson}]`)).rejects.toThrow();
     });
 
     maybeTest.each([
@@ -1927,6 +1948,45 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    maybeTest('fails parser prewarm promptly on initialization message errors', async () => {
+        let terminateCount = 0;
+        /** @implements {WorkerMock} */
+        class MessageErrorWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map();
+            }
+
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                addWorkerListener(this.listeners, type, listener);
+            }
+
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage(/** @type {WorkerMessage} */ message) {
+                if (message.type !== 'initialize') { return; }
+                queueMicrotask(() => {
+                    for (const listener of this.listeners.get('messageerror') ?? []) {
+                        listener(/** @type {MessageEvent<unknown>} */ ({}));
+                    }
+                });
+            }
+
+            terminate() { ++terminateCount; }
+        }
+
+        vi.stubGlobal('Worker', MessageErrorWorker);
+        try {
+            await expect(prewarmParallelTermBankParser()).resolves.toBe(false);
+            expect(terminateCount).toBeGreaterThanOrEqual(2);
+        } finally {
+            await disposeParallelTermBankParser();
+            vi.stubGlobal('Worker', void 0);
+        }
+    });
+
     maybeTest('aborts a hung parser prewarm during import cleanup', async () => {
         let terminateCount = 0;
         /** @implements {WorkerMock} */
@@ -1937,9 +1997,7 @@ describe('term-bank WASM parser', () => {
             }
 
             addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
-                const listeners = this.listeners.get(type) ?? new Set();
-                listeners.add(listener);
-                this.listeners.set(type, listeners);
+                addWorkerListener(this.listeners, type, listener);
             }
 
             removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
@@ -2541,7 +2599,14 @@ describe('term-bank WASM parser', () => {
         ));
 
         const escapedChunk = await parsePrepared('escaped\\expression');
-        expect(escapedChunk.preparedLookupIndexes).toBeUndefined();
+        expect(escapedChunk.preparedLookupIndexes?.get('0:2')?.bytes).toStrictEqual(
+            encodePersistedTermLookupIndexFromPreinternedPlan(
+                escapedChunk.termRecordPreinternedPlan,
+                escapedChunk.readingEqualsExpressionList,
+                escapedChunk.sequenceList,
+                escapedChunk.rowCount,
+            ),
+        );
     });
 
     maybeTest('keeps native lookup encoding byte-identical across dense mixed columns', async () => {
@@ -2861,7 +2926,9 @@ describe('term-bank WASM parser', () => {
         expect(getContentString({termEntryContentBytes: chunk.contentBytesList[0]})).toContain('"plain"');
         expect(plan.stringHashes[plan.expressionIndexes[0]]).toBe(hashBytes(textEncoder.encode('escaped\\value')));
         expect(plan.stringHashes[plan.expressionIndexes[1]]).toBe(hashBytes(textEncoder.encode('image')));
-        expect(consumeLastTermBankWasmParseProfile()?.nativeStringPlanFallbackChunkCount).toBe(1);
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(profile?.nativeStringPlanChunkCount).toBe(1);
+        expect(profile?.nativeStringPlanFallbackChunkCount).toBe(0);
     });
 
     maybeTest('emits shared content slabs without allocating per-row content views', async () => {

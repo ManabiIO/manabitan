@@ -45,6 +45,7 @@ import {
     encodeRawTermContentBinary,
     getRawTermContentGlossaryJsonBytes,
     isRawTermContentBinary,
+    isValidRawTermContentBinary,
     isRawTermContentSharedGlossaryBinary,
     isRawTermContentTokenBinary,
     isValidRawTermContentSharedGlossaryBinary,
@@ -5245,6 +5246,10 @@ null;
             };
 
             for (let i = start, ii = start + count; i < ii; ++i) {
+                // Both cached and new content must honor the same staging bound.
+                if (stagedRows.length >= stagingBatchSize) {
+                    await flushStagedRows();
+                }
                 ++processedRowCount;
                 const row = /** @type {import('dictionary-database').DatabaseTermEntry} */ (items[i]);
                 const tComputeStart = safePerformance.now();
@@ -5332,10 +5337,6 @@ null;
                         `[manabitan-db-import] bulkAdd terms progress rows=${processedRowCount}/${count} ` +
                         `cached=${resolvedFromCacheCount} pendingUnique=${pendingContentBytes.length}`,
                     );
-                }
-
-                if (stagedRows.length >= stagingBatchSize) {
-                    await flushStagedRows();
                 }
             }
             await flushStagedRows();
@@ -7062,13 +7063,11 @@ this._readTermContentSignature(
             } else if (existing.offset !== offset) {
                 if (
                     typeof existing.signature1 === 'number' &&
-                    typeof meta.signature1 === 'number' &&
-                    (
-                        existing.signature1 !== meta.signature1 ||
-                        existing.signature2 !== meta.signature2 ||
-                        existing.signature3 !== meta.signature3
-                    )
+                    typeof meta.signature1 === 'number'
                 ) {
+                    // Signatures reject obvious non-matches but are not content
+                    // identities. Preserve every fully-signed same-hash
+                    // candidate so an exact byte comparison can still reach it.
                     const key = `${hash1 >>> 0}:${hash2 >>> 0}`;
                     let collisions = this._termEntryContentMetaCollisionsByHashPair.get(key);
                     if (typeof collisions === 'undefined') {
@@ -7243,7 +7242,7 @@ this._readTermContentSignature(
                             explicitContentDictName.length > 0
                         ) ?
                             explicitContentDictName :
-                            (isRawTermContentBinary(contentChunks[j]) ? RAW_TERM_CONTENT_DICT_NAME : 'raw');
+                            (isValidRawTermContentBinary(contentChunks[j]) ? RAW_TERM_CONTENT_DICT_NAME : 'raw');
                         if (j === 0) {
                             uniformContentDictName = resolvedContentDictName;
                             continue;
@@ -7441,7 +7440,7 @@ this._readTermContentSignature(
                         resolvedContentDictName = explicitContentDictName;
                     } else if (
                         this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                        isRawTermContentBinary(contentChunks[i])
+                        isValidRawTermContentBinary(contentChunks[i])
                     ) {
                         resolvedContentDictName = RAW_TERM_CONTENT_DICT_NAME;
                     } else {
@@ -11247,7 +11246,7 @@ null :
                     if (typeof override === 'string' && override.length > 0) {
                         return override;
                     }
-                    return isRawTermContentBinary(contentBytes) ?
+                    return isValidRawTermContentBinary(contentBytes) ?
                         RAW_TERM_CONTENT_DICT_NAME :
                         (isValidRawTermContentSharedGlossaryBinary(contentBytes) ? RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME : 'raw');
                 }),

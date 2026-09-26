@@ -213,8 +213,12 @@ export class TemplateRendererProxy {
 
                 cleanup();
                 const {error} = response;
-                if (error) {
-                    reject(ExtensionError.deserialize(error));
+                if (typeof error !== 'undefined') {
+                    try {
+                        reject(ExtensionError.deserialize(error));
+                    } catch (e) {
+                        reject(e);
+                    }
                 } else {
                     resolve(/** @type {import('template-renderer-proxy').FrontendApiReturn<TName>} */ (response.result));
                 }
@@ -234,7 +238,12 @@ export class TemplateRendererProxy {
             window.addEventListener('message', onMessage, false);
             /** @type {import('template-renderer-proxy').FrontendMessage<TName>} */
             const requestMessage = {action, params, id};
-            frameWindow.postMessage(requestMessage, '*');
+            try {
+                frameWindow.postMessage(requestMessage, '*');
+            } catch (e) {
+                cleanup();
+                reject(e);
+            }
         });
     }
 
