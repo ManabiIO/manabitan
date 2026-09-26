@@ -1,0 +1,67 @@
+name: Final focus ownership browser qualification
+on:
+  push:
+    branches: [review/focus-cause-20260926]
+    paths: [.github/workflows/focus-final-browser-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [baseline, cache]
+        headless: ['0', '1']
+    env:
+      FIX: 'c1eecc36455c368c636df7d3d8c1a88fe1bc6eb8'
+      BASE: '384d1c97dae6bd17555973b77ad415e038438499'
+      CACHE: '31431c90eab14421f9ecc70616cce984406bceec'
+      MANABITAN_CHROMIUM_HEADLESS: ${{ matrix.headless }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Assemble exact repair with optional unchanged cache
+        env:
+          ARM: ${{ matrix.arm }}
+        run: |
+          git fetch origin "$BASE" "$FIX" "$CACHE"
+          git checkout --detach "$FIX"
+          if [ "$ARM" = cache ]; then
+            git diff "$BASE" "$CACHE" > /tmp/cache.patch
+            git apply --check /tmp/cache.patch
+            git apply /tmp/cache.patch
+          fi
+          mkdir -p builds/focus-final
+          git rev-parse HEAD > builds/focus-final/fix.txt
+          git hash-object test/playwright/integration.spec.js test/playwright/playwright-util.js > builds/focus-final/unchanged-test-blobs.txt
+          sha256sum ext/js/dom/document-focus-controller.js ext/js/dictionary/mdx/mdx-converter.js test/document-focus-controller.test.js test/playwright/document-focus-ownership.spec.js > builds/focus-final/source-sha256.txt
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Validate and build exact source
+        run: |
+          npx eslint ext/js/dom/document-focus-controller.js test/document-focus-controller.test.js test/playwright/document-focus-ownership.spec.js
+          npx vitest run test/document-focus-controller.test.js test/search-display-controller.test.js --maxWorkers=1 --minWorkers=1
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Deterministic cross-document focus and keyboard tests
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test document-focus-ownership.spec.js --project=chromium --workers=1 --retries=0 --reporter=line 2>&1 | tee builds/focus-final/deterministic.log
+      - name: Thirty repetitions of each unchanged original contract
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js --project=chromium --workers=1 --retries=0 --repeat-each=30 --grep 'search accepts typing immediately|chromium settings drag and drop imports a local MDX fixture, updates preview, and supports lookup' --reporter=line 2>&1 | tee builds/focus-final/repeated.log
+      - name: Full installed MDict and startup suite
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-inline-style.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep 'MDX|search accepts typing immediately' 2>&1 | tee builds/focus-final/mdict.log
+          sha256sum -c builds/focus-final/source-sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focus-final-${{ matrix.arm }}-${{ matrix.headless }}
+          path: builds/focus-final/
+          retention-days: 14
