@@ -19,30 +19,39 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           node-version: '22'
-      - name: Pin comparison and retain source identities
+      - name: Export local validation dependencies
+        if: matrix.workload == 'frequency'
         run: |
-          git fetch --no-tags --depth=1 origin 384d1c97dae6bd17555973b77ad415e038438499 67e03e925816d0b43cf321f3e89f198352cb1569
+          mkdir -p builds/local-dependencies
+          tar -czf builds/local-dependencies/node-modules.tgz node_modules
+      - name: Apply only the reviewed SQL delta to the current source
+        run: |
+          git fetch --no-tags --depth=1 origin 384d1c97dae6bd17555973b77ad415e038438499 76362775484661b3cd8b9d2c84b228802c023a76 67e03e925816d0b43cf321f3e89f198352cb1569
           mkdir -p builds/sql-import
           git rev-parse HEAD > builds/sql-import/research-head.txt
-          git diff --name-only 384d1c97dae6bd17555973b77ad415e038438499 67e03e925816d0b43cf321f3e89f198352cb1569 -- ext/ > builds/sql-import/product-diff.txt
+          git diff 76362775484661b3cd8b9d2c84b228802c023a76 67e03e925816d0b43cf321f3e89f198352cb1569 -- ext/js/dictionary/dictionary-database.js > builds/sql-import/qualified-delta.patch
+          git apply --check builds/sql-import/qualified-delta.patch
+          git apply builds/sql-import/qualified-delta.patch
+          git diff --name-only -- ext/ > builds/sql-import/product-diff.txt
           test "$(cat builds/sql-import/product-diff.txt)" = ext/js/dictionary/dictionary-database.js
+          cp ext/js/dictionary/dictionary-database.js builds/sql-import/database-candidate.js
+          git show 384d1c97dae6bd17555973b77ad415e038438499:ext/js/dictionary/dictionary-database.js > builds/sql-import/database-baseline.js
+          git checkout -- ext/js/dictionary/dictionary-database.js
           python3 - <<'PY'
           from pathlib import Path
           p = Path('dev/review/sql-complete-import-20260926.mjs')
           s = p.read_text()
           old = 'ids.map((i) => [`term-${i}`, null])'
           assert old in s
-          p.write_text(s.replace(old, 'ids.map((i) => ({term: `term-${i}`, reading: null}))'))
+          s = s.replace(old, 'ids.map((i) => ({term: `term-${i}`, reading: null}))')
+          old = "const focusHash = sha(await readFile('ext/js/dom/document-focus-controller.js'))"
+          assert old in s
+          s = s.replace(old, "sources.B = await readFile('builds/sql-import/database-candidate.js')\n" + old)
+          s = s.replace('moduleHashes: {A:', "candidateComposition: 'current base plus isolated #266 SQL patch', moduleHashes: {A:")
+          p.write_text(s)
           PY
           cp dev/review/sql-complete-import-20260926.mjs builds/sql-import/driver.mjs
-          git show 384d1c97dae6bd17555973b77ad415e038438499:ext/js/dictionary/dictionary-database.js > builds/sql-import/database-baseline.js
-          git show 67e03e925816d0b43cf321f3e89f198352cb1569:ext/js/dictionary/dictionary-database.js > builds/sql-import/database-candidate.js
           sha256sum builds/sql-import/database-*.js ext/js/dom/document-focus-controller.js package-lock.json > builds/sql-import/source.sha256
-      - name: Export local validation dependencies
-        if: matrix.workload == 'frequency'
-        run: |
-          mkdir -p builds/local-dependencies
-          tar -czf builds/local-dependencies/node-modules.tgz node_modules
       - name: Build extension and install browser
         run: |
           npm run build -- --target chrome-dev
