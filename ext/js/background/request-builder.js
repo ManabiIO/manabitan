@@ -51,8 +51,10 @@ export class RequestBuilder {
      */
     async fetchAnonymous(url, init) {
         const id = this._getNewRuleId();
+        const parsedUrl = new URL(url);
+        parsedUrl.hash = '';
+        url = parsedUrl.href;
         const originUrl = this._getOriginURL(url);
-        url = encodeURI(decodeURIComponent(url));
 
         this._ruleIds.add(id);
         try {
@@ -143,7 +145,7 @@ export class RequestBuilder {
             if (target === null) {
                 targets.push({array: value, length: value.length});
             } else if (targetPosition + value.length > target.length) {
-                targets.push({array: target, length: targetPosition});
+                targets.push({array: target.subarray(0, targetPosition), length: targetPosition}, {array: value, length: value.length});
                 target = null;
             } else {
                 target.set(value, targetPosition);
