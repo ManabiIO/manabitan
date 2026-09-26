@@ -4006,34 +4006,53 @@ export class DictionaryImporter {
         termArtifactFiles,
     ) {
         let total = 0;
+        /**
+         * @param {number} value
+         * @returns {boolean}
+         */
+        const addBytes = (value) => {
+            if (
+                !Number.isSafeInteger(value) ||
+                value < 0 ||
+                value > Number.MAX_SAFE_INTEGER - total
+            ) {
+                return false;
+            }
+            total += value;
+            return true;
+        };
         if (packedTermArtifactBytes instanceof Uint8Array) {
-            total += packedTermArtifactBytes.byteLength;
+            if (!addBytes(packedTermArtifactBytes.byteLength)) { return null; }
         } else if (preloadedTermArtifactBytes !== null) {
             for (const bytes of preloadedTermArtifactBytes.values()) {
-                total += bytes.byteLength;
+                if (!addBytes(bytes.byteLength)) { return null; }
             }
         } else if (termArtifactManifest !== null) {
             for (const {packedLength} of termArtifactManifest.termBanksByArtifact.values()) {
-                total += packedLength;
+                if (!addBytes(packedLength)) { return null; }
             }
         } else {
             for (const termArtifactFile of termArtifactFiles) {
                 const artifactUncompressedSize = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'uncompressedSize'));
                 const artifactBytes = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'bytes'));
-                const uncompressedSize = typeof artifactUncompressedSize === 'number' ?
-                    artifactUncompressedSize :
-                    (artifactBytes instanceof Uint8Array ? artifactBytes.byteLength : 0);
-                const size = typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) ?
-                    Math.max(0, Math.trunc(uncompressedSize)) :
-                    0;
-                total += size;
+                let size = 0;
+                if (typeof artifactUncompressedSize === 'number') {
+                    if (!Number.isSafeInteger(artifactUncompressedSize) || artifactUncompressedSize < 0) {
+                        return null;
+                    }
+                    size = artifactUncompressedSize;
+                } else if (artifactBytes instanceof Uint8Array) {
+                    size = artifactBytes.byteLength;
+                }
+                if (!addBytes(size)) { return null; }
             }
         }
         if (
             sharedGlossaryArtifactBytes instanceof Uint8Array &&
-            !(packedTermArtifactBytes instanceof Uint8Array)
+            !(packedTermArtifactBytes instanceof Uint8Array) &&
+            !addBytes(sharedGlossaryArtifactBytes.byteLength)
         ) {
-            total += sharedGlossaryArtifactBytes.byteLength;
+            return null;
         }
         return total > 0 ? total : null;
     }
