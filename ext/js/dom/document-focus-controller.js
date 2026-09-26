@@ -64,9 +64,7 @@ export class DocumentFocusController {
 
     /** */
     _onWindowFocus() {
-        // Firefox activates the window before publishing the element selected
-        // by a click or focus(). Inspect that target after activation completes.
-        window.requestAnimationFrame(() => this._updateFocusedElement(false));
+        this._updateFocusedElement(false);
     }
 
     /**

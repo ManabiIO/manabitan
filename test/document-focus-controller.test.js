@@ -14,7 +14,7 @@ afterEach(() => { vi.restoreAllMocks() })
 
 /**
  * @param {Document} document
- * @returns {{controller: DocumentFocusController, target: HTMLDivElement, input: HTMLInputElement, flushFocus: () => void}}
+ * @returns {{controller: DocumentFocusController, target: HTMLDivElement, input: HTMLInputElement}}
  */
 function createController(document) {
     const target = document.createElement('div')
@@ -23,17 +23,8 @@ function createController(document) {
     const input = document.createElement('input')
     input.id = 'query'
     document.body.replaceChildren(target, input)
-    /** @type {FrameRequestCallback[]} */
-    const frames = []
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
-        frames.push(callback)
-        return frames.length
-    })
     const controller = new DocumentFocusController('#query')
-    const flushFocus = () => {
-        for (const callback of frames.splice(0)) { callback(0) }
-    }
-    return {controller, target, input, flushFocus}
+    return {controller, target, input}
 }
 
 test('background initialization does not claim focus', ({window}) => {
@@ -45,14 +36,13 @@ test('background initialization does not claim focus', ({window}) => {
 })
 
 test('an unfocused document ignores a stale window focus event', ({window}) => {
-    const {controller, target, flushFocus} = createController(window.document)
+    const {controller, target} = createController(window.document)
     vi.spyOn(window.document, 'hasFocus').mockReturnValue(false)
     const focus = vi.spyOn(target, 'focus')
     controller.prepare()
     target.blur()
     focus.mockClear()
     window.dispatchEvent(new window.Event('focus'))
-    flushFocus()
     expect(focus).not.toHaveBeenCalled()
 })
 
@@ -64,24 +54,22 @@ test('a focused document still initializes its scrolling target', ({window}) => 
 })
 
 test('a focused editable element is not replaced', ({window}) => {
-    const {controller, input, flushFocus} = createController(window.document)
+    const {controller, input} = createController(window.document)
     input.focus()
     vi.spyOn(window.document, 'hasFocus').mockReturnValue(true)
     controller.prepare()
     window.dispatchEvent(new window.Event('focus'))
-    flushFocus()
     expect(window.document.activeElement).toBe(input)
 })
 
 test('deferred initialization resumes on genuine document activation', ({window}) => {
-    const {controller, target, flushFocus} = createController(window.document)
+    const {controller, target} = createController(window.document)
     const hasFocus = vi.spyOn(window.document, 'hasFocus').mockReturnValue(false)
     const focus = vi.spyOn(target, 'focus')
     controller.prepare()
     expect(focus).not.toHaveBeenCalled()
     hasFocus.mockReturnValue(true)
     window.dispatchEvent(new window.Event('focus'))
-    flushFocus()
     expect(focus).toHaveBeenCalledWith({preventScroll: true})
     expect(window.document.activeElement).toBe(target)
 })
@@ -125,31 +113,4 @@ test('scroll focus still restores a selection changed by the browser', ({window}
     controller.prepare()
     expect(selection.toString()).toBe('elected')
     expect(selection.rangeCount).toBe(1)
-})
-
-
-test('window activation waits for the browser to publish its chosen focus target', ({window}) => {
-    const {controller, target, input, flushFocus} = createController(window.document)
-    const hasFocus = vi.spyOn(window.document, 'hasFocus').mockReturnValue(false)
-    const focus = vi.spyOn(target, 'focus')
-    controller.prepare()
-    hasFocus.mockReturnValue(true)
-    window.dispatchEvent(new window.Event('focus'))
-    expect(focus).not.toHaveBeenCalled()
-    input.focus()
-    flushFocus()
-    expect(focus).not.toHaveBeenCalled()
-    expect(window.document.activeElement).toBe(input)
-})
-
-test('pending passive focus rechecks document ownership before running', ({window}) => {
-    const {controller, target, flushFocus} = createController(window.document)
-    const hasFocus = vi.spyOn(window.document, 'hasFocus').mockReturnValue(false)
-    const focus = vi.spyOn(target, 'focus')
-    controller.prepare()
-    hasFocus.mockReturnValue(true)
-    window.dispatchEvent(new window.Event('focus'))
-    hasFocus.mockReturnValue(false)
-    flushFocus()
-    expect(focus).not.toHaveBeenCalled()
 })
