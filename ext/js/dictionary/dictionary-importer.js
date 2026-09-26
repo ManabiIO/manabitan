@@ -2586,9 +2586,7 @@ export class DictionaryImporter {
                 importSession.recordFailure(error);
             }
             const bulkFinalizationDetails = await importSession.finalizeBulkImport((checkpointIndex, total) => {
-                this._progressData.index = Math.max(1, Math.floor((checkpointIndex / total) * this._progressData.count));
-                this._progress();
-                this._logImport(`bulk finalization ${checkpointIndex}/${total}`);
+                this._reportBulkFinalizationProgress(checkpointIndex, total);
             }, summary);
             this._progressData.index = this._progressData.count;
             try {
@@ -2643,6 +2641,18 @@ export class DictionaryImporter {
             errors,
             debug: {phaseTimings},
         };
+    }
+
+    /**
+     * Delivers best-effort progress while the database owns the commit boundary.
+     * A progress sink failure must not abort an otherwise valid publication.
+     * @param {number} checkpointIndex
+     * @param {number} total
+     */
+    _reportBulkFinalizationProgress(checkpointIndex, total) {
+        this._progressData.index = Math.max(1, Math.floor((checkpointIndex / total) * this._progressData.count));
+        this._progress();
+        this._logImport(`bulk finalization ${checkpointIndex}/${total}`);
     }
 
     /**
@@ -2813,7 +2823,11 @@ export class DictionaryImporter {
         this._lastProgressTimestamp = now;
         this._lastProgressIndex = index;
         this._lastProgressCount = count;
-        this._onProgress({...this._progressData, nextStep});
+        try {
+            this._onProgress({...this._progressData, nextStep});
+        } catch (_) {
+            // Progress delivery is best effort. Cancellation uses _isCancelled.
+        }
     }
 
     /**
