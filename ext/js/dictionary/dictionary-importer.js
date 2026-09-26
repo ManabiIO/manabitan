@@ -3019,8 +3019,8 @@ export class DictionaryImporter {
     _tryAddFastMediaRequirementsFromGlossaryJson(glossaryJson, entry, requirements) {
         // Escaped property names require semantic traversal, not a partial path scan.
         if (glossaryJson.includes('\\u')) { return false; }
-        let found = false;
         GLOSSARY_IMAGE_PATH_PATTERN.lastIndex = 0;
+        let hasImagePathCandidate = false;
         for (const match of glossaryJson.matchAll(GLOSSARY_IMAGE_PATH_PATTERN)) {
             let path;
             try {
@@ -3028,13 +3028,23 @@ export class DictionaryImporter {
             } catch (_) {
                 return false;
             }
-            if (typeof path !== 'string' || getImageMediaTypeFromFileName(path) === null) {
-                continue;
+            if (typeof path === 'string' && getImageMediaTypeFromFileName(path) !== null) {
+                hasImagePathCandidate = true;
+                break;
             }
-            found = true;
+        }
+        if (!hasImagePathCandidate) { return false; }
+        let glossary;
+        try {
+            glossary = /** @type {unknown} */ (parseJson(glossaryJson));
+        } catch (_) {
+            return false;
+        }
+        const paths = this._collectGlossaryImagePaths(glossary);
+        for (const path of paths) {
             this._addFastMediaRequirement(path, entry, requirements);
         }
-        return found;
+        return paths.length > 0;
     }
 
     /**
@@ -3045,16 +3055,71 @@ export class DictionaryImporter {
      */
     _tryAddFastMediaRequirementsFromFastRow(row, entry, requirements) {
         if (row.glossaryJsonBytes instanceof Uint8Array) {
-            const paths = this._extractImagePathsFromGlossaryJsonBytes(row.glossaryJsonBytes);
-            if (paths === null || paths.length === 0) {
+            const candidatePaths = this._extractImagePathsFromGlossaryJsonBytes(row.glossaryJsonBytes);
+            if (candidatePaths === null || candidatePaths.length === 0) {
                 return false;
             }
+            let glossary;
+            try {
+                glossary = /** @type {unknown} */ (parseJson(decodeUtf8Bytes(this._textDecoder, row.glossaryJsonBytes)));
+            } catch (_) {
+                return false;
+            }
+            const paths = this._collectGlossaryImagePaths(glossary);
             for (const path of paths) {
                 this._addFastMediaRequirement(path, entry, requirements);
             }
-            return true;
+            return paths.length > 0;
         }
         return this._tryAddFastMediaRequirementsFromGlossaryJson(this._getFastRowGlossaryJson(row), entry, requirements);
+    }
+
+    /**
+     * @param {unknown} glossary
+     * @returns {string[]}
+     */
+    _collectGlossaryImagePaths(glossary) {
+        /** @type {string[]} */
+        const paths = [];
+        if (!Array.isArray(glossary)) { return paths; }
+        for (const item of glossary) {
+            if (!(typeof item === 'object' && item !== null) || Array.isArray(item)) { continue; }
+            const value = /** @type {import('core').SafeAny} */ (item);
+            if (value.type === 'image') {
+                if (typeof value.path === 'string' && getImageMediaTypeFromFileName(value.path) !== null) {
+                    paths.push(value.path);
+                }
+                continue;
+            }
+            if (value.type === 'structured-content') {
+                this._collectStructuredContentImagePaths(value.content, paths);
+            }
+        }
+        return paths;
+    }
+
+    /**
+     * @param {unknown} content
+     * @param {string[]} paths
+     */
+    _collectStructuredContentImagePaths(content, paths) {
+        if (Array.isArray(content)) {
+            for (const item of content) {
+                this._collectStructuredContentImagePaths(item, paths);
+            }
+            return;
+        }
+        if (!(typeof content === 'object' && content !== null)) { return; }
+        const value = /** @type {import('core').SafeAny} */ (content);
+        if (value.tag === 'img') {
+            if (typeof value.path === 'string' && getImageMediaTypeFromFileName(value.path) !== null) {
+                paths.push(value.path);
+            }
+            return;
+        }
+        if (typeof value.content !== 'undefined') {
+            this._collectStructuredContentImagePaths(value.content, paths);
+        }
     }
 
     /**
