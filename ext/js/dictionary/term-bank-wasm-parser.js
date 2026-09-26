@@ -2051,7 +2051,13 @@ null :
                 // without being the same raw reading token. Preserve the fused
                 // parser's flag, matching the established JavaScript fallback.
                 const readingEqualsExpression = fusedStringPlan === null ?
-                    readingIndex === expressionIndex :
+                    (
+                        readingIndex === expressionIndex &&
+                        (
+                            isEmptyJsonStringToken(source, metas[o + 2], metas[o + 3]) ||
+                            tokenBytesEqual(source, metas[o], metas[o + 1], metas[o + 2], metas[o + 3])
+                        )
+                    ) :
                     readingEqualsExpressionList[i] === 1;
                 readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
                 if (emitTermByteLists) {

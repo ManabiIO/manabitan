@@ -1923,13 +1923,22 @@ int32_t build_term_string_plan(
             }
             const uint32_t token_start = token_starts[field];
             const uint32_t token_length = token_lengths[field];
+            const uint8_t* value_source = src;
+            uint32_t value_start = token_start + 1u;
+            uint32_t value_length = token_length - 2u;
             if (json_string_token_has_escape(src, token_start, token_length)) {
-                return -4;
+                // Decode into the unused arena tail. A failed attempt is never
+                // published; retain the JavaScript fallback for unusual keys.
+                const int32_t decoded_length = decode_escaped_key(
+                    src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
+                );
+                if (decoded_length < 0 || (uint32_t)decoded_length > MAX_INTERNED_KEY_BYTES) { return -4; }
+                value_source = strings;
+                value_start = strings_cursor;
+                value_length = (uint32_t)decoded_length;
             }
-            const uint32_t value_start = token_start + 1u;
-            const uint32_t value_length = token_length - 2u;
             if (value_length > MAX_INTERNED_KEY_BYTES) { return -5; }
-            const uint32_t hash = hash_content_xxh32(src + value_start, value_length, FNV1A_OFFSET);
+            const uint32_t hash = hash_content_xxh32(value_source + value_start, value_length, FNV1A_OFFSET);
             uint32_t slot = mix_string_hash(hash, value_length) & table_mask;
             uint32_t matched_index = 0xffffffffu;
             for (uint32_t probes = 0u; probes < hash_table_size; ++probes) {
@@ -1943,7 +1952,7 @@ int32_t build_term_string_plan(
                     content_bytes_equal_between(
                         strings,
                         string_offsets[candidate],
-                        src,
+                        value_source,
                         value_start,
                         value_length
                     )
@@ -1964,8 +1973,10 @@ int32_t build_term_string_plan(
             ) {
                 return -2;
             }
-            for (uint32_t i = 0u; i < value_length; ++i) {
-                strings[strings_cursor + i] = src[value_start + i];
+            if (value_source != strings) {
+                for (uint32_t i = 0u; i < value_length; ++i) {
+                    strings[strings_cursor + i] = value_source[value_start + i];
+                }
             }
             string_lengths[unique_count] = (uint16_t)value_length;
             string_offsets[unique_count] = strings_cursor;
