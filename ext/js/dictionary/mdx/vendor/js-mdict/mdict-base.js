@@ -434,7 +434,7 @@ class MDictBase {
             if (keyEndIndex == -1) {
                 throw new Error('Unterminated MDict key block entry');
             }
-            const keyTextBuffer = keyBlock.slice(keyStartIndex + this.meta.numWidth, keyEndIndex);
+            const keyTextBuffer = keyBlock.subarray(keyStartIndex + this.meta.numWidth, keyEndIndex);
             const keyText = this.meta.keyDecoder.decode(keyTextBuffer);
             if (keyList.length > 0) {
                 keyList[keyList.length - 1].recordEndOffset = meaningOffset;
