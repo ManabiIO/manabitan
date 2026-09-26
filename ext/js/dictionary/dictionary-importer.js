@@ -1052,6 +1052,16 @@ export class DictionaryImporter {
         if (fileMap.has(TERM_BANK_ARTIFACT_MANIFEST_FILE)) {
             termArtifactManifest = await this._readTermArtifactManifest(fileMap);
         }
+        const incompleteTermArtifactManifest = termArtifactManifest?.termBanksComplete === false;
+        if (incompleteTermArtifactManifest) {
+            // A partially accepted manifest is not evidence of complete terms.
+            // Only the ordinary source banks may recover this import; discard
+            // every artifact hint so pruning or sibling artifacts cannot win.
+            if (![...fileMap.keys()].some((name) => /^term_bank_[0-9]+\.json$/.test(name))) {
+                throw new Error('Incomplete packed term artifact manifest without source term banks');
+            }
+            termArtifactManifest = null;
+        }
         if (termArtifactManifest !== null) {
             this._validateSharedGlossaryArtifactDescriptor(termArtifactManifest);
         }
@@ -1076,7 +1086,7 @@ export class DictionaryImporter {
         }
         const archiveFiles = Object.fromEntries(this._getArchiveFiles(fileMap, queryDetails));
         const termFiles = archiveFiles.termFiles ?? [];
-        const termArtifactFiles = archiveFiles.termArtifactFiles ?? [];
+        const termArtifactFiles = incompleteTermArtifactManifest ? [] : archiveFiles.termArtifactFiles ?? [];
         const termMetaFiles = archiveFiles.termMetaFiles ?? [];
         const kanjiFiles = archiveFiles.kanjiFiles ?? [];
         const kanjiMetaFiles = archiveFiles.kanjiMetaFiles ?? [];
@@ -1129,6 +1139,17 @@ export class DictionaryImporter {
             typeof packedTermArtifactEntry !== 'undefined' &&
             this._hasCompleteTermArtifactCoverage(termFiles, termArtifactManifest.termBanksByArtifact.keys())
         );
+        if (termArtifactManifest !== null && termFiles.length === 0 && !usePackedTermArtifactSource) {
+            // With no ordinary source, every declared bank needs a standalone
+            // replacement when the packed container is absent. A nonempty
+            // subset alone must not qualify as a complete dictionary.
+            const availableArtifactNames = new Set(termArtifactFiles.map(({filename}) => filename));
+            for (const artifact of termArtifactManifest.termBanksByArtifact.keys()) {
+                if (!availableArtifactNames.has(artifact)) {
+                    throw new Error(`Missing declared term artifact: ${JSON.stringify(artifact)}`);
+                }
+            }
+        }
         const sharedGlossaryPackedOffset = termArtifactManifest?.sharedGlossaryPackedOffset ?? null;
         const sharedGlossaryPackedLength = termArtifactManifest?.sharedGlossaryPackedLength ?? null;
         const sharedGlossaryCompression = termArtifactManifest?.sharedGlossaryCompression ?? null;
@@ -4001,7 +4022,7 @@ export class DictionaryImporter {
 
     /**
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
-     * @returns {Promise<{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, packedFileName: string|null, packedMediaFileName: string|null, packedMediaEntries: Array<{path: string, packedOffset: number, packedLength: number, mediaType: string, compressionMethod: number, uncompressedLength: number}>, packedMediaEntriesComplete: boolean, sharedGlossaryFileName: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null, sharedGlossaryCompression: string|null, sharedGlossaryUncompressedLength: number|null, termContentMode: string|null, prunedAuxFiles: boolean, includesMediaFiles: boolean}|null>}
+     * @returns {Promise<{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, termBanksComplete: boolean, packedFileName: string|null, packedMediaFileName: string|null, packedMediaEntries: Array<{path: string, packedOffset: number, packedLength: number, mediaType: string, compressionMethod: number, uncompressedLength: number}>, packedMediaEntriesComplete: boolean, sharedGlossaryFileName: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null, sharedGlossaryCompression: string|null, sharedGlossaryUncompressedLength: number|null, termContentMode: string|null, prunedAuxFiles: boolean, includesMediaFiles: boolean}|null>}
      */
     async _readTermArtifactManifest(fileMap) {
         const manifestEntry = fileMap.get(TERM_BANK_ARTIFACT_MANIFEST_FILE);
@@ -4021,14 +4042,21 @@ export class DictionaryImporter {
         }
         /** @type {Map<string, {packedOffset: number, packedLength: number, rows: number|null}>} */
         const termBanksByArtifact = new Map();
+        let termBanksComplete = typeof manifest.termBanks === 'undefined' || Array.isArray(manifest.termBanks);
         const termBanks = Array.isArray(manifest.termBanks) ? manifest.termBanks : [];
         for (const termBank of termBanks) {
-            if (!(typeof termBank === 'object' && termBank !== null)) { continue; }
+            if (!(typeof termBank === 'object' && termBank !== null)) {
+                termBanksComplete = false;
+                continue;
+            }
             const artifact = typeof termBank.artifact === 'string' ? termBank.artifact : null;
             const packedOffset = Number.isSafeInteger(termBank.packedOffset) ? /** @type {number} */ (termBank.packedOffset) : -1;
             const packedLength = Number.isSafeInteger(termBank.packedLength) ? /** @type {number} */ (termBank.packedLength) : -1;
             const rows = this._getArtifactTermBankRowCount(termBank.rows);
-            if (artifact === null || packedOffset < 0 || packedLength <= 0) { continue; }
+            if (artifact === null || artifact.length === 0 || packedOffset < 0 || packedLength <= 0) {
+                termBanksComplete = false;
+                continue;
+            }
             if (termBanksByArtifact.has(artifact)) {
                 throw new Error(`Duplicate packed term artifact descriptor: ${JSON.stringify(artifact)}`);
             }
@@ -4122,6 +4150,7 @@ export class DictionaryImporter {
         const includesMediaFiles = manifest.includesMediaFiles === true;
         return {
             termBanksByArtifact,
+            termBanksComplete,
             packedFileName,
             packedMediaFileName,
             packedMediaEntries,

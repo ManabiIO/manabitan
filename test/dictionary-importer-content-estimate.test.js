@@ -20,6 +20,7 @@ const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), () 
 function manifest(termBanksByArtifact) {
     return {
         termBanksByArtifact,
+        termBanksComplete: true,
         packedFileName: null,
         packedMediaFileName: null,
         packedMediaEntries: [],
