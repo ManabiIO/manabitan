@@ -8,8 +8,8 @@ import {chromium, expect} from '@playwright/test'
 import {ManifestUtil} from '../manifest-util.js'
 import {makeMdictFixture} from '../../test/util/mdict-binary-fixture.js'
 
-const base = '2d79cd1dec164caa3075884133d9d12204a4f48a'
-const candidate = '8a0ecf9f1a90a51c9482ad8f389a59c0a4fcc7c5'
+const base = '9fe19a57864653d84dc5f7c41b6277ccd6d2f7f0'
+const candidate = '3997012b4fd04d0803f2ef39993da371ca00ee45'
 const modulePaths = [
     'ext/js/dictionary/mdx/vendor/js-mdict/mdict.js',
     'ext/js/dictionary/mdx/mdx-converter.js',
