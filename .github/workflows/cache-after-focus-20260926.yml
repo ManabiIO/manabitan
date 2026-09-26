@@ -1,0 +1,81 @@
+name: Complete cache imports after focus repair
+on:
+  push:
+    branches: [review/focus-cause-20260926]
+    paths: [.github/workflows/cache-after-focus-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [repeated, unique, none]
+    env:
+      FIX: '508e2e9c0e24102cbcb4d41fa448bfd80fb189e2'
+      BASE: '384d1c97dae6bd17555973b77ad415e038438499'
+      CACHE: '31431c90eab14421f9ecc70616cce984406bceec'
+      RECIPE: 'b104e192d5efec5ee92e7f46a624b372f3dfeb46'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin common repair and original converter-only comparison
+        run: |
+          git fetch origin "$FIX" "$BASE" "$CACHE" "$RECIPE"
+          git show "$RECIPE":dev/review/mdx-complete-import-20260926.mjs > /tmp/import-driver.mjs
+          git checkout --detach "$FIX"
+          mkdir -p dev/review builds/cache-completion
+          cp /tmp/import-driver.mjs dev/review/mdx-complete-import-20260926.mjs
+          test "$(git diff --name-only "$BASE" "$CACHE" -- ext/)" = ext/js/dictionary/mdx/mdx-converter.js
+          test "$(git hash-object ext/js/dom/document-focus-controller.js)" = 8e8968fea22279fd0fd45cc2e3b8ef5b7b66361d
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dev/review/mdx-complete-import-20260926.mjs')
+          s=p.read_text()
+          anchor='const save = () =>'
+          assert s.count(anchor)==1
+          s=s.replace(anchor, "report.commonProductRef = process.env.FIX\nreport.focusControllerSha256 = sha(await readFile('ext/js/dom/document-focus-controller.js'))\n"+anchor)
+          anchor='        assert.deepEqual(pageErrors,[])'
+          assert s.count(anchor)==1
+          check="""        const executedFocusHash = await page.evaluate(async () => {
+                      const bytes = await (await fetch('/js/dom/document-focus-controller.js')).arrayBuffer()
+                      return [...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x => x.toString(16).padStart(2,'0')).join('')
+                  })
+                  assert.equal(executedFocusHash,report.focusControllerSha256)
+          """
+          s=s.replace(anchor,check+anchor)
+          s=s.replace('sourceHash:executedSourceHash,browser:', 'sourceHash:executedSourceHash,focusSourceHash:executedFocusHash,browser:')
+          p.write_text(s)
+          PY
+          cp dev/review/mdx-complete-import-20260926.mjs builds/cache-completion/driver.mjs
+          git rev-parse HEAD > builds/cache-completion/common-product-ref.txt
+          sha256sum ext/js/dom/document-focus-controller.js > builds/cache-completion/focus-source.sha256
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build extension and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Verify both arms before timing
+        env:
+          REVIEW_PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/mdx-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/cache-completion/${WORKLOAD}-preflight.log"
+      - name: Fixed complete-import pairs and same-code controls
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/mdx-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/cache-completion/${WORKLOAD}.log"
+          sha256sum -c builds/cache-completion/focus-source.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cache-after-focus-${{ matrix.workload }}
+          path: builds/cache-completion/
+          retention-days: 14
