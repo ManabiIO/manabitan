@@ -1,122 +1,19 @@
-name: Full Chromium extension channel qualification
+name: Archived Chromium channel focus experiment
 on:
-  push:
-    branches: [review/focus-and-import-20260926]
-    paths: [.github/workflows/review-extension-channel-20260926.yml]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  browser:
+  disposition:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        variant: [baseline, cache]
-        headless: ['0', '1']
+    timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v6
-      - name: Pin product source and choose the full Chromium channel
-        env:
-          VARIANT: ${{ matrix.variant }}
+      - name: Retain the failed experiment without a publication path
         run: |
-          SOURCE_REF=384d1c97dae6bd17555973b77ad415e038438499
-          if test "$VARIANT" = cache; then SOURCE_REF=31431c90eab14421f9ecc70616cce984406bceec; fi
-          git fetch --no-tags --depth=1 origin "$SOURCE_REF"
-          git checkout --detach "$SOURCE_REF"
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('test/playwright/playwright-util.js')
-          s=p.read_text()
-          old="        const context = await chromium.launchPersistentContext('', {\n            headless: runHeadless,"
-          new="        const context = await chromium.launchPersistentContext('', {\n            // Use full Chromium for extension behavior in both headed and headless runs.\n            channel: 'chromium',\n            headless: runHeadless,"
-          assert s.count(old)==1
-          p.write_text(s.replace(old,new))
-          PY
-          mkdir -p builds/channel-qualification
-          git rev-parse HEAD > builds/channel-qualification/base.txt
-          git diff > builds/channel-qualification/patch.diff
-          test "$(git diff --name-only)" = test/playwright/playwright-util.js
-          git hash-object test/playwright/integration.spec.js > builds/channel-qualification/unchanged-integration-blob.txt
-      - uses: ./.github/actions/setup
-        with:
-          node-version: '22'
-      - name: Validate and build
-        run: |
-          npx eslint test/playwright/playwright-util.js
-          npm run test:ts
-          npm run build -- --target chrome-dev
-          npx playwright install --with-deps chromium
-      - name: Twenty repetitions without modifying focus, input or result assertions
-        env:
-          MANABITAN_CHROMIUM_HEADLESS: ${{ matrix.headless }}
-          MANABITAN_CHROMIUM_HIDE_WINDOW: '0'
-          DEBUG: pw:browser
-        run: |
-          set -o pipefail
-          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js --project=chromium --workers=1 --retries=0 --repeat-each=20 --reporter=line --grep 'search accepts typing|drag and drop imports a local MDX fixture' 2>&1 | tee builds/channel-qualification/repeated.log
-      - name: Complete installed MDict suite plus untouched startup autofocus test
-        env:
-          MANABITAN_CHROMIUM_HEADLESS: ${{ matrix.headless }}
-          MANABITAN_CHROMIUM_HIDE_WINDOW: '0'
-        run: |
-          set -o pipefail
-          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-inline-style.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep 'MDX|search accepts typing' 2>&1 | tee builds/channel-qualification/mdict.log
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: extension-channel-${{ matrix.variant }}-headless-${{ matrix.headless }}
-          path: |
-            builds/channel-qualification/
-            test-results/
-          retention-days: 14
-  publish:
-    needs: browser
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: 384d1c97dae6bd17555973b77ad415e038438499
-      - uses: ./.github/actions/setup
-        with:
-          node-version: '22'
-      - name: Publish only the qualified test fixture and its CI trigger coverage
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('test/playwright/playwright-util.js')
-          s=p.read_text()
-          old="        const context = await chromium.launchPersistentContext('', {\n            headless: runHeadless,"
-          new="        const context = await chromium.launchPersistentContext('', {\n            // Use full Chromium for extension behavior in both headed and headless runs.\n            channel: 'chromium',\n            headless: runHeadless,"
-          assert s.count(old)==1
-          p.write_text(s.replace(old,new))
-          p=Path('.github/workflows/mdict-native.yml')
-          s=p.read_text()
-          old="      - 'test/playwright/mdict-*.spec.js'"
-          assert s.count(old)==1
-          p.write_text(s.replace(old,old+"\n      - 'test/playwright/playwright-util.js'\n      - 'test/playwright/integration.spec.js'"))
-          PY
-          mkdir -p builds/channel-publication
-          npx eslint test/playwright/playwright-util.js
-          npm run test:ts
-          npm run test:unit -- --maxWorkers=2 --minWorkers=1 > builds/channel-publication/unit.log 2>&1
-          npm run test:build > builds/channel-publication/build.log 2>&1
-          git diff --check
-          git switch -c test/chromium-extension-channel-20260926
-          git config user.name 'Manabitan review'
-          git config user.email 'noreply@users.noreply.github.com'
-          git add test/playwright/playwright-util.js .github/workflows/mdict-native.yml
-          git -c core.hooksPath=/dev/null commit -m 'test: run extension fixtures on the full Chromium channel'
-          git rev-parse HEAD > builds/channel-publication/head.txt
-          git diff HEAD^ HEAD > builds/channel-publication/patch.diff
-          git push origin HEAD:refs/heads/test/chromium-extension-channel-20260926
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: extension-channel-publication
-          path: builds/channel-publication/
-          retention-days: 14
+          echo 'The full Chromium channel did not resolve the search focus/input-loss failure.'
+          echo 'No product branch or test assertion changes were published.'
+          echo 'Original recipe: f1e24e60a96a240437207e9fbc9859c200aa0207'
+          echo 'Qualification run: 36228805921'
+          echo 'Baseline headed and both cache lanes still failed. Baseline headless passed.'
+          echo 'The cache headless lane includes three focus failures and one empty-value failure.'
+          echo 'Historical source and complete results remain available at those immutable identities.'
