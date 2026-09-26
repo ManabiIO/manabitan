@@ -305,3 +305,136 @@ describe('DictionaryImporter term artifacts', () => {
         expect(chunkDelivered).toBe(false);
     });
 });
+
+describe('DictionaryImporter packed artifact validation', () => {
+    test('rejects term spans which would be silently clamped by Uint8Array.subarray', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedTermArtifactManifest');
+        /** @type {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null}} */
+        const manifest = {
+            termBanksByArtifact: new Map([
+                ['term_bank_1.mbtb', {packedOffset: 8, packedLength: 4, rows: null}],
+            ]),
+            sharedGlossaryPackedOffset: null,
+            sharedGlossaryPackedLength: null,
+        };
+
+        expect(() => validate.call(importer, manifest, 10)).toThrow(/term_bank_1\.mbtb/u);
+        manifest.termBanksByArtifact.set('term_bank_1.mbtb', {packedOffset: 6, packedLength: 4, rows: null});
+        expect(() => validate.call(importer, manifest, 10)).not.toThrow();
+    });
+
+    test('rejects negative row hints and incomplete packed shared-glossary spans', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedTermArtifactManifest');
+        /** @type {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null}} */
+        const manifest = {
+            termBanksByArtifact: new Map([
+                ['term_bank_1.mbtb', {packedOffset: 0, packedLength: 10, rows: -1}],
+            ]),
+            sharedGlossaryPackedOffset: null,
+            sharedGlossaryPackedLength: null,
+        };
+
+        expect(() => validate.call(importer, manifest, 10)).toThrow(/row count/u);
+        manifest.termBanksByArtifact.set('term_bank_1.mbtb', {packedOffset: 0, packedLength: 10, rows: 0});
+        expect(() => validate.call(importer, manifest, 10)).not.toThrow();
+
+        manifest.sharedGlossaryPackedOffset = 0;
+        expect(() => validate.call(importer, manifest, 10)).toThrow(/incomplete/u);
+        manifest.sharedGlossaryPackedOffset = null;
+        manifest.sharedGlossaryPackedLength = 10;
+        expect(() => validate.call(importer, manifest, 10)).toThrow(/incomplete/u);
+        manifest.sharedGlossaryPackedOffset = 0;
+        expect(() => validate.call(importer, manifest, 10)).not.toThrow();
+    });
+
+    test('validates shared glossary compression descriptors without breaking legacy raw-v4', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validateSharedGlossaryArtifactDescriptor');
+        /** @type {{sharedGlossaryFileName: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null, sharedGlossaryCompression: string|null, sharedGlossaryUncompressedLength: number|null, termContentMode: string|null}} */
+        const descriptor = {
+            sharedGlossaryFileName: 'manabitan-term-glossary-shared.bin',
+            sharedGlossaryPackedOffset: null,
+            sharedGlossaryPackedLength: null,
+            sharedGlossaryCompression: null,
+            sharedGlossaryUncompressedLength: 100,
+            termContentMode: 'raw-v4',
+        };
+
+        expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = 'zstd';
+        expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = 'brotli';
+        expect(() => validate.call(importer, descriptor)).toThrow(/compression/u);
+        descriptor.sharedGlossaryCompression = null;
+        descriptor.sharedGlossaryUncompressedLength = null;
+        expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
+        descriptor.termContentMode = 'raw-v3';
+        expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryUncompressedLength = -1;
+        expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
+    });
+
+    test('rejects packed media spans and invalid preserved compression descriptors', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedMediaArtifactManifest');
+
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 9, packedLength: 2, compressionMethod: 0, uncompressedLength: 2,
+        }], 10, false)).toThrow(/image\.webp/u);
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 99, uncompressedLength: 10,
+        }], 10, true)).toThrow(/compression method 99/u);
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 8, uncompressedLength: 25,
+        }], 10, true)).not.toThrow();
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 0, uncompressedLength: 11,
+        }], 10, true)).toThrow(/length mismatch/u);
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 8, uncompressedLength: 0,
+        }], 10, true)).toThrow(/uncompressed length/u);
+    });
+
+    test('ignores compression metadata when packed media is imported uncompressed', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedMediaArtifactManifest');
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 99, uncompressedLength: 123,
+        }], 10, false)).not.toThrow();
+    });
+
+    test('rejects duplicate packed media paths before creating ambiguous database rows', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedMediaArtifactManifest');
+        const entries = [
+            {path: 'same.png', packedOffset: 0, packedLength: 4, compressionMethod: 0, uncompressedLength: 4},
+            {path: 'same.png', packedOffset: 4, packedLength: 4, compressionMethod: 0, uncompressedLength: 4},
+        ];
+        expect(() => validate.call(importer, entries, 8, true)).toThrow(/Duplicate packed media artifact path/u);
+    });
+
+    test('span validation rejects unsafe integer arithmetic', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const isValid = Reflect.get(importer, '_isValidPackedArtifactSpan');
+        expect(isValid.call(importer, Number.MAX_SAFE_INTEGER, 2, Number.MAX_SAFE_INTEGER)).toBe(false);
+        expect(isValid.call(importer, 4, 6, 10)).toBe(true);
+    });
+
+    test('rejects duplicate packed term artifact descriptors instead of silently taking the last one', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const read = Reflect.get(importer, '_readTermArtifactManifest');
+        Reflect.set(importer, '_getData', async () => JSON.stringify({
+            termBanks: [
+                {artifact: 'term_bank_1.mbtb', packedOffset: 0, packedLength: 4, rows: 1},
+                {artifact: 'term_bank_1.mbtb', packedOffset: 4, packedLength: 4, rows: 1},
+            ],
+        }));
+        const fileMap = new Map([
+            ['manabitan-import-artifact.json', /** @type {import('@zip.js/zip.js').Entry} */ ({})],
+        ]);
+        await expect(read.call(importer, fileMap)).rejects.toThrow(/Duplicate packed term artifact descriptor/u);
+    });
+});
+

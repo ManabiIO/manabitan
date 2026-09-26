@@ -108,6 +108,7 @@ const TERM_BANK_PACKED_MEDIA_ARTIFACT_FILE = 'manabitan-media-packed.bin';
 const TERM_BANK_SHARED_GLOSSARY_ARTIFACT_FILE = 'manabitan-term-glossary-shared.bin';
 const TERM_ARTIFACT_PRELOAD_CONCURRENCY = 4;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
+const ZIP_COMPRESSION_METHOD_DEFLATE = 8;
 const GLOSSARY_IMAGE_PATH_PATTERN = /"path"\s*:\s*"((?:\\.|[^"\\])*)"/g;
 const JSON_PATH_KEY_BYTES = new Uint8Array([0x22, 0x70, 0x61, 0x74, 0x68, 0x22]);
 const FREQUENCY_DATA_KEYS = ['value', 'displayValue'];
@@ -1051,6 +1052,9 @@ export class DictionaryImporter {
         if (fileMap.has(TERM_BANK_ARTIFACT_MANIFEST_FILE)) {
             termArtifactManifest = await this._readTermArtifactManifest(fileMap);
         }
+        if (termArtifactManifest !== null) {
+            this._validateSharedGlossaryArtifactDescriptor(termArtifactManifest);
+        }
         const usePrunedArtifactAuxFastPath = (
             termArtifactManifest?.prunedAuxFiles === true &&
             this._hasUsableArtifactTermSource(termArtifactManifest, fileMap)
@@ -1187,6 +1191,9 @@ export class DictionaryImporter {
                 this._logImport(`term artifact preload ${termArtifactPreloadMs}ms files=${preloadedTermArtifactBytes.size}`);
             }
         }
+        if (packedTermArtifactBytes instanceof Uint8Array && termArtifactManifest !== null) {
+            this._validatePackedTermArtifactManifest(termArtifactManifest, packedTermArtifactBytes.byteLength);
+        }
         if (
             packedTermArtifactBytes instanceof Uint8Array &&
             Number.isInteger(sharedGlossaryPackedOffset) &&
@@ -1237,6 +1244,18 @@ export class DictionaryImporter {
                 }`,
             );
         }
+        if (termArtifactManifest !== null) {
+            const packedMediaLength = packedMediaArtifactBytes instanceof Uint8Array ?
+                packedMediaArtifactBytes.byteLength :
+                (packedMediaArtifactBlob instanceof Blob ? packedMediaArtifactBlob.size : null);
+            if (packedMediaLength !== null) {
+                this._validatePackedMediaArtifactManifest(
+                    termArtifactManifest.packedMediaEntries,
+                    packedMediaLength,
+                    preserveCompressedMedia,
+                );
+            }
+        }
         const useCompressedSharedGlossaryArtifact = termArtifactManifest?.termContentMode === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME;
         if (
             sharedGlossaryArtifactBytes instanceof Uint8Array &&
@@ -1256,6 +1275,14 @@ export class DictionaryImporter {
                 );
                 if (!(decompressedGlossary instanceof Uint8Array)) {
                     throw new TypeError('Shared glossary decompressor returned invalid bytes');
+                }
+                if (
+                    sharedGlossaryUncompressedLength !== null &&
+                    decompressedGlossary.byteLength !== sharedGlossaryUncompressedLength
+                ) {
+                    throw new Error(
+                        `Shared glossary decoded length mismatch: expected ${sharedGlossaryUncompressedLength}, got ${decompressedGlossary.byteLength}`,
+                    );
                 }
                 sharedGlossaryArtifactBytes = decompressedGlossary;
             } catch (e) {
@@ -3934,10 +3961,13 @@ export class DictionaryImporter {
         for (const termBank of termBanks) {
             if (!(typeof termBank === 'object' && termBank !== null)) { continue; }
             const artifact = typeof termBank.artifact === 'string' ? termBank.artifact : null;
-            const packedOffset = Number.isInteger(termBank.packedOffset) ? /** @type {number} */ (termBank.packedOffset) : -1;
-            const packedLength = Number.isInteger(termBank.packedLength) ? /** @type {number} */ (termBank.packedLength) : -1;
+            const packedOffset = Number.isSafeInteger(termBank.packedOffset) ? /** @type {number} */ (termBank.packedOffset) : -1;
+            const packedLength = Number.isSafeInteger(termBank.packedLength) ? /** @type {number} */ (termBank.packedLength) : -1;
             const rows = this._getArtifactTermBankRowCount(termBank.rows);
             if (artifact === null || packedOffset < 0 || packedLength <= 0) { continue; }
+            if (termBanksByArtifact.has(artifact)) {
+                throw new Error(`Duplicate packed term artifact descriptor: ${JSON.stringify(artifact)}`);
+            }
             termBanksByArtifact.set(artifact, {packedOffset, packedLength, rows});
         }
         const packedFileName = (
@@ -3966,11 +3996,11 @@ export class DictionaryImporter {
         for (const mediaEntry of mediaEntries) {
             if (!(typeof mediaEntry === 'object' && mediaEntry !== null)) { continue; }
             const path = typeof mediaEntry.path === 'string' ? mediaEntry.path : null;
-            const packedOffset = Number.isInteger(mediaEntry.packedOffset) ? /** @type {number} */ (mediaEntry.packedOffset) : -1;
-            const packedLength = Number.isInteger(mediaEntry.packedLength) ? /** @type {number} */ (mediaEntry.packedLength) : -1;
+            const packedOffset = Number.isSafeInteger(mediaEntry.packedOffset) ? /** @type {number} */ (mediaEntry.packedOffset) : -1;
+            const packedLength = Number.isSafeInteger(mediaEntry.packedLength) ? /** @type {number} */ (mediaEntry.packedLength) : -1;
             const mediaType = typeof mediaEntry.mediaType === 'string' ? mediaEntry.mediaType : null;
             const compressionMethod = Number.isInteger(mediaEntry.compressionMethod) ? /** @type {number} */ (mediaEntry.compressionMethod) : ZIP_COMPRESSION_METHOD_STORE;
-            const uncompressedLength = Number.isInteger(mediaEntry.uncompressedLength) ? /** @type {number} */ (mediaEntry.uncompressedLength) : packedLength;
+            const uncompressedLength = Number.isSafeInteger(mediaEntry.uncompressedLength) ? /** @type {number} */ (mediaEntry.uncompressedLength) : packedLength;
             if (path === null || mediaType === null || packedOffset < 0 || packedLength <= 0 || uncompressedLength <= 0) { continue; }
             packedMediaEntries.push({path, packedOffset, packedLength, mediaType, compressionMethod, uncompressedLength});
         }
@@ -3984,14 +4014,14 @@ export class DictionaryImporter {
         const sharedGlossaryPackedOffset = (
             typeof manifest.sharedGlossaryArtifact === 'object' &&
             manifest.sharedGlossaryArtifact !== null &&
-            Number.isInteger(manifest.sharedGlossaryArtifact.packedOffset)
+            Number.isSafeInteger(manifest.sharedGlossaryArtifact.packedOffset)
         ) ?
             /** @type {number} */ (manifest.sharedGlossaryArtifact.packedOffset) :
             null;
         const sharedGlossaryPackedLength = (
             typeof manifest.sharedGlossaryArtifact === 'object' &&
             manifest.sharedGlossaryArtifact !== null &&
-            Number.isInteger(manifest.sharedGlossaryArtifact.packedLength)
+            Number.isSafeInteger(manifest.sharedGlossaryArtifact.packedLength)
         ) ?
             /** @type {number} */ (manifest.sharedGlossaryArtifact.packedLength) :
             null;
@@ -4005,7 +4035,7 @@ export class DictionaryImporter {
         const sharedGlossaryUncompressedLength = (
             typeof manifest.sharedGlossaryArtifact === 'object' &&
             manifest.sharedGlossaryArtifact !== null &&
-            Number.isInteger(manifest.sharedGlossaryArtifact.uncompressedBytes)
+            Number.isSafeInteger(manifest.sharedGlossaryArtifact.uncompressedBytes)
         ) ?
             /** @type {number} */ (manifest.sharedGlossaryArtifact.uncompressedBytes) :
             null;
@@ -4027,6 +4057,123 @@ export class DictionaryImporter {
             prunedAuxFiles,
             includesMediaFiles,
         };
+    }
+
+    /**
+     * @param {{sharedGlossaryFileName?: string|null, sharedGlossaryPackedOffset?: number|null, sharedGlossaryPackedLength?: number|null, sharedGlossaryCompression?: string|null, sharedGlossaryUncompressedLength?: number|null, termContentMode?: string|null}} manifest
+     * @throws {Error} If the shared-glossary descriptor is incomplete or unsupported.
+     */
+    _validateSharedGlossaryArtifactDescriptor(manifest) {
+        const {
+            sharedGlossaryFileName = null,
+            sharedGlossaryPackedOffset = null,
+            sharedGlossaryPackedLength = null,
+            sharedGlossaryCompression = null,
+            sharedGlossaryUncompressedLength = null,
+            termContentMode = null,
+        } = manifest;
+        const hasDescriptor = (
+            sharedGlossaryFileName !== null ||
+            sharedGlossaryPackedOffset !== null ||
+            sharedGlossaryPackedLength !== null ||
+            sharedGlossaryCompression !== null ||
+            sharedGlossaryUncompressedLength !== null
+        );
+        if (!hasDescriptor) { return; }
+
+        if (sharedGlossaryCompression !== null && sharedGlossaryCompression !== 'zstd') {
+            throw new Error(`Unsupported shared glossary compression: ${JSON.stringify(sharedGlossaryCompression)}`);
+        }
+        if (
+            sharedGlossaryUncompressedLength !== null &&
+            (!Number.isSafeInteger(sharedGlossaryUncompressedLength) || sharedGlossaryUncompressedLength <= 0)
+        ) {
+            throw new Error('Shared glossary uncompressed length is invalid');
+        }
+        if (
+            termContentMode === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME &&
+            sharedGlossaryUncompressedLength === null
+        ) {
+            throw new Error('Compressed shared glossary is missing its uncompressed length');
+        }
+    }
+
+    /**
+     * @param {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null}} manifest
+     * @param {number} artifactLength
+     * @throws {Error} If a packed term or shared-glossary span is invalid.
+     */
+    _validatePackedTermArtifactManifest(manifest, artifactLength) {
+        for (const [artifact, {packedOffset, packedLength, rows}] of manifest.termBanksByArtifact) {
+            if (!this._isValidPackedArtifactSpan(packedOffset, packedLength, artifactLength)) {
+                throw new Error(`Packed term artifact span is out of bounds for '${artifact}'`);
+            }
+            if (rows !== null && (!Number.isSafeInteger(rows) || rows < 0)) {
+                throw new Error(`Packed term artifact row count is invalid for '${artifact}'`);
+            }
+        }
+        const {sharedGlossaryPackedOffset, sharedGlossaryPackedLength} = manifest;
+        if ((sharedGlossaryPackedOffset === null) !== (sharedGlossaryPackedLength === null)) {
+            throw new Error('Packed shared glossary artifact span is incomplete');
+        }
+        if (
+            sharedGlossaryPackedOffset !== null &&
+            sharedGlossaryPackedLength !== null &&
+            !this._isValidPackedArtifactSpan(
+                sharedGlossaryPackedOffset,
+                sharedGlossaryPackedLength,
+                artifactLength,
+            )
+        ) {
+            throw new Error('Packed shared glossary artifact span is out of bounds');
+        }
+    }
+
+    /**
+     * @param {Array<{path: string, packedOffset: number, packedLength: number, compressionMethod: number, uncompressedLength: number}>} entries
+     * @param {number} artifactLength
+     * @param {boolean} preserveCompressedMedia
+     * @throws {Error} If a packed media span or preserved compression descriptor is invalid.
+     */
+    _validatePackedMediaArtifactManifest(entries, artifactLength, preserveCompressedMedia) {
+        const paths = new Set();
+        for (const {path, packedOffset, packedLength, compressionMethod, uncompressedLength} of entries) {
+            if (paths.has(path)) {
+                throw new Error(`Duplicate packed media artifact path: ${JSON.stringify(path)}`);
+            }
+            paths.add(path);
+            if (!this._isValidPackedArtifactSpan(packedOffset, packedLength, artifactLength)) {
+                throw new Error(`Packed media artifact span is out of bounds for ${JSON.stringify(path)}`);
+            }
+            if (!preserveCompressedMedia) { continue; }
+            if (compressionMethod !== ZIP_COMPRESSION_METHOD_STORE && compressionMethod !== ZIP_COMPRESSION_METHOD_DEFLATE) {
+                throw new Error(`Unsupported packed media compression method ${compressionMethod} for ${JSON.stringify(path)}`);
+            }
+            if (!Number.isSafeInteger(uncompressedLength) || uncompressedLength <= 0) {
+                throw new Error(`Packed media uncompressed length is invalid for ${JSON.stringify(path)}`);
+            }
+            if (compressionMethod === ZIP_COMPRESSION_METHOD_STORE && uncompressedLength !== packedLength) {
+                throw new Error(`Stored packed media length mismatch for ${JSON.stringify(path)}`);
+            }
+        }
+    }
+
+    /**
+     * @param {number} offset
+     * @param {number} length
+     * @param {number} totalLength
+     * @returns {boolean}
+     */
+    _isValidPackedArtifactSpan(offset, length, totalLength) {
+        return (
+            Number.isSafeInteger(offset) &&
+            offset >= 0 &&
+            Number.isSafeInteger(length) &&
+            length > 0 &&
+            Number.isSafeInteger(totalLength) &&
+            totalLength >= 0 &&
+            offset <= totalLength - length
+        );
     }
 
     /**
