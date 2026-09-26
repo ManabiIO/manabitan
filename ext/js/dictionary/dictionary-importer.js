@@ -3412,8 +3412,22 @@ export class DictionaryImporter {
      * @param {import('dictionary-data').TermV1} entry
      * @param {string} dictionary
      * @returns {import('dictionary-database').DatabaseTermEntry}
+     * @throws {TypeError} If the term-bank row has an invalid shape or field type.
      */
     _convertTermBankEntryV1(entry, dictionary) {
+        if (
+            !Array.isArray(entry) ||
+            entry.length < 5 ||
+            typeof entry[0] !== 'string' ||
+            typeof entry[1] !== 'string' ||
+            !(typeof entry[2] === 'string' || entry[2] === null) ||
+            typeof entry[3] !== 'string' ||
+            typeof entry[4] !== 'number' ||
+            !Number.isFinite(entry[4]) ||
+            !entry.slice(5).every((value) => typeof value === 'string')
+        ) {
+            throw new TypeError('Invalid version 1 term-bank entry');
+        }
         let [expression, reading, definitionTags, rules, score, ...glossary] = entry;
         reading = reading.length > 0 ? reading : expression;
         return {expression, reading, definitionTags, rules, score, glossary, dictionary};
@@ -3423,8 +3437,24 @@ export class DictionaryImporter {
      * @param {import('dictionary-data').TermV3} entry
      * @param {string} dictionary
      * @returns {import('dictionary-database').DatabaseTermEntry}
+     * @throws {TypeError} If the term-bank row has an invalid shape or field type.
      */
     _convertTermBankEntryV3(entry, dictionary) {
+        if (
+            !Array.isArray(entry) ||
+            entry.length !== 8 ||
+            typeof entry[0] !== 'string' ||
+            typeof entry[1] !== 'string' ||
+            !(typeof entry[2] === 'string' || entry[2] === null) ||
+            typeof entry[3] !== 'string' ||
+            typeof entry[4] !== 'number' ||
+            !Number.isFinite(entry[4]) ||
+            !Array.isArray(entry[5]) ||
+            !(entry[6] === null || Number.isSafeInteger(entry[6])) ||
+            typeof entry[7] !== 'string'
+        ) {
+            throw new TypeError('Invalid version 3 term-bank entry');
+        }
         let [expression, reading, definitionTags, rules, score, glossary, sequence, termTags] = entry;
         reading = reading.length > 0 ? reading : expression;
         return {expression, reading, definitionTags, rules, score, glossary, sequence, termTags, dictionary};
