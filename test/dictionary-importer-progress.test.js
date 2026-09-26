@@ -110,5 +110,4 @@ describe('DictionaryImporter progress delivery', () => {
         expect(progressData.index).toBe(10);
         expect(progressSink).toHaveBeenCalledOnce();
     });
-
 });

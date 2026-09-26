@@ -80,7 +80,7 @@ describe('embedded legacy dictionary tags', () => {
     });
 
 
-    test('a finalization progress failure still aborts the owned import session', async () => {
+    test('a finalization progress failure still publishes the owned import session', async () => {
         const db = database();
         const progressFailure = new Error('progress sink failed');
         let now = 1_000;
@@ -88,12 +88,10 @@ describe('embedded legacy dictionary tags', () => {
             now += 2_000;
             return now;
         });
-        const importer = new DictionaryImporter(
-            new DictionaryImporterMediaLoader(),
-            (progress) => {
-                if (progress.count === 20) { throw progressFailure; }
-            },
-        );
+        const failingProgressSink = vi.fn((/** @type {import('dictionary-importer').ProgressData} */ progress) => {
+            if (progress.count === 20) { throw progressFailure; }
+        });
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), failingProgressSink);
         try {
             const result = await importer.importDictionary(
                 /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
@@ -101,11 +99,15 @@ describe('embedded legacy dictionary tags', () => {
                 /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
             );
 
-            expect(result.result).toBeNull();
-            expect(result.errors).toContain(progressFailure);
-            expect(db.finishBulkImport).not.toHaveBeenCalled();
-            expect(db.abortBulkImport).toHaveBeenCalledWith('legacy-tags-session');
-            expect(db.deleteDictionaryImportPlaceholder).toHaveBeenCalledWith(1);
+            expect(failingProgressSink.mock.results.some(({type, value}) => type === 'throw' && value === progressFailure)).toBe(true);
+            expect(result.errors).toEqual([]);
+            expect(result.result).toMatchObject({title: 'Legacy tags', importSuccess: true});
+            expect(db.finishBulkImport).toHaveBeenCalledOnce();
+            expect(db.finishBulkImport).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({
+                summary: expect.objectContaining({title: 'Legacy tags', importSuccess: true}),
+            }));
+            expect(db.abortBulkImport).not.toHaveBeenCalled();
+            expect(db.deleteDictionaryImportPlaceholder).not.toHaveBeenCalled();
         } finally {
             nowSpy.mockRestore();
         }

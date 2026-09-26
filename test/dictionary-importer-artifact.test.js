@@ -19,9 +19,11 @@ import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-con
 
 /**
  * @param {Uint8Array} [content]
+ * @param {[number, number]} [hashPair]
  * @returns {Uint8Array}
  */
-function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0), [hash1, hash2] = [0, 0]) {
+function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0), hashPair = [0, 0]) {
+    const [hash1, hash2] = hashPair;
     const expression = new TextEncoder().encode('term');
     const headerBytes = 8 + 4 + 8;
     const stringLengthsBytes = 4;

@@ -15,6 +15,7 @@ const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), () 
 
 /**
  * @param {Map<string, {packedOffset: number, packedLength: number, rows: number|null}>} termBanksByArtifact
+ * @returns {NonNullable<Awaited<ReturnType<DictionaryImporter['_readTermArtifactManifest']>>>}
  */
 function manifest(termBanksByArtifact) {
     return {
@@ -91,7 +92,7 @@ describe('DictionaryImporter expected term-content byte estimate', () => {
             null,
             null,
             null,
-            [/** @type {import('dictionary-importer').ImportFileEntry} */ (/** @type {unknown} */ ({
+            [ /** @type {import('dictionary-importer').ImportFileEntry} */ (/** @type {unknown} */ ({
                 filename: 'term_bank_1.mbtb',
                 uncompressedSize,
             }))],

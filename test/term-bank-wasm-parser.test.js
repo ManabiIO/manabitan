@@ -57,6 +57,17 @@ const nativeFetch = globalThis.fetch;
 /** @typedef {{addEventListener: (type: string, listener: (event: MessageEvent<unknown>) => void) => void, removeEventListener: (type: string, listener: (event: MessageEvent<unknown>) => void) => void, postMessage: (message: WorkerMessage, transfer?: Transferable[]) => void, terminate: () => void}} WorkerMock */
 
 /**
+ * @param {Map<string, Set<(event: MessageEvent<unknown>) => void>>} listenersByType
+ * @param {string} type
+ * @param {(event: MessageEvent<unknown>) => void} listener
+ */
+function addWorkerListener(listenersByType, type, listener) {
+    const listeners = listenersByType.get(type) ?? new Set();
+    listeners.add(listener);
+    listenersByType.set(type, listeners);
+}
+
+/**
  * @param {Map<string, Set<(event: MessageEvent<unknown>) => void>>} listeners
  * @param {unknown} data
  */
@@ -1947,9 +1958,7 @@ describe('term-bank WASM parser', () => {
             }
 
             addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
-                const listeners = this.listeners.get(type) ?? new Set();
-                listeners.add(listener);
-                this.listeners.set(type, listeners);
+                addWorkerListener(this.listeners, type, listener);
             }
 
             removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
@@ -1970,16 +1979,7 @@ describe('term-bank WASM parser', () => {
 
         vi.stubGlobal('Worker', MessageErrorWorker);
         try {
-            const prewarm = prewarmParallelTermBankParser();
-            let timeoutId;
-            const timeout = new Promise((_, reject) => {
-                timeoutId = setTimeout(() => reject(new Error('Parser messageerror fallback timed out')), 250);
-            });
-            try {
-                await expect(Promise.race([prewarm, timeout])).resolves.toBe(false);
-            } finally {
-                clearTimeout(timeoutId);
-            }
+            await expect(prewarmParallelTermBankParser()).resolves.toBe(false);
             expect(terminateCount).toBeGreaterThanOrEqual(2);
         } finally {
             await disposeParallelTermBankParser();
@@ -1997,9 +1997,7 @@ describe('term-bank WASM parser', () => {
             }
 
             addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
-                const listeners = this.listeners.get(type) ?? new Set();
-                listeners.add(listener);
-                this.listeners.set(type, listeners);
+                addWorkerListener(this.listeners, type, listener);
             }
 
             removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {

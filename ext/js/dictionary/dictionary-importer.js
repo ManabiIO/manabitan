@@ -298,16 +298,10 @@ function isDictionaryIndex(value) {
         }
     }
     if (Object.hasOwn(value, 'tagMeta') && !isDictionaryIndexTagMeta(value.tagMeta)) { return false; }
-    if (
-        value.isUpdatable === true &&
-        (
-            typeof value.indexUrl !== 'string' ||
-            typeof value.downloadUrl !== 'string'
-        )
-    ) {
-        return false;
-    }
-    return true;
+    return value.isUpdatable !== true || (
+        typeof value.indexUrl === 'string' &&
+        typeof value.downloadUrl === 'string'
+    );
 }
 
 /**
