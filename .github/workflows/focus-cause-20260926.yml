@@ -1,0 +1,64 @@
+name: Focus cause traces
+on:
+  push:
+    branches: [review/focus-cause-20260926]
+    paths: [.github/workflows/focus-cause-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arm: baseline
+            ref: '384d1c97dae6bd17555973b77ad415e038438499'
+          - arm: cache
+            ref: '31431c90eab14421f9ecc70616cce984406bceec'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin source and install observational hooks
+        env:
+          PRODUCT_REF: ${{ matrix.ref }}
+        run: |
+          cp dev/review/focus-cause-20260926.mjs /tmp/focus-cause.mjs
+          git fetch origin "$PRODUCT_REF"
+          git checkout --detach "$PRODUCT_REF"
+          cp /tmp/focus-cause.mjs test/playwright/focus-cause.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('test/playwright/integration.spec.js')
+          s=p.read_text()
+          s += '\nimport {installFocusProbe, saveFocusProbe} from "./focus-cause.mjs"\n'
+          s += 'test.beforeEach(async ({context, page}, info) => { await installFocusProbe(context, page, info) })\n'
+          s += 'test.afterEach(async ({context, page}, info) => { await saveFocusProbe(context, page, info) })\n'
+          p.write_text(s)
+          p=Path('test/playwright/playwright-util.js')
+          s=p.read_text().replace('headless: runHeadless,', "headless: runHeadless,\n            channel: 'chromium',")
+          p.write_text(s)
+          PY
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Trace unchanged import and focus assertions
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        run: |
+          set -o pipefail
+          mkdir -p builds/focus-cause
+          git rev-parse HEAD > builds/focus-cause/head.txt
+          git diff > builds/focus-cause/instrumentation.patch
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js --project=chromium --workers=1 --retries=0 --repeat-each=12 --grep 'chromium settings drag and drop imports a local MDX fixture, updates preview, and supports lookup' --reporter=line 2>&1 | tee builds/focus-cause/tests.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focus-cause-${{ matrix.arm }}
+          path: builds/focus-cause/
+          retention-days: 14
