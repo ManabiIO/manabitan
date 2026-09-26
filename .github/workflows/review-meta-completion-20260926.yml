@@ -1,0 +1,63 @@
+name: Metadata counting complete imports
+on:
+  push:
+    branches: [review/import-followthrough-20260926]
+    paths: [.github/workflows/review-meta-completion-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [frequency, mixed, none]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin complete product source and retain driver
+        run: |
+          cp dev/review/meta-complete-import-20260926.mjs /tmp/meta-driver.mjs
+          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a 6c7c690ccb3794c01941a536e7564907348cd83c
+          git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
+          mkdir -p dev/review builds/meta-completion
+          cp /tmp/meta-driver.mjs dev/review/meta-complete-import-20260926.mjs
+          cp /tmp/meta-driver.mjs builds/meta-completion/executed-driver.mjs
+          git diff 2d79cd1dec164caa3075884133d9d12204a4f48a 6c7c690ccb3794c01941a536e7564907348cd83c -- ext/ > builds/meta-completion/product.patch
+          test "$(git diff --name-only 2d79cd1dec164caa3075884133d9d12204a4f48a 6c7c690ccb3794c01941a536e7564907348cd83c -- ext/)" = ext/js/dictionary/dictionary-importer.js
+          git rev-parse HEAD > builds/meta-completion/product-head.txt
+          node --check dev/review/meta-complete-import-20260926.mjs
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms including all readback assertions
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/meta-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/meta-completion/${WORKLOAD}-preflight.log"
+      - name: Fixed paired cohort without retries or trimming
+        env:
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/meta-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/meta-completion/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meta-complete-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: |
+            builds/meta-completion/*.json
+            builds/meta-completion/*.log
+            builds/meta-completion/*.mjs
+            builds/meta-completion/*.patch
+            builds/meta-completion/*.txt
+          retention-days: 14
