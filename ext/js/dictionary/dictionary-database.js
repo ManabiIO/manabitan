@@ -5301,9 +5301,10 @@ null;
                 }
 
                 let pendingContentIndex = -1;
-                let pendingHashCandidates = void 0;
+                /** @type {number|number[]|undefined} */
+                let pendingHashCandidates;
                 if (pendingContentRowIndexByHash !== null && contentHash !== null) {
-                    pendingHashCandidates = pendingContentRowIndexByHash.get(contentHash);
+                    pendingHashCandidates = /** @type {number|number[]|undefined} */ (pendingContentRowIndexByHash.get(contentHash));
                     if (typeof pendingHashCandidates === 'number') {
                         if (this._termContentBytesEqual(pendingContentBytes[pendingHashCandidates], contentBytes)) {
                             pendingContentIndex = pendingHashCandidates;
