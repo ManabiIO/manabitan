@@ -41,16 +41,16 @@ function artifact(term) {
 
 /**
  * @param {unknown} second
- * @param {{ordinary?: boolean, standalone?: boolean|number, replaceList?: boolean, packedSource?: boolean}} [options]
+ * @param {{ordinary?: boolean, standalone?: boolean|number, replaceList?: boolean, packedSource?: boolean, manifestText?: string}} [options]
  * @returns {Promise<ArrayBuffer>}
  */
-async function archive(second, {ordinary = false, standalone = false, replaceList = false, packedSource = true} = {}) {
+async function archive(second, {ordinary = false, standalone = false, replaceList = false, packedSource = true, manifestText = void 0} = {}) {
     const banks = [artifact('first'), artifact('second')]
     const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0})
     await writer.add('index.json', new TextReader(JSON.stringify({title: 'Term manifest completeness', revision: '1', format: 3})))
     const valid = {artifact: 'term_bank_1.mbtb', packedOffset: 0, packedLength: banks[0].length, rows: 1}
     const descriptor = second === 'valid' ? {artifact: 'term_bank_2.mbtb', packedOffset: banks[0].length, packedLength: banks[1].length, rows: 1} : second
-    await writer.add('manabitan-import-artifact.json', new TextReader(JSON.stringify({
+    await writer.add('manabitan-import-artifact.json', new TextReader(manifestText ?? JSON.stringify({
         termBanks: replaceList ? descriptor : [valid, descriptor],
         packedTermArtifact: {file: 'packed.bin'},
         prunedAuxFiles: true,
@@ -139,6 +139,27 @@ describe('packed term manifest completeness through public ZIP import', () => {
         const db = database()
         await expect(importArchive(db, await archive(second, {replaceList: true}))).rejects.toThrow(/incomplete.*term.*artifact.*manifest/i)
         expect(db.finishBulkImport).not.toHaveBeenCalled()
+    })
+
+    test.each(['{"termBanks":', 'null', '[]', 'true', '"invalid"'])('rejects an unreadable or malformed manifest root: %s', async (manifestText) => {
+        const db = database()
+        const close = vi.spyOn(ArchiveZipReader.prototype, 'close')
+        await expect(importArchive(db, await archive('valid', {manifestText})))
+            .rejects.toThrow(/incomplete.*term.*artifact.*manifest/i)
+        expect(db.terms).toEqual([])
+        expect(close).toHaveBeenCalledOnce()
+        expect(db.startBulkImport).not.toHaveBeenCalled()
+        expect(db.addWithResult).not.toHaveBeenCalled()
+    })
+
+    test.each(['{"termBanks":', 'null', '[]', 'true', '"invalid"'])('malformed manifest root falls back only to ordinary banks: %s', async (manifestText) => {
+        const db = database()
+        const result = await importArchive(db, await archive('valid', {manifestText, ordinary: true, standalone: true}))
+        expect(result.errors).toEqual([])
+        expect(result.result?.counts?.terms.total).toBe(2)
+        expect(result.result?.counts?.tagMeta.total).toBe(1)
+        expect(db.terms).toEqual(['source1', 'source2'])
+        expect(db.bulkAddArtifactTermsChunk).not.toHaveBeenCalled()
     })
 
     test('a complete packed manifest imports every bank', async () => {

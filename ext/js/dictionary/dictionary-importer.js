@@ -1052,7 +1052,9 @@ export class DictionaryImporter {
         if (fileMap.has(TERM_BANK_ARTIFACT_MANIFEST_FILE)) {
             termArtifactManifest = await this._readTermArtifactManifest(fileMap);
         }
-        const incompleteTermArtifactManifest = termArtifactManifest?.termBanksComplete === false;
+        const incompleteTermArtifactManifest = fileMap.has(TERM_BANK_ARTIFACT_MANIFEST_FILE) && (
+            termArtifactManifest === null || termArtifactManifest.termBanksComplete === false
+        );
         if (incompleteTermArtifactManifest) {
             // A partially accepted manifest is not evidence of complete terms.
             // Only the ordinary source banks may recover this import; discard
@@ -4037,7 +4039,7 @@ export class DictionaryImporter {
         } catch (_) {
             return null;
         }
-        if (!(typeof manifest === 'object' && manifest !== null)) {
+        if (!(typeof manifest === 'object' && manifest !== null) || Array.isArray(manifest)) {
             return null;
         }
         /** @type {Map<string, {packedOffset: number, packedLength: number, rows: number|null}>} */
