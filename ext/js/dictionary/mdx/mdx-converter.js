@@ -513,13 +513,17 @@ function collapsePosixPath(path) {
 
 /**
  * @param {string} path
+ * @param {boolean} [preserveEncodedSeparators]
  * @returns {string}
  */
-function decodePercentEncodedPathSegments(path) {
+function decodePercentEncodedPathSegments(path, preserveEncodedSeparators = false) {
     const decodedParts = [];
     for (const part of path.split('/')) {
         try {
-            decodedParts.push(decodeURIComponent(part));
+            const encodedPart = preserveEncodedSeparators ?
+                part.replace(/%(?:2f|5c)/giu, (match) => `%25${match.slice(1)}`) :
+                part;
+            decodedParts.push(decodeURIComponent(encodedPart));
         } catch (_error) {
             decodedParts.push(part);
         }
@@ -560,7 +564,9 @@ function normalizeRelativeAssetPath(path, sourceAssetPath = null, assetPrefix = 
     if (lowered.startsWith('file://')) {
         value = value.slice(7);
     }
-    value = decodePercentEncodedPathSegments(value);
+    // Encoded slash/backslash are data within a URL path segment, not path
+    // separators. Preserve them while decoding ordinary percent escapes.
+    value = decodePercentEncodedPathSegments(value, true);
     value = value.replace(/^\/+/u, '');
     const alreadyPrefixed = assetPrefix.length > 0 && value.startsWith(assetPrefix);
     if (sourceAssetPath !== null && !fromRoot && !alreadyPrefixed) {
@@ -1799,8 +1805,10 @@ function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferen
     const image = {tag: 'img', path};
     const data = buildStructuredData(attrs);
     if (data !== null) { image.data = {tag: 'img', ...data}; }
-    if (typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width)) { image.width = Number.parseInt(attrs.width, 10); }
-    if (typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height)) { image.height = Number.parseInt(attrs.height, 10); }
+    const width = typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width) ? Number.parseInt(attrs.width, 10) : Number.NaN;
+    const height = typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height) ? Number.parseInt(attrs.height, 10) : Number.NaN;
+    if (Number.isFinite(width)) { image.width = width; }
+    if (Number.isFinite(height)) { image.height = height; }
     if (typeof attrs.title === 'string' && attrs.title.length > 0) { image.title = attrs.title; }
     if (typeof attrs.alt === 'string' && attrs.alt.length > 0) { image.alt = attrs.alt; }
     return image;
@@ -1909,11 +1917,13 @@ function appendStructuredContent(parent, content, details) {
         if (mappedTag === 'a') {
             const sourceHref = attrs.href ?? attrs.src ?? '';
             element.href = convertLinkHref(sourceHref, details);
-        } else if ((mappedTag === 'td' || mappedTag === 'th') && typeof attrs.colspan === 'string' && /^\d+$/u.test(attrs.colspan)) {
-            element.colSpan = Number.parseInt(attrs.colspan, 10);
+        } else if (mappedTag === 'td' || mappedTag === 'th') {
+            const colSpan = typeof attrs.colspan === 'string' && /^\d+$/u.test(attrs.colspan) ? Number.parseInt(attrs.colspan, 10) : Number.NaN;
+            if (Number.isFinite(colSpan) && colSpan >= 1) { element.colSpan = colSpan; }
         }
-        if ((mappedTag === 'td' || mappedTag === 'th') && typeof attrs.rowspan === 'string' && /^\d+$/u.test(attrs.rowspan)) {
-            element.rowSpan = Number.parseInt(attrs.rowspan, 10);
+        if (mappedTag === 'td' || mappedTag === 'th') {
+            const rowSpan = typeof attrs.rowspan === 'string' && /^\d+$/u.test(attrs.rowspan) ? Number.parseInt(attrs.rowspan, 10) : Number.NaN;
+            if (Number.isFinite(rowSpan) && rowSpan >= 1) { element.rowSpan = rowSpan; }
         }
         if (mappedTag === 'details' && Object.hasOwn(attrs, 'open')) {
             element.open = true;

@@ -123,7 +123,18 @@ function cloneObject(value, visited) {
         const result = {};
         for (const key in value) {
             if (Object.prototype.hasOwnProperty.call(value, key)) {
-                result[key] = cloneInternal(value[key], visited);
+                const clonedValue = cloneInternal(value[key], visited);
+                if (key === '__proto__') {
+                    // Preserve an own data property without invoking the inherited setter.
+                    Object.defineProperty(result, key, {
+                        value: clonedValue,
+                        writable: true,
+                        enumerable: true,
+                        configurable: true,
+                    });
+                } else {
+                    result[key] = clonedValue;
+                }
             }
         }
         return result;

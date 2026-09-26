@@ -62,4 +62,52 @@ describe('DictionaryImporter progress delivery', () => {
         expect(events.at(-1)).toEqual({index: 0, count: 20, nextStep: true});
         expect(events.map(({index}) => index)).toEqual([0, 100, 200, 0]);
     });
+    test('does not let ordinary progress listener failures abort import work', () => {
+        const progressSink = vi.fn(() => {
+            throw new Error('injected progress failure');
+        });
+        const importer = new DictionaryImporter(
+            new DictionaryImporterMediaLoader(),
+            progressSink,
+        );
+        const progressReset = /** @type {() => void} */ (Reflect.get(importer, '_progressReset')).bind(importer);
+        const progress = /** @type {(nextStep?: boolean) => void} */ (Reflect.get(importer, '_progress')).bind(importer);
+
+        expect(progressReset).not.toThrow();
+        expect(progress).not.toThrow();
+        expect(progressSink).toHaveBeenCalled();
+    });
+
+    test('still propagates explicit cancellation through progress checks', () => {
+        const importer = new DictionaryImporter(
+            new DictionaryImporterMediaLoader(),
+            () => {},
+            () => true,
+        );
+        const progress = /** @type {(nextStep?: boolean) => void} */ (Reflect.get(importer, '_progress')).bind(importer);
+
+        expect(progress).toThrow('Dictionary import was cancelled');
+    });
+
+    test('does not let finalization checkpoint progress failures escape the persistence boundary', () => {
+        const progressSink = vi.fn(() => {
+            throw new Error('injected progress failure');
+        });
+        const importer = new DictionaryImporter(
+            new DictionaryImporterMediaLoader(),
+            progressSink,
+        );
+        const progressReset = /** @type {() => void} */ (Reflect.get(importer, '_progressReset')).bind(importer);
+        const reportFinalizationProgress = /** @type {(checkpointIndex: number, total: number) => void} */ (
+            Reflect.get(importer, '_reportBulkFinalizationProgress')
+        ).bind(importer);
+
+        progressReset();
+        const progressData = /** @type {import('dictionary-importer').ProgressData} */ (Reflect.get(importer, '_progressData'));
+        progressData.count = 20;
+
+        expect(() => { reportFinalizationProgress(2, 4); }).not.toThrow();
+        expect(progressData.index).toBe(10);
+        expect(progressSink).toHaveBeenCalledOnce();
+    });
 });

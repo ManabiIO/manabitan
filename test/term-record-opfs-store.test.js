@@ -204,6 +204,70 @@ describe('TermRecordOpfsStore', () => {
         ]);
     });
 
+    test('reset truncates shard storage when unlink fails', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Reset dictionary', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([
+            [descriptorFileName, new Uint8Array([1, 2, 3, 4])],
+            [indexFileName, new Uint8Array([5, 6, 7, 8])],
+        ]);
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            removeEntryFailures: new Map([
+                [descriptorFileName, 1],
+                [indexFileName, 1],
+            ]),
+        });
+        Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
+
+        await expect(store.reset()).resolves.toBeUndefined();
+
+        expect(fileBytesByName.get(descriptorFileName)).toStrictEqual(new Uint8Array());
+        expect(fileBytesByName.get(indexFileName)).toStrictEqual(new Uint8Array());
+        expect(store.size).toBe(0);
+        expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0);
+    });
+
+    test('reset reports persistent cleanup failures after clearing runtime state and still attempts every file', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Reset failure', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([
+            [descriptorFileName, new Uint8Array([1])],
+            [indexFileName, new Uint8Array([2])],
+        ]);
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+        const cleanupError = new Error('Injected reset cleanup failure');
+        const removeOrTruncate = vi.spyOn(store, '_removeStorageFileOrTruncate')
+            .mockImplementation(async (name) => {
+                if (name === descriptorFileName) { throw cleanupError; }
+                fileBytesByName.delete(name);
+            });
+        Reflect.get(store, '_recordsById').set(1, {
+            id: 1,
+            dictionary: 'Reset failure',
+            expression: '失敗',
+            reading: 'しっぱい',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 1,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        await expect(store.reset()).rejects.toMatchObject({
+            name: 'AggregateError',
+            errors: [cleanupError],
+        });
+
+        expect(removeOrTruncate).toHaveBeenCalledWith(descriptorFileName, false);
+        expect(removeOrTruncate).toHaveBeenCalledWith(indexFileName, false);
+        expect(store.size).toBe(0);
+        expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0);
+    });
+
     test('uses compact artifact fields only when they reduce persisted bytes', () => {
         const store = new TermRecordOpfsStore();
         const encode = store._encodeArtifactRecordFields.bind(store);
@@ -2247,6 +2311,35 @@ describe('TermRecordOpfsStore', () => {
         expect(Reflect.get(store, '_activeAppendShardStateByKey').has(logicalKey)).toBe(false);
     });
 
+    test('remove-or-truncate suppresses only a confirmed missing file', async () => {
+        const store = new TermRecordOpfsStore();
+        const removeError = new Error('unlink failed');
+        const notFoundError = new Error('missing');
+        notFoundError.name = 'NotFoundError';
+        Reflect.set(store, '_recordsDirectoryHandle', /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+            removeEntry: vi.fn(async () => { throw removeError; }),
+            getFileHandle: vi.fn(async () => { throw notFoundError; }),
+        })));
+
+        await expect(store._removeStorageFileOrTruncate('missing.mbtr', true)).resolves.toBeUndefined();
+    });
+
+    test('remove-or-truncate does not hide a transient lookup failure as missing', async () => {
+        const store = new TermRecordOpfsStore();
+        const removeError = new Error('unlink failed');
+        const lookupError = new Error('backend temporarily unreadable');
+        lookupError.name = 'NotReadableError';
+        Reflect.set(store, '_recordsDirectoryHandle', /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+            removeEntry: vi.fn(async () => { throw removeError; }),
+            getFileHandle: vi.fn(async () => { throw lookupError; }),
+        })));
+
+        await expect(store._removeStorageFileOrTruncate('still-there.mbtr', true)).rejects.toMatchObject({
+            name: 'AggregateError',
+            errors: [removeError, lookupError],
+        });
+    });
+
     test('round-trips artifact chunk records into the exact expression index', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Jitendex.org [2026-04-04]';
@@ -2283,6 +2376,38 @@ describe('TermRecordOpfsStore', () => {
         const loadedRecord = readerStore.getById(index.expression.get('食う')?.[0] ?? -1);
         expect(loadedRecord?.expression).toBe('食う');
         expect(loadedRecord?.reading).toBe('くう');
+    });
+
+
+    test('existing-shard finalization truncates a stale lookup sidecar when unlink is blocked', async () => {
+        const store = new TermRecordOpfsStore();
+        const descriptorFileName = store._getShardSegmentFileName('Existing shard append', 'raw', 0);
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([
+            [descriptorFileName, new Uint8Array([1, 2, 3, 4])],
+            [indexFileName, new Uint8Array([5, 6, 7, 8])],
+        ]);
+        const directory = createFakeDirectoryHandle(fileBytesByName, {
+            removeEntryFailures: new Map([[indexFileName, 1]]),
+        });
+        const descriptorHandle = await directory.getFileHandle(descriptorFileName, {create: false});
+        const state = store._createShardState(
+            descriptorFileName,
+            descriptorHandle,
+            fileBytesByName.get(descriptorFileName)?.byteLength ?? 0,
+            'raw',
+        );
+        state.pendingLookupIndexChunks = [new Uint8Array([9])];
+        state.pendingLookupIndexBytes = 1;
+        state.pendingLookupIndexRecordCount = 1;
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+
+        await expect(store._flushLookupIndexFile(state)).resolves.toBeUndefined();
+
+        expect(fileBytesByName.get(indexFileName)).toStrictEqual(new Uint8Array());
+        expect(state.pendingLookupIndexChunks).toEqual([]);
+        expect(state.pendingLookupIndexBytes).toBe(0);
+        expect(state.pendingLookupIndexRecordCount).toBe(0);
     });
 
     test('streams lookup sidecar chunks before finalization without exposing a valid header', async () => {

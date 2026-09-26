@@ -102,6 +102,7 @@ describe('artifact preload ownership', () => {
             packedFileName: 'term.bin',
             packedMediaFileName: 'media.bin',
             packedMediaEntries: new Array(100000).fill({}),
+            packedMediaEntriesComplete: true,
             termBanksByArtifact: new Map([
                 ['term_bank_1.mbtb', {packedOffset: 0, packedLength: 1, rows: 1}],
             ]),
