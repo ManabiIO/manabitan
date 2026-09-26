@@ -1,0 +1,76 @@
+name: Qualify malformed manifest root refinement
+on:
+  push:
+    branches: [audit/current-import-hash-20260926]
+    paths: [.github/workflows/audit-manifest-root-refinement.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 67f130ed1f7257f936dd14ac6af1cf1f377dcf22
+          path: audit
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 5d64e1670127003ae74f7ddbb3b1f077d9acda89
+          path: source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - run: npm ci && npm run build:libs
+        working-directory: source
+      - name: Assert regression before and after repair
+        run: |
+          mkdir evidence
+          python3 audit/dev/perf/refine-malformed-manifest.py source --tests-only
+          cd source
+          set +e
+          npx vitest run test/dictionary-importer-term-manifest-completeness.test.js --minWorkers=1 --maxWorkers=2 --reporter=json --outputFile=../evidence/baseline.json > ../evidence/baseline.log 2>&1
+          red=$?
+          set -e
+          test "$red" -ne 0
+          python3 -c 'import json; d=json.load(open("../evidence/baseline.json")); assert (d["numFailedTests"],d["numPassedTests"]) == (10,17)'
+          git restore test/dictionary-importer-term-manifest-completeness.test.js
+          python3 ../audit/dev/perf/refine-malformed-manifest.py . > ../evidence/expected.json
+          npx vitest run test/dictionary-importer-term-manifest-completeness.test.js --minWorkers=1 --maxWorkers=2 --reporter=json --outputFile=../evidence/candidate.json > ../evidence/candidate.log 2>&1
+          python3 -c 'import json; d=json.load(open("../evidence/candidate.json")); assert (d["numFailedTests"],d["numPassedTests"]) == (0,27)'
+      - name: Full qualification and exact-file verification
+        working-directory: source
+        run: |
+          npx eslint ext/js/dictionary/dictionary-importer.js test/dictionary-importer-term-manifest-completeness.test.js > ../evidence/lint.log 2>&1
+          npm run test:ts > ../evidence/types.log 2>&1
+          npm run test:unit -- --minWorkers=1 --maxWorkers=2 > ../evidence/unit.log 2>&1
+          npm run test:unit:options -- --minWorkers=1 --maxWorkers=2 > ../evidence/options.log 2>&1
+          npm run test:build > ../evidence/build.log 2>&1
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+          for p, sha in json.load(open('../evidence/expected.json')).items():
+              assert hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() == sha, p
+          PY
+      - name: Fast-forward the product branch
+        working-directory: source
+        run: |
+          test "$(git rev-parse HEAD)" = 5d64e1670127003ae74f7ddbb3b1f077d9acda89
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/dictionary/dictionary-importer.js test/dictionary-importer-term-manifest-completeness.test.js
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git diff --cached --check
+          git commit -m 'fix(import): retain completeness failure for malformed manifest roots'
+          git diff HEAD^ HEAD > ../evidence/refinement.patch
+          git rev-parse HEAD > ../evidence/published-head.txt
+          git push origin HEAD:refs/heads/fix/import-incomplete-term-artifacts-20260926
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: manifest-root-refinement-384d1c9
+          path: evidence
+          retention-days: 30
+          if-no-files-found: error
