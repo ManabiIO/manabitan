@@ -2,6 +2,7 @@
  * Copyright (C) 2026 Manabitan authors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+/* eslint @stylistic/semi: ["error", "never"] */
 
 import {expect, test, vi} from 'vitest'
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js'
