@@ -19,7 +19,7 @@
 
 /**
  * Per-import implementation switches. Qualified native lookup construction
- * defaults on; the other experiments remain default-off. Snapshot before
+ * and generic shared-span compression default on; other experiments remain off. Snapshot before
  * asynchronous work and copy effective values into each worker request.
  * Explicit false opts out for diagnostics; no toggle survives an import.
  * @param {import('dictionary-importer').ImportExperiments} [options]
@@ -27,7 +27,7 @@
  */
 export function snapshotTermBankExperiments(options = {}) {
     return Object.freeze({
-        experimentalGenericSpanCompression: options.experimentalGenericSpanCompression === true,
+        experimentalGenericSpanCompression: typeof options.experimentalGenericSpanCompression === 'undefined' || options.experimentalGenericSpanCompression === true,
         experimentalParserWorkers3: options.experimentalParserWorkers3 === true,
         experimentalLibdeflate: options.experimentalLibdeflate === true,
         experimentalSkipFusedParse: options.experimentalSkipFusedParse === true,
