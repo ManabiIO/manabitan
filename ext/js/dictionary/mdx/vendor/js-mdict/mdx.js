@@ -16,7 +16,7 @@ export class MDX extends Mdict {
                 definition: null
             };
         }
-        const def = this.lookupRecordByKeyBlock(keyWordItem);
+        const def = this._lookupRecordByKeyBlock(keyWordItem, false);
         if (!def) {
             return {
                 keyText: word,
@@ -30,7 +30,7 @@ export class MDX extends Mdict {
     }
     ;
     fetch(keywordItem) {
-        const def = this.lookupRecordByKeyBlock(keywordItem);
+        const def = this._lookupRecordByKeyBlock(keywordItem, false);
         if (!def) {
             return {
                 keyText: keywordItem.keyText,
@@ -98,7 +98,7 @@ export class MDX extends Mdict {
         return suggestList;
     }
     fetch_definition(keywordItem) {
-        const def = this.lookupRecordByKeyBlock(keywordItem);
+        const def = this._lookupRecordByKeyBlock(keywordItem, false);
         if (!def) {
             return {
                 keyText: keywordItem.keyText,
