@@ -5252,7 +5252,7 @@ null;
                 }
                 ++processedRowCount;
                 const row = /** @type {import('dictionary-database').DatabaseTermEntry} */ (items[i]);
-                const tComputeStart = safePerformance.now();
+                const tComputeStart = this._importDebugLogging ? safePerformance.now() : 0;
                 const precomputedHash = (typeof row.termEntryContentHash === 'string' && row.termEntryContentHash.length > 0) ? row.termEntryContentHash : null;
                 const precomputedHash1 = Number.isInteger(row.termEntryContentHash1) ? (/** @type {number} */ (row.termEntryContentHash1) >>> 0) : -1;
                 const precomputedHash2 = Number.isInteger(row.termEntryContentHash2) ? (/** @type {number} */ (row.termEntryContentHash2) >>> 0) : -1;
@@ -5284,7 +5284,9 @@ null;
                 ) {
                     contentHash = hashPairToHex(contentHash1, contentHash2);
                 }
-                computeContentMs += safePerformance.now() - tComputeStart;
+                if (this._importDebugLogging) {
+                    computeContentMs += safePerformance.now() - tComputeStart;
+                }
 
                 let existingMeta = this._findMatchingTermEntryContentMeta(contentHash1, contentHash2, contentBytes);
                 if (existingMeta instanceof Promise) {
@@ -5311,8 +5313,6 @@ null;
                     }
                 }
                 if (pendingContentIndex < 0) {
-                    const tCompressStart = safePerformance.now();
-                    compressContentMs += safePerformance.now() - tCompressStart;
                     pendingContentIndex = pendingContentBytes.length;
                     if (pendingContentRowIndexByHash !== null && contentHash !== null) {
                         pendingContentRowIndexByHash.set(contentHash, pendingContentIndex);
@@ -5330,13 +5330,15 @@ null;
                 stagedContentLengths.push(-1);
                 stagedContentDictNames.push(null);
 
-                const tNow = safePerformance.now();
-                if (this._importDebugLogging && (tNow - lastProgressLog) >= this._termBulkAddLogIntervalMs) {
-                    lastProgressLog = tNow;
-                    log.log(
-                        `[manabitan-db-import] bulkAdd terms progress rows=${processedRowCount}/${count} ` +
-                        `cached=${resolvedFromCacheCount} pendingUnique=${pendingContentBytes.length}`,
-                    );
+                if (this._importDebugLogging) {
+                    const tNow = safePerformance.now();
+                    if ((tNow - lastProgressLog) >= this._termBulkAddLogIntervalMs) {
+                        lastProgressLog = tNow;
+                        log.log(
+                            `[manabitan-db-import] bulkAdd terms progress rows=${processedRowCount}/${count} ` +
+                            `cached=${resolvedFromCacheCount} pendingUnique=${pendingContentBytes.length}`,
+                        );
+                    }
                 }
             }
             await flushStagedRows();
