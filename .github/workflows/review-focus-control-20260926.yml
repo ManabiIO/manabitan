@@ -1,0 +1,83 @@
+name: Review focus baseline and cache control
+on:
+  push:
+    branches: [review/focus-and-import-20260926]
+    paths: [.github/workflows/review-focus-control-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  focus:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: baseline
+            ref: 384d1c97dae6bd17555973b77ad415e038438499
+          - variant: cache
+            ref: 31431c90eab14421f9ecc70616cce984406bceec
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.ref }}
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install Chromium
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Add observational focus diagnostics
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('test/playwright/integration.spec.js')
+          s = p.read_text()
+          old = '    await searchTextbox.focus();\n    await expect(searchTextbox).toBeFocused();\n    await searchTextbox.fill(query);\n    try {'
+          assert old in s
+          s = s.replace(old, '    try {\n        await searchTextbox.focus();\n        await expect(searchTextbox).toBeFocused();\n        await searchTextbox.fill(query);')
+          s = s.replace("            debug: Reflect.get(globalThis, '__manabitanSearchDebug'),", "            focusCalls: Reflect.get(globalThis, '__reviewFocusCalls'),\n            debug: Reflect.get(globalThis, '__manabitanSearchDebug'),")
+          s = s.replace('test.beforeEach(async ({context}) => {', '''test.beforeEach(async ({context}) => {
+              await context.addInitScript(() => {
+                  const calls = []
+                  Reflect.set(globalThis, '__reviewFocusCalls', calls)
+                  for (const name of ['focus', 'blur']) {
+                      const original = HTMLElement.prototype[name]
+                      HTMLElement.prototype[name] = function(...args) {
+                          calls.push({name, target:this.id, active:document.activeElement?.id, focused:document.hasFocus(), stack:new Error().stack, time:performance.now()})
+                          return original.apply(this,args)
+                      }
+                  }
+                  for (const name of ['focus','blur','focusin','focusout']) {
+                      window.addEventListener(name, e => calls.push({event:name,target:e.target?.id,active:document.activeElement?.id,focused:document.hasFocus(),time:performance.now()}),true)
+                  }
+              })
+          ''')
+          s += '''
+          test.afterEach(async ({page}, testInfo) => {
+              const state = await page.evaluate(() => ({calls:Reflect.get(globalThis,'__reviewFocusCalls'),debug:Reflect.get(globalThis,'__manabitanSearchDebug'),active:document.activeElement?.id,focused:document.hasFocus(),url:location.href})).catch(error => ({error:String(error)}))
+              console.log('FOCUS_AUDIT',JSON.stringify({title:testInfo.title,repeat:testInfo.repeatEachIndex,status:testInfo.status,state}))
+          })
+          '''
+          p.write_text(s)
+          PY
+          mkdir -p builds/focus-review
+          git rev-parse HEAD > builds/focus-review/source-head.txt
+          git diff > builds/focus-review/diagnostics-only.patch
+      - name: Repeat original startup and Japanese drag-drop contracts without retries
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js --project=chromium --workers=1 --retries=0 --repeat-each=6 --reporter=line --grep 'search accepts typing|drag and drop imports a local MDX fixture' 2>&1 | tee "builds/focus-review/${VARIANT}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focus-control-${{ matrix.variant }}
+          path: |
+            builds/focus-review/
+            test-results/
+          retention-days: 14
