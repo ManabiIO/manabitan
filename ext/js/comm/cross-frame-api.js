@@ -424,7 +424,10 @@ export class CrossFrameAPI {
         commPort.off('disconnect', this._onDisconnectBind);
         const {otherTabId, otherFrameId} = commPort;
         const tabPorts = this._commPorts.get(otherTabId);
-        if (typeof tabPorts !== 'undefined') {
+        if (
+            typeof tabPorts !== 'undefined' &&
+            tabPorts.get(otherFrameId) === commPort
+        ) {
             tabPorts.delete(otherFrameId);
             if (tabPorts.size === 0) {
                 this._commPorts.delete(otherTabId);
