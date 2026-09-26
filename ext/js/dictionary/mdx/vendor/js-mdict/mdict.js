@@ -229,7 +229,7 @@ export class Mdict extends MdictBase {
         let unpackRecordBlockBuff = new Uint8Array(recordBuffer.length);
         const recordBlockChecksum = common.b2n(recordBuffer.subarray(4, 8));
         if (rbCompType === '00000000') {
-            unpackRecordBlockBuff = recordBuffer.slice(8);
+            unpackRecordBlockBuff = recordBuffer.subarray(8);
         }
         else {
             // decrypt

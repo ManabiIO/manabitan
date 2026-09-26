@@ -760,7 +760,7 @@ class MDictBase {
         const keyBlockChecksum = common.b2n(kbPackedBuff.subarray(4, 8));
         let keyBlock;
         if (compType == '00000000') {
-            keyBlock = kbPackedBuff.slice(8);
+            keyBlock = kbPackedBuff.subarray(8);
         } else if (compType == '01000000') {
             // TODO: tests for v2.0 dictionary
             const decompressedBuff = lzo1x.decompress(kbPackedBuff.slice(8), unpackSize);
@@ -932,7 +932,7 @@ class MDictBase {
             if (rbPackBuff.length < 8) { throw new Error('Truncated MDict record block'); }
             const recordBlockChecksum = common.b2n(rbPackBuff.subarray(4, 8));
             if (rbCompType === '00000000') {
-                recordBlock = rbPackBuff.slice(8, rbPackBuff.length);
+                recordBlock = rbPackBuff.subarray(8, rbPackBuff.length);
             }
             else {
                 // decrypt
