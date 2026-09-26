@@ -1,111 +1,17 @@
-name: Search pointer activation qualification
+name: Archived search pointer experiment
 on:
-  push:
-    branches: [review/focus-and-import-20260926]
-    paths: [.github/workflows/review-search-pointer-20260926.yml]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  browser:
+  disposition:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - variant: baseline
-            ref: 384d1c97dae6bd17555973b77ad415e038438499
-          - variant: cache
-            ref: 31431c90eab14421f9ecc70616cce984406bceec
+    timeout-minutes: 1
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ matrix.ref }}
-      - uses: ./.github/actions/setup
-        with:
-          node-version: '22'
-      - name: Apply only the proposed search helper change
+      - name: Retain the failed experiment without a publication path
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('test/playwright/integration.spec.js')
-          s=p.read_text()
-          old='    await searchTextbox.focus();\n    await expect(searchTextbox).toBeFocused();\n    await searchTextbox.fill(query);\n    try {'
-          new='    // Activate through a pointer interaction, as a user returning from settings would.\n    // The startup test separately verifies autofocus without an explicit click.\n    try {\n        await searchTextbox.click();\n        await expect(searchTextbox).toBeFocused();\n        await searchTextbox.fill(query);'
-          assert s.count(old)==1
-          p.write_text(s.replace(old,new))
-          PY
-          mkdir -p builds/pointer-qualification
-          git diff --check
-          git rev-parse HEAD > builds/pointer-qualification/base.txt
-          git diff > builds/pointer-qualification/patch.diff
-          npx eslint test/playwright/integration.spec.js
-          npm run test:ts
-          npm run build -- --target chrome-dev
-          npx playwright install --with-deps chromium
-      - name: Repeat startup and import focus assertions twelve times without retries
-        env:
-          MANABITAN_CHROMIUM_HEADLESS: '1'
-        run: |
-          set -o pipefail
-          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js --project=chromium --workers=1 --retries=0 --repeat-each=12 --reporter=line --grep 'search accepts typing|drag and drop imports a local MDX fixture' 2>&1 | tee builds/pointer-qualification/repeated.log
-      - name: Complete installed MDict suite and original autofocus test
-        env:
-          MANABITAN_CHROMIUM_HEADLESS: '1'
-        run: |
-          set -o pipefail
-          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-inline-style.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep 'MDX|search accepts typing' 2>&1 | tee builds/pointer-qualification/mdict.log
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: search-pointer-${{ matrix.variant }}
-          path: |
-            builds/pointer-qualification/
-            test-results/
-          retention-days: 14
-  publish:
-    needs: browser
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: 384d1c97dae6bd17555973b77ad415e038438499
-      - uses: ./.github/actions/setup
-        with:
-          node-version: '22'
-      - name: Verify and publish clean test-only branch
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('test/playwright/integration.spec.js')
-          s=p.read_text()
-          old='    await searchTextbox.focus();\n    await expect(searchTextbox).toBeFocused();\n    await searchTextbox.fill(query);\n    try {'
-          new='    // Activate through a pointer interaction, as a user returning from settings would.\n    // The startup test separately verifies autofocus without an explicit click.\n    try {\n        await searchTextbox.click();\n        await expect(searchTextbox).toBeFocused();\n        await searchTextbox.fill(query);'
-          assert s.count(old)==1
-          p.write_text(s.replace(old,new))
-          PY
-          mkdir -p builds/pointer-publication
-          npx eslint test/playwright/integration.spec.js
-          npm run test:ts
-          npm run test:unit -- --maxWorkers=2 --minWorkers=1 > builds/pointer-publication/unit.log 2>&1
-          npm run test:build > builds/pointer-publication/build.log 2>&1
-          git diff --check
-          git switch -c test/search-pointer-activation-20260926
-          git config user.name 'Manabitan review'
-          git config user.email 'noreply@users.noreply.github.com'
-          git add test/playwright/integration.spec.js
-          git -c core.hooksPath=/dev/null commit -m 'test(search): activate search input through pointer interaction'
-          test "$(git diff --name-only HEAD^ HEAD)" = test/playwright/integration.spec.js
-          git rev-parse HEAD > builds/pointer-publication/head.txt
-          git diff HEAD^ HEAD > builds/pointer-publication/patch.diff
-          git push origin HEAD:refs/heads/test/search-pointer-activation-20260926
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: search-pointer-publication
-          path: builds/pointer-publication/
-          retention-days: 14
+          echo 'Rejected as a focus fix. No product branch was published.'
+          echo 'Original recipe: d4c155cc2c15a38d6c511c3248af601da26b4b93'
+          echo 'Qualification run: 36228151631'
+          echo 'Baseline passed; the cache composition still failed a focus assertion.'
+          echo 'Historical source and complete results remain available at those immutable identities.'
