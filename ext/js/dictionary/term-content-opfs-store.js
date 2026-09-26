@@ -849,11 +849,7 @@ export class TermContentOpfsStore {
         let total = this._computeSegmentedLength();
         total += this._pendingWriteBytes;
         total += this._inFlightWriteBytes;
-        if (this._queuedWriteChunks.length > 0) {
-            for (const chunk of this._queuedWriteChunks) {
-                total += chunk.byteLength;
-            }
-        }
+        total += this._queuedWriteBytes;
         return total;
     }
 
