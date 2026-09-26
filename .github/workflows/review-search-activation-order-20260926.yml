@@ -1,0 +1,103 @@
+name: Search activation order qualification
+on:
+  push:
+    branches: [review/focus-and-import-20260926]
+    paths: [.github/workflows/review-search-activation-order-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: baseline
+            ref: 384d1c97dae6bd17555973b77ad415e038438499
+          - variant: cache
+            ref: 31431c90eab14421f9ecc70616cce984406bceec
+    steps:
+      - uses: actions/checkout@v6
+      - name: Apply the identical test-only change to the pinned source
+        env:
+          SOURCE_REF: ${{ matrix.ref }}
+        run: |
+          cp dev/review/search-activation-order-20260926.py /tmp/review-search-order.py
+          git fetch --no-tags --depth=1 origin "$SOURCE_REF"
+          git checkout --detach "$SOURCE_REF"
+          python3 /tmp/review-search-order.py
+          mkdir -p builds/search-order
+          git rev-parse HEAD > builds/search-order/base.txt
+          git diff > builds/search-order/patch.diff
+          git diff --check
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Validate and build
+        run: |
+          npx eslint test/playwright/integration.spec.js
+          npm run test:ts
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Twenty repetitions of each original startup and import-focus contract
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js --project=chromium --workers=1 --retries=0 --repeat-each=20 --reporter=line --grep 'search accepts typing|drag and drop imports a local MDX fixture' 2>&1 | tee builds/search-order/repeated.log
+      - name: All installed MDict tests plus original startup autofocus contract
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-inline-style.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep 'MDX|search accepts typing' 2>&1 | tee builds/search-order/mdict.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: search-order-${{ matrix.variant }}
+          path: |
+            builds/search-order/
+            test-results/
+          retention-days: 14
+  publish:
+    needs: browser
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Apply exact qualified patch on a clean product base
+        run: |
+          cp dev/review/search-activation-order-20260926.py /tmp/review-search-order.py
+          git fetch --no-tags --depth=1 origin 384d1c97dae6bd17555973b77ad415e038438499
+          git checkout --detach 384d1c97dae6bd17555973b77ad415e038438499
+          python3 /tmp/review-search-order.py
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Qualify complete checkout and publish only the test branch
+        run: |
+          mkdir -p builds/search-order-publication
+          npx eslint test/playwright/integration.spec.js
+          npm run test:ts
+          npm run test:unit -- --maxWorkers=2 --minWorkers=1 > builds/search-order-publication/unit.log 2>&1
+          npm run test:build > builds/search-order-publication/build.log 2>&1
+          git diff --check
+          git switch -c test/search-activation-before-navigation-20260926
+          git config user.name 'Manabitan review'
+          git config user.email 'noreply@users.noreply.github.com'
+          git add test/playwright/integration.spec.js
+          git -c core.hooksPath=/dev/null commit -m 'test(search): activate tab before search navigation'
+          test "$(git diff --name-only HEAD^ HEAD)" = test/playwright/integration.spec.js
+          git rev-parse HEAD > builds/search-order-publication/head.txt
+          git diff HEAD^ HEAD > builds/search-order-publication/patch.diff
+          git push origin HEAD:refs/heads/test/search-activation-before-navigation-20260926
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: search-order-publication
+          path: builds/search-order-publication/
+          retention-days: 14
