@@ -7062,13 +7062,11 @@ this._readTermContentSignature(
             } else if (existing.offset !== offset) {
                 if (
                     typeof existing.signature1 === 'number' &&
-                    typeof meta.signature1 === 'number' &&
-                    (
-                        existing.signature1 !== meta.signature1 ||
-                        existing.signature2 !== meta.signature2 ||
-                        existing.signature3 !== meta.signature3
-                    )
+                    typeof meta.signature1 === 'number'
                 ) {
+                    // Signatures reject obvious non-matches but are not content
+                    // identities. Preserve every fully-signed same-hash
+                    // candidate so an exact byte comparison can still reach it.
                     const key = `${hash1 >>> 0}:${hash2 >>> 0}`;
                     let collisions = this._termEntryContentMetaCollisionsByHashPair.get(key);
                     if (typeof collisions === 'undefined') {
