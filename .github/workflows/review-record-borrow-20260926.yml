@@ -1,0 +1,128 @@
+name: Borrowed record complete import qualification
+on:
+  push:
+    branches: [review/record-borrow-zlib-20260926]
+    paths: [.github/workflows/review-record-borrow-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin source and exact candidate
+        run: |
+          cp dev/review/borrowed-records-current.patch /tmp/borrow.patch
+          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a
+          git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
+          git apply /tmp/borrow.patch
+          mkdir -p builds/borrow-qualification
+          cp /tmp/borrow.patch builds/borrow-qualification/product.patch
+          test "$(git hash-object ext/js/dictionary/mdx/vendor/js-mdict/mdict.js)" = 00a19a0e0219b9968fd7ac2028430cd874539da3
+          test "$(git hash-object ext/js/dictionary/mdx/vendor/js-mdict/mdx.js)" = 418aa52d68d416ea02a1adfcbdf6f86cd0db5114
+          test "$(git hash-object test/util/mdict-borrowed-record-cases.js)" = 94fd3418bce4f753656eb54c118daf80677a523a
+          test "$(git hash-object test/mdict-borrowed-definition-records.test.js)" = a58697645930a5cff39e1b187062298389847bad
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Assert exact baseline failures then repaired behavior
+        run: |
+          cp ext/js/dictionary/mdx/vendor/js-mdict/mdict.js /tmp/mdict.js
+          cp ext/js/dictionary/mdx/vendor/js-mdict/mdx.js /tmp/mdx.js
+          git checkout HEAD -- ext/js/dictionary/mdx/vendor/js-mdict/mdict.js ext/js/dictionary/mdx/vendor/js-mdict/mdx.js
+          set +e
+          node --test --test-reporter=tap test/util/mdict-borrowed-record-cases.js > builds/borrow-qualification/baseline.log 2>&1
+          result=$?
+          set -e
+          test "$result" -eq 1
+          grep '^# pass 19$' builds/borrow-qualification/baseline.log
+          grep '^# fail 8$' builds/borrow-qualification/baseline.log
+          cp /tmp/mdict.js ext/js/dictionary/mdx/vendor/js-mdict/mdict.js
+          cp /tmp/mdx.js ext/js/dictionary/mdx/vendor/js-mdict/mdx.js
+          node --test --test-reporter=tap test/util/mdict-borrowed-record-cases.js > builds/borrow-qualification/repaired.log 2>&1
+          grep '^# pass 27$' builds/borrow-qualification/repaired.log
+          grep '^# fail 0$' builds/borrow-qualification/repaired.log
+      - name: Full current-source qualification
+        run: |
+          npx vitest run --reporter=json --outputFile=builds/borrow-qualification/unit.json > builds/borrow-qualification/unit.log 2>&1
+          npm run test:ts > builds/borrow-qualification/types.log 2>&1
+          npx eslint test/mdict-borrowed-definition-records.test.js test/util/mdict-borrowed-record-cases.js > builds/borrow-qualification/lint.log 2>&1
+          npm run test:unit:options > builds/borrow-qualification/options.log 2>&1
+          npm run test:build > builds/borrow-qualification/build.log 2>&1
+          node --test --test-reporter=tap test/util/mdict-native-cases.js > builds/borrow-qualification/native.log 2>&1
+      - name: Preserve qualified candidate without promoting an import-speed claim
+        run: |
+          test "$(git hash-object ext/js/dictionary/mdx/vendor/js-mdict/mdict.js)" = 00a19a0e0219b9968fd7ac2028430cd874539da3
+          test "$(git hash-object ext/js/dictionary/mdx/vendor/js-mdict/mdx.js)" = 418aa52d68d416ea02a1adfcbdf6f86cd0db5114
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ext/js/dictionary/mdx/vendor/js-mdict/mdict.js ext/js/dictionary/mdx/vendor/js-mdict/mdx.js test/mdict-borrowed-definition-records.test.js test/util/mdict-borrowed-record-cases.js
+          git -c core.hooksPath=/dev/null commit -m 'perf(mdict): qualify borrowed string decoding on current source'
+          git push origin HEAD:refs/heads/review/record-borrow-candidate-20260926
+          git rev-parse HEAD > builds/borrow-qualification/head.txt
+          git rev-parse 'HEAD^{tree}' > builds/borrow-qualification/tree.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: record-borrow-qualified-source
+          path: builds/borrow-qualification/
+          retention-days: 14
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [short, long, small]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin source and driver
+        run: |
+          cp dev/review/borrowed-records-current.patch /tmp/borrow.patch
+          cp dev/review/borrowed-record-complete-import.mjs /tmp/borrow-driver.mjs
+          git fetch --no-tags --depth=1 origin 2d79cd1dec164caa3075884133d9d12204a4f48a
+          git checkout --detach 2d79cd1dec164caa3075884133d9d12204a4f48a
+          git apply /tmp/borrow.patch
+          mkdir -p dev/review builds/borrow-completion
+          cp /tmp/borrow-driver.mjs dev/review/borrowed-record-complete-import.mjs
+          cp /tmp/borrow-driver.mjs builds/borrow-completion/executed-driver.mjs
+          cp /tmp/borrow.patch builds/borrow-completion/product.patch
+          git rev-parse HEAD > builds/borrow-completion/base.txt
+          node --check dev/review/borrowed-record-complete-import.mjs
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build extension and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms and all readback assertions
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          PREFLIGHT: '1'
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/borrowed-record-complete-import.mjs "$WORKLOAD" 2>&1 | tee "builds/borrow-completion/${WORKLOAD}-preflight.log"
+      - name: Fixed paired cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/borrowed-record-complete-import.mjs "$WORKLOAD" 2>&1 | tee "builds/borrow-completion/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: record-borrow-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: |
+            builds/borrow-completion/*.json
+            builds/borrow-completion/*.log
+            builds/borrow-completion/*.mjs
+            builds/borrow-completion/*.patch
+            builds/borrow-completion/*.txt
+          retention-days: 14
