@@ -218,6 +218,42 @@ test('native split-record MDD media and case-fallback references materialize wit
     assert.deepEqual(getMdictConversionWarnings(data.phaseTimings), []);
 });
 
+test('native MDD exact lookup still wins when case-insensitive fallback is ambiguous', async () => {
+    const exactPng = makeFixturePng([10, 20, 30, 255]);
+    const variantPng = makeFixturePng([40, 50, 60, 255]);
+    const mdd = makeMdictFixture(
+        [
+            {key: '\\Image.PNG', value: exactPng},
+            {key: '\\image.png', value: variantPng},
+        ],
+        {mdd: true, recordBlockSize: 7},
+    );
+    const data = await convert(
+        [{key: 'cat', value: '<img src="Image.PNG">'}],
+        [{name: 'Book.MDD', bytes: mdd.bytes}],
+    );
+    assert.deepEqual(data.files.get('mdict-media/Image.PNG'), exactPng);
+    assert.equal(stats(data).missingReferencedAssetCount ?? 0, 0);
+});
+
+test('native MDD ambiguous case-insensitive fallback remains unresolved', async () => {
+    const firstPng = makeFixturePng([10, 20, 30, 255]);
+    const secondPng = makeFixturePng([40, 50, 60, 255]);
+    const mdd = makeMdictFixture(
+        [
+            {key: '\\Image.PNG', value: firstPng},
+            {key: '\\image.png', value: secondPng},
+        ],
+        {mdd: true, recordBlockSize: 7},
+    );
+    const data = await convert(
+        [{key: 'cat', value: '<img src="IMAGE.PNG">'}],
+        [{name: 'Book.MDD', bytes: mdd.bytes}],
+    );
+    assert.equal(data.files.has('mdict-media/IMAGE.PNG'), false);
+    assert.equal(stats(data).missingReferencedAssetCount, 1);
+});
+
 test('native embedded image is not misreported as missing external media', async () => {
     const png = Buffer.from(makeFixturePng([12, 34, 56, 255])).toString('base64');
     const data = await convert([
