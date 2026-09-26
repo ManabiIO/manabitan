@@ -10,13 +10,18 @@
 import {describe, expect, test} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionaryImporterMediaLoader} from '../ext/js/dictionary/dictionary-importer-media-loader.js';
-import {RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js';
+import {
+    decodeRawTermContentSharedGlossaryHeader,
+    encodeRawTermContentSharedGlossaryBinary,
+    RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+} from '../ext/js/dictionary/raw-term-content.js';
+import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 
 /**
  * @param {Uint8Array} [content]
  * @returns {Uint8Array}
  */
-function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0)) {
+function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0), [hash1, hash2] = [0, 0]) {
     const expression = new TextEncoder().encode('term');
     const headerBytes = 8 + 4 + 8;
     const stringLengthsBytes = 4;
@@ -38,8 +43,8 @@ function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0)) {
     view.setUint32(cursor, 1, true); cursor += 4;
     view.setInt32(cursor, 10, true); cursor += 4;
     view.setInt32(cursor, -1, true); cursor += 4;
-    view.setUint32(cursor, 0, true); cursor += 4;
-    view.setUint32(cursor, 0, true); cursor += 4;
+    view.setUint32(cursor, hash1, true); cursor += 4;
+    view.setUint32(cursor, hash2, true); cursor += 4;
     view.setUint32(cursor, content.byteLength, true); cursor += 4;
     bytes.set(content, cursor);
     return bytes;
@@ -94,6 +99,164 @@ describe('DictionaryImporter term artifacts', () => {
             .toBe(chunk.termRecordPreinternedPlan.expressionIndexes[0]);
         expect(bytes).toStrictEqual(originalBytes);
         expect(chunk.termRecordPreinternedPlan.readingIndexes.buffer).not.toBe(bytes.buffer);
+    });
+
+
+    test('recomputes direct-chunk content hashes after shared-glossary rebasing', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const sourceContent = encodeRawTermContentSharedGlossaryBinary(
+            '',
+            '',
+            '',
+            7,
+            11,
+            new TextEncoder(),
+        );
+        const sourceHash = hashTermEntryContentBytesPair(sourceContent);
+        const artifact = createArtifactWithEmptyReadingSentinel(sourceContent, sourceHash);
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            4096,
+            true,
+            1,
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        );
+
+        expect(capturedChunk).not.toBeNull();
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        const rebasedContent = /** @type {Uint8Array} */ (chunk.contentBytesList[0]);
+        const rebasedHeader = decodeRawTermContentSharedGlossaryHeader(rebasedContent, new TextDecoder());
+        expect(rebasedHeader?.glossaryOffset).toBe(4103);
+        const rebasedHash = hashTermEntryContentBytesPair(rebasedContent);
+        expect([chunk.contentHash1List[0], chunk.contentHash2List[0]]).toStrictEqual(rebasedHash);
+        expect(rebasedHash).not.toStrictEqual(sourceHash);
+    });
+
+    test('recomputes direct-chunk hashes when legacy JSON is converted to raw binary', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const sourceContent = new TextEncoder().encode(JSON.stringify({
+            rules: 'rule',
+            definitionTags: 'tag',
+            termTags: '',
+            glossary: ['definition'],
+        }));
+        const sourceHash = hashTermEntryContentBytesPair(sourceContent);
+        const artifact = createArtifactWithEmptyReadingSentinel(sourceContent, sourceHash);
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            0,
+            true,
+            1,
+            null,
+        );
+
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        const normalizedBytes = /** @type {Uint8Array} */ (chunk.contentBytesList[0]);
+        const normalizedHash = hashTermEntryContentBytesPair(normalizedBytes);
+        expect(normalizedBytes).not.toStrictEqual(sourceContent);
+        expect([chunk.contentHash1List[0], chunk.contentHash2List[0]]).toStrictEqual(normalizedHash);
+        expect(normalizedHash).not.toStrictEqual(sourceHash);
+    });
+
+    test('recomputes materialized-row hashes after shared-glossary rebasing', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const sourceContent = encodeRawTermContentSharedGlossaryBinary(
+            '',
+            '',
+            '',
+            13,
+            5,
+            new TextEncoder(),
+        );
+        const sourceHash = hashTermEntryContentBytesPair(sourceContent);
+        const artifact = createArtifactWithEmptyReadingSentinel(sourceContent, sourceHash);
+
+        const result = await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            void 0,
+            0,
+            512,
+            false,
+            1,
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        );
+
+        expect(result.termList).toHaveLength(1);
+        const entry = result.termList[0];
+        const rebasedBytes = /** @type {Uint8Array} */ (entry.termEntryContentBytes);
+        const rebasedHash = hashTermEntryContentBytesPair(rebasedBytes);
+        expect([entry.termEntryContentHash1, entry.termEntryContentHash2]).toStrictEqual(rebasedHash);
+        expect(rebasedHash).not.toStrictEqual(sourceHash);
+        expect(decodeRawTermContentSharedGlossaryHeader(rebasedBytes, new TextDecoder())?.glossaryOffset).toBe(525);
+    });
+
+    test('preserves artifact content hashes when normalization does not change bytes', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const contentBytes = encodeRawTermContentSharedGlossaryBinary(
+            '',
+            '',
+            '',
+            7,
+            11,
+            new TextEncoder(),
+        );
+        const sourceHash = hashTermEntryContentBytesPair(contentBytes);
+        const artifact = createArtifactWithEmptyReadingSentinel(contentBytes, sourceHash);
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            0,
+            true,
+            1,
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        );
+
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        expect(chunk.contentBytesList[0]).toStrictEqual(contentBytes);
+        expect([chunk.contentHash1List[0], chunk.contentHash2List[0]]).toStrictEqual(sourceHash);
     });
 
     test('rejects malformed zero-base shared-glossary artifact rows before chunk delivery', async () => {
