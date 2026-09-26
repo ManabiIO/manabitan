@@ -1,0 +1,36 @@
+name: Mozilla Firefox native focus controls
+on:
+  push:
+    branches: [review/focus-cause-20260926]
+    paths: [.github/workflows/mozilla-focus-controls-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  firefox:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - name: Fetch exact production modules
+        run: git fetch origin 384d1c97dae6bd17555973b77ad415e038438499 9280a9fbd65bba7c8db73c2aec34fcd6b4afc915
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Install Mozilla Firefox as in normal repository CI
+        run: |
+          curl -fsSL "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US" -o /tmp/firefox-devedition.tar.bz2
+          mkdir -p "$HOME/firefox-devedition"
+          tar -xf /tmp/firefox-devedition.tar.bz2 -C "$HOME/firefox-devedition"
+          echo "MANABITAN_FIREFOX_BINARY=$HOME/firefox-devedition/firefox/firefox" >> "$GITHUB_ENV"
+      - name: Native no-controller and guard focus and keyboard controls
+        run: |
+          set -o pipefail
+          mkdir -p builds/mozilla-focus
+          node dev/review/mozilla-focus-controls.mjs 2>&1 | tee builds/mozilla-focus/run.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mozilla-native-focus-controls
+          path: builds/mozilla-focus/
+          retention-days: 14
