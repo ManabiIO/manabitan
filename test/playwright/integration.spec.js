@@ -676,8 +676,8 @@ test('search accepts typing immediately after visible initialization', async ({p
     await waitForSearchPageReady(page);
     const searchTextbox = page.locator('#search-textbox');
     await expect(searchTextbox).toBeFocused();
-    await page.keyboard.insertText('initial query');
-    await expect(searchTextbox).toHaveValue('initial query');
+    await page.keyboard.insertText('日本語');
+    await expect(searchTextbox).toHaveValue('日本語');
 });
 
 test('search clipboard', async ({page, extensionId}) => {

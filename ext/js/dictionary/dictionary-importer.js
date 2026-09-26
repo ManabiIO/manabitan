@@ -3082,9 +3082,8 @@ export class DictionaryImporter {
         /** @type {string[]} */
         const paths = [];
         if (!Array.isArray(glossary)) { return paths; }
-        for (const item of glossary) {
-            if (!(typeof item === 'object' && item !== null) || Array.isArray(item)) { continue; }
-            const value = /** @type {Record<string, unknown>} */ (item);
+        for (const value of /** @type {unknown[]} */ (glossary)) {
+            if (!isJsonObject(value)) { continue; }
             if (value.type === 'image') {
                 if (typeof value.path === 'string' && getImageMediaTypeFromFileName(value.path) !== null) {
                     paths.push(value.path);
