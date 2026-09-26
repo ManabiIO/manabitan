@@ -1,15 +1,10 @@
 name: Current MDX progress qualification
 on:
-  push:
-    branches: [review/import-followthrough-20260926]
-    paths: [.github/workflows/review-progress-qualification-20260926.yml]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   qualify:
-    permissions:
-      contents: write
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -52,18 +47,12 @@ jobs:
           npm run test:unit:options > builds/progress-qualification/options.log 2>&1
           npm run test:build > builds/progress-qualification/build.log 2>&1
           node --test test/util/mdict-native-cases.js > builds/progress-qualification/native.log 2>&1
-      - name: Retain isolated candidate branch, not a promoted PR
+      - name: Verify final bytes without publishing refs
         run: |
           test "$(git hash-object ext/js/dictionary/mdx/mdx-converter.js)" = e1e10ebb9fc5e7a5957ac8c8cc607d73c8e64b16
           test "$(git hash-object test/mdx-progress-native.test.js)" = 7a29a17854dd2466f65fd7a6481f38f4bda61cf7
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add ext/js/dictionary/mdx/mdx-converter.js test/mdx-progress-native.test.js
-          git -c core.hooksPath=/dev/null commit -m 'perf(mdict): qualify coalesced progress on current source'
-          git push origin HEAD:refs/heads/review/progress-candidate-20260926-2140
-          git rev-parse HEAD > builds/progress-qualification/candidate-head.txt
-          git rev-parse HEAD^{tree} > builds/progress-qualification/candidate-tree.txt
-          git show --stat HEAD > builds/progress-qualification/commit.txt
+          git diff --stat > builds/progress-qualification/diff-stat.txt
+          git rev-parse 'HEAD^{tree}' > builds/progress-qualification/base-tree.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
