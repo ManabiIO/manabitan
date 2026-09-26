@@ -687,7 +687,7 @@ export class TermContentBlockStore {
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async tryAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
-        validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
+        const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
         if (sourceOffsets.length === 0) { return null; }
         if (
             (compressionDictName === 'jmdict' || this._compressionExperiments.experimentalGenericSpanCompression === true) &&
@@ -700,6 +700,7 @@ export class TermContentBlockStore {
                 sourceLengths,
                 compressionDictName,
                 force,
+                uncompressedBytes,
             );
         }
         return await this._tryAppendPacked(
@@ -707,6 +708,7 @@ export class TermContentBlockStore {
             sourceLengths,
             compressionDictName,
             force,
+            uncompressedBytes,
         );
     }
 
@@ -923,12 +925,11 @@ export class TermContentBlockStore {
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
      * @param {boolean} force
+     * @param {number} uncompressedBytes
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
-    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force) {
+    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force, uncompressedBytes) {
         const compressionExperiments = this._compressionExperiments;
-        let uncompressedBytes = 0;
-        for (const length of sourceLengths) { uncompressedBytes += length; }
         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
 
         let phaseStart = safePerformance.now();
@@ -961,6 +962,7 @@ export class TermContentBlockStore {
                 sourceLengths,
                 compressionDictName,
                 force,
+                uncompressedBytes,
             );
         }
         const compressMs = Math.max(0, safePerformance.now() - phaseStart - envelopeMs);
@@ -983,12 +985,16 @@ export class TermContentBlockStore {
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
      * @param {boolean} force
+     * @param {number|null} [validatedUncompressedBytes=null]
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
-    async _tryAppendPacked(pack, sourceLengths, compressionDictName, force) {
+    async _tryAppendPacked(pack, sourceLengths, compressionDictName, force, validatedUncompressedBytes = null) {
         const compressionExperiments = this._compressionExperiments;
-        let uncompressedBytes = 0;
-        for (const length of sourceLengths) { uncompressedBytes += length; }
+        let uncompressedBytes = validatedUncompressedBytes;
+        if (uncompressedBytes === null) {
+            uncompressedBytes = 0;
+            for (const length of sourceLengths) { uncompressedBytes += length; }
+        }
         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
 
         let phaseStart = safePerformance.now();
