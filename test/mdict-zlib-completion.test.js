@@ -9,7 +9,7 @@ import {expect, test} from 'vitest'
 
 test('MDict requires actual compressed-stream completion using the vendored codec', () => {
     const path = fileURLToPath(new URL('util/mdict-zlib-completion-cases.js', import.meta.url))
-    const result = spawnSync(process.execPath, ['--test', path], {
+    const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', path], {
         encoding: 'utf8', timeout: 15000, maxBuffer: 4 * 1024 * 1024,
     })
     expect(result.error).toBeUndefined()
