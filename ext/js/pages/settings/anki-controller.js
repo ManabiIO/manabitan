@@ -179,7 +179,12 @@ export class AnkiController {
         if (promise === null) {
             promise = this._getAnkiData();
             this._getAnkiDataPromise = promise;
-            void promise.finally(() => { this._getAnkiDataPromise = null; });
+            const clearPromise = () => {
+                if (this._getAnkiDataPromise === promise) {
+                    this._getAnkiDataPromise = null;
+                }
+            };
+            void promise.then(clearPromise, clearPromise);
         }
         return promise;
     }

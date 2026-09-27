@@ -945,15 +945,17 @@ export class TermRecordOpfsStore {
      */
     _setDictionaryHealth(dictionaryName, status, reason = null) {
         const previous = this._dictionaryHealthByName.get(dictionaryName);
+        const previousStatus = previous?.status ?? 'available';
+        const previousReason = previous?.reason ?? null;
+        if (previousStatus === status && previousReason === reason) { return; }
         if (status === 'available') {
             this._dictionaryHealthByName.delete(dictionaryName);
         } else {
             this._dictionaryHealthByName.set(dictionaryName, {status, reason});
         }
-        if (previous?.status === status && previous.reason === reason) { return; }
         reportDiagnostics('term-record-dictionary-health-changed', {
             dictionaryName,
-            previousStatus: previous?.status ?? 'available',
+            previousStatus,
             status,
             reason,
         });
@@ -1336,6 +1338,22 @@ export class TermRecordOpfsStore {
      */
     async reset() {
         await this._closeAllWritables();
+        /** @type {Error[]} */
+        const resetErrors = [];
+        if (this._recordsDirectoryHandle !== null) {
+            const shardFileNames = await this._listTermRecordStorageFileNames();
+            for (const fileName of shardFileNames) {
+                try {
+                    await this._removeStorageFileOrTruncate(fileName, false);
+                } catch (error) {
+                    resetErrors.push(toError(error));
+                }
+            }
+        }
+
+        // Reset runtime ownership even when persistent cleanup fails. Some files
+        // may already have been removed/truncated, so retaining materialized
+        // records would expose state which no longer matches persistence.
         this._recordsById.clear();
         this._recordIdsByDictionary.clear();
         this._recordIdStaleDictionaryNames.clear();
@@ -1353,16 +1371,9 @@ export class TermRecordOpfsStore {
         this._preinternedCompactionRemap = new Uint32Array(0);
         this._loadedDictionaryNames.clear();
         this._allShardContentsLoaded = false;
-        if (this._recordsDirectoryHandle === null) {
-            return;
-        }
-        const shardFileNames = await this._listTermRecordStorageFileNames();
-        for (const fileName of shardFileNames) {
-            try {
-                await this._recordsDirectoryHandle.removeEntry(fileName);
-            } catch (_) {
-                // NOP
-            }
+
+        if (resetErrors.length > 0) {
+            throw new AggregateError(resetErrors, 'Failed to reset term-record storage');
         }
     }
 
@@ -1737,12 +1748,16 @@ export class TermRecordOpfsStore {
      * @param {number} count
      * @param {number[]} contentOffsets
      * @param {number[]} contentLengths
-     * @param {string|null} [contentDictName='raw']
+     * @param {string|(string|null)[]} [contentDictNames='raw']
      * @returns {Promise<{buildRecordsMs: number, encodeMs: number, appendWriteMs: number}>}
      */
-    async appendBatchFromImportTermEntriesResolvedContent(rows, start, count, contentOffsets, contentLengths, contentDictName = 'raw') {
+    async appendBatchFromImportTermEntriesResolvedContent(rows, start, count, contentOffsets, contentLengths, contentDictNames = 'raw') {
         if (count <= 0) { return {buildRecordsMs: 0, encodeMs: 0, appendWriteMs: 0}; }
-        if (contentOffsets.length < count || contentLengths.length < count) {
+        if (
+            contentOffsets.length < count ||
+            contentLengths.length < count ||
+            (Array.isArray(contentDictNames) && contentDictNames.length < count)
+        ) {
             throw new Error('appendBatchFromImportTermEntriesResolvedContent content arrays are smaller than row count');
         }
         await this._ensureNextIdReadyForAppend();
@@ -1750,17 +1765,19 @@ export class TermRecordOpfsStore {
         let buildRecordsMs = 0;
         let encodeMs = 0;
         let appendWriteMs = 0;
-        /** @type {Map<string, TermRecord[]>|null} */
+        /** @type {Map<string, {records: TermRecord[], indexes: number[]}>|null} */
         let recordsByShard = null;
         /** @type {TermRecord[]} */
         const singleDictionaryRecords = new Array(count);
         let singleDictionaryRecordCount = 0;
         let firstDictionaryName = '';
-        const normalizedContentDictName = contentDictName ?? 'raw';
+        let firstContentDictName = 'raw';
+        const uniformContentDictName = Array.isArray(contentDictNames) ? null : (contentDictNames ?? 'raw');
         for (let i = 0; i < count; ++i) {
             const row = /** @type {{dictionary: string, expression: string, reading: string, readingEqualsExpression?: boolean, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, expressionReverse?: string, readingReverse?: string, score: number, sequence?: number}} */ (rows[start + i]);
             const id = this._nextId++;
             const dictionary = row.dictionary;
+            const entryContentDictName = uniformContentDictName ?? (contentDictNames[i] ?? 'raw');
             /** @type {TermRecord} */
             const record = {
                 id,
@@ -1774,30 +1791,41 @@ export class TermRecordOpfsStore {
                 readingReverse: row.readingReverse ?? null,
                 entryContentOffset: contentOffsets[i],
                 entryContentLength: contentLengths[i],
-                entryContentDictName: normalizedContentDictName,
+                entryContentDictName,
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
             this._storeRecord(record);
             if (i === 0) {
                 firstDictionaryName = dictionary;
+                firstContentDictName = entryContentDictName;
             }
             if (recordsByShard === null) {
-                if (dictionary === firstDictionaryName) {
+                if (dictionary === firstDictionaryName && entryContentDictName === firstContentDictName) {
                     singleDictionaryRecords[singleDictionaryRecordCount++] = record;
                 } else {
                     recordsByShard = new Map();
-                    recordsByShard.set(this._getShardFileName(firstDictionaryName, normalizedContentDictName), singleDictionaryRecords.slice(0, singleDictionaryRecordCount));
-                    recordsByShard.set(this._getShardFileName(dictionary, normalizedContentDictName), [record]);
+                    recordsByShard.set(
+                        this._getShardFileName(firstDictionaryName, firstContentDictName),
+                        {
+                            records: singleDictionaryRecords.slice(0, singleDictionaryRecordCount),
+                            indexes: Array.from({length: singleDictionaryRecordCount}, (_value, index) => index),
+                        },
+                    );
+                    recordsByShard.set(
+                        this._getShardFileName(dictionary, entryContentDictName),
+                        {records: [record], indexes: [i]},
+                    );
                 }
             } else {
-                const shardFileName = this._getShardFileName(dictionary, normalizedContentDictName);
-                let dictionaryRecords = recordsByShard.get(shardFileName);
-                if (typeof dictionaryRecords === 'undefined') {
-                    dictionaryRecords = [];
-                    recordsByShard.set(shardFileName, dictionaryRecords);
+                const shardFileName = this._getShardFileName(dictionary, entryContentDictName);
+                let shardRecords = recordsByShard.get(shardFileName);
+                if (typeof shardRecords === 'undefined') {
+                    shardRecords = {records: [], indexes: []};
+                    recordsByShard.set(shardFileName, shardRecords);
                 }
-                dictionaryRecords.push(record);
+                shardRecords.records.push(record);
+                shardRecords.indexes.push(i);
             }
             if (!this._deferIndexBuild) {
                 const existingIndex = this._indexByDictionary.get(dictionary);
@@ -1819,7 +1847,8 @@ export class TermRecordOpfsStore {
             getTermRecordPreinternedPlan(rows) :
             null;
         if (recordsByShard === null) {
-            const state = await this._getOrCreateShardState(firstDictionaryName, normalizedContentDictName);
+            this._loadedDictionaryNames.add(firstDictionaryName);
+            const state = await this._getOrCreateShardState(firstDictionaryName, firstContentDictName);
             if (state !== null) {
                 const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
                 encodeMs += metrics.encodeMs;
@@ -1827,11 +1856,17 @@ export class TermRecordOpfsStore {
             }
             return {buildRecordsMs, encodeMs, appendWriteMs};
         }
-        for (const dictionaryRecords of recordsByShard.values()) {
+        for (const {records: dictionaryRecords, indexes} of recordsByShard.values()) {
             const firstRecord = dictionaryRecords[0];
+            this._loadedDictionaryNames.add(firstRecord.dictionary);
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            const metrics = await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
+            const metrics = await this._encodeAndAppendChunkRunsForState(
+                state,
+                dictionaryRecords,
+                preinternedPlan,
+                indexes,
+            );
             encodeMs += metrics.encodeMs;
             appendWriteMs += metrics.appendWriteMs;
         }
@@ -2534,26 +2569,31 @@ export class TermRecordOpfsStore {
         const removedPlans = [];
         try {
             for (const plan of renamePlans) {
+                // Cleanup owns this destination before the first mutating write.
+                // If the shard copy succeeds but index creation/write fails, the
+                // partially-created destination must still be removed.
+                createdPlans.push(plan);
                 await writeShardFile(plan.nextFileHandle, plan.file);
                 const nextIndexHandle = await this._recordsDirectoryHandle.getFileHandle(
                     `${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
                     {create: true},
                 );
                 await writeShardFile(nextIndexHandle, plan.indexFile);
-                createdPlans.push(plan);
             }
             if (!preserveSourceFiles) {
                 for (const plan of renamePlans) {
-                    await this._recordsDirectoryHandle.removeEntry(plan.state.fileName);
-                    try {
-                        await this._recordsDirectoryHandle.removeEntry(`${plan.state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
-                    } catch (_) {
-                        // NOP
-                    }
+                    // Restoration owns the source before the first delete. An
+                    // index-only orphan is recoverable as a descriptor on
+                    // startup, so failing to remove the old index cannot be
+                    // treated as a successful rename.
                     removedPlans.push(plan);
+                    await this._recordsDirectoryHandle.removeEntry(plan.state.fileName);
+                    await this._recordsDirectoryHandle.removeEntry(`${plan.state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
                 }
             }
         } catch (e) {
+            /** @type {Error[]} */
+            const cleanupErrors = [];
             for (const plan of [...removedPlans].reverse()) {
                 try {
                     const restoredHandle = await this._recordsDirectoryHandle.getFileHandle(plan.state.fileName, {create: true});
@@ -2563,21 +2603,33 @@ export class TermRecordOpfsStore {
                         {create: true},
                     );
                     await writeShardFile(restoredIndexHandle, plan.indexFile);
-                } catch (_) {
-                    // NOP - preserve original failure.
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
                 }
             }
             for (const plan of [...createdPlans].reverse()) {
+                // Remove/truncate the recoverable index first. If unlinking is
+                // blocked by another runtime, an empty index cannot recreate the
+                // destination descriptor on the next startup.
                 try {
-                    await this._recordsDirectoryHandle.removeEntry(plan.nextFileName);
-                    try {
-                        await this._recordsDirectoryHandle.removeEntry(`${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
-                    } catch (_) {
-                        // NOP
-                    }
-                } catch (_) {
-                    // NOP - preserve original failure.
+                    await this._removeStorageFileOrTruncate(
+                        `${plan.nextFileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
+                        true,
+                    );
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
                 }
+                try {
+                    await this._removeStorageFileOrTruncate(plan.nextFileName, true);
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
+                }
+            }
+            if (cleanupErrors.length > 0) {
+                throw new AggregateError(
+                    [toError(e), ...cleanupErrors],
+                    `Dictionary rename and rollback cleanup failed for ${fromName} to ${toName}`,
+                );
             }
             throw e;
         }
@@ -2636,8 +2688,8 @@ export class TermRecordOpfsStore {
         const removedFileNames = [];
         /** @type {Set<string>} */
         const removedDictionaryNames = new Set();
-        const fileNames = await this._listShardFileNames();
-        for (const fileName of fileNames) {
+        const shardFiles = await this._listShardStorageFiles();
+        for (const {descriptorFileName: fileName, hasDescriptor} of shardFiles) {
             const dictionaryName = this._decodeDictionaryNameFromShardFileName(fileName);
             if (dictionaryName === null || !predicate(dictionaryName)) {
                 continue;
@@ -2647,7 +2699,9 @@ export class TermRecordOpfsStore {
                 await this._flushPendingWritesForShard(state);
                 await this._closeShardWritable(state);
             }
-            await this._removeStorageFileOrTruncate(fileName, true);
+            if (hasDescriptor) {
+                await this._removeStorageFileOrTruncate(fileName, true);
+            }
             if (typeof state !== 'undefined') {
                 this._shardStateByFileName.delete(fileName);
                 this._activeAppendShardStateByKey.delete(state.logicalKey);
@@ -4620,8 +4674,8 @@ export class TermRecordOpfsStore {
         const bytes = content.subarray(offset, offset + length);
         // Some browser TextDecoder implementations reject shared WASM views.
         // Copy only this string; ordinary buffers stay on the no-copy path.
-        const shared = typeof SharedArrayBuffer !== 'undefined' && bytes.buffer instanceof SharedArrayBuffer;
-        return this._textDecoder.decode(shared ? Uint8Array.from(bytes) : bytes);
+        // Shared memory can exist without an exposed same-realm constructor.
+        return this._textDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : Uint8Array.from(bytes));
     }
 
     /**
@@ -5103,11 +5157,10 @@ export class TermRecordOpfsStore {
         }
         const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
         if (state.initialFileLength !== 0) {
-            try {
-                await this._recordsDirectoryHandle.removeEntry(indexFileName);
-            } catch (_) {
-                // Missing or stale sidecars are handled by the full-shard fallback.
-            }
+            // Appending to an existing descriptor invalidates the previous
+            // sidecar's descriptor-length metadata. Do not leave a stale
+            // authoritative container behind when unlink is blocked.
+            await this._removeStorageFileOrTruncate(indexFileName, true);
             state.pendingLookupIndexChunks = [];
             state.pendingLookupIndexBytes = 0;
             state.pendingLookupIndexRecordCount = 0;
@@ -5532,7 +5585,7 @@ export class TermRecordOpfsStore {
             const chunks = (this._persistentRecordChunksByDictionary.get(dictionaryName) ?? [])
                 .filter((chunk) => chunk.fileName === state.fileName);
             const recordCount = chunks.reduce((sum, chunk) => sum + chunk.count, 0);
-            if (recordCount === 0 || recordCount > PERSISTED_ONLY_IMPORT_ROW_THRESHOLD) { return recordCount > 0; }
+            if (recordCount === 0 || recordCount >= PERSISTED_ONLY_IMPORT_ROW_THRESHOLD) { return recordCount > 0; }
             const ids = new Array(recordCount);
             let cursor = 0;
             for (const chunk of chunks) {
@@ -5596,6 +5649,36 @@ export class TermRecordOpfsStore {
             })());
         }
         await Promise.all(workers);
+    }
+
+    /**
+     * Lists logical shard pairs, including an index-only orphan whose descriptor
+     * is currently missing. Startup can recover such a descriptor from the
+     * lookup index, so cleanup must treat the pair as live storage identity.
+     * @returns {Promise<Array<{descriptorFileName: string, hasDescriptor: boolean, hasIndex: boolean}>>}
+     */
+    async _listShardStorageFiles() {
+        const storageFileNames = await this._listTermRecordStorageFileNames();
+        /** @type {Map<string, {descriptorFileName: string, hasDescriptor: boolean, hasIndex: boolean}>} */
+        const byDescriptor = new Map();
+        for (const storageFileName of storageFileNames) {
+            const isIndex = storageFileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`);
+            const descriptorFileName = isIndex ?
+                storageFileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length) :
+                storageFileName;
+            if (!this._isShardFileName(descriptorFileName)) { continue; }
+            let pair = byDescriptor.get(descriptorFileName);
+            if (typeof pair === 'undefined') {
+                pair = {descriptorFileName, hasDescriptor: false, hasIndex: false};
+                byDescriptor.set(descriptorFileName, pair);
+            }
+            if (isIndex) {
+                pair.hasIndex = true;
+            } else {
+                pair.hasDescriptor = true;
+            }
+        }
+        return [...byDescriptor.values()];
     }
 
     /**
@@ -5741,6 +5824,7 @@ export class TermRecordOpfsStore {
             const seekOffset = state.fileLength - state.pendingWriteBytes;
             await state.writable.seek(Math.max(0, seekOffset));
         }
+        const writeStartOffset = state.fileLength - state.pendingWriteBytes;
         const chunks = this._coalescePendingChunks(state.pendingWriteChunks);
         state.pendingWriteChunks = [];
         state.pendingWriteBytes = 0;
@@ -5759,7 +5843,7 @@ export class TermRecordOpfsStore {
             await this._awaitQueuedWritesForShard(state);
             return;
         }
-        await this._writeChunksForShard(state, chunks);
+        await this._writeChunksForShard(state, chunks, writeStartOffset);
     }
 
     /**
@@ -5848,9 +5932,10 @@ export class TermRecordOpfsStore {
             ++this._writeDrainMetrics.drainCycleCount;
             while (state.queuedWriteChunks.length > 0) {
                 const chunks = state.queuedWriteChunks;
+                const writeStartOffset = state.fileLength - state.pendingWriteBytes - state.queuedWriteBytes;
                 state.queuedWriteChunks = [];
                 state.queuedWriteBytes = 0;
-                await this._writeChunksForShard(state, chunks);
+                await this._writeChunksForShard(state, chunks, writeStartOffset);
             }
         } catch (error) {
             state.queuedWriteError = error instanceof Error ? error : new Error(String(error));
@@ -5865,9 +5950,10 @@ export class TermRecordOpfsStore {
     /**
      * @param {TermRecordShardState} state
      * @param {Uint8Array[]} chunks
+     * @param {number} writeStartOffset Stable logical offset captured before queued writes can admit a later suffix.
      * @returns {Promise<void>}
      */
-    async _writeChunksForShard(state, chunks) {
+    async _writeChunksForShard(state, chunks, writeStartOffset) {
         if (state.writable === null) {
             return;
         }
@@ -5882,7 +5968,7 @@ export class TermRecordOpfsStore {
                     throw error;
                 }
                 state.writable = null;
-                const seekOffset = state.fileLength - this._sumChunkByteLength(chunks) + writtenBytes;
+                const seekOffset = writeStartOffset + writtenBytes;
                 await this._reopenShardWritable(state, seekOffset);
                 if (state.writable === null) {
                     throw error;
@@ -5894,18 +5980,6 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {Uint8Array[]} chunks
-     * @returns {number}
-     */
-    _sumChunkByteLength(chunks) {
-        let total = 0;
-        for (const chunk of chunks) {
-            total += chunk.byteLength;
-        }
-        return total;
-    }
-
-    /**
      * @param {string} dictionaryName
      * @returns {Promise<void>}
      */
@@ -5913,8 +5987,8 @@ export class TermRecordOpfsStore {
         if (this._recordsDirectoryHandle === null) {
             return;
         }
-        const fileNames = await this._listShardFileNames();
-        for (const fileName of fileNames) {
+        const shardFiles = await this._listShardStorageFiles();
+        for (const {descriptorFileName: fileName, hasDescriptor} of shardFiles) {
             if (this._decodeDictionaryNameFromShardFileName(fileName) !== dictionaryName) {
                 continue;
             }
@@ -5923,7 +5997,9 @@ export class TermRecordOpfsStore {
                 await this._flushPendingWritesForShard(state);
                 await this._closeShardWritable(state);
             }
-            await this._removeStorageFileOrTruncate(fileName, false);
+            if (hasDescriptor) {
+                await this._removeStorageFileOrTruncate(fileName, false);
+            }
             await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
             if (typeof state !== 'undefined') {
                 this._shardStateByFileName.delete(fileName);
@@ -5951,7 +6027,10 @@ export class TermRecordOpfsStore {
             try {
                 fileHandle = await this._recordsDirectoryHandle.getFileHandle(fileName, {create: false});
             } catch (lookupError) {
-                if (allowMissing) { return; }
+                const lookupErrorName = typeof lookupError === 'object' && lookupError !== null ?
+                    /** @type {unknown} */ (Reflect.get(lookupError, 'name')) :
+                    null;
+                if (allowMissing && lookupErrorName === 'NotFoundError') { return; }
                 throw new AggregateError(
                     [removeError, lookupError],
                     `Failed to remove or open term-record storage file ${fileName}`,

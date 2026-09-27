@@ -78,6 +78,8 @@ const MDX_GLOSSARY_ENTRY_CLASS_PREFIX = 'mdict-yomitan-entry-';
 // Conversion walks every definition, so cache decompressed MDX record blocks.
 // MDD resource lookup remains lazy and uncached.
 const MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES = 8 * 1024 * 1024;
+// One separately bounded slot for a repeatedly requested oversized block.
+const MDX_IMPORT_OVERSIZED_RECORD_BLOCK_CACHE_BYTES = 16 * 1024 * 1024;
 const STRUCTURED_CLASS_ATTR = 'data-sc-class';
 const STRUCTURED_ID_ATTR = 'data-sc-id';
 const STRUCTURED_TAG_ATTR = 'data-sc-tag';
@@ -220,19 +222,62 @@ const EMBEDDED_ASSET_EXTENSION_MAP = new Map([
     ['image/tiff', '.tiff'],
     ['image/webp', '.webp'],
 ]);
+const EMBEDDED_ASSET_DATA_URL_CACHE_MAX_ENTRIES = 64;
+const EMBEDDED_ASSET_DATA_URL_CACHE_MAX_KEY_BYTES = 256 * 1024;
 const NULL_CHARACTER = String.fromCodePoint(0);
 const SELECTOR_LIST_PSEUDO_CLASSES = new Set(['has', 'is', 'not', 'where']);
+
+/**
+ * @param {string} dataUrl
+ * @returns {number}
+ */
+function getEmbeddedAssetDataUrlProbe(dataUrl) {
+    const length = dataUrl.length;
+    if (length === 0) { return 0; }
+    const midpoint = length >> 1;
+    const quarter = length >> 2;
+    const threeQuarter = midpoint + quarter;
+    let probe = dataUrl.charCodeAt(quarter);
+    probe = Math.imul(probe ^ dataUrl.charCodeAt(midpoint), 0x45d9f3b);
+    probe ^= dataUrl.charCodeAt(threeQuarter);
+    return probe >>> 0;
+}
+
+/**
+ * The cache is hard-bounded, so a linear scan with a precomputed constant-time
+ * probe is cheaper on misses than hashing an entire (potentially very large)
+ * data URL. Exact string equality still guards probe collisions.
+ * @param {Array<{dataUrl: string, path: string, probe: number}>} entries
+ * @param {string} dataUrl
+ * @param {number} probe
+ * @returns {string|null}
+ */
+function findEmbeddedAssetDataUrlPath(entries, dataUrl, probe) {
+    const length = dataUrl.length;
+    for (const {dataUrl: candidate, path, probe: candidateProbe} of entries) {
+        if (candidate.length !== length || candidateProbe !== probe) { continue; }
+        if (candidate === dataUrl) { return path; }
+    }
+    return null;
+}
 
 class EmbeddedAssetCollector {
     /**
      * @param {string} assetPrefix
      * @param {{value: number}} counter
+     * @param {{entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}} sharedDataUrlCache
      */
-    constructor(assetPrefix, counter) {
+    constructor(assetPrefix, counter, sharedDataUrlCache) {
         /** @type {string} */
         this._assetPrefix = assetPrefix;
         /** @type {Map<string, Uint8Array>} */
         this._assets = new Map();
+        /** @type {Array<{dataUrl: string, path: string, probe: number}>} */
+        this._dataUrlCacheEntries = [];
+        /** @type {number} */
+        this._dataUrlRetainedKeyBytes = 0;
+        /** @type {{entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}} */
+        this._sharedDataUrlCache = sharedDataUrlCache;
         /** @type {{value: number}} */
         this._counter = counter;
     }
@@ -245,10 +290,26 @@ class EmbeddedAssetCollector {
     }
 
     /**
+     * Cache candidates remain local until the whole definition converts
+     * successfully. This keeps corrupt/skipped definitions from publishing
+     * paths whose asset bytes will never be committed.
+     * @returns {Array<{dataUrl: string, path: string, probe: number}>}
+     */
+    get dataUrlCacheEntries() {
+        return this._dataUrlCacheEntries;
+    }
+
+    /**
      * @param {string} dataUrl
      * @returns {string|null}
      */
     registerDataUrl(dataUrl) {
+        const probe = getEmbeddedAssetDataUrlProbe(dataUrl);
+        const localPath = findEmbeddedAssetDataUrlPath(this._dataUrlCacheEntries, dataUrl, probe);
+        if (typeof localPath === 'string') { return localPath; }
+        const sharedPath = findEmbeddedAssetDataUrlPath(this._sharedDataUrlCache.entries, dataUrl, probe);
+        if (typeof sharedPath === 'string') { return sharedPath; }
+
         const decoded = decodeDataUrl(dataUrl);
         if (decoded === null) { return null; }
         const {mediaType, data} = decoded;
@@ -256,6 +317,15 @@ class EmbeddedAssetCollector {
         const category = (mediaType.split('/', 1)[0] || 'asset').trim().toLowerCase();
         const path = `${this._assetPrefix}embedded/${category}/${String(++this._counter.value).padStart(6, '0')}${extension}`;
         this._assets.set(path, data);
+
+        const retainedKeyBytes = dataUrl.length * 2;
+        if (
+            this._sharedDataUrlCache.entries.length + this._dataUrlCacheEntries.length < EMBEDDED_ASSET_DATA_URL_CACHE_MAX_ENTRIES &&
+            this._sharedDataUrlCache.retainedKeyBytes + this._dataUrlRetainedKeyBytes + retainedKeyBytes <= EMBEDDED_ASSET_DATA_URL_CACHE_MAX_KEY_BYTES
+        ) {
+            this._dataUrlCacheEntries.push({dataUrl, path, probe});
+            this._dataUrlRetainedKeyBytes += retainedKeyBytes;
+        }
         return path;
     }
 }
@@ -445,13 +515,17 @@ function collapsePosixPath(path) {
 
 /**
  * @param {string} path
+ * @param {boolean} [preserveEncodedSeparators]
  * @returns {string}
  */
-function decodePercentEncodedPathSegments(path) {
+function decodePercentEncodedPathSegments(path, preserveEncodedSeparators = false) {
     const decodedParts = [];
     for (const part of path.split('/')) {
         try {
-            decodedParts.push(decodeURIComponent(part));
+            const encodedPart = preserveEncodedSeparators ?
+                part.replace(/%(?:2f|5c)/giu, (match) => `%25${match.slice(1)}`) :
+                part;
+            decodedParts.push(decodeURIComponent(encodedPart));
         } catch (_error) {
             decodedParts.push(part);
         }
@@ -466,7 +540,7 @@ function decodePercentEncodedPathSegments(path) {
  * @returns {string|null}
  */
 function normalizeRelativeAssetPath(path, sourceAssetPath = null, assetPrefix = '') {
-    let value = path.trim().replaceAll('\\', '/');
+    let value = trimCssWhitespace(path).replaceAll('\\', '/');
     if (value.length === 0) { return null; }
     const lowered = value.toLowerCase();
     if (
@@ -492,7 +566,9 @@ function normalizeRelativeAssetPath(path, sourceAssetPath = null, assetPrefix = 
     if (lowered.startsWith('file://')) {
         value = value.slice(7);
     }
-    value = decodePercentEncodedPathSegments(value);
+    // Encoded slash/backslash are data within a URL path segment, not path
+    // separators. Preserve them while decoding ordinary percent escapes.
+    value = decodePercentEncodedPathSegments(value, true);
     value = value.replace(/^\/+/u, '');
     const alreadyPrefixed = assetPrefix.length > 0 && value.startsWith(assetPrefix);
     if (sourceAssetPath !== null && !fromRoot && !alreadyPrefixed) {
@@ -555,6 +631,34 @@ function decodeDataUrl(value) {
 }
 
 /**
+ * CSS syntax whitespace is ASCII-only. JavaScript \s and trim() also
+ * consume NBSP and other non-ASCII characters that CSS permits in identifiers.
+ * @param {string} character
+ * @returns {boolean}
+ */
+function isCssWhitespace(character) {
+    return (
+        character === '\t' ||
+        character === '\n' ||
+        character === '\f' ||
+        character === '\r' ||
+        character === ' '
+    );
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function trimCssWhitespace(value) {
+    let start = 0;
+    let end = value.length;
+    while (start < end && isCssWhitespace(value[start])) { ++start; }
+    while (end > start && isCssWhitespace(value[end - 1])) { --end; }
+    return value.slice(start, end);
+}
+
+/**
  * @param {Uint8Array} bytes
  * @returns {string|null}
  */
@@ -567,7 +671,7 @@ function getDeclaredStylesheetEncoding(bytes) {
         prefix += String.fromCodePoint(byte);
         if (byte === 0x3b) { break; }
     }
-    const match = /^@charset\s+"([^"\r\n]+)"\s*;/iu.exec(prefix);
+    const match = /^@charset[\t\n\f\r ]+"([^"\r\n]+)"[\t\n\f\r ]*;/iu.exec(prefix);
     return match?.[1] ?? null;
 }
 
@@ -617,9 +721,9 @@ function getLikelyUtf16StylesheetEncoding(bytes) {
 function decodeStylesheetWithEncoding(bytes, encoding) {
     try {
         const decoded = new TextDecoder(encoding, {fatal: true}).decode(bytes);
-        const value = decoded
-            .replace(/^\ufeff?@charset\s+"[^"\r\n]+"\s*;\s*/iu, '')
-            .trim();
+        const value = trimCssWhitespace(
+            decoded.replace(/^\ufeff?@charset[\t\n\f\r ]+"[^"\r\n]+"[\t\n\f\r ]*;[\t\n\f\r ]*/iu, ''),
+        );
         return value.length > 0 && !value.includes('\u0000') ? value : null;
     } catch (_error) {
         return null;
@@ -658,7 +762,7 @@ function decodeStylesheetAsset(bytes) {
 function readCssUrlFunction(value, startIndex) {
     if (value.slice(startIndex, startIndex + 4).toLowerCase() !== 'url(') { return null; }
     let index = startIndex + 4;
-    while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+    while (index < value.length && isCssWhitespace(value[index])) { index += 1; }
     if (index >= value.length) { return null; }
 
     const quote = value[index] === '"' || value[index] === "'" ? value[index++] : '';
@@ -668,14 +772,14 @@ function readCssUrlFunction(value, startIndex) {
         if (quote.length > 0) {
             if (character === quote) {
                 index += 1;
-                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+                while (index < value.length && isCssWhitespace(value[index])) { index += 1; }
                 return value[index] === ')' ? {path, endIndex: index + 1} : null;
             }
             if (/[\n\r\f]/u.test(character)) { return null; }
         } else {
             if (character === ')') { return {path, endIndex: index + 1}; }
-            if (/\s/u.test(character)) {
-                while (index < value.length && /\s/u.test(value[index])) { index += 1; }
+            if (isCssWhitespace(character)) {
+                while (index < value.length && isCssWhitespace(value[index])) { index += 1; }
                 return value[index] === ')' ? {path, endIndex: index + 1} : null;
             }
             if (character === '"' || character === "'" || character === '(' || /[\n\r\f]/u.test(character)) {
@@ -782,8 +886,12 @@ function readCssEscape(value, startIndex) {
         ) ?
             '\ufffd' :
             String.fromCodePoint(codePoint);
-        if (endIndex < value.length && /\s/u.test(value[endIndex])) {
-            endIndex += 1;
+        if (endIndex < value.length) {
+            if (value[endIndex] === '\r' && value[endIndex + 1] === '\n') {
+                endIndex += 2;
+            } else if (isCssWhitespace(value[endIndex])) {
+                endIndex += 1;
+            }
         }
         return {value: decoded, endIndex};
     }
@@ -914,10 +1022,10 @@ function splitSelectorByCombinators(selector) {
                 if (startIndex < index) { parts.push(selector.slice(startIndex, index)); }
                 parts.push(character);
                 startIndex = index + 1;
-            } else if (parenDepth === 0 && bracketDepth === 0 && /\s/u.test(character)) {
+            } else if (parenDepth === 0 && bracketDepth === 0 && isCssWhitespace(character)) {
                 if (startIndex < index) { parts.push(selector.slice(startIndex, index)); }
                 const whitespaceStart = index;
-                while (index + 1 < selector.length && /\s/u.test(selector[index + 1])) { index += 1; }
+                while (index + 1 < selector.length && isCssWhitespace(selector[index + 1])) { index += 1; }
                 parts.push(selector.slice(whitespaceStart, index + 1));
                 startIndex = index + 1;
             }
@@ -986,12 +1094,21 @@ function readCssIdentifier(selector, startIndex) {
  * @returns {string}
  */
 function rewriteCssAttributeSelector(attributeSelector) {
-    const match = attributeSelector.match(/^\[\s*(?<name>[-\w]+)(?<rest>[\s\S]*)\]$/u);
-    const groups = match?.groups;
-    if (typeof groups?.name !== 'string' || typeof groups.rest !== 'string') { return attributeSelector; }
-    const name = groups.name.toLowerCase();
+    if (!attributeSelector.startsWith('[') || !attributeSelector.endsWith(']')) {
+        return attributeSelector;
+    }
+    let nameStart = 1;
+    while (nameStart < attributeSelector.length && isCssWhitespace(attributeSelector[nameStart])) {
+        nameStart += 1;
+    }
+    const {value: rawName, endIndex} = readCssIdentifier(attributeSelector, nameStart);
+    if (
+        rawName === null ||
+        (attributeSelector[endIndex] === '|' && attributeSelector[endIndex + 1] !== '=')
+    ) { return attributeSelector; }
+    const name = rawName.toLowerCase();
     const replacement = name === 'class' ? STRUCTURED_CLASS_ATTR : (name === 'id' ? STRUCTURED_ID_ATTR : null);
-    return replacement === null ? attributeSelector : `[${replacement}${groups.rest}]`;
+    return replacement === null ? attributeSelector : `[${replacement}${attributeSelector.slice(endIndex)}`;
 }
 
 /**
@@ -1117,6 +1234,10 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
                     }
                     if (inner === quote) { quote = ''; }
                 } else {
+                    if (inner === '\\') {
+                        endIndex += 2;
+                        continue;
+                    }
                     switch (inner) {
                         case '"':
                         case "'":
@@ -1160,7 +1281,7 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
             }
         }
         parts.push(character);
-        if (!/\s/u.test(character)) {
+        if (!isCssWhitespace(character)) {
             expectTagName = false;
         }
         index += 1;
@@ -1174,12 +1295,12 @@ function migrateCssSelectorSegment(selector, glossaryRootSelector) {
  * @returns {string}
  */
 function migrateCssSelector(selector, glossaryRootSelector) {
-    const migrated = splitSelectorByCombinators(selector.trim()).map((part) => {
-        if (part.trim().length === 0 || ['>', '+', '~'].includes(part)) { return part; }
+    const migrated = splitSelectorByCombinators(trimCssWhitespace(selector)).map((part) => {
+        if (trimCssWhitespace(part).length === 0 || ['>', '+', '~'].includes(part)) { return part; }
         return migrateCssSelectorSegment(part, glossaryRootSelector);
     }).join('');
     // Quoted attribute values and whitespace after CSS hex escapes are significant.
-    return migrated.trim();
+    return trimCssWhitespace(migrated);
 }
 
 /**
@@ -1195,7 +1316,7 @@ function scopeCssSelectorSubject(selector, glossaryRootSelector) {
     let subjectIndex = parts.length - 1;
     while (subjectIndex >= 0) {
         const part = parts[subjectIndex];
-        if (part.trim().length > 0 && !['>', '+', '~'].includes(part)) { break; }
+        if (trimCssWhitespace(part).length > 0 && !['>', '+', '~'].includes(part)) { break; }
         subjectIndex -= 1;
     }
     if (subjectIndex < 0) { return selector; }
@@ -1281,12 +1402,20 @@ function findMatchingCssBrace(stylesheet, blockStartIndex) {
             }
             continue;
         }
-        if (character === '"' || character === "'") {
-            quote = character;
-        } else if (character === '{') {
-            depth += 1;
-        } else if (character === '}' && --depth === 0) {
-            return index;
+        switch (character) {
+            case '\\':
+                index += 1;
+                break;
+            case '"':
+            case "'":
+                quote = character;
+                break;
+            case '{':
+                depth += 1;
+                break;
+            case '}':
+                if (--depth === 0) { return index; }
+                break;
         }
     }
     return stylesheet.length - 1;
@@ -1315,7 +1444,7 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelector
                 preludeStart = commentEnd + 2;
                 continue;
             }
-            if (/\s/u.test(stylesheet[preludeStart])) {
+            if (isCssWhitespace(stylesheet[preludeStart])) {
                 preludeStart += 1;
                 continue;
             }
@@ -1348,6 +1477,10 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelector
                 cursor += 1;
                 continue;
             }
+            if (character === '\\') {
+                cursor += 2;
+                continue;
+            }
             // The delimiter cases below intentionally share cursor state.
             // eslint-disable-next-line unicorn/prefer-switch
             if (character === '"' || character === "'") {
@@ -1369,9 +1502,9 @@ function rewriteCssRuleSelectors(stylesheet, glossaryRootSelector, scopeSelector
                 const prelude = stylesheet.slice(preludeStart, cursor);
                 const blockEnd = findMatchingCssBrace(stylesheet, cursor);
                 let body = stylesheet.slice(cursor + 1, blockEnd);
-                const stripped = prelude.trim();
+                const stripped = trimCssWhitespace(prelude);
                 if (stripped.startsWith('@')) {
-                    const atRuleName = stripped.slice(1).split(/\s|\(/u, 1)[0].toLowerCase();
+                    const atRuleName = stripped.slice(1).split(/[\t\n\f\r (]/u, 1)[0].toLowerCase();
                     if (['media', 'supports', 'layer', 'container', 'document'].includes(atRuleName)) {
                         body = rewriteCssRuleSelectors(body, glossaryRootSelector, scopeSelectors);
                     }
@@ -1466,9 +1599,11 @@ function isStructuredStyleRecord(value) {
 function buildStructuredData(attrs) {
     /** @type {Record<string, string>} */
     const data = {};
-    const className = attrs.class?.trim().replace(/\s+/gu, ' ') || '';
+    const className = typeof attrs.class === 'string' ?
+        trimCssWhitespace(attrs.class).replace(/[\t\n\f\r ]+/gu, ' ') :
+        '';
     if (className.length > 0) { data.class = className; }
-    const id = attrs.id?.trim() || '';
+    const id = typeof attrs.id === 'string' ? trimCssWhitespace(attrs.id) : '';
     if (id.length > 0) { data.id = id; }
     return Object.keys(data).length > 0 ? data : null;
 }
@@ -1500,6 +1635,10 @@ function splitInlineCssDeclarations(styleText) {
             }
             continue;
         }
+        if (character === '\\') {
+            index += 1;
+            continue;
+        }
         switch (character) {
             case '"':
             case "'": {
@@ -1528,27 +1667,63 @@ function splitInlineCssDeclarations(styleText) {
 }
 
 /**
+ * Remove CSS comments without treating comment markers inside quoted strings
+ * as syntax. Closed comments retain the previous removal behavior; an
+ * unterminated comment is left intact for the existing declaration handling.
+ * @param {string} value
+ * @returns {string}
+ */
+function stripCssCommentsOutsideStrings(value) {
+    let result = '';
+    let startIndex = 0;
+    let quote = '';
+    for (let index = 0; index < value.length; ++index) {
+        const character = value[index];
+        if (quote.length > 0) {
+            if (character === '\\') {
+                ++index;
+            } else if (character === quote) {
+                quote = '';
+            }
+            continue;
+        }
+        if (character === '"' || character === "'") {
+            quote = character;
+            continue;
+        }
+        if (value.startsWith('/*', index)) {
+            const commentEnd = value.indexOf('*/', index + 2);
+            if (commentEnd < 0) { break; }
+            result += value.slice(startIndex, index);
+            startIndex = commentEnd + 2;
+            index = commentEnd + 1;
+        }
+    }
+    return startIndex === 0 ? value : result + value.slice(startIndex);
+}
+
+/**
  * @param {string|null|undefined} styleText
  * @param {string} assetPrefix
  * @param {Set<string>} assetReferences
  * @returns {Record<string, string|string[]>|null}
  */
 function convertInlineStyle(styleText, assetPrefix, assetReferences) {
-    if (typeof styleText !== 'string' || styleText.trim().length === 0) { return null; }
+    if (typeof styleText !== 'string' || trimCssWhitespace(styleText).length === 0) { return null; }
     /** @type {Record<string, string|string[]>} */
     const style = {};
     for (const rawDeclaration of splitInlineCssDeclarations(styleText)) {
-        const declaration = rawDeclaration.replace(/\/\*[\s\S]*?\*\//gu, '');
+        const declaration = stripCssCommentsOutsideStrings(rawDeclaration);
         const separator = declaration.indexOf(':');
         if (separator < 0) { continue; }
-        const propertyName = declaration.slice(0, separator).trim().toLowerCase();
-        let value = declaration.slice(separator + 1).trim();
+        const propertyName = trimCssWhitespace(declaration.slice(0, separator)).toLowerCase();
+        let value = trimCssWhitespace(declaration.slice(separator + 1));
         if (propertyName.length === 0 || value.length === 0) { continue; }
         if (/url\(/iu.test(value)) {
             value = rewriteCssAssetUrls(value, assetPrefix, null, assetReferences);
         }
         if (propertyName === 'text-decoration' || propertyName === 'text-decoration-line') {
-            const parts = value.split(/\s+/u).filter((part) => ['underline', 'overline', 'line-through', 'none'].includes(part));
+            const parts = value.split(/[\t\n\f\r ]+/u).filter((part) => ['underline', 'overline', 'line-through', 'none'].includes(part));
             if (parts.length === 0) { continue; }
             style.textDecorationLine = parts.length === 1 ? parts[0] : parts;
             continue;
@@ -1583,7 +1758,7 @@ function convertLegacyFontSize(value) {
  * @returns {string}
  */
 function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetReferences}) {
-    const value = href.trim();
+    const value = trimCssWhitespace(href);
     const lowered = value.toLowerCase();
     if (lowered.startsWith('entry://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
     if (lowered.startsWith('bword://')) { return createSearchHref(decodePercentEncodedPathSegments(value.slice(8))); }
@@ -1618,7 +1793,7 @@ function convertLinkHref(href, {assetPrefix, enableAudio, embeddedAssets, assetR
  */
 function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferences}) {
     const src = attrs.src ?? '';
-    const lowerSrc = src.trim().toLowerCase();
+    const lowerSrc = trimCssWhitespace(src).toLowerCase();
     let path;
     if (lowerSrc.startsWith('data:')) {
         path = embeddedAssets.registerDataUrl(src);
@@ -1632,8 +1807,10 @@ function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferen
     const image = {tag: 'img', path};
     const data = buildStructuredData(attrs);
     if (data !== null) { image.data = {tag: 'img', ...data}; }
-    if (typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width)) { image.width = Number.parseInt(attrs.width, 10); }
-    if (typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height)) { image.height = Number.parseInt(attrs.height, 10); }
+    const width = typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width) ? Number.parseInt(attrs.width, 10) : Number.NaN;
+    const height = typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height) ? Number.parseInt(attrs.height, 10) : Number.NaN;
+    if (Number.isFinite(width)) { image.width = width; }
+    if (Number.isFinite(height)) { image.height = height; }
     if (typeof attrs.title === 'string' && attrs.title.length > 0) { image.title = attrs.title; }
     if (typeof attrs.alt === 'string' && attrs.alt.length > 0) { image.alt = attrs.alt; }
     return image;
@@ -1692,14 +1869,13 @@ function appendStructuredContent(parent, content, details) {
         const attrs = getElementAttributes(elementNode);
         if (tagName === 'script' || tagName === 'noscript') { continue; }
         if (tagName === 'style') {
-            const stylesheet = getDirectTextContent(elementNode)
-                .trim();
+            const stylesheet = trimCssWhitespace(getDirectTextContent(elementNode));
             if (stylesheet.length > 0) {
                 details.inlineStylesheets.push([`inline/${details.inlineStylesheets.length + 1}.css`, stylesheet]);
             }
             continue;
         }
-        if (tagName === 'link' && (attrs.rel || '').toLowerCase().includes('stylesheet')) {
+        if (tagName === 'link' && (attrs.rel || '').split(/[\t\n\f\r ]+/u).some((token) => token.toLowerCase() === 'stylesheet')) {
             const assetKey = normalizeReferencedAssetKey(attrs.href ?? '', details.assetPrefix, null);
             if (assetKey !== null) {
                 details.assetReferences.add(assetKey);
@@ -1743,11 +1919,13 @@ function appendStructuredContent(parent, content, details) {
         if (mappedTag === 'a') {
             const sourceHref = attrs.href ?? attrs.src ?? '';
             element.href = convertLinkHref(sourceHref, details);
-        } else if ((mappedTag === 'td' || mappedTag === 'th') && typeof attrs.colspan === 'string' && /^\d+$/u.test(attrs.colspan)) {
-            element.colSpan = Number.parseInt(attrs.colspan, 10);
+        } else if (mappedTag === 'td' || mappedTag === 'th') {
+            const colSpan = typeof attrs.colspan === 'string' && /^\d+$/u.test(attrs.colspan) ? Number.parseInt(attrs.colspan, 10) : Number.NaN;
+            if (Number.isFinite(colSpan) && colSpan >= 1) { element.colSpan = colSpan; }
         }
-        if ((mappedTag === 'td' || mappedTag === 'th') && typeof attrs.rowspan === 'string' && /^\d+$/u.test(attrs.rowspan)) {
-            element.rowSpan = Number.parseInt(attrs.rowspan, 10);
+        if (mappedTag === 'td' || mappedTag === 'th') {
+            const rowSpan = typeof attrs.rowspan === 'string' && /^\d+$/u.test(attrs.rowspan) ? Number.parseInt(attrs.rowspan, 10) : Number.NaN;
+            if (Number.isFinite(rowSpan) && rowSpan >= 1) { element.rowSpan = rowSpan; }
         }
         if (mappedTag === 'details' && Object.hasOwn(attrs, 'open')) {
             element.open = true;
@@ -1784,11 +1962,11 @@ function appendStructuredContent(parent, content, details) {
 
 /**
  * @param {string} definition
- * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}, entryScopeClass: string}} options
- * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, assetReferences: Set<string>}}
+ * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}, embeddedAssetDataUrlCache: {entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}, entryScopeClass: string}} options
+ * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, embeddedAssetDataUrlCacheEntries: Array<{dataUrl: string, path: string, probe: number}>, assetReferences: Set<string>}}
  */
 function convertDefinitionToStructuredContent(definition, options) {
-    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix, options.embeddedAssetCounter);
+    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix, options.embeddedAssetCounter, options.embeddedAssetDataUrlCache);
     /** @type {Set<string>} */
     const assetReferences = new Set();
     /** @type {Array<[string, string]>} */
@@ -1819,6 +1997,7 @@ function convertDefinitionToStructuredContent(definition, options) {
         },
         inlineStylesheets,
         embeddedAssets: embeddedAssets.assets,
+        embeddedAssetDataUrlCacheEntries: embeddedAssets.dataUrlCacheEntries,
         assetReferences,
     };
 }
@@ -1934,7 +2113,10 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         termBankSize = 10000,
     } = options;
 
-    const mdx = /** @type {MdxDictionaryLike} */ (new MDX(fileName, mdxBytes, {recordBlockCacheBytes: MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES}));
+    const mdx = /** @type {MdxDictionaryLike} */ (new MDX(fileName, mdxBytes, {
+        recordBlockCacheBytes: MDX_IMPORT_RECORD_BLOCK_CACHE_BYTES,
+        oversizedRecordBlockCacheBytes: MDX_IMPORT_OVERSIZED_RECORD_BLOCK_CACHE_BYTES,
+    }));
     /** @type {MddAssetResolver|null} */
     let assetResolver = null;
     try {
@@ -1968,13 +2150,40 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         });
 
         const totalEntries = Math.max(1, mdx.keywordList.length);
-        if (typeof onProgress === 'function') {
-            onProgress({stage: 'convert', completed: 0, total: totalEntries});
-        }
+        const progressStep = Math.max(1, Math.ceil(totalEntries / 100));
+        let lastProgressCompleted = -1;
+        let lastProgressAt = 0;
+        /**
+         * Bound progress traffic while still reporting slow entries promptly.
+         * @param {number} completed
+         * @param {boolean} [force]
+         */
+        const reportConvertProgress = (completed, force = false) => {
+            if (typeof onProgress !== 'function' || completed === lastProgressCompleted) { return; }
+            const now = Date.now();
+            if (
+                !force &&
+                lastProgressCompleted >= 0 &&
+                completed < totalEntries &&
+                completed - lastProgressCompleted < progressStep &&
+                now - lastProgressAt < 50
+            ) {
+                return;
+            }
+            onProgress({stage: 'convert', completed, total: totalEntries});
+            lastProgressCompleted = completed;
+            lastProgressAt = now;
+        };
+        reportConvertProgress(0, true);
 
         /** @type {Map<string, Uint8Array>} */
         const embeddedAssets = new Map();
         const embeddedAssetCounter = {value: 0};
+        const embeddedAssetDataUrlCache = {
+            /** @type {Array<{dataUrl: string, path: string, probe: number}>} */
+            entries: [],
+            retainedKeyBytes: 0,
+        };
         const encoder = new TextEncoder();
         /** @type {Map<string, Uint8Array>} */
         const files = new Map();
@@ -2030,9 +2239,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             const term = trimNullSuffix(item.keyText);
             processedEntries += 1;
             if (term.length === 0) {
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
             let definition;
@@ -2041,14 +2248,12 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 definition = trimNullSuffix(result.definition ?? '');
             } catch (_error) {
                 skippedEntryErrorCount += 1;
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
-            const redirectDefinition = definition.trim();
+            const redirectDefinition = trimCssWhitespace(definition);
             if (redirectDefinition.startsWith('@@@LINK=')) {
-                const target = trimNullSuffix(redirectDefinition.slice(8)).trim();
+                const target = trimCssWhitespace(trimNullSuffix(redirectDefinition.slice(8)));
                 if (target.length > 0) {
                     const aliases = redirects.get(target) ?? new Set();
                     if (!aliases.has(term)) {
@@ -2057,9 +2262,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                         redirectCount += 1;
                     }
                 }
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
 
@@ -2070,19 +2273,22 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                     enableAudio,
                     assetPrefix,
                     embeddedAssetCounter,
+                    embeddedAssetDataUrlCache,
                     entryScopeClass: `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`,
                 });
             } catch (_error) {
                 skippedEntryErrorCount += 1;
-                if (typeof onProgress === 'function') {
-                    onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-                }
+                reportConvertProgress(processedEntries);
                 continue;
             }
             for (const [path, bytes] of converted.embeddedAssets) {
                 if (!embeddedAssets.has(path)) {
                     embeddedAssets.set(path, bytes);
                 }
+            }
+            for (const {dataUrl, path, probe} of converted.embeddedAssetDataUrlCacheEntries) {
+                embeddedAssetDataUrlCache.entries.push({dataUrl, path, probe});
+                embeddedAssetDataUrlCache.retainedKeyBytes += dataUrl.length * 2;
             }
             for (const [sourceName, stylesheet] of converted.inlineStylesheets) {
                 inlineStylesheets.push([`${term}/${sourceName}`, stylesheet, `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`]);
@@ -2092,9 +2298,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             }
             convertedEntries.push({term, glossary: converted.glossary, sequence});
             sequence += 1;
-            if (typeof onProgress === 'function') {
-                onProgress({stage: 'convert', completed: processedEntries, total: totalEntries});
-            }
+            reportConvertProgress(processedEntries);
         }
         recordPhaseTiming('prepare-mdx:convert-entries', tConvertEntriesStart, {
             entries: processedEntries,
@@ -2103,6 +2307,8 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             referencedAssetCount: referencedAssetKeys.size,
             inlineStylesheetCount: inlineStylesheets.length,
             embeddedAssetCount: embeddedAssets.size,
+            embeddedAssetDataUrlCacheEntries: embeddedAssetDataUrlCache.entries.length,
+            embeddedAssetDataUrlRetainedKeyBytes: embeddedAssetDataUrlCache.retainedKeyBytes,
             skippedEntryErrorCount,
         });
         if (
@@ -2215,9 +2421,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
             assetLookupErrorCount: assetResolver?.lookupErrorCount ?? 0,
             hasRootStylesheet: rootStylesheet !== null,
         });
-        if (typeof onProgress === 'function') {
-            onProgress({stage: 'convert', completed: totalEntries, total: totalEntries});
-        }
+        reportConvertProgress(totalEntries, true);
         return {
             files,
             archiveFileName: `${title}.zip`,
