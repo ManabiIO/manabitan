@@ -132,6 +132,8 @@ describe('DictionaryImporter term artifacts', () => {
         expect(chunk.readingBytesList[0]).toBe(chunk.expressionBytesList[0]);
         expect(chunk.termRecordPreinternedPlan.readingIndexes[0])
             .toBe(chunk.termRecordPreinternedPlan.expressionIndexes[0]);
+        expect(chunk.termRecordPreinternedPlan.stringOffsets)
+            .toStrictEqual(new Uint32Array([0, 4]));
         expect(bytes).toStrictEqual(originalBytes);
         expect(chunk.termRecordPreinternedPlan.readingIndexes.buffer).not.toBe(bytes.buffer);
     });
