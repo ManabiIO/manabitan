@@ -1,0 +1,27 @@
+name: Zstd unknown-size frame probe
+on:
+  push:
+    branches: [review/zstd-unknown-size-frame-20260927]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Generate an unknown-size streaming frame
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq zstd
+          python3 - <<'PY' | zstd -q -c > /tmp/unknown.zst
+          import sys
+          sys.stdout.write('unknown-size-zstd-frame\n' * 4096)
+          PY
+          zstd -q -d -c /tmp/unknown.zst > /tmp/native.txt
+          test "$(wc -c < /tmp/native.txt)" -eq 98304
+      - name: Decode through the Manabitan wrapper
+        run: node dev/review/zstd-unknown-frame-20260927.mjs /tmp/unknown.zst
