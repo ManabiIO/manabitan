@@ -1102,14 +1102,14 @@ export class DictionaryImportController {
      * @param {import('settings-controller').EventArgument<'importDictionaryFromUrl'>} details
      */
     _onEventImportDictionaryFromUrl({url, profilesDictionarySettings, onImportDone, importDetailsOverrides}) {
-        void this.importFilesFromURLs(url, profilesDictionarySettings, onImportDone, importDetailsOverrides ?? null);
+        this._observeImportTask(this.importFilesFromURLs(url, profilesDictionarySettings, onImportDone, importDetailsOverrides ?? null));
     }
 
     /**
      * @param {import('settings-controller').EventArgument<'importDictionaryFromFile'>} details
      */
     _onEventImportDictionaryFromFile({files, profilesDictionarySettings, onImportDone, importDetailsOverrides}) {
-        void this.importFiles(files, profilesDictionarySettings, onImportDone, importDetailsOverrides ?? null);
+        this._observeImportTask(this.importFiles(files, profilesDictionarySettings, onImportDone, importDetailsOverrides ?? null));
     }
 
     /**
@@ -1208,7 +1208,7 @@ export class DictionaryImportController {
             }
         }
         if (fileArray.length === 0) { return; }
-        void this.importFiles(fileArray, null, null);
+        this._observeImportTask(this.importFiles(fileArray, null, null));
     }
 
     /**
@@ -1336,7 +1336,7 @@ export class DictionaryImportController {
         const files2 = [...files];
         node.value = '';
         if (files2.length === 0) { return; }
-        void this.importFiles(files2, null, null);
+        this._observeImportTask(this.importFiles(files2, null, null));
     }
 
     /**
@@ -1527,6 +1527,18 @@ export class DictionaryImportController {
         if (source.type === 'zip') { return 'ZIP archive'; }
         const mddCount = source.mddFiles.length;
         return mddCount > 0 ? `MDX dictionary with ${mddCount} matching MDD file${mddCount === 1 ? '' : 's'}` : 'MDX dictionary';
+    }
+
+    /**
+     * Owns import promises launched from synchronous UI/event callbacks.
+     * Watchdog recovery deliberately rejects after restoring UI state; observing
+     * that rejection here prevents a second global unhandled-rejection signal.
+     * @param {Promise<void>} promise
+     */
+    _observeImportTask(promise) {
+        void promise.catch((error) => {
+            log.error(error);
+        });
     }
 
     /**

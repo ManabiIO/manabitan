@@ -53,6 +53,7 @@ describe('generic span compression with the real codec', () => {
     test.each([512, 4096, 1024 * 1024])('matches packed frames and persisted content with a %i-byte block target', async (blockTargetBytes) => {
         const {source, offsets, lengths, expected} = makeSource();
         const baseline = new TermContentBlockStore(new TermContentOpfsStore(), {blockTargetBytes});
+        baseline.setCompressionExperiments({experimentalGenericSpanCompression: false});
         const candidate = new TermContentBlockStore(new TermContentOpfsStore(), {blockTargetBytes});
         candidate.setCompressionExperiments(options);
         const a = await baseline.tryAppendSpans(source, offsets, lengths, null, true);
@@ -93,9 +94,10 @@ describe('generic span compression with the real codec', () => {
         finishWrappedTermContentZstdSpans(prepared);
         expect(() => prepareWrappedTermContentZstdSpans(source, offsets, lengths, packed.length, null)).toThrow('unavailable');
         const store = new TermContentBlockStore(new TermContentOpfsStore());
-        store.setCompressionExperiments(options);
-        store.setCompressionExperiments();
+        store.setCompressionExperiments({experimentalGenericSpanCompression: false});
         expect(store.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: false});
+        store.setCompressionExperiments();
+        expect(store.getDiagnostics().compressionExperiments).toMatchObject({experimentalGenericSpanCompression: true});
     });
 
     test('rejects out-of-range spans before producing a compressed frame', () => {

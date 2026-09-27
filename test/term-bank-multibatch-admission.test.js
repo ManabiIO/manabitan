@@ -73,6 +73,20 @@ describe('compressed transport admission follows the ordinary batch boundary', (
         await pipeline.dispose();
     });
 
+    test.each([
+        [4, 24 * MiB],
+        [8, 96 * MiB],
+    ])('does not prefetch a first bank larger than the %i GiB-device byte cap', async (deviceMemory, prefetchMaxBytes) => {
+        const files = filesFor([prefetchMaxBytes + 1, MiB]);
+        const {pipeline, read} = setup(files, deviceMemory);
+
+        expect(pipeline.prefetchMaxBytes).toBe(prefetchMaxBytes);
+        expect(pipeline.prefetchNext(0)).toEqual({fileCount: 0, estimatedBytes: 0});
+        expect(read).not.toHaveBeenCalled();
+
+        await pipeline.dispose();
+    });
+
     test('preserves prefetch ownership and laziness on the ordinary one-pass route', async () => {
         const files = filesFor(new Array(4).fill(16 * MiB));
         const {pipeline, read, readCompressed} = setup(files);

@@ -123,7 +123,18 @@ function cloneObject(value, visited) {
         const result = {};
         for (const key in value) {
             if (Object.prototype.hasOwnProperty.call(value, key)) {
-                result[key] = cloneInternal(value[key], visited);
+                const clonedValue = cloneInternal(value[key], visited);
+                if (key === '__proto__') {
+                    // Preserve an own data property without invoking the inherited setter.
+                    Object.defineProperty(result, key, {
+                        value: clonedValue,
+                        writable: true,
+                        enumerable: true,
+                        configurable: true,
+                    });
+                } else {
+                    result[key] = clonedValue;
+                }
             }
         }
         return result;
@@ -174,11 +185,16 @@ function deepEqualInternal(value1, value2, visited1) {
             if (array !== Array.isArray(value2)) { return false; }
             if (visited1.has(value1)) { return false; }
             visited1.add(value1);
-            return (
-                    array ?
-                    areArraysEqual(/** @type {unknown[]} */ (value1), /** @type {unknown[]} */ (value2), visited1) :
-                    areObjectsEqual(/** @type {import('core').UnknownObject} */ (value1), /** @type {import('core').UnknownObject} */ (value2), visited1)
-            );
+            try {
+                return (
+                        array ?
+                        areArraysEqual(/** @type {unknown[]} */ (value1), /** @type {unknown[]} */ (value2), visited1) :
+                        areObjectsEqual(/** @type {import('core').UnknownObject} */ (value1), /** @type {import('core').UnknownObject} */ (value2), visited1)
+                );
+            } finally {
+                // Only ancestors form a cycle; siblings can share an object.
+                visited1.delete(value1);
+            }
         }
         default:
             return false;
