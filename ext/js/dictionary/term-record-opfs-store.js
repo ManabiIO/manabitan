@@ -1487,7 +1487,7 @@ export class TermRecordOpfsStore {
         let singleDictionaryName = '';
         let singleContentDictName = 'raw';
         for (let i = start, ii = start + count; i < ii; ++i) {
-            const row = /** @type {[string, string, string, (string|null), (string|null), unknown, number, number, (string|null), unknown, unknown, unknown, number, unknown, (number|null)]} */ (rows[i]);;
+            const row = /** @type {[string, string, string, (string|null), (string|null), unknown, number, number, (string|null), unknown, unknown, unknown, number, unknown, (number|null)]} */ (rows[i]);
             const id = this._nextId++;
             const dictionary = row[0];
             /** @type {TermRecord} */
@@ -1792,7 +1792,7 @@ export class TermRecordOpfsStore {
         ) {
             throw new Error('appendBatchFromImportTermEntriesResolvedContent content arrays are smaller than row count');
         }
-        const uniformContentDictName = Array.isArray(contentDictNames) ? null : (contentDictNames ?? 'raw')
+        const uniformContentDictName = Array.isArray(contentDictNames) ? null : (contentDictNames ?? 'raw');
         let previousDictionary = '';
         let previousContentDictName = '';
         for (let i = 0; i < count; ++i) {
