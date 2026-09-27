@@ -1961,7 +1961,7 @@ describe('TermRecordOpfsStore', () => {
             },
         }));
         const directory = /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
-            async getFileHandle(name) {
+            async getFileHandle(/** @type {string} */ name) {
                 if (name !== indexFileName) {
                     throw new Error(`Unexpected file ${name}`);
                 }
