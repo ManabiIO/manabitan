@@ -63,6 +63,99 @@ describe('DictionaryImporter ZIP filename aliases', () => {
     });
 });
 
+describe('DictionaryImporter artifact bank admission', () => {
+    /**
+     * @param {string[]} termFileNames
+     * @param {string[]} artifactFileNames
+     * @returns {boolean}
+     */
+    const hasCompleteCoverage = (termFileNames, artifactFileNames) => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const check = /** @type {(termFiles: {filename: string}[], artifactFileNames: Iterable<string>) => boolean} */ (
+            Reflect.get(importer, '_hasCompleteTermArtifactCoverage')
+        );
+        return check.call(
+            importer,
+            termFileNames.map((filename) => ({filename})),
+            artifactFileNames,
+        );
+    };
+
+    test('falls back to ordinary term banks when standalone artifact coverage is partial', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const ordinaryFailure = new Error('ordinary term source selected');
+        const artifactFailure = new Error('partial artifact source selected');
+        const fileMap = new Map([
+            ['term_bank_1.json', {filename: 'term_bank_1.json'}],
+            ['term_bank_2.json', {filename: 'term_bank_2.json'}],
+            ['term_bank_1.mbtb', {filename: 'term_bank_1.mbtb', getData: async () => new Uint8Array(0)}],
+        ]);
+        Reflect.set(importer, '_getFilesFromArchive', async () => ({
+            fileMap,
+            zipReader: {close: async () => {}},
+        }));
+        Reflect.set(importer, '_readAndValidateIndex', async () => ({
+            title: 'Partial artifact coverage',
+            version: 3,
+            revision: '1',
+        }));
+        Reflect.set(importer, '_readTermBankFile', async () => { throw ordinaryFailure; });
+        Reflect.set(importer, '_readTermBankArtifactFile', async () => { throw artifactFailure; });
+        const database = /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ ({
+            isPrepared: () => true,
+            setImportOptimizationFlags() {},
+            dictionaryExists: async () => false,
+            setImportDebugLogging() {},
+            setTermEntryContentDedupEnabled() {},
+            addWithResult: async () => 1,
+            startBulkImport: async () => 'test-session',
+            abortBulkImport: async () => {},
+            deleteDictionaryImportPlaceholder: async () => {},
+        }));
+
+        const result = await importer.importDictionary(
+            database,
+            new ArrayBuffer(0),
+            /** @type {import('dictionary-importer').ImportDetails} */ ({}),
+        );
+
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(ordinaryFailure);
+        expect(result.errors).not.toContain(artifactFailure);
+    });
+
+    test('rejects a partial standalone artifact replacement', () => {
+        expect(hasCompleteCoverage(
+            ['term_bank_1.json', 'term_bank_2.json'],
+            ['term_bank_1.mbtb'],
+        )).toBe(false);
+    });
+
+    test('accepts a complete standalone artifact replacement', () => {
+        expect(hasCompleteCoverage(
+            ['term_bank_1.json', 'term_bank_2.json'],
+            ['term_bank_1.mbtb', 'term_bank_2.mbtb'],
+        )).toBe(true);
+    });
+
+    test('rejects artifact banks which do not match the ordinary bank set', () => {
+        expect(hasCompleteCoverage(
+            ['term_bank_1.json', 'term_bank_2.json'],
+            ['term_bank_1.mbtb', 'term_bank_2.mbtb', 'term_bank_3.mbtb'],
+        )).toBe(false);
+    });
+
+    test('preserves exact bank index spelling when matching replacements', () => {
+        expect(hasCompleteCoverage(['term_bank_01.json'], ['term_bank_1.mbtb'])).toBe(false);
+        expect(hasCompleteCoverage(['term_bank_01.json'], ['term_bank_01.mbtb'])).toBe(true);
+    });
+
+    test('allows artifact-only dictionaries when no ordinary term banks exist', () => {
+        expect(hasCompleteCoverage([], ['term_bank_1.mbtb'])).toBe(true);
+        expect(hasCompleteCoverage([], [])).toBe(false);
+    });
+});
+
 describe('DictionaryImporter archive bank discovery', () => {
     test('sorts numbered bank files numerically regardless of ZIP entry order', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
@@ -98,6 +191,33 @@ describe('DictionaryImporter archive filename validation', () => {
         expect(() => createArchiveFileMap.call(importer, [entry, {...entry}])).toThrow(
             "Duplicate archive filename: 'term_bank_1.json'",
         );
+    });
+
+    test('preserves a leading U+FEFF in raw UTF-8 filename aliases', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const prefixed = {filename: '\ufeffimage.png', rawFilename: new TextEncoder().encode('\ufeffimage.png')};
+        const plain = {filename: 'image.png', rawFilename: new TextEncoder().encode('image.png')};
+
+        const map = createArchiveFileMap.call(importer, [prefixed, plain]);
+        expect(map.get('\ufeffimage.png')).toBe(prefixed);
+        expect(map.get('image.png')).toBe(plain);
+        expect(map.size).toBe(2);
+    });
+
+    test('legacy-decoded raw alias retains every leading U+FEFF', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const file = {filename: 'legacy', rawFilename: new TextEncoder().encode('\ufeff\ufeffimage.png')};
+
+        const map = createArchiveFileMap.call(importer, [file]);
+        expect(map.get('\ufeff\ufeffimage.png')).toBe(file);
+        expect(map.has('\ufeffimage.png')).toBe(false);
+        expect(map.has('image.png')).toBe(false);
     });
 
     test('rejects collisions between decoded filenames and UTF-8 aliases', () => {

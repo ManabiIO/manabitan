@@ -79,6 +79,106 @@ describe('embedded legacy dictionary tags', () => {
         expect(result.result?.counts?.tagMeta.total).toBe(3);
     });
 
+
+    test('a finalization progress failure still publishes the owned import session', async () => {
+        const db = database();
+        const progressFailure = new Error('progress sink failed');
+        let now = 1_000;
+        const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => {
+            now += 2_000;
+            return now;
+        });
+        /** @type {import('dictionary-importer').OnProgressCallback} */
+        const onProgress = (progress) => {
+            if (progress.count === 20) { throw progressFailure; }
+        };
+        const failingProgressSink = vi.fn(onProgress);
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), failingProgressSink);
+        try {
+            const result = await importer.importDictionary(
+                /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+                await archive(0, true, 3),
+                /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
+            );
+
+            expect(failingProgressSink.mock.results.some(({type, value}) => type === 'throw' && value === progressFailure)).toBe(true);
+            expect(result.errors).toEqual([]);
+            expect(result.result).toMatchObject({title: 'Legacy tags', importSuccess: true});
+            expect(db.finishBulkImport).toHaveBeenCalledOnce();
+            expect(db.finishBulkImport).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({
+                summary: expect.objectContaining({title: 'Legacy tags', importSuccess: true}),
+            }), 'legacy-tags-session');
+            expect(db.abortBulkImport).not.toHaveBeenCalled();
+            expect(db.deleteDictionaryImportPlaceholder).not.toHaveBeenCalled();
+        } finally {
+            nowSpy.mockRestore();
+        }
+    });
+
+
+    test('a final cancellation predicate failure still aborts the owned import session', async () => {
+        const db = database();
+        const cancellationFailure = new Error('cancellation predicate failed');
+        let finalizationArmed = false;
+        const importer = new DictionaryImporter(
+            new DictionaryImporterMediaLoader(),
+            void 0,
+            () => {
+                if (finalizationArmed) { throw cancellationFailure; }
+                return false;
+            },
+        );
+        const createSummary = /** @type {(...args: import('core').SafeAny[]) => import('dictionary-importer').Summary} */ (
+            Reflect.get(importer, '_createSummary').bind(importer)
+        );
+        Reflect.set(importer, '_createSummary', (...args) => {
+            const summary = createSummary(...args);
+            finalizationArmed = true;
+            return summary;
+        });
+
+        const result = await importer.importDictionary(
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+            await archive(0, true, 3),
+            /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
+        );
+
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(cancellationFailure);
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(db.abortBulkImport).toHaveBeenCalledWith('legacy-tags-session');
+        expect(db.deleteDictionaryImportPlaceholder).toHaveBeenCalledWith(1);
+    });
+
+    test('orphan pruned-artifact manifest does not suppress ordinary tag banks', async () => {
+        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Orphan artifact manifest', revision: '1', format: 3})));
+        await writer.add('manabitan-import-artifact.json', new TextReader(JSON.stringify({
+            termBanks: [],
+            prunedAuxFiles: true,
+        })));
+        await writer.add('tag_bank_1.json', new TextReader(JSON.stringify([
+            ['ordinary', 'misc', 0, 'Ordinary tag bank', 0],
+        ])));
+        const archiveContent = new Uint8Array(await writer.close()).buffer;
+
+        const db = database();
+        const result = await new DictionaryImporter(new DictionaryImporterMediaLoader()).importDictionary(
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+            archiveContent,
+            /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
+        );
+
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.tagMeta.total).toBe(1);
+        const tags = db.bulkAdd.mock.calls
+            .filter(([store]) => store === 'tagMeta')
+            .flatMap(([, entries, start, count]) => entries.slice(start, start + count));
+        expect(tags).toEqual([
+            {dictionary: 'Orphan artifact manifest', name: 'ordinary', category: 'misc', order: 0, notes: 'Ordinary tag bank', score: 0},
+        ]);
+    });
+
     test('an embedded-tag write failure aborts rather than publishing a tagless dictionary', async () => {
         const db = database();
         const failure = new Error('tag storage failed');

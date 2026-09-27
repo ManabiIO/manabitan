@@ -107,8 +107,9 @@ try {
             const settingsDisplayController = new SettingsDisplayController(settingsController, modalController);
             await settingsDisplayController.prepare();
 
-            documentFocusController.focusElement();
             await display.initializeState();
+            document.body.hidden = false;
+            documentFocusController.focusElement();
             document.documentElement.dataset.loaded = 'true';
             delete document.documentElement.dataset.loadError;
             setSearchDebugState({

@@ -64,7 +64,9 @@ export class DocumentFocusController {
 
     /** */
     _onWindowFocus() {
-        this._updateFocusedElement(false);
+        // Firefox activates the window before publishing the element selected
+        // by a click or focus(). Inspect that target after activation completes.
+        window.requestAnimationFrame(() => this._updateFocusedElement(false));
     }
 
     /**
@@ -72,7 +74,9 @@ export class DocumentFocusController {
      */
     _updateFocusedElement(force) {
         const target = this._contentScrollFocusElement;
-        if (target === null) { return; }
+        // Passive scrollbar setup must not take focus from another frame/tab.
+        // Hidden popup frames can initialize after the host accepts input.
+        if (target === null || !document.hasFocus()) { return; }
 
         const {activeElement} = document;
         if (

@@ -23,7 +23,9 @@ import './pako-inflate.js';
  *   Inflate?: new (options?: {chunkSize?: number}) => {
  *     push: (bytes: Uint8Array, final: boolean) => boolean,
  *     err: number,
+ *     ended: boolean,
  *     msg: string,
+ *     strm: {avail_in: number},
  *     onData: (chunk: Uint8Array) => void
  *   }
  * }} PakoInflateApi
@@ -67,9 +69,17 @@ export function inflateSync(bytes, maxOutputSize = null) {
         outputSize = nextOutputSize;
     };
 
-    const ok = inflator.push(bytes, true);
+    // In pako 1.x, forcing finalization can succeed before Z_STREAM_END.
+    // Let the decoder finish itself, then require that it reached the trailer.
+    const ok = inflator.push(bytes, false);
     if (!ok || inflator.err !== 0) {
         throw new Error(inflator.msg || 'MDict zlib decompression failed');
+    }
+    if (!inflator.ended) {
+        throw new Error('MDict zlib stream is incomplete');
+    }
+    if (inflator.strm.avail_in !== 0) {
+        throw new Error('MDict zlib stream has trailing compressed input');
     }
     const result = new Uint8Array(outputSize);
     let offset = 0;

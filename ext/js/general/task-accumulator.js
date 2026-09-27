@@ -84,7 +84,8 @@ export class TaskAccumulator {
         [this._tasks, this._tasksActive] = [this._tasksActive, this._tasks];
         [this._uniqueTasks, this._uniqueTasksActive] = [this._uniqueTasksActive, this._uniqueTasks];
 
-        const promise = this._runTasksAsync();
+        // Publish active ownership before the callback can synchronously enqueue more work.
+        const promise = Promise.resolve().then(() => this._runTasksAsync());
         this._activePromise = promise.then(this._tasksCompleteBind);
         return this._activePromise;
     }

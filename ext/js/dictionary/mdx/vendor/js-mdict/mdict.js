@@ -17,6 +17,10 @@ export class Mdict extends MdictBase {
         if (!Number.isSafeInteger(recordBlockCacheBytes) || recordBlockCacheBytes < 0) {
             throw new RangeError('Invalid MDict record block cache budget');
         }
+        const oversizedRecordBlockCacheBytes = options.oversizedRecordBlockCacheBytes ?? 0
+        if (!Number.isSafeInteger(oversizedRecordBlockCacheBytes) || oversizedRecordBlockCacheBytes < 0) {
+            throw new RangeError('Invalid MDict oversized record block cache budget')
+        }
         const maxDecompressedBlockBytes = options.maxDecompressedBlockBytes ?? DEFAULT_MAX_DECOMPRESSED_BLOCK_BYTES;
         if (!Number.isSafeInteger(maxDecompressedBlockBytes) || maxDecompressedBlockBytes < 0) {
             throw new RangeError('Invalid MDict decompressed block limit');
@@ -30,6 +34,7 @@ export class Mdict extends MdictBase {
             isCaseSensitive: (_e = options.isCaseSensitive) !== null && _e !== void 0 ? _e : true,
             encryptType: (_f = options.encryptType) !== null && _f !== void 0 ? _f : -1,
             recordBlockCacheBytes,
+            oversizedRecordBlockCacheBytes,
             maxDecompressedBlockBytes,
         };
         const passcode = options.passcode || undefined;
@@ -39,6 +44,9 @@ export class Mdict extends MdictBase {
         this._lookupKeywordList = null;
         this._recordBlockCache = new Map();
         this._recordBlockCacheSize = 0;
+        this._oversizedRecordBlockCandidateIndex = -1
+        this._oversizedRecordBlockIndex = -1
+        this._oversizedRecordBlock = null
     }
     // Build a lookup-only view; physical key order and record offsets remain
     // untouched for import iteration. Code-unit ordering keeps every normalized
@@ -147,6 +155,15 @@ export class Mdict extends MdictBase {
     }
 
     _readRecordBlock(blockIndex) {
+        if (this._oversizedRecordBlockIndex === blockIndex && this._oversizedRecordBlock !== null) {
+            return this._oversizedRecordBlock
+        }
+        const repeatedCandidate = this._oversizedRecordBlockCandidateIndex === blockIndex
+        // Release the transient slot before any other block is read, including
+        // normal-cache hits and reads that subsequently fail validation.
+        this._oversizedRecordBlockCandidateIndex = -1
+        this._oversizedRecordBlockIndex = -1
+        this._oversizedRecordBlock = null
         const cached = this._recordBlockCache.get(blockIndex);
         if (typeof cached !== 'undefined') {
             this._recordBlockCache.delete(blockIndex);
@@ -171,6 +188,18 @@ export class Mdict extends MdictBase {
             this._recordBlockCache.set(blockIndex, owned);
             this._recordBlockCacheSize += owned.byteLength;
             return owned;
+        }
+        if (budget > 0 && bytes.byteLength > budget &&
+            bytes.byteLength <= this.options.oversizedRecordBlockCacheBytes) {
+            // Separate opt-in bound: a custom normal-cache budget never silently
+            // enables retention of a block up to the decompression limit.
+            this._oversizedRecordBlockCandidateIndex = blockIndex
+            if (repeatedCandidate) {
+                const owned = new Uint8Array(bytes)
+                this._oversizedRecordBlockIndex = blockIndex
+                this._oversizedRecordBlock = owned
+                return owned
+            }
         }
         return bytes;
     }
@@ -289,6 +318,9 @@ export class Mdict extends MdictBase {
         this.recordInfoList = [];
         this._recordBlockCache.clear();
         this._recordBlockCacheSize = 0;
+        this._oversizedRecordBlockCandidateIndex = -1
+        this._oversizedRecordBlockIndex = -1
+        this._oversizedRecordBlock = null
     }
 }
 /**
