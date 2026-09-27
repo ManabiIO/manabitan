@@ -203,6 +203,29 @@ function validateReusableWholePlan(plan, rowCount, scratch, readingEqualsExpress
 }
 
 /**
+ * Prepared indexes cross the worker boundary and can bypass lookup-index
+ * reconstruction. Validate every supplied string boundary before accepting
+ * their companion preinterned plan.
+ * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
+ * @returns {boolean}
+ */
+function hasValidPreparedStringOffsets(plan) {
+    const {stringLengths, stringOffsets, stringsBuffer} = plan;
+    if (!(stringOffsets instanceof Uint32Array)) { return true; }
+    let expectedOffset = 0;
+    for (let i = 0; i < stringLengths.length; ++i) {
+        if (
+            stringOffsets[i] !== expectedOffset ||
+            expectedOffset > stringsBuffer.byteLength - stringLengths[i]
+        ) {
+            return false;
+        }
+        expectedOffset += stringLengths[i];
+    }
+    return expectedOffset === stringsBuffer.byteLength;
+}
+
+/**
  * @param {unknown} value
  * @param {number} rowCount
  * @returns {value is PreparedTermLookupIndex}
@@ -217,7 +240,8 @@ function isCompletePreparedTermLookupIndex(value, rowCount) {
     return (
         bytes instanceof Uint8Array &&
         bytes.byteLength > 0 &&
-        hasCompleteTermRecordPreinternedPlan(plan, rowCount)
+        hasCompleteTermRecordPreinternedPlan(plan, rowCount) &&
+        hasValidPreparedStringOffsets(plan)
     );
 }
 
