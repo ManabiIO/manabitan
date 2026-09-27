@@ -44,8 +44,8 @@ function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0), has
     cursor += (-cursor) & 3;
     view.setUint32(cursor, 0, true); cursor += 4;
     view.setUint32(cursor, 1, true); cursor += 4;
-    view.setInt32(cursor, 10, true); cursor += 4;
-    view.setInt32(cursor, -1, true); cursor += 4;
+    view.setInt32(cursor, score, true); cursor += 4;
+    view.setInt32(cursor, sequence, true); cursor += 4;
     view.setUint32(cursor, hash1, true); cursor += 4;
     view.setUint32(cursor, hash2, true); cursor += 4;
     view.setUint32(cursor, content.byteLength, true); cursor += 4;
@@ -69,6 +69,36 @@ function createMalformedSharedGlossaryContent() {
 }
 
 describe('DictionaryImporter term artifacts', () => {
+    test('keeps direct artifact score and sequence columns in their native int32 width', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            createArtifactWithEmptyReadingSentinel(new Uint8Array(0), -2147483648, 2147483647),
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            0,
+            true,
+            1,
+            'raw-v4',
+        );
+
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        expect(chunk.scoreList).toBeInstanceOf(Int32Array);
+        expect(chunk.sequenceList).toBeInstanceOf(Int32Array);
+        expect(chunk.scoreList[0]).toBe(-2147483648);
+        expect(chunk.sequenceList[0]).toBe(2147483647);
+    });
+
     test('normalizes an empty reading sentinel without mutating the source artifact', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         /** @type {Record<string, import('core').SafeAny>|null} */
