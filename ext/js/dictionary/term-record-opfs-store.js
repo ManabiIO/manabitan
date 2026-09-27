@@ -5803,6 +5803,8 @@ export class TermRecordOpfsStore {
         const logicalKey = this._getShardFileName(dictionaryName, contentDictName);
         const state = this._activeAppendShardStateByKey.get(logicalKey);
         if (typeof state === 'undefined') { return; }
+        if (state.queuedWriteError !== null) { throw state.queuedWriteError; }
+        if (state.lookupIndexWriteError !== null) { throw state.lookupIndexWriteError; }
         const finalized = this._importSessionActive ?
             state.initialFileLength > 0 :
             state.fileLength > 0;
