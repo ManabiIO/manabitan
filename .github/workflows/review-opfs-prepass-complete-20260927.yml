@@ -1,0 +1,56 @@
+name: OPFS prepass complete imports
+on:
+  push:
+    branches: [review/opfs-prepass-bench-20260927]
+    paths: [.github/workflows/review-opfs-prepass-complete-20260927.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [int, float, small]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/opfs-prepass-complete-import-20260927.mjs /tmp/opfs-prepass-driver.mjs
+          git fetch --no-tags --depth=1 origin 4280587bdb20066143b730aafe25431a927aba3a 1c392c62300c4c4bfe5ce854d8f6d7f301c38359
+          git checkout --detach 4280587bdb20066143b730aafe25431a927aba3a
+          mkdir -p dev/review builds/opfs-prepass
+          cp /tmp/opfs-prepass-driver.mjs dev/review/opfs-prepass-complete-import-20260927.mjs
+          cp /tmp/opfs-prepass-driver.mjs builds/opfs-prepass/executed-driver.mjs
+          git diff 4280587bdb20066143b730aafe25431a927aba3a 1c392c62300c4c4bfe5ce854d8f6d7f301c38359 -- ext/ > builds/opfs-prepass/product.patch
+          test "$(git diff --name-only 4280587bdb20066143b730aafe25431a927aba3a 1c392c62300c4c4bfe5ce854d8f6d7f301c38359 -- ext/)" = ext/js/dictionary/term-record-opfs-store.js
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/opfs-prepass-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/opfs-prepass/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort with unchanged-code controls
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/opfs-prepass-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/opfs-prepass/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: opfs-prepass-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/opfs-prepass/
+          retention-days: 14
