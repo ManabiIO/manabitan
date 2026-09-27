@@ -65,6 +65,7 @@ const BINARY_MAGIC_BYTES = 8;
 const SHARD_GENERATION_BYTES = 16;
 const BINARY_HEADER_PREFIX_BYTES = BINARY_MAGIC_BYTES + SHARD_GENERATION_BYTES;
 const U32_NULL = 0xffffffff;
+const MAX_TERM_RECORD_ID = U32_NULL - 1;
 const MAX_CONTENT_OFFSET_DELTA = U32_NULL - 1;
 const U32_RANGE = 0x100000000;
 const U16_NULL = 0xffff;
@@ -3136,8 +3137,8 @@ export class TermRecordOpfsStore {
         if (
             !Number.isSafeInteger(this._nextId) ||
             this._nextId <= 0 ||
-            this._nextId > U32_RANGE ||
-            count > U32_RANGE - this._nextId
+            this._nextId > MAX_TERM_RECORD_ID ||
+            count > (MAX_TERM_RECORD_ID - this._nextId + 1)
         ) {
             throw new RangeError('Term-record ID space is exhausted');
         }
