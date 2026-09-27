@@ -25,7 +25,7 @@ function createReverse() {
  * @returns {string}
  */
 function referenceReverse(value) {
-    return Array.from(value).reverse().join('');
+    return [...value].reverse().join('');
 }
 
 describe('fast import prefix reversal', () => {
