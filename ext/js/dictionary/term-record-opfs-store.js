@@ -1467,16 +1467,16 @@ export class TermRecordOpfsStore {
      */
     async appendBatchFromTermRows(rows, start, count) {
         if (count <= 0) { return; }
-        let previousDictionary = ''
-        let previousContentDictName = ''
+        let previousDictionary = '';
+        let previousContentDictName = '';
         for (let i = start, ii = start + count; i < ii; ++i) {
-            const row = /** @type {[string, string, string, (string|null), (string|null), unknown, number, number, (string|null), unknown, unknown, unknown, number, unknown, (number|null)]} */ (rows[i])
-            const dictionary = row[0]
-            const contentDictName = row[8] ?? 'raw'
+            const row = /** @type {[string, string, string, (string|null), (string|null), unknown, number, number, (string|null), unknown, unknown, unknown, number, unknown, (number|null)]} */ (rows[i]);
+            const dictionary = row[0];
+            const contentDictName = row[8] ?? 'raw';
             if (i === start || dictionary !== previousDictionary || contentDictName !== previousContentDictName) {
-                this._assertShardAcceptsAppend(dictionary, contentDictName)
-                previousDictionary = dictionary
-                previousContentDictName = contentDictName
+                this._assertShardAcceptsAppend(dictionary, contentDictName);
+                previousDictionary = dictionary;
+                previousContentDictName = contentDictName;
             }
         }
         await this._ensureNextIdReadyForAppend();
@@ -1487,7 +1487,7 @@ export class TermRecordOpfsStore {
         let singleDictionaryName = '';
         let singleContentDictName = 'raw';
         for (let i = start, ii = start + count; i < ii; ++i) {
-            const row = /** @type {[string, string, string, (string|null), (string|null), unknown, number, number, (string|null), unknown, unknown, unknown, number, unknown, (number|null)]} */ (rows[i]);
+            const row = /** @type {[string, string, string, (string|null), (string|null), unknown, number, number, (string|null), unknown, unknown, unknown, number, unknown, (number|null)]} */ (rows[i]);;
             const id = this._nextId++;
             const dictionary = row[0];
             /** @type {TermRecord} */
@@ -1568,16 +1568,16 @@ export class TermRecordOpfsStore {
         if (contentOffsets.length < (start + count) || contentLengths.length < (start + count) || contentDictNames.length < (start + count)) {
             throw new Error('appendBatchFromResolvedImportTermEntries content refs length is smaller than row count');
         }
-        let previousDictionary = ''
-        let previousContentDictName = ''
+        let previousDictionary = '';
+        let previousContentDictName = '';
         for (let i = start, ii = start + count; i < ii; ++i) {
-            const row = /** @type {{dictionary: string}} */ (rows[i])
-            const dictionary = row.dictionary
-            const contentDictName = contentDictNames[i] ?? 'raw'
+            const row = /** @type {{dictionary: string}} */ (rows[i]);
+            const dictionary = row.dictionary;
+            const contentDictName = contentDictNames[i] ?? 'raw';
             if (i === start || dictionary !== previousDictionary || contentDictName !== previousContentDictName) {
-                this._assertShardAcceptsAppend(dictionary, contentDictName)
-                previousDictionary = dictionary
-                previousContentDictName = contentDictName
+                this._assertShardAcceptsAppend(dictionary, contentDictName);
+                previousDictionary = dictionary;
+                previousContentDictName = contentDictName;
             }
         }
         await this._ensureNextIdReadyForAppend();
@@ -1689,12 +1689,12 @@ export class TermRecordOpfsStore {
         if (spans.length < count) {
             throw new Error('appendBatchFromImportTermEntries spans length is smaller than row count');
         }
-        let previousDictionary = ''
+        let previousDictionary = '';
         for (let i = 0; i < count; ++i) {
-            const dictionary = /** @type {{dictionary: string}} */ (rows[start + i]).dictionary
+            const dictionary = /** @type {{dictionary: string}} */ (rows[start + i]).dictionary;
             if (i === 0 || dictionary !== previousDictionary) {
-                this._assertShardAcceptsAppend(dictionary, 'raw')
-                previousDictionary = dictionary
+                this._assertShardAcceptsAppend(dictionary, 'raw');
+                previousDictionary = dictionary;
             }
         }
         await this._ensureNextIdReadyForAppend();
@@ -1793,15 +1793,15 @@ export class TermRecordOpfsStore {
             throw new Error('appendBatchFromImportTermEntriesResolvedContent content arrays are smaller than row count');
         }
         const uniformContentDictName = Array.isArray(contentDictNames) ? null : (contentDictNames ?? 'raw')
-        let previousDictionary = ''
-        let previousContentDictName = ''
+        let previousDictionary = '';
+        let previousContentDictName = '';
         for (let i = 0; i < count; ++i) {
-            const dictionary = /** @type {{dictionary: string}} */ (rows[start + i]).dictionary
-            const contentDictName = uniformContentDictName ?? (contentDictNames[i] ?? 'raw')
+            const dictionary = /** @type {{dictionary: string}} */ (rows[start + i]).dictionary;
+            const contentDictName = uniformContentDictName ?? (contentDictNames[i] ?? 'raw');
             if (i === 0 || dictionary !== previousDictionary || contentDictName !== previousContentDictName) {
-                this._assertShardAcceptsAppend(dictionary, contentDictName)
-                previousDictionary = dictionary
-                previousContentDictName = contentDictName
+                this._assertShardAcceptsAppend(dictionary, contentDictName);
+                previousDictionary = dictionary;
+                previousContentDictName = contentDictName;
             }
         }
         await this._ensureNextIdReadyForAppend();
@@ -1943,16 +1943,16 @@ export class TermRecordOpfsStore {
         ) {
             throw new Error('appendBatchFromArtifactChunkResolvedContent content arrays are smaller than row count');
         }
-        const uniformContentDictName = Array.isArray(contentDictNames) ? null : (contentDictNames ?? 'raw')
+        const uniformContentDictName = Array.isArray(contentDictNames) ? null : (contentDictNames ?? 'raw');
         if (uniformContentDictName !== null) {
-            this._assertShardAcceptsAppend(chunk.dictionary, uniformContentDictName)
+            this._assertShardAcceptsAppend(chunk.dictionary, uniformContentDictName);
         } else {
-            let previousContentDictName = ''
+            let previousContentDictName = '';
             for (let i = 0; i < count; ++i) {
-                const contentDictName = contentDictNames[i] ?? 'raw'
+                const contentDictName = contentDictNames[i] ?? 'raw';
                 if (i === 0 || contentDictName !== previousContentDictName) {
-                    this._assertShardAcceptsAppend(chunk.dictionary, contentDictName)
-                    previousContentDictName = contentDictName
+                    this._assertShardAcceptsAppend(chunk.dictionary, contentDictName);
+                    previousContentDictName = contentDictName;
                 }
             }
         }
