@@ -513,6 +513,47 @@ describe('TermContentOpfsStore', () => {
         expect(Reflect.get(store, '_segmentStates')).toStrictEqual([]);
     });
 
+    test('cold snapshot refresh rejects unsafe cumulative file sizes before publication', async () => {
+        const store = new TermContentOpfsStore();
+        const firstFile = /** @type {File} */ (/** @type {unknown} */ ({size: Number.MAX_SAFE_INTEGER}));
+        const secondFile = /** @type {File} */ (/** @type {unknown} */ ({size: 1}));
+        const firstHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => firstFile),
+        }));
+        const secondHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => secondFile),
+        }));
+        const first = {
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: firstHandle,
+            fileLength: 1,
+            startOffset: 0,
+            readFile: null,
+        };
+        const second = {
+            index: 1,
+            fileName: 'manabitan-term-content^1.bin',
+            fileHandle: secondHandle,
+            fileLength: 1,
+            startOffset: 1,
+            readFile: null,
+        };
+        Reflect.set(store, '_fileHandle', firstHandle);
+        Reflect.set(store, '_length', 2);
+        Reflect.set(store, '_segmentStates', [first, second]);
+
+        await expect(store.ensureLoadedForRead()).rejects.toThrow(/safe integer range/u);
+        expect(first.fileLength).toBe(1);
+        expect(first.startOffset).toBe(0);
+        expect(first.readFile).toBeNull();
+        expect(second.fileLength).toBe(1);
+        expect(second.startOffset).toBe(1);
+        expect(second.readFile).toBeNull();
+        expect(Reflect.get(store, '_length')).toBe(2);
+        expect(Reflect.get(store, '_loadedForRead')).toBe(false);
+    });
+
     test('segmented length overflow does not partially rewrite existing start offsets', () => {
         const store = new TermContentOpfsStore();
         const first = {
