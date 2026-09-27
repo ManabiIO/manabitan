@@ -491,6 +491,70 @@ describe('TermContentOpfsStore', () => {
         expect(fileBytesByName.get(segmentName)).toStrictEqual(new Uint8Array([4, 5, 6]));
     });
 
+    test('rejects an unsafe in-memory append before mutating storage state', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_length', Number.MAX_SAFE_INTEGER - 1);
+        const offsets = [123];
+        const lengths = [456];
+
+        await expect(store.appendBatchToArrays([new Uint8Array(2)], offsets, lengths))
+            .rejects.toThrow(/safe integer range/u);
+
+        expect(Reflect.get(store, '_length')).toBe(Number.MAX_SAFE_INTEGER - 1);
+        expect(Reflect.get(store, '_chunks')).toStrictEqual([]);
+        expect(Reflect.get(store, '_chunkOffsets')).toStrictEqual([]);
+        expect(offsets).toStrictEqual([123]);
+        expect(lengths).toStrictEqual([456]);
+    });
+
+    test('rejects unsafe primary derived-chunk planning before invoking the builder', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_length', Number.MAX_SAFE_INTEGER - 1);
+        const createDerivedChunks = vi.fn(() => [new Uint8Array(1)]);
+
+        await expect(store.appendBatchWithDerivedChunks(
+            [new Uint8Array(2)],
+            createDerivedChunks,
+        )).rejects.toThrow(/safe integer range/u);
+
+        expect(createDerivedChunks).not.toHaveBeenCalled();
+        expect(Reflect.get(store, '_length')).toBe(Number.MAX_SAFE_INTEGER - 1);
+        expect(Reflect.get(store, '_chunks')).toStrictEqual([]);
+    });
+
+    test('rejects an unsafe derived-prefix reservation instead of publishing offsets', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_length', Number.MAX_SAFE_INTEGER - 1);
+        const operation = store.beginAppendBatchWithDerivedPrefix(
+            Promise.resolve([new Uint8Array(1)]),
+            [2],
+            () => [new Uint8Array(2)],
+        );
+
+        await expect(operation.reserved).rejects.toThrow(/safe integer range/u);
+        await expect(operation.completion).rejects.toThrow(/safe integer range/u);
+        expect(Reflect.get(store, '_length')).toBe(Number.MAX_SAFE_INTEGER - 1);
+        expect(Reflect.get(store, '_chunks')).toStrictEqual([]);
+    });
+
+    test('rejects an unsafe buffered OPFS cursor before append admission', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', {});
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: {},
+            fileLength: Number.MAX_SAFE_INTEGER,
+            startOffset: 0,
+            readFile: null,
+        }]);
+        Reflect.set(store, '_pendingWriteBytes', 1);
+
+        await expect(store.appendBatch([new Uint8Array(1)]))
+            .rejects.toThrow(/safe integer range/u);
+        expect(Reflect.get(store, '_pendingWriteChunks')).toStrictEqual([]);
+    });
+
     test('appends primary and offset-derived chunks in one logical mutation', async () => {
         const store = new TermContentOpfsStore();
         const result = await store.appendBatchWithDerivedChunks(
