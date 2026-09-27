@@ -106,14 +106,10 @@ export function prepareTermLookupIndexesFromPreinternedPlan(chunk, remapScratch 
         compactMs += safePerformance.now() - compactStartedAt;
         const readingEqualsExpressionList = isWholeChunk ?
             chunk.readingEqualsExpressionList :
-            (chunk.readingEqualsExpressionList instanceof Uint8Array ?
-                chunk.readingEqualsExpressionList.subarray(runStart, runStart + runCount) :
-                chunk.readingEqualsExpressionList.slice(runStart, runStart + runCount));
+            chunk.readingEqualsExpressionList.slice(runStart, runStart + runCount);
         const sequenceList = isWholeChunk ?
             chunk.sequenceList :
-            (chunk.sequenceList instanceof Int32Array || chunk.sequenceList instanceof Float64Array ?
-                chunk.sequenceList.subarray(runStart, runStart + runCount) :
-                chunk.sequenceList.slice(runStart, runStart + runCount));
+            chunk.sequenceList.slice(runStart, runStart + runCount);
         const encodeStartedAt = safePerformance.now();
         const bytes = reuseWholePlan ?
             encodePersistedTermLookupIndexFromValidatedPreinternedPlan(
