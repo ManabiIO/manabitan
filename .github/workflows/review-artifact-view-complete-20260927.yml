@@ -2,7 +2,9 @@ name: Artifact view complete imports
 on:
   push:
     branches: [review/artifact-view-complete-20260927]
-    paths: [.github/workflows/review-artifact-view-complete-20260927.yml]
+    paths:
+      - .github/workflows/review-artifact-view-complete-20260927.yml
+      - dev/review/artifact-view-complete-import-20260927.mjs
   workflow_dispatch:
 permissions:
   contents: read
