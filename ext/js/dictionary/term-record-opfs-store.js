@@ -5852,6 +5852,7 @@ export class TermRecordOpfsStore {
      * @param {TermRecordShardState} state
      * @param {Uint8Array[]} chunks
      * @returns {void}
+     * @throws {Error} If an earlier queued write failed.
      */
     _queueWriteChunksForShard(state, chunks) {
         if (chunks.length === 0) {
