@@ -1912,6 +1912,79 @@ describe('TermRecordOpfsStore', () => {
         expect(index.readingReverse.get('んほに')).toEqual([2]);
     });
 
+    test('rejects a batch that would cross the persisted uint32 record-id ceiling before mutation', async () => {
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_nextId', 0xffffffff);
+        const createRecord = (/** @type {string} */ expression) => ({
+            dictionary: 'ID ceiling',
+            expression,
+            reading: expression,
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        });
+
+        await expect(store.appendBatch([createRecord('last'), createRecord('overflow')]))
+            .rejects.toThrow(/ID space is exhausted/u);
+
+        expect(Reflect.get(store, '_nextId')).toBe(0xffffffff);
+        expect(store.size).toBe(0);
+        expect(Reflect.get(store, '_loadedDictionaryNames').has('ID ceiling')).toBe(false);
+        expect(Reflect.get(store, '_recordsById').size).toBe(0);
+    });
+
+    test('allows the final uint32 ID but rejects any following reservation', async () => {
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_nextId', 0xffffffff);
+
+        await expect(Reflect.get(store, '_ensureNextIdReadyForAppend').call(store, 1))
+            .resolves.toBeUndefined();
+        Reflect.set(store, '_nextId', 0x100000000);
+        await expect(Reflect.get(store, '_ensureNextIdReadyForAppend').call(store, 1))
+            .rejects.toThrow(/ID space is exhausted/u);
+    });
+
+    test('cold max-id scan fails the pending append when persisted IDs already exhaust uint32', async () => {
+        const store = new TermRecordOpfsStore();
+        const fileName = store._getShardSegmentFileName('Full dictionary', 'raw', 0);
+        const indexFileName = `${fileName}.mbti`;
+        const indexHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            async getFile() {
+                return {
+                    size: 1,
+                    async arrayBuffer() { return new ArrayBuffer(1); },
+                };
+            },
+        }));
+        const directory = /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+            async getFileHandle(name) {
+                if (name !== indexFileName) {
+                    throw new Error(`Unexpected file ${name}`);
+                }
+                return indexHandle;
+            },
+        }));
+        const descriptorHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({}));
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+        Reflect.get(store, '_shardStateByFileName').set(
+            fileName,
+            store._createShardState(fileName, descriptorHandle, 1, 'raw'),
+        );
+        Reflect.set(store, '_nextIdMayNeedShardScan', true);
+        vi.spyOn(store, '_scanPersistentIndexMaxRecordId').mockReturnValue(0xffffffff);
+
+        await expect(Reflect.get(store, '_ensureNextIdReadyForAppend').call(store, 1))
+            .rejects.toThrow(/ID space is exhausted/u);
+
+        expect(Reflect.get(store, '_nextId')).toBe(0x100000000);
+        expect(Reflect.get(store, '_nextIdMayNeedShardScan')).toBe(false);
+        expect(store.size).toBe(0);
+    });
+
     test('lazy shard metadata scan prevents cold append id collisions', async () => {
         const sourceStore = new TermRecordOpfsStore();
         const sourceFileBytesByName = new Map();
