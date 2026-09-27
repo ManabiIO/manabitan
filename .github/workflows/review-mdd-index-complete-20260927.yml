@@ -1,0 +1,53 @@
+name: MDD index complete imports
+on:
+  push:
+    branches: [review/mdd-index-complete-20260927]
+    paths: [.github/workflows/review-mdd-index-complete-20260927.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        comparison: [lazy, css]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact driver
+        run: |
+          cp dev/review/mdd-index-complete-import-20260927.mjs /tmp/mdd-driver.mjs
+          git fetch --no-tags --depth=1 origin             60695b51226f6b86978bfd5ea3f11c53fcf55f11             71a8cd996a6dca5c98f028d1207446c2fff26269             15392114355189179963e317750e0fbab748f034
+          git checkout --detach 60695b51226f6b86978bfd5ea3f11c53fcf55f11
+          mkdir -p dev/review builds/mdd-index-completion
+          cp /tmp/mdd-driver.mjs dev/review/mdd-index-complete-import-20260927.mjs
+          cp /tmp/mdd-driver.mjs builds/mdd-index-completion/executed-driver.mjs
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install Chromium
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          COMPARISON: ${{ matrix.comparison }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/mdd-index-complete-import-20260927.mjs "$COMPARISON" 2>&1 | tee "builds/mdd-index-completion/${COMPARISON}-preflight.log"
+      - name: Counterbalanced complete-import cohort
+        env:
+          COMPARISON: ${{ matrix.comparison }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/mdd-index-complete-import-20260927.mjs "$COMPARISON" 2>&1 | tee "builds/mdd-index-completion/${COMPARISON}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mdd-index-${{ matrix.comparison }}-${{ matrix.cohort }}
+          path: builds/mdd-index-completion/
+          retention-days: 14
