@@ -11,7 +11,7 @@ import {makeFixturePng, makeMdictFixture} from '../../test/util/mdict-binary-fix
 const refs = {
     A: '60695b51226f6b86978bfd5ea3f11c53fcf55f11',
     B: '02b144615e2e5f1af25fe9202a9c61d858b078a8',
-    C: '97c443695cef6900af95b33292b42b5196ddd009',
+    C: 'd22ff3d64333911fc82c0d7b631f7fb097d9a246',
 }
 const comparison = process.argv[2] ?? 'lazy'
 const pair = comparison === 'lazy' ? ['A', 'B'] : comparison === 'css' ? ['B', 'C'] : null
