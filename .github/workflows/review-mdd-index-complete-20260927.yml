@@ -19,7 +19,7 @@ jobs:
       - name: Pin product and retain exact driver
         run: |
           cp dev/review/mdd-index-complete-import-20260927.mjs /tmp/mdd-driver.mjs
-          git fetch --no-tags --depth=1 origin             60695b51226f6b86978bfd5ea3f11c53fcf55f11             71a8cd996a6dca5c98f028d1207446c2fff26269             15392114355189179963e317750e0fbab748f034
+          git fetch --no-tags --depth=1 origin             60695b51226f6b86978bfd5ea3f11c53fcf55f11             02b144615e2e5f1af25fe9202a9c61d858b078a8             97c443695cef6900af95b33292b42b5196ddd009
           git checkout --detach 60695b51226f6b86978bfd5ea3f11c53fcf55f11
           mkdir -p dev/review builds/mdd-index-completion
           cp /tmp/mdd-driver.mjs dev/review/mdd-index-complete-import-20260927.mjs
