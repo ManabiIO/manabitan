@@ -43,6 +43,25 @@ const DEFAULT_QUEUED_WRITE_BUDGET_BYTES = 64 * 1024 * 1024;
 const LOW_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 24 * 1024 * 1024;
 const HIGH_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 512 * 1024 * 1024;
 
+/**
+ * @param {number} offset
+ * @param {number} length
+ * @returns {number}
+ * @throws {RangeError} If the resulting byte offset cannot be represented safely.
+ */
+function addSafeByteLength(offset, length) {
+    if (
+        !Number.isSafeInteger(offset) ||
+        offset < 0 ||
+        !Number.isSafeInteger(length) ||
+        length < 0 ||
+        offset > Number.MAX_SAFE_INTEGER - length
+    ) {
+        throw new RangeError('Term-content storage offset exceeds the safe integer range');
+    }
+    return offset + length;
+}
+
 export class TermContentOpfsStore {
     constructor() {
         /** @type {FileSystemFileHandle|null} */
@@ -622,6 +641,7 @@ export class TermContentOpfsStore {
         return await this._runMutationExclusive(async () => {
             const length = blob.size;
             const offset = this._getBufferedLength();
+            addSafeByteLength(offset, length);
             if (length <= 0) {
                 return {offset, length: 0};
             }
@@ -685,7 +705,7 @@ export class TermContentOpfsStore {
             for (let i = 0; i < primaryChunks.length; ++i) {
                 primaryOffsets[i] = nextOffset;
                 primaryLengths[i] = primaryChunks[i].byteLength;
-                nextOffset += primaryLengths[i];
+                nextOffset = addSafeByteLength(nextOffset, primaryLengths[i]);
             }
             const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
             if (!Array.isArray(derivedChunks)) {
@@ -751,7 +771,7 @@ export class TermContentOpfsStore {
                 let primaryStartOffset = startOffset;
                 for (let i = 0; i < normalizedDerivedLengths.length; ++i) {
                     derivedOffsets[i] = primaryStartOffset;
-                    primaryStartOffset += normalizedDerivedLengths[i];
+                    primaryStartOffset = addSafeByteLength(primaryStartOffset, normalizedDerivedLengths[i]);
                 }
                 reservationSettled = true;
                 resolveReserved({
@@ -771,7 +791,7 @@ export class TermContentOpfsStore {
                 for (let i = 0; i < primaryChunks.length; ++i) {
                     primaryOffsets[i] = nextOffset;
                     primaryLengths[i] = primaryChunks[i].byteLength;
-                    nextOffset += primaryLengths[i];
+                    nextOffset = addSafeByteLength(nextOffset, primaryLengths[i]);
                 }
                 const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
                 if (
@@ -811,7 +831,16 @@ export class TermContentOpfsStore {
      * @returns {void}
      */
     _appendBatchInternal(chunks, offsets, lengths) {
-        let nextOffset = this._getBufferedLength();
+        const startOffset = this._getBufferedLength();
+        let totalBytes = 0;
+        for (const chunk of chunks) {
+            totalBytes = addSafeByteLength(totalBytes, chunk.byteLength);
+        }
+        // Validate the complete reservation before mutating output arrays,
+        // in-memory chunks, import overlays, or the logical length.
+        addSafeByteLength(startOffset, totalBytes);
+
+        let nextOffset = startOffset;
         offsets.length = 0;
         lengths.length = 0;
         for (const chunk of chunks) {
@@ -847,9 +876,9 @@ export class TermContentOpfsStore {
             return this._length;
         }
         let total = this._computeSegmentedLength();
-        total += this._pendingWriteBytes;
-        total += this._inFlightWriteBytes;
-        total += this._queuedWriteBytes;
+        total = addSafeByteLength(total, this._pendingWriteBytes);
+        total = addSafeByteLength(total, this._inFlightWriteBytes);
+        total = addSafeByteLength(total, this._queuedWriteBytes);
         return total;
     }
 
