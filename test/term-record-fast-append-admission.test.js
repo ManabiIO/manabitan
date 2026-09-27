@@ -18,13 +18,16 @@ function createRejectedStore() {
     Reflect.set(store, '_recordsDirectoryHandle', {})
     Reflect.set(store, '_nextIdMayNeedShardScan', false)
     const logicalKey = Reflect.get(store, '_getShardFileName').call(store, dictionary, 'raw')
-    Reflect.get(store, '_activeAppendShardStateByKey').set(logicalKey, {
-        fileName: logicalKey,
-        fileLength: 64,
-        initialFileLength: 64,
-        queuedWriteError: null,
-        lookupIndexWriteError: null,
-    })
+    Reflect.get(store, '_activeAppendShardStateByKey').set(
+        logicalKey,
+        /** @type {any} */ ({
+            fileName: logicalKey,
+            fileLength: 64,
+            initialFileLength: 64,
+            queuedWriteError: null,
+            lookupIndexWriteError: null,
+        }),
+    )
     return store
 }
 
