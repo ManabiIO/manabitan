@@ -985,7 +985,7 @@ export class TermContentOpfsStore {
             for (const state of states) {
                 const file = await state.fileHandle.getFile();
                 snapshots.push({state, file, startOffset});
-                startOffset += file.size;
+                startOffset = addSafeByteLength(startOffset, file.size);
             }
             if (generation !== this._readStateGeneration || states !== this._segmentStates) { return; }
             this._assertReadableSegmentGrowth(snapshots.map(({state, file}) => ({
@@ -1967,7 +1967,7 @@ export class TermContentOpfsStore {
                 throw new Error('Term-content segments are not contiguous');
             }
             state.startOffset = startOffset;
-            startOffset += state.fileLength;
+            startOffset = addSafeByteLength(startOffset, state.fileLength);
         }
         return states;
     }
@@ -1990,8 +1990,12 @@ export class TermContentOpfsStore {
     _computeSegmentedLength() {
         let total = 0;
         for (const state of this._segmentStates) {
-            state.startOffset = total;
-            total += state.fileLength;
+            total = addSafeByteLength(total, state.fileLength);
+        }
+        let startOffset = 0;
+        for (const state of this._segmentStates) {
+            state.startOffset = startOffset;
+            startOffset += state.fileLength;
         }
         return total;
     }
