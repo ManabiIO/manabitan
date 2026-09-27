@@ -43,3 +43,30 @@ test('empty queue submission remains a no-op after a sticky write failure', () =
 
     expect(() => queue(state, [])).not.toThrow()
 })
+
+
+test.each([
+    ['record data', 'queuedWriteError'],
+    ['lookup index', 'lookupIndexWriteError'],
+])('shard admission rejects sticky %s failures before append mutation', (_label, errorField) => {
+    const store = new TermRecordOpfsStore()
+    const failure = new Error(`simulated ${errorField} failure`)
+    const getShardFileName = /** @type {(dictionary: string, contentDictName: string) => string} */ (
+        Reflect.get(store, '_getShardFileName')
+    ).bind(store)
+    const logicalKey = getShardFileName('dictionary', 'raw')
+    const state = {
+        fileName: logicalKey,
+        fileLength: 0,
+        initialFileLength: 0,
+        queuedWriteError: null,
+        lookupIndexWriteError: null,
+    }
+    state[errorField] = failure
+    Reflect.set(store, '_activeAppendShardStateByKey', new Map([[logicalKey, state]]))
+    const assertAccepts = /** @type {(dictionary: string, contentDictName?: string) => void} */ (
+        Reflect.get(store, '_assertShardAcceptsAppend')
+    ).bind(store)
+
+    expect(() => assertAccepts('dictionary', 'raw')).toThrow(failure)
+})
