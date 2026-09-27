@@ -264,7 +264,7 @@ test('native embedded image is not misreported as missing external media', async
 
 test('native CSS dependencies contribute to missing resources', async () => {
     const mdd = makeMdictFixture(
-        [{key: 'styles/main.css', value: '.word {background: url(images/missing.png)}'}],
+        [{key: 'styles/main.CsS', value: '.word {background: url(images/missing.png)}'}],
         {mdd: true, recordBlockSize: 7},
     );
     const data = await convert(
