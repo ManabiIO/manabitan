@@ -5803,6 +5803,8 @@ export class TermRecordOpfsStore {
         const logicalKey = this._getShardFileName(dictionaryName, contentDictName);
         const state = this._activeAppendShardStateByKey.get(logicalKey);
         if (typeof state === 'undefined') { return; }
+        if (state.queuedWriteError !== null) { throw state.queuedWriteError; }
+        if (state.lookupIndexWriteError !== null) { throw state.lookupIndexWriteError; }
         const finalized = this._importSessionActive ?
             state.initialFileLength > 0 :
             state.fileLength > 0;
@@ -5850,13 +5852,14 @@ export class TermRecordOpfsStore {
      * @param {TermRecordShardState} state
      * @param {Uint8Array[]} chunks
      * @returns {void}
+     * @throws {Error} If an earlier queued write failed.
      */
     _queueWriteChunksForShard(state, chunks) {
         if (chunks.length === 0) {
             return;
         }
         if (state.queuedWriteError !== null) {
-            return;
+            throw state.queuedWriteError;
         }
         state.importWriteStarted = true;
         for (const chunk of chunks) {
