@@ -173,6 +173,20 @@ describe('zstd wasm wrapper', () => {
         expect(module._free).toHaveBeenCalledWith(16);
     });
 
+    test('rejects a frame above maxOutputSize before destination allocation', async () => {
+        const module = createMockModule({frameContentSize: 4096});
+        mockState.createModule.mockResolvedValue(module);
+        const {decompress, init} = await import('../dev/lib/zstd-wasm.js');
+        await init();
+
+        expect(() => decompress(new Uint8Array([1, 2]), {defaultHeapSize: 128, maxOutputSize: 1024}))
+            .toThrow('exceeds configured output limit');
+        expect(module._malloc).toHaveBeenCalledTimes(1);
+        expect(module._malloc).toHaveBeenCalledWith(2);
+        expect(module._ZSTD_decompress).not.toHaveBeenCalled();
+        expect(module._free).toHaveBeenCalledOnce();
+    });
+
     test('releases decompression buffers when dictionary allocation fails', async () => {
         const module = createMockModule({allocations: [16, 40, 0]});
         mockState.createModule.mockResolvedValue(module);
@@ -203,10 +217,10 @@ describe('zstd wasm wrapper', () => {
 });
 
 /**
- * @param {{allocations?: number[]}} [options]
+ * @param {{allocations?: number[], frameContentSize?: number}} [options]
  * @returns {import('core').SafeAny}
  */
-function createMockModule({allocations = []} = {}) {
+function createMockModule({allocations = [], frameContentSize = 3} = {}) {
     const heap = new Uint8Array(4096);
     let nextPointer = 512;
     const allocationQueue = [...allocations];
@@ -235,7 +249,7 @@ function createMockModule({allocations = []} = {}) {
         _ZSTD_decompress_usingDict: vi.fn(() => 0),
         _ZSTD_freeCCtx: vi.fn(() => 0),
         _ZSTD_freeDCtx: vi.fn(() => 0),
-        _ZSTD_getFrameContentSize: vi.fn(() => 3),
+        _ZSTD_getFrameContentSize: vi.fn(() => frameContentSize),
         _ZSTD_isError: vi.fn(() => 0),
         _manabitan_write_block_envelope: vi.fn((destination, length) => {
             if (length <= 12) { return 0; }

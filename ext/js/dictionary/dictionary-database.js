@@ -4592,7 +4592,10 @@ null;
         if (meta.contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME) {
             const defaultHeapSize = meta.uncompressedLength > 0 ? meta.uncompressedLength : (compressedBytes.byteLength * 16);
             try {
-                const decoded = /** @type {unknown} */ (zstdDecompress(compressedBytes, {defaultHeapSize}));
+                const decoded = /** @type {unknown} */ (zstdDecompress(compressedBytes, {
+                    defaultHeapSize,
+                    ...(meta.uncompressedLength > 0 ? {maxOutputSize: meta.uncompressedLength} : {}),
+                }));
                 if (!(decoded instanceof Uint8Array)) {
                     throw new TypeError('Shared glossary decoder returned non-byte data');
                 }
