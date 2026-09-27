@@ -1296,7 +1296,12 @@ export class DictionaryImporter {
                     /** @type {number} */ (sharedGlossaryUncompressedLength) :
                     (sharedGlossaryArtifactBytes.byteLength * 16);
                 const decompressedGlossary = /** @type {unknown} */ (
-                    zstdDecompress(sharedGlossaryArtifactBytes, {defaultHeapSize})
+                    zstdDecompress(sharedGlossaryArtifactBytes, {
+                        defaultHeapSize,
+                        ...(sharedGlossaryUncompressedLength !== null ?
+                            {maxOutputSize: sharedGlossaryUncompressedLength} :
+                            {}),
+                    })
                 );
                 if (!(decompressedGlossary instanceof Uint8Array)) {
                     throw new TypeError('Shared glossary decompressor returned invalid bytes');
