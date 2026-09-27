@@ -103,7 +103,12 @@ async function observe(plan) {
             assert.ok(text.includes(`definition ${i}`))
             digests.push(hash(text))
         }
-        const servedHash=await page.evaluate(async(path)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await(await fetch('/'+path.replace(/^ext\\//,'').replace(/^ext\//,''))).arrayBuffer()))].map((x)=>x.toString(16).padStart(2,'0')).join(''),modulePath)
+        const servedHash=await page.evaluate(async(path)=>{
+            const response=await fetch('/'+path.replace(/^ext\//,''))
+            const bytes=await response.arrayBuffer()
+            return [...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))]
+                .map((x)=>x.toString(16).padStart(2,'0')).join('')
+        },modulePath)
         assert.equal(servedHash,report.moduleHashes[plan.arm])
         assert.deepEqual(pageErrors,[])
         return {...plan,elapsedMs,counts,contentDigest:hash(JSON.stringify(digests)),servedHash,browser:context.browser()?.version(),pageErrors}
