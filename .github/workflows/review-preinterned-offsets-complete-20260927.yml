@@ -1,0 +1,55 @@
+name: Preinterned offsets complete imports
+on:
+  push:
+    branches: [review/preinterned-offsets-bench-20260927]
+    paths: [.github/workflows/review-preinterned-offsets-complete-20260927.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [large, small]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/preinterned-offsets-complete-import-20260927.mjs /tmp/driver.mjs
+          git fetch --no-tags --depth=1 origin 60695b51226f6b86978bfd5ea3f11c53fcf55f11 2b879bb58e9720b2f1154433d46c0eb87906bc19
+          git checkout --detach 60695b51226f6b86978bfd5ea3f11c53fcf55f11
+          mkdir -p dev/review builds/preinterned-offsets
+          cp /tmp/driver.mjs dev/review/preinterned-offsets-complete-import-20260927.mjs
+          cp /tmp/driver.mjs builds/preinterned-offsets/executed-driver.mjs
+          git diff 60695b51226f6b86978bfd5ea3f11c53fcf55f11 2b879bb58e9720b2f1154433d46c0eb87906bc19 -- ext/ > builds/preinterned-offsets/product.patch
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/preinterned-offsets-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/preinterned-offsets/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/preinterned-offsets-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/preinterned-offsets/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preinterned-offsets-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/preinterned-offsets/
+          retention-days: 14
