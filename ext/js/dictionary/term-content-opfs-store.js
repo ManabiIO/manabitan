@@ -1967,7 +1967,7 @@ export class TermContentOpfsStore {
                 throw new Error('Term-content segments are not contiguous');
             }
             state.startOffset = startOffset;
-            startOffset += state.fileLength;
+            startOffset = addSafeByteLength(startOffset, state.fileLength);
         }
         return states;
     }
@@ -1990,8 +1990,12 @@ export class TermContentOpfsStore {
     _computeSegmentedLength() {
         let total = 0;
         for (const state of this._segmentStates) {
-            state.startOffset = total;
-            total += state.fileLength;
+            total = addSafeByteLength(total, state.fileLength);
+        }
+        let startOffset = 0;
+        for (const state of this._segmentStates) {
+            state.startOffset = startOffset;
+            startOffset += state.fileLength;
         }
         return total;
     }
