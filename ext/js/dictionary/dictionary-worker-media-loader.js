@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {toError} from '../core/to-error.js';
 import {generateId} from '../core/utilities.js';
 
 const imageDetailsResponseTimeoutMs = 60_000;
@@ -46,9 +47,29 @@ export class DictionaryWorkerMediaLoader {
         clearTimeout(request.timer);
         const {error} = params;
         if (typeof error !== 'undefined') {
-            request.reject(ExtensionError.deserialize(error));
+            try {
+                request.reject(ExtensionError.deserialize(error));
+            } catch (e) {
+                // The timeout is already cleared; decoding must not leave the request pending.
+                request.reject(toError(e));
+            }
         } else {
-            request.resolve(params.result);
+            const result = params.result;
+            if (
+                typeof result !== 'object' ||
+                result === null ||
+                !(result.content instanceof ArrayBuffer) ||
+                typeof result.width !== 'number' ||
+                !Number.isSafeInteger(result.width) ||
+                result.width < 0 ||
+                typeof result.height !== 'number' ||
+                !Number.isSafeInteger(result.height) ||
+                result.height < 0
+            ) {
+                request.reject(new Error('Dictionary image-details response is invalid'));
+                return;
+            }
+            request.resolve(result);
         }
     }
 
