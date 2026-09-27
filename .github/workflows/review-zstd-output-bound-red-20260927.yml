@@ -1,0 +1,23 @@
+name: Zstd output bound red reproduction
+on:
+  push:
+    branches: [review/zstd-output-bound-red-20260927]
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Confirm the new regression fails before the production fix
+        run: |
+          set +e
+          npx vitest run test/zstd-wasm.test.js --reporter=json --outputFile=/tmp/result.json
+          status=$?
+          set -e
+          test "$status" -eq 1
+          node -e "const r=require('/tmp/result.json'); require('node:assert/strict').equal(r.numFailedTests,1)"
