@@ -21,9 +21,11 @@ import {getTermRecordPreinternedPlan} from '../ext/js/dictionary/term-record-pre
 /**
  * @param {Uint8Array} [content]
  * @param {[number, number]} [hashPair]
+ * @param {number} [score]
+ * @param {number} [sequence]
  * @returns {Uint8Array}
  */
-function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0), hashPair = [0, 0]) {
+function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0), hashPair = [0, 0], score = 10, sequence = -1) {
     const [hash1, hash2] = hashPair;
     const expression = new TextEncoder().encode('term');
     const headerBytes = 8 + 4 + 8;
@@ -76,7 +78,7 @@ describe('DictionaryImporter term artifacts', () => {
 
         await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
             importer,
-            createArtifactWithEmptyReadingSentinel(new Uint8Array(0), -2147483648, 2147483647),
+            createArtifactWithEmptyReadingSentinel(new Uint8Array(0), [0, 0], -2147483648, 2147483647),
             'term_bank_1.mbtb',
             'Test dictionary',
             false,
