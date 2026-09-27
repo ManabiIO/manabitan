@@ -415,22 +415,34 @@ export function finishPreparedSpanCompression(prepared) {
 
 /**
  * @param {Uint8Array} content
- * @param {{defaultHeapSize?: number}} [options]
+ * @param {{defaultHeapSize?: number, maxOutputSize?: number}} [options]
  * @returns {Uint8Array}
  */
 export function decompress(content, options = {}) {
-    return decompressUsingContext(0, content, null, options.defaultHeapSize ?? 1024 * 1024);
+    return decompressUsingContext(
+        0,
+        content,
+        null,
+        options.defaultHeapSize ?? 1024 * 1024,
+        options.maxOutputSize ?? null,
+    );
 }
 
 /**
  * @param {number} context
  * @param {Uint8Array} content
  * @param {Uint8Array} dictionary
- * @param {{defaultHeapSize?: number}} [options]
+ * @param {{defaultHeapSize?: number, maxOutputSize?: number}} [options]
  * @returns {Uint8Array}
  */
 export function decompressUsingDict(context, content, dictionary, options = {}) {
-    return decompressUsingContext(context, content, dictionary, options.defaultHeapSize ?? 1024 * 1024);
+    return decompressUsingContext(
+        context,
+        content,
+        dictionary,
+        options.defaultHeapSize ?? 1024 * 1024,
+        options.maxOutputSize ?? null,
+    );
 }
 
 /**
@@ -438,10 +450,11 @@ export function decompressUsingDict(context, content, dictionary, options = {}) 
  * @param {Uint8Array} content
  * @param {Uint8Array|null} dictionary
  * @param {number} defaultHeapSize
+ * @param {number|null} maxOutputSize
  * @returns {Uint8Array}
  * @throws {Error} If the frame is invalid or allocation or decompression fails.
  */
-function decompressUsingContext(context, content, dictionary, defaultHeapSize) {
+function decompressUsingContext(context, content, dictionary, defaultHeapSize, maxOutputSize) {
     const module = getModule();
     const source = module._malloc(content.byteLength);
     if (source === 0) { throw new Error('Failed to allocate Zstd input buffer'); }
@@ -452,6 +465,20 @@ function decompressUsingContext(context, content, dictionary, defaultHeapSize) {
         const outputSize = frameSize < 0 ? defaultHeapSize : frameSize;
         if (!Number.isSafeInteger(outputSize) || outputSize <= 0) {
             throw new Error(`Invalid Zstd frame content size: ${frameSizeValue}`);
+        }
+        if (
+            maxOutputSize !== null &&
+            (
+                !Number.isSafeInteger(maxOutputSize) ||
+                maxOutputSize <= 0
+            )
+        ) {
+            throw new RangeError(`Invalid Zstd output limit: ${String(maxOutputSize)}`);
+        }
+        if (maxOutputSize !== null && outputSize > maxOutputSize) {
+            throw new RangeError(
+                `Zstd frame output size ${outputSize} exceeds configured output limit ${maxOutputSize}`,
+            );
         }
         const destination = module._malloc(outputSize);
         if (destination === 0) { throw new Error('Failed to allocate Zstd destination buffer'); }
