@@ -1,0 +1,56 @@
+name: Prefix reverse complete imports
+on:
+  push:
+    branches: [review/prefix-reverse-complete-20260926]
+    paths: [.github/workflows/review-prefix-reverse-complete-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [japanese, ascii]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact driver
+        run: |
+          cp dev/review/prefix-reverse-complete-import-20260926.mjs /tmp/prefix-driver.mjs
+          git fetch --no-tags --depth=1 origin 65294053e65f7e45937d51dbc3cab70543f327e4 d17785340129efebfc532a6ee32cc274a83e3d21
+          git checkout --detach 65294053e65f7e45937d51dbc3cab70543f327e4
+          mkdir -p dev/review builds/prefix-reverse-completion
+          cp /tmp/prefix-driver.mjs dev/review/prefix-reverse-complete-import-20260926.mjs
+          cp /tmp/prefix-driver.mjs builds/prefix-reverse-completion/executed-driver.mjs
+          git diff 65294053e65f7e45937d51dbc3cab70543f327e4 d17785340129efebfc532a6ee32cc274a83e3d21 -- ext/ > builds/prefix-reverse-completion/product.patch
+          test "$(git diff --name-only 65294053e65f7e45937d51dbc3cab70543f327e4 d17785340129efebfc532a6ee32cc274a83e3d21 -- ext/)" = ext/js/dictionary/dictionary-importer.js
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms and readback
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/prefix-reverse-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/prefix-reverse-completion/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced complete-import cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/prefix-reverse-complete-import-20260926.mjs "$WORKLOAD" 2>&1 | tee "builds/prefix-reverse-completion/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prefix-reverse-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/prefix-reverse-completion/
+          retention-days: 14
