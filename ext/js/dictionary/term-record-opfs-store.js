@@ -5856,7 +5856,7 @@ export class TermRecordOpfsStore {
             return;
         }
         if (state.queuedWriteError !== null) {
-            return;
+            throw state.queuedWriteError;
         }
         state.importWriteStarted = true;
         for (const chunk of chunks) {
