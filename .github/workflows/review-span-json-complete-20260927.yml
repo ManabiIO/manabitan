@@ -1,0 +1,56 @@
+name: JSON span planning complete imports
+on:
+  push:
+    branches: [review/span-planning-json-bench-20260927]
+    paths: [.github/workflows/review-span-json-complete-20260927.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [jmdict, generic]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/span-json-complete-import-20260927.mjs /tmp/span-json-driver.mjs
+          git fetch --no-tags --depth=1 origin 60695b51226f6b86978bfd5ea3f11c53fcf55f11 98a02a994998adac2e2bbba89aace381ec93dcb1
+          git checkout --detach 60695b51226f6b86978bfd5ea3f11c53fcf55f11
+          mkdir -p dev/review builds/span-json
+          cp /tmp/span-json-driver.mjs dev/review/span-json-complete-import-20260927.mjs
+          cp /tmp/span-json-driver.mjs builds/span-json/executed-driver.mjs
+          git diff 60695b51226f6b86978bfd5ea3f11c53fcf55f11 98a02a994998adac2e2bbba89aace381ec93dcb1 -- ext/ > builds/span-json/product.patch
+          test "$(git diff --name-only 60695b51226f6b86978bfd5ea3f11c53fcf55f11 98a02a994998adac2e2bbba89aace381ec93dcb1 -- ext/)" = ext/js/dictionary/term-content-block-store.js
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/span-json-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/span-json/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/span-json-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/span-json/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: span-json-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/span-json/
+          retention-days: 14
