@@ -63,7 +63,16 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
         });
         return {sourceConsumed: completion.then(() => {}), completion};
     }),
-    decompressTermContentZstd: vi.fn((/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes)),
+    decompressTermContentZstd: vi.fn((
+        /** @type {Uint8Array} */ bytes,
+        /** @type {string|null} */ _dictName,
+        /** @type {{defaultHeapSize?: number, maxOutputSize?: number}} */ options = {},
+    ) => {
+        if (typeof options.maxOutputSize === 'number' && bytes.byteLength > options.maxOutputSize) {
+            throw new RangeError(`Zstd frame output size ${bytes.byteLength} exceeds configured output limit ${options.maxOutputSize}`);
+        }
+        return Uint8Array.from(bytes);
+    }),
 }));
 
 /** @typedef {NonNullable<Awaited<ReturnType<TermContentBlockStore['_tryAppendPacked']>>>} TermContentBlockAppendResult */
@@ -973,6 +982,32 @@ describe('TermContentBlockStore', () => {
             contentOffset: referenceOffset,
             contentLength: 2,
             decodedEntryLength: null,
+        });
+    });
+
+    test('bounds decompression by the persisted uncompressed block length', async () => {
+        vi.mocked(decompressTermContentZstd).mockClear();
+        const contentStore = new TermContentOpfsStore();
+        const block = wrapCompressedTermContentBlock(new Uint8Array([1, 2, 3, 4]));
+        await contentStore.appendBatch([block]);
+        const [{offset: referenceOffset}] = await contentStore.appendBatch([
+            encodeRawTermContentBlockReference(0, block.byteLength, 3, 0, 3),
+        ]);
+        const blockStore = new TermContentBlockStore(contentStore);
+
+        await expect(blockStore.readDetailed(referenceOffset, 3, 'raw-block-v1')).resolves.toMatchObject({
+            status: 'corrupt',
+            reason: 'Term content block decompression failed',
+        });
+        expect(decompressTermContentZstd).toHaveBeenCalledWith(
+            new Uint8Array([1, 2, 3, 4]),
+            null,
+            {defaultHeapSize: 3, maxOutputSize: 3},
+        );
+        expect(blockStore.getDiagnostics().lastError).toMatchObject({
+            blockOffset: 0,
+            blockUncompressedLength: 3,
+            error: expect.stringContaining('exceeds configured output limit 3'),
         });
     });
 
