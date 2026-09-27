@@ -53,8 +53,21 @@ describe('fast term-record append admission is mutation-free on rejection', () =
     test('SQL term rows', async () => {
         const store = createRejectedStore()
         const row = [
-            dictionary, 'term', 'reading', null, null, null,
-            0, 4, 'raw', null, null, null, 1, null, 10,
+            dictionary,
+            'term',
+            'reading',
+            null,
+            null,
+            null,
+            0,
+            4,
+            'raw',
+            null,
+            null,
+            null,
+            1,
+            null,
+            10,
         ]
         await expectRejectedWithoutMutation(
             store,
@@ -67,9 +80,7 @@ describe('fast term-record append admission is mutation-free on rejection', () =
         const rows = [{dictionary, expression: 'term', reading: 'reading', score: 1, sequence: 10}]
         await expectRejectedWithoutMutation(
             store,
-            async () => await store.appendBatchFromResolvedImportTermEntries(
-                rows, 0, 1, [0], [4], ['raw'],
-            ),
+            async () => await store.appendBatchFromResolvedImportTermEntries(rows, 0, 1, [0], [4], ['raw']),
         )
     })
 
@@ -78,9 +89,7 @@ describe('fast term-record append admission is mutation-free on rejection', () =
         const rows = [{dictionary, expression: 'term', reading: 'reading', score: 1, sequence: 10}]
         await expectRejectedWithoutMutation(
             store,
-            async () => await store.appendBatchFromImportTermEntries(
-                rows, 0, 1, [{offset: 0, length: 4}],
-            ),
+            async () => await store.appendBatchFromImportTermEntries(rows, 0, 1, [{offset: 0, length: 4}]),
         )
     })
 
@@ -89,9 +98,7 @@ describe('fast term-record append admission is mutation-free on rejection', () =
         const rows = [{dictionary, expression: 'term', reading: 'reading', score: 1, sequence: 10}]
         await expectRejectedWithoutMutation(
             store,
-            async () => await store.appendBatchFromImportTermEntriesResolvedContent(
-                rows, 0, 1, [0], [4], 'raw',
-            ),
+            async () => await store.appendBatchFromImportTermEntriesResolvedContent(rows, 0, 1, [0], [4], 'raw'),
         )
     })
 
