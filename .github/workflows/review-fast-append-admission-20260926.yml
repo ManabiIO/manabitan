@@ -1,0 +1,17 @@
+name: Fast append admission reproduction
+on:
+  push:
+    branches: [review/fast-append-admission-20260926]
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Run focused regression
+        run: npx vitest run test/term-record-fast-append-admission.test.js
