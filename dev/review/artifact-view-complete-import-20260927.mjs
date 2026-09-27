@@ -183,9 +183,13 @@ async function observe(plan) {
             readback.push(sha(json))
         }
         const hashes = await page.evaluate(async (paths) => {
-            const digest = async (path) => [...new Uint8Array(
-                await crypto.subtle.digest('SHA-256', await (await fetch('/' + path.replace(/^ext\\//, ''))).arrayBuffer()),
-            )].map((x) => x.toString(16).padStart(2, '0')).join('')
+            const digest = async (path) => {
+                const relativePath = path.startsWith('ext/') ? path.slice(4) : path
+                const response = await fetch('/' + relativePath)
+                const bytes = await response.arrayBuffer()
+                const value = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))
+                return [...value].map((x) => x.toString(16).padStart(2, '0')).join('')
+            }
             return Object.fromEntries(await Promise.all(paths.map(async (path) => [path, await digest(path)])))
         }, runtimePaths)
         for (const path of runtimePaths) { assert.equal(hashes[path], report.moduleHashes[plan.arm][path], path) }
