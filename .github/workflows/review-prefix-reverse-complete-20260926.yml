@@ -1,4 +1,5 @@
 name: Prefix reverse complete imports
+# rerun after driver syntax repair
 on:
   push:
     branches: [review/prefix-reverse-complete-20260926]
