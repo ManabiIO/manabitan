@@ -55,6 +55,7 @@ test.each([
         Reflect.get(store, '_getShardFileName')
     ).bind(store)
     const logicalKey = getShardFileName('dictionary', 'raw')
+    /** @type {Record<string, any>} */
     const state = {
         fileName: logicalKey,
         fileLength: 0,
