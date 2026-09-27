@@ -131,7 +131,10 @@ describe('DictionaryImporter term artifacts', () => {
         );
 
         expect(streamedPlan).not.toBeNull();
-        expect(streamedPlan?.stringsBuffer.buffer).toBe(streamedBytes.buffer);
+        const completedStreamedPlan = /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (
+            /** @type {unknown} */ (streamedPlan)
+        );
+        expect(completedStreamedPlan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
 
         const retainedBytes = createArtifactWithEmptyReadingSentinel();
         const result = await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
