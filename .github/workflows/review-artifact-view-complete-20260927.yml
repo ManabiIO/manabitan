@@ -1,0 +1,58 @@
+name: Artifact view complete imports
+on:
+  push:
+    branches: [review/artifact-view-complete-20260927]
+    paths: [.github/workflows/review-artifact-view-complete-20260927.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [segmented, control]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/artifact-view-complete-import-20260927.mjs /tmp/artifact-view-driver.mjs
+          git fetch --no-tags --depth=1 origin 3df9e379038b60aca21db1d00e522ab20e6fd959 05f960fceebc66202bc611b8638a52f6d8a8f885
+          git checkout --detach 3df9e379038b60aca21db1d00e522ab20e6fd959
+          mkdir -p dev/review builds/artifact-view-completion
+          cp /tmp/artifact-view-driver.mjs dev/review/artifact-view-complete-import-20260927.mjs
+          cp /tmp/artifact-view-driver.mjs builds/artifact-view-completion/executed-driver.mjs
+          git diff 3df9e379038b60aca21db1d00e522ab20e6fd959 05f960fceebc66202bc611b8638a52f6d8a8f885 -- ext/ > builds/artifact-view-completion/product.patch
+          test "$(git diff --name-only 3df9e379038b60aca21db1d00e522ab20e6fd959 05f960fceebc66202bc611b8638a52f6d8a8f885 -- ext/ | sort | tr '\n' ' ')" = "ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-lookup-index-preparation.js ext/js/dictionary/term-record-opfs-store.js "
+          git rev-parse HEAD > builds/artifact-view-completion/product-head.txt
+          node --check dev/review/artifact-view-complete-import-20260927.mjs
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/artifact-view-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/artifact-view-completion/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/artifact-view-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/artifact-view-completion/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifact-view-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/artifact-view-completion/
+          retention-days: 14
