@@ -63,6 +63,10 @@ const zip=new JSZip()
 const date=new Date('2026-01-01T00:00:00Z')
 zip.file('index.json',JSON.stringify({title,format:3,revision:'media-enum-20260927',sequenced:true}),{date})
 zip.file('term_bank_1.mbtb',termArtifact,{date,compression:'STORE'})
+zip.file('manabitan-import-artifact.json',JSON.stringify({
+    termBanks:[{artifact:'term_bank_1.mbtb',packedOffset:0,packedLength:termArtifact.length,rows:rowCount}],
+    includesMediaFiles:true,
+}),{date})
 zip.file('images/control.png',png,{date,compression:'STORE'})
 for(let i=0;i<extras;++i){zip.file(`resources/noise-${String(i).padStart(5,'0')}.dat`,new Uint8Array(0),{date,compression:'STORE'})}
 const fixture=await zip.generateAsync({type:'nodebuffer',compression:'STORE'})
