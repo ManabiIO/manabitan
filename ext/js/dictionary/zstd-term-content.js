@@ -815,17 +815,18 @@ export function finishWrappedTermContentZstdSpans(prepared) {
 /**
  * @param {Uint8Array} content
  * @param {string|null} dictName
+ * @param {{defaultHeapSize?: number, maxOutputSize?: number}} [options]
  * @returns {Uint8Array}
  * @throws {Error}
  */
-export function decompressTermContentZstd(content, dictName) {
+export function decompressTermContentZstd(content, dictName, options = {}) {
     if (!isInitialized || dctx === null) {
         throw new Error('Term content zstd not initialized');
     }
     if (dictName === 'jmdict' && jmdictDict !== null) {
-        return decompressUsingDict(dctx, content, jmdictDict);
+        return decompressUsingDict(dctx, content, jmdictDict, options);
     }
-    return decompress(content);
+    return decompress(content, options);
 }
 
 /**
