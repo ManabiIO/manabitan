@@ -71,3 +71,54 @@ test.each([
 
     expect(() => assertAccepts('dictionary', 'raw')).toThrow(failure)
 })
+
+
+test.each([
+    ['record data', 'queuedWriteError', false],
+    ['lookup index', 'lookupIndexWriteError', true],
+])('encoded append rechecks sticky %s failure after async format validation', async (_label, errorField, includeLookupIndex) => {
+    const store = new TermRecordOpfsStore()
+    const failure = new Error(`late ${errorField} failure`)
+    /** @type {Record<string, any>} */
+    const state = {
+        fileName: 'term-records-race.bin',
+        fileLength: 0,
+        initialFileLength: 0,
+        sharedContentDictName: null,
+        pendingWriteChunks: [],
+        pendingWriteBytes: 0,
+        pendingLookupIndexChunks: [],
+        pendingLookupIndexBytes: 0,
+        pendingLookupIndexRecordCount: 0,
+        lookupIndexChunkCount: 0,
+        lookupIndexWritePromise: null,
+        queuedWriteError: null,
+        lookupIndexWriteError: null,
+        generationId: new Uint8Array(16),
+    }
+    Reflect.set(store, '_validateShardAppendFormat', async () => {
+        await Promise.resolve()
+        state[errorField] = failure
+    })
+    Reflect.set(store, '_createBinaryHeader', () => Uint8Array.of(1, 2, 3))
+    Reflect.set(store, '_createLookupIndexChunk', () => Uint8Array.of(4, 5))
+
+    await expect(Reflect.get(store, '_appendEncodedChunk').call(
+        store,
+        /** @type {import('core').SafeAny} */ (state),
+        1,
+        1,
+        'raw',
+        0,
+        includeLookupIndex ? Uint8Array.of(9) : null,
+        includeLookupIndex ? Uint8Array.of(8) : null,
+    )).rejects.toBe(failure)
+
+    expect(state.sharedContentDictName).toBeNull()
+    expect(state.fileLength).toBe(0)
+    expect(state.pendingWriteChunks).toEqual([])
+    expect(state.pendingWriteBytes).toBe(0)
+    expect(state.pendingLookupIndexChunks).toEqual([])
+    expect(state.pendingLookupIndexBytes).toBe(0)
+    expect(state.pendingLookupIndexRecordCount).toBe(0)
+})

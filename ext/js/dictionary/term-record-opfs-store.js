@@ -5035,6 +5035,8 @@ export class TermRecordOpfsStore {
     ) {
         if (count <= 0) { return; }
         await this._validateShardAppendFormat(state);
+        if (state.queuedWriteError !== null) { throw state.queuedWriteError; }
+        if (state.lookupIndexWriteError !== null) { throw state.lookupIndexWriteError; }
         const firstRecord = this._recordsById.get(firstId) ?? null;
         const contentDictName = contentDictNameOverride ?? firstRecord?.entryContentDictName ?? 'raw';
         if (state.sharedContentDictName === null) {
@@ -5071,9 +5073,6 @@ export class TermRecordOpfsStore {
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
             state.pendingLookupIndexRecordCount += count;
-            if (state.lookupIndexWriteError !== null) {
-                throw state.lookupIndexWriteError;
-            }
             if (state.pendingLookupIndexBytes >= LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES) {
                 await this._flushPendingLookupIndexChunks(state, !this._importSessionActive);
             } else if (
