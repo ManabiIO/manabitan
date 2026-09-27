@@ -71,6 +71,17 @@ async function observe(plan) {
         await expect(page.locator('html')).toHaveAttribute('data-loaded','true',{timeout:30000})
         for(const other of context.pages()){if(other!==page&&other.url().endsWith('/welcome.html')){await other.close()}}
         await page.bringToFront()
+        const settingResults=await api(page,'modifySettings',{
+            targets:[{
+                action:'set',
+                path:'global.database.prefixWildcardsSupported',
+                value:true,
+                scope:'global',
+            }],
+            source:'prefix-reverse-benchmark',
+        })
+        assert.equal(settingResults.length,1)
+        assert.equal(settingResults[0].result,true)
         await page.locator('.settings-item[data-modal-action="show,dictionaries"]').click()
         await page.locator('#dictionary-import-button').click()
         await page.evaluate(()=>{
