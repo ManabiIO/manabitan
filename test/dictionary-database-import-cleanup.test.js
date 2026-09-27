@@ -281,6 +281,44 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(exec).toHaveBeenCalledWith('ROLLBACK');
     });
 
+
+    test('post-commit progress failures do not interrupt deletion cleanup', async () => {
+        const database = new DictionaryDatabase();
+        const deleteByDictionary = vi.fn().mockResolvedValue(3);
+        const cleanupTermContent = vi.spyOn(
+            database,
+            /** @type {never} */ ('_cleanupTermContentAfterDictionaryDelete'),
+        ).mockImplementation(resolveVoid);
+        const clearDirectTermIndexCaches = vi.spyOn(
+            database,
+            /** @type {never} */ ('_clearDirectTermIndexCaches'),
+        );
+        Reflect.set(database, '_db', {
+            exec: vi.fn(),
+            selectValue: vi.fn((sql) => (sql.includes('COUNT(*) FROM dictionaries') ? 1 : 0)),
+        });
+        Reflect.set(database, '_termRecordStore', {
+            ensureDictionariesLoaded: vi.fn(resolveVoid),
+            getDictionaryRecordCount: vi.fn(() => 3),
+            deleteByDictionary,
+        });
+
+        const progressFailure = new Error('progress channel closed');
+        let postCommitProgressCalls = 0;
+        const onProgress = vi.fn((progress) => {
+            if (progress.storesProcesed !== 8) { return; }
+            ++postCommitProgressCalls;
+            throw progressFailure;
+        });
+
+        await expect(database.deleteDictionary('JMdict', 1000, onProgress)).resolves.toBeUndefined();
+
+        expect(deleteByDictionary).toHaveBeenCalledWith('JMdict');
+        expect(cleanupTermContent).toHaveBeenCalledOnce();
+        expect(clearDirectTermIndexCaches).toHaveBeenCalledOnce();
+        expect(postCommitProgressCalls).toBe(2);
+    });
+
     test('resets the last dictionary content store only after metadata commits', async () => {
         const database = new DictionaryDatabase();
         const reset = vi.fn(resolveVoid);
@@ -345,6 +383,50 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(termRecordRollbackImportSession).toHaveBeenCalledOnce();
         expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
         expect(Reflect.get(database, '_deferTermsVirtualTableSync')).toBe(false);
+    });
+
+    test('keeps bulk-import ownership until all failed startup checkpoints settle', async () => {
+        const database = new DictionaryDatabase();
+        /** @type {() => void} */
+        let releaseRecordCheckpoint = () => {};
+        /** @type {Promise<void>} */
+        const recordCheckpointGate = new Promise((resolve) => {
+            releaseRecordCheckpoint = resolve;
+        });
+        const contentCheckpoint = vi.fn().mockRejectedValue(new Error('content checkpoint failed'));
+        const recordCheckpoint = vi.fn(async () => {
+            await recordCheckpointGate;
+            return {shards: []};
+        });
+        Reflect.set(database, '_db', {exec: vi.fn(), selectValue: vi.fn(() => 0)});
+        Reflect.set(database, '_termContentStore', {
+            createImportCheckpoint: contentCheckpoint,
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
+        });
+        Reflect.set(database, '_termRecordStore', {
+            createImportCheckpoint: recordCheckpoint,
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
+        });
+        Reflect.set(database, '_importJournal', {write: vi.fn(resolveVoid), clear: vi.fn(resolveVoid)});
+
+        let firstStartSettled = false;
+        const firstStart = database.startBulkImport();
+        void firstStart.then(
+            () => { firstStartSettled = true; },
+            () => { firstStartSettled = true; },
+        );
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
+
+        expect(firstStartSettled).toBe(false);
+        await expect(database.startBulkImport()).rejects.toThrow('A dictionary bulk import is already active');
+        expect(contentCheckpoint).toHaveBeenCalledOnce();
+        expect(recordCheckpoint).toHaveBeenCalledOnce();
+
+        releaseRecordCheckpoint();
+        await expect(firstStart).rejects.toThrow('content checkpoint failed');
+        expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
     });
 
     test('reserves bulk-import ownership before awaiting storage checkpoints', async () => {

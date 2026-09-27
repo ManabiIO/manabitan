@@ -313,7 +313,7 @@ const lzo1x = function lzo1x() {
                     this.match_next();
                     const ret = this.match();
                     if (ret !== this.OK) {
-                        return ret === this.EOF_FOUND ? this.OK : ret;
+                        return ret === this.EOF_FOUND ? this.eof_found() : ret;
                     }
                 }
                 else {
@@ -329,7 +329,7 @@ const lzo1x = function lzo1x() {
                     if (this.t >= 16) {
                         const ret = this.match();
                         if (ret !== this.OK) {
-                            return ret === this.EOF_FOUND ? this.OK : ret;
+                            return ret === this.EOF_FOUND ? this.eof_found() : ret;
                         }
                         continue;
                     }
@@ -363,7 +363,7 @@ const lzo1x = function lzo1x() {
                 }
                 const ret = this.match();
                 if (ret !== this.OK) {
-                    return ret === this.EOF_FOUND ? this.OK : ret;
+                    return ret === this.EOF_FOUND ? this.eof_found() : ret;
                 }
             }
             // eslint-disable-next-line
