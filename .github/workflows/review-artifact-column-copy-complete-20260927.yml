@@ -1,0 +1,55 @@
+name: Artifact column-copy complete imports
+on:
+  push:
+    branches: [review/artifact-column-copy-bench-20260927]
+    paths: [.github/workflows/review-artifact-column-copy-complete-20260927.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [large, small]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/artifact-column-copy-complete-import-20260927.mjs /tmp/driver.mjs
+          git fetch --no-tags --depth=1 origin 60695b51226f6b86978bfd5ea3f11c53fcf55f11 04ee0bc3937c278260bb42540d9927651b170a95
+          git checkout --detach 60695b51226f6b86978bfd5ea3f11c53fcf55f11
+          mkdir -p dev/review builds/artifact-columns
+          cp /tmp/driver.mjs dev/review/artifact-column-copy-complete-import-20260927.mjs
+          cp /tmp/driver.mjs builds/artifact-columns/executed-driver.mjs
+          git diff 60695b51226f6b86978bfd5ea3f11c53fcf55f11 04ee0bc3937c278260bb42540d9927651b170a95 -- ext/ > builds/artifact-columns/product.patch
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/artifact-column-copy-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/artifact-columns/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/artifact-column-copy-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/artifact-columns/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifact-columns-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/artifact-columns/
+          retention-days: 14
