@@ -145,6 +145,15 @@ describe('parser-prepared term lookup indexes', () => {
         const bytes = detached.get('0:1')?.bytes;
         if (bytes instanceof Uint8Array) { structuredClone(bytes, {transfer: [bytes.buffer]}); }
         expect(hasCompletePreparedTermLookupIndexes(detached, 1)).toBe(false);
+
+        const malformedOffsets = prepareTermLookupIndexesFromPreinternedPlan(createChunk(1))?.indexes ?? new Map();
+        const malformedPlan = malformedOffsets.get('0:1')?.preinternedPlan;
+        expect(malformedPlan?.stringOffsets).toBeInstanceOf(Uint32Array);
+        if (malformedPlan?.stringOffsets instanceof Uint32Array) {
+            const originalOffset = malformedPlan.stringOffsets[1];
+            malformedPlan.stringOffsets[1] = originalOffset + 1;
+        }
+        expect(hasCompletePreparedTermLookupIndexes(malformedOffsets, 1)).toBe(false);
     });
 });
 
