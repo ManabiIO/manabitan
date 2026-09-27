@@ -491,6 +491,54 @@ describe('TermContentOpfsStore', () => {
         expect(fileBytesByName.get(segmentName)).toStrictEqual(new Uint8Array([4, 5, 6]));
     });
 
+    test('rejects an unsafe persisted segment map before publishing offsets', async () => {
+        const store = new TermContentOpfsStore();
+        const firstHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            kind: 'file',
+            getFile: vi.fn(async () => ({size: Number.MAX_SAFE_INTEGER})),
+        }));
+        const secondHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            kind: 'file',
+            getFile: vi.fn(async () => ({size: 1})),
+        }));
+        const root = /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+            async *entries() {
+                yield ['manabitan-term-content.bin', firstHandle];
+                yield ['manabitan-term-content^1.bin', secondHandle];
+            },
+        }));
+
+        await expect(Reflect.get(store, '_loadSegmentStates').call(store, root))
+            .rejects.toThrow(/safe integer range/u);
+        expect(Reflect.get(store, '_segmentStates')).toStrictEqual([]);
+    });
+
+    test('segmented length overflow does not partially rewrite existing start offsets', () => {
+        const store = new TermContentOpfsStore();
+        const first = {
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: {},
+            fileLength: Number.MAX_SAFE_INTEGER,
+            startOffset: 111,
+            readFile: null,
+        };
+        const second = {
+            index: 1,
+            fileName: 'manabitan-term-content^1.bin',
+            fileHandle: {},
+            fileLength: 1,
+            startOffset: 222,
+            readFile: null,
+        };
+        Reflect.set(store, '_segmentStates', [first, second]);
+
+        expect(() => Reflect.get(store, '_computeSegmentedLength').call(store))
+            .toThrow(/safe integer range/u);
+        expect(first.startOffset).toBe(111);
+        expect(second.startOffset).toBe(222);
+    });
+
     test('rejects an unsafe in-memory append before mutating storage state', async () => {
         const store = new TermContentOpfsStore();
         Reflect.set(store, '_length', Number.MAX_SAFE_INTEGER - 1);
