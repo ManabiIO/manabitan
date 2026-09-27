@@ -1,4 +1,4 @@
-name: Artifact column-copy complete imports
+name: Artifact column-copy complete imports\n# rerun: digest syntax fixed
 on:
   push:
     branches: [review/artifact-column-copy-bench-20260927]
