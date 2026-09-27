@@ -95,7 +95,15 @@ async function observe(plan){
     const counts=(await api(page,'getDictionaryCounts',{dictionaryNames:[title],getTotal:false})).counts[0];assert.equal(counts.terms,spec.rows)
     const ids=[0,1,Math.floor(spec.rows/2),spec.rows-1];const content=[]
     for(const i of ids){const found=await api(page,'termsFind',{text:terms[i],details:{matchType:'exact',deinflect:false,primaryReading:''},optionsContext:{depth:0,url:page.url()}});assert.ok(JSON.stringify(found).includes(`definition ${i} 日本語`));content.push(found)}
-    const hashes=await page.evaluate(async(paths)=>{const digest=async(path)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await(await fetch('/'+path.replace(/^ext\//,'')).arrayBuffer()))].map((x)=>x.toString(16).padStart(2,'0')).join('');return Object.fromEntries(await Promise.all(paths.map(async(p)=>[p,await digest(p)])))},paths)
+    const hashes=await page.evaluate(async(paths)=>{
+      const digest=async(path)=>{
+        const response=await fetch('/'+path.replace(/^ext\//,''))
+        const bytes=await response.arrayBuffer()
+        const digested=await crypto.subtle.digest('SHA-256',bytes)
+        return [...new Uint8Array(digested)].map((x)=>x.toString(16).padStart(2,'0')).join('')
+      }
+      return Object.fromEntries(await Promise.all(paths.map(async(p)=>[p,await digest(p)])))
+    },paths)
     for(const p of paths)assert.equal(hashes[p],report.moduleHashes[plan.arm][p])
     assert.deepEqual(pageErrors,[])
     return {...plan,elapsedMs,counts,contentDigest:hash(JSON.stringify(content)),debug:timing.debug,hashes,browser:context.browser()?.version(),pageErrors}
