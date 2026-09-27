@@ -812,7 +812,11 @@ describe('TermRecordOpfsStore', () => {
         await expect(drain).rejects.toBe(writeError);
 
         expect(state.queuedWriteChunks).toStrictEqual([]);
-        Reflect.get(store, '_queueWriteChunksForShard').call(store, state, [new Uint8Array([3])]);
+        expect(() => Reflect.get(store, '_queueWriteChunksForShard').call(
+            store,
+            state,
+            [new Uint8Array([3])],
+        )).toThrow(writeError);
         expect(state.queuedWriteChunks).toStrictEqual([]);
         await expect(Reflect.get(store, '_awaitQueuedWritesForShard').call(store, state)).rejects.toBe(writeError);
     });
