@@ -1,5 +1,5 @@
 name: Prefix reverse complete imports
-# rerun after driver syntax repair
+# rerun after explicit prefix-wildcard enablement
 on:
   push:
     branches: [review/prefix-reverse-complete-20260926]
