@@ -1,0 +1,56 @@
+name: Artifact media enumeration complete imports
+on:
+  push:
+    branches: [review/artifact-media-enum-bench-20260927]
+    paths: [.github/workflows/review-artifact-media-enum-complete-20260927.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [many, medium, small]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/artifact-media-enum-complete-import-20260927.mjs /tmp/media-enum-driver.mjs
+          git fetch --no-tags --depth=1 origin 60695b51226f6b86978bfd5ea3f11c53fcf55f11 a95f7fe7059ed78b9d2f09ae045dd82bd567f0e7
+          git checkout --detach 60695b51226f6b86978bfd5ea3f11c53fcf55f11
+          mkdir -p dev/review builds/artifact-media-enum
+          cp /tmp/media-enum-driver.mjs dev/review/artifact-media-enum-complete-import-20260927.mjs
+          cp /tmp/media-enum-driver.mjs builds/artifact-media-enum/executed-driver.mjs
+          git diff 60695b51226f6b86978bfd5ea3f11c53fcf55f11 a95f7fe7059ed78b9d2f09ae045dd82bd567f0e7 -- ext/ > builds/artifact-media-enum/product.patch
+          test "$(git diff --name-only 60695b51226f6b86978bfd5ea3f11c53fcf55f11 a95f7fe7059ed78b9d2f09ae045dd82bd567f0e7 -- ext/)" = ext/js/dictionary/dictionary-importer.js
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/artifact-media-enum-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/artifact-media-enum/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort with unchanged-code controls
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/artifact-media-enum-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/artifact-media-enum/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifact-media-enum-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/artifact-media-enum/
+          retention-days: 14
