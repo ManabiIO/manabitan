@@ -1,0 +1,17 @@
+name: Zstd output bound focused check
+on:
+  push:
+    branches: [review/zstd-output-bound-20260927]
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Run zstd wrapper tests
+        run: npx vitest run test/zstd-wasm.test.js
