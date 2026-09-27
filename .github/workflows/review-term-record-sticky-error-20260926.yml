@@ -1,0 +1,17 @@
+name: Term-record sticky error reproduction
+on:
+  push:
+    branches: [review/term-record-sticky-error-20260926]
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Run focused regression
+        run: npx vitest run test/term-record-queued-write-error.test.js
