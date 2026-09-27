@@ -439,7 +439,7 @@ static uint32_t key_hex4(const uint8_t* p);
 /* Compare a short ASCII keyword without allocating or decoding an arbitrary
  * JSON string. Escapes and literal characters have the same field identity.
  * end is a logical token/bank boundary, never the size of the WASM heap. */
-static int json_string_matches_ascii(
+static int json_string_matches_ascii_escaped(
     const uint8_t* src, uint32_t start, uint32_t end,
     const char* keyword, uint32_t keyword_length
 ) {
@@ -452,6 +452,25 @@ static int json_string_matches_ascii(
             if (end - i < 5u || src[i] != 'u') { return 0; }
             c = key_hex4(src + i + 1u);
             i += 5u;
+        }
+        if (c != (uint8_t)keyword[k]) { return 0; }
+    }
+    return i < end && src[i] == '"';
+}
+
+/* Keep the common literal comparison small enough to specialize at each call
+ * site. Escaped spellings still use the same complete bounded decoder. */
+static __attribute__((always_inline)) inline int json_string_matches_ascii(
+    const uint8_t* src, uint32_t start, uint32_t end,
+    const char* keyword, uint32_t keyword_length
+) {
+    if (start >= end || src[start] != '"') { return 0; }
+    uint32_t i = start + 1u;
+    for (uint32_t k = 0u; k < keyword_length; ++k) {
+        if (i >= end) { return 0; }
+        const uint8_t c = src[i++];
+        if (c == '\\') {
+            return json_string_matches_ascii_escaped(src, start, end, keyword, keyword_length);
         }
         if (c != (uint8_t)keyword[k]) { return 0; }
     }
@@ -706,11 +725,20 @@ static int parse_int32_token(
 
 static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index, uint32_t start, uint32_t end) {
     uint32_t length = end > start ? (end - start) : 0u;
+    const int string_token = length >= 2u && src[start] == '"' && src[end - 1u] == '"';
     switch (field_index) {
-        case 0: meta->expression_start = start; meta->expression_length = length; break;
-        case 1: meta->reading_start = start; meta->reading_length = length; break;
-        case 2: meta->definition_tags_start = start; meta->definition_tags_length = length; break;
-        case 3: meta->rules_start = start; meta->rules_length = length; break;
+        case 0:
+            if (!string_token) { return 0; }
+            meta->expression_start = start; meta->expression_length = length; break;
+        case 1:
+            if (!string_token) { return 0; }
+            meta->reading_start = start; meta->reading_length = length; break;
+        case 2:
+            if (!string_token && !is_null_token(src, start, length)) { return 0; }
+            meta->definition_tags_start = start; meta->definition_tags_length = length; break;
+        case 3:
+            if (!string_token) { return 0; }
+            meta->rules_start = start; meta->rules_length = length; break;
         case 4:
             if (!is_valid_json_number(src, start, end)) { return 0; }
             meta->score_start = start; break;
@@ -719,7 +747,9 @@ static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index
             if (is_null_token(src, start, length)) { meta->sequence_start = 0xffffffffu; break; }
             if (!is_valid_json_number(src, start, end)) { return 0; }
             meta->sequence_start = start; break;
-        case 7: meta->term_tags_start = start; meta->term_tags_length = length; break;
+        case 7:
+            if (!string_token) { return 0; }
+            meta->term_tags_start = start; meta->term_tags_length = length; break;
         default: break;
     }
     return 1;
@@ -1923,13 +1953,22 @@ int32_t build_term_string_plan(
             }
             const uint32_t token_start = token_starts[field];
             const uint32_t token_length = token_lengths[field];
+            const uint8_t* value_source = src;
+            uint32_t value_start = token_start + 1u;
+            uint32_t value_length = token_length - 2u;
             if (json_string_token_has_escape(src, token_start, token_length)) {
-                return -4;
+                // Decode into the unused arena tail. A failed attempt is never
+                // published; retain the JavaScript fallback for unusual keys.
+                const int32_t decoded_length = decode_escaped_key(
+                    src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
+                );
+                if (decoded_length < 0 || (uint32_t)decoded_length > MAX_INTERNED_KEY_BYTES) { return -4; }
+                value_source = strings;
+                value_start = strings_cursor;
+                value_length = (uint32_t)decoded_length;
             }
-            const uint32_t value_start = token_start + 1u;
-            const uint32_t value_length = token_length - 2u;
             if (value_length > MAX_INTERNED_KEY_BYTES) { return -5; }
-            const uint32_t hash = hash_content_xxh32(src + value_start, value_length, FNV1A_OFFSET);
+            const uint32_t hash = hash_content_xxh32(value_source + value_start, value_length, FNV1A_OFFSET);
             uint32_t slot = mix_string_hash(hash, value_length) & table_mask;
             uint32_t matched_index = 0xffffffffu;
             for (uint32_t probes = 0u; probes < hash_table_size; ++probes) {
@@ -1943,7 +1982,7 @@ int32_t build_term_string_plan(
                     content_bytes_equal_between(
                         strings,
                         string_offsets[candidate],
-                        src,
+                        value_source,
                         value_start,
                         value_length
                     )
@@ -1964,8 +2003,10 @@ int32_t build_term_string_plan(
             ) {
                 return -2;
             }
-            for (uint32_t i = 0u; i < value_length; ++i) {
-                strings[strings_cursor + i] = src[value_start + i];
+            if (value_source != strings) {
+                for (uint32_t i = 0u; i < value_length; ++i) {
+                    strings[strings_cursor + i] = value_source[value_start + i];
+                }
             }
             string_lengths[unique_count] = (uint16_t)value_length;
             string_offsets[unique_count] = strings_cursor;

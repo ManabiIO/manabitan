@@ -449,6 +449,20 @@ function decodeJsonNumberToken(source, start) {
         if (value === U8_COMMA || value === 0x5d || value === 0x7d || isJsonWhitespace(value)) { break; }
         ++end;
     }
+    const negative = source[start] === 0x2d;
+    const digitsStart = negative ? start + 1 : start;
+    // Every step of a <=15-digit integer conversion is exact. Keep longer
+    // tokens on Number's existing path, including fractions and exponents.
+    if (end > digitsStart && end - digitsStart <= 15) {
+        let integer = 0;
+        let i = digitsStart;
+        for (; i < end; ++i) {
+            const digit = source[i] - 0x30;
+            if (digit < 0 || digit > 9) { break; }
+            integer = integer * 10 + digit;
+        }
+        if (i === end) { return negative ? -integer : integer; }
+    }
     const value = Number(decodeParserText(source.subarray(start, end)));
     if (!Number.isFinite(value)) {
         throw new RangeError('Term-bank number must be finite');
@@ -2037,7 +2051,13 @@ null :
                 // without being the same raw reading token. Preserve the fused
                 // parser's flag, matching the established JavaScript fallback.
                 const readingEqualsExpression = fusedStringPlan === null ?
-                    readingIndex === expressionIndex :
+                    (
+                        readingIndex === expressionIndex &&
+                        (
+                            isEmptyJsonStringToken(source, metas[o + 2], metas[o + 3]) ||
+                            tokenBytesEqual(source, metas[o], metas[o + 1], metas[o + 2], metas[o + 3])
+                        )
+                    ) :
                     readingEqualsExpressionList[i] === 1;
                 readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
                 if (emitTermByteLists) {
@@ -3083,6 +3103,10 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
             cleanup();
             reject(new Error(event.message || 'Term-bank parser worker initialization failed'));
         };
+        const onMessageError = () => {
+            cleanup();
+            reject(new Error('Term-bank parser worker initialization returned an invalid message'));
+        };
         const onAbort = () => {
             cleanup();
             reject(createParallelParserCancellationError());
@@ -3091,10 +3115,12 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
             clearTimeout(timeoutId);
             worker.removeEventListener('message', onMessage);
             worker.removeEventListener('error', onError);
+            worker.removeEventListener('messageerror', onMessageError);
             signal.removeEventListener('abort', onAbort);
         };
         worker.addEventListener('message', onMessage);
         worker.addEventListener('error', onError);
+        worker.addEventListener('messageerror', onMessageError);
         signal.addEventListener('abort', onAbort, {once: true});
         try {
             if (signal.aborted) {

@@ -602,10 +602,11 @@ describe('explicit fused parser bypass', () => {
 
 
 describe('compression experiment admission', () => {
-    test.each(['experimentalGenericSpanCompression'])('requires literal true: %s', (key) => {
+    test.each(['experimentalGenericSpanCompression'])('defaults on and preserves explicit opt-out: %s', (key) => {
         const name = /** @type {keyof Experiments} */ (key)
-        expect(snapshotTermBankExperiments()[name]).toBe(false)
-        for (const value of [false, 0, 1, null, undefined, 'true', {}]) {
+        expect(snapshotTermBankExperiments()[name]).toBe(true)
+        expect(snapshotTermBankExperiments({[name]: undefined})[name]).toBe(true)
+        for (const value of [false, 0, 1, null, 'true', {}]) {
             const options = /** @type {Experiments} */ (/** @type {unknown} */ ({[name]: value}))
             expect(snapshotTermBankExperiments(options)[name]).toBe(false)
         }

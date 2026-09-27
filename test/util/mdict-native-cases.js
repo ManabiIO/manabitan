@@ -1117,6 +1117,36 @@ describe('MDict selector literal preservation', () => {
     }
 });
 
+describe('MDict redirect target non-ASCII whitespace identity', () => {
+    test('preserves NBSP in redirect targets while retaining ASCII syntax trimming', async () => {
+        const nbsp = '\u00a0';
+        const fixture = makeMdictFixture([
+            {key: `${nbsp}target`, value: 'leading NBSP definition'},
+            {key: 'target', value: 'plain definition'},
+            {key: `target${nbsp}`, value: 'trailing NBSP definition'},
+            {key: 'AliasLeading', value: `@@@LINK=${nbsp}target`},
+            {key: 'AliasPlain', value: '@@@LINK= target '},
+            {key: 'AliasTrailing', value: `@@@LINK=target${nbsp}`},
+        ], {keyCaseSensitive: 'Yes', stripKey: 'No', keysPerBlock: 1});
+        const result = await createMdxImportData('redirect-nonascii-whitespace.mdx', {}, fixture.bytes, []);
+        const rows = readRows(result.files);
+        /**
+         * @param {string} term
+         * @returns {string}
+         */
+        const definitionsFor = (term) => JSON.stringify(rows.filter(([expression]) => expression === term));
+
+        assert.match(definitionsFor('AliasLeading'), /leading NBSP definition/u);
+        assert.doesNotMatch(definitionsFor('AliasLeading'), /plain definition|trailing NBSP definition/u);
+        assert.match(definitionsFor('AliasPlain'), /plain definition/u);
+        assert.doesNotMatch(definitionsFor('AliasPlain'), /leading NBSP definition|trailing NBSP definition/u);
+        assert.match(definitionsFor('AliasTrailing'), /trailing NBSP definition/u);
+        assert.doesNotMatch(definitionsFor('AliasTrailing'), /leading NBSP definition|plain definition/u);
+        const details = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:encode-banks')?.details;
+        assert.equal(details?.unresolvedRedirectCount, 0);
+    });
+});
+
 describe('MDict literal key whitespace identity', () => {
     test('direct lookup preserves leading and trailing whitespace when StripKey=No', () => {
         const fixture = makeMdictFixture([

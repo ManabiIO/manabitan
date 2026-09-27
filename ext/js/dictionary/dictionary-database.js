@@ -45,6 +45,7 @@ import {
     encodeRawTermContentBinary,
     getRawTermContentGlossaryJsonBytes,
     isRawTermContentBinary,
+    isValidRawTermContentBinary,
     isRawTermContentSharedGlossaryBinary,
     isRawTermContentTokenBinary,
     isValidRawTermContentSharedGlossaryBinary,
@@ -1966,11 +1967,28 @@ export class DictionaryDatabase {
         this._termsVirtualTableDirty = true;
         progressData.processed += deletedTerms;
         ++progressData.storesProcesed;
-        onProgress(progressData);
+        /**
+         * Progress delivery is not part of the durable deletion boundary. Once
+         * SQLite has committed, a callback failure must not skip required OPFS
+         * cleanup or leave the live worker's caches describing deleted data.
+         * @param {string} phase
+         */
+        const reportPostCommitProgress = (phase) => {
+            try {
+                onProgress(progressData);
+            } catch (error) {
+                reportDiagnostics('dictionary-delete-progress-failed', {
+                    dictionaryName,
+                    phase,
+                    error: toError(error).message,
+                });
+            }
+        };
+        reportPostCommitProgress('term-record-delete');
 
         await this._cleanupTermContentAfterDictionaryDelete();
 
-        onProgress(progressData);
+        reportPostCommitProgress('term-content-cleanup');
         this._termEntryContentCache.clear();
         this._termEntryContentIdByHash.clear();
         this._clearTermEntryContentMetaCaches();
@@ -5071,7 +5089,7 @@ null;
         let pendingContentBytes = [];
         /** @type {(string|null)[]} */
         let pendingContentDictNames = [];
-        /** @type {Map<string, number>|null} */
+        /** @type {Map<string, number|number[]>|null} */
         let pendingContentRowIndexByHash = shouldDedupWithinBatch ? new Map() : null;
 
         if (useLocalTransaction) {
@@ -5228,6 +5246,10 @@ null;
             };
 
             for (let i = start, ii = start + count; i < ii; ++i) {
+                // Both cached and new content must honor the same staging bound.
+                if (stagedRows.length >= stagingBatchSize) {
+                    await flushStagedRows();
+                }
                 ++processedRowCount;
                 const row = /** @type {import('dictionary-database').DatabaseTermEntry} */ (items[i]);
                 const tComputeStart = safePerformance.now();
@@ -5279,13 +5301,21 @@ null;
                 }
 
                 let pendingContentIndex = -1;
+                /** @type {number|number[]|undefined} */
+                let pendingHashCandidates;
                 if (pendingContentRowIndexByHash !== null && contentHash !== null) {
-                    const existingPendingContentIndex = pendingContentRowIndexByHash.get(contentHash);
-                    if (
-                        typeof existingPendingContentIndex === 'number' &&
-                        this._termContentBytesEqual(pendingContentBytes[existingPendingContentIndex], contentBytes)
-                    ) {
-                        pendingContentIndex = existingPendingContentIndex;
+                    pendingHashCandidates = /** @type {number|number[]|undefined} */ (pendingContentRowIndexByHash.get(contentHash));
+                    if (typeof pendingHashCandidates === 'number') {
+                        if (this._termContentBytesEqual(pendingContentBytes[pendingHashCandidates], contentBytes)) {
+                            pendingContentIndex = pendingHashCandidates;
+                        }
+                    } else if (Array.isArray(pendingHashCandidates)) {
+                        for (const candidateIndex of pendingHashCandidates) {
+                            if (this._termContentBytesEqual(pendingContentBytes[candidateIndex], contentBytes)) {
+                                pendingContentIndex = candidateIndex;
+                                break;
+                            }
+                        }
                     }
                 }
                 if (pendingContentIndex < 0) {
@@ -5293,7 +5323,13 @@ null;
                     compressContentMs += safePerformance.now() - tCompressStart;
                     pendingContentIndex = pendingContentBytes.length;
                     if (pendingContentRowIndexByHash !== null && contentHash !== null) {
-                        pendingContentRowIndexByHash.set(contentHash, pendingContentIndex);
+                        if (typeof pendingHashCandidates === 'number') {
+                            pendingContentRowIndexByHash.set(contentHash, [pendingHashCandidates, pendingContentIndex]);
+                        } else if (Array.isArray(pendingHashCandidates)) {
+                            pendingHashCandidates.push(pendingContentIndex);
+                        } else {
+                            pendingContentRowIndexByHash.set(contentHash, pendingContentIndex);
+                        }
                     }
                     pendingContentHashes.push(contentHash);
                     pendingContentHash1s.push(contentHash1);
@@ -5315,10 +5351,6 @@ null;
                         `[manabitan-db-import] bulkAdd terms progress rows=${processedRowCount}/${count} ` +
                         `cached=${resolvedFromCacheCount} pendingUnique=${pendingContentBytes.length}`,
                     );
-                }
-
-                if (stagedRows.length >= stagingBatchSize) {
-                    await flushStagedRows();
                 }
             }
             await flushStagedRows();
@@ -7045,13 +7077,11 @@ this._readTermContentSignature(
             } else if (existing.offset !== offset) {
                 if (
                     typeof existing.signature1 === 'number' &&
-                    typeof meta.signature1 === 'number' &&
-                    (
-                        existing.signature1 !== meta.signature1 ||
-                        existing.signature2 !== meta.signature2 ||
-                        existing.signature3 !== meta.signature3
-                    )
+                    typeof meta.signature1 === 'number'
                 ) {
+                    // Signatures reject obvious non-matches but are not content
+                    // identities. Preserve every fully-signed same-hash
+                    // candidate so an exact byte comparison can still reach it.
                     const key = `${hash1 >>> 0}:${hash2 >>> 0}`;
                     let collisions = this._termEntryContentMetaCollisionsByHashPair.get(key);
                     if (typeof collisions === 'undefined') {
@@ -7167,7 +7197,6 @@ this._readTermContentSignature(
                     const contentJson = row.termEntryContentJson ?? this._serializeTermEntryContent(rules, definitionTags, termTags, row.glossary);
                     contentChunks[j] = this._textEncoder.encode(contentJson);
                 }
-                let chunksToAppend = contentChunks;
                 const tContentAppendStart = safePerformance.now();
                 if (this._importDebugLogging) {
                     const debugStateBeforeAppend = this._termContentStore.getDebugState();
@@ -7181,7 +7210,6 @@ this._readTermContentSignature(
                         contentChunks,
                         this._rawTermContentPackTargetBytes,
                     );
-                    chunksToAppend = packedChunks;
                     /** @type {number[]} */
                     const packedOffsets = new Array(packedChunks.length);
                     /** @type {number[]} */
@@ -7216,21 +7244,40 @@ this._readTermContentSignature(
                     }
                 }
                 contentAppendMs += safePerformance.now() - tContentAppendStart;
-                const explicitContentDictName = chunkCount > 0 ? (items[i].termEntryContentDictName ?? null) : null;
-                let contentDictName = 'raw';
-                if (
-                    this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                    typeof explicitContentDictName === 'string' &&
-                    explicitContentDictName.length > 0
-                ) {
-                    contentDictName = explicitContentDictName;
-                } else if (
-                    this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                    chunksToAppend.every((contentBytes) => isRawTermContentBinary(contentBytes))
-                ) {
-                    contentDictName = RAW_TERM_CONTENT_DICT_NAME;
+                /** @type {string} */
+                let uniformContentDictName = 'raw';
+                /** @type {(string|null)[]|null} */
+                let contentDictNames = null;
+                if (this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES) {
+                    for (let j = 0; j < chunkCount; ++j) {
+                        const explicitContentDictName = items[i + j].termEntryContentDictName ?? null;
+                        const resolvedContentDictName = (
+                            typeof explicitContentDictName === 'string' &&
+                            explicitContentDictName.length > 0
+                        ) ?
+                            explicitContentDictName :
+                            (isValidRawTermContentBinary(contentChunks[j]) ? RAW_TERM_CONTENT_DICT_NAME : 'raw');
+                        if (j === 0) {
+                            uniformContentDictName = resolvedContentDictName;
+                            continue;
+                        }
+                        if (contentDictNames === null && resolvedContentDictName !== uniformContentDictName) {
+                            contentDictNames = new Array(chunkCount);
+                            contentDictNames.fill(uniformContentDictName, 0, j);
+                        }
+                        if (contentDictNames !== null) {
+                            contentDictNames[j] = resolvedContentDictName;
+                        }
+                    }
                 }
-                const metrics = await this._termRecordStore.appendBatchFromImportTermEntriesResolvedContent(items, i, chunkCount, contentOffsets, contentLengths, contentDictName);
+                const metrics = await this._termRecordStore.appendBatchFromImportTermEntriesResolvedContent(
+                    items,
+                    i,
+                    chunkCount,
+                    contentOffsets,
+                    contentLengths,
+                    contentDictNames ?? uniformContentDictName,
+                );
                 termRecordBuildMs += metrics.buildRecordsMs;
                 termRecordEncodeMs += metrics.encodeMs;
                 termRecordWriteMs += metrics.appendWriteMs;
@@ -7407,7 +7454,7 @@ this._readTermContentSignature(
                         resolvedContentDictName = explicitContentDictName;
                     } else if (
                         this._termContentStorageMode === TERM_CONTENT_STORAGE_MODE_RAW_BYTES &&
-                        isRawTermContentBinary(contentChunks[i])
+                        isValidRawTermContentBinary(contentChunks[i])
                     ) {
                         resolvedContentDictName = RAW_TERM_CONTENT_DICT_NAME;
                     } else {
@@ -11213,7 +11260,7 @@ null :
                     if (typeof override === 'string' && override.length > 0) {
                         return override;
                     }
-                    return isRawTermContentBinary(contentBytes) ?
+                    return isValidRawTermContentBinary(contentBytes) ?
                         RAW_TERM_CONTENT_DICT_NAME :
                         (isValidRawTermContentSharedGlossaryBinary(contentBytes) ? RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME : 'raw');
                 }),

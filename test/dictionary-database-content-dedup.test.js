@@ -1026,6 +1026,29 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         await expect(findMatching(123, 456, secondBytes)).resolves.toMatchObject({offset: 20});
     });
 
+    test('retains byte-distinct same-hash candidates with identical sampled signatures', async () => {
+        const database = new DictionaryDatabase();
+        const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
+        const findMatching = Reflect.get(database, '_findMatchingTermEntryContentMeta').bind(database);
+        const firstBytes = Uint8Array.from({length: 16}, (_, index) => index);
+        const secondBytes = Uint8Array.from(firstBytes);
+        // The three sampled signatures cover offsets 0..3, 6..9, and 12..15.
+        // Change only an unsampled byte so both candidates have identical
+        // signatures despite different exact content.
+        secondBytes[4] ^= 0xff;
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', vi.fn(async (offset) => ({
+            status: 'ok',
+            bytes: offset === 10 ? firstBytes : secondBytes,
+        })));
+
+        cache(null, 10, firstBytes.byteLength, 'raw', 0, 123, 456, firstBytes);
+        cache(null, 20, secondBytes.byteLength, 'raw', 0, 123, 456, secondBytes);
+
+        await expect(findMatching(123, 456, firstBytes)).resolves.toMatchObject({offset: 10});
+        await expect(findMatching(123, 456, secondBytes)).resolves.toMatchObject({offset: 20});
+        expect(Reflect.get(database, '_termEntryContentMetaCollisionsByHashPair').get('123:456')).toHaveLength(1);
+    });
+
     test('does not trust matching hashes and sampled signatures without exact bytes', async () => {
         const database = new DictionaryDatabase();
         const cache = Reflect.get(database, '_cacheTermEntryContentMeta').bind(database);
