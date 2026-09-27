@@ -1,0 +1,16 @@
+name: Term-record sticky admission red check
+on:
+  push:
+    branches: [review/term-record-sticky-admission-red-20260926]
+permissions:
+  contents: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - run: npx vitest run test/term-record-queued-write-error.test.js
