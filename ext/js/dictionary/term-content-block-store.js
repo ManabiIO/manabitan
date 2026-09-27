@@ -633,7 +633,10 @@ export class TermContentBlockStore {
         let block;
         try {
             // zstd-wasm reuses its output heap between calls.
-            block = Uint8Array.from(decompressTermContentZstd(compressed, compressionDictName));
+            block = Uint8Array.from(decompressTermContentZstd(compressed, compressionDictName, {
+                defaultHeapSize: reference.blockUncompressedLength,
+                maxOutputSize: reference.blockUncompressedLength,
+            }));
         } catch (error) {
             this._recordError('term-content-block-decompress-error', {
                 ...context,
