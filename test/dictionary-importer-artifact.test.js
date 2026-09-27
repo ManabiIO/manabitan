@@ -16,6 +16,7 @@ import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
 } from '../ext/js/dictionary/raw-term-content.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
+import {getTermRecordPreinternedPlan} from '../ext/js/dictionary/term-record-preinterned-plan.js';
 
 /**
  * @param {Uint8Array} [content]
@@ -101,6 +102,52 @@ describe('DictionaryImporter term artifacts', () => {
             .toBe(chunk.termRecordPreinternedPlan.expressionIndexes[0]);
         expect(bytes).toStrictEqual(originalBytes);
         expect(chunk.termRecordPreinternedPlan.readingIndexes.buffer).not.toBe(bytes.buffer);
+    });
+
+    test('borrows the preinterned string arena only for awaited streaming chunks', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const streamedBytes = createArtifactWithEmptyReadingSentinel();
+        /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} */
+        let streamedPlan = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            streamedBytes,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {Record<string, import('core').SafeAny>} chunk */
+            async (chunk) => {
+                streamedPlan = /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (chunk.termRecordPreinternedPlan);
+                await Promise.resolve();
+                expect(streamedPlan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
+            },
+            0,
+            0,
+            true,
+            1,
+            'raw-v4',
+        );
+
+        expect(streamedPlan).not.toBeNull();
+        const completedStreamedPlan = /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (
+            /** @type {unknown} */ (streamedPlan)
+        );
+        expect(completedStreamedPlan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
+
+        const retainedBytes = createArtifactWithEmptyReadingSentinel();
+        const result = await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            retainedBytes,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+        );
+        const retainedPlan = getTermRecordPreinternedPlan(result.termList);
+        expect(retainedPlan).not.toBeNull();
+        expect(retainedPlan?.stringsBuffer.buffer).not.toBe(retainedBytes.buffer);
     });
 
 
