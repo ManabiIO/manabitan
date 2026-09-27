@@ -985,7 +985,7 @@ export class TermContentOpfsStore {
             for (const state of states) {
                 const file = await state.fileHandle.getFile();
                 snapshots.push({state, file, startOffset});
-                startOffset += file.size;
+                startOffset = addSafeByteLength(startOffset, file.size);
             }
             if (generation !== this._readStateGeneration || states !== this._segmentStates) { return; }
             this._assertReadableSegmentGrowth(snapshots.map(({state, file}) => ({
