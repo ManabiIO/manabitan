@@ -1,0 +1,57 @@
+name: Streaming artifact arena complete imports
+on:
+  push:
+    branches: [review/streaming-arena-complete-20260927]
+    paths: [.github/workflows/review-streaming-arena-complete-20260927.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [large-arena, small-arena]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/streaming-arena-complete-import-20260927.mjs /tmp/driver.mjs
+          git fetch --no-tags --depth=1 origin d10dd947645b3340a387d2af18892b1fd9fdd4a9 f304910cbbcf552d7881db10abf65fa1bc84bd20
+          git checkout --detach d10dd947645b3340a387d2af18892b1fd9fdd4a9
+          mkdir -p dev/review builds/streaming-arena-completion
+          cp /tmp/driver.mjs dev/review/streaming-arena-complete-import-20260927.mjs
+          cp /tmp/driver.mjs builds/streaming-arena-completion/executed-driver.mjs
+          git diff d10dd947645b3340a387d2af18892b1fd9fdd4a9 f304910cbbcf552d7881db10abf65fa1bc84bd20 -- ext/ > builds/streaming-arena-completion/product.patch
+          test "$(git diff --name-only d10dd947645b3340a387d2af18892b1fd9fdd4a9 f304910cbbcf552d7881db10abf65fa1bc84bd20 -- ext/)" = ext/js/dictionary/dictionary-importer.js
+          git rev-parse HEAD > builds/streaming-arena-completion/product-head.txt
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms and persistent readback
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/streaming-arena-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/streaming-arena-completion/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/streaming-arena-complete-import-20260927.mjs "$WORKLOAD" 2>&1 | tee "builds/streaming-arena-completion/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: streaming-arena-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/streaming-arena-completion/
+          retention-days: 14
