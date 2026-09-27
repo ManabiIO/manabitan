@@ -58,3 +58,38 @@ for (const {name, css} of cases) {
         assert.ok(!stylesheet.includes('.after{color:blue}'), stylesheet);
     });
 }
+
+
+const escapeCases = [
+    {
+        name: 'escaped opening brace in class selector',
+        css: String.raw`.a\{b{color:red}.after{color:blue}`,
+        expected: String.raw`[data-sc-class~="a{b"]`,
+    },
+    {
+        name: 'escaped closing brace in declaration',
+        css: String.raw`.before{--label:a\}b}.after{color:blue}`,
+        expected: String.raw`--label:a\}b`,
+    },
+    {
+        name: 'escaped closing bracket stays inside unquoted attribute value',
+        css: String.raw`[class=a\]\.b]{color:red}.after{color:blue}`,
+        expected: String.raw`[data-sc-class=a\]\.b]`,
+    },
+];
+
+for (const {name, css, expected} of escapeCases) {
+    test(`MDict CSS escaped delimiter: ${name}`, async () => {
+        const fixture = makeMdictFixture([
+            {key: 'Entry', value: `<style>${css}</style><div class="before">before</div><div class="after">after</div>`},
+        ], {compression: 'zlib'});
+        const result = await createMdxImportData('css-escapes.mdx', {}, fixture.bytes, []);
+        const stylesheetBytes = result.files.get('styles.css');
+        assert.ok(stylesheetBytes instanceof Uint8Array);
+        const stylesheet = new TextDecoder().decode(stylesheetBytes);
+        const root = '[data-sc-class~="mdict-yomitan-entry-0"]';
+        const migratedAfter = `[data-sc-class~="after"]:where(${root}, ${root} *)`;
+        assert.ok(stylesheet.includes(expected), stylesheet);
+        assert.ok(stylesheet.includes(`${migratedAfter}{color:blue}`), stylesheet);
+    });
+}

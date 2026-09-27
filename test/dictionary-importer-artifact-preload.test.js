@@ -102,7 +102,10 @@ describe('artifact preload ownership', () => {
             packedFileName: 'term.bin',
             packedMediaFileName: 'media.bin',
             packedMediaEntries: new Array(100000).fill({}),
-            termBanksByArtifact: new Map(),
+            packedMediaEntriesComplete: true,
+            termBanksByArtifact: new Map([
+                ['term_bank_1.mbtb', {packedOffset: 0, packedLength: 1, rows: 1}],
+            ]),
         };
         const close = vi.fn(async () => { events.push('close'); });
         const {importer, database} = setup(entries, manifest, close);

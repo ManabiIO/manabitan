@@ -72,6 +72,68 @@ describe('term content zstd initialization', () => {
         expect(zstd.freeCCtx).toHaveBeenCalledTimes(1);
     });
 
+    test('falls back immediately when compression worker initialization messages cannot be decoded', async () => {
+        class MessageErrorCompressionWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: unknown) => void>>} */
+                this.listeners = new Map();
+                queueMicrotask(() => { this._emit('messageerror', {}); });
+            }
+
+            /**
+             * @param {string} type
+             * @param {(event: unknown) => void} listener
+             */
+            addEventListener(type, listener) {
+                this.listeners.set(type, (this.listeners.get(type) ?? new Set()).add(listener));
+            }
+
+            /**
+             * @param {string} type
+             * @param {(event: unknown) => void} listener
+             */
+            removeEventListener(type, listener) {
+                this.listeners.get(type)?.delete(listener);
+            }
+
+            postMessage() {}
+
+            terminate() {}
+
+            /**
+             * @param {string} type
+             * @param {unknown} event
+             */
+            _emit(type, event) {
+                for (const listener of this.listeners.get(type) ?? []) { listener(event); }
+            }
+        }
+
+        zstd.createCCtx.mockReturnValue(11);
+        zstd.createDCtx.mockReturnValue(22);
+        zstd.compressUsingDictWithPrefix.mockReturnValue(Uint8Array.of(7, 8, 9));
+        vi.stubGlobal('Worker', MessageErrorCompressionWorker);
+        const {
+            compressWrappedTermContentZstdBatch,
+            initializeTermContentZstd,
+        } = await import('../ext/js/dictionary/zstd-term-content.js');
+        await initializeTermContentZstd();
+
+        const completion = compressWrappedTermContentZstdBatch(
+            [Uint8Array.of(1), Uint8Array.of(2)],
+            'jmdict',
+        );
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(zstd.compressUsingDictWithPrefix).toHaveBeenCalled();
+        await expect(completion).resolves.toMatchObject({
+            wrapped: true,
+            chunks: [Uint8Array.of(7, 8, 9), Uint8Array.of(7, 8, 9)],
+        });
+    });
+
     test('does not synchronously recompress slabs detached by a failed worker dispatch', async () => {
         class DetachingCompressionWorker {
             constructor() {

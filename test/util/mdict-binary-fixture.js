@@ -95,7 +95,7 @@ function createFixtureTextEncoder(encoding) {
  * Does not import the parser under test. Record blocks may split Unicode scalars.
  * Optional metadata overrides are only for negative regression cases.
  * @param {Array<{key: string, value: string|Uint8Array}>} entries
- * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', encodingLabel?: string, textEncoder?: ((value: string) => Uint8Array), encrypted?: string|number, format?: string, styleSheet?: string, keyCaseSensitive?: 'Yes'|'No', stripKey?: 'Yes'|'No', compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, headerQuote?: '"'|"'", spacedHeaderAttributes?: boolean, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array, keyInfoTerminatorByte?: number}} [options]
+ * @param {{mdd?: boolean, encoding?: 'utf8'|'utf16le', encodingLabel?: string, textEncoder?: ((value: string) => Uint8Array), encrypted?: string|number, format?: string, styleSheet?: string, keyCaseSensitive?: 'Yes'|'No', stripKey?: 'Yes'|'No', compression?: 'raw'|'zlib', recordBlockSize?: number, keysPerBlock?: number, title?: string, version?: string, headerQuote?: '"'|"'", spacedHeaderAttributes?: boolean, keyBlockUnpackSizeDelta?: number, keyBlockEntryCounts?: number[], keyInfoTrailer?: Uint8Array, keyInfoTerminatorByte?: number, recordOffsets?: number[]}} [options]
  * @returns {{bytes: Uint8Array, records: Uint8Array[], recordDataOffset: number}}
  */
 export function makeMdictFixture(entries, options = {}) {
@@ -120,6 +120,7 @@ export function makeMdictFixture(entries, options = {}) {
         keyBlockEntryCounts = [],
         keyInfoTrailer = new Uint8Array(0),
         keyInfoTerminatorByte = 0,
+        recordOffsets = [],
     } = options;
     if (!Number.isSafeInteger(recordBlockSize) || recordBlockSize < 1 ||
     !Number.isSafeInteger(keysPerBlock) || keysPerBlock < 1) {
@@ -168,7 +169,7 @@ export function makeMdictFixture(entries, options = {}) {
         const count = Math.min(keysPerBlock, orderedEntries.length - index);
         const keyParts = [];
         for (let i = index; i < index + count; i += 1) {
-            keyParts.push(integer(offsets[i], numWidth), mdd ? Buffer.from(orderedEntries[i].key, keyEncoding) : encodeDictionaryText(orderedEntries[i].key), terminator);
+            keyParts.push(integer(recordOffsets[i] ?? offsets[i], numWidth), mdd ? Buffer.from(orderedEntries[i].key, keyEncoding) : encodeDictionaryText(orderedEntries[i].key), terminator);
         }
         const unpacked = Buffer.concat(keyParts);
         const packed = packBlock(unpacked, compression);

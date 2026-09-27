@@ -74,6 +74,23 @@ function parseEncryptionFlag(value) {
     return result;
 }
 
+/**
+ * Parse the declared file-format version without accepting parseFloat prefixes.
+ * @param {unknown} value
+ * @returns {number}
+ */
+function parseEngineVersion(value) {
+    const normalized = typeof value === 'string' ? value.trim() : '';
+    if (!/^\d+(?:\.\d+)?$/u.test(normalized)) {
+        throw new Error(`Unsupported MDict engine version: ${String(value)}`);
+    }
+    const result = Number(normalized);
+    if (!Number.isFinite(result) || result < 1 || result >= 3) {
+        throw new Error(`Unsupported MDict engine version: ${String(value)}`);
+    }
+    return result;
+}
+
 /** Read a declared integer without allowing a clipped slice to change its type. */
 function readNumber(bytes, offset, width) {
     if (!Number.isSafeInteger(offset) || offset < 0 || offset > bytes.length - width) {
@@ -110,6 +127,8 @@ export class MdictMeta {
         this.encoding = '';
         // decoder 解码器
         this.decoder = new TextDecoder();
+        // Keys are fields, not standalone documents with byte-order marks.
+        this.keyDecoder = null;
         // 是否加密
         this.encrypt = 0;
     }
@@ -356,6 +375,18 @@ class MDictBase {
         // STEP7: read record block
         // _readRecordBlock method is very slow, avoid invoke directly
         // this._readRecordBlock();
+        const recordEndOffset = this.recordInfoList.length > 0 ?
+            this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize :
+            0;
+        for (const {recordStartOffset} of this.keywordList) {
+            if (
+                !Number.isSafeInteger(recordStartOffset) ||
+                recordStartOffset < 0 ||
+                recordStartOffset > recordEndOffset
+            ) {
+                throw new RangeError(`Invalid MDict record start offset: ${String(recordStartOffset)}`);
+            }
+        }
         // Finally: resort the keyword list
         this.keywordList.sort((ki1, ki2) => {
             return ki1.keyText.localeCompare(ki2.keyText);
@@ -364,9 +395,6 @@ class MDictBase {
         // boundaries. Recompute them after sorting so dictionaries whose key
         // blocks are not in lexical order cannot return truncated records.
         if (this.keywordList.length > 0) {
-            const recordEndOffset = this.recordInfoList.length > 0 ?
-                this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize :
-                0;
             const starts = [...new Set(this.keywordList.map(({recordStartOffset}) => recordStartOffset))]
                 .sort((a, b) => a - b);
             const ends = new Map();
@@ -407,7 +435,7 @@ class MDictBase {
                 throw new Error('Unterminated MDict key block entry');
             }
             const keyTextBuffer = keyBlock.slice(keyStartIndex + this.meta.numWidth, keyEndIndex);
-            const keyText = this.meta.decoder.decode(keyTextBuffer);
+            const keyText = this.meta.keyDecoder.decode(keyTextBuffer);
             if (keyList.length > 0) {
                 keyList[keyList.length - 1].recordEndOffset = meaningOffset;
             }
@@ -476,10 +504,7 @@ class MDictBase {
         //        header_info['_stylesheet'][lines[i]] = (lines[i + 1], lines[i + 2])
         // before version 2.0, number is 4 bytes integer alias, int32
         // version 2.0 and above use 8 bytes, alias int64
-        this.meta.version = parseFloat(this.header['GeneratedByEngineVersion']);
-        if (!Number.isFinite(this.meta.version) || this.meta.version < 1 || this.meta.version >= 3) {
-            throw new Error(`Unsupported MDict engine version: ${this.header['GeneratedByEngineVersion']}`);
-        }
+        this.meta.version = parseEngineVersion(this.header['GeneratedByEngineVersion']);
         if (this.meta.version >= 2.0) {
             this.meta.numWidth = 8;
             this.meta.numFmt = common.NUMFMT_UINT64;
@@ -498,6 +523,9 @@ class MDictBase {
             this.meta.encoding = resolvedEncoding.encoding;
             this.meta.decoder = resolvedEncoding.decoder;
         }
+        // Preserve literal leading U+FEFF in keys and key-info boundaries.
+        // Header and definition decoding retain their existing BOM handling.
+        this.meta.keyDecoder = new TextDecoder(this.meta.decoder.encoding, {ignoreBOM: true});
     }
     /**
      * STEP 2. read key block header
@@ -510,8 +538,8 @@ class MDictBase {
         // [16:24]/[8:12] - key block info decompressed size (if version >= 2.0, else not exist)
         // [24:32]/null - key block info size
         // [32:40]/[12:16] - key block size
-        // note: if version <2.0, the key info buffer size is 4 * 4
-        //       otherwise, ths key info buffer size is 5 * 8
+        // note: if version <2.0, number of key blocks, entry count, info size and block size are all present
+        //       otherwise, ths key block header includes an unpacked key-info size too
         // <2.0  the order of number is same
         // set offset
         this._keyHeaderStartOffset = this._headerEndOffset;
@@ -525,7 +553,8 @@ class MDictBase {
                 // TODO: encrypted file not support yet
                 throw Error(' user identification is needed to read encrypted file');
             }
-            // regcode, userid = header_info['_passcode']
+            // regcode, userid = passcode
+            // if user_id is email, the regcode is encrypted with the email string
             if (this.header.RegisterBy == 'Email') {
                 // encrypted_key = _decrypt_regcode_by_email(regcode, userid);
                 throw Error('encrypted file not support yet');
@@ -688,12 +717,12 @@ class MDictBase {
             indexOffset += this.meta.numWidth;
             assert(unpackSize <= this.options.maxDecompressedBlockBytes, 'MDict key block exceeds decompressed block limit');
             if (this.meta.encoding === UTF16) {
-                firstKey = this.meta.decoder.decode(firstWordBuffer);
-                lastKey = this.meta.decoder.decode(lastWordBuffer);
+                firstKey = this.meta.keyDecoder.decode(firstWordBuffer);
+                lastKey = this.meta.keyDecoder.decode(lastWordBuffer);
             }
             else {
-                firstKey = this.meta.decoder.decode(firstWordBuffer);
-                lastKey = this.meta.decoder.decode(lastWordBuffer);
+                firstKey = this.meta.keyDecoder.decode(firstWordBuffer);
+                lastKey = this.meta.keyDecoder.decode(lastWordBuffer);
             }
             keyBlockInfoList.push({
                 firstKey,

@@ -12,7 +12,10 @@ export class FileScanner {
             throw new TypeError('MDict source must be an ArrayBuffer or Uint8Array');
         }
         this.offset = 0;
-        this._buffer = source instanceof Uint8Array ? source : new Uint8Array(source);
+        // Normalize Buffer/subclass inputs so slice always returns owned bytes.
+        this._buffer = source instanceof Uint8Array ?
+            new Uint8Array(source.buffer, source.byteOffset, source.byteLength) :
+            new Uint8Array(source);
     }
 
     close() {

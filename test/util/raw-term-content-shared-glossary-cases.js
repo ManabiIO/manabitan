@@ -137,6 +137,15 @@ test('zero rebase retains identity even for malformed shared data', () => {
     assert.equal(rebaseRawTermContentSharedGlossaryBinary(bytes, 0), bytes)
 })
 
+test('nonzero rebase rejects structurally truncated shared data', () => {
+    const bytes = rawReference(17n, 2)
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+    view.setUint32(4, view.getUint32(4, true) + 1, true)
+    const snapshot = Uint8Array.from(bytes)
+    assert.throws(() => rebaseRawTermContentSharedGlossaryBinary(bytes, 1), RangeError)
+    assert.deepEqual(bytes, snapshot)
+})
+
 for (const [offset, length, delta] of [[5, 2, -5], [0, 2, u32 + 1], [u32 - 1, 7, 1], [max - 10, 2, 8], [max, 0, -max]]) {
     test(`valid rebase preserves exact bytes for ${offset}, ${delta}`, () => {
         const original = encode(offset, length)
