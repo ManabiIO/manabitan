@@ -1,0 +1,54 @@
+name: Quote cache complete imports
+on:
+  push:
+    branches: [review/json-quote-cache-current-20260927]
+    paths: [.github/workflows/review-quote-cache-complete-20260927.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact driver
+        run: |
+          cp dev/review/quote-cache-complete-import-20260927.mjs /tmp/quote-driver.mjs
+          git fetch --no-tags --depth=1 origin 65294053e65f7e45937d51dbc3cab70543f327e4 f32ca7bd419e82fc59752e306d820725ce785135
+          git checkout --detach 65294053e65f7e45937d51dbc3cab70543f327e4
+          mkdir -p dev/review builds/quote-cache-completion
+          cp /tmp/quote-driver.mjs dev/review/quote-cache-complete-import-20260927.mjs
+          cp /tmp/quote-driver.mjs builds/quote-cache-completion/executed-driver.mjs
+          git diff 65294053e65f7e45937d51dbc3cab70543f327e4 f32ca7bd419e82fc59752e306d820725ce785135 -- ext/ > builds/quote-cache-completion/product.patch
+          test "$(git diff --name-only 65294053e65f7e45937d51dbc3cab70543f327e4 f32ca7bd419e82fc59752e306d820725ce785135 -- ext/)" = ext/js/dictionary/dictionary-importer.js
+          node --check dev/review/quote-cache-complete-import-20260927.mjs
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/quote-cache-complete-import-20260927.mjs 2>&1 | tee builds/quote-cache-completion/preflight.log
+      - name: Counterbalanced complete-import cohort
+        env:
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/quote-cache-complete-import-20260927.mjs 2>&1 | tee builds/quote-cache-completion/result.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quote-cache-${{ matrix.cohort }}
+          path: builds/quote-cache-completion/
+          retention-days: 14
