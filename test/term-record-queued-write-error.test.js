@@ -105,7 +105,7 @@ test.each([
 
     await expect(Reflect.get(store, '_appendEncodedChunk').call(
         store,
-        state,
+        /** @type {import('core').SafeAny} */ (state),
         1,
         1,
         'raw',
