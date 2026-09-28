@@ -45,7 +45,7 @@ function createContext(encoding = 'utf-8', numWidth = 8) {
  * @param {string[]} keys
  * @param {Encoding} [encoding]
  * @param {number} [numWidth]
- * @returns {Uint8Array<ArrayBuffer>}
+ * @returns {Buffer<ArrayBuffer>}
  */
 function createKeys(keys, encoding = 'utf-8', numWidth = 8) {
     const width = encoding.startsWith('utf-16') ? 2 : 1;
@@ -61,7 +61,7 @@ function createKeys(keys, encoding = 'utf-8', numWidth = 8) {
         entry.set(text, numWidth);
         return entry;
     });
-    return new Uint8Array(Buffer.concat(parts));
+    return Buffer.concat(parts);
 }
 
 /**
@@ -152,7 +152,7 @@ describe('MDict key text views', () => {
             test(`preserves text, BOM, offsets and ownership: ${encoding}/${numWidth}`, () => {
                 const keys = ['', 'ASCII', '日本語', '😀🧪', '\ufeffliteral', ' e\u0301 ', 'x'.repeat(65536)];
                 const original = createKeys(keys, encoding, numWidth);
-                const padded = new Uint8Array(original.length + 41).fill(0xa5);
+                const padded = Buffer.alloc(original.length + 41, 0xa5);
                 padded.set(original, 17);
                 const bytes = padded.subarray(17, 17 + original.length);
                 const copy = vi.spyOn(bytes, 'slice');
@@ -276,9 +276,15 @@ function createBinaryFixture(counts, encoding, version, ext) {
         const first = keys[0] ?? Buffer.alloc(0);
         const last = keys.at(-1) ?? Buffer.alloc(0);
         keyInfos.push(Buffer.concat([
-            number(count), number(first.length / unit, width / 4), first, version >= 2 ? Buffer.alloc(unit) : Buffer.alloc(0),
-            number(last.length / unit, width / 4), last, version >= 2 ? Buffer.alloc(unit) : Buffer.alloc(0),
-            number(encoded.length), number(payload.length),
+            number(count),
+            number(first.length / unit, width / 4),
+            first,
+            version >= 2 ? Buffer.alloc(unit) : Buffer.alloc(0),
+            number(last.length / unit, width / 4),
+            last,
+            version >= 2 ? Buffer.alloc(unit) : Buffer.alloc(0),
+            number(encoded.length),
+            number(payload.length),
         ]));
     }
     const keyInfoBytes = Buffer.concat(keyInfos);
