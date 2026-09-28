@@ -104,6 +104,9 @@ export class SearchDisplayController {
         this._contentUpdateSequence = 0;
         /** @type {string} */
         this._contentUpdateQuery = '';
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        this._liveSearchTimer = null;
+        this._composing = false;
     }
 
     /** */
@@ -191,6 +194,16 @@ export class SearchDisplayController {
 
         this._searchButton.addEventListener('click', this._onSearch.bind(this), false);
         this._clearButton.addEventListener('click', this._onClear.bind(this), false);
+        this._queryInput.addEventListener('compositionstart', () => {
+            this._composing = true;
+            this._cancelLiveSearch();
+            this._display.invalidateSearchDraft();
+        });
+        this._queryInput.addEventListener('compositionend', () => {
+            this._composing = false;
+            this._scheduleLiveSearch();
+        });
+        window.addEventListener('pagehide', () => this._cancelLiveSearch());
 
         this._searchBackButton.addEventListener('click', this._onSearchBackButtonClick.bind(this), false);
         this._wanakanaEnableCheckbox.addEventListener('change', this._onWanakanaEnableChange.bind(this));
@@ -417,6 +430,26 @@ export class SearchDisplayController {
         if (this._wanakanaEnabled) {
             this._searchTextKanaConversion(element, e);
         }
+        if (e.isComposing || this._composing) {return;}
+        this._scheduleLiveSearch();
+    }
+
+    /** */
+    _cancelLiveSearch() {
+        if (this._liveSearchTimer !== null) {clearTimeout(this._liveSearchTimer);}
+        this._liveSearchTimer = null;
+    }
+
+    /** */
+    _scheduleLiveSearch() {
+        this._cancelLiveSearch();
+        this._display.invalidateSearchDraft();
+        // Keep the established explicit-submit path for pasted blocks of text.
+        if (this._queryInput.value.length > 256) {return;}
+        this._liveSearchTimer = setTimeout(() => {
+            this._liveSearchTimer = null;
+            this._search(false, 'overwrite', !!this._queryInput.value.trim(), null, true);
+        }, 100);
     }
 
     /**
@@ -470,6 +503,9 @@ export class SearchDisplayController {
         this._queryInput.value = '';
         this._queryInput.focus();
         this._updateSearchHeight(true);
+        this._cancelLiveSearch();
+        this._display.invalidateSearchDraft();
+        this._search(false, 'overwrite', false, null, true);
     }
 
     /** */
@@ -789,9 +825,11 @@ export class SearchDisplayController {
      * @param {import('display').HistoryMode} historyMode
      * @param {boolean} lookup
      * @param {?import('settings').OptionsContextFlag[]} flags
+     * @param {boolean} [preserveSearchInput]
      */
-    _search(animate, historyMode, lookup, flags) {
-        this._updateSearchText();
+    _search(animate, historyMode, lookup, flags, preserveSearchInput = false) {
+        this._cancelLiveSearch();
+        if (!preserveSearchInput) {this._updateSearchText();}
 
         const query = this._queryInput.value;
         const sequence = ++this._searchRequestSequence;
@@ -830,6 +868,7 @@ export class SearchDisplayController {
             },
             content: {
                 dictionaryEntries: void 0,
+                preserveSearchInput,
                 animate,
                 contentOrigin: {tabId, frameId},
             },

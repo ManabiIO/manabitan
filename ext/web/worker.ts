@@ -3,6 +3,8 @@ import {DictionaryDatabase} from '../js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../js/dictionary/dictionary-importer.js';
 import {DictionaryImporterMediaLoader} from '../js/dictionary/dictionary-importer-media-loader.js';
 import {Translator} from '../js/language/translator.js';
+import {findJapaneseSearch} from '../js/search/japanese-search.js';
+import {dictionaryPreview} from '../js/search/dictionary-preview.js';
 import {parseJson} from '../js/core/json.js';
 import {API_VERSION, STORAGE_LOCK, MAX_ARCHIVE_BYTES, WebRuntimeError, isRequest, record, text, type Preferences, type Request, type Reply, type Status} from './protocol.js';
 import type {TermEnabledDictionaryMap, FindTermsOptions} from '../../types/ext/translation';
@@ -166,6 +168,26 @@ async function dispatch(request: Request): Promise<unknown> {
             abortIfCancelled();
             // Bound UI work, without replacing the real translator or importer.
             return {...result, dictionaryEntries: result.dictionaryEntries.slice(0, 100)};
+        }
+        case 'search': {
+            const query = text(p.text, 256).trim();
+            if (typeof p.full !== 'boolean') {throw new WebRuntimeError('invalid_request', 'Expected a search presentation');}
+            const options = await lookupOptions();
+            const {result, matchedQuery} = await findJapaneseSearch(query, async (candidate) => {
+                // Explicit trailing wildcard is prefix search; do not make every
+                // one-character keystroke an unbounded prefix enumeration.
+                const prefix = candidate.endsWith('*') && candidate.length > 1;
+                const source = prefix ? candidate.slice(0, -1) : candidate;
+                return translator.findTerms('group', source, {...options,
+                    removeNonJapaneseCharacters: false,
+                    matchType: prefix ? 'prefix' : 'exact', deinflect: !prefix});
+            }, abortIfCancelled);
+            abortIfCancelled();
+            const entries = result?.dictionaryEntries ?? [];
+            return {version: 1, query, matchedQuery,
+                dictionaryCount: options.enabledDictionaryMap.size,
+                preview: dictionaryPreview(entries),
+                ...(p.full ? {lookup: {...(result ?? {originalTextLength: 0}), dictionaryEntries: entries.slice(0, 100)}} : {})};
         }
         case 'import': {
             if (!(p.archive instanceof Blob) || p.archive.size <= 0 || p.archive.size > MAX_ARCHIVE_BYTES) {

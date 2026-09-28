@@ -17,6 +17,19 @@ import {expect} from '@playwright/test';
  * @param root0.requests
  */
 export async function runExtended({context, page, origin, fixtures, check, importFile, dictionary, requests}) {
+    await check('search RPC returns bounded previews for kana, romaji and inflected words', async () => {
+        for (const query of ['ねこ', 'neko', 'gakkou', '食べました', 'tabemashita']) {
+            const result = await page.evaluate((text) => runtime.search(text, false), query);
+            assert.equal(result.version, 1);
+            assert.equal(result.query, query);
+            assert.ok(result.dictionaryCount > 0);
+            assert.ok(result.preview.items.length > 0 && result.preview.items.length <= 2, query);
+            assert.equal(result.lookup, undefined, 'compact responses must not transfer full glossaries');
+            assert.ok(JSON.stringify(result).length < 6000);
+        }
+        const full = await page.evaluate(() => runtime.search('neko', true));
+        assert.ok(full.lookup.dictionaryEntries.length > 0);
+    });
     await check('recommendations reuse the existing ManabiTan Japanese catalog', async () => {
         const catalog = await page.evaluate(async () => (await import('/vendor/web/presets.js')).recommendedDictionaries());
         assert.ok(catalog.some((d) => d.name === 'Jitendex'));
