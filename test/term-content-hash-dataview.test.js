@@ -246,9 +246,10 @@ const vectors = [
  * @returns {Uint8Array<ArrayBuffer>}
  */
 function createInput(size, pattern) {
-    return Uint8Array.from({length: size}, (_, index) => pattern === 0 ?
-        ((index * 73) ^ (index >>> 8)) & 255 :
-        [0, 0, 255, 128][pattern]);
+    return Uint8Array.from({length: size}, (_, index) => {
+        if (pattern === 0) { return ((index * 73) ^ (index >>> 8)) & 255; }
+        return [0, 0, 255, 128][pattern];
+    });
 }
 
 test('content hashes match independent native XXH32 vectors at every alignment', () => {
@@ -258,7 +259,7 @@ test('content hashes match independent native XXH32 vectors at every alignment',
             const backing = new Uint8Array(size + offset + 9).fill(177);
             backing.set(input, offset);
             const bytes = backing.subarray(offset, offset + size);
-            const before = backing.slice();
+            const before = Uint8Array.from(backing);
             assert.deepEqual(hashTermEntryContentBytesPair(bytes), [h1, h2], `${size}/${pattern}/${offset}`);
             assert.equal(hashTermEntryContentBytes(bytes), h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0'));
             assert.deepEqual(backing, before);
