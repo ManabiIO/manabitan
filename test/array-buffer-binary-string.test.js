@@ -64,12 +64,11 @@ describe('bounded binary string conversion', () => {
     test('does not submit a whole media buffer as one argument list', () => {
         const bytes = createBytes(65539);
         const expected = Buffer.from(bytes).toString('latin1');
-        const fromCharCode = String.fromCharCode;
         /** @type {number[]} */
         const callSizes = [];
         vi.spyOn(String, 'fromCharCode').mockImplementation((...codes) => {
             callSizes.push(codes.length);
-            return fromCharCode(...codes);
+            return Buffer.from(codes).toString('latin1');
         });
         expect(arrayBufferToBinaryString(bytes.buffer)).toBe(expected);
         expect(callSizes).toEqual([32768, 32768, 3]);
@@ -78,14 +77,13 @@ describe('bounded binary string conversion', () => {
     test('retains the fallback for runtimes with a smaller argument limit', () => {
         const bytes = createBytes(5000);
         const expected = Buffer.from(bytes).toString('latin1');
-        const fromCharCode = String.fromCharCode;
         let rejectedCalls = 0;
         vi.spyOn(String, 'fromCharCode').mockImplementation((...codes) => {
             if (codes.length > 4096) {
                 ++rejectedCalls;
                 throw new RangeError('Simulated smaller argument limit');
             }
-            return fromCharCode(...codes);
+            return Buffer.from(codes).toString('latin1');
         });
         expect(arrayBufferToBinaryString(bytes.buffer)).toBe(expected);
         expect(rejectedCalls).toBe(1);
