@@ -54,7 +54,7 @@ function decode(block, unpackSize) {
 describe('MDict block allocation and validation', () => {
     test.each([0, 1, 256, 2000, 65536])('preserves stored bytes and ownership for %i bytes', (size) => {
         const {block, payload} = createBlock(size);
-        const before = block.slice();
+        const before = new Uint8Array(block);
         const copy = vi.spyOn(block, 'slice');
         const result = decode(block, size);
         expect(result).toEqual(payload);
