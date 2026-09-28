@@ -64,8 +64,10 @@ async function main() {
     const baselineUrl = pathToFileURL(resolve(baselinePath));
     // The CLI operator explicitly selects a trusted local baseline module.
     // pathToFileURL keeps this loader restricted to a local filesystem URL.
+    /** @type {unknown} */
     // eslint-disable-next-line no-unsanitized/method
-    const baseline = /** @type {typeof candidate} */ (await import(baselineUrl.href));
+    const baselineModule = await import(baselineUrl.href);
+    const baseline = /** @type {typeof candidate} */ (baselineModule);
     const candidateUrl = new URL('../../ext/js/data/array-buffer-util.js', import.meta.url);
     let assertions = 0;
     for (const size of [0, 1, 2, 3, 255, 256, 257, 32767, 32768, 32769, 65535, 65536, 65537, 131071, 131072, 1048576, 4194304]) {
