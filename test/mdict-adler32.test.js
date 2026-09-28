@@ -39,7 +39,7 @@ describe('MDict Adler-32', () => {
             for (let index = 0; index < size; ++index) {
                 bytes[index] = fill ?? (((index * 73) ^ (index >>> 9)) & 255);
             }
-            const before = bytes.slice();
+            const before = new Uint8Array(bytes);
             const actual = common.adler32(bytes);
             expect(actual).toBe(oracle(bytes));
             expect(actual).toBeGreaterThanOrEqual(0);
