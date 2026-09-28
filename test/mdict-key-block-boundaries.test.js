@@ -155,7 +155,7 @@ describe('MDict key text views', () => {
                 const padded = Buffer.alloc(original.length + 41, 0xa5);
                 padded.set(original, 17);
                 const bytes = padded.subarray(17, 17 + original.length);
-                const copy = vi.spyOn(bytes, 'slice');
+                const copy = vi.spyOn(Buffer.prototype, 'slice');
                 const context = createContext(encoding, numWidth);
                 const entries = context.splitKeyBlock(bytes, 3);
                 expect(copy).not.toHaveBeenCalled();
