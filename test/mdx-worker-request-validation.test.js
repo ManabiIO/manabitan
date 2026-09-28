@@ -16,7 +16,7 @@
  */
 
 import assert from 'node:assert/strict';
-import {afterEach, beforeEach, test, vi} from 'vitest';
+import {afterEach, beforeEach, expect, test, vi} from 'vitest';
 import {DictionaryWorkerHandler} from '../ext/js/dictionary/dictionary-worker-handler.js';
 
 /** @typedef {(name: string, options: Record<string, unknown>, mdx: Uint8Array, mdd: Array<{name: string, bytes: Uint8Array}>, onProgress: (details: unknown) => void) => Promise<{archiveContent: ArrayBuffer}>} ConversionFunction */
@@ -328,11 +328,7 @@ test('dictionary worker rejects sparse MDD lists instead of dropping holes', asy
 test('dictionary worker preserves valid MDD order, bytes, and filename defaults', async () => {
     const first = new ArrayBuffer(2);
     const second = new ArrayBuffer(3);
-    convertMdxToArchive.mockResolvedValue({
-        archiveContent: new ArrayBuffer(8),
-        archiveFileName: 'fixture.zip',
-        phaseTimings: [],
-    });
+    convertMdxToArchive.mockResolvedValue({archiveContent: new ArrayBuffer(8)});
     await importThroughDictionaryWorker({
         mddFiles: [{name: 'first.mdd', bytes: first}, {name: /** @type {import('core').SafeAny} */ (undefined), bytes: second}],
     });
