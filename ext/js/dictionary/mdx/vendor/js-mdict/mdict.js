@@ -255,9 +255,13 @@ export class Mdict extends MdictBase {
         // 4 bytes: compression type
         const rbCompType = bytesToHex(recordBuffer.subarray(0, 4));
         // record_block stores the final record data
-        let unpackRecordBlockBuff = new Uint8Array(recordBuffer.length);
+        let unpackRecordBlockBuff;
         const recordBlockChecksum = common.b2n(recordBuffer.subarray(4, 8));
         if (rbCompType === '00000000') {
+            // Reject invalid stored lengths before allocating a payload copy.
+            if (recordBuffer.byteLength - 8 !== unpackSize) {
+                throw new Error('MDict decompressed block size mismatch');
+            }
             unpackRecordBlockBuff = recordBuffer.slice(8);
         }
         else {
@@ -326,9 +330,9 @@ export class Mdict extends MdictBase {
 /**
  * 经过一系列测试, 发现mdx格式的文件存在较大的词语排序问题，存在如下情况：
  * 1. 大小写的问题 比如 a-zA-Z 和 aA-zZ 这种并存的情况
- * 2. 多语言的情况，存在英文和汉字比较大小的情况一般情况下 英文应当排在汉字前面
+ * 2. 多语言的情况，存在英文和汉字比较大小等
  * 3. 小语种的情况
- * 上述的这些情况都有可能出现，无法通过字典头中的设置实现排序，所以无法通过内部的keyInfoList进行快速索引，
+ * 上述的这些情况都有可能出现，无法通过字典头中的设置实现排序，所以无法实现排序
  * 在现代计算机的性能条件下，直接遍历全部词条也可得到较好的效果，因此目前采用的策略是全部读取词条，内部排序
  *
  */
