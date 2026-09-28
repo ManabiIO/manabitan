@@ -39,6 +39,7 @@ jobs:
           PY
           git apply --check "$RUNNER_TEMP/search.patch"
           git apply "$RUNNER_TEMP/search.patch"
+          rm .github/workflows/search-contract.yml
           git add -A
       - name: Install locked dependencies
         working-directory: product
@@ -47,7 +48,7 @@ jobs:
         working-directory: product
         run: |
           git diff --cached --name-only -z -- '*.js' '*.ts' '*.mjs' | xargs -0 npx eslint --fix > "$RUNNER_TEMP/search-evidence/lint.txt" 2>&1 || true
-          npx prettier docs/design/unified-search.md .github/workflows/search-contract.yml --write
+          npx prettier docs/design/unified-search.md --write
       - name: Qualify focused source behavior
         working-directory: product
         run: |
@@ -62,9 +63,9 @@ jobs:
           git config user.email 'development@manabi.io'
           git switch -c feat/live-dictionary-search-20260928
           git commit -m 'feat(search): add IME-safe live search and shared bounded dictionary previews'
-          git push origin HEAD:refs/heads/feat/live-dictionary-search-20260928
           git rev-parse HEAD | tee "$RUNNER_TEMP/search-evidence/product-head.txt"
           git diff 7294d63871e7e0a6a6ee714b443c0f5e9dec7b1f HEAD > "$RUNNER_TEMP/search-evidence/product.patch"
+          git push origin HEAD:refs/heads/feat/live-dictionary-search-20260928
       - name: Build shared runtime
         working-directory: product
         run: npm run build:libs && node web/build.mjs
