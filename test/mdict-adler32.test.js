@@ -29,26 +29,49 @@ function oracle(bytes) {
 }
 
 describe('MDict Adler-32', () => {
-    test.each([
-        0, 1, 2, 7, 8, 9, 15, 16, 17, 255, 256, 257,
-        1999, 2000, 2001, 3999, 4000, 4001, 5552, 65536, 1048576,
-    ])('matches independent zlib checksums at %i bytes without mutating the view', (size) => {
-        for (const fill of [0, 1, 255, null]) {
-            const padded = new Uint8Array(size + 39).fill(171);
-            const bytes = padded.subarray(13, 13 + size);
-            for (let index = 0; index < size; ++index) {
-                bytes[index] = fill ?? (((index * 73) ^ (index >>> 9)) & 255);
-            }
-            const before = new Uint8Array(bytes);
-            const actual = common.adler32(bytes);
-            expect(actual).toBe(oracle(bytes));
-            expect(actual).toBeGreaterThanOrEqual(0);
-            expect(actual).toBeLessThanOrEqual(0xffffffff);
-            expect(bytes).toEqual(before);
-            expect(padded.subarray(0, 13).every((value) => value === 171)).toBe(true);
-            expect(padded.subarray(size + 13).every((value) => value === 171)).toBe(true);
+    const sizes = [
+        0,
+        1,
+        2,
+        7,
+        8,
+        9,
+        15,
+        16,
+        17,
+        255,
+        256,
+        257,
+        1999,
+        2000,
+        2001,
+        3999,
+        4000,
+        4001,
+        5552,
+        65536,
+        1048576,
+    ];
+    const fills = [0, 1, 255, null];
+    for (const size of sizes) {
+        for (const fill of fills) {
+            test(`matches zlib at ${size} bytes with fill ${String(fill)} without mutating the view`, () => {
+                const padded = new Uint8Array(size + 39).fill(171);
+                const bytes = padded.subarray(13, 13 + size);
+                for (let index = 0; index < size; ++index) {
+                    bytes[index] = fill ?? (((index * 73) ^ (index >>> 9)) & 255);
+                }
+                const before = new Uint8Array(bytes);
+                const actual = common.adler32(bytes);
+                expect(actual).toBe(oracle(bytes));
+                expect(actual).toBeGreaterThanOrEqual(0);
+                expect(actual).toBeLessThanOrEqual(0xffffffff);
+                expect(bytes).toEqual(before);
+                expect(padded.subarray(0, 13).every((value) => value === 171)).toBe(true);
+                expect(padded.subarray(size + 13).every((value) => value === 171)).toBe(true);
+            });
         }
-    });
+    }
 
     test('matches 1000 deterministic mixed-byte inputs', () => {
         let seed = 9134291;
