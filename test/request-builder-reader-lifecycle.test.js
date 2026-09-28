@@ -24,5 +24,6 @@ test('response readers release locks and cancel abandoned bodies', () => {
     execFileSync(process.execPath, [
         '--test',
         fileURLToPath(new URL('util/response-reader-lifecycle-cases.js', import.meta.url)),
+        fileURLToPath(new URL('util/response-reader-http-cases.js', import.meta.url)),
     ], {encoding: 'utf8', timeout: 30_000})
 })
