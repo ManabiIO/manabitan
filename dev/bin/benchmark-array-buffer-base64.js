@@ -59,7 +59,7 @@ async function main() {
     if (typeof baselinePath !== 'string' || !Number.isSafeInteger(pairs) || pairs < 1) {
         throw new Error('Usage: node --expose-gc dev/bin/benchmark-array-buffer-base64.js BASELINE_MODULE [PAIRS=20]');
     }
-    const collectGarbage = global.gc;
+    const collectGarbage = globalThis.gc;
     if (typeof collectGarbage !== 'function') { throw new Error('Run with --expose-gc for comparable batches'); }
     const baselineUrl = pathToFileURL(resolve(baselinePath));
     // The CLI operator explicitly selects a trusted local baseline module.
@@ -149,7 +149,13 @@ async function main() {
     }, null, 2));
 }
 
-void main().catch((error) => {
+/**
+ * @param {unknown} error
+ * @returns {void}
+ */
+function onError(error) {
     console.error(error);
     process.exitCode = 1;
-});
+}
+
+void main().catch(onError);
