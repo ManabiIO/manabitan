@@ -65,6 +65,7 @@ const BINARY_MAGIC_BYTES = 8;
 const SHARD_GENERATION_BYTES = 16;
 const BINARY_HEADER_PREFIX_BYTES = BINARY_MAGIC_BYTES + SHARD_GENERATION_BYTES;
 const U32_NULL = 0xffffffff;
+const MAX_TERM_RECORD_ID = U32_NULL - 1;
 const MAX_CONTENT_OFFSET_DELTA = U32_NULL - 1;
 const U32_RANGE = 0x100000000;
 const U16_NULL = 0xffff;
@@ -1410,7 +1411,7 @@ export class TermRecordOpfsStore {
         for (const row of records) {
             this._assertShardAcceptsAppend(row.dictionary, row.entryContentDictName ?? 'raw');
         }
-        await this._ensureNextIdReadyForAppend();
+        await this._ensureNextIdReadyForAppend(records.length);
         /** @type {Map<string, TermRecord[]>} */
         const recordsByShard = new Map();
         for (const row of records) {
@@ -1479,7 +1480,7 @@ export class TermRecordOpfsStore {
                 previousContentDictName = contentDictName;
             }
         }
-        await this._ensureNextIdReadyForAppend();
+        await this._ensureNextIdReadyForAppend(count);
         /** @type {Map<string, TermRecord[]>|null} */
         let recordsByShard = null;
         /** @type {TermRecord[]} */
@@ -1580,7 +1581,7 @@ export class TermRecordOpfsStore {
                 previousContentDictName = contentDictName;
             }
         }
-        await this._ensureNextIdReadyForAppend();
+        await this._ensureNextIdReadyForAppend(count);
         const tBuildStart = safePerformance.now();
         let buildRecordsMs = 0;
         let encodeMs = 0;
@@ -1697,7 +1698,7 @@ export class TermRecordOpfsStore {
                 previousDictionary = dictionary;
             }
         }
-        await this._ensureNextIdReadyForAppend();
+        await this._ensureNextIdReadyForAppend(count);
         /** @type {Map<string, TermRecord[]>|null} */
         let recordsByShard = null;
         /** @type {TermRecord[]} */
@@ -1804,7 +1805,7 @@ export class TermRecordOpfsStore {
                 previousContentDictName = contentDictName;
             }
         }
-        await this._ensureNextIdReadyForAppend();
+        await this._ensureNextIdReadyForAppend(count);
         const tBuildStart = safePerformance.now();
         let buildRecordsMs = 0;
         let encodeMs = 0;
@@ -1956,7 +1957,7 @@ export class TermRecordOpfsStore {
                 }
             }
         }
-        await this._ensureNextIdReadyForAppend();
+        await this._ensureNextIdReadyForAppend(count);
         const tBuildStart = safePerformance.now();
         const firstId = this._nextId;
         const firstContentDictName = uniformContentDictName ?? (contentDictNames[0] ?? 'raw');
@@ -3095,40 +3096,52 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {number} count Number of IDs required by the pending append.
      * @returns {Promise<void>}
      * @throws {Error} If existing record IDs cannot be established from every authoritative container.
+     * @throws {RangeError} If the pending append cannot fit in the persisted uint32 ID space.
      */
-    async _ensureNextIdReadyForAppend() {
-        if (!this._nextIdMayNeedShardScan || this._recordsDirectoryHandle === null) {
-            return;
+    async _ensureNextIdReadyForAppend(count) {
+        if (!Number.isSafeInteger(count) || count <= 0) {
+            throw new RangeError('Invalid term-record ID reservation count');
         }
-        let maxId = this._nextId - 1;
-        for (const state of this._shardStateByFileName.values()) {
-            const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
-            let fileHandle;
-            try {
-                fileHandle = await this._recordsDirectoryHandle.getFileHandle(indexFileName, {create: false});
-            } catch (error) {
-                // An empty descriptor left by cleanup has no IDs to reserve.
-                // Any other unreadable/missing container leaves the maximum unknown.
-                if (state.fileLength === 0 && isStorageEntryNotFoundError(error)) {
-                    continue;
+        if (this._nextIdMayNeedShardScan && this._recordsDirectoryHandle !== null) {
+            let maxId = this._nextId - 1;
+            for (const state of this._shardStateByFileName.values()) {
+                const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
+                let fileHandle;
+                try {
+                    fileHandle = await this._recordsDirectoryHandle.getFileHandle(indexFileName, {create: false});
+                } catch (error) {
+                    // An empty descriptor left by cleanup has no IDs to reserve.
+                    // Any other unreadable/missing container leaves the maximum unknown.
+                    if (state.fileLength === 0 && isStorageEntryNotFoundError(error)) {
+                        continue;
+                    }
+                    throw new Error(`Cannot reserve term-record IDs: cannot open ${indexFileName}`, {cause: error});
                 }
-                throw new Error(`Cannot reserve term-record IDs: cannot open ${indexFileName}`, {cause: error});
+                const file = await fileHandle.getFile();
+                if (file.size === 0 && state.fileLength === 0) { continue; }
+                const content = new Uint8Array(await file.arrayBuffer());
+                const shardMaxId = this._scanPersistentIndexMaxRecordId(content);
+                if (shardMaxId === null) {
+                    throw new Error(`Cannot reserve term-record IDs: invalid container ${indexFileName}`);
+                }
+                maxId = Math.max(maxId, shardMaxId);
             }
-            const file = await fileHandle.getFile();
-            if (file.size === 0 && state.fileLength === 0) { continue; }
-            const content = new Uint8Array(await file.arrayBuffer());
-            const shardMaxId = this._scanPersistentIndexMaxRecordId(content);
-            if (shardMaxId === null) {
-                throw new Error(`Cannot reserve term-record IDs: invalid container ${indexFileName}`);
-            }
-            maxId = Math.max(maxId, shardMaxId);
+            // Publish only after every authoritative shard has been inspected.
+            // A failed scan remains retryable and must not consume an ID.
+            this._nextId = Math.max(this._nextId, maxId + 1);
+            this._nextIdMayNeedShardScan = false;
         }
-        // Publish only after every authoritative shard has been inspected.
-        // A failed scan remains retryable and must not consume an ID.
-        this._nextId = Math.max(this._nextId, maxId + 1);
-        this._nextIdMayNeedShardScan = false;
+        if (
+            !Number.isSafeInteger(this._nextId) ||
+            this._nextId <= 0 ||
+            this._nextId > MAX_TERM_RECORD_ID ||
+            count > (MAX_TERM_RECORD_ID - this._nextId + 1)
+        ) {
+            throw new RangeError('Term-record ID space is exhausted');
+        }
     }
 
     /**
