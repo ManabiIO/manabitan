@@ -60,6 +60,7 @@ describe('MDict block allocation and validation', () => {
         expect(result).toEqual(payload);
         expect(result.buffer).not.toBe(block.buffer);
         expect(copy).toHaveBeenCalledExactlyOnceWith(8);
+        copy.mockRestore();
         if (result.length > 0) { result[0] ^= 255; }
         expect(block).toEqual(before);
     });
