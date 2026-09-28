@@ -29,7 +29,10 @@ vi.mock('../ext/js/dictionary/dictionary-database.js', () => ({
     DictionaryDatabase: class {
         constructor() { mocks.createDatabase(); }
         prepare() { return mocks.prepareDatabase(); }
-        /** @param {MessagePort} port */
+        /**
+         * @param {MessagePort} port
+         * @returns {Promise<void>}
+         */
         connectToDatabaseWorker(port) { return mocks.connect(port); }
     },
 }));
