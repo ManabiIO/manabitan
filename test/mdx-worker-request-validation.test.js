@@ -38,9 +38,10 @@ afterEach(() => { vi.unstubAllGlobals(); });
 /** @typedef {(event: {data: unknown}) => Promise<void>} MessageHandler */
 
 /**
- * @returns {Promise<{send: (data: unknown) => Promise<void>, responses: Array<{message: WorkerResponse, transfer?: Transferable[]}>}>}
+ * @param {boolean} [cloneMessages]
+ * @returns {Promise<{send: (data: unknown, transfer?: Transferable[]) => Promise<void>, responses: Array<{message: WorkerResponse, transfer?: Transferable[]}>}>}
  */
-async function loadWorker() {
+async function loadWorker(cloneMessages = false) {
     /** @type {{handler: MessageHandler|null}} */
     const state = {handler: null};
     /** @type {Array<{message: WorkerResponse, transfer?: Transferable[]}>} */
@@ -58,14 +59,20 @@ async function loadWorker() {
          * @param {WorkerResponse} message
          * @param {Transferable[]} [transfer]
          */
-        postMessage(message, transfer) { responses.push({message, transfer}); },
+        postMessage(message, transfer) {
+            const received = cloneMessages ? structuredClone(message, {transfer: transfer ?? []}) : message;
+            responses.push({message: received, transfer});
+        },
     });
     await import('../ext/js/dictionary/mdx-worker-main.js');
     const handler = state.handler;
     assert.notEqual(handler, null);
     return {
         responses,
-        send: async (data) => { await /** @type {MessageHandler} */ (handler)({data}); },
+        send: async (data, transfer = []) => {
+            const received = cloneMessages ? structuredClone(data, {transfer}) : data;
+            await /** @type {MessageHandler} */ (handler)({data: received});
+        },
     };
 }
 
@@ -133,10 +140,13 @@ test('preserves valid resource order, bytes, and filename defaults', async () =>
     const second = new ArrayBuffer(3);
     convertMdxToArchive.mockResolvedValue({archiveContent: new ArrayBuffer(8)});
     const {send, responses} = await loadWorker();
-    await send({action: 'convertDictionary', params: {
-        mdxBytes: new ArrayBuffer(2),
-        mddFiles: [{name: 'first.mdd', bytes: first}, {bytes: second}],
-    }});
+    await send({
+        action: 'convertDictionary',
+        params: {
+            mdxBytes: new ArrayBuffer(2),
+            mddFiles: [{name: 'first.mdd', bytes: first}, {bytes: second}],
+        },
+    });
     assert.equal(convertMdxToArchive.mock.calls.length, 1);
     /** @type {Array<{name: string, bytes: Uint8Array}>} */
     const resources = convertMdxToArchive.mock.calls[0][3];
@@ -181,3 +191,88 @@ for (const data of [null, {action: 'unrelated', params: null}]) {
         assert.equal(convertMdxToArchive.mock.calls.length, 0);
     });
 }
+
+// Exercise actual structured cloning and buffer detachment, not only transfer
+// list identity. The converter remains mocked; this is not a browser Worker.
+test('preserves bytes and progress across input and output transfers', async () => {
+    const mdx = new Uint8Array([3, 1, 4]).buffer;
+    const first = new Uint8Array([2, 7]).buffer;
+    const second = new Uint8Array([1, 8, 2, 8]).buffer;
+    const archiveContent = new Uint8Array([9, 0, 5, 7]).buffer;
+    const progress = {step: 1};
+    convertMdxToArchive.mockImplementation((name, options, bytes, resources, onProgress) => {
+        assert.equal(name, 'input.mdx');
+        assert.deepEqual(options, {title: 'Transfer fixture'});
+        assert.deepEqual([...bytes], [3, 1, 4]);
+        assert.deepEqual(resources.map((resource) => resource.name), ['first.mdd', 'second.mdd']);
+        assert.deepEqual(resources.map((resource) => [...resource.bytes]), [[2, 7], [1, 8, 2, 8]]);
+        assert.notEqual(bytes.buffer, mdx);
+        onProgress(progress);
+        progress.step = 2;
+        return Promise.resolve({archiveContent});
+    });
+    const {send, responses} = await loadWorker(true);
+    await send({
+        action: 'convertDictionary',
+        params: {
+            mdxFileName: 'input.mdx',
+            mdxBytes: mdx,
+            options: {title: 'Transfer fixture'},
+            mddFiles: [{name: 'first.mdd', bytes: first}, {name: 'second.mdd', bytes: second}],
+        },
+    }, [mdx, first, second]);
+    assert.deepEqual([mdx.byteLength, first.byteLength, second.byteLength, archiveContent.byteLength], [0, 0, 0, 0]);
+    assert.equal(convertMdxToArchive.mock.calls.length, 1);
+    assert.deepEqual(responses.map(({message}) => message.action), ['progress', 'complete']);
+    assert.deepEqual(responses[0].message.params.details, {step: 1});
+    const result = responses[1].message.params.result;
+    assert.ok(result);
+    assert.notEqual(result.archiveContent, archiveContent);
+    assert.deepEqual([...new Uint8Array(result.archiveContent)], [9, 0, 5, 7]);
+});
+
+test('rejects a cloned typed-array resource without dropping valid transferred resources', async () => {
+    const mdx = new ArrayBuffer(2);
+    const valid = new ArrayBuffer(3);
+    const malformed = new Uint8Array([4, 5]);
+    const {send, responses} = await loadWorker(true);
+    await send({
+        action: 'convertDictionary',
+        params: {mdxBytes: mdx, mddFiles: [{bytes: valid}, {bytes: malformed}]},
+    }, [mdx, valid, malformed.buffer]);
+    assert.deepEqual([mdx.byteLength, valid.byteLength, malformed.byteLength], [0, 0, 0]);
+    assert.equal(convertMdxToArchive.mock.calls.length, 0);
+    assert.equal(responses.length, 1);
+    assert.equal(responses[0].message.action, 'complete');
+    assert.match(responses[0].message.params.error ?? '', /MDD bytes at index 1/);
+});
+
+test('rejects sparse resource lists after structured cloning', async () => {
+    const mdx = new ArrayBuffer(2);
+    const {send, responses} = await loadWorker(true);
+    await send({action: 'convertDictionary', params: {mdxBytes: mdx, mddFiles: new Array(2)}}, [mdx]);
+    assert.equal(mdx.byteLength, 0);
+    assert.equal(convertMdxToArchive.mock.calls.length, 0);
+    assert.equal(responses.length, 1);
+    assert.equal(responses[0].message.action, 'complete');
+    assert.match(responses[0].message.params.error ?? '', /invalid MDD file at index 0/);
+});
+
+test('accepts a valid transfer after settling an invalid request on the same worker', async () => {
+    const archiveContent = new Uint8Array([6, 2, 6]).buffer;
+    convertMdxToArchive.mockResolvedValue({archiveContent});
+    const {send, responses} = await loadWorker(true);
+    await send({action: 'convertDictionary', params: null});
+    assert.equal(convertMdxToArchive.mock.calls.length, 0);
+    assert.equal(responses.length, 1);
+    assert.equal(typeof responses[0].message.params.error, 'string');
+    const mdx = new ArrayBuffer(2);
+    await send({action: 'convertDictionary', params: {mdxBytes: mdx}}, [mdx]);
+    assert.equal(convertMdxToArchive.mock.calls.length, 1);
+    assert.deepEqual(responses.map(({message}) => message.action), ['complete', 'complete']);
+    const result = responses[1].message.params.result;
+    assert.ok(result);
+    assert.deepEqual([...new Uint8Array(result.archiveContent)], [6, 2, 6]);
+    assert.equal(mdx.byteLength, 0);
+    assert.equal(archiveContent.byteLength, 0);
+});
