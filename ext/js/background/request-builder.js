@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Content-Length is an untrusted allocation hint, not a body-size limit.
+const RESPONSE_PREALLOCATION_MAX_BYTES = 16 * 1024 * 1024;
+
 /**
  * This class is used to generate `fetch()` requests on the background page
  * with additional controls over anonymity and error handling.
@@ -131,8 +134,12 @@ export class RequestBuilder {
 
         try {
             const contentLengthString = response.headers.get('Content-Length');
-            const contentLength = contentLengthString !== null ? Number.parseInt(contentLengthString, 10) : null;
-            let target = contentLength !== null && Number.isFinite(contentLength) ? new Uint8Array(contentLength) : null;
+            const contentLength = contentLengthString !== null && /^\d+$/.test(contentLengthString) ?
+                Number(contentLengthString) :
+                Number.NaN;
+            let target = Number.isSafeInteger(contentLength) && contentLength <= RESPONSE_PREALLOCATION_MAX_BYTES ?
+                new Uint8Array(contentLength) :
+                null;
             let targetPosition = 0;
             let totalLength = 0;
             const targets = [];
