@@ -34,9 +34,22 @@ function createBytes(size) {
 
 describe('bounded binary string conversion', () => {
     test.each([
-        0, 1, 2, 3, 255, 256, 257,
-        32767, 32768, 32769, 65535, 65536, 65537,
-        131071, 131072, 1048576,
+        0,
+        1,
+        2,
+        3,
+        255,
+        256,
+        257,
+        32767,
+        32768,
+        32769,
+        65535,
+        65536,
+        65537,
+        131071,
+        131072,
+        1048576,
     ])('preserves every byte and base64 padding for %i bytes', (size) => {
         const bytes = createBytes(size);
         const expected = Buffer.from(bytes);

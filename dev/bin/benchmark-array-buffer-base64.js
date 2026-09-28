@@ -1,6 +1,19 @@
 /*
- * Copyright (C) 2026 Manabitan authors
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2021-2022  Yomichan Authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import assert from 'node:assert/strict';
@@ -8,7 +21,7 @@ import {Buffer} from 'node:buffer';
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {performance} from 'node:perf_hooks';
+import {performance as safePerformance} from 'node:perf_hooks';
 import {pathToFileURL} from 'node:url';
 import * as candidate from '../../ext/js/data/array-buffer-util.js';
 
@@ -49,8 +62,10 @@ async function main() {
     const collectGarbage = Reflect.get(globalThis, 'gc');
     if (typeof collectGarbage !== 'function') { throw new Error('Run with --expose-gc for comparable batches'); }
     const baselineUrl = pathToFileURL(resolve(baselinePath));
-    /** @type {typeof candidate} */
-    const baseline = await import(baselineUrl.href);
+    // The CLI operator explicitly selects a trusted local baseline module.
+    // pathToFileURL keeps this loader restricted to a local filesystem URL.
+    // eslint-disable-next-line no-unsanitized/method
+    const baseline = /** @type {typeof candidate} */ (await import(baselineUrl.href));
     const candidateUrl = new URL('../../ext/js/data/array-buffer-util.js', import.meta.url);
     let assertions = 0;
     for (const size of [0, 1, 2, 3, 255, 256, 257, 32767, 32768, 32769, 65535, 65536, 65537, 131071, 131072, 1048576, 4194304]) {
@@ -83,14 +98,17 @@ async function main() {
          */
         const measure = (implementation) => {
             collectGarbage();
-            const start = performance.now();
+            const start = safePerformance.now();
             for (let i = 0; i < iterations; ++i) {
                 const value = implementation.arrayBufferToBase64(input);
                 sink = (sink + value.length + value.charCodeAt(value.length >> 1)) | 0;
             }
-            return (performance.now() - start) / iterations;
+            return (safePerformance.now() - start) / iterations;
         };
-        for (let i = 0; i < 8; ++i) { measure(baseline); measure(candidate); }
+        for (let i = 0; i < 8; ++i) {
+            measure(baseline);
+            measure(candidate);
+        }
         const samples = [];
         for (let i = 0; i < pairs; ++i) {
             let baselineMs;
