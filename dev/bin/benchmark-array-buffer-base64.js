@@ -59,7 +59,7 @@ async function main() {
     if (typeof baselinePath !== 'string' || !Number.isSafeInteger(pairs) || pairs < 1) {
         throw new Error('Usage: node --expose-gc dev/bin/benchmark-array-buffer-base64.js BASELINE_MODULE [PAIRS=20]');
     }
-    const collectGarbage = Reflect.get(globalThis, 'gc');
+    const collectGarbage = global.gc;
     if (typeof collectGarbage !== 'function') { throw new Error('Run with --expose-gc for comparable batches'); }
     const baselineUrl = pathToFileURL(resolve(baselinePath));
     // The CLI operator explicitly selects a trusted local baseline module.
