@@ -46,7 +46,15 @@ export function arrayBufferToBase64(arrayBuffer) {
 export function arrayBufferToBinaryString(arrayBuffer) {
     const bytes = new Uint8Array(arrayBuffer);
     try {
-        return String.fromCharCode(...bytes);
+        // Keep argument counts bounded for large dictionary media. A whole-buffer
+        // spread can throw and force the much slower byte-by-byte fallback.
+        const chunkSize = 0x8000;
+        if (bytes.length <= chunkSize) { return String.fromCharCode(...bytes); }
+        const chunks = [];
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+            chunks.push(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
+        }
+        return chunks.join('');
     } catch (e) {
         let binary = '';
         for (let i = 0, ii = bytes.byteLength; i < ii; ++i) {
