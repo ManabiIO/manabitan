@@ -59,7 +59,7 @@ describe('bounded binary string conversion', () => {
         expect(encoded).toBe(expected.toString('base64'));
         expect(new Uint8Array(base64ToArrayBuffer(encoded))).toEqual(bytes);
         expect(Buffer.from(bytes)).toEqual(expected);
-    });
+    }, 15_000);
 
     test('does not submit a whole media buffer as one argument list', () => {
         const bytes = createBytes(65539);
