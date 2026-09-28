@@ -2,7 +2,7 @@ name: Qualify live-search proposal
 on:
   push:
     branches: [review/search-proposal-20260928]
-    paths: [.github/workflows/review-search-proposal.yml, .review/search.patch.gz.b64]
+    paths: [.github/workflows/review-search-proposal.yml]
 permissions:
   contents: write
 jobs:
@@ -12,77 +12,49 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: proposal
-          persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
-          ref: 7294d63871e7e0a6a6ee714b443c0f5e9dec7b1f
-          path: product
+          ref: a50e88412cc8ab8009fbe5fee223ca2f45fc8406
       - uses: actions/setup-node@v4
         with:
           node-version: 24.21.0
-      - name: Apply exact reviewed patch
-        working-directory: product
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run build:libs
+      - name: Complete local style and API documentation
         run: |
-          set -euo pipefail
           mkdir -p "$RUNNER_TEMP/search-evidence"
-          cp ../proposal/.review/search.patch.gz.b64 "$RUNNER_TEMP/search-evidence/transport.b64"
           python3 - <<'PY'
-          import base64, gzip, hashlib, os, pathlib
-          data = pathlib.Path('../proposal/.review/search.patch.gz.b64').read_text().strip()
-          assert hashlib.sha256(data.encode()).hexdigest() == '12a51045a7828a3c02d4e504cf391b33b4d5a4f7d132a69d2628a1f392e17444'
-          for start, end in reversed([(503,504),(740,741),(973,974),(1082,1083),(1232,1233),(1251,1252),(1424,1425),(1798,1799),(1950,1951),(1980,1982)]):
-              data = data[:start] + data[end:]
-          patch = gzip.decompress(base64.b64decode(data, validate=True))
-          assert hashlib.sha256(patch).hexdigest() == '3ef68cc0b52c07d5e872bbbaca7b0eed9fd71a5b72895af9b00ae5854aaf726f'
-          pathlib.Path(os.environ['RUNNER_TEMP'], 'search.patch').write_bytes(patch)
+          from pathlib import Path
+          header = Path('ext/js/display/display.js').read_text().split('*/', 1)[0] + '*/'
+          for name in ['dictionary-preview', 'japanese-search']:
+              p = Path(f'ext/js/search/{name}.js')
+              p.write_text(p.read_text().replace('/* SPDX-License-Identifier: GPL-3.0-or-later */', header, 1))
+          p = Path('ext/js/search/japanese-search.js')
+          p.write_text(p.read_text().replace(' * @returns {string[]}', ' * @throws {RangeError} The query exceeds the length limit or contains NUL.\n * @returns {string[]}'))
+          p = Path('ext/js/display/search-display-controller.js')
+          p.write_text(p.read_text().replace('        this._composing = false;', '        /** @type {boolean} */\n        this._composing = false;', 1))
+          p = Path('ext/web/client.ts')
+          p.write_text(p.read_text().replace('/** Search-page spelling alternatives; preview payloads never contain full glossaries. */', '/**\n     * Search-page spelling alternatives; preview payloads never contain full glossaries.\n     * @param text\n     * @param full\n     * @param options\n     */'))
           PY
-          git apply --check "$RUNNER_TEMP/search.patch"
-          git apply "$RUNNER_TEMP/search.patch"
-          rm .github/workflows/search-contract.yml
-          git add -A
-      - name: Install locked dependencies
-        working-directory: product
-        run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Format only proposed files
-        working-directory: product
-        run: |
-          git diff --cached --name-only -z -- '*.js' '*.ts' '*.mjs' | xargs -0 npx eslint --fix > "$RUNNER_TEMP/search-evidence/lint.txt" 2>&1 || true
-          npx prettier docs/design/unified-search.md --write
-      - name: Qualify focused source behavior
-        working-directory: product
+          git diff 7294d63871e7e0a6a6ee714b443c0f5e9dec7b1f --name-only -z -- '*.js' '*.ts' '*.mjs' | xargs -0 npx eslint --fix > "$RUNNER_TEMP/search-evidence/focused-lint.txt" 2>&1 || true
+      - name: Qualify and publish only product changes
         run: |
           set -euo pipefail
           node --test test/search/search.test.mjs test/util/search-refresh-cases.js | tee "$RUNNER_TEMP/search-evidence/focused.txt"
-      - name: Publish bounded product branch
-        working-directory: product
-        run: |
-          set -euo pipefail
-          git add -A
-          git config user.name 'Manabi development'
-          git config user.email 'development@manabi.io'
-          git switch -c feat/live-dictionary-search-20260928
-          git commit -m 'feat(search): add IME-safe live search and shared bounded dictionary previews'
-          git rev-parse HEAD | tee "$RUNNER_TEMP/search-evidence/product-head.txt"
-          git diff 7294d63871e7e0a6a6ee714b443c0f5e9dec7b1f HEAD > "$RUNNER_TEMP/search-evidence/product.patch"
-          git push origin HEAD:refs/heads/feat/live-dictionary-search-20260928
-      - name: Build shared runtime
-        working-directory: product
-        run: npm run build:libs && node web/build.mjs
-      - name: Type and lint qualification
-        working-directory: product
-        run: |
-          set +e
-          npx tsc --noEmit --project web/tsconfig.json > "$RUNNER_TEMP/search-evidence/web-types.txt" 2>&1
-          echo "web_types_exit=$?" >> "$RUNNER_TEMP/search-evidence/status.txt"
           npm run test:ts > "$RUNNER_TEMP/search-evidence/types.txt" 2>&1
-          echo "types_exit=$?" >> "$RUNNER_TEMP/search-evidence/status.txt"
+          npx tsc --noEmit --project web/tsconfig.json > "$RUNNER_TEMP/search-evidence/web-types.txt" 2>&1
           npm run test:js > "$RUNNER_TEMP/search-evidence/all-lint.txt" 2>&1
-          echo "lint_exit=$?" >> "$RUNNER_TEMP/search-evidence/status.txt"
+          node web/build.mjs | tee "$RUNNER_TEMP/search-evidence/build.txt"
+          git add ext/js/display ext/js/search ext/web test/search web/extended-e2e.mjs
+          if ! git diff --cached --quiet; then
+            git config user.name 'Manabi development'
+            git config user.email 'development@manabi.io'
+            git commit -m 'style(search): satisfy repository lint and document query contracts'
+            git push origin HEAD:refs/heads/feat/live-dictionary-search-20260928
+          fi
+          git rev-parse HEAD > "$RUNNER_TEMP/search-evidence/product-head.txt"
+          git diff 7294d63871e7e0a6a6ee714b443c0f5e9dec7b1f HEAD > "$RUNNER_TEMP/search-evidence/product.patch"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: live-search-proposal-evidence
+          name: live-search-final-qualification
           path: ${{ runner.temp }}/search-evidence
-          if-no-files-found: warn
           retention-days: 3
