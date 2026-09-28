@@ -25,7 +25,8 @@ jobs:
         working-directory: product
         run: |
           set -euo pipefail
-          test -f ../proposal/.review/search.patch.gz.b64
+          mkdir -p "$RUNNER_TEMP/search-evidence"
+          cp ../proposal/.review/search.patch.gz.b64 "$RUNNER_TEMP/search-evidence/transport.b64"
           base64 --decode ../proposal/.review/search.patch.gz.b64 | gzip -d > "$RUNNER_TEMP/search.patch"
           echo '3ef68cc0b52c07d5e872bbbaca7b0eed9fd71a5b72895af9b00ae5854aaf726f  '"$RUNNER_TEMP/search.patch" | sha256sum -c -
           git apply --check "$RUNNER_TEMP/search.patch"
@@ -37,14 +38,13 @@ jobs:
       - name: Format only proposed files
         working-directory: product
         run: |
-          mkdir -p "$RUNNER_TEMP/search-evidence"
           git diff --cached --name-only -z -- '*.js' '*.ts' '*.mjs' | xargs -0 npx eslint --fix > "$RUNNER_TEMP/search-evidence/lint.txt" 2>&1 || true
           npx prettier docs/design/unified-search.md .github/workflows/search-contract.yml --write
       - name: Qualify focused source behavior
         working-directory: product
         run: |
           set -euo pipefail
-          node --test test/search/search.test.mjs test/display-search-input-refresh.test.js | tee "$RUNNER_TEMP/search-evidence/focused.txt"
+          node --test test/search/search.test.mjs test/display-lookup-refresh.test.js | tee "$RUNNER_TEMP/search-evidence/focused.txt"
       - name: Publish bounded product branch
         working-directory: product
         run: |
