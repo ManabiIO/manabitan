@@ -1914,7 +1914,7 @@ describe('TermRecordOpfsStore', () => {
 
     test('rejects a batch that would cross the persisted uint32 record-id ceiling before mutation', async () => {
         const store = new TermRecordOpfsStore();
-        Reflect.set(store, '_nextId', 0xffffffff);
+        Reflect.set(store, '_nextId', 0xfffffffe);
         const createRecord = (/** @type {string} */ expression) => ({
             dictionary: 'ID ceiling',
             expression,
@@ -1931,19 +1931,19 @@ describe('TermRecordOpfsStore', () => {
         await expect(store.appendBatch([createRecord('last'), createRecord('overflow')]))
             .rejects.toThrow(/ID space is exhausted/u);
 
-        expect(Reflect.get(store, '_nextId')).toBe(0xffffffff);
+        expect(Reflect.get(store, '_nextId')).toBe(0xfffffffe);
         expect(store.size).toBe(0);
         expect(Reflect.get(store, '_loadedDictionaryNames').has('ID ceiling')).toBe(false);
         expect(Reflect.get(store, '_recordsById').size).toBe(0);
     });
 
-    test('allows the final uint32 ID but rejects any following reservation', async () => {
+    test('allows the final array-indexable ID but rejects any following reservation', async () => {
         const store = new TermRecordOpfsStore();
-        Reflect.set(store, '_nextId', 0xffffffff);
+        Reflect.set(store, '_nextId', 0xfffffffe);
 
         await expect(Reflect.get(store, '_ensureNextIdReadyForAppend').call(store, 1))
             .resolves.toBeUndefined();
-        Reflect.set(store, '_nextId', 0x100000000);
+        Reflect.set(store, '_nextId', 0xffffffff);
         await expect(Reflect.get(store, '_ensureNextIdReadyForAppend').call(store, 1))
             .rejects.toThrow(/ID space is exhausted/u);
     });
