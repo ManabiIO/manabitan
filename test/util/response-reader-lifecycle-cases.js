@@ -63,6 +63,26 @@ for (const {label, chunks, length} of [
     })
 }
 
+test('accepts bodies larger than the speculative preallocation threshold', async () => {
+    const size = (16 * 1024 * 1024) + 7
+    const expected = new Uint8Array(size).fill(0x5a)
+    expected[0] = 0x11
+    expected[size - 1] = 0xee
+    const stream = new ReadableStream({
+        start(controller) {
+            controller.enqueue(expected)
+            controller.close()
+        },
+    })
+    const response = new Response(stream, {headers: {'Content-Length': String(size)}})
+    const actual = await RequestBuilder.readFetchResponseArrayBuffer(response, () => {})
+    assert.equal(actual.byteLength, size)
+    assert.equal(actual[0], 0x11)
+    assert.equal(actual[size >> 1], 0x5a)
+    assert.equal(actual[size - 1], 0xee)
+    assert.equal(stream.locked, false)
+})
+
 for (const reason of [new Error('progress failed'), 'literal failure', null]) {
     test(`cancels the unfinished body with the original progress error: ${String(reason)}`, async () => {
         /** @type {unknown[]} */
