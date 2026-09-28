@@ -93,16 +93,17 @@ test('releases an errored stream without replacing its read error', async () => 
     await nextTurn()
 })
 
-test('cleans up when response preallocation fails before the first read', async () => {
-    /** @type {unknown[]} */
-    const cancellations = []
-    const stream = new ReadableStream({cancel(reason) { cancellations.push(reason) }})
-    const response = new Response(stream, {headers: {'Content-Length': '-1'}})
-    await assert.rejects(RequestBuilder.readFetchResponseArrayBuffer(response, () => {}), RangeError)
-    assert.equal(stream.locked, false)
-    assert.equal(cancellations.length, 1)
-    assert.ok(cancellations[0] instanceof RangeError)
-})
+for (const length of ['-1', '3suffix', '9007199254740992']) {
+    test(`treats Content-Length ${length} as an optional hint and still releases the reader`, async () => {
+        const {response, stream, cancellations} = closedResponse([[1], [2, 3]], length)
+        assert.deepEqual(
+            await RequestBuilder.readFetchResponseArrayBuffer(response, () => {}),
+            Uint8Array.from([1, 2, 3]),
+        )
+        assert.equal(stream.locked, false)
+        assert.deepEqual(cancellations, [])
+    })
+}
 
 for (const mode of ['throw', 'reject']) {
     test(`owns ${mode} cancellation failures without masking the progress error`, async () => {
