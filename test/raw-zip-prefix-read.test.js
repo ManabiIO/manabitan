@@ -152,7 +152,9 @@ for (const phase of [-1, 0, 1]) {
         const blob = new RangedBlob(bytes);
         const controller = new AbortController();
         if (phase < 0) { controller.abort(); }
-        blob.onRead = (index) => { if (index === phase) { controller.abort(); } };
+        blob.onRead = (index) => {
+            if (index === phase) { controller.abort(); }
+        };
         await assert.rejects(new RawZipPayloadReader(blob).read(file, controller.signal), {name: 'AbortError'});
         assert.equal(blob.ranges.length, phase + 1);
     });
