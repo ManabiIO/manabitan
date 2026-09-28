@@ -17,6 +17,7 @@
 
 import assert from 'node:assert/strict';
 import {afterEach, beforeEach, test, vi} from 'vitest';
+import {DictionaryWorkerHandler} from '../ext/js/dictionary/dictionary-worker-handler.js';
 
 /** @typedef {(name: string, options: Record<string, unknown>, mdx: Uint8Array, mdd: Array<{name: string, bytes: Uint8Array}>, onProgress: (details: unknown) => void) => Promise<{archiveContent: ArrayBuffer}>} ConversionFunction */
 const {convertMdxToArchive} = vi.hoisted(() => ({
@@ -275,4 +276,71 @@ test('accepts a valid transfer after settling an invalid request on the same wor
     assert.deepEqual([...new Uint8Array(result.archiveContent)], [6, 2, 6]);
     assert.equal(mdx.byteLength, 0);
     assert.equal(archiveContent.byteLength, 0);
+});
+
+
+/**
+ * @param {Partial<import('dictionary-worker-handler').ImportMdxDictionaryMessageParams>} overrides
+ * @returns {Promise<unknown>}
+ */
+async function importThroughDictionaryWorker(overrides) {
+    const handler = new DictionaryWorkerHandler();
+    const importDictionary = vi.fn(async () => ({result: null, errors: [], debug: null}));
+    Reflect.set(handler, '_importDictionary', importDictionary);
+    const params = {
+        details: {},
+        mdxFileName: 'fixture.mdx',
+        mdxBytes: new ArrayBuffer(2),
+        mddFiles: [],
+        options: {},
+        ...overrides,
+    };
+    return await Reflect.get(handler, '_importMdxDictionary').call(handler, params, () => {});
+}
+
+test('dictionary worker rejects a non-array MDD collection before conversion', async () => {
+    await expect(importThroughDictionaryWorker({mddFiles: /** @type {import('core').SafeAny} */ (null)}))
+        .rejects.toThrow('invalid MDD files');
+    expect(convertMdxToArchive).not.toHaveBeenCalled();
+});
+
+test('dictionary worker rejects malformed MDD entries before conversion', async () => {
+    await expect(importThroughDictionaryWorker({
+        mddFiles: /** @type {import('core').SafeAny} */ ([{name: 'valid.mdd', bytes: new ArrayBuffer(2)}, null]),
+    })).rejects.toThrow('invalid MDD file at index 1');
+    expect(convertMdxToArchive).not.toHaveBeenCalled();
+});
+
+test('dictionary worker rejects non-ArrayBuffer MDD bytes instead of fabricating empty content', async () => {
+    await expect(importThroughDictionaryWorker({
+        mddFiles: /** @type {import('core').SafeAny} */ ([{name: 'invalid.mdd', bytes: new Uint8Array(3)}]),
+    })).rejects.toThrow('did not receive MDD bytes at index 0');
+    expect(convertMdxToArchive).not.toHaveBeenCalled();
+});
+
+test('dictionary worker rejects sparse MDD lists instead of dropping holes', async () => {
+    await expect(importThroughDictionaryWorker({
+        mddFiles: /** @type {import('core').SafeAny} */ (new Array(2)),
+    })).rejects.toThrow('invalid MDD file at index 0');
+    expect(convertMdxToArchive).not.toHaveBeenCalled();
+});
+
+test('dictionary worker preserves valid MDD order, bytes, and filename defaults', async () => {
+    const first = new ArrayBuffer(2);
+    const second = new ArrayBuffer(3);
+    convertMdxToArchive.mockResolvedValue({
+        archiveContent: new ArrayBuffer(8),
+        archiveFileName: 'fixture.zip',
+        phaseTimings: [],
+    });
+    await importThroughDictionaryWorker({
+        mddFiles: [{name: 'first.mdd', bytes: first}, {name: /** @type {import('core').SafeAny} */ (undefined), bytes: second}],
+    });
+    expect(convertMdxToArchive).toHaveBeenCalledTimes(1);
+    const resources = /** @type {Array<{name: string, bytes: Uint8Array}>} */ (convertMdxToArchive.mock.calls[0][3]);
+    expect(resources).toHaveLength(2);
+    expect(resources[0].name).toBe('first.mdd');
+    expect(resources[1].name).toBe('dictionary.mdd');
+    expect(resources[0].bytes.buffer).toBe(first);
+    expect(resources[1].bytes.buffer).toBe(second);
 });
