@@ -129,42 +129,51 @@ export class RequestBuilder {
             return new Uint8Array(result);
         }
 
-        const contentLengthString = response.headers.get('Content-Length');
-        const contentLength = contentLengthString !== null ? Number.parseInt(contentLengthString, 10) : null;
-        let target = contentLength !== null && Number.isFinite(contentLength) ? new Uint8Array(contentLength) : null;
-        let targetPosition = 0;
-        let totalLength = 0;
-        const targets = [];
+        try {
+            const contentLengthString = response.headers.get('Content-Length');
+            const contentLength = contentLengthString !== null ? Number.parseInt(contentLengthString, 10) : null;
+            let target = contentLength !== null && Number.isFinite(contentLength) ? new Uint8Array(contentLength) : null;
+            let targetPosition = 0;
+            let totalLength = 0;
+            const targets = [];
 
-        while (true) {
-            const {done, value} = await reader.read();
-            if (done) { break; }
-            if (onProgress !== null) {
-                onProgress(false);
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) { break; }
+                if (onProgress !== null) {
+                    onProgress(false);
+                }
+                if (target === null) {
+                    targets.push({array: value, length: value.length});
+                } else if (targetPosition + value.length > target.length) {
+                    targets.push({array: target.subarray(0, targetPosition), length: targetPosition}, {array: value, length: value.length});
+                    target = null;
+                } else {
+                    target.set(value, targetPosition);
+                    targetPosition += value.length;
+                }
+                totalLength += value.length;
             }
+
             if (target === null) {
-                targets.push({array: value, length: value.length});
-            } else if (targetPosition + value.length > target.length) {
-                targets.push({array: target.subarray(0, targetPosition), length: targetPosition}, {array: value, length: value.length});
-                target = null;
-            } else {
-                target.set(value, targetPosition);
-                targetPosition += value.length;
+                target = this._joinUint8Arrays(targets, totalLength);
+            } else if (totalLength < target.length) {
+                target = target.slice(0, totalLength);
             }
-            totalLength += value.length;
-        }
 
-        if (target === null) {
-            target = this._joinUint8Arrays(targets, totalLength);
-        } else if (totalLength < target.length) {
-            target = target.slice(0, totalLength);
-        }
+            if (onProgress !== null) {
+                onProgress(true);
+            }
 
-        if (onProgress !== null) {
-            onProgress(true);
+            return /** @type {Uint8Array} */ (target);
+        } catch (error) {
+            // A failed consumer no longer needs the remaining download. Own
+            // cancellation failures without delaying the original rejection.
+            void reader.cancel(error).catch(() => {});
+            throw error;
+        } finally {
+            reader.releaseLock();
         }
-
-        return /** @type {Uint8Array} */ (target);
     }
 
     // Private
