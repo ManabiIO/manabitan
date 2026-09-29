@@ -1,0 +1,57 @@
+name: Research PR348 Complete MDX Imports
+on:
+  push:
+    branches: [research/pr348-mdx-import-ab-20260929]
+    paths:
+      - .github/workflows/research-pr348-mdx-import-ab.yml
+      - dev/review/pr348-mdx-import-ab.mjs
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [large, medium]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin integrated baseline and exact candidate
+        run: |
+          cp dev/review/pr348-mdx-import-ab.mjs /tmp/pr348-driver.mjs
+          git fetch --no-tags --depth=1 origin 8f7933c1bf6659deb0641a174205a34b3ec399a8 3751ef01ecc5a2038872d6f5bbb6a505f50a3f19
+          git checkout --detach 8f7933c1bf6659deb0641a174205a34b3ec399a8
+          mkdir -p dev/review builds/pr348-mdx-import-ab
+          cp /tmp/pr348-driver.mjs dev/review/pr348-mdx-import-ab.mjs
+          cp /tmp/pr348-driver.mjs builds/pr348-mdx-import-ab/executed-driver.mjs
+          git diff 8f7933c1bf6659deb0641a174205a34b3ec399a8 3751ef01ecc5a2038872d6f5bbb6a505f50a3f19 -- ext/js/dictionary/mdx/vendor/js-mdict/utils.js > builds/pr348-mdx-import-ab/product.patch
+          test "$(git diff --name-only 8f7933c1bf6659deb0641a174205a34b3ec399a8 3751ef01ecc5a2038872d6f5bbb6a505f50a3f19 -- ext/ | tr '\n' ' ')" = "ext/js/dictionary/mdx/vendor/js-mdict/utils.js "
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/pr348-mdx-import-ab.mjs "$WORKLOAD" 2>&1 | tee "builds/pr348-mdx-import-ab/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/pr348-mdx-import-ab.mjs "$WORKLOAD" 2>&1 | tee "builds/pr348-mdx-import-ab/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: pr348-mdx-import-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/pr348-mdx-import-ab/
+          retention-days: 7
