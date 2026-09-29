@@ -31,6 +31,14 @@ export async function runExtended({context, page, origin, fixtures, check, impor
         assert.equal(prefix.prefix, true);
         assert.equal(prefix.matchedQuery, 'とうきょ');
         assert.ok(prefix.preview.items.length > 0 && prefix.preview.items.length <= 2);
+
+        // Protocol and search normalization both use Unicode code points, not
+        // UTF-16 code units. A valid 256-character supplementary query must
+        // complete normally even though it occupies 512 UTF-16 code units.
+        const supplementary = await page.evaluate(() => runtime.search('𠮷'.repeat(256), false));
+        assert.equal(supplementary.query, '𠮷'.repeat(256));
+        assert.equal(supplementary.prefix, false);
+
         const full = await page.evaluate(() => runtime.search('neko', true));
         assert.equal(full.prefix, false);
         assert.ok(full.lookup.dictionaryEntries.length > 0);
