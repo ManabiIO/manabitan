@@ -27,7 +27,25 @@ export async function runExtended({context, page, origin, fixtures, check, impor
             assert.equal(result.lookup, undefined, 'compact responses must not transfer full glossaries');
             assert.ok(JSON.stringify(result).length < 6000);
         }
+        const exact = await page.evaluate(() => runtime.search('gakkou', false));
+        assert.equal(exact.prefix, false, 'an exact romaji result must outrank prefix completion');
+        // Full JMdict contains shorter leading words for this unfinished
+        // spelling. They must not suppress completion of a longer headword.
+        const prefix = await page.evaluate(() => runtime.search('東京大学演', false));
+        assert.equal(prefix.prefix, true);
+        assert.equal(prefix.matchedQuery, '東京大学演');
+        assert.ok(prefix.preview.items.length > 0 && prefix.preview.items.length <= 2);
+        assert.ok(prefix.preview.items[0].term.startsWith('東京大学演'));
+
+        // Protocol and search normalization both use Unicode code points, not
+        // UTF-16 code units. A valid 256-character supplementary query must
+        // complete normally even though it occupies 512 UTF-16 code units.
+        const supplementary = await page.evaluate(() => runtime.search('𠮷'.repeat(256), false));
+        assert.equal(supplementary.query, '𠮷'.repeat(256));
+        assert.equal(supplementary.prefix, false);
+
         const full = await page.evaluate(() => runtime.search('neko', true));
+        assert.equal(full.prefix, false);
         assert.ok(full.lookup.dictionaryEntries.length > 0);
     });
     await check('recommendations reuse the existing ManabiTan Japanese catalog', async () => {
