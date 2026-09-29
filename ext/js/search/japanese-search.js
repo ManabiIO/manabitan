@@ -64,23 +64,54 @@ export function japaneseSearchQueries(value) {
 }
 
 /**
+ * Prefix fallback is deliberately conservative: at least two Japanese code
+ * points and no remaining Latin letters. This lets completed kana converted
+ * from romaji participate without interpreting arbitrary English as Japanese.
+ * @param {string} query
+ * @returns {boolean}
+ */
+export function isJapanesePrefixCandidate(query) {
+    return [...query].length >= 2 &&
+        /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(query) &&
+        !/[a-zāīūēōâîûêô]/i.test(query);
+}
+
+/**
  * Exact/deinflected results retain the translator's ordering. Only try spelling
  * alternatives when the literal query has no result; never fuse homophones or
  * override an installed dictionary's lexical identities with a surface key.
+ *
+ * An optional prefix lookup runs only after every exact/deinflected candidate
+ * misses. It is intended for live-search completion, not ranking exact matches.
  * @template {{dictionaryEntries: unknown[]}} T
  * @param {string} text
  * @param {(query: string) => Promise<T>} lookup
  * @param {() => void} [guard]
- * @returns {Promise<{result: T|null, matchedQuery: string}>}
+ * @param {((query: string) => Promise<T>) | null} [prefixLookup]
+ * @returns {Promise<{result: T|null, matchedQuery: string, matchType: 'exact'|'prefix'}>}
  */
-export async function findJapaneseSearch(text, lookup, guard = () => {}) {
-    for (const query of japaneseSearchQueries(text)) {
+export async function findJapaneseSearch(text, lookup, guard = () => {}, prefixLookup = null) {
+    const queries = japaneseSearchQueries(text);
+    for (const query of queries) {
         guard();
         const result = await lookup(query);
         guard();
         if (result.dictionaryEntries.length > 0) {
-            return {result, matchedQuery: query};
+            return {result, matchedQuery: query, matchType: 'exact'};
         }
     }
-    return {result: null, matchedQuery: text.trim()};
+    if (prefixLookup !== null) {
+        for (const query of queries) {
+            if (!isJapanesePrefixCandidate(query) || query.endsWith('*')) {
+                continue;
+            }
+            guard();
+            const result = await prefixLookup(query);
+            guard();
+            if (result.dictionaryEntries.length > 0) {
+                return {result, matchedQuery: query, matchType: 'prefix'};
+            }
+        }
+    }
+    return {result: null, matchedQuery: text.trim(), matchType: 'exact'};
 }
