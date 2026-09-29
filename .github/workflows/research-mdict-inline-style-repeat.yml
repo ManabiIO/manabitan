@@ -1,0 +1,34 @@
+name: Research MDict Inline Style Repeat
+
+on:
+  push:
+    branches:
+      - research/mdict-inline-style-repeat-20260929
+
+permissions:
+  contents: read
+
+jobs:
+  repeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build Chromium extension
+        run: npm run build -- --target chrome-dev
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Repeat inline-style contract
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            echo "::group::inline-style run $i"
+            xvfb-run -a node dev/bin/run-playwright.js test mdict-native.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep "inline styles preserve functional roots"
+            echo "::endgroup::"
+          done
