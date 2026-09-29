@@ -1390,6 +1390,29 @@ describe('TermRecordOpfsStore', () => {
         expect(decoded).toBe(RAW_TERM_CONTENT_TOKEN_DICT_NAME);
     });
 
+    test('rejects non-canonical and unsafe numeric shard filename fields', () => {
+        const store = new TermRecordOpfsStore();
+        const decode = Reflect.get(store, '_decodeShardInfoFromShardFileName').bind(store);
+        const canonical = Reflect.get(store, '_isCanonicalTermRecordStorageFileName').bind(store);
+
+        const safeSegment = store._getShardSegmentFileName('JMdict', 'raw', Number.MAX_SAFE_INTEGER);
+        expect(decode(safeSegment)).toMatchObject({dictionaryName: 'JMdict', segmentIndex: Number.MAX_SAFE_INTEGER});
+        expect(canonical(safeSegment)).toBe(true);
+
+        for (const fileName of [
+            'dict-JMdict^9007199254740992.mbtr',
+            'dict-JMdict^999999999999999999999999999999.mbtr',
+            'dict-JMdict^01.mbtr',
+            'dict-02|ABraw.mbtr',
+            'dict-2x|ABraw.mbtr',
+            'dict-9007199254740992|ABraw.mbtr',
+        ]) {
+            expect(canonical(fileName)).toBe(false);
+        }
+        expect(decode('dict-JMdict^9007199254740992.mbtr')).toBeNull();
+        expect(decode('dict-9007199254740992|ABraw.mbtr')).toBeNull();
+    });
+
     test('rejects custom content dictionary names which exceed the shard metadata field', () => {
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_textEncoder', {

@@ -106,6 +106,18 @@ const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
 const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 
 /**
+ * Parses an on-disk decimal filename field without allowing Number rounding,
+ * prefixes, signs, whitespace, or other non-canonical spellings.
+ * @param {string} value
+ * @returns {number|null}
+ */
+function parseCanonicalSafeInteger(value) {
+    if (!/^(?:0|[1-9][0-9]*)$/.test(value)) { return null; }
+    const parsed = Number(value);
+    return Number.isSafeInteger(parsed) && String(parsed) === value ? parsed : null;
+}
+
+/**
  * @param {Uint8Array} content
  * @param {number} offset
  * @param {number} count
@@ -6497,8 +6509,9 @@ export class TermRecordOpfsStore {
         const segmentSeparatorIndex = encoded.lastIndexOf(SHARD_FILE_SEGMENT_SEPARATOR);
         if (segmentSeparatorIndex > 0) {
             const segmentValue = encoded.slice(segmentSeparatorIndex + SHARD_FILE_SEGMENT_SEPARATOR.length);
-            if (/^[0-9]+$/.test(segmentValue)) {
-                segmentIndex = Number.parseInt(segmentValue, 10);
+            const parsedSegmentIndex = parseCanonicalSafeInteger(segmentValue);
+            if (parsedSegmentIndex !== null) {
+                segmentIndex = parsedSegmentIndex;
                 encoded = encoded.slice(0, segmentSeparatorIndex);
             }
         }
@@ -6508,8 +6521,8 @@ export class TermRecordOpfsStore {
                 const dictionaryName = decodeURIComponent(encoded);
                 return dictionaryName.length > 0 ? {dictionaryName, contentDictName: 'raw', segmentIndex} : null;
             }
-            const dictionaryLength = Number.parseInt(encoded.slice(0, separatorIndex), 10);
-            if (!Number.isFinite(dictionaryLength) || dictionaryLength < 0) {
+            const dictionaryLength = parseCanonicalSafeInteger(encoded.slice(0, separatorIndex));
+            if (dictionaryLength === null) {
                 return null;
             }
             const payload = encoded.slice(separatorIndex + SHARD_FILE_CONTENT_DICT_SEPARATOR.length);
