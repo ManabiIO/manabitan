@@ -27,9 +27,11 @@ export async function runExtended({context, page, origin, fixtures, check, impor
             assert.equal(result.lookup, undefined, 'compact responses must not transfer full glossaries');
             assert.ok(JSON.stringify(result).length < 6000);
         }
-        const prefix = await page.evaluate(() => runtime.search('toukyo', false));
+        const exact = await page.evaluate(() => runtime.search('gakkou', false));
+        assert.equal(exact.prefix, false, 'an exact romaji result must outrank prefix completion');
+        const prefix = await page.evaluate(() => runtime.search('gakkoukyou', false));
         assert.equal(prefix.prefix, true);
-        assert.equal(prefix.matchedQuery, 'とうきょ');
+        assert.equal(prefix.matchedQuery, 'がっこうきょう');
         assert.ok(prefix.preview.items.length > 0 && prefix.preview.items.length <= 2);
 
         // Protocol and search normalization both use Unicode code points, not
