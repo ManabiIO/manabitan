@@ -1390,6 +1390,78 @@ describe('TermRecordOpfsStore', () => {
         expect(decoded).toBe(RAW_TERM_CONTENT_TOKEN_DICT_NAME);
     });
 
+    test('rejects non-canonical and unsafe numeric shard filename fields', () => {
+        const store = new TermRecordOpfsStore();
+        const decode = Reflect.get(store, '_decodeShardInfoFromShardFileName').bind(store);
+        const canonical = Reflect.get(store, '_isCanonicalTermRecordStorageFileName').bind(store);
+
+        const safeSegment = store._getShardSegmentFileName('JMdict', 'raw', Number.MAX_SAFE_INTEGER);
+        expect(decode(safeSegment)).toMatchObject({dictionaryName: 'JMdict', segmentIndex: Number.MAX_SAFE_INTEGER});
+        expect(canonical(safeSegment)).toBe(true);
+
+        for (const fileName of [
+            'dict-JMdict^9007199254740992.mbtr',
+            'dict-JMdict^999999999999999999999999999999.mbtr',
+            'dict-JMdict^01.mbtr',
+            'dict-02|ABraw.mbtr',
+            'dict-2x|ABraw.mbtr',
+            'dict-9007199254740992|ABraw.mbtr',
+        ]) {
+            expect(canonical(fileName)).toBe(false);
+        }
+        expect(decode('dict-JMdict^9007199254740992.mbtr')).toBeNull();
+        expect(decode('dict-9007199254740992|ABraw.mbtr')).toBeNull();
+
+        for (const segmentIndex of [-1, 0.5, Number.MAX_SAFE_INTEGER + 1, Number.POSITIVE_INFINITY]) {
+            expect(() => store._getShardSegmentFileName('JMdict', 'raw', segmentIndex))
+                .toThrow(/safe integer range/u);
+        }
+    });
+
+    test('does not rotate a maximum safe shard segment into an imprecise successor', async () => {
+        const store = new TermRecordOpfsStore();
+        const fileName = store._getShardSegmentFileName('JMdict', 'raw', Number.MAX_SAFE_INTEGER);
+        const fileHandle = asFileHandle({
+            name: fileName,
+            async getFile() {
+                return /** @type {File} */ (/** @type {unknown} */ ({
+                    name: fileName,
+                    size: 1024 * 1024 * 1024,
+                }));
+            },
+        });
+        const state = store._createShardState(
+            fileName,
+            fileHandle,
+            1024 * 1024 * 1024,
+            'raw',
+            Number.MAX_SAFE_INTEGER,
+            store._getShardFileName('JMdict', 'raw'),
+        );
+        if (state.logicalKey === null) { throw new Error('Expected shard logical key'); }
+        Reflect.get(store, '_activeAppendShardStateByKey').set(state.logicalKey, state);
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
+
+        await expect(Reflect.get(store, '_rotateActiveShardSegmentAfterQueuePressure').call(store, state))
+            .rejects.toThrow(/safe integer range/u);
+        expect(Reflect.get(store, '_activeAppendShardStateByKey').get(state.logicalKey)).toBe(state);
+    });
+
+    test('rejects unsafe numeric shard aliases before cold-start state publication', async () => {
+        const fileName = 'dict-JMdict^9007199254740992.mbtr';
+        const store = new TermRecordOpfsStore();
+        Reflect.set(
+            store,
+            '_recordsDirectoryHandle',
+            createFakeDirectoryHandle(new Map([[fileName, new Uint8Array([1])]])),
+        );
+
+        await expect(Reflect.get(store, '_loadShardFiles').call(store, false))
+            .rejects.toThrow(/Invalid term-record storage file name/u);
+        expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0);
+        expect(Reflect.get(store, '_activeAppendShardStateByKey').size).toBe(0);
+    });
+
     test('rejects custom content dictionary names which exceed the shard metadata field', () => {
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_textEncoder', {
