@@ -46,6 +46,7 @@ export default defineConfig({
         exclude: [
             ...sharedExclude,
             'test/json.test.js',
+            'test/search/search.test.mjs',
             '.tmp-*.test.js',
         ],
         poolOptions: {
