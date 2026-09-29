@@ -6441,6 +6441,7 @@ export class TermRecordOpfsStore {
      * @param {string} [contentDictName='raw']
      * @param {number} [segmentIndex=0]
      * @returns {string}
+     * @throws {RangeError} If the segment index is outside the safe integer range.
      */
     _getShardSegmentFileName(dictionaryName, contentDictName = 'raw', segmentIndex = 0) {
         if (!Number.isSafeInteger(segmentIndex) || segmentIndex < 0) {
