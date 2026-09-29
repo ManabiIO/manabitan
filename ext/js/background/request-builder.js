@@ -60,6 +60,7 @@ export class RequestBuilder {
         const originUrl = this._getOriginURL(url);
 
         this._ruleIds.add(id);
+        let releaseRuleId = true;
         try {
             /** @type {chrome.declarativeNetRequest.Rule[]} */
             const addRules = [{
@@ -97,10 +98,14 @@ export class RequestBuilder {
             try {
                 return await fetch(url, init);
             } finally {
-                await this._tryUpdateSessionRules({removeRuleIds: [id]});
+                // A failed browser cleanup leaves the rule alive. Keep its ID
+                // reserved locally so a later request cannot collide with it.
+                releaseRuleId = await this._tryUpdateSessionRules({removeRuleIds: [id]});
             }
         } finally {
-            this._ruleIds.delete(id);
+            if (releaseRuleId) {
+                this._ruleIds.delete(id);
+            }
         }
     }
 
