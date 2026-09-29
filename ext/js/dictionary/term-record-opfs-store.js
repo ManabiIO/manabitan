@@ -6510,10 +6510,11 @@ export class TermRecordOpfsStore {
         if (segmentSeparatorIndex > 0) {
             const segmentValue = encoded.slice(segmentSeparatorIndex + SHARD_FILE_SEGMENT_SEPARATOR.length);
             const parsedSegmentIndex = parseCanonicalSafeInteger(segmentValue);
-            if (parsedSegmentIndex !== null) {
-                segmentIndex = parsedSegmentIndex;
-                encoded = encoded.slice(0, segmentSeparatorIndex);
+            if (parsedSegmentIndex === null || parsedSegmentIndex <= 0) {
+                return null;
             }
+            segmentIndex = parsedSegmentIndex;
+            encoded = encoded.slice(0, segmentSeparatorIndex);
         }
         const separatorIndex = encoded.indexOf(SHARD_FILE_CONTENT_DICT_SEPARATOR);
         try {
