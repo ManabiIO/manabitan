@@ -21,7 +21,7 @@ import {setupDomTest} from './fixtures/dom-test.js';
 
 const {window, teardown} = await setupDomTest('ext/search.html');
 
-afterAll(() => teardown());
+afterAll(() => teardown(global));
 
 describe('search page controls', () => {
     test('icon-only controls are native, named buttons', () => {
