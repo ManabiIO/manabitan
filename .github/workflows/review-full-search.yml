@@ -1,0 +1,83 @@
+name: Full search qualification
+on:
+  push:
+    branches: [review/search-proposal-20260928]
+    paths: [.github/workflows/review-full-search.yml]
+permissions:
+  contents: write
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: proposal
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 5571ec9eb637b3ae3a0aec6aa411024499f6da98
+          path: product
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.21.0'
+      - name: Apply checksum-verified source patch
+        working-directory: product
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/full-search"
+          python3 - <<'PY'
+          import pathlib, hashlib, gzip, base64, os
+          chunks = [pathlib.Path(f'../proposal/.review/full-search.{i}.b64').read_text().strip() for i in range(1,5)]
+          expected = ['8ec33b68303067b1fcfb531969c81f18273f4b80f9a041aa03f37f40b3dd8f38','1e6b76010e0148906ba2d14b483d5487bcfe31ebbbbb37be5272d3db5e81ee3d','a4b7fb57a33ea7eb241de60e9d0b4b068e419a6deef7814aae4e773d1335c1aa','9398da9924d8d5cbb5b7cee7c2ac53e4fb762968cbadf405c5830c1a83cd9c70']
+          assert [hashlib.sha256(c.encode()).hexdigest() for c in chunks] == expected
+          patch = gzip.decompress(base64.b64decode(''.join(chunks), validate=True))
+          assert hashlib.sha256(patch).hexdigest() == 'ae1be7b689ad032de235ea4c52bce2ff2c7ef9deea45aa86cbc53e40e552a1da'
+          pathlib.Path(os.environ['RUNNER_TEMP'],'full-search','source.patch').write_bytes(patch)
+          PY
+          git apply --check "$RUNNER_TEMP/full-search/source.patch"
+          git apply "$RUNNER_TEMP/full-search/source.patch"
+          git add -A
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: product
+      - run: npm run build:libs
+        working-directory: product
+      - name: Format and qualify all changed source
+        working-directory: product
+        run: |
+          set -euo pipefail
+          git diff --cached --name-only -z -- '*.js' '*.ts' '*.mjs' | xargs -0 npx eslint --fix > "$RUNNER_TEMP/full-search/lint.txt" 2>&1
+          npx stylelint ext/css/web-search.css --fix > "$RUNNER_TEMP/full-search/css.txt" 2>&1
+          node --test test/search/search.test.mjs test/util/search-refresh-cases.js | tee "$RUNNER_TEMP/full-search/unit.txt"
+          npx tsc --noEmit --project web/tsconfig.json > "$RUNNER_TEMP/full-search/web-types.txt" 2>&1
+          npm run test:ts > "$RUNNER_TEMP/full-search/types.txt" 2>&1
+          npm run test:js > "$RUNNER_TEMP/full-search/all-lint.txt" 2>&1
+          node web/build.mjs | tee "$RUNNER_TEMP/full-search/build.txt"
+      - name: Publish bounded product changes
+        working-directory: product
+        run: |
+          set -euo pipefail
+          git add ext/web ext/css/web-search.css ext/js/display/display-generator.js web/build.mjs
+          git config user.name 'Manabi development'
+          git config user.email 'development@manabi.io'
+          git commit -m 'feat(search): reuse full Yomitan entry generation with host actions and pagination'
+          git push origin HEAD:refs/heads/feat/live-dictionary-search-20260928
+          git rev-parse HEAD > "$RUNNER_TEMP/full-search/product-head.txt"
+          git diff 5571ec9eb637b3ae3a0aec6aa411024499f6da98 HEAD > "$RUNNER_TEMP/full-search/product.patch"
+      - name: Retain exact candidate on failure
+        if: always()
+        working-directory: product
+        run: |
+          git diff HEAD > "$RUNNER_TEMP/full-search/unpublished.patch"
+          mkdir -p "$RUNNER_TEMP/full-search/source"
+          cp ext/web/search-render.ts "$RUNNER_TEMP/full-search/source/" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-search-qualification
+          path: ${{ runner.temp }}/full-search
+          retention-days: 3
+          if-no-files-found: error
