@@ -173,21 +173,26 @@ async function dispatch(request: Request): Promise<unknown> {
             const query = text(p.text, 256).trim();
             if (typeof p.full !== 'boolean') {throw new WebRuntimeError('invalid_request', 'Expected a search presentation');}
             const options = await lookupOptions();
-            const {result, matchedQuery} = await findJapaneseSearch(query, async (candidate) => {
-                // Explicit trailing wildcard is prefix search; do not make every
-                // one-character keystroke an unbounded prefix enumeration.
+            const {result, matchedQuery, matchType} = await findJapaneseSearch(query, async (candidate) => {
+                // Explicit trailing wildcard remains an intentional prefix
+                // request. Implicit completion is attempted separately only
+                // after exact/deinflected candidates miss.
                 const prefix = candidate.endsWith('*') && candidate.length > 1;
                 const source = prefix ? candidate.slice(0, -1) : candidate;
                 return translator.findTerms('group', source, {...options,
                     removeNonJapaneseCharacters: false,
                     matchType: prefix ? 'prefix' : 'exact',
                     deinflect: !prefix});
-            }, abortIfCancelled);
+            }, abortIfCancelled, (candidate) => translator.findTerms('group', candidate, {...options,
+                removeNonJapaneseCharacters: false,
+                matchType: 'prefix',
+                deinflect: false}));
             abortIfCancelled();
             const entries = result?.dictionaryEntries ?? [];
             return {version: 1,
                 query,
                 matchedQuery,
+                prefix: matchType === 'prefix' || matchedQuery.endsWith('*'),
                 dictionaryCount: options.enabledDictionaryMap.size,
                 preview: dictionaryPreview(entries),
                 ...p.full ? {lookup: {...result ?? {originalTextLength: 0}, dictionaryEntries: entries.slice(0, 100)}} : {}};
