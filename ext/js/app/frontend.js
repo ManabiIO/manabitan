@@ -1235,7 +1235,7 @@ export class Frontend {
     async _ignorePoint(x, y) {
         try {
             return this._readerLookupBridge?.ownsPoint(x, y) === true ||
-                (this._popup !== null && await this._popup.containsPoint(x, y));
+            (this._popup !== null && await this._popup.containsPoint(x, y));
         } catch (e) {
             if (!this._application.webExtension.unloaded) {
                 throw e;

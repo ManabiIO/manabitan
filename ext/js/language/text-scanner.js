@@ -471,12 +471,14 @@ export class TextScanner extends EventDispatcher {
         }
     }
 
-    /** Cancel any queued/in-flight scanner result before an external exact lookup.
+    /**
+     * Cancel any queued/in-flight scanner result before an external exact lookup.
      * @returns {void}
      */
     beginExternalLookup() {
         ++this._externalLookupGeneration;
         this._activeLookupSequence = null;
+        this._pendingLookup = false;
         this._queuedLookup = null;
         this._queuedMouseMoveLookup = null;
         this._scanTimerClear();

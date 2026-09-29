@@ -45,6 +45,8 @@ const compat = new FlatCompat({
 header.rules.header.meta.schema = false;
 
 const manabitanHeaderFiles = [
+    'ext/js/app/reader-lookup-bridge.js',
+    'ext/js/app/reader-lookup-integration.js',
     'dev/lib/zstd-simd-module.d.ts',
     'ext/js/data/data-transmission-consent-util.js',
     'ext/js/dictionary/term-entry-content-hash.js',
