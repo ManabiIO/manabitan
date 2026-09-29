@@ -6664,5 +6664,4 @@ export class TermRecordOpfsStore {
             }
         }
     }
-
 }
