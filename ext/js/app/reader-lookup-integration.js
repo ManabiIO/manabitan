@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* eslint no-underscore-dangle: ["error", {"allow": ["_options", "_disabledOverride", "_textScanner", "_getOptionsContext", "_application", "_showContent"]}] */
+/* eslint no-underscore-dangle: ["error", {"allow": ["_options", "_disabledOverride", "_textScanner", "_getOptionsContext", "_application", "_showContent", "_stopClearSelectionDelayed"]}] */
 import {TextSourceRange} from '../dom/text-source-range.js';
 import {exactReaderEntries, readerEntriesWithSurface, ReaderLookupBridge} from './reader-lookup-bridge.js';
 
@@ -28,9 +28,12 @@ export function installReaderLookupIntegration(frontend) {
     return new ReaderLookupBridge({
         document,
         enabled: () => frontend._options?.general.enable === true && !frontend._disabledOverride,
-        invalidateSearch: () => frontend._textScanner.beginExternalLookup(),
+        invalidateSearch: () => {
+            frontend._stopClearSelectionDelayed();
+            frontend._textScanner.beginExternalLookup();
+        },
         report: (status) => { document.documentElement.dataset.readerLookupStatus = status; },
-        show: async (request, anchor, isCurrent) => {
+        show: async (request, anchor, isCurrent, subscribe) => {
             const optionsContext = await frontend._getOptionsContext();
             if (!isCurrent()) { return; }
             const {dictionaryEntries} = await frontend._application.api.termsFind(request.term, {
@@ -48,10 +51,13 @@ export function installReaderLookupIntegration(frontend) {
                 false,
                 entries,
                 'terms',
-                {text: request.sentence, offset: request.offset},
+                // eslint-disable-next-line unicorn/no-useless-spread -- Anki offsets count code points, not UTF-16 code units.
+                {text: request.sentence, offset: [...request.sentence.slice(0, request.offset)].length},
                 document.title,
                 optionsContext,
                 matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+                void 0,
+                {isCurrent, subscribe},
             );
             await frontend.showContentCompleted();
             if (isCurrent()) { document.documentElement.dataset.readerLookupStatus = entries.length > 0 ? 'shown' : 'no-exact-match'; }

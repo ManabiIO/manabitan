@@ -72,7 +72,7 @@ export function parseReaderLookup(raw, contextRaw = null) {
     typeof value.offset !== 'number' || !Number.isSafeInteger(value.offset) || value.offset < 0 ||
     value.sentence.slice(value.offset, value.offset + value.surface.length) !== value.surface) { return null; }
     // Native sequence/namespace are provenance, NOT Manabitan database row IDs.
-    if (typeof value.namespace !== 'undefined' && !['jmdict', 'jmnedict'].includes(value.namespace)) { return null; }
+    if (typeof value.namespace !== 'undefined' && value.namespace !== 'jmdict' && value.namespace !== 'jmnedict') { return null; }
     if (typeof value.entryID !== 'undefined' && (typeof value.entryID !== 'string' || !/^[1-9][0-9]{0,19}$/.test(value.entryID))) { return null; }
     return {protocol: 1,
         term: value.term,
@@ -217,14 +217,14 @@ function contextMatches(context, anchor, request) {
 
 export class ReaderLookupBridge {
     /**
-     * @param {{document: Document, enabled: () => boolean, show: (request: ReaderLookup, anchor: Element, isCurrent: () => boolean) => Promise<void>, invalidateSearch: () => void, report?: (status: string) => void}} options
+     * @param {{document: Document, enabled: () => boolean, show: (request: ReaderLookup, anchor: Element, isCurrent: () => boolean, subscribe: (cancel: () => void) => (() => void)) => Promise<void>, invalidateSearch: () => void, report?: (status: string) => void}} options
      */
     constructor({document, enabled, show, invalidateSearch, report = () => {}}) {
         /** @type {Document} */
         this._document = document;
         /** @type {() => boolean} */
         this._enabled = enabled;
-        /** @type {(request: ReaderLookup, anchor: Element, isCurrent: () => boolean) => Promise<void>} */
+        /** @type {(request: ReaderLookup, anchor: Element, isCurrent: () => boolean, subscribe: (cancel: () => void) => (() => void)) => Promise<void>} */
         this._show = show;
         /** @type {() => void} */
         this._invalidateSearch = invalidateSearch;
@@ -232,6 +232,8 @@ export class ReaderLookupBridge {
         this._report = report;
         /** @type {number} */
         this._sequence = 0;
+        /** @type {Set<() => void>} */
+        this._pendingInvalidations = new Set();
         /** @type {boolean} */
         this._disposed = false;
         /** @type {{x: number, y: number, target: Element, time: number}|null} */
@@ -311,23 +313,54 @@ export class ReaderLookupBridge {
         if (event.detail !== 0 && (!down || down.target !== target.anchor ||
         Math.hypot(event.clientX - down.x, event.clientY - down.y) > 8 || event.timeStamp - down.time > 700)) { return; }
         const raw = target.anchor.getAttribute(ATTRIBUTE);
-        const sequence = ++this._sequence;
+        this.invalidate();
+        const sequence = this._sequence;
         const isCurrent = () => !this._disposed && this._enabled() && sequence === this._sequence &&
         target.anchor.isConnected && target.anchor.getAttribute(ATTRIBUTE) === raw && surfaceText(target.anchor) === target.request.surface &&
         (target.context === null || (target.context.isConnected && target.context.contains(target.anchor) &&
         target.context.getAttribute(CONTEXT_ATTRIBUTE) === target.contextRaw && contextMatches(target.context, target.anchor, target.request)));
+        /** @type {Set<() => void>} */
+        const subscriptions = new Set();
+        /**
+         * @param {() => void} cancel
+         * @returns {() => void}
+         */
+        const subscribe = (cancel) => {
+            const observer = new MutationObserver(() => {
+                if (!isCurrent()) { invalidate(); }
+            });
+            const unsubscribe = () => {
+                observer.disconnect();
+                this._pendingInvalidations.delete(invalidate);
+                subscriptions.delete(unsubscribe);
+            };
+            const invalidate = () => {
+                unsubscribe();
+                cancel();
+            };
+            subscriptions.add(unsubscribe);
+            this._pendingInvalidations.add(invalidate);
+            observer.observe(this._document, {subtree: true, childList: true, characterData: true, attributes: true});
+            if (!isCurrent()) { invalidate(); }
+            return unsubscribe;
+        };
         event.preventDefault();
         event.stopImmediatePropagation();
         this._invalidateSearch();
-        void this._show(target.request, target.anchor, isCurrent).catch(() => {
+        void this._show(target.request, target.anchor, isCurrent, subscribe).catch(() => {
             if (isCurrent()) {
                 try { this._report('lookup-failed'); } catch { /* diagnostic only */ }
             }
+        }).finally(() => {
+            for (const unsubscribe of subscriptions) { unsubscribe(); }
         });
     }
 
     /** @returns {void} */
-    invalidate() { ++this._sequence; }
+    invalidate() {
+        ++this._sequence;
+        for (const cancel of this._pendingInvalidations) { cancel(); }
+    }
 
     /** @returns {void} */
     dispose() {

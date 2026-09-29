@@ -1,72 +1,95 @@
-# Document-provided exact lookup — preparation
+# Reader Lookup Contract
 
-Status: prepared source additions plus a hash-guarded frontend/scanner integration
-recipe in the private handoff capsule. Generate/apply the combined patch using
-that recipe; the additions alone do not register the bridge.
+The reader bridge is installed in the `develop` frontend and shares the existing
+scanner, dictionary lookup, popup and Anki UI. Pages without reader attributes
+continue through the normal scanner. The bridge does not install dictionaries or
+load a page's analysis engine.
 
-The generic `data-reader-lookup` JSON protocol contains a canonical term/reading,
-original surface, original sentence and UTF-16 sentence offset. Optional lexical
-namespace/sequence are provenance, NOT extension row IDs. No page-supplied
-DictionaryEntry object is trusted. No SQL, file, general API or automatic Anki
-mutation is exposed. The extension queries its own configured dictionaries and
-uses its own existing popup and Anki UI. No proprietary plugin is loaded by the
-extension. Sites without attributes continue through the normal scanner.
+## Document Protocol
 
-Only a trusted, unmodified activation is accepted. Text selection, links/forms,
-long presses, drags, stale/detached anchors and disabled extension state are not
-hijacked. Superseded work and option/dictionary updates invalidate late responses.
-Original surface length is rebound for sentence/cloze templates without changing
-canonical headwords or mutating cached dictionary results.
+An element's `data-reader-lookup` attribute contains JSON:
 
-`deinflect: false` skips algorithmic deinflection, NOT dictionary redirects.
-Matching headwords are now projected from mixed groups. Definitions are retained
-only for those headwords and headwordIndices are remapped; pitch/frequency arrays
-are filtered and reindexed too. Row IDs, sequences, ordering and definition data
-are preserved; cached input objects are not mutated. Group-level transform chains
-are cleared for a subset rather than attributed to discarded forms. An exact-match
-miss displays an empty popup. Dictionary-sequence/homograph/sense identity still
-requires separate qualification; canonical-term lookup alone does not guarantee
-native-selected-entry parity.
+```json
+{
+  "protocol": 1,
+  "term": "食べる",
+  "reading": "たべる",
+  "surface": "食べた",
+  "sentence": "私は食べた。",
+  "offset": 2
+}
+```
 
-## Before enabling/merging
+`term` and `reading` are canonical lexical forms; `surface` is the original
+rendered text. `offset` is a nonnegative safe integer measured in **UTF-16 code
+units** within `sentence`. The substring at that offset must equal `surface`.
+The integration converts this offset to code points for display/mining consumers;
+page producers must still send UTF-16 offsets, including for supplementary Unicode
+characters.
 
-Run existing JS/TS/unit suites and actual packaged Chromium/Firefox extension
-checks. Verify capture-order arbitration with TextScanner, touch scroll, queued
-hover results, popup retarget/dismiss, author ruby and vertical text. Test actual
-Anki templates/audio/media/duplicate checks using inflected surfaces longer than
-the lemma. Nothing in this patch writes to Anki automatically.
+Alternatively, omit `sentence` and supply `contextID`. The nearest ancestor with
+`data-reader-lookup-context` must contain
+`{ "protocol": 1, "id": "sentence-1", "text": "私は食べた。" }`, with a matching ID.
+Inline `sentence` and `contextID` cannot be combined. The receiver verifies the
+owner's actual base text and the specific anchor's position, not just a matching
+substring. Repeated words must identify the correct occurrence. Ruby annotations
+(`rt`, `rp`, `rtc`), scripts and styles do not contribute base text.
 
-A later optional batched lexicon-evidence interface requires a separate reviewed
-permission/origin/budget/generation contract. It is not implemented here. Do not
-expose arbitrary extension API calls as a shortcut. File/worker separation alone
-is not a GPL license exception; review the intended distribution and interaction
-before connecting a proprietary analysis engine through new detailed interfaces.
+Lengths are bounded in UTF-16 units: term/reading/context ID 512, surface 2048,
+sentence 16384, lookup JSON 32768, context JSON 65536. Optional `namespace` is
+`jmdict` or `jmnedict`; optional `entryID` is a positive decimal string of at most
+20 digits. These fields are provenance, not extension database row IDs or a
+guarantee of dictionary-sequence, homograph or sense identity.
 
-Run prepared pure protocol tests:
-`node --test dev/tests/reader-lookup-contract.mjs`
+## Activation And Results
 
-## Shared document sentence context
+Only trusted, unmodified primary activation is accepted. Pointer gestures must
+stay within 8 CSS pixels and complete within 700 ms; moving away and returning
+still counts as a drag. Trusted keyboard/assistive clicks may activate without a
+pointer gesture. Synthetic clicks, modifiers, active text selection, prevented
+clicks, links, form controls, button roles and editable content are left alone.
+Disabled extension state and invalid/detached anchors cannot activate lookup.
 
-The receiver also accepts a compact word attribute with contextID (and no inline
-sentence) together with the nearest data-reader-lookup-context owner. That owner's
-JSON is `{protocol:1,id,text}`. IDs must agree, bounded text and UTF-16 offsets must
-validate, and actual rendered base text must match. This avoids copying a full
-sentence into every word. Mutation/removal of the context invalidates in-flight
-presentation just like mutation/removal of the anchor. This remains untrusted
-page data and grants no general extension or Anki-write capability.
+Accepted activation supersedes scanner work. Mutation of lookup/context data or
+base text, detachment, a newer activation, page hiding and frontend
+option/dictionary invalidation make pending work stale. Asynchronous popup
+publication must remain guarded by that current-request check. Reparenting a
+context-based anchor invalidates work if it leaves the original context owner or
+changes its validated base-text position. Moving a connected inline-sentence
+anchor without changing its lookup data or surface does not itself invalidate it.
 
-A real pointer must not have moved beyond the gesture threshold and back before
-clicking. Links, form controls, role=button, editing, modifiers, selection and
-long presses remain ordinary browser interactions. No proprietary dependency
-or skeletal dictionary install is added to this extension. Website setup owns
-website analysis resources; extension settings installation is a separate action.
+The extension queries its own configured dictionaries with exact term matching,
+the requested reading and algorithmic deinflection disabled. Dictionary redirects
+are not disabled by `deinflect: false`. Exact headwords are projected out of mixed
+groups: only attached definitions, frequencies and pronunciations remain, with
+relationship indices remapped. Original ordering, definition IDs and sequences
+are preserved. Subset projection clears group transform chains rather than
+attributing unrelated transformations to the selected form.
 
+Mining uses the original surface span and sentence, not the lemma's length.
+Cached dictionary entries are not mutated. An exact miss produces an empty popup.
+Page data remains untrusted: no supplied dictionary entry, arbitrary extension
+API, SQL, filesystem access or automatic Anki write is exposed. A batched
+lexicon-evidence API would require a separate reviewed permission, origin, budget
+and generation contract, plus distribution/license review where applicable.
 
-R3 context validation verifies the actual base-text offset of the specific anchor,
-including repeated identical words. Matching sentence text and substring alone is
-insufficient. Changing/reordering a context invalidates the pending presentation.
-Pure projection and DOM receiver tests are not full packaged-extension or Anki tests.
-Run all prepared protocol suites with `node --test dev/tests/reader-*.mjs` as well
-as the existing project checks before enabling the source integration recipe.
+## Verification
 
-For the extension's general development and installation context, see the [project README](../../README.md).
+The routinely discovered Vitest suites preserve protocol/projection assertions
+and cover receiver activation, invalid contexts, mutations, detachment, ruby,
+modifiers, selection and drag rejection:
+
+```sh
+npx vitest run test/reader-lookup-contract.test.js test/reader-context-contract.test.js test/reader-projection-contract.test.js --maxWorkers=1 --no-file-parallelism
+npx eslint test/reader-lookup-contract.test.js test/reader-context-contract.test.js test/reader-projection-contract.test.js
+```
+
+DOM handler fixtures cannot qualify real trusted input or packaged-extension
+behavior. Chromium/Firefox checks still need to verify scanner capture-order
+arbitration, touch scrolling, queued hover results, asynchronous popup
+retarget/dismiss, author ruby and vertical text. Actual Anki checks need templates,
+cloze offsets (including supplementary Unicode), inflected spans longer than the
+lemma, audio/media and duplicate detection. No unit result substitutes for those
+browser/Anki checks.
+
+See the [project README](../../README.md) for development and installation.

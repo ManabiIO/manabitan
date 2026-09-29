@@ -1261,8 +1261,10 @@ export class Frontend {
      * @param {import('settings').OptionsContext} optionsContext
      * @param {'dark' | 'light'} pageTheme
      * @param {number} searchSuccessAt
+     * @param {import('popup').PublicationGuard} [guard]
      */
-    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now()) {
+    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now(), guard) {
+        if (guard && !guard.isCurrent()) { return; }
         const query = textSource.text();
         const {url} = optionsContext;
         /** @type {import('display').HistoryState} */
@@ -1301,7 +1303,7 @@ export class Frontend {
             details.params.full = textSource.fullContent;
             details.params['full-visible'] = 'true';
         }
-        void this._showPopupContent(textSource, optionsContext, details, searchSuccessAt);
+        void this._showPopupContent(textSource, optionsContext, details, searchSuccessAt, guard);
     }
 
     /**
@@ -1309,9 +1311,10 @@ export class Frontend {
      * @param {?import('settings').OptionsContext} optionsContext
      * @param {?import('display').ContentDetails} details
      * @param {number} searchSuccessAt
+     * @param {import('popup').PublicationGuard} [guard]
      * @returns {Promise<void>}
      */
-    _showPopupContent(textSource, optionsContext, details, searchSuccessAt = safePerformance.now()) {
+    _showPopupContent(textSource, optionsContext, details, searchSuccessAt = safePerformance.now(), guard) {
         const showRequestedAt = safePerformance.now();
         this._updatePageDebugState({
             popupShowRequestedAt: Math.round(showRequestedAt),
@@ -1332,6 +1335,7 @@ export class Frontend {
                     writingMode: textSource.getWritingMode(),
                 },
                 details,
+                guard,
             ) :
             Promise.resolve()
         );
