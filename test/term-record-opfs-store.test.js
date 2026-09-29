@@ -1423,7 +1423,12 @@ describe('TermRecordOpfsStore', () => {
         const fileName = store._getShardSegmentFileName('JMdict', 'raw', Number.MAX_SAFE_INTEGER);
         const fileHandle = asFileHandle({
             name: fileName,
-            async getFile() { return new Blob([new Uint8Array(1024 * 1024 * 1024)]); },
+            async getFile() {
+                return /** @type {File} */ (/** @type {unknown} */ ({
+                    name: fileName,
+                    size: 1024 * 1024 * 1024,
+                }));
+            },
         });
         const state = store._createShardState(
             fileName,
