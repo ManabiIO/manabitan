@@ -463,6 +463,7 @@ describe('DictionaryImporter packed artifact validation', () => {
     test('requires a shared glossary source only when shared-glossary artifact terms are selected', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const validate = Reflect.get(importer, '_validateSelectedSharedGlossaryArtifactSource');
+        /** @type {{termContentMode: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null}} */
         const manifest = {
             termContentMode: 'raw-v3',
             sharedGlossaryPackedOffset: null,
