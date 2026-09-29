@@ -50,6 +50,8 @@ export interface SearchResult {
     version: 1;
     query: string;
     matchedQuery: string;
+    /** True when results come from explicit or conservative implicit prefix completion. */
+    prefix: boolean;
     dictionaryCount: number;
     preview: ReturnType<typeof import('../js/search/dictionary-preview.js').dictionaryPreview>;
     /** Only populated by an explicit full search. */
