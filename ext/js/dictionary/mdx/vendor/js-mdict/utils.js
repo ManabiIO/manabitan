@@ -182,6 +182,18 @@ function adler32(bytes) {
     while (remaining > 0) {
         let count = Math.min(remaining, 2000);
         remaining -= count;
+        // Unroll the byte loop without changing the 2000-byte reduction bound.
+        while (count >= 8) {
+            s1 += bytes[offset++]; s2 += s1;
+            s1 += bytes[offset++]; s2 += s1;
+            s1 += bytes[offset++]; s2 += s1;
+            s1 += bytes[offset++]; s2 += s1;
+            s1 += bytes[offset++]; s2 += s1;
+            s1 += bytes[offset++]; s2 += s1;
+            s1 += bytes[offset++]; s2 += s1;
+            s1 += bytes[offset++]; s2 += s1;
+            count -= 8;
+        }
         while (count-- > 0) {
             s1 += bytes[offset++];
             s2 += s1;
