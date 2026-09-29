@@ -1156,6 +1156,14 @@ export class DictionaryImporter {
         const sharedGlossaryPackedLength = termArtifactManifest?.sharedGlossaryPackedLength ?? null;
         const sharedGlossaryCompression = termArtifactManifest?.sharedGlossaryCompression ?? null;
         const sharedGlossaryUncompressedLength = termArtifactManifest?.sharedGlossaryUncompressedLength ?? null;
+        if (termArtifactManifest !== null) {
+            this._validateSelectedSharedGlossaryArtifactSource(
+                termArtifactManifest,
+                useTermArtifactFiles,
+                usePackedTermArtifactSource,
+                typeof sharedGlossaryArtifactEntry !== 'undefined',
+            );
+        }
         /** @type {Uint8Array|null} */
         let packedTermArtifactBytes = null;
         /** @type {Uint8Array|null} */
@@ -4205,6 +4213,41 @@ export class DictionaryImporter {
             sharedGlossaryUncompressedLength === null
         ) {
             throw new Error('Compressed shared glossary is missing its uncompressed length');
+        }
+    }
+
+    /**
+     * Requires a materialized shared glossary only when artifact term banks
+     * are actually selected. Ordinary JSON fallback must remain independent
+     * of stale artifact metadata.
+     * @param {{termContentMode: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null}} manifest
+     * @param {boolean} useTermArtifactFiles
+     * @param {boolean} usePackedTermArtifactSource
+     * @param {boolean} hasStandaloneArtifact
+     * @throws {Error} If selected shared-glossary term artifacts have no usable glossary source.
+     */
+    _validateSelectedSharedGlossaryArtifactSource(
+        manifest,
+        useTermArtifactFiles,
+        usePackedTermArtifactSource,
+        hasStandaloneArtifact,
+    ) {
+        if (!useTermArtifactFiles && !usePackedTermArtifactSource) { return; }
+        if (
+            manifest.termContentMode !== RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME &&
+            manifest.termContentMode !== RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME
+        ) {
+            return;
+        }
+        const hasPackedArtifact = (
+            usePackedTermArtifactSource &&
+            Number.isSafeInteger(manifest.sharedGlossaryPackedOffset) &&
+            /** @type {number} */ (manifest.sharedGlossaryPackedOffset) >= 0 &&
+            Number.isSafeInteger(manifest.sharedGlossaryPackedLength) &&
+            /** @type {number} */ (manifest.sharedGlossaryPackedLength) > 0
+        );
+        if (!hasStandaloneArtifact && !hasPackedArtifact) {
+            throw new Error('Selected shared-glossary term artifacts are missing their glossary artifact');
         }
     }
 
