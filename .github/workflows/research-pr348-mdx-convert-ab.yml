@@ -31,13 +31,18 @@ jobs:
           cache: npm
           cache-dependency-path: candidate/package-lock.json
 
-      - name: Install shared dependencies
+      - name: Install shared dependencies and build candidate libraries
         working-directory: candidate
-        run: npm ci
+        run: |
+          npm ci
+          npm run build:libs
 
-      - name: Link baseline dependencies
+      - name: Link baseline dependencies and build baseline libraries
         shell: bash
-        run: ln -s "$GITHUB_WORKSPACE/candidate/node_modules" "$GITHUB_WORKSPACE/baseline/node_modules"
+        run: |
+          ln -s "$GITHUB_WORKSPACE/candidate/node_modules" "$GITHUB_WORKSPACE/baseline/node_modules"
+          cd baseline
+          npm run build:libs
 
       - name: Run alternating converter benchmark
         shell: bash
