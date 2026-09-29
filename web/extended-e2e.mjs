@@ -29,10 +29,13 @@ export async function runExtended({context, page, origin, fixtures, check, impor
         }
         const exact = await page.evaluate(() => runtime.search('gakkou', false));
         assert.equal(exact.prefix, false, 'an exact romaji result must outrank prefix completion');
-        const prefix = await page.evaluate(() => runtime.search('gakkoukyou', false));
+        // Full JMdict contains shorter leading words for this unfinished
+        // spelling. They must not suppress completion of a longer headword.
+        const prefix = await page.evaluate(() => runtime.search('東京大学演', false));
         assert.equal(prefix.prefix, true);
-        assert.equal(prefix.matchedQuery, 'がっこうきょう');
+        assert.equal(prefix.matchedQuery, '東京大学演');
         assert.ok(prefix.preview.items.length > 0 && prefix.preview.items.length <= 2);
+        assert.ok(prefix.preview.items[0].term.startsWith('東京大学演'));
 
         // Protocol and search normalization both use Unicode code points, not
         // UTF-16 code units. A valid 256-character supplementary query must

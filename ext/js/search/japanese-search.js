@@ -72,8 +72,8 @@ export function japaneseSearchQueries(value) {
  */
 export function isJapanesePrefixCandidate(query) {
     return [...query].length >= 2 &&
-        /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(query) &&
-        !/[a-zāīūēōâîûêô]/i.test(query);
+    /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(query) &&
+    !/[a-zāīūēōâîûêô]/i.test(query);
 }
 
 /**
@@ -82,8 +82,9 @@ export function isJapanesePrefixCandidate(query) {
  * override an installed dictionary's lexical identities with a surface key.
  *
  * An optional prefix lookup runs only after every exact/deinflected candidate
- * misses. It is intended for live-search completion, not ranking exact matches.
- * @template {{dictionaryEntries: unknown[]}} T
+ * fails to cover its full query. The translator can return a shorter leading
+ * word for an unfinished query; retain that result if completion also misses.
+ * @template {{dictionaryEntries: unknown[], originalTextLength?: number}} T
  * @param {string} text
  * @param {(query: string) => Promise<T>} lookup
  * @param {() => void} [guard]
@@ -92,12 +93,19 @@ export function isJapanesePrefixCandidate(query) {
  */
 export async function findJapaneseSearch(text, lookup, guard = () => {}, prefixLookup = null) {
     const queries = japaneseSearchQueries(text);
+    /** @type {{result: T, matchedQuery: string, matchType: 'exact'} | null} */
+    let leadingResult = null;
     for (const query of queries) {
         guard();
         const result = await lookup(query);
         guard();
         if (result.dictionaryEntries.length > 0) {
-            return {result, matchedQuery: query, matchType: 'exact'};
+            // Older callers and test doubles do not provide the translator's
+            // span, so keep their established first-hit behavior.
+            if (prefixLookup === null || typeof result.originalTextLength !== 'number' || result.originalTextLength >= query.length) {
+                return {result, matchedQuery: query, matchType: 'exact'};
+            }
+            leadingResult ??= {result, matchedQuery: query, matchType: 'exact'};
         }
     }
     if (prefixLookup !== null) {
@@ -113,5 +121,5 @@ export async function findJapaneseSearch(text, lookup, guard = () => {}, prefixL
             }
         }
     }
-    return {result: null, matchedQuery: text.trim(), matchType: 'exact'};
+    return leadingResult ?? {result: null, matchedQuery: text.trim(), matchType: 'exact'};
 }

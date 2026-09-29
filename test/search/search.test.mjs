@@ -54,7 +54,7 @@ test('prefix completion runs only after all exact and spelling alternatives miss
 });
 test('exact dictionary result always outranks implicit prefix completion', async () => {
     let prefixes = 0;
-    const exact = {dictionaryEntries: [{id: 9}]};
+    const exact = {dictionaryEntries: [{id: 9}], originalTextLength: 2};
     const found = await findJapaneseSearch('たべ', async () => exact, () => {}, async () => {
         prefixes++;
         return {dictionaryEntries: [{id: 10}]};
@@ -62,6 +62,35 @@ test('exact dictionary result always outranks implicit prefix completion', async
     assert.equal(found.result, exact);
     assert.equal(found.matchType, 'exact');
     assert.equal(prefixes, 0);
+});
+test('shorter leading words do not suppress completion of an unfinished query', async () => {
+    const leading = {dictionaryEntries: [{id: 1}], originalTextLength: 2};
+    const completion = {dictionaryEntries: [{id: 2}], originalTextLength: 5};
+    const found = await findJapaneseSearch('東京大学演', async () => leading, () => {}, async (query) => {
+        assert.equal(query, '東京大学演');
+        return completion;
+    });
+    assert.equal(found.result, completion);
+    assert.equal(found.matchType, 'prefix');
+});
+test('a complete spelling alternative outranks a shorter literal match', async () => {
+    let prefixes = 0;
+    const found = await findJapaneseSearch('toukyo', async (query) => ({
+        dictionaryEntries: [{id: query === 'とうきょ' ? 2 : 1}],
+        originalTextLength: query === 'とうきょ' ? query.length : 3,
+    }), () => {}, async () => {
+        prefixes++;
+        return {dictionaryEntries: [{id: 3}]};
+    });
+    assert.equal(found.matchedQuery, 'とうきょ');
+    assert.equal(found.matchType, 'exact');
+    assert.equal(prefixes, 0);
+});
+test('shorter leading words remain available when completion misses', async () => {
+    const leading = {dictionaryEntries: [{id: 1}], originalTextLength: 2};
+    const found = await findJapaneseSearch('東京大学演', async () => leading, () => {}, async () => ({dictionaryEntries: []}));
+    assert.equal(found.result, leading);
+    assert.equal(found.matchType, 'exact');
 });
 test('English and unfinished romaji never trigger implicit prefix enumeration', async () => {
     for (const query of ['cat', 'hello world', 'ny']) {
