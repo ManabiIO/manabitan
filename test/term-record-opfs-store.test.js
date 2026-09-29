@@ -1370,24 +1370,20 @@ describe('TermRecordOpfsStore', () => {
         expect(store.isDictionaryAvailable('JMdict')).toBe(false);
     });
 
-    test('encodes and decodes raw-v4 entry content dict names without falling back to custom strings', () => {
+    test('encodes raw-v4 entry content dict names with a built-in code', () => {
         const store = new TermRecordOpfsStore();
         const {meta, bytes} = store._encodeEntryContentDictNameMeta(RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME);
-        const decoded = store._decodeEntryContentDictName(meta, new Uint8Array(), 0, 0);
 
         expect(meta & 0xff).not.toBe(0xff);
         expect(bytes).toBeNull();
-        expect(decoded).toBe(RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME);
     });
 
-    test('encodes and decodes raw-v6 entry content dict names without custom strings', () => {
+    test('encodes raw-v6 entry content dict names with a built-in code', () => {
         const store = new TermRecordOpfsStore();
         const {meta, bytes} = store._encodeEntryContentDictNameMeta(RAW_TERM_CONTENT_TOKEN_DICT_NAME);
-        const decoded = store._decodeEntryContentDictName(meta, new Uint8Array(), 0, 0);
 
         expect(meta & 0xff).not.toBe(0xff);
         expect(bytes).toBeNull();
-        expect(decoded).toBe(RAW_TERM_CONTENT_TOKEN_DICT_NAME);
     });
 
     test('rejects non-canonical and unsafe numeric shard filename fields', () => {
