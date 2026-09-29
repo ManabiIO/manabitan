@@ -1,0 +1,171 @@
+name: Research PR351 Import AB
+
+on:
+  push:
+    branches:
+      - research/pr351-import-ab-20260929
+
+permissions:
+  contents: read
+
+jobs:
+  import-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v6
+        with:
+          path: candidate
+
+      - name: Checkout integrated baseline
+        uses: actions/checkout@v6
+        with:
+          ref: 8f7933c1bf6659deb0641a174205a34b3ec399a8
+          path: baseline
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+          cache-dependency-path: candidate/package-lock.json
+
+      - name: Install candidate dependencies and libraries
+        working-directory: candidate
+        run: |
+          npm ci
+          npm run build:libs
+
+      - name: Reuse exact dependencies and build baseline libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          ln -s "$GITHUB_WORKSPACE/candidate/node_modules" "$GITHUB_WORKSPACE/baseline/node_modules"
+          cd baseline
+          npm run build:libs
+
+      - name: Install Chromium
+        working-directory: candidate
+        run: npx playwright install chromium
+
+      - name: Prepare verified pinned dictionaries
+        working-directory: candidate
+        run: node ./dev/perf/prepare-dictionaries.js
+
+      - name: Share verified dictionary cache with baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p baseline/builds
+          cp -a candidate/builds/e2e-dictionary-cache baseline/builds/
+
+      - name: Build both extensions once
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd baseline && node ./dev/bin/build.js --target chrome-dev)
+          (cd candidate && node ./dev/bin/build.js --target chrome-dev)
+
+      - name: Run alternating real-dictionary pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/results"
+          for dictionary in jmdict jitendex; do
+            for pair in 1 2 3 4 5 6; do
+              if (( pair % 2 == 1 )); then
+                order="baseline candidate"
+              else
+                order="candidate baseline"
+              fi
+              for arm in $order; do
+                out="$GITHUB_WORKSPACE/results/${dictionary}-pair${pair}-${arm}"
+                echo "::group::${dictionary} pair ${pair} ${arm}"
+                (cd "$arm" && node ./dev/perf/import-benchmark.js "$dictionary" --runs 1 --no-build --output "$out")
+                echo "::endgroup::"
+              done
+            done
+          done
+
+      - name: Run adjacent baseline A/A controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pair in 1 2 3 4; do
+            for sample in a b; do
+              out="$GITHUB_WORKSPACE/results/jmdict-aa${pair}-${sample}"
+              echo "::group::jmdict A/A ${pair} ${sample}"
+              (cd baseline && node ./dev/perf/import-benchmark.js jmdict --runs 1 --no-build --output "$out")
+              echo "::endgroup::"
+            done
+          done
+
+      - name: Summarize paired timing
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync, writeFileSync} from 'node:fs'
+          import path from 'node:path'
+
+          const root = process.env.GITHUB_WORKSPACE
+          const readTiming = (dir) => {
+            const value = JSON.parse(readFileSync(path.join(root, 'results', dir, 'summary.json'), 'utf8'))
+            if (value.timing?.count !== 1) throw new Error(`Unexpected timing count for ${dir}`)
+            return {
+              total: value.timing.medianMs,
+              worker: value.workerTiming?.medianMs ?? null,
+              source: value.source,
+              fixture: value.fixture,
+            }
+          }
+          const median = (values) => {
+            const sorted = [...values].sort((a, b) => a - b)
+            const middle = Math.floor(sorted.length / 2)
+            return sorted.length % 2 === 1 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2
+          }
+          const output = {schemaVersion: 1, candidate: process.env.GITHUB_SHA, baseline: '8f7933c1bf6659deb0641a174205a34b3ec399a8', dictionaries: {}, aa: {}}
+          for (const dictionary of ['jmdict', 'jitendex']) {
+            const pairs = []
+            for (let pair = 1; pair <= 6; ++pair) {
+              const baseline = readTiming(`${dictionary}-pair${pair}-baseline`)
+              const candidate = readTiming(`${dictionary}-pair${pair}-candidate`)
+              pairs.push({
+                pair,
+                baselineMs: baseline.total,
+                candidateMs: candidate.total,
+                changePct: (candidate.total / baseline.total - 1) * 100,
+                workerBaselineMs: baseline.worker,
+                workerCandidateMs: candidate.worker,
+                workerChangePct: baseline.worker !== null && candidate.worker !== null ? (candidate.worker / baseline.worker - 1) * 100 : null,
+              })
+            }
+            output.dictionaries[dictionary] = {
+              pairs,
+              pairedMedianChangePct: median(pairs.map((x) => x.changePct)),
+              fasterPairs: pairs.filter((x) => x.candidateMs < x.baselineMs).length,
+              pairedWorkerMedianChangePct: median(pairs.flatMap((x) => x.workerChangePct === null ? [] : [x.workerChangePct])),
+            }
+          }
+          const aaPairs = []
+          for (let pair = 1; pair <= 4; ++pair) {
+            const a = readTiming(`jmdict-aa${pair}-a`).total
+            const b = readTiming(`jmdict-aa${pair}-b`).total
+            aaPairs.push({pair, aMs: a, bMs: b, changePct: (b / a - 1) * 100, absoluteChangePct: Math.abs((b / a - 1) * 100)})
+          }
+          output.aa.jmdict = {
+            pairs: aaPairs,
+            medianAbsoluteChangePct: median(aaPairs.map((x) => x.absoluteChangePct)),
+            maxAbsoluteChangePct: Math.max(...aaPairs.map((x) => x.absoluteChangePct)),
+          }
+          writeFileSync(path.join(root, 'results', 'ab-summary.json'), JSON.stringify(output, null, 2))
+          console.log(JSON.stringify(output, null, 2))
+          NODE
+
+      - name: Upload raw results
+        uses: actions/upload-artifact@v6
+        with:
+          name: pr351-real-import-ab
+          path: results
+          compression-level: 6
+          retention-days: 7
