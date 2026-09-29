@@ -1947,11 +1947,13 @@ export class TermContentOpfsStore {
             if (handle.kind !== 'file') { continue; }
             const fileName = String(name);
             const index = this._parseSegmentIndexFromFileName(fileName);
-            if (index === null) { continue; }
-            if (!allowIncomplete && (
-                !Number.isSafeInteger(index) || index < 0 ||
-                this._getSegmentFileName(index) !== fileName
-            )) {
+            if (index === null) {
+                if (this._isSegmentFileNameCandidate(fileName)) {
+                    throw new Error(`Invalid term-content segment name: ${fileName}`);
+                }
+                continue;
+            }
+            if (this._getSegmentFileName(index) !== fileName) {
                 throw new Error(`Invalid term-content segment name: ${fileName}`);
             }
             const fileHandle = /** @type {FileSystemFileHandle} */ (handle);
@@ -2005,7 +2007,10 @@ export class TermContentOpfsStore {
      * @returns {string}
      */
     _getSegmentFileName(index) {
-        if (index <= 0) {
+        if (!Number.isSafeInteger(index) || index < 0) {
+            throw new RangeError('Term-content segment index exceeds the safe integer range');
+        }
+        if (index === 0) {
             return FILE_NAME;
         }
         const suffixIndex = FILE_NAME.lastIndexOf('.');
@@ -2033,7 +2038,24 @@ export class TermContentOpfsStore {
             return null;
         }
         const value = fileName.slice(prefix.length + FILE_NAME_SEGMENT_SEPARATOR.length, fileName.length - suffix.length);
-        return /^[0-9]+$/.test(value) ? Number.parseInt(value, 10) : null;
+        if (!/^[1-9][0-9]*$/.test(value)) { return null; }
+        const index = Number(value);
+        return Number.isSafeInteger(index) && String(index) === value ? index : null;
+    }
+
+    /**
+     * @param {string} fileName
+     * @returns {boolean}
+     */
+    _isSegmentFileNameCandidate(fileName) {
+        if (fileName === FILE_NAME) { return true; }
+        const suffixIndex = FILE_NAME.lastIndexOf('.');
+        if (suffixIndex < 0) {
+            return fileName.startsWith(`${FILE_NAME}${FILE_NAME_SEGMENT_SEPARATOR}`);
+        }
+        const prefix = FILE_NAME.slice(0, suffixIndex);
+        const suffix = FILE_NAME.slice(suffixIndex);
+        return fileName.startsWith(`${prefix}${FILE_NAME_SEGMENT_SEPARATOR}`) && fileName.endsWith(suffix);
     }
 
     /**
@@ -2105,10 +2127,10 @@ export class TermContentOpfsStore {
         if (activeSegment.fileLength <= 0 || (activeSegment.fileLength + nextChunkBytes) <= MAX_FILE_SEGMENT_BYTES) {
             return;
         }
-        await this._closeWritable();
-        const root = await navigator.storage.getDirectory();
         const nextIndex = activeSegment.index + 1;
         const nextFileName = this._getSegmentFileName(nextIndex);
+        await this._closeWritable();
+        const root = await navigator.storage.getDirectory();
         const nextFileHandle = await root.getFileHandle(nextFileName, {create: true});
         const nextFile = await nextFileHandle.getFile();
         const nextState = this._createSegmentState(nextIndex, nextFileName, nextFileHandle, nextFile.size, activeSegment.startOffset + activeSegment.fileLength);
