@@ -451,6 +451,11 @@ describe('DictionaryImporter packed artifact validation', () => {
         expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
         descriptor.termContentMode = 'raw-v3';
         expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = 'zstd';
+        expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
+        descriptor.sharedGlossaryUncompressedLength = 100;
+        expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = null;
         descriptor.sharedGlossaryUncompressedLength = -1;
         expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
     });

@@ -1289,18 +1289,11 @@ export class DictionaryImporter {
         ) {
             try {
                 await initializeTermContentZstd();
-                const defaultHeapSize = (
-                    Number.isInteger(sharedGlossaryUncompressedLength) &&
-                    /** @type {number} */ (sharedGlossaryUncompressedLength) > 0
-                ) ?
-                    /** @type {number} */ (sharedGlossaryUncompressedLength) :
-                    (sharedGlossaryArtifactBytes.byteLength * 16);
+                const exactOutputSize = /** @type {number} */ (sharedGlossaryUncompressedLength);
                 const decompressedGlossary = /** @type {unknown} */ (
                     zstdDecompress(sharedGlossaryArtifactBytes, {
-                        defaultHeapSize,
-                        ...(sharedGlossaryUncompressedLength !== null ?
-                            {maxOutputSize: sharedGlossaryUncompressedLength} :
-                            {}),
+                        defaultHeapSize: exactOutputSize,
+                        maxOutputSize: exactOutputSize,
                     })
                 );
                 if (!(decompressedGlossary instanceof Uint8Array)) {
@@ -4205,7 +4198,10 @@ export class DictionaryImporter {
             throw new Error('Shared glossary uncompressed length is invalid');
         }
         if (
-            termContentMode === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME &&
+            (
+                sharedGlossaryCompression === 'zstd' ||
+                termContentMode === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME
+            ) &&
             sharedGlossaryUncompressedLength === null
         ) {
             throw new Error('Compressed shared glossary is missing its uncompressed length');
