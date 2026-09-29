@@ -4583,6 +4583,12 @@ null;
         if (meta === null || meta.contentOffset < 0 || meta.contentLength <= 0) {
             return new Uint8Array(0);
         }
+        if (
+            meta.contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME &&
+            (!Number.isSafeInteger(meta.uncompressedLength) || meta.uncompressedLength <= 0)
+        ) {
+            throw new TermContentLookupReadError('corrupt', 'Compressed shared glossary decoded length is invalid');
+        }
         const readResult = await this._termContentBlockStore.readDetailed(meta.contentOffset, meta.contentLength, 'raw');
         if (readResult.status !== 'ok') {
             throw new TermContentLookupReadError(readResult.status, readResult.reason);
@@ -4590,11 +4596,11 @@ null;
         const compressedBytes = readResult.bytes;
         let inflatedBytes = compressedBytes;
         if (meta.contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME) {
-            const defaultHeapSize = meta.uncompressedLength > 0 ? meta.uncompressedLength : (compressedBytes.byteLength * 16);
+            const exactOutputSize = meta.uncompressedLength;
             try {
                 const decoded = /** @type {unknown} */ (zstdDecompress(compressedBytes, {
-                    defaultHeapSize,
-                    ...(meta.uncompressedLength > 0 ? {maxOutputSize: meta.uncompressedLength} : {}),
+                    defaultHeapSize: exactOutputSize,
+                    maxOutputSize: exactOutputSize,
                 }));
                 if (!(decoded instanceof Uint8Array)) {
                     throw new TypeError('Shared glossary decoder returned non-byte data');
