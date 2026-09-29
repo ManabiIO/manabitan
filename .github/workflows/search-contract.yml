@@ -8,6 +8,7 @@ on:
       - 'test/search/**'
       - 'test/util/search-refresh-cases.js'
       - '.github/workflows/search-contract.yml'
+# Integrated validation touch
 permissions:
   contents: read
 jobs:
