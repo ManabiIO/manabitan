@@ -749,8 +749,6 @@ export class DictionaryImporter {
         this._textDecoder = new TextDecoder();
         /** @type {Map<string, string>} */
         this._jsonQuotedStringCache = new Map();
-        /** @type {Map<string, Uint8Array>} */
-        this._utf8StringBytesCache = new Map();
         /** @type {number} */
         this._progressMinIntervalMs = 1000;
         /** @type {boolean} */
@@ -890,7 +888,6 @@ export class DictionaryImporter {
         this._pendingImageMediaByPath.clear();
         this._imageMetadataByPath.clear();
         this._jsonQuotedStringCache.clear();
-        this._utf8StringBytesCache.clear();
         this._reverseStringCache.clear();
         const importOptimizationFlags = {
             ...snapshotTermBankExperiments(details),
@@ -3755,45 +3752,6 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {string} value
-     * @returns {Uint8Array}
-     */
-    _getUtf8StringBytesCached(value) {
-        const cached = this._utf8StringBytesCache.get(value);
-        if (cached instanceof Uint8Array) {
-            this._utf8StringBytesCache.delete(value);
-            this._utf8StringBytesCache.set(value, cached);
-            return cached;
-        }
-        const bytes = this._textEncoder.encode(value);
-        if (this._utf8StringBytesCache.size >= JSON_QUOTED_STRING_CACHE_MAX_ENTRIES) {
-            const oldestKey = this._utf8StringBytesCache.keys().next().value;
-            if (typeof oldestKey === 'string') {
-                this._utf8StringBytesCache.delete(oldestKey);
-            }
-        }
-        this._utf8StringBytesCache.set(value, bytes);
-        return bytes;
-    }
-
-    /**
-     * @param {string} contentJson
-     * @returns {string}
-     */
-    _hashEntryContent(contentJson) {
-        const [h1, h2] = this._hashEntryContentPair(contentJson);
-        return hashPairToHex(h1, h2);
-    }
-
-    /**
-     * @param {string} contentJson
-     * @returns {[number, number]}
-     */
-    _hashEntryContentPair(contentJson) {
-        return this._hashEntryContentBytesPair(this._textEncoder.encode(contentJson));
-    }
-
-    /**
      * @param {Uint8Array} bytes
      * @returns {[number, number]}
      */
@@ -5631,31 +5589,6 @@ null;
 {}),
         };
         return {termList: streamToChunkHandler ? [] : termList, requirements: null};
-    }
-
-    /**
-     * @param {import('dictionary-database').DatabaseTermEntry} entry
-     * @param {'baseline'|'raw-bytes'} termContentStorageMode
-     * @returns {void}
-     */
-    _normalizeArtifactTermEntryContent(entry, termContentStorageMode) {
-        if (termContentStorageMode !== 'raw-bytes') {
-            return;
-        }
-        const termEntryContentBytes = entry.termEntryContentBytes;
-        if (!(termEntryContentBytes instanceof Uint8Array) || termEntryContentBytes.byteLength === 0) {
-            return;
-        }
-        const normalizedBytes = this._normalizeArtifactTermContentBytes(termEntryContentBytes, termContentStorageMode);
-        if (normalizedBytes === termEntryContentBytes) {
-            return;
-        }
-        const [hash1, hash2] = this._hashEntryContentBytesPair(normalizedBytes);
-        entry.termEntryContentHash1 = hash1;
-        entry.termEntryContentHash2 = hash2;
-        entry.termEntryContentHash = hashPairToHex(hash1, hash2);
-        entry.termEntryContentBytes = normalizedBytes;
-        entry.termEntryContentRawGlossaryJsonBytes = void 0;
     }
 
     /**
