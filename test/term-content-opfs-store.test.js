@@ -428,6 +428,71 @@ describe('TermContentOpfsStore', () => {
         expect(fileBytesByName.has('manabitan-term-content-2.bin')).toBe(false);
     });
 
+    test('rejects unsafe and non-canonical segment names in incomplete recovery inventories', async () => {
+        const store = new TermContentOpfsStore();
+        const makeHandle = (size = 1) => /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            kind: 'file',
+            getFile: vi.fn(async () => ({size})),
+        }));
+        for (const fileName of [
+            'manabitan-term-content^9007199254740992.bin',
+            'manabitan-term-content^999999999999999999999999.bin',
+            'manabitan-term-content^01.bin',
+            'manabitan-term-content^0.bin',
+            'manabitan-term-content^-1.bin',
+        ]) {
+            const root = /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+                async *entries() {
+                    yield ['manabitan-term-content.bin', makeHandle()];
+                    yield [fileName, makeHandle()];
+                },
+            }));
+            await expect(Reflect.get(store, '_loadSegmentStates').call(store, root, true))
+                .rejects.toThrow(/Invalid term-content segment name/u);
+        }
+
+        for (const index of [-1, 0.5, Number.MAX_SAFE_INTEGER + 1, Number.POSITIVE_INFINITY]) {
+            expect(() => Reflect.get(store, '_getSegmentFileName').call(store, index))
+                .toThrow(/safe integer range/u);
+        }
+    });
+
+    test('reset does not delete an unsafe rounded segment alias', async () => {
+        const baseName = 'manabitan-term-content.bin';
+        const unsafeName = 'manabitan-term-content^9007199254740992.bin';
+        const fileBytesByName = new Map([
+            [baseName, new Uint8Array([1, 2, 3])],
+            [unsafeName, new Uint8Array([9, 9, 9])],
+        ]);
+        const root = createMutableDirectory(fileBytesByName);
+        vi.stubGlobal('navigator', {storage: {getDirectory: vi.fn(async () => root)}});
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', await root.getFileHandle(baseName));
+
+        await expect(store.reset()).rejects.toThrow(/Invalid term-content segment name/u);
+
+        expect(fileBytesByName.get(baseName)).toStrictEqual(new Uint8Array([1, 2, 3]));
+        expect(fileBytesByName.get(unsafeName)).toStrictEqual(new Uint8Array([9, 9, 9]));
+    });
+
+    test('segment rotation rejects an unsafe successor before closing the active writable', async () => {
+        const store = new TermContentOpfsStore();
+        const closeWritable = vi.spyOn(/** @type {import('core').SafeAny} */ (store), '_closeWritable');
+        Reflect.set(store, '_segmentStates', [{
+            index: Number.MAX_SAFE_INTEGER,
+            fileName: 'manabitan-term-content^9007199254740991.bin',
+            fileHandle: {},
+            fileLength: 128 * 1024 * 1024,
+            startOffset: 0,
+            readFile: null,
+        }]);
+        Reflect.set(store, '_writable', {});
+
+        await expect(Reflect.get(store, '_rollActiveSegmentIfNeeded').call(store, 1))
+            .rejects.toThrow(/safe integer range/u);
+        expect(closeWritable).not.toHaveBeenCalled();
+    });
+
     test('reset truncates a segment when unlink fails instead of leaving stale bytes', async () => {
         const fileName = 'manabitan-term-content.bin';
         const segmentName = 'manabitan-term-content^1.bin';
