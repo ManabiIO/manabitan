@@ -5376,49 +5376,6 @@ null;
     }
 
     /**
-     * @param {import('@sqlite.org/sqlite-wasm').Bindable[][]} rows
-     * @param {number} start
-     * @param {number} count
-     * @returns {Promise<{termRecordAppendMs: number, termsVtabInsertMs: number}>}
-     */
-    async _insertResolvedTermRows(rows, start, count) {
-        const tRecordAppendStart = safePerformance.now();
-        if (this._termRecordRowAppendFastPath) {
-            await this._termRecordStore.appendBatchFromTermRows(rows, start, count);
-        } else {
-            /** @type {{dictionary: string, expression: string, reading: string, expressionReverse: string|null, readingReverse: string|null, entryContentOffset: number, entryContentLength: number, entryContentDictName: string|null, score: number, sequence: number|null}[]} */
-            const records = [];
-            for (let i = start, ii = start + count; i < ii; ++i) {
-                const row = rows[i];
-                records.push({
-                    dictionary: this._asString(row[0]),
-                    expression: this._asString(row[1]),
-                    reading: this._asString(row[2]),
-                    expressionReverse: this._asNullableString(row[3]) ?? null,
-                    readingReverse: this._asNullableString(row[4]) ?? null,
-                    entryContentOffset: this._asNumber(row[6], -1),
-                    entryContentLength: this._asNumber(row[7], -1),
-                    entryContentDictName: this._asNullableString(row[8]),
-                    score: this._asNumber(row[12], 0),
-                    sequence: this._asNullableNumber(row[14]) ?? null,
-                });
-            }
-            await this._termRecordStore.appendBatch(records);
-        }
-        const termRecordAppendMs = safePerformance.now() - tRecordAppendStart;
-        let termsVtabInsertMs = 0;
-        const deferVirtualTableWrite = this._deferTermsVirtualTableSync || this._isBulkImportInProgress();
-        if (deferVirtualTableWrite) {
-            this._termsVirtualTableDirty = true;
-        } else {
-            const tVtabStart = safePerformance.now();
-            await this._insertTermRowsIntoVirtualTable(count);
-            termsVtabInsertMs = safePerformance.now() - tVtabStart;
-        }
-        return {termRecordAppendMs, termsVtabInsertMs};
-    }
-
-    /**
      * @param {import('dictionary-database').DatabaseTermEntry[]} rows
      * @param {number[]} contentOffsets
      * @param {number[]} contentLengths
