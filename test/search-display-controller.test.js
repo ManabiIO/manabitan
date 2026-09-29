@@ -130,8 +130,15 @@ describe('Keyboard Event Handling', () => {
 
     test('search controls expose native accessible names and mobile search semantics', () => {
         expect(queryInput.getAttribute('aria-label')).toBe('Search Japanese dictionary');
+        expect(queryInput.getAttribute('aria-controls')).toBe('dictionary-entries');
         expect(queryInput.getAttribute('enterkeyhint')).toBe('search');
         expect(queryInput.getAttribute('spellcheck')).toBe('false');
+        expect(querySelectorNotNull(document, '#profile-select').getAttribute('aria-label')).toBe('Search profile');
+        expect(querySelectorNotNull(document, '#query-parser-mode-select').getAttribute('aria-label')).toBe('Parser');
+        expect(querySelectorNotNull(document, '#wanakana-enable').getAttribute('aria-label')).toBe('Automatic kana conversion');
+        expect(querySelectorNotNull(document, '#sticky-header-enable').getAttribute('aria-label')).toBe('Sticky search header');
+        expect(querySelectorNotNull(document, '#no-results').getAttribute('role')).toBe('status');
+        expect(querySelectorNotNull(document, '#no-dictionaries').getAttribute('role')).toBe('status');
         for (const [selector, label] of [
             ['#clear-button', 'Clear search'],
             ['#search-back-button', 'Back in search history'],
