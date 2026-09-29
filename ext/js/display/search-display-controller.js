@@ -448,7 +448,10 @@ export class SearchDisplayController {
         // Keep the established explicit-submit path for pasted blocks of text.
         // Count Unicode code points, not UTF-16 code units, so supplementary
         // Japanese characters do not disable live search at half the limit.
-        if ([...this._queryInput.value].length > 256) { return; }
+        let characters = 0;
+        for (const _character of this._queryInput.value) {
+            if (++characters > 256) { return; }
+        }
         this._liveSearchTimer = setTimeout(() => {
             this._liveSearchTimer = null;
             this._search(false, 'overwrite', !!this._queryInput.value.trim(), null, true);
