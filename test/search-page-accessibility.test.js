@@ -41,6 +41,13 @@ describe('search page controls', () => {
         }
     });
 
+    test('search input has an explicit accessible name and mobile search hint', () => {
+        const input = window.document.querySelector('#search-textbox');
+        expect(input?.getAttribute('aria-label')).toBe('Search terms');
+        expect(input?.getAttribute('enterkeyhint')).toBe('search');
+        expect(input?.getAttribute('spellcheck')).toBe('false');
+    });
+
     test('search controls retain a touch-size CSS floor', async () => {
         const css = await readFile(new URL('../ext/css/search.css', import.meta.url), 'utf8');
         expect(css).toContain('--search-control-min-size: 44px');
