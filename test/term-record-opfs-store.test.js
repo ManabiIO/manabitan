@@ -1411,6 +1411,11 @@ describe('TermRecordOpfsStore', () => {
         }
         expect(decode('dict-JMdict^9007199254740992.mbtr')).toBeNull();
         expect(decode('dict-9007199254740992|ABraw.mbtr')).toBeNull();
+
+        for (const segmentIndex of [-1, 0.5, Number.MAX_SAFE_INTEGER + 1, Number.POSITIVE_INFINITY]) {
+            expect(() => store._getShardSegmentFileName('JMdict', 'raw', segmentIndex))
+                .toThrow(/safe integer range/u);
+        }
     });
 
     test('does not rotate a maximum safe shard segment into an imprecise successor', async () => {
