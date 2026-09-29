@@ -1413,6 +1413,21 @@ describe('TermRecordOpfsStore', () => {
         expect(decode('dict-9007199254740992|ABraw.mbtr')).toBeNull();
     });
 
+    test('rejects unsafe numeric shard aliases before cold-start state publication', async () => {
+        const fileName = 'dict-JMdict^9007199254740992.mbtr';
+        const store = new TermRecordOpfsStore();
+        Reflect.set(
+            store,
+            '_recordsDirectoryHandle',
+            createFakeDirectoryHandle(new Map([[fileName, new Uint8Array([1])]])),
+        );
+
+        await expect(Reflect.get(store, '_loadShardFiles').call(store, false))
+            .rejects.toThrow(/Invalid term-record storage file name/u);
+        expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0);
+        expect(Reflect.get(store, '_activeAppendShardStateByKey').size).toBe(0);
+    });
+
     test('rejects custom content dictionary names which exceed the shard metadata field', () => {
         const store = new TermRecordOpfsStore();
         Reflect.set(store, '_textEncoder', {
