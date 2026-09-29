@@ -213,6 +213,9 @@ h1 {
 }
 .search-options-right {
     flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 .search-options {
     display: flex;
