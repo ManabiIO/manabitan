@@ -1,0 +1,121 @@
+name: Research Parser Workers3 Default AB
+
+on:
+  push:
+    branches:
+      - research/parser-workers3-default-20260929
+
+permissions:
+  contents: read
+
+jobs:
+  import-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v6
+        with:
+          path: candidate
+      - name: Checkout baseline
+        uses: actions/checkout@v6
+        with:
+          ref: 4b0ee2e40a31025e510a2f62bac073d0dff26286
+          path: baseline
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+          cache-dependency-path: candidate/package-lock.json
+      - name: Install and build libraries
+        working-directory: candidate
+        run: |
+          npm ci
+          npm run build:libs
+      - name: Reuse dependencies and build baseline libraries
+        shell: bash
+        run: |
+          ln -s "$GITHUB_WORKSPACE/candidate/node_modules" "$GITHUB_WORKSPACE/baseline/node_modules"
+          (cd baseline && npm run build:libs)
+      - name: Install Chromium
+        working-directory: candidate
+        run: npx playwright install chromium
+      - name: Prepare pinned dictionaries
+        working-directory: candidate
+        run: node ./dev/perf/prepare-dictionaries.js
+      - name: Share cache and build both extensions
+        shell: bash
+        run: |
+          mkdir -p baseline/builds
+          cp -a candidate/builds/e2e-dictionary-cache baseline/builds/
+          (cd baseline && node ./dev/bin/build.js --target chrome-dev)
+          (cd candidate && node ./dev/bin/build.js --target chrome-dev)
+      - name: Run four alternating pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/results"
+          for dictionary in jmdict jitendex; do
+            for pair in 1 2 3 4; do
+              if (( pair % 2 == 1 )); then order="baseline candidate"; else order="candidate baseline"; fi
+              for arm in $order; do
+                out="$GITHUB_WORKSPACE/results/${dictionary}-pair${pair}-${arm}"
+                (cd "$arm" && node ./dev/perf/import-benchmark.js "$dictionary" --runs 1 --no-build --output "$out")
+              done
+            done
+          done
+      - name: Run three Jitendex A/A pairs
+        shell: bash
+        run: |
+          for pair in 1 2 3; do
+            for sample in a b; do
+              out="$GITHUB_WORKSPACE/results/jitendex-aa${pair}-${sample}"
+              (cd baseline && node ./dev/perf/import-benchmark.js jitendex --runs 1 --no-build --output "$out")
+            done
+          done
+      - name: Summarize and validate worker receipts
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs'
+          import path from 'node:path'
+          const root=process.env.GITHUB_WORKSPACE
+          const median=(v)=>{const s=[...v].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2}
+          const load=(dir)=>{
+            const x=JSON.parse(readFileSync(path.join(root,'results',dir,'summary.json'),'utf8'))
+            const run=x.runs[0]
+            const phases=run.importDebug?.importerPhaseTimings??[]
+            const fast=phases.find(p=>typeof p.phase==='string'&&p.phase.startsWith('term-file-fast-path:'))
+            const experiments=fast?.details?.parserExperiments
+            const workers=fast?.details?.parallelParserWorkerCount
+            if(!experiments||typeof experiments.experimentalParserWorkers3!=='boolean') throw new Error(`Missing experiment receipt for ${dir}`)
+            if(!Number.isFinite(workers)) throw new Error(`Missing worker receipt for ${dir}`)
+            return {total:run.totalImportMs,worker:run.workerImportMs,flag:experiments.experimentalParserWorkers3,workers}
+          }
+          const out={candidate:process.env.GITHUB_SHA,baseline:'4b0ee2e40a31025e510a2f62bac073d0dff26286',dictionaries:{},aa:{}}
+          for(const dictionary of ['jmdict','jitendex']){
+            const pairs=[]
+            for(let pair=1;pair<=4;++pair){
+              const a=load(`${dictionary}-pair${pair}-baseline`)
+              const b=load(`${dictionary}-pair${pair}-candidate`)
+              if(a.flag!==false||b.flag!==true) throw new Error(`Flag receipt mismatch ${dictionary}/${pair}`)
+              if(!(b.workers>a.workers)) throw new Error(`Worker count did not increase ${dictionary}/${pair}: ${a.workers}->${b.workers}`)
+              pairs.push({pair,baselineMs:a.total,candidateMs:b.total,changePct:(b.total/a.total-1)*100,baselineWorkers:a.workers,candidateWorkers:b.workers})
+            }
+            out.dictionaries[dictionary]={pairs,pairedMedianChangePct:median(pairs.map(x=>x.changePct)),fasterPairs:pairs.filter(x=>x.candidateMs<x.baselineMs).length}
+          }
+          const aa=[]
+          for(let pair=1;pair<=3;++pair){
+            const a=load(`jitendex-aa${pair}-a`),b=load(`jitendex-aa${pair}-b`)
+            const change=(b.total/a.total-1)*100
+            aa.push({pair,changePct:change,absoluteChangePct:Math.abs(change)})
+          }
+          out.aa.jitendex={pairs:aa,medianAbsoluteChangePct:median(aa.map(x=>x.absoluteChangePct))}
+          writeFileSync(path.join(root,'results','summary-ab.json'),JSON.stringify(out,null,2))
+          console.log(JSON.stringify(out,null,2))
+          NODE
+      - uses: actions/upload-artifact@v6
+        with:
+          name: parser-workers3-default-screen
+          path: results
+          retention-days: 7
