@@ -1,0 +1,23 @@
+name: Search contract
+on:
+  pull_request:
+    paths:
+      - 'ext/js/search/**'
+      - 'ext/js/display/**'
+      - 'ext/web/**'
+      - 'test/search/**'
+      - 'test/util/search-refresh-cases.js'
+      - '.github/workflows/search-contract.yml'
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.21.0'
+      - run: node --test test/search/search.test.mjs test/util/search-refresh-cases.js
