@@ -118,19 +118,6 @@ function parseCanonicalSafeInteger(value) {
 }
 
 /**
- * @param {number} segmentIndex
- * @returns {number}
- * @throws {RangeError} If the successor cannot be represented exactly.
- */
-function getNextShardSegmentIndex(segmentIndex) {
-    const nextSegmentIndex = segmentIndex + 1;
-    if (!Number.isSafeInteger(nextSegmentIndex)) {
-        throw new RangeError('Term-record shard segment index exceeds the safe integer range');
-    }
-    return nextSegmentIndex;
-}
-
-/**
  * @param {Uint8Array} content
  * @param {number} offset
  * @param {number} count
@@ -5856,7 +5843,7 @@ export class TermRecordOpfsStore {
             if (existing.fileLength < MAX_SHARD_SEGMENT_FILE_BYTES) {
                 return existing;
             }
-            const nextSegmentIndex = getNextShardSegmentIndex(existing.segmentIndex);
+            const nextSegmentIndex = existing.segmentIndex + 1;
             const nextFileName = this._getShardSegmentFileName(dictionaryName, normalizedContentDictName, nextSegmentIndex);
             const nextFileHandle = await this._recordsDirectoryHandle.getFileHandle(nextFileName, {create: true});
             const created = this._createShardState(
@@ -5996,7 +5983,7 @@ export class TermRecordOpfsStore {
         if (active !== state) {
             return false;
         }
-        const nextSegmentIndex = getNextShardSegmentIndex(state.segmentIndex);
+        const nextSegmentIndex = state.segmentIndex + 1;
         const decodedShardInfo = this._decodeShardInfoFromShardFileName(state.logicalKey ?? state.fileName);
         const dictionaryName = decodedShardInfo?.dictionaryName ?? this._decodeShardInfoFromShardFileName(state.fileName)?.dictionaryName ?? '';
         const sharedContentDictName = String(state.sharedContentDictName ?? 'raw');
@@ -6456,8 +6443,11 @@ export class TermRecordOpfsStore {
      * @returns {string}
      */
     _getShardSegmentFileName(dictionaryName, contentDictName = 'raw', segmentIndex = 0) {
+        if (!Number.isSafeInteger(segmentIndex) || segmentIndex < 0) {
+            throw new RangeError('Term-record shard segment index exceeds the safe integer range');
+        }
         const baseFileName = this._getShardFileName(dictionaryName, contentDictName);
-        if (segmentIndex <= 0) {
+        if (segmentIndex === 0) {
             return baseFileName;
         }
         return `${baseFileName.slice(0, -SHARD_FILE_SUFFIX.length)}${SHARD_FILE_SEGMENT_SEPARATOR}${segmentIndex}${SHARD_FILE_SUFFIX}`;
