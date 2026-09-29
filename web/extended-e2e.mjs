@@ -27,7 +27,12 @@ export async function runExtended({context, page, origin, fixtures, check, impor
             assert.equal(result.lookup, undefined, 'compact responses must not transfer full glossaries');
             assert.ok(JSON.stringify(result).length < 6000);
         }
+        const prefix = await page.evaluate(() => runtime.search('toukyo', false));
+        assert.equal(prefix.prefix, true);
+        assert.equal(prefix.matchedQuery, 'とうきょ');
+        assert.ok(prefix.preview.items.length > 0 && prefix.preview.items.length <= 2);
         const full = await page.evaluate(() => runtime.search('neko', true));
+        assert.equal(full.prefix, false);
         assert.ok(full.lookup.dictionaryEntries.length > 0);
     });
     await check('recommendations reuse the existing ManabiTan Japanese catalog', async () => {
