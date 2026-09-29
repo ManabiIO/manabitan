@@ -1,5 +1,20 @@
-/* SPDX-License-Identifier: GPL-3.0-or-later */
-
+/*
+ * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2017-2022  Yomichan Authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 /**
  * Only traverse text-bearing glossary fields, not CSS, links or image data.
  * The explicit stack, character, depth and node budgets apply before cloning
@@ -11,10 +26,13 @@
 export function glossaryPreview(value, maximum = 220) {
     maximum = Math.max(1, Math.min(220, Math.trunc(maximum) || 220));
     const stack = [{value, depth: 0}];
-    let output = '', visited = 0;
-    while (stack.length && visited++ < 256 && output.length <= maximum) {
+    let output = '',
+        visited = 0;
+    while (stack.length > 0 && visited++ < 256 && output.length <= maximum) {
         const item = stack.pop();
-        if (!item || item.depth > 24) {continue;}
+        if (!item || item.depth > 24) {
+            continue;
+        }
         const content = item.value;
         if (typeof content === 'string') {
             output += content.slice(0, maximum + 1) + ' ';
@@ -24,15 +42,22 @@ export function glossaryPreview(value, maximum = 220) {
             }
         } else if (content && typeof content === 'object') {
             const node = /** @type {Record<string, unknown>} */ (content);
-            if (node.type === 'image' || node.tag === 'img' || node.tag === 'rt' || node.tag === 'rp') {continue;}
-            if (typeof node.text === 'string') {stack.push({value: node.text, depth: item.depth + 1});}
-            else if ('content' in node) {stack.push({value: node.content, depth: item.depth + 1});}
+            if (node.type === 'image' || node.tag === 'img' || node.tag === 'rt' || node.tag === 'rp') {
+                continue;
+            }
+            if (typeof node.text === 'string') {
+                stack.push({value: node.text, depth: item.depth + 1});
+            } else if ('content' in node) {
+                stack.push({value: node.content, depth: item.depth + 1});
+            }
         }
     }
     output = output.replace(/\s+/g, ' ').trim();
     const truncated = output.length > maximum || stack.length > 0;
     let clipped = output.slice(0, maximum);
-    if (/[\uD800-\uDBFF]$/.test(clipped)) {clipped = clipped.slice(0, -1);}
+    if (/[\uD800-\uDBFF]$/.test(clipped)) {
+        clipped = clipped.slice(0, -1);
+    }
     return clipped + (truncated ? '…' : '');
 }
 
@@ -44,21 +69,29 @@ export function dictionaryPreview(entries) {
     const items = [];
     for (const entry of entries.slice(0, 2)) {
         const headword = entry.headwords[0];
-        if (!headword) {continue;}
+        if (!headword) {
+            continue;
+        }
         const senses = [];
         // Respect definition/headword restrictions instead of pairing the first
         // gloss for another spelling with this preview's visible headword.
         for (const definition of entry.definitions.slice(0, 16)) {
-            if (definition.headwordIndices.length && !definition.headwordIndices.includes(headword.headwordIndex)) {continue;}
+            if (definition.headwordIndices.length > 0 && !definition.headwordIndices.includes(headword.headwordIndex)) {
+                continue;
+            }
             const text = glossaryPreview(definition.entries);
             if (text) {
                 senses.push({source: definition.dictionary.slice(0, 256), text, tags: definition.tags.slice(0, 4).map((tag) => tag.name.slice(0, 40))});
             }
-            if (senses.length === 2) {break;}
+            if (senses.length === 2) {
+                break;
+            }
         }
         const definition = entry.definitions[0];
-        items.push({id: JSON.stringify([definition?.dictionary.slice(0, 256), definition?.id, headword.term.slice(0, 256), headword.reading.slice(0, 256)]),
-            term: headword.term.slice(0, 256), reading: headword.reading.slice(0, 256), senses});
+        items.push({id: JSON.stringify([items.length, definition?.dictionary.slice(0, 256), definition?.id, headword.term.slice(0, 256), headword.reading.slice(0, 256)]),
+            term: headword.term.slice(0, 256),
+            reading: headword.reading.slice(0, 256),
+            senses});
     }
     return {items, hasMore: entries.length > 2};
 }

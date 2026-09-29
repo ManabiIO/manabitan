@@ -180,14 +180,17 @@ async function dispatch(request: Request): Promise<unknown> {
                 const source = prefix ? candidate.slice(0, -1) : candidate;
                 return translator.findTerms('group', source, {...options,
                     removeNonJapaneseCharacters: false,
-                    matchType: prefix ? 'prefix' : 'exact', deinflect: !prefix});
+                    matchType: prefix ? 'prefix' : 'exact',
+                    deinflect: !prefix});
             }, abortIfCancelled);
             abortIfCancelled();
             const entries = result?.dictionaryEntries ?? [];
-            return {version: 1, query, matchedQuery,
+            return {version: 1,
+                query,
+                matchedQuery,
                 dictionaryCount: options.enabledDictionaryMap.size,
                 preview: dictionaryPreview(entries),
-                ...(p.full ? {lookup: {...(result ?? {originalTextLength: 0}), dictionaryEntries: entries.slice(0, 100)}} : {})};
+                ...p.full ? {lookup: {...result ?? {originalTextLength: 0}, dictionaryEntries: entries.slice(0, 100)}} : {}};
         }
         case 'import': {
             if (!(p.archive instanceof Blob) || p.archive.size <= 0 || p.archive.size > MAX_ARCHIVE_BYTES) {

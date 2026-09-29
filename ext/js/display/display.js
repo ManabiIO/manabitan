@@ -1490,9 +1490,14 @@ export class Display extends EventDispatcher {
             this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, termEntries);
         } else {
             const search = this._pageType === 'search' && source2.length <= 256 && this.getLanguageSummary().iso === 'ja';
-            const found = search ? await findJapaneseSearch(source2,
-                (query) => this._application.api.termsFind(query, findDetails, optionsContext)) : null;
-            const termEntries = search ? (found?.result?.dictionaryEntries ?? []) :
+            const found = search ?
+await findJapaneseSearch(
+    source2,
+    (query) => this._application.api.termsFind(query, findDetails, optionsContext),
+) :
+null;
+            const termEntries = search ?
+(found?.result?.dictionaryEntries ?? []) :
                 (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
             dictionaryEntries = termEntries;
             this._reportTermsFindSnapshot(source, found?.matchedQuery ?? source2, isKanji, findDetails, optionsContext, termEntries);

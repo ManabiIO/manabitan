@@ -106,6 +106,7 @@ export class SearchDisplayController {
         this._contentUpdateQuery = '';
         /** @type {ReturnType<typeof setTimeout>|null} */
         this._liveSearchTimer = null;
+        /** @type {boolean} */
         this._composing = false;
     }
 
@@ -430,13 +431,13 @@ export class SearchDisplayController {
         if (this._wanakanaEnabled) {
             this._searchTextKanaConversion(element, e);
         }
-        if (e.isComposing || this._composing) {return;}
+        if (e.isComposing || this._composing) { return; }
         this._scheduleLiveSearch();
     }
 
     /** */
     _cancelLiveSearch() {
-        if (this._liveSearchTimer !== null) {clearTimeout(this._liveSearchTimer);}
+        if (this._liveSearchTimer !== null) { clearTimeout(this._liveSearchTimer); }
         this._liveSearchTimer = null;
     }
 
@@ -445,7 +446,7 @@ export class SearchDisplayController {
         this._cancelLiveSearch();
         this._display.invalidateSearchDraft();
         // Keep the established explicit-submit path for pasted blocks of text.
-        if (this._queryInput.value.length > 256) {return;}
+        if (this._queryInput.value.length > 256) { return; }
         this._liveSearchTimer = setTimeout(() => {
             this._liveSearchTimer = null;
             this._search(false, 'overwrite', !!this._queryInput.value.trim(), null, true);
@@ -829,7 +830,7 @@ export class SearchDisplayController {
      */
     _search(animate, historyMode, lookup, flags, preserveSearchInput = false) {
         this._cancelLiveSearch();
-        if (!preserveSearchInput) {this._updateSearchText();}
+        if (!preserveSearchInput) { this._updateSearchText(); }
 
         const query = this._queryInput.value;
         const sequence = ++this._searchRequestSequence;

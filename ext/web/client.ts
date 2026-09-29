@@ -202,7 +202,12 @@ export class ManabiTanWebClient {
      * @param options
      */
     lookup(text: string, options?: CallOptions) { return this.call<LookupResult>('lookup', {text}, options); }
-    /** Search-page spelling alternatives; preview payloads never contain full glossaries. */
+    /**
+     * Search-page spelling alternatives; preview payloads never contain full glossaries.
+     * @param text
+     * @param full
+     * @param options
+     */
     search(text: string, full = false, options?: CallOptions) { return this.call<SearchResult>('search', {text, full}, options); }
     /**
      *
