@@ -1,0 +1,182 @@
+name: Research PR348 MDict Conversion AB
+
+on:
+  push:
+    branches:
+      - research/pr348-mdict-conversion-ab-20260929
+
+permissions:
+  contents: read
+
+jobs:
+  mdict-conversion-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: candidate
+
+      - uses: actions/checkout@v6
+        with:
+          ref: cf0ee862ed8f10c36765d6928f7a6563d8757885
+          path: baseline
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+          cache-dependency-path: candidate/package-lock.json
+
+      - name: Install shared dependencies
+        working-directory: candidate
+        run: npm ci
+
+      - name: Share dependencies with baseline
+        shell: bash
+        run: ln -s "$GITHUB_WORKSPACE/candidate/node_modules" "$GITHUB_WORKSPACE/baseline/node_modules"
+
+      - name: Install benchmark driver
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/mdict-conversion-sample.mjs" <<'NODE'
+          import {createHash} from 'node:crypto'
+          import {performance} from 'node:perf_hooks'
+          import path from 'node:path'
+          import {pathToFileURL} from 'node:url'
+
+          const [workspace, countText] = process.argv.slice(2)
+          const count = Number(countText)
+          if (!workspace || !Number.isSafeInteger(count) || count <= 0) throw new Error('invalid args')
+
+          const fixtureModule = await import(pathToFileURL(path.join(workspace, 'test/util/mdict-binary-fixture.js')).href)
+          const converter = await import(pathToFileURL(path.join(workspace, 'ext/js/dictionary/mdx/mdx-converter.js')).href)
+          const {makeMdictFixture} = fixtureModule
+          const {createMdxImportData} = converter
+
+          let state = 0x12345678
+          const nextByte = () => {
+            state ^= state << 13
+            state ^= state >>> 17
+            state ^= state << 5
+            return state & 255
+          }
+          const entries = Array.from({length: count}, (_, index) => {
+            let payload = ''
+            for (let i = 0; i < 160; ++i) payload += String.fromCharCode(32 + (nextByte() % 95))
+            return {
+              key: `term-${String(index).padStart(6, '0')}`,
+              value: `<div><b>${index}</b> ${payload}</div>`,
+            }
+          })
+          const fixture = makeMdictFixture(entries, {
+            recordBlockSize: 32 * 1024,
+            keysPerBlock: 64,
+            compression: 'zlib',
+            title: `PR348 fixture ${count}`,
+          })
+
+          // Process-local warmup on a small independent fixture.
+          const warm = makeMdictFixture(entries.slice(0, Math.min(128, entries.length)), {
+            recordBlockSize: 8 * 1024,
+            keysPerBlock: 32,
+            compression: 'zlib',
+            title: 'warmup',
+          })
+          await createMdxImportData('warmup.mdx', {}, warm.bytes, [])
+
+          const start = performance.now()
+          const result = await createMdxImportData('benchmark.mdx', {}, fixture.bytes, [])
+          const elapsedMs = performance.now() - start
+
+          const hash = createHash('sha256')
+          const fileNames = [...result.files.keys()].sort()
+          for (const name of fileNames) {
+            hash.update(name)
+            const value = result.files.get(name)
+            if (typeof value === 'string') hash.update(value)
+            else if (value instanceof Uint8Array) hash.update(value)
+            else throw new Error(`unexpected output for ${name}: ${typeof value}`)
+          }
+          console.log(JSON.stringify({
+            elapsedMs,
+            outputSha256: hash.digest('hex'),
+            fileCount: fileNames.length,
+            fixtureBytes: fixture.bytes.byteLength,
+            entries: count,
+          }))
+          NODE
+
+      - name: Run alternating paired samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          : > results/samples.ndjson
+          for count in 2048 10000; do
+            for pair in 1 2 3 4 5 6 7 8; do
+              if (( pair % 2 == 1 )); then order="baseline candidate"; else order="candidate baseline"; fi
+              for arm in $order; do
+                result="$(node "$RUNNER_TEMP/mdict-conversion-sample.mjs" "$GITHUB_WORKSPACE/$arm" "$count")"
+                printf '{"count":%s,"pair":%s,"arm":"%s","result":%s}\n' "$count" "$pair" "$arm" "$result" >> results/samples.ndjson
+              done
+            done
+          done
+          for pair in 1 2 3 4 5 6; do
+            for sample in a b; do
+              result="$(node "$RUNNER_TEMP/mdict-conversion-sample.mjs" "$GITHUB_WORKSPACE/baseline" 10000)"
+              printf '{"count":10000,"pair":%s,"arm":"aa-%s","result":%s}\n' "$pair" "$sample" "$result" >> results/samples.ndjson
+            done
+          done
+
+      - name: Summarize
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync, writeFileSync} from 'node:fs'
+          const rows = readFileSync('results/samples.ndjson', 'utf8').trim().split('\n').map(JSON.parse)
+          const median = (values) => {
+            const sorted = [...values].sort((a,b)=>a-b)
+            const m = Math.floor(sorted.length/2)
+            return sorted.length % 2 ? sorted[m] : (sorted[m-1]+sorted[m])/2
+          }
+          const output = {schemaVersion:1, candidate:process.env.GITHUB_SHA, baseline:'cf0ee862ed8f10c36765d6928f7a6563d8757885', workloads:{}, aa:{}}
+          for (const count of [2048,10000]) {
+            const pairs=[]
+            for (let pair=1; pair<=8; ++pair) {
+              const a=rows.find(x=>x.count===count&&x.pair===pair&&x.arm==='baseline')
+              const b=rows.find(x=>x.count===count&&x.pair===pair&&x.arm==='candidate')
+              if (!a||!b) throw new Error('missing pair')
+              if (a.result.outputSha256!==b.result.outputSha256) throw new Error(`output mismatch count=${count} pair=${pair}`)
+              pairs.push({
+                pair,
+                baselineMs:a.result.elapsedMs,
+                candidateMs:b.result.elapsedMs,
+                changePct:(b.result.elapsedMs/a.result.elapsedMs-1)*100,
+                sha256:a.result.outputSha256,
+                fixtureBytes:a.result.fixtureBytes,
+              })
+            }
+            output.workloads[count]={
+              pairs,
+              pairedMedianChangePct:median(pairs.map(x=>x.changePct)),
+              fasterPairs:pairs.filter(x=>x.candidateMs<x.baselineMs).length,
+            }
+          }
+          const aa=[]
+          for(let pair=1;pair<=6;++pair){
+            const a=rows.find(x=>x.pair===pair&&x.arm==='aa-a')
+            const b=rows.find(x=>x.pair===pair&&x.arm==='aa-b')
+            const change=(b.result.elapsedMs/a.result.elapsedMs-1)*100
+            aa.push({pair,aMs:a.result.elapsedMs,bMs:b.result.elapsedMs,changePct:change,absoluteChangePct:Math.abs(change)})
+          }
+          output.aa[10000]={pairs:aa,medianAbsoluteChangePct:median(aa.map(x=>x.absoluteChangePct)),maxAbsoluteChangePct:Math.max(...aa.map(x=>x.absoluteChangePct))}
+          writeFileSync('results/summary.json',JSON.stringify(output,null,2))
+          console.log(JSON.stringify(output,null,2))
+          NODE
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: pr348-mdict-conversion-ab
+          path: results
+          retention-days: 7
