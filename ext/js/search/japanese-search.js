@@ -26,7 +26,7 @@ import {convertToHiragana} from '../language/ja/japanese-wanakana.js';
  * @returns {string[]}
  */
 export function japaneseSearchQueries(value) {
-    if (value.length > 256 || value.includes('\0')) {
+    if ([...value].length > 256 || value.includes('\0')) {
         throw new RangeError('Use a dictionary query of 256 characters or fewer.');
     }
     const raw = value.trim();
