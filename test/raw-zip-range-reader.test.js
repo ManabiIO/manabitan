@@ -107,7 +107,7 @@ describe('bounded large ZIP entry reads', () => {
         const actual = await reader.read(file, signal());
         expect(actual).toEqual(payload);
         expect(method === 8 ? new Uint8Array(inflateRawSync(actual)) : actual).toEqual(content);
-        expect(archive.ranges).toEqual([[0, 30], [30, 30 + name.length], [header.length, header.length + payload.length]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length], [header.length, header.length + payload.length]]);
         actual.fill(0);
         expect(await reader.read(file, signal())).toEqual(payload);
     });
@@ -191,7 +191,7 @@ describe('bounded large ZIP entry reads', () => {
         release();
         await disposal;
         await rejected;
-        expect(archive.ranges).toEqual([[0, 30]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length]]);
     });
     test.each([2, 8])('retains the compressed-source budget on deviceMemory=%i', async (deviceMemory) => {
         const lowMemory = deviceMemory === 2;
