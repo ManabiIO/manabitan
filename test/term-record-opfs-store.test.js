@@ -1413,6 +1413,29 @@ describe('TermRecordOpfsStore', () => {
         expect(decode('dict-9007199254740992|ABraw.mbtr')).toBeNull();
     });
 
+    test('does not rotate a maximum safe shard segment into an imprecise successor', async () => {
+        const store = new TermRecordOpfsStore();
+        const fileName = store._getShardSegmentFileName('JMdict', 'raw', Number.MAX_SAFE_INTEGER);
+        const fileHandle = asFileHandle({
+            name: fileName,
+            async getFile() { return new Blob([new Uint8Array(1024 * 1024 * 1024)]); },
+        });
+        const state = store._createShardState(
+            fileName,
+            fileHandle,
+            1024 * 1024 * 1024,
+            'raw',
+            Number.MAX_SAFE_INTEGER,
+            store._getShardFileName('JMdict', 'raw'),
+        );
+        Reflect.get(store, '_activeAppendShardStateByKey').set(state.logicalKey, state);
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
+
+        await expect(Reflect.get(store, '_rotateActiveShardSegmentAfterQueuePressure').call(store, state))
+            .rejects.toThrow(/safe integer range/u);
+        expect(Reflect.get(store, '_activeAppendShardStateByKey').get(state.logicalKey)).toBe(state);
+    });
+
     test('rejects unsafe numeric shard aliases before cold-start state publication', async () => {
         const fileName = 'dict-JMdict^9007199254740992.mbtr';
         const store = new TermRecordOpfsStore();
