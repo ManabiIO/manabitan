@@ -501,12 +501,6 @@ function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkByte
     return {packedChunks, packedRowStarts, packedRowCounts};
 }
 
-/**
- * @typedef {object} InsertStatement
- * @property {string} sql
- * @property {(item: unknown) => import('@sqlite.org/sqlite-wasm').BindingSpec} bind
- */
-
 export class DictionaryDatabase {
     constructor() {
         /** @type {import('@sqlite.org/sqlite-wasm').Sqlite3Static|null} */
@@ -2451,28 +2445,6 @@ null;
         }
         return {
             clause: placeholders.length > 0 ? placeholders.join(', ') : "''",
-            bind,
-        };
-    }
-
-    /**
-     * @param {Iterable<number>} values
-     * @param {string} prefix
-     * @returns {{clause: string, bind: Record<string, number>}}
-     */
-    _buildNumberInClause(values, prefix) {
-        /** @type {string[]} */
-        const placeholders = [];
-        /** @type {Record<string, number>} */
-        const bind = {};
-        let index = 0;
-        for (const value of values) {
-            const key = `${prefix}${index++}`;
-            placeholders.push(`$${key}`);
-            bind[`$${key}`] = value;
-        }
-        return {
-            clause: placeholders.length > 0 ? placeholders.join(', ') : '-1',
             bind,
         };
     }
@@ -5515,31 +5487,6 @@ null;
         this._termsVirtualTableDirty = count > 0;
     }
 
-    /**
-     * @param {{values: import('@sqlite.org/sqlite-wasm').Bindable[], contentKey: string|null}[]} rows
-     * @throws {Error}
-     */
-    async _insertResolvedTermRowsWithContentKeys(rows) {
-        for (const row of rows) {
-            const {contentKey} = row;
-            if (contentKey !== null) {
-                const contentId = this._termEntryContentIdByKey.get(contentKey);
-                if (typeof contentId !== 'number') {
-                    throw new Error('Failed to resolve term entry content id for batched insert');
-                }
-                const meta = this._termEntryContentMetaByHash.get(contentKey);
-                if (typeof meta === 'undefined') {
-                    throw new Error('Failed to resolve term entry content metadata for batched insert');
-                }
-                row.values[5] = contentId;
-                row.values[6] = meta.offset;
-                row.values[7] = meta.length;
-                row.values[8] = meta.dictName;
-            }
-        }
-        await this._insertResolvedTermRows(rows.map((row) => row.values), 0, rows.length);
-    }
-
     /** */
     _clearTermEntryContentMetaCaches() {
         this._termEntryContentMetaByHash.clear();
@@ -7104,58 +7051,6 @@ this._readTermContentSignature(
             }
         }
         return meta;
-    }
-
-    /**
-     * @param {{contentKey: string, contentHash: string, contentBytes: Uint8Array, contentDictName: string|null}[]} rows
-     * @throws {Error}
-     */
-    async _insertTermEntryContentBatch(rows) {
-        if (rows.length === 0) { return; }
-        const spans = await this._termContentStore.appendBatch(rows.map((row) => row.contentBytes));
-        this._insertTermEntryContentBatchWithSpans(rows, spans, 0, rows.length);
-    }
-
-    /**
-     * @param {{contentHash: string, contentDictName: string|null}[]} rows
-     * @param {{offset: number, length: number}[]} spans
-     * @param {number} start
-     * @param {number} count
-     * @throws {Error}
-     */
-    _insertTermEntryContentBatchWithSpans(rows, spans, start, count) {
-        if (count <= 0) { return; }
-        /** @type {string[]} */
-        const valueRows = [];
-        /** @type {import('@sqlite.org/sqlite-wasm').Bindable[]} */
-        const bind = [];
-        for (let i = start, ii = start + count; i < ii; ++i) {
-            const row = rows[i];
-            const span = spans[i];
-            valueRows.push('(?, NULL, ?, \'\', \'\', \'\', \'[]\', ?, ?)');
-            bind.push(row.contentHash, row.contentDictName, span.offset, span.length);
-        }
-        const sql = `
-            INSERT INTO termEntryContent(contentHash, contentZstd, contentDictName, rules, definitionTags, termTags, glossaryJson, contentOffset, contentLength)
-            VALUES ${valueRows.join(',')}
-        `;
-        const stmt = this._getCachedStatement(sql);
-        stmt.reset(true);
-        stmt.bind(bind);
-        stmt.step();
-
-        const db = this._requireDb();
-        const lastInsertRowId = this._asNumber(db.selectValue('SELECT last_insert_rowid()'), -1);
-        if (lastInsertRowId <= 0) {
-            throw new Error('Failed to insert batched term entry content');
-        }
-        const firstId = lastInsertRowId - count + 1;
-        for (let i = start, ii = start + count; i < ii; ++i) {
-            const id = firstId + (i - start);
-            this._termEntryContentIdByHash.set(rows[i].contentHash, id);
-            this._termEntryContentIdByKey.set(rows[i].contentHash, id);
-            this._cacheTermEntryContentMeta(rows[i].contentHash, spans[i].offset, spans[i].length, rows[i].contentDictName, id);
-        }
     }
 
     /**
@@ -8998,86 +8893,6 @@ null :
         importMetrics.termsVtabInsertMs += safePerformance.now() - tTermsVtabInsertStart;
     }
 
-    /**
-     * @param {import('@sqlite.org/sqlite-wasm').PreparedStatement} insertContentStmt
-     * @param {string} contentHash
-     * @param {Uint8Array} contentZstd
-     * @param {string|null} contentDictName
-     * @param {string} contentKey
-     * @returns {Promise<number>}
-     * @throws {Error}
-     */
-    async _resolveOrCreateTermEntryContentId(insertContentStmt, contentHash, contentZstd, contentDictName, contentKey) {
-        const cachedId = this._termEntryContentIdByKey.get(contentKey);
-        if (typeof cachedId === 'number') {
-            return cachedId;
-        }
-        const cachedHashId = this._termEntryContentIdByHash.get(contentHash);
-        if (typeof cachedHashId === 'number') {
-            this._termEntryContentIdByKey.set(contentKey, cachedHashId);
-            if (!this._termEntryContentMetaByHash.has(contentHash)) {
-                const stmt = this._getCachedStatement('SELECT contentOffset, contentLength, contentDictName FROM termEntryContent WHERE id = $id LIMIT 1');
-                stmt.reset(true);
-                stmt.bind({$id: cachedHashId});
-                if (stmt.step()) {
-                    const row = /** @type {import('core').SafeAny} */ (stmt.get({}));
-                    const offset = this._asNumber(row.contentOffset, -1);
-                    const length = this._asNumber(row.contentLength, -1);
-                    const dictName = this._asNullableString(row.contentDictName) ?? 'raw';
-                    if (offset >= 0 && length > 0) {
-                        this._cacheTermEntryContentMeta(contentHash, offset, length, dictName, cachedHashId);
-                    }
-                }
-            }
-            if (this._termEntryContentMetaByHash.has(contentHash)) {
-                return cachedHashId;
-            }
-        }
-
-        insertContentStmt.reset(true);
-        const [span] = await this._termContentStore.appendBatch([contentZstd]);
-        insertContentStmt.bind({
-            $contentHash: contentHash,
-            $contentDictName: contentDictName,
-            $contentOffset: span.offset,
-            $contentLength: span.length,
-        });
-        insertContentStmt.step();
-
-        const db = this._requireDb();
-        const id = this._asNumber(db.selectValue('SELECT last_insert_rowid()'), -1);
-        if (id <= 0) {
-            throw new Error('Failed to insert term entry content');
-        }
-        this._termEntryContentIdByHash.set(contentHash, id);
-        this._termEntryContentIdByKey.set(contentKey, id);
-        this._cacheTermEntryContentMeta(contentHash, span.offset, span.length, contentDictName, id);
-        return id;
-    }
-
-    /** */
-    _loadTermEntryContentHashIndex() {
-        if (this._termEntryContentIdByHash.size > 0) { return; }
-        const stmt = this._getCachedStatement('SELECT id, contentHash, contentOffset, contentLength, contentDictName FROM termEntryContent');
-        stmt.reset(true);
-        while (stmt.step()) {
-            const row = /** @type {import('core').SafeAny[]} */ (stmt.get([]));
-            const id = this._asNumber(row[0], -1);
-            if (id <= 0) { continue; }
-            const contentHash = this._asString(row[1]);
-            if (contentHash.length === 0) { continue; }
-            const offset = this._asNumber(row[2], -1);
-            const length = this._asNumber(row[3], -1);
-            const dictName = this._asNullableString(row[4]) ?? 'raw';
-            if (offset >= 0 && length > 0) {
-                if (!this._termEntryContentIdByHash.has(contentHash)) {
-                    this._termEntryContentIdByHash.set(contentHash, id);
-                }
-                this._cacheTermEntryContentMeta(contentHash, offset, length, dictName, id);
-            }
-        }
-    }
-
     /** */
     _pruneOrphanTermEntryContent() {
         const db = this._requireDb();
@@ -9599,65 +9414,6 @@ null :
         this._termsVirtualTableDirty = false;
     }
 
-    /**
-     * @param {string} dictionaryName
-     * @returns {Promise<void>}
-     */
-    async _appendTermRecordsFromTermsTableByDictionary(dictionaryName) {
-        const db = this._requireDb();
-        const termsTableInfo = db.selectObjects('PRAGMA table_info(terms)');
-        const termsColumns = new Set(termsTableInfo.map((row) => this._asString(row.name)));
-        const hasEntryContentOffset = termsColumns.has('entryContentOffset');
-        const hasEntryContentLength = termsColumns.has('entryContentLength');
-        const hasEntryContentDictName = termsColumns.has('entryContentDictName');
-        const hasEntryContentId = termsColumns.has('entryContentId');
-        const entryContentOffsetExpr = hasEntryContentOffset ? 't.entryContentOffset' : (hasEntryContentId ? 'c.contentOffset' : '-1');
-        const entryContentLengthExpr = hasEntryContentLength ? 't.entryContentLength' : (hasEntryContentId ? 'c.contentLength' : '-1');
-        const entryContentDictNameExpr = hasEntryContentDictName ? 't.entryContentDictName' : (hasEntryContentId ? 'c.contentDictName' : '\'raw\'');
-        const stmt = this._getCachedStatement(`
-            SELECT
-                t.dictionary AS dictionary,
-                t.expression AS expression,
-                t.reading AS reading,
-                t.expressionReverse AS expressionReverse,
-                t.readingReverse AS readingReverse,
-                ${entryContentOffsetExpr} AS entryContentOffset,
-                ${entryContentLengthExpr} AS entryContentLength,
-                COALESCE(${entryContentDictNameExpr}, 'raw') AS entryContentDictName,
-                t.score AS score,
-                t.sequence AS sequence
-            FROM terms t
-            ${hasEntryContentId ? 'LEFT JOIN termEntryContent c ON c.id = t.entryContentId' : ''}
-            WHERE t.dictionary = $dictionary
-        `);
-        stmt.reset(true);
-        stmt.bind({$dictionary: dictionaryName});
-        /** @type {{dictionary: string, expression: string, reading: string, expressionReverse: string|null, readingReverse: string|null, entryContentOffset: number, entryContentLength: number, entryContentDictName: string|null, score: number, sequence: number|null}[]} */
-        let batch = [];
-        while (stmt.step()) {
-            const row = /** @type {import('core').SafeAny} */ (stmt.get({}));
-            batch.push({
-                dictionary: this._asString(row.dictionary),
-                expression: this._asString(row.expression),
-                reading: this._asString(row.reading),
-                expressionReverse: this._asNullableString(row.expressionReverse) ?? null,
-                readingReverse: this._asNullableString(row.readingReverse) ?? null,
-                entryContentOffset: this._asNumber(row.entryContentOffset, -1),
-                entryContentLength: this._asNumber(row.entryContentLength, -1),
-                entryContentDictName: this._asNullableString(row.entryContentDictName),
-                score: this._asNumber(row.score, 0),
-                sequence: this._asNullableNumber(row.sequence) ?? null,
-            });
-            if (batch.length >= 4096) {
-                await this._termRecordStore.appendBatch(batch);
-                batch = [];
-            }
-        }
-        if (batch.length > 0) {
-            await this._termRecordStore.appendBatch(batch);
-        }
-    }
-
     /** */
     async _migrateLegacyTermsTableToExternalStore() {
         if (!this._termRecordStore.isEmpty()) {
@@ -9925,117 +9681,6 @@ null :
         return this._sqlite3;
     }
 
-    /**
-     * @template {import('dictionary-database').ObjectStoreName} T
-     * @param {T} objectStoreName
-     * @returns {InsertStatement}
-     * @throws {Error}
-     */
-    _getInsertStatement(objectStoreName) {
-        switch (objectStoreName) {
-            case 'dictionaries':
-                return {
-                    sql: 'INSERT INTO dictionaries(title, version, summaryJson) VALUES($title, $version, $summaryJson)',
-                    bind: (item) => {
-                        const summary = /** @type {import('dictionary-importer').Summary} */ (item);
-                        return {
-                            $title: summary.title,
-                            $version: summary.version,
-                            $summaryJson: JSON.stringify(summary),
-                        };
-                    },
-                };
-            case 'terms':
-                throw new Error('terms uses external virtual storage; use bulkAdd');
-            case 'termMeta':
-                return {
-                    sql: 'INSERT INTO termMeta(dictionary, expression, mode, dataJson) VALUES($dictionary, $expression, $mode, $dataJson)',
-                    bind: (item) => {
-                        const row = /** @type {import('dictionary-database').DatabaseTermMeta} */ (item);
-                        return {
-                            $dictionary: row.dictionary,
-                            $expression: row.expression,
-                            $mode: row.mode,
-                            $dataJson: JSON.stringify(row.data),
-                        };
-                    },
-                };
-            case 'kanji':
-                return {
-                    sql: 'INSERT INTO kanji(dictionary, character, onyomi, kunyomi, tags, meaningsJson, statsJson) VALUES($dictionary, $character, $onyomi, $kunyomi, $tags, $meaningsJson, $statsJson)',
-                    bind: (item) => {
-                        const row = /** @type {import('dictionary-database').DatabaseKanjiEntry} */ (item);
-                        return {
-                            $dictionary: row.dictionary,
-                            $character: row.character,
-                            $onyomi: row.onyomi,
-                            $kunyomi: row.kunyomi,
-                            $tags: row.tags,
-                            $meaningsJson: JSON.stringify(row.meanings),
-                            $statsJson: row.stats ? JSON.stringify(row.stats) : null,
-                        };
-                    },
-                };
-            case 'kanjiMeta':
-                return {
-                    sql: 'INSERT INTO kanjiMeta(dictionary, character, mode, dataJson) VALUES($dictionary, $character, $mode, $dataJson)',
-                    bind: (item) => {
-                        const row = /** @type {import('dictionary-database').DatabaseKanjiMeta} */ (item);
-                        return {
-                            $dictionary: row.dictionary,
-                            $character: row.character,
-                            $mode: row.mode,
-                            $dataJson: JSON.stringify(row.data),
-                        };
-                    },
-                };
-            case 'tagMeta':
-                return {
-                    sql: 'INSERT INTO tagMeta(dictionary, name, category, ord, notes, score) VALUES($dictionary, $name, $category, $ord, $notes, $score)',
-                    bind: (item) => {
-                        const row = /** @type {import('dictionary-database').Tag} */ (item);
-                        return {
-                            $dictionary: row.dictionary,
-                            $name: row.name,
-                            $category: row.category,
-                            $ord: row.order,
-                            $notes: row.notes,
-                            $score: row.score,
-                        };
-                    },
-                };
-            case 'media':
-                return {
-                    sql: 'INSERT INTO media(dictionary, path, mediaType, width, height, content, contentOffset, contentLength, contentCompressionMethod, contentUncompressedLength) VALUES($dictionary, $path, $mediaType, $width, $height, $content, $contentOffset, $contentLength, $contentCompressionMethod, $contentUncompressedLength)',
-                    /**
-                     * @param {import('dictionary-database').MediaDataArrayBufferContent} row
-                     * @returns {{$dictionary: string, $path: string, $mediaType: string, $width: number, $height: number, $content: ArrayBuffer, $contentOffset: number, $contentLength: number, $contentCompressionMethod: number, $contentUncompressedLength: number}}
-                     */
-                    bind: (row) => {
-                        const source = /** @type {{dictionary: string, path: string, mediaType: string, width: number, height: number, content: ArrayBuffer, contentOffset?: unknown, contentLength?: unknown, contentCompressionMethod?: unknown, contentUncompressedLength?: unknown}} */ (row);
-                        const contentOffset = typeof source.contentOffset === 'number' ? source.contentOffset : 0;
-                        const contentLength = typeof source.contentLength === 'number' ? source.contentLength : 0;
-                        const contentCompressionMethod = typeof source.contentCompressionMethod === 'number' ? source.contentCompressionMethod : ZIP_COMPRESSION_METHOD_STORE;
-                        const contentUncompressedLength = typeof source.contentUncompressedLength === 'number' ? source.contentUncompressedLength : contentLength;
-                        return {
-                            $dictionary: source.dictionary,
-                            $path: source.path,
-                            $mediaType: source.mediaType,
-                            $width: source.width,
-                            $height: source.height,
-                            $content: source.content,
-                            $contentOffset: contentOffset,
-                            $contentLength: contentLength,
-                            $contentCompressionMethod: contentCompressionMethod,
-                            $contentUncompressedLength: contentUncompressedLength,
-                        };
-                    },
-                };
-            default:
-                throw new Error(`Unsupported object store: ${objectStoreName}`);
-        }
-    }
-
     /** */
     _clearTermsVtabCursorState() {
         this._termsVtabCursorState.clear();
@@ -10266,19 +9911,6 @@ null :
             throw new Error(`Failed to register manabitan_terms module: rc=${rc}`);
         }
         this._termsVtabModuleRegistered = true;
-    }
-
-    /**
-     * @param {string} whereClause
-     * @returns {string}
-     */
-    _createTermSelectSql(whereClause) {
-        return `
-            SELECT
-                t.*
-            FROM terms t
-            WHERE ${whereClause}
-        `;
     }
 
     /**
@@ -11021,23 +10653,6 @@ null :
             return new Uint8Array(value);
         }
         return null;
-    }
-
-    /**
-     * @param {Uint8Array} a
-     * @param {Uint8Array} b
-     * @returns {boolean}
-     */
-    _areUint8ArraysEqual(a, b) {
-        if (a.byteLength !== b.byteLength) {
-            return false;
-        }
-        for (let i = 0, ii = a.byteLength; i < ii; ++i) {
-            if (a[i] !== b[i]) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
