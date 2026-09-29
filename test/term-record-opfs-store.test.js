@@ -1428,6 +1428,7 @@ describe('TermRecordOpfsStore', () => {
             Number.MAX_SAFE_INTEGER,
             store._getShardFileName('JMdict', 'raw'),
         );
+        if (state.logicalKey === null) { throw new Error('Expected shard logical key'); }
         Reflect.get(store, '_activeAppendShardStateByKey').set(state.logicalKey, state);
         Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
 
