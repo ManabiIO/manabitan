@@ -128,6 +128,47 @@ describe('Keyboard Event Handling', () => {
         expect(focusSpy.mock.calls.length).toBe(0);
     });
 
+    test('search controls expose native accessible names and mobile search semantics', () => {
+        expect(queryInput.getAttribute('aria-label')).toBe('Search Japanese dictionary');
+        expect(queryInput.getAttribute('enterkeyhint')).toBe('search');
+        expect(queryInput.getAttribute('spellcheck')).toBe('false');
+        for (const [selector, label] of [
+            ['#clear-button', 'Clear search'],
+            ['#search-back-button', 'Back in search history'],
+            ['#search-button', 'Search'],
+            ['#search-settings-button', 'Search settings'],
+        ]) {
+            const control = querySelectorNotNull(document, selector);
+            expect(control.tagName).toBe('BUTTON');
+            expect(control.getAttribute('aria-label')).toBe(label);
+        }
+    });
+
+    test('live search character limit counts supplementary Unicode as one character', () => {
+        vi.useFakeTimers();
+        const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        const invalidateSpy = vi.spyOn(display, 'invalidateSearchDraft').mockImplementation(() => {});
+        try {
+            queryInput.value = '𠮷'.repeat(256);
+            searchDisplayController._scheduleLiveSearch();
+            vi.advanceTimersByTime(100);
+            expect(searchSpy).toHaveBeenCalledOnce();
+            expect(searchSpy).toHaveBeenCalledWith(false, 'overwrite', true, null, true);
+            expect(invalidateSpy).toHaveBeenCalledOnce();
+
+            searchSpy.mockClear();
+            invalidateSpy.mockClear();
+            queryInput.value = '𠮷'.repeat(257);
+            searchDisplayController._scheduleLiveSearch();
+            vi.advanceTimersByTime(100);
+            expect(searchSpy).not.toHaveBeenCalled();
+            expect(invalidateSpy).toHaveBeenCalledOnce();
+        } finally {
+            searchDisplayController._cancelLiveSearch();
+            vi.useRealTimers();
+        }
+    });
+
     test('search button click dispatches search', () => {
         const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
         const preventDefault = vi.fn();
