@@ -28,7 +28,7 @@ afterEach(() => {
  * @returns {{fetch: ReturnType<typeof vi.fn>, addIds: number[], removeIds: number[], rules: Set<number>}}
  */
 function installRuntime({failFirstRemoval = false, failFirstAdd = false} = {}) {
-    /** @type {chrome.runtime.LastError|null} */
+    /** @type {{message: string}|null} */
     let lastError = null;
     let removalAttempts = 0;
     let addAttempts = 0;
@@ -45,8 +45,8 @@ function installRuntime({failFirstRemoval = false, failFirstAdd = false} = {}) {
         const addRules = details.addRules ?? [];
         const removeRuleIds = details.removeRuleIds ?? [];
 
-        ++addAttempts;
         if (addRules.length > 0) {
+            ++addAttempts;
             for (const {id} of addRules) {
                 addIds.push(id);
                 if (failFirstAdd && addAttempts === 1) {
