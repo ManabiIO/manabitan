@@ -2986,20 +2986,6 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {TermRecord} record
-     * @param {number[]} recordIds
-     * @returns {boolean} Whether the record must be added to its dictionary indexes.
-     */
-    _storeRecordWithKnownDictionaryIds(record, recordIds) {
-        if (typeof this._recordsById.get(record.id) !== 'undefined') {
-            return this._storeRecord(record);
-        }
-        this._recordsById.set(record.id, record);
-        recordIds.push(record.id);
-        return true;
-    }
-
-    /**
      * @param {string} dictionaryName
      * @returns {number[]}
      */
@@ -4684,34 +4670,6 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {number} meta
-     * @param {Uint8Array} content
-     * @param {number} offset
-     * @param {number} customLength
-     * @returns {string}
-     */
-    _decodeEntryContentDictName(meta, content, offset, customLength) {
-        switch (meta & 0xff) {
-            case ENTRY_CONTENT_DICT_NAME_CODE_RAW:
-                return 'raw';
-            case ENTRY_CONTENT_DICT_NAME_CODE_RAW_V2:
-                return RAW_TERM_CONTENT_DICT_NAME;
-            case ENTRY_CONTENT_DICT_NAME_CODE_RAW_V3:
-                return RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME;
-            case ENTRY_CONTENT_DICT_NAME_CODE_RAW_V4:
-                return RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME;
-            case ENTRY_CONTENT_DICT_NAME_CODE_JMDICT:
-                return 'jmdict';
-            case ENTRY_CONTENT_DICT_NAME_CODE_RAW_V6:
-                return RAW_TERM_CONTENT_TOKEN_DICT_NAME;
-            case ENTRY_CONTENT_DICT_NAME_CODE_CUSTOM:
-                return this._decodeString(content, offset, customLength);
-            default:
-                return 'raw';
-        }
-    }
-
-    /**
      * @param {string} value
      * @returns {{meta: number, bytes: Uint8Array|null}}
      * @throws {RangeError} If a custom dictionary name exceeds the persisted format limit.
@@ -5763,30 +5721,6 @@ export class TermRecordOpfsStore {
     /**
      * @returns {Promise<string[]>}
      */
-    async _listShardFileNames() {
-        if (this._recordsDirectoryHandle === null) {
-            return [];
-        }
-        const entriesMethod = /** @type {unknown} */ (Reflect.get(this._recordsDirectoryHandle, 'entries'));
-        if (typeof entriesMethod !== 'function') {
-            return [];
-        }
-        const entries = /** @type {() => AsyncIterable<[string, FileSystemHandle]>} */ (entriesMethod).call(this._recordsDirectoryHandle);
-        /** @type {string[]} */
-        const names = [];
-        for await (const entry of entries) {
-            const name = String(entry[0] ?? '');
-            const fileSystemHandle = /** @type {FileSystemHandle} */ (/** @type {unknown} */ (entry[1]));
-            if (fileSystemHandle.kind === 'file' && this._isShardFileName(name)) {
-                names.push(name);
-            }
-        }
-        return names;
-    }
-
-    /**
-     * @returns {Promise<string[]>}
-     */
     async _listTermRecordStorageFileNames() {
         if (this._recordsDirectoryHandle === null) { return []; }
         const entriesMethod = /** @type {unknown} */ (Reflect.get(this._recordsDirectoryHandle, 'entries'));
@@ -6731,51 +6665,4 @@ export class TermRecordOpfsStore {
         }
     }
 
-    /**
-     * @param {unknown} value
-     * @param {number} fallback
-     * @returns {number}
-     */
-    _asNumber(value, fallback) {
-        if (typeof value === 'number' && Number.isFinite(value)) {
-            return value;
-        }
-        if (typeof value === 'string' && value.length > 0) {
-            const parsed = Number(value);
-            if (Number.isFinite(parsed)) {
-                return parsed;
-            }
-        }
-        return fallback;
-    }
-
-    /**
-     * @param {unknown} value
-     * @returns {number|null}
-     */
-    _asNullableNumber(value) {
-        if (value === null || typeof value === 'undefined') {
-            return null;
-        }
-        return this._asNumber(value, 0);
-    }
-
-    /**
-     * @param {unknown} value
-     * @returns {string}
-     */
-    _asString(value) {
-        return typeof value === 'string' ? value : '';
-    }
-
-    /**
-     * @param {unknown} value
-     * @returns {string|null}
-     */
-    _asNullableString(value) {
-        if (value === null || typeof value === 'undefined') {
-            return null;
-        }
-        return this._asString(value);
-    }
 }
