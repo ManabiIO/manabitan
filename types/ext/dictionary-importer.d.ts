@@ -60,8 +60,6 @@ export type ImportExperiments = {
     experimentalLookupScratchReuse?: boolean;
     /** Qualified production default: true. Explicit false retains portable large-group lookup construction. */
     experimentalNativeSegmentedLookup?: boolean;
-    experimentalDirectLookupArena?: boolean;
-    experimentalSinglePassLookupCompaction?: boolean;
     experimentalTermBankSpans?: boolean;
     experimentalNativeEscapedKeys?: boolean;
     experimentalValidatedGlossaryReuse?: boolean;

@@ -173,6 +173,8 @@ describe('default-off term-bank experiments', () => {
         expect(snapshotTermBankExperiments()).toEqual(flags(0))
         expect(getTermBankExperimentMask(flags(63))).toBe(31)
         expect(snapshotTermBankExperiments(/** @type {Experiments} */ (/** @type {unknown} */ ({experimentalTermBankSpans: 'true'})))).toEqual(flags(0))
+        expect(Reflect.has(snap, 'experimentalDirectLookupArena')).toBe(false)
+        expect(Reflect.has(snap, 'experimentalSinglePassLookupCompaction')).toBe(false)
     })
 
     const glossary = [{type: 'structured-content', content: [{tag: 'span', content: '日本語'}, {tag: 'ruby', content: '読み'}]}]

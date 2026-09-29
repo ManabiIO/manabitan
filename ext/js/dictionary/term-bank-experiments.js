@@ -33,8 +33,6 @@ export function snapshotTermBankExperiments(options = {}) {
         experimentalSkipFusedParse: options.experimentalSkipFusedParse === true,
         experimentalLookupScratchReuse: typeof options.experimentalLookupScratchReuse === 'undefined' || options.experimentalLookupScratchReuse === true,
         experimentalNativeSegmentedLookup: typeof options.experimentalNativeSegmentedLookup === 'undefined' || options.experimentalNativeSegmentedLookup === true,
-        experimentalDirectLookupArena: options.experimentalDirectLookupArena === true,
-        experimentalSinglePassLookupCompaction: options.experimentalSinglePassLookupCompaction === true,
         experimentalTermBankSpans: options.experimentalTermBankSpans === true,
         experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true,
         experimentalValidatedGlossaryReuse: options.experimentalValidatedGlossaryReuse === true,
