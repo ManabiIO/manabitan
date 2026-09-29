@@ -25,7 +25,7 @@ export interface Status {
     storage: {usage?: number, quota?: number, persisted: boolean};
 }
 
-export type Operation = 'open' | 'status' | 'lookup' | 'import' | 'delete' | 'enable' | 'default' | 'media' | 'close';
+export type Operation = 'open' | 'status' | 'lookup' | 'search' | 'import' | 'delete' | 'enable' | 'default' | 'media' | 'close';
 
 export interface Request {
     version: 1;
@@ -45,6 +45,16 @@ export interface Reply {
 }
 
 export type LookupResult = FindTermsResult;
+
+export interface SearchResult {
+    version: 1;
+    query: string;
+    matchedQuery: string;
+    dictionaryCount: number;
+    preview: ReturnType<typeof import('../js/search/dictionary-preview.js').dictionaryPreview>;
+    /** Only populated by an explicit full search. */
+    lookup?: LookupResult;
+}
 
 export class WebRuntimeError extends Error {
     /**
@@ -87,5 +97,5 @@ export function text(value: unknown, maximum = 256): string {
 export function isRequest(value: unknown): value is Message {
     return record(value) && value.version === API_VERSION && Number.isSafeInteger(value.id) &&
         Number(value.id) > 0 && typeof value.operation === 'string' &&
-        ['open', 'status', 'lookup', 'import', 'delete', 'enable', 'default', 'media', 'close', 'cancel'].includes(value.operation);
+        ['open', 'status', 'lookup', 'search', 'import', 'delete', 'enable', 'default', 'media', 'close', 'cancel'].includes(value.operation);
 }

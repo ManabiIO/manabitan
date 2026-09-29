@@ -434,7 +434,8 @@ class MDictBase {
             if (keyEndIndex == -1) {
                 throw new Error('Unterminated MDict key block entry');
             }
-            const keyTextBuffer = keyBlock.slice(keyStartIndex + this.meta.numWidth, keyEndIndex);
+            // Decoding is synchronous and returns an independent string; no byte copy is needed.
+            const keyTextBuffer = keyBlock.subarray(keyStartIndex + this.meta.numWidth, keyEndIndex);
             const keyText = this.meta.keyDecoder.decode(keyTextBuffer);
             if (keyList.length > 0) {
                 keyList[keyList.length - 1].recordEndOffset = meaningOffset;
@@ -760,6 +761,10 @@ class MDictBase {
         const keyBlockChecksum = common.b2n(kbPackedBuff.subarray(4, 8));
         let keyBlock;
         if (compType == '00000000') {
+            // Stored bytes must match the declaration before allocating a copy.
+            if (kbPackedBuff.length - 8 !== unpackSize) {
+                throw Error(`MDict key block size mismatch: expected ${unpackSize}, got ${kbPackedBuff.length - 8}`);
+            }
             keyBlock = kbPackedBuff.slice(8);
         } else if (compType == '01000000') {
             // TODO: tests for v2.0 dictionary
@@ -803,7 +808,7 @@ class MDictBase {
             if (splitKeyBlock.length !== this.keyInfoList[idx].keyBlockEntriesNum) {
                 throw Error(`MDict key block entry count mismatch: expected ${this.keyInfoList[idx].keyBlockEntriesNum}, got ${splitKeyBlock.length}`);
             }
-            if (keyBlockList.length > 0 && keyBlockList[keyBlockList.length - 1].recordEndOffset == -1) {
+            if (splitKeyBlock.length > 0 && keyBlockList.length > 0 && keyBlockList[keyBlockList.length - 1].recordEndOffset == -1) {
                 keyBlockList[keyBlockList.length - 1].recordEndOffset = splitKeyBlock[0].recordStartOffset;
             }
             // Keep the first owned block, then append only new keys instead of

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {findJapaneseSearch} from '../search/japanese-search.js';
 import {ThemeController} from '../app/theme-controller.js';
 import {FrameEndpoint} from '../comm/frame-endpoint.js';
 import {extendApiMap, invokeApiMapHandler} from '../core/api-map.js';
@@ -559,6 +560,22 @@ export class Display extends EventDispatcher {
             this._setTheme(this._options);
         }
         return stateChangeCompletePromise;
+    }
+
+    /** Invalidate stale results immediately when the search draft changes. */
+    invalidateSearchDraft() {
+        this._setContentToken = {};
+        this._closePopups();
+        this._closeAllPopupMenus();
+        this._eventListeners.removeAllEventListeners();
+        this._contentManager.unloadAll();
+        this._triggerContentClear();
+        this._dictionaryEntries = [];
+        this._dictionaryEntryNodes = [];
+        this._elementOverflowController.clearElements();
+        this._container.textContent = '';
+        this._setNoContentVisible(false);
+        this._setNoDictionariesVisible(false);
     }
 
     /**
@@ -1472,9 +1489,18 @@ export class Display extends EventDispatcher {
             dictionaryEntries = termEntries;
             this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, termEntries);
         } else {
-            const termEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
+            const search = this._pageType === 'search' && source2.length <= 256 && this.getLanguageSummary().iso === 'ja';
+            const found = search ?
+await findJapaneseSearch(
+    source2,
+    (query) => this._application.api.termsFind(query, findDetails, optionsContext),
+) :
+null;
+            const termEntries = search ?
+(found?.result?.dictionaryEntries ?? []) :
+                (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
             dictionaryEntries = termEntries;
-            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, termEntries);
+            this._reportTermsFindSnapshot(source, found?.matchedQuery ?? source2, isKanji, findDetails, optionsContext, termEntries);
             if (dictionaryEntries.length > 0) { return dictionaryEntries; }
 
             dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);

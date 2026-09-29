@@ -50,23 +50,36 @@ self.addEventListener('message', async (event) => {
     if (!isRecord(event.data)) { return; }
     const action = event.data.action;
     const params = event.data.params;
-    if (action !== 'convertDictionary' || !isRecord(params)) { return; }
+    if (action !== 'convertDictionary') { return; }
 
     try {
+        if (!isRecord(params)) {
+            throw new Error('MDX conversion worker received invalid conversion parameters');
+        }
         const mdxFileName = getString(params, 'mdxFileName', 'dictionary.mdx');
         const mdxArrayBuffer = getArrayBuffer(params, 'mdxBytes');
         if (mdxArrayBuffer === null) {
             throw new Error('MDX conversion worker did not receive MDX bytes');
         }
         const mdxBytes = new Uint8Array(mdxArrayBuffer);
-        const mddFilesRaw = Array.isArray(params.mddFiles) ? params.mddFiles : [];
+        const mddFilesRaw = typeof params.mddFiles === 'undefined' ? [] : params.mddFiles;
+        if (!Array.isArray(mddFilesRaw)) {
+            throw new Error('MDX conversion worker received invalid MDD files');
+        }
         const options = isRecord(params.options) ? params.options : {};
-        const mddFiles = mddFilesRaw
-            .filter((value) => isRecord(value))
-            .map((value) => ({
+        const mddFiles = Array.from(mddFilesRaw, (value, index) => {
+            if (!isRecord(value)) {
+                throw new Error(`MDX conversion worker received an invalid MDD file at index ${index}`);
+            }
+            const bytes = getArrayBuffer(value, 'bytes');
+            if (bytes === null) {
+                throw new Error(`MDX conversion worker did not receive MDD bytes at index ${index}`);
+            }
+            return {
                 name: getString(value, 'name', 'dictionary.mdd'),
-                bytes: new Uint8Array(getArrayBuffer(value, 'bytes') ?? new ArrayBuffer(0)),
-            }));
+                bytes: new Uint8Array(bytes),
+            };
+        });
 
         const result = await convertMdxToArchive(
             mdxFileName,

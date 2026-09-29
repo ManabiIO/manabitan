@@ -23,24 +23,31 @@ export class DictionaryDatabaseWorkerHandler {
     constructor() {
         /** @type {DictionaryDatabase?} */
         this._dictionaryDatabase = null;
+        /** @type {Promise<void>|null} */
+        this._preparePromise = null;
     }
 
-    /**
-     *
-     */
-    async prepare() {
-        this._dictionaryDatabase = new DictionaryDatabase();
-        try {
-            await this._dictionaryDatabase.prepare();
-        } catch (e) {
-            log.error(e);
-        }
+    /** @returns {Promise<void>} */
+    prepare() {
+        if (this._preparePromise !== null) { return this._preparePromise; }
+        const dictionaryDatabase = new DictionaryDatabase();
+        this._dictionaryDatabase = dictionaryDatabase;
+        // Publish readiness and install listeners before database startup yields.
+        // A transferred connection port must not be lost while prepare is pending.
+        this._preparePromise = Promise.resolve().then(async () => {
+            try {
+                await dictionaryDatabase.prepare();
+            } catch (e) {
+                log.error(e);
+            }
+        });
         self.addEventListener('message', this._onMessage.bind(this), false);
         self.addEventListener('messageerror', (event) => {
             const error = new ExtensionError('DictionaryDatabaseWorkerHandler: Error receiving message from main thread');
             error.data = event;
             log.error(error);
         });
+        return this._preparePromise;
     }
     // Private
 
@@ -51,7 +58,8 @@ export class DictionaryDatabaseWorkerHandler {
         const {action} = event.data;
         switch (action) {
             case 'connectToDatabaseWorker': {
-                const task = this._dictionaryDatabase?.connectToDatabaseWorker(event.ports[0]);
+                const port = event.ports[0];
+                const task = this._preparePromise?.then(() => this._dictionaryDatabase?.connectToDatabaseWorker(port));
                 if (typeof task !== 'undefined') {
                     void task.catch((error) => { log.error(error); });
                 }

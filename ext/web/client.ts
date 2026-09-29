@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
-import {API_VERSION, WebRuntimeError, record, type DefaultChoice, type LookupResult, type Operation, type Reply, type Status} from './protocol.js';
+import {API_VERSION, WebRuntimeError, record, type DefaultChoice, type LookupResult, type Operation, type Reply, type Status, type SearchResult} from './protocol.js';
 import type {Summary} from '../../types/ext/dictionary-importer';
 
 export interface CallOptions { signal?: AbortSignal, onProgress?: (progress: unknown) => void }
@@ -202,6 +202,13 @@ export class ManabiTanWebClient {
      * @param options
      */
     lookup(text: string, options?: CallOptions) { return this.call<LookupResult>('lookup', {text}, options); }
+    /**
+     * Search-page spelling alternatives; preview payloads never contain full glossaries.
+     * @param text
+     * @param full
+     * @param options
+     */
+    search(text: string, full = false, options?: CallOptions) { return this.call<SearchResult>('search', {text, full}, options); }
     /**
      *
      * @param archive

@@ -136,17 +136,23 @@ export class DictionaryWorkerHandler {
         if (!(mdxBytes instanceof ArrayBuffer)) {
             throw new Error('MDX import worker did not receive MDX bytes');
         }
-        const normalizedMddFiles = Array.isArray(mddFiles) ?
-            mddFiles
-                .filter((value) => typeof value === 'object' && value !== null && !Array.isArray(value))
-                .map((value) => {
-                    const bytes = Reflect.get(value, 'bytes');
-                    return {
-                        name: typeof Reflect.get(value, 'name') === 'string' ? /** @type {string} */ (Reflect.get(value, 'name')) : 'dictionary.mdd',
-                        bytes: new Uint8Array(bytes instanceof ArrayBuffer ? bytes : new ArrayBuffer(0)),
-                    };
-                }) :
-            [];
+        if (!Array.isArray(mddFiles)) {
+            throw new Error('MDX import worker received invalid MDD files');
+        }
+        const normalizedMddFiles = Array.from(mddFiles, (value, index) => {
+            if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+                throw new Error(`MDX import worker received an invalid MDD file at index ${index}`);
+            }
+            const bytes = Reflect.get(value, 'bytes');
+            if (!(bytes instanceof ArrayBuffer)) {
+                throw new Error(`MDX import worker did not receive MDD bytes at index ${index}`);
+            }
+            const name = Reflect.get(value, 'name');
+            return {
+                name: typeof name === 'string' ? name : 'dictionary.mdd',
+                bytes: new Uint8Array(bytes),
+            };
+        });
         const tPrepareStart = Date.now();
         const progressState = {messageCount: 0};
         const archive = await convertMdxToArchive(
