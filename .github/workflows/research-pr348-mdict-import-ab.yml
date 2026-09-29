@@ -1,0 +1,55 @@
+name: Adler32 complete MDict imports
+on:
+  push:
+    branches: [research/pr348-mdict-import-ab-20260929]
+    paths: [.github/workflows/research-pr348-mdict-import-ab.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [large, medium, small]
+        cohort: [initial, confirmation]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pin product and retain exact executed driver
+        run: |
+          cp dev/review/adler32-complete-import-20260929.mjs /tmp/borrowed-records-driver.mjs
+          git fetch --no-tags --depth=1 origin 4db879b7b5bcb749f90042a313669526ef2f57f4 31fe290430c62e14ec3d69666987d9bdb1d745d9
+          git checkout --detach 4db879b7b5bcb749f90042a313669526ef2f57f4
+          mkdir -p dev/review builds/adler32-completion
+          cp /tmp/borrowed-records-driver.mjs dev/review/adler32-complete-import-20260929.mjs
+          cp /tmp/borrowed-records-driver.mjs builds/adler32-completion/executed-driver.mjs
+          git diff 4db879b7b5bcb749f90042a313669526ef2f57f4 31fe290430c62e14ec3d69666987d9bdb1d745d9 -- ext/ > builds/adler32-completion/product.patch
+          test "$(git diff --name-only 4db879b7b5bcb749f90042a313669526ef2f57f4 31fe290430c62e14ec3d69666987d9bdb1d745d9 -- ext/ | tr '\n' ' ')" = "ext/js/dictionary/mdx/vendor/js-mdict/utils.js "
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+      - name: Build and install browser
+        run: |
+          npm run build -- --target chrome-dev
+          npx playwright install --with-deps chromium
+      - name: Preflight both arms
+        env:
+          PREFLIGHT: '1'
+          WORKLOAD: ${{ matrix.workload }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/adler32-complete-import-20260929.mjs "$WORKLOAD" 2>&1 | tee "builds/adler32-completion/${WORKLOAD}-preflight.log"
+      - name: Counterbalanced cohort
+        env:
+          WORKLOAD: ${{ matrix.workload }}
+          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+        run: |
+          set -o pipefail
+          xvfb-run -a node dev/review/adler32-complete-import-20260929.mjs "$WORKLOAD" 2>&1 | tee "builds/adler32-completion/${WORKLOAD}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: adler32-complete-${{ matrix.workload }}-${{ matrix.cohort }}
+          path: builds/adler32-completion/
+          retention-days: 14
