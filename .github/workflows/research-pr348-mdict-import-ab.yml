@@ -1,55 +1,124 @@
 name: Adler32 complete MDict imports
+
 on:
   push:
     branches: [research/pr348-mdict-import-ab-20260929]
     paths: [.github/workflows/research-pr348-mdict-import-ab.yml]
+
 permissions:
   contents: read
+
 jobs:
   compare:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        workload: [large, medium, small]
-        cohort: [initial, confirmation]
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
+
       - name: Pin product and retain exact executed driver
         run: |
-          cp dev/review/adler32-complete-import-20260929.mjs /tmp/borrowed-records-driver.mjs
+          cp dev/review/adler32-complete-import-20260929.mjs /tmp/adler32-driver.mjs
           git fetch --no-tags --depth=1 origin 4db879b7b5bcb749f90042a313669526ef2f57f4 31fe290430c62e14ec3d69666987d9bdb1d745d9
           git checkout --detach 4db879b7b5bcb749f90042a313669526ef2f57f4
           mkdir -p dev/review builds/adler32-completion
-          cp /tmp/borrowed-records-driver.mjs dev/review/adler32-complete-import-20260929.mjs
-          cp /tmp/borrowed-records-driver.mjs builds/adler32-completion/executed-driver.mjs
+          cp /tmp/adler32-driver.mjs dev/review/adler32-complete-import-20260929.mjs
+          cp /tmp/adler32-driver.mjs builds/adler32-completion/executed-driver.mjs
           git diff 4db879b7b5bcb749f90042a313669526ef2f57f4 31fe290430c62e14ec3d69666987d9bdb1d745d9 -- ext/ > builds/adler32-completion/product.patch
           test "$(git diff --name-only 4db879b7b5bcb749f90042a313669526ef2f57f4 31fe290430c62e14ec3d69666987d9bdb1d745d9 -- ext/ | tr '\n' ' ')" = "ext/js/dictionary/mdx/vendor/js-mdict/utils.js "
+
       - uses: ./.github/actions/setup
         with:
           node-version: '22'
+
       - name: Build and install browser
         run: |
           npm run build -- --target chrome-dev
           npx playwright install --with-deps chromium
-      - name: Preflight both arms
-        env:
-          PREFLIGHT: '1'
-          WORKLOAD: ${{ matrix.workload }}
+
+      - name: Preflight all workloads
+        shell: bash
         run: |
-          set -o pipefail
-          xvfb-run -a node dev/review/adler32-complete-import-20260929.mjs "$WORKLOAD" 2>&1 | tee "builds/adler32-completion/${WORKLOAD}-preflight.log"
-      - name: Counterbalanced cohort
-        env:
-          WORKLOAD: ${{ matrix.workload }}
-          REVERSE_ORDER: ${{ matrix.cohort == 'confirmation' && '1' || '0' }}
+          set -euo pipefail
+          for workload in large medium small; do
+            echo "::group::preflight $workload"
+            PREFLIGHT=1 xvfb-run -a node dev/review/adler32-complete-import-20260929.mjs "$workload" 2>&1 | tee "builds/adler32-completion/$workload-preflight.log"
+            echo "::endgroup::"
+          done
+
+      - name: Initial cohorts
+        shell: bash
         run: |
-          set -o pipefail
-          xvfb-run -a node dev/review/adler32-complete-import-20260929.mjs "$WORKLOAD" 2>&1 | tee "builds/adler32-completion/${WORKLOAD}.log"
-      - uses: actions/upload-artifact@v4
+          set -euo pipefail
+          for workload in large medium small; do
+            echo "::group::initial $workload"
+            REVERSE_ORDER=0 xvfb-run -a node dev/review/adler32-complete-import-20260929.mjs "$workload" 2>&1 | tee "builds/adler32-completion/$workload-initial.log"
+            cp "builds/adler32-completion/$workload.json" "builds/adler32-completion/$workload-initial.json"
+            echo "::endgroup::"
+          done
+
+      - name: Confirmation cohorts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for workload in large medium small; do
+            echo "::group::confirmation $workload"
+            REVERSE_ORDER=1 xvfb-run -a node dev/review/adler32-complete-import-20260929.mjs "$workload" 2>&1 | tee "builds/adler32-completion/$workload-confirmation.log"
+            cp "builds/adler32-completion/$workload.json" "builds/adler32-completion/$workload-confirmation.json"
+            echo "::endgroup::"
+          done
+
+      - name: Summarize paired results
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync, writeFileSync} from 'node:fs'
+          const root = 'builds/adler32-completion'
+          const median = (values) => {
+            const sorted = [...values].sort((a, b) => a - b)
+            const mid = Math.floor(sorted.length / 2)
+            return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+          }
+          const summarize = (file) => {
+            const report = JSON.parse(readFileSync(`${root}/${file}`, 'utf8'))
+            if (report.status !== 'success') throw new Error(`${file} did not succeed`)
+            const measurements = report.observations.filter((x) => x.kind === 'measurement')
+            const controls = report.observations.filter((x) => x.kind === 'control')
+            const a = measurements.filter((x) => x.arm === 'A')
+            const b = measurements.filter((x) => x.arm === 'B')
+            if (a.length !== 8 || b.length !== 8 || controls.length !== 4) throw new Error(`unexpected cohort shape in ${file}`)
+            const pairs = []
+            for (let i = 0; i < 8; ++i) {
+              pairs.push({baselineMs: a[i].elapsedMs, candidateMs: b[i].elapsedMs, changePct: (b[i].elapsedMs / a[i].elapsedMs - 1) * 100})
+            }
+            const aa = [
+              Math.abs((controls[1].elapsedMs / controls[0].elapsedMs - 1) * 100),
+              Math.abs((controls[3].elapsedMs / controls[2].elapsedMs - 1) * 100),
+            ]
+            return {
+              pairedMedianChangePct: median(pairs.map((x) => x.changePct)),
+              fasterPairs: pairs.filter((x) => x.candidateMs < x.baselineMs).length,
+              pairs,
+              aaMedianAbsolutePct: median(aa),
+              aaMaxAbsolutePct: Math.max(...aa),
+              browser: report.observations[0]?.browser,
+              fixtureBytes: report.fixtureBytes,
+              moduleHashes: report.moduleHashes,
+            }
+          }
+          const output = {base: '4db879b7b5bcb749f90042a313669526ef2f57f4', candidate: '31fe290430c62e14ec3d69666987d9bdb1d745d9', workloads: {}}
+          for (const workload of ['large','medium','small']) {
+            output.workloads[workload] = {
+              initial: summarize(`${workload}-initial.json`),
+              confirmation: summarize(`${workload}-confirmation.json`),
+            }
+          }
+          writeFileSync(`${root}/summary.json`, JSON.stringify(output, null, 2))
+          console.log(JSON.stringify(output, null, 2))
+          NODE
+
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
-          name: adler32-complete-${{ matrix.workload }}-${{ matrix.cohort }}
+          name: adler32-complete-import-ab
           path: builds/adler32-completion/
           retention-days: 14
