@@ -8893,7 +8893,6 @@ null :
         importMetrics.termsVtabInsertMs += safePerformance.now() - tTermsVtabInsertStart;
     }
 
-
     /** */
     _pruneOrphanTermEntryContent() {
         const db = this._requireDb();
