@@ -50,6 +50,8 @@ export interface SearchResult {
     version: 1;
     query: string;
     matchedQuery: string;
+    /** True when results come from explicit or conservative implicit prefix completion. */
+    prefix: boolean;
     dictionaryCount: number;
     preview: ReturnType<typeof import('../js/search/dictionary-preview.js').dictionaryPreview>;
     /** Only populated by an explicit full search. */
@@ -84,7 +86,12 @@ export function record(value: unknown): value is Record<string, unknown> {
  * @param maximum
  */
 export function text(value: unknown, maximum = 256): string {
-    if (typeof value !== 'string' || value.length === 0 || value.length > maximum || value.includes('\0')) {
+    if (
+        typeof value !== 'string' ||
+        value.length === 0 ||
+        [...value].length > maximum ||
+        value.includes('\0')
+    ) {
         throw new WebRuntimeError('invalid_request', 'Invalid dictionary request text');
     }
     return value;
