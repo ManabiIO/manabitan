@@ -86,7 +86,12 @@ export function record(value: unknown): value is Record<string, unknown> {
  * @param maximum
  */
 export function text(value: unknown, maximum = 256): string {
-    if (typeof value !== 'string' || value.length === 0 || value.length > maximum || value.includes('\0')) {
+    if (
+        typeof value !== 'string' ||
+        value.length === 0 ||
+        [...value].length > maximum ||
+        value.includes('\0')
+    ) {
         throw new WebRuntimeError('invalid_request', 'Invalid dictionary request text');
     }
     return value;
