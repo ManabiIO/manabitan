@@ -1,0 +1,54 @@
+name: Research Current Import Profile
+
+on:
+  push:
+    branches:
+      - research/current-import-profile-20260929
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Prepare pinned dictionaries
+        run: node ./dev/perf/prepare-dictionaries.js
+      - name: Build extension
+        run: node ./dev/bin/build.js --target chrome-dev
+      - name: Run current import profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/profile-current
+          for dictionary in jmdict jitendex; do
+            node ./dev/perf/import-benchmark.js "$dictionary" --runs 1 --no-build --output "builds/perf/profile-current/$dictionary"
+          done
+      - name: Print phase summaries
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs'
+          for (const dictionary of ['jmdict','jitendex']) {
+            const summary=JSON.parse(readFileSync(`builds/perf/profile-current/${dictionary}/summary.json`,'utf8'))
+            const run=summary.runs[0]
+            console.log(JSON.stringify({
+              dictionary,
+              totalImportMs:run.totalImportMs,
+              workerImportMs:run.workerImportMs,
+              stepTimingSummary:run.stepTimingSummary,
+              step4Breakdown:run.step4Breakdown,
+              importDebug:run.importDebug
+            },null,2))
+          }
+          NODE
+      - uses: actions/upload-artifact@v6
+        with:
+          name: current-import-profile
+          path: builds/perf/profile-current
+          retention-days: 7
