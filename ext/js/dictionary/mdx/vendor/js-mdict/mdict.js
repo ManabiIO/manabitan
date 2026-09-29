@@ -255,9 +255,13 @@ export class Mdict extends MdictBase {
         // 4 bytes: compression type
         const rbCompType = bytesToHex(recordBuffer.subarray(0, 4));
         // record_block stores the final record data
-        let unpackRecordBlockBuff = new Uint8Array(recordBuffer.length);
+        let unpackRecordBlockBuff;
         const recordBlockChecksum = common.b2n(recordBuffer.subarray(4, 8));
         if (rbCompType === '00000000') {
+            // Reject invalid stored lengths before allocating a payload copy.
+            if (recordBuffer.byteLength - 8 !== unpackSize) {
+                throw new Error('MDict decompressed block size mismatch');
+            }
             unpackRecordBlockBuff = recordBuffer.slice(8);
         }
         else {
