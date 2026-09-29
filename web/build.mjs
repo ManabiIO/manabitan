@@ -35,6 +35,7 @@ await walk(output);
 const {DEFAULT_DICTIONARY} = await import(pathToFileURL(path.join(output, 'web/presets.js')).href);
 await fs.writeFile(path.join(output, 'manifest.json'), JSON.stringify({package: 'manabitan-web',
     apiVersion: 1,
+    searchVersion: 1,
     revision,
     defaultDictionary: DEFAULT_DICTIONARY,
     client: 'web/client.js',
