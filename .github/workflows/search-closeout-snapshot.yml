@@ -1,0 +1,34 @@
+name: Search closeout dependency snapshot
+on:
+  push:
+    branches: [review/search-proposal-20260928]
+    paths: [.github/workflows/search-closeout-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 5571ec9eb637b3ae3a0aec6aa411024499f6da98
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.21.0'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run build:libs
+      - name: Archive exact dependency inputs
+        run: |
+          mkdir -p "$RUNNER_TEMP/search-dependencies"
+          tar -czf "$RUNNER_TEMP/search-dependencies/dependencies.tar.gz" node_modules ext/lib
+          git rev-parse HEAD > "$RUNNER_TEMP/search-dependencies/head.txt"
+          cd "$RUNNER_TEMP/search-dependencies"
+          sha256sum dependencies.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: search-closeout-dependencies
+          path: ${{ runner.temp }}/search-dependencies
+          retention-days: 1
+          if-no-files-found: error
