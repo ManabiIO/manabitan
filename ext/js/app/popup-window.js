@@ -344,6 +344,7 @@ export class PopupWindow extends EventDispatcher {
                     message,
                 ));
             } catch (e) {
+                if (e instanceof Error && e.name === 'PopupContentTimeoutError') { throw e; }
                 if (this._application.webExtension.unloaded) {
                     open = false;
                 }

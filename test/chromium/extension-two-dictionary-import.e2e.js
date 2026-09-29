@@ -2885,6 +2885,28 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
             assert.ok(frame, 'Reader popup must have an installed extension frame');
             assert.equal(new URL(frame.url()).protocol, 'chrome-extension:', 'Popup must be an extension document');
             assert.equal(new URL(frame.url()).host, new URL(extensionPageUrl).host, 'Popup must belong to the installed extension');
+            // Status can settle before rendering; require this operation's context and content together.
+            await frame.waitForFunction(({sentence, offset, request, expectedStatus, expectedDictionaryNames}) => {
+                const currentSentence = history.state?.state?.sentence;
+                if (currentSentence?.text !== sentence || currentSentence.offset !== offset ||
+                new URL(location.href).searchParams.get('query') !== request.surface) { return false; }
+                const entries = document.querySelector('#dictionary-entries');
+                if (!(entries instanceof HTMLElement)) { return false; }
+                const headwords = Array.from(entries.querySelectorAll('.headword'));
+                const glossary = Array.from(entries.querySelectorAll('.gloss-content')).map((node) => node.textContent.trim()).join('');
+                if (expectedStatus === 'no-exact-match') {
+                    return headwords.length === 0 && glossary === '' && entries.textContent.trim() === '';
+                }
+                return headwords.length > 0 && headwords.every((node) => {
+                    const termNode = node.querySelector('.headword-term');
+                    const readingNode = node.querySelector('.headword-reading');
+                    if (termNode === null || readingNode === null) { return false; }
+                    const term = termNode.cloneNode(true);
+                    for (const annotation of term.querySelectorAll('rt,rp,rtc')) { annotation.remove(); }
+                    return term.textContent === request.term && readingNode.textContent === request.reading;
+                }) && /\beat\b/i.test(glossary) &&
+                Array.from(entries.querySelectorAll('.definition-item[data-dictionary]')).some((node) => expectedDictionaryNames.includes(node.dataset.dictionary));
+            }, {sentence, offset: [...scenario.prefix].length, request, expectedStatus: scenario.expectedStatus, expectedDictionaryNames}, {timeout: 10000});
             const content = await frame.evaluate(() => {
                 const entries = document.querySelector('#dictionary-entries');
                 return {
@@ -2935,6 +2957,17 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
                     Front: request.term,
                     Back: `PREFIX[${scenario.prefix}]BODY[${request.surface}]SUFFIX[。]SENTENCE[${sentence}]`,
                 }, 'Mined expression must be the lemma; cloze must retain the original emoji, inflected surface, occurrence, and sentence');
+                // View-note publication precedes optional post-add work; wait for the whole mining flow.
+                await frame.waitForFunction((noteId) => {
+                    const entry = document.querySelector('#dictionary-entries .entry');
+                    const button = entry?.querySelector('.note-actions-container .action-button-container[data-card-format-index="0"] .action-button[data-action="view-note"]');
+                    const progress = document.querySelector('#progress-indicator');
+                    return button instanceof HTMLButtonElement && !button.hidden && !button.disabled &&
+                    button.dataset.noteIds?.split(/\s+/).includes(String(noteId)) &&
+                    progress instanceof HTMLElement && progress.dataset.active === 'false' &&
+                    document.querySelector('.footer-notification:not([hidden]) [class^="anki-note-error"]') === null;
+                }, write.result, {timeout: 10000});
+                await expect(frame.locator('.footer-notification:not([hidden]) [class^="anki-note-error"]')).toHaveCount(0);
                 result.minedNote = write;
             }
         }

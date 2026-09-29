@@ -3,6 +3,7 @@ import {Popup} from '../ext/js/app/popup.js';
 import {PopupFactory} from '../ext/js/app/popup-factory.js';
 import {PopupProxy} from '../ext/js/app/popup-proxy.js';
 import {PopupWindow} from '../ext/js/app/popup-window.js';
+import {ExtensionError} from '../ext/js/core/extension-error.js';
 
 function deferred() {
     /** @type {(value?: unknown) => void} */
@@ -282,6 +283,48 @@ describe('popup publication cancellation', () => {
         await result;
         expect(invokeTab).not.toHaveBeenCalled();
         expect(g.unsubscribe).toHaveBeenCalledOnce();
+    });
+
+    test('window publication timeout survives serialization and rejects without retry, releasing its subscription', async () => {
+        const timeout = new Error('Popup content rendering timed out');
+        timeout.name = 'PopupContentTimeoutError';
+        const receivedError = ExtensionError.deserialize(ExtensionError.serialize(timeout));
+        expect(receivedError.name).toBe('PopupContentTimeoutError');
+        const invokeTab = vi.fn().mockRejectedValue(receivedError);
+        const getOrCreateSearchPopup = vi.fn().mockResolvedValue({tabId: 20});
+        const p = new PopupWindow(fakeApplication({
+            webExtension: {unloaded: false},
+            crossFrame: {invokeTab},
+            api: {getOrCreateSearchPopup},
+        }), 'p', 0, 0);
+        p._popupTabId = 10;
+        const g = guard();
+        await expect(p.showContent(details(), displayDetails(), g)).rejects.toBe(receivedError);
+        expect(invokeTab).toHaveBeenCalledOnce();
+        expect(getOrCreateSearchPopup).not.toHaveBeenCalled();
+        expect(p._popupTabId).toBe(10);
+        expect(g.unsubscribe).toHaveBeenCalledOnce();
+        expect(p._cancelPendingPublication).toBeNull();
+    });
+
+    test('window transport failure still recovers through popup creation and retry', async () => {
+        const invokeTab = vi.fn().mockRejectedValueOnce(new Error('closed')).mockResolvedValue(void 0);
+        const getOrCreateSearchPopup = vi.fn().mockResolvedValue({tabId: 20});
+        const p = new PopupWindow(fakeApplication({
+            webExtension: {unloaded: false},
+            crossFrame: {invokeTab},
+            api: {getOrCreateSearchPopup},
+        }), 'p', 0, 0);
+        p._popupTabId = 10;
+        const g = guard();
+        await p.showContent(details(), displayDetails(), g);
+        expect(getOrCreateSearchPopup).toHaveBeenCalledExactlyOnceWith({focus: 'ifCreated'});
+        expect(invokeTab).toHaveBeenCalledTimes(2);
+        expect(invokeTab.mock.calls[0][0]).toBe(10);
+        expect(invokeTab.mock.calls[1][0]).toBe(20);
+        expect(invokeTab.mock.calls[1][3]).toEqual(invokeTab.mock.calls[0][3]);
+        expect(g.unsubscribe).toHaveBeenCalledOnce();
+        expect(p._cancelPendingPublication).toBeNull();
     });
 
     test('window failed existing-tab RPC cannot create fallback after cancellation', async () => {

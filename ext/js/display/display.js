@@ -529,7 +529,7 @@ export class Display extends EventDispatcher {
     /**
      * Updates the content of the display.
      * @param {import('display').ContentDetails} details Information about the content to show.
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>} Whether the state-change handler completed before the timeout.
      */
     setContent(details) {
         this._activePublication = null;
@@ -813,10 +813,18 @@ export class Display extends EventDispatcher {
         }
         safePerformance.mark('invokeDisplaySetContent:end');
         const completion = this.setContent(details);
+        let activePublication = null;
         if (typeof publication !== 'undefined') {
-            this._activePublication = {publication, token: this._setContentToken};
+            activePublication = {publication, token: this._setContentToken};
+            this._activePublication = activePublication;
         }
-        await completion;
+        const completed = await completion;
+        if (completed === false && activePublication !== null && this._activePublication === activePublication && activePublication.token === this._setContentToken) {
+            void this._onMessageCancelPublication({publication: activePublication.publication});
+            const error = new Error('Popup content rendering timed out');
+            error.name = 'PopupContentTimeoutError';
+            throw error;
+        }
     }
 
     /** @type {import('display').DirectApiHandler<'displayCancelPublication'>} */
@@ -889,6 +897,8 @@ export class Display extends EventDispatcher {
     async _onStateChanged() {
         if (this._historyChangeIgnore) { return; }
 
+        // Claim this render's waiters before another history change can start.
+        const stateChangeCompleteResolvers = this._stateChangeCompleteResolvers.splice(0);
         safePerformance.mark('display:_onStateChanged:start');
 
         /** @type {?import('core').TokenObject} */
@@ -947,7 +957,7 @@ export class Display extends EventDispatcher {
         }
         safePerformance.mark('display:_onStateChanged:end');
         safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
-        this._resolveStateChangeCompleteWaiters();
+        this._resolveStateChangeCompleteWaiters(stateChangeCompleteResolvers);
     }
 
     /**
@@ -2692,17 +2702,17 @@ null;
 
     /**
      * @param {number} timeoutMs
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     _waitForStateChangeComplete(timeoutMs) {
         /** @type {import('core').Timeout|null} */
         let timeout = null;
-        /** @type {(value?: void) => void} */
+        /** @type {(value: boolean) => void} */
         let resolvePromise;
         const promise = new Promise((resolve) => {
             resolvePromise = resolve;
         });
-        const finish = () => {
+        const finish = (completed = true) => {
             const index = this._stateChangeCompleteResolvers.indexOf(finish);
             if (index >= 0) {
                 this._stateChangeCompleteResolvers.splice(index, 1);
@@ -2711,16 +2721,17 @@ null;
                 clearTimeout(timeout);
                 timeout = null;
             }
-            resolvePromise();
+            resolvePromise(completed);
         };
         this._stateChangeCompleteResolvers.push(finish);
-        timeout = setTimeout(finish, timeoutMs);
+        timeout = setTimeout(() => finish(false), timeoutMs);
         return promise;
     }
 
-    /** */
-    _resolveStateChangeCompleteWaiters() {
-        const resolvers = this._stateChangeCompleteResolvers.splice(0);
+    /**
+     * @param {(() => void)[]} resolvers
+     */
+    _resolveStateChangeCompleteWaiters(resolvers) {
         for (const resolve of resolvers) {
             resolve();
         }
