@@ -8999,6 +8999,20 @@ null :
     }
 
 
+    /** */
+    _pruneOrphanTermEntryContent() {
+        const db = this._requireDb();
+        db.exec(`
+            DELETE FROM termEntryContent
+            WHERE id NOT IN (
+                SELECT DISTINCT entryContentId
+                FROM terms
+                WHERE entryContentId IS NOT NULL
+            )
+        `);
+    }
+
+
     // Parent-Worker API
 
     /**
