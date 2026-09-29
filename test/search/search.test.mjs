@@ -29,6 +29,8 @@ test('unfinished syllables and English are not stripped into misleading partial 
     assert.deepEqual(japaneseSearchQueries('cat'), ['cat']);
     assert.deepEqual(japaneseSearchQueries('  '), []);
     assert.throws(() => japaneseSearchQueries('a'.repeat(257)), RangeError);
+    assert.doesNotThrow(() => japaneseSearchQueries('𠮷'.repeat(256)));
+    assert.throws(() => japaneseSearchQueries('𠮷'.repeat(257)), RangeError);
     assert.throws(() => japaneseSearchQueries('a\0'), RangeError);
 });
 test('implicit prefix candidates require completed Japanese and at least two code points', () => {
