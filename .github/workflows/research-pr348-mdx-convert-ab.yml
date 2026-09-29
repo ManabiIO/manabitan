@@ -1,0 +1,189 @@
+name: Research PR348 MDX Convert AB
+
+on:
+  push:
+    branches:
+      - research/pr348-mdx-convert-ab-20260929
+
+permissions:
+  contents: read
+
+jobs:
+  mdx-convert-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v6
+        with:
+          path: candidate
+
+      - name: Checkout integrated baseline
+        uses: actions/checkout@v6
+        with:
+          ref: 8bd9af7f168b2a963d203ea037b51e4a2986ba58
+          path: baseline
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+          cache-dependency-path: candidate/package-lock.json
+
+      - name: Install shared dependencies
+        working-directory: candidate
+        run: npm ci
+
+      - name: Link baseline dependencies
+        shell: bash
+        run: ln -s "$GITHUB_WORKSPACE/candidate/node_modules" "$GITHUB_WORKSPACE/baseline/node_modules"
+
+      - name: Run alternating converter benchmark
+        shell: bash
+        run: |
+          node --expose-gc --input-type=module <<'NODE' | tee mdx-convert-ab.json
+          import {createHash} from 'node:crypto'
+          import {pathToFileURL} from 'node:url'
+          import path from 'node:path'
+          import {performance} from 'node:perf_hooks'
+
+          const root = process.env.GITHUB_WORKSPACE
+          const candidateRoot = path.join(root, 'candidate')
+          const baselineRoot = path.join(root, 'baseline')
+
+          const {makeMdictFixture} = await import(pathToFileURL(path.join(candidateRoot, 'test/util/mdict-binary-fixture.js')).href)
+          const baseline = await import(pathToFileURL(path.join(baselineRoot, 'ext/js/dictionary/mdx/mdx-converter.js')).href)
+          const candidate = await import(pathToFileURL(path.join(candidateRoot, 'ext/js/dictionary/mdx/mdx-converter.js')).href)
+
+          const median = (values) => {
+            const sorted = [...values].sort((a, b) => a - b)
+            const m = Math.floor(sorted.length / 2)
+            return sorted.length % 2 === 1 ? sorted[m] : (sorted[m - 1] + sorted[m]) / 2
+          }
+
+          const hashFiles = (files) => {
+            const h = createHash('sha256')
+            for (const [name, bytes] of [...files.entries()].sort((a, b) => a[0].localeCompare(b[0], 'en'))) {
+              h.update(String(name.length))
+              h.update(':')
+              h.update(name)
+              h.update(':')
+              h.update(String(bytes.byteLength))
+              h.update(':')
+              h.update(bytes)
+              h.update('\n')
+            }
+            return h.digest('hex')
+          }
+
+          const makeEntries = (count) => Array.from({length: count}, (_, index) => {
+            const key = `term-${String(index).padStart(6, '0')}`
+            const seed = (index * 2654435761) >>> 0
+            const body = Array.from({length: 18}, (_, part) => {
+              const value = (seed ^ Math.imul(part + 1, 2246822519)) >>> 0
+              return `${value.toString(16).padStart(8, '0')} 日本語 definition ${part}`
+            }).join(' ')
+            return {key, value: `<div><b>${key}</b> ${body}</div>`}
+          })
+
+          const workloads = [
+            {name: '2k', count: 2000, pairs: 8},
+            {name: '10k', count: 10000, pairs: 8},
+          ]
+          const output = {
+            schemaVersion: 1,
+            baseline: '8bd9af7f168b2a963d203ea037b51e4a2986ba58',
+            candidate: process.env.GITHUB_SHA,
+            node: process.version,
+            v8: process.versions.v8,
+            workloads: {},
+          }
+
+          for (const workload of workloads) {
+            const fixture = makeMdictFixture(makeEntries(workload.count), {
+              compression: 'zlib',
+              recordBlockSize: 32768,
+              keysPerBlock: 64,
+              title: `Adler benchmark ${workload.name}`,
+            })
+            const expectedFixtureHash = createHash('sha256').update(fixture.bytes).digest('hex')
+
+            const measure = async (implementation) => {
+              globalThis.gc?.()
+              const start = performance.now()
+              const result = await implementation.createMdxImportData(
+                `fixture-${workload.name}.mdx`,
+                {
+                  titleOverride: `Adler benchmark ${workload.name}`,
+                  revision: '1',
+                  enableAudio: false,
+                  includeAssets: false,
+                  termBankSize: 10000,
+                },
+                fixture.bytes,
+                [],
+              )
+              const elapsedMs = performance.now() - start
+              return {
+                elapsedMs,
+                outputHash: hashFiles(result.files),
+                fileCount: result.files.size,
+                phaseTimings: result.phaseTimings,
+              }
+            }
+
+            for (let i = 0; i < 2; ++i) {
+              await measure(baseline)
+              await measure(candidate)
+            }
+
+            const pairs = []
+            let canonicalOutputHash = null
+            for (let pair = 1; pair <= workload.pairs; ++pair) {
+              let a
+              let b
+              if (pair % 2 === 1) {
+                a = await measure(baseline)
+                b = await measure(candidate)
+              } else {
+                b = await measure(candidate)
+                a = await measure(baseline)
+              }
+              canonicalOutputHash ??= a.outputHash
+              if (a.outputHash !== canonicalOutputHash || b.outputHash !== canonicalOutputHash) {
+                throw new Error(`Output mismatch for ${workload.name} pair ${pair}: ${a.outputHash} vs ${b.outputHash}`)
+              }
+              if (a.fileCount !== b.fileCount) {
+                throw new Error(`File-count mismatch for ${workload.name} pair ${pair}`)
+              }
+              pairs.push({
+                pair,
+                baselineMs: a.elapsedMs,
+                candidateMs: b.elapsedMs,
+                changePct: (b.elapsedMs / a.elapsedMs - 1) * 100,
+                baselinePhases: a.phaseTimings,
+                candidatePhases: b.phaseTimings,
+              })
+            }
+
+            output.workloads[workload.name] = {
+              count: workload.count,
+              fixtureBytes: fixture.bytes.byteLength,
+              fixtureSha256: expectedFixtureHash,
+              outputSha256: canonicalOutputHash,
+              pairedMedianChangePct: median(pairs.map((x) => x.changePct)),
+              fasterPairs: pairs.filter((x) => x.candidateMs < x.baselineMs).length,
+              pairs,
+            }
+          }
+
+          console.log(JSON.stringify(output, null, 2))
+          NODE
+
+      - name: Upload benchmark evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: pr348-mdx-convert-ab
+          path: mdx-convert-ab.json
+          retention-days: 7
