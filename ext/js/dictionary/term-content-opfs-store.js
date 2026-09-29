@@ -2005,6 +2005,7 @@ export class TermContentOpfsStore {
     /**
      * @param {number} index
      * @returns {string}
+     * @throws {RangeError} If the segment index is outside the safe integer range.
      */
     _getSegmentFileName(index) {
         if (!Number.isSafeInteger(index) || index < 0) {
