@@ -451,8 +451,41 @@ describe('DictionaryImporter packed artifact validation', () => {
         expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
         descriptor.termContentMode = 'raw-v3';
         expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = 'zstd';
+        expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
+        descriptor.sharedGlossaryUncompressedLength = 100;
+        expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = null;
         descriptor.sharedGlossaryUncompressedLength = -1;
         expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
+    });
+
+    test('requires a shared glossary source only when shared-glossary artifact terms are selected', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validateSelectedSharedGlossaryArtifactSource');
+        /** @type {{termContentMode: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null}} */
+        const manifest = {
+            termContentMode: 'raw-v3',
+            sharedGlossaryPackedOffset: null,
+            sharedGlossaryPackedLength: null,
+        };
+
+        expect(() => validate.call(importer, manifest, false, false, false)).not.toThrow();
+        expect(() => validate.call(importer, manifest, true, false, false)).toThrow(/missing.*glossary artifact/u);
+        expect(() => validate.call(importer, manifest, true, false, true)).not.toThrow();
+
+        manifest.sharedGlossaryPackedOffset = 10;
+        manifest.sharedGlossaryPackedLength = 20;
+        expect(() => validate.call(importer, manifest, false, true, false)).not.toThrow();
+
+        manifest.sharedGlossaryPackedLength = null;
+        expect(() => validate.call(importer, manifest, false, true, false)).toThrow(/missing.*glossary artifact/u);
+
+        manifest.termContentMode = 'raw-v4';
+        expect(() => validate.call(importer, manifest, true, false, true)).not.toThrow();
+
+        manifest.termContentMode = 'raw-v2';
+        expect(() => validate.call(importer, manifest, true, false, false)).not.toThrow();
     });
 
     test('rejects packed media spans and invalid preserved compression descriptors', () => {
