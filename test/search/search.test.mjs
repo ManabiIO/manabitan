@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {japaneseSearchQueries, findJapaneseSearch} from '../../ext/js/search/japanese-search.js';
+import {japaneseSearchQueries, findJapaneseSearch, isJapanesePrefixCandidate} from '../../ext/js/search/japanese-search.js';
 import {dictionaryPreview, glossaryPreview} from '../../ext/js/search/dictionary-preview.js';
 import {SearchDisplayController} from '../../ext/js/display/search-display-controller.js';
 import {Display} from '../../ext/js/display/display.js';
@@ -30,6 +30,47 @@ test('unfinished syllables and English are not stripped into misleading partial 
     assert.deepEqual(japaneseSearchQueries('  '), []);
     assert.throws(() => japaneseSearchQueries('a'.repeat(257)), RangeError);
     assert.throws(() => japaneseSearchQueries('a\0'), RangeError);
+});
+test('implicit prefix candidates require completed Japanese and at least two code points', () => {
+    for (const query of ['たべ', '食べ', 'ガッ']) { assert.equal(isJapanesePrefixCandidate(query), true, query); }
+    for (const query of ['食', 'た', 'ny', 'hello', 'たbe']) { assert.equal(isJapanesePrefixCandidate(query), false, query); }
+});
+test('prefix completion runs only after all exact and spelling alternatives miss', async () => {
+    const exact = [],
+        prefixes = [];
+    const found = await findJapaneseSearch('tabe', async (query) => {
+        exact.push(query);
+        return {dictionaryEntries: []};
+    }, () => {}, async (query) => {
+        prefixes.push(query);
+        return {dictionaryEntries: query === 'たべ' ? [{id: 1}] : []};
+    });
+    assert.deepEqual(exact, ['tabe', 'たべ']);
+    assert.deepEqual(prefixes, ['たべ']);
+    assert.equal(found.matchedQuery, 'たべ');
+    assert.equal(found.matchType, 'prefix');
+});
+test('exact dictionary result always outranks implicit prefix completion', async () => {
+    let prefixes = 0;
+    const exact = {dictionaryEntries: [{id: 9}]};
+    const found = await findJapaneseSearch('たべ', async () => exact, () => {}, async () => {
+        prefixes++;
+        return {dictionaryEntries: [{id: 10}]};
+    });
+    assert.equal(found.result, exact);
+    assert.equal(found.matchType, 'exact');
+    assert.equal(prefixes, 0);
+});
+test('English and unfinished romaji never trigger implicit prefix enumeration', async () => {
+    for (const query of ['cat', 'hello world', 'ny']) {
+        let prefixes = 0;
+        const found = await findJapaneseSearch(query, async () => ({dictionaryEntries: []}), () => {}, async () => {
+            prefixes++;
+            return {dictionaryEntries: [{}]};
+        });
+        assert.equal(found.result, null, query);
+        assert.equal(prefixes, 0, query);
+    }
 });
 test('literal results preserve original dictionary entry identity and order', async () => {
     const result = {dictionaryEntries: [{id: 9}, {id: 3}]};
