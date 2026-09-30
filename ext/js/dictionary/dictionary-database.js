@@ -2184,18 +2184,16 @@ null;
                         $version: this._asNumber(Reflect.get(nextSummary, 'version'), 0),
                         $summaryJson: JSON.stringify(nextSummary),
                     }});
-                for (const table of [
-                    'termMeta',
-                    'kanji',
-                    'kanjiMeta',
-                    'tagMeta',
-                    'media',
-                    'sharedGlossaryArtifacts',
-                    'termGlossaryTokens',
-                    'termGlossarySearchTerms',
-                    'dictionaryGlossarySearchIndex',
-                ]) {
+                for (const table of ['termMeta', 'kanji', 'kanjiMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts']) {
                     db.exec({sql: `UPDATE ${table} SET dictionary = $toTitle WHERE dictionary = $fromTitle`, bind: {$fromTitle: sourceTitle, $toTitle: targetTitle}});
+                }
+                // Reverse indexes are derived data. Invalidate both identities
+                // rather than risking a collision with a pre-existing target index.
+                for (const table of ['termGlossaryTokens', 'termGlossarySearchTerms', 'dictionaryGlossarySearchIndex']) {
+                    db.exec({
+                        sql: `DELETE FROM ${table} WHERE dictionary = $fromTitle OR dictionary = $toTitle`,
+                        bind: {$fromTitle: sourceTitle, $toTitle: targetTitle},
+                    });
                 }
                 db.exec('COMMIT');
             } catch (e) {
