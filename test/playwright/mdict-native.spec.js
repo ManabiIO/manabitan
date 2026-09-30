@@ -242,7 +242,7 @@ test('MDX inline styles preserve functional roots, cascade and pseudo-elements w
     const outside = entries.locator('[data-sc-class~="outside"]').first();
     await expect(scoped).toHaveCSS('border-top-width', '3px');
     await expect(outside).toHaveCSS('border-top-width', '0px');
-    expect(await scoped.evaluate((node) => getComputedStyle(node, '::before').content)).toBe('"scoped"');
-    expect(await scoped.evaluate((node) => getComputedStyle(node, '::after').content)).toBe('"legacy"');
-    expect(await outside.evaluate((node) => getComputedStyle(node, '::before').content)).toBe('none');
+    await expect.poll(() => scoped.evaluate((node) => getComputedStyle(node, '::before').content)).toBe('"scoped"');
+    await expect.poll(() => scoped.evaluate((node) => getComputedStyle(node, '::after').content)).toBe('"legacy"');
+    await expect.poll(() => outside.evaluate((node) => getComputedStyle(node, '::before').content)).toBe('none');
 });
