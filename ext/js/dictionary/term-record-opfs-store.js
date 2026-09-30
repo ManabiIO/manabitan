@@ -4296,6 +4296,33 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Returns authoritative IDs without materializing term records. Persistent
+     * chunks already describe contiguous ID ranges, so consumers such as the
+     * glossary index builder can scan in bounded batches.
+     * @param {string} dictionaryName
+     * @returns {number[]}
+     */
+    getDictionaryIds(dictionaryName) {
+        const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            const ids = [];
+            for (const chunk of chunks) {
+                for (let i = 0; i < chunk.count; ++i) {
+                    ids.push(chunk.firstId + i);
+                }
+            }
+            return ids;
+        }
+        const liveIds = this._getLiveRecordIdsForDictionary(dictionaryName);
+        if (typeof liveIds !== 'undefined') { return [...liveIds]; }
+        const ids = [];
+        for (const record of this._recordsById.values()) {
+            if (record.dictionary === dictionaryName) { ids.push(record.id); }
+        }
+        return ids;
+    }
+
+    /**
      * @param {string} dictionaryName
      * @param {number} limit
      * @returns {number[]}
