@@ -9552,6 +9552,9 @@ null :
             db.exec('DELETE FROM termEntryContent');
             db.exec('DELETE FROM sharedGlossaryArtifacts');
             db.exec('DELETE FROM dictionaryStorageHealth');
+            db.exec('DELETE FROM termGlossaryTokens');
+            db.exec('DELETE FROM termGlossarySearchTerms');
+            db.exec('DELETE FROM dictionaryGlossarySearchIndex');
             db.exec('DELETE FROM dictionaries');
             db.exec('COMMIT');
         } catch (e) {
