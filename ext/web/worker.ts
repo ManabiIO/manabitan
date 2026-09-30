@@ -238,10 +238,8 @@ async function dispatch(request: Request): Promise<unknown> {
             if (!imported.result) {
                 throw new WebRuntimeError('import_failed', imported.errors.map((e) => e.message).slice(0, 8).join('; ') || 'Dictionary import did not commit');
             }
-            const importedTitle = imported.result.title;
-            setTimeout(() => {
-                void database.ensureGlossarySearchIndex(new Set([importedTitle])).catch(() => {});
-            }, 0);
+            // Glossary reverse indexes are demand-built. Importing a large
+            // dictionary must not pay that cost unless the user searches definitions.
             // Cancellation during commit is not a rollback. Report the committed
             // result; the caller must not claim that this dictionary was removed.
             return {summary: imported.result, warnings: imported.errors.map((error) => error.message).slice(0, 8), cancelledAfterCommit: !!current?.cancelled, status: await status()};
