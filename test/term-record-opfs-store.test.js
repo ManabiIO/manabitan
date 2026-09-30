@@ -2129,6 +2129,85 @@ describe('TermRecordOpfsStore', () => {
         expect(store.getDictionaryIndex('JMdict').expression.get('日本語')).toBeUndefined();
     });
 
+    test('cold max-id file scan uses bounded ranges instead of materializing the index', async () => {
+        const sourceStore = new TermRecordOpfsStore();
+        const sourceFileBytesByName = new Map();
+        Reflect.set(sourceStore, '_recordsDirectoryHandle', createFakeDirectoryHandle(sourceFileBytesByName));
+        Reflect.set(sourceStore, '_nextId', 42);
+        await sourceStore.appendBatch([{
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        }]);
+        await sourceStore._closeAllWritables();
+        const sourceFileName = sourceStore._getShardSegmentFileName('JMdict', 'raw', 0);
+        const descriptorBytes = sourceFileBytesByName.get(sourceFileName);
+        const indexBytes = sourceFileBytesByName.get(`${sourceFileName}.mbti`);
+        expect(descriptorBytes).toBeInstanceOf(Uint8Array);
+        expect(indexBytes).toBeInstanceOf(Uint8Array);
+
+        /** @type {Array<[number, number]>} */
+        const ranges = [];
+        const fullRead = vi.fn(async () => {
+            throw new Error('full index materialization is forbidden');
+        });
+        const file = /** @type {File} */ (/** @type {unknown} */ ({
+            size: /** @type {Uint8Array} */ (indexBytes).byteLength,
+            arrayBuffer: fullRead,
+            slice(start, end) {
+                ranges.push([start, end]);
+                return new Blob([/** @type {Uint8Array} */ (indexBytes).subarray(start, end)]);
+            },
+        }));
+        const store = new TermRecordOpfsStore();
+        const maxId = await Reflect.get(store, '_scanPersistentIndexMaxRecordIdFile').call(
+            store,
+            file,
+            /** @type {Uint8Array} */ (descriptorBytes).byteLength,
+        );
+
+        expect(maxId).toBe(42);
+        expect(fullRead).not.toHaveBeenCalled();
+        expect(ranges.length).toBeGreaterThanOrEqual(2);
+        expect(Math.max(...ranges.map(([start, end]) => end - start))).toBe(40);
+        expect(ranges.reduce((total, [start, end]) => total + end - start, 0))
+            .toBeLessThan(/** @type {Uint8Array} */ (indexBytes).byteLength);
+    });
+
+    test('cold max-id file scan rejects implausible size after the fixed header', async () => {
+        const header = new Uint8Array(40);
+        header.set(new TextEncoder().encode('MBTIDX11'));
+        const view = new DataView(header.buffer);
+        view.setBigUint64(8, 1n, true);
+        view.setUint32(16, 1, true);
+        view.setUint32(20, 1, true);
+        const fullRead = vi.fn(async () => {
+            throw new Error('full index materialization is forbidden');
+        });
+        const ranges = [];
+        const file = /** @type {File} */ (/** @type {unknown} */ ({
+            size: 512 * 1024 * 1024,
+            arrayBuffer: fullRead,
+            slice(start, end) {
+                ranges.push([start, end]);
+                return new Blob([header.subarray(start, Math.min(end, header.byteLength))]);
+            },
+        }));
+        const store = new TermRecordOpfsStore();
+
+        await expect(Reflect.get(store, '_scanPersistentIndexMaxRecordIdFile').call(store, file, 1))
+            .resolves.toBeNull();
+        expect(fullRead).not.toHaveBeenCalled();
+        expect(ranges).toEqual([[0, 40]]);
+    });
+
     test('persistent-container max-id scan reads chunk metadata without materializing records', async () => {
         const sourceStore = new TermRecordOpfsStore();
         const sourceFileBytesByName = new Map();

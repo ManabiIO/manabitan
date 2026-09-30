@@ -104,6 +104,7 @@ const STORAGE_READ_RETRY_COUNT = 2;
 const REPAIR_YIELD_BUDGET_MS = 8;
 const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
 const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
+const EMPTY_BYTES = new Uint8Array(0);
 
 /**
  * Parses an on-disk decimal filename field without allowing Number rounding,
@@ -3120,8 +3121,7 @@ export class TermRecordOpfsStore {
                 }
                 const file = await fileHandle.getFile();
                 if (file.size === 0 && state.fileLength === 0) { continue; }
-                const content = new Uint8Array(await file.arrayBuffer());
-                const shardMaxId = this._scanPersistentIndexMaxRecordId(content);
+                const shardMaxId = await this._scanPersistentIndexMaxRecordIdFile(file, state.fileLength);
                 if (shardMaxId === null) {
                     throw new Error(`Cannot reserve term-record IDs: invalid container ${indexFileName}`);
                 }
@@ -3140,6 +3140,103 @@ export class TermRecordOpfsStore {
         ) {
             throw new RangeError('Term-record ID space is exhausted');
         }
+    }
+
+    /**
+     * Scans only persisted index framing needed to establish the maximum ID.
+     * Browser File objects support ranged reads, so payload/index bodies never
+     * need to be materialized merely to reserve the next append ID.
+     * @param {File} file
+     * @param {number} expectedDescriptorFileLength
+     * @returns {Promise<number|null>}
+     */
+    async _scanPersistentIndexMaxRecordIdFile(file, expectedDescriptorFileLength) {
+        const slice = /** @type {unknown} */ (Reflect.get(file, 'slice'));
+        if (typeof slice !== 'function') {
+            return this._scanPersistentIndexMaxRecordId(new Uint8Array(await file.arrayBuffer()));
+        }
+        if (file.size < LOOKUP_INDEX_FILE_HEADER_BYTES) { return null; }
+        const header = await this._readFileRange(file, 0, LOOKUP_INDEX_FILE_HEADER_BYTES);
+        if (this._textDecoder.decode(header.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
+            return null;
+        }
+        const headerView = new DataView(header.buffer, header.byteOffset, header.byteLength);
+        let descriptorFileLength;
+        try {
+            descriptorFileLength = readSafeU64Le(headerView, 8);
+        } catch (_) {
+            return null;
+        }
+        const chunkCount = headerView.getUint32(16, true);
+        const expectedRecordCount = headerView.getUint32(20, true);
+        if (
+            descriptorFileLength !== expectedDescriptorFileLength ||
+            chunkCount === 0 ||
+            expectedRecordCount === 0 ||
+            chunkCount > expectedRecordCount
+        ) {
+            return null;
+        }
+        const minimumIndexBytes = LOOKUP_INDEX_FILE_HEADER_BYTES +
+        (chunkCount * LOOKUP_INDEX_CHUNK_HEADER_BYTES) +
+        (expectedRecordCount * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
+        const maximumIndexBytes = Math.max(
+            MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
+            Math.min(
+                Number.MAX_SAFE_INTEGER,
+                (expectedRecordCount * MAX_LOOKUP_INDEX_BYTES_PER_RECORD) + MAX_LOOKUP_INDEX_OVERHEAD_BYTES,
+            ),
+        );
+        if (
+            !Number.isSafeInteger(minimumIndexBytes) ||
+            minimumIndexBytes > file.size ||
+            file.size > maximumIndexBytes
+        ) {
+            return null;
+        }
+
+        let cursor = LOOKUP_INDEX_FILE_HEADER_BYTES;
+        let maxId = 0;
+        let recordCount = 0;
+        for (let chunk = 0; chunk < chunkCount; ++chunk) {
+            const chunkHeaderEnd = cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES;
+            if (!Number.isSafeInteger(chunkHeaderEnd) || chunkHeaderEnd > file.size) { return null; }
+            const chunkHeader = await this._readFileRange(file, cursor, chunkHeaderEnd);
+            const view = new DataView(chunkHeader.buffer, chunkHeader.byteOffset, chunkHeader.byteLength);
+            const firstId = view.getUint32(0, true);
+            const count = view.getUint32(4, true);
+            const payloadLength = view.getUint32(16, true);
+            const recordFieldsFormat = view.getUint32(36, true);
+            if (
+                firstId <= 0 ||
+                count === 0 ||
+                (firstId + count - 1) > MAX_TERM_RECORD_ID ||
+                recordCount > expectedRecordCount - count
+            ) {
+                return null;
+            }
+            maxId = Math.max(maxId, firstId + count - 1);
+            recordCount += count;
+            const recordFieldsOffset = chunkHeaderEnd + payloadLength;
+            if (!Number.isSafeInteger(recordFieldsOffset) || recordFieldsOffset > file.size) { return null; }
+
+            let recordFieldsLength;
+            try {
+                if (recordFieldsFormat === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) {
+                    const compactHeaderEnd = recordFieldsOffset + COMPACT_RECORD_FIELDS_HEADER_BYTES;
+                    if (!Number.isSafeInteger(compactHeaderEnd) || compactHeaderEnd > file.size) { return null; }
+                    const compactHeader = await this._readFileRange(file, recordFieldsOffset, compactHeaderEnd);
+                    recordFieldsLength = getRecordFieldsByteLength(compactHeader, 0, count, recordFieldsFormat);
+                } else {
+                    recordFieldsLength = getRecordFieldsByteLength(EMPTY_BYTES, 0, count, recordFieldsFormat);
+                }
+            } catch (_) {
+                return null;
+            }
+            cursor = recordFieldsOffset + recordFieldsLength;
+            if (!Number.isSafeInteger(cursor) || cursor > file.size) { return null; }
+        }
+        return cursor === file.size && maxId > 0 && recordCount === expectedRecordCount ? maxId : null;
     }
 
     /**
