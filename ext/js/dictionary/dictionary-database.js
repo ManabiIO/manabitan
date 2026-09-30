@@ -3376,7 +3376,7 @@ null;
      * @param {string} dictionaryName
      */
     _invalidateGlossarySearchIndex(dictionaryName) {
-        if (dictionaryName.length === 0) { return; }
+        if (dictionaryName.length === 0 || this._db === null) { return; }
         const db = this._requireDb();
         const bind = {$dictionary: dictionaryName};
         db.exec({sql: 'DELETE FROM termGlossaryTokens WHERE dictionary = $dictionary', bind});
