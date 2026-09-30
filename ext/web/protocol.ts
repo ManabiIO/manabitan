@@ -52,6 +52,8 @@ export interface SearchResult {
     matchedQuery: string;
     /** True when results come from explicit or conservative implicit prefix completion. */
     prefix: boolean;
+    /** True when Japanese headword lookup missed and definitions matched the Latin query. */
+    glossary: boolean;
     dictionaryCount: number;
     preview: ReturnType<typeof import('../js/search/dictionary-preview.js').dictionaryPreview>;
     /** Only populated by an explicit full search. */
