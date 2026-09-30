@@ -701,6 +701,8 @@ export class DictionaryDatabase {
         this._termIndexSortedKeysByLookup = new WeakMap();
         /** @type {Map<string, Promise<void>>} */
         this._directTermIndexLoadPromiseByDictionary = new Map();
+        /** @type {Map<string, Promise<void>>} */
+        this._glossarySearchBuildPromiseByDictionary = new Map();
         /** @type {Set<string>} */
         this._directTermIndexLoadedDictionaryNames = new Set();
         /** @type {number} */
