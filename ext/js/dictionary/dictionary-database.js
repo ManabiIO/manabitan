@@ -1995,6 +1995,9 @@ export class DictionaryDatabase {
                     onProgress(progressData);
                 }
             }
+            for (const table of ['termGlossaryTokens', 'termGlossarySearchTerms', 'dictionaryGlossarySearchIndex']) {
+                db.exec({sql: `DELETE FROM ${table} WHERE dictionary = $value`, bind: {$value: dictionaryName}});
+            }
             db.exec('COMMIT');
         } catch (e) {
             try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
@@ -2181,7 +2184,17 @@ null;
                         $version: this._asNumber(Reflect.get(nextSummary, 'version'), 0),
                         $summaryJson: JSON.stringify(nextSummary),
                     }});
-                for (const table of ['termMeta', 'kanji', 'kanjiMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts']) {
+                for (const table of [
+                    'termMeta',
+                    'kanji',
+                    'kanjiMeta',
+                    'tagMeta',
+                    'media',
+                    'sharedGlossaryArtifacts',
+                    'termGlossaryTokens',
+                    'termGlossarySearchTerms',
+                    'dictionaryGlossarySearchIndex',
+                ]) {
                     db.exec({sql: `UPDATE ${table} SET dictionary = $toTitle WHERE dictionary = $fromTitle`, bind: {$fromTitle: sourceTitle, $toTitle: targetTitle}});
                 }
                 db.exec('COMMIT');
@@ -4585,6 +4598,11 @@ null;
         }
         if (count <= 0) { return; }
         if (objectStoreName === 'terms') {
+            for (const dictionaryName of new Set(
+                items.slice(start, start + count).map((item) => /** @type {import('dictionary-database').DatabaseTermEntry} */ (item).dictionary),
+            )) {
+                this._invalidateGlossarySearchIndex(dictionaryName);
+            }
             this._lastBulkAddTermsMetrics = null;
             this._termEntryContentCache.clear();
             if (!this._bulkImportTransactionOpen) {
@@ -4625,6 +4643,7 @@ null;
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
+        this._invalidateGlossarySearchIndex(chunk.dictionary);
         this._lastBulkAddTermsMetrics = null;
         this._termEntryContentCache.clear();
         if (!this._bulkImportTransactionOpen) {
