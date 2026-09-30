@@ -148,6 +148,7 @@ describe('Keyboard Event Handling', () => {
             const control = querySelectorNotNull(document, selector);
             expect(control.tagName).toBe('BUTTON');
             expect(control.getAttribute('aria-label')).toBe(label);
+            expect(control.querySelector('.icon')?.getAttribute('aria-hidden')).toBe('true');
         }
     });
 
