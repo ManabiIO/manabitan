@@ -141,6 +141,7 @@ export class Translator {
             onProgress,
             isCancelled,
         );
+        const rankByDefinitionId = new Map(databaseEntries.map(({id}, index) => [id, index]));
         const tagAggregator = new TranslatorTagAggregator();
         const dictionaryEntries = databaseEntries.map((databaseEntry) => {
             const source = databaseEntry.term;
@@ -158,6 +159,16 @@ export class Translator {
             );
         });
         const result = await this._finalizeTermDictionaryEntries(mode, dictionaryEntries, options, tagAggregator);
+        const standardOrder = new Map(result.map((entry, index) => [entry, index]));
+        const reverseRank = (entry) => {
+            let rank = Number.MAX_SAFE_INTEGER;
+            for (const definition of entry.definitions) {
+                const value = rankByDefinitionId.get(definition.id);
+                if (typeof value === 'number') { rank = Math.min(rank, value); }
+            }
+            return rank;
+        };
+        result.sort((a, b) => reverseRank(a) - reverseRank(b) || standardOrder.get(a) - standardOrder.get(b));
         safePerformance.mark('translator:findTermsByGlossary:end');
         safePerformance.measure(
             'translator:findTermsByGlossary',
