@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {readFile} from 'node:fs/promises';
 import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
 import {Application} from '../ext/js/application.js';
 import {API} from '../ext/js/comm/api.js';
@@ -150,6 +151,15 @@ describe('Keyboard Event Handling', () => {
             expect(control.getAttribute('aria-label')).toBe(label);
             expect(control.querySelector('.icon')?.getAttribute('aria-hidden')).toBe('true');
         }
+    });
+
+    test('search controls retain touch targets and visible keyboard focus', async () => {
+        const css = await readFile(new URL('../ext/css/search.css', import.meta.url), 'utf8');
+        expect(css).toContain('width: max(2.5em, 44px)');
+        expect(css).toContain('min-height: var(--search-textbox-min-height)');
+        expect(css).toContain('#search-textbox:focus-visible');
+        expect(css).toContain('#search-settings-button:focus-visible');
+        expect(css).toContain('outline: 2px solid var(--accent-color)');
     });
 
     test('live search character limit counts supplementary Unicode as one character', () => {
