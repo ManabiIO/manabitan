@@ -1,0 +1,145 @@
+name: Research Retained Import Experiments
+
+on:
+  push:
+    branches:
+      - research/retained-import-experiments-20260930
+
+permissions:
+  contents: read
+
+jobs:
+  ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24.20.0'
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Prepare pinned dictionaries
+        run: node ./dev/perf/prepare-dictionaries.js
+      - name: Build once
+        run: node ./dev/bin/build.js --target chrome-dev
+
+      - name: Run alternating A/B matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/retained-experiment-ab
+          variants=(
+            'libdeflate|{"experimentalLibdeflate":true}'
+            'parser3|{"experimentalParserWorkers3":true}'
+            'combined|{"experimentalLibdeflate":true,"experimentalParserWorkers3":true}'
+          )
+          for dictionary in jmdict jmnedict jitendex; do
+            for spec in "${variants[@]}"; do
+              name="${spec%%|*}"
+              flags="${spec#*|}"
+              for pair in 1 2 3 4 5 6; do
+                if (( pair % 2 == 1 )); then order="baseline candidate"; else order="candidate baseline"; fi
+                for arm in $order; do
+                  out="$GITHUB_WORKSPACE/builds/retained-experiment-ab/${dictionary}-${name}-pair${pair}-${arm}"
+                  echo "::group::${dictionary} ${name} pair ${pair} ${arm}"
+                  if [[ "$arm" == "baseline" ]]; then
+                    node ./dev/perf/import-benchmark.js "$dictionary" --runs 1 --no-build --output "$out"
+                  else
+                    node ./dev/perf/import-benchmark.js "$dictionary" --runs 1 --no-build --flags "$flags" --output "$out"
+                  fi
+                  echo "::endgroup::"
+                done
+              done
+            done
+          done
+
+      - name: Run adjacent JMdict A/A controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          for pair in 1 2 3 4 5 6; do
+            for sample in a b; do
+              out="$GITHUB_WORKSPACE/builds/retained-experiment-ab/jmdict-aa${pair}-${sample}"
+              node ./dev/perf/import-benchmark.js jmdict --runs 1 --no-build --output "$out"
+            done
+          done
+
+      - name: Summarize
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync, writeFileSync} from 'node:fs'
+          import path from 'node:path'
+
+          const root = 'builds/retained-experiment-ab'
+          const median = (values) => {
+            const sorted = [...values].sort((a, b) => a - b)
+            const mid = Math.floor(sorted.length / 2)
+            return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+          }
+          const read = (name) => JSON.parse(readFileSync(path.join(root, name, 'summary.json'), 'utf8'))
+          const one = (name) => {
+            const s = read(name)
+            if (s.runs.length !== 1) throw new Error(`Expected one run: ${name}`)
+            return s.runs[0]
+          }
+
+          const result = {
+            schemaVersion: 1,
+            source: process.env.GITHUB_SHA,
+            dictionaries: {},
+            aa: {},
+          }
+          for (const dictionary of ['jmdict', 'jmnedict', 'jitendex']) {
+            result.dictionaries[dictionary] = {}
+            for (const variant of ['libdeflate', 'parser3', 'combined']) {
+              const pairs = []
+              for (let pair = 1; pair <= 6; ++pair) {
+                const a = one(`${dictionary}-${variant}-pair${pair}-baseline`)
+                const b = one(`${dictionary}-${variant}-pair${pair}-candidate`)
+                pairs.push({
+                  pair,
+                  baselineMs: a.totalImportMs,
+                  candidateMs: b.totalImportMs,
+                  changePct: (b.totalImportMs / a.totalImportMs - 1) * 100,
+                  workerBaselineMs: a.workerImportMs,
+                  workerCandidateMs: b.workerImportMs,
+                  workerChangePct: a.workerImportMs !== null && b.workerImportMs !== null ? (b.workerImportMs / a.workerImportMs - 1) * 100 : null,
+                  candidateStep4: b.step4Breakdown,
+                  candidateDebug: b.importDebug,
+                })
+              }
+              result.dictionaries[dictionary][variant] = {
+                pairs,
+                pairedMedianChangePct: median(pairs.map((x) => x.changePct)),
+                fasterPairs: pairs.filter((x) => x.candidateMs < x.baselineMs).length,
+                pairedWorkerMedianChangePct: median(pairs.flatMap((x) => x.workerChangePct === null ? [] : [x.workerChangePct])),
+                baselineMedianMs: median(pairs.map((x) => x.baselineMs)),
+                candidateMedianMs: median(pairs.map((x) => x.candidateMs)),
+              }
+            }
+          }
+          const aaPairs=[]
+          for(let pair=1;pair<=6;++pair){
+            const a=one(`jmdict-aa${pair}-a`).totalImportMs
+            const b=one(`jmdict-aa${pair}-b`).totalImportMs
+            const pct=(b/a-1)*100
+            aaPairs.push({pair,aMs:a,bMs:b,changePct:pct,absoluteChangePct:Math.abs(pct)})
+          }
+          result.aa.jmdict={
+            pairs:aaPairs,
+            medianAbsoluteChangePct:median(aaPairs.map(x=>x.absoluteChangePct)),
+            maxAbsoluteChangePct:Math.max(...aaPairs.map(x=>x.absoluteChangePct)),
+          }
+          const output=JSON.stringify(result,null,2)
+          writeFileSync(path.join(root,'summary.json'),output)
+          console.log(output)
+          NODE
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: retained-import-experiment-ab
+          path: builds/retained-experiment-ab
+          compression-level: 6
+          retention-days: 7
