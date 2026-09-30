@@ -3360,6 +3360,238 @@ null;
     }
 
     /**
+     * @param {string} dictionaryName
+     */
+    _invalidateGlossarySearchIndex(dictionaryName) {
+        if (dictionaryName.length === 0) { return; }
+        const db = this._requireDb();
+        const bind = {$dictionary: dictionaryName};
+        db.exec({sql: 'DELETE FROM termGlossaryTokens WHERE dictionary = $dictionary', bind});
+        db.exec({sql: 'DELETE FROM termGlossarySearchTerms WHERE dictionary = $dictionary', bind});
+        db.exec({sql: 'DELETE FROM dictionaryGlossarySearchIndex WHERE dictionary = $dictionary', bind});
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {(progress: {dictionary: string, processed: number, total: number}) => void} [onProgress]
+     * @param {() => boolean} [isCancelled]
+     * @returns {Promise<void>}
+     */
+    async _ensureGlossarySearchIndexForDictionary(dictionaryName, onProgress = () => {}, isCancelled = () => false) {
+        const existing = this._glossarySearchBuildPromiseByDictionary.get(dictionaryName);
+        if (typeof existing !== 'undefined') {
+            await existing;
+            return;
+        }
+        const build = (async () => {
+            const generation = this._directTermIndexGeneration;
+            await this._ensureDirectTermIndexesLoaded([dictionaryName]);
+            this._assertTermLookupGeneration(generation);
+            if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+            const storageName = this._getTermRecordStorageName(dictionaryName);
+            const count = this._termRecordStore.getDictionaryRecordCount(storageName);
+            const db = this._requireDb();
+            const current = db.selectObjects(
+                'SELECT version, termCount FROM dictionaryGlossarySearchIndex WHERE dictionary = $dictionary LIMIT 1',
+                {$dictionary: dictionaryName},
+            )[0];
+            if (
+                typeof current !== 'undefined' &&
+                this._asNumber(current.version, -1) === GLOSSARY_SEARCH_INDEX_VERSION &&
+                this._asNumber(current.termCount, -1) === count
+            ) {
+                return;
+            }
+
+            const getDictionaryIds = /** @type {unknown} */ (Reflect.get(this._termRecordStore, 'getDictionaryIds'));
+            if (typeof getDictionaryIds !== 'function') {
+                throw new Error('Dictionary term ID enumeration is unavailable');
+            }
+            const ids = /** @type {number[]} */ (getDictionaryIds.call(this._termRecordStore, storageName));
+            if (ids.length !== count) {
+                throw new Error(`Cannot build glossary search index for ${dictionaryName}: term count mismatch`);
+            }
+
+            this._invalidateGlossarySearchIndex(dictionaryName);
+            const insertTerm = this._getCachedStatement(
+                'INSERT OR REPLACE INTO termGlossarySearchTerms(dictionary, termId, score) VALUES ($dictionary, $termId, $score)',
+            );
+            const insertToken = this._getCachedStatement(
+                'INSERT OR IGNORE INTO termGlossaryTokens(dictionary, token, termId) VALUES ($dictionary, $token, $termId)',
+            );
+            for (let start = 0; start < ids.length; start += GLOSSARY_SEARCH_BUILD_BATCH_SIZE) {
+                if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+                const batch = ids.slice(start, start + GLOSSARY_SEARCH_BUILD_BATCH_SIZE);
+                const rows = await this._fetchTermRowsByIds(batch);
+                this._assertTermLookupGeneration(generation);
+                if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+                db.exec('BEGIN IMMEDIATE');
+                try {
+                    for (const id of batch) {
+                        const row = rows.get(id);
+                        if (typeof row === 'undefined' || row.dictionary !== dictionaryName) { continue; }
+                        insertTerm.reset(true);
+                        insertTerm.bind({
+                            $dictionary: dictionaryName,
+                            $termId: id,
+                            $score: row.score,
+                        });
+                        insertTerm.step();
+                        for (const token of glossarySearchTokens(row.glossary)) {
+                            insertToken.reset(true);
+                            insertToken.bind({
+                                $dictionary: dictionaryName,
+                                $token: token,
+                                $termId: id,
+                            });
+                            insertToken.step();
+                        }
+                    }
+                    db.exec('COMMIT');
+                } catch (error) {
+                    try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+                    throw error;
+                }
+                const processed = Math.min(ids.length, start + batch.length);
+                try { onProgress({dictionary: dictionaryName, processed, total: ids.length}); } catch (_) { /* NOP */ }
+                await new Promise((resolve) => setTimeout(resolve, 0));
+                this._assertTermLookupGeneration(generation);
+            }
+
+            if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+            this._assertTermLookupGeneration(generation);
+            db.exec({
+                sql: `
+                    INSERT OR REPLACE INTO dictionaryGlossarySearchIndex(dictionary, version, termCount, completedAt)
+                    VALUES ($dictionary, $version, $termCount, $completedAt)
+                `,
+                bind: {
+                    $dictionary: dictionaryName,
+                    $version: GLOSSARY_SEARCH_INDEX_VERSION,
+                    $termCount: count,
+                    $completedAt: Date.now(),
+                },
+            });
+        })();
+        this._glossarySearchBuildPromiseByDictionary.set(dictionaryName, build);
+        try {
+            await build;
+        } finally {
+            if (this._glossarySearchBuildPromiseByDictionary.get(dictionaryName) === build) {
+                this._glossarySearchBuildPromiseByDictionary.delete(dictionaryName);
+            }
+        }
+    }
+
+    /**
+     * @param {import('dictionary-database').DictionarySet} dictionaries
+     * @param {(progress: {dictionary: string, processed: number, total: number}) => void} [onProgress]
+     * @param {() => boolean} [isCancelled]
+     * @returns {Promise<void>}
+     */
+    async ensureGlossarySearchIndex(dictionaries, onProgress = () => {}, isCancelled = () => false) {
+        for (const dictionaryName of this._getDictionaryNames(dictionaries)) {
+            if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+            await this._ensureGlossarySearchIndexForDictionary(dictionaryName, onProgress, isCancelled);
+        }
+    }
+
+    /**
+     * Finds term rows by English/Latin glossary text. All persisted postings are
+     * verified against the real glossary before publication.
+     * @param {string} text
+     * @param {import('dictionary-database').DictionarySet} dictionaries
+     * @param {number} [limit=GLOSSARY_SEARCH_RESULT_LIMIT]
+     * @param {(progress: {dictionary: string, processed: number, total: number}) => void} [onProgress]
+     * @param {() => boolean} [isCancelled]
+     * @returns {Promise<import('dictionary-database').TermEntry[]>}
+     */
+    async findTermsByGlossary(text, dictionaries, limit = GLOSSARY_SEARCH_RESULT_LIMIT, onProgress = () => {}, isCancelled = () => false) {
+        const query = createGlossarySearchQuery(text);
+        if (query === null || dictionaries.size === 0 || limit <= 0) { return []; }
+        const generation = this._directTermIndexGeneration;
+        const dictionaryNames = this._getDictionaryNames(dictionaries);
+        await this.ensureGlossarySearchIndex(new Set(dictionaryNames), onProgress, isCancelled);
+        this._assertTermLookupGeneration(generation);
+        if (isCancelled()) { throw new DOMException('Glossary search cancelled', 'AbortError'); }
+
+        const {clause: dictionaryClause, bind: dictionaryBind} = this._buildTextInClause(dictionaryNames, 'glossaryDict');
+        const requiredTokens = query.tokens.slice(0, -1);
+        const upper = glossaryPrefixUpperBound(query.prefix);
+        const bind = {
+            ...dictionaryBind,
+            $prefix: query.prefix,
+            $candidateLimit: GLOSSARY_SEARCH_CANDIDATE_LIMIT,
+            ...(upper === null ? {} : {$prefixUpper: upper}),
+        };
+        let tokenCondition = upper === null ?
+            'p.token >= $prefix' :
+            '(p.token >= $prefix AND p.token < $prefixUpper)';
+        let requiredCountSql = '';
+        if (requiredTokens.length > 0) {
+            const {clause, bind: tokenBind} = this._buildTextInClause(requiredTokens, 'glossaryToken');
+            Object.assign(bind, tokenBind);
+            tokenCondition = `(p.token IN (${clause}) OR ${tokenCondition})`;
+            requiredCountSql = `
+                AND SUM(CASE WHEN p.token IN (${clause}) THEN 1 ELSE 0 END) = ${requiredTokens.length}
+            `;
+        }
+        const prefixCase = upper === null ?
+            'p.token >= $prefix' :
+            '(p.token >= $prefix AND p.token < $prefixUpper)';
+        const sql = `
+            SELECT p.termId
+            FROM termGlossaryTokens p
+            INNER JOIN termGlossarySearchTerms t
+                ON t.dictionary = p.dictionary AND t.termId = p.termId
+            WHERE p.dictionary IN (${dictionaryClause})
+              AND ${tokenCondition}
+            GROUP BY p.dictionary, p.termId
+            HAVING SUM(CASE WHEN ${prefixCase} THEN 1 ELSE 0 END) > 0
+              ${requiredCountSql}
+            ORDER BY MAX(CASE WHEN p.token = $prefix THEN 1 ELSE 0 END) DESC,
+                     MAX(t.score) DESC,
+                     p.termId ASC
+            LIMIT $candidateLimit
+        `;
+        const stmt = this._getCachedStatement(sql);
+        stmt.reset(true);
+        stmt.bind(bind);
+        const ids = [];
+        while (stmt.step()) {
+            const row = /** @type {import('core').SafeAny} */ (stmt.get({}));
+            const id = this._asNumber(row.termId, -1);
+            if (id > 0) { ids.push(id); }
+        }
+        if (ids.length === 0) { return []; }
+        const rows = await this._fetchTermRowsByIds(ids);
+        this._assertTermLookupGeneration(generation);
+        if (isCancelled()) { throw new DOMException('Glossary search cancelled', 'AbortError'); }
+
+        const dictionaryOrder = new Map(dictionaryNames.map((name, index) => [name, index]));
+        const ranked = [];
+        for (const id of ids) {
+            const row = rows.get(id);
+            if (typeof row === 'undefined') { continue; }
+            const match = scoreGlossarySearchMatch(row.glossary, query);
+            if (match === null) { continue; }
+            ranked.push({
+                row,
+                match,
+                dictionaryIndex: dictionaryOrder.get(row.dictionary) ?? Number.MAX_SAFE_INTEGER,
+            });
+        }
+        ranked.sort((a, b) =>
+            a.match.tier - b.match.tier ||
+            a.match.phraseIndex - b.match.phraseIndex ||
+            b.row.score - a.row.score ||
+            a.dictionaryIndex - b.dictionaryIndex ||
+            a.row.id - b.row.id
+        );
+        return ranked.slice(0, limit).map(({row}, index) => this._createTerm('term', 'exact', row, index));
+    }
+
+    /**
      * @param {import('dictionary-database').TermExactRequest[]} termList
      * @param {import('dictionary-database').DictionarySet} dictionaries
      * @returns {Promise<import('dictionary-database').TermEntry[]>}
