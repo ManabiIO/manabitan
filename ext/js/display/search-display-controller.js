@@ -449,7 +449,9 @@ export class SearchDisplayController {
         // Count Unicode code points, not UTF-16 code units, so supplementary
         // Japanese characters do not disable live search at half the limit.
         let characters = 0;
-        for (const _character of this._queryInput.value) {
+        for (let index = 0; index < this._queryInput.value.length;) {
+            const codePoint = this._queryInput.value.codePointAt(index);
+            index += typeof codePoint === 'number' && codePoint > 0xffff ? 2 : 1;
             if (++characters > 256) { return; }
         }
         this._liveSearchTimer = setTimeout(() => {
