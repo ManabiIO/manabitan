@@ -113,26 +113,27 @@ describe('DictionaryDatabase compressed external media', () => {
         let cancelReason = null;
         class ControlledDecompressionStream {
             constructor() {
-                return {
-                    writable: new WritableStream(),
-                    readable: new ReadableStream({
-                        pull(controller) {
-                            ++pullCount;
-                            if (pullCount === 1) {
+                this.writable = new WritableStream();
+                this.readable = new ReadableStream({
+                    pull(controller) {
+                        ++pullCount;
+                        switch (pullCount) {
+                            case 1:
+                            case 2:
                                 controller.enqueue(new Uint8Array(6));
-                            } else if (pullCount === 2) {
-                                controller.enqueue(new Uint8Array(6));
-                            } else if (pullCount === 3) {
+                                break;
+                            case 3:
                                 controller.enqueue(new Uint8Array(4096));
-                            } else {
+                                break;
+                            default:
                                 controller.close();
-                            }
-                        },
-                        cancel(reason) {
-                            cancelReason = reason;
-                        },
-                    }, {highWaterMark: 0}),
-                };
+                                break;
+                        }
+                    },
+                    cancel(reason) {
+                        cancelReason = reason;
+                    },
+                }, {highWaterMark: 0});
             }
         }
         vi.stubGlobal('DecompressionStream', ControlledDecompressionStream);
@@ -159,15 +160,47 @@ describe('DictionaryDatabase compressed external media', () => {
         expect(cancelReason).toBeInstanceOf(RangeError);
     });
 
+    test('rejects decoded media that ends before the declared exact length', async () => {
+        class ShortDecompressionStream {
+            constructor() {
+                this.writable = new WritableStream();
+                this.readable = new ReadableStream({
+                    start(controller) {
+                        controller.enqueue(new Uint8Array(4));
+                        controller.close();
+                    },
+                });
+            }
+        }
+        vi.stubGlobal('DecompressionStream', ShortDecompressionStream);
+
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_termContentStore', {
+            readSlice: vi.fn().mockResolvedValue(new Uint8Array([1])),
+        });
+        const result = await deserialize(database, {
+            dictionary: 'media-test',
+            path: 'short.png',
+            mediaType: 'image/png',
+            width: 16,
+            height: 16,
+            content: new Uint8Array(0),
+            contentOffset: 1536,
+            contentLength: 1,
+            contentCompressionMethod: 8,
+            contentUncompressedLength: 5,
+        });
+
+        expect(result.content.byteLength).toBe(0);
+    });
+
     test('rejects an unsafe decoded-length descriptor before starting decompression', async () => {
-        const constructor = vi.fn();
+        const constructorSpy = vi.fn();
         class UnexpectedDecompressionStream {
             constructor() {
-                constructor();
-                return {
-                    writable: new WritableStream(),
-                    readable: new ReadableStream(),
-                };
+                constructorSpy();
+                this.writable = new WritableStream();
+                this.readable = new ReadableStream();
             }
         }
         vi.stubGlobal('DecompressionStream', UnexpectedDecompressionStream);
@@ -190,6 +223,6 @@ describe('DictionaryDatabase compressed external media', () => {
         });
 
         expect(result.content.byteLength).toBe(0);
-        expect(constructor).not.toHaveBeenCalled();
+        expect(constructorSpy).not.toHaveBeenCalled();
     });
 });
