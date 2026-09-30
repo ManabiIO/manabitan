@@ -9174,6 +9174,13 @@ null :
                 PRIMARY KEY (dictionary, token, termId)
             ) WITHOUT ROWID;
 
+            CREATE TABLE IF NOT EXISTS termGlossarySearchTerms (
+                dictionary TEXT NOT NULL,
+                termId INTEGER NOT NULL,
+                score INTEGER NOT NULL,
+                PRIMARY KEY (dictionary, termId)
+            ) WITHOUT ROWID;
+
             CREATE TABLE IF NOT EXISTS dictionaryGlossarySearchIndex (
                 dictionary TEXT PRIMARY KEY,
                 version INTEGER NOT NULL,
