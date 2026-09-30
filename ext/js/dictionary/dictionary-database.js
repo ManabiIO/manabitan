@@ -348,10 +348,46 @@ async function inflateZipMediaContent(bytes, compressionMethod, uncompressedLeng
             if (typeof DecompressionStream === 'undefined') {
                 throw new Error('DecompressionStream is unavailable for compressed media content');
             }
+            if (!Number.isSafeInteger(uncompressedLength) || uncompressedLength <= 0) {
+                throw new RangeError(`Invalid compressed media output length: ${String(uncompressedLength)}`);
+            }
             const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-            const inflated = new Uint8Array(await new Response(stream).arrayBuffer());
-            if (uncompressedLength > 0 && inflated.byteLength !== uncompressedLength) {
-                throw new Error(`Compressed media length mismatch: expected ${uncompressedLength}, got ${inflated.byteLength}`);
+            const reader = stream.getReader();
+            /** @type {Uint8Array[]} */
+            const chunks = [];
+            let totalLength = 0;
+            try {
+                while (true) {
+                    const {done, value} = await reader.read();
+                    if (done) { break; }
+                    if (!(value instanceof Uint8Array)) {
+                        throw new TypeError('Compressed media decompressor returned non-byte data');
+                    }
+                    if (value.byteLength > uncompressedLength - totalLength) {
+                        throw new RangeError(
+                            `Compressed media output exceeds declared length: expected ${uncompressedLength}`,
+                        );
+                    }
+                    if (value.byteLength > 0) { chunks.push(value); }
+                    totalLength += value.byteLength;
+                }
+            } catch (error) {
+                void reader.cancel(error).catch(() => {});
+                throw error;
+            } finally {
+                reader.releaseLock();
+            }
+            if (totalLength !== uncompressedLength) {
+                throw new Error(`Compressed media length mismatch: expected ${uncompressedLength}, got ${totalLength}`);
+            }
+            if (chunks.length === 1) {
+                return Uint8Array.from(chunks[0]);
+            }
+            const inflated = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const chunk of chunks) {
+                inflated.set(chunk, offset);
+                offset += chunk.byteLength;
             }
             return inflated;
         }
