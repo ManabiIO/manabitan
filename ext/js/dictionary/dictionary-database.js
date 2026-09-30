@@ -9164,6 +9164,20 @@ null :
                 title TEXT PRIMARY KEY,
                 reason TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS termGlossaryTokens (
+                dictionary TEXT NOT NULL,
+                token TEXT NOT NULL,
+                termId INTEGER NOT NULL,
+                PRIMARY KEY (dictionary, token, termId)
+            ) WITHOUT ROWID;
+
+            CREATE TABLE IF NOT EXISTS dictionaryGlossarySearchIndex (
+                dictionary TEXT PRIMARY KEY,
+                version INTEGER NOT NULL,
+                termCount INTEGER NOT NULL,
+                completedAt INTEGER NOT NULL
+            ) WITHOUT ROWID;
         `);
         await this._ensureTermsVirtualTable();
         await this._migrateTermsContentSchema();
