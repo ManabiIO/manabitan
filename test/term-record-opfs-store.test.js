@@ -2191,6 +2191,7 @@ describe('TermRecordOpfsStore', () => {
         const fullRead = vi.fn(async () => {
             throw new Error('full index materialization is forbidden');
         });
+        /** @type {Array<[number, number]>} */
         const ranges = [];
         const file = /** @type {File} */ (/** @type {unknown} */ ({
             size: 512 * 1024 * 1024,
