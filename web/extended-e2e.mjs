@@ -51,7 +51,10 @@ export async function runExtended({context, page, origin, fixtures, check, impor
     await check('English definition search is indexed, bounded and lower priority than Japanese lookup', async () => {
         const imported = await importFile('web-glossary.zip');
         const reverseTitle = imported.summary.title;
-        await page.evaluate((title) => runtime.setEnabled(title, false), dictionary);
+        await page.evaluate(async (title) => {
+            await runtime.setEnabled(title, false);
+            await runtime.setEnabled('Web Frequency', false);
+        }, dictionary);
         try {
             const live = await page.evaluate(() => runtime.search('house ca', false));
             assert.equal(live.glossary, true);
@@ -74,7 +77,10 @@ export async function runExtended({context, page, origin, fixtures, check, impor
             assert.equal(structural.glossary, false);
             assert.equal(structural.preview.items.length, 0);
         } finally {
-            await page.evaluate((title) => runtime.setEnabled(title, true), dictionary);
+            await page.evaluate(async (title) => {
+                await runtime.setEnabled(title, true);
+                await runtime.setEnabled('Web Frequency', true);
+            }, dictionary);
             await page.evaluate((title) => runtime.deleteDictionary(title), reverseTitle);
         }
     });
