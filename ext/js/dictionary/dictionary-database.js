@@ -62,6 +62,12 @@ import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictio
 import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {TermRecordOpfsStore} from './term-record-opfs-store.js';
 import {hasCompletePreparedTermLookupIndexes} from './term-lookup-index-preparation.js';
+import {
+    createGlossarySearchQuery,
+    glossaryPrefixUpperBound,
+    glossarySearchTokens,
+    scoreGlossarySearchMatch,
+} from '../search/glossary-search.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
@@ -76,6 +82,11 @@ const LOW_MEMORY_TERM_EXACT_PRESENCE_CACHE_MAX_ENTRIES = 8000;
 const TERM_EXACT_MATCH_CACHE_MAX_ENTRIES = 4096;
 const TERM_EXACT_MATCH_CACHE_MAX_BYTES = 4 * 1024 * 1024;
 const TERM_EXACT_MATCH_CACHE_MAX_IDS_PER_TERM = 256;
+const GLOSSARY_SEARCH_INDEX_VERSION = 1;
+const GLOSSARY_SEARCH_BUILD_BATCH_SIZE = 192;
+const GLOSSARY_SEARCH_POSTING_LIMIT = 2000;
+const GLOSSARY_SEARCH_CANDIDATE_LIMIT = 400;
+const GLOSSARY_SEARCH_RESULT_LIMIT = 100;
 const TERM_BULK_ADD_STAGING_MAX_ROWS = 3000;
 const DEFAULT_TERM_BULK_ADD_STAGING_MAX_ROWS = 4096;
 const HIGH_MEMORY_TERM_BULK_ADD_STAGING_MAX_ROWS = 10240;
