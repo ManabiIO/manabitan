@@ -26,6 +26,7 @@ const SOURCE_TERM_BANK_UNKNOWN_SIZE_PREFETCH_MAX_FILES = 8;
 const ZIP_LOCAL_FILE_HEADER_LENGTH = 30;
 const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
 const RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES = 128 * 1024 * 1024;
+const RAW_ZIP_RANGE_READ_MIN_BYTES = 32 * 1024 * 1024;
 
 /** @typedef {import('@zip.js/zip.js').Entry|{filename: string}} TermBankSourceFile */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}} CompressedTermBankSource */
@@ -75,7 +76,7 @@ export class RawZipPayloadReader {
         }
         // Keep the existing small-archive path. Large Files/Blobs read only
         // validated entry ranges; an already-owned ArrayBuffer needs no copy.
-        const ranged = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
+        const ranged = this._archiveContent instanceof Blob && archiveSize >= RAW_ZIP_RANGE_READ_MIN_BYTES;
         const archiveBytes = ranged ?
             await this._readBlobRange(offset, ZIP_LOCAL_FILE_HEADER_LENGTH, signal) :
             await this._getArchiveBytes();
