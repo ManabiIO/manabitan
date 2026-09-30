@@ -173,7 +173,7 @@ async function dispatch(request: Request): Promise<unknown> {
             const query = text(p.text, 256).trim();
             if (typeof p.full !== 'boolean') {throw new WebRuntimeError('invalid_request', 'Expected a search presentation');}
             const options = await lookupOptions();
-            const {result, matchedQuery, matchType} = await findJapaneseSearch(query, async (candidate) => {
+            const japanese = await findJapaneseSearch(query, async (candidate) => {
                 // Explicit trailing wildcard remains an intentional prefix
                 // request. Implicit completion is attempted separately only
                 // after exact/deinflected candidates miss.
@@ -188,11 +188,32 @@ async function dispatch(request: Request): Promise<unknown> {
                 matchType: 'prefix',
                 deinflect: false}));
             abortIfCancelled();
+            let result = japanese.result;
+            let matchedQuery = japanese.matchedQuery;
+            let prefix = japanese.matchType === 'prefix' || matchedQuery.endsWith('*');
+            let glossary = false;
+            if (result === null) {
+                const reverse = await translator.findTermsByGlossary(
+                    'group',
+                    query,
+                    options,
+                    (progress) => reply(request.id, {progress: {phase: 'glossary-index', ...progress}}),
+                    () => closing || !!current?.cancelled,
+                );
+                abortIfCancelled();
+                if (reverse.dictionaryEntries.length > 0) {
+                    result = reverse;
+                    matchedQuery = query;
+                    prefix = false;
+                    glossary = true;
+                }
+            }
             const entries = result?.dictionaryEntries ?? [];
             return {version: 1,
                 query,
                 matchedQuery,
-                prefix: matchType === 'prefix' || matchedQuery.endsWith('*'),
+                prefix,
+                glossary,
                 dictionaryCount: options.enabledDictionaryMap.size,
                 preview: dictionaryPreview(entries),
                 ...p.full ? {lookup: {...result ?? {originalTextLength: 0}, dictionaryEntries: entries.slice(0, 100)}} : {}};
