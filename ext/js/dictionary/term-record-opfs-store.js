@@ -3155,7 +3155,14 @@ export class TermRecordOpfsStore {
         if (typeof slice !== 'function') {
             return this._scanPersistentIndexMaxRecordId(new Uint8Array(await file.arrayBuffer()));
         }
-        if (file.size < LOOKUP_INDEX_FILE_HEADER_BYTES) { return null; }
+        if (
+            !Number.isSafeInteger(file.size) ||
+            file.size < LOOKUP_INDEX_FILE_HEADER_BYTES ||
+            !Number.isSafeInteger(expectedDescriptorFileLength) ||
+            expectedDescriptorFileLength < 0
+        ) {
+            return null;
+        }
         const header = await this._readFileRange(file, 0, LOOKUP_INDEX_FILE_HEADER_BYTES);
         if (this._textDecoder.decode(header.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
             return null;
