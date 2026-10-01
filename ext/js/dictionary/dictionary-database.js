@@ -6006,8 +6006,13 @@ null;
         if (publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
             return 0;
         }
-        const byteLength = maximumEnd - minimumOffset;
-        if (byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES) { return 0; }
+        const sourceRangeLength = maximumEnd - minimumOffset;
+        if (sourceRangeLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES) { return 0; }
+        const compactPublishedSpans = (
+            publishedContentBytes > 0 &&
+            publishedContentBytes * 4 <= sourceRangeLength * 3
+        );
+        const byteLength = compactPublishedSpans ? publishedContentBytes : sourceRangeLength;
         while (
             this._recentTermContentSourceBatchBytes + byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES &&
             this._recentTermContentSourceBatches.size > 0
@@ -6024,15 +6029,34 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
+        let owned;
+        if (compactPublishedSpans) {
+            owned = new Uint8Array(publishedContentBytes);
+            let targetOffset = 0;
+            for (let i = 0; i < staged.indexes.length; ++i) {
+                const index = staged.indexes[i];
+                if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+                const sourceOffset = spans.offsets[i];
+                const length = spans.lengths[i];
+                owned.set(spans.buffer.subarray(sourceOffset, sourceOffset + length), targetOffset);
+                this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
+                this._termEntryContentMetaRecentSourceOffsetTable[index] = targetOffset;
+                targetOffset += length;
+            }
+            if (targetOffset !== owned.byteLength) {
+                throw new RangeError('Recent term content source compaction length mismatch');
+            }
+        } else {
+            owned = spans.buffer.slice(minimumOffset, maximumEnd);
+            for (let i = 0; i < staged.indexes.length; ++i) {
+                const index = staged.indexes[i];
+                if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+                this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
+                this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
+            }
+        }
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.byteLength;
-        for (let i = 0; i < staged.indexes.length; ++i) {
-            const index = staged.indexes[i];
-            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
-            this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
-            this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
-        }
         return owned.byteLength;
     }
 
