@@ -3413,11 +3413,6 @@ null;
                 return;
             }
 
-            const ids = this._termRecordStore.getDictionaryIds(storageName);
-            if (ids.length !== count) {
-                throw new Error(`Cannot build glossary search index for ${dictionaryName}: term count mismatch`);
-            }
-
             this._invalidateGlossarySearchIndex(dictionaryName);
             const insertTerm = this._getCachedStatement(
                 'INSERT OR REPLACE INTO termGlossarySearchTerms(dictionary, termId, score) VALUES ($dictionary, $termId, $score)',
@@ -3425,9 +3420,13 @@ null;
             const insertToken = this._getCachedStatement(
                 'INSERT OR IGNORE INTO termGlossaryTokens(dictionary, token, termId) VALUES ($dictionary, $token, $termId)',
             );
-            for (let start = 0; start < ids.length; start += GLOSSARY_SEARCH_BUILD_BATCH_SIZE) {
+            for (let start = 0; start < count; start += GLOSSARY_SEARCH_BUILD_BATCH_SIZE) {
                 if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
-                const batch = ids.slice(start, start + GLOSSARY_SEARCH_BUILD_BATCH_SIZE);
+                const expected = Math.min(GLOSSARY_SEARCH_BUILD_BATCH_SIZE, count - start);
+                const batch = this._termRecordStore.getDictionaryIdBatch(storageName, start, expected);
+                if (batch.length !== expected) {
+                    throw new Error(`Cannot build glossary search index for ${dictionaryName}: term count mismatch`);
+                }
                 const rows = await this._fetchTermRowsByIds(batch);
                 this._assertTermLookupGeneration(generation);
                 if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
@@ -3458,8 +3457,8 @@ null;
                     try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
                     throw error;
                 }
-                const processed = Math.min(ids.length, start + batch.length);
-                try { onProgress({dictionary: dictionaryName, processed, total: ids.length}); } catch (_) { /* NOP */ }
+                const processed = start + batch.length;
+                try { onProgress({dictionary: dictionaryName, processed, total: count}); } catch (_) { /* NOP */ }
                 await new Promise((resolve) => { setTimeout(resolve, 0); });
                 this._assertTermLookupGeneration(generation);
             }
