@@ -17,6 +17,7 @@
  */
 
 const MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS = 16384;
+const MAX_GLOSSARY_SEARCH_NODES = 4096;
 const MAX_GLOSSARY_SEARCH_TOKENS_PER_ENTRY = 256;
 const MAX_GLOSSARY_QUERY_TOKENS = 8;
 const MIN_INDEX_TOKEN_CODEPOINTS = 2;
@@ -47,6 +48,7 @@ export function glossarySearchText(glossary) {
     /** @type {string[]} */
     const parts = [];
     let codepoints = 0;
+    let nodes = 0;
     /**
      * @param {string} value
      */
@@ -63,7 +65,14 @@ export function glossarySearchText(glossary) {
      * @param {number} depth
      */
     const visit = (value, depth) => {
-        if (depth > 32 || value === null || typeof value === 'undefined') { return; }
+        if (
+            depth > 32 ||
+            ++nodes > MAX_GLOSSARY_SEARCH_NODES ||
+            value === null ||
+            typeof value === 'undefined'
+        ) {
+            return;
+        }
         if (typeof value === 'string') {
             append(value);
             return;
@@ -71,7 +80,12 @@ export function glossarySearchText(glossary) {
         if (Array.isArray(value)) {
             for (const item of value) {
                 visit(item, depth + 1);
-                if (codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS) { break; }
+                if (
+                    codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS ||
+                    nodes >= MAX_GLOSSARY_SEARCH_NODES
+                ) {
+                    break;
+                }
             }
             return;
         }
