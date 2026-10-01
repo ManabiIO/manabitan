@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2026 Manabi Authors
+ * Copyright (C) 2023-2026  Yomitan Authors
+ * Copyright (C) 2017-2022  Yomichan Authors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,8 +9,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
- * <https://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 const MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS = 16384;
@@ -43,9 +47,12 @@ export function glossarySearchText(glossary) {
     /** @type {string[]} */
     const parts = [];
     let codepoints = 0;
+    /**
+     * @param {string} value
+     */
     const append = (value) => {
-        if (typeof value !== 'string' || codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS) { return; }
-        const points = Array.from(value);
+        if (codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS) { return; }
+        const points = [...value];
         const available = MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS - codepoints;
         if (available <= 0) { return; }
         parts.push(points.slice(0, available).join(''));
@@ -94,7 +101,7 @@ export function glossarySearchTokensFromText(text) {
     const tokens = [];
     for (const match of folded.matchAll(TOKEN_PATTERN)) {
         const token = match[0].replace(/’/gu, "'");
-        const length = Array.from(token).length;
+        const length = [...token].length;
         if (
             length < MIN_INDEX_TOKEN_CODEPOINTS ||
             length > MAX_INDEX_TOKEN_CODEPOINTS ||
@@ -133,8 +140,9 @@ export function createGlossarySearchQuery(query) {
     const tokens = glossarySearchTokensFromText(folded).slice(0, MAX_GLOSSARY_QUERY_TOKENS);
     if (tokens.length === 0) { return null; }
     const prefix = tokens[tokens.length - 1];
-    if (Array.from(prefix).length < MIN_INDEX_TOKEN_CODEPOINTS) { return null; }
-    const phrase = Array.from(folded.matchAll(TOKEN_PATTERN), (match) => match[0].replace(/’/gu, "'"))
+    if ([...prefix].length < MIN_INDEX_TOKEN_CODEPOINTS) { return null; }
+    const phrase = [...folded.matchAll(TOKEN_PATTERN)]
+        .map((match) => match[0].replace(/’/gu, "'"))
         .slice(0, MAX_GLOSSARY_QUERY_TOKENS)
         .join(' ');
     return {folded, phrase, tokens, prefix};
