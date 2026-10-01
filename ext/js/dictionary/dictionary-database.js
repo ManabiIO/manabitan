@@ -84,7 +84,6 @@ const TERM_EXACT_MATCH_CACHE_MAX_BYTES = 4 * 1024 * 1024;
 const TERM_EXACT_MATCH_CACHE_MAX_IDS_PER_TERM = 256;
 const GLOSSARY_SEARCH_INDEX_VERSION = 1;
 const GLOSSARY_SEARCH_BUILD_BATCH_SIZE = 192;
-const GLOSSARY_SEARCH_POSTING_LIMIT = 2000;
 const GLOSSARY_SEARCH_CANDIDATE_LIMIT = 400;
 const GLOSSARY_SEARCH_RESULT_LIMIT = 100;
 const TERM_BULK_ADD_STAGING_MAX_ROWS = 3000;
@@ -3414,11 +3413,7 @@ null;
                 return;
             }
 
-            const getDictionaryIds = /** @type {unknown} */ (Reflect.get(this._termRecordStore, 'getDictionaryIds'));
-            if (typeof getDictionaryIds !== 'function') {
-                throw new Error('Dictionary term ID enumeration is unavailable');
-            }
-            const ids = /** @type {number[]} */ (getDictionaryIds.call(this._termRecordStore, storageName));
+            const ids = this._termRecordStore.getDictionaryIds(storageName);
             if (ids.length !== count) {
                 throw new Error(`Cannot build glossary search index for ${dictionaryName}: term count mismatch`);
             }
@@ -3465,7 +3460,7 @@ null;
                 }
                 const processed = Math.min(ids.length, start + batch.length);
                 try { onProgress({dictionary: dictionaryName, processed, total: ids.length}); } catch (_) { /* NOP */ }
-                await new Promise((resolve) => setTimeout(resolve, 0));
+                await new Promise((resolve) => { setTimeout(resolve, 0); });
                 this._assertTermLookupGeneration(generation);
             }
 
@@ -3592,13 +3587,15 @@ null;
                 dictionaryIndex: dictionaryOrder.get(row.dictionary) ?? Number.MAX_SAFE_INTEGER,
             });
         }
-        ranked.sort((a, b) =>
-            a.match.tier - b.match.tier ||
-            a.match.phraseIndex - b.match.phraseIndex ||
-            b.row.score - a.row.score ||
-            a.dictionaryIndex - b.dictionaryIndex ||
-            a.row.id - b.row.id
-        );
+        ranked.sort((a, b) => {
+            return (
+                a.match.tier - b.match.tier ||
+                a.match.phraseIndex - b.match.phraseIndex ||
+                b.row.score - a.row.score ||
+                a.dictionaryIndex - b.dictionaryIndex ||
+                a.row.id - b.row.id
+            );
+        });
         return ranked.slice(0, limit).map(({row}, index) => this._createTerm('term', 'exact', row, index));
     }
 
