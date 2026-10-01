@@ -47,7 +47,7 @@ function asFileHandle(handle) {
 
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
- * @param {{removeEntryFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, onGetFile?: (name: string) => void}} [options]
+ * @param {{removeEntryFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, onGetFile?: (name: string) => void, fileFactory?: ((name: string, bytes: Uint8Array) => File|null)}} [options]
  * @returns {FileSystemDirectoryHandle}
  */
 function createFakeDirectoryHandle(
@@ -57,6 +57,7 @@ function createFakeDirectoryHandle(
         getFileFailures = new Map(),
         beforeWrite = () => {},
         onGetFile = () => {},
+        fileFactory = () => null,
     } = {},
 ) {
     /**
@@ -89,6 +90,8 @@ function createFakeDirectoryHandle(
                     throw new Error(`Injected getFile failure for ${name}`);
                 }
                 const bytes = fileBytesByName.get(name) ?? new Uint8Array();
+                const customFile = fileFactory(name, bytes);
+                if (customFile !== null) { return customFile; }
                 const file = new Blob([new Uint8Array(bytes)]);
                 Object.defineProperty(file, 'name', {value: name});
                 return /** @type {File} */ (file);
@@ -3486,6 +3489,83 @@ describe('TermRecordOpfsStore', () => {
         });
         expect(Reflect.get(readerStore, '_recordsById').size).toBe(1);
         expect(readerStore.size).toBe(3);
+    });
+
+    test('loads persistent lookup indexes through bounded sidecar ranges', async () => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Bounded persistent lookup';
+        const fileBytesByName = new Map();
+        const writerDirectory = createFakeDirectoryHandle(fileBytesByName);
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', writerDirectory);
+        await writerStore.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                dictionaryTotalRows: 1_000_000,
+                rowCount: 3,
+                expressionBytesList: ['一', '二', '三'].map((value) => textEncoder.encode(value)),
+                readingBytesList: ['いち', 'に', 'さん'].map((value) => textEncoder.encode(value)),
+                readingEqualsExpressionList: new Uint8Array([0, 0, 0]),
+                scoreList: new Int32Array([1, 2, 3]),
+                sequenceList: new Int32Array([10, 20, 30]),
+            },
+            [100, 200, 300],
+            [5, 6, 7],
+            'raw',
+        );
+        await writerStore._closeAllWritables();
+
+        const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
+        if (typeof indexFileName !== 'string') { throw new Error('Expected lookup index'); }
+        const indexBytes = fileBytesByName.get(indexFileName);
+        if (!(indexBytes instanceof Uint8Array)) { throw new Error('Expected lookup-index bytes'); }
+        /** @type {Array<[number, number]>} */
+        const ranges = [];
+        const fullRead = vi.fn(async () => {
+            throw new Error('full lookup-index materialization is forbidden');
+        });
+        const readerDirectory = createFakeDirectoryHandle(fileBytesByName, {
+            fileFactory(name, bytes) {
+                if (name !== indexFileName) { return null; }
+                return /** @type {File} */ (/** @type {unknown} */ ({
+                    size: bytes.byteLength,
+                    arrayBuffer: fullRead,
+                    /**
+                     * @param {number} start
+                     * @param {number} end
+                     * @returns {Blob}
+                     */
+                    slice(start, end) {
+                        ranges.push([start, end]);
+                        return new Blob([bytes.subarray(start, end)]);
+                    },
+                }));
+            },
+        });
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', readerDirectory);
+        await readerStore._loadShardFiles(false);
+        await readerStore.ensureDictionariesLoaded([dictionaryName]);
+
+        expect(fullRead).not.toHaveBeenCalled();
+        expect(ranges.length).toBeGreaterThan(2);
+        expect(ranges[0]).toEqual([0, 40]);
+        expect(ranges.every(([start, end]) => start >= 0 && end > start && end <= indexBytes.byteLength)).toBe(true);
+        expect(Math.max(...ranges.map(([start, end]) => end - start))).toBeLessThan(indexBytes.byteLength);
+        expect(readerStore.getDictionaryRecordCount(dictionaryName)).toBe(3);
+        const matchingId = readerStore.findTermIds(dictionaryName, '二', 'expression')[0] ?? -1;
+        expect(matchingId).toBeGreaterThan(0);
+        expect(await readerStore.getByIdsAsync([matchingId])).toMatchObject(new Map([[
+            matchingId,
+            expect.objectContaining({
+                expression: '二',
+                reading: 'に',
+                entryContentOffset: 200,
+                entryContentLength: 6,
+                score: 2,
+                sequence: 20,
+            }),
+        ]]));
     });
 
     test('gets cold MBTIDX11 dictionary counts and samples without materializing Maps', async () => {
