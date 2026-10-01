@@ -5641,7 +5641,7 @@ export class TermRecordOpfsStore {
         }
         await this._recoverMissingDescriptors(fileHandlesByName);
         let shardFileCount = 0;
-        /** @type {TermRecordShardState[]} */
+        /** @type {Array<{state: TermRecordShardState, file: File}>} */
         const statesToMaterialize = [];
         for (const [name, fileHandle] of fileHandlesByName) {
             if (!this._isShardFileName(name)) { continue; }
@@ -5670,7 +5670,7 @@ export class TermRecordOpfsStore {
             if (!materializeRecords || file === null || file.size <= 0) {
                 continue;
             }
-            statesToMaterialize.push(state);
+            statesToMaterialize.push({state, file});
         }
         if (statesToMaterialize.length > 0) {
             await this._loadShardStatesContents(statesToMaterialize);
@@ -5766,15 +5766,16 @@ export class TermRecordOpfsStore {
         if (file.size <= 0) {
             return false;
         }
-        let arrayBuffer;
-        try {
-            arrayBuffer = await file.arrayBuffer();
-        } catch (_) {
-            return false;
+        let header = new Uint8Array(0);
+        if (file.size >= BINARY_HEADER_PREFIX_BYTES) {
+            try {
+                header = await this._readFileRange(file, 0, BINARY_HEADER_PREFIX_BYTES);
+            } catch (_) {
+                return false;
+            }
         }
-        const content = new Uint8Array(arrayBuffer);
         const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
-        if (this._isBinaryFormat(content) && dictionaryName !== null) {
+        if (this._isBinaryFormat(header) && dictionaryName !== null) {
             if (!await this._tryLoadPersistentDictionaryIndex(dictionaryName)) { return false; }
             const chunks = (this._persistentRecordChunksByDictionary.get(dictionaryName) ?? [])
                 .filter((chunk) => chunk.fileName === state.fileName);
@@ -5824,7 +5825,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {TermRecordShardState[]} states
+     * @param {Array<{state: TermRecordShardState, file: File}>} states
      * @returns {Promise<void>}
      */
     async _loadShardStatesContents(states) {
@@ -5837,8 +5838,8 @@ export class TermRecordOpfsStore {
         for (let i = 0; i < workerCount; ++i) {
             workers.push((async () => {
                 while (nextIndex < states.length) {
-                    const state = states[nextIndex++];
-                    await this._loadShardStateContents(state);
+                    const {state, file} = states[nextIndex++];
+                    await this._loadShardStateContents(state, file);
                 }
             })());
         }

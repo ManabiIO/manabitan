@@ -47,10 +47,18 @@ function asFileHandle(handle) {
 
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
- * @param {{removeEntryFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void}} [options]
+ * @param {{removeEntryFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, onGetFile?: (name: string) => void}} [options]
  * @returns {FileSystemDirectoryHandle}
  */
-function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new Map(), getFileFailures = new Map(), beforeWrite = () => {}} = {}) {
+function createFakeDirectoryHandle(
+    fileBytesByName,
+    {
+        removeEntryFailures = new Map(),
+        getFileFailures = new Map(),
+        beforeWrite = () => {},
+        onGetFile = () => {},
+    } = {},
+) {
     /**
      * @param {string} name
      * @param {{create?: boolean}} [options]
@@ -74,6 +82,7 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
                 throw new Error('SyncAccessHandle not implemented in test double');
             },
             async getFile() {
+                onGetFile(name);
                 const failuresRemaining = getFileFailures.get(name) ?? 0;
                 if (failuresRemaining > 0) {
                     getFileFailures.set(name, failuresRemaining - 1);
@@ -3514,6 +3523,112 @@ describe('TermRecordOpfsStore', () => {
         expect(readerStore.getDictionarySampleIds(dictionaryName, 0)).toEqual([]);
         expect(Reflect.get(readerStore, '_recordsById').size).toBe(0);
         expect(Reflect.get(readerStore, '_indexByDictionary').has(dictionaryName)).toBe(false);
+    });
+
+    test('binary shard startup uses bounded descriptor reads instead of full materialization', async () => {
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await writerStore.appendBatch([{
+            dictionary: 'JMdict',
+            expression: '日本',
+            reading: 'にほん',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        }]);
+        await writerStore._closeAllWritables();
+
+        const descriptorFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
+        if (typeof descriptorFileName !== 'string') { throw new Error('Expected descriptor'); }
+        const descriptorBytes = fileBytesByName.get(descriptorFileName);
+        if (!(descriptorBytes instanceof Uint8Array)) { throw new Error('Expected descriptor bytes'); }
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(false);
+        const state = Reflect.get(readerStore, '_shardStateByFileName').get(descriptorFileName);
+        if (typeof state === 'undefined') { throw new Error('Expected shard state'); }
+
+        /** @type {Array<[number, number]>} */
+        const ranges = [];
+        const fullRead = vi.fn(async () => {
+            throw new Error('full descriptor materialization is forbidden');
+        });
+        const descriptorFile = /** @type {File} */ (/** @type {unknown} */ ({
+            size: descriptorBytes.byteLength,
+            arrayBuffer: fullRead,
+            /**
+             * @param {number} start
+             * @param {number} end
+             * @returns {Blob}
+             */
+            slice(start, end) {
+                ranges.push([start, end]);
+                return new Blob([descriptorBytes.subarray(start, end)]);
+            },
+        }));
+        state.fileHandle = asFileHandle({
+            async getFile() {
+                return descriptorFile;
+            },
+        });
+
+        await expect(Reflect.get(readerStore, '_loadShardStateContents').call(
+            readerStore,
+            state,
+            descriptorFile,
+        )).resolves.toBe(true);
+        expect(fullRead).not.toHaveBeenCalled();
+        expect(ranges[0]).toEqual([0, 24]);
+        expect(Math.max(...ranges.map(([start, end]) => end - start)))
+            .toBeLessThan(descriptorBytes.byteLength);
+        expect(readerStore.getDictionaryRecordCount('JMdict')).toBe(1);
+    });
+
+    test('startup reuses the fresh post-recovery descriptor snapshot for format probing', async () => {
+        const fileBytesByName = new Map();
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+        await writerStore.appendBatch([{
+            dictionary: 'JMdict',
+            expression: '再利用',
+            reading: 'さいりよう',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        }]);
+        await writerStore._closeAllWritables();
+
+        const descriptorFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
+        if (typeof descriptorFileName !== 'string') { throw new Error('Expected descriptor'); }
+        const getFileCounts = new Map();
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName, {
+            onGetFile(name) {
+                getFileCounts.set(name, (getFileCounts.get(name) ?? 0) + 1);
+            },
+        }));
+        const load = vi.spyOn(readerStore, '_loadShardStateContents').mockImplementation(async (_state, existingFile) => {
+            expect(existingFile).toBeInstanceOf(Blob);
+            return true;
+        });
+
+        await expect(readerStore._loadShardFiles(true)).resolves.toBeGreaterThan(0);
+        // One stat during recovery inspection and one fresh snapshot afterward.
+        // The bounded format probe must not acquire a third descriptor File.
+        expect(getFileCounts.get(descriptorFileName)).toBe(2);
+        expect(load).toHaveBeenCalledOnce();
+        expect(load.mock.calls[0][1]).toBeInstanceOf(Blob);
     });
 
     test('requires reimport when the authoritative container generation changes', async () => {
