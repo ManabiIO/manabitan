@@ -2273,6 +2273,9 @@ null;
                         ['tagMeta', 'dictionary'],
                         ['media', 'dictionary'],
                         ['sharedGlossaryArtifacts', 'dictionary'],
+                        ['termGlossaryTokens', 'dictionary'],
+                        ['termGlossarySearchTerms', 'dictionary'],
+                        ['dictionaryGlossarySearchIndex', 'dictionary'],
                         ['dictionaries', 'title'],
                     ]) {
                         db.exec({sql: `DELETE FROM ${table} WHERE ${keyColumn} = $value`, bind: {$value: title}});
