@@ -138,6 +138,7 @@ jobs:
           const files = new Map()
           const writer = new BaselineStore()
           Reflect.set(writer, '_recordsDirectoryHandle', createDirectory(files))
+          await writer.beginImportSession()
           let globalRow = 0
           for (let batch = 0; batch < batchCount; ++batch) {
             const expressionBytesList = new Array(rowsPerBatch)
@@ -169,7 +170,7 @@ jobs:
               sequenceList: sequences,
             }, offsets, lengths, 'raw')
           }
-          await writer._closeAllWritables()
+          await writer.endImportSession()
 
           const indexName = [...files.keys()].find((name) => name.endsWith('.mbti'))
           assert.equal(typeof indexName, 'string')
