@@ -2177,6 +2177,7 @@ describe('TermRecordOpfsStore', () => {
             store,
             file,
             /** @type {Uint8Array} */ (descriptorBytes).byteLength,
+            /** @type {Uint8Array} */ (descriptorBytes).subarray(8, 24),
         );
 
         expect(maxId).toBe(42);
@@ -2215,10 +2216,50 @@ describe('TermRecordOpfsStore', () => {
         }));
         const store = new TermRecordOpfsStore();
 
-        await expect(Reflect.get(store, '_scanPersistentIndexMaxRecordIdFile').call(store, file, 1))
-            .resolves.toBeNull();
+        await expect(Reflect.get(store, '_scanPersistentIndexMaxRecordIdFile').call(
+            store,
+            file,
+            1,
+            new Uint8Array(16),
+        )).resolves.toBeNull();
         expect(fullRead).not.toHaveBeenCalled();
         expect(ranges).toEqual([[0, 40]]);
+    });
+
+    test('cold ID reservation rejects a stale lookup-index generation without consuming an ID', async () => {
+        const fileBytesByName = new Map();
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await writerStore.appendBatch([{
+            dictionary: 'JMdict',
+            expression: '世代',
+            reading: 'せだい',
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 4,
+            entryContentDictName: 'raw',
+            score: 0,
+            sequence: null,
+        }]);
+        await writerStore._closeAllWritables();
+
+        const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
+        if (typeof indexFileName !== 'string') { throw new Error('Expected lookup sidecar'); }
+        const staleIndex = new Uint8Array(fileBytesByName.get(indexFileName) ?? []);
+        staleIndex[24] ^= 0xff;
+        fileBytesByName.set(indexFileName, staleIndex);
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(false);
+        const nextIdBefore = Reflect.get(readerStore, '_nextId');
+
+        await expect(Reflect.get(readerStore, '_ensureNextIdReadyForAppend').call(readerStore, 1))
+            .rejects.toThrow(/invalid container/u);
+        expect(Reflect.get(readerStore, '_nextId')).toBe(nextIdBefore);
+        expect(Reflect.get(readerStore, '_nextIdMayNeedShardScan')).toBe(true);
     });
 
     test('persistent-container max-id scan reads chunk metadata without materializing records', async () => {
