@@ -3591,7 +3591,7 @@ describe('TermRecordOpfsStore', () => {
         expect(readerStore.getDictionaryRecordCount('JMdict')).toBe(1);
     });
 
-    test('startup reuses the descriptor snapshot already inspected during recovery scanning', async () => {
+    test('startup reuses the fresh post-recovery descriptor snapshot for format probing', async () => {
         const fileBytesByName = new Map();
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
@@ -3624,7 +3624,9 @@ describe('TermRecordOpfsStore', () => {
         });
 
         await expect(readerStore._loadShardFiles(true)).resolves.toBeGreaterThan(0);
-        expect(getFileCounts.get(descriptorFileName)).toBe(1);
+        // One stat during recovery inspection and one fresh snapshot afterward.
+        // The bounded format probe must not acquire a third descriptor File.
+        expect(getFileCounts.get(descriptorFileName)).toBe(2);
         expect(load).toHaveBeenCalledOnce();
         expect(load.mock.calls[0][1]).toBeInstanceOf(Blob);
     });
