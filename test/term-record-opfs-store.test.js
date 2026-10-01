@@ -2036,14 +2036,21 @@ describe('TermRecordOpfsStore', () => {
                 return indexHandle;
             },
         }));
-        const descriptorHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({}));
+        const descriptorBytes = new Uint8Array(24);
+        descriptorBytes.set(new TextEncoder().encode('MBTRD16X'));
+        descriptorBytes.fill(0x5a, 8);
+        const descriptorHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            async getFile() {
+                return new Blob([descriptorBytes]);
+            },
+        }));
         Reflect.set(store, '_recordsDirectoryHandle', directory);
         Reflect.get(store, '_shardStateByFileName').set(
             fileName,
-            store._createShardState(fileName, descriptorHandle, 1, 'raw'),
+            store._createShardState(fileName, descriptorHandle, descriptorBytes.byteLength, 'raw'),
         );
         Reflect.set(store, '_nextIdMayNeedShardScan', true);
-        vi.spyOn(store, '_scanPersistentIndexMaxRecordId').mockReturnValue(0xffffffff);
+        vi.spyOn(store, '_scanPersistentIndexMaxRecordIdFile').mockResolvedValue(0xffffffff);
 
         await expect(Reflect.get(store, '_ensureNextIdReadyForAppend').call(store, 1))
             .rejects.toThrow(/ID space is exhausted/u);
@@ -2253,7 +2260,9 @@ describe('TermRecordOpfsStore', () => {
 
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
-        await readerStore._loadShardFiles(false);
+        const shardFileCount = await readerStore._loadShardFiles(false);
+        expect(shardFileCount).toBeGreaterThan(0);
+        Reflect.set(readerStore, '_nextIdMayNeedShardScan', true);
         const nextIdBefore = Reflect.get(readerStore, '_nextId');
 
         await expect(Reflect.get(readerStore, '_ensureNextIdReadyForAppend').call(readerStore, 1))
