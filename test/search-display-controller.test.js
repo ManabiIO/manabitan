@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {readFile} from 'node:fs/promises';
 import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
 import {Application} from '../ext/js/application.js';
 import {API} from '../ext/js/comm/api.js';
@@ -126,6 +127,64 @@ describe('Keyboard Event Handling', () => {
         }
 
         expect(focusSpy.mock.calls.length).toBe(0);
+    });
+
+    test('search controls expose native accessible names and mobile search semantics', () => {
+        expect(queryInput.getAttribute('aria-label')).toBe('Search Japanese dictionary');
+        expect(queryInput.getAttribute('aria-controls')).toBe('dictionary-entries');
+        expect(queryInput.getAttribute('enterkeyhint')).toBe('search');
+        expect(queryInput.getAttribute('spellcheck')).toBe('false');
+        expect(querySelectorNotNull(document, '#profile-select').getAttribute('aria-label')).toBe('Search profile');
+        expect(querySelectorNotNull(document, '#query-parser-mode-select').getAttribute('aria-label')).toBe('Parser');
+        expect(querySelectorNotNull(document, '#wanakana-enable').getAttribute('aria-label')).toBe('Automatic kana conversion');
+        expect(querySelectorNotNull(document, '#sticky-header-enable').getAttribute('aria-label')).toBe('Sticky search header');
+        expect(querySelectorNotNull(document, '#no-results').getAttribute('role')).toBe('status');
+        expect(querySelectorNotNull(document, '#no-dictionaries').getAttribute('role')).toBe('status');
+        for (const [selector, label] of [
+            ['#clear-button', 'Clear search'],
+            ['#search-back-button', 'Back in search history'],
+            ['#search-button', 'Search'],
+            ['#search-settings-button', 'Search settings'],
+        ]) {
+            const control = querySelectorNotNull(document, selector);
+            expect(control.tagName).toBe('BUTTON');
+            expect(control.getAttribute('aria-label')).toBe(label);
+            expect(control.querySelector('.icon')?.getAttribute('aria-hidden')).toBe('true');
+        }
+    });
+
+    test('search controls retain touch targets and visible keyboard focus', async () => {
+        const css = await readFile(new URL('../ext/css/search.css', import.meta.url), 'utf8');
+        expect(css).toContain('width: max(2.5em, 44px)');
+        expect(css).toContain('min-height: var(--search-textbox-min-height)');
+        expect(css).toContain('#search-textbox:focus-visible');
+        expect(css).toContain('#search-settings-button:focus-visible');
+        expect(css).toContain('outline: 2px solid var(--accent-color)');
+    });
+
+    test('live search character limit counts supplementary Unicode as one character', () => {
+        vi.useFakeTimers();
+        const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        const invalidateSpy = vi.spyOn(display, 'invalidateSearchDraft').mockImplementation(() => {});
+        try {
+            queryInput.value = '𠮷'.repeat(256);
+            searchDisplayController._scheduleLiveSearch();
+            vi.advanceTimersByTime(100);
+            expect(searchSpy).toHaveBeenCalledOnce();
+            expect(searchSpy).toHaveBeenCalledWith(false, 'overwrite', true, null, true);
+            expect(invalidateSpy).toHaveBeenCalledOnce();
+
+            searchSpy.mockClear();
+            invalidateSpy.mockClear();
+            queryInput.value = '𠮷'.repeat(257);
+            searchDisplayController._scheduleLiveSearch();
+            vi.advanceTimersByTime(100);
+            expect(searchSpy).not.toHaveBeenCalled();
+            expect(invalidateSpy).toHaveBeenCalledOnce();
+        } finally {
+            searchDisplayController._cancelLiveSearch();
+            vi.useRealTimers();
+        }
     });
 
     test('search button click dispatches search', () => {
