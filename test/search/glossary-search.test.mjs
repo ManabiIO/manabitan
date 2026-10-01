@@ -32,6 +32,15 @@ test('glossary text includes user-facing structured content but excludes structu
     assert.doesNotMatch(text, /example\.invalid|cat\.png|span/);
 });
 
+test('glossary traversal is bounded even when structured content contains little text', () => {
+    const content = Array.from({length: 5000}, (_, index) => ({
+        tag: 'span',
+        content: index === 4999 ? 'unreachable sentinel' : [],
+    }));
+    const text = glossarySearchText({type: 'structured-content', content});
+    assert.doesNotMatch(text, /unreachable sentinel/);
+});
+
 test('tokenization normalizes width case apostrophes and bounds duplicate tokens', () => {
     assert.deepEqual(
         glossarySearchTokens(['ＣＡＴ cat', 'Owner’s companion', "owner's companion"]),
