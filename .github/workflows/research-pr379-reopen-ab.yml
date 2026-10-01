@@ -1,0 +1,262 @@
+name: Research PR379 Reopen AB
+
+on:
+  push:
+    branches:
+      - research/pr379-reopen-ab-20261001
+
+permissions:
+  contents: read
+
+jobs:
+  reopen-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v6
+        with:
+          path: candidate
+
+      - name: Checkout baseline
+        uses: actions/checkout@v6
+        with:
+          ref: e433f8ce407ee6cba7ccc48ded3571e01602fc83
+          path: baseline
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: npm
+          cache-dependency-path: candidate/package-lock.json
+
+      - name: Install dependencies and build libraries
+        working-directory: candidate
+        run: |
+          npm ci
+          npm run build:libs
+
+      - name: Reuse dependencies in baseline
+        shell: bash
+        run: |
+          ln -s "$GITHUB_WORKSPACE/candidate/node_modules" "$GITHUB_WORKSPACE/baseline/node_modules"
+
+      - name: Run bounded reopen benchmark
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/reopen-ab.mjs" <<'NODE'
+          import assert from 'node:assert/strict'
+          import {performance} from 'node:perf_hooks'
+          import {pathToFileURL} from 'node:url'
+          import path from 'node:path'
+          import {writeFile} from 'node:fs/promises'
+
+          const root = process.env.GITHUB_WORKSPACE
+          const baselineRoot = path.join(root, 'baseline')
+          const candidateRoot = path.join(root, 'candidate')
+          const {TermRecordOpfsStore: BaselineStore} = await import(pathToFileURL(path.join(baselineRoot, 'ext/js/dictionary/term-record-opfs-store.js')).href)
+          const {TermRecordOpfsStore: CandidateStore} = await import(pathToFileURL(path.join(candidateRoot, 'ext/js/dictionary/term-record-opfs-store.js')).href)
+
+          const dictionaryName = 'Persistent reopen benchmark'
+          const batchCount = 48
+          const rowsPerBatch = 1000
+          const totalRows = batchCount * rowsPerBatch
+          const encoder = new TextEncoder()
+
+          function createDirectory(fileBytesByName, metrics = null) {
+            const getFileHandle = async (name, options = {}) => {
+              if (!fileBytesByName.has(name)) {
+                if (options.create !== true) throw new Error(`File not found: ${name}`)
+                fileBytesByName.set(name, new Uint8Array())
+              }
+              return {
+                kind: 'file',
+                name,
+                async isSameEntry() { return false },
+                async createSyncAccessHandle() { throw new Error('not implemented') },
+                async getFile() {
+                  const bytes = fileBytesByName.get(name) ?? new Uint8Array()
+                  if (name.endsWith('.mbti') && metrics !== null) {
+                    return {
+                      size: bytes.byteLength,
+                      async arrayBuffer() {
+                        metrics.fullReadCount += 1
+                        metrics.fullReadBytes += bytes.byteLength
+                        return bytes.slice().buffer
+                      },
+                      slice(start = 0, end = bytes.byteLength) {
+                        metrics.rangeReadCount += 1
+                        metrics.rangeReadBytes += end - start
+                        metrics.maxRangeBytes = Math.max(metrics.maxRangeBytes, end - start)
+                        return new Blob([bytes.subarray(start, end)])
+                      },
+                    }
+                  }
+                  const blob = new Blob([bytes])
+                  Object.defineProperty(blob, 'name', {value: name})
+                  return blob
+                },
+                async createWritable() {
+                  let next = fileBytesByName.get(name) ?? new Uint8Array()
+                  let cursor = next.byteLength
+                  return {
+                    async seek(position) { cursor = Math.max(0, position) },
+                    async truncate(length) {
+                      next = next.slice(0, Math.max(0, length))
+                      cursor = Math.min(cursor, next.byteLength)
+                    },
+                    async write(value) {
+                      let bytes
+                      if (value instanceof ArrayBuffer) bytes = new Uint8Array(value)
+                      else if (ArrayBuffer.isView(value)) bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+                      else if (value instanceof Blob) bytes = new Uint8Array(await value.arrayBuffer())
+                      else throw new Error('unsupported write')
+                      const required = cursor + bytes.byteLength
+                      if (required > next.byteLength) {
+                        const expanded = new Uint8Array(required)
+                        expanded.set(next)
+                        next = expanded
+                      }
+                      next.set(bytes, cursor)
+                      cursor += bytes.byteLength
+                    },
+                    async close() { fileBytesByName.set(name, next) },
+                  }
+                },
+              }
+            }
+            return {
+              async getFileHandle(name, options = {}) { return await getFileHandle(name, options) },
+              async removeEntry(name) { fileBytesByName.delete(name) },
+              async *entries() {
+                for (const name of fileBytesByName.keys()) yield [name, await getFileHandle(name, {create: false})]
+              },
+            }
+          }
+
+          const files = new Map()
+          const writer = new BaselineStore()
+          Reflect.set(writer, '_recordsDirectoryHandle', createDirectory(files))
+          let globalRow = 0
+          for (let batch = 0; batch < batchCount; ++batch) {
+            const expressionBytesList = new Array(rowsPerBatch)
+            const readingBytesList = new Array(rowsPerBatch)
+            const offsets = new Array(rowsPerBatch)
+            const lengths = new Array(rowsPerBatch)
+            const scores = new Int32Array(rowsPerBatch)
+            const sequences = new Int32Array(rowsPerBatch)
+            const equal = new Uint8Array(rowsPerBatch)
+            for (let row = 0; row < rowsPerBatch; ++row) {
+              const index = globalRow++
+              const expression = encoder.encode(`word-${String(index).padStart(6, '0')}`)
+              expressionBytesList[row] = expression
+              readingBytesList[row] = expression
+              offsets[row] = index * 16
+              lengths[row] = 8 + (index % 8)
+              scores[row] = (index % 101) - 50
+              sequences[row] = index + 1
+              equal[row] = 1
+            }
+            await writer.appendBatchFromArtifactChunkResolvedContent({
+              dictionary: dictionaryName,
+              dictionaryTotalRows: totalRows,
+              rowCount: rowsPerBatch,
+              expressionBytesList,
+              readingBytesList,
+              readingEqualsExpressionList: equal,
+              scoreList: scores,
+              sequenceList: sequences,
+            }, offsets, lengths, 'raw')
+          }
+          await writer._closeAllWritables()
+
+          const indexName = [...files.keys()].find((name) => name.endsWith('.mbti'))
+          assert.equal(typeof indexName, 'string')
+          const indexBytes = files.get(indexName)
+          assert.ok(indexBytes instanceof Uint8Array)
+          const descriptorName = [...files.keys()].find((name) => name.endsWith('.mbtr'))
+          assert.equal(typeof descriptorName, 'string')
+
+          async function run(StoreClass) {
+            global.gc?.()
+            const metrics = {fullReadCount: 0, fullReadBytes: 0, rangeReadCount: 0, rangeReadBytes: 0, maxRangeBytes: 0}
+            const store = new StoreClass()
+            Reflect.set(store, '_recordsDirectoryHandle', createDirectory(files, metrics))
+            const start = performance.now()
+            await store._loadShardFiles(false)
+            await store.ensureDictionariesLoaded([dictionaryName])
+            const elapsedMs = performance.now() - start
+            assert.equal(store.getDictionaryRecordCount(dictionaryName), totalRows)
+            const id = store.findTermIds(dictionaryName, 'word-024000', 'expression')[0] ?? -1
+            assert.ok(id > 0)
+            const records = await store.getByIdsAsync([id])
+            assert.equal(records.get(id)?.expression, 'word-024000')
+            return {elapsedMs, ...metrics}
+          }
+
+          for (let i = 0; i < 3; ++i) {
+            await run(BaselineStore)
+            await run(CandidateStore)
+          }
+
+          const samples = []
+          for (let pair = 0; pair < 12; ++pair) {
+            let baseline
+            let candidate
+            if ((pair & 1) === 0) {
+              baseline = await run(BaselineStore)
+              candidate = await run(CandidateStore)
+            } else {
+              candidate = await run(CandidateStore)
+              baseline = await run(BaselineStore)
+            }
+            samples.push({
+              pair: pair + 1,
+              baseline,
+              candidate,
+              changePct: (candidate.elapsedMs / baseline.elapsedMs - 1) * 100,
+            })
+          }
+          const median = (values) => {
+            const sorted = [...values].sort((a, b) => a - b)
+            const m = Math.floor(sorted.length / 2)
+            return sorted.length % 2 ? sorted[m] : (sorted[m - 1] + sorted[m]) / 2
+          }
+          const result = {
+            schemaVersion: 1,
+            baseline: 'e433f8ce407ee6cba7ccc48ded3571e01602fc83',
+            candidate: process.env.GITHUB_SHA,
+            fixture: {
+              batchCount,
+              rowsPerBatch,
+              totalRows,
+              indexFileBytes: indexBytes.byteLength,
+              descriptorFileBytes: files.get(descriptorName)?.byteLength ?? null,
+            },
+            samples,
+            summary: {
+              pairedMedianChangePct: median(samples.map((s) => s.changePct)),
+              fasterPairs: samples.filter((s) => s.candidate.elapsedMs < s.baseline.elapsedMs).length,
+              baselineMedianMs: median(samples.map((s) => s.baseline.elapsedMs)),
+              candidateMedianMs: median(samples.map((s) => s.candidate.elapsedMs)),
+              baselineFullReadBytes: median(samples.map((s) => s.baseline.fullReadBytes)),
+              candidateFullReadBytes: median(samples.map((s) => s.candidate.fullReadBytes)),
+              baselineMaxRangeBytes: median(samples.map((s) => s.baseline.maxRangeBytes)),
+              candidateMaxRangeBytes: median(samples.map((s) => s.candidate.maxRangeBytes)),
+              baselineRangeReadBytes: median(samples.map((s) => s.baseline.rangeReadBytes)),
+              candidateRangeReadBytes: median(samples.map((s) => s.candidate.rangeReadBytes)),
+              baselineRangeReadCount: median(samples.map((s) => s.baseline.rangeReadCount)),
+              candidateRangeReadCount: median(samples.map((s) => s.candidate.rangeReadCount)),
+            },
+          }
+          console.log(JSON.stringify(result, null, 2))
+          await writeFile(path.join(root, 'reopen-ab.json'), JSON.stringify(result, null, 2))
+          NODE
+          node --expose-gc "$RUNNER_TEMP/reopen-ab.mjs"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: pr379-reopen-ab
+          path: reopen-ab.json
+          retention-days: 7
