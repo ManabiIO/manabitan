@@ -3519,6 +3519,10 @@ describe('TermRecordOpfsStore', () => {
         await readerStore.ensureDictionariesLoaded([dictionaryName]);
 
         expect(readerStore.getDictionaryRecordCount(dictionaryName)).toBe(3);
+        expect(readerStore.getDictionaryIdBatch(dictionaryName, 0, 2)).toEqual([1, 2]);
+        expect(readerStore.getDictionaryIdBatch(dictionaryName, 1, 2)).toEqual([2, 3]);
+        expect(readerStore.getDictionaryIdBatch(dictionaryName, 3, 2)).toEqual([]);
+        expect(readerStore.getDictionaryIdBatch(dictionaryName, -1, 2)).toEqual([]);
         expect(readerStore.getDictionarySampleIds(dictionaryName, 2)).toEqual([1, 2]);
         expect(readerStore.getDictionarySampleIds(dictionaryName, 0)).toEqual([]);
         expect(Reflect.get(readerStore, '_recordsById').size).toBe(0);
