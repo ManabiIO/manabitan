@@ -5766,15 +5766,16 @@ export class TermRecordOpfsStore {
         if (file.size <= 0) {
             return false;
         }
-        let arrayBuffer;
-        try {
-            arrayBuffer = await file.arrayBuffer();
-        } catch (_) {
-            return false;
+        let header = new Uint8Array(0);
+        if (file.size >= BINARY_HEADER_PREFIX_BYTES) {
+            try {
+                header = await this._readFileRange(file, 0, BINARY_HEADER_PREFIX_BYTES);
+            } catch (_) {
+                return false;
+            }
         }
-        const content = new Uint8Array(arrayBuffer);
         const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
-        if (this._isBinaryFormat(content) && dictionaryName !== null) {
+        if (this._isBinaryFormat(header) && dictionaryName !== null) {
             if (!await this._tryLoadPersistentDictionaryIndex(dictionaryName)) { return false; }
             const chunks = (this._persistentRecordChunksByDictionary.get(dictionaryName) ?? [])
                 .filter((chunk) => chunk.fileName === state.fileName);
