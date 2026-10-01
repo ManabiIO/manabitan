@@ -5639,13 +5639,13 @@ export class TermRecordOpfsStore {
                 throw new Error(`Invalid term-record storage file name: ${name}`);
             }
         }
-        const descriptorFilesByName = await this._recoverMissingDescriptors(fileHandlesByName);
+        await this._recoverMissingDescriptors(fileHandlesByName);
         let shardFileCount = 0;
         /** @type {Array<{state: TermRecordShardState, file: File}>} */
         const statesToMaterialize = [];
         for (const [name, fileHandle] of fileHandlesByName) {
             if (!this._isShardFileName(name)) { continue; }
-            let file = descriptorFilesByName.get(name) ?? null;
+            let file = null;
             for (let attempt = 0; attempt < STORAGE_READ_RETRY_COUNT && file === null; ++attempt) {
                 try {
                     file = await fileHandle.getFile();
@@ -5683,12 +5683,10 @@ export class TermRecordOpfsStore {
      * containers. Existing descriptors are never replaced here: a temporary
      * descriptor read failure must remain a retryable storage failure.
      * @param {Map<string, FileSystemFileHandle>} fileHandlesByName
-     * @returns {Promise<Map<string, File>>} Stable nonempty descriptor snapshots already inspected here.
+     * @returns {Promise<void>}
      */
     async _recoverMissingDescriptors(fileHandlesByName) {
-        /** @type {Map<string, File>} */
-        const descriptorFilesByName = new Map();
-        if (this._recordsDirectoryHandle === null) { return descriptorFilesByName; }
+        if (this._recordsDirectoryHandle === null) { return; }
         for (const [indexFileName, indexFileHandle] of fileHandlesByName) {
             if (!indexFileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`)) { continue; }
             const descriptorFileName = indexFileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length);
@@ -5696,11 +5694,7 @@ export class TermRecordOpfsStore {
             let descriptorFileHandle = fileHandlesByName.get(descriptorFileName) ?? null;
             if (descriptorFileHandle !== null) {
                 try {
-                    const descriptorFile = await descriptorFileHandle.getFile();
-                    if (descriptorFile.size > 0) {
-                        descriptorFilesByName.set(descriptorFileName, descriptorFile);
-                        continue;
-                    }
+                    if ((await descriptorFileHandle.getFile()).size > 0) { continue; }
                 } catch (_) {
                     // Preserve the existing retryable behavior for a descriptor
                     // whose current contents cannot be inspected.
@@ -5752,7 +5746,6 @@ export class TermRecordOpfsStore {
                 });
             }
         }
-        return descriptorFilesByName;
     }
 
     /**
