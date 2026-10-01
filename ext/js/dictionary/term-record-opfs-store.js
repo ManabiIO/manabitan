@@ -5639,13 +5639,13 @@ export class TermRecordOpfsStore {
                 throw new Error(`Invalid term-record storage file name: ${name}`);
             }
         }
-        await this._recoverMissingDescriptors(fileHandlesByName);
+        const descriptorFilesByName = await this._recoverMissingDescriptors(fileHandlesByName);
         let shardFileCount = 0;
-        /** @type {TermRecordShardState[]} */
+        /** @type {Array<{state: TermRecordShardState, file: File}>} */
         const statesToMaterialize = [];
         for (const [name, fileHandle] of fileHandlesByName) {
             if (!this._isShardFileName(name)) { continue; }
-            let file = null;
+            let file = descriptorFilesByName.get(name) ?? null;
             for (let attempt = 0; attempt < STORAGE_READ_RETRY_COUNT && file === null; ++attempt) {
                 try {
                     file = await fileHandle.getFile();
@@ -5670,7 +5670,7 @@ export class TermRecordOpfsStore {
             if (!materializeRecords || file === null || file.size <= 0) {
                 continue;
             }
-            statesToMaterialize.push(state);
+            statesToMaterialize.push({state, file});
         }
         if (statesToMaterialize.length > 0) {
             await this._loadShardStatesContents(statesToMaterialize);
@@ -5683,10 +5683,12 @@ export class TermRecordOpfsStore {
      * containers. Existing descriptors are never replaced here: a temporary
      * descriptor read failure must remain a retryable storage failure.
      * @param {Map<string, FileSystemFileHandle>} fileHandlesByName
-     * @returns {Promise<void>}
+     * @returns {Promise<Map<string, File>>} Stable nonempty descriptor snapshots already inspected here.
      */
     async _recoverMissingDescriptors(fileHandlesByName) {
-        if (this._recordsDirectoryHandle === null) { return; }
+        /** @type {Map<string, File>} */
+        const descriptorFilesByName = new Map();
+        if (this._recordsDirectoryHandle === null) { return descriptorFilesByName; }
         for (const [indexFileName, indexFileHandle] of fileHandlesByName) {
             if (!indexFileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`)) { continue; }
             const descriptorFileName = indexFileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length);
@@ -5694,7 +5696,11 @@ export class TermRecordOpfsStore {
             let descriptorFileHandle = fileHandlesByName.get(descriptorFileName) ?? null;
             if (descriptorFileHandle !== null) {
                 try {
-                    if ((await descriptorFileHandle.getFile()).size > 0) { continue; }
+                    const descriptorFile = await descriptorFileHandle.getFile();
+                    if (descriptorFile.size > 0) {
+                        descriptorFilesByName.set(descriptorFileName, descriptorFile);
+                        continue;
+                    }
                 } catch (_) {
                     // Preserve the existing retryable behavior for a descriptor
                     // whose current contents cannot be inspected.
@@ -5746,6 +5752,7 @@ export class TermRecordOpfsStore {
                 });
             }
         }
+        return descriptorFilesByName;
     }
 
     /**
@@ -5825,7 +5832,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @param {TermRecordShardState[]} states
+     * @param {Array<{state: TermRecordShardState, file: File}>} states
      * @returns {Promise<void>}
      */
     async _loadShardStatesContents(states) {
@@ -5838,8 +5845,8 @@ export class TermRecordOpfsStore {
         for (let i = 0; i < workerCount; ++i) {
             workers.push((async () => {
                 while (nextIndex < states.length) {
-                    const state = states[nextIndex++];
-                    await this._loadShardStateContents(state);
+                    const {state, file} = states[nextIndex++];
+                    await this._loadShardStateContents(state, file);
                 }
             })());
         }
