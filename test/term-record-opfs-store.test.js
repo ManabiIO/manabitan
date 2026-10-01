@@ -2161,9 +2161,15 @@ describe('TermRecordOpfsStore', () => {
         const file = /** @type {File} */ (/** @type {unknown} */ ({
             size: /** @type {Uint8Array} */ (indexBytes).byteLength,
             arrayBuffer: fullRead,
+            /**
+             * @param {number} start
+             * @param {number} end
+             * @returns {Blob}
+             */
             slice(start, end) {
                 ranges.push([start, end]);
-                return new Blob([/** @type {Uint8Array} */ (indexBytes).subarray(start, end)]);
+                const bytes = /** @type {Uint8Array} */ (indexBytes).subarray(start, end);
+                return new Blob([bytes]);
             },
         }));
         const store = new TermRecordOpfsStore();
@@ -2196,9 +2202,15 @@ describe('TermRecordOpfsStore', () => {
         const file = /** @type {File} */ (/** @type {unknown} */ ({
             size: 512 * 1024 * 1024,
             arrayBuffer: fullRead,
+            /**
+             * @param {number} start
+             * @param {number} end
+             * @returns {Blob}
+             */
             slice(start, end) {
                 ranges.push([start, end]);
-                return new Blob([header.subarray(start, Math.min(end, header.byteLength))]);
+                const bytes = header.subarray(start, Math.min(end, header.byteLength));
+                return new Blob([bytes]);
             },
         }));
         const store = new TermRecordOpfsStore();
