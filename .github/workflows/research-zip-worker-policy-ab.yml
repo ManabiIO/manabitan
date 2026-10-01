@@ -1,0 +1,32 @@
+name: Research ZIP Worker Policy AB
+
+on:
+  push:
+    branches:
+      - research/zip-worker-policy-ab-20261001
+
+permissions:
+  contents: read
+
+jobs:
+  import-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24.20.0'
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Prepare pinned dictionaries
+        run: node ./dev/perf/prepare-dictionaries.js
+      - name: Jitendex default vs no ZIP web workers
+        run: node ./dev/perf/import-ab.js jitendex --pairs 10 --flags '{"zipUseWebWorkers":false}' --out builds/perf/jitendex-zip-workers-off.json
+      - name: JMdict control
+        run: node ./dev/perf/import-ab.js jmdict --pairs 6 --flags '{"zipUseWebWorkers":false}' --out builds/perf/jmdict-zip-workers-off-control.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: zip-worker-policy-ab
+          path: builds/perf/*zip-workers-off*.json
+          retention-days: 7
