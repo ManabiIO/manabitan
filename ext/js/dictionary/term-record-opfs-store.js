@@ -3121,7 +3121,33 @@ export class TermRecordOpfsStore {
                 }
                 const file = await fileHandle.getFile();
                 if (file.size === 0 && state.fileLength === 0) { continue; }
-                const shardMaxId = await this._scanPersistentIndexMaxRecordIdFile(file, state.fileLength);
+                const descriptorFile = await state.fileHandle.getFile();
+                if (
+                    descriptorFile.size !== state.fileLength ||
+                    descriptorFile.size < BINARY_HEADER_PREFIX_BYTES
+                ) {
+                    throw new Error(`Cannot reserve term-record IDs: invalid descriptor ${state.fileName}`);
+                }
+                const descriptorHeader = await this._readFileRange(
+                    descriptorFile,
+                    0,
+                    BINARY_HEADER_PREFIX_BYTES,
+                );
+                if (
+                    this._textDecoder.decode(descriptorHeader.subarray(0, BINARY_MAGIC_BYTES)) !==
+                    BINARY_MAGIC_TEXT
+                ) {
+                    throw new Error(`Cannot reserve term-record IDs: invalid descriptor ${state.fileName}`);
+                }
+                const descriptorGenerationId = descriptorHeader.subarray(
+                    BINARY_MAGIC_BYTES,
+                    BINARY_HEADER_PREFIX_BYTES,
+                );
+                const shardMaxId = await this._scanPersistentIndexMaxRecordIdFile(
+                    file,
+                    state.fileLength,
+                    descriptorGenerationId,
+                );
                 if (shardMaxId === null) {
                     throw new Error(`Cannot reserve term-record IDs: invalid container ${indexFileName}`);
                 }
@@ -3148,20 +3174,43 @@ export class TermRecordOpfsStore {
      * need to be materialized merely to reserve the next append ID.
      * @param {File} file
      * @param {number} expectedDescriptorFileLength
+     * @param {Uint8Array} expectedGenerationId
      * @returns {Promise<number|null>}
      */
-    async _scanPersistentIndexMaxRecordIdFile(file, expectedDescriptorFileLength) {
-        const slice = /** @type {unknown} */ (Reflect.get(file, 'slice'));
-        if (typeof slice !== 'function') {
-            return this._scanPersistentIndexMaxRecordId(new Uint8Array(await file.arrayBuffer()));
-        }
+    async _scanPersistentIndexMaxRecordIdFile(file, expectedDescriptorFileLength, expectedGenerationId) {
         if (
             !Number.isSafeInteger(file.size) ||
             file.size < LOOKUP_INDEX_FILE_HEADER_BYTES ||
             !Number.isSafeInteger(expectedDescriptorFileLength) ||
-            expectedDescriptorFileLength < 0
+            expectedDescriptorFileLength < 0 ||
+            !(expectedGenerationId instanceof Uint8Array) ||
+            expectedGenerationId.byteLength !== SHARD_GENERATION_BYTES
         ) {
             return null;
+        }
+        const slice = /** @type {unknown} */ (Reflect.get(file, 'slice'));
+        if (typeof slice !== 'function') {
+            const content = new Uint8Array(await file.arrayBuffer());
+            if (content.byteLength < LOOKUP_INDEX_FILE_HEADER_BYTES) { return null; }
+            const header = content.subarray(0, LOOKUP_INDEX_FILE_HEADER_BYTES);
+            const headerView = new DataView(header.buffer, header.byteOffset, header.byteLength);
+            let descriptorFileLength;
+            try {
+                descriptorFileLength = readSafeU64Le(headerView, 8);
+            } catch (_) {
+                return null;
+            }
+            if (
+                this._textDecoder.decode(header.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT ||
+                descriptorFileLength !== expectedDescriptorFileLength ||
+                !bytesEqual(
+                    header.subarray(24, LOOKUP_INDEX_FILE_HEADER_BYTES),
+                    expectedGenerationId,
+                )
+            ) {
+                return null;
+            }
+            return this._scanPersistentIndexMaxRecordId(content);
         }
         const header = await this._readFileRange(file, 0, LOOKUP_INDEX_FILE_HEADER_BYTES);
         if (this._textDecoder.decode(header.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
@@ -3178,6 +3227,10 @@ export class TermRecordOpfsStore {
         const expectedRecordCount = headerView.getUint32(20, true);
         if (
             descriptorFileLength !== expectedDescriptorFileLength ||
+            !bytesEqual(
+                header.subarray(24, LOOKUP_INDEX_FILE_HEADER_BYTES),
+                expectedGenerationId,
+            ) ||
             chunkCount === 0 ||
             expectedRecordCount === 0 ||
             chunkCount > expectedRecordCount
