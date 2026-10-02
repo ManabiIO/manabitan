@@ -3513,12 +3513,28 @@ describe('TermRecordOpfsStore', () => {
             [5, 6, 7],
             'raw',
         );
+        await writerStore.appendBatchFromArtifactChunkResolvedContent(
+            {
+                dictionary: dictionaryName,
+                dictionaryTotalRows: 1_000_000,
+                rowCount: 2,
+                expressionBytesList: ['四', '五'].map((value) => textEncoder.encode(value)),
+                readingBytesList: ['よん', 'ご'].map((value) => textEncoder.encode(value)),
+                readingEqualsExpressionList: new Uint8Array([0, 0]),
+                scoreList: new Int32Array([4, 5]),
+                sequenceList: new Int32Array([40, 50]),
+            },
+            [400, 500],
+            [8, 9],
+            'raw',
+        );
         await writerStore._closeAllWritables();
 
         const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
         if (typeof indexFileName !== 'string') { throw new Error('Expected lookup index'); }
         const indexBytes = fileBytesByName.get(indexFileName);
         if (!(indexBytes instanceof Uint8Array)) { throw new Error('Expected lookup-index bytes'); }
+        expect(new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength).getUint32(16, true)).toBe(2);
         /** @type {Array<[number, number]>} */
         const ranges = [];
         const fullRead = vi.fn(async () => {
@@ -3552,20 +3568,35 @@ describe('TermRecordOpfsStore', () => {
         expect(ranges[0]).toEqual([0, 40]);
         expect(ranges.every(([start, end]) => start >= 0 && end > start && end <= indexBytes.byteLength)).toBe(true);
         expect(Math.max(...ranges.map(([start, end]) => end - start))).toBeLessThan(indexBytes.byteLength);
-        expect(readerStore.getDictionaryRecordCount(dictionaryName)).toBe(3);
-        const matchingId = readerStore.findTermIds(dictionaryName, '二', 'expression')[0] ?? -1;
-        expect(matchingId).toBeGreaterThan(0);
-        expect(await readerStore.getByIdsAsync([matchingId])).toMatchObject(new Map([[
-            matchingId,
-            expect.objectContaining({
-                expression: '二',
-                reading: 'に',
-                entryContentOffset: 200,
-                entryContentLength: 6,
-                score: 2,
-                sequence: 20,
-            }),
-        ]]));
+        expect(readerStore.getDictionaryRecordCount(dictionaryName)).toBe(5);
+        const firstChunkId = readerStore.findTermIds(dictionaryName, '二', 'expression')[0] ?? -1;
+        const secondChunkId = readerStore.findTermIds(dictionaryName, '五', 'expression')[0] ?? -1;
+        expect(firstChunkId).toBeGreaterThan(0);
+        expect(secondChunkId).toBeGreaterThan(firstChunkId);
+        expect(await readerStore.getByIdsAsync([firstChunkId, secondChunkId])).toMatchObject(new Map([
+            [
+                firstChunkId,
+                expect.objectContaining({
+                    expression: '二',
+                    reading: 'に',
+                    entryContentOffset: 200,
+                    entryContentLength: 6,
+                    score: 2,
+                    sequence: 20,
+                }),
+            ],
+            [
+                secondChunkId,
+                expect.objectContaining({
+                    expression: '五',
+                    reading: 'ご',
+                    entryContentOffset: 500,
+                    entryContentLength: 9,
+                    score: 5,
+                    sequence: 50,
+                }),
+            ],
+        ]));
     });
 
     test('gets cold MBTIDX11 dictionary counts and samples without materializing Maps', async () => {
