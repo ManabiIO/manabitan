@@ -86,13 +86,16 @@ export function record(value: unknown): value is Record<string, unknown> {
  * @param maximum
  */
 export function text(value: unknown, maximum = 256): string {
-    if (
-        typeof value !== 'string' ||
-        value.length === 0 ||
-        [...value].length > maximum ||
-        value.includes('\0')
-    ) {
+    if (typeof value !== 'string' || value.length === 0 || value.includes('\0')) {
         throw new WebRuntimeError('invalid_request', 'Invalid dictionary request text');
+    }
+    let characters = 0;
+    for (let index = 0; index < value.length;) {
+        const codePoint = value.codePointAt(index);
+        index += typeof codePoint === 'number' && codePoint > 0xffff ? 2 : 1;
+        if (++characters > maximum) {
+            throw new WebRuntimeError('invalid_request', 'Invalid dictionary request text');
+        }
     }
     return value;
 }
