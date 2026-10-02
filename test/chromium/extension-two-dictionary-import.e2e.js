@@ -20,6 +20,7 @@
 // @ts-nocheck
 
 import {createServer} from 'node:http';
+import assert from 'node:assert/strict';
 import os from 'node:os';
 import path from 'node:path';
 import {execFile} from 'node:child_process';
@@ -27,13 +28,15 @@ import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
 import {existsSync, readFileSync} from 'node:fs';
 import {access, copyFile, mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
-import {chromium} from '@playwright/test';
+import {chromium, expect} from '@playwright/test';
 import {ensurePinnedDictionaryCache} from '../../dev/perf/dictionary-fixtures.js';
 import {getHostEnvironment} from '../../dev/perf/host-environment.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
 import {armBrowserImportTiming} from '../e2e/import-timing.js';
+import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
+import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -1042,6 +1045,9 @@ async function evalSendMessage(page, expression, arg = null) {
                 resolve(response && typeof response === 'object' ? response.result : response);
             });
         });
+        if (expression === 'readerBridgeRuntime') {
+            return await send(arg.action, arg.params);
+        }
         if (expression === 'purge') {
             await send('purgeDatabase', undefined);
             const optionsFull = await send('optionsGetFull', undefined);
@@ -2790,6 +2796,207 @@ async function getPopupContentDebugState(popupFrame) {
             noDictionariesHidden: noDictionariesNode instanceof HTMLElement ? noDictionariesNode.hidden : null,
         };
     });
+}
+
+async function verifyInstalledReaderLookupBridge(page, localServer, expectedDictionaryNames) {
+    const extensionPageUrl = page.url();
+    const send = async (action, params) => await evalSendMessage(page, 'readerBridgeRuntime', {action, params});
+    const savedOptions = await send('optionsGetFull', undefined);
+    const mockState = createAnkiMockState();
+    mockState.beginScenario('reader-lookup-only', []);
+    const ankiServer = await startAnkiMockHttpServer(mockState);
+    const getWrites = () => mockState.getScenarioState().actions.filter(({action}) => (
+        /^(?:addNote|addNotes|updateNoteFields|storeMediaFile|deleteNotes|suspend)$/.test(action)
+    ));
+    const result = {clicks: [], hover: null, ankiActions: [], minedNote: null};
+    try {
+        const options = structuredClone(savedOptions);
+        for (const {options: profileOptions} of options.profiles) {
+            profileOptions.anki.enable = true;
+            profileOptions.anki.server = ankiServer.ankiConnectUrl;
+            profileOptions.anki.apiKey = '';
+            profileOptions.anki.displayTagsAndFlags = 'never';
+            profileOptions.anki.cardFormats = [{
+                type: 'term',
+                name: 'Reader E2E',
+                deck: 'Default',
+                model: 'Basic',
+                icon: 'big-circle',
+                fields: {
+                    Front: {value: '{expression}', overwriteMode: 'overwrite'},
+                    Back: {value: 'PREFIX[{cloze-prefix}]BODY[{cloze-body}]SUFFIX[{cloze-suffix}]SENTENCE[{sentence}]', overwriteMode: 'overwrite'},
+                },
+            }];
+        }
+        await send('setAllSettings', {value: options, source: 'chromium-e2e-reader-bridge'});
+        // Positive control: the installed backend can reach the enabled mock.
+        await send('getAnkiConnectVersion', undefined);
+        assert.ok(mockState.getActionNames().includes('version'), 'Anki mock must observe the installed backend');
+        await page.goto(`${localServer.baseUrl}/wagahai-neko.html`);
+        await waitForPageFrontendHoverPrewarmReady(page);
+
+        const scenarios = [
+            {surface: '食べた', prefix: '私は', reading: 'たべる', expectedStatus: 'shown'},
+            {surface: '食べさせられた', prefix: '\u{1f600}昨日も食べさせられたが、今日は', reading: 'たべる', expectedStatus: 'shown'},
+            {surface: '食べた', prefix: '私は', reading: 'たべるまなびたん', expectedStatus: 'no-exact-match'},
+        ];
+        for (const [index, scenario] of scenarios.entries()) {
+            await dismissVisiblePopupFrames(page);
+            const sentence = `${scenario.prefix}${scenario.surface}。`;
+            const request = {protocol: 1,
+                term: '食べる',
+                reading: scenario.reading,
+                surface: scenario.surface,
+                contextID: `reader-e2e-${index}`,
+                offset: scenario.prefix.length};
+            await page.evaluate(({request, sentence, prefix}) => {
+                document.querySelector('#reader-e2e-context')?.remove();
+                const context = document.createElement('p');
+                context.id = 'reader-e2e-context';
+                context.dataset.readerLookupContext = JSON.stringify({protocol: 1, id: request.contextID, text: sentence});
+                const anchor = document.createElement('span');
+                anchor.id = 'reader-e2e-anchor';
+                anchor.dataset.readerLookup = JSON.stringify(request);
+                const ruby = document.createElement('ruby');
+                ruby.append(request.surface);
+                const rt = document.createElement('rt');
+                rt.textContent = 'たべる';
+                ruby.append(rt);
+                anchor.append(ruby);
+                context.append(prefix, anchor, '。');
+                document.querySelector('main').prepend(context);
+                delete document.documentElement.dataset.readerLookupStatus;
+                document.getSelection()?.removeAllRanges();
+            }, {request, sentence, prefix: scenario.prefix});
+            const anchor = page.locator('#reader-e2e-anchor');
+            await anchor.scrollIntoViewIfNeeded();
+            const box = await anchor.boundingBox();
+            assert.ok(box && box.width > 0 && box.height > 0, 'Reader anchor must have actual click geometry');
+            // Mouse input, not dispatchEvent/HTMLElement.click: the bridge requires trusted pointer activation.
+            await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.75);
+            await page.waitForFunction(
+                (status) => document.documentElement.dataset.readerLookupStatus === status,
+                scenario.expectedStatus,
+                {timeout: 10000},
+            );
+            const frameHandle = await waitForVisiblePopupFrameHandle(page, 2000);
+            assert.ok(frameHandle, 'Reader click must display a popup');
+            const frame = await frameHandle.contentFrame();
+            assert.ok(frame, 'Reader popup must have an installed extension frame');
+            assert.equal(new URL(frame.url()).protocol, 'chrome-extension:', 'Popup must be an extension document');
+            assert.equal(new URL(frame.url()).host, new URL(extensionPageUrl).host, 'Popup must belong to the installed extension');
+            // Status can settle before rendering; require this operation's context and content together.
+            await frame.waitForFunction(({sentence, offset, request, expectedStatus, expectedDictionaryNames}) => {
+                const currentSentence = history.state?.state?.sentence;
+                if (currentSentence?.text !== sentence || currentSentence.offset !== offset ||
+                new URL(location.href).searchParams.get('query') !== request.surface) { return false; }
+                const entries = document.querySelector('#dictionary-entries');
+                if (!(entries instanceof HTMLElement)) { return false; }
+                const headwords = Array.from(entries.querySelectorAll('.headword'));
+                const glossary = Array.from(entries.querySelectorAll('.gloss-content')).map((node) => node.textContent.trim()).join('');
+                if (expectedStatus === 'no-exact-match') {
+                    return headwords.length === 0 && glossary === '' && entries.textContent.trim() === '';
+                }
+                return headwords.length > 0 && headwords.every((node) => {
+                    const termNode = node.querySelector('.headword-term');
+                    const readingNode = node.querySelector('.headword-reading');
+                    if (termNode === null || readingNode === null) { return false; }
+                    const term = termNode.cloneNode(true);
+                    for (const annotation of term.querySelectorAll('rt,rp,rtc')) { annotation.remove(); }
+                    return term.textContent === request.term && readingNode.textContent === request.reading;
+                }) && /\beat\b/i.test(glossary) &&
+                Array.from(entries.querySelectorAll('.definition-item[data-dictionary]')).some((node) => expectedDictionaryNames.includes(node.dataset.dictionary));
+            }, {sentence, offset: [...scenario.prefix].length, request, expectedStatus: scenario.expectedStatus, expectedDictionaryNames}, {timeout: 10000});
+            const content = await frame.evaluate(() => {
+                const entries = document.querySelector('#dictionary-entries');
+                return {
+                    sentence: history.state?.state?.sentence,
+                    query: new URL(location.href).searchParams.get('query'),
+                    headwords: Array.from(entries.querySelectorAll('.headword')).map((node) => {
+                        const term = node.querySelector('.headword-term').cloneNode(true);
+                        for (const annotation of term.querySelectorAll('rt,rp,rtc')) { annotation.remove(); }
+                        return {term: term.textContent, reading: node.querySelector('.headword-reading').textContent};
+                    }),
+                    dictionaries: Array.from(entries.querySelectorAll('.definition-item[data-dictionary]')).map((node) => node.dataset.dictionary),
+                    glossary: Array.from(entries.querySelectorAll('.gloss-content')).map((node) => node.textContent.trim()).join(''),
+                    entriesText: entries.textContent.trim(),
+                };
+            });
+            assert.deepEqual(
+                content.sentence,
+                {text: sentence, offset: [...scenario.prefix].length},
+                'Popup must retain the sentence and convert the UTF-16 occurrence offset to codepoints',
+            );
+            assert.equal(content.query, request.surface, 'Popup source must remain the inflected surface, not the lemma');
+            if (scenario.expectedStatus === 'shown') {
+                assert.ok(content.headwords.length > 0, 'Reader popup must render dictionary headwords');
+                for (const headword of content.headwords) {
+                    assert.deepEqual(headword, {term: request.term, reading: request.reading}, 'Every rendered headword must be the exact requested lexical pair');
+                }
+                assert.match(content.glossary, /\beat\b/i, 'Reader popup must render the actual eating definition');
+                assert.ok(content.dictionaries.some((name) => expectedDictionaryNames.includes(name)), 'Reader popup must identify an imported dictionary');
+            } else {
+                assert.deepEqual(content.headwords, [], 'Wrong reading must not fall back to lemma or surface lookup');
+                assert.equal(content.glossary, '', 'Exact miss must not retain previous definitions');
+                assert.equal(content.entriesText, '', 'Exact miss must clear previous dictionary content');
+            }
+            result.clicks.push({request, ...content});
+            if (index <= 1) {
+                assert.deepEqual(getWrites(), [], 'Reader trusted clicks must not write Anki notes or media before explicit mining');
+            }
+            if (index === 1) {
+                // Exercise the ordinary popup UI, not a mining/runtime API shortcut.
+                const saveButton = frame.locator('.entry .note-actions-container .action-button[data-action="save-note"]').first();
+                await saveButton.click({timeout: 10000});
+                await expect.poll(() => getWrites().length, {timeout: 10000, intervals: [100, 250, 500]}).toBe(1);
+                const [write] = getWrites();
+                assert.equal(write.action, 'addNote', 'Explicit popup mining must create one note');
+                assert.equal(write.error, null, 'Mock must accept the mined note');
+                assert.ok(Number.isSafeInteger(write.result) && write.result > 0, 'Explicit mining must return a real mock note ID');
+                assert.deepEqual(write.params.note.fields, {
+                    Front: request.term,
+                    Back: `PREFIX[${scenario.prefix}]BODY[${request.surface}]SUFFIX[。]SENTENCE[${sentence}]`,
+                }, 'Mined expression must be the lemma; cloze must retain the original emoji, inflected surface, occurrence, and sentence');
+                // View-note publication precedes optional post-add work; wait for the whole mining flow.
+                await frame.waitForFunction((noteId) => {
+                    const entry = document.querySelector('#dictionary-entries .entry');
+                    const button = entry?.querySelector('.note-actions-container .action-button-container[data-card-format-index="0"] .action-button[data-action="view-note"]');
+                    const progress = document.querySelector('#progress-indicator');
+                    return button instanceof HTMLButtonElement && !button.hidden && !button.disabled &&
+                    button.dataset.noteIds?.split(/\s+/).includes(String(noteId)) &&
+                    progress instanceof HTMLElement && progress.dataset.active === 'false' &&
+                    document.querySelector('.footer-notification:not([hidden]) [class^="anki-note-error"]') === null;
+                }, write.result, {timeout: 10000});
+                await expect(frame.locator('.footer-notification:not([hidden]) [class^="anki-note-error"]')).toHaveCount(0);
+                result.minedNote = write;
+            }
+        }
+        await dismissVisiblePopupFrames(page);
+        result.hover = await hoverLookupOnWagahai(page, '#target-cat');
+        assert.ok(result.hover.hasDictionaryEntries, 'Ordinary hover must still render entries after Reader clicks');
+        const hoverFrameHandle = await waitForVisiblePopupFrameHandle(page);
+        const hoverFrame = await hoverFrameHandle.contentFrame();
+        assert.ok(
+            await hoverFrame.locator('.headword-reading').evaluateAll((nodes) => nodes.some((node) => node.textContent === 'ねこ')),
+            'Ordinary cat hover must render the real reading',
+        );
+        assert.match(result.hover.entriesTextPreview, /猫/, 'Ordinary hover must show the cat headword');
+    } finally {
+        // Restore settings from an extension-origin page, even if an assertion failed on the lookup site.
+        try {
+            await page.goto(extensionPageUrl);
+            await send('setAllSettings', {value: savedOptions, source: 'chromium-e2e-reader-bridge-restore'});
+        } finally {
+            await ankiServer.close();
+        }
+    }
+    result.ankiActions = mockState.getActionNames();
+    assert.deepEqual(
+        getWrites(),
+        [result.minedNote],
+        'Wrong-reading miss and subsequent hover must not write additional notes or media after explicit mining',
+    );
+    return result;
 }
 
 async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) {
@@ -5306,6 +5513,30 @@ async function main() {
                 postUsageSearchStart,
                 postUsageSearchEnd,
                 postUsageSearchProfile,
+                processSampler,
+            );
+
+            const readerBridgeStart = safePerformance.now();
+            let readerBridgeResult = null;
+            let readerBridgeError = '';
+            try {
+                assert.ok(localServer, 'Local lookup site is required for installed Reader bridge coverage');
+                await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+                await waitForSettingsPageReady(page);
+                readerBridgeResult = await verifyInstalledReaderLookupBridge(page, localServer, expectedLookupDictionaries);
+            } catch (e) {
+                readerBridgeError = errorMessage(e);
+                verificationErrors.push(`Installed Reader bridge verification failed: ${readerBridgeError}`);
+            }
+            await addReportPhase(
+                report,
+                page,
+                'Verify installed Reader trusted-click lookup bridge',
+                readerBridgeError.length > 0 ? `Reader bridge failed: ${readerBridgeError}` :
+                    `Exact lexical pairs, inflected ruby surface, shared sentence/codepoint offset, explicit popup Anki mining with original cloze, wrong-reading miss, no automatic Anki writes, and ordinary hover: ${JSON.stringify(readerBridgeResult)}`,
+                readerBridgeStart,
+                safePerformance.now(),
+                null,
                 processSampler,
             );
         }

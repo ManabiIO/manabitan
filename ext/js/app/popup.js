@@ -21,8 +21,9 @@ import {DynamicProperty} from '../core/dynamic-property.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
+import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
-import {deepEqual} from '../core/utilities.js';
+import {deepEqual, generateId} from '../core/utilities.js';
 import {addFullscreenChangeEventListener, computeZoomScale, convertRectZoomCoordinates, getFullscreenElement} from '../dom/document-util.js';
 import {loadStyle} from '../dom/style-util.js';
 import {checkPopupPreviewURL} from '../pages/settings/popup-preview-controller.js';
@@ -42,6 +43,14 @@ export class Popup extends EventDispatcher {
      */
     constructor(application, id, depth, frameId, childrenSupported) {
         super();
+        /** @type {number} */
+        this._publicationGeneration = 0;
+        /** @type {string} */
+        this._publicationSource = generateId(16);
+        /** @type {number} */
+        this._optionsGeneration = 0;
+        /** @type {?(() => void)} */
+        this._cancelPendingPublication = null;
         /** @type {import('../application.js').Application} */
         this._application = application;
         /** @type {string} */
@@ -227,8 +236,11 @@ export class Popup extends EventDispatcher {
      * @param {import('settings').OptionsContext} optionsContext The options context object.
      */
     async setOptionsContext(optionsContext) {
-        await this._setOptionsContext(optionsContext);
-        if (this._frameConnected) {
+        this._cancelPendingPublication?.();
+        const generation = ++this._publicationGeneration;
+        const isCurrent = () => generation === this._publicationGeneration;
+        await this._setOptionsContext(optionsContext, isCurrent);
+        if (isCurrent() && this._frameConnected) {
             await this._invokeSafe('displaySetOptionsContext', {optionsContext});
         }
     }
@@ -275,6 +287,8 @@ export class Popup extends EventDispatcher {
      * @param {boolean} changeFocus Whether or not the parent popup or host frame should be focused.
      */
     hide(changeFocus) {
+        this._cancelPendingPublication?.();
+        ++this._publicationGeneration;
         this.stopHideDelayed();
         if (this._child !== null) {
             this._child.hide(false);
@@ -366,30 +380,58 @@ export class Popup extends EventDispatcher {
      * Shows and updates the positioning and content of the popup.
      * @param {import('popup').ContentDetails} details Settings for the outer popup.
      * @param {?import('display').ContentDetails} displayDetails The details parameter passed to `Display.setContent`.
+     * @param {import('popup').PublicationGuard} [guard]
      * @returns {Promise<void>}
      */
-    async showContent(details, displayDetails) {
-        if (this._optionsContext === null) { throw new Error('Options not assigned'); }
-        this._updateHostPageDebugState({
-            popupShowAttemptCount: this._incrementHostDebugCounter('popupShowAttemptCount'),
-        });
+    async showContent(details, displayDetails, guard) {
+        if (displayDetails !== null) { this._cancelPendingPublication?.(); }
+        const generation = displayDetails === null ? this._publicationGeneration : ++this._publicationGeneration;
+        /** @type {import('popup').PublicationToken} */
+        const publication = {source: this._publicationSource, generation};
+        let dispatched = false;
+        let cancelled = false;
+        const cancel = () => {
+            if (cancelled) { return; }
+            cancelled = true;
+            if (dispatched) {
+                void this._invokeSafe('displayCancelPublication', {publication}).catch((error) => {
+                    if (!this._application.webExtension.unloaded) { log.error(error); }
+                });
+            }
+        };
+        if (displayDetails !== null) { this._cancelPendingPublication = cancel; }
+        const isCurrent = () => !cancelled && generation === this._publicationGeneration && (typeof guard === 'undefined' || guard.isCurrent());
+        const unsubscribe = guard?.subscribe?.(cancel);
+        try {
+            if (!isCurrent()) { return; }
+            if (displayDetails === null && !this.isVisibleSync()) { return; }
+            if (this._optionsContext === null) { throw new Error('Options not assigned'); }
+            this._updateHostPageDebugState({
+                popupShowAttemptCount: this._incrementHostDebugCounter('popupShowAttemptCount'),
+            });
 
-        const {optionsContext, sourceRects, writingMode} = details;
-        if (optionsContext !== null) {
-            await this._setOptionsContextIfDifferent(optionsContext);
+            const {optionsContext, sourceRects, writingMode} = details;
+            if (optionsContext !== null) {
+                await this._setOptionsContextIfDifferent(optionsContext, isCurrent);
+            }
+            if (!isCurrent()) { return; }
+
+            // If there's already a timer running on the same popup from a previous lookup, reset it
+            this.stopHideDelayed();
+
+            if (displayDetails !== null) {
+                safePerformance.mark('invokeDisplaySetContent:start');
+                const injected = await this._inject();
+                if (!injected || !isCurrent()) { return; }
+                dispatched = true;
+                await this._invokeSafe('displaySetContent', {details: displayDetails, publication});
+            }
+            if (!isCurrent()) { return; }
+            await this._show(sourceRects, writingMode, isCurrent);
+        } finally {
+            if (this._cancelPendingPublication === cancel) { this._cancelPendingPublication = null; }
+            unsubscribe?.();
         }
-
-        // If there's already a timer running on the same popup from a previous lookup, reset it
-        this.stopHideDelayed();
-
-        if (displayDetails !== null) {
-            safePerformance.mark('invokeDisplaySetContent:start');
-            const injected = await this._inject();
-            if (!injected) { return; }
-            await this._invokeSafe('displaySetContent', {details: displayDetails});
-        }
-
-        await this._show(sourceRects, writingMode);
     }
 
     /**
@@ -398,9 +440,23 @@ export class Popup extends EventDispatcher {
      * @returns {Promise<void>}
      */
     async prewarmContent(displayDetails) {
+        if (this.isVisibleSync() || this._cancelPendingPublication !== null) { return; }
+        const generation = ++this._publicationGeneration;
         const injected = await this._inject();
-        if (!injected) { return; }
-        await this._invokeSafe('displaySetContent', {details: displayDetails});
+        if (!injected || generation !== this._publicationGeneration || this.isVisibleSync() || this._cancelPendingPublication !== null) { return; }
+        /** @type {import('popup').PublicationToken} */
+        const publication = {source: this._publicationSource, generation};
+        const cancel = () => {
+            void this._invokeSafe('displayCancelPublication', {publication}).catch((error) => {
+                if (!this._application.webExtension.unloaded) { log.error(error); }
+            });
+        };
+        this._cancelPendingPublication = cancel;
+        try {
+            await this._invokeSafe('displaySetContent', {details: displayDetails, publication});
+        } finally {
+            if (this._cancelPendingPublication === cancel) { this._cancelPendingPublication = null; }
+        }
     }
 
     /**
@@ -788,10 +844,11 @@ export class Popup extends EventDispatcher {
     /**
      * @param {import('popup').Rect[]} sourceRects
      * @param {import('document-util').NormalizedWritingMode} writingMode
+     * @param {() => boolean} [isCurrent]
      */
-    async _show(sourceRects, writingMode) {
+    async _show(sourceRects, writingMode, isCurrent = () => true) {
         const injected = await this._inject();
-        if (!injected) { return; }
+        if (!injected || !isCurrent()) { return; }
 
         const viewport = this._getViewport(this._scaleRelativeToVisualViewport);
         let {left, top, width, height, after, below} = this._getPosition(sourceRects, writingMode, viewport);
@@ -1243,10 +1300,13 @@ export class Popup extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {() => boolean} [isCurrent]
      */
-    async _setOptionsContext(optionsContext) {
-        this._optionsContext = optionsContext;
+    async _setOptionsContext(optionsContext, isCurrent = () => true) {
+        const generation = ++this._optionsGeneration;
         const options = await this._application.api.optionsGet(optionsContext);
+        if (!isCurrent() || generation !== this._optionsGeneration) { return; }
+        this._optionsContext = optionsContext;
         const {general, scanning} = options;
         this._themeController.theme = general.popupTheme;
         this._themeController.themePreset = general.popupThemePreset;
@@ -1277,10 +1337,11 @@ export class Popup extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {() => boolean} [isCurrent]
      */
-    async _setOptionsContextIfDifferent(optionsContext) {
+    async _setOptionsContextIfDifferent(optionsContext, isCurrent) {
         if (deepEqual(this._optionsContext, optionsContext)) { return; }
-        await this._setOptionsContext(optionsContext);
+        await this._setOptionsContext(optionsContext, isCurrent);
     }
 
     /**
