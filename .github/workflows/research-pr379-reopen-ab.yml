@@ -1,0 +1,42 @@
+name: Research PR379 Cold Reopen AB
+
+on:
+  push:
+    branches:
+      - research/pr379-cold-reopen-ab-20261001
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout candidate research branch
+        uses: actions/checkout@v6
+
+      - name: Checkout exact baseline
+        uses: actions/checkout@v6
+        with:
+          ref: 636fd0149d674566b8f588ab746d2531739c14d0
+          path: baseline
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+
+      - name: Run same-process alternating A/B
+        run: |
+          node --expose-gc dev/perf/term-record-reopen-ab.js "$GITHUB_WORKSPACE/baseline" 12 > pr379-reopen-ab.json
+
+      - name: Show summary
+        run: |
+          node --input-type=module -e "const r=JSON.parse(require('node:fs').readFileSync('pr379-reopen-ab.json')); console.log(JSON.stringify(r.summary,null,2)); console.log(JSON.stringify(r.fixture,null,2))"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: pr379-cold-reopen-ab
+          path: pr379-reopen-ab.json
+          retention-days: 7
