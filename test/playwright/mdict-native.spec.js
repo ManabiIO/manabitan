@@ -162,7 +162,23 @@ test('MDX audio-only resources survive import, reopening and a real media-link c
     expect(fetched.type).toBe('audio/wav');
     expect(fetched.bytes).toStrictEqual([...wav]);
     expect(fetched.hasOpener).toBe(false);
-    await expect.poll(() => mediaTab.locator('audio').evaluate((audio) => /** @type {HTMLAudioElement} */ (audio).readyState)).toBeGreaterThanOrEqual(1);
+    // Chromium's native audio document can use a video element as its player.
+    const playback = await mediaTab.locator('audio, video').evaluate(async (element) => {
+        const audio = /** @type {HTMLMediaElement} */ (element);
+        await new Promise((resolve) => {
+            const timer = setTimeout(resolve, 10_000);
+            const settled = () => {
+                clearTimeout(timer);
+                resolve(void 0);
+            };
+            audio.addEventListener('loadedmetadata', settled, {once: true});
+            audio.addEventListener('error', settled, {once: true});
+            audio.load();
+        });
+        return {readyState: audio.readyState, error: audio.error?.message ?? null, source: audio.currentSrc, preload: audio.preload};
+    });
+    expect(playback.error).toBeNull();
+    expect(playback.readyState, JSON.stringify(playback)).toBeGreaterThanOrEqual(1);
     await mediaTab.close();
     await reopened.close();
 });
