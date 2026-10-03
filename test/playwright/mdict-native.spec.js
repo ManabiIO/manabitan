@@ -104,9 +104,82 @@ async function importFiles(page, extensionBaseUrl, files, title) {
  */
 async function assertStoredMedia(page, title, path, expected) {
     const media = /** @type {Array<{content: string}>} */ (await api(page, 'getMedia', {targets: [{dictionary: title, path}]}));
-    expect(media).toHaveLength(1);
+    expect(media, `Stored media: ${path}`).toHaveLength(1);
     expect(Buffer.from(media[0].content, 'base64')).toStrictEqual(Buffer.from(expected));
 }
+
+test('MDX stylesheet media preserves special filename identities after import and reopening', async ({page, context, extensionId}) => {
+    test.setTimeout(180_000);
+    const title = 'MDict CSS filename regression';
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const assets = [
+        'slash%2Fname.png',
+        'backslash%5Cname.png',
+        'literal%20name.png',
+        'double%252Fname.png',
+        'bad%ZZname.png',
+        'hash#name.png',
+        'query?name.png',
+        'literal name.png',
+    ].map((name, index) => ({name, bytes: makeFixturePng([index * 30, 255 - index * 30, 100, 255])}));
+    const mdx = makeMdictFixture([{
+        key: 'Media',
+        value: assets.map((_asset, index) => `<span class="media${index}">media ${index}</span>`).join(''),
+    }], {title});
+    const stylesheet = assets.map(({name}, index) => (
+        `.media${index}{background-image:url("images/${encodeURIComponent(name)}")}`
+    )).join('\n');
+    const mdd = makeMdictFixture([
+        {key: '\\styles\\theme.css', value: stylesheet},
+        ...assets.map(({name, bytes}) => ({key: `\\styles\\images\\${name}`, value: bytes})),
+    ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1});
+    await importFiles(page, extensionBaseUrl, [
+        {name: 'filenames.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
+        {name: 'filenames.mdd', mimeType: 'application/octet-stream', buffer: Buffer.from(mdd.bytes)},
+    ], title);
+    for (const {name, bytes} of assets) {
+        await assertStoredMedia(page, title, `mdict-media/styles/images/${name}`, bytes);
+    }
+    await api(page, 'modifySettings', {
+        targets: [{
+            action: 'set',
+            path: 'general.enableWanakana',
+            value: false,
+            scope: 'profile',
+            optionsContext: {depth: 0, url: `${extensionBaseUrl}/search.html`},
+        }],
+        source: 'test',
+    });
+    /**
+     * @param {import('@playwright/test').Page} searchPage
+     * @returns {Promise<void>}
+     */
+    const assertRenderedMedia = async (searchPage) => {
+        await searchPage.goto(`${extensionBaseUrl}/search.html`);
+        await expect(searchPage.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+        await expect(searchPage.locator('#wanakana-enable')).not.toBeChecked();
+        await searchPage.locator('#search-textbox').fill('Media');
+        await searchPage.locator('#search-button').click();
+        await expect(searchPage.locator('#dictionary-entries')).toContainText('media 0', {timeout: 30_000});
+        for (const [index, {bytes}] of assets.entries()) {
+            const target = searchPage.locator(`[data-sc-class~="media${index}"]`).first();
+            await expect(async () => {
+                const background = await target.evaluate((element) => getComputedStyle(element).backgroundImage);
+                const match = /^url\("(blob:[^"]+)"\)$/u.exec(background);
+                expect(match).not.toBeNull();
+                const renderedBytes = await searchPage.evaluate(async (url) => (
+                    [...new Uint8Array(await (await fetch(url)).arrayBuffer())]
+                ), match?.[1] ?? '');
+                expect(renderedBytes).toStrictEqual([...bytes]);
+            }).toPass({timeout: 30_000});
+        }
+    };
+    await assertRenderedMedia(page);
+    const reopened = await context.newPage();
+    await page.close();
+    await assertRenderedMedia(reopened);
+    await reopened.close();
+});
 
 test('MDX imports every key from many small blocks and retains boundary lookups after reload', async ({page, extensionId}) => {
     test.setTimeout(180_000);

@@ -37,7 +37,7 @@ import {TextSourceGenerator} from '../dom/text-source-generator.js';
 import {HotkeyHelpController} from '../input/hotkey-help-controller.js';
 import {TextScanner} from '../language/text-scanner.js';
 import {checkPopupPreviewURL} from '../pages/settings/popup-preview-controller.js';
-import {DictionaryCssMediaResolver, getMdictMediaPathsFromComputedCss, getMdictMediaPathsFromCss} from './dictionary-css-media-resolver.js';
+import {DictionaryCssMediaResolver, getMdictMediaPathsFromComputedCss, getMdictMediaPathsFromCss, getMdictMediaUrlPathMap} from './dictionary-css-media-resolver.js';
 import {DisplayContentManager} from './display-content-manager.js';
 import {DisplayGenerator} from './display-generator.js';
 import {DisplayHistory} from './display-history.js';
@@ -1383,12 +1383,15 @@ export class Display extends EventDispatcher {
         const options = this._options;
         if (options === null || this._setContentToken !== token) { return; }
 
-        const dictionariesWithMediaStyles = new Set();
+        /** @type {Map<string, string>} */
+        const dictionariesWithMediaStyles = new Map();
         for (const {name, enabled, styles = ''} of options.dictionaries) {
             if (enabled && styles.includes('mdict-media/')) {
-                dictionariesWithMediaStyles.add(name);
+                dictionariesWithMediaStyles.set(name, styles);
             }
         }
+        /** @type {Map<string, Map<string, string[]>>} */
+        const declaredMediaPaths = new Map();
 
         /** @type {Array<{element: HTMLElement, dictionary: string}>} */
         const inlineStyleElements = [];
@@ -1439,7 +1442,13 @@ export class Display extends EventDispatcher {
                 for (const property of imageBearingProperties) {
                     const value = style.getPropertyValue(property);
                     if (!value.includes('url(')) { continue; }
-                    for (const path of getMdictMediaPathsFromComputedCss(value, baseUrl)) {
+                    if (!value.includes('mdict-media/')) { continue; }
+                    let declaredPaths = declaredMediaPaths.get(dictionary);
+                    if (typeof declaredPaths === 'undefined') {
+                        declaredPaths = getMdictMediaUrlPathMap(dictionariesWithMediaStyles.get(dictionary) ?? '', baseUrl);
+                        declaredMediaPaths.set(dictionary, declaredPaths);
+                    }
+                    for (const path of getMdictMediaPathsFromComputedCss(value, baseUrl, declaredPaths)) {
                         addTarget(dictionary, path);
                     }
                 }

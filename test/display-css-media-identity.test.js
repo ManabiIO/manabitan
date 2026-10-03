@@ -4,6 +4,51 @@
 import {expect, test, vi} from 'vitest';
 import {Display} from '../ext/js/display/display.js';
 
+test.each([
+    'images/slash%2Fname.png',
+    'images/backslash%5Cname.png',
+    'images/literal%20name.png',
+    'images/double%252Fname.png',
+    'images/bad%ZZname.png',
+    'images/hash#name.png',
+    'images/query?name.png',
+])('display resolves the declared CSS filename identity: %s', async (name) => {
+    const display = /** @type {Display} */ (Object.create(Display.prototype));
+    const token = /** @type {import('core').TokenObject} */ ({});
+    const path = `mdict-media/${name}`;
+    const baseUrl = 'chrome-extension://example/search.html';
+    const resolve = vi.fn().mockResolvedValue(false);
+    const element = {style: {cssText: ''}, closest: () => ({dataset: {dictionary: 'A'}})};
+    Reflect.set(display, '_options', {dictionaries: [{name: 'A', enabled: true, styles: `.image{background:url("${path}")}`}]});
+    Reflect.set(display, '_setContentToken', token);
+    Reflect.set(display, '_container', {querySelectorAll: () => [element]});
+    Reflect.set(display, '_dictionaryCssMediaResolver', {
+        resolve,
+        /**
+         * @param {string} _dictionary
+         * @param {string} css
+         * @returns {string}
+         */
+        rewriteStyles(_dictionary, css) { return css; },
+    });
+    vi.stubGlobal('window', {location: {href: baseUrl}});
+    vi.stubGlobal('getComputedStyle', () => ({
+        /**
+         * @param {string} property
+         * @returns {string}
+         */
+        getPropertyValue(property) {
+            return property === 'background-image' ? `url("${new URL(path, baseUrl).href}")` : 'none';
+        },
+    }));
+    try {
+        await Display.prototype._resolveDictionaryCssMedia.call(display, token);
+        expect(resolve).toHaveBeenCalledExactlyOnceWith([{dictionary: 'A', path}]);
+    } finally {
+        vi.unstubAllGlobals();
+    }
+});
+
 test('display preserves distinct dictionary/path pairs before resolver batching', async () => {
     const display = /** @type {Display} */ (Object.create(Display.prototype));
     const token = /** @type {import('core').TokenObject} */ ({});
