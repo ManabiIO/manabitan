@@ -21,7 +21,7 @@ This policy is an inbound copyright-license grant, not a retroactive relicensing
 
 BSD-3-Clause does not contain an express patent grant. If Manabitan later needs an explicit contributor patent grant or a broader contributor agreement for proprietary reuse, establish that separately with qualified counsel rather than assuming this copyright policy supplies it.
 
-Human pull requests must affirm the dual-license grant in the pull-request checklist. CI rejects a human pull request without that checked acknowledgement; dependency/update bots are exempt. If you intend any part of a mixed GPL patch to be reusable elsewhere, use the template's optional independently reusable subset field to identify the exact original files/functions/hunks; otherwise leave it as `None`.
+Human pull requests must affirm the dual-license grant in the pull-request checklist. The `Contribution license acknowledgement / acknowledgement` check reports failure when that acknowledgement is missing; dependency/update bots are exempt. Repository administrators must configure that check as required on `develop` and every other branch that accepts contributions. Without a required-check branch rule, the workflow records the failure but GitHub may still permit a merge. If you intend any part of a mixed GPL patch to be reusable elsewhere, use the template's optional independently reusable subset field to identify the exact original files/functions/hunks; otherwise leave it as `None`.
 
 # Issues and Features
 
