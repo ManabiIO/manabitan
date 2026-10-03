@@ -888,13 +888,17 @@ export class API {
         return new Promise((resolve, reject) => {
             let settled = false;
             let retriedTransientFailure = false;
-            /** @param {Error} error */
-            const shutdownReject = (error) => {
-                if (settled) { return; }
+            /** @returns {boolean} */
+            const finalizeRequest = () => {
+                if (settled) { return false; }
                 settled = true;
                 this._shutdownRejectors.delete(shutdownReject);
                 globalThis.clearTimeout(timeoutId);
-                reject(error);
+                return true;
+            };
+            /** @param {unknown} error */
+            const shutdownReject = (error) => {
+                if (finalizeRequest()) { reject(error); }
             };
             const timeoutMs = this._getInvokeTimeoutMs(action);
             const timeoutId = globalThis.setTimeout(() => {
@@ -909,48 +913,45 @@ export class API {
                 try {
                     this._webExtension.sendMessage(data, (response) => {
                         if (settled) { return; }
-                        const runtimeError = this._webExtension.getLastError();
-                        if (runtimeError !== null) {
-                            if (!retriedTransientFailure && this._shouldRetryInvokeAfterRuntimeError(action, runtimeError)) {
-                                retriedTransientFailure = true;
-                                setTimeout(() => {
-                                    if (settled) { return; }
-                                    if (this._runtimeConnectionsShutdown) {
-                                        shutdownReject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
-                                        return;
-                                    }
-                                    attemptSend();
-                                }, 100);
+                        // Browser callbacks run after sendMessage returns. Their
+                        // failures must settle here, not escape the outer catch.
+                        try {
+                            const runtimeError = this._webExtension.getLastError();
+                            if (settled) { return; }
+                            if (runtimeError !== null) {
+                                if (!retriedTransientFailure && this._shouldRetryInvokeAfterRuntimeError(action, runtimeError)) {
+                                    retriedTransientFailure = true;
+                                    setTimeout(() => {
+                                        if (settled) { return; }
+                                        if (this._runtimeConnectionsShutdown) {
+                                            shutdownReject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
+                                            return;
+                                        }
+                                        attemptSend();
+                                    }, 100);
+                                    return;
+                                }
+                                shutdownReject(runtimeError);
                                 return;
                             }
-                            settled = true;
-                            this._shutdownRejectors.delete(shutdownReject);
-                            globalThis.clearTimeout(timeoutId);
-                            reject(runtimeError);
-                            return;
-                        }
-                        settled = true;
-                        this._shutdownRejectors.delete(shutdownReject);
-                        globalThis.clearTimeout(timeoutId);
-                        if (response !== null && typeof response === 'object') {
-                            const {error} = /** @type {import('core').UnknownObject} */ (response);
-                            if (typeof error !== 'undefined') {
-                                reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */(error)));
+                            if (response !== null && typeof response === 'object') {
+                                const {error} = /** @type {import('core').UnknownObject} */ (response);
+                                if (typeof error !== 'undefined') {
+                                    shutdownReject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */(error)));
+                                } else {
+                                    const {result} = /** @type {import('core').UnknownObject} */ (response);
+                                    if (finalizeRequest()) { resolve(/** @type {import('api').ApiReturn<TAction>} */(result)); }
+                                }
                             } else {
-                                const {result} = /** @type {import('core').UnknownObject} */ (response);
-                                resolve(/** @type {import('api').ApiReturn<TAction>} */(result));
+                                const message = response === null ? 'Unexpected null response. You may need to refresh the page.' : `Unexpected response of type ${typeof response}. You may need to refresh the page.`;
+                                shutdownReject(new Error(`${message} (${JSON.stringify(data)})`));
                             }
-                        } else {
-                            const message = response === null ? 'Unexpected null response. You may need to refresh the page.' : `Unexpected response of type ${typeof response}. You may need to refresh the page.`;
-                            reject(new Error(`${message} (${JSON.stringify(data)})`));
+                        } catch (error) {
+                            shutdownReject(error);
                         }
                     });
                 } catch (e) {
-                    if (settled) { return; }
-                    settled = true;
-                    this._shutdownRejectors.delete(shutdownReject);
-                    globalThis.clearTimeout(timeoutId);
-                    reject(e);
+                    shutdownReject(e);
                 }
             };
             attemptSend();
