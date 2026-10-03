@@ -148,10 +148,12 @@ test('MDX native cross-block import preserves aliases, senses and media through 
         {key: '別名', value: '@@@LINK=ねこ'},
         {key: '青', value: `<div>blue entry<img src="data:image/png;base64,${Buffer.from(blue).toString('base64')}"></div>`},
         {key: '緑', value: '<div>green MDD entry<img src="styles/images/green.png"></div>'},
+        {key: 'Source', value: '<div>MDD embedded-name collision<img src="embedded/image/000001.png"></div>'},
     ], {title, recordBlockSize: 7, keysPerBlock: 1, headerQuote: "'", spacedHeaderAttributes: true});
     const mdd = makeMdictFixture([
         {key: '\\styles\\theme.css', value: '.native-sense { color: rgb(12, 34, 56); background-image: url(images/green.png); }'},
         {key: '\\styles\\images\\green.png', value: green},
+        {key: '\\embedded\\image\\000001.png', value: green},
     ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1, headerQuote: "'", spacedHeaderAttributes: true});
     const files = [
         {name: 'native.MDX', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
@@ -167,11 +169,16 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     }
     const redPaths = imagePaths(await lookup(page, '猫'));
     const bluePaths = imagePaths(await lookup(page, '青'));
+    const sourcePaths = imagePaths(await lookup(page, 'Source'));
     expect(redPaths).toHaveLength(1);
     expect(bluePaths).toHaveLength(1);
+    expect(sourcePaths).toStrictEqual(['mdict-media/embedded/image/000001.png']);
     expect(redPaths[0]).not.toBe(bluePaths[0]);
+    expect(redPaths[0]).not.toBe(sourcePaths[0]);
+    expect(bluePaths[0]).not.toBe(sourcePaths[0]);
     await assertStoredMedia(page, title, redPaths[0], red);
     await assertStoredMedia(page, title, bluePaths[0], blue);
+    await assertStoredMedia(page, title, sourcePaths[0], green);
     await assertStoredMedia(page, title, 'mdict-media/styles/images/green.png', green);
 
     await page.goto(`${extensionBaseUrl}/search.html`);
@@ -207,12 +214,15 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     await expect(reopened.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
     expect(JSON.stringify(await lookup(reopened, '別名'))).toContain('second independent native sense');
     await assertStoredMedia(reopened, title, redPaths[0], red);
+    await assertStoredMedia(reopened, title, sourcePaths[0], green);
     await api(reopened, 'deleteDictionaryByTitle', {dictionaryTitle: title});
     expect(await api(reopened, 'getDictionaryInfo')).toStrictEqual([]);
     expect(JSON.stringify(await lookup(reopened, '別名'))).not.toContain('second independent native sense');
     await importFiles(reopened, extensionBaseUrl, files, title);
     expect(JSON.stringify(await lookup(reopened, '別名'))).toContain('second independent native sense');
     await assertStoredMedia(reopened, title, 'mdict-media/styles/images/green.png', green);
+    await assertStoredMedia(reopened, title, redPaths[0], red);
+    await assertStoredMedia(reopened, title, sourcePaths[0], green);
     await reopened.close();
 });
 

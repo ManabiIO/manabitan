@@ -839,6 +839,43 @@ describe('convertMdxToArchive', () => {
         expect(await zip.file(embeddedPath)?.async('uint8array')).toStrictEqual(Uint8Array.of(0, 255, 128));
     });
 
+    test.each(['embedded/image/000001.png', 'EMBEDDED/IMAGE/000001.PNG'])(
+        'keeps embedded data URL bytes distinct from the MDD resource %s',
+        async (sourceKey) => {
+            mockState.mdxFactory = () => ({
+                header: {Title: 'Embedded resource collision'},
+                entries: [{
+                    keyText: 'Images',
+                    definition: '<div><img src="data:image/png;base64,AQID"><img src="embedded/image/000001.png"><img src="data:image/png;base64,AQID"></div>',
+                }],
+            });
+            mockState.mddFactory = () => [
+                {keyText: sourceKey, value: Uint8Array.of(4, 5, 6)},
+                {keyText: 'embedded/image/000002.png', value: Uint8Array.of(7, 8, 9)},
+            ];
+
+            const result = await convertMdxToArchive(
+                'resource-collision.mdx',
+                {},
+                Uint8Array.of(1),
+                [{name: 'resource-collision.mdd', bytes: Uint8Array.of(2)}],
+            );
+            const zip = await loadArchive(result.archiveContent);
+            const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+            const glossary = /** @type {{content: {content: Array<unknown>}}} */ (termBank[0][5][0]);
+            const root = /** @type {{content: Array<{path: string}>}} */ (glossary.content.content[0]);
+            const [embedded, external, repeated] = root.content.map(({path}) => path);
+
+            expect(embedded).not.toBe(external);
+            expect(embedded).toBe('mdict-media/embedded/image/000003.png');
+            expect(repeated).toBe(embedded);
+            expect(external).toBe('mdict-media/embedded/image/000001.png');
+            expect(await zip.file(embedded)?.async('uint8array')).toStrictEqual(Uint8Array.of(1, 2, 3));
+            expect(await zip.file(external)?.async('uint8array')).toStrictEqual(Uint8Array.of(4, 5, 6));
+            expect(zip.file('mdict-media/embedded/image/000002.png')).toBeNull();
+        },
+    );
+
     test('bounds all-unique embedded data URL caching without dropping assets', async () => {
         const entries = Array.from({length: 65}, (_, index) => ({
             keyText: `Unique ${String(index)}`,

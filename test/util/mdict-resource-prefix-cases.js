@@ -65,3 +65,41 @@ for (const {sourceDirectory, occupiedOutputDirectory} of cases) {
         assert.equal(phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets')?.details?.missingReferencedAssetCount, 0);
     });
 }
+
+for (const sourceDirectory of ['embedded/image', 'EMBEDDED/IMAGE']) {
+    for (const occupiedMediaRoot of [false, true]) {
+        test(`embedded PNG does not replace MDD ${sourceDirectory} bytes (occupied media root=${occupiedMediaRoot})`, async () => {
+            const embedded = makeFixturePng([0, 255, 0, 255]);
+            const external = makeFixturePng([255, 0, 0, 255]);
+            const mdx = makeMdictFixture([
+                {key: 'Embedded', value: `<img src="data:image/png;base64,${Buffer.from(embedded).toString('base64')}">`},
+                {key: 'External', value: '<img src="embedded/image/000001.png">'},
+                {key: 'Repeat', value: `<img src="data:image/png;base64,${Buffer.from(embedded).toString('base64')}">`},
+            ], {compression: 'zlib'});
+            const entries = [
+                {key: `\\${sourceDirectory}\\000001.png`, value: external},
+                {key: '\\embedded\\image\\000002.png', value: external},
+                {key: '\\theme.css', value: new TextEncoder().encode('.image{background:url("embedded/image/000001.png")}')},
+            ];
+            if (occupiedMediaRoot) {
+                entries.push({key: '\\mdict-media\\reserved.txt', value: Uint8Array.of(1)});
+            }
+            const mdd = makeMdictFixture(entries, {mdd: true, compression: 'zlib'});
+            const beforeMdx = Uint8Array.from(mdx.bytes);
+            const beforeMdd = Uint8Array.from(mdd.bytes);
+            const {files, phaseTimings} = await createMdxImportData('embedded-collision.mdx', {}, mdx.bytes, [{name: 'embedded-collision.mdd', bytes: mdd.bytes}]);
+            const rows = JSON.parse(new TextDecoder().decode(files.get('term_bank_1.json')));
+            const paths = /** @type {string[]} */ (rows.map((/** @type {unknown} */ row) => findNode(row, 'img')?.path));
+            assert.notEqual(paths[0], paths[1]);
+            assert.equal(paths[0], paths[2], 'cached data URL must retain its collision-free path');
+            assert.ok(paths[0].endsWith('/embedded/image/000003.png'));
+            assert.deepEqual(files.get(paths[0]), embedded);
+            assert.deepEqual(files.get(paths[1]), external);
+            const styles = new TextDecoder().decode(files.get('styles.css'));
+            assert.ok(styles.includes(`url("${paths[1]}")`), 'CSS and image references must resolve the same MDD bytes');
+            assert.equal(phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets')?.details?.missingReferencedAssetCount, 0);
+            assert.deepEqual(mdx.bytes, beforeMdx);
+            assert.deepEqual(mdd.bytes, beforeMdd);
+        });
+    }
+}

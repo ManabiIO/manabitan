@@ -266,8 +266,9 @@ class EmbeddedAssetCollector {
      * @param {string} assetPrefix
      * @param {{value: number}} counter
      * @param {{entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}} sharedDataUrlCache
+     * @param {MddAssetResolver|null} assetResolver
      */
-    constructor(assetPrefix, counter, sharedDataUrlCache) {
+    constructor(assetPrefix, counter, sharedDataUrlCache, assetResolver) {
         /** @type {string} */
         this._assetPrefix = assetPrefix;
         /** @type {Map<string, Uint8Array>} */
@@ -280,6 +281,8 @@ class EmbeddedAssetCollector {
         this._sharedDataUrlCache = sharedDataUrlCache;
         /** @type {{value: number}} */
         this._counter = counter;
+        /** @type {MddAssetResolver|null} */
+        this._assetResolver = assetResolver;
     }
 
     /**
@@ -315,7 +318,13 @@ class EmbeddedAssetCollector {
         const {mediaType, data} = decoded;
         const extension = EMBEDDED_ASSET_EXTENSION_MAP.get(mediaType.split(';', 1)[0].trim().toLowerCase()) ?? '.bin';
         const category = (mediaType.split('/', 1)[0] || 'asset').trim().toLowerCase();
-        const path = `${this._assetPrefix}embedded/${category}/${String(++this._counter.value).padStart(6, '0')}${extension}`;
+        // Source resources and generated assets share the archive media root.
+        // Reserve both exact and case-folded source keys before assigning a path.
+        let key;
+        do {
+            key = `embedded/${category}/${String(++this._counter.value).padStart(6, '0')}${extension}`;
+        } while (this._assetResolver?.hasKey(key));
+        const path = `${this._assetPrefix}${key}`;
         this._assets.set(path, data);
 
         const retainedKeyBytes = dataUrl.length * 2;
@@ -398,6 +407,14 @@ class MddAssetResolver {
      */
     get lookupErrorCount() {
         return this._lookupErrorCount;
+    }
+
+    /**
+     * @param {string} key
+     * @returns {boolean}
+     */
+    hasKey(key) {
+        return this._records.has(key) || this._recordsLowercase.has(key.toLowerCase());
     }
 
     /** @returns {string} */
@@ -1983,11 +2000,11 @@ function appendStructuredContent(parent, content, details) {
 
 /**
  * @param {string} definition
- * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}, embeddedAssetDataUrlCache: {entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}, entryScopeClass: string}} options
+ * @param {{enableAudio: boolean, assetPrefix: string, assetResolver: MddAssetResolver|null, embeddedAssetCounter: {value: number}, embeddedAssetDataUrlCache: {entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}, entryScopeClass: string}} options
  * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, embeddedAssetDataUrlCacheEntries: Array<{dataUrl: string, path: string, probe: number}>, assetReferences: Set<string>}}
  */
 function convertDefinitionToStructuredContent(definition, options) {
-    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix, options.embeddedAssetCounter, options.embeddedAssetDataUrlCache);
+    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix, options.embeddedAssetCounter, options.embeddedAssetDataUrlCache, options.assetResolver);
     /** @type {Set<string>} */
     const assetReferences = new Set();
     /** @type {Array<[string, string]>} */
@@ -2293,6 +2310,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 converted = convertDefinitionToStructuredContent(preparedDefinition, {
                     enableAudio,
                     assetPrefix,
+                    assetResolver,
                     embeddedAssetCounter,
                     embeddedAssetDataUrlCache,
                     entryScopeClass: `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`,
