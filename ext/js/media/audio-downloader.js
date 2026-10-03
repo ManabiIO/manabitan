@@ -393,13 +393,17 @@ export class AudioDownloader {
         const fetchFileInfos = lookupResults.map(async ({title}) => {
             const fileInfoURL = `https://commons.wikimedia.org/w/api.php?action=query&format=json&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=user|url&origin=*`;
             const response2 = await this._requestBuilder.fetchAnonymous(fileInfoURL, DEFAULT_REQUEST_INIT_PARAMS);
+            if (!response2.ok) { return []; }
             /** @type {import('audio-downloader').WikimediaCommonsFileResponse} */
             const fileResponse = await readResponseJson(response2);
             const fileResults = fileResponse.query.pages;
             const results = [];
             for (const page of Object.values(fileResults)) {
-                const fileUrl = page.imageinfo[0].url;
-                const fileUser = page.imageinfo[0].user;
+                if (typeof page !== 'object' || page === null || !Array.isArray(page.imageinfo)) { continue; }
+                const info = page.imageinfo[0];
+                if (typeof info !== 'object' || info === null || typeof info.url !== 'string' || typeof info.user !== 'string') { continue; }
+                const fileUrl = info.url;
+                const fileUser = info.user;
                 if (validateFilename(title, fileUser)) {
                     results.push({type: 'url', url: fileUrl, name: displayName(title, fileUser)});
                 }
@@ -407,7 +411,9 @@ export class AudioDownloader {
             return /** @type {import('audio-downloader').Info1[]} */ (results);
         });
 
-        return (await Promise.all(fetchFileInfos)).flat();
+        // Deleted files and individual request failures must not discard valid
+        // recordings. Settled results preserve the original search ordering.
+        return (await Promise.allSettled(fetchFileInfos)).flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
     }
 
     /** @type {import('audio-downloader').GetInfoHandler} */
