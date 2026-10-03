@@ -2377,6 +2377,20 @@ export class DictionaryImporter {
                 deferredNoMetadataMediaRequirements.length = 0;
             }
 
+            if (useTermMediaRequirements) {
+                const tMediaResolveStart = Date.now();
+                let mediaWriteMs = 0;
+                await this._importMdictImageFiles(fileMap, dictionaryTitle, async (media) => {
+                    const tMediaWriteStart = Date.now();
+                    await bulkAdd('media', media, {trackProgress: false});
+                    mediaWriteMs += Math.max(0, Date.now() - tMediaWriteStart);
+                    counts.media.total += media.length;
+                    this._progress();
+                });
+                step4TimingBreakdown.mediaResolveMs += Math.max(0, Date.now() - tMediaResolveStart - mediaWriteMs);
+                step4TimingBreakdown.mediaWriteMs += mediaWriteMs;
+            }
+
             await dictionaryDatabase.queuePendingTermContentImportWrites();
 
             for (const termMetaFile of termMetaFiles) {
@@ -3323,6 +3337,44 @@ export class DictionaryImporter {
         return {
             media: [...media.values()],
         };
+    }
+
+    /**
+     * MDX conversion materializes referenced media, including CSS-only images
+     * which have no term-record image requirement. Import those in bounded
+     * batches after term media drains, without rereading already stored images.
+     * @param {import('dictionary-importer').ArchiveFileMap} fileMap
+     * @param {string} dictionaryTitle
+     * @param {(media: import('dictionary-database').MediaDataArrayBufferContent[]) => Promise<void>} writeMedia
+     * @returns {Promise<void>}
+     */
+    async _importMdictImageFiles(fileMap, dictionaryTitle, writeMedia) {
+        /** @type {import('dictionary-importer').ImportRequirementContext} */
+        const context = {fileMap, media: new Map()};
+        /** @type {import('dictionary-database').DatabaseTermEntry} */
+        const entry = {dictionary: dictionaryTitle, expression: '[MDict media]', reading: '', definitionTags: '', rules: '', score: 0, glossary: EMPTY_TERM_GLOSSARY};
+        /** @type {string[]} */
+        const paths = [];
+        const flush = async () => {
+            if (paths.length === 0) { return; }
+            await this._runWithConcurrencyLimit(paths, this._mediaResolutionConcurrency, async (path) => {
+                await this._getImageMedia(context, path, entry);
+            });
+            if (this._isCancelled()) { throw new Error('Dictionary import was cancelled'); }
+            await writeMedia([...context.media.values()]);
+            context.media.clear();
+            paths.length = 0;
+        };
+        for (const path of fileMap.keys()) {
+            if (
+                !path.startsWith('mdict-media/') ||
+                this._imageMetadataByPath.has(path) ||
+                getImageMediaTypeFromFileName(path) === null
+            ) { continue; }
+            paths.push(path);
+            if (paths.length >= 128) { await flush(); }
+        }
+        await flush();
     }
 
     /**
