@@ -54,6 +54,51 @@ const STARTUP_DIAGNOSTICS_STORAGE_KEY = 'manabitanStartupDiagnostics';
 const DICTIONARY_REFRESH_RETRY_DELAYS_MS = [250, 1000, 3000, 10000];
 
 /**
+ * @param {string} url
+ * @param {string} contentDisposition
+ * @returns {string}
+ */
+function getDictionaryArchiveFileName(url, contentDisposition) {
+    /** @type {Map<string, string>} */
+    const parameters = new Map();
+    // Quoted parameter values may contain semicolons and escaped quotes.
+    for (const match of contentDisposition.matchAll(/(?:^|;)\s*([^=;\s]+)\s*=\s*("(?:[^"\\]|\\.)*"|[^;]*)/g)) {
+        const name = match[1].toLowerCase();
+        if (name !== 'filename' && name !== 'filename*') { continue; }
+        let value = match[2].trim();
+        if (value.startsWith('"')) {
+            if (!value.endsWith('"')) { continue; }
+            value = value.slice(1, -1).replace(/\\(.)/g, '$1');
+        }
+        if (!parameters.has(name)) { parameters.set(name, value); }
+    }
+    const candidates = [];
+    const extendedName = parameters.get('filename*');
+    const encodedMatch = typeof extendedName === 'string' ? /^UTF-8'[^']*'(.*)$/i.exec(extendedName) : null;
+    if (encodedMatch !== null) {
+        try {
+            candidates.push(decodeURIComponent(encodedMatch[1]));
+        } catch (_) {
+            // Invalid extended parameters fall back to an ordinary filename or URL.
+        }
+    }
+    const ordinaryName = parameters.get('filename');
+    if (typeof ordinaryName === 'string') { candidates.push(ordinaryName); }
+    try {
+        const pathPart = new URL(url).pathname.split('/').reverse().find((part) => part.length > 0);
+        if (typeof pathPart === 'string') { candidates.push(pathPart); }
+    } catch (_) {
+        // The request has already validated its URL; this is only a naming fallback.
+    }
+    for (const candidate of candidates) {
+        // A server-supplied filename is not a filesystem path.
+        const name = candidate.split(/[\\/]/).pop()?.trim() ?? '';
+        if (name.length > 0 && name !== '.' && name !== '..') { return name; }
+    }
+    return 'fileFromURL.zip';
+}
+
+/**
  * @param {?MessagePort} responsePort
  * @param {unknown} message
  * @returns {boolean}
@@ -1934,9 +1979,8 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         const timeoutId = globalThis.setTimeout(() => {
             abortController.abort(new Error(`Timed out fetching dictionary archive after ${String(downloadTimeoutMs)}ms: ${normalizedUrl}`));
         }, downloadTimeoutMs);
-        let response;
         try {
-            response = await fetch(normalizedUrl, {
+            const response = await fetch(normalizedUrl, {
                 method: 'GET',
                 cache: 'no-store',
                 credentials: 'omit',
@@ -1944,6 +1988,17 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                 referrerPolicy: 'no-referrer',
                 signal: abortController.signal,
             });
+            if (!response.ok) {
+                // Reject promptly, but do not leave an unread error-body download running.
+                void response.body?.cancel().catch(() => {});
+                throw new Error(`Failed to fetch dictionary archive: ${normalizedUrl} (status=${String(response.status)})`);
+            }
+            const content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
+            return {
+                contentBase64: arrayBufferToBase64(content),
+                fileName: getDictionaryArchiveFileName(normalizedUrl, response.headers.get('Content-Disposition') || ''),
+                contentType: response.headers.get('Content-Type'),
+            };
         } catch (error) {
             const abortReason = /** @type {unknown} */ (abortController.signal.reason);
             if (abortController.signal.aborted && abortReason instanceof Error) {
@@ -1953,36 +2008,6 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         } finally {
             globalThis.clearTimeout(timeoutId);
         }
-        if (!response.ok) {
-            throw new Error(`Failed to fetch dictionary archive: ${normalizedUrl} (status=${String(response.status)})`);
-        }
-        const content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
-        const fileName = (() => {
-            const contentDisposition = response.headers.get('Content-Disposition') || '';
-            const match = /filename\\*?=(?:UTF-8''|"?)([^";]+)/i.exec(contentDisposition);
-            if (match) {
-                try {
-                    return decodeURIComponent(match[1].replace(/^"|"$/g, ''));
-                } catch (_) {
-                    return match[1].replace(/^"|"$/g, '');
-                }
-            }
-            try {
-                const parsed = new URL(normalizedUrl);
-                const pathPart = parsed.pathname.split('/').reverse().find((part) => part.length > 0);
-                if (typeof pathPart === 'string' && pathPart.length > 0) {
-                    return pathPart;
-                }
-            } catch (_) {
-                // Ignore malformed URL parsing here; we already attempted the request.
-            }
-            return 'fileFromURL.zip';
-        })();
-        return {
-            contentBase64: arrayBufferToBase64(content),
-            fileName,
-            contentType: response.headers.get('Content-Type'),
-        };
     }
 
     /** @type {import('api').ApiHandler<'setDictionaryImportMode'>} */
