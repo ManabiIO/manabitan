@@ -19,6 +19,126 @@ import {describe, expect, test, vi} from 'vitest';
 import {DictionaryCssMediaResolver, getMdictMediaPathFromComputedUrl, getMdictMediaPathsFromComputedCss, getMdictMediaUrlPathMap} from '../ext/js/display/dictionary-css-media-resolver.js';
 
 describe('DictionaryCssMediaResolver', () => {
+    test('overlapping renders share one in-flight fetch for each media identity', async () => {
+        const deferred = Promise.withResolvers();
+        const media = {dictionary: 'A', path: 'mdict-media/a.png', mediaType: 'image/png', content: 'AA=='};
+        const getMedia = vi.fn(() => deferred.promise);
+        const createObjectURL = vi.fn(() => 'blob:a');
+        const resolver = new DictionaryCssMediaResolver({getMedia}, {createObjectURL});
+        const first = resolver.resolve([media]);
+        const second = resolver.resolve([media]);
+        deferred.resolve([media]);
+        await Promise.all([first, second]);
+        expect(getMedia).toHaveBeenCalledTimes(1);
+        expect(createObjectURL).toHaveBeenCalledTimes(1);
+    });
+
+    test('disabling an unrelated dictionary preserves healthy in-flight results', async () => {
+        const deferred = Promise.withResolvers();
+        const media = ['A', 'B'].map((dictionary) => ({dictionary, path: 'mdict-media/a.png', mediaType: 'image/png', content: 'AA=='}));
+        const createObjectURL = vi.fn(() => 'blob:a');
+        const resolver = new DictionaryCssMediaResolver({getMedia: () => deferred.promise}, {createObjectURL});
+        resolver.prune([{name: 'A', enabled: true}, {name: 'B', enabled: true}]);
+        const pending = resolver.resolve(media);
+        resolver.prune([{name: 'A', enabled: true}, {name: 'B', enabled: false}]);
+        deferred.resolve(media);
+        await expect(pending).resolves.toBe(true);
+        expect(createObjectURL).toHaveBeenCalledTimes(1);
+        expect(resolver.rewriteStyles('A', 'url(mdict-media/a.png)')).toBe('url("blob:a")');
+        expect(resolver.rewriteStyles('B', 'url(mdict-media/a.png)')).toBe('url(mdict-media/a.png)');
+    });
+
+    test('failed decoding revokes staged URLs without publishing a partial batch, and can retry', async () => {
+        const first = {dictionary: 'A', path: 'mdict-media/a.png', mediaType: 'image/png', content: 'AA=='};
+        const second = {...first, path: 'mdict-media/b.png'};
+        const getMedia = vi.fn().mockResolvedValueOnce([first, {...second, content: '%%%'}]).mockResolvedValueOnce([first, second]);
+        const createObjectURL = vi.fn().mockReturnValueOnce('blob:staged').mockReturnValueOnce('blob:a')
+            .mockReturnValueOnce('blob:b');
+        const revokeObjectURL = vi.fn();
+        const resolver = new DictionaryCssMediaResolver({getMedia}, {createObjectURL, revokeObjectURL});
+        await expect(resolver.resolve([first, second])).rejects.toThrow();
+        expect(resolver.rewriteStyles('A', 'url(mdict-media/a.png)')).toBe('url(mdict-media/a.png)');
+        expect(revokeObjectURL).toHaveBeenCalledExactlyOnceWith('blob:staged');
+        await expect(resolver.resolve([first, second])).resolves.toBe(true);
+        expect(resolver.rewriteStyles('A', 'url(mdict-media/a.png)')).toBe('url("blob:a")');
+        expect(resolver.rewriteStyles('A', 'url(mdict-media/b.png)')).toBe('url("blob:b")');
+    });
+
+    test('obsolete completion cannot evict a replacement in-flight request', async () => {
+        const old = Promise.withResolvers();
+        const current = Promise.withResolvers();
+        const media = {dictionary: 'A', path: 'mdict-media/a.png', mediaType: 'image/png', content: 'AA=='};
+        const getMedia = vi.fn().mockReturnValueOnce(old.promise).mockReturnValue(current.promise);
+        const resolver = new DictionaryCssMediaResolver({getMedia}, {createObjectURL: () => 'blob:current'});
+        const obsolete = resolver.resolve([media]);
+        resolver.clear();
+        const replacement = resolver.resolve([media]);
+        old.resolve([media]);
+        await expect(obsolete).resolves.toBe(false);
+        const joined = resolver.resolve([media]);
+        current.resolve([media]);
+        await Promise.all([replacement, joined]);
+        expect(getMedia).toHaveBeenCalledTimes(2);
+        expect(resolver.rewriteStyles('A', 'url(mdict-media/a.png)')).toBe('url("blob:current")');
+    });
+
+    test('a joined failure settles independent batches before returning and permits retry', async () => {
+        const failed = Promise.withResolvers();
+        const healthy = Promise.withResolvers();
+        const first = {dictionary: 'A', path: 'mdict-media/a.png', mediaType: 'image/png', content: 'AA=='};
+        const second = {...first, path: 'mdict-media/b.png'};
+        const getMedia = vi.fn().mockReturnValueOnce(failed.promise).mockReturnValueOnce(healthy.promise)
+            .mockResolvedValueOnce([first]);
+        const resolver = new DictionaryCssMediaResolver({getMedia}, {createObjectURL: () => 'blob:healthy'});
+        const error = new Error('Media unavailable');
+        const original = resolver.resolve([first]).catch((reason) => reason);
+        let settled = false;
+        const joined = resolver.resolve([first, second]).catch((reason) => {
+            settled = true;
+            return reason;
+        });
+        failed.reject(error);
+        expect(await original).toBe(error);
+        expect(settled).toBe(false);
+        healthy.resolve([second]);
+        expect(await joined).toBe(error);
+        expect(resolver.rewriteStyles('A', 'url(mdict-media/b.png)')).toBe('url("blob:healthy")');
+        await expect(resolver.resolve([first])).resolves.toBe(true);
+        expect(getMedia).toHaveBeenCalledTimes(3);
+    });
+
+    test('allocation failure releases staged URLs, retaining previously cached media', async () => {
+        const cached = {dictionary: 'A', path: 'mdict-media/cached.png', mediaType: 'image/png', content: 'AA=='};
+        const first = {...cached, path: 'mdict-media/a.png'};
+        const second = {...cached, path: 'mdict-media/b.png'};
+        const getMedia = vi.fn().mockResolvedValueOnce([cached]).mockResolvedValueOnce([first, second]);
+        const error = new Error('Object URL allocation failed');
+        const createObjectURL = vi.fn().mockReturnValueOnce('blob:cached').mockReturnValueOnce('blob:staged')
+            .mockImplementationOnce(() => { throw error; });
+        const revokeObjectURL = vi.fn();
+        const resolver = new DictionaryCssMediaResolver({getMedia}, {createObjectURL, revokeObjectURL});
+        await resolver.resolve([cached]);
+        await expect(resolver.resolve([cached, first, second])).rejects.toBe(error);
+        expect(resolver.rewriteStyles('A', 'url(mdict-media/cached.png)')).toBe('url("blob:cached")');
+        expect(resolver.rewriteStyles('A', 'url(mdict-media/a.png)')).toBe('url(mdict-media/a.png)');
+        expect(revokeObjectURL).toHaveBeenCalledExactlyOnceWith('blob:staged');
+    });
+
+    test('ignores unsolicited identities and duplicate deliveries before decoding', async () => {
+        const media = {dictionary: 'A', path: 'mdict-media/a.png', mediaType: 'image/png', content: 'AA=='};
+        const getMedia = vi.fn().mockResolvedValue([
+            {...media, dictionary: 'B', content: '%%%'},
+            {...media, path: 'mdict-media/unrequested.png', content: '%%%'},
+            media,
+            {...media, content: '%%%'},
+        ]);
+        const createObjectURL = vi.fn(() => 'blob:a');
+        const resolver = new DictionaryCssMediaResolver({getMedia}, {createObjectURL});
+        await expect(resolver.resolve([media])).resolves.toBe(true);
+        expect(createObjectURL).toHaveBeenCalledTimes(1);
+        expect(resolver.rewriteStyles('B', 'url(mdict-media/a.png)')).toBe('url(mdict-media/a.png)');
+    });
+
     test('maps active MDX CSS image media to cached blob URLs and revokes them on clear', async () => {
         const getMedia = vi.fn().mockResolvedValue([{
             dictionary: 'MDict',

@@ -37,7 +37,8 @@ import {TextSourceGenerator} from '../dom/text-source-generator.js';
 import {HotkeyHelpController} from '../input/hotkey-help-controller.js';
 import {TextScanner} from '../language/text-scanner.js';
 import {checkPopupPreviewURL} from '../pages/settings/popup-preview-controller.js';
-import {DictionaryCssMediaResolver, getMdictMediaPathsFromComputedCss, getMdictMediaPathsFromCss, getMdictMediaUrlPathMap} from './dictionary-css-media-resolver.js';
+import {DictionaryCssMediaResolver} from './dictionary-css-media-resolver.js';
+import {collectDictionaryCssMediaTargets} from './dictionary-css-media-targets.js';
 import {DisplayContentManager} from './display-content-manager.js';
 import {DisplayGenerator} from './display-generator.js';
 import {DisplayHistory} from './display-history.js';
@@ -1368,7 +1369,6 @@ export class Display extends EventDispatcher {
                 customCss += '\n' + addScopeToCss(resolvedStyles, `[data-dictionary="${escapedTitle}"]`);
             }
         }
-        this.setCustomCss(customCss);
         return customCss;
     }
 
@@ -1383,103 +1383,31 @@ export class Display extends EventDispatcher {
         const options = this._options;
         if (options === null || this._setContentToken !== token) { return; }
 
-        /** @type {Map<string, string>} */
-        const dictionariesWithMediaStyles = new Map();
-        for (const {name, enabled, styles = ''} of options.dictionaries) {
-            if (enabled && styles.includes('mdict-media/')) {
-                dictionariesWithMediaStyles.set(name, styles);
-            }
-        }
-        /** @type {Map<string, Map<string, string[]>>} */
-        const declaredMediaPaths = new Map();
-
-        /** @type {Array<{element: HTMLElement, dictionary: string}>} */
-        const inlineStyleElements = [];
-        /** @type {Array<{dictionary: string, path: string}>} */
-        const targets = [];
-        const targetKeys = new Set();
-        const baseUrl = window.location.href;
-        const imageBearingProperties = [
-            'background-image',
-            'border-image-source',
-            'list-style-image',
-            'mask-image',
-            '-webkit-mask-image',
-            'content',
-            'cursor',
-            'filter',
-            'clip-path',
-            'shape-outside',
-        ];
-
-        /**
-         * @param {string} dictionary
-         * @param {string} path
-         */
-        const addTarget = (dictionary, path) => {
-            const key = JSON.stringify([dictionary, path]);
-            if (targetKeys.has(key)) { return; }
-            targetKeys.add(key);
-            targets.push({dictionary, path});
-        };
-
-        for (const element of /** @type {NodeListOf<HTMLElement>} */ (this._container.querySelectorAll('[data-sc-tag], [data-sc-id], [data-sc-class], [style*="mdict-media/"]'))) {
-            const dictionaryContainer = /** @type {HTMLElement|null} */ (element.closest('[data-dictionary]'));
-            const dictionary = dictionaryContainer?.dataset.dictionary;
-            if (typeof dictionary !== 'string' || dictionary.length === 0) { continue; }
-
-            const inlineCss = element.style.cssText;
-            if (inlineCss.includes('mdict-media/')) {
-                inlineStyleElements.push({element, dictionary});
-                for (const path of getMdictMediaPathsFromCss(inlineCss)) {
-                    addTarget(dictionary, path);
-                }
-            }
-
-            if (!dictionariesWithMediaStyles.has(dictionary)) { continue; }
-            for (const pseudoElement of [null, '::before', '::after']) {
-                const style = getComputedStyle(element, pseudoElement);
-                for (const property of imageBearingProperties) {
-                    const value = style.getPropertyValue(property);
-                    if (!value.includes('url(')) { continue; }
-                    if (!value.includes('mdict-media/')) { continue; }
-                    let declaredPaths = declaredMediaPaths.get(dictionary);
-                    if (typeof declaredPaths === 'undefined') {
-                        declaredPaths = getMdictMediaUrlPathMap(dictionariesWithMediaStyles.get(dictionary) ?? '', baseUrl);
-                        declaredMediaPaths.set(dictionary, declaredPaths);
-                    }
-                    for (const path of getMdictMediaPathsFromComputedCss(value, baseUrl, declaredPaths)) {
-                        addTarget(dictionary, path);
-                    }
-                }
-            }
-        }
-
-        if (targets.length === 0) { return; }
         try {
+            const {targets, inlineStyleElements} = collectDictionaryCssMediaTargets(this._container, options.dictionaries, window.location.href);
+            if (targets.length === 0) { return; }
             await this._dictionaryCssMediaResolver.resolve(targets);
+            if (this._setContentToken !== token) { return; }
+
+            for (const {element, dictionary} of inlineStyleElements) {
+                const source = element.style.cssText;
+                const resolved = this._dictionaryCssMediaResolver.rewriteStyles(dictionary, source);
+                if (resolved !== source) {
+                    element.style.cssText = resolved;
+                }
+            }
+
+            // An obsolete render may have populated the cache without publishing
+            // its stylesheet. The current render must apply those cached URLs too.
+            if (this._options !== null && this._options.dictionaries.some(({name, enabled, styles = ''}) => (
+                enabled && this._dictionaryCssMediaResolver.rewriteStyles(name, styles) !== styles
+            ))) {
+                this._setTheme(this._options);
+            }
         } catch (error) {
-            if (!this._application.webExtension.unloaded) {
+            if (this._setContentToken === token && !this._application.webExtension.unloaded) {
                 log.error(error);
             }
-            return;
-        }
-        if (this._setContentToken !== token) { return; }
-
-        for (const {element, dictionary} of inlineStyleElements) {
-            const source = element.style.cssText;
-            const resolved = this._dictionaryCssMediaResolver.rewriteStyles(dictionary, source);
-            if (resolved !== source) {
-                element.style.cssText = resolved;
-            }
-        }
-
-        // An obsolete render may have populated the cache without publishing
-        // its stylesheet. The current render must apply those cached URLs too.
-        if (this._options !== null && this._options.dictionaries.some(({name, enabled, styles = ''}) => (
-            enabled && this._dictionaryCssMediaResolver.rewriteStyles(name, styles) !== styles
-        ))) {
-            this._setTheme(this._options);
         }
     }
 

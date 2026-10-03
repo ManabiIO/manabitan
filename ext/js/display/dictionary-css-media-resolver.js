@@ -16,6 +16,7 @@
  */
 
 import {base64ToArrayBuffer} from '../data/array-buffer-util.js';
+import {deferPromise} from '../core/utilities.js';
 
 const MDICT_MEDIA_PREFIX = 'mdict-media/';
 
@@ -254,15 +255,15 @@ export class DictionaryCssMediaResolver {
         this._revokeObjectURL = urlApi.revokeObjectURL ?? ((url) => { URL.revokeObjectURL(url); });
         /** @type {Map<string, {dictionary: string, path: string, url: string}>} */
         this._cache = new Map();
-        /** @type {number} */
-        this._generation = 0;
+        /** @type {Map<string, {dictionary: string, promise: Promise<boolean>}>} */
+        this._pending = new Map();
         /** @type {Set<string>|null} */
         this._enabledDictionaries = null;
     }
 
     /** */
     clear() {
-        this._generation += 1;
+        this._pending.clear();
         for (const {url} of this._cache.values()) {
             this._revokeObjectURL(url);
         }
@@ -281,13 +282,10 @@ export class DictionaryCssMediaResolver {
                 .filter(({enabled: value}) => value)
                 .map(({name}) => name),
         );
-        const previous = this._enabledDictionaries;
-        if (previous === null || previous.size !== enabled.size || [...previous].some((name) => !enabled.has(name))) {
-            // Revoke in-flight results even when no URL has reached the cache.
-            // Disable/re-enable must not revive work admitted before disabling.
-            this._generation += 1;
-        }
         this._enabledDictionaries = enabled;
+        for (const [key, {dictionary}] of this._pending) {
+            if (!enabled.has(dictionary)) { this._pending.delete(key); }
+        }
         for (const [key, value] of this._cache) {
             if (enabled.has(value.dictionary)) { continue; }
             this._revokeObjectURL(value.url);
@@ -302,31 +300,74 @@ export class DictionaryCssMediaResolver {
     async resolve(targets) {
         const missing = [];
         const seen = new Set();
+        /** @type {Set<Promise<boolean>>} */
+        const promises = new Set();
         for (const {dictionary, path} of targets) {
             if (!path.startsWith(MDICT_MEDIA_PREFIX)) { continue; }
             if (this._enabledDictionaries !== null && !this._enabledDictionaries.has(dictionary)) { continue; }
             const key = getCacheKey(dictionary, path);
             if (this._cache.has(key) || seen.has(key)) { continue; }
             seen.add(key);
-            missing.push({dictionary, path});
+            const pending = this._pending.get(key);
+            if (typeof pending !== 'undefined') {
+                promises.add(pending.promise);
+            } else {
+                missing.push({dictionary, path});
+            }
         }
-        if (missing.length === 0) { return false; }
+        if (missing.length > 0) {
+            const deferred = /** @type {import('core').DeferredPromiseDetails<boolean>} */ (deferPromise());
+            for (const {dictionary, path} of missing) {
+                this._pending.set(getCacheKey(dictionary, path), {dictionary, promise: deferred.promise});
+            }
+            promises.add(deferred.promise);
+            void this._loadMedia(missing, deferred.promise).then(deferred.resolve, deferred.reject);
+        }
 
-        const generation = this._generation;
-        const results = await this._api.getMedia(missing);
-        if (generation !== this._generation) { return false; }
-
+        // A rejection cannot leave another joined batch mutating the cache
+        // after this request reports completion.
+        const results = await Promise.allSettled(promises);
         let changed = false;
-        for (const item of results) {
-            const {dictionary, path, mediaType, content} = item;
-            const key = getCacheKey(dictionary, path);
-            if (!seen.has(key) || this._cache.has(key)) { continue; }
-            const blob = new Blob([base64ToArrayBuffer(content)], {type: mediaType});
-            const url = this._createObjectURL(blob);
-            this._cache.set(key, {dictionary, path, url});
-            changed = true;
+        for (const result of results) {
+            if (result.status === 'rejected') { throw result.reason; }
+            changed ||= result.value;
         }
         return changed;
+    }
+
+    /**
+     * @param {Array<{dictionary: string, path: string}>} targets
+     * @param {Promise<boolean>} owner
+     * @returns {Promise<boolean>}
+     */
+    async _loadMedia(targets, owner) {
+        const keys = new Set(targets.map(({dictionary, path}) => getCacheKey(dictionary, path)));
+        /** @type {Map<string, {dictionary: string, path: string, url: string}>} */
+        const staged = new Map();
+        let changed = false;
+        try {
+            const results = await this._api.getMedia(targets);
+            for (const {dictionary, path, mediaType, content} of results) {
+                const key = getCacheKey(dictionary, path);
+                if (!keys.has(key) || this._pending.get(key)?.promise !== owner || staged.has(key)) { continue; }
+                const blob = new Blob([base64ToArrayBuffer(content)], {type: mediaType});
+                const url = this._createObjectURL(blob);
+                staged.set(key, {dictionary, path, url});
+            }
+            for (const [key, value] of staged) {
+                if (this._pending.get(key)?.promise !== owner) { continue; }
+                this._cache.set(key, value);
+                staged.delete(key);
+                changed = true;
+            }
+            return changed;
+        } finally {
+            // Failed batches and revoked ownership never publish partial URLs.
+            for (const {url} of staged.values()) { this._revokeObjectURL(url); }
+            for (const key of keys) {
+                if (this._pending.get(key)?.promise === owner) { this._pending.delete(key); }
+            }
+        }
     }
 
     /**
