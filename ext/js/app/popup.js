@@ -585,7 +585,7 @@ export class Popup extends EventDispatcher {
             });
             return true;
         } catch (e) {
-            this._resetFrame();
+            this._resetFrame(this._useSecureFrameUrl);
             this._updateHostPageDebugState({
                 popupInjected: false,
                 popupConnected: false,
@@ -656,12 +656,6 @@ export class Popup extends EventDispatcher {
         await frameClient.connect(this._frame, this._targetOrigin, this._frameId, setupFrame);
         this._frameConnected = true;
 
-        // Reattach mouse event listeners after frame injection
-        const boundMouseOver = this._onFrameMouseOver.bind(this);
-        const boundMouseOut = this._onFrameMouseOut.bind(this);
-        this._frame.addEventListener('mouseover', boundMouseOver);
-        this._frame.addEventListener('mouseout', boundMouseOut);
-
         // Configure
         /** @type {import('display').DirectApiParams<'displayConfigure'>} */
         const configureParams = {
@@ -684,9 +678,10 @@ export class Popup extends EventDispatcher {
     }
 
     /**
+     * @param {boolean} [preserveInjection]
      * @returns {void}
      */
-    _resetFrame() {
+    _resetFrame(preserveInjection = false) {
         const parent = this._container.parentNode;
         if (parent !== null) {
             parent.removeChild(this._container);
@@ -696,8 +691,11 @@ export class Popup extends EventDispatcher {
 
         this._frameClient = null;
         this._frameConnected = false;
-        this._injectPromise = null;
-        this._injectPromiseComplete = false;
+        // A secure-URL retry is still owned by the original injection request.
+        if (!preserveInjection) {
+            this._injectPromise = null;
+            this._injectPromiseComplete = false;
+        }
     }
 
     /**
