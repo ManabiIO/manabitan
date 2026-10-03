@@ -34,6 +34,113 @@ function createApi() {
 afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+});
+
+describe('dictionary import asynchronous response settlement', () => {
+    const kinds = /** @type {const} */ (['file', 'url']);
+
+    /**
+     * @param {((progress: import('dictionary-importer').ProgressData) => void)|null} onProgress
+     * @returns {{
+     *   api: API,
+     *   port: Pick<MessagePort, 'onmessage'|'onmessageerror'> & {close: ReturnType<typeof vi.fn>},
+     *   invoke: import('vitest').MockInstance<API['_pmInvoke']>,
+     *   deliver: (data: unknown) => void,
+     *   start: (kind: 'file'|'url') => Promise<unknown>,
+     * }}
+     */
+    function createImport(onProgress) {
+        const {api} = createApi();
+        const port = {onmessage: /** @type {((event: MessageEvent) => void)|null} */ (null), onmessageerror: null, close: vi.fn()};
+        vi.stubGlobal('MessageChannel', class {
+            constructor() {
+                this.port1 = port;
+                this.port2 = {close: vi.fn()};
+            }
+        });
+        vi.stubGlobal('navigator', {serviceWorker: {}});
+        const invoke = vi.spyOn(api, '_pmInvoke').mockResolvedValue();
+        /** @param {unknown} data */
+        const deliver = (data) => { port.onmessage?.(new MessageEvent('message', {data})); };
+        /**
+         * @param {'file'|'url'} kind
+         * @returns {Promise<unknown>}
+         */
+        const start = (kind) => {
+            const details = /** @type {import('dictionary-importer').ImportDetails} */ ({});
+            return kind === 'file' ?
+                api.importDictionaryOffscreen(new Blob([]), details, onProgress, 'operation') :
+                api.importDictionaryUrlOffscreen('https://example.com/dictionary.zip', details, onProgress, 'operation');
+        };
+        return {api, port, invoke, deliver, start};
+    }
+
+    describe.each(kinds)('%s import', (kind) => {
+        test.each(['complete', 'error'])('malformed %s reply reconciles without throwing or retrying the mutation', async (type) => {
+            vi.useFakeTimers();
+            const {api, port, invoke, deliver, start} = createImport(null);
+            const status = vi.spyOn(api, 'getDictionaryImportOperationStatus').mockResolvedValue({operationId: 'operation', workerGeneration: 'generation', state: 'completed', result: {result: {title: 'Published'}, errors: []}});
+            const malformed = {hasValue: true, value: {toString: null, valueOf: null}};
+            /** @type {Array<unknown>} */
+            const outcomes = [];
+            const pending = start(kind).then(
+                (value) => { outcomes.push(value); },
+                (error) => { outcomes.push(error); },
+            );
+            const data = type === 'complete' ? {type, result: {errors: [malformed]}} : {type, error: malformed};
+            expect(() => { deliver(data); }).not.toThrow();
+            await pending;
+            expect(outcomes).toEqual([{result: {title: 'Published'}, errors: []}]);
+            expect(status).toHaveBeenCalledExactlyOnceWith('operation');
+            expect(invoke).toHaveBeenCalledTimes(1);
+            expect(port.close).toHaveBeenCalledOnce();
+            expect(api._shutdownRejectors.size).toBe(0);
+            expect(vi.getTimerCount()).toBe(0);
+            deliver({type: 'error', error: malformed});
+            expect(outcomes).toHaveLength(1);
+        });
+
+        test('malformed reply with unavailable status reports an unknown outcome, never retries', async () => {
+            vi.useFakeTimers();
+            const {api, port, invoke, deliver, start} = createImport(null);
+            vi.spyOn(api, 'getDictionaryImportOperationStatus').mockRejectedValue(new Error('worker unavailable'));
+            const assertion = expect(start(kind)).rejects.toThrow('outcome unknown (operation); import was not retried');
+            expect(() => { deliver({type: 'error', error: {hasValue: true, value: {toString: null, valueOf: null}}}); }).not.toThrow();
+            await assertion;
+            expect(invoke).toHaveBeenCalledTimes(1);
+            expect(port.close).toHaveBeenCalledOnce();
+            expect(api._shutdownRejectors.size).toBe(0);
+            expect(vi.getTimerCount()).toBe(0);
+        });
+
+        test('throwing progress observer does not abandon a live import', async () => {
+            vi.useFakeTimers();
+            const {api, port, deliver, start} = createImport(() => { throw new Error('UI observer failed'); });
+            const status = vi.spyOn(api, 'getDictionaryImportOperationStatus');
+            const pending = start(kind);
+            expect(() => { deliver({type: 'progress', progress: {index: 1, count: 2}}); }).not.toThrow();
+            deliver({type: 'complete', result: {errors: []}});
+            await expect(pending).resolves.toEqual({errors: []});
+            expect(status).not.toHaveBeenCalled();
+            expect(port.close).toHaveBeenCalledOnce();
+            expect(api._shutdownRejectors.size).toBe(0);
+            expect(vi.getTimerCount()).toBe(0);
+        });
+
+        test('valid worker error settles directly and preserves metadata', async () => {
+            vi.useFakeTimers();
+            const {api, port, deliver, start} = createImport(null);
+            const status = vi.spyOn(api, 'getDictionaryImportOperationStatus');
+            const assertion = expect(start(kind)).rejects.toMatchObject({name: 'ArchiveError', message: 'Invalid CRC', stack: 'worker stack', data: {bank: 'term_bank_1.json'}});
+            deliver({type: 'error', error: {name: 'ArchiveError', message: 'Invalid CRC', stack: 'worker stack', data: {bank: 'term_bank_1.json'}}});
+            await assertion;
+            expect(status).not.toHaveBeenCalled();
+            expect(port.close).toHaveBeenCalledOnce();
+            expect(api._shutdownRejectors.size).toBe(0);
+            expect(vi.getTimerCount()).toBe(0);
+        });
+    });
 });
 
 describe('cross-frame asynchronous response settlement', () => {

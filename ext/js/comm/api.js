@@ -84,6 +84,82 @@ function createDictionaryRuntimeImportRejectionState(shutdownRejectors, response
     return {state, shutdownReject};
 }
 
+/**
+ * @param {Set<(error: Error) => void>} shutdownRejectors
+ * @param {MessagePort} responsePort
+ * @param {(value: unknown) => void} resolve
+ * @param {(reason?: unknown) => void} reject
+ * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+ * @param {string} label
+ * @returns {(error: Error) => void}
+ */
+function configureDictionaryRuntimeImportResponse(shutdownRejectors, responsePort, resolve, reject, onProgress, label) {
+    const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(shutdownRejectors, responsePort, (error) => {
+        const transportError = new Error(error instanceof Error ? error.message : 'Dictionary runtime import transport failed');
+        transportError.name = 'DictionaryImportTransportError';
+        transportError.cause = error;
+        reject(transportError);
+    });
+    const resetInactivityTimeout = () => {
+        state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
+            shutdownReject(new Error(`${label} response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
+        });
+    };
+    resetInactivityTimeout();
+    responsePort.onmessage = (event) => {
+        if (state.settled) { return; }
+        try {
+            const eventData = /** @type {unknown} */ (event.data);
+            const data = (
+                typeof eventData === 'object' && eventData !== null && !Array.isArray(eventData)
+            ) ?
+                /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
+                null;
+            switch (data?.type) {
+                case 'progress':
+                    resetInactivityTimeout();
+                    try {
+                        onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
+                    } catch (_) {
+                        // A UI observer does not own the live backend mutation.
+                    }
+                    return;
+                case 'complete':
+                    if (data.result && typeof data.result === 'object' && !Array.isArray(data.result)) {
+                        const result = /** @type {{errors?: unknown[]}} */ (data.result);
+                        if (Array.isArray(result.errors)) {
+                            result.errors = result.errors.map((error) => {
+                                if (error && typeof error === 'object' && !Array.isArray(error)) {
+                                    return ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error));
+                                }
+                                return error;
+                            });
+                        }
+                    }
+                    if (!finalizeDictionaryRuntimeImportResponse(state, shutdownRejectors, shutdownReject, responsePort)) { return; }
+                    resolve(data.result ?? null);
+                    return;
+                case 'error': {
+                    const error = ExtensionError.deserialize(data.error ?? {name: 'Error', message: `${label} failed`, stack: ''});
+                    if (!finalizeDictionaryRuntimeImportResponse(state, shutdownRejectors, shutdownReject, responsePort)) { return; }
+                    reject(error);
+                    return;
+                }
+                default:
+                    return;
+            }
+        } catch (error) {
+            // Decode before releasing ownership so a malformed terminal reply
+            // can reconcile durable status instead of stranding the import.
+            shutdownReject(error instanceof Error ? error : new Error('Invalid dictionary import response', {cause: error}));
+        }
+    };
+    responsePort.onmessageerror = () => {
+        shutdownReject(new Error(`${label} response channel failed`));
+    };
+    return shutdownReject;
+}
+
 export class API {
     /**
      * @param {import('../extension/web-extension.js').WebExtension} webExtension
@@ -655,65 +731,7 @@ export class API {
         }
         const channel = new MessageChannel();
         return this._reconcileDictionaryImport(new Promise((resolve, reject) => {
-            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, (error) => {
-                const transportError = new Error(error instanceof Error ? error.message : String(error));
-                transportError.name = 'DictionaryImportTransportError';
-                transportError.cause = error;
-                reject(transportError);
-            });
-            const resetInactivityTimeout = () => {
-                state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
-                    shutdownReject(new Error(`Dictionary runtime import response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
-                });
-            };
-            resetInactivityTimeout();
-            channel.port1.onmessage = (event) => {
-                if (state.settled) { return; }
-                const eventData = /** @type {unknown} */ (event.data);
-                const data = (
-                    typeof eventData === 'object' &&
-                    eventData !== null &&
-                    !Array.isArray(eventData)
-                ) ?
-                    /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
-                    null;
-                switch (data?.type) {
-                    case 'progress':
-                        resetInactivityTimeout();
-                        onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
-                        return;
-                    case 'complete':
-                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
-                        if (
-                            data.result &&
-                            typeof data.result === 'object' &&
-                            !Array.isArray(data.result)
-                        ) {
-                            const result = /** @type {{errors?: unknown[]}} */ (data.result);
-                            if (Array.isArray(result.errors)) {
-                                result.errors = result.errors.map((error) => {
-                                    if (error && typeof error === 'object' && !Array.isArray(error)) {
-                                        return ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error));
-                                    }
-                                    return error;
-                                });
-                            }
-                        }
-                        resolve(data.result ?? null);
-                        return;
-                    case 'error':
-                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
-                        reject(ExtensionError.deserialize(
-                            data.error ?? {name: 'Error', message: 'Dictionary runtime import failed', stack: ''},
-                        ));
-                        return;
-                    default:
-                        return;
-                }
-            };
-            channel.port1.onmessageerror = () => {
-                shutdownReject(new Error('Dictionary runtime import response channel failed'));
-            };
+            const shutdownReject = configureDictionaryRuntimeImportResponse(this._shutdownRejectors, channel.port1, resolve, reject, onProgress, 'Dictionary runtime import');
             try {
                 void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details, operationId, ownerId}, [channel.port2]).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
@@ -739,65 +757,7 @@ export class API {
         }
         const channel = new MessageChannel();
         return this._reconcileDictionaryImport(new Promise((resolve, reject) => {
-            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, (error) => {
-                const transportError = new Error(error instanceof Error ? error.message : String(error));
-                transportError.name = 'DictionaryImportTransportError';
-                transportError.cause = error;
-                reject(transportError);
-            });
-            const resetInactivityTimeout = () => {
-                state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
-                    shutdownReject(new Error(`Dictionary runtime URL import response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
-                });
-            };
-            resetInactivityTimeout();
-            channel.port1.onmessage = (event) => {
-                if (state.settled) { return; }
-                const eventData = /** @type {unknown} */ (event.data);
-                const data = (
-                    typeof eventData === 'object' &&
-                    eventData !== null &&
-                    !Array.isArray(eventData)
-                ) ?
-                    /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
-                    null;
-                switch (data?.type) {
-                    case 'progress':
-                        resetInactivityTimeout();
-                        onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
-                        return;
-                    case 'complete':
-                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
-                        if (
-                            data.result &&
-                            typeof data.result === 'object' &&
-                            !Array.isArray(data.result)
-                        ) {
-                            const result = /** @type {{errors?: unknown[]}} */ (data.result);
-                            if (Array.isArray(result.errors)) {
-                                result.errors = result.errors.map((error) => {
-                                    if (error && typeof error === 'object' && !Array.isArray(error)) {
-                                        return ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error));
-                                    }
-                                    return error;
-                                });
-                            }
-                        }
-                        resolve(data.result ?? null);
-                        return;
-                    case 'error':
-                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
-                        reject(ExtensionError.deserialize(
-                            data.error ?? {name: 'Error', message: 'Dictionary runtime URL import failed', stack: ''},
-                        ));
-                        return;
-                    default:
-                        return;
-                }
-            };
-            channel.port1.onmessageerror = () => {
-                shutdownReject(new Error('Dictionary runtime URL import response channel failed'));
-            };
+            const shutdownReject = configureDictionaryRuntimeImportResponse(this._shutdownRejectors, channel.port1, resolve, reject, onProgress, 'Dictionary runtime URL import');
             try {
                 void this._pmInvoke('importDictionaryUrlOffscreen', {url, details, operationId, ownerId}, [channel.port2]).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
