@@ -2396,11 +2396,10 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         const allReferencedAssetKeys = new Set([...referencedAssetKeys, ...cssReferencedAssetKeys]);
         if (assetResolver !== null) {
             for (const assetKey of allReferencedAssetKeys) {
-                if (assetKey.toLowerCase().endsWith('.css')) { continue; }
-                const bytes = assetResolver.getBytes(assetKey);
-                if (!(bytes instanceof Uint8Array)) { continue; }
                 const archivePath = `${assetPrefix}${assetKey}`;
                 if (files.has(archivePath)) { continue; }
+                const bytes = assetResolver.getBytes(assetKey);
+                if (!(bytes instanceof Uint8Array)) { continue; }
                 files.set(archivePath, bytes);
                 materializedReferencedAssetCount += 1;
             }
