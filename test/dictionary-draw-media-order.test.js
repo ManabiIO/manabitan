@@ -17,6 +17,7 @@ vi.mock('../ext/lib/resvg-wasm.js', () => ({
 
 beforeEach(() => {
     vi.resetAllMocks();
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([0]))));
     svg.render.mockImplementation(() => ({
         pixels: new Uint8Array([1, 2, 3, 4]),
         width: 1,

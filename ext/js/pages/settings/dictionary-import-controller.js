@@ -475,6 +475,8 @@ export class DictionaryImportController {
         };
         /** @type {number} */
         this._activeImportRunGeneration = 0;
+        /** @type {string|undefined} */
+        this._activeImportOwnerId = void 0;
         /** @type {DictionaryImportSource[]} */
         this._pendingImportSources = [];
         /** @type {(event: MouseEvent) => void} */
@@ -543,7 +545,7 @@ export class DictionaryImportController {
             throw new Error('Dictionary import requires Blob-backed archive content');
         }
         return /** @type {ImportResultWithDebug} */ (
-            await this._settingsController.application.api.importDictionaryOffscreen(archiveContent, details, onProgress)
+            await this._settingsController.application.api.importDictionaryOffscreen(archiveContent, details, onProgress, `${Date.now()}:${crypto.randomUUID()}`, this._activeImportOwnerId)
         );
     }
 
@@ -555,12 +557,17 @@ export class DictionaryImportController {
      */
     async _tryImportDictionaryUrlOffscreen(url, details, onProgress) {
         return /** @type {ImportResultWithDebug} */ (
-            await this._settingsController.application.api.importDictionaryUrlOffscreen(url, details, onProgress)
+            await this._settingsController.application.api.importDictionaryUrlOffscreen(url, details, onProgress, `${Date.now()}:${crypto.randomUUID()}`, this._activeImportOwnerId)
         );
     }
 
     /** */
     _onBeforeUnload() {
+        const ownerId = this._activeImportOwnerId;
+        if (typeof ownerId === 'string') {
+            this._activeImportOwnerId = void 0;
+            void this._settingsController.application.api.setDictionaryImportMode(false, ownerId).catch(() => {});
+        }
         this._activeMdx?.disconnect();
         this._activeMdx = null;
         document.removeEventListener('click', this._onDocumentClickCaptureBind, true);
@@ -1589,6 +1596,8 @@ export class DictionaryImportController {
      * @returns {void}
      */
     _forceRecoverHungImportSession(error, label) {
+        const ownerId = this._activeImportOwnerId;
+        this._activeImportOwnerId = void 0;
         this._activeImportRunGeneration += 1;
         this._activeMdx?.disconnect();
         this._activeMdx = null;
@@ -1623,7 +1632,7 @@ export class DictionaryImportController {
         if (statusFooter !== null) {
             statusFooter.setTaskActive(progressSelector, false);
         }
-        void this._settingsController.application.api.setDictionaryImportMode(false).catch((importModeError) => {
+        void this._settingsController.application.api.setDictionaryImportMode(false, ownerId).catch((importModeError) => {
             const normalizedImportModeError = toError(importModeError);
             reportDiagnostics('dictionary-import-watchdog-import-mode-exit-failed', {
                 label,
@@ -1779,6 +1788,8 @@ export class DictionaryImportController {
                 return abortReason instanceof Error ? abortReason : new Error(`Aborted fetching dictionary archive: ${url}`);
             };
             const onAbortSignal = () => {
+                // Cancellation owns settlement even if XHR cannot emit an abort event.
+                fail(getAbortError());
                 try {
                     request.abort();
                 } catch (_) {
@@ -1848,11 +1859,12 @@ export class DictionaryImportController {
 
         const response = await fetch(url, {signal: abortSignal});
         if (!response.ok) {
+            void response.body?.cancel().catch(() => {});
             throw new Error(`Failed to fetch dictionary archive: ${url} (status=${String(response.status)})`);
         }
         const contentType = response.headers.get('content-type') || '';
         if (/text\/html|application\/xhtml\+xml/i.test(contentType)) {
-            const listing = this._parseMdxListingDocument(url, await response.text(), null);
+            const listing = this._parseMdxListingDocument(response.url || url, await response.text(), null);
             if (listing === null) {
                 throw new Error(`URL did not point to a supported dictionary file or MDX directory listing: ${url}`);
             }
@@ -1912,18 +1924,22 @@ export class DictionaryImportController {
      */
     async _getMdxListingForUrl(url, mdxFileName, abortSignal) {
         const parentUrl = new URL('.', url).href;
+        let listingUrl = parentUrl;
         let html;
         try {
             const response = await fetch(parentUrl, {signal: abortSignal});
-            if (!response.ok) { return null; }
             const contentType = response.headers.get('content-type') || '';
-            if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) { return null; }
+            if (!response.ok || !/text\/html|application\/xhtml\+xml/i.test(contentType)) {
+                void response.body?.cancel().catch(() => {});
+                return null;
+            }
+            listingUrl = response.url || parentUrl;
             html = await response.text();
         } catch (error) {
             if (abortSignal.aborted) { throw error; }
             return null;
         }
-        return this._parseMdxListingDocument(parentUrl, html, mdxFileName);
+        return this._parseMdxListingDocument(listingUrl, html, mdxFileName);
     }
 
     /**
@@ -2156,6 +2172,14 @@ export class DictionaryImportController {
     ) {
         if (this._modifying) { return; }
         const importRunGeneration = ++this._activeImportRunGeneration;
+        const importOwnerId = crypto.randomUUID();
+        this._activeImportOwnerId = importOwnerId;
+        const assertCurrentRun = () => {
+            if (!this._isImportRunCurrent(importRunGeneration)) {
+                throw new Error('Ignored stale dictionary import run');
+            }
+        };
+        importProgressTracker.setImportRunCheck(() => this._isImportRunCurrent(importRunGeneration));
 
         const statusFooter = this._statusFooter;
         const progressSelector = '.dictionary-import-progress';
@@ -2190,12 +2214,14 @@ export class DictionaryImportController {
         try {
             this._setModifying(true);
             this._hideErrors();
-            await this._settingsController.application.api.setDictionaryImportMode(true);
             importModeEnabled = true;
+            await this._settingsController.application.api.setDictionaryImportMode(true, importOwnerId);
+            assertCurrentRun();
 
             for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = false; }
 
             const optionsFull = await this._settingsController.getOptionsFull();
+            assertCurrentRun();
             const {
                 skipImageMetadata,
                 skipMediaImport,
@@ -2231,6 +2257,7 @@ export class DictionaryImportController {
             };
 
             for (let i = 0; i < importProgressTracker.dictionaryCount; ++i) {
+                assertCurrentRun();
                 importProgressTracker.onNextDictionary();
                 if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, true); }
                 const dictionaryLoopStartTime = safePerformance.now();
@@ -2241,6 +2268,7 @@ export class DictionaryImportController {
                     finalizeImportSession,
                 });
                 const nextDictionary = await dictionaries.next();
+                assertCurrentRun();
                 const source = nextDictionary.done ? null : nextDictionary.value;
                 /** @type {string|null} */
                 let downloadUrl = null;
@@ -2319,6 +2347,7 @@ export class DictionaryImportController {
                     errors.push(new Error(`Unsupported dictionary import source at item ${i + 1}.`));
                     continue;
                 }
+                assertCurrentRun();
                 errors = [...errors, ...importItemResult.errors];
                 if (typeof importItemResult.importedTitle === 'string' && importItemResult.importedTitle.length > 0) {
                     importedTitles.push(importItemResult.importedTitle);
@@ -2341,6 +2370,15 @@ export class DictionaryImportController {
                 message: toError(error).message,
             });
         } finally {
+            try {
+                await dictionaries.return();
+            } catch (error) {
+                errors.push(toError(error));
+                reportDiagnostics('dictionary-import-source-close-failed', {
+                    message: toError(error).message,
+                    importRunGeneration,
+                });
+            }
             if (
                 deferredFinalizations !== null &&
                 deferredFinalizations.length > 0 &&
@@ -2359,8 +2397,10 @@ export class DictionaryImportController {
                     });
                 }
             }
-            importProgressTracker.onImportComplete(errors.length);
-            Reflect.set(globalThis, '__manabitanImportStepTimingHistory', importProgressTracker.getStepTimingHistory());
+            if (this._isImportRunCurrent(importRunGeneration)) {
+                importProgressTracker.onImportComplete(errors.length);
+                Reflect.set(globalThis, '__manabitanImportStepTimingHistory', importProgressTracker.getStepTimingHistory());
+            }
             const importEndTime = safePerformance.now();
             log.log(`[ImportTiming] import session complete in ${formatDurationMs(importEndTime - importStartTime)} (errors=${errors.length})`);
             reportDiagnostics('dictionary-import-session-complete', {
@@ -2372,22 +2412,26 @@ export class DictionaryImportController {
                 importRunCurrent: this._isImportRunCurrent(importRunGeneration),
             });
             prevention.end();
+            // Keep mutation ownership until backend cleanup settles, then
+            // recheck ownership before touching a possibly newer import UI.
+            if (importModeEnabled) {
+                try {
+                    await this._settingsController.application.api.setDictionaryImportMode(false, importOwnerId);
+                } catch (error) {
+                    const importModeExitError = toError(error);
+                    errors.push(importModeExitError);
+                    reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
+                        message: importModeExitError.message,
+                        importRunGeneration,
+                        activeImportRunGeneration: this._activeImportRunGeneration,
+                    });
+                }
+            }
+            if (this._activeImportOwnerId === importOwnerId) { this._activeImportOwnerId = void 0; }
             if (this._isImportRunCurrent(importRunGeneration)) {
                 for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
                 if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
                 this._setModifying(false);
-                if (importModeEnabled) {
-                    try {
-                        await this._settingsController.application.api.setDictionaryImportMode(false);
-                    } catch (error) {
-                        const importModeExitError = toError(error);
-                        errors.push(importModeExitError);
-                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
-                            message: importModeExitError.message,
-                            importRunGeneration,
-                        });
-                    }
-                }
                 this._showErrors(errors);
                 this._triggerStorageChanged();
                 if (onImportDone) {
@@ -2407,17 +2451,6 @@ export class DictionaryImportController {
                     }
                 }
             } else {
-                if (importModeEnabled && !this._modifying) {
-                    try {
-                        await this._settingsController.application.api.setDictionaryImportMode(false);
-                    } catch (error) {
-                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed-stale', {
-                            message: toError(error).message,
-                            importRunGeneration,
-                            activeImportRunGeneration: this._activeImportRunGeneration,
-                        });
-                    }
-                }
                 reportDiagnostics('dictionary-import-session-complete-stale', {
                     dictionaryCount: importProgressTracker.dictionaryCount,
                     errorCount: errors.length,
@@ -3613,6 +3646,8 @@ export class ImportProgressTracker {
      * @param {number} dictionaryCount
      */
     constructor(steps, dictionaryCount) {
+        /** @type {(() => boolean)|null} */
+        this._isImportRunCurrent = null;
         /** @type {import('dictionary-importer').ImportSteps} */
         this._steps = steps;
         /** @type {number} */
@@ -3697,8 +3732,14 @@ export class ImportProgressTracker {
         return this._stepTimingHistory.map((item) => ({...item}));
     }
 
+    /** @param {() => boolean} check */
+    setImportRunCheck(check) {
+        this._isImportRunCurrent = check;
+    }
+
     /** @type {import('dictionary-worker').ImportProgressCallback} */
     onProgress(data) {
+        if (this._isImportRunCurrent !== null && !this._isImportRunCurrent()) { return; }
         const now = safePerformance.now();
         this._lastActivityTime = now;
         const {nextStep, index, count} = data;

@@ -104,9 +104,208 @@ async function importFiles(page, extensionBaseUrl, files, title) {
  */
 async function assertStoredMedia(page, title, path, expected) {
     const media = /** @type {Array<{content: string}>} */ (await api(page, 'getMedia', {targets: [{dictionary: title, path}]}));
-    expect(media).toHaveLength(1);
+    expect(media, `Stored media: ${path}`).toHaveLength(1);
     expect(Buffer.from(media[0].content, 'base64')).toStrictEqual(Buffer.from(expected));
 }
+
+test('MDX audio-only resources survive import, reopening and a real media-link click', async ({page, context, extensionId}) => {
+    test.setTimeout(180_000);
+    const title = 'MDict audio regression';
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    // Valid mono, unsigned 8-bit PCM; no dependency on a browser audio encoder.
+    const wav = Buffer.alloc(76, 128);
+    wav.write('RIFF', 0);
+    wav.writeUInt32LE(wav.length - 8, 4);
+    wav.write('WAVEfmt ', 8);
+    wav.writeUInt32LE(16, 16);
+    wav.writeUInt16LE(1, 20);
+    wav.writeUInt16LE(1, 22);
+    wav.writeUInt32LE(8000, 24);
+    wav.writeUInt32LE(8000, 28);
+    wav.writeUInt16LE(1, 32);
+    wav.writeUInt16LE(8, 34);
+    wav.write('data', 36);
+    wav.writeUInt32LE(wav.length - 44, 40);
+    const mdx = makeMdictFixture([{
+        key: '\u97f3\u58f0',
+        value: '<a class="audio" href="audio/ping%252Fname.WAV">play audio</a><a href="sound://disabled.wav">disabled sound</a>',
+    }], {title});
+    const mdd = makeMdictFixture([
+        {key: '\\audio\\ping%2Fname.WAV', value: wav},
+        {key: '\\disabled.wav', value: wav},
+    ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1});
+    await importFiles(page, extensionBaseUrl, [
+        {name: 'audio.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
+        {name: 'audio.mdd', mimeType: 'application/octet-stream', buffer: Buffer.from(mdd.bytes)},
+    ], title);
+    const path = 'mdict-media/audio/ping%2Fname.WAV';
+    await assertStoredMedia(page, title, path, wav);
+    expect(await api(page, 'getMedia', {targets: [{dictionary: title, path: 'mdict-media/disabled.wav'}]})).toStrictEqual([]);
+    const reopened = await context.newPage();
+    await page.close();
+    await reopened.goto(`${extensionBaseUrl}/search.html`);
+    await expect(reopened.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+    await assertStoredMedia(reopened, title, path, wav);
+    await reopened.locator('#search-textbox').fill('\u97f3\u58f0');
+    await reopened.locator('#search-button').click();
+    const link = reopened.locator('#dictionary-entries [data-sc-class~="audio"]').first();
+    await expect(link).toHaveText('play audio', {timeout: 30_000});
+    const opened = context.waitForEvent('page');
+    await link.click();
+    const mediaTab = await opened;
+    await mediaTab.waitForURL(/^blob:/u);
+    await mediaTab.waitForLoadState('domcontentloaded');
+    const fetched = await mediaTab.evaluate(async () => {
+        const response = await fetch(location.href);
+        return {type: response.headers.get('content-type'), bytes: [...new Uint8Array(await response.arrayBuffer())], hasOpener: window.opener !== null};
+    });
+    expect(fetched.type).toBe('audio/wav');
+    expect(fetched.bytes).toStrictEqual([...wav]);
+    expect(fetched.hasOpener).toBe(false);
+    // Chromium's native audio document can use a video element as its player.
+    const playback = await mediaTab.locator('audio, video').evaluate(async (element) => {
+        const audio = /** @type {HTMLMediaElement} */ (element);
+        await new Promise((resolve) => {
+            const timer = setTimeout(resolve, 10_000);
+            const settled = () => {
+                clearTimeout(timer);
+                resolve(void 0);
+            };
+            audio.addEventListener('loadedmetadata', settled, {once: true});
+            audio.addEventListener('error', settled, {once: true});
+            audio.load();
+        });
+        return {readyState: audio.readyState, error: audio.error?.message ?? null, source: audio.currentSrc, preload: audio.preload};
+    });
+    expect(playback.error).toBeNull();
+    expect(playback.readyState, JSON.stringify(playback)).toBeGreaterThanOrEqual(1);
+    await mediaTab.close();
+    await reopened.close();
+});
+
+test('MDX stylesheet media preserves special filename identities after import and reopening', async ({page, context, extensionId}) => {
+    test.setTimeout(180_000);
+    const title = 'MDict CSS filename regression';
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const assets = [
+        'slash%2Fname.png',
+        'backslash%5Cname.png',
+        'literal%20name.png',
+        'double%252Fname.png',
+        'bad%ZZname.png',
+        'hash#name.png',
+        'query?name.png',
+        'literal name.png',
+    ].map((name, index) => ({name, bytes: makeFixturePng([index * 30, 255 - index * 30, 100, 255])}));
+    const mdx = makeMdictFixture([{
+        key: 'Media',
+        value: assets.map((_asset, index) => `<span class="media${index}">media ${index}</span>`).join(''),
+    }], {title});
+    const stylesheet = assets.map(({name}, index) => (
+        `.media${index}{background-image:url("images/${encodeURIComponent(name)}")}`
+    )).join('\n');
+    const mdd = makeMdictFixture([
+        {key: '\\styles\\theme.css', value: stylesheet},
+        ...assets.map(({name, bytes}) => ({key: `\\styles\\images\\${name}`, value: bytes})),
+    ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1});
+    await importFiles(page, extensionBaseUrl, [
+        {name: 'filenames.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
+        {name: 'filenames.mdd', mimeType: 'application/octet-stream', buffer: Buffer.from(mdd.bytes)},
+    ], title);
+    for (const {name, bytes} of assets) {
+        await assertStoredMedia(page, title, `mdict-media/styles/images/${name}`, bytes);
+    }
+    await api(page, 'modifySettings', {
+        targets: [{
+            action: 'set',
+            path: 'general.enableWanakana',
+            value: false,
+            scope: 'profile',
+            optionsContext: {depth: 0, url: `${extensionBaseUrl}/search.html`},
+        }],
+        source: 'test',
+    });
+    /**
+     * @param {import('@playwright/test').Page} searchPage
+     * @returns {Promise<void>}
+     */
+    const assertRenderedMedia = async (searchPage) => {
+        await searchPage.goto(`${extensionBaseUrl}/search.html`);
+        await expect(searchPage.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+        await expect(searchPage.locator('#wanakana-enable')).not.toBeChecked();
+        await searchPage.locator('#search-textbox').fill('Media');
+        await searchPage.locator('#search-button').click();
+        await expect(searchPage.locator('#dictionary-entries')).toContainText('media 0', {timeout: 30_000});
+        for (const [index, {bytes}] of assets.entries()) {
+            const target = searchPage.locator(`[data-sc-class~="media${index}"]`).first();
+            await expect(async () => {
+                const background = await target.evaluate((element) => getComputedStyle(element).backgroundImage);
+                const match = /^url\("(blob:[^"]+)"\)$/u.exec(background);
+                expect(match).not.toBeNull();
+                const renderedBytes = await searchPage.evaluate(async (url) => (
+                    [...new Uint8Array(await (await fetch(url)).arrayBuffer())]
+                ), match?.[1] ?? '');
+                expect(renderedBytes).toStrictEqual([...bytes]);
+            }).toPass({timeout: 30_000});
+        }
+    };
+    await assertRenderedMedia(page);
+    const reopened = await context.newPage();
+    await page.close();
+    await assertRenderedMedia(reopened);
+    await reopened.close();
+});
+
+test('MDX bare tags and ID-only elements retain stylesheet rules and CSS media after reopening', async ({page, context, extensionId}) => {
+    test.setTimeout(180_000);
+    const title = 'MDict bare tag regression';
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const png = makeFixturePng([12, 34, 56, 255]);
+    const mdx = makeMdictFixture([{
+        key: '\u732b',
+        value: '<p>paragraph <em>emphasis</em></p><span>bare image</span><div id="hero">ID image</div><img src="styles/icon.png">',
+    }], {title});
+    const mdd = makeMdictFixture([
+        {key: '\\styles\\theme.css', value: 'p{color:rgb(12,34,56)} em{color:rgb(65,43,21)} span,#hero{background-image:url(icon.png)} img{border:3px solid rgb(12,34,56)}'},
+        {key: '\\styles\\icon.png', value: png},
+    ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1});
+    await importFiles(page, extensionBaseUrl, [
+        {name: 'bare-tags.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
+        {name: 'bare-tags.mdd', mimeType: 'application/octet-stream', buffer: Buffer.from(mdd.bytes)},
+    ], title);
+    await assertStoredMedia(page, title, 'mdict-media/styles/icon.png', png);
+    /**
+     * @param {import('@playwright/test').Page} searchPage
+     * @returns {Promise<void>}
+     */
+    const assertRendered = async (searchPage) => {
+        await searchPage.goto(`${extensionBaseUrl}/search.html`);
+        await expect(searchPage.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+        await searchPage.locator('#search-textbox').fill('\u732b');
+        await searchPage.locator('#search-button').click();
+        await expect(searchPage.locator('#dictionary-entries [data-sc-tag="p"]')).toHaveCSS('color', 'rgb(12, 34, 56)', {timeout: 30_000});
+        await expect(searchPage.locator('#dictionary-entries [data-sc-tag="em"]')).toHaveCSS('color', 'rgb(65, 43, 21)');
+        await expect(searchPage.locator('#dictionary-entries [data-sc-tag="img"]')).toHaveCSS('border-top-width', '3px');
+        for (const selector of ['[data-sc-tag="span"]', '[data-sc-id="hero"]']) {
+            const target = searchPage.locator(`#dictionary-entries ${selector}`);
+            await expect(target).not.toHaveAttribute('data-sc-class');
+            await expect(async () => {
+                const background = await target.evaluate((element) => getComputedStyle(element).backgroundImage);
+                const match = /^url\("(blob:[^"]+)"\)$/u.exec(background);
+                expect(match).not.toBeNull();
+                const bytes = await searchPage.evaluate(async (url) => (
+                    [...new Uint8Array(await (await fetch(url)).arrayBuffer())]
+                ), match?.[1] ?? '');
+                expect(bytes).toStrictEqual([...png]);
+            }).toPass({timeout: 30_000});
+        }
+    };
+    await assertRendered(page);
+    const reopened = await context.newPage();
+    await page.close();
+    await assertRendered(reopened);
+    await reopened.close();
+});
 
 test('MDX imports every key from many small blocks and retains boundary lookups after reload', async ({page, extensionId}) => {
     test.setTimeout(180_000);
@@ -148,10 +347,12 @@ test('MDX native cross-block import preserves aliases, senses and media through 
         {key: '別名', value: '@@@LINK=ねこ'},
         {key: '青', value: `<div>blue entry<img src="data:image/png;base64,${Buffer.from(blue).toString('base64')}"></div>`},
         {key: '緑', value: '<div>green MDD entry<img src="styles/images/green.png"></div>'},
+        {key: 'Source', value: '<div>MDD embedded-name collision<img src="embedded/image/000001.png"></div>'},
     ], {title, recordBlockSize: 7, keysPerBlock: 1, headerQuote: "'", spacedHeaderAttributes: true});
     const mdd = makeMdictFixture([
         {key: '\\styles\\theme.css', value: '.native-sense { color: rgb(12, 34, 56); background-image: url(images/green.png); }'},
         {key: '\\styles\\images\\green.png', value: green},
+        {key: '\\embedded\\image\\000001.png', value: green},
     ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1, headerQuote: "'", spacedHeaderAttributes: true});
     const files = [
         {name: 'native.MDX', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
@@ -167,11 +368,16 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     }
     const redPaths = imagePaths(await lookup(page, '猫'));
     const bluePaths = imagePaths(await lookup(page, '青'));
+    const sourcePaths = imagePaths(await lookup(page, 'Source'));
     expect(redPaths).toHaveLength(1);
     expect(bluePaths).toHaveLength(1);
+    expect(sourcePaths).toStrictEqual(['mdict-media/embedded/image/000001.png']);
     expect(redPaths[0]).not.toBe(bluePaths[0]);
+    expect(redPaths[0]).not.toBe(sourcePaths[0]);
+    expect(bluePaths[0]).not.toBe(sourcePaths[0]);
     await assertStoredMedia(page, title, redPaths[0], red);
     await assertStoredMedia(page, title, bluePaths[0], blue);
+    await assertStoredMedia(page, title, sourcePaths[0], green);
     await assertStoredMedia(page, title, 'mdict-media/styles/images/green.png', green);
 
     await page.goto(`${extensionBaseUrl}/search.html`);
@@ -207,12 +413,15 @@ test('MDX native cross-block import preserves aliases, senses and media through 
     await expect(reopened.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
     expect(JSON.stringify(await lookup(reopened, '別名'))).toContain('second independent native sense');
     await assertStoredMedia(reopened, title, redPaths[0], red);
+    await assertStoredMedia(reopened, title, sourcePaths[0], green);
     await api(reopened, 'deleteDictionaryByTitle', {dictionaryTitle: title});
     expect(await api(reopened, 'getDictionaryInfo')).toStrictEqual([]);
     expect(JSON.stringify(await lookup(reopened, '別名'))).not.toContain('second independent native sense');
     await importFiles(reopened, extensionBaseUrl, files, title);
     expect(JSON.stringify(await lookup(reopened, '別名'))).toContain('second independent native sense');
     await assertStoredMedia(reopened, title, 'mdict-media/styles/images/green.png', green);
+    await assertStoredMedia(reopened, title, redPaths[0], red);
+    await assertStoredMedia(reopened, title, sourcePaths[0], green);
     await reopened.close();
 });
 

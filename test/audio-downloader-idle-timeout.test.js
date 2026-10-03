@@ -80,6 +80,44 @@ describe('AudioDownloader idle timeout cleanup', () => {
         expect(getSignal().aborted).toBe(false);
     });
 
+    describe.each(['audio', 'custom-json', 'wikimedia'])('%s rejected body ownership', (route) => {
+        test.each(['resolved', 'rejected', 'pending'])('cancels an unread error body without waiting for %s cleanup', async (cleanup) => {
+            const cancel = vi.fn(() => {
+                if (cleanup === 'rejected') { throw new Error('cancel failed'); }
+                if (cleanup === 'pending') { return /** @type {Promise<void>} */ (new Promise(() => {})); }
+            });
+            const response = new Response(new ReadableStream({cancel}), {status: 503});
+            const downloader = createDownloader(async (url) => {
+                if (route === 'wikimedia' && new URL(url).searchParams.get('list') === 'search') {
+                    return new Response(JSON.stringify({query: {search: [{title: 'File:en-word.ogg'}]}}));
+                }
+                return response;
+            });
+            if (route === 'audio') {
+                await expect(downloader._downloadAudioFromUrl('https://example.test/audio.mp3', 'custom', 5000)).rejects.toThrow('Invalid response: 503');
+            } else {
+                const language = {name: 'English', iso: 'en', iso639_3: 'eng', exampleText: 'example'};
+                await expect(downloader.getTermAudioInfoList({type: route === 'wikimedia' ? 'wiktionary' : 'custom-json', url: 'https://example.test/audio.json', voice: ''}, 'word', '', language)).resolves.toEqual([]);
+            }
+            expect(cancel).toHaveBeenCalledOnce();
+            expect(response.bodyUsed).toBe(true);
+            expect(vi.getTimerCount()).toBe(0);
+        });
+    });
+
+    test('an HTTP error releases its stream while the next audio source succeeds', async () => {
+        const cancel = vi.fn();
+        const downloader = createDownloader(async (url) => (url.endsWith('/bad') ?
+            new Response(new ReadableStream({cancel}), {status: 503}) :
+            new Response(new Uint8Array([1, 2, 3]), {headers: {'Content-Type': 'audio/mpeg'}})));
+        await expect(downloader.downloadTermAudio([
+            {type: 'custom', url: 'https://example.test/bad', voice: ''},
+            {type: 'custom', url: 'https://example.test/good', voice: ''},
+        ], null, 'word', '', 5000, {name: 'English', iso: 'en', iso639_3: 'eng', exampleText: 'example'}, false)).resolves.toEqual({data: 'AQID', contentType: 'audio/mpeg'});
+        expect(cancel).toHaveBeenCalledOnce();
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
     test('clears the idle timer when reading the response body fails', async () => {
         const error = new Error('stream failed');
         const {downloader, getSignal} = createSignalCapturingDownloader(async () => new Response(new ReadableStream({

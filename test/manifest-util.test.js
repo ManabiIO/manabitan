@@ -48,3 +48,19 @@ describe('ManifestUtil firefox variants', () => {
         expect(manifest.browser_specific_settings?.gecko?.update_url).toBeUndefined();
     });
 });
+
+describe('dictionary audio content security policy', () => {
+    const manifestUtil = new ManifestUtil();
+    test.each(manifestUtil.getVariants().map(({name}) => name))('%s permits locally stored blob audio', (variant) => {
+        const manifest = manifestUtil.getManifest(variant);
+        const csp = manifest.content_security_policy;
+        /** @type {string|undefined} */
+        const extensionPolicy = typeof csp === 'string' ? csp : csp?.extension_pages;
+        const directives = new Map(extensionPolicy?.split(';').map((directive) => {
+            const [name, ...sources] = directive.trim().split(/\s+/);
+            return [name, sources];
+        }));
+        expect(directives.get('media-src')).toContain('blob:');
+        expect(directives.get('script-src')).not.toContain('blob:');
+    });
+});

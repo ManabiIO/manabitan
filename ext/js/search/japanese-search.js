@@ -92,7 +92,7 @@ export function isJapanesePrefixCandidate(query) {
  * An optional prefix lookup runs only after every exact/deinflected candidate
  * fails to cover its full query. The translator can return a shorter leading
  * word for an unfinished query; retain that result if completion also misses.
- * @template {{dictionaryEntries: unknown[], originalTextLength?: number}} T
+ * @template {{dictionaryEntries: unknown[], originalTextLength?: number, dictionaryAvailability?: import('translator').DictionaryAvailability[]}} T
  * @param {string} text
  * @param {(query: string) => Promise<T>} lookup
  * @param {() => void} [guard]
@@ -107,6 +107,9 @@ export async function findJapaneseSearch(text, lookup, guard = () => {}, prefixL
         guard();
         const result = await lookup(query);
         guard();
+        if (result.dictionaryAvailability?.length) {
+            return {result, matchedQuery: query, matchType: 'exact'};
+        }
         if (result.dictionaryEntries.length > 0) {
             // Older callers and test doubles do not provide the translator's
             // span, so keep their established first-hit behavior.
@@ -124,6 +127,9 @@ export async function findJapaneseSearch(text, lookup, guard = () => {}, prefixL
             guard();
             const result = await prefixLookup(query);
             guard();
+            if (result.dictionaryAvailability?.length) {
+                return {result, matchedQuery: query, matchType: 'prefix'};
+            }
             if (result.dictionaryEntries.length > 0) {
                 return {result, matchedQuery: query, matchType: 'prefix'};
             }

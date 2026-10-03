@@ -158,6 +158,32 @@ export function getMdictMediaPathsFromCss(css) {
 }
 
 /**
+ * Computed URLs lose filename spelling (e.g. a space and a literal %20 have
+ * the same URL). Retain all declared identities so rewriting can distinguish them.
+ * @param {string} css
+ * @param {string} baseUrl
+ * @returns {Map<string, string[]>}
+ */
+export function getMdictMediaUrlPathMap(css, baseUrl) {
+    /** @type {Map<string, string[]>} */
+    const result = new Map();
+    for (const path of getMdictMediaPathsFromCss(css)) {
+        try {
+            const url = new URL(path, baseUrl).href;
+            const paths = result.get(url);
+            if (typeof paths === 'undefined') {
+                result.set(url, [path]);
+            } else if (!paths.includes(path)) {
+                paths.push(path);
+            }
+        } catch (_error) {
+            // Invalid declarations cannot produce a computed URL.
+        }
+    }
+    return result;
+}
+
+/**
  * @param {string} value
  * @param {string} baseUrl
  * @returns {string|null}
@@ -177,11 +203,23 @@ export function getMdictMediaPathFromComputedUrl(value, baseUrl) {
 /**
  * @param {string} css
  * @param {string} baseUrl
+ * @param {Map<string, string[]>} [declaredPaths]
  * @returns {string[]}
  */
-export function getMdictMediaPathsFromComputedCss(css, baseUrl) {
+export function getMdictMediaPathsFromComputedCss(css, baseUrl, declaredPaths) {
     const result = [];
     for (const {path: value} of getCssUrlTokens(css)) {
+        if (typeof declaredPaths !== 'undefined') {
+            try {
+                const paths = declaredPaths.get(new URL(value, baseUrl).href);
+                if (typeof paths !== 'undefined') {
+                    for (const path of paths) { result.push(path); }
+                    continue;
+                }
+            } catch (_error) {
+                continue;
+            }
+        }
         const path = getMdictMediaPathFromComputedUrl(value, baseUrl);
         if (path !== null) { result.push(path); }
     }

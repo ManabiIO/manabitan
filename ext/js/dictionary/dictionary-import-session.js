@@ -63,6 +63,8 @@ export class DictionaryImportSession {
         this._published = false;
         /** @type {boolean} */
         this._failed = false;
+        /** @type {string[]} */
+        this._warnings = [];
     }
 
     /** @returns {boolean} */
@@ -74,6 +76,21 @@ export class DictionaryImportSession {
     get state() {
         if (this._published) { return 'published'; }
         return this._bulkState;
+    }
+
+    /** @returns {import('dictionary-importer').ImportOutcome} */
+    get outcome() {
+        return {
+            status: this._published ? 'published' : (this._bulkState === 'aborted' ? 'aborted' : 'unknown'),
+            ...(this._published && this._bulkImportSessionId !== null ? {generationId: this._bulkImportSessionId} : {}),
+            ...(this._warnings.length > 0 ? {warnings: [...this._warnings]} : {}),
+        };
+    }
+
+    /** @param {unknown} error */
+    recordWarning(error) {
+        const message = toError(error).message;
+        if (!this._warnings.includes(message)) { this._warnings.push(message); }
     }
 
     /**
@@ -200,8 +217,16 @@ export class DictionaryImportSession {
                     summary,
                     primaryKey: this._dictionarySummaryPrimaryKey,
                 }, this._bulkImportSessionId);
+                if (details === null) {
+                    throw new Error('Dictionary import was not published');
+                }
                 this._bulkState = 'committed';
                 this._published = true;
+                if ('housekeepingErrors' in details && Array.isArray(details.housekeepingErrors)) {
+                    for (const error of /** @type {unknown[]} */ (details.housekeepingErrors)) { this.recordWarning(error); }
+                }
+                // Housekeeping warnings stay in finalization details, not the
+                // import errors which settings treats as failed activation.
                 return details;
             } catch (error) {
                 this._bulkState = 'failed';

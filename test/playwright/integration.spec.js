@@ -662,12 +662,13 @@ async function runSearch(page, query) {
 
 /**
  * @param {import('@playwright/test').Page} page
- * @returns {Promise<void>}
+ * @returns {Promise<import('@playwright/test').Locator>}
  */
 async function waitForSaveButtonEnabled(page) {
-    const saveButton = page.locator('.entry .note-actions-container .action-button[data-action="save-note"]').first();
+    const saveButton = page.locator('.entry .note-actions-container .action-button[data-action="save-note"][data-card-format-index="0"]').first();
     await expect(saveButton).toBeVisible({timeout: 30_000});
     await expect(saveButton).toBeEnabled({timeout: 30_000});
+    return saveButton;
 }
 
 test('search accepts typing immediately after visible initialization', async ({page, extensionId}) => {
@@ -684,7 +685,7 @@ test('search clipboard', async ({page, extensionId}) => {
     await page.goto(`chrome-extension://${extensionId}/search.html`);
     await waitForSearchPageReady(page);
     await writeToClipboardFromPage(page, clipboardMonitorInitialValue);
-    await page.locator('#search-option-clipboard-monitor-container > label').click();
+    await page.locator('#search-option-clipboard-monitor-container').click();
     await expect(page.locator('#clipboard-monitor-enable')).toBeChecked();
 
     await expect(async () => {
@@ -1030,6 +1031,16 @@ test('chromium happy path covers multi-dictionary import, lookup scroll, and Ank
         await page.goto(`${extensionBaseUrl}/search.html`);
         await waitForSearchPageReady(page);
         await waitForTermsLookupReady(page, japaneseLookupTerm);
+        const lookup = /** @type {import('translator').FindTermsResult} */ (await invokeRuntimeApi(page, 'termsFind', {
+            text: japaneseLookupTerm,
+            details: {matchType: 'exact', deinflect: true, primaryReading: ''},
+            optionsContext: {depth: 0, url: page.url()},
+        }));
+        const headwords = lookup.dictionaryEntries.flatMap((entry) => entry.headwords);
+        expect(headwords.length).toBeGreaterThan(0);
+        for (const headword of headwords) {
+            expect(headword).toMatchObject({term: japaneseLookupTerm, reading: japaneseLookupReading});
+        }
         await runSearch(page, japaneseLookupTerm);
         await expect(page.locator('#dictionary-entries .entry')).toBeVisible({timeout: 30_000});
         await expect(page.locator('#dictionary-entries .headword-reading').first()).toHaveText(new RegExp(japaneseLookupReading));
@@ -1047,8 +1058,7 @@ test('chromium happy path covers multi-dictionary import, lookup scroll, and Ank
         await setContentScrollTop(page, 0);
         await page.waitForTimeout(150);
 
-        await waitForSaveButtonEnabled(page);
-        const saveButton = page.locator('.entry .note-actions-container .action-button[data-action="save-note"]:not([disabled])').first();
+        const saveButton = await waitForSaveButtonEnabled(page);
         await saveButton.click();
 
         await expect(async () => {

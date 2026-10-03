@@ -142,4 +142,19 @@ describe('StructuredContentGenerator MDX rendering compatibility', () => {
         expect(link.getAttribute('href')).toBe('#');
         expect(openMediaInTab).toHaveBeenCalledWith('mdict-media/audio/%E0%A4%A.mp3', 'Test Dictionary', /** @type {Window} */ (/** @type {unknown} */ (window)));
     });
+
+    test('media click failures are reported without an unhandled rejection', async () => {
+        const failure = new Error('Media retrieval failed');
+        const display = {
+            application: {api: {getMedia: vi.fn().mockRejectedValue(failure)}},
+            onError: vi.fn(),
+        };
+        const contentManager = new DisplayContentManager(/** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ (display)));
+        const generator = new StructuredContentGenerator(contentManager, window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+        const node = generator.createStructuredContent({tag: 'a', href: 'media:mdict-media/ping.wav', content: 'play'}, 'Audio');
+        const link = node.querySelector('a');
+        expect(link).not.toBeNull();
+        link?.dispatchEvent(new window.MouseEvent('click', {bubbles: true, cancelable: true}));
+        await vi.waitFor(() => { expect(display.onError).toHaveBeenCalledWith(failure); });
+    });
 });

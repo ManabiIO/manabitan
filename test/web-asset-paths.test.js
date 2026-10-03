@@ -26,8 +26,8 @@ import {DictionaryWorker} from '../ext/js/dictionary/dictionary-worker.js';
 /** @type {Array<[string, RegExp, string]>} */
 const resources = [
     ['dictionary/dictionary-database.js', /new Worker\((.+), \{type: 'module'\}\)/, 'js/dictionary/dictionary-database-worker-main.js'],
-    ['dictionary/dictionary-database.js', /initWasm\(fetch\((.+)\)\)/, 'lib/resvg.wasm'],
-    ['dictionary/dictionary-database.js', /const font = await fetch\((.+)\);/, 'fonts/NotoSansJP-Regular.ttf'],
+    ['dictionary/dictionary-media-renderer.js', /_fetchResource\((new URL\('[^']*resvg\.wasm', import\.meta\.url\))\)/, 'lib/resvg.wasm'],
+    ['dictionary/dictionary-media-renderer.js', /_fetchResource\((new URL\('[^']*NotoSansJP-Regular\.ttf', import\.meta\.url\))\)/, 'fonts/NotoSansJP-Regular.ttf'],
     ['dictionary/zstd-term-content.js', /await init\((.+)\);/, 'lib/zstd.wasm'],
     ['dictionary/zstd-term-content.js', /const response = await fetch\((.+)\);/, 'lib/zstd-dicts/jmdict.zdict'],
     ['dictionary/dictionary-importer.js', /deflate: \[(.+)\]/, 'lib/z-worker.js'],

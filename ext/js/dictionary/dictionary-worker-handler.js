@@ -239,6 +239,8 @@ export class DictionaryWorkerHandler {
         }
         /** @type {unknown|null} */
         let importError = null;
+        /** @type {import('dictionary-importer').ImportOutcome|null} */
+        let importOutcome = null;
         try {
             const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress);
             const detailsRecord = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (details));
@@ -262,11 +264,12 @@ export class DictionaryWorkerHandler {
                 null;
             /**
              * @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase
-             * @returns {Promise<{result: import('dictionary-importer').Summary|null, errors: Error[], importerDebug: import('dictionary-importer').ImportDebug|null}>}
+             * @returns {Promise<{result: import('dictionary-importer').Summary|null, errors: Error[], importerDebug: import('dictionary-importer').ImportDebug|null, outcome: import('dictionary-importer').ImportOutcome}>}
              */
             const importOnce = async (activeDictionaryDatabase) => {
                 const importPayload = await dictionaryImporter.importDictionary(activeDictionaryDatabase, archiveContent, details);
                 const {result, errors} = importPayload;
+                const outcome = importPayload.outcome ?? {status: result === null ? 'unknown' : 'published'};
                 const importerDebug = (typeof importPayload === 'object' && importPayload !== null && !Array.isArray(importPayload)) ?
                     (/** @type {import('dictionary-importer').ImportDebug|null} */ (Reflect.get(importPayload, 'debug') ?? null)) :
                     null;
@@ -294,7 +297,7 @@ export class DictionaryWorkerHandler {
                     result.title = sourceDictionaryTitle;
                     result.sourceTitle = sourceDictionaryTitle;
                 }
-                return {result, errors, importerDebug};
+                return {result, errors, importerDebug, outcome};
             };
 
             let result;
@@ -302,7 +305,7 @@ export class DictionaryWorkerHandler {
             /** @type {import('dictionary-importer').ImportDebug|null} */
             let importerDebug = null;
             try {
-                ({result, errors, importerDebug} = await importOnce(dictionaryDatabase));
+                ({result, errors, importerDebug, outcome: importOutcome} = await importOnce(dictionaryDatabase));
             } catch (error) {
                 if (replacementDictionaryTitle !== null || dictionaryTitleOverride !== null) {
                     try {
@@ -319,6 +322,7 @@ export class DictionaryWorkerHandler {
             return {
                 result,
                 errors: errors.map((error) => ExtensionError.serialize(error)),
+                outcome: importOutcome ?? {status: 'unknown'},
                 debug: {
                     usesFallbackStorage,
                     openStorageDiagnostics,
@@ -336,6 +340,7 @@ export class DictionaryWorkerHandler {
                 useImportSession,
                 finalizeImportSession,
                 importError,
+                importOutcome,
             );
         }
     }
@@ -345,6 +350,7 @@ export class DictionaryWorkerHandler {
      * @param {boolean} useImportSession
      * @param {boolean} finalizeImportSession
      * @param {unknown|null} importError
+     * @param {import('dictionary-importer').ImportOutcome|null} [outcome]
      * @returns {Promise<void>}
      */
     async _closeDictionaryDatabaseAfterImport(
@@ -352,6 +358,7 @@ export class DictionaryWorkerHandler {
         useImportSession,
         finalizeImportSession,
         importError,
+        outcome = null,
     ) {
         const shouldCloseImportSession = useImportSession && (finalizeImportSession || importError !== null);
         const shouldCloseStandaloneDatabase = !useImportSession && dictionaryDatabase.isPrepared();
@@ -362,6 +369,11 @@ export class DictionaryWorkerHandler {
         try {
             await dictionaryDatabase.close();
         } catch (closeError) {
+            if (importError === null && outcome?.status === 'published') {
+                (outcome.warnings ??= []).push(closeError instanceof Error ? closeError.message : String(closeError));
+                try { log.error(closeError); } catch (_) { /* Publication is already durable. */ }
+                return;
+            }
             if (importError === null) { throw closeError; }
             log.error(new AggregateError(
                 [importError, closeError],

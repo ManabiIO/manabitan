@@ -16,7 +16,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
-import {DictionaryCssMediaResolver, getMdictMediaPathFromComputedUrl, getMdictMediaPathsFromComputedCss} from '../ext/js/display/dictionary-css-media-resolver.js';
+import {DictionaryCssMediaResolver, getMdictMediaPathFromComputedUrl, getMdictMediaPathsFromComputedCss, getMdictMediaUrlPathMap} from '../ext/js/display/dictionary-css-media-resolver.js';
 
 describe('DictionaryCssMediaResolver', () => {
     test('maps active MDX CSS image media to cached blob URLs and revokes them on clear', async () => {
@@ -150,6 +150,39 @@ describe('DictionaryCssMediaResolver', () => {
 });
 
 describe('getMdictMediaPathFromComputedUrl', () => {
+    test('preserves ambiguous declared identities and does not fetch unused stylesheet resources', async () => {
+        const baseUrl = 'chrome-extension://example/search.html';
+        const paths = ['mdict-media/literal%20name.png', 'mdict-media/literal name.png'];
+        const css = [
+            ...paths.map((path, index) => `.image${index}{background:url("${path}")}`),
+            '.unused{background:url("mdict-media/unused.png")}',
+            '.duplicate{background:url("mdict-media/literal%20name.png")}',
+            '/* url("mdict-media/comment.png") */',
+            '.label{content:\'url("mdict-media/string.png")\'}',
+        ].join('\n');
+        const declaredPaths = getMdictMediaUrlPathMap(css, baseUrl);
+        expect(declaredPaths.size).toBe(2);
+        const computed = `url("${new URL(paths[0], baseUrl).href}")`;
+        const activePaths = getMdictMediaPathsFromComputedCss(computed, baseUrl, declaredPaths);
+        expect(activePaths).toStrictEqual(paths);
+        expect(getMdictMediaPathsFromComputedCss('url("https://other.invalid/mdict-media/literal%20name.png")', baseUrl, declaredPaths)).toStrictEqual([]);
+
+        const getMedia = vi.fn().mockResolvedValue(paths.map((path, index) => ({
+            dictionary: 'A', path, mediaType: 'image/png', content: 'AA==', index,
+        })));
+        const resolver = new DictionaryCssMediaResolver({getMedia}, {
+            createObjectURL: vi.fn().mockReturnValueOnce('blob:literal').mockReturnValueOnce('blob:space'),
+            revokeObjectURL: vi.fn(),
+        });
+        await resolver.resolve(activePaths.map((path) => ({dictionary: 'A', path})));
+        expect(getMedia).toHaveBeenCalledExactlyOnceWith(paths.map((path) => ({dictionary: 'A', path})));
+        const rewritten = resolver.rewriteStyles('A', css);
+        expect(rewritten).toContain('.image0{background:url("blob:literal")}');
+        expect(rewritten).toContain('.image1{background:url("blob:space")}');
+        expect(rewritten).toContain('.unused{background:url("mdict-media/unused.png")}');
+        expect(resolver.rewriteStyles('B', css)).toBe(css);
+    });
+
     test('extracts only same-extension-origin MDict media URLs', () => {
         const baseUrl = 'chrome-extension://example/search.html';
         expect(getMdictMediaPathFromComputedUrl(

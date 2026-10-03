@@ -231,11 +231,17 @@ export class CrossFrameAPIPort extends EventDispatcher {
             invocation.timer = null;
         }
 
-        const error = data.error;
-        if (typeof error !== 'undefined') {
-            invocation.reject(ExtensionError.deserialize(error));
-        } else {
-            invocation.resolve(data.result);
+        // The invocation is no longer registered. Decoding failures must still
+        // reject it rather than escape the listener with no timeout remaining.
+        try {
+            const error = data.error;
+            if (typeof error !== 'undefined') {
+                invocation.reject(ExtensionError.deserialize(error));
+            } else {
+                invocation.resolve(data.result);
+            }
+        } catch (error) {
+            invocation.reject(error instanceof Error ? error : new Error('Failed to decode cross-frame API response', {cause: error}));
         }
     }
 

@@ -165,8 +165,8 @@ type ApiSurface = {
         return: void;
     };
     cancelDictionaryImportOffscreen: {
-        params: void;
-        return: void;
+        params: {operationId?: string, lookupOnly?: boolean, workerGeneration?: string};
+        return: ImportOperationStatus | void;
     };
     clipboardSetBrowserOffscreen: {
         params: {
@@ -250,6 +250,7 @@ type McApiSurface = {
         params: {
             archiveContent: Blob;
             details: DictionaryImporter.ImportDetails;
+            operationId: string;
         };
         return: void;
     };
@@ -265,6 +266,21 @@ type McApiSurface = {
         params: void;
         return: void;
     };
+};
+
+/**
+ * IDs are timestamp-prefixed unique tokens, admitted within ten minutes of issue.
+ * Lookup does not replay import; missing volatile receipts reconcile only exact
+ * published summary metadata. Unconfirmed restart/rollback outcomes stay unknown.
+ */
+export type ImportOperationStatus = {
+    operationId: string;
+    workerGeneration: string;
+    state: 'unknown' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+    published?: boolean;
+    outcome?: DictionaryImporter.ImportOutcome;
+    result?: unknown;
+    error?: import('core').SerializedError;
 };
 
 type McApiExtraArgs = [ports: readonly MessagePort[]];

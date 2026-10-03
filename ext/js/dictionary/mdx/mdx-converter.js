@@ -266,8 +266,9 @@ class EmbeddedAssetCollector {
      * @param {string} assetPrefix
      * @param {{value: number}} counter
      * @param {{entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}} sharedDataUrlCache
+     * @param {MddAssetResolver|null} assetResolver
      */
-    constructor(assetPrefix, counter, sharedDataUrlCache) {
+    constructor(assetPrefix, counter, sharedDataUrlCache, assetResolver) {
         /** @type {string} */
         this._assetPrefix = assetPrefix;
         /** @type {Map<string, Uint8Array>} */
@@ -280,6 +281,8 @@ class EmbeddedAssetCollector {
         this._sharedDataUrlCache = sharedDataUrlCache;
         /** @type {{value: number}} */
         this._counter = counter;
+        /** @type {MddAssetResolver|null} */
+        this._assetResolver = assetResolver;
     }
 
     /**
@@ -315,7 +318,13 @@ class EmbeddedAssetCollector {
         const {mediaType, data} = decoded;
         const extension = EMBEDDED_ASSET_EXTENSION_MAP.get(mediaType.split(';', 1)[0].trim().toLowerCase()) ?? '.bin';
         const category = (mediaType.split('/', 1)[0] || 'asset').trim().toLowerCase();
-        const path = `${this._assetPrefix}embedded/${category}/${String(++this._counter.value).padStart(6, '0')}${extension}`;
+        // Source resources and generated assets share the archive media root.
+        // Reserve both exact and case-folded source keys before assigning a path.
+        let key;
+        do {
+            key = `embedded/${category}/${String(++this._counter.value).padStart(6, '0')}${extension}`;
+        } while (this._assetResolver?.hasKey(key));
+        const path = `${this._assetPrefix}${key}`;
         this._assets.set(path, data);
 
         const retainedKeyBytes = dataUrl.length * 2;
@@ -398,6 +407,35 @@ class MddAssetResolver {
      */
     get lookupErrorCount() {
         return this._lookupErrorCount;
+    }
+
+    /**
+     * @param {string} key
+     * @returns {boolean}
+     */
+    hasKey(key) {
+        return this._records.has(key) || this._recordsLowercase.has(key.toLowerCase());
+    }
+
+    /** @returns {string} */
+    getAssetPrefix() {
+        const root = 'mdict-media/';
+        const sourceDirectories = new Set();
+        let rootOccupied = false;
+        for (const key of this._records.keys()) {
+            const normalizedKey = key.toLowerCase();
+            if (!normalizedKey.startsWith(root)) { continue; }
+            rootOccupied = true;
+            const slash = normalizedKey.indexOf('/', root.length);
+            if (slash >= 0) { sourceDirectories.add(normalizedKey.slice(0, slash + 1)); }
+        }
+        if (!rootOccupied) { return root; }
+        // Source paths must not be mistaken for already-converted paths.
+        // Keep the renderer's media root while choosing a disjoint subdirectory.
+        for (let index = 1; ; ++index) {
+            const prefix = `${root}converted-${index}/`;
+            if (!sourceDirectories.has(prefix)) { return prefix; }
+        }
     }
 
     /**
@@ -1594,18 +1632,19 @@ function isStructuredStyleRecord(value) {
 
 /**
  * @param {Record<string, string>} attrs
- * @returns {Record<string, string>|null}
+ * @param {string} tagName
+ * @returns {Record<string, string>}
  */
-function buildStructuredData(attrs) {
+function buildStructuredData(attrs, tagName) {
     /** @type {Record<string, string>} */
-    const data = {};
+    const data = {tag: tagName};
     const className = typeof attrs.class === 'string' ?
         trimCssWhitespace(attrs.class).replace(/[\t\n\f\r ]+/gu, ' ') :
         '';
     if (className.length > 0) { data.class = className; }
     const id = typeof attrs.id === 'string' ? trimCssWhitespace(attrs.id) : '';
     if (id.length > 0) { data.id = id; }
-    return Object.keys(data).length > 0 ? data : null;
+    return data;
 }
 
 /**
@@ -1804,9 +1843,7 @@ function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferen
     }
     if (path === null) { return null; }
     /** @type {Record<string, unknown>} */
-    const image = {tag: 'img', path};
-    const data = buildStructuredData(attrs);
-    if (data !== null) { image.data = {tag: 'img', ...data}; }
+    const image = {tag: 'img', path, data: buildStructuredData(attrs, 'img')};
     const width = typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width) ? Number.parseInt(attrs.width, 10) : Number.NaN;
     const height = typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height) ? Number.parseInt(attrs.height, 10) : Number.NaN;
     if (Number.isFinite(width)) { image.width = width; }
@@ -1896,9 +1933,7 @@ function appendStructuredContent(parent, content, details) {
         }
 
         /** @type {Record<string, unknown>} */
-        const element = {tag: mappedTag};
-        const data = buildStructuredData(attrs);
-        if (data !== null) { element.data = {tag: tagName, ...data}; }
+        const element = {tag: mappedTag, data: buildStructuredData(attrs, tagName)};
 
         /** @type {StructuredStyle} */
         const style = {};
@@ -1962,11 +1997,11 @@ function appendStructuredContent(parent, content, details) {
 
 /**
  * @param {string} definition
- * @param {{enableAudio: boolean, assetPrefix: string, embeddedAssetCounter: {value: number}, embeddedAssetDataUrlCache: {entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}, entryScopeClass: string}} options
+ * @param {{enableAudio: boolean, assetPrefix: string, assetResolver: MddAssetResolver|null, embeddedAssetCounter: {value: number}, embeddedAssetDataUrlCache: {entries: Array<{dataUrl: string, path: string, probe: number}>, retainedKeyBytes: number}, entryScopeClass: string}} options
  * @returns {{glossary: Record<string, unknown>, inlineStylesheets: Array<[string, string]>, embeddedAssets: Map<string, Uint8Array>, embeddedAssetDataUrlCacheEntries: Array<{dataUrl: string, path: string, probe: number}>, assetReferences: Set<string>}}
  */
 function convertDefinitionToStructuredContent(definition, options) {
-    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix, options.embeddedAssetCounter, options.embeddedAssetDataUrlCache);
+    const embeddedAssets = new EmbeddedAssetCollector(options.assetPrefix, options.embeddedAssetCounter, options.embeddedAssetDataUrlCache, options.assetResolver);
     /** @type {Set<string>} */
     const assetReferences = new Set();
     /** @type {Array<[string, string]>} */
@@ -2122,7 +2157,6 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
     try {
         const title = extractTitle(mdx, fileName, titleOverride);
         const description = extractDescription(mdx, descriptionOverride);
-        const assetPrefix = 'mdict-media/';
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const phaseTimings = [];
         /**
@@ -2142,6 +2176,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         if (includeAssets && mddSources.length > 0) {
             assetResolver = new MddAssetResolver(mddSources);
         }
+        const assetPrefix = assetResolver?.getAssetPrefix() ?? 'mdict-media/';
         recordPhaseTiming('prepare-mdx:index-mdd', tIndexMddStart, {
             includeAssets,
             mddCount: mddSources.length,
@@ -2272,6 +2307,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
                 converted = convertDefinitionToStructuredContent(preparedDefinition, {
                     enableAudio,
                     assetPrefix,
+                    assetResolver,
                     embeddedAssetCounter,
                     embeddedAssetDataUrlCache,
                     entryScopeClass: `${MDX_GLOSSARY_ENTRY_CLASS_PREFIX}${sequence}`,
@@ -2396,11 +2432,10 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         const allReferencedAssetKeys = new Set([...referencedAssetKeys, ...cssReferencedAssetKeys]);
         if (assetResolver !== null) {
             for (const assetKey of allReferencedAssetKeys) {
-                if (assetKey.toLowerCase().endsWith('.css')) { continue; }
-                const bytes = assetResolver.getBytes(assetKey);
-                if (!(bytes instanceof Uint8Array)) { continue; }
                 const archivePath = `${assetPrefix}${assetKey}`;
                 if (files.has(archivePath)) { continue; }
+                const bytes = assetResolver.getBytes(assetKey);
+                if (!(bytes instanceof Uint8Array)) { continue; }
                 files.set(archivePath, bytes);
                 materializedReferencedAssetCount += 1;
             }

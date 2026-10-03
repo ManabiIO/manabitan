@@ -146,6 +146,7 @@ type ApiSurface = {
         return: {
             dictionaryEntries: Dictionary.TermDictionaryEntry[];
             originalTextLength: number;
+            dictionaryAvailability?: import('dictionary-database').DictionaryAvailability[];
         };
     };
     parseText: {
@@ -363,8 +364,13 @@ type ApiSurface = {
     setDictionaryImportMode: {
         params: {
             active: boolean;
+            ownerId?: string;
         };
         return: void;
+    };
+    getDictionaryImportOperationStatus: {
+        params: {operationId: string, workerGeneration?: string};
+        return: import('offscreen').ImportOperationStatus;
     };
     purgeDatabase: {
         params: void;
@@ -561,6 +567,8 @@ type PmApiSurface = {
         params: {
             archiveContent: Blob;
             details: DictionaryImporter.ImportDetails;
+            operationId: string;
+            ownerId?: string;
         };
         return: void;
     };
@@ -568,6 +576,8 @@ type PmApiSurface = {
         params: {
             url: string;
             details: DictionaryImporter.ImportDetails;
+            operationId: string;
+            ownerId?: string;
         };
         return: void;
     };

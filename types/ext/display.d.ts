@@ -19,6 +19,7 @@ import type * as Dictionary from './dictionary';
 import type * as Extension from './extension';
 import type * as Settings from './settings';
 import type * as TextScannerTypes from './text-scanner';
+import type {DictionaryAvailability} from './translator';
 import type {EventNames, EventArgument as BaseEventArgument} from './core';
 import type {Message as FrameClientMessage} from './frame-client';
 import type {
@@ -119,11 +120,18 @@ export type HistoryContent = {
     animate?: boolean;
     /** An array of dictionary entries to display as content. */
     dictionaryEntries?: Dictionary.DictionaryEntry[];
+    /** Degraded dictionaries for this lookup, including incomplete misses. */
+    dictionaryAvailability?: DictionaryAvailability[];
     /** The identifying information for the frame the content originated from. */
     contentOrigin?: Extension.ContentOrigin;
 };
 
 export type SearchMode = null | 'popup' | 'action-popup';
+
+export type DictionarySearchResult = {
+    dictionaryEntries: Dictionary.DictionaryEntry[];
+    dictionaryAvailability?: DictionaryAvailability[];
+};
 
 export type GetSearchContextCallback = TextScannerTypes.GetSearchContextCallbackSync;
 

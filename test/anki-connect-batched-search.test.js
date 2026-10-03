@@ -42,7 +42,7 @@ function client(invoke) {
     const result = new AnkiConnect();
     result.enabled = true;
     result.apiKey = 'test-key';
-    Reflect.set(result, '_checkVersion', vi.fn().mockResolvedValue(6));
+    Reflect.set(result, '_checkVersion', vi.fn().mockResolvedValue(Reflect.get(result, '_connectionGeneration')));
     Reflect.set(result, '_invoke', invoke);
     return result;
 }
@@ -55,8 +55,9 @@ describe('Anki batched duplicate search integration', () => {
         const queries = [first, second].map((value) => createAnkiNoteDuplicateSearchDetails(value)?.query);
         const invoke = vi.fn().mockResolvedValueOnce([11, 22]).mockResolvedValueOnce([[11], [22]]);
         expect(await client(invoke).findNoteIds([first, invalid, second, first])).toEqual([[11], [], [22], [11]]);
-        expect(invoke).toHaveBeenNthCalledWith(1, 'findNotes', {query: queries.map((query) => `(${query})`).join(' or ')});
-        expect(invoke).toHaveBeenNthCalledWith(2, 'multi', {actions: queries.map((query) => ({action: 'findNotes', key: 'test-key', params: {query: `nid:11,22 (${query})`}}))});
+        expect(invoke).toHaveBeenNthCalledWith(1, 'findNotes', {query: queries.map((query) => `(${query})`).join(' or ')}, expect.any(Number));
+        expect(invoke).toHaveBeenNthCalledWith(2, 'multi', {actions: queries.map((query) => ({action: 'findNotes', key: 'test-key', params: {query: `nid:11,22 (${query})`}}))}, expect.any(Number));
+        expect(invoke.mock.calls[0][2]).toBe(invoke.mock.calls[1][2]);
     });
 
     test('returns ordinary misses without an additional multi request', async () => {
@@ -69,7 +70,7 @@ describe('Anki batched duplicate search integration', () => {
         const value = note('猫');
         const invoke = vi.fn().mockResolvedValue([[11]]);
         expect(await client(invoke).findNoteIds([value, value])).toEqual([[11], [11]]);
-        expect(invoke).toHaveBeenCalledWith('multi', {actions: [{action: 'findNotes', key: 'test-key', params: {query: createAnkiNoteDuplicateSearchDetails(value)?.query}}]});
+        expect(invoke).toHaveBeenCalledWith('multi', {actions: [{action: 'findNotes', key: 'test-key', params: {query: createAnkiNoteDuplicateSearchDetails(value)?.query}}]}, expect.any(Number));
         expect(invoke).toHaveBeenCalledOnce();
     });
 });
