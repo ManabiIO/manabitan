@@ -1,3 +1,28 @@
+# Contribution licensing
+
+Manabitan as a whole remains licensed under GPL-3.0-or-later because it is derived from Yomitan/Yomichan and includes upstream GPL-covered work.
+
+For a contribution submitted or updated after this policy is published on the active contribution branch, you agree to license the copyrightable portions of that contribution that you own separately under each of these licenses, at the recipient's option:
+
+- GPL-3.0-or-later; and
+- [BSD-3-Clause](LICENSE-BSD-3-CLAUSE).
+
+The BSD option applies only to rights you actually own in your contribution. It does **not** relicense Yomitan, Yomichan, Manabitan code written by other authors, third-party code, or other material whose license you cannot change. The repository and distributed Manabitan builds remain GPL-3.0-or-later.
+
+If your contribution copies, adapts, ports, translates, mechanically rewrites, or otherwise derives from third-party implementation code, identify that source and its license in the pull request. Do not describe such material as BSD-reusable merely because your patch also contains original work.
+
+If a contribution is intended to be reusable in a BSD or proprietary Manabi component, identify the independently authored portion clearly. Reuse outside Manabitan must not require copying GPL implementation text or structure from Manabitan/Yomitan/Yomichan.
+
+The dual grant is not permission to cherry-pick a Manabitan commit into a BSD/proprietary repository. A commit can contain GPL-owned context, structure, and work by other authors. Generic code intended for reuse should preferably originate in a separately permissive component before Manabitan consumes it; otherwise the receiving project should implement independently from a clean specification.
+
+For a **new standalone file** that is intentionally reusable outside Manabitan and is entirely original or otherwise license-compatible with both grants, use `SPDX-License-Identifier: GPL-3.0-or-later OR BSD-3-Clause`. Do not add that marker to a file derived from GPL-only implementation or to a mixed file merely because your own edit is dual-licensed.
+
+This policy is an inbound copyright-license grant, not a retroactive relicensing of earlier contributions. It becomes effective for a target branch when this policy is present on that branch. Normal development currently targets `develop`. The default `main` branch must carry the same trusted acknowledgement workflow because GitHub runs `pull_request_target` from the default-branch context. A contributor who submits a new contribution or updates an existing pull request after the policy is effective for its target branch must affirm the grant for the copyrightable portions of that submitted or updated work that they own.
+
+BSD-3-Clause does not contain an express patent grant. If Manabitan later needs an explicit contributor patent grant or a broader contributor agreement for proprietary reuse, establish that separately with qualified counsel rather than assuming this copyright policy supplies it.
+
+Human pull requests must affirm the dual-license grant in the pull-request checklist. The `Contribution license acknowledgement / acknowledgement` check reports failure when that acknowledgement is missing; dependency/update bots are exempt. Repository administrators must configure that check as required on `develop` and every other branch that accepts contributions. Without a required-check branch rule, the workflow records the failure but GitHub may still permit a merge. Repository/organization Actions policy must also permit `pull_request_target`; the workflow deliberately performs no checkout and executes no pull-request code. If you intend any part of a mixed GPL patch to be reusable elsewhere, use the template's optional independently reusable subset field to identify the exact original files/functions/hunks; otherwise leave it as `None`.
+
 # Issues and Features
 
 Issues reported on [GitHub](https://github.com/yomidevs/yomitan/issues) should include information about:
@@ -21,7 +46,7 @@ Below are a few guidelines to ensure contributions have a good level of quality 
 
 ## Setup
 
-Yomitan uses [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) tools for building and testing.
+Yomitan uses [Node.js](https://nodejs.org/) and [npm](https://docs.npmjs.com/) tools for building and testing.
 After installing these, the development environment can be set up by running `npm ci` and subsequently `npm run build`.
 
 ## Testing
