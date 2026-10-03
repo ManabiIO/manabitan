@@ -400,6 +400,27 @@ class MddAssetResolver {
         return this._lookupErrorCount;
     }
 
+    /** @returns {string} */
+    getAssetPrefix() {
+        const root = 'mdict-media/';
+        const sourceDirectories = new Set();
+        let rootOccupied = false;
+        for (const key of this._records.keys()) {
+            const normalizedKey = key.toLowerCase();
+            if (!normalizedKey.startsWith(root)) { continue; }
+            rootOccupied = true;
+            const slash = normalizedKey.indexOf('/', root.length);
+            if (slash >= 0) { sourceDirectories.add(normalizedKey.slice(0, slash + 1)); }
+        }
+        if (!rootOccupied) { return root; }
+        // Source paths must not be mistaken for already-converted paths.
+        // Keep the renderer's media root while choosing a disjoint subdirectory.
+        for (let index = 1; ; ++index) {
+            const prefix = `${root}converted-${index}/`;
+            if (!sourceDirectories.has(prefix)) { return prefix; }
+        }
+    }
+
     /**
      * @param {string} key
      * @returns {Uint8Array|null}
@@ -2122,7 +2143,6 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
     try {
         const title = extractTitle(mdx, fileName, titleOverride);
         const description = extractDescription(mdx, descriptionOverride);
-        const assetPrefix = 'mdict-media/';
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const phaseTimings = [];
         /**
@@ -2142,6 +2162,7 @@ export async function createMdxImportData(fileName, options, mdxBytes, mddSource
         if (includeAssets && mddSources.length > 0) {
             assetResolver = new MddAssetResolver(mddSources);
         }
+        const assetPrefix = assetResolver?.getAssetPrefix() ?? 'mdict-media/';
         recordPhaseTiming('prepare-mdx:index-mdd', tIndexMddStart, {
             includeAssets,
             mddCount: mddSources.length,
