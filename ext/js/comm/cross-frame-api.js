@@ -241,7 +241,7 @@ export class CrossFrameAPIPort extends EventDispatcher {
                 invocation.resolve(data.result);
             }
         } catch (error) {
-            invocation.reject(error);
+            invocation.reject(error instanceof Error ? error : new Error('Failed to decode cross-frame API response', {cause: error}));
         }
     }
 

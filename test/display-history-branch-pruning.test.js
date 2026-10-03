@@ -18,7 +18,10 @@
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {DisplayHistory} from '../ext/js/display/display-history.js';
 
-/** @param {boolean} useBrowserHistory */
+/**
+ * @param {boolean} useBrowserHistory
+ * @returns {{displayHistory: DisplayHistory, browserHistory: {state: unknown}}}
+ */
 function createHistory(useBrowserHistory) {
     const browserHistory = {state: /** @type {unknown} */ (null), replaceState: vi.fn(), pushState: vi.fn(), back: vi.fn(), forward: vi.fn()};
     vi.stubGlobal('history', browserHistory);

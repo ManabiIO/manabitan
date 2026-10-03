@@ -74,7 +74,8 @@ describe('API asynchronous response settlement', () => {
         }
         /** @type {Array<{value?: unknown, error?: unknown}>} */
         const outcomes = [];
-        const pending = api.getDictionaryInfo().then((value) => { outcomes.push({value}); }, (reason) => { outcomes.push({error: reason}); });
+        const pending = api.getDictionaryInfo()
+            .then((value) => { outcomes.push({value}); }, (reason) => { outcomes.push({error: reason}); });
         // Browser delivery is asynchronous. A synchronous transport mock lets
         // sendMessage's outer catch mask exceptions from the response callback.
         expect(() => { callbacks[0]({error: fault === 'null-error' ? null : {name: 'Error', message: 'failure', stack: ''}}); }).not.toThrow();
