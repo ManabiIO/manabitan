@@ -1,1 +1,7 @@
 * @yomidevs/yomitan-codeowners
+
+# Manabitan-specific inbound license policy
+/CONTRIBUTING.md @aehlke @yomidevs/yomitan-codeowners
+/LICENSE-BSD-3-CLAUSE @aehlke @yomidevs/yomitan-codeowners
+/.github/pull_request_template.md @aehlke @yomidevs/yomitan-codeowners
+/.github/workflows/contribution-license.yml @aehlke @yomidevs/yomitan-codeowners
