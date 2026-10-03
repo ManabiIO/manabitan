@@ -145,6 +145,8 @@ Install from the latest GitHub release page:
 
 Since this is a distributed effort, we **highly welcome new contributors**! Feel free to browse the [issue tracker](https://github.com/ManabiIO/manabitan/issues), and read our [contributing guidelines](./CONTRIBUTING.md).
 
+New or updated contributions grant contributor-owned portions separately under GPL-3.0-or-later and [BSD-3-Clause](./LICENSE-BSD-3-CLAUSE), at the recipient's option. This does not relicense upstream or third-party GPL material; see the contribution guide for provenance rules.
+
 Here are some ways anyone can help:
 
 - Try using the Manabitan dev build. Not only do you get cutting edge features, but you can help uncover bugs and give feedback to developers early on.
