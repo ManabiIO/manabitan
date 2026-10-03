@@ -200,8 +200,13 @@ export class DictionaryImportSession {
                     summary,
                     primaryKey: this._dictionarySummaryPrimaryKey,
                 }, this._bulkImportSessionId);
+                if (details === null) {
+                    throw new Error('Dictionary import was not published');
+                }
                 this._bulkState = 'committed';
                 this._published = true;
+                // Housekeeping warnings stay in finalization details, not the
+                // import errors which settings treats as failed activation.
                 return details;
             } catch (error) {
                 this._bulkState = 'failed';

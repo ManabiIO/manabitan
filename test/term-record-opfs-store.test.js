@@ -47,13 +47,14 @@ function asFileHandle(handle) {
 
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
- * @param {{removeEntryFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, onGetFile?: (name: string) => void}} [options]
+ * @param {{removeEntryFailures?: Map<string, number>, truncateFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, onGetFile?: (name: string) => void}} [options]
  * @returns {FileSystemDirectoryHandle}
  */
 function createFakeDirectoryHandle(
     fileBytesByName,
     {
         removeEntryFailures = new Map(),
+        truncateFailures = new Map(),
         getFileFailures = new Map(),
         beforeWrite = () => {},
         onGetFile = () => {},
@@ -101,6 +102,11 @@ function createFakeDirectoryHandle(
                         cursor = Math.max(0, position);
                     },
                     async truncate(/** @type {number} */ length) {
+                        const failuresRemaining = truncateFailures.get(name) ?? 0;
+                        if (failuresRemaining > 0) {
+                            truncateFailures.set(name, failuresRemaining - 1);
+                            throw new Error(`Injected truncate failure for ${name}`);
+                        }
                         nextBytes = nextBytes.slice(0, Math.max(0, length));
                         cursor = Math.min(cursor, nextBytes.byteLength);
                     },
@@ -1779,6 +1785,96 @@ describe('TermRecordOpfsStore', () => {
         expect(fileBytesByName.has(indexFileName)).toBe(false);
     });
 
+    test.each(['descriptor', 'sidecar', 'both'])('committed deletion cannot reload or append orphan records after %s cleanup fails', async (failedFile) => {
+        const target = ' physical-target ';
+        const sibling = ' physical-sibling ';
+        const title = ' Deleted dictionary ';
+        const fileBytesByName = new Map();
+        /** @type {Map<string, number>} */
+        const removeEntryFailures = new Map();
+        /** @type {Map<string, number>} */
+        const truncateFailures = new Map();
+        const directory = createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures, truncateFailures});
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', directory);
+        const textEncoder = new TextEncoder();
+        /**
+         * @param {TermRecordOpfsStore} store
+         * @param {string} dictionary
+         * @param {string} [expression]
+         * @returns {Promise<unknown>}
+         */
+        const append = async (store, dictionary, expression = 'word') => await store.appendBatchFromArtifactChunkResolvedContent({
+            dictionary,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode(expression)],
+            readingBytesList: [textEncoder.encode('reading')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [0], 'raw');
+        await writer.beginImportSession();
+        await append(writer, target);
+        await append(writer, sibling);
+        await writer.endImportSession();
+
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+        await store._loadShardFiles(false);
+        Reflect.set(store, '_nextIdMayNeedShardScan', true);
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_db', {exec: vi.fn(), selectValue: () => 1, selectObjects: () => []});
+        Reflect.set(database, '_termRecordStore', store);
+        store.setDictionaryHealthChangeHandler(database._onTermRecordDictionaryHealthChanged.bind(database));
+        database._registerTermRecordStorageName(title, target);
+        database._registerTermRecordStorageName('Sibling', sibling);
+        vi.spyOn(database, '_pruneOrphanTermEntryContent').mockImplementation(() => {});
+        expect(await database.findTermsBulk(['word'], new Set([title]), 'exact')).toHaveLength(1);
+        expect(await database.findTermsBulk(['word'], new Set(['Sibling']), 'exact')).toHaveLength(1);
+        expect(store.hasPersistentTermLookupIndex(target)).toBe(true);
+        const descriptor = store._getShardSegmentFileName(target, 'raw', 0);
+        const failedFileName = failedFile === 'descriptor' ? descriptor : `${descriptor}.mbti`;
+        removeEntryFailures.set(failedFileName, Infinity);
+        truncateFailures.set(failedFileName, Infinity);
+        if (failedFile === 'both') {
+            removeEntryFailures.set(descriptor, Infinity);
+            truncateFailures.set(descriptor, Infinity);
+        }
+        const orphanBytes = new Uint8Array(fileBytesByName.get(failedFileName));
+
+        await expect(database.deleteDictionary(title, 1000, () => {})).resolves.toBeUndefined();
+        expect(fileBytesByName.get(failedFileName)).toEqual(orphanBytes);
+        // Query the exact physical name too: unregistering the logical alias must
+        // not merely hide an otherwise still queryable orphan.
+        database._clearDirectTermIndexCaches();
+        expect(await database.findTermsBulk(['word'], new Set([target]), 'exact')).toEqual([]);
+        expect(store.getDictionaryHealth(target)).toEqual({status: 'available', reason: null});
+        await expect(store._tryRepairPersistentDictionaryIndex(target)).resolves.toBe(false);
+        expect(store.getDictionaryHealth(target)).toEqual({status: 'available', reason: null});
+        expect(store.findTermIds(target, 'word', 'expression')).toEqual([]);
+        expect(store.getShardFileNames()).not.toContain(descriptor);
+        expect(await database.findTermsBulk(['word'], new Set(['Sibling']), 'exact')).toMatchObject([{dictionary: 'Sibling', term: 'word'}]);
+        await expect(append(store, target)).rejects.toThrow(/cleanup|retired/u);
+        expect(fileBytesByName.get(failedFileName)).toEqual(orphanBytes);
+        await store._loadShardFiles(false);
+        await store.ensureDictionariesLoaded([target, sibling]);
+        expect(store.findTermIds(target, 'word', 'expression')).toEqual([]);
+        expect(store.findTermIds(sibling, 'word', 'expression')).toHaveLength(1);
+        removeEntryFailures.clear();
+        truncateFailures.clear();
+        await store.deleteByDictionary(target);
+        expect(fileBytesByName.has(descriptor)).toBe(false);
+        expect(fileBytesByName.has(`${descriptor}.mbti`)).toBe(false);
+        await store.beginImportSession();
+        await append(store, target, 'replacement');
+        await store.endImportSession();
+        await store.ensureDictionariesLoaded([target, sibling]);
+        expect(store.findTermIds(target, 'word', 'expression')).toEqual([]);
+        expect(store.findTermIds(target, 'replacement', 'expression')).toHaveLength(1);
+        expect(store.findTermIds(sibling, 'word', 'expression')).toHaveLength(1);
+    });
+
     test('deleteByDictionary removes an index-only orphan without masking real descriptor failures', async () => {
         const store = new TermRecordOpfsStore();
         const descriptorFileName = store._getShardSegmentFileName('Deleted dictionary', 'raw', 0);
@@ -3125,7 +3221,7 @@ describe('TermRecordOpfsStore', () => {
         expect(store.getDictionaryHealth('JMnedict')).toEqual({status: 'available', reason: null});
     });
 
-    test('preserves shard state when dictionary storage deletion fails', async () => {
+    test('retires failed deletion after draining writers and restores append eligibility after reset', async () => {
         const fileBytesByName = new Map();
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName);
         const store = new TermRecordOpfsStore();
@@ -3142,14 +3238,37 @@ describe('TermRecordOpfsStore', () => {
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
         Reflect.get(store, '_shardStateByFileName').set(fileName, state);
         Reflect.get(store, '_activeAppendShardStateByKey').set(fileName, state);
-        vi.spyOn(store, '_removeStorageFileOrTruncate').mockImplementation(async (name) => {
+        /** @type {() => void} */
+        let finishWrite = () => {};
+        state.queuedWritePromise = new Promise((resolve) => { finishWrite = resolve; });
+        const closeRecord = vi.fn().mockResolvedValue(void 0);
+        const closeIndex = vi.fn().mockResolvedValue(void 0);
+        state.writable = /** @type {FileSystemWritableFileStream} */ (/** @type {unknown} */ ({close: closeRecord}));
+        state.lookupIndexWritable = /** @type {FileSystemWritableFileStream} */ (/** @type {unknown} */ ({close: closeIndex}));
+        const remove = vi.spyOn(store, '_removeStorageFileOrTruncate').mockImplementation(async (name) => {
+            expect(closeRecord).toHaveBeenCalledOnce();
+            expect(closeIndex).toHaveBeenCalledOnce();
             if (name === fileName) { throw new Error('injected record removal failure'); }
         });
 
-        await expect(store._deleteShardByDictionary(dictionaryName)).rejects.toThrow('injected record removal failure');
-
+        const deletion = expect(store._deleteShardByDictionary(dictionaryName)).rejects.toMatchObject({
+            name: 'AggregateError',
+            errors: [expect.objectContaining({message: 'injected record removal failure'})],
+        });
+        await Promise.resolve();
+        expect(remove).not.toHaveBeenCalled();
+        expect(closeRecord).not.toHaveBeenCalled();
         expect(Reflect.get(store, '_shardStateByFileName').get(fileName)).toBe(state);
-        expect(Reflect.get(store, '_activeAppendShardStateByKey').get(fileName)).toBe(state);
+        finishWrite();
+        await deletion;
+
+        expect(Reflect.get(store, '_shardStateByFileName').has(fileName)).toBe(false);
+        expect(Reflect.get(store, '_activeAppendShardStateByKey').has(fileName)).toBe(false);
+        expect(() => store._assertShardAcceptsAppend(dictionaryName)).toThrow('retired');
+        remove.mockRestore();
+        await store.reset();
+        expect(() => store._assertShardAcceptsAppend(dictionaryName)).not.toThrow();
+        expect(await store._getOrCreateShardState(dictionaryName)).not.toBeNull();
     });
 
     test('preserves orphan shard state when integrity cleanup cannot remove storage', async () => {

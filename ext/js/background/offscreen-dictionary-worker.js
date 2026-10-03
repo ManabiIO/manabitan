@@ -39,6 +39,8 @@ export class OffscreenDictionaryWorkerHandler {
         /** @type {?Promise<void>} */
         this._prepareDatabasePromise = null;
         /** @type {boolean} */
+        this._databaseReady = false;
+        /** @type {boolean} */
         this._databaseSuspended = false;
         /** @type {DictionaryImporterMediaLoader} */
         this._mediaLoader = new DictionaryImporterMediaLoader();
@@ -69,16 +71,21 @@ export class OffscreenDictionaryWorkerHandler {
         if (this._databaseSuspended) {
             throw new Error('Dictionary database access is suspended while import is in progress');
         }
-        if (this._dictionaryDatabase.isPrepared()) {
-            return;
-        }
         if (this._prepareDatabasePromise !== null) {
             await this._prepareDatabasePromise;
             return;
         }
+        // Connection availability alone does not establish translator readiness.
+        if (this._databaseReady && this._dictionaryDatabase.isPrepared()) {
+            return;
+        }
+        this._databaseReady = false;
         this._prepareDatabasePromise = (async () => {
-            await this._dictionaryDatabase.prepare();
+            if (!this._dictionaryDatabase.isPrepared()) {
+                await this._dictionaryDatabase.prepare();
+            }
             this._translator.prepare();
+            this._databaseReady = true;
         })();
         try {
             await this._prepareDatabasePromise;
@@ -387,6 +394,7 @@ export class OffscreenDictionaryWorkerHandler {
                 const suspended = params.suspended === true;
                 if (suspended) {
                     this._databaseSuspended = true;
+                    this._databaseReady = false;
                     if (this._dictionaryDatabase.isPrepared()) {
                         await this._dictionaryDatabase.close();
                     }
@@ -395,7 +403,6 @@ export class OffscreenDictionaryWorkerHandler {
                 }
                 this._databaseSuspended = false;
                 await this._ensureDatabasePrepared();
-                this._translator.prepare();
                 return;
             }
             case 'getDictionaryInfoOffscreen':
@@ -475,8 +482,10 @@ export class OffscreenDictionaryWorkerHandler {
                 );
             case 'databasePurgeOffscreen':
                 await this._ensureDatabasePrepared();
+                this._databaseReady = false;
                 return await this._dictionaryDatabase.purge();
             case 'databaseRefreshOffscreen':
+                this._databaseReady = false;
                 if (this._dictionaryDatabase.isPrepared()) {
                     await this._dictionaryDatabase.close();
                 }
@@ -490,8 +499,8 @@ export class OffscreenDictionaryWorkerHandler {
                 return media.map((m) => ({...m, content: arrayBufferToBase64(m.content)}));
             }
             case 'translatorPrepareOffscreen':
+                this._databaseReady = false;
                 await this._ensureDatabasePrepared();
-                this._translator.prepare();
                 return;
             case 'findKanjiOffscreen': {
                 await this._ensureDatabasePrepared();

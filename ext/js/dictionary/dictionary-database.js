@@ -55,6 +55,7 @@ import {
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
 } from './raw-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
+import {isZstdResourceError} from './zstd-resource-error.js';
 import {TermContentOpfsStore} from './term-content-opfs-store.js';
 import {TermContentBlockStore} from './term-content-block-store.js';
 import {createTermImportMetrics} from './term-import-metrics.js';
@@ -1448,7 +1449,7 @@ export class DictionaryDatabase {
      * @param {((index: number, count: number) => void)?} [onCheckpoint]
      * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
      * @param {string|null} [expectedSessionId] When supplied, only this owner may publish.
-     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|null>}
+     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|{published: true, housekeepingErrors: Error[]}|null>}
      */
     async finishBulkImport(onCheckpoint = null, publication = null, expectedSessionId = null) {
         await this._waitForBulkImportSetup();
@@ -1622,6 +1623,7 @@ export class DictionaryDatabase {
                         this._deleteImportPublicationMarkerBestEffort(sessionId);
                     } catch (error) {
                         this._importJournalRecoveryPending = true;
+                        cleanupErrors.push(toError(error));
                         reportDiagnostics('dictionary-import-publication-cleanup-failed', {
                             sessionId,
                             error: toError(error).message,
@@ -1749,9 +1751,14 @@ export class DictionaryDatabase {
                         !termRecordSessionEnded,
                     );
                 }
-                if (operationError !== null) {
-                    this._restoreRuntimeAfterBulkImportFailure(db, cleanupErrors);
-                } else {
+                try {
+                    if (operationError !== null) {
+                        this._restoreRuntimeAfterBulkImportFailure(db, cleanupErrors);
+                    } else {
+                        this._closeBulkImportBlockSession(cleanupErrors);
+                    }
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
                     this._closeBulkImportBlockSession(cleanupErrors);
                 }
                 if (this._bulkImportJournalRecord !== null) {
@@ -1761,6 +1768,15 @@ export class DictionaryDatabase {
                     this._quarantineBulkImportConnection(cleanupErrors);
                 }
                 this._endBulkImportLifecycle();
+            }
+            if (sqlitePublished) {
+                // COMMIT is the durable publication boundary. Runtime repair
+                // and disposal errors are warnings, not unpublished imports.
+                return {
+                    ...result,
+                    published: true,
+                    housekeepingErrors: operationError === null ? cleanupErrors : [operationError, ...cleanupErrors],
+                };
             }
             if (operationError !== null) {
                 if (cleanupErrors.length > 0) {
@@ -1992,11 +2008,17 @@ export class DictionaryDatabase {
         // deletion first: a crash can then leave only an orphan shard, which
         // startup integrity cleanup can safely remove. The opposite order can
         // leave an installed dictionary pointing at records that no longer exist.
-        const deletedTerms = await this._termRecordStore.deleteByDictionary(termRecordStorageName);
-        this._unregisterTermRecordStorageName(dictionaryName);
+        // Commit is the public deletion boundary. Invalidate before any fallible
+        // cleanup so callers can reconcile even when orphan bytes remain in OPFS.
         this._termsVirtualTableDirty = true;
-        progressData.processed += deletedTerms;
-        ++progressData.storesProcesed;
+        this._termEntryContentCache.clear();
+        this._termEntryContentIdByHash.clear();
+        this._clearTermEntryContentMetaCaches();
+        this._termExactPresenceCache.clear();
+        this._termPrefixNegativeCache.clear();
+        this._clearDirectTermIndexCaches();
+        this._termEntryContentIdByKey.clear();
+        this._clearSharedGlossaryArtifactCaches();
         /**
          * Progress delivery is not part of the durable deletion boundary. Once
          * SQLite has committed, a callback failure must not skip required OPFS
@@ -2014,19 +2036,41 @@ export class DictionaryDatabase {
                 });
             }
         };
+        /**
+         * Cleanup failure must not report a committed mutation as failed and
+         * bypass backend refresh/settings reconciliation. Startup can retry
+         * orphan cleanup; pre-commit errors above still reject normally.
+         * @param {string} phase
+         * @param {unknown} error
+         */
+        const reportCleanupFailure = (phase, error) => {
+            reportDiagnostics('dictionary-delete-cleanup-failed', {
+                dictionaryName,
+                termRecordStorageName,
+                phase,
+                committed: true,
+                error: toError(error).message,
+            });
+            log.warn(toError(error));
+        };
+        try {
+            progressData.processed += await this._termRecordStore.deleteByDictionary(termRecordStorageName);
+        } catch (error) {
+            reportCleanupFailure('term-record-delete', error);
+            progressData.processed += termCount;
+        } finally {
+            // Health callbacks during deletion still need the logical identity.
+            this._unregisterTermRecordStorageName(dictionaryName);
+        }
+        ++progressData.storesProcesed;
         reportPostCommitProgress('term-record-delete');
 
-        await this._cleanupTermContentAfterDictionaryDelete();
-
+        try {
+            await this._cleanupTermContentAfterDictionaryDelete();
+        } catch (error) {
+            reportCleanupFailure('term-content-cleanup', error);
+        }
         reportPostCommitProgress('term-content-cleanup');
-        this._termEntryContentCache.clear();
-        this._termEntryContentIdByHash.clear();
-        this._clearTermEntryContentMetaCaches();
-        this._termExactPresenceCache.clear();
-        this._termPrefixNegativeCache.clear();
-        this._clearDirectTermIndexCaches();
-        this._termEntryContentIdByKey.clear();
-        this._clearSharedGlossaryArtifactCaches();
         try {
             this._requireDb().exec('PRAGMA wal_checkpoint(TRUNCATE)');
         } catch (_) {
@@ -2580,6 +2624,11 @@ null;
             const title = this._asString(row.title);
             if (title.length === 0) { continue; }
             const summary = this._safeParseJson(this._asString(row.summaryJson), null);
+            // Incomplete replacements cannot claim the recovery generation's
+            // immutable storage before startup has reconciled their metadata.
+            if (typeof summary !== 'object' || summary === null || Array.isArray(summary) || Reflect.get(summary, 'importSuccess') === false) {
+                continue;
+            }
             this._registerTermRecordStorageName(
                 title,
                 this._getSummaryTermRecordStorageName(summary, title),
@@ -4054,14 +4103,15 @@ null;
             if (summaryParseFailed) {
                 parseErrorCount += 1;
             }
-            const importSuccess = (
+            const summaryObject = (
                 typeof summary === 'object' &&
                 summary !== null &&
                 !Array.isArray(summary)
             ) ?
-                /** @type {unknown} */ (Reflect.get(summary, 'importSuccess')) :
-                void 0;
-            if (title.length > 0 && !TRANSIENT_UPDATE_TITLE_PATTERN.test(title)) {
+                summary :
+                null;
+            const validSummary = summaryObject !== null && Reflect.get(summaryObject, 'importSuccess') !== false;
+            if (title.length > 0 && !TRANSIENT_UPDATE_TITLE_PATTERN.test(title) && validSummary) {
                 installedTitles.add(title);
             }
             if (title.length > 0 && isRecognizedTransientUpdateTitle(title, summary)) {
@@ -4071,11 +4121,10 @@ null;
                     transientInfo !== null &&
                     transientInfo.stage === 'replaced' &&
                     originalTitle.length > 0 &&
-                    typeof summary === 'object' &&
-                    summary !== null &&
-                    !Array.isArray(summary)
+                    validSummary &&
+                    summaryObject !== null
                 ) {
-                    const restoredSummary = {...summary, title: originalTitle};
+                    const restoredSummary = {...summaryObject, title: originalTitle};
                     delete restoredSummary.transientUpdateStage;
                     delete restoredSummary.updateSessionToken;
                     restorableReplacedTitles.push({title, originalTitle, summary: restoredSummary});
@@ -4083,7 +4132,7 @@ null;
                 dictionaryTitlesToDelete.add(title);
                 continue;
             }
-            if (summary !== null && importSuccess !== false) {
+            if (validSummary) {
                 continue;
             }
             if (title.length === 0) {
@@ -4099,9 +4148,19 @@ null;
         const restoredTitles = [];
         /** @type {string[]} */
         const failedTitles = [];
+        /** @type {string[]} */
+        const removedTitles = [];
         for (const {title, originalTitle, summary} of restorableReplacedTitles) {
             if (installedTitles.has(originalTitle)) { continue; }
+            const discardIncompleteReplacement = dictionaryTitlesToDelete.delete(originalTitle);
             try {
+                if (discardIncompleteReplacement) {
+                    // Invalid replacement metadata may alias the backup's immutable
+                    // record storage. Remove metadata only; startup integrity cleanup
+                    // can reclaim any truly unreferenced shards after restoration.
+                    await this._discardIncompleteReplacementMetadata(originalTitle);
+                    removedTitles.push(originalTitle);
+                }
                 // Term-record storage has immutable identity. Restoring the
                 // logical title is a SQLite-only cutover and must retain the
                 // storage name recorded by the moved-aside summary.
@@ -4121,8 +4180,6 @@ null;
             }
         }
 
-        /** @type {string[]} */
-        const removedTitles = [];
         for (const dictionaryTitle of dictionaryTitlesToDelete) {
             try {
                 await this.deleteDictionary(dictionaryTitle, 1000, () => {});
@@ -4148,6 +4205,33 @@ null;
         this._startupCleanupIncompleteImportsSummary = summary;
         reportDiagnostics('dictionary-startup-cleanup-summary', summary);
         return summary;
+    }
+
+    /**
+     * @param {string} title
+     * @returns {Promise<void>}
+     */
+    async _discardIncompleteReplacementMetadata(title) {
+        const db = this._requireDb();
+        await this._beginImmediateTransaction(db);
+        try {
+            for (const table of ['termMeta', 'kanji', 'kanjiMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts']) {
+                db.exec({sql: `DELETE FROM ${table} WHERE dictionary = $title`, bind: {$title: title}});
+            }
+            db.exec({sql: 'DELETE FROM dictionaries WHERE title = $title', bind: {$title: title}});
+            db.exec('COMMIT');
+        } catch (error) {
+            try {
+                db.exec('ROLLBACK');
+            } catch (rollbackError) {
+                throw new AggregateError([toError(error), toError(rollbackError)], 'Failed to discard incomplete replacement metadata and roll back');
+            }
+            throw error;
+        }
+        this._unregisterTermRecordStorageName(title);
+        this._termsVirtualTableDirty = true;
+        this._clearCachedStatements();
+        this._clearSharedGlossaryArtifactCaches();
     }
 
     /**
@@ -4628,7 +4712,11 @@ null;
                 }
                 inflatedBytes = decoded;
             } catch (error) {
-                throw new TermContentLookupReadError('corrupt', 'Shared glossary decompression failed', {cause: error});
+                throw new TermContentLookupReadError(
+                    isZstdResourceError(error) ? 'temporarilyUnavailable' : 'corrupt',
+                    'Shared glossary decompression failed',
+                    {cause: error},
+                );
             }
         }
         if (meta.uncompressedLength > 0 && inflatedBytes.byteLength !== meta.uncompressedLength) {

@@ -4,9 +4,12 @@
  */
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js';
 import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImportSession} from '../ext/js/dictionary/dictionary-import-session.js';
+import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 /** @type {import('@sqlite.org/sqlite-wasm').Sqlite3Static} */
 let sqlite3;
@@ -101,6 +104,85 @@ const summary = /** @type {import('dictionary-importer').Summary} */ ({
     title: 'Dictionary 42', version: 3, importSuccess: true,
 });
 
+/** @returns {Promise<ArrayBuffer>} */
+async function createArchive() {
+    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+    await writer.add('index.json', new TextReader(JSON.stringify({title: summary.title, revision: '1', format: 3})));
+    return new Uint8Array(await writer.close()).buffer;
+}
+
+describe('importer reports durable publication to the settings UI', () => {
+    test.each(['runtime', 'block-close', 'journal-clear', 'healthy', 'seal'])('publication with %s finalization', async (failurePoint) => {
+        const {database, connection} = createDatabase();
+        // Only OPFS is mocked; summary writes, COMMIT, and retry detection use SQLite.
+        Reflect.set(database, 'queuePendingTermContentImportWrites', resolveVoid);
+        Reflect.set(database, 'setImportOptimizationFlags', () => {});
+        const failure = new Error(`injected ${failurePoint} failure`);
+        const runtime = vi.fn(() => {});
+        Reflect.set(database, '_applyRuntimePragmas', runtime);
+        if (failurePoint === 'runtime') {
+            runtime.mockImplementationOnce(() => { throw failure; });
+        }
+        if (failurePoint === 'journal-clear') {
+            vi.mocked(Reflect.get(database, '_importJournal').clear).mockRejectedValueOnce(failure);
+        }
+        const contentStore = Reflect.get(database, '_termContentStore');
+        if (failurePoint === 'seal') { vi.mocked(contentStore.endImportSession).mockRejectedValueOnce(failure); }
+        if (failurePoint === 'block-close') {
+            vi.mocked(contentStore.endImportSession).mockImplementationOnce(async () => {
+                Reflect.set(database, '_termContentBlockImportSession', {close() { throw failure; }});
+            });
+        }
+        const finish = vi.spyOn(database, 'finishBulkImport');
+        const cleanup = vi.spyOn(database, 'deleteDictionaryImportPlaceholder');
+        const abort = vi.spyOn(database, 'abortBulkImport');
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const archive = await createArchive();
+        const details = /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false});
+        const result = await importer.importDictionary(database, archive, details);
+        expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
+        if (failurePoint === 'seal') {
+            expect(result.result).toBeNull();
+            expect(result.errors).toContain(failure);
+            expect(cleanup).toHaveBeenCalledOnce();
+            expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(0);
+            expect(contentStore.rollbackImportSession).toHaveBeenCalledOnce();
+            expect(Reflect.get(database, '_termRecordStore').rollbackImportSession).toHaveBeenCalledOnce();
+            const retry = await importer.importDictionary(database, archive, details);
+            expect(retry.result).toMatchObject({title: summary.title, importSuccess: true});
+            expect(retry.errors).toEqual([]);
+            expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(1);
+            return;
+        }
+        // This non-null summary is the activation input consumed by settings.
+        expect(result.result).toMatchObject({title: summary.title, importSuccess: true});
+        expect(result.errors).toEqual([]);
+        expect(result.debug?.phaseTimings).toContainEqual(expect.objectContaining({
+            phase: 'bulk-finalization',
+            details: expect.objectContaining({
+                ok: true,
+                published: true,
+                housekeepingErrors: failurePoint === 'healthy' ? [] : [failure],
+            }),
+        }));
+        expect(cleanup).not.toHaveBeenCalled();
+        expect(abort).not.toHaveBeenCalled();
+        expect(contentStore.rollbackImportSession).not.toHaveBeenCalled();
+        expect(connection.selectValue("SELECT json_type(summaryJson, '$.importSuccess') FROM dictionaries")).toBe('true');
+        expect(Reflect.get(database, '_bulkImportJournalRecord')).toBeNull();
+        if (failurePoint === 'journal-clear') {
+            expect(Reflect.get(database, '_importJournalRecoveryPending')).toBe(true);
+            expect(connection.selectValue('SELECT COUNT(*) FROM dictionaryImportPublications')).toBe(1);
+            await expect(database.startBulkImport()).rejects.toThrow();
+        }
+        const retry = await importer.importDictionary(database, archive, details);
+        expect(retry.result).toBeNull();
+        expect(retry.errors.map(({message}) => message)).toContain(`Dictionary ${summary.title} is already imported, skipped it.`);
+        expect(finish).toHaveBeenCalledOnce();
+        expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(1);
+    });
+});
+
 describe('committed dictionary cleanup uses real SQLite metadata', () => {
     test.each([
         {importSuccess: true},
@@ -177,14 +259,22 @@ describe('committed dictionary cleanup uses real SQLite metadata', () => {
         if (failurePoint === 'block-close') {
             Reflect.set(database, '_termContentBlockImportSession', {close() { throw housekeepingError; }});
         }
-        expect(await session.finalizeBulkImport(() => {}, summary)).toBeNull();
+        const result = await session.finalizeBulkImport(() => {}, summary);
+        expect(result).toMatchObject({published: true});
         // Publication really committed before the late error was returned.
         expect(connection.selectValue("SELECT json_extract(summaryJson, '$.importSuccess') FROM dictionaries WHERE id = 42")).toBe(1);
         await session.cleanupIncompleteSummary();
         expect(deletion).not.toHaveBeenCalled();
         expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries WHERE id = 42')).toBe(1);
-        expect(session.failed).toBe(true);
-        expect(errors.length).toBeGreaterThan(0);
+        expect(session.state).toBe('published');
+        expect(session.failed).toBe(false);
+        expect(errors).toEqual([]);
+        expect(result?.housekeepingErrors).toContain(housekeepingError);
+        expect(await session.finalizeBulkImport(() => {}, summary)).toBe(result);
+        expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
+        expect(Reflect.get(database, '_bulkImportJournalRecord')).toBeNull();
+        expect(Reflect.get(database, '_termContentStore').rollbackImportSession).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_termRecordStore').rollbackImportSession).not.toHaveBeenCalled();
     });
 });
 

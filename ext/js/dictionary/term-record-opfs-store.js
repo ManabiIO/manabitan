@@ -711,6 +711,8 @@ export class TermRecordOpfsStore {
         this._shardStateByFileName = new Map();
         /** @type {Map<string, TermRecordShardState>} */
         this._activeAppendShardStateByKey = new Map();
+        /** @type {Set<string>} */
+        this._pendingDictionaryDeletionNames = new Set();
         /** @type {Map<string, PersistentRecordChunk[]>} */
         this._persistentRecordChunksByDictionary = new Map();
         /** @type {Set<string>} */
@@ -1389,6 +1391,7 @@ export class TermRecordOpfsStore {
         if (resetErrors.length > 0) {
             throw new AggregateError(resetErrors, 'Failed to reset term-record storage');
         }
+        this._pendingDictionaryDeletionNames.clear();
     }
 
     /**
@@ -3850,6 +3853,7 @@ export class TermRecordOpfsStore {
      * @returns {Promise<boolean>}
      */
     async _tryRepairPersistentDictionaryIndex(dictionaryName, allowDuringStorageMutation = false) {
+        if (this._pendingDictionaryDeletionNames.has(dictionaryName)) { return false; }
         if (this.getDictionaryHealth(dictionaryName).status === 'reimportRequired') { return false; }
         if (this._importSessionActive || (this._storageMutationActive && !allowDuringStorageMutation)) {
             return false;
@@ -4491,6 +4495,7 @@ export class TermRecordOpfsStore {
                 const dictionaryName = `${value}`;
                 if (
                     dictionaryName.length > 0 &&
+                    !this._pendingDictionaryDeletionNames.has(dictionaryName) &&
                     this.getDictionaryHealth(dictionaryName).status !== 'reimportRequired'
                 ) {
                     this._setDictionaryHealth(
@@ -4510,6 +4515,7 @@ export class TermRecordOpfsStore {
             const healthStatus = this.getDictionaryHealth(name).status;
             if (
                 name.length === 0 ||
+                this._pendingDictionaryDeletionNames.has(name) ||
                 healthStatus === 'reimportRequired' ||
                 (healthStatus === 'available' && this._hasCompleteDictionaryLookupState(name))
             ) {
@@ -5645,6 +5651,9 @@ export class TermRecordOpfsStore {
         const statesToMaterialize = [];
         for (const [name, fileHandle] of fileHandlesByName) {
             if (!this._isShardFileName(name)) { continue; }
+            // Reprepare/rescans must not adopt bytes left by a failed deletion.
+            const dictionaryName = this._decodeDictionaryNameFromShardFileName(name);
+            if (dictionaryName !== null && this._pendingDictionaryDeletionNames.has(dictionaryName)) { continue; }
             let file = null;
             for (let attempt = 0; attempt < STORAGE_READ_RETRY_COUNT && file === null; ++attempt) {
                 try {
@@ -5691,6 +5700,8 @@ export class TermRecordOpfsStore {
             if (!indexFileName.endsWith(`${SHARD_FILE_SUFFIX}${LOOKUP_INDEX_FILE_SUFFIX}`)) { continue; }
             const descriptorFileName = indexFileName.slice(0, -LOOKUP_INDEX_FILE_SUFFIX.length);
             if (!this._isShardFileName(descriptorFileName)) { continue; }
+            const dictionaryName = this._decodeDictionaryNameFromShardFileName(descriptorFileName);
+            if (dictionaryName !== null && this._pendingDictionaryDeletionNames.has(dictionaryName)) { continue; }
             let descriptorFileHandle = fileHandlesByName.get(descriptorFileName) ?? null;
             if (descriptorFileHandle !== null) {
                 try {
@@ -5971,6 +5982,9 @@ export class TermRecordOpfsStore {
      * @throws {Error} If the target is an immutable finalized container.
      */
     _assertShardAcceptsAppend(dictionaryName, contentDictName = 'raw') {
+        if (this._pendingDictionaryDeletionNames.has(dictionaryName)) {
+            throw new Error(`Cannot append to retired term records until deletion cleanup succeeds: ${dictionaryName}`);
+        }
         const logicalKey = this._getShardFileName(dictionaryName, contentDictName);
         const state = this._activeAppendShardStateByKey.get(logicalKey);
         if (typeof state === 'undefined') { return; }
@@ -6161,26 +6175,71 @@ export class TermRecordOpfsStore {
         if (this._recordsDirectoryHandle === null) {
             return;
         }
-        const shardFiles = await this._listShardStorageFiles();
-        for (const {descriptorFileName: fileName, hasDescriptor} of shardFiles) {
-            if (this._decodeDictionaryNameFromShardFileName(fileName) !== dictionaryName) {
-                continue;
+        this._pendingDictionaryDeletionNames.add(dictionaryName);
+        /** @type {Error[]} */
+        const errors = [];
+        try {
+            // Settle every owned writer before unlinking or retiring its state.
+            for (const state of this._shardStateByFileName.values()) {
+                if (this._decodeDictionaryNameFromShardFileName(state.fileName) !== dictionaryName) { continue; }
+                try {
+                    await this._flushPendingWritesForShard(state);
+                } catch (error) {
+                    errors.push(toError(error));
+                }
+                const writes = await Promise.allSettled([state.queuedWritePromise, state.lookupIndexWritePromise]);
+                for (const write of writes) {
+                    if (write.status === 'rejected') { errors.push(toError(write.reason)); }
+                }
+                try {
+                    await this._closeShardWritable(state);
+                } catch (error) {
+                    errors.push(toError(error));
+                }
+                if (state.lookupIndexWritable !== null) {
+                    try {
+                        await state.lookupIndexWritable.close();
+                    } catch (error) {
+                        errors.push(toError(error));
+                    } finally {
+                        state.lookupIndexWritable = null;
+                    }
+                }
             }
-            const state = this._shardStateByFileName.get(fileName);
-            if (typeof state !== 'undefined') {
-                await this._flushPendingWritesForShard(state);
-                await this._closeShardWritable(state);
+            if (errors.length > 0) {
+                throw new AggregateError(errors, `Failed to close deleted term-record storage: ${dictionaryName}`);
             }
-            if (hasDescriptor) {
-                await this._removeStorageFileOrTruncate(fileName, false);
+            const shardFiles = await this._listShardStorageFiles();
+            for (const {descriptorFileName: fileName, hasDescriptor} of shardFiles) {
+                if (this._decodeDictionaryNameFromShardFileName(fileName) !== dictionaryName) { continue; }
+                if (hasDescriptor) {
+                    try {
+                        await this._removeStorageFileOrTruncate(fileName, false);
+                    } catch (error) {
+                        errors.push(toError(error));
+                    }
+                }
+                try {
+                    await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
+                } catch (error) {
+                    errors.push(toError(error));
+                }
             }
-            await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
-            if (typeof state !== 'undefined') {
+            if (errors.length > 0) {
+                throw new AggregateError(errors, `Failed to delete term-record storage: ${dictionaryName}`);
+            }
+            this._pendingDictionaryDeletionNames.delete(dictionaryName);
+        } finally {
+            // Orphan files are not live lookup/append state, even when OPFS fails.
+            for (const [fileName, state] of this._shardStateByFileName) {
+                if (this._decodeDictionaryNameFromShardFileName(fileName) !== dictionaryName) { continue; }
                 this._shardStateByFileName.delete(fileName);
-                this._activeAppendShardStateByKey.delete(state.logicalKey);
+                if (this._activeAppendShardStateByKey.get(state.logicalKey) === state) {
+                    this._activeAppendShardStateByKey.delete(state.logicalKey);
+                }
             }
+            this._invalidatePersistentLookupState(dictionaryName);
         }
-        this._invalidatePersistentLookupState(dictionaryName);
     }
 
     /**

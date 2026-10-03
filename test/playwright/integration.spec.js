@@ -662,12 +662,13 @@ async function runSearch(page, query) {
 
 /**
  * @param {import('@playwright/test').Page} page
- * @returns {Promise<void>}
+ * @returns {Promise<import('@playwright/test').Locator>}
  */
 async function waitForSaveButtonEnabled(page) {
-    const saveButton = page.locator('.entry .note-actions-container .action-button[data-action="save-note"]').first();
+    const saveButton = page.locator('.entry .note-actions-container .action-button[data-action="save-note"][data-card-format-index="0"]').first();
     await expect(saveButton).toBeVisible({timeout: 30_000});
     await expect(saveButton).toBeEnabled({timeout: 30_000});
+    return saveButton;
 }
 
 test('search accepts typing immediately after visible initialization', async ({page, extensionId}) => {
@@ -1047,8 +1048,7 @@ test('chromium happy path covers multi-dictionary import, lookup scroll, and Ank
         await setContentScrollTop(page, 0);
         await page.waitForTimeout(150);
 
-        await waitForSaveButtonEnabled(page);
-        const saveButton = page.locator('.entry .note-actions-container .action-button[data-action="save-note"]:not([disabled])').first();
+        const saveButton = await waitForSaveButtonEnabled(page);
         await saveButton.click();
 
         await expect(async () => {
