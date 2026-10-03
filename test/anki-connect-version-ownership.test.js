@@ -71,7 +71,7 @@ describe.each(['server', 'apiKey'])('Anki version ownership after changing %s', 
         } else {
             old.reject(new Error('old connection failed'));
         }
-        // An obsolete completion must neither settle callers nor clear the new flight.
+        // An obsolete completion must not dispatch an action or clear the new flight.
         await old.promise.catch(() => {});
         expect(invoke).not.toHaveBeenCalled();
         const third = client.getDeckNames();
@@ -80,7 +80,9 @@ describe.each(['server', 'apiKey'])('Anki version ownership after changing %s', 
         current.resolve(6);
 
         const results = await Promise.all([firstResult, secondResult, thirdResult]);
-        expect(results).toEqual(new Array(3).fill({value: ['Japanese'], error: null}));
+        expect(results[0].value).toBeNull();
+        expect(results[0].error).toMatchObject({message: 'Anki connection settings changed during request'});
+        expect(results.slice(1)).toEqual(new Array(2).fill({value: ['Japanese'], error: null}));
         expect(version).toHaveBeenCalledTimes(2);
     });
 });
@@ -90,6 +92,7 @@ test('identical Anki connection settings retain a successful version check', asy
     const version = vi.spyOn(client, '_getVersion').mockResolvedValue(6);
     vi.spyOn(client, '_invoke').mockResolvedValue(['Japanese']);
     await client.getDeckNames();
+    client.enabled = true;
     client.server = 'http://localhost:8765';
     client.apiKey = 'first-key';
     await client.getDeckNames();
