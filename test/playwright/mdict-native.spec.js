@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import JSZip from 'jszip';
 import {makeFixturePng, makeMdictFixture} from '../util/mdict-binary-fixture.js';
 import {INLINE_STYLE_SCOPE_TITLE, makeInlineStyleScopeFixture} from '../util/mdict-inline-style-fixture.js';
 import {expect, test} from './playwright-util.js';
@@ -107,6 +108,76 @@ async function assertStoredMedia(page, title, path, expected) {
     expect(media, `Stored media: ${path}`).toHaveLength(1);
     expect(Buffer.from(media[0].content, 'base64')).toStrictEqual(Buffer.from(expected));
 }
+
+test('ZIP images with skipped metadata render pixels after import and reopening', async ({page, context, extensionId}) => {
+    test.setTimeout(180_000);
+    const title = 'Unknown image dimensions';
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const png = makeFixturePng([20, 180, 40, 255]);
+    const zip = new JSZip();
+    zip.file('index.json', JSON.stringify({title, revision: '1', format: 3}));
+    zip.file('image.png', png);
+    zip.file('term_bank_1.json', JSON.stringify([
+        ['Media', '', '', '', 0, [{
+            type: 'structured-content',
+            content: [
+                {tag: 'img', path: 'image.png', width: 0, height: 0},
+                {tag: 'img', path: 'image.png', width: 0.25, height: 0.125, sizeUnits: 'px'},
+            ],
+        }], 1, ''],
+    ]));
+    await importFiles(page, extensionBaseUrl, [{
+        name: 'images.zip', mimeType: 'application/zip', buffer: await zip.generateAsync({type: 'nodebuffer'}),
+    }], title);
+    await assertStoredMedia(page, title, 'image.png', png);
+    expect(JSON.stringify(await lookup(page, 'Media'))).toContain('"width":0,"height":0');
+    await api(page, 'modifySettings', {
+        targets: [{
+            action: 'set',
+            path: 'general.enableWanakana',
+            value: false,
+            scope: 'profile',
+            optionsContext: {depth: 0, url: `${extensionBaseUrl}/search.html`},
+        }],
+        source: 'unknown-image-dimensions-test',
+    });
+
+    const reopened = await context.newPage();
+    await page.close();
+    await reopened.goto(`${extensionBaseUrl}/search.html`);
+    await expect(reopened.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+    await assertStoredMedia(reopened, title, 'image.png', png);
+    await reopened.locator('#search-textbox').fill('Media');
+    await reopened.locator('#search-button').click();
+    const canvases = reopened.locator('#dictionary-entries canvas.gloss-image');
+    await expect(canvases).toHaveCount(2, {timeout: 30_000});
+    await expect(canvases.first()).toHaveAttribute('width', '100');
+    await expect(canvases.first()).toHaveAttribute('height', '100');
+    await expect(canvases.nth(1)).toHaveAttribute('width', '1');
+    await expect(canvases.nth(1)).toHaveAttribute('height', '1');
+    await expect(canvases.first()).toBeVisible();
+    // Transferred canvases cannot be read on the page. Decode a browser screenshot
+    // in a separate canvas to verify the actual drawing worker's visible output.
+    await expect(async () => {
+        const screenshot = await canvases.first().screenshot();
+        const pixel = await reopened.evaluate(async (bytes) => {
+            const bitmap = await createImageBitmap(new Blob([new Uint8Array(bytes)], {type: 'image/png'}));
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = bitmap.width;
+                canvas.height = bitmap.height;
+                const ctx = canvas.getContext('2d');
+                if (ctx === null) { throw new Error('No screenshot canvas context'); }
+                ctx.drawImage(bitmap, 0, 0);
+                return [...ctx.getImageData(Math.floor(bitmap.width / 2), Math.floor(bitmap.height / 2), 1, 1).data];
+            } finally {
+                bitmap.close();
+            }
+        }, [...screenshot]);
+        expect(pixel).toStrictEqual([20, 180, 40, 255]);
+    }).toPass({timeout: 30_000});
+    await reopened.close();
+});
 
 test('MDX audio-only resources survive import, reopening and a real media-link click', async ({page, context, extensionId}) => {
     test.setTimeout(180_000);

@@ -27,6 +27,75 @@ afterAll(async () => {
     await testEnv.teardown(global);
 });
 
+describe('StructuredContentGenerator image geometry', () => {
+    test.each([
+        {data: {}, width: 100, height: 100},
+        {data: {width: 0, height: 0}, width: 100, height: 100},
+        {data: {width: 64, height: 0}, width: 100, height: 100},
+        {data: {width: 0, height: 32}, width: 100, height: 100},
+        {data: {width: Number.NaN, height: 32}, width: 100, height: 100},
+        {data: {width: 64, height: Number.POSITIVE_INFINITY}, width: 100, height: 100},
+        {data: {width: 64, height: 32}, width: 64, height: 32},
+        {data: {width: 64, height: 32, preferredWidth: 20}, width: 20, height: 10},
+        {data: {width: 64, height: 32, preferredHeight: 20}, width: 40, height: 20},
+        {data: {width: 0, height: 0, preferredWidth: 20}, width: 20, height: 20},
+        {data: {width: 0, height: 0, preferredHeight: 20}, width: 20, height: 20},
+        {data: {width: 0, height: 0, preferredWidth: 20, preferredHeight: 10}, width: 20, height: 10},
+        {data: {width: 64, height: 32, preferredWidth: 0, preferredHeight: 0}, width: 64, height: 32},
+        {data: {width: 64, height: 32, preferredWidth: -1, preferredHeight: Number.NaN}, width: 64, height: 32},
+        {data: {width: 64, height: 32, preferredWidth: Number.POSITIVE_INFINITY}, width: 64, height: 32},
+        {data: {width: 64, height: 32, preferredWidth: 0.25}, width: 0.25, height: 0.125},
+    ])('produces usable geometry for $data', ({data, width, height}) => {
+        const {window} = testEnv;
+        const mediaProvider = /** @type {import('../ext/js/templates/template-renderer-media-provider.js').TemplateRendererMediaProvider} */ (/** @type {unknown} */ ({getMedia: () => 'image.png'}));
+        const manager = new AnkiTemplateRendererContentManager(mediaProvider, /** @type {import('anki-templates').NoteData} */ (/** @type {unknown} */ ({})));
+        const generator = new StructuredContentGenerator(manager, window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+        const node = generator.createDefinitionImage({tag: 'img', path: 'image.png', ...data}, 'Images');
+        expect(node.querySelector('.gloss-image-container')?.getAttribute('style')).toBe(`width: ${width}em;`);
+        expect(node.querySelector('.gloss-image-sizer')?.getAttribute('style')).toBe(`padding-top: ${height / width * 100}%;`);
+        const image = /** @type {HTMLImageElement} */ (node.querySelector('img'));
+        expect(image.width).toBe(Math.max(1, Math.ceil(width)));
+        expect(image.height).toBe(Math.max(1, Math.ceil(height)));
+        expect(image.getAttribute('src')).toBe('image.png');
+    });
+
+    test('preserves em sizing and gives tiny popup images a nonzero drawing surface', () => {
+        const {window} = testEnv;
+        const manager = new DisplayContentManager(/** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ ({})));
+        const generator = new StructuredContentGenerator(manager, window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+        const prototype = window.HTMLCanvasElement.prototype;
+        const descriptor = Object.getOwnPropertyDescriptor(prototype, 'transferControlToOffscreen');
+        /**
+         * @this {HTMLCanvasElement}
+         * @returns {{width: number, height: number}}
+         */
+        function transferControlToOffscreen() {
+            return {width: this.width, height: this.height};
+        }
+        Object.defineProperty(prototype, 'transferControlToOffscreen', {
+            configurable: true,
+            value: transferControlToOffscreen,
+        });
+        try {
+            for (const preferredWidth of [2, 0.001]) {
+                const node = generator.createDefinitionImage({tag: 'img', path: 'image.png', width: 64, height: 32, preferredWidth, sizeUnits: 'em'}, 'Images');
+                expect(node.dataset.sizeUnits).toBe('em');
+                const canvas = /** @type {HTMLCanvasElement} */ (node.querySelector('canvas'));
+                const pixels = preferredWidth * 14 * 2 * window.devicePixelRatio;
+                expect(canvas.width).toBe(Math.max(1, Math.ceil(pixels)));
+                expect(canvas.height).toBe(Math.max(1, Math.ceil(pixels / 2)));
+                expect(manager.loadMediaRequests.at(-1)?.canvas).toMatchObject({width: canvas.width, height: canvas.height});
+            }
+        } finally {
+            if (typeof descriptor === 'undefined') {
+                Reflect.deleteProperty(prototype, 'transferControlToOffscreen');
+            } else {
+                Object.defineProperty(prototype, 'transferControlToOffscreen', descriptor);
+            }
+        }
+    });
+});
+
 describe('StructuredContentGenerator MDX rendering compatibility', () => {
     const {window} = testEnv;
 
