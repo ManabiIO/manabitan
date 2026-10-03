@@ -127,6 +127,17 @@ export class DisplayHistory extends EventDispatcher {
     pushState(state, content, url) {
         if (typeof url === 'undefined') { url = location.href; }
 
+        // A new branch also discards browser forward history. Release the
+        // corresponding cached results instead of retaining unreachable entries.
+        let abandoned = this._current.next;
+        this._current.next = null;
+        while (abandoned !== null) {
+            const next = abandoned.next;
+            this._historyMap.delete(abandoned.id);
+            abandoned.previous = null;
+            abandoned.next = null;
+            abandoned = next;
+        }
         const entry = this._createHistoryEntry(null, url, state, content, this._current);
         this._current.next = entry;
         this._current = entry;
