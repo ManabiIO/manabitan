@@ -457,7 +457,7 @@ export class Frontend {
     /**
      * @param {import('text-scanner').EventArgument<'searchSuccess'>} details
      */
-    _onSearchSuccess({type, dictionaryEntries, sentence, inputInfo: {eventType, detail: inputInfoDetail}, textSource, optionsContext, detail, pageTheme}) {
+    _onSearchSuccess({type, dictionaryEntries, dictionaryAvailability, sentence, inputInfo: {eventType, detail: inputInfoDetail}, textSource, optionsContext, detail, pageTheme}) {
         this._debugSearchSuccessCount += 1;
         const searchSuccessAt = safePerformance.now();
         this._updatePageDebugState({
@@ -473,7 +473,7 @@ export class Frontend {
             const focus2 = inputInfoDetail.focus;
             if (typeof focus2 === 'boolean') { focus = focus2; }
         }
-        this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme, searchSuccessAt);
+        this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme, searchSuccessAt, dictionaryAvailability);
     }
 
     /** */
@@ -1252,8 +1252,9 @@ export class Frontend {
      * @param {import('settings').OptionsContext} optionsContext
      * @param {'dark' | 'light'} pageTheme
      * @param {number} searchSuccessAt
+     * @param {import('translator').DictionaryAvailability[]} [dictionaryAvailability]
      */
-    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now()) {
+    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now(), dictionaryAvailability) {
         const query = textSource.text();
         const {url} = optionsContext;
         /** @type {import('display').HistoryState} */
@@ -1275,6 +1276,7 @@ export class Frontend {
         /** @type {import('display').HistoryContent} */
         const detailsContent = {
             contentOrigin: {tabId, frameId},
+            ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
         };
         if (dictionaryEntries !== null) {
             detailsContent.dictionaryEntries = dictionaryEntries;

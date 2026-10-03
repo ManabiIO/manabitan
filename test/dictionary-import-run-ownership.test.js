@@ -180,6 +180,9 @@ test('healthy imports complete all files and publish once', async () => {
 
     expect(importZip).toHaveBeenCalledTimes(2);
     expect(mode.mock.calls.map(([active]) => active)).toEqual([true, false]);
+    expect(mode.mock.calls[0][1]).toEqual(expect.any(String));
+    expect(mode.mock.calls[1][1]).toBe(mode.mock.calls[0][1]);
+    expect(Reflect.get(controller, '_activeImportOwnerId')).toBeUndefined();
     expect(done).toHaveBeenCalledWith({ok: true, errors: [], importedTitles: ['Test']});
     expect(completion).toHaveBeenCalledOnce();
     expect(completion).toHaveBeenCalledWith(expect.objectContaining({importRunCurrent: true}));

@@ -17,6 +17,10 @@
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
 
+const importOperationId1 = `${Date.now()}:request-1`;
+const importOperationId2 = `${Date.now()}:request-2`;
+const importOperationId3 = `${Date.now()}:request-3`;
+
 const logWarn = vi.fn();
 const logError = vi.fn();
 const importControl = vi.hoisted(() => ({
@@ -239,6 +243,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
                 id: 1,
                 action: 'importDictionaryOffscreen',
                 params: {
+                    operationId: importOperationId1,
                     archiveContent: new Blob(['dictionary']),
                     details: {},
                 },
@@ -283,7 +288,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
         const onMessage = listeners.get('message');
         const responsePort = {postMessage: vi.fn(), close: vi.fn()};
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: new Blob(['dictionary']), details: {}}},
+            data: {id: 1, action: 'importDictionaryOffscreen', params: {operationId: importOperationId1, archiveContent: new Blob(['dictionary']), details: {}}},
             ports: [responsePort],
         })));
 
@@ -306,20 +311,20 @@ describe('Offscreen dictionary worker import response port handling', () => {
         await import('../ext/js/background/offscreen-dictionary-worker.js');
         const onMessage = listeners.get('message');
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: null, details: {}}},
+            data: {id: 1, action: 'importDictionaryOffscreen', params: {operationId: importOperationId1, archiveContent: null, details: {}}},
             ports: [],
         })));
         await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({id: 1, error: expect.anything()})));
 
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 2, action: 'cancelDictionaryImportOffscreen', params: {}},
+            data: {id: 2, action: 'cancelDictionaryImportOffscreen', params: {operationId: importOperationId1}},
             ports: [],
         })));
         await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith({id: 2, result: undefined}));
 
         const responsePort = {postMessage: vi.fn(), close: vi.fn()};
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 3, action: 'importDictionaryOffscreen', params: {archiveContent: null, details: {}}},
+            data: {id: 3, action: 'importDictionaryOffscreen', params: {operationId: importOperationId3, archiveContent: null, details: {}}},
             ports: [responsePort],
         })));
         await vi.waitFor(() => expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'})));
@@ -346,7 +351,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
             close: vi.fn(),
         };
         listeners.get('message')?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: null, details: {}}},
+            data: {id: 1, action: 'importDictionaryOffscreen', params: {operationId: importOperationId1, archiveContent: null, details: {}}},
             ports: [responsePort],
         })));
 
@@ -371,7 +376,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
         const onMessage = listeners.get('message');
         const responsePort = {postMessage: vi.fn(), close: vi.fn()};
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: new Blob(['dictionary']), details: {}}},
+            data: {id: 1, action: 'importDictionaryOffscreen', params: {operationId: importOperationId1, archiveContent: new Blob(['dictionary']), details: {}}},
             ports: [responsePort],
         })));
         await vi.waitFor(() => expect(importControl.started).toBe(true));
@@ -390,7 +395,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
         })));
 
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 3, action: 'cancelDictionaryImportOffscreen', params: {}},
+            data: {id: 3, action: 'cancelDictionaryImportOffscreen', params: {operationId: importOperationId1}},
             ports: [],
         })));
         await vi.waitFor(() => expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'})));
@@ -425,7 +430,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
         const onMessage = listeners.get('message');
         const responsePort = {postMessage: vi.fn(), close: vi.fn()};
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: new Blob(['dictionary']), details: {}}},
+            data: {id: 1, action: 'importDictionaryOffscreen', params: {operationId: importOperationId1, archiveContent: new Blob(['dictionary']), details: {}}},
             ports: [responsePort],
         })));
         await vi.waitFor(() => expect(importControl.started).toBe(true));
@@ -445,7 +450,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
         expect(importControl.lookupStartedCount).toBe(0);
 
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 4, action: 'cancelDictionaryImportOffscreen', params: {}},
+            data: {id: 4, action: 'cancelDictionaryImportOffscreen', params: {operationId: importOperationId1}},
             ports: [],
         })));
         await vi.waitFor(() => expect(responsePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'})));
@@ -495,7 +500,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
 
         const responsePort = {postMessage: vi.fn(), close: vi.fn()};
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 2, action: 'importDictionaryOffscreen', params: {archiveContent: new Blob(['dictionary']), details: {}}},
+            data: {id: 2, action: 'importDictionaryOffscreen', params: {operationId: importOperationId2, archiveContent: new Blob(['dictionary']), details: {}}},
             ports: [responsePort],
         })));
         await new Promise((resolve) => { setTimeout(resolve, 10); });
@@ -618,11 +623,11 @@ describe('Offscreen dictionary worker import response port handling', () => {
 
         const responsePort = {postMessage: vi.fn(), close: vi.fn()};
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 2, action: 'importDictionaryOffscreen', params: {archiveContent: new Blob(['dictionary']), details: {}}},
+            data: {id: 2, action: 'importDictionaryOffscreen', params: {operationId: importOperationId2, archiveContent: new Blob(['dictionary']), details: {}}},
             ports: [responsePort],
         })));
         onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 3, action: 'cancelDictionaryImportOffscreen', params: {}},
+            data: {id: 3, action: 'cancelDictionaryImportOffscreen', params: {operationId: importOperationId2}},
             ports: [],
         })));
 

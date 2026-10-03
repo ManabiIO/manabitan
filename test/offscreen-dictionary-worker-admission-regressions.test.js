@@ -109,6 +109,7 @@ async function createWorkerHarness() {
  * @param {MessagePort[]} [ports]
  */
 function send(onMessage, id, action, params = {}, ports = []) {
+    if (action === 'importDictionaryOffscreen') { params = {...params, operationId: `${Date.now()}:request-${id}`}; }
     onMessage(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
         data: {id, action, params},
         ports,

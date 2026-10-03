@@ -37,7 +37,10 @@ function createDatabase(index = {}) {
         matchType,
         itemIndex,
     })));
-    Reflect.set(database, '_termRecordStore', {ensureDictionaryReverseIndex: vi.fn()});
+    Reflect.set(database, '_termRecordStore', {
+        ensureDictionaryReverseIndex: vi.fn(),
+        getDictionaryHealth: vi.fn(() => ({status: 'available', reason: null})),
+    });
     return database;
 }
 

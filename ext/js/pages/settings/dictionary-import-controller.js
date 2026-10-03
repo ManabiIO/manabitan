@@ -475,6 +475,8 @@ export class DictionaryImportController {
         };
         /** @type {number} */
         this._activeImportRunGeneration = 0;
+        /** @type {string|undefined} */
+        this._activeImportOwnerId = void 0;
         /** @type {DictionaryImportSource[]} */
         this._pendingImportSources = [];
         /** @type {(event: MouseEvent) => void} */
@@ -543,7 +545,7 @@ export class DictionaryImportController {
             throw new Error('Dictionary import requires Blob-backed archive content');
         }
         return /** @type {ImportResultWithDebug} */ (
-            await this._settingsController.application.api.importDictionaryOffscreen(archiveContent, details, onProgress)
+            await this._settingsController.application.api.importDictionaryOffscreen(archiveContent, details, onProgress, `${Date.now()}:${crypto.randomUUID()}`, this._activeImportOwnerId)
         );
     }
 
@@ -555,12 +557,17 @@ export class DictionaryImportController {
      */
     async _tryImportDictionaryUrlOffscreen(url, details, onProgress) {
         return /** @type {ImportResultWithDebug} */ (
-            await this._settingsController.application.api.importDictionaryUrlOffscreen(url, details, onProgress)
+            await this._settingsController.application.api.importDictionaryUrlOffscreen(url, details, onProgress, `${Date.now()}:${crypto.randomUUID()}`, this._activeImportOwnerId)
         );
     }
 
     /** */
     _onBeforeUnload() {
+        const ownerId = this._activeImportOwnerId;
+        if (typeof ownerId === 'string') {
+            this._activeImportOwnerId = void 0;
+            void this._settingsController.application.api.setDictionaryImportMode(false, ownerId).catch(() => {});
+        }
         this._activeMdx?.disconnect();
         this._activeMdx = null;
         document.removeEventListener('click', this._onDocumentClickCaptureBind, true);
@@ -1589,6 +1596,8 @@ export class DictionaryImportController {
      * @returns {void}
      */
     _forceRecoverHungImportSession(error, label) {
+        const ownerId = this._activeImportOwnerId;
+        this._activeImportOwnerId = void 0;
         this._activeImportRunGeneration += 1;
         this._activeMdx?.disconnect();
         this._activeMdx = null;
@@ -1623,7 +1632,7 @@ export class DictionaryImportController {
         if (statusFooter !== null) {
             statusFooter.setTaskActive(progressSelector, false);
         }
-        void this._settingsController.application.api.setDictionaryImportMode(false).catch((importModeError) => {
+        void this._settingsController.application.api.setDictionaryImportMode(false, ownerId).catch((importModeError) => {
             const normalizedImportModeError = toError(importModeError);
             reportDiagnostics('dictionary-import-watchdog-import-mode-exit-failed', {
                 label,
@@ -2156,6 +2165,8 @@ export class DictionaryImportController {
     ) {
         if (this._modifying) { return; }
         const importRunGeneration = ++this._activeImportRunGeneration;
+        const importOwnerId = crypto.randomUUID();
+        this._activeImportOwnerId = importOwnerId;
         const assertCurrentRun = () => {
             if (!this._isImportRunCurrent(importRunGeneration)) {
                 throw new Error('Ignored stale dictionary import run');
@@ -2196,8 +2207,8 @@ export class DictionaryImportController {
         try {
             this._setModifying(true);
             this._hideErrors();
-            await this._settingsController.application.api.setDictionaryImportMode(true);
             importModeEnabled = true;
+            await this._settingsController.application.api.setDictionaryImportMode(true, importOwnerId);
             assertCurrentRun();
 
             for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = false; }
@@ -2396,9 +2407,9 @@ export class DictionaryImportController {
             prevention.end();
             // Keep mutation ownership until backend cleanup settles, then
             // recheck ownership before touching a possibly newer import UI.
-            if (importModeEnabled && (this._isImportRunCurrent(importRunGeneration) || !this._modifying)) {
+            if (importModeEnabled) {
                 try {
-                    await this._settingsController.application.api.setDictionaryImportMode(false);
+                    await this._settingsController.application.api.setDictionaryImportMode(false, importOwnerId);
                 } catch (error) {
                     const importModeExitError = toError(error);
                     errors.push(importModeExitError);
@@ -2409,6 +2420,7 @@ export class DictionaryImportController {
                     });
                 }
             }
+            if (this._activeImportOwnerId === importOwnerId) { this._activeImportOwnerId = void 0; }
             if (this._isImportRunCurrent(importRunGeneration)) {
                 for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
                 if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }

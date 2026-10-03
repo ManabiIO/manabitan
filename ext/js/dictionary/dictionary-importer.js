@@ -808,8 +808,15 @@ export class DictionaryImporter {
         const archiveOwnership = new DictionaryArchiveOwnership();
         try {
             const result = await this._importDictionary(dictionaryDatabase, archiveContent, details, archiveOwnership);
+            result.outcome ??= {status: result.result === null ? 'aborted' : 'published'};
             const closeError = await archiveOwnership.closeIfOwned();
-            if (closeError !== null) { result.errors.push(closeError); }
+            if (closeError !== null) {
+                if (result.outcome.status === 'published') {
+                    (result.outcome.warnings ??= []).push(closeError.message);
+                } else {
+                    result.errors.push(closeError);
+                }
+            }
             return result;
         } catch (error) {
             const closeError = await archiveOwnership.closeIfOwned();
@@ -2619,6 +2626,9 @@ export class DictionaryImporter {
                 }
             }
             this._ignoreCancellation = true;
+            if (typeof details.operationId === 'string' && details.operationId.length > 0) {
+                summary.storageImportOperationId = details.operationId;
+            }
             await importSession.disposeImportResources();
             this._setProgressInterval(previousProgressInterval);
             const tBulkFinalizationStart = Date.now();
@@ -2643,6 +2653,8 @@ export class DictionaryImporter {
                 // committed dictionary back into an import failure.
                 if (importSession.state !== 'published') {
                     importSession.recordFailure(error);
+                } else {
+                    importSession.recordWarning(error);
                 }
             }
             const bulkFinalizationPhaseDetails = {ok: !importSession.failed};
@@ -2673,6 +2685,7 @@ export class DictionaryImporter {
                 result: null,
                 errors,
                 debug: {phaseTimings},
+                outcome: importSession.outcome,
             };
         }
 
@@ -2680,13 +2693,15 @@ export class DictionaryImporter {
 
         try {
             this._progress();
-        } catch (_) {
+        } catch (error) {
             // Publication is already durable; progress delivery is best effort.
+            importSession.recordWarning(error);
         }
         return {
             result: summary,
             errors,
             debug: {phaseTimings},
+            outcome: importSession.outcome,
         };
     }
 

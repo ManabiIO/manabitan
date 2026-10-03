@@ -45,7 +45,7 @@ describe('Display lookup refresh', () => {
         display.updateOptions = vi.fn().mockImplementation(async () => {
             display._options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [{enabled: true}]}));
         });
-        display._findDictionaryEntries = vi.fn().mockResolvedValue([]);
+        display._findDictionaryEntries = vi.fn().mockResolvedValue({dictionaryEntries: []});
         display._replaceHistoryStateNoNavigate = vi.fn();
         display.getOptionsContext = /** @type {typeof display.getOptionsContext} */ (/** @type {unknown} */ (vi.fn(() => ({depth: 0}))));
         display.getContentOrigin = vi.fn(() => ({tabId: null, frameId: null}));

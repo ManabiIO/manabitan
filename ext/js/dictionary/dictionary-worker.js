@@ -441,12 +441,13 @@ export class DictionaryWorker {
      * @returns {import('dictionary-worker').MessageCompleteResult}
      */
     _formatImportDictionaryResult(response) {
-        const {result, errors, debug} = response;
+        const {result, errors, debug, outcome} = response;
         const debugResult = (typeof debug === 'object' && debug !== null && !Array.isArray(debug)) ? debug : null;
         return {
             result,
             errors: errors.map((error) => ExtensionError.deserialize(error)),
             debug: debugResult,
+            ...(typeof outcome === 'undefined' ? {} : {outcome}),
         };
     }
 }

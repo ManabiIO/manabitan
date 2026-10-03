@@ -33,6 +33,8 @@ describe('Backend URL import progress', () => {
         };
         const responsePorts = /** @type {MessagePort[]} */ (/** @type {unknown} */ ([responsePort]));
         const context = /** @type {any} */ ({
+            _registerDictionaryImportOwner: vi.fn(),
+            _settleDictionaryImportOwnership: vi.fn(),
             _forwardDictionaryImportToRuntime: vi.fn(async () => {
                 throw new Error('dictionary runtime unavailable');
             }),
@@ -40,7 +42,7 @@ describe('Backend URL import progress', () => {
 
         await expect(Reflect.get(Backend.prototype, '_onPmImportDictionaryOffscreen').call(
             context,
-            {archiveContent: new Blob(['dictionary']), details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
+            {operationId: `${Date.now()}:file`, archiveContent: new Blob(['dictionary']), details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
             responsePorts,
         )).resolves.toBeUndefined();
 
@@ -64,6 +66,8 @@ describe('Backend URL import progress', () => {
             return archiveBlob;
         });
         const context = /** @type {any} */ ({
+            _registerDictionaryImportOwner: vi.fn(),
+            _settleDictionaryImportOwnership: vi.fn(),
             _lastDictionaryUrlImportDebug: null,
             _downloadDictionaryArchiveBlobViaXhr: downloadDictionaryArchiveBlobViaXhr,
             _forwardDictionaryImportToRuntime: forwardDictionaryImportToRuntime,
@@ -71,7 +75,7 @@ describe('Backend URL import progress', () => {
 
         await Reflect.get(Backend.prototype, '_onPmImportDictionaryUrlOffscreen').call(
             context,
-            {url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
+            {operationId: 'url-operation', url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
             responsePorts,
         );
 
@@ -87,7 +91,7 @@ describe('Backend URL import progress', () => {
             type: 'progress',
             progress: {nextStep: false, index: 100, count: 100},
         });
-        expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort);
+        expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort, 'url-operation', undefined);
         expect(responsePort.close).not.toHaveBeenCalled();
     });
 
@@ -106,6 +110,8 @@ describe('Backend URL import progress', () => {
             return archiveBlob;
         });
         const context = /** @type {any} */ ({
+            _registerDictionaryImportOwner: vi.fn(),
+            _settleDictionaryImportOwnership: vi.fn(),
             _lastDictionaryUrlImportDebug: null,
             _downloadDictionaryArchiveBlobViaXhr: downloadDictionaryArchiveBlobViaXhr,
             _forwardDictionaryImportToRuntime: forwardDictionaryImportToRuntime,
@@ -113,12 +119,12 @@ describe('Backend URL import progress', () => {
 
         await Reflect.get(Backend.prototype, '_onPmImportDictionaryUrlOffscreen').call(
             context,
-            {url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
+            {operationId: 'url-operation', url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
             responsePorts,
         );
 
         expect(responsePort.postMessage).toHaveBeenCalledTimes(2);
-        expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort);
+        expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort, 'url-operation', undefined);
         expect(responsePort.close).not.toHaveBeenCalled();
     });
 });

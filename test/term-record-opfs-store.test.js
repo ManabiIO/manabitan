@@ -47,7 +47,7 @@ function asFileHandle(handle) {
 
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
- * @param {{removeEntryFailures?: Map<string, number>, truncateFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, onGetFile?: (name: string) => void}} [options]
+ * @param {{removeEntryFailures?: Map<string, number>, truncateFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, onGetFile?: (name: string) => void, onAbort?: () => Promise<void>|void}} [options]
  * @returns {FileSystemDirectoryHandle}
  */
 function createFakeDirectoryHandle(
@@ -58,6 +58,7 @@ function createFakeDirectoryHandle(
         getFileFailures = new Map(),
         beforeWrite = () => {},
         onGetFile = () => {},
+        onAbort = () => {},
     } = {},
 ) {
     /**
@@ -136,6 +137,9 @@ function createFakeDirectoryHandle(
                     },
                     async close() {
                         fileBytesByName.set(name, nextBytes);
+                    },
+                    async abort() {
+                        await onAbort();
                     },
                 };
             },
@@ -281,6 +285,42 @@ describe('TermRecordOpfsStore', () => {
         expect(removeOrTruncate).toHaveBeenCalledWith(indexFileName, false);
         expect(store.size).toBe(0);
         expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0);
+    });
+
+    test.each(/** @type {const} */ (['single', 'bulk', 'async']))('decodes requested cached UTF-8 keys without constructing indexes (%s)', async (mode) => {
+        const store = new TermRecordOpfsStore();
+        const encoder = new TextEncoder();
+        await store.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: 'Test',
+            rowCount: 2,
+            expressionBytesList: [encoder.encode('読む'), encoder.encode('かな')],
+            readingBytesList: [encoder.encode('よむ'), encoder.encode('かな')],
+            readingEqualsExpressionList: new Uint8Array([0, 1]),
+            scoreList: new Int32Array([1, 2]),
+            sequenceList: new Int32Array([1, 2]),
+        }, [0, 16], [16, 16], 'raw');
+        const records = Reflect.get(store, '_recordsById');
+        const first = records.get(1);
+        const second = records.get(2);
+        if (typeof first === 'undefined' || typeof second === 'undefined') { throw new Error('Missing appended records'); }
+        expect(first.expression).toBeUndefined();
+        expect(second.expression).toBeUndefined();
+        const getDictionaryIndex = vi.spyOn(store, 'getDictionaryIndex');
+        /**
+         * @param {number} id
+         * @returns {Promise<ReturnType<TermRecordOpfsStore['getById']>>}
+         */
+        const read = async (id) => {
+            switch (mode) {
+                case 'single': return store.getById(id);
+                case 'bulk': return store.getByIds([id]).get(id);
+                case 'async': return (await store.getByIdsAsync([id])).get(id);
+            }
+        };
+        expect(await read(1)).toMatchObject({expression: '読む', reading: 'よむ'});
+        expect(second.expression).toBeUndefined();
+        expect(await read(2)).toMatchObject({expression: 'かな', reading: 'かな'});
+        expect(getDictionaryIndex).not.toHaveBeenCalled();
     });
 
     test('uses compact artifact fields only when they reduce persisted bytes', () => {
@@ -4441,7 +4481,7 @@ describe('TermRecordOpfsStore', () => {
         expect(readerStore.getDictionaryIndex('New').expression.get('猫')).toBeUndefined();
     });
 
-    test('repairs a corrupt persistent index without materializing the record shard', async () => {
+    test.each(/** @type {const} */ (['await', 'background']))('repairs a corrupt persistent index without materializing the record shard (%s)', async (repairMode) => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Corrupt persistent index';
         const fileBytesByName = new Map();
@@ -4463,6 +4503,16 @@ describe('TermRecordOpfsStore', () => {
             [16, 16],
             'raw',
         );
+        await writerStore.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: 'Healthy sibling',
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('healthy')],
+            readingBytesList: [textEncoder.encode('healthy')],
+            readingEqualsExpressionList: new Uint8Array([1]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([30]),
+        }, [32], [16], 'raw');
         await writerStore._closeAllWritables();
         const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
         expect(indexFileName).toBeDefined();
@@ -4480,7 +4530,31 @@ describe('TermRecordOpfsStore', () => {
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
         await readerStore._loadShardFiles(false);
-        await readerStore.ensureDictionariesLoaded([dictionaryName]);
+        const repairGate = {
+            entered: /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers()),
+            resume: /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers()),
+        };
+        if (repairMode === 'background') {
+            const rebuild = readerStore._rebuildLookupIndexForShard.bind(readerStore);
+            vi.spyOn(readerStore, '_rebuildLookupIndexForShard').mockImplementation(async (...args) => {
+                repairGate.entered.resolve();
+                await repairGate.resume.promise;
+                return await rebuild(...args);
+            });
+        }
+        try {
+            await readerStore.ensureDictionariesLoaded([dictionaryName, 'Healthy sibling'], {repairMode});
+            if (repairMode === 'background') {
+                await repairGate.entered.promise;
+                expect(readerStore.getDictionaryHealth(dictionaryName).status).toBe('repairing');
+                expect(readerStore.isDictionaryAvailable(dictionaryName)).toBe(false);
+            }
+            expect(readerStore.isDictionaryAvailable('Healthy sibling')).toBe(true);
+            expect(readerStore.findTermIds('Healthy sibling', 'healthy', 'expression')).toEqual([3]);
+        } finally {
+            repairGate.resume.resolve();
+            await readerStore._awaitPersistentIndexRepairs();
+        }
 
         expect(Reflect.get(readerStore, '_recordsById').size).toBe(0);
         expect(readerStore.findTermIds(dictionaryName, '飲む', 'expression')).toHaveLength(1);
@@ -4562,7 +4636,7 @@ describe('TermRecordOpfsStore', () => {
         expect(retryStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
     });
 
-    test('superseded derived repair aborts before publishing its staged sidecar', async () => {
+    test.each(['quarantine', 'mutation'])('superseded derived repair aborts before publishing its staged sidecar (%s)', async (supersession) => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Superseded derived repair';
         const fileBytesByName = new Map();
@@ -4571,11 +4645,19 @@ describe('TermRecordOpfsStore', () => {
             entered: /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers()),
             resume: /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers()),
         };
+        const abortGate = {
+            entered: /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers()),
+            resume: /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers()),
+        };
         const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
             beforeWrite: async (name) => {
                 if (!writeGate.enabled || !name.endsWith('.mbti')) { return; }
                 writeGate.entered.resolve();
                 await writeGate.resume.promise;
+            },
+            onAbort: async () => {
+                abortGate.entered.resolve();
+                await abortGate.resume.promise;
             },
         });
         const writerStore = new TermRecordOpfsStore();
@@ -4607,15 +4689,42 @@ describe('TermRecordOpfsStore', () => {
         writeGate.enabled = true;
         const repair = readerStore._tryRepairPersistentDictionaryIndex(dictionaryName);
         await writeGate.entered.promise;
-        readerStore.markDictionaryReimportRequired(dictionaryName, 'Newer quarantine');
-        writeGate.resume.resolve();
+        const mutationCallback = vi.fn(async () => {
+            expect(fileBytesByName.get(indexFileName)).toStrictEqual(damagedBytes);
+            expect(Reflect.get(readerStore, '_persistentIndexRepairPromiseByDictionary').size).toBe(0);
+        });
+        let mutation = Promise.resolve();
+        if (supersession === 'quarantine') {
+            readerStore.markDictionaryReimportRequired(dictionaryName, 'Newer quarantine');
+        } else {
+            mutation = readerStore._runExclusiveStorageMutation(mutationCallback);
+        }
+        try {
+            await Promise.resolve();
+            expect(mutationCallback).not.toHaveBeenCalled();
+            writeGate.resume.resolve();
+            await abortGate.entered.promise;
+            expect(mutationCallback).not.toHaveBeenCalled();
+            expect(Reflect.get(readerStore, '_persistentIndexRepairPromiseByDictionary').size).toBe(1);
+            expect(fileBytesByName.get(indexFileName)).toStrictEqual(damagedBytes);
+        } finally {
+            writeGate.resume.resolve();
+            abortGate.resume.resolve();
+            await Promise.all([repair, mutation, readerStore._awaitPersistentIndexRepairs()]);
+        }
 
         await expect(repair).resolves.toBe(false);
         expect(fileBytesByName.get(indexFileName)).toStrictEqual(damagedBytes);
-        expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({
-            status: 'reimportRequired',
-            reason: 'Newer quarantine',
-        });
+        if (supersession === 'quarantine') {
+            expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({
+                status: 'reimportRequired',
+                reason: 'Newer quarantine',
+            });
+        } else {
+            expect(mutationCallback).toHaveBeenCalledTimes(1);
+            expect(readerStore.getDictionaryHealth(dictionaryName).status).toBe('repairPending');
+            expect(readerStore.isDictionaryAvailable(dictionaryName)).toBe(false);
+        }
     });
 
     test('requires reimport when the authoritative container is missing', async () => {

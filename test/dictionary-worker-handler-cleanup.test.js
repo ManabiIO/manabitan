@@ -9,6 +9,7 @@
 
 import {describe, expect, test, vi} from 'vitest';
 import {log} from '../ext/js/core/log.js';
+import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionaryWorkerHandler} from '../ext/js/dictionary/dictionary-worker-handler.js';
 
 describe('DictionaryWorkerHandler transient update cleanup', () => {
@@ -89,6 +90,36 @@ describe('DictionaryWorkerHandler transient update cleanup', () => {
 });
 
 describe('DictionaryWorkerHandler import database cleanup', () => {
+    test.each([false, true])('a committed standalone import survives database close failure; logger fails=%s', async (loggerFails) => {
+        const handler = new DictionaryWorkerHandler();
+        const database = {
+            isPrepared: vi.fn(() => true),
+            usesFallbackStorage: vi.fn(() => false),
+            getOpenStorageDiagnostics: vi.fn(() => ({})),
+            close: vi.fn().mockRejectedValue(new Error('close failed')),
+        };
+        const prepare = vi.spyOn(handler, '_getPreparedDictionaryDatabase').mockResolvedValue(
+            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (database)),
+        );
+        const summary = /** @type {import('dictionary-importer').Summary} */ ({title: 'Fixture', storageGenerationId: 'generation'});
+        const importer = vi.spyOn(DictionaryImporter.prototype, 'importDictionary').mockResolvedValue({
+            result: summary, errors: [], outcome: {status: 'published', generationId: 'generation'},
+        });
+        const logged = vi.spyOn(log, 'error').mockImplementation(() => {
+            if (loggerFails) { throw new Error('logger failed'); }
+        });
+        try {
+            const result = await handler._importDictionary({details: {}, archiveContent: new ArrayBuffer(0)}, vi.fn());
+            expect(result).toMatchObject({result: summary, errors: [], outcome: {status: 'published', generationId: 'generation', warnings: ['close failed']}});
+            expect(database.close).toHaveBeenCalledOnce();
+            expect(importer).toHaveBeenCalledOnce();
+        } finally {
+            prepare.mockRestore();
+            importer.mockRestore();
+            logged.mockRestore();
+        }
+    });
+
     test('keeps a successful non-final import session open', async () => {
         const handler = new DictionaryWorkerHandler();
         const database = {

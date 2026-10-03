@@ -77,6 +77,8 @@ export class OffscreenProxy {
     constructor(webExtension) {
         /** @type {import('../extension/web-extension.js').WebExtension} */
         this._webExtension = webExtension;
+        /** @type {Map<string, {cancelled: boolean}>} */
+        this._pendingImportOperations = new Map();
         /** @type {?Promise<void>} */
         this._creatingOffscreen = null;
 
@@ -235,6 +237,13 @@ export class OffscreenProxy {
      * @returns {Promise<import('offscreen').ApiReturn<TMessageType>>}
      */
     async sendMessagePromise(message) {
+        if (message.action === 'cancelDictionaryImportOffscreen') {
+            const params = /** @type {import('offscreen').ApiParams<'cancelDictionaryImportOffscreen'>} */ (message.params);
+            if (params?.lookupOnly !== true && typeof params?.operationId === 'string') {
+                const operation = this._pendingImportOperations?.get(params.operationId);
+                if (operation) { operation.cancelled = true; }
+            }
+        }
         await this._ensureOffscreenDocument();
         const response = await this._webExtension.sendMessagePromise(message);
         return this._getMessageResponseResult(/** @type {import('core').Response<import('offscreen').ApiReturn<TMessageType>>} */ (response));
@@ -287,42 +296,57 @@ export class OffscreenProxy {
      * @returns {Promise<import('offscreen').McApiReturn<TMessageType>>}
      */
     async sendMessageViaPort(message, transfers) {
-        const attemptCount = transfers.length === 0 ? 2 : 1;
-        for (let attempt = 0; attempt < attemptCount; ++attempt) {
-            /** @type {MessagePort|null} */
-            let port = null;
-            try {
+        const operationId = message.action === 'importDictionaryOffscreen' ?
+            /** @type {import('offscreen').McApiParams<'importDictionaryOffscreen'>} */ (message.params).operationId :
+            null;
+        const operation = {cancelled: false};
+        if (operationId !== null) {
+            this._pendingImportOperations ??= new Map();
+            if (this._pendingImportOperations.has(operationId)) { throw new Error('Duplicate dictionary import operation ID'); }
+            if (this._pendingImportOperations.size >= 128) { throw new Error('Dictionary import handoff registry is full'); }
+            this._pendingImportOperations.set(operationId, operation);
+        }
+        try {
+            const attemptCount = transfers.length === 0 ? 2 : 1;
+            for (let attempt = 0; attempt < attemptCount; ++attempt) {
+                /** @type {MessagePort|null} */
+                let port = null;
                 try {
-                    await this._ensureOffscreenPort();
-                } catch (initialError) {
-                    reportDiagnostics('offscreen-control-runtime-recovery', {
-                        action: message.action,
-                        attempt: attempt + 1,
-                        reason: initialError instanceof Error ? initialError.message : String(initialError),
-                    });
-                    await this.prepare();
-                }
-                port = this._currentOffscreenPort;
-                if (port === null) {
-                    throw new OffscreenControlTransportError('Offscreen control port is unavailable');
-                }
-                return /** @type {import('offscreen').McApiReturn<TMessageType>} */ (
-                    await this._sendOffscreenControlMessage(port, /** @type {import('offscreen').McApiMessageAny} */ (message), transfers)
-                );
-            } catch (error) {
-                const transportError = error instanceof OffscreenControlTransportError ?
-                    error :
-                    (port === null ? new OffscreenControlTransportError('Failed to establish offscreen control transport', {cause: error}) : null);
-                if (transportError === null) {
-                    throw error;
-                }
-                if (port !== null) {
-                    this._clearCurrentOffscreenPort(port);
-                }
-                if (attempt + 1 >= attemptCount) {
-                    throw transportError;
+                    try {
+                        await this._ensureOffscreenPort();
+                    } catch (initialError) {
+                        reportDiagnostics('offscreen-control-runtime-recovery', {
+                            action: message.action,
+                            attempt: attempt + 1,
+                            reason: initialError instanceof Error ? initialError.message : String(initialError),
+                        });
+                        await this.prepare();
+                    }
+                    port = this._currentOffscreenPort;
+                    if (port === null) {
+                        throw new OffscreenControlTransportError('Offscreen control port is unavailable');
+                    }
+                    if (operation.cancelled) { throw new Error('Dictionary import cancelled before runtime admission'); }
+                    return /** @type {import('offscreen').McApiReturn<TMessageType>} */ (
+                        await this._sendOffscreenControlMessage(port, /** @type {import('offscreen').McApiMessageAny} */ (message), transfers)
+                    );
+                } catch (error) {
+                    const transportError = error instanceof OffscreenControlTransportError ?
+                        error :
+                        (port === null ? new OffscreenControlTransportError('Failed to establish offscreen control transport', {cause: error}) : null);
+                    if (transportError === null) {
+                        throw error;
+                    }
+                    if (port !== null) {
+                        this._clearCurrentOffscreenPort(port);
+                    }
+                    if (attempt + 1 >= attemptCount) {
+                        throw transportError;
+                    }
                 }
             }
+        } finally {
+            if (operationId !== null) { this._pendingImportOperations.delete(operationId); }
         }
     }
 

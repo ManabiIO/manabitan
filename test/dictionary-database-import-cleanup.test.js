@@ -112,6 +112,7 @@ describe('DictionaryDatabase import cleanup', () => {
         });
         Reflect.set(database, '_db', {
             exec,
+            close: vi.fn(),
             selectObject: vi.fn((_sql, bind) => {
                 return bind.$title === row.title ? row : null;
             }),
@@ -133,6 +134,7 @@ describe('DictionaryDatabase import cleanup', () => {
             });
         expect(Reflect.get(database, '_termRecordStore').replaceDictionaryName).not.toHaveBeenCalled();
         expect(Reflect.get(database, '_termRecordStore').rollbackPreservedDictionaryRename).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_db')).toBeNull();
     });
 
     test.each(['JMdict', ' \ufeffJMdict '])('publishes an update with exact titles: %j', async (dictionaryTitle) => {

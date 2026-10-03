@@ -270,6 +270,7 @@ describe('committed dictionary cleanup uses real SQLite metadata', () => {
         expect(session.failed).toBe(false);
         expect(errors).toEqual([]);
         expect(result?.housekeepingErrors).toContain(housekeepingError);
+        expect(session.outcome).toMatchObject({status: 'published', warnings: [housekeepingError.message]});
         expect(await session.finalizeBulkImport(() => {}, summary)).toBe(result);
         expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
         expect(Reflect.get(database, '_bulkImportJournalRecord')).toBeNull();

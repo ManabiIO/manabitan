@@ -92,6 +92,8 @@ export class TextScanner extends EventDispatcher {
         this._scanTimerPromiseResolve = null;
         /** @type {?import('text-source').TextSource} */
         this._textSourceCurrent = null;
+        /** @type {boolean} Incomplete searches must permit same-position retries. */
+        this._textSourceCurrentIncomplete = false;
         /** @type {boolean} */
         this._textSourceCurrentSelected = false;
         /** @type {boolean} */
@@ -431,6 +433,7 @@ export class TextScanner extends EventDispatcher {
                 }
             }
             this._textSourceCurrent = null;
+            this._textSourceCurrentIncomplete = false;
             this._textSourceCurrentSelected = false;
             this._inputInfoCurrent = null;
         }
@@ -453,6 +456,7 @@ export class TextScanner extends EventDispatcher {
      */
     setCurrentTextSource(textSource) {
         this._textSourceCurrent = textSource;
+        this._textSourceCurrentIncomplete = false;
         if (this._selectText && this._userHasNotSelectedAnythingManually && textSource !== null) {
             this._yomitanIsChangingTextSelectionNow = true;
             textSource.select();
@@ -551,7 +555,7 @@ export class TextScanner extends EventDispatcher {
                 textSource.setStartOffset(this._scanLength, this._layoutAwareScan, true);
             }
 
-            if (this._textSourceCurrent !== null && this._textSourceCurrent.hasSameStart(textSource)) {
+            if (!this._textSourceCurrentIncomplete && this._textSourceCurrent !== null && this._textSourceCurrent.hasSameStart(textSource)) {
                 return null;
             }
 
@@ -569,12 +573,14 @@ export class TextScanner extends EventDispatcher {
             let sentence = null;
             /** @type {'terms'|'kanji'} */
             let type = 'terms';
+            /** @type {import('translator').DictionaryAvailability[]|undefined} */
+            let dictionaryAvailability;
             phaseStartedAt = safePerformance.now();
             const result = await this._findDictionaryEntries(textSource, searchTerms, searchKanji, optionsContext);
             findDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
             if (this._isLookupStale(lookupSequence)) { return null; }
             if (result !== null) {
-                ({dictionaryEntries, sentence, type} = result);
+                ({dictionaryEntries, sentence, type, dictionaryAvailability} = result);
             } else if (showEmpty || (textSource !== null && isAltText && await this._isTextLookupWorthy(textSource.content))) {
                 // Shows a "No results found" message
                 dictionaryEntries = [];
@@ -585,6 +591,7 @@ export class TextScanner extends EventDispatcher {
             if (dictionaryEntries !== null && sentence !== null) {
                 this._inputInfoCurrent = inputInfo;
                 this.setCurrentTextSource(textSource);
+                this._textSourceCurrentIncomplete = (dictionaryAvailability?.length ?? 0) > 0;
                 this._selectionRestoreInfo = selectionRestoreInfo;
 
                 const pageTheme = this._getSiteTheme();
@@ -606,6 +613,7 @@ export class TextScanner extends EventDispatcher {
                     optionsContext,
                     detail,
                     pageTheme,
+                    ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
                 });
                 safePerformance.mark('scanner:_search:end');
                 safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
@@ -1356,13 +1364,13 @@ export class TextScanner extends EventDispatcher {
         /** @type {import('api').FindTermsDetails} */
         const details = {};
         const searchTextPrimary = this._getPrimaryTermSearchText(searchText);
-        let {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchText, details, optionsContext);
-        if (dictionaryEntries.length === 0 && searchTextPrimary !== searchText) {
-            ({dictionaryEntries, originalTextLength} = await this._api.termsFind(searchTextPrimary, details, optionsContext));
+        let {dictionaryEntries, originalTextLength, dictionaryAvailability} = await this._api.termsFind(searchText, details, optionsContext);
+        if (dictionaryEntries.length === 0 && !dictionaryAvailability?.length && searchTextPrimary !== searchText) {
+            ({dictionaryEntries, originalTextLength, dictionaryAvailability} = await this._api.termsFind(searchTextPrimary, details, optionsContext));
         }
-        if (dictionaryEntries.length === 0) { return null; }
+        if (dictionaryEntries.length === 0 && !dictionaryAvailability?.length) { return null; }
 
-        textSource.setEndOffset(originalTextLength, false, layoutAwareScan);
+        textSource.setEndOffset(dictionaryEntries.length === 0 ? 1 : originalTextLength, false, layoutAwareScan);
         const sentence = this._textSourceGenerator.extractSentence(
             textSource,
             layoutAwareScan,
@@ -1373,7 +1381,7 @@ export class TextScanner extends EventDispatcher {
             sentenceBackwardQuoteMap,
         );
 
-        return {dictionaryEntries, sentence, type: 'terms'};
+        return {dictionaryEntries, sentence, type: 'terms', ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {})};
     }
 
     /**

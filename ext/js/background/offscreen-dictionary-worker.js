@@ -52,8 +52,12 @@ export class OffscreenDictionaryWorkerHandler {
         this._queuedExclusiveRequestCount = 0;
         /** @type {number} */
         this._queuedImportRequestCount = 0;
+        /** @type {Map<string, {status: import('offscreen').ImportOperationStatus, abortController: AbortController, updatedAt: number}>} */
+        this._importOperations = new Map();
+        /** @type {string} */
+        this._importWorkerGeneration = crypto.randomUUID();
         /** @type {number} */
-        this._queuedImportCancellationCount = 0;
+        this._retiredImportIssuedAt = 0;
         /** @type {AbortController|null} */
         this._activeImportAbortController = null;
     }
@@ -107,6 +111,17 @@ export class OffscreenDictionaryWorkerHandler {
             return;
         }
         if (policy.concurrency === 'streamed-import') {
+            try {
+                this._admitImportOperation(event.data.params?.operationId);
+            } catch (error) {
+                const port = event.ports[0];
+                if (port) {
+                    this._postImportError(port, error);
+                    port.close();
+                }
+                self.postMessage({id: event.data.id, error: ExtensionError.serialize(error)});
+                return;
+            }
             ++this._queuedImportRequestCount;
         }
         if (
@@ -287,20 +302,89 @@ export class OffscreenDictionaryWorkerHandler {
         if (this._queuedImportRequestCount > 0) {
             --this._queuedImportRequestCount;
         }
-        if (this._queuedImportCancellationCount <= 0) {
-            return false;
+        return false;
+    }
+
+    /**
+     * @param {unknown} operationId
+     * @throws {Error}
+     */
+    _admitImportOperation(operationId) {
+        const issuedAt = typeof operationId === 'string' ? Number(operationId.split(':', 1)[0]) : Number.NaN;
+        if (typeof operationId !== 'string' || !/^[0-9]{13}:[a-zA-Z0-9_-]{1,64}$/.test(operationId) || issuedAt > Date.now() || issuedAt <= Date.now() - 10 * 60 * 1000) {
+            throw new Error('Invalid dictionary import operation ID');
         }
-        --this._queuedImportCancellationCount;
-        return true;
+        this._pruneImportOperations();
+        if (this._importOperations.has(operationId)) { throw new Error('Duplicate dictionary import operation ID'); }
+        if (issuedAt <= this._retiredImportIssuedAt) { throw new Error('Dictionary import operation ID was retired'); }
+        if (this._importOperations.size >= 128) {
+            const settled = [...this._importOperations.entries()]
+                .filter(([, operation]) => !['queued', 'running'].includes(operation.status.state))
+                .sort((a, b) => a[1].updatedAt - b[1].updatedAt);
+            if (settled.length === 0) { throw new Error('Dictionary import operation registry is full'); }
+            const [id] = settled[0];
+            // Reject IDs behind the retirement horizon even after their receipt
+            // is evicted. This conservatively rejects stale, not-yet-admitted IDs.
+            const retiredIssuedAt = Math.max(this._retiredImportIssuedAt, Number(id.split(':', 1)[0]));
+            if (issuedAt <= retiredIssuedAt) { throw new Error('Dictionary import operation ID was retired'); }
+            this._importOperations.delete(id);
+            this._retiredImportIssuedAt = retiredIssuedAt;
+        }
+        this._importOperations.set(operationId, {
+            status: {operationId, workerGeneration: this._importWorkerGeneration, state: 'queued'},
+            abortController: new AbortController(),
+            updatedAt: Date.now(),
+        });
+    }
+
+    /** */
+    _pruneImportOperations() {
+        const cutoff = Date.now() - 10 * 60 * 1000;
+        for (const [id, operation] of this._importOperations) {
+            if (operation.updatedAt < cutoff && !['queued', 'running'].includes(operation.status.state)) {
+                this._importOperations.delete(id);
+            }
+        }
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {unknown} workerGeneration
+     * @returns {Promise<import('offscreen').ImportOperationStatus>}
+     */
+    async _getImportOperationStatus(operationId, workerGeneration) {
+        this._pruneImportOperations();
+        const operation = this._importOperations.get(operationId);
+        if (operation && (typeof workerGeneration !== 'string' || workerGeneration === this._importWorkerGeneration)) { return operation.status; }
+        const unknown = {operationId, workerGeneration: this._importWorkerGeneration, state: /** @type {const} */ ('unknown')};
+        if (!/^[0-9]{13}:[a-zA-Z0-9_-]{1,64}$/.test(operationId) || this._databaseSuspended) { return unknown; }
+        try {
+            await this._ensureDatabasePrepared();
+            const receipt = this._dictionaryDatabase.getPublishedDictionaryImport(operationId);
+            if (receipt?.result?.storageImportOperationId !== operationId || receipt.outcome?.status !== 'published') { return unknown; }
+            return {
+                operationId,
+                workerGeneration: this._importWorkerGeneration,
+                state: 'completed',
+                published: true,
+                outcome: receipt.outcome,
+                result: {...receipt, errors: receipt.errors.map((error) => ExtensionError.serialize(error))},
+            };
+        } catch (_) {
+            return unknown;
+        }
     }
 
     /**
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {ArrayBuffer|Blob|null} archiveContent
      * @param {MessagePort} port
+     * @param {string} operationId
      * @returns {Promise<void>}
      */
-    async _importDictionaryOffscreen(details, archiveContent, port) {
+    async _importDictionaryOffscreen(details, archiveContent, port, operationId) {
+        const operation = this._importOperations.get(operationId);
+        if (!operation) { throw new Error('Dictionary import operation was not admitted'); }
         let queuedRequestAccounted = true;
         /** @type {AbortController|null} */
         let abortController = null;
@@ -313,25 +397,24 @@ export class OffscreenDictionaryWorkerHandler {
         try {
             this._assertDatabaseAvailable('importDictionaryOffscreen');
             await this._ensureDatabasePrepared();
+            if (this._dictionaryDatabase.getPublishedDictionaryImport?.(operationId)?.result) {
+                throw new Error('Duplicate published dictionary import operation ID');
+            }
             if (this._activeImportAbortController !== null) {
                 throw new Error('A dictionary import is already active');
             }
-            abortController = new AbortController();
+            abortController = operation.abortController;
             this._activeImportAbortController = abortController;
-            const startCancelled = this._consumeQueuedImportRequest();
+            this._consumeQueuedImportRequest();
             queuedRequestAccounted = false;
-            if (startCancelled) {
-                abortController.abort();
-            }
+            operation.status.state = 'running';
             const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress, () => abortController?.signal.aborted === true);
-            const importPayload = await dictionaryImporter.importDictionary(this._dictionaryDatabase, archiveContent, details);
-            const {result, errors, debug} = importPayload;
-            // Publish completion only after lookups can no longer observe cached
-            // translations from the pre-import dictionary generation.
-            this._translator.clearDatabaseCaches();
-            const completionDelivered = this._postImportComplete(port, {
+            const importPayload = await dictionaryImporter.importDictionary(this._dictionaryDatabase, archiveContent, {...details, operationId});
+            const {result, errors, debug, outcome} = importPayload;
+            const completion = {
                 result,
                 errors: errors.map((error) => ExtensionError.serialize(error)),
+                ...(typeof outcome === 'undefined' ? {} : {outcome}),
                 debug: {
                     usesFallbackStorage: this._dictionaryDatabase.usesFallbackStorage(),
                     openStorageDiagnostics: (
@@ -343,12 +426,34 @@ export class OffscreenDictionaryWorkerHandler {
                     finalizeImportSession: Reflect.get(details, 'finalizeImportSession') === true,
                     importerDebug: debug ?? null,
                 },
-            });
+            };
+            const published = outcome ?
+                (outcome.status === 'unknown' ? void 0 : outcome.status === 'published') :
+                result !== null && typeof result !== 'undefined';
+            operation.status = {...operation.status, state: outcome?.status === 'unknown' ? 'unknown' : 'completed', published, result: completion, ...(typeof outcome === 'undefined' ? {} : {outcome})};
+            operation.updatedAt = Date.now();
+            // Retain publication before cache invalidation or response delivery
+            // can fail. Never replay an import to recover a transport response.
+            this._translator.clearDatabaseCaches();
+            const completionDelivered = this._postImportComplete(port, completion);
             if (!completionDelivered) {
-                this._postImportError(port, new Error('Dictionary import completed but its result could not be delivered'));
+                const error = new Error('Dictionary import completed but its result could not be delivered');
+                error.name = 'DictionaryImportTransportError';
+                this._postImportError(port, error);
             }
         } catch (error) {
-            this._postImportError(port, error);
+            const hasCompletion = typeof operation.status.result !== 'undefined';
+            if (!hasCompletion) {
+                operation.status = {...operation.status, state: operation.abortController.signal.aborted ? 'cancelled' : 'failed', error: this._serializeTransportSafeError(error)};
+                operation.updatedAt = Date.now();
+            }
+            if (hasCompletion) {
+                const transportError = new Error('Dictionary import completed but terminal handling failed');
+                transportError.name = 'DictionaryImportTransportError';
+                this._postImportError(port, transportError);
+            } else {
+                this._postImportError(port, error);
+            }
         } finally {
             if (queuedRequestAccounted) {
                 this._consumeQueuedImportRequest();
@@ -557,21 +662,31 @@ export class OffscreenDictionaryWorkerHandler {
                 this._translator.clearDatabaseCaches();
                 return;
             case 'cancelDictionaryImportOffscreen':
-                if (this._activeImportAbortController !== null) {
-                    this._activeImportAbortController.abort();
-                } else if (this._queuedImportCancellationCount < this._queuedImportRequestCount) {
-                    ++this._queuedImportCancellationCount;
+                this._pruneImportOperations();
+                {
+                    const operationId = typeof params.operationId === 'string' ? params.operationId : '';
+                    const operation = this._importOperations.get(operationId);
+                    if (params.lookupOnly === true) {
+                        return await this._getImportOperationStatus(operationId, params.workerGeneration);
+                    }
+                    if (operation && ['queued', 'running'].includes(operation.status.state)) { operation.abortController.abort(); }
                 }
                 return;
             case 'importDictionaryOffscreen':
                 if (ports.length === 0) {
                     this._consumeQueuedImportRequest();
+                    const operation = this._importOperations.get(/** @type {string} */ (params.operationId));
+                    if (operation) {
+                        operation.status = {...operation.status, state: 'failed', error: ExtensionError.serialize(new Error('Offscreen import response port missing'))};
+                        operation.updatedAt = Date.now();
+                    }
                     throw new Error('Offscreen import response port missing');
                 }
                 await this._importDictionaryOffscreen(
                     /** @type {import('dictionary-importer').ImportDetails} */ (params.details),
                     /** @type {ArrayBuffer|Blob|null} */ (params.archiveContent ?? null),
                     ports[0],
+                    /** @type {string} */ (params.operationId),
                 );
                 return;
             case 'connectToDatabaseWorker':

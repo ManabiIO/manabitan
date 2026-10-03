@@ -38,6 +38,13 @@ export type ImportResult = {
     errors: Error[];
     fallbackDatabaseContentBase64?: string | null;
     debug?: ImportDebug;
+    outcome?: ImportOutcome;
+};
+
+export type ImportOutcome = {
+    status: 'published' | 'aborted' | 'unknown';
+    generationId?: string;
+    warnings?: string[];
 };
 
 export type ImportDebug = {
@@ -71,6 +78,8 @@ export type ImportExperiments = {
 };
 
 export type ImportDetails = ImportExperiments & {
+    /** Internal request identity; persisted only with successful publication. */
+    operationId?: string;
     prefixWildcardsSupported?: boolean;
     yomitanVersion?: string;
     existingDatabaseContentBase64?: string;
@@ -109,6 +118,8 @@ export type DictionaryStorageHealth = 'available' | 'repairPending' | 'repairing
 export type Summary = {
     title: string;
     termRecordStorageName?: string;
+    storageGenerationId?: string;
+    storageImportOperationId?: string;
     sourceTitle?: string | null;
     replacedDictionaryTitle?: string | null;
     transientUpdateStage?: string | null;

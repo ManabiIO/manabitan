@@ -121,7 +121,7 @@ describe('Offscreen control message acknowledgements', () => {
         const {controlPort} = dispatchControlMessage(
             offscreen,
             'importDictionaryOffscreen',
-            {archiveContent: new Blob([]), details: {}},
+            {operationId: `${Date.now()}:test`, archiveContent: new Blob([]), details: {}},
             [responsePort],
         );
 

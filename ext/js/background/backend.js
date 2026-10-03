@@ -249,6 +249,7 @@ export class Backend {
             ['debugDictionaryStorageState',  this._onApiDebugDictionaryStorageState.bind(this)],
             ['downloadDictionaryArchive',    this._onApiDownloadDictionaryArchive.bind(this)],
             ['setDictionaryImportMode',      this._onApiSetDictionaryImportMode.bind(this)],
+            ['getDictionaryImportOperationStatus', this._onApiGetDictionaryImportOperationStatus.bind(this)],
             ['purgeDatabase',                this._onApiPurgeDatabase.bind(this)],
             ['getMedia',                     this._onApiGetMedia.bind(this)],
             ['logGenericErrorBackend',       this._onApiLogGenericErrorBackend.bind(this)],
@@ -305,6 +306,10 @@ export class Backend {
         this._pendingDatabaseUpdatedNotifications = [];
         /** @type {Promise<void>|null} */
         this._setDictionaryImportModePromise = null;
+        /** @type {Set<string>} */
+        this._dictionaryImportOwners = new Set();
+        /** @type {Map<string, {ownerId: string, cancelled: boolean, settled: boolean, completed: boolean, responseCleanup?: () => void}>} */
+        this._ownedDictionaryImports = new Map();
         /** @type {Record<string, unknown>|null} */
         this._lastDictionaryUrlImportDebug = null;
         /** @type {SharedWorker|null} */
@@ -388,23 +393,31 @@ export class Backend {
     }
 
     /** @type {import('api').PmApiHandler<'importDictionaryOffscreen'>} */
-    async _onPmImportDictionaryOffscreen({archiveContent, details}, ports) {
+    async _onPmImportDictionaryOffscreen({archiveContent, details, operationId, ownerId}, ports) {
         const responsePort = ports !== null && ports.length > 0 ? ports[0] : null;
+        let admitted = false;
         try {
+            this._registerDictionaryImportOwner(operationId, ownerId);
+            admitted = true;
             if (responsePort === null) {
                 throw new Error('Offscreen import response port missing');
             }
-            await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort);
+            await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort, operationId, ownerId);
         } catch (error) {
             postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
             closeDictionaryImportResponsePort(responsePort);
+        } finally {
+            if (admitted) { this._settleDictionaryImportOwnership(operationId, ownerId); }
         }
     }
 
     /** @type {import('api').PmApiHandler<'importDictionaryUrlOffscreen'>} */
-    async _onPmImportDictionaryUrlOffscreen({url, details}, ports) {
+    async _onPmImportDictionaryUrlOffscreen({url, details, operationId, ownerId}, ports) {
         const responsePort = ports !== null && ports.length > 0 ? ports[0] : null;
+        let admitted = false;
         try {
+            this._registerDictionaryImportOwner(operationId, ownerId);
+            admitted = true;
             if (responsePort === null) {
                 throw new Error('Offscreen import response port missing');
             }
@@ -441,7 +454,7 @@ export class Backend {
                     stage: 'forward-to-runtime',
                     forwardedAtIso: new Date().toISOString(),
                 };
-                await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort);
+                await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort, operationId, ownerId);
                 this._lastDictionaryUrlImportDebug = {
                     ...this._lastDictionaryUrlImportDebug,
                     stage: 'runtime-forwarded',
@@ -467,6 +480,8 @@ export class Backend {
             };
             postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(normalizedError)});
             closeDictionaryImportResponsePort(responsePort);
+        } finally {
+            if (admitted) { this._settleDictionaryImportOwnership(operationId, ownerId); }
         }
     }
 
@@ -548,19 +563,122 @@ export class Backend {
      * @param {Blob} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {MessagePort} responsePort
+     * @param {string} operationId
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<void>}
      */
-    async _forwardDictionaryImportToRuntime(archiveContent, details, responsePort) {
+    async _forwardDictionaryImportToRuntime(archiveContent, details, responsePort, operationId, ownerId) {
+        const operation = typeof ownerId === 'string' ? this._ownedDictionaryImports.get(operationId) : void 0;
+        if (operation && operation.ownerId !== ownerId) { throw new Error('Dictionary import session owner mismatch'); }
+        const assertNotCancelled = () => {
+            if (operation?.cancelled) { throw new Error('Dictionary import cancelled before admission'); }
+        };
+        assertNotCancelled();
         if (this._offscreen !== null) {
             await this._offscreen.prepare();
-            await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
+            assertNotCancelled();
+            const relay = operation ? this._superviseOwnedDictionaryImport(operationId, responsePort) : null;
+            try {
+                await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details, operationId}}, [relay?.port ?? responsePort]);
+            } catch (error) {
+                if (relay) {
+                    postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
+                    relay.close();
+                }
+                throw error;
+            }
             return;
         }
         if (this._localDictionaryRuntime !== null) {
-            await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
+            const relay = operation ? this._superviseOwnedDictionaryImport(operationId, responsePort) : null;
+            try {
+                await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details, operationId}}, [relay?.port ?? responsePort]);
+            } catch (error) {
+                if (relay) {
+                    postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
+                    relay.close();
+                }
+                throw error;
+            }
             return;
         }
         throw new Error('Dictionary runtime import is unavailable');
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {MessagePort} responsePort
+     * @returns {{port: MessagePort, close: () => void}}
+     */
+    _superviseOwnedDictionaryImport(operationId, responsePort) {
+        const operation = this._ownedDictionaryImports.get(operationId);
+        const channel = new MessageChannel();
+        let closed = false;
+        const close = () => {
+            if (closed) { return; }
+            closed = true;
+            channel.port1.onmessage = null;
+            channel.port1.onmessageerror = null;
+            channel.port2.onmessage = null;
+            channel.port2.onmessageerror = null;
+            responsePort.onmessage = null;
+            responsePort.onmessageerror = null;
+            closeDictionaryImportResponsePort(channel.port1);
+            closeDictionaryImportResponsePort(channel.port2);
+            closeDictionaryImportResponsePort(responsePort);
+            if (operation?.responseCleanup === close) { delete operation.responseCleanup; }
+        };
+        if (operation) { operation.responseCleanup = close; }
+        channel.port1.onmessage = (event) => {
+            if (closed) { return; }
+            /** @type {unknown} */
+            const message = event.data;
+            const details = isObjectNotArray(message) ? message : null;
+            const terminal = details?.type === 'complete' || details?.type === 'error';
+            const errorName = isObjectNotArray(details?.error) && typeof details.error.name === 'string' ? details.error.name : '';
+            const uncertain = details?.type === 'error' && ['DictionaryImportTransportError', 'DictionaryWorkerTransportError', 'OffscreenControlTransportError'].includes(errorName);
+            if (terminal && !uncertain && operation && this._ownedDictionaryImports.get(operationId) === operation) {
+                operation.completed = true;
+                if (operation.settled) { this._ownedDictionaryImports.delete(operationId); }
+            }
+            postDictionaryImportResponseMessage(responsePort, message);
+            if (terminal) {
+                close();
+            }
+        };
+        channel.port1.onmessageerror = () => {
+            if (closed) { return; }
+            const error = new Error('Backend dictionary import response channel failed');
+            error.name = 'DictionaryImportTransportError';
+            postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
+            close();
+        };
+        return {port: channel.port2, close};
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {string|undefined} ownerId
+     * @throws {Error}
+     */
+    _registerDictionaryImportOwner(operationId, ownerId) {
+        if (typeof operationId !== 'string' || !/^[a-zA-Z0-9:_-]{1,128}$/.test(operationId)) { throw new Error('Invalid dictionary import operation ID'); }
+        if (this._ownedDictionaryImports?.has(operationId)) { throw new Error('Duplicate dictionary import operation ID'); }
+        if (typeof ownerId === 'undefined') { return; }
+        if (!this._dictionaryImportOwners?.has(ownerId)) { throw new Error('Dictionary import session owner is not active'); }
+        if (this._ownedDictionaryImports.size >= 128) { throw new Error('Dictionary import ownership registry is full'); }
+        this._ownedDictionaryImports.set(operationId, {ownerId, cancelled: false, settled: false, completed: false});
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {string|undefined} ownerId
+     */
+    _settleDictionaryImportOwnership(operationId, ownerId) {
+        const operation = this._ownedDictionaryImports?.get(operationId);
+        if (!operation || operation.ownerId !== ownerId) { return; }
+        operation.settled = true;
+        if (operation.cancelled || operation.completed) { this._ownedDictionaryImports.delete(operationId); }
     }
 
     /**
@@ -1037,7 +1155,7 @@ export class Backend {
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
         const findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-        const {dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions);
+        const {dictionaryEntries, originalTextLength, dictionaryAvailability} = await this._translator.findTerms(mode, text, findTermsOptions);
         const hasExactHeadwordMatch = (
             text.length > 0 &&
             dictionaryEntries.some((entry) => (
@@ -1099,7 +1217,7 @@ export class Backend {
                 })) :
                 void 0,
         }));
-        return {dictionaryEntries, originalTextLength};
+        return {dictionaryEntries, originalTextLength, ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {})};
     }
 
     /** @type {import('api').ApiHandler<'parseText'>} */
@@ -1831,8 +1949,21 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
     }
 
     /** @type {import('api').ApiHandler<'setDictionaryImportMode'>} */
-    async _onApiSetDictionaryImportMode({active}) {
-        await this._setDictionaryImportMode(active);
+    async _onApiSetDictionaryImportMode({active, ownerId}) {
+        await this._setDictionaryImportMode(active, ownerId);
+    }
+
+    /** @type {import('api').ApiHandler<'getDictionaryImportOperationStatus'>} */
+    async _onApiGetDictionaryImportOperationStatus({operationId, workerGeneration}) {
+        /** @type {import('offscreen').ApiMessage<'cancelDictionaryImportOffscreen'>} */
+        const message = {action: 'cancelDictionaryImportOffscreen', params: {operationId, workerGeneration, lookupOnly: true}};
+        if (this._offscreen !== null) {
+            return /** @type {import('offscreen').ImportOperationStatus} */ (await this._offscreen.sendMessagePromise(/** @type {import('offscreen').ApiMessage<'cancelDictionaryImportOffscreen'>} */ (message)));
+        }
+        if (this._localDictionaryRuntime !== null) {
+            return await this._localDictionaryRuntime.sendMessagePromise(message);
+        }
+        return {operationId, workerGeneration: '', state: 'unknown'};
     }
 
     /** @type {import('api').ApiHandler<'purgeDatabase'>} */
@@ -4918,9 +5049,10 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
 
     /**
      * @param {boolean} active
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<void>}
      */
-    async _setDictionaryImportMode(active) {
+    async _setDictionaryImportMode(active, ownerId) {
         while (this._setDictionaryImportModePromise !== null) {
             try {
                 await this._setDictionaryImportModePromise;
@@ -4929,6 +5061,37 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             }
         }
         const transitionPromise = (async () => {
+            this._dictionaryImportOwners ??= new Set();
+            this._ownedDictionaryImports ??= new Map();
+            if (typeof ownerId !== 'undefined') {
+                if (!/^[a-zA-Z0-9:_-]{1,128}$/.test(ownerId)) { throw new Error('Invalid dictionary import session owner'); }
+                if (active) {
+                    if (!this._dictionaryImportOwners.has(ownerId) && this._dictionaryImportOwners.size >= 128) { throw new Error('Dictionary import session owner registry is full'); }
+                    this._dictionaryImportOwners.add(ownerId);
+                } else {
+                    if (!this._dictionaryImportOwners.delete(ownerId)) { return; }
+                    const ownedOperations = [...this._ownedDictionaryImports].filter(([, operation]) => operation.ownerId === ownerId);
+                    for (const [, operation] of ownedOperations) {
+                        operation.cancelled = true;
+                        operation.responseCleanup?.();
+                    }
+                    for (const [operationId, operation] of ownedOperations) {
+                        try {
+                            if (this._offscreen !== null) {
+                                await this._offscreen.sendMessagePromise({action: 'cancelDictionaryImportOffscreen', params: {operationId}});
+                            } else if (this._localDictionaryRuntime !== null) {
+                                await this._localDictionaryRuntime.sendMessagePromise({action: 'cancelDictionaryImportOffscreen', params: {operationId}});
+                            }
+                        } catch (error) {
+                            reportDiagnostics('dictionary-import-cancel-failed', {operationId, error: toError(error).message});
+                        }
+                        if (operation.settled) { this._ownedDictionaryImports.delete(operationId); }
+                    }
+                    if (this._dictionaryImportOwners.size > 0) { return; }
+                }
+            } else if (!active && this._dictionaryImportOwners.size > 0) {
+                return;
+            }
             const hasDeferredRefresh = (
                 this._deferredDictionaryRefreshDuringImport ||
                 this._pendingDatabaseUpdatedNotifications.length > 0
@@ -4951,15 +5114,6 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             }
 
             this._dictionaryImportModeActive = false;
-            try {
-                if (this._offscreen !== null) {
-                    await this._offscreen.sendMessagePromise({action: 'cancelDictionaryImportOffscreen'});
-                } else if (this._localDictionaryRuntime !== null) {
-                    await this._localDictionaryRuntime.sendMessagePromise({action: 'cancelDictionaryImportOffscreen'});
-                }
-            } catch (error) {
-                reportDiagnostics('dictionary-import-cancel-failed', {error: toError(error).message});
-            }
             await this._ensureDictionaryDatabaseReady();
             reportDiagnostics('dictionary-import-mode-changed', {active: false});
             const hadDeferredRefresh = this._deferredDictionaryRefreshDuringImport || this._pendingDatabaseUpdatedNotifications.length > 0;

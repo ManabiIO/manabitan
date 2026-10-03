@@ -433,10 +433,48 @@ export class API {
 
     /**
      * @param {import('api').ApiParam<'setDictionaryImportMode', 'active'>} active
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<import('api').ApiReturn<'setDictionaryImportMode'>>}
      */
-    setDictionaryImportMode(active) {
-        return this._invoke('setDictionaryImportMode', {active});
+    setDictionaryImportMode(active, ownerId) {
+        return this._invoke('setDictionaryImportMode', {active, ownerId});
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {string|undefined} [workerGeneration]
+     * @returns {Promise<import('offscreen').ImportOperationStatus>}
+     */
+    getDictionaryImportOperationStatus(operationId, workerGeneration) {
+        return this._invoke('getDictionaryImportOperationStatus', {operationId, workerGeneration});
+    }
+
+    /**
+     * @param {Promise<unknown>} response
+     * @param {string} operationId
+     * @returns {Promise<unknown>}
+     */
+    async _reconcileDictionaryImport(response, operationId) {
+        try {
+            return await response;
+        } catch (error) {
+            if (!(error instanceof Error) || !['DictionaryImportTransportError', 'OffscreenControlTransportError', 'DictionaryWorkerTransportError'].includes(error.name)) { throw error; }
+            let status;
+            try { status = await this.getDictionaryImportOperationStatus(operationId); } catch (_) { /* Outcome remains unknown. */ }
+            if (status?.operationId === operationId) {
+                if (status.state === 'completed') {
+                    const result = /** @type {{errors?: unknown[]}|null} */ (status.result);
+                    if (Array.isArray(result?.errors)) {
+                        result.errors = result.errors.map((item) => ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (item)));
+                    }
+                    return result;
+                }
+                if (status.error && ['failed', 'cancelled'].includes(status.state)) { throw ExtensionError.deserialize(status.error); }
+            }
+            const outcomeError = new Error(`Dictionary import outcome unknown (${operationId}); import was not retried: ${error.message}`);
+            outcomeError.cause = error;
+            throw outcomeError;
+        }
     }
 
     /**
@@ -606,16 +644,23 @@ export class API {
      * @param {Blob} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {string} [operationId]
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<unknown>}
      */
-    importDictionaryOffscreen(archiveContent, details, onProgress) {
+    importDictionaryOffscreen(archiveContent, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
         const pmTransportError = this._getPmTransportError();
         if (pmTransportError !== null) {
             return Promise.reject(pmTransportError);
         }
         const channel = new MessageChannel();
-        return new Promise((resolve, reject) => {
-            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, reject);
+        return this._reconcileDictionaryImport(new Promise((resolve, reject) => {
+            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, (error) => {
+                const transportError = new Error(error instanceof Error ? error.message : String(error));
+                transportError.name = 'DictionaryImportTransportError';
+                transportError.cause = error;
+                reject(transportError);
+            });
             const resetInactivityTimeout = () => {
                 state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
                     shutdownReject(new Error(`Dictionary runtime import response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
@@ -670,29 +715,36 @@ export class API {
                 shutdownReject(new Error('Dictionary runtime import response channel failed'));
             };
             try {
-                void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details}, [channel.port2]).catch((error) => {
+                void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details, operationId, ownerId}, [channel.port2]).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {
                 shutdownReject(error instanceof Error ? error : new Error(String(error)));
             }
-        });
+        }), operationId);
     }
 
     /**
      * @param {string} url
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {string} [operationId]
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<unknown>}
      */
-    importDictionaryUrlOffscreen(url, details, onProgress) {
+    importDictionaryUrlOffscreen(url, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
         const pmTransportError = this._getPmTransportError();
         if (pmTransportError !== null) {
             return Promise.reject(pmTransportError);
         }
         const channel = new MessageChannel();
-        return new Promise((resolve, reject) => {
-            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, reject);
+        return this._reconcileDictionaryImport(new Promise((resolve, reject) => {
+            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, (error) => {
+                const transportError = new Error(error instanceof Error ? error.message : String(error));
+                transportError.name = 'DictionaryImportTransportError';
+                transportError.cause = error;
+                reject(transportError);
+            });
             const resetInactivityTimeout = () => {
                 state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
                     shutdownReject(new Error(`Dictionary runtime URL import response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
@@ -747,13 +799,13 @@ export class API {
                 shutdownReject(new Error('Dictionary runtime URL import response channel failed'));
             };
             try {
-                void this._pmInvoke('importDictionaryUrlOffscreen', {url, details}, [channel.port2]).catch((error) => {
+                void this._pmInvoke('importDictionaryUrlOffscreen', {url, details, operationId, ownerId}, [channel.port2]).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {
                 shutdownReject(error instanceof Error ? error : new Error(String(error)));
             }
-        });
+        }), operationId);
     }
 
     /**

@@ -1031,6 +1031,16 @@ test('chromium happy path covers multi-dictionary import, lookup scroll, and Ank
         await page.goto(`${extensionBaseUrl}/search.html`);
         await waitForSearchPageReady(page);
         await waitForTermsLookupReady(page, japaneseLookupTerm);
+        const lookup = /** @type {import('translator').FindTermsResult} */ (await invokeRuntimeApi(page, 'termsFind', {
+            text: japaneseLookupTerm,
+            details: {matchType: 'exact', deinflect: true, primaryReading: ''},
+            optionsContext: {depth: 0, url: page.url()},
+        }));
+        const headwords = lookup.dictionaryEntries.flatMap((entry) => entry.headwords);
+        expect(headwords.length).toBeGreaterThan(0);
+        for (const headword of headwords) {
+            expect(headword).toMatchObject({term: japaneseLookupTerm, reading: japaneseLookupReading});
+        }
         await runSearch(page, japaneseLookupTerm);
         await expect(page.locator('#dictionary-entries .entry')).toBeVisible({timeout: 30_000});
         await expect(page.locator('#dictionary-entries .headword-reading').first()).toHaveText(new RegExp(japaneseLookupReading));

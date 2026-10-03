@@ -29,6 +29,7 @@ function createRecoveryDatabase(invalidSummary) {
     const connection = new sqlite3.oo1.DB(':memory:');
     connections.push(connection);
     connection.exec('CREATE TABLE dictionaries(id INTEGER PRIMARY KEY, title TEXT UNIQUE, version INTEGER, summaryJson TEXT)');
+    connection.exec('CREATE TABLE dictionaryStorageHealth(title TEXT PRIMARY KEY, generationId TEXT, reason TEXT)');
     for (const table of metadataTables) {
         connection.exec(`CREATE TABLE ${table}(dictionary TEXT, value TEXT)`);
         connection.exec({sql: `INSERT INTO ${table} VALUES (?, ?), (?, ?), (?, ?)`,

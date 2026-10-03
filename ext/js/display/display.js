@@ -182,6 +182,8 @@ export class Display extends EventDispatcher {
         this._contentTextScanner = null;
         /** @type {?import('./display-notification.js').DisplayNotification} */
         this._tagNotification = null;
+        /** @type {?DisplayNotification} */
+        this._dictionaryAvailabilityNotification = null;
         /** @type {?import('./display-notification.js').DisplayNotification} */
         this._inflectionNotification = null;
         /** @type {HTMLElement} */
@@ -565,6 +567,7 @@ export class Display extends EventDispatcher {
     /** Invalidate stale results immediately when the search draft changes. */
     invalidateSearchDraft() {
         this._setContentToken = {};
+        this._dictionaryAvailabilityNotification?.close(false);
         this._closePopups();
         this._closeAllPopupMenus();
         this._eventListeners.removeAllEventListeners();
@@ -857,6 +860,7 @@ export class Display extends EventDispatcher {
         /** @type {?import('core').TokenObject} */
         const token = {}; // Unique identifier token
         this._setContentToken = token;
+        this._dictionaryAvailabilityNotification?.close(false);
         try {
             // Clear
             safePerformance.mark('display:_onStateChanged:clear:start');
@@ -916,7 +920,7 @@ export class Display extends EventDispatcher {
     /**
      * @param {import('query-parser').EventArgument<'searched'>} details
      */
-    _onQueryParserSearch({type, dictionaryEntries, sentence, inputInfo: {eventType}, textSource, optionsContext, sentenceOffset}) {
+    _onQueryParserSearch({type, dictionaryEntries, dictionaryAvailability, sentence, inputInfo: {eventType}, textSource, optionsContext, sentenceOffset}) {
         const query = textSource.text();
         const historyState = this._history.state;
         const historyMode = (
@@ -938,6 +942,7 @@ export class Display extends EventDispatcher {
             },
             content: {
                 dictionaryEntries,
+                ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
                 contentOrigin: this.getContentOrigin(),
             },
         };
@@ -1475,37 +1480,31 @@ export class Display extends EventDispatcher {
      * @param {string} primaryReading
      * @param {boolean} wildcardsEnabled
      * @param {import('settings').OptionsContext} optionsContext
-     * @returns {Promise<import('dictionary').DictionaryEntry[]>}
+     * @returns {Promise<import('display').DictionarySearchResult>}
      */
     async _findDictionaryEntries(isKanji, source, primaryReading, wildcardsEnabled, optionsContext) {
-        /** @type {import('dictionary').DictionaryEntry[]} */
-        let dictionaryEntries = [];
         const {findDetails, source: source2} = this._getFindDetails(source, primaryReading, wildcardsEnabled);
         if (isKanji) {
-            dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
-            if (dictionaryEntries.length > 0) { return dictionaryEntries; }
-
-            const termEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
-            dictionaryEntries = termEntries;
-            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, termEntries);
-        } else {
-            const search = this._pageType === 'search' && source2.length <= 256 && this.getLanguageSummary().iso === 'ja';
-            const found = search ?
-await findJapaneseSearch(
-    source2,
-    (query) => this._application.api.termsFind(query, findDetails, optionsContext),
-) :
-null;
-            const termEntries = search ?
-(found?.result?.dictionaryEntries ?? []) :
-                (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
-            dictionaryEntries = termEntries;
-            this._reportTermsFindSnapshot(source, found?.matchedQuery ?? source2, isKanji, findDetails, optionsContext, termEntries);
-            if (dictionaryEntries.length > 0) { return dictionaryEntries; }
-
-            dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
+            const dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
+            if (dictionaryEntries.length > 0) { return {dictionaryEntries}; }
         }
-        return dictionaryEntries;
+        const search = !isKanji && this._pageType === 'search' && source2.length <= 256 && this.getLanguageSummary().iso === 'ja';
+        const found = search ?
+            await findJapaneseSearch(
+                source2,
+                (query) => this._application.api.termsFind(query, findDetails, optionsContext),
+            ) :
+            null;
+        /** @type {Pick<import('translator').FindTermsResult, 'dictionaryEntries'|'dictionaryAvailability'>} */
+        const result = search ?
+            (found?.result ?? {dictionaryEntries: []}) :
+            await this._application.api.termsFind(source2, findDetails, optionsContext);
+        const {dictionaryEntries, dictionaryAvailability} = result;
+        this._reportTermsFindSnapshot(source, found?.matchedQuery ?? source2, isKanji, findDetails, optionsContext, dictionaryEntries);
+        if (isKanji || dictionaryEntries.length > 0 || dictionaryAvailability?.length) {
+            return {dictionaryEntries, ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {})};
+        }
+        return {dictionaryEntries: await this._application.api.kanjiFind(source, optionsContext)};
     }
 
     /**
@@ -1613,7 +1612,7 @@ null;
             delete content.preserveSearchInput;
             changeHistory = true;
         }
-        let {dictionaryEntries} = content;
+        let {dictionaryEntries, dictionaryAvailability} = content;
 
         let contentOriginValid = false;
         const {contentOrigin} = content;
@@ -1646,11 +1645,15 @@ null;
         }
         if (!Array.isArray(dictionaryEntries)) {
             safePerformance.mark('display:findDictionaryEntries:start');
-            dictionaryEntries = hasEnabledDictionaries && lookup && query.length > 0 ? await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext) : [];
+            const result = hasEnabledDictionaries && lookup && query.length > 0 ?
+                await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext) :
+                {dictionaryEntries: []};
+            ({dictionaryEntries, dictionaryAvailability} = result);
             safePerformance.mark('display:findDictionaryEntries:end');
             safePerformance.measure('display:findDictionaryEntries', 'display:findDictionaryEntries:start', 'display:findDictionaryEntries:end');
             if (this._setContentToken !== token) { return; }
             content.dictionaryEntries = void 0;
+            content.dictionaryAvailability = void 0;
             changeHistory = true;
         }
 
@@ -1665,7 +1668,8 @@ null;
         safePerformance.mark('display:updateNavigationAuto:end');
         safePerformance.measure('display:updateNavigationAuto', 'display:updateNavigationAuto:start', 'display:updateNavigationAuto:end');
 
-        this._setNoContentVisible(hasEnabledDictionaries && dictionaryEntries.length === 0 && lookup);
+        this._updateDictionaryAvailability(dictionaryAvailability, token);
+        this._setNoContentVisible(hasEnabledDictionaries && dictionaryEntries.length === 0 && lookup && !dictionaryAvailability?.length);
         this._setNoDictionariesVisible(!hasEnabledDictionaries);
 
         const container = this._container;
@@ -1733,6 +1737,7 @@ null;
 
     /** */
     _setContentExtensionUnloaded() {
+        this._dictionaryAvailabilityNotification?.close(false);
         /** @type {?HTMLElement} */
         const errorExtensionUnloaded = document.querySelector('#error-extension-unloaded');
 
@@ -1755,6 +1760,7 @@ null;
 
     /** */
     _clearContent() {
+        this._dictionaryAvailabilityNotification?.close(false);
         this._container.textContent = '';
         this._updateNavigationAuto();
         this._setQuery('', '', 0);
@@ -1773,6 +1779,42 @@ null;
         if (noResults !== null) {
             noResults.hidden = !visible;
         }
+    }
+
+    /**
+     * @param {import('translator').DictionaryAvailability[]|undefined} availability
+     * @param {import('core').TokenObject} token
+     */
+    _updateDictionaryAvailability(availability, token) {
+        if (this._setContentToken !== token) { return; }
+        if (!availability?.length) {
+            this._dictionaryAvailabilityNotification?.close(false);
+            return;
+        }
+        if (!this._dictionaryAvailabilityNotification) {
+            this._dictionaryAvailabilityNotification = this.createNotification(false);
+        }
+        const content = document.createElement('ul');
+        for (const {dictionary, status} of availability) {
+            const item = document.createElement('li');
+            let message;
+            switch (status) {
+                case 'repairPending':
+                case 'repairing':
+                    message = 'Dictionary data is being repaired. Results may be incomplete; retry shortly.';
+                    break;
+                case 'reimportRequired':
+                    message = 'Dictionary data is damaged. Reimport this dictionary.';
+                    break;
+                default:
+                    message = 'Dictionary is temporarily unavailable. Results may be incomplete; retry shortly.';
+                    break;
+            }
+            item.textContent = `${dictionary}: ${message}`;
+            content.appendChild(item);
+        }
+        this._dictionaryAvailabilityNotification.setContent(content);
+        this._dictionaryAvailabilityNotification.open();
     }
 
     /**
@@ -2384,7 +2426,7 @@ null;
     /**
      * @param {import('text-scanner').EventArgument<'searchSuccess'>} details
      */
-    _onContentTextScannerSearchSuccess({type, dictionaryEntries, sentence, textSource, optionsContext}) {
+    _onContentTextScannerSearchSuccess({type, dictionaryEntries, dictionaryAvailability, sentence, textSource, optionsContext}) {
         const query = textSource.text();
         const url = window.location.href;
         const documentTitle = document.title;
@@ -2407,6 +2449,7 @@ null;
             },
             content: {
                 dictionaryEntries: dictionaryEntries !== null ? dictionaryEntries : void 0,
+                ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
                 contentOrigin: this.getContentOrigin(),
             },
         };

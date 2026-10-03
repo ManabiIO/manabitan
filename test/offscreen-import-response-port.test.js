@@ -38,7 +38,7 @@ function getOffscreenMethod(name) {
 }
 
 describe('Offscreen import response port handling', () => {
-    const importDictionaryOffscreenHandler = /** @type {(this: Offscreen, params: {archiveContent: Blob, details: import('dictionary-importer').ImportDetails}, ports: MessagePort[]) => void} */ (getOffscreenMethod('_importDictionaryOffscreenHandler'));
+    const importDictionaryOffscreenHandler = /** @type {(this: Offscreen, params: {operationId: string, archiveContent: Blob, details: import('dictionary-importer').ImportDetails}, ports: MessagePort[]) => void} */ (getOffscreenMethod('_importDictionaryOffscreenHandler'));
 
     afterEach(() => {
         vi.restoreAllMocks();
@@ -62,6 +62,7 @@ describe('Offscreen import response port handling', () => {
         expect(importDictionaryOffscreenHandler.call(
             offscreen,
             {
+                operationId: `${Date.now()}:test`,
                 archiveContent: new Blob(['dictionary']),
                 details: /** @type {import('dictionary-importer').ImportDetails} */ ({}),
             },

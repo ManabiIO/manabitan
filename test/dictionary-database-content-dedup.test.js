@@ -2591,7 +2591,7 @@ describe('DictionaryDatabase term lookup warming', () => {
         await ensureDirectTermIndexesLoaded.call(database, ['JMdict', 'Jitendex']);
 
         expect(ensureDictionariesLoaded).toHaveBeenCalledOnce();
-        expect(ensureDictionariesLoaded).toHaveBeenCalledWith(['JMdict', 'Jitendex']);
+        expect(ensureDictionariesLoaded).toHaveBeenCalledWith(['JMdict', 'Jitendex'], {repairMode: 'background'});
         expect(ensureDictionaryIndexes).toHaveBeenCalledOnce();
         expect(ensureDictionaryIndexes).toHaveBeenCalledWith(['JMdict', 'Jitendex']);
         expect(getDictionaryIndex).toHaveBeenCalledTimes(2);
@@ -2624,7 +2624,7 @@ describe('DictionaryDatabase term lookup warming', () => {
         await database.warmTermLookupCaches(['JMdict']);
 
         expect(Reflect.get(database, '_termContentStore').ensureLoadedForRead).toHaveBeenCalledOnce();
-        expect(Reflect.get(database, '_termRecordStore').ensureDictionariesLoaded).toHaveBeenCalledWith(['JMdict']);
+        expect(Reflect.get(database, '_termRecordStore').ensureDictionariesLoaded).toHaveBeenCalledWith(['JMdict'], {repairMode: 'background'});
         expect(warmPrefixIndexes).toHaveBeenCalledWith(['JMdict']);
         expect(Reflect.get(database, '_warmSharedGlossaryArtifacts')).toHaveBeenCalledWith(['JMdict']);
         expect(warmLookupProbeTerms).toHaveBeenCalledWith(['JMdict']);
