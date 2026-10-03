@@ -318,6 +318,33 @@ describe('dictionary import operation ownership', () => {
         expect(control.calls).toBe(1);
     });
 
+    test.each(['queued', 'running'])('generation mismatch never reconciles an in-flight %s operation from summary metadata', async (state) => {
+        const {worker, submit, query, drain} = await harness();
+        let release = () => {};
+        const gate = new Promise((resolve) => { release = () => resolve(void 0); });
+        if (state === 'queued') {
+            Reflect.set(worker, '_requestQueue', gate);
+        } else {
+            control.gate = gate;
+        }
+        const id = operationId('in-flight');
+        submit(id);
+        if (state === 'running') { await vi.waitFor(() => expect(control.calls).toBe(1)); }
+        control.publishedReceipt = /** @type {import('dictionary-importer').ImportResult} */ (/** @type {unknown} */ ({
+            result: {title: 'Fixture', importSuccess: true, storageImportOperationId: id, storageGenerationId: 'staged-generation'},
+            errors: [],
+            outcome: {status: 'published', generationId: 'staged-generation'},
+        }));
+        try {
+            expect(await query(id, true, 'obsolete-worker')).toMatchObject({state: 'unknown'});
+            expect(await query(id)).toMatchObject({state});
+        } finally {
+            control.publishedReceipt = null;
+            release();
+            await drain();
+        }
+    });
+
     test('restart and generation mismatch reconcile only an exact durable publication', async () => {
         const id = operationId('published');
         const oldWorker = await harness();

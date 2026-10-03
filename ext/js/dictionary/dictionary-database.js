@@ -3879,7 +3879,9 @@ null;
      * @returns {import('dictionary-importer').ImportResult|null}
      */
     getPublishedDictionaryImport(operationId) {
-        if (operationId.length === 0) { return null; }
+        // Control/status requests can bypass the mutation queue. This owning
+        // connection sees staged summary rows before COMMIT, not durable receipts.
+        if (operationId.length === 0 || this._bulkImportTransactionOpen) { return null; }
         const rows = this._requireDb().selectObjects('SELECT title, summaryJson FROM dictionaries');
         for (const row of rows) {
             const summary = /** @type {import('dictionary-importer').Summary|null} */ (this._safeParseJson(this._asString(row.summaryJson), null));

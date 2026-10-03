@@ -140,6 +140,22 @@ describe('generation-owned durable dictionary health', () => {
         expect(database.getPublishedDictionaryImport('exact-operation')).toBeNull();
     });
 
+    test.each(['COMMIT', 'ROLLBACK'])('uncommitted import metadata is not a durable receipt (%s)', (terminalStatement) => {
+        const {database, connection, newSummary} = createDatabase();
+        connection.exec('BEGIN IMMEDIATE');
+        Reflect.set(database, '_bulkImportTransactionOpen', true);
+        connection.exec({sql: 'UPDATE dictionaries SET summaryJson = ? WHERE title = ?', bind: [JSON.stringify({...newSummary, storageImportOperationId: 'pending-operation'}), stagingTitle]});
+        expect(database.getPublishedDictionaryImport('pending-operation')).toBeNull();
+        connection.exec(terminalStatement);
+        Reflect.set(database, '_bulkImportTransactionOpen', false);
+        const receipt = database.getPublishedDictionaryImport('pending-operation');
+        if (terminalStatement === 'COMMIT') {
+            expect(receipt).toMatchObject({outcome: {status: 'published', generationId: 'new-generation'}});
+        } else {
+            expect(receipt).toBeNull();
+        }
+    });
+
     test('legacy implicit physical identity survives rename', async () => {
         const {database, connection} = createDatabase();
         connection.exec({sql: 'UPDATE dictionaries SET summaryJson = ? WHERE title = ?', bind: [JSON.stringify({title: stagingTitle, version: 3, importSuccess: true}), stagingTitle]});

@@ -33,6 +33,11 @@ unconfirmed rollbacks remain `unknown`; they must not be reported as confirmed
 failure or retried automatically. Post-publication housekeeping failures are
 warnings, not failed imports.
 
+The owning SQLite connection can see staged summaries before commit. Durable
+receipt queries therefore return no publication while its import transaction is
+open. A stale-worker query for an operation still queued or running in the current
+worker stays `unknown`; it must not adopt staged metadata as a completion receipt.
+
 ## Lookup Availability and Repair
 
 Interactive term lookup uses `repairMode: 'background'`. Maintenance callers may

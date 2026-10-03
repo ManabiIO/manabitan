@@ -357,6 +357,9 @@ export class OffscreenDictionaryWorkerHandler {
         const operation = this._importOperations.get(operationId);
         if (operation && (typeof workerGeneration !== 'string' || workerGeneration === this._importWorkerGeneration)) { return operation.status; }
         const unknown = {operationId, workerGeneration: this._importWorkerGeneration, state: /** @type {const} */ ('unknown')};
+        // A stale worker receipt cannot authorize an operation still owned here.
+        // In particular, do not reconcile its uncommitted summary during import.
+        if (operation && ['queued', 'running'].includes(operation.status.state)) { return unknown; }
         if (!/^[0-9]{13}:[a-zA-Z0-9_-]{1,64}$/.test(operationId) || this._databaseSuspended) { return unknown; }
         try {
             await this._ensureDatabasePrepared();
