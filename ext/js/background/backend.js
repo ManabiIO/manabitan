@@ -308,7 +308,7 @@ export class Backend {
         this._setDictionaryImportModePromise = null;
         /** @type {Set<string>} */
         this._dictionaryImportOwners = new Set();
-        /** @type {Map<string, {ownerId: string, cancelled: boolean, settled: boolean, completed: boolean, responseCleanup?: () => void}>} */
+        /** @type {Map<string, {ownerId: string, cancelled: boolean, settled: boolean, completed: boolean, runtimeAdmissionAttempted?: boolean, downloadAbortController?: AbortController, responseCleanup?: () => void}>} */
         this._ownedDictionaryImports = new Map();
         /** @type {Record<string, unknown>|null} */
         this._lastDictionaryUrlImportDebug = null;
@@ -396,6 +396,7 @@ export class Backend {
     async _onPmImportDictionaryOffscreen({archiveContent, details, operationId, ownerId}, ports) {
         const responsePort = ports !== null && ports.length > 0 ? ports[0] : null;
         let admitted = false;
+        let failed = false;
         try {
             this._registerDictionaryImportOwner(operationId, ownerId);
             admitted = true;
@@ -404,10 +405,11 @@ export class Backend {
             }
             await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort, operationId, ownerId);
         } catch (error) {
+            failed = true;
             postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
             closeDictionaryImportResponsePort(responsePort);
         } finally {
-            if (admitted) { this._settleDictionaryImportOwnership(operationId, ownerId); }
+            if (admitted) { this._settleDictionaryImportOwnership(operationId, ownerId, failed); }
         }
     }
 
@@ -415,6 +417,7 @@ export class Backend {
     async _onPmImportDictionaryUrlOffscreen({url, details, operationId, ownerId}, ports) {
         const responsePort = ports !== null && ports.length > 0 ? ports[0] : null;
         let admitted = false;
+        let failed = false;
         try {
             this._registerDictionaryImportOwner(operationId, ownerId);
             admitted = true;
@@ -435,14 +438,23 @@ export class Backend {
                 // Without an explicit download progress phase here, fallback URL imports
                 // mislabel long download time as the later archive-loading step.
                 postDictionaryImportResponseMessage(responsePort, {type: 'progress', progress: {nextStep: true, index: 0, count: 0}});
-                const archiveContent = await this._downloadDictionaryArchiveBlobViaXhr(normalizedUrl, downloadTimeoutMs, (phase) => {
-                    this._lastDictionaryUrlImportDebug = {
-                        ...this._lastDictionaryUrlImportDebug,
-                        ...phase,
-                    };
-                }, (loaded, total) => {
-                    postDictionaryImportResponseMessage(responsePort, {type: 'progress', progress: {nextStep: false, index: loaded, count: total}});
-                });
+                const operation = this._ownedDictionaryImports?.get(operationId);
+                const controller = new AbortController();
+                if (operation) { operation.downloadAbortController = controller; }
+                /** @type {Blob} */
+                let archiveContent;
+                try {
+                    archiveContent = await this._downloadDictionaryArchiveBlobViaXhr(normalizedUrl, downloadTimeoutMs, (phase) => {
+                        this._lastDictionaryUrlImportDebug = {
+                            ...this._lastDictionaryUrlImportDebug,
+                            ...phase,
+                        };
+                    }, (loaded, total) => {
+                        postDictionaryImportResponseMessage(responsePort, {type: 'progress', progress: {nextStep: false, index: loaded, count: total}});
+                    }, controller.signal);
+                } finally {
+                    if (operation?.downloadAbortController === controller) { delete operation.downloadAbortController; }
+                }
                 this._lastDictionaryUrlImportDebug = {
                     ...this._lastDictionaryUrlImportDebug,
                     stage: 'blob-ready',
@@ -471,6 +483,7 @@ export class Backend {
                 throw normalizedError;
             }
         } catch (error) {
+            failed = true;
             const normalizedError = toError(error);
             this._lastDictionaryUrlImportDebug = {
                 ...this._lastDictionaryUrlImportDebug,
@@ -481,7 +494,7 @@ export class Backend {
             postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(normalizedError)});
             closeDictionaryImportResponsePort(responsePort);
         } finally {
-            if (admitted) { this._settleDictionaryImportOwnership(operationId, ownerId); }
+            if (admitted) { this._settleDictionaryImportOwnership(operationId, ownerId, failed); }
         }
     }
 
@@ -490,12 +503,18 @@ export class Backend {
      * @param {number} timeoutMs
      * @param {(details: Record<string, string|number|null>) => void} onPhase
      * @param {(loaded: number, total: number) => void} [onProgress]
+     * @param {AbortSignal} [signal]
      * @returns {Promise<Blob>}
      */
-    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = void 0) {
+    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = void 0, signal = void 0) {
         return await new Promise((resolve, reject) => {
+            if (signal?.aborted) {
+                reject(new Error('Dictionary import cancelled before admission'));
+                return;
+            }
             const request = new XMLHttpRequest();
             const cleanup = () => {
+                signal?.removeEventListener('abort', abort);
                 request.onload = null;
                 request.onerror = null;
                 request.onabort = null;
@@ -507,6 +526,14 @@ export class Backend {
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
+            };
+            const abort = () => {
+                fail(new Error('Dictionary import cancelled before admission'));
+                try {
+                    request.abort();
+                } catch (_) {
+                    // The promise is already rejected and all handlers are detached.
+                }
             };
             request.open('GET', url, true);
             request.responseType = 'blob';
@@ -548,7 +575,12 @@ export class Backend {
                 if (typeof onProgress !== 'function' || !event.lengthComputable) { return; }
                 onProgress(event.loaded, event.total);
             };
-            request.send();
+            signal?.addEventListener('abort', abort, {once: true});
+            try {
+                request.send();
+            } catch (error) {
+                fail(toError(error));
+            }
         });
     }
 
@@ -579,6 +611,7 @@ export class Backend {
             assertNotCancelled();
             const relay = operation ? this._superviseOwnedDictionaryImport(operationId, responsePort) : null;
             try {
+                if (operation) { operation.runtimeAdmissionAttempted = true; }
                 await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details, operationId}}, [relay?.port ?? responsePort]);
             } catch (error) {
                 if (relay) {
@@ -592,6 +625,7 @@ export class Backend {
         if (this._localDictionaryRuntime !== null) {
             const relay = operation ? this._superviseOwnedDictionaryImport(operationId, responsePort) : null;
             try {
+                if (operation) { operation.runtimeAdmissionAttempted = true; }
                 await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details, operationId}}, [relay?.port ?? responsePort]);
             } catch (error) {
                 if (relay) {
@@ -673,11 +707,14 @@ export class Backend {
     /**
      * @param {string} operationId
      * @param {string|undefined} ownerId
+     * @param {boolean} [failed]
      */
-    _settleDictionaryImportOwnership(operationId, ownerId) {
+    _settleDictionaryImportOwnership(operationId, ownerId, failed = false) {
         const operation = this._ownedDictionaryImports?.get(operationId);
         if (!operation || operation.ownerId !== ownerId) { return; }
         operation.settled = true;
+        // Once dispatch is attempted, a failed acknowledgement does not prove non-admission.
+        if (failed && !operation.runtimeAdmissionAttempted) { operation.completed = true; }
         if (operation.cancelled || operation.completed) { this._ownedDictionaryImports.delete(operationId); }
     }
 
@@ -5073,6 +5110,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                     const ownedOperations = [...this._ownedDictionaryImports].filter(([, operation]) => operation.ownerId === ownerId);
                     for (const [, operation] of ownedOperations) {
                         operation.cancelled = true;
+                        operation.downloadAbortController?.abort();
                         operation.responseCleanup?.();
                     }
                     for (const [operationId, operation] of ownedOperations) {

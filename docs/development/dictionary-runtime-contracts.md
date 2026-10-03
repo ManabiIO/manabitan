@@ -25,6 +25,12 @@ Cancellation targets an operation, never an ambient active import or queue slot.
 Releasing one settings owner cannot cancel another owner's work. Response relays
 are closed on completion, failure, or owner release.
 
+Owner release also aborts that owner's pending archive downloads. Download
+cancellation listeners are detached on every terminal path. Proven failures
+before runtime dispatch release ownership immediately; once dispatch is attempted,
+an acknowledgement failure retains ownership for cancellation and reconciliation
+because runtime admission may already have occurred.
+
 The bounded worker receipt registry supports response reconciliation without
 replaying a mutation. Successful publication also persists the operation ID in
 the committed summary, permitting exact reconciliation after a worker restart.
@@ -37,6 +43,8 @@ The owning SQLite connection can see staged summaries before commit. Durable
 receipt queries therefore return no publication while its import transaction is
 open. A stale-worker query for an operation still queued or running in the current
 worker stays `unknown`; it must not adopt staged metadata as a completion receipt.
+If SQLite rollback fails, the receipt fence remains held through asynchronous
+storage cleanup until the uncertain connection is released and quarantined.
 
 ## Lookup Availability and Repair
 

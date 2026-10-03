@@ -918,6 +918,7 @@ export class DictionaryDatabase {
         this._termsVtabModuleRegistered = false;
         const db = this._db;
         this._db = null;
+        this._bulkImportTransactionOpen = false;
         if (db !== null) {
             try {
                 db.close();
@@ -1035,7 +1036,8 @@ export class DictionaryDatabase {
                 errors.push(rollbackError);
             }
         }
-        this._bulkImportTransactionOpen = false;
+        // A failed ROLLBACK may leave staged rows visible until quarantine closes this connection.
+        if (succeeded) { this._bulkImportTransactionOpen = false; }
         return succeeded;
     }
 

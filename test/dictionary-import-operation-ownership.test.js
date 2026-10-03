@@ -444,6 +444,44 @@ describe('dictionary import operation ownership', () => {
         expect(operation.cancelled).toBe(false);
     });
 
+    test.each(['url', 'port', 'runtime', 'prepare'])('backend releases ownership after a pre-admission %s failure', async (failure) => {
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        Reflect.set(backend, '_dictionaryImportOwners', new Set(['page-A']));
+        Reflect.set(backend, '_ownedDictionaryImports', new Map());
+        Reflect.set(backend, '_offscreen', failure === 'prepare' ? {prepare: vi.fn().mockRejectedValue(new Error('Preparation failed'))} : null);
+        Reflect.set(backend, '_localDictionaryRuntime', null);
+        const details = /** @type {import('dictionary-importer').ImportDetails} */ ({});
+        // Failures within one still-active settings session must not fill the 128-entry registry.
+        for (let i = 0; i < 129; ++i) {
+            const port = /** @type {MessagePort} */ (/** @type {unknown} */ ({postMessage: vi.fn(), close: vi.fn()}));
+            const params = {operationId: operationId(`failure-${i}`), ownerId: 'page-A', details};
+            await (failure === 'url' ?
+                backend._onPmImportDictionaryUrlOffscreen({...params, url: ''}, [port]) :
+                backend._onPmImportDictionaryOffscreen({...params, archiveContent: new Blob([])}, failure === 'port' ? [] : [port]));
+            expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(0);
+        }
+        expect(Reflect.get(backend, '_dictionaryImportOwners').has('page-A')).toBe(true);
+    });
+
+    test('backend retains ownership when runtime handoff may already have admitted an import', async () => {
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        Reflect.set(backend, '_dictionaryImportOwners', new Set(['page-A', 'page-B']));
+        Reflect.set(backend, '_ownedDictionaryImports', new Map());
+        Reflect.set(backend, '_setDictionaryImportModePromise', null);
+        Reflect.set(backend, '_offscreen', null);
+        const error = new Error('Handoff acknowledgement lost');
+        error.name = 'DictionaryImportTransportError';
+        const cancel = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(backend, '_localDictionaryRuntime', {sendMessageViaPort: vi.fn().mockRejectedValue(error), sendMessagePromise: cancel});
+        const port = /** @type {MessagePort} */ (/** @type {unknown} */ ({postMessage: vi.fn(), close: vi.fn()}));
+        const id = operationId('uncertain-handoff');
+        await backend._onPmImportDictionaryOffscreen({operationId: id, ownerId: 'page-A', archiveContent: new Blob([]), details: /** @type {import('dictionary-importer').ImportDetails} */ ({})}, [port]);
+        expect(Reflect.get(backend, '_ownedDictionaryImports').get(id)).toMatchObject({settled: true, completed: false});
+        await backend._setDictionaryImportMode(false, 'page-A');
+        expect(cancel).toHaveBeenCalledExactlyOnceWith({action: 'cancelDictionaryImportOffscreen', params: {operationId: id}});
+        expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(0);
+    });
+
     test('backend releases completed ownership after supervised dispatch, not before', async () => {
         const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
         const id = operationId('A');

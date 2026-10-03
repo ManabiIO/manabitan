@@ -184,6 +184,53 @@ describe('importer reports durable publication to the settings UI', () => {
 });
 
 describe('committed dictionary cleanup uses real SQLite metadata', () => {
+    test('a failed SQLite rollback cannot expose staged receipts during asynchronous storage cleanup', async () => {
+        const {database, connection} = createDatabase();
+        activateImport(database, connection);
+        insertSummary(connection, 42, {...summary, storageImportOperationId: 'pending-operation', storageGenerationId: 'pending-generation'});
+        const rollbackError = new Error('Injected SQLite rollback failure');
+        const exec = vi.spyOn(connection, 'exec').mockImplementationOnce(() => { throw rollbackError; });
+        let release = () => {};
+        const gate = new Promise((resolve) => { release = () => resolve(void 0); });
+        let cleanupStarted = false;
+        vi.mocked(Reflect.get(database, '_termContentStore').rollbackImportSession).mockImplementationOnce(async () => {
+            cleanupStarted = true;
+            await gate;
+        });
+        const pending = database.abortBulkImport();
+        const rejected = expect(pending).rejects.toThrow('Failed to roll back dictionary import storage');
+        let receipt;
+        let fenced;
+        try {
+            await vi.waitFor(() => expect(cleanupStarted).toBe(true));
+            expect(exec).toHaveBeenNthCalledWith(1, 'ROLLBACK');
+            // The real connection still sees the successful-looking uncommitted row.
+            expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(1);
+            fenced = Reflect.get(database, '_bulkImportTransactionOpen');
+            receipt = database.getPublishedDictionaryImport('pending-operation');
+        } finally {
+            release();
+            await rejected;
+        }
+        expect(receipt).toBeNull();
+        expect(fenced).toBe(true);
+        expect(database.isPrepared()).toBe(false);
+        expect(Reflect.get(database, '_bulkImportTransactionOpen')).toBe(false);
+    });
+
+    test.each(['active', 'already-rolled-back'])('a confirmed %s rollback releases the receipt fence', async (state) => {
+        const {database, connection} = createDatabase();
+        activateImport(database, connection);
+        insertSummary(connection, 42, {...summary, storageImportOperationId: 'pending-operation', storageGenerationId: 'pending-generation'});
+        if (state === 'already-rolled-back') { connection.exec('ROLLBACK'); }
+        const errors = /** @type {Error[]} */ ([]);
+        expect(Reflect.get(database, '_rollbackBulkImportSqlite').call(database, connection, errors)).toBe(true);
+        expect(errors).toEqual([]);
+        expect(Reflect.get(database, '_bulkImportTransactionOpen')).toBe(false);
+        expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(0);
+        expect(database.getPublishedDictionaryImport('pending-operation')).toBeNull();
+    });
+
     test.each([
         {importSuccess: true},
         {},
