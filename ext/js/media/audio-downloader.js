@@ -393,7 +393,10 @@ export class AudioDownloader {
         const fetchFileInfos = lookupResults.map(async ({title}) => {
             const fileInfoURL = `https://commons.wikimedia.org/w/api.php?action=query&format=json&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=user|url&origin=*`;
             const response2 = await this._requestBuilder.fetchAnonymous(fileInfoURL, DEFAULT_REQUEST_INIT_PARAMS);
-            if (!response2.ok) { return []; }
+            if (!response2.ok) {
+                void response2.body?.cancel().catch(() => {});
+                return [];
+            }
             /** @type {import('audio-downloader').WikimediaCommonsFileResponse} */
             const fileResponse = await readResponseJson(response2);
             const fileResults = fileResponse.query.pages;
@@ -467,6 +470,7 @@ export class AudioDownloader {
         const response = await this._requestBuilder.fetchAnonymous(url, DEFAULT_REQUEST_INIT_PARAMS);
 
         if (!response.ok) {
+            void response.body?.cancel().catch(() => {});
             throw new Error(`Invalid response: ${response.status}`);
         }
 
@@ -556,6 +560,7 @@ export class AudioDownloader {
             });
 
             if (!response.ok) {
+                void response.body?.cancel().catch(() => {});
                 throw new Error(`Invalid response: ${response.status}`);
             }
 
