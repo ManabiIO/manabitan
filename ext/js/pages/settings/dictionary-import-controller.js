@@ -1788,6 +1788,8 @@ export class DictionaryImportController {
                 return abortReason instanceof Error ? abortReason : new Error(`Aborted fetching dictionary archive: ${url}`);
             };
             const onAbortSignal = () => {
+                // Cancellation owns settlement even if XHR cannot emit an abort event.
+                fail(getAbortError());
                 try {
                     request.abort();
                 } catch (_) {
@@ -1857,11 +1859,12 @@ export class DictionaryImportController {
 
         const response = await fetch(url, {signal: abortSignal});
         if (!response.ok) {
+            void response.body?.cancel().catch(() => {});
             throw new Error(`Failed to fetch dictionary archive: ${url} (status=${String(response.status)})`);
         }
         const contentType = response.headers.get('content-type') || '';
         if (/text\/html|application\/xhtml\+xml/i.test(contentType)) {
-            const listing = this._parseMdxListingDocument(url, await response.text(), null);
+            const listing = this._parseMdxListingDocument(response.url || url, await response.text(), null);
             if (listing === null) {
                 throw new Error(`URL did not point to a supported dictionary file or MDX directory listing: ${url}`);
             }
@@ -1921,18 +1924,22 @@ export class DictionaryImportController {
      */
     async _getMdxListingForUrl(url, mdxFileName, abortSignal) {
         const parentUrl = new URL('.', url).href;
+        let listingUrl = parentUrl;
         let html;
         try {
             const response = await fetch(parentUrl, {signal: abortSignal});
-            if (!response.ok) { return null; }
             const contentType = response.headers.get('content-type') || '';
-            if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) { return null; }
+            if (!response.ok || !/text\/html|application\/xhtml\+xml/i.test(contentType)) {
+                void response.body?.cancel().catch(() => {});
+                return null;
+            }
+            listingUrl = response.url || parentUrl;
             html = await response.text();
         } catch (error) {
             if (abortSignal.aborted) { throw error; }
             return null;
         }
-        return this._parseMdxListingDocument(parentUrl, html, mdxFileName);
+        return this._parseMdxListingDocument(listingUrl, html, mdxFileName);
     }
 
     /**
