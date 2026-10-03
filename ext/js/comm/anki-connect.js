@@ -39,6 +39,8 @@ export class AnkiConnect {
         this._remoteVersion = 0;
         /** @type {?Promise<number>} */
         this._versionCheckPromise = null;
+        /** @type {number} */
+        this._connectionGeneration = 0;
         /** @type {?string} */
         this._apiKey = null;
     }
@@ -56,7 +58,9 @@ export class AnkiConnect {
      * @param {string} value The new server URL to assign.
      */
     set server(value) {
+        if (this._server === value) { return; }
         this._server = value;
+        this._invalidateVersionCheck();
     }
 
     /**
@@ -89,7 +93,9 @@ export class AnkiConnect {
      * @param {?string} value The API key to use, or `null` if no API key should be used.
      */
     set apiKey(value) {
+        if (this._apiKey === value) { return; }
         this._apiKey = value;
+        this._invalidateVersionCheck();
     }
 
     /**
@@ -456,19 +462,38 @@ export class AnkiConnect {
 
     // Private
 
+    /** */
+    _invalidateVersionCheck() {
+        ++this._connectionGeneration;
+        this._remoteVersion = 0;
+        this._versionCheckPromise = null;
+    }
+
     /**
      * @returns {Promise<void>}
      */
     async _checkVersion() {
-        if (this._remoteVersion < this._localVersion) {
+        while (this._remoteVersion < this._localVersion) {
+            const generation = this._connectionGeneration;
             if (this._versionCheckPromise === null) {
                 const promise = this._getVersion();
+                this._versionCheckPromise = promise;
                 promise
                     .catch(() => {})
-                    .finally(() => { this._versionCheckPromise = null; });
-                this._versionCheckPromise = promise;
+                    .finally(() => {
+                        if (this._versionCheckPromise === promise) { this._versionCheckPromise = null; }
+                    });
             }
-            this._remoteVersion = await this._versionCheckPromise;
+            let version;
+            try {
+                version = await this._versionCheckPromise;
+            } catch (error) {
+                if (generation !== this._connectionGeneration) { continue; }
+                throw error;
+            }
+            // A settings change can replace the server/key while this check is pending.
+            if (generation !== this._connectionGeneration) { continue; }
+            this._remoteVersion = version;
             if (this._remoteVersion < this._localVersion) {
                 throw new Error('Extension and plugin versions incompatible');
             }
