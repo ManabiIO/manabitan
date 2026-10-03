@@ -108,6 +108,65 @@ async function assertStoredMedia(page, title, path, expected) {
     expect(Buffer.from(media[0].content, 'base64')).toStrictEqual(Buffer.from(expected));
 }
 
+test('MDX audio-only resources survive import, reopening and a real media-link click', async ({page, context, extensionId}) => {
+    test.setTimeout(180_000);
+    const title = 'MDict audio regression';
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    // Valid mono, unsigned 8-bit PCM; no dependency on a browser audio encoder.
+    const wav = Buffer.alloc(76, 128);
+    wav.write('RIFF', 0);
+    wav.writeUInt32LE(wav.length - 8, 4);
+    wav.write('WAVEfmt ', 8);
+    wav.writeUInt32LE(16, 16);
+    wav.writeUInt16LE(1, 20);
+    wav.writeUInt16LE(1, 22);
+    wav.writeUInt32LE(8000, 24);
+    wav.writeUInt32LE(8000, 28);
+    wav.writeUInt16LE(1, 32);
+    wav.writeUInt16LE(8, 34);
+    wav.write('data', 36);
+    wav.writeUInt32LE(wav.length - 44, 40);
+    const mdx = makeMdictFixture([{
+        key: '\u97f3\u58f0',
+        value: '<a class="audio" href="audio/ping%252Fname.WAV">play audio</a><a href="sound://disabled.wav">disabled sound</a>',
+    }], {title});
+    const mdd = makeMdictFixture([
+        {key: '\\audio\\ping%2Fname.WAV', value: wav},
+        {key: '\\disabled.wav', value: wav},
+    ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1});
+    await importFiles(page, extensionBaseUrl, [
+        {name: 'audio.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
+        {name: 'audio.mdd', mimeType: 'application/octet-stream', buffer: Buffer.from(mdd.bytes)},
+    ], title);
+    const path = 'mdict-media/audio/ping%2Fname.WAV';
+    await assertStoredMedia(page, title, path, wav);
+    expect(await api(page, 'getMedia', {targets: [{dictionary: title, path: 'mdict-media/disabled.wav'}]})).toStrictEqual([]);
+    const reopened = await context.newPage();
+    await page.close();
+    await reopened.goto(`${extensionBaseUrl}/search.html`);
+    await expect(reopened.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+    await assertStoredMedia(reopened, title, path, wav);
+    await reopened.locator('#search-textbox').fill('\u97f3\u58f0');
+    await reopened.locator('#search-button').click();
+    const link = reopened.locator('#dictionary-entries [data-sc-class~="audio"]').first();
+    await expect(link).toHaveText('play audio', {timeout: 30_000});
+    const opened = context.waitForEvent('page');
+    await link.click();
+    const mediaTab = await opened;
+    await mediaTab.waitForURL(/^blob:/u);
+    await mediaTab.waitForLoadState('domcontentloaded');
+    const fetched = await mediaTab.evaluate(async () => {
+        const response = await fetch(location.href);
+        return {type: response.headers.get('content-type'), bytes: [...new Uint8Array(await response.arrayBuffer())], hasOpener: window.opener !== null};
+    });
+    expect(fetched.type).toBe('audio/wav');
+    expect(fetched.bytes).toStrictEqual([...wav]);
+    expect(fetched.hasOpener).toBe(false);
+    await expect.poll(() => mediaTab.locator('audio').evaluate((audio) => /** @type {HTMLAudioElement} */ (audio).readyState)).toBeGreaterThanOrEqual(1);
+    await mediaTab.close();
+    await reopened.close();
+});
+
 test('MDX stylesheet media preserves special filename identities after import and reopening', async ({page, context, extensionId}) => {
     test.setTimeout(180_000);
     const title = 'MDict CSS filename regression';
