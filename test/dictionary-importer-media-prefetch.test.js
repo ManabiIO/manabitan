@@ -24,7 +24,7 @@ vi.mock('../ext/lib/zip.js', async (importOriginal) => {
         async getEntries() {
             const entries = await super.getEntries();
             return entries.map((entry) => {
-                if (!entry.filename.endsWith('.png') || entry.directory || typeof entry.getData !== 'function') { return entry; }
+                if (!/\.(?:png|wav)$/i.test(entry.filename) || entry.directory || typeof entry.getData !== 'function') { return entry; }
                 const getData = entry.getData;
                 const observed = {...entry};
                 if (state.sizeOverride !== null) { Reflect.set(observed, 'uncompressedSize', state.sizeOverride); }
@@ -95,6 +95,26 @@ async function cssArchive(extraImageCount = 0) {
         await writer.add(`mdict-media/extra${index}.png`, new Uint8ArrayReader(Uint8Array.of(index & 255, 17, 255)));
     }
     await writer.add('unused.png', new Uint8ArrayReader(Uint8Array.of(3, 17, 255)));
+    return new Uint8Array(await writer.close()).buffer;
+}
+
+/**
+ * @param {boolean} [withImage]
+ * @returns {Promise<ArrayBuffer>}
+ */
+async function audioArchive(withImage = false) {
+    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+    await writer.add('index.json', new TextReader(JSON.stringify({title: 'Media test', revision: '1', format: 3})));
+    const glossary = [{type: 'structured-content', content: {tag: 'a', href: 'media:mdict-media/audio%252Fping.WAV', content: 'play'}}];
+    await writer.add('term_bank_1.json', new TextReader(JSON.stringify([
+        ['term', '', '', '', 0, glossary, 0, ''],
+    ])));
+    await writer.add('mdict-media/audio%2Fping.WAV', new Uint8ArrayReader(Uint8Array.of(82, 73, 70, 70, 0, 255)));
+    if (withImage) {
+        await writer.add('mdict-media/css.png', new Uint8ArrayReader(Uint8Array.of(1, 17, 255)));
+    }
+    await writer.add('unused.wav', new Uint8ArrayReader(Uint8Array.of(0)));
+    await writer.add('mdict-media/unsafe.html', new TextReader('<script>throw 0;</script>'));
     return new Uint8Array(await writer.close()).buffer;
 }
 
@@ -170,6 +190,77 @@ beforeEach(() => {
 });
 
 describe('bounded referenced-media prefetch', () => {
+    test('does not reread images or audio already persisted by the artifact path', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const importedPaths = ['mdict-media/prior.wav', 'mdict-media/prior.png'];
+        /** @type {Map<string, unknown>} */
+        const files = new Map();
+        for (const path of importedPaths) {
+            files.set(path, {filename: path, getData: vi.fn(() => { throw new Error('Already imported media was read again'); })});
+        }
+        files.set('mdict-media/new.wav', {filename: 'mdict-media/new.wav', bytes: Uint8Array.of(0, 1, 255)});
+        const fileMap = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (files));
+        const write = vi.fn();
+        await Reflect.get(importer, '_importMdictMediaFiles').call(importer, fileMap, 'Media test', importedPaths.map((path) => ({path})), write);
+        expect(write).toHaveBeenCalledOnce();
+        expect(write).toHaveBeenCalledWith([
+            expect.objectContaining({path: 'mdict-media/new.wav', mediaType: 'audio/wav', content: Uint8Array.of(0, 1, 255).buffer}),
+        ]);
+    });
+
+    test.each([false, true])('retains converted MDX audio with exact identity (withImage=%s)', async (withImage) => {
+        const db = database();
+        const result = await run(await audioArchive(withImage), db);
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(withImage ? 2 : 1);
+        const media = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').flatMap(([, entries]) => entries);
+        expect(media).toContainEqual({
+            dictionary: 'Media test',
+            path: 'mdict-media/audio%2Fping.WAV',
+            mediaType: 'audio/wav',
+            width: 0,
+            height: 0,
+            content: Uint8Array.of(82, 73, 70, 70, 0, 255).buffer,
+        });
+        expect(state.events.filter((event) => event === 'read:mdict-media/audio%2Fping.WAV')).toHaveLength(1);
+        expect(state.events).not.toContain('read:unused.wav');
+        expect(media).not.toEqual(expect.arrayContaining([expect.objectContaining({path: 'mdict-media/unsafe.html'})]));
+    });
+
+    test('audio read failure rolls back instead of publishing an unusable link', async () => {
+        const failure = new Error('Audio read failed');
+        state.readGate = async (path) => {
+            if (path.endsWith('.WAV')) { throw failure; }
+        };
+        const db = database();
+        const result = await run(await audioArchive(), db);
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(failure);
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(state.events.indexOf('archive-close')).toBeGreaterThan(state.events.indexOf('settled:mdict-media/audio%2Fping.WAV'));
+    });
+
+    test('cancellation during audio loading prevents publication', async () => {
+        state.readGate = async (path) => {
+            if (path.endsWith('.WAV')) { state.cancelled = true; }
+        };
+        const db = database();
+        const result = await run(await audioArchive(), db);
+        expect(result.result).toBeNull();
+        expect(result.errors.some(({message}) => message.includes('cancelled'))).toBe(true);
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+    });
+
+    test('disabled media imports do not read converted audio', async () => {
+        const db = database();
+        const result = await run(await audioArchive(), db, {skipMediaImport: true});
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(0);
+        expect(state.events.some((event) => event.startsWith('read:'))).toBe(false);
+    });
+
     test.each([
         {skipImageMetadata: true, disableTermBankWasmFastPath: true},
         {skipImageMetadata: false, disableTermBankWasmFastPath: true},

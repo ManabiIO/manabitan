@@ -28,7 +28,7 @@ import {
 import {parseJson} from '../core/json.js';
 import {toError} from '../core/to-error.js';
 import {stringReverse} from '../core/utilities.js';
-import {getFileExtensionFromImageMediaType, getImageMediaTypeFromFileName} from '../media/media-util.js';
+import {getAudioMediaTypeFromFileName, getFileExtensionFromImageMediaType, getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {
     decodeRawTermContentBinary,
     decodeRawTermContentTokenBinary,
@@ -2377,10 +2377,10 @@ export class DictionaryImporter {
                 deferredNoMetadataMediaRequirements.length = 0;
             }
 
-            if (useTermMediaRequirements) {
+            if (!this._skipMediaImport) {
                 const tMediaResolveStart = Date.now();
                 let mediaWriteMs = 0;
-                await this._importMdictImageFiles(fileMap, dictionaryTitle, async (media) => {
+                await this._importMdictMediaFiles(fileMap, dictionaryTitle, artifactArchiveImageFileEntries, async (media) => {
                     const tMediaWriteStart = Date.now();
                     await bulkAdd('media', media, {trackProgress: false});
                     mediaWriteMs += Math.max(0, Date.now() - tMediaWriteStart);
@@ -3340,25 +3340,40 @@ export class DictionaryImporter {
     }
 
     /**
-     * MDX conversion materializes referenced media, including CSS-only images
-     * which have no term-record image requirement. Import those in bounded
-     * batches after term media drains, without rereading already stored images.
+     * MDX conversion materializes referenced images and audio, including assets
+     * with no term-record image requirement. Import those in bounded batches
+     * after term media drains, without rereading already stored images.
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
      * @param {string} dictionaryTitle
+     * @param {Array<{path: string}>} artifactMediaEntries Media already imported from artifacts.
      * @param {(media: import('dictionary-database').MediaDataArrayBufferContent[]) => Promise<void>} writeMedia
      * @returns {Promise<void>}
      */
-    async _importMdictImageFiles(fileMap, dictionaryTitle, writeMedia) {
+    async _importMdictMediaFiles(fileMap, dictionaryTitle, artifactMediaEntries, writeMedia) {
+        const importedPaths = new Set();
+        for (const {path} of artifactMediaEntries) {
+            if (path.startsWith('mdict-media/')) { importedPaths.add(path); }
+        }
         /** @type {import('dictionary-importer').ImportRequirementContext} */
         const context = {fileMap, media: new Map()};
         /** @type {import('dictionary-database').DatabaseTermEntry} */
         const entry = {dictionary: dictionaryTitle, expression: '[MDict media]', reading: '', definitionTags: '', rules: '', score: 0, glossary: EMPTY_TERM_GLOSSARY};
-        /** @type {string[]} */
+        /** @type {Array<{path: string, mediaType: string|null}>} */
         const paths = [];
         const flush = async () => {
             if (paths.length === 0) { return; }
-            await this._runWithConcurrencyLimit(paths, this._mediaResolutionConcurrency, async (path) => {
-                await this._getImageMedia(context, path, entry);
+            await this._runWithConcurrencyLimit(paths, this._mediaResolutionConcurrency, async ({path, mediaType}) => {
+                if (mediaType === null) {
+                    await this._getImageMedia(context, path, entry);
+                    return;
+                }
+                const file = fileMap.get(path);
+                if (typeof file === 'undefined') { throw new Error(`Could not find MDict audio: ${path}`); }
+                const bytes = await this._getData(file, new Uint8ArrayWriter());
+                const content = bytes.byteOffset === 0 && bytes.byteLength === bytes.buffer.byteLength ?
+                    bytes.buffer :
+                    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+                context.media.set(path, {dictionary: dictionaryTitle, path, mediaType, width: 0, height: 0, content});
             });
             if (this._isCancelled()) { throw new Error('Dictionary import was cancelled'); }
             await writeMedia([...context.media.values()]);
@@ -3366,12 +3381,10 @@ export class DictionaryImporter {
             paths.length = 0;
         };
         for (const path of fileMap.keys()) {
-            if (
-                !path.startsWith('mdict-media/') ||
-                this._imageMetadataByPath.has(path) ||
-                getImageMediaTypeFromFileName(path) === null
-            ) { continue; }
-            paths.push(path);
+            if (!path.startsWith('mdict-media/') || importedPaths.has(path) || this._imageMetadataByPath.has(path)) { continue; }
+            const mediaType = getAudioMediaTypeFromFileName(path);
+            if (mediaType === null && getImageMediaTypeFromFileName(path) === null) { continue; }
+            paths.push({path, mediaType});
             if (paths.length >= 128) { await flush(); }
         }
         await flush();
