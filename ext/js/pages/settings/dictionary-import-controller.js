@@ -2156,6 +2156,12 @@ export class DictionaryImportController {
     ) {
         if (this._modifying) { return; }
         const importRunGeneration = ++this._activeImportRunGeneration;
+        const assertCurrentRun = () => {
+            if (!this._isImportRunCurrent(importRunGeneration)) {
+                throw new Error('Ignored stale dictionary import run');
+            }
+        };
+        importProgressTracker.setImportRunCheck(() => this._isImportRunCurrent(importRunGeneration));
 
         const statusFooter = this._statusFooter;
         const progressSelector = '.dictionary-import-progress';
@@ -2192,10 +2198,12 @@ export class DictionaryImportController {
             this._hideErrors();
             await this._settingsController.application.api.setDictionaryImportMode(true);
             importModeEnabled = true;
+            assertCurrentRun();
 
             for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = false; }
 
             const optionsFull = await this._settingsController.getOptionsFull();
+            assertCurrentRun();
             const {
                 skipImageMetadata,
                 skipMediaImport,
@@ -2231,6 +2239,7 @@ export class DictionaryImportController {
             };
 
             for (let i = 0; i < importProgressTracker.dictionaryCount; ++i) {
+                assertCurrentRun();
                 importProgressTracker.onNextDictionary();
                 if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, true); }
                 const dictionaryLoopStartTime = safePerformance.now();
@@ -2241,6 +2250,7 @@ export class DictionaryImportController {
                     finalizeImportSession,
                 });
                 const nextDictionary = await dictionaries.next();
+                assertCurrentRun();
                 const source = nextDictionary.done ? null : nextDictionary.value;
                 /** @type {string|null} */
                 let downloadUrl = null;
@@ -2319,6 +2329,7 @@ export class DictionaryImportController {
                     errors.push(new Error(`Unsupported dictionary import source at item ${i + 1}.`));
                     continue;
                 }
+                assertCurrentRun();
                 errors = [...errors, ...importItemResult.errors];
                 if (typeof importItemResult.importedTitle === 'string' && importItemResult.importedTitle.length > 0) {
                     importedTitles.push(importItemResult.importedTitle);
@@ -2341,6 +2352,15 @@ export class DictionaryImportController {
                 message: toError(error).message,
             });
         } finally {
+            try {
+                await dictionaries.return();
+            } catch (error) {
+                errors.push(toError(error));
+                reportDiagnostics('dictionary-import-source-close-failed', {
+                    message: toError(error).message,
+                    importRunGeneration,
+                });
+            }
             if (
                 deferredFinalizations !== null &&
                 deferredFinalizations.length > 0 &&
@@ -2359,8 +2379,10 @@ export class DictionaryImportController {
                     });
                 }
             }
-            importProgressTracker.onImportComplete(errors.length);
-            Reflect.set(globalThis, '__manabitanImportStepTimingHistory', importProgressTracker.getStepTimingHistory());
+            if (this._isImportRunCurrent(importRunGeneration)) {
+                importProgressTracker.onImportComplete(errors.length);
+                Reflect.set(globalThis, '__manabitanImportStepTimingHistory', importProgressTracker.getStepTimingHistory());
+            }
             const importEndTime = safePerformance.now();
             log.log(`[ImportTiming] import session complete in ${formatDurationMs(importEndTime - importStartTime)} (errors=${errors.length})`);
             reportDiagnostics('dictionary-import-session-complete', {
@@ -2372,22 +2394,25 @@ export class DictionaryImportController {
                 importRunCurrent: this._isImportRunCurrent(importRunGeneration),
             });
             prevention.end();
+            // Keep mutation ownership until backend cleanup settles, then
+            // recheck ownership before touching a possibly newer import UI.
+            if (importModeEnabled && (this._isImportRunCurrent(importRunGeneration) || !this._modifying)) {
+                try {
+                    await this._settingsController.application.api.setDictionaryImportMode(false);
+                } catch (error) {
+                    const importModeExitError = toError(error);
+                    errors.push(importModeExitError);
+                    reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
+                        message: importModeExitError.message,
+                        importRunGeneration,
+                        activeImportRunGeneration: this._activeImportRunGeneration,
+                    });
+                }
+            }
             if (this._isImportRunCurrent(importRunGeneration)) {
                 for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
                 if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
                 this._setModifying(false);
-                if (importModeEnabled) {
-                    try {
-                        await this._settingsController.application.api.setDictionaryImportMode(false);
-                    } catch (error) {
-                        const importModeExitError = toError(error);
-                        errors.push(importModeExitError);
-                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
-                            message: importModeExitError.message,
-                            importRunGeneration,
-                        });
-                    }
-                }
                 this._showErrors(errors);
                 this._triggerStorageChanged();
                 if (onImportDone) {
@@ -2407,17 +2432,6 @@ export class DictionaryImportController {
                     }
                 }
             } else {
-                if (importModeEnabled && !this._modifying) {
-                    try {
-                        await this._settingsController.application.api.setDictionaryImportMode(false);
-                    } catch (error) {
-                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed-stale', {
-                            message: toError(error).message,
-                            importRunGeneration,
-                            activeImportRunGeneration: this._activeImportRunGeneration,
-                        });
-                    }
-                }
                 reportDiagnostics('dictionary-import-session-complete-stale', {
                     dictionaryCount: importProgressTracker.dictionaryCount,
                     errorCount: errors.length,
@@ -3613,6 +3627,8 @@ export class ImportProgressTracker {
      * @param {number} dictionaryCount
      */
     constructor(steps, dictionaryCount) {
+        /** @type {(() => boolean)|null} */
+        this._isImportRunCurrent = null;
         /** @type {import('dictionary-importer').ImportSteps} */
         this._steps = steps;
         /** @type {number} */
@@ -3697,8 +3713,14 @@ export class ImportProgressTracker {
         return this._stepTimingHistory.map((item) => ({...item}));
     }
 
+    /** @param {() => boolean} check */
+    setImportRunCheck(check) {
+        this._isImportRunCurrent = check;
+    }
+
     /** @type {import('dictionary-worker').ImportProgressCallback} */
     onProgress(data) {
+        if (this._isImportRunCurrent !== null && !this._isImportRunCurrent()) { return; }
         const now = safePerformance.now();
         this._lastActivityTime = now;
         const {nextStep, index, count} = data;
