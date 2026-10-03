@@ -3254,17 +3254,19 @@ null;
             return results;
         }
 
-        const visited = new Set();
-        /** @type {Map<number, {matchSource: import('dictionary-database').MatchSource, matchType: import('dictionary-database').MatchType, itemIndex: number}>} */
+        /** @type {Map<number, Array<{matchSource: import('dictionary-database').MatchSource, matchType: import('dictionary-database').MatchType, itemIndex: number}>>} */
         const idMatches = new Map();
-        /** @type {Map<string, {term: string, query: string, itemIndex: number}>} */
+        /** @type {Map<string, {term: string, query: string, itemIndexes: number[]}>} */
         const uniqueQueryMap = new Map();
         for (let itemIndex = 0; itemIndex < termList.length; ++itemIndex) {
             const term = termList[itemIndex];
             const query = matchType === 'suffix' ? stringReverse(term) : term;
             if (query.length === 0) { continue; }
-            if (!uniqueQueryMap.has(query)) {
-                uniqueQueryMap.set(query, {term, query, itemIndex});
+            const existingQuery = uniqueQueryMap.get(query);
+            if (typeof existingQuery === 'undefined') {
+                uniqueQueryMap.set(query, {term, query, itemIndexes: [itemIndex]});
+            } else {
+                existingQuery.itemIndexes.push(itemIndex);
             }
         }
         const dictionaryCacheKey = this._getDictionaryCacheKey(dictionaryNames);
@@ -3274,6 +3276,8 @@ null;
         const foundQueries = new Set();
         const directFindForDictionaries = Reflect.get(this._termRecordStore, 'findTermPrefixIdMatchesForDictionaries');
         for (const queryData of queriesToCheck) {
+            // Deduplicate postings within one query, not its associations with other queries.
+            const visited = new Set();
             const directQuery = matchType === 'suffix' ? queryData.term : queryData.query;
             const matchesByDictionary = typeof directFindForDictionaries === 'function' ?
                 /** @type {(dictionaryNames: string[], query: string, reverse: boolean) => Array<{expression: Array<{id: number, exact: boolean}>, reading: Array<{id: number, exact: boolean}>}>} */ (
@@ -3297,7 +3301,14 @@ null;
                         visited.add(id);
                         const matchSource = (indexIndex === 0) ? 'term' : 'reading';
                         const matchType2 = exact ? 'exact' : matchType;
-                        idMatches.set(id, {matchSource, matchType: matchType2, itemIndex: queryData.itemIndex});
+                        let matches = idMatches.get(id);
+                        if (typeof matches === 'undefined') {
+                            matches = [];
+                            idMatches.set(id, matches);
+                        }
+                        for (const itemIndex of queryData.itemIndexes) {
+                            matches.push({matchSource, matchType: matchType2, itemIndex});
+                        }
                     }
                 }
             }
@@ -3327,10 +3338,12 @@ null;
                 matchedRowCount: rowsById.size,
             }));
         }
-        for (const [id, {matchSource, matchType: matchType2, itemIndex}] of idMatches) {
+        for (const [id, matches] of idMatches) {
             const row = rowsById.get(id);
             if (typeof row === 'undefined') { continue; }
-            results.push(this._createTerm(matchSource, matchType2, row, itemIndex));
+            for (const {matchSource, matchType: matchType2, itemIndex} of matches) {
+                results.push(this._createTerm(matchSource, matchType2, row, itemIndex));
+            }
         }
         if (results.length === 0 && shouldReportDiagnostics) {
             reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
