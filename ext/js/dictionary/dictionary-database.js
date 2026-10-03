@@ -2192,7 +2192,13 @@ null;
             const nextSummary = buildSummaryForTitle(summaryRow, targetTitle, summaryValue, sourceTitle);
             if (finalPublication) {
                 delete nextSummary.transientUpdateStage;
-                delete nextSummary.updateSessionToken;
+                // Explicit updates retain their completion receipt; recovery must
+                // not inherit the interrupted generation's staging token.
+                if (explicitTransientSessionToken !== null) {
+                    nextSummary.updateSessionToken = explicitTransientSessionToken;
+                } else {
+                    delete nextSummary.updateSessionToken;
+                }
             }
             const termRecordStorageName = this._getSummaryTermRecordStorageName(
                 nextSummary,

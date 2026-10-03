@@ -685,7 +685,7 @@ test('search clipboard', async ({page, extensionId}) => {
     await page.goto(`chrome-extension://${extensionId}/search.html`);
     await waitForSearchPageReady(page);
     await writeToClipboardFromPage(page, clipboardMonitorInitialValue);
-    await page.locator('#search-option-clipboard-monitor-container > label').click();
+    await page.locator('#search-option-clipboard-monitor-container').click();
     await expect(page.locator('#clipboard-monitor-enable')).toBeChecked();
 
     await expect(async () => {

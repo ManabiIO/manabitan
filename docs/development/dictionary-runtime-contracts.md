@@ -14,6 +14,10 @@ publish after commit; old physical storage cleanup is best effort. Existing reco
 formats do not change. Legacy unbound health can apply only to legacy summaries,
 not summaries with a new publication identity.
 
+Completed updates retain their explicit `updateSessionToken` completion receipt
+without `transientUpdateStage`. Startup restoration clears the interrupted
+operation's token instead of reporting it as a successfully completed update.
+
 ## Request Ownership and Outcomes
 
 Settings sessions have owner IDs; each import has a separate operation ID.
@@ -55,3 +59,10 @@ Database readiness does not require SVG WASM or fonts. The SVG renderer prepares
 those resources lazily with retryable single-flight initialization. Raster media
 does not depend on that initialization. Rendering owns native handles and copies
 pixels before freeing or transferring them; failure does not poison term lookup.
+
+## Implementation References
+
+- [Database publication and health](../../ext/js/dictionary/dictionary-database.js)
+- [Record availability and repair](../../ext/js/dictionary/term-record-opfs-store.js)
+- [Import operation ownership](../../ext/js/background/offscreen-dictionary-worker.js)
+- [Lazy media rendering](../../ext/js/dictionary/dictionary-media-renderer.js)

@@ -55,6 +55,17 @@ function reopen(connection) {
 }
 
 describe('generation-owned durable dictionary health', () => {
+    test.each([null, 'JMdict'])('explicit publication retains its update receipt after reopen (replaced=%s)', async (replacedTitle) => {
+        const {database, connection, newSummary} = createDatabase();
+        const title = replacedTitle ?? 'Renamed';
+        const stagedSummary = {...newSummary, transientUpdateStage: 'update-staging', updateSessionToken: 'stale-token'};
+        connection.exec({sql: 'UPDATE dictionaries SET summaryJson = ? WHERE title = ?', bind: [JSON.stringify(stagedSummary), stagingTitle]});
+        await database.replaceDictionaryTitle(stagingTitle, title, {...newSummary, title, updateSessionToken: ' current-operation '}, replacedTitle);
+        const summary = (await reopen(connection).getDictionaryInfo()).find((entry) => entry.title === title);
+        expect(summary).toMatchObject({title, updateSessionToken: 'current-operation', storageGenerationId: 'new-generation'});
+        expect(summary).not.toHaveProperty('transientUpdateStage');
+    });
+
     test('a healthy replacement does not inherit old quarantine on reopen', async () => {
         const {database, connection, newSummary} = createDatabase();
         Reflect.get(database, '_termRecordStore').markDictionaryReimportRequired('old-storage', 'old checksum failure');
