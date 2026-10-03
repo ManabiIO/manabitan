@@ -1632,18 +1632,19 @@ function isStructuredStyleRecord(value) {
 
 /**
  * @param {Record<string, string>} attrs
- * @returns {Record<string, string>|null}
+ * @param {string} tagName
+ * @returns {Record<string, string>}
  */
-function buildStructuredData(attrs) {
+function buildStructuredData(attrs, tagName) {
     /** @type {Record<string, string>} */
-    const data = {};
+    const data = {tag: tagName};
     const className = typeof attrs.class === 'string' ?
         trimCssWhitespace(attrs.class).replace(/[\t\n\f\r ]+/gu, ' ') :
         '';
     if (className.length > 0) { data.class = className; }
     const id = typeof attrs.id === 'string' ? trimCssWhitespace(attrs.id) : '';
     if (id.length > 0) { data.id = id; }
-    return Object.keys(data).length > 0 ? data : null;
+    return data;
 }
 
 /**
@@ -1842,9 +1843,7 @@ function createStructuredImage(attrs, {assetPrefix, embeddedAssets, assetReferen
     }
     if (path === null) { return null; }
     /** @type {Record<string, unknown>} */
-    const image = {tag: 'img', path};
-    const data = buildStructuredData(attrs);
-    if (data !== null) { image.data = {tag: 'img', ...data}; }
+    const image = {tag: 'img', path, data: buildStructuredData(attrs, 'img')};
     const width = typeof attrs.width === 'string' && /^\d+$/u.test(attrs.width) ? Number.parseInt(attrs.width, 10) : Number.NaN;
     const height = typeof attrs.height === 'string' && /^\d+$/u.test(attrs.height) ? Number.parseInt(attrs.height, 10) : Number.NaN;
     if (Number.isFinite(width)) { image.width = width; }
@@ -1934,9 +1933,7 @@ function appendStructuredContent(parent, content, details) {
         }
 
         /** @type {Record<string, unknown>} */
-        const element = {tag: mappedTag};
-        const data = buildStructuredData(attrs);
-        if (data !== null) { element.data = {tag: tagName, ...data}; }
+        const element = {tag: mappedTag, data: buildStructuredData(attrs, tagName)};
 
         /** @type {StructuredStyle} */
         const style = {};

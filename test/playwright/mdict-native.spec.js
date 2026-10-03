@@ -256,6 +256,57 @@ test('MDX stylesheet media preserves special filename identities after import an
     await reopened.close();
 });
 
+test('MDX bare tags and ID-only elements retain stylesheet rules and CSS media after reopening', async ({page, context, extensionId}) => {
+    test.setTimeout(180_000);
+    const title = 'MDict bare tag regression';
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const png = makeFixturePng([12, 34, 56, 255]);
+    const mdx = makeMdictFixture([{
+        key: '\u732b',
+        value: '<p>paragraph <em>emphasis</em></p><span>bare image</span><div id="hero">ID image</div><img src="styles/icon.png">',
+    }], {title});
+    const mdd = makeMdictFixture([
+        {key: '\\styles\\theme.css', value: 'p{color:rgb(12,34,56)} em{color:rgb(65,43,21)} span,#hero{background-image:url(icon.png)} img{border:3px solid rgb(12,34,56)}'},
+        {key: '\\styles\\icon.png', value: png},
+    ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1});
+    await importFiles(page, extensionBaseUrl, [
+        {name: 'bare-tags.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
+        {name: 'bare-tags.mdd', mimeType: 'application/octet-stream', buffer: Buffer.from(mdd.bytes)},
+    ], title);
+    await assertStoredMedia(page, title, 'mdict-media/styles/icon.png', png);
+    /**
+     * @param {import('@playwright/test').Page} searchPage
+     * @returns {Promise<void>}
+     */
+    const assertRendered = async (searchPage) => {
+        await searchPage.goto(`${extensionBaseUrl}/search.html`);
+        await expect(searchPage.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+        await searchPage.locator('#search-textbox').fill('\u732b');
+        await searchPage.locator('#search-button').click();
+        await expect(searchPage.locator('#dictionary-entries [data-sc-tag="p"]')).toHaveCSS('color', 'rgb(12, 34, 56)', {timeout: 30_000});
+        await expect(searchPage.locator('#dictionary-entries [data-sc-tag="em"]')).toHaveCSS('color', 'rgb(65, 43, 21)');
+        await expect(searchPage.locator('#dictionary-entries [data-sc-tag="img"]')).toHaveCSS('border-top-width', '3px');
+        for (const selector of ['[data-sc-tag="span"]', '[data-sc-id="hero"]']) {
+            const target = searchPage.locator(`#dictionary-entries ${selector}`);
+            await expect(target).not.toHaveAttribute('data-sc-class');
+            await expect(async () => {
+                const background = await target.evaluate((element) => getComputedStyle(element).backgroundImage);
+                const match = /^url\("(blob:[^"]+)"\)$/u.exec(background);
+                expect(match).not.toBeNull();
+                const bytes = await searchPage.evaluate(async (url) => (
+                    [...new Uint8Array(await (await fetch(url)).arrayBuffer())]
+                ), match?.[1] ?? '');
+                expect(bytes).toStrictEqual([...png]);
+            }).toPass({timeout: 30_000});
+        }
+    };
+    await assertRendered(page);
+    const reopened = await context.newPage();
+    await page.close();
+    await assertRendered(reopened);
+    await reopened.close();
+});
+
 test('MDX imports every key from many small blocks and retains boundary lookups after reload', async ({page, extensionId}) => {
     test.setTimeout(180_000);
     const title = 'MDict many-key-block regression';

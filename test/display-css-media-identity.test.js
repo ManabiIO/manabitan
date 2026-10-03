@@ -3,6 +3,51 @@
  */
 import {expect, test, vi} from 'vitest';
 import {Display} from '../ext/js/display/display.js';
+import {createDomTest} from './fixtures/dom-test.js';
+
+const domTest = createDomTest();
+
+for (const attribute of ['data-sc-id', 'data-sc-tag']) {
+    domTest(`display resolves CSS images on elements selected only by ${attribute}`, async ({window}) => {
+        const display = /** @type {Display} */ (Object.create(Display.prototype));
+        const token = /** @type {import('core').TokenObject} */ ({});
+        const container = window.document.createElement('div');
+        const dictionaryContainer = window.document.createElement('div');
+        dictionaryContainer.dataset.dictionary = 'A';
+        const element = window.document.createElement('span');
+        element.setAttribute(attribute, 'hero');
+        dictionaryContainer.appendChild(element);
+        container.appendChild(dictionaryContainer);
+        const resolve = vi.fn().mockResolvedValue(false);
+        Reflect.set(display, '_options', {dictionaries: [{name: 'A', enabled: true, styles: `[${attribute}="hero"]{background:url("mdict-media/icon.png")}`}]});
+        Reflect.set(display, '_setContentToken', token);
+        Reflect.set(display, '_container', container);
+        Reflect.set(display, '_dictionaryCssMediaResolver', {
+            resolve,
+            /**
+             * @param {string} _dictionary
+             * @param {string} css
+             * @returns {string}
+             */
+            rewriteStyles(_dictionary, css) { return css; },
+        });
+        vi.stubGlobal('getComputedStyle', () => ({
+            /**
+             * @param {string} property
+             * @returns {string}
+             */
+            getPropertyValue(property) {
+                return property === 'background-image' ? 'url("mdict-media/icon.png")' : 'none';
+            },
+        }));
+        try {
+            await Display.prototype._resolveDictionaryCssMedia.call(display, token);
+            expect(resolve).toHaveBeenCalledExactlyOnceWith([{dictionary: 'A', path: 'mdict-media/icon.png'}]);
+        } finally {
+            vi.unstubAllGlobals();
+        }
+    });
+}
 
 test.each([
     'images/slash%2Fname.png',
@@ -81,7 +126,7 @@ test('display preserves distinct dictionary/path pairs before resolver batching'
     vi.stubGlobal('window', {location: {href: 'chrome-extension://example/search.html'}});
     try {
         await Display.prototype._resolveDictionaryCssMedia.call(display, token);
-        expect(querySelectorAll).toHaveBeenCalledExactlyOnceWith('[data-sc-class], [style*="mdict-media/"]');
+        expect(querySelectorAll).toHaveBeenCalledExactlyOnceWith('[data-sc-tag], [data-sc-id], [data-sc-class], [style*="mdict-media/"]');
         expect(resolve).toHaveBeenCalledExactlyOnceWith([first, second]);
     } finally {
         vi.unstubAllGlobals();

@@ -559,6 +559,30 @@ describe('convertMdxToArchive', () => {
         });
     });
 
+    test('preserves source tag identity without requiring a class or ID', async () => {
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Bare tags', Description: ''},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<p>paragraph <em>emphasis</em><span id="hero">ID only</span><img src="icon.png"></p>',
+            }],
+        });
+        const result = await convertMdxToArchive('bare-tags.mdx', {enableAudio: false}, new Uint8Array([1]), []);
+        const zip = await loadArchive(result.archiveContent);
+        const terms = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<unknown>}}} */ (terms[0][5][0]);
+        expect(glossary.content.content).toStrictEqual([expect.objectContaining({
+            tag: 'div',
+            data: {tag: 'p'},
+            content: [
+                'paragraph ',
+                expect.objectContaining({tag: 'span', data: {tag: 'em'}, content: ['emphasis']}),
+                expect.objectContaining({tag: 'span', data: {tag: 'span', id: 'hero'}, content: ['ID only']}),
+                {tag: 'img', path: 'mdict-media/icon.png', data: {tag: 'img'}},
+            ],
+        })]);
+    });
+
     test('rewrites MDX CSS selectors for structured-content attributes', async () => {
         mockState.mdxFactory = () => ({
             header: {Title: 'CSS selector fixture', Description: ''},
