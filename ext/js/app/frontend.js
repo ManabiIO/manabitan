@@ -385,6 +385,7 @@ export class Frontend {
 
     /** @type {import('cross-frame-api').ApiHandler<'frontendClosePopup'>} */
     _onApiClosePopup() {
+        this._textScanner.cancelPendingSearches();
         this._clearSelection(false);
     }
 
@@ -455,6 +456,7 @@ export class Frontend {
      * @returns {void}
      */
     _onClosePopups() {
+        this._textScanner.cancelPendingSearches();
         this._clearSelection(true);
         this._clearMousePosition();
     }

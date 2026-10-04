@@ -100,6 +100,8 @@ export class TextScanner extends EventDispatcher {
         this._pendingLookup = false;
         /** @type {number} Pointer admission lifetime; programmatic search is independent. */
         this._pointerGeneration = 0;
+        /** @type {number} Explicit dismissal invalidates all outstanding searches. */
+        this._searchGeneration = 0;
         /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
         this._queuedLookup = null;
         /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
@@ -269,23 +271,11 @@ export class TextScanner extends EventDispatcher {
         const value = enabled && this._isPrepared;
         if (this._enabledValue === value) { return; }
 
-        // Stop admission and invalidate pointer results synchronously. The actual
-        // API promise may still finish; its sequence can no longer publish or
-        // release a newer pointer operation's state after a disable/re-enable.
-        ++this._pointerGeneration;
-        this._activeLookupSequence = null;
-        this._pendingLookup = false;
-        this._queuedLookup = null;
-        this._queuedMouseMoveLookup = null;
-        this._scanTimerClear();
-        if (this._mouseMoveLookupTimer !== null) { clearTimeout(this._mouseMoveLookupTimer); }
-        this._mouseMoveLookupTimer = null;
+        this._cancelPointerLookups();
         if (this._preventNextClickScanTimer !== null) { clearTimeout(this._preventNextClickScanTimer); }
         this._preventNextClickScanTimer = null;
         this._preventNextClickScan = false;
         this._lastMouseMove = null;
-        this._isMouseOverText = false;
-
         this._eventListeners.removeAllEventListeners();
         this._primaryTouchIdentifier = null;
         this._preventNextContextMenu = false;
@@ -445,6 +435,15 @@ export class TextScanner extends EventDispatcher {
     }
 
     /**
+     * Abandons publication and queued admission, not the underlying API readers.
+     * New input remains enabled; automatic selection hiding does not call this.
+     */
+    cancelPendingSearches() {
+        ++this._searchGeneration;
+        this._cancelPointerLookups();
+    }
+
+    /**
      * @returns {?import('text-source').TextSource}
      */
     getCurrentTextSource() {
@@ -497,6 +496,19 @@ export class TextScanner extends EventDispatcher {
 
     // Private
 
+    /** */
+    _cancelPointerLookups() {
+        ++this._pointerGeneration;
+        this._activeLookupSequence = null;
+        this._pendingLookup = false;
+        this._queuedLookup = null;
+        this._queuedMouseMoveLookup = null;
+        this._scanTimerClear();
+        if (this._mouseMoveLookupTimer !== null) { clearTimeout(this._mouseMoveLookupTimer); }
+        this._mouseMoveLookupTimer = null;
+        this._isMouseOverText = false;
+    }
+
     /**
      * @param {import('settings').OptionsContext} baseOptionsContext
      * @param {import('text-scanner').InputInfo} inputInfo
@@ -522,12 +534,13 @@ export class TextScanner extends EventDispatcher {
      * @returns {Promise<?boolean>}
      */
     async _search(textSource, searchTerms, searchKanji, inputInfo, showEmpty = false, disallowExpandStartOffset = false, lookupSequence = null) {
+        const searchGeneration = this._searchGeneration;
         const searchStartedAt = safePerformance.now();
         let contextDurationMs = 0;
         let findDurationMs = 0;
         try {
             safePerformance.mark('scanner:_search:start');
-            if (this._isLookupStale(lookupSequence)) { return null; }
+            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
             const isAltText = textSource instanceof TextSourceElement;
             if (inputInfo.pointerType === 'touch') {
                 if (isAltText) {
@@ -563,7 +576,7 @@ export class TextScanner extends EventDispatcher {
             const getSearchContextPromise = this._getSearchContext();
             const getSearchContextResult = getSearchContextPromise instanceof Promise ? await getSearchContextPromise : getSearchContextPromise;
             contextDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
-            if (this._isLookupStale(lookupSequence)) { return null; }
+            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
             const {detail} = getSearchContextResult;
             const optionsContext = this._createOptionsContextForInput(getSearchContextResult.optionsContext, inputInfo);
 
@@ -578,7 +591,7 @@ export class TextScanner extends EventDispatcher {
             phaseStartedAt = safePerformance.now();
             const result = await this._findDictionaryEntries(textSource, searchTerms, searchKanji, optionsContext);
             findDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
-            if (this._isLookupStale(lookupSequence)) { return null; }
+            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
             if (result !== null) {
                 ({dictionaryEntries, sentence, type, dictionaryAvailability} = result);
             } else if (showEmpty || (textSource !== null && isAltText && await this._isTextLookupWorthy(textSource.content))) {
@@ -586,7 +599,7 @@ export class TextScanner extends EventDispatcher {
                 dictionaryEntries = [];
                 sentence = {text: '', offset: 0};
             }
-            if (this._isLookupStale(lookupSequence)) { return null; }
+            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
 
             if (dictionaryEntries !== null && sentence !== null) {
                 this._inputInfoCurrent = inputInfo;
@@ -633,7 +646,7 @@ export class TextScanner extends EventDispatcher {
                 return false;
             }
         } catch (error) {
-            if (this._isLookupStale(lookupSequence)) { return null; }
+            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
             this.trigger('searchError', {
                 error: error instanceof Error ? error : new Error(`A search error occurred: ${error}`),
                 textSource,
@@ -1523,10 +1536,11 @@ search);
 
     /**
      * @param {?number} lookupSequence
+     * @param {number} [searchGeneration]
      * @returns {boolean}
      */
-    _isLookupStale(lookupSequence) {
-        return (lookupSequence !== null && this._activeLookupSequence !== lookupSequence);
+    _isLookupStale(lookupSequence, searchGeneration = this._searchGeneration) {
+        return (searchGeneration !== this._searchGeneration || (lookupSequence !== null && this._activeLookupSequence !== lookupSequence));
     }
 
     /**
