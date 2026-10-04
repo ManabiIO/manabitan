@@ -2278,30 +2278,48 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             otherFrameId: sourceFrameId,
         };
         /** @type {?chrome.runtime.Port} */
-        let sourcePort = chrome.tabs.connect(sourceTabId, {frameId: sourceFrameId, name: JSON.stringify(sourceDetails)});
+        let sourcePort = null;
         /** @type {?chrome.runtime.Port} */
-        let targetPort = chrome.tabs.connect(targetTabId, {frameId: targetFrameId, name: JSON.stringify(targetDetails)});
+        let targetPort = null;
 
         const cleanup = () => {
             this._checkLastError(chrome.runtime.lastError);
-            if (targetPort !== null) {
-                targetPort.disconnect();
-                targetPort = null;
-            }
-            if (sourcePort !== null) {
-                sourcePort.disconnect();
-                sourcePort = null;
+            const ports = [targetPort, sourcePort];
+            targetPort = null;
+            sourcePort = null;
+            for (const port of ports) {
+                if (port === null) { continue; }
+                try {
+                    port.disconnect();
+                } catch (e) {
+                    // An invalidated endpoint must not prevent closing its peer.
+                }
             }
         };
 
-        sourcePort.onMessage.addListener((message) => {
-            if (targetPort !== null) { targetPort.postMessage(message); }
-        });
-        targetPort.onMessage.addListener((message) => {
-            if (sourcePort !== null) { sourcePort.postMessage(message); }
-        });
-        sourcePort.onDisconnect.addListener(cleanup);
-        targetPort.onDisconnect.addListener(cleanup);
+        try {
+            sourcePort = chrome.tabs.connect(sourceTabId, {frameId: sourceFrameId, name: JSON.stringify(sourceDetails)});
+            targetPort = chrome.tabs.connect(targetTabId, {frameId: targetFrameId, name: JSON.stringify(targetDetails)});
+            sourcePort.onMessage.addListener((message) => {
+                try {
+                    if (targetPort !== null) { targetPort.postMessage(message); }
+                } catch (e) {
+                    cleanup();
+                }
+            });
+            targetPort.onMessage.addListener((message) => {
+                try {
+                    if (sourcePort !== null) { sourcePort.postMessage(message); }
+                } catch (e) {
+                    cleanup();
+                }
+            });
+            sourcePort.onDisconnect.addListener(cleanup);
+            targetPort.onDisconnect.addListener(cleanup);
+        } catch (error) {
+            cleanup();
+            throw error;
+        }
 
         return {targetTabId, targetFrameId};
     }
