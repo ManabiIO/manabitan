@@ -39,8 +39,12 @@ export class PopupWindow extends EventDispatcher {
         this._depth = depth;
         /** @type {number} */
         this._frameId = frameId;
-        /** @type {?number} */
-        this._popupTabId = null;
+        /** @type {?{id: number}} */
+        this._popupTab = null;
+        /** @type {?Promise<?{id: number}>} */
+        this._popupTabPromise = null;
+        /** @type {?object} */
+        this._showContentToken = null;
     }
 
     /**
@@ -148,7 +152,8 @@ export class PopupWindow extends EventDispatcher {
      * @returns {Promise<boolean>} `true` if the popup is visible, `false` otherwise.
      */
     async isVisible() {
-        return (this._popupTabId !== null && await this._application.api.isTabSearchPopup(this._popupTabId));
+        const popupTab = this._popupTab;
+        return (!this._application.webExtension.unloaded && popupTab !== null && await this._application.api.isTabSearchPopup(popupTab.id));
     }
 
     /**
@@ -189,7 +194,9 @@ export class PopupWindow extends EventDispatcher {
      */
     async showContent(_details, displayDetails) {
         if (displayDetails === null) { return; }
-        await this._invoke(true, 'displaySetContent', {details: displayDetails});
+        const token = {};
+        this._showContentToken = token;
+        await this._invoke(true, 'displaySetContent', {details: displayDetails}, token);
     }
 
     /**
@@ -284,44 +291,80 @@ export class PopupWindow extends EventDispatcher {
      * @param {boolean} open
      * @param {TName} action
      * @param {import('display').DirectApiParams<TName>} params
+     * @param {?object} [token]
      * @returns {Promise<import('display').DirectApiReturn<TName>|undefined>}
      */
-    async _invoke(open, action, params) {
-        if (this._application.webExtension.unloaded) {
-            return void 0;
-        }
+    async _invoke(open, action, params, token = null) {
+        if (!this._isInvocationActive(token)) { return void 0; }
 
         const message = /** @type {import('display').DirectApiMessageAny} */ ({action, params});
 
         const frameId = 0;
-        if (this._popupTabId !== null) {
+        let popupTab = this._popupTab;
+        if (popupTab !== null) {
             try {
                 return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
-                    this._popupTabId,
+                    popupTab.id,
                     frameId,
                     'displayPopupMessage2',
                     message,
                 ));
             } catch (e) {
-                if (this._application.webExtension.unloaded) {
-                    open = false;
-                }
+                if (!this._isInvocationActive(token)) { return void 0; }
+                if (this._popupTab === popupTab) { this._popupTab = null; }
             }
-            this._popupTabId = null;
         }
 
         if (!open) {
             return void 0;
         }
 
-        const {tabId} = await this._application.api.getOrCreateSearchPopup({focus: 'ifCreated'});
-        this._popupTabId = tabId;
+        popupTab = await this._getPopupTab();
+        if (popupTab === null || !this._isInvocationActive(token)) { return void 0; }
 
-        return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
-            this._popupTabId,
-            frameId,
-            'displayPopupMessage2',
-            message,
-        ));
+        try {
+            return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
+                popupTab.id,
+                frameId,
+                'displayPopupMessage2',
+                message,
+            ));
+        } catch (e) {
+            if (!this._isInvocationActive(token)) { return void 0; }
+            if (this._popupTab === popupTab) { this._popupTab = null; }
+            throw e;
+        }
+    }
+
+    /**
+     * @param {?object} token
+     * @returns {boolean}
+     */
+    _isInvocationActive(token) {
+        return !this._application.webExtension.unloaded && (token === null || this._showContentToken === token);
+    }
+
+    /** @returns {Promise<?{id: number}>} */
+    async _getPopupTab() {
+        if (this._popupTab !== null) { return this._popupTab; }
+        if (this._popupTabPromise === null) {
+            const promise = this._createPopupTab().finally(() => {
+                if (this._popupTabPromise === promise) { this._popupTabPromise = null; }
+            });
+            this._popupTabPromise = promise;
+        }
+        return await this._popupTabPromise;
+    }
+
+    /** @returns {Promise<?{id: number}>} */
+    async _createPopupTab() {
+        const {tabId} = await this._application.api.getOrCreateSearchPopup({focus: 'ifCreated'});
+        if (this._application.webExtension.unloaded) { return null; }
+        if (typeof tabId !== 'number' || !Number.isSafeInteger(tabId) || tabId < 0) {
+            throw new Error('Invalid popup tab ID');
+        }
+        const popupTab = {id: tabId};
+        this._popupTab = popupTab;
+        return popupTab;
     }
 }
