@@ -1456,7 +1456,7 @@ export class Frontend {
         for (const {left, top, right, bottom} of textSource.getRects()) {
             sourceRects.push({left, top, right, bottom});
         }
-        this._lastShowPromise = (
+        const showPromise = (
             this._popup !== null ?
             this._popup.showContent(
                 {
@@ -1468,8 +1468,10 @@ export class Frontend {
             ) :
             Promise.resolve()
         );
-        void this._lastShowPromise.then(
+        this._lastShowPromise = showPromise;
+        void showPromise.then(
             () => {
+                if (this._lastShowPromise !== showPromise) { return; }
                 this._updatePageDebugState({
                     popupShowSettled: true,
                     popupShowDurationMs: Math.round(safePerformance.now() - showRequestedAt),
@@ -1480,7 +1482,7 @@ export class Frontend {
                 log.error(error);
             },
         );
-        return this._lastShowPromise;
+        return showPromise;
     }
 
     /**
@@ -1528,13 +1530,36 @@ export class Frontend {
      */
     async _updatePopupPosition() {
         const textSource = this._textScanner.getCurrentTextSource();
-        if (
-            textSource !== null &&
-            this._popup !== null &&
-            await this._popup.isVisible()
-        ) {
-            void this._showPopupContent(textSource, null, null);
+        const popup = this._popup;
+        const showPromise = this._lastShowPromise;
+        if (textSource === null || popup === null) { return; }
+        // A position-only show supersedes popup content delivery too. Wait for
+        // that delivery rather than allowing resize/scroll to cancel it.
+        try {
+            await showPromise;
+        } catch (e) {
+            // The content request owns error reporting; do not show its old DOM.
+            return;
         }
+        if (!this._isPopupPositionRequestCurrent(textSource, popup, showPromise)) { return; }
+        try {
+            if (!await popup.isVisible()) { return; }
+            if (!this._isPopupPositionRequestCurrent(textSource, popup, showPromise)) { return; }
+            void this._showPopupContent(textSource, null, null);
+        } catch (error) {
+            if (!this._isPopupPositionRequestCurrent(textSource, popup, showPromise) || this._application.webExtension.unloaded) { return; }
+            log.error(error);
+        }
+    }
+
+    /**
+     * @param {import('text-source').TextSource} textSource
+     * @param {import('popup').PopupAny} popup
+     * @param {Promise<void>} showPromise
+     * @returns {boolean}
+     */
+    _isPopupPositionRequestCurrent(textSource, popup, showPromise) {
+        return this._lastShowPromise === showPromise && this._popup === popup && this._textScanner.getCurrentTextSource() === textSource;
     }
 
     /**
