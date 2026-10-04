@@ -573,9 +573,12 @@ export class API {
      * @param {Transferable[]} transferables
      */
     drawMedia(requests, transferables) {
-        if (this._mediaDrawingWorker === null) { return; }
+        const worker = this._mediaDrawingWorker;
+        const generation = this._mediaDrawingWorkerGeneration;
+        if (worker === null) { return; }
         void this._ensureMediaDrawingWorkerConnected().then(() => {
-            this._mediaDrawingWorker?.postMessage({action: 'drawMedia', params: {requests}}, transferables);
+            if (worker !== this._mediaDrawingWorker || generation !== this._mediaDrawingWorkerGeneration) { return; }
+            worker.postMessage({action: 'drawMedia', params: {requests}}, transferables);
         }).catch(() => {
             // Ignore media draw failures here; the runtime error paths above now surface backend/bridge failures explicitly.
         });
@@ -1218,7 +1221,7 @@ export class API {
             }
         }
         this._mediaDrawingWorkerConnectGeneration = this._mediaDrawingWorkerGeneration;
-        this._mediaDrawingWorkerConnectPromise = (async () => {
+        const connectPromise = (async () => {
             const mediaDrawingWorker = this._mediaDrawingWorker;
             const mediaDrawingWorkerGeneration = this._mediaDrawingWorkerGeneration;
             const mediaDrawingWorkerToBackendChannel = new MessageChannel();
@@ -1234,10 +1237,11 @@ export class API {
                 throw error;
             }
         })();
+        this._mediaDrawingWorkerConnectPromise = connectPromise;
         try {
-            await this._mediaDrawingWorkerConnectPromise;
+            await connectPromise;
         } finally {
-            if (this._mediaDrawingWorkerConnectGeneration === this._mediaDrawingWorkerGeneration) {
+            if (this._mediaDrawingWorkerConnectPromise === connectPromise) {
                 this._mediaDrawingWorkerConnectPromise = null;
             }
         }
