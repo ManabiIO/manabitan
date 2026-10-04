@@ -151,3 +151,24 @@ for (const constructor of ['SharedWorker', 'MessageChannel']) {
         expect(vi.getTimerCount()).toBe(0);
     });
 }
+
+test('backend readiness request errors reject startup even if a ready broadcast arrived', async ({window}) => {
+    const {shutdown} = setupApplication(window);
+    const ready = vi.mocked(WebExtension.prototype.sendMessagePromise).getMockImplementation();
+    /**
+     * @this {WebExtension}
+     * @param {unknown} message
+     * @returns {Promise<unknown>}
+     */
+    async function failedReadyRequest(message) {
+        await ready?.call(this, message);
+        return {error: {name: 'Error', message: 'bridge registration failed', stack: ''}};
+    }
+    vi.mocked(WebExtension.prototype.sendMessagePromise).mockImplementation(failedReadyRequest);
+    const main = vi.fn(async () => {});
+    await expect(Application.main(false, main)).rejects.toThrow('bridge registration failed');
+    expect(shutdown).toHaveBeenCalledTimes(1);
+    expect(main).not.toHaveBeenCalled();
+    expect(window.document.querySelector('#startup-error-message')?.textContent).toContain('bridge registration failed');
+    expect(vi.getTimerCount()).toBe(0);
+});

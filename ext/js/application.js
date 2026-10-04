@@ -147,7 +147,10 @@ async function waitForBackendReady(webExtension) {
     let timeoutId = null;
     let unloaded = false;
     try {
-        await sendExtensionMessageWithRetry(webExtension, {action: 'requestBackendReadySignal'});
+        const response = await sendExtensionMessageWithRetry(webExtension, {action: 'requestBackendReadySignal'});
+        if (typeof response === 'object' && response !== null && 'error' in response && typeof response.error !== 'undefined') {
+            throw ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (response.error));
+        }
         const timeoutPromise = new Promise((_, reject) => {
             timeoutId = setTimeout(async () => {
                 const storedFailureMessage = await getStoredBackendStartupFailureMessage();

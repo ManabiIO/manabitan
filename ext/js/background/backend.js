@@ -1073,27 +1073,45 @@ export class Backend {
      * @throws {Error} If the shared worker cannot be constructed.
      */
     _setupSharedWorkerBridge() {
+        if (this._sharedWorkerBridge !== null) { return; }
         const sharedWorkerBridge = new SharedWorker(new URL('../comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
         this._sharedWorkerBridge = sharedWorkerBridge;
-        sharedWorkerBridge.port.addEventListener('message', (/** @type {MessageEvent} */ e) => {
-            // connectToBackend2
-            e.ports[0].onmessage = this._onPmMessage.bind(this);
-        });
-        sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent<import('api').PmApiMessageAny>} */ event) => {
-            this._onPmMessageError(event);
-            this._resetSharedWorkerBridge(sharedWorkerBridge, 'messageerror', new Error('Shared worker backend bridge message deserialization failed'));
-        });
-        sharedWorkerBridge.onerror = (event) => {
-            const message = typeof event.message === 'string' && event.message.length > 0 ? event.message : 'unknown shared worker failure';
-            this._resetSharedWorkerBridge(sharedWorkerBridge, 'error', new Error(message));
-        };
-        sharedWorkerBridge.port.start();
+        let stage = 'configurePort';
         try {
+            sharedWorkerBridge.port.addEventListener('message', (/** @type {MessageEvent} */ e) => {
+                if (this._sharedWorkerBridge !== sharedWorkerBridge || e.ports.length !== 1) {
+                    for (const port of e.ports) {
+                        try {
+                            port.close();
+                        } catch (_) {
+                            // Release every port received by the obsolete or malformed handshake.
+                        }
+                    }
+                    if (this._sharedWorkerBridge === sharedWorkerBridge) {
+                        log.error(new Error('Backend bridge connection message must contain exactly one frontend port'));
+                    }
+                    return;
+                }
+                // connectToBackend2
+                e.ports[0].onmessage = this._onPmMessage.bind(this);
+            });
+            sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent<import('api').PmApiMessageAny>} */ event) => {
+                if (this._sharedWorkerBridge !== sharedWorkerBridge) { return; }
+                this._onPmMessageError(event);
+                this._resetSharedWorkerBridge(sharedWorkerBridge, 'messageerror', new Error('Shared worker backend bridge message deserialization failed'));
+            });
+            sharedWorkerBridge.onerror = (event) => {
+                const message = typeof event.message === 'string' && event.message.length > 0 ? event.message : 'unknown shared worker failure';
+                this._resetSharedWorkerBridge(sharedWorkerBridge, 'error', new Error(message));
+            };
+            stage = 'start';
+            sharedWorkerBridge.port.start();
+            stage = 'registerBackendPort';
             sharedWorkerBridge.port.postMessage({action: 'registerBackendPort'});
         } catch (error) {
             this._resetSharedWorkerBridge(
                 sharedWorkerBridge,
-                'registerBackendPort',
+                stage,
                 error instanceof Error ? error : new Error(String(error)),
             );
             throw error;
@@ -1126,15 +1144,18 @@ export class Backend {
         }
         this._sharedWorkerBridgeReconnectScheduled = true;
         queueMicrotask(() => {
-            this._sharedWorkerBridgeReconnectScheduled = false;
             try {
-                this._setupSharedWorkerBridge();
+                if (this._sharedWorkerBridge === null) {
+                    this._setupSharedWorkerBridge();
+                }
             } catch (reconnectError) {
                 const normalizedError = reconnectError instanceof Error ? reconnectError : new Error(String(reconnectError));
                 reportDiagnostics('shared-worker-bridge-reconnect-failed', {
                     message: normalizedError.message,
                 });
                 log.error(normalizedError);
+            } finally {
+                this._sharedWorkerBridgeReconnectScheduled = false;
             }
         });
     }
@@ -1144,6 +1165,20 @@ export class Backend {
      */
     _isWindowBackgroundRuntime() {
         return typeof self !== 'undefined' && self !== null && self.constructor?.name === 'Window';
+    }
+
+    /** @returns {void} */
+    _ensureSharedWorkerBridge() {
+        if (this._sharedWorkerBridge !== null || this._sharedWorkerBridgeReconnectScheduled || !this._isWindowBackgroundRuntime()) {
+            return;
+        }
+        // Retry a missing bridge on later demand, never through a self-scheduling loop.
+        this._sharedWorkerBridgeReconnectScheduled = true;
+        try {
+            this._setupSharedWorkerBridge();
+        } finally {
+            this._sharedWorkerBridgeReconnectScheduled = false;
+        }
     }
 
 
@@ -1188,6 +1223,7 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'requestBackendReadySignal'>} */
     _onApiRequestBackendReadySignal(_params, sender) {
+        this._ensureSharedWorkerBridge();
         // Tab ID isn't set in background (e.g. browser_action)
         /** @type {import('application').ApiMessage<'applicationBackendReady'>} */
         const data = {action: 'applicationBackendReady'};
@@ -2277,6 +2313,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
 
     /** @type {import('api').ApiHandler<'heartbeat'>} */
     _onApiHeartbeat() {
+        this._ensureSharedWorkerBridge();
         return void 0;
     }
 

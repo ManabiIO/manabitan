@@ -28,6 +28,75 @@ afterEach(() => {
 });
 
 describe('SharedWorkerBridge', () => {
+    test('replaced backend ports close and stale errors do not affect the current registration', () => {
+        const report = vi.spyOn(log, 'error').mockImplementation(() => {});
+        const bridge = new SharedWorkerBridge();
+        /** @type {Map<string, () => void>} */
+        const oldEvents = new Map();
+        /** @type {Map<string, () => void>} */
+        const currentEvents = new Map();
+        const oldPort = {close: vi.fn(), postMessage: vi.fn(), addEventListener: vi.fn((type, listener) => oldEvents.set(type, listener))};
+        const currentPort = {close: vi.fn(), postMessage: vi.fn(), addEventListener: vi.fn((type, listener) => currentEvents.set(type, listener))};
+        bridge._onRegisterBackendPort(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ (oldPort)), []);
+        bridge._onRegisterBackendPort(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ (currentPort)), []);
+        expect(oldPort.close).toHaveBeenCalledTimes(1);
+        oldEvents.get('messageerror')?.();
+        expect(bridge._backendPort).toBe(currentPort);
+        expect(currentPort.close).not.toHaveBeenCalled();
+        expect(report).not.toHaveBeenCalled();
+        currentEvents.get('messageerror')?.();
+        expect(bridge._backendPort).toBeNull();
+        expect(currentPort.close).toHaveBeenCalledTimes(1);
+        expect(report).toHaveBeenCalledTimes(1);
+    });
+
+    test('same backend registration is idempotent', () => {
+        const bridge = new SharedWorkerBridge();
+        const port = {close: vi.fn(), addEventListener: vi.fn(), postMessage: vi.fn()};
+        const backendPort = /** @type {MessagePort} */ (/** @type {unknown} */ (port));
+        bridge._onRegisterBackendPort(undefined, backendPort, []);
+        bridge._onRegisterBackendPort(undefined, backendPort, []);
+        expect(port.addEventListener).toHaveBeenCalledTimes(1);
+        expect(port.close).not.toHaveBeenCalled();
+    });
+
+    test('failed forwarding closes the broken backend without closing the queued frontend', () => {
+        vi.spyOn(log, 'error').mockImplementation(() => {});
+        const bridge = new SharedWorkerBridge();
+        const frontend = {close: vi.fn()};
+        const backend = {close: vi.fn(), addEventListener: vi.fn(), postMessage: vi.fn(() => { throw new Error('backend dead'); })};
+        bridge._onRegisterBackendPort(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ (backend)), []);
+        const frontendPort = /** @type {MessagePort} */ (/** @type {unknown} */ (frontend));
+        bridge._onConnectToBackend1(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ ({})), [frontendPort]);
+        expect(backend.close).toHaveBeenCalledTimes(1);
+        expect(frontend.close).not.toHaveBeenCalled();
+        expect(bridge._pendingBackendConnectionPorts).toStrictEqual([frontend]);
+    });
+
+    test('large failed flush retains every queued port without argument-limit failure', () => {
+        vi.spyOn(log, 'error').mockImplementation(() => {});
+        const bridge = new SharedWorkerBridge();
+        const pending = Array.from({length: 160_000}, (_, index) => /** @type {MessagePort} */ (/** @type {unknown} */ ({index})));
+        bridge._pendingBackendConnectionPorts = [...pending];
+        const backend = {close: vi.fn(), addEventListener: vi.fn(), postMessage: vi.fn(() => { throw new Error('backend dead'); })};
+        expect(() => bridge._onRegisterBackendPort(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ (backend)), [])).not.toThrow();
+        expect(bridge._pendingBackendConnectionPorts).toStrictEqual(pending);
+    });
+
+    test('partial flush resumes in original order without replaying transferred ports', () => {
+        vi.spyOn(log, 'error').mockImplementation(() => {});
+        const bridge = new SharedWorkerBridge();
+        const pending = Array.from({length: 4}, (_, index) => /** @type {MessagePort} */ (/** @type {unknown} */ ({index})));
+        bridge._pendingBackendConnectionPorts = [...pending];
+        const failed = {close: vi.fn(), addEventListener: vi.fn(), postMessage: vi.fn().mockImplementationOnce(() => {}).mockImplementation(() => { throw new Error('backend dead'); })};
+        bridge._onRegisterBackendPort(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ (failed)), []);
+        expect(bridge._pendingBackendConnectionPorts).toStrictEqual(pending.slice(1));
+        const replacement = {close: vi.fn(), addEventListener: vi.fn(), postMessage: vi.fn()};
+        bridge._onRegisterBackendPort(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ (replacement)), []);
+        expect(replacement.postMessage.mock.calls.map(([, ports]) => ports[0])).toStrictEqual(pending.slice(1));
+        expect(bridge._pendingBackendConnectionPorts).toHaveLength(0);
+    });
+
     test('queues frontend connection ports until backend registers', () => {
         vi.spyOn(log, 'warn').mockImplementation(() => {});
         const bridge = new SharedWorkerBridge();
