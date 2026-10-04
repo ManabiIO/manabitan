@@ -551,41 +551,47 @@ export class Display extends EventDispatcher {
      * Updates the content of the display.
      * @param {import('display').ContentDetails} details Information about the content to show.
      * @returns {Promise<void>}
+     * @throws {Error} If request setup or history publication fails.
      */
     setContent(details) {
-        const stateChangeCompletePromise = this._waitForStateChangeComplete(5000);
-        const {focus, params, state, content} = details;
-        const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
+        const {promise, finish} = this._createStateChangeCompletion(5000);
+        try {
+            const {focus, params, state, content} = details;
+            const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
 
-        if (focus) {
-            window.focus();
-        }
+            if (focus) {
+                window.focus();
+            }
 
-        const urlSearchParams = new URLSearchParams();
-        for (const [key, value] of Object.entries(params)) {
-            if (typeof value !== 'string') { continue; }
-            urlSearchParams.append(key, value);
-        }
-        const url = `${location.protocol}//${location.host}${location.pathname}?${urlSearchParams.toString()}`;
+            const urlSearchParams = new URLSearchParams();
+            for (const [key, value] of Object.entries(params)) {
+                if (typeof value !== 'string') { continue; }
+                urlSearchParams.append(key, value);
+            }
+            const url = `${location.protocol}//${location.host}${location.pathname}?${urlSearchParams.toString()}`;
 
-        switch (historyMode) {
-            case 'clear':
-                this._history.clear();
-                this._history.replaceState(state, content, url);
-                break;
-            case 'overwrite':
-                this._history.replaceState(state, content, url);
-                break;
-            case 'new':
-                this._updateHistoryState();
-                this._history.pushState(state, content, url);
-                break;
-        }
+            switch (historyMode) {
+                case 'clear':
+                    this._history.clear();
+                    this._history.replaceState(state, content, url);
+                    break;
+                case 'overwrite':
+                    this._history.replaceState(state, content, url);
+                    break;
+                case 'new':
+                    this._updateHistoryState();
+                    this._history.pushState(state, content, url);
+                    break;
+            }
 
-        if (this._options) {
-            this._setTheme(this._options);
+            if (this._options) {
+                this._setTheme(this._options);
+            }
+        } catch (e) {
+            finish();
+            throw e;
         }
-        return stateChangeCompletePromise;
+        return promise;
     }
 
     /** Invalidate stale results immediately when the search draft changes. */
@@ -879,13 +885,15 @@ export class Display extends EventDispatcher {
     async _onStateChanged() {
         if (this._historyChangeIgnore) { return; }
 
-        safePerformance.mark('display:_onStateChanged:start');
+        // History events are synchronous; later requests belong to later renders.
+        const completions = this._stateChangeCompleteResolvers.splice(0);
 
         /** @type {?import('core').TokenObject} */
         const token = {}; // Unique identifier token
         this._setContentToken = token;
-        this._dictionaryAvailabilityNotification?.close(false);
         try {
+            safePerformance.mark('display:_onStateChanged:start');
+            this._dictionaryAvailabilityNotification?.close(false);
             // Clear
             safePerformance.mark('display:_onStateChanged:clear:start');
             this._closePopups();
@@ -934,11 +942,21 @@ export class Display extends EventDispatcher {
             safePerformance.mark('display:_onStateChanged:setContent:end');
             safePerformance.measure('display:_onStateChanged:setContent', 'display:_onStateChanged:setContent:start', 'display:_onStateChanged:setContent:end');
         } catch (e) {
-            this.onError(toError(e));
+            try {
+                this.onError(toError(e));
+            } catch (error) {
+                // Reporting must not reject the unawaited history event handler.
+            }
+        } finally {
+            try {
+                safePerformance.mark('display:_onStateChanged:end');
+                safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
+            } catch (error) {
+                // Profiling failures cannot strand completion or reject history events.
+            } finally {
+                for (const finish of completions) { finish(); }
+            }
         }
-        safePerformance.mark('display:_onStateChanged:end');
-        safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
-        this._resolveStateChangeCompleteWaiters();
     }
 
     /**
@@ -2680,13 +2698,14 @@ export class Display extends EventDispatcher {
 
     /**
      * @param {number} timeoutMs
-     * @returns {Promise<void>}
+     * @returns {{promise: Promise<void>, finish: () => void}}
      */
-    _waitForStateChangeComplete(timeoutMs) {
+    _createStateChangeCompletion(timeoutMs) {
         /** @type {import('core').Timeout|null} */
         let timeout = null;
         /** @type {(value?: void) => void} */
         let resolvePromise;
+        /** @type {Promise<void>} */
         const promise = new Promise((resolve) => {
             resolvePromise = resolve;
         });
@@ -2703,15 +2722,7 @@ export class Display extends EventDispatcher {
         };
         this._stateChangeCompleteResolvers.push(finish);
         timeout = setTimeout(finish, timeoutMs);
-        return promise;
-    }
-
-    /** */
-    _resolveStateChangeCompleteWaiters() {
-        const resolvers = this._stateChangeCompleteResolvers.splice(0);
-        for (const resolve of resolvers) {
-            resolve();
-        }
+        return {promise, finish};
     }
 
     /**
