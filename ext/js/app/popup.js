@@ -60,6 +60,8 @@ export class Popup extends EventDispatcher {
         this._injectPromise = null;
         /** @type {boolean} */
         this._injectPromiseComplete = false;
+        /** @type {?object} */
+        this._showContentToken = null;
         /** @type {DynamicProperty<boolean>} */
         this._visible = new DynamicProperty(false);
         /** @type {boolean} */
@@ -275,6 +277,7 @@ export class Popup extends EventDispatcher {
      * @param {boolean} changeFocus Whether or not the parent popup or host frame should be focused.
      */
     hide(changeFocus) {
+        this._showContentToken = null;
         this.stopHideDelayed();
         if (this._child !== null) {
             this._child.hide(false);
@@ -370,6 +373,8 @@ export class Popup extends EventDispatcher {
      */
     async showContent(details, displayDetails) {
         if (this._optionsContext === null) { throw new Error('Options not assigned'); }
+        const token = {};
+        this._showContentToken = token;
         this._updateHostPageDebugState({
             popupShowAttemptCount: this._incrementHostDebugCounter('popupShowAttemptCount'),
         });
@@ -378,6 +383,7 @@ export class Popup extends EventDispatcher {
         if (optionsContext !== null) {
             await this._setOptionsContextIfDifferent(optionsContext);
         }
+        if (this._showContentToken !== token) { return; }
 
         // If there's already a timer running on the same popup from a previous lookup, reset it
         this.stopHideDelayed();
@@ -385,11 +391,12 @@ export class Popup extends EventDispatcher {
         if (displayDetails !== null) {
             safePerformance.mark('invokeDisplaySetContent:start');
             const injected = await this._inject();
-            if (!injected) { return; }
+            if (!injected || this._showContentToken !== token) { return; }
             await this._invokeSafe('displaySetContent', {details: displayDetails});
+            if (this._showContentToken !== token) { return; }
         }
 
-        await this._show(sourceRects, writingMode);
+        await this._show(sourceRects, writingMode, token);
     }
 
     /**
@@ -786,10 +793,11 @@ export class Popup extends EventDispatcher {
     /**
      * @param {import('popup').Rect[]} sourceRects
      * @param {import('document-util').NormalizedWritingMode} writingMode
+     * @param {object} token
      */
-    async _show(sourceRects, writingMode) {
+    async _show(sourceRects, writingMode, token) {
         const injected = await this._inject();
-        if (!injected) { return; }
+        if (!injected || this._showContentToken !== token) { return; }
 
         const viewport = this._getViewport(this._scaleRelativeToVisualViewport);
         let {left, top, width, height, after, below} = this._getPosition(sourceRects, writingMode, viewport);
