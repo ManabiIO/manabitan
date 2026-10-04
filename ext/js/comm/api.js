@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {createFirefoxBackendPort} from './firefox-backend-port.js';
 
 const pmTransportTimeoutMs = 10_000;
 const apiInvokeTimeoutMs = 30_000;
@@ -1167,31 +1168,7 @@ export class API {
      * @throws {Error} If the Firefox backend channel cannot be initialized.
      */
     _createFirefoxBackendPort() {
-        const sharedWorkerBridge = new SharedWorker(new URL('shared-worker-bridge.js', import.meta.url), {type: 'module'});
-        const backendChannel = new MessageChannel();
-        try {
-            sharedWorkerBridge.port.postMessage({action: 'connectToBackend1'}, [backendChannel.port1]);
-            sharedWorkerBridge.port.close();
-            return backendChannel.port2;
-        } catch (error) {
-            try {
-                sharedWorkerBridge.port.close();
-            } catch (_) {
-                // Ignore close failures for broken shared-worker bridge setup.
-            }
-            try {
-                backendChannel.port1.close();
-            } catch (_) {
-                // Ignore close failures for unused bridge ports.
-            }
-            try {
-                backendChannel.port2.close();
-            } catch (_) {
-                // Ignore close failures for unused bridge ports.
-            }
-            const normalizedError = error instanceof Error ? error : new Error(String(error));
-            throw new Error(`Failed to initialize Firefox backend bridge. You may need to refresh the page. ${normalizedError.message}`);
-        }
+        return createFirefoxBackendPort();
     }
 
     /**
@@ -1230,10 +1207,12 @@ export class API {
                 mediaDrawingWorker?.postMessage({action: 'connectToDatabaseWorker'}, [mediaDrawingWorkerToBackendChannel.port2]);
                 await this.connectToDatabaseWorker(mediaDrawingWorkerToBackendChannel.port1, {expectedMediaDrawingWorkerGeneration: mediaDrawingWorkerGeneration});
             } catch (error) {
-                try {
-                    mediaDrawingWorkerToBackendChannel.port1.close();
-                } catch (_) {
-                    // Ignore close failures for failed media bridge setup.
+                for (const port of [mediaDrawingWorkerToBackendChannel.port1, mediaDrawingWorkerToBackendChannel.port2]) {
+                    try {
+                        port.close();
+                    } catch (_) {
+                        // Ignore close failures for failed media bridge setup.
+                    }
                 }
                 throw error;
             }

@@ -59,6 +59,18 @@ describe('WebExtension', () => {
         await expectation;
     });
 
+    test('sendMessagePromise rejects already-unloaded runtime without dispatch or timers', async () => {
+        vi.useFakeTimers();
+        const webExtension = new WebExtension();
+        webExtension.triggerUnloaded();
+        const request = webExtension.sendMessagePromise({action: 'noop'});
+        const expectation = expect(request).rejects.toThrow(/Lost connection to the extension runtime/);
+        expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+        expect(vi.getTimerCount()).toBe(0);
+        await vi.advanceTimersByTimeAsync(30_000);
+        await expectation;
+    });
+
     test('sendMessagePromise does not mark a live extension unloaded when a recipient disconnects', async () => {
         const webExtension = new WebExtension();
         globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {

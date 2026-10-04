@@ -125,3 +125,29 @@ test('restart limit is handled without an unhandled rejection', async ({window})
     expect(report.mock.calls.some(([error]) => error instanceof Error && error.message === 'Media drawing worker restart limit exceeded')).toBe(true);
     expect(vi.getTimerCount()).toBe(0);
 });
+
+for (const constructor of ['SharedWorker', 'MessageChannel']) {
+    test(`initial Firefox ${constructor} failure shows startup error and releases acquired ports`, async ({window}) => {
+        const {workers} = setupApplication(window);
+        vi.stubGlobal('navigator', {});
+        const bridgePort = {postMessage: vi.fn(), close: vi.fn()};
+        vi.stubGlobal('SharedWorker', class {
+            constructor() {
+                if (constructor === 'SharedWorker') { throw new Error('bridge constructor failed'); }
+                this.port = bridgePort;
+            }
+        });
+        vi.stubGlobal('MessageChannel', class {
+            constructor() { throw new Error('channel constructor failed'); }
+        });
+        const message = constructor === 'SharedWorker' ? 'bridge constructor failed' : 'channel constructor failed';
+        const main = vi.fn(async () => {});
+        await expect(Application.main(false, main)).rejects.toThrow(message);
+        expect(window.document.documentElement.dataset.loadingError).toBe('true');
+        expect(window.document.querySelector('#startup-error-message')?.textContent).toContain(message);
+        if (constructor === 'MessageChannel') { expect(bridgePort.close).toHaveBeenCalledTimes(1); }
+        expect(main).not.toHaveBeenCalled();
+        expect(workers).toHaveLength(0);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+}

@@ -85,6 +85,9 @@ export class WebExtension extends EventDispatcher {
      * @returns {Promise<unknown>}
      */
     sendMessagePromise(message) {
+        if (this._unloaded) {
+            return Promise.reject(new Error('Lost connection to the extension runtime. Refresh this page to reconnect.'));
+        }
         return new Promise((resolve, reject) => {
             let settled = false;
             /** @type {() => void} */
