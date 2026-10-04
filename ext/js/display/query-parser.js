@@ -323,9 +323,9 @@ export class QueryParser extends EventDispatcher {
             this._setPreview(this._text);
             return;
         }
-        this._queryParser.textContent = '';
+        const fragment = this._createParseResult(parseResult.content);
+        this._queryParser.replaceChildren(fragment);
         this._queryParser.dataset.parsed = 'true';
-        this._queryParser.appendChild(this._createParseResult(parseResult.content));
     }
 
     /**
@@ -487,14 +487,29 @@ export class QueryParser extends EventDispatcher {
     _setReadingMode(value) {
         this._readingMode = value;
         if (value === 'romaji') {
-            this._loadJapaneseWanakanaModule();
+            void this._loadJapaneseWanakanaModule();
         }
     }
 
     /** */
-    _loadJapaneseWanakanaModule() {
-        if (this._japaneseWanakanaModuleImport !== null) { return; }
+    async _loadJapaneseWanakanaModule() {
+        if (this._japaneseWanakanaModule !== null || this._japaneseWanakanaModuleImport !== null) { return; }
         this._japaneseWanakanaModuleImport = import('../language/ja/japanese-wanakana.js');
-        void this._japaneseWanakanaModuleImport.then((value) => { this._japaneseWanakanaModule = value; });
+        try {
+            this._japaneseWanakanaModule = await this._japaneseWanakanaModuleImport;
+            if (this._readingMode === 'romaji' && this._parseResults.length > 0) {
+                this._renderParseResult();
+            }
+        } catch (error) {
+            // A loaded converter can still fail while rendering; retain the previous DOM for a later retry.
+            if (this._japaneseWanakanaModule !== null) { this._needsTextUpdate = true; }
+            try {
+                log.error(error);
+            } catch (e) {
+                // Reporting must not reject this fire-and-forget initialization.
+            }
+        } finally {
+            this._japaneseWanakanaModuleImport = null;
+        }
     }
 }
