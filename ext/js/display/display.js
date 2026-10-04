@@ -75,8 +75,8 @@ export class Display extends EventDispatcher {
         this._dictionaryEntryNodes = [];
         /** @type {import('settings').OptionsContext} */
         this._optionsContext = {depth: 0, url: window.location.href};
-        // Retain a successful or pending load; failed loads are evicted for retry.
-        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>}} */
+        // Retain failed requests for existing waiters; new consumers retry them.
+        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
         this._optionsContextRequest = null;
         /** @type {?object} */
         this._nestedFrontendUpdateToken = null;
@@ -162,6 +162,8 @@ export class Display extends EventDispatcher {
         this._navigationNextButton = document.querySelector('#navigate-next-button');
         /** @type {?import('../app/frontend.js').Frontend} */
         this._frontend = null;
+        /** @type {?{frontend: import('../app/frontend.js').Frontend, popupFactory: import('../app/popup-factory.js').PopupFactory}} */
+        this._frontendPending = null;
         /** @type {?Promise<void>} */
         this._frontendSetupPromise = null;
         /** @type {number} */
@@ -481,13 +483,11 @@ export class Display extends EventDispatcher {
 
     /** @returns {Promise<void>} */
     updateOptions() {
-        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>}} */
-        const request = {optionsContext: this.getOptionsContext(), promise: null};
+        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
+        const request = {optionsContext: this.getOptionsContext(), promise: null, failed: false};
         this._optionsContextRequest = request;
         request.promise = this._updateOptionsInner(request.optionsContext, request).catch((error) => {
-            if (this._optionsContextRequest === request) {
-                this._optionsContextRequest = null;
-            }
+            request.failed = true;
             throw error;
         });
         return request.promise;
@@ -2140,12 +2140,22 @@ export class Display extends EventDispatcher {
      * @param {import('settings').OptionsContext} optionsContext
      */
     async _setOptionsContextIfDifferent(optionsContext) {
-        const request = this._optionsContextRequest;
-        if (request && deepEqual(request.optionsContext, optionsContext)) {
-            await request.promise;
-            return;
+        let request = this._optionsContextRequest;
+        let promise;
+        if (request && !request.failed && deepEqual(request.optionsContext, optionsContext)) { promise = request.promise; } else {
+            promise = this.setOptionsContext(optionsContext);
+            request = this._optionsContextRequest;
         }
-        await this.setOptionsContext(optionsContext);
+        for (;;) {
+            try { await promise; } catch (error) {
+                const next = this._optionsContextRequest;
+                if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { throw error; }
+            }
+            const next = this._optionsContextRequest;
+            if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { return; }
+            request = next;
+            promise = next.promise;
+        }
     }
 
     /**
@@ -2179,16 +2189,15 @@ export class Display extends EventDispatcher {
         if (this._frontend === null || this._frontendSetupPromise !== null) {
             if (!isEnabled && this._frontendSetupPromise === null) { return; }
 
+            const promise = this._frontendSetupPromise ?? this._setupNestedFrontend();
+            this._frontendSetupPromise = promise;
             try {
-                if (this._frontendSetupPromise === null) {
-                    this._frontendSetupPromise = this._setupNestedFrontend();
-                }
-                await this._frontendSetupPromise;
+                await promise;
             } catch (e) {
-                log.error(e);
+                if (this._nestedFrontendUpdateToken === token) { log.error(e); }
                 return;
             } finally {
-                this._frontendSetupPromise = null;
+                if (this._frontendSetupPromise === promise) { this._frontendSetupPromise = null; }
             }
         }
 
@@ -2198,34 +2207,40 @@ export class Display extends EventDispatcher {
 
     /** */
     async _setupNestedFrontend() {
-        const useProxyPopup = this._parentFrameId !== null;
-        const parentPopupId = this._parentPopupId;
-        const parentFrameId = this._parentFrameId;
+        if (this._frontendPending === null) {
+            const useProxyPopup = this._parentFrameId !== null;
+            const parentPopupId = this._parentPopupId;
+            const parentFrameId = this._parentFrameId;
 
-        const [{PopupFactory}, {Frontend}] = await Promise.all([
-            import('../app/popup-factory.js'),
-            import('../app/frontend.js'),
-        ]);
+            const [{PopupFactory}, {Frontend}] = await Promise.all([
+                import('../app/popup-factory.js'),
+                import('../app/frontend.js'),
+            ]);
 
-        const popupFactory = new PopupFactory(this._application);
+            const popupFactory = new PopupFactory(this._application);
+
+            const frontend = new Frontend({
+                application: this._application,
+                useProxyPopup,
+                parentPopupId,
+                parentFrameId,
+                depth: this._depth + 1,
+                popupFactory,
+                pageType: this._pageType,
+                allowRootFramePopupProxy: true,
+                childrenSupported: this._childrenSupported,
+                hotkeyHandler: this._hotkeyHandler,
+                canUseWindowPopup: true,
+                browser: this._browser,
+            });
+            frontend.setDisabledOverride(true);
+            this._frontendPending = {frontend, popupFactory};
+        }
+        const {frontend, popupFactory} = this._frontendPending;
         popupFactory.prepare();
-
-        const frontend = new Frontend({
-            application: this._application,
-            useProxyPopup,
-            parentPopupId,
-            parentFrameId,
-            depth: this._depth + 1,
-            popupFactory,
-            pageType: this._pageType,
-            allowRootFramePopupProxy: true,
-            childrenSupported: this._childrenSupported,
-            hotkeyHandler: this._hotkeyHandler,
-            canUseWindowPopup: true,
-            browser: this._browser,
-        });
-        this._frontend = frontend;
         await frontend.prepare();
+        this._frontend = frontend;
+        this._frontendPending = null;
     }
 
     /**

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {extendApiMap, invokeApiMapHandler} from '../core/api-map.js';
+import {extendApiMap, invokeApiMapHandler, registerApiMapScope} from '../core/api-map.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
@@ -419,6 +419,14 @@ export class CrossFrameAPI {
      */
     registerHandlers(handlers) {
         extendApiMap(this._apiMap, handlers);
+    }
+
+    /**
+     * @param {import('cross-frame-api').ApiMapInit} handlers
+     * @returns {() => void}
+     */
+    registerHandlersScoped(handlers) {
+        return registerApiMapScope(this._apiMap, handlers);
     }
 
     // Private

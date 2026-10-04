@@ -39,12 +39,15 @@ export class PopupFactory {
         this._popups = new Map();
         /** @type {Map<string, {popup: import('popup').PopupAny, token: string}[]>} */
         this._allPopupVisibilityTokenMap = new Map();
+        /** @type {boolean} */
+        this._prepared = false;
     }
 
     /**
      * Prepares the instance for use.
      */
     prepare() {
+        if (this._prepared) { return; }
         this._frameOffsetForwarder.prepare();
         /* eslint-disable @stylistic/no-multi-spaces */
         this._application.crossFrame.registerHandlers([
@@ -66,6 +69,7 @@ export class PopupFactory {
             ['popupFactoryIsPointerOver',        this._onApiIsPointerOver.bind(this)],
         ]);
         /* eslint-enable @stylistic/no-multi-spaces */
+        this._prepared = true;
     }
 
     /**

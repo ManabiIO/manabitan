@@ -81,6 +81,20 @@ export class Frontend {
         this._disabledOverride = false;
         /** @type {?import('settings').ProfileOptions} */
         this._options = null;
+        /** @type {?object} */
+        this._optionsUpdateToken = null;
+        /** @type {?Promise<void>} */
+        this._optionsUpdatePromise = null;
+        /** @type {?Promise<void>} */
+        this._preparePromise = null;
+        /** @type {boolean} */
+        this._prepared = false;
+        /** @type {boolean} */
+        this._preparing = false;
+        /** @type {?AggregateError} */
+        this._prepareCleanupError = null;
+        /** @type {boolean} */
+        this._siteSpecificPrepared = false;
         /** @type {number} */
         this._pageZoomFactor = 1;
         /** @type {number} */
@@ -129,6 +143,10 @@ export class Frontend {
         this._dictionaryUpdateSearchActive = false;
         /** @type {boolean} */
         this._optionsUpdateSearchActive = false;
+        /** @type {number} */
+        this._optionsUpdateSearchCount = 0;
+        /** @type {number} */
+        this._dictionaryUpdateSearchCount = 0;
 
         /* eslint-disable @stylistic/no-multi-spaces */
         /** @type {import('application').ApiMap} */
@@ -139,13 +157,6 @@ export class Frontend {
             ['frontendScanSelectedText',        this._onApiScanSelectedText.bind(this)],
         ]);
 
-        this._hotkeyHandler.registerActions([
-            ['scanSelectedText', this._onActionScanSelectedText.bind(this)],
-            ['scanTextAtSelection', this._onActionScanTextAtSelection.bind(this)],
-            ['scanTextAtCaret',  this._onActionScanTextAtCaret.bind(this)],
-            ['profilePrevious',   async () => { await setProfile(-1, this._application); }],
-            ['profileNext',       async () => { await setProfile(1, this._application); }],
-        ]);
         /* eslint-enable @stylistic/no-multi-spaces */
     }
 
@@ -175,54 +186,111 @@ export class Frontend {
 
     /**
      * Prepares the instance for use.
+     * @returns {Promise<void>}
      */
-    async prepare() {
-        this._updatePageDebugState({prepareStarted: true});
-        await this.updateOptions();
+    prepare() {
+        if (this._prepareCleanupError !== null) { return Promise.reject(this._prepareCleanupError); }
+        if (this._prepared) { return Promise.resolve(); }
+        if (this._preparePromise !== null) { return this._preparePromise; }
+        const promise = this._prepareInternal().finally(() => {
+            if (this._preparePromise === promise) { this._preparePromise = null; }
+        });
+        this._preparePromise = promise;
+        return promise;
+    }
+
+    /** @returns {Promise<void>} */
+    async _prepareInternal() {
+        const listeners = new EventListenerCollection();
+        /** @type {(() => void)[]} */
+        const cleanups = [() => listeners.removeAllEventListeners(), () => this._textScanner.setEnabled(false)];
+        this._preparing = true;
         try {
-            const {zoomFactor} = await this._application.api.getZoom();
-            this._pageZoomFactor = zoomFactor;
-        } catch (e) {
-            // Ignore exceptions which may occur due to being on an unsupported page (e.g. about:blank)
+            this._updatePageDebugState({prepareStarted: true});
+            let optionsPromise = this.updateOptions();
+            for (;;) {
+                try {
+                    await optionsPromise;
+                } catch (error) {
+                    if (this._optionsUpdatePromise === optionsPromise) { throw error; }
+                }
+                if (this._optionsUpdatePromise === optionsPromise) { break; }
+                optionsPromise = /** @type {Promise<void>} */ (this._optionsUpdatePromise);
+            }
+            try {
+                const {zoomFactor} = await this._application.api.getZoom();
+                this._pageZoomFactor = zoomFactor;
+            } catch (e) {
+                // Ignore exceptions which may occur due to being on an unsupported page (e.g. about:blank)
+            }
+
+            this._textScanner.prepare();
+
+            listeners.addEventListener(window, 'resize', this._onResize.bind(this), false);
+            addFullscreenChangeEventListener(() => {
+                void this._updatePopup().catch((e) => { log.error(e); });
+            }, listeners);
+
+            const {visualViewport} = window;
+            if (typeof visualViewport !== 'undefined' && visualViewport !== null) {
+                listeners.addEventListener(visualViewport, 'scroll', this._onVisualViewportScroll.bind(this));
+                listeners.addEventListener(visualViewport, 'resize', this._onVisualViewportResize.bind(this));
+            }
+
+            listeners.on(this._application, 'optionsUpdated', this._onOptionsUpdated.bind(this));
+            listeners.on(this._application, 'zoomChanged', this._onZoomChanged.bind(this));
+            listeners.on(this._application, 'closePopups', this._onClosePopups.bind(this));
+            listeners.on(this._application, 'databaseUpdated', this._onDatabaseUpdated.bind(this));
+            listeners.addListener(chrome.runtime.onMessage, this._onRuntimeMessage.bind(this));
+
+            listeners.on(this._textScanner, 'clear', this._onTextScannerClear.bind(this));
+            listeners.on(this._textScanner, 'searchSuccess', this._onSearchSuccess.bind(this));
+            listeners.on(this._textScanner, 'searchEmpty', this._onSearchEmpty.bind(this));
+            listeners.on(this._textScanner, 'searchError', this._onSearchError.bind(this));
+
+            /* eslint-disable @stylistic/no-multi-spaces */
+            cleanups.push(this._application.crossFrame.registerHandlersScoped([
+                ['frontendClosePopup',       this._onApiClosePopup.bind(this)],
+                ['frontendCopySelection',    this._onApiCopySelection.bind(this)],
+                ['frontendGetPopupSelectionText', this._onApiGetPopupSelectionText.bind(this)],
+                ['frontendGetPopupInfo',     this._onApiGetPopupInfo.bind(this)],
+                ['frontendGetPageInfo',      this._onApiGetPageInfo.bind(this)],
+            ]));
+            /* eslint-enable @stylistic/no-multi-spaces */
+
+            this._prepareSiteSpecific();
+            this._updateContentScale();
+            this._preparing = false;
+            this._prepared = true;
+            this._updateTextScannerEnabled();
+            cleanups.push(this._hotkeyHandler.registerActionsScoped([
+                ['scanSelectedText', this._onActionScanSelectedText.bind(this)],
+                ['scanTextAtSelection', this._onActionScanTextAtSelection.bind(this)],
+                ['scanTextAtCaret', this._onActionScanTextAtCaret.bind(this)],
+                ['profilePrevious', async () => { await setProfile(-1, this._application); }],
+                ['profileNext', async () => { await setProfile(1, this._application); }],
+            ]));
+            this._updatePageDebugState({prepared: true});
+            this._signalFrontendReady(null);
+        } catch (error) {
+            this._prepared = false;
+            this._preparing = false;
+            this._optionsUpdateToken = null;
+            this._updatePopupToken = null;
+            const errors = [error];
+            for (const cleanup of cleanups.reverse()) {
+                try {
+                    cleanup();
+                } catch (cleanupError) {
+                    errors.push(cleanupError);
+                }
+            }
+            if (errors.length > 1) {
+                this._prepareCleanupError = new AggregateError(errors, 'Frontend preparation cleanup failed');
+                throw this._prepareCleanupError;
+            }
+            throw error;
         }
-
-        this._textScanner.prepare();
-        this._startPopupPrewarmForHover();
-
-        window.addEventListener('resize', this._onResize.bind(this), false);
-        addFullscreenChangeEventListener(this._updatePopup.bind(this));
-
-        const {visualViewport} = window;
-        if (typeof visualViewport !== 'undefined' && visualViewport !== null) {
-            visualViewport.addEventListener('scroll', this._onVisualViewportScroll.bind(this));
-            visualViewport.addEventListener('resize', this._onVisualViewportResize.bind(this));
-        }
-
-        this._application.on('optionsUpdated', this._onOptionsUpdated.bind(this));
-        this._application.on('zoomChanged', this._onZoomChanged.bind(this));
-        this._application.on('closePopups', this._onClosePopups.bind(this));
-        this._application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
-        chrome.runtime.onMessage.addListener(this._onRuntimeMessage.bind(this));
-
-        this._textScanner.on('clear', this._onTextScannerClear.bind(this));
-        this._textScanner.on('searchSuccess', this._onSearchSuccess.bind(this));
-        this._textScanner.on('searchEmpty', this._onSearchEmpty.bind(this));
-        this._textScanner.on('searchError', this._onSearchError.bind(this));
-
-        /* eslint-disable @stylistic/no-multi-spaces */
-        this._application.crossFrame.registerHandlers([
-            ['frontendClosePopup',       this._onApiClosePopup.bind(this)],
-            ['frontendCopySelection',    this._onApiCopySelection.bind(this)],
-            ['frontendGetPopupSelectionText', this._onApiGetPopupSelectionText.bind(this)],
-            ['frontendGetPopupInfo',     this._onApiGetPopupInfo.bind(this)],
-            ['frontendGetPageInfo',      this._onApiGetPageInfo.bind(this)],
-        ]);
-        /* eslint-enable @stylistic/no-multi-spaces */
-
-        this._prepareSiteSpecific();
-        this._updateContentScale();
-        this._updatePageDebugState({prepared: true});
-        this._signalFrontendReady(null);
     }
 
     /**
@@ -254,15 +322,16 @@ export class Frontend {
     /**
      * Updates the internal options representation.
      * @param {boolean} [suppressSearchLast]
+     * @returns {Promise<void>}
      */
-    async updateOptions(suppressSearchLast = false) {
-        try {
-            await this._updateOptionsInternal(suppressSearchLast);
-        } catch (e) {
+    updateOptions(suppressSearchLast = false) {
+        const promise = this._updateOptionsInternal(suppressSearchLast).catch((e) => {
             if (!this._application.webExtension.unloaded) {
                 throw e;
             }
-        }
+        });
+        this._optionsUpdatePromise = promise;
+        return promise;
     }
 
     /**
@@ -393,17 +462,22 @@ export class Frontend {
      */
     async _onOptionsUpdated() {
         this._updatePageDebugState({lastSearchState: 'options-updated'});
+        this._optionsUpdateSearchCount = (this._optionsUpdateSearchCount ?? 0) + 1;
+        let token;
         try {
             this._optionsUpdateSearchActive = true;
-            await this.updateOptions();
+            const promise = this.updateOptions();
+            token = this._optionsUpdateToken;
+            await promise;
         } catch (error) {
+            if (this._optionsUpdateToken !== token) { return; }
             if (!this._application.webExtension.unloaded) {
                 log.error(error);
             }
             this._clearSelection(true);
             this._clearMousePosition();
         } finally {
-            this._optionsUpdateSearchActive = false;
+            this._optionsUpdateSearchActive = (--this._optionsUpdateSearchCount > 0);
         }
     }
 
@@ -414,19 +488,26 @@ export class Frontend {
     async _onDatabaseUpdated({type}) {
         if (type !== 'dictionary') { return; }
         this._updatePageDebugState({lastSearchState: 'dictionary-updated'});
+        this._dictionaryUpdateSearchCount = (this._dictionaryUpdateSearchCount ?? 0) + 1;
+        let token;
         try {
             this._dictionaryUpdateSearchActive = true;
-            await this.updateOptions(true);
+            const promise = this.updateOptions(true);
+            token = this._optionsUpdateToken;
+            await promise;
+            if (this._optionsUpdateToken !== token) { return; }
             this._startPopupPrewarmForHover();
             if (await this._textScanner.searchLast()) {
                 return;
             }
+            if (this._optionsUpdateToken !== token) { return; }
         } catch (error) {
+            if (this._optionsUpdateToken !== token) { return; }
             if (!this._application.webExtension.unloaded) {
                 log.error(error);
             }
         } finally {
-            this._dictionaryUpdateSearchActive = false;
+            this._dictionaryUpdateSearchActive = (--this._dictionaryUpdateSearchCount > 0);
         }
         this._clearSelection(true);
         this._clearMousePosition();
@@ -631,59 +712,69 @@ export class Frontend {
      * @returns {Promise<void>}
      */
     async _updateOptionsInternal(suppressSearchLast = false) {
-        const optionsContext = await this._getOptionsContext();
-        const options = await this._application.api.optionsGet(optionsContext);
-        const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
-        this._options = options;
+        const token = {};
+        this._optionsUpdateToken = token;
+        this._updatePopupToken = null;
+        try {
+            const optionsContext = await this._getOptionsContext();
+            if (this._optionsUpdateToken !== token) { return; }
+            const options = await this._application.api.optionsGet(optionsContext);
+            if (this._optionsUpdateToken !== token) { return; }
+            const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
+            this._options = options;
 
-        this._hotkeyHandler.setHotkeys('web', options.inputs.hotkeys);
+            this._hotkeyHandler.setHotkeys('web', options.inputs.hotkeys);
 
-        await this._updatePopup();
+            await this._updatePopup(optionsContext, token);
+            if (this._optionsUpdateToken !== token) { return; }
 
-        const preventMiddleMouseOnPage = this._getPreventSecondaryMouseValueForPageType(scanningOptions.preventMiddleMouse);
-        const preventMiddleMouseOnTextHover = scanningOptions.preventMiddleMouse.onTextHover;
-        const preventBackForwardOnPage = this._getPreventSecondaryMouseValueForPageType(scanningOptions.preventBackForward);
-        const preventBackForwardOnTextHover = scanningOptions.preventBackForward.onTextHover;
-        this._textScanner.language = options.general.language;
-        this._textScanner.setOptions({
-            inputs: scanningOptions.inputs,
-            deepContentScan: scanningOptions.deepDomScan,
-            normalizeCssZoom: scanningOptions.normalizeCssZoom,
-            selectText: scanningOptions.selectText,
-            delay: scanningOptions.delay,
-            scanLength: scanningOptions.length,
-            layoutAwareScan: scanningOptions.layoutAwareScan,
-            preventMiddleMouseOnPage,
-            preventMiddleMouseOnTextHover,
-            preventBackForwardOnPage,
-            preventBackForwardOnTextHover,
-            sentenceParsingOptions,
-            scanWithoutMousemove: scanningOptions.scanWithoutMousemove,
-            scanResolution: scanningOptions.scanResolution,
-        });
-        this._updateTextScannerEnabled();
-        this._updatePageDebugState({
-            optionsLoaded: true,
-            generalEnabled: options.general.enable,
-            scanningDelay: scanningOptions.delay,
-            scanWithoutMousemove: scanningOptions.scanWithoutMousemove,
-            popupWindow: options.general.usePopupWindow,
-        });
+            const preventMiddleMouseOnPage = this._getPreventSecondaryMouseValueForPageType(scanningOptions.preventMiddleMouse);
+            const preventMiddleMouseOnTextHover = scanningOptions.preventMiddleMouse.onTextHover;
+            const preventBackForwardOnPage = this._getPreventSecondaryMouseValueForPageType(scanningOptions.preventBackForward);
+            const preventBackForwardOnTextHover = scanningOptions.preventBackForward.onTextHover;
+            this._textScanner.language = options.general.language;
+            this._textScanner.setOptions({
+                inputs: scanningOptions.inputs,
+                deepContentScan: scanningOptions.deepDomScan,
+                normalizeCssZoom: scanningOptions.normalizeCssZoom,
+                selectText: scanningOptions.selectText,
+                delay: scanningOptions.delay,
+                scanLength: scanningOptions.length,
+                layoutAwareScan: scanningOptions.layoutAwareScan,
+                preventMiddleMouseOnPage,
+                preventMiddleMouseOnTextHover,
+                preventBackForwardOnPage,
+                preventBackForwardOnTextHover,
+                sentenceParsingOptions,
+                scanWithoutMousemove: scanningOptions.scanWithoutMousemove,
+                scanResolution: scanningOptions.scanResolution,
+            });
+            this._updateTextScannerEnabled();
+            this._updatePageDebugState({
+                optionsLoaded: true,
+                generalEnabled: options.general.enable,
+                scanningDelay: scanningOptions.delay,
+                scanWithoutMousemove: scanningOptions.scanWithoutMousemove,
+                popupWindow: options.general.usePopupWindow,
+            });
 
-        if (this._pageType !== 'web') {
-            const excludeSelectors = ['.scan-disable', '.scan-disable *'];
-            if (!scanningOptions.enableOnPopupExpressions) {
-                excludeSelectors.push('.source-text', '.source-text *');
+            if (this._pageType !== 'web') {
+                const excludeSelectors = ['.scan-disable', '.scan-disable *'];
+                if (!scanningOptions.enableOnPopupExpressions) {
+                    excludeSelectors.push('.source-text', '.source-text *');
+                }
+                this._textScanner.excludeSelector = excludeSelectors.join(',');
+                this._textScanner.touchEventExcludeSelector = '.gloss-link, .gloss-link *, .tag, .tag *, .inflection';
             }
-            this._textScanner.excludeSelector = excludeSelectors.join(',');
-            this._textScanner.touchEventExcludeSelector = '.gloss-link, .gloss-link *, .tag, .tag *, .inflection';
-        }
 
-        this._updateContentScale();
-        this._startPopupPrewarmForHover();
+            this._updateContentScale();
+            this._startPopupPrewarmForHover();
 
-        if (!suppressSearchLast) {
-            await this._textScanner.searchLast();
+            if (!suppressSearchLast) {
+                await this._textScanner.searchLast();
+            }
+        } catch (error) {
+            if (this._optionsUpdateToken === token) { throw error; }
         }
     }
 
@@ -1064,9 +1155,12 @@ export class Frontend {
     }
 
     /**
+     * @param {import('settings').OptionsContext} [requestedContext]
+     * @param {object} [optionsToken]
      * @returns {Promise<void>}
      */
-    async _updatePopup() {
+    async _updatePopup(requestedContext, optionsToken) {
+        if (optionsToken && this._optionsUpdateToken !== optionsToken) { return; }
         const {usePopupWindow, showIframePopupsInRootFrame} = /** @type {import('settings').ProfileOptions} */ (this._options).general;
         const isIframe = !this._useProxyPopup && (window !== window.parent);
 
@@ -1078,7 +1172,7 @@ export class Frontend {
             popupPromise = this._popupCache.get('window');
             if (typeof popupPromise === 'undefined') {
                 popupPromise = this._getPopupWindow();
-                this._popupCache.set('window', popupPromise);
+                popupPromise = this._cachePopup('window', popupPromise);
             }
         } else if (
             isIframe &&
@@ -1089,19 +1183,19 @@ export class Frontend {
             popupPromise = this._popupCache.get('iframe');
             if (typeof popupPromise === 'undefined') {
                 popupPromise = this._getIframeProxyPopup();
-                this._popupCache.set('iframe', popupPromise);
+                popupPromise = this._cachePopup('iframe', popupPromise);
             }
         } else if (this._useProxyPopup) {
             popupPromise = this._popupCache.get('proxy');
             if (typeof popupPromise === 'undefined') {
                 popupPromise = this._getProxyPopup();
-                this._popupCache.set('proxy', popupPromise);
+                popupPromise = this._cachePopup('proxy', popupPromise);
             }
         } else {
             popupPromise = this._popupCache.get('default');
             if (typeof popupPromise === 'undefined') {
                 popupPromise = this._getDefaultPopup();
-                this._popupCache.set('default', popupPromise);
+                popupPromise = this._cachePopup('default', popupPromise);
             }
         }
 
@@ -1113,7 +1207,8 @@ export class Frontend {
         const token = {};
         this._updatePopupToken = token;
         const popup = await popupPromise;
-        const optionsContext = await this._getOptionsContext();
+        const optionsContext = requestedContext ?? await this._getOptionsContext();
+        if (optionsToken && this._optionsUpdateToken !== optionsToken) { return; }
         if (this._updatePopupToken !== token) { return; }
         if (popup !== null) {
             await popup.setOptionsContext(optionsContext);
@@ -1131,6 +1226,20 @@ export class Frontend {
             this._popupEventListeners.on(popup, 'mouseOut', this._onPopupFramePointerOut.bind(this));
         }
         this._isPointerOverPopup = false;
+    }
+
+    /**
+     * @param {'default'|'window'|'iframe'|'proxy'} key
+     * @param {Promise<?import('popup').PopupAny>} pending
+     * @returns {Promise<?import('popup').PopupAny>}
+     */
+    _cachePopup(key, pending) {
+        const promise = pending.catch((error) => {
+            if (this._popupCache.get(key) === promise) { this._popupCache.delete(key); }
+            throw error;
+        });
+        this._popupCache.set(key, promise);
+        return promise;
     }
 
     /**
@@ -1347,7 +1456,7 @@ export class Frontend {
      * @returns {void}
      */
     _updateTextScannerEnabled() {
-        const enabled = (this._options !== null && this._options.general.enable && !this._disabledOverride);
+        const enabled = (this._prepared && this._options !== null && this._options.general.enable && !this._disabledOverride && !this._preparing);
         if (enabled === this._textScanner.isEnabled()) { return; }
         this._textScanner.setEnabled(enabled);
         this._updatePageDebugState({scannerEnabled: enabled});
@@ -1405,9 +1514,9 @@ export class Frontend {
         /** @type {import('application').ApiMessageNoFrameId<'frontendReady'>} */
         const message = {action: 'frontendReady', params: {frameId: this._application.frameId}};
         if (targetFrameId === null) {
-            void this._application.api.broadcastTab(message);
+            void this._application.api.broadcastTab(message).catch((e) => { log.error(e); });
         } else {
-            void this._application.api.sendMessageToFrame(targetFrameId, message);
+            void this._application.api.sendMessageToFrame(targetFrameId, message).catch((e) => { log.error(e); });
         }
     }
 
@@ -1540,11 +1649,13 @@ export class Frontend {
      * @returns {void}
      */
     _prepareSiteSpecific() {
+        if (this._siteSpecificPrepared) { return; }
         switch (location.hostname.toLowerCase()) {
             case 'docs.google.com':
-                void this._prepareGoogleDocs();
+                void this._prepareGoogleDocs().catch((e) => { log.error(e); });
                 break;
         }
+        this._siteSpecificPrepared = true;
     }
 
     /**

@@ -189,6 +189,79 @@ describe.each(['popup', 'display'])('%s options publication', (kind) => {
     });
 });
 
+describe.each(['popup', 'display'])('%s superseding options waiters', (kind) => {
+    const ownerKind = /** @type {'popup'|'display'} */ (kind);
+    test.each([false, true])('a replacement failure remains visible when it settles before the old request (old failure=%s)', async (oldFailure) => {
+        const {owner, optionsGet} = createOwner(ownerKind);
+        const older = /** @type {PromiseWithResolvers<import('settings').ProfileOptions>} */ (Promise.withResolvers());
+        const newer = /** @type {PromiseWithResolvers<import('settings').ProfileOptions>} */ (Promise.withResolvers());
+        optionsGet.mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise).mockResolvedValueOnce(options(700));
+        const first = owner.setOptionsContext(a).catch(() => {});
+        const consumer = owner._setOptionsContextIfDifferent({...a});
+        const observedConsumer = consumer.catch(() => {});
+        const second = owner.setOptionsContext({...a}).catch(() => {});
+        const error = new Error('Newest request failed first');
+        newer.reject(error);
+        await second;
+        if (oldFailure) {
+            older.reject(new Error('Retired request failed later'));
+        } else {
+            older.resolve(options(300));
+        }
+        await Promise.all([first, observedConsumer]);
+        await expect(consumer).rejects.toBe(error);
+        await owner._setOptionsContextIfDifferent({...a});
+        expect(appliedWidth(owner)).toBe(700);
+        expect(optionsGet).toHaveBeenCalledTimes(3);
+    });
+
+    test.each([false, true])('consumers follow a superseding refresh (old failure=%s)', async (oldFailure) => {
+        const {owner, optionsGet} = createOwner(ownerKind);
+        const older = /** @type {PromiseWithResolvers<import('settings').ProfileOptions>} */ (Promise.withResolvers());
+        const newer = /** @type {PromiseWithResolvers<import('settings').ProfileOptions>} */ (Promise.withResolvers());
+        optionsGet.mockResolvedValueOnce(options(200)).mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise);
+        await owner.setOptionsContext(a);
+        const first = owner.setOptionsContext(a).catch(() => {});
+        let consumed = false;
+        const consumer = owner._setOptionsContextIfDifferent({...a}).then(() => { consumed = true; });
+        const observedConsumer = consumer.catch(() => {});
+        const second = owner.setOptionsContext({...a});
+        if (oldFailure) {
+            older.reject(new Error('Old load failed'));
+        } else {
+            older.resolve(options(300));
+        }
+        await first;
+        await Promise.resolve();
+        const consumedBeforeNewerLoad = consumed;
+        newer.resolve(options(700));
+        await Promise.all([second, observedConsumer]);
+        expect(consumedBeforeNewerLoad).toBe(false);
+        await expect(consumer).resolves.toBeUndefined();
+        expect(appliedWidth(owner)).toBe(700);
+        expect(optionsGet).toHaveBeenCalledTimes(3);
+    });
+
+    test('consumers receive the failure of the superseding refresh', async () => {
+        const {owner, optionsGet} = createOwner(ownerKind);
+        const older = /** @type {PromiseWithResolvers<import('settings').ProfileOptions>} */ (Promise.withResolvers());
+        const newer = /** @type {PromiseWithResolvers<import('settings').ProfileOptions>} */ (Promise.withResolvers());
+        optionsGet.mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise).mockResolvedValueOnce(options(700));
+        const first = owner.setOptionsContext(a);
+        const error = new Error('New refresh failed');
+        const consumer = owner._setOptionsContextIfDifferent({...a});
+        const observedConsumer = consumer.catch(() => {});
+        const second = owner.setOptionsContext({...a}).catch(() => {});
+        older.resolve(options(300));
+        await first;
+        newer.reject(error);
+        await Promise.all([observedConsumer, second]);
+        await expect(consumer).rejects.toBe(error);
+        await owner._setOptionsContextIfDifferent({...a});
+        expect(appliedWidth(owner)).toBe(700);
+    });
+});
+
 test('nested scanner waits for setup before applying the latest disabled state', async () => {
     const display = /** @type {Display} */ (Object.create(Display.prototype));
     const pending = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());

@@ -68,8 +68,8 @@ export class Popup extends EventDispatcher {
         this._visibleValue = false;
         /** @type {?import('settings').OptionsContext} */
         this._optionsContext = null;
-        // Retain a successful or pending load; failed loads are evicted for retry.
-        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>}} */
+        // Retain failed requests for existing waiters; new consumers retry them.
+        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
         this._optionsContextRequest = null;
         /** @type {number} */
         this._contentScale = 1;
@@ -1257,13 +1257,11 @@ export class Popup extends EventDispatcher {
      * @returns {Promise<void>}
      */
     _setOptionsContext(optionsContext) {
-        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>}} */
-        const request = {optionsContext, promise: null};
+        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
+        const request = {optionsContext, promise: null, failed: false};
         this._optionsContextRequest = request;
         request.promise = this._loadOptionsContext(optionsContext, request).catch((error) => {
-            if (this._optionsContextRequest === request) {
-                this._optionsContextRequest = null;
-            }
+            request.failed = true;
             throw error;
         });
         return request.promise;
@@ -1311,12 +1309,22 @@ export class Popup extends EventDispatcher {
      * @param {import('settings').OptionsContext} optionsContext
      */
     async _setOptionsContextIfDifferent(optionsContext) {
-        const request = this._optionsContextRequest;
-        if (request && deepEqual(request.optionsContext, optionsContext)) {
-            await request.promise;
-            return;
+        let request = this._optionsContextRequest;
+        let promise;
+        if (request && !request.failed && deepEqual(request.optionsContext, optionsContext)) { promise = request.promise; } else {
+            promise = this._setOptionsContext(optionsContext);
+            request = this._optionsContextRequest;
         }
-        await this._setOptionsContext(optionsContext);
+        for (;;) {
+            try { await promise; } catch (error) {
+                const next = this._optionsContextRequest;
+                if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { throw error; }
+            }
+            const next = this._optionsContextRequest;
+            if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { return; }
+            request = next;
+            promise = next.promise;
+        }
     }
 
     /**
