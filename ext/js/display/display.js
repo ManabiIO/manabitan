@@ -75,6 +75,11 @@ export class Display extends EventDispatcher {
         this._dictionaryEntryNodes = [];
         /** @type {import('settings').OptionsContext} */
         this._optionsContext = {depth: 0, url: window.location.href};
+        // Retain a successful or pending load; failed loads are evicted for retry.
+        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>}} */
+        this._optionsContextRequest = null;
+        /** @type {?object} */
+        this._nestedFrontendUpdateToken = null;
         /** @type {?import('settings').ProfileOptions} */
         this._options = null;
         /** @type {number} */
@@ -474,9 +479,27 @@ export class Display extends EventDispatcher {
         await this.updateOptions();
     }
 
-    /** */
-    async updateOptions() {
-        const options = await this._application.api.optionsGet(this.getOptionsContext());
+    /** @returns {Promise<void>} */
+    updateOptions() {
+        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>}} */
+        const request = {optionsContext: this.getOptionsContext(), promise: null};
+        this._optionsContextRequest = request;
+        request.promise = this._updateOptionsInner(request.optionsContext, request).catch((error) => {
+            if (this._optionsContextRequest === request) {
+                this._optionsContextRequest = null;
+            }
+            throw error;
+        });
+        return request.promise;
+    }
+
+    /**
+     * @param {import('settings').OptionsContext} optionsContext
+     * @param {object} request
+     */
+    async _updateOptionsInner(optionsContext, request) {
+        const options = await this._application.api.optionsGet(optionsContext);
+        if (this._optionsContextRequest !== request) { return; }
         const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
         this._options = options;
         this._dictionaryCssMediaResolver.prune(options.dictionaries);
@@ -518,7 +541,7 @@ export class Display extends EventDispatcher {
             },
         });
 
-        void this._updateNestedFrontend(options);
+        void this._updateNestedFrontend(options).catch((e) => { log.error(e); });
         this._updateContentTextScanner(options);
 
         this.trigger('optionsUpdated', {options});
@@ -2117,7 +2140,11 @@ export class Display extends EventDispatcher {
      * @param {import('settings').OptionsContext} optionsContext
      */
     async _setOptionsContextIfDifferent(optionsContext) {
-        if (deepEqual(this._optionsContext, optionsContext)) { return; }
+        const request = this._optionsContextRequest;
+        if (request && deepEqual(request.optionsContext, optionsContext)) {
+            await request.promise;
+            return;
+        }
         await this.setOptionsContext(optionsContext);
     }
 
@@ -2134,6 +2161,8 @@ export class Display extends EventDispatcher {
      * @param {import('settings').ProfileOptions} options
      */
     async _updateNestedFrontend(options) {
+        const token = {};
+        this._nestedFrontendUpdateToken = token;
         const {tabId, frameId} = this._application;
         if (tabId === null || frameId === null) { return; }
 
@@ -2147,8 +2176,8 @@ export class Display extends EventDispatcher {
             )
         );
 
-        if (this._frontend === null) {
-            if (!isEnabled) { return; }
+        if (this._frontend === null || this._frontendSetupPromise !== null) {
+            if (!isEnabled && this._frontendSetupPromise === null) { return; }
 
             try {
                 if (this._frontendSetupPromise === null) {
@@ -2163,6 +2192,7 @@ export class Display extends EventDispatcher {
             }
         }
 
+        if (this._nestedFrontendUpdateToken !== token) { return; }
         /** @type {import('../app/frontend.js').Frontend} */ (this._frontend).setDisabledOverride(!isEnabled);
     }
 

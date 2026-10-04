@@ -68,6 +68,9 @@ export class Popup extends EventDispatcher {
         this._visibleValue = false;
         /** @type {?import('settings').OptionsContext} */
         this._optionsContext = null;
+        // Retain a successful or pending load; failed loads are evicted for retry.
+        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>}} */
+        this._optionsContextRequest = null;
         /** @type {number} */
         this._contentScale = 1;
         /** @type {string} */
@@ -229,8 +232,10 @@ export class Popup extends EventDispatcher {
      * @param {import('settings').OptionsContext} optionsContext The options context object.
      */
     async setOptionsContext(optionsContext) {
-        await this._setOptionsContext(optionsContext);
-        if (this._frameConnected) {
+        const promise = this._setOptionsContext(optionsContext);
+        const request = this._optionsContextRequest;
+        await promise;
+        if (this._optionsContextRequest === request && this._frameConnected) {
             await this._invokeSafe('displaySetOptionsContext', {optionsContext});
         }
     }
@@ -1249,10 +1254,28 @@ export class Popup extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @returns {Promise<void>}
      */
-    async _setOptionsContext(optionsContext) {
-        this._optionsContext = optionsContext;
+    _setOptionsContext(optionsContext) {
+        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>}} */
+        const request = {optionsContext, promise: null};
+        this._optionsContextRequest = request;
+        request.promise = this._loadOptionsContext(optionsContext, request).catch((error) => {
+            if (this._optionsContextRequest === request) {
+                this._optionsContextRequest = null;
+            }
+            throw error;
+        });
+        return request.promise;
+    }
+
+    /**
+     * @param {import('settings').OptionsContext} optionsContext
+     * @param {object} request
+     */
+    async _loadOptionsContext(optionsContext, request) {
         const options = await this._application.api.optionsGet(optionsContext);
+        if (this._optionsContextRequest !== request) { return; }
         const {general, scanning} = options;
         this._themeController.theme = general.popupTheme;
         this._themeController.themePreset = general.popupThemePreset;
@@ -1278,14 +1301,21 @@ export class Popup extends EventDispatcher {
         this._customOuterCss = general.customPopupOuterCss;
         this._hidePopupOnCursorExit = scanning.hidePopupOnCursorExit;
         this._hidePopupOnCursorExitDelay = scanning.hidePopupOnCursorExitDelay;
-        void this.updateTheme();
+        await this.updateTheme();
+        if (this._optionsContextRequest === request) {
+            this._optionsContext = optionsContext;
+        }
     }
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
      */
     async _setOptionsContextIfDifferent(optionsContext) {
-        if (deepEqual(this._optionsContext, optionsContext)) { return; }
+        const request = this._optionsContextRequest;
+        if (request && deepEqual(request.optionsContext, optionsContext)) {
+            await request.promise;
+            return;
+        }
         await this._setOptionsContext(optionsContext);
     }
 
