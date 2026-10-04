@@ -1825,7 +1825,7 @@ export class Display extends EventDispatcher {
         const text = this._fullQuery;
         const visible = this._isQueryParserVisible();
         this._queryParserContainer.hidden = !visible || text.length === 0;
-        if (visible && this._queryParser.text !== text) {
+        if (visible && (this._queryParser.text !== text || this._queryParser.needsTextUpdate)) {
             void this._setQueryParserText(text);
         }
     }
@@ -1837,6 +1837,12 @@ export class Display extends EventDispatcher {
         const overrideToken = this._progressIndicatorVisible.setOverride(true);
         try {
             await this._queryParser.setText(text);
+        } catch (error) {
+            try {
+                this.onError(toError(error));
+            } catch (e) {
+                // Reporting cannot reject this fire-and-forget refresh.
+            }
         } finally {
             this._progressIndicatorVisible.clearOverride(overrideToken);
         }
