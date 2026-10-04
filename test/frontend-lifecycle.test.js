@@ -294,6 +294,27 @@ test('failed retired popup acquisition cannot evict its cache replacement', asyn
     expect(frontend._popupCache.get('default')).toBe(replacement);
 });
 
+test('root-frame offset fallback owns popup refresh rejection', async ({window: _window}) => {
+    const {frontend} = createFrontend();
+    const popup = {on: vi.fn()};
+    vi.spyOn(frontend, '_waitForFrontendReady').mockResolvedValue(void 0);
+    vi.spyOn(frontend._application.crossFrame, 'invoke').mockResolvedValue(/** @type {never} */ ({popupId: 'root'}));
+    vi.spyOn(frontend._popupFactory, 'getOrCreatePopup').mockResolvedValue(/** @type {import('popup').PopupAny} */ (/** @type {unknown} */ (popup)));
+    await frontend._getIframeProxyPopup();
+    const error = new Error('Fallback popup unavailable');
+    const failed = Promise.reject(error);
+    // Observe the rejection independently so the pre-fix repro reports an assertion failure.
+    await failed.catch(() => {});
+    const ownership = vi.spyOn(failed, 'catch');
+    vi.mocked(frontend._updatePopup).mockReturnValue(failed);
+    const report = vi.spyOn(log, 'error').mockImplementation(() => {});
+    popup.on.mock.calls[0][1]();
+    await Promise.resolve();
+    expect(ownership).toHaveBeenCalledTimes(1);
+    expect(report).toHaveBeenCalledExactlyOnceWith(error);
+    expect(frontend._allowRootFramePopupProxy).toBe(false);
+});
+
 test('overlapping popup acquisition is shared and uses the latest captured context', async ({window: _window}) => {
     const {frontend} = createFrontend();
     const pending = /** @type {PromiseWithResolvers<import('popup').PopupAny>} */ (Promise.withResolvers());

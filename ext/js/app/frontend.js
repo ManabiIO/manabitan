@@ -1299,7 +1299,7 @@ export class Frontend {
         });
         popup.on('offsetNotFound', () => {
             this._allowRootFramePopupProxy = false;
-            void this._updatePopup();
+            void this._updatePopup().catch((error) => { log.error(error); });
         });
         return popup;
     }
