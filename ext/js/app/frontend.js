@@ -31,6 +31,8 @@ import {TextScanner} from '../language/text-scanner.js';
 const JAPANESE_TEXT_PATTERN = /[\u3040-\u30ff\u3400-\u9fff]+/g;
 const JAPANESE_PARTICLE_BOUNDARY_PATTERN = /[はがをにへでとものや]/u;
 
+/** @typedef {{timer: ?import('core').Timeout, resolveDelay: ?(() => void)}} DelayedSelectionClearRequest */
+
 /**
  * This is the main class responsible for scanning and handling webpage content.
  */
@@ -129,8 +131,8 @@ export class Frontend {
         this._popupEventListeners = new EventListenerCollection();
         /** @type {?import('core').TokenObject} */
         this._updatePopupToken = null;
-        /** @type {?import('core').Timeout} */
-        this._clearSelectionTimer = null;
+        /** @type {?DelayedSelectionClearRequest} */
+        this._clearSelectionRequest = null;
         /** @type {boolean} */
         this._isPointerOverPopup = false;
         /** @type {?import('settings').OptionsContext} */
@@ -675,36 +677,63 @@ export class Frontend {
      */
     async _clearSelectionDelayed(delay, restart, passive) {
         if (!this._textScanner.hasSelection()) { return; }
+        if (this._clearSelectionRequest !== null && !restart) { return; }
+        this._stopClearSelectionDelayed();
+        /** @type {DelayedSelectionClearRequest} */
+        const request = {timer: null, resolveDelay: null};
+        this._clearSelectionRequest = request;
+        try {
+            // Allow mouseover events to settle, but keep this wait cancellation-owned too.
+            await this._waitForClearSelectionDelay(50, request);
+            if (this._clearSelectionRequest !== request || !this._textScanner.hasSelection()) { return; }
+            if (await this._isPointerOverAnyPopup() || this._clearSelectionRequest !== request) { return; }
 
-        // Add a small delay to allow mouseover events to be processed
-        await new Promise((resolve) => {
-            setTimeout(resolve, 50);
-        });
-
-        // Always check if pointer is over any popup before clearing
-        if (await this._isPointerOverAnyPopup()) { return; }
-
-        if (delay > 0) {
-            if (this._clearSelectionTimer !== null && !restart) { return; } // Already running
-            this._stopClearSelectionDelayed();
-            this._clearSelectionTimer = setTimeout(async () => {
-                this._clearSelectionTimer = null;
-                if (await this._isPointerOverAnyPopup()) { return; }
-                this._clearSelection(passive);
-            }, delay);
-        } else {
+            if (delay > 0) {
+                await this._waitForClearSelectionDelay(delay, request);
+                if (this._clearSelectionRequest !== request || !this._textScanner.hasSelection()) { return; }
+                if (await this._isPointerOverAnyPopup() || this._clearSelectionRequest !== request) { return; }
+            }
             this._clearSelection(passive);
+        } catch (error) {
+            if (this._clearSelectionRequest !== request) { return; }
+            try {
+                log.error(error);
+            } catch (e) {
+                // Automatic hiding must not leak a rejection if error reporting also fails.
+            }
+        } finally {
+            if (this._clearSelectionRequest === request) { this._stopClearSelectionDelayed(); }
         }
+    }
+
+    /**
+     * @param {number} delay
+     * @param {DelayedSelectionClearRequest} request
+     * @returns {Promise<void>}
+     */
+    _waitForClearSelectionDelay(delay, request) {
+        return new Promise((resolve) => {
+            request.resolveDelay = resolve;
+            request.timer = setTimeout(() => {
+                request.timer = null;
+                request.resolveDelay = null;
+                resolve();
+            }, delay);
+        });
     }
 
     /**
      * @returns {void}
      */
     _stopClearSelectionDelayed() {
-        if (this._clearSelectionTimer !== null) {
-            clearTimeout(this._clearSelectionTimer);
-            this._clearSelectionTimer = null;
-        }
+        const request = this._clearSelectionRequest;
+        this._clearSelectionRequest = null;
+        if (request === null) { return; }
+        if (request.timer !== null) { clearTimeout(request.timer); }
+        const resolve = request.resolveDelay;
+        request.timer = null;
+        request.resolveDelay = null;
+        if (resolve !== null) { resolve(); }
     }
 
     /**
