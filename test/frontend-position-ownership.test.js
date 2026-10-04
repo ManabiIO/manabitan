@@ -43,7 +43,7 @@ function setup() {
     for (const [key, value] of Object.entries({
         _popup: popup,
         _lastShowPromise: Promise.resolve(),
-        _textScanner: {getCurrentTextSource: () => selected},
+        _textScanner: {getCurrentTextSource: () => selected, allowCurrentTextSourceRetry: vi.fn()},
         _application: {webExtension: {unloaded: false}},
         _updatePageDebugState: vi.fn(),
     })) { Reflect.set(frontend, key, value); }

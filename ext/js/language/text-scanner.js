@@ -457,6 +457,15 @@ export class TextScanner extends EventDispatcher {
     }
 
     /**
+     * Permit fresh user input to retry failed publication without discarding the
+     * selected anchor or its selection-restoration state.
+     * @param {import('text-source').TextSource} textSource
+     */
+    allowCurrentTextSourceRetry(textSource) {
+        if (this._textSourceCurrent === textSource) { this._textSourceCurrentIncomplete = true; }
+    }
+
+    /**
      * @param {?import('text-source').TextSource} textSource
      */
     setCurrentTextSource(textSource) {
@@ -680,6 +689,7 @@ export class TextScanner extends EventDispatcher {
             }
         } catch (error) {
             if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
+            this.allowCurrentTextSourceRetry(textSource);
             this.trigger('searchError', {
                 error: error instanceof Error ? error : new Error(`A search error occurred: ${error}`),
                 textSource,

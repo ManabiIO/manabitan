@@ -1478,6 +1478,9 @@ export class Frontend {
                 });
             },
             (error) => {
+                if (details !== null && this._lastShowPromise === showPromise) {
+                    this._textScanner.allowCurrentTextSourceRetry(textSource);
+                }
                 if (this._application.webExtension.unloaded) { return; }
                 log.error(error);
             },
