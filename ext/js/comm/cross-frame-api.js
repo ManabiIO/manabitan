@@ -114,6 +114,7 @@ export class CrossFrameAPIPort extends EventDispatcher {
                 this._port.postMessage(/** @type {import('cross-frame-api').InvokeMessage} */ ({type: 'invoke', id, data: {action, params}}));
             } catch (e) {
                 this._onError(id, e);
+                this.disconnect();
             }
         });
     }
@@ -122,11 +123,14 @@ export class CrossFrameAPIPort extends EventDispatcher {
     disconnect() {
         const port = this._port;
         if (port === null) { return; }
-        this._onDisconnect();
         try {
-            port.disconnect();
-        } catch (e) {
-            // The browser may have already invalidated the transport.
+            this._onDisconnect();
+        } finally {
+            try {
+                port.disconnect();
+            } catch (e) {
+                // The browser may have already invalidated the transport.
+            }
         }
     }
 
@@ -156,17 +160,23 @@ export class CrossFrameAPIPort extends EventDispatcher {
     _onDisconnect() {
         if (this._port === null) { return; }
         this._port = null;
-        this._eventListeners.removeAllEventListeners();
-        for (const id of this._activeInvocations.keys()) {
-            this._onError(id, 'Disconnected');
+        try {
+            this._eventListeners.removeAllEventListeners();
+        } catch (error) {
+            log.warn(error);
+        } finally {
+            for (const id of this._activeInvocations.keys()) {
+                this._onError(id, 'Disconnected');
+            }
+            this.trigger('disconnect', this);
         }
-        this.trigger('disconnect', this);
     }
 
     /**
      * @param {import('cross-frame-api').Message} details
      */
     _onMessage(details) {
+        if (this._port === null) { return; }
         const {type, id} = details;
         switch (type) {
             case 'invoke':
@@ -277,7 +287,7 @@ export class CrossFrameAPIPort extends EventDispatcher {
      * @param {import('cross-frame-api').ApiMessageAny} details
      */
     _onInvoke(id, {action, params}) {
-        this._sendAck(id);
+        if (!this._sendAck(id)) { return; }
         invokeApiMapHandler(
             this._apiMap,
             action,
@@ -290,21 +300,25 @@ export class CrossFrameAPIPort extends EventDispatcher {
 
     /**
      * @param {import('cross-frame-api').Message} data
+     * @returns {boolean}
      */
     _sendResponse(data) {
-        if (this._port === null) { return; }
+        if (this._port === null) { return false; }
         try {
             this._port.postMessage(data);
+            return true;
         } catch (e) {
-            // NOP
+            this.disconnect();
+            return false;
         }
     }
 
     /**
      * @param {number} id
+     * @returns {boolean}
      */
     _sendAck(id) {
-        this._sendResponse({type: 'ack', id});
+        return this._sendResponse({type: 'ack', id});
     }
 
     /**

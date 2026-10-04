@@ -18,6 +18,7 @@
 
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {CrossFrameAPI, CrossFrameAPIPort} from '../ext/js/comm/cross-frame-api.js';
+import {log} from '../ext/js/core/log.js';
 
 /**
  * @param {number} tabId
@@ -229,6 +230,115 @@ describe('CrossFrameAPI connection lifecycle', () => {
         expect(api._commPorts.get(2)?.get(3)).toBe(replacement);
         replacement.disconnect();
         expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('failed invoke delivery evicts the channel, rejects its peers, and a later request reconnects', async () => {
+        const api = createApi();
+        const runtime = createRuntimePort();
+        const port = api._setupCommPort(2, 3, runtime);
+        /** @type {unknown[]} */
+        const errors = [];
+        const first = port.invoke('popupFactoryIsVisible', {id: 'first'}, 1000, 2000).catch((error) => { errors.push(error); });
+        const failure = new Error('Attempting to use a disconnected port object');
+        vi.spyOn(runtime, 'postMessage').mockImplementationOnce(() => { throw failure; });
+        await expect(port.invoke('popupFactoryIsVisible', {id: 'second'}, 1000, 2000)).rejects.toBe(failure);
+        expect(api._commPorts.size).toBe(0);
+        expect(vi.getTimerCount()).toBe(0);
+        expect(runtime.disconnect).toHaveBeenCalledTimes(1);
+        await first;
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).toBeInstanceOf(Error);
+
+        const nextRuntime = createRuntimePort();
+        api._api.openCrossFramePort = vi.fn(async () => {
+            const next = api._setupCommPort(2, 3, nextRuntime);
+            vi.spyOn(nextRuntime, 'postMessage').mockImplementation((message) => {
+                next._onMessage({type: 'ack', id: message.id});
+                next._onMessage({type: 'result', id: message.id, data: {result: true}});
+            });
+            return {targetTabId: 2, targetFrameId: 3};
+        });
+        await expect(api.invokeTab(2, 3, 'popupFactoryIsVisible', {id: 'recovered'})).resolves.toBe(true);
+        expect(api._api.openCrossFramePort).toHaveBeenCalledTimes(1);
+        expect(vi.getTimerCount()).toBe(0);
+        api._commPorts.get(2)?.get(3)?.disconnect();
+    });
+
+    test('a failed acknowledgement does not execute the incoming action', () => {
+        const api = createApi();
+        const handler = vi.fn();
+        api.registerHandlers([['frontendClosePopup', handler]]);
+        const runtime = createRuntimePort();
+        vi.spyOn(runtime, 'postMessage').mockImplementation(() => { throw new Error('port closed'); });
+        const port = api._setupCommPort(2, 3, runtime);
+        expect(() => port._onMessage({type: 'invoke', id: 7, data: {action: 'frontendClosePopup', params: undefined}})).not.toThrow();
+        expect(handler).not.toHaveBeenCalled();
+        expect(api._commPorts.size).toBe(0);
+        expect(runtime.disconnect).toHaveBeenCalledTimes(1);
+    });
+
+    test('failed result delivery closes the channel and ignores late invocations', () => {
+        const api = createApi();
+        const handler = vi.fn(() => true);
+        api.registerHandlers([['popupFactoryIsVisible', handler]]);
+        const runtime = createRuntimePort();
+        vi.spyOn(runtime, 'postMessage').mockImplementationOnce(() => {}).mockImplementationOnce(() => { throw new Error('result send failed'); });
+        const port = api._setupCommPort(2, 3, runtime);
+        const message = /** @type {const} */ ({type: 'invoke', id: 7, data: {action: 'popupFactoryIsVisible', params: {id: 'popup'}}});
+        expect(() => port._onMessage(message)).not.toThrow();
+        expect(api._commPorts.size).toBe(0);
+        expect(runtime.disconnect).toHaveBeenCalledTimes(1);
+        port._onMessage(message);
+        expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    test('a queued invocation on a retired port cannot execute its handler', () => {
+        const api = createApi();
+        const handler = vi.fn();
+        api.registerHandlers([['frontendClosePopup', handler]]);
+        const port = api._setupCommPort(2, 3, createRuntimePort());
+        port.disconnect();
+        port._onMessage({type: 'invoke', id: 7, data: {action: 'frontendClosePopup', params: undefined}});
+        expect(handler).not.toHaveBeenCalled();
+    });
+
+    test('listener removal failure cannot strand pending requests or prevent transport closure', async () => {
+        const api = createApi();
+        const runtime = createRuntimePort();
+        const failure = new Error('Extension context invalidated');
+        vi.spyOn(runtime.onDisconnect, 'removeListener').mockImplementation(() => { throw failure; });
+        const warn = vi.spyOn(log, 'warn').mockImplementation(() => {});
+        const port = api._setupCommPort(2, 3, runtime);
+        const windowRemoval = vi.spyOn(window, 'removeEventListener');
+        const documentRemoval = vi.spyOn(document, 'removeEventListener');
+        const pending = expect(port.invoke('popupFactoryIsVisible', {id: 'popup'}, 1000, 2000)).rejects.toThrow('Disconnected');
+        expect(() => port.disconnect()).not.toThrow();
+        await pending;
+        expect(warn).toHaveBeenCalledExactlyOnceWith(failure);
+        expect(api._commPorts.size).toBe(0);
+        expect(port._eventListeners.size).toBe(0);
+        expect(runtime.onMessage.removeListener).toHaveBeenCalledTimes(1);
+        expect(windowRemoval).toHaveBeenCalledTimes(1);
+        expect(documentRemoval).toHaveBeenCalledTimes(1);
+        expect(runtime.disconnect).toHaveBeenCalledTimes(1);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('asynchronous results from a disconnected handler cannot affect the replacement channel', async () => {
+        const api = createApi();
+        let complete = () => {};
+        const result = new Promise((resolve) => { complete = () => resolve(true); });
+        api.registerHandlers([['popupFactoryIsVisible', () => result]]);
+        const runtime = createRuntimePort();
+        const port = api._setupCommPort(2, 3, runtime);
+        port._onMessage({type: 'invoke', id: 7, data: {action: 'popupFactoryIsVisible', params: {id: 'popup'}}});
+        port.disconnect();
+        const replacement = api._setupCommPort(2, 3, createRuntimePort());
+        complete();
+        await result;
+        expect(runtime.postMessage).toHaveBeenCalledTimes(1);
+        expect(api._commPorts.get(2)?.get(3)).toBe(replacement);
+        replacement.disconnect();
     });
 });
 
