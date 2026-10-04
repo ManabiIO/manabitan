@@ -29,6 +29,9 @@ const SCAN_RESOLUTION_EXCLUDED_LANGUAGES = new Set(['ja', 'zh', 'yue', 'ko']);
 const TERM_SEARCH_SEGMENT_TERMINATOR_PATTERN = /[。．.!?！？\n\r\t,、，;；:：]/;
 const TERM_SEARCH_PARTICLE_BOUNDARY_PATTERN = /[はがをにへでとものや]/u;
 
+/** @typedef {{type: 'refresh', textSource: import('text-source').TextSource}} RescanRequest */
+/** @typedef {{type: 'manual'} | RescanRequest} SearchRequest */
+
 /**
  * @augments EventDispatcher<import('text-scanner').Events>
  */
@@ -100,8 +103,10 @@ export class TextScanner extends EventDispatcher {
         this._pendingLookup = false;
         /** @type {number} Pointer admission lifetime; programmatic search is independent. */
         this._pointerGeneration = 0;
-        /** @type {number} Explicit dismissal invalidates all outstanding searches. */
+        /** @type {number} Admitted user scans and explicit dismissal invalidate older results. */
         this._searchGeneration = 0;
+        /** @type {?RescanRequest} */
+        this._rescanRequest = null;
         /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
         this._queuedLookup = null;
         /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
@@ -414,6 +419,7 @@ export class TextScanner extends EventDispatcher {
     /** */
     clearSelection() {
         if (!this._canClearSelection) { return; }
+        this._rescanRequest = null;
         if (this._textSourceCurrent !== null) {
             if (this._textSourceCurrentSelected) {
                 this._textSourceCurrent.deselect();
@@ -477,7 +483,19 @@ export class TextScanner extends EventDispatcher {
      */
     async searchLast() {
         if (this._textSourceCurrent !== null && this._inputInfoCurrent !== null) {
-            await this._search(this._textSourceCurrent, this._searchTerms, this._searchKanji, this._inputInfoCurrent);
+            const inputInfo = this._inputInfoCurrent;
+            const {input} = inputInfo;
+            const searchTerms = this._searchTerms && (input === null || input.searchTerms);
+            const searchKanji = this._searchKanji && (input === null || input.searchKanji);
+            /** @type {RescanRequest} */
+            const request = {type: 'refresh', textSource: this._textSourceCurrent};
+            const textSource = request.textSource.clone();
+            this._rescanRequest = request;
+            try {
+                await this._search(textSource, searchTerms, searchKanji, inputInfo, false, false, null, request);
+            } finally {
+                if (this._rescanRequest === request) { this._rescanRequest = null; }
+            }
             return true;
         }
         return false;
@@ -490,8 +508,9 @@ export class TextScanner extends EventDispatcher {
      * @param {boolean} disallowExpandStartOffset disallows expanding the start offset of the range
      */
     async search(textSource, inputDetail, showEmpty = false, disallowExpandStartOffset = false) {
+        this._cancelPointerLookups();
         const inputInfo = this._createInputInfo(null, 'script', 'script', true, [], [], inputDetail);
-        await this._search(textSource, this._searchTerms, this._searchKanji, inputInfo, showEmpty, disallowExpandStartOffset);
+        await this._search(textSource, this._searchTerms, this._searchKanji, inputInfo, showEmpty, disallowExpandStartOffset, null, {type: 'manual'});
     }
 
     // Private
@@ -531,19 +550,26 @@ export class TextScanner extends EventDispatcher {
      * @param {boolean} showEmpty shows a "No results found" popup if no results are found
      * @param {boolean} disallowExpandStartOffset disallows expanding the start offset of the range
      * @param {?number} lookupSequence
+     * @param {?SearchRequest} searchRequest
      * @returns {Promise<?boolean>}
      */
-    async _search(textSource, searchTerms, searchKanji, inputInfo, showEmpty = false, disallowExpandStartOffset = false, lookupSequence = null) {
-        const searchGeneration = this._searchGeneration;
+    async _search(textSource, searchTerms, searchKanji, inputInfo, showEmpty = false, disallowExpandStartOffset = false, lookupSequence = null, searchRequest = null) {
+        const rescanRequest = searchRequest?.type === 'refresh' ? searchRequest : null;
+        const isManual = searchRequest?.type === 'manual';
+        let searchGeneration = this._searchGeneration;
         const searchStartedAt = safePerformance.now();
         let contextDurationMs = 0;
         let findDurationMs = 0;
         try {
             safePerformance.mark('scanner:_search:start');
-            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
-            const isAltText = textSource instanceof TextSourceElement;
+            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
+            // Clone mutable range state, not ownership of creator-owned DOM
+            // resources. Manual callers may reuse a source while a reader waits.
+            if (isManual) {
+                textSource = textSource.clone();
+            }
             if (inputInfo.pointerType === 'touch') {
-                if (isAltText) {
+                if (textSource instanceof TextSourceElement) {
                     return null;
                 }
                 const {imposterSourceElement, rangeStartOffset} = textSource;
@@ -555,12 +581,15 @@ export class TextScanner extends EventDispatcher {
                 }
             }
 
-            const inputInfoDetail = inputInfo.detail;
-            const selectionRestoreInfo = (
-                (typeof inputInfoDetail === 'object' && inputInfoDetail !== null && inputInfoDetail.restoreSelection) ?
-                (this._inputInfoCurrent === null ? this._createSelectionRestoreInfo() : null) :
-                null
-            );
+            let selectionRestoreInfo = this._selectionRestoreInfo;
+            if (rescanRequest === null) {
+                const inputInfoDetail = inputInfo.detail;
+                selectionRestoreInfo = (
+                    (typeof inputInfoDetail === 'object' && inputInfoDetail !== null && inputInfoDetail.restoreSelection) ?
+                    (this._inputInfoCurrent === null ? this._createSelectionRestoreInfo() : null) :
+                    null
+                );
+            }
 
             if (this._scanResolution === 'word' && !disallowExpandStartOffset &&
             (this._language === null || !SCAN_RESOLUTION_EXCLUDED_LANGUAGES.has(this._language))) {
@@ -568,15 +597,18 @@ export class TextScanner extends EventDispatcher {
                 textSource.setStartOffset(this._scanLength, this._layoutAwareScan, true);
             }
 
-            if (!this._textSourceCurrentIncomplete && this._textSourceCurrent !== null && this._textSourceCurrent.hasSameStart(textSource)) {
+            if (!isManual && rescanRequest === null && !this._textSourceCurrentIncomplete && this._textSourceCurrent !== null && this._textSourceCurrent.hasSameStart(textSource)) {
                 return null;
             }
+            // A refresh is lower priority than user input, and repeated hover
+            // no-ops must not invalidate useful refresh work.
+            if (rescanRequest === null) { searchGeneration = ++this._searchGeneration; }
 
             let phaseStartedAt = safePerformance.now();
             const getSearchContextPromise = this._getSearchContext();
             const getSearchContextResult = getSearchContextPromise instanceof Promise ? await getSearchContextPromise : getSearchContextPromise;
             contextDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
-            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
+            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
             const {detail} = getSearchContextResult;
             const optionsContext = this._createOptionsContextForInput(getSearchContextResult.optionsContext, inputInfo);
 
@@ -591,18 +623,19 @@ export class TextScanner extends EventDispatcher {
             phaseStartedAt = safePerformance.now();
             const result = await this._findDictionaryEntries(textSource, searchTerms, searchKanji, optionsContext);
             findDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
-            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
+            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
             if (result !== null) {
                 ({dictionaryEntries, sentence, type, dictionaryAvailability} = result);
-            } else if (showEmpty || (textSource !== null && isAltText && await this._isTextLookupWorthy(textSource.content))) {
+            } else if (showEmpty || (textSource instanceof TextSourceElement && await this._isTextLookupWorthy(textSource.content))) {
                 // Shows a "No results found" message
                 dictionaryEntries = [];
                 sentence = {text: '', offset: 0};
             }
-            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
+            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
 
             if (dictionaryEntries !== null && sentence !== null) {
                 this._inputInfoCurrent = inputInfo;
+                if (rescanRequest !== null) { rescanRequest.textSource = textSource; }
                 this.setCurrentTextSource(textSource);
                 this._textSourceCurrentIncomplete = (dictionaryAvailability?.length ?? 0) > 0;
                 this._selectionRestoreInfo = selectionRestoreInfo;
@@ -646,7 +679,7 @@ export class TextScanner extends EventDispatcher {
                 return false;
             }
         } catch (error) {
-            if (this._isLookupStale(lookupSequence, searchGeneration)) { return null; }
+            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
             this.trigger('searchError', {
                 error: error instanceof Error ? error : new Error(`A search error occurred: ${error}`),
                 textSource,
@@ -1541,6 +1574,19 @@ search);
      */
     _isLookupStale(lookupSequence, searchGeneration = this._searchGeneration) {
         return (searchGeneration !== this._searchGeneration || (lookupSequence !== null && this._activeLookupSequence !== lookupSequence));
+    }
+
+    /**
+     * @param {?number} lookupSequence
+     * @param {number} searchGeneration
+     * @param {?RescanRequest} rescanRequest
+     * @returns {boolean}
+     */
+    _isSearchStale(lookupSequence, searchGeneration, rescanRequest) {
+        return (
+            this._isLookupStale(lookupSequence, searchGeneration) ||
+            (rescanRequest !== null && (this._rescanRequest !== rescanRequest || this._textSourceCurrent !== rescanRequest.textSource))
+        );
     }
 
     /**
