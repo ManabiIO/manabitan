@@ -716,6 +716,28 @@ describe('API PM transport reliability', () => {
         expect(api._mediaDrawingWorkerConnected).toBe(false);
     });
 
+    test('obsolete Firefox backend-port errors preserve the replacement transport', () => {
+        const stalePort = {postMessage: vi.fn(), close: vi.fn(), onmessageerror: /** @type {((event: Event) => void)|null} */ (null)};
+        const currentPort = {postMessage: vi.fn(), close: vi.fn(), onmessageerror: /** @type {((event: Event) => void)|null} */ (null)};
+        const api = new API(
+            /** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})),
+            null,
+            /** @type {MessagePort} */ (/** @type {unknown} */ (stalePort)),
+        );
+        const staleError = stalePort.onmessageerror;
+        api._setBackendPort(/** @type {MessagePort} */ (/** @type {unknown} */ (currentPort)));
+        api._mediaDrawingWorkerConnected = true;
+        staleError?.(new Event('messageerror'));
+        expect(api._backendPort).toBe(currentPort);
+        expect(api._mediaDrawingWorkerConnected).toBe(true);
+        expect(stalePort.close).toHaveBeenCalledTimes(1);
+        expect(currentPort.close).not.toHaveBeenCalled();
+        currentPort.onmessageerror?.(new Event('messageerror'));
+        expect(api._backendPort).toBeNull();
+        expect(api._mediaDrawingWorkerConnected).toBe(false);
+        expect(currentPort.close).toHaveBeenCalledTimes(1);
+    });
+
     test('shutdownRuntimeConnections clears stale backend and media worker state', () => {
         Object.defineProperty(globalThis, 'navigator', {
             configurable: true,

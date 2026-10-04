@@ -463,15 +463,15 @@ export class Application extends EventDispatcher {
                     throw new Error('Media drawing worker startup was interrupted by runtime shutdown');
                 }
                 nextWorker.addEventListener('error', (event) => {
-                    if (runtimeResourcesClosed) { return; }
+                    if (runtimeResourcesClosed || mediaDrawingWorker !== nextWorker) { return; }
                     const message = typeof event.message === 'string' && event.message.length > 0 ? event.message : 'unknown media worker failure';
                     log.error(new Error(`Media drawing worker failed: ${message}`));
-                    void restartMediaDrawingWorker('error');
+                    requestMediaDrawingWorkerRestart('error');
                 });
                 nextWorker.addEventListener('messageerror', () => {
-                    if (runtimeResourcesClosed) { return; }
+                    if (runtimeResourcesClosed || mediaDrawingWorker !== nextWorker) { return; }
                     log.error(new Error('Media drawing worker message deserialization failed'));
-                    void restartMediaDrawingWorker('messageerror');
+                    requestMediaDrawingWorkerRestart('messageerror');
                 });
                 mediaDrawingWorker = nextWorker;
                 api.setMediaDrawingWorker(nextWorker);
@@ -506,6 +506,21 @@ export class Application extends EventDispatcher {
                 mediaDrawingWorker = null;
             }
         };
+        /**
+         * @param {string} reason
+         * @returns {void}
+         */
+        const requestMediaDrawingWorkerRestart = (reason) => {
+            void restartMediaDrawingWorker(reason).catch((error) => {
+                log.error(error);
+                if (runtimeResourcesClosed) { return; }
+                closeRuntimeResources();
+                showRuntimeDisconnectedUi(
+                    'Manabitan could not restart its media rendering worker.\n' +
+                    `Refresh this page to reconnect. ${error instanceof Error ? error.message : String(error)}`,
+                );
+            });
+        };
         webExtension.on('unloaded', () => {
             closeRuntimeResources();
             showRuntimeDisconnectedUi(
@@ -513,13 +528,13 @@ export class Application extends EventDispatcher {
                 'Refresh this page to reconnect.',
             );
         });
-        if (inExtensionContext) {
-            await restartMediaDrawingWorker('initial');
-        }
         /** @type {boolean} */
         let heartbeatFailureLogged = false;
         let startupCompleted = false;
         try {
+            if (inExtensionContext) {
+                await restartMediaDrawingWorker('initial');
+            }
             await waitForBackendReady(webExtension);
             if (mediaDrawingWorker !== null) {
                 await api.ensureMediaDrawingWorkerConnected();

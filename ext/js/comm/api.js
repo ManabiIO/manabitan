@@ -1111,6 +1111,7 @@ export class API {
         this._backendPort = backendPort;
         if (this._backendPort !== null) {
             this._backendPort.onmessageerror = () => {
+                if (this._backendPort !== backendPort) { return; }
                 this._setBackendPort(null);
             };
         }
