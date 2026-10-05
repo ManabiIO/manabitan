@@ -41,6 +41,8 @@ export class DisplayAudio {
         this._modalController = modalController;
         /** @type {?import('display-audio').GenericAudio} */
         this._audioPlaying = null;
+        /** @type {boolean} */
+        this._audioPlayPending = false;
         /** @type {?import('core').TokenObject} */
         this._playbackToken = null;
         /** @type {?import('core').TokenString} */
@@ -93,6 +95,8 @@ export class DisplayAudio {
         this._dataTransmissionConsentState = 'unknown';
         /** @type {import('core').TokenObject} */
         this._consentStateToken = {};
+        /** @type {?Promise<boolean>} */
+        this._consentUpdatePromise = null;
         /** @type {?import('../pages/settings/modal.js').Modal} */
         this._firefoxDataTransmissionModal = null;
         /** @type {?HTMLButtonElement} */
@@ -161,10 +165,7 @@ export class DisplayAudio {
 
     /** */
     stopAudio() {
-        const audio = this._audioPlaying;
-        this._audioPlaying = null;
-        this._invalidatePlayback();
-        if (audio !== null) { audio.pause(); }
+        this._stopAudio(null);
     }
 
     /**
@@ -216,10 +217,30 @@ export class DisplayAudio {
 
     // Private
 
-    /** */
-    _invalidatePlayback() {
-        this._playbackToken = null;
-        this._clearPlaybackProgress();
+    /**
+     * @param {?import('core').TokenObject} token
+     */
+    _stopAudio(token) {
+        const audio = this._audioPlaying;
+        this._audioPlaying = null;
+        this._invalidatePlayback(token);
+        if (audio !== null) { audio.pause(); }
+    }
+
+    /**
+     * @param {?import('core').TokenObject} [token]
+     */
+    _invalidatePlayback(token = null) {
+        this._playbackToken = token;
+        const progressToken = this._playbackProgressToken;
+        const audio = this._audioPlayPending ? this._audioPlaying : null;
+        this._audioPlayPending = false;
+        if (audio !== null) {
+            // A pending play/resume promise is not already-started playback.
+            this._audioPlaying = null;
+            audio.pause();
+        }
+        this._clearPlaybackProgress(progressToken);
     }
 
     /**
@@ -429,6 +450,7 @@ export class DisplayAudio {
 
     /** */
     async _refreshDataTransmissionConsentState() {
+        if (this._consentUpdatePromise !== null) { return; }
         /** @type {import('core').TokenObject} */
         const token = {};
         this._consentStateToken = token;
@@ -445,6 +467,7 @@ export class DisplayAudio {
      * @param {unknown} value
      */
     _setDataTransmissionConsentState(value) {
+        this._consentStateToken = {};
         this._dataTransmissionConsentState = normalizeDataTransmissionConsentState(value);
         if (!this._canPlayAudio()) {
             this._invalidatePlayback();
@@ -489,20 +512,45 @@ export class DisplayAudio {
      * @param {boolean} audioEnabled
      */
     async _updateDataTransmissionConsent(state, audioEnabled) {
-        const optionsContext = this._display.getOptionsContext();
-        try {
-            const results = await this._display.application.api.modifySettings(
-                getDataTransmissionConsentUpdateTargets(state, audioEnabled, optionsContext),
-                'display-audio',
-            );
-            for (const {error} of results) {
-                if (typeof error !== 'undefined') {
-                    throw toError(error);
+        const optionsContext = {...this._display.getOptionsContext()};
+        /** @returns {Promise<boolean>} */
+        const update = async () => {
+            // Serialize persistence, but do not send superseded queued choices.
+            if (this._consentUpdatePromise !== promise) { return false; }
+            try {
+                const results = await this._display.application.api.modifySettings(
+                    getDataTransmissionConsentUpdateTargets(state, audioEnabled, optionsContext),
+                    'display-audio',
+                );
+                for (const {error} of results) {
+                    if (typeof error !== 'undefined') { throw toError(error); }
                 }
+                if (this._consentUpdatePromise !== promise) { return false; }
+                this._setDataTransmissionConsentState(state);
+                return true;
+            } catch (_) {
+                if (this._consentUpdatePromise === promise) {
+                    this._showNotification('Failed to update audio consent. Check extension settings and try again.', true);
+                }
+                return false;
             }
-            this._setDataTransmissionConsentState(state);
-        } catch (_) {
-            this._showNotification('Failed to update audio consent. Check extension settings and try again.', true);
+        };
+        const promise = (this._consentUpdatePromise ?? Promise.resolve(false)).then(update, update);
+        this._consentUpdatePromise = promise;
+        this._consentStateToken = {};
+        // Revocation takes effect locally without waiting for storage or older
+        // requests. Granting consent still requires a successful current save.
+        if (state === 'declined') { this._setDataTransmissionConsentState(state); }
+        let applied = false;
+        try {
+            applied = await promise;
+        } finally {
+            if (this._consentUpdatePromise === promise) {
+                this._consentUpdatePromise = null;
+                // Reconcile broadcasts skipped during persistence, including
+                // changes made by another settings context in the meantime.
+                if (applied) { void this._refreshDataTransmissionConsentState(); }
+            }
         }
     }
 
@@ -645,15 +693,19 @@ export class DisplayAudio {
      * @returns {Promise<import('display-audio').PlayAudioResult>}
      */
     async _playAudio(dictionaryEntryIndex, headwordIndex, sources, audioInfoListIndex) {
-        this.stopAudio();
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        // Publish admission before cleanup can synchronously dispatch a stop
+        // or a newer request through progress observers.
+        this._stopAudio(token);
+        if (this._playbackToken !== token) {
+            return {audio: null, source: null, subIndex: 0, valid: false};
+        }
         this.clearAutoPlayTimer();
         if (!this._canPlayAudio()) {
             this._showDataTransmissionConsentModal();
             return {audio: null, source: null, subIndex: 0, valid: false};
         }
-        /** @type {import('core').TokenObject} */
-        const token = {};
-        this._playbackToken = token;
         sources = [...sources];
 
         const headword = this._getHeadword(dictionaryEntryIndex, headwordIndex);
@@ -707,6 +759,7 @@ export class DisplayAudio {
             audio.volume = this._playbackVolume;
 
             this._audioPlaying = audio;
+            this._audioPlayPending = true;
             const playPromise = audio.play();
 
             if (typeof playPromise !== 'undefined') {
@@ -720,6 +773,7 @@ export class DisplayAudio {
             if (this._playbackToken !== token) {
                 return {audio: null, source: null, subIndex: 0, valid: false};
             }
+            this._audioPlayPending = false;
             return {audio, source, subIndex, valid};
         } finally {
             this._clearPlaybackProgress(overrideToken);
@@ -843,7 +897,9 @@ export class DisplayAudio {
 
             let cacheUpdated = false;
             let sourceInfo = sourceMap.get(index);
-            if (typeof sourceInfo === 'undefined') {
+            // Empty lists can also represent a provider/HTTP failure. Preserve
+            // their badges, but retry discovery on a later playback request.
+            if (typeof sourceInfo === 'undefined' || sourceInfo.infoList?.length === 0) {
                 const infoListPromise = this._getTermAudioInfoList(source, term, reading);
                 sourceInfo = {infoListPromise, infoList: null};
                 sourceMap.set(index, sourceInfo);
