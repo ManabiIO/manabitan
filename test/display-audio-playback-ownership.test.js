@@ -386,3 +386,51 @@ for (const consent of ['accepted', 'declined']) {
         expect(requests).toBe(consent === 'accepted' ? 1 : 0);
     });
 }
+
+for (const order of [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]) {
+    test(`the latest of three playback requests wins with completion order ${order.join(',')}`, async () => {
+        const {player, sources, progress, info, setCreate} = setup();
+        const preparations = order.map(() => deferred());
+        const audios = order.map(() => makeAudio());
+        let next = 0;
+        setCreate(() => preparations[next++].promise);
+        const requests = order.map(() => player._playAudio(0, 0, sources, null));
+        for (const index of order) {
+            preparations[index].resolve(info(audios[index]));
+            await flush();
+        }
+        const results = await Promise.all(requests);
+        expect(results.map(({valid}) => valid)).toEqual([false, false, true]);
+        expect(audios.map(({plays}) => plays)).toEqual([0, 0, 1]);
+        expect(audios[2].pauses).toBe(0);
+        expect(progress.size).toBe(0);
+    });
+}
+
+test('a late rejected-cache observer cannot delete a newer retry created between promise reactions', async () => {
+    const {player, sources, progress} = setup();
+    const pending = deferred();
+    const audio = makeAudio();
+    let lookups = 0;
+    Reflect.set(player, '_getTermAudioInfoList', () => {
+        ++lookups;
+        return lookups === 1 ? pending.promise : Promise.resolve([{info: {type: 'url', url: sources[0].url}, audio, audioPromise: null, audioResolved: true}]);
+    });
+    const first = player._playAudio(0, 0, sources, null);
+    const state = {latest: /** @type {Promise<import('display-audio').PlayAudioResult>|null} */ (null)};
+    // The first observer retires the failed entry; this reaction installs a
+    // replacement before the second observer handles the same rejection.
+    void pending.promise.catch(() => {
+        state.latest = player._playAudio(0, 0, sources, null);
+        void state.latest.catch(() => {});
+    });
+    const second = player._playAudio(0, 0, sources, null);
+    pending.reject(new Error('transport closed'));
+    const staleResults = await Promise.all([first, second]);
+    expect(staleResults.map(({valid}) => valid)).toEqual([false, false]);
+    if (state.latest === null) { throw new Error('The retry did not start'); }
+    expect((await state.latest).valid).toBe(true);
+    expect((await player._playAudio(0, 0, sources, null)).valid).toBe(true);
+    expect(lookups).toBe(2);
+    expect(progress.size).toBe(0);
+});
