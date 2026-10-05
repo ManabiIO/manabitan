@@ -93,9 +93,12 @@ export class AudioDownloader {
     async downloadTermAudio(sources, preferredAudioIndex, term, reading, idleTimeout, languageSummary, enableDefaultAudioSources) {
         const errors = [];
         const requiredAudioSources = enableDefaultAudioSources ? getRequiredAudioSources(languageSummary.iso, sources) : [];
-        for (const source of [...sources, ...requiredAudioSources]) {
+        const sourceCount = sources.length;
+        for (const [sourceIndex, source] of [...sources, ...requiredAudioSources].entries()) {
             let infoList = await this.getTermAudioInfoList(source, term, reading, languageSummary);
-            if (typeof preferredAudioIndex === 'number') {
+            // A preferred recording belongs to the explicit source list, not
+            // unrelated default providers with their own recording order.
+            if (sourceIndex < sourceCount && typeof preferredAudioIndex === 'number') {
                 infoList = (preferredAudioIndex >= 0 && preferredAudioIndex < infoList.length ? [infoList[preferredAudioIndex]] : []);
             }
             for (const info of infoList) {
