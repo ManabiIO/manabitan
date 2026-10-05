@@ -590,6 +590,7 @@ export class AudioDownloader {
      * @returns {Promise<boolean>}
      */
     async _isAudioBinaryValid(arrayBuffer, sourceType) {
+        if (arrayBuffer.byteLength === 0) { return false; }
         switch (sourceType) {
             case 'jpod101':
             {
