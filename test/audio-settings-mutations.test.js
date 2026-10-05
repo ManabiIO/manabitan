@@ -41,7 +41,7 @@ function deferred() {
 
 /** @returns {TestElement} */
 function makeElement() {
-    const element = Object.assign(new EventTarget(), {
+    return Object.assign(new EventTarget(), {
         value: '',
         hidden: false,
         dataset: /** @type {Record<string, string>} */ ({}),
@@ -51,8 +51,9 @@ function makeElement() {
         textContent: '',
         /** @param {TestElement} child */
         appendChild(child) {
+            child.parentNode?.removeChild(child);
             this.children.push(child);
-            child.parentNode = this;
+            child.parentNode = /** @type {TestElement} */ (this);
         },
         /** @param {TestElement} child */
         removeChild(child) {
@@ -73,7 +74,6 @@ function makeElement() {
         },
         querySelectorAll: () => [],
     });
-    return element;
 }
 
 /**
@@ -131,9 +131,16 @@ async function setup() {
          */
         setProfileSetting(path, value) { return this.modifyProfileSettings([{action: 'set', path, value}]); },
     };
+    const moveModal = {
+        node: root.querySelector('#move-modal'),
+        visible: false,
+        /** @param {boolean} value */
+        setVisible(value) { this.visible = value; },
+    };
+    moveModal.node.selectors.set('#audio-source-move-location', root.querySelector('#audio-source-move-location'));
     const controller = new AudioController(
         /** @type {import('../ext/js/pages/settings/settings-controller.js').SettingsController} */ (/** @type {unknown} */ (settings)),
-        /** @type {import('../ext/js/pages/settings/modal-controller.js').ModalController} */ (/** @type {unknown} */ ({getModal: () => null})),
+        /** @type {import('../ext/js/pages/settings/modal-controller.js').ModalController} */ (/** @type {unknown} */ ({getModal: (/** @type {string} */ name) => (name === 'audio-source-move-location' ? moveModal : null)})),
     );
     await controller.prepare();
     const entries = () => Reflect.get(controller, '_audioSourceEntries');
@@ -143,9 +150,12 @@ async function setup() {
         state.profileIndex = index;
         events.get('optionsContextChanged')?.({});
     };
-    /** @param {string[]} names */
+    /**
+     * @param {string[]} names
+     * @returns {void}
+     */
     const render = (names) => controller._onOptionsChanged({options: options(names), optionsContext: {index: state.profileIndex}});
-    return {controller, state, entries, urls, switchProfile, render};
+    return {controller, state, entries, urls, switchProfile, render, moveModal, root};
 }
 
 /** @returns {import('settings-controller').ModifyResult[]} */
@@ -157,10 +167,18 @@ for (const operation of ['add', 'remove', 'move']) {
     test(`${operation} surfaces an embedded settings error and restores the authoritative source list`, async () => {
         const {controller, state, entries, urls} = await setup();
         state.save = async () => saveError();
-        const request = operation === 'add' ? controller._addAudioSource() :
-            (operation === 'remove' ? controller.removeSource(entries()[0]) : controller.moveAudioSourceOptions(0, 1));
+        let request;
+        switch (operation) {
+            case 'add': request = controller._addAudioSource(); break;
+            case 'remove': request = controller.removeSource(entries()[0]); break;
+            default: request = controller.moveAudioSourceOptions(0, 1); break;
+        }
         let failure = null;
-        try { await request; } catch (error) { failure = error instanceof Error ? error : new Error(String(error)); }
+        try {
+            await request;
+        } catch (error) {
+            failure = error instanceof Error ? error : new Error(String(error));
+        }
         expect(failure instanceof Error).toBe(true);
         expect(failure?.message).toBe('Audio setting was not saved');
         expect(urls()).toEqual(['A', 'B', 'C']);
@@ -179,7 +197,11 @@ for (const [method, property, input, value, previous] of [
         const entry = entries()[0];
         Reflect.get(entry, input).value = value;
         let failure = null;
-        try { await Reflect.get(entry, method).call(entry, value); } catch (error) { failure = error instanceof Error ? error : new Error(String(error)); }
+        try {
+            await Reflect.get(entry, method).call(entry, value);
+        } catch (error) {
+            failure = error instanceof Error ? error : new Error(String(error));
+        }
         expect(failure instanceof Error).toBe(true);
         expect(Reflect.get(entry, property)).toBe(previous);
         expect(Reflect.get(entry, input).value).toBe(previous);
@@ -278,7 +300,11 @@ test('transport rejection still restores a failed removal', async () => {
     const {controller, state, entries, urls} = await setup();
     state.save = async () => { throw new Error('transport closed'); };
     let failure = null;
-    try { await controller.removeSource(entries()[0]); } catch (error) { failure = error instanceof Error ? error : new Error(String(error)); }
+    try {
+        await controller.removeSource(entries()[0]);
+    } catch (error) {
+        failure = error instanceof Error ? error : new Error(String(error));
+    }
     expect(failure?.message).toBe('transport closed');
     expect(urls()).toEqual(['A', 'B', 'C']);
 });
@@ -356,7 +382,11 @@ test('queued field edits are dropped when their source row is replaced', async (
 test('healthy rapid field edits persist in order and retain the latest visible value', async () => {
     const {state, entries} = await setup();
     const entry = entries()[0];
-    await Promise.all([entry._setUrl('first'), entry._setUrl('second'), entry._setUrl('third')]);
+    const requests = ['first', 'second', 'third'].map((value) => {
+        Reflect.get(entry, '_urlInput').value = value;
+        return entry._setUrl(value);
+    });
+    await Promise.all(requests);
     expect(state.writes.map(({targets}) => /** @type {{value: string}[]} */ (targets)[0].value)).toEqual(['first', 'second', 'third']);
     expect(Reflect.get(entry, '_urlInput').value).toBe('third');
 });
@@ -381,4 +411,166 @@ test('a reorder waits for earlier field saves before reading the array it will p
     await Promise.all([edit, move]);
     expect(earlyReads).toBe(readsBefore);
     expect(urls()).toEqual(['B', 'C', 'saved-new-url']);
+});
+
+for (const change of ['profile', 'replace', 'remove', 'add']) {
+    test(`a move-to dialog is retired when its source identity changes through ${change}`, async () => {
+        const {controller, state, entries, switchProfile, render, moveModal, root} = await setup();
+        entries()[0]._showMoveToModal();
+        expect(moveModal.visible).toBe(true);
+        root.querySelector('#audio-source-move-location').value = '2';
+        switch (change) {
+            case 'profile':
+                switchProfile(1);
+                render(['X', 'Y', 'Z']);
+                break;
+            case 'replace': render(['X', 'Y', 'Z']); break;
+            case 'remove': await controller.removeSource(entries()[1]); break;
+            case 'add': await controller._addAudioSource(); break;
+        }
+        const writesBefore = state.writes.length;
+        controller._onAudioSourceMoveButtonClick();
+        for (let i = 0; i < 30; ++i) { await Promise.resolve(); }
+        expect(moveModal.visible).toBe(false);
+        expect(moveModal.node.dataset.index).toBe(undefined);
+        expect(state.writes.length).toBe(writesBefore);
+    });
+}
+
+test('a healthy move-to dialog still reorders the intended source', async () => {
+    const {controller, entries, root, urls} = await setup();
+    entries()[0]._showMoveToModal();
+    root.querySelector('#audio-source-move-location').value = '3';
+    controller._onAudioSourceMoveButtonClick();
+    for (let i = 0; i < 30; ++i) { await Promise.resolve(); }
+    expect(urls()).toEqual(['B', 'C', 'A']);
+});
+
+test('a field edit cannot be sent to the shifted index of a removal that later fails', async () => {
+    const {controller, state, entries} = await setup();
+    const [first, second] = entries();
+    const pending = deferred();
+    let calls = 0;
+    state.save = async () => {
+        ++calls;
+        if (calls === 1) {
+            await pending.promise;
+            return saveError();
+        }
+        return [{result: true}];
+    };
+    const remove = controller.removeSource(first).catch(() => {});
+    for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
+    const edit = second._setUrl('belongs-to-B');
+    for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
+    const earlyWrites = state.writes.length;
+    pending.resolve(null);
+    await Promise.all([remove, edit]);
+    expect(earlyWrites).toBe(1);
+    expect(state.writes.length).toBe(1);
+});
+
+test('an edit during a sent reorder follows its row to the new persisted index', async () => {
+    const {controller, state, entries, urls} = await setup();
+    const second = entries()[1];
+    const pending = deferred();
+    let calls = 0;
+    state.save = async () => {
+        ++calls;
+        if (calls === 1) { await pending.promise; }
+        return [{result: true}];
+    };
+    const move = controller.moveAudioSourceOptions(0, 2);
+    for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
+    const edit = second._setUrl('updated-B');
+    for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
+    const earlyWrites = state.writes.length;
+    pending.resolve(null);
+    await Promise.all([move, edit]);
+    expect(earlyWrites).toBe(1);
+    expect(state.writes.length).toBe(2);
+    expect(state.writes[1].targets).toEqual([{action: 'set', path: 'audio.sources[0].url', value: 'updated-B'}]);
+    expect(urls()).toEqual(['updated-B', 'C', 'A']);
+});
+
+test('two pending structural changes never send overlapping index mutations', async () => {
+    const {controller, state, entries, urls} = await setup();
+    const [first, second] = entries();
+    const pending = deferred();
+    let calls = 0;
+    state.save = async () => {
+        ++calls;
+        if (calls === 1) { await pending.promise; }
+        return [{result: true}];
+    };
+    const removeFirst = controller.removeSource(first);
+    const removeSecond = controller.removeSource(second);
+    for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
+    const earlyWrites = state.writes.length;
+    pending.resolve(null);
+    await Promise.all([removeFirst, removeSecond]);
+    expect(earlyWrites).toBe(1);
+    expect(urls()).toEqual(['C']);
+    expect(state.writes.length).toBe(2);
+});
+
+test('an edit during failed-removal reconciliation cannot cancel the authoritative repair of shifted indices', async () => {
+    const {controller, state, entries, urls} = await setup();
+    const [first, second] = entries();
+    const pendingRead = deferred();
+    state.get = () => /** @type {Promise<import('settings').ProfileOptions>} */ (pendingRead.promise);
+    state.save = async () => saveError();
+    const remove = controller.removeSource(first).catch(() => {});
+    for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
+    const edit = second._setUrl('new-B').catch(() => {});
+    pendingRead.resolve(options());
+    await Promise.all([remove, edit]);
+    expect(urls()).toEqual(['A', 'B', 'C']);
+    expect(state.writes.length).toBe(1);
+});
+
+for (const operation of ['move', 'field']) {
+    test(`${operation} completion repairs a profile revisited before the saved change became visible`, async () => {
+        const {controller, state, entries, switchProfile, render, urls} = await setup();
+        const pending = deferred();
+        state.save = async () => {
+            await pending.promise;
+            if (operation === 'move') { state.stored = options(['B', 'C', 'A']); } else { state.stored.audio.sources[0].url = 'saved-A'; }
+            return [{result: true}];
+        };
+        const change = operation === 'move' ? controller.moveAudioSourceOptions(0, 2) : entries()[0]._setUrl('saved-A');
+        for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
+        switchProfile(1);
+        render(['other-profile']);
+        switchProfile(0);
+        render(['A', 'B', 'C']);
+        pending.resolve(null);
+        await change;
+        expect(urls()).toEqual(operation === 'move' ? ['B', 'C', 'A'] : ['saved-A', 'B', 'C']);
+    });
+}
+
+test('failed authoritative recovery prevents queued edits from using unverified shifted indices', async () => {
+    const {controller, state, entries} = await setup();
+    const [first, second] = entries();
+    const pending = deferred();
+    let calls = 0;
+    state.save = async () => {
+        ++calls;
+        if (calls === 1) { await pending.promise; }
+        return saveError();
+    };
+    state.get = async () => { throw new Error('settings transport unavailable'); };
+    const remove = controller.removeSource(first).catch(() => {});
+    for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
+    const edit = second._setUrl('new-B').catch(() => {});
+    pending.resolve(null);
+    await Promise.all([remove, edit]);
+    expect(state.writes.length).toBe(1);
+    state.get = async () => structuredClone(state.stored);
+    await controller._refreshAudioSources();
+    state.save = async () => [{result: true}];
+    await entries()[1]._setUrl('recovered-B');
+    expect(state.writes.length).toBe(2);
+    expect(state.writes[1].targets).toEqual([{action: 'set', path: 'audio.sources[1].url', value: 'recovered-B'}]);
 });
