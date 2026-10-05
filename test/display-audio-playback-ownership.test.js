@@ -20,7 +20,10 @@ function deferred() {
     /** @type {(reason: unknown) => void} */
     let reject = (_reason) => { throw new Error('deferred not initialized'); };
     /** @type {Promise<T>} */
-    const promise = new Promise((resolve2, reject2) => { resolve = resolve2; reject = reject2; });
+    const promise = new Promise((resolve2, reject2) => {
+        resolve = resolve2;
+        reject = reject2;
+    });
     return {promise, resolve, reject};
 }
 
@@ -80,6 +83,7 @@ function setup() {
         _audioSystem: {getFallbackAudio: () => fallback},
         _display: {
             application: {api: {}},
+            frameVisible: true,
             getLanguageSummary: () => ({iso: 'ja'}),
             getOptions: () => options,
             dictionaryEntries: [{type: 'term', headwords: [{term: 'first', reading: 'first'}, {term: 'second', reading: 'second'}]}],
@@ -96,6 +100,7 @@ function setup() {
         /**
          * @param {number} _entry
          * @param {number} headword
+         * @returns {typeof buttons}
          */
         _getAudioPlayButtons: (_entry, headword) => [buttons[headword]],
         _updateOpenMenu: () => { ++calls.menuUpdates; },
@@ -128,7 +133,7 @@ test('a slower earlier request cannot stop or replace the latest pronunciation',
     const {player, sources, progress, buttons, info, setCreate} = setup();
     const old = deferred();
     const latest = deferred();
-    setCreate((term) => term === 'first' ? old.promise : latest.promise);
+    setCreate((term) => (term === 'first' ? old.promise : latest.promise));
     const first = player._playAudio(0, 0, sources, null);
     const second = player._playAudio(0, 1, sources, null);
     const firstAudio = makeAudio();
@@ -186,7 +191,10 @@ test('source-menu playback cannot bypass declined consent', async () => {
     const {player, calls, item, info, setCreate} = setup();
     let requests = 0;
     const audio = makeAudio();
-    setCreate(async () => { ++requests; return info(audio); });
+    setCreate(async () => {
+        ++requests;
+        return info(audio);
+    });
     Reflect.set(player, '_dataTransmissionConsentRequired', true);
     player._setDataTransmissionConsentState('declined');
     await player._playAudioFromSource(0, 0, item(0));
@@ -216,7 +224,10 @@ test('cancelled source discovery does not admit a second source or update menus'
     const {player, sources, calls, progress} = setup();
     const pending = deferred();
     let requests = 0;
-    Reflect.set(player, '_getTermAudioInfoList', () => { ++requests; return pending.promise; });
+    Reflect.set(player, '_getTermAudioInfoList', () => {
+        ++requests;
+        return pending.promise;
+    });
     const request = player._playAudio(0, 0, sources, null);
     player.stopAudio();
     pending.resolve([]);
@@ -231,7 +242,10 @@ test('cancelled media failure does not start the next recording', async () => {
     const pending = deferred();
     let requests = 0;
     Reflect.set(player, '_getTermAudioInfoList', async () => [0, 1].map(() => ({info: {type: 'url', url: 'https://audio.example/'}, audio: null, audioPromise: null, audioResolved: false})));
-    Reflect.set(player, '_createAudioFromInfo', () => { ++requests; return pending.promise; });
+    Reflect.set(player, '_createAudioFromInfo', () => {
+        ++requests;
+        return pending.promise;
+    });
     const request = player._playAudio(0, 0, sources, null);
     await flush();
     player.stopAudio();
@@ -247,7 +261,10 @@ test('superseded callers may share a cached decode without pausing the winning a
     const pending = deferred();
     let requests = 0;
     Reflect.set(player, '_getTermAudioInfoList', async () => [{info: {type: 'url', url: 'https://audio.example/'}, audio: null, audioPromise: null, audioResolved: false}]);
-    Reflect.set(player, '_createAudioFromInfo', () => { ++requests; return pending.promise; });
+    Reflect.set(player, '_createAudioFromInfo', () => {
+        ++requests;
+        return pending.promise;
+    });
     const first = player._playAudio(0, 0, sources, null);
     await flush();
     const second = player._playAudio(0, 0, sources, null);
@@ -308,17 +325,22 @@ test('a rejected source lookup falls through and is retryable on the next reques
     const firstAudio = makeAudio();
     const secondAudio = makeAudio();
     const lookups = [0, 0];
-    Reflect.set(player, '_getTermAudioInfoList', /** @param {import('display-audio').AudioSource} source */ async (source) => {
+    /**
+     * @param {import('display-audio').AudioSource} source
+     * @returns {Promise<import('display-audio').AudioInfoList>}
+     */
+    const getAudioInfoList = async (source) => {
         const attempt = ++lookups[source.index];
         if (source.index === 0 && attempt === 1) { throw new Error('background worker restarted'); }
         return [{info: {type: 'url', url: source.url}, audio: null, audioPromise: null, audioResolved: false}];
-    });
+    };
+    Reflect.set(player, '_getTermAudioInfoList', getAudioInfoList);
     /**
      * @param {import('audio-downloader').Info} _info
      * @param {import('display-audio').AudioSource} source
      * @returns {Promise<ReturnType<typeof makeAudio>>}
      */
-    const createAudio = async (_info, source) => source.index === 0 ? firstAudio : secondAudio;
+    const createAudio = async (_info, source) => (source.index === 0 ? firstAudio : secondAudio);
     Reflect.set(player, '_createAudioFromInfo', createAudio);
     const first = await player._playAudio(0, 0, sources, null);
     expect(first.source?.index).toBe(1);
@@ -334,7 +356,10 @@ test('a cancelled source rejection is contained without admitting fallback reque
     const {player, sources, fallback, progress} = setup();
     const pending = deferred();
     let requests = 0;
-    Reflect.set(player, '_getTermAudioInfoList', () => { ++requests; return pending.promise; });
+    Reflect.set(player, '_getTermAudioInfoList', () => {
+        ++requests;
+        return pending.promise;
+    });
     const request = player._playAudio(0, 0, sources, null);
     player.stopAudio();
     pending.reject(new Error('transport closed'));
@@ -351,7 +376,6 @@ for (const consent of ['accepted', 'declined']) {
         Reflect.set(player, '_dataTransmissionConsentRequired', true);
         player._setDataTransmissionConsentState('unknown');
         player._onOptionsUpdated({options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ (options))});
-        Reflect.get(player, '_display').frameVisible = true;
         player.autoPlayAudioDelay = 0;
         let requests = 0;
         Reflect.set(player, 'playAudio', async () => { ++requests; });

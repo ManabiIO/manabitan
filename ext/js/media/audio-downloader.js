@@ -280,7 +280,7 @@ export class AudioDownloader {
 
     /** @type {import('audio-downloader').GetInfoHandler} */
     async _getInfoJisho(term, reading) {
-        const fetchUrl = `https://jisho.org/search/${term}`;
+        const fetchUrl = `https://jisho.org/search/${encodeURIComponent(term)}`;
         const response = await this._requestBuilder.fetchAnonymous(fetchUrl, DEFAULT_REQUEST_INIT_PARAMS);
         const responseText = await response.text();
 
@@ -518,7 +518,7 @@ export class AudioDownloader {
          */
         const replacer = (m0, m1) => (
             Object.prototype.hasOwnProperty.call(data, m1) ?
-            `${data[/** @type {'term'|'reading'|'language'} */ (m1)]}` :
+            encodeURIComponent(data[/** @type {'term'|'reading'|'language'} */ (m1)]) :
             m0
         );
         return url.replace(/\{([^}]*)\}/g, replacer);
