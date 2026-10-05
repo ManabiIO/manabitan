@@ -43,6 +43,8 @@ export class DisplayAudio {
         this._audioPlaying = null;
         /** @type {?import('core').TokenObject} */
         this._playbackToken = null;
+        /** @type {import('core').TokenObject} */
+        this._primaryCardAudioToken = {};
         /** @type {AudioSystem} */
         this._audioSystem = new AudioSystem(this._display.application.api);
         /** @type {number} */
@@ -217,6 +219,7 @@ export class DisplayAudio {
      */
     _onOptionsUpdated({options}) {
         this._playbackToken = null;
+        this._closeOpenMenus();
         this.clearAutoPlayTimer();
         const {
             general: {language},
@@ -257,6 +260,7 @@ export class DisplayAudio {
     /** */
     _onContentClear() {
         this._playbackToken = null;
+        this._closeOpenMenus();
         this._entriesToken = {};
         this._cache.clear();
         this.clearAutoPlayTimer();
@@ -542,7 +546,7 @@ export class DisplayAudio {
         const headwordIndex = this._getAudioPlayButtonHeadwordIndex(button);
         const dictionaryEntryIndex = this._display.getElementDictionaryEntryIndex(button);
 
-        const {detail: {action, item, menu, shiftKey}} = e;
+        const {detail: {action, item, shiftKey}} = e;
         switch (action) {
             case 'playAudioFromSource':
                 if (shiftKey) {
@@ -552,7 +556,9 @@ export class DisplayAudio {
                 break;
             case 'setPrimaryAudio':
                 e.preventDefault();
-                this._setPrimaryAudio(dictionaryEntryIndex, headwordIndex, item, menu, true);
+                if (item !== null) {
+                    this._setPrimaryAudio(dictionaryEntryIndex, headwordIndex, this._getMenuItemSourceInfo(item), true);
+                }
                 break;
         }
     }
@@ -708,11 +714,14 @@ export class DisplayAudio {
 
         try {
             const token = this._entriesToken;
+            const primaryCardAudioToken = this._primaryCardAudioToken;
             const playPromise = this._playAudio(dictionaryEntryIndex, headwordIndex, [source], subIndex);
             const playbackToken = this._playbackToken;
-            const {valid} = await playPromise;
-            if (valid && token === this._entriesToken && playbackToken === this._playbackToken) {
-                this._setPrimaryAudio(dictionaryEntryIndex, headwordIndex, item, null, false);
+            const result = await playPromise;
+            if (result.valid && token === this._entriesToken && playbackToken === this._playbackToken && primaryCardAudioToken === this._primaryCardAudioToken) {
+                // Menu rows may be reused while audio loads; select the recording
+                // that actually played, not the row's current source/index.
+                this._setPrimaryAudio(dictionaryEntryIndex, headwordIndex, result, false);
             }
         } catch (e) {
             // NOP
@@ -722,13 +731,11 @@ export class DisplayAudio {
     /**
      * @param {number} dictionaryEntryIndex
      * @param {number} headwordIndex
-     * @param {?HTMLElement} item
-     * @param {?PopupMenu} menu
+     * @param {import('display-audio').SourceInfo} sourceInfo
      * @param {boolean} canToggleOff
      */
-    _setPrimaryAudio(dictionaryEntryIndex, headwordIndex, item, menu, canToggleOff) {
-        if (item === null) { return; }
-        const {source, subIndex} = this._getMenuItemSourceInfo(item);
+    _setPrimaryAudio(dictionaryEntryIndex, headwordIndex, sourceInfo, canToggleOff) {
+        const {source, subIndex} = sourceInfo;
         if (source === null || !source.downloadable) { return; }
 
         const headword = this._getHeadword(dictionaryEntryIndex, headwordIndex);
@@ -749,9 +756,13 @@ export class DisplayAudio {
             null
         );
         cacheEntry.primaryCardAudio = primaryCardAudio;
+        this._primaryCardAudioToken = {};
 
-        if (menu !== null) {
-            this._updateMenuPrimaryCardAudio(menu.bodyNode, term, reading);
+        for (const menu of this._openMenus) {
+            const {dataset} = menu.containerNode;
+            if (dataset.term === term && dataset.reading === reading) {
+                this._updateMenuPrimaryCardAudio(menu.bodyNode, term, reading);
+            }
         }
     }
 
@@ -865,13 +876,14 @@ export class DisplayAudio {
             if (this._playbackToken !== token) { break; }
             const item = infoList[i];
 
-            let {audio, audioResolved} = item;
+            let {audio} = item;
 
-            if (!audioResolved) {
+            if (audio === null) {
                 let {audioPromise} = item;
                 if (audioPromise === null) {
                     audioPromise = this._createAudioFromInfo(item.info, source);
                     item.audioPromise = audioPromise;
+                    item.audioResolved = false;
                 }
 
                 result.cacheUpdated = true;
@@ -879,12 +891,20 @@ export class DisplayAudio {
                 try {
                     audio = await audioPromise;
                 } catch (e) {
+                    // Keep the failure visible, but let a later request retry.
+                    // A late observer must not retire a newer decode attempt.
+                    if (item.audioPromise === audioPromise) {
+                        item.audioPromise = null;
+                        item.audioResolved = true;
+                    }
                     continue;
-                } finally {
-                    item.audioResolved = true;
                 }
 
-                item.audio = audio;
+                if (item.audioPromise === audioPromise) {
+                    item.audio = audio;
+                    item.audioPromise = null;
+                    item.audioResolved = true;
+                }
             }
 
             if (audio !== null) {
@@ -1102,15 +1122,19 @@ export class DisplayAudio {
                 const cardButton = querySelectorNotNull(node, '.popup-menu-item-set-primary-audio-button');
                 cardButton.hidden = !downloadable;
 
-                if (valid !== null) {
-                    /** @type {HTMLElement} */
-                    const icon = querySelectorNotNull(node, '.popup-menu-item-audio-button .popup-menu-item-icon');
+                /** @type {HTMLElement} */
+                const icon = querySelectorNotNull(node, '.popup-menu-item-audio-button .popup-menu-item-icon');
+                if (valid === null) {
+                    delete icon.dataset.icon;
+                } else {
                     icon.dataset.icon = valid ? 'checkmark' : 'cross';
                     showIcons = true;
                 }
                 node.dataset.index = `${index}`;
                 if (subIndex !== null) {
                     node.dataset.subIndex = `${subIndex}`;
+                } else {
+                    delete node.dataset.subIndex;
                 }
                 node.dataset.valid = `${valid}`;
                 node.dataset.sourceInOptions = `${isInOptions}`;
@@ -1215,12 +1239,20 @@ export class DisplayAudio {
     }
 
     /** */
+    _closeOpenMenus() {
+        for (const menu of this._openMenus) { menu.close(false); }
+        this._openMenus.clear();
+    }
+
+    /** */
     _updateOpenMenu() {
         for (const menu of this._openMenus) {
             const menuContainerNode = menu.containerNode;
             const {term, reading} = menuContainerNode.dataset;
             if (typeof term === 'string' && typeof reading === 'string') {
                 this._createMenuItems(menuContainerNode, menu.bodyNode, term, reading);
+                this._updateMenuPrimaryCardAudio(menu.bodyNode, term, reading);
+                menu.updateMenuItems();
             }
             menu.updatePosition();
         }

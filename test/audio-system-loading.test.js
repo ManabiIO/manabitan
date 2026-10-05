@@ -78,15 +78,17 @@ function setup(initialize = /** @type {(audio: FakeAudio) => void} */ (() => {})
             audios.push(this);
         }
     });
-    vi.stubGlobal('setTimeout', /**
+    /**
      * @param {() => void} callback
      * @param {number} delay
      * @returns {number}
-     */ (callback, delay) => {
+     */
+    const scheduleTimeout = (callback, delay) => {
         const id = ++nextTimer;
         timers.set(id, {callback, delay});
         return id;
-    });
+    };
+    vi.stubGlobal('setTimeout', scheduleTimeout);
     vi.stubGlobal('clearTimeout', /** @param {number} id */ (id) => { timers.delete(id); });
     const expire = () => {
         const pending = [...timers.values()];

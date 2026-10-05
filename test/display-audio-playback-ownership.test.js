@@ -68,6 +68,7 @@ function setup() {
     Object.assign(player, {
         _audioPlaying: null,
         _playbackToken: null,
+        _primaryCardAudioToken: {},
         _playbackVolume: 0.7,
         _autoPlayAudioTimer: null,
         _fallbackSoundType: 'none',
@@ -433,4 +434,180 @@ test('a late rejected-cache observer cannot delete a newer retry created between
     expect((await player._playAudio(0, 0, sources, null)).valid).toBe(true);
     expect(lookups).toBe(2);
     expect(progress.size).toBe(0);
+});
+
+test('a failed media load is retried on a later pronunciation request', async () => {
+    const {player, sources, fallback, progress} = setup();
+    const audio = makeAudio();
+    let attempts = 0;
+    Reflect.set(player, '_getTermAudioInfoList', async () => [{info: {type: 'url', url: sources[0].url}, audio: null, audioPromise: null, audioResolved: false}]);
+    Reflect.set(player, '_createAudioFromInfo', async () => {
+        if (++attempts === 1) { throw new Error('temporary network failure'); }
+        return audio;
+    });
+    expect((await player._playAudio(0, 0, [sources[0]], null)).valid).toBe(false);
+    expect(fallback.plays).toBe(1);
+    expect((await player._playAudio(0, 0, [sources[0]], null)).valid).toBe(true);
+    expect(attempts).toBe(2);
+    expect(audio.plays).toBe(1);
+    expect(progress.size).toBe(0);
+});
+
+test('an old failed media observer cannot erase the replacement decode', async () => {
+    const {player, sources, progress} = setup();
+    const pending = deferred();
+    const replacement = deferred();
+    const audio = makeAudio();
+    let attempts = 0;
+    const infoList = [{info: {type: 'url', url: sources[0].url}, audio: null, audioPromise: null, audioResolved: false}];
+    Reflect.set(player, '_getTermAudioInfoList', async () => infoList);
+    Reflect.set(player, '_createAudioFromInfo', () => (++attempts === 1 ? pending.promise : replacement.promise));
+    const first = player._playAudio(0, 0, [sources[0]], null);
+    await flush();
+    const state = {latest: /** @type {Promise<import('display-audio').PlayAudioResult>|null} */ (null)};
+    void pending.promise.catch(() => {
+        state.latest = player._playAudio(0, 0, [sources[0]], null);
+        void state.latest.catch(() => {});
+    });
+    const second = player._playAudio(0, 0, [sources[0]], null);
+    await flush();
+    pending.reject(new Error('temporary decode failure'));
+    await Promise.all([first, second]);
+    await flush();
+    expect(attempts).toBe(2);
+    expect(infoList[0].audioResolved).toBe(false);
+    replacement.resolve(audio);
+    if (state.latest === null) { throw new Error('Missing retry'); }
+    expect((await state.latest).valid).toBe(true);
+    expect((await player._playAudio(0, 0, [sources[0]], null)).valid).toBe(true);
+    expect(attempts).toBe(2);
+    expect(progress.size).toBe(0);
+});
+
+test('source-menu playback pins the recording actually played, not a reused menu row', async () => {
+    const {player, sources, progress} = setup();
+    const audio = makeAudio();
+    const group = {dataset: /** @type {Record<string, string>} */ ({index: '0'})};
+    const menuItem = /** @type {HTMLElement} */ (/** @type {unknown} */ ({closest: () => group}));
+    Reflect.set(player, '_getTermAudioInfoList', async () => [0, 1].map((index) => ({info: {type: 'url', url: `${index}`}, audio: null, audioPromise: null, audioResolved: false})));
+    /**
+     * @param {{url: string}} value
+     * @returns {Promise<ReturnType<typeof makeAudio>>}
+     */
+    const createAudio = async (value) => {
+        if (value.url === '0') { throw new Error('First recording unavailable'); }
+        return audio;
+    };
+    Reflect.set(player, '_createAudioFromInfo', createAudio);
+    // The real menu reuses the original source-level row for recording zero.
+    Reflect.set(player, '_updateOpenMenu', () => { group.dataset.subIndex = '0'; });
+    await player._playAudioFromSource(0, 0, menuItem);
+    expect(audio.plays).toBe(1);
+    expect(player._getPrimaryCardAudio('first', 'first')).toEqual({index: 0, subIndex: 1});
+    expect(player.getAnkiNoteMediaAudioDetails('first', 'first')).toEqual({sources: [{type: sources[0].type, url: sources[0].url, voice: ''}], preferredAudioIndex: 1, enableDefaultAudioSources: false});
+    expect(progress.size).toBe(0);
+});
+
+for (const event of ['options', 'content']) {
+    test(`${event} replacement closes obsolete audio menus`, () => {
+        const {player, options} = setup();
+        /** @type {boolean[]} */
+        const closeArguments = [];
+        const menus = new Set([0, 1].map(() => ({
+            /** @param {boolean} cancelable */
+            close(cancelable) {
+                closeArguments.push(cancelable);
+                menus.delete(this);
+            },
+        })));
+        Reflect.set(player, '_openMenus', menus);
+        if (event === 'options') {
+            player._onOptionsUpdated({options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ (options))});
+        } else {
+            player._onContentClear();
+        }
+        expect(closeArguments).toEqual([false, false]);
+        expect(menus.size).toBe(0);
+    });
+}
+
+test('menu refresh binds newly created actions and reapplies primary-recording markers', () => {
+    const {player} = setup();
+    const group = {dataset: {index: '0', subIndex: '1', isPrimaryCardAudio: 'false'}};
+    /** @type {string[]} */
+    const operations = [];
+    const menu = {
+        containerNode: {dataset: {term: 'first', reading: 'first'}},
+        bodyNode: {querySelectorAll: () => [group]},
+        updateMenuItems() { operations.push('bind'); },
+        updatePosition() { operations.push('position'); },
+    };
+    Reflect.set(player, '_openMenus', new Set([menu]));
+    Reflect.set(player, '_createMenuItems', () => { operations.push('populate'); });
+    const cache = player._getCacheItem('first', 'first', true);
+    if (typeof cache === 'undefined') { throw new Error('Missing cache'); }
+    cache.primaryCardAudio = {index: 0, subIndex: 1};
+    DisplayAudio.prototype._updateOpenMenu.call(player);
+    expect(operations).toEqual(['populate', 'bind', 'position']);
+    expect(group.dataset.isPrimaryCardAudio).toBe('true');
+});
+
+test('reused source-level rows clear obsolete recording indices and validation icons', () => {
+    const {player, sources} = setup();
+    vi.stubGlobal('HTMLElement', Object);
+    const label = {textContent: ''};
+    const cardButton = {hidden: false};
+    const icon = {dataset: /** @type {Record<string, string>} */ ({icon: 'cross'})};
+    const node = {
+        dataset: /** @type {Record<string, string>} */ ({index: '0', subIndex: '0'}),
+        /**
+         * @param {string} selector
+         * @returns {object|null}
+         */
+        querySelector(selector) {
+            if (selector.endsWith('.popup-menu-item-label')) { return label; }
+            if (selector.endsWith('.popup-menu-item-icon')) { return icon; }
+            if (selector === '.popup-menu-item-set-primary-audio-button') { return cardButton; }
+            return null;
+        },
+    };
+    const container = {dataset: {}};
+    const body = {children: [node], appendChild() {}};
+    Reflect.set(player, '_audioSources', [sources[0]]);
+    player._createMenuItems(/** @type {HTMLElement} */ (/** @type {unknown} */ (container)), /** @type {HTMLElement} */ (/** @type {unknown} */ (body)), 'first', 'first');
+    expect(typeof node.dataset.subIndex).toBe('undefined');
+    expect(typeof icon.dataset.icon).toBe('undefined');
+    expect(node.dataset.valid).toBe('null');
+});
+
+for (const selections of [1, 2]) {
+    test(`an explicit primary selection made ${selections} times wins over pending playback`, async () => {
+        const {player, item, info, setCreate} = setup();
+        /** @type {{promise: Promise<void>, resolve: (value?: void) => void, reject: (reason: unknown) => void}} */
+        const pending = deferred();
+        const audio = makeAudio(pending.promise);
+        setCreate(async () => info(audio));
+        Reflect.set(Reflect.get(player, '_display'), 'getElementDictionaryEntryIndex', () => 0);
+        const play = player._playAudioFromSource(0, 0, item(0));
+        await flush();
+        const event = /** @type {import('popup-menu').MenuCloseEvent} */ (/** @type {unknown} */ ({
+            currentTarget: {closest: () => null},
+            preventDefault() {},
+            detail: {action: 'setPrimaryAudio', item: item(1), menu: null, shiftKey: false},
+        }));
+        for (let i = 0; i < selections; ++i) { player._onAudioPlayMenuCloseClick(event); }
+        pending.resolve();
+        await play;
+        expect(player._getPrimaryCardAudio('first', 'first')).toEqual(selections === 1 ? {index: 1, subIndex: 0} : null);
+        expect(audio.plays).toBe(1);
+        expect(audio.pauses).toBe(0);
+    });
+}
+
+test('successful non-downloadable playback never becomes primary Anki audio', async () => {
+    const {player, sources, item, info, setCreate} = setup();
+    sources[0].downloadable = false;
+    setCreate(async () => info(makeAudio()));
+    await player._playAudioFromSource(0, 0, item(0));
+    expect(player._getPrimaryCardAudio('first', 'first')).toBe(null);
 });
