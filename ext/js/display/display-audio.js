@@ -43,6 +43,8 @@ export class DisplayAudio {
         this._audioPlaying = null;
         /** @type {?import('core').TokenObject} */
         this._playbackToken = null;
+        /** @type {?import('core').TokenString} */
+        this._playbackProgressToken = null;
         /** @type {import('core').TokenObject} */
         this._primaryCardAudioToken = {};
         /** @type {AudioSystem} */
@@ -159,9 +161,9 @@ export class DisplayAudio {
 
     /** */
     stopAudio() {
-        this._playbackToken = null;
         const audio = this._audioPlaying;
         this._audioPlaying = null;
+        this._invalidatePlayback();
         if (audio !== null) { audio.pause(); }
     }
 
@@ -214,11 +216,26 @@ export class DisplayAudio {
 
     // Private
 
+    /** */
+    _invalidatePlayback() {
+        this._playbackToken = null;
+        this._clearPlaybackProgress();
+    }
+
+    /**
+     * @param {?import('core').TokenString} [token]
+     */
+    _clearPlaybackProgress(token = this._playbackProgressToken) {
+        if (token === null || token !== this._playbackProgressToken) { return; }
+        this._playbackProgressToken = null;
+        this._display.progressIndicatorVisible.clearOverride(token);
+    }
+
     /**
      * @param {import('display').EventArgument<'optionsUpdated'>} details
      */
     _onOptionsUpdated({options}) {
-        this._playbackToken = null;
+        this._invalidatePlayback();
         this._closeOpenMenus();
         this.clearAutoPlayTimer();
         const {
@@ -259,7 +276,7 @@ export class DisplayAudio {
 
     /** */
     _onContentClear() {
-        this._playbackToken = null;
+        this._invalidatePlayback();
         this._closeOpenMenus();
         this._entriesToken = {};
         this._cache.clear();
@@ -313,7 +330,7 @@ export class DisplayAudio {
         if (!value) {
             // Pending playback is retired, but audio that has already started playing
             // is not stopped, as this is a valid use case for some users.
-            this._playbackToken = null;
+            this._invalidatePlayback();
             this.clearAutoPlayTimer();
         }
     }
@@ -430,7 +447,7 @@ export class DisplayAudio {
     _setDataTransmissionConsentState(value) {
         this._dataTransmissionConsentState = normalizeDataTransmissionConsentState(value);
         if (!this._canPlayAudio()) {
-            this._playbackToken = null;
+            this._invalidatePlayback();
             this.clearAutoPlayTimer();
         }
         this._syncAudioConsentDataset();
@@ -650,6 +667,13 @@ export class DisplayAudio {
 
         const progressIndicatorVisible = this._display.progressIndicatorVisible;
         const overrideToken = progressIndicatorVisible.setOverride(true);
+        // Setting an override emits a synchronous change event. Do not retain
+        // progress or start a lookup if that event already retired this request.
+        if (this._playbackToken !== token) {
+            progressIndicatorVisible.clearOverride(overrideToken);
+            return {audio: null, source: null, subIndex: 0, valid: false};
+        }
+        this._playbackProgressToken = overrideToken;
         try {
             // Create audio
             let audio;
@@ -698,7 +722,7 @@ export class DisplayAudio {
             }
             return {audio, source, subIndex, valid};
         } finally {
-            progressIndicatorVisible.clearOverride(overrideToken);
+            this._clearPlaybackProgress(overrideToken);
         }
     }
 

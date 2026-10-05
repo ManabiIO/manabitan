@@ -68,6 +68,7 @@ function setup() {
     Object.assign(player, {
         _audioPlaying: null,
         _playbackToken: null,
+        _playbackProgressToken: null,
         _primaryCardAudioToken: {},
         _playbackVolume: 0.7,
         _autoPlayAudioTimer: null,
@@ -610,4 +611,95 @@ test('successful non-downloadable playback never becomes primary Anki audio', as
     setCreate(async () => info(makeAudio()));
     await player._playAudioFromSource(0, 0, item(0));
     expect(player._getPrimaryCardAudio('first', 'first')).toBe(null);
+});
+
+for (const invalidation of ['stop', 'hide', 'content', 'options', 'consent']) {
+    test(`${invalidation} releases loading progress without waiting for abandoned metadata`, async () => {
+        const {player, sources, options, progress, fallback} = setup();
+        const pending = deferred();
+        Reflect.set(player, '_getTermAudioInfoList', () => pending.promise);
+        Reflect.set(player, '_dataTransmissionConsentRequired', true);
+        const request = player._playAudio(0, 0, sources, null);
+        expect(progress.size).toBe(1);
+        switch (invalidation) {
+            case 'stop': player.stopAudio(); break;
+            case 'hide': player._onFrameVisibilityChange({value: false}); break;
+            case 'content': player._onContentClear(); break;
+            case 'options': player._onOptionsUpdated({options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ (options))}); break;
+            default: player._setDataTransmissionConsentState('declined'); break;
+        }
+        expect(progress.size).toBe(0);
+        pending.resolve([]);
+        expect((await request).valid).toBe(false);
+        expect(progress.size).toBe(0);
+        expect(fallback.plays).toBe(0);
+    });
+}
+
+test('an abandoned request cannot keep the spinner visible after newer playback finishes', async () => {
+    const {player, sources, progress, setCreate, info} = setup();
+    const pending = deferred();
+    const audio = makeAudio();
+    setCreate((term) => (term === 'first' ? pending.promise : Promise.resolve(info(audio))));
+    const first = player._playAudio(0, 0, sources, null);
+    expect((await player._playAudio(0, 1, sources, null)).valid).toBe(true);
+    expect(progress.size).toBe(0);
+    pending.resolve(null);
+    expect((await first).valid).toBe(false);
+    expect(progress.size).toBe(0);
+});
+
+test('late cleanup cannot remove the current request or another feature’s progress override', async () => {
+    const {player, sources, progress, setCreate, info} = setup();
+    const old = deferred();
+    const latest = deferred();
+    const externalToken = {};
+    progress.add(externalToken);
+    setCreate((term) => (term === 'first' ? old.promise : latest.promise));
+    const first = player._playAudio(0, 0, sources, null);
+    const second = player._playAudio(0, 1, sources, null);
+    expect(progress.size).toBe(2);
+    old.resolve(null);
+    await first;
+    expect(progress.size).toBe(2);
+    latest.resolve(info(makeAudio()));
+    await second;
+    expect(progress.size).toBe(1);
+    expect(progress.has(externalToken)).toBe(true);
+});
+
+test('cancellation from the progress change event does not admit an audio lookup', async () => {
+    const {player, sources, progress} = setup();
+    let lookups = 0;
+    Reflect.set(player, '_getTermAudioInfoList', async () => {
+        ++lookups;
+        return [];
+    });
+    const indicator = Reflect.get(player, '_display').progressIndicatorVisible;
+    Reflect.set(indicator, 'setOverride', () => {
+        const token = {};
+        progress.add(token);
+        player.stopAudio();
+        return token;
+    });
+    expect((await player._playAudio(0, 0, sources, null)).valid).toBe(false);
+    expect(lookups).toBe(0);
+    expect(progress.size).toBe(0);
+});
+
+test('stop releases progress immediately while the native play promise is pending', async () => {
+    const {player, sources, progress, info, setCreate} = setup();
+    /** @type {{promise: Promise<void>, resolve: (value?: void) => void, reject: (reason: unknown) => void}} */
+    const pending = deferred();
+    const audio = makeAudio(pending.promise);
+    setCreate(async () => info(audio));
+    const request = player._playAudio(0, 0, sources, null);
+    await flush();
+    expect(progress.size).toBe(1);
+    player.stopAudio();
+    expect(progress.size).toBe(0);
+    expect(audio.pauses).toBe(1);
+    pending.resolve();
+    expect((await request).valid).toBe(false);
+    expect(progress.size).toBe(0);
 });
