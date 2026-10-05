@@ -95,11 +95,19 @@ export class AudioSystem extends EventDispatcher {
         }
 
         const audio = new Audio(url);
-        await this._waitForData(audio);
-        if (!this._isAudioValid(audio, sourceType)) {
-            throw new Error('Could not retrieve audio');
+        try {
+            await this._waitForData(audio);
+            if (!this._isAudioValid(audio, sourceType)) {
+                throw new Error('Could not retrieve audio');
+            }
+            return audio;
+        } catch (e) {
+            // Do not leave failed or timed-out elements fetching in the background.
+            audio.pause();
+            audio.removeAttribute('src');
+            audio.load();
+            throw e;
         }
-        return audio;
     }
 
     /**
@@ -130,9 +138,38 @@ export class AudioSystem extends EventDispatcher {
      * @returns {Promise<void>}
      */
     _waitForData(audio) {
+        if (audio.error !== null) { return Promise.reject(audio.error); }
+        if (audio.readyState >= 2) { return Promise.resolve(); } // HAVE_CURRENT_DATA
         return new Promise((resolve, reject) => {
-            audio.addEventListener('loadeddata', () => resolve());
-            audio.addEventListener('error', () => reject(audio.error));
+            let settled = false;
+            /** @type {?import('core').Timeout} */
+            let timer = null;
+            const cleanup = () => {
+                if (settled) { return false; }
+                settled = true;
+                if (timer !== null) { clearTimeout(timer); }
+                audio.removeEventListener('loadeddata', onLoadedData);
+                audio.removeEventListener('error', onError);
+                audio.removeEventListener('abort', onAbort);
+                return true;
+            };
+            const onLoadedData = () => {
+                if (cleanup()) { resolve(); }
+            };
+            const onError = () => {
+                if (cleanup()) { reject(audio.error ?? new Error('Failed to load audio')); }
+            };
+            const onAbort = () => {
+                if (cleanup()) { reject(new Error('Audio loading aborted')); }
+            };
+            const onTimeout = () => {
+                if (cleanup()) { reject(new Error('Audio loading timed out')); }
+            };
+            audio.addEventListener('loadeddata', onLoadedData);
+            audio.addEventListener('error', onError);
+            audio.addEventListener('abort', onAbort);
+            // A silent/stalled provider must not prevent trying the next source.
+            timer = setTimeout(onTimeout, 15000);
         });
     }
 
