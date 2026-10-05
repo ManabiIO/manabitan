@@ -45,16 +45,22 @@ function setup() {
     const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
         general: {language: 'ja'},
         audio: {
-            enabled: true, autoPlay: false, fallbackSoundType: 'none', volume: 70, enableDefaultAudioSources: false,
+            enabled: true,
+            autoPlay: false,
+            fallbackSoundType: 'none',
+            volume: 70,
+            enableDefaultAudioSources: false,
             sources: [0, 1].map((index) => ({type: 'custom', url: `https://audio.example/${index}`, voice: ''})),
         },
     }));
     const display = /** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ ({
-        application: {api: {}}, frameVisible: true,
+        application: {api: {}},
+        frameVisible: true,
         getOptions: () => options,
         getLanguageSummary: () => ({iso: 'ja'}),
         dictionaryEntries: [{type: 'term', headwords: [{term: 'first', reading: 'first'}, {term: 'second', reading: 'second'}]}],
-        dictionaryEntryNodes: [], progressIndicatorVisible: progress,
+        dictionaryEntryNodes: [],
+        progressIndicatorVisible: progress,
     }));
     const player = new DisplayAudio(display);
     player._onOptionsUpdated({options});
@@ -168,7 +174,7 @@ test('a formerly unavailable preferred source can recover ahead of a cached fall
      */
     const lookup = async (source) => {
         if (++lookups[source.index] === 1 && source.index === 0) { return []; }
-        return [{info: {type: 'url', url: source.url}, audio: audios[source.index], audioPromise: null, audioResolved: true}];
+        return [{info: {type: 'url', url: source.url}, audio: /** @type {import('display-audio').GenericAudio} */ (/** @type {unknown} */ (audios[source.index])), audioPromise: null, audioResolved: true}];
     };
     Reflect.set(player, '_getTermAudioInfoList', lookup);
     expect((await player._playAudio(0, 0, sources, null)).source?.index).toBe(1);
