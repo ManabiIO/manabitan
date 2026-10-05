@@ -41,6 +41,8 @@ export class DisplayAudio {
         this._modalController = modalController;
         /** @type {?import('display-audio').GenericAudio} */
         this._audioPlaying = null;
+        /** @type {?import('core').TokenObject} */
+        this._playbackToken = null;
         /** @type {AudioSystem} */
         this._audioSystem = new AudioSystem(this._display.application.api);
         /** @type {number} */
@@ -155,9 +157,10 @@ export class DisplayAudio {
 
     /** */
     stopAudio() {
-        if (this._audioPlaying === null) { return; }
-        this._audioPlaying.pause();
+        this._playbackToken = null;
+        const audio = this._audioPlaying;
         this._audioPlaying = null;
+        if (audio !== null) { audio.pause(); }
     }
 
     /**
@@ -213,11 +216,14 @@ export class DisplayAudio {
      * @param {import('display').EventArgument<'optionsUpdated'>} details
      */
     _onOptionsUpdated({options}) {
+        this._playbackToken = null;
+        this.clearAutoPlayTimer();
         const {
             general: {language},
             audio: {enabled, autoPlay, fallbackSoundType, volume, sources, enableDefaultAudioSources},
         } = options;
-        this._autoPlay = enabled && autoPlay && this._canPlayAudio();
+        // Consent can finish loading after options; check it when scheduling.
+        this._autoPlay = enabled && autoPlay;
         this._fallbackSoundType = fallbackSoundType;
         this._playbackVolume = Number.isFinite(volume) ? Math.max(0, Math.min(1, volume / 100)) : 1;
         this._enableDefaultAudioSources = enableDefaultAudioSources;
@@ -250,6 +256,7 @@ export class DisplayAudio {
 
     /** */
     _onContentClear() {
+        this._playbackToken = null;
         this._entriesToken = {};
         this._cache.clear();
         this.clearAutoPlayTimer();
@@ -300,8 +307,9 @@ export class DisplayAudio {
      */
     _onFrameVisibilityChange({value}) {
         if (!value) {
-            // The auto-play timer is stopped, but any audio that has already started playing
+            // Pending playback is retired, but audio that has already started playing
             // is not stopped, as this is a valid use case for some users.
+            this._playbackToken = null;
             this.clearAutoPlayTimer();
         }
     }
@@ -417,6 +425,10 @@ export class DisplayAudio {
      */
     _setDataTransmissionConsentState(value) {
         this._dataTransmissionConsentState = normalizeDataTransmissionConsentState(value);
+        if (!this._canPlayAudio()) {
+            this._playbackToken = null;
+            this.clearAutoPlayTimer();
+        }
         this._syncAudioConsentDataset();
     }
 
@@ -612,6 +624,14 @@ export class DisplayAudio {
     async _playAudio(dictionaryEntryIndex, headwordIndex, sources, audioInfoListIndex) {
         this.stopAudio();
         this.clearAutoPlayTimer();
+        if (!this._canPlayAudio()) {
+            this._showDataTransmissionConsentModal();
+            return {audio: null, source: null, subIndex: 0, valid: false};
+        }
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._playbackToken = token;
+        sources = [...sources];
 
         const headword = this._getHeadword(dictionaryEntryIndex, headwordIndex);
         if (headword === null) {
@@ -631,6 +651,9 @@ export class DisplayAudio {
             let source = null;
             let subIndex = 0;
             const info = await this._createTermAudio(term, reading, sources, audioInfoListIndex);
+            if (this._playbackToken !== token) {
+                return {audio: null, source: null, subIndex: 0, valid: false};
+            }
             const valid = (info !== null);
             if (valid) {
                 ({audio, source, subIndex} = info);
@@ -640,9 +663,6 @@ export class DisplayAudio {
                 audio = this._audioSystem.getFallbackAudio(this._fallbackSoundType);
                 title = 'Could not find audio';
             }
-
-            // Stop any currently playing audio
-            this.stopAudio();
 
             // Update details
             const potentialAvailableAudioCount = this._getPotentialAvailableAudioCount(term, reading);
@@ -656,8 +676,8 @@ export class DisplayAudio {
             audio.currentTime = 0;
             audio.volume = this._playbackVolume;
 
-            const playPromise = audio.play();
             this._audioPlaying = audio;
+            const playPromise = audio.play();
 
             if (typeof playPromise !== 'undefined') {
                 try {
@@ -667,6 +687,9 @@ export class DisplayAudio {
                 }
             }
 
+            if (this._playbackToken !== token) {
+                return {audio: null, source: null, subIndex: 0, valid: false};
+            }
             return {audio, source, subIndex, valid};
         } finally {
             progressIndicatorVisible.clearOverride(overrideToken);
@@ -685,8 +708,10 @@ export class DisplayAudio {
 
         try {
             const token = this._entriesToken;
-            const {valid} = await this._playAudio(dictionaryEntryIndex, headwordIndex, [source], subIndex);
-            if (valid && token === this._entriesToken) {
+            const playPromise = this._playAudio(dictionaryEntryIndex, headwordIndex, [source], subIndex);
+            const playbackToken = this._playbackToken;
+            const {valid} = await playPromise;
+            if (valid && token === this._entriesToken && playbackToken === this._playbackToken) {
                 this._setPrimaryAudio(dictionaryEntryIndex, headwordIndex, item, null, false);
             }
         } catch (e) {
@@ -772,11 +797,13 @@ export class DisplayAudio {
      * @returns {Promise<?import('display-audio').TermAudio>}
      */
     async _createTermAudio(term, reading, sources, audioInfoListIndex) {
+        const token = this._playbackToken;
         const cacheItem = this._getCacheItem(term, reading, true);
         if (typeof cacheItem === 'undefined') { return null; }
         const {sourceMap} = cacheItem;
 
         for (const source of sources) {
+            if (this._playbackToken !== token) { return null; }
             const {index} = source;
 
             let cacheUpdated = false;
@@ -790,11 +817,20 @@ export class DisplayAudio {
 
             let {infoList} = sourceInfo;
             if (infoList === null) {
-                infoList = await sourceInfo.infoListPromise;
+                try {
+                    infoList = await sourceInfo.infoListPromise;
+                } catch (e) {
+                    // A failed lookup must not poison later attempts. Retire only
+                    // the flight observed here, never a newer cache replacement.
+                    if (sourceMap.get(index) === sourceInfo) { sourceMap.delete(index); }
+                    continue;
+                }
                 sourceInfo.infoList = infoList;
             }
+            if (this._playbackToken !== token) { return null; }
 
             const {audio, index: subIndex, cacheUpdated: cacheUpdated2} = await this._createAudioFromInfoList(source, infoList, audioInfoListIndex);
+            if (this._playbackToken !== token) { return null; }
             if (cacheUpdated || cacheUpdated2) { this._updateOpenMenu(); }
             if (audio !== null) {
                 return {audio, source, subIndex};
@@ -811,6 +847,7 @@ export class DisplayAudio {
      * @returns {Promise<import('display-audio').CreateAudioResult>}
      */
     async _createAudioFromInfoList(source, infoList, audioInfoListIndex) {
+        const token = this._playbackToken;
         let start = 0;
         let end = infoList.length;
         if (audioInfoListIndex !== null) {
@@ -825,6 +862,7 @@ export class DisplayAudio {
             cacheUpdated: false,
         };
         for (let i = start; i < end; ++i) {
+            if (this._playbackToken !== token) { break; }
             const item = infoList[i];
 
             let {audio, audioResolved} = item;
