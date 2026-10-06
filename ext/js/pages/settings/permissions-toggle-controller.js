@@ -84,6 +84,7 @@ export class PermissionsToggleController {
         const valuePre = !value;
         const {permissionsSetting} = toggle.dataset;
         const hasPermissionsSetting = typeof permissionsSetting === 'string';
+        const optionsContext = hasPermissionsSetting ? this._settingsController.getOptionsContext() : null;
 
         if (value || !hasPermissionsSetting) {
             toggle.checked = valuePre;
@@ -102,6 +103,7 @@ export class PermissionsToggleController {
         }
 
         if (hasPermissionsSetting) {
+            if (optionsContext === null || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
             this._setToggleValid(toggle, true);
             try {
                 await this._settingsController.setProfileSetting(permissionsSetting, value);
