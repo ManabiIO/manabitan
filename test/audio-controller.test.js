@@ -49,6 +49,23 @@ describe('AudioController voice language classification', () => {
     });
 });
 
+
+
+describe('AudioController speech voice discovery', () => {
+    test('a speech-service failure yields an empty voice list without breaking settings', ({window}) => {
+        window.speechSynthesis.getVoices = () => { throw new Error('speech service unavailable'); };
+        const controller = createControllerForInternalTests();
+        Reflect.set(controller, '_language', 'ja');
+        Reflect.set(controller, '_voices', [{voice: /** @type {SpeechSynthesisVoice} */ ({}), isJapanese: false, index: 0}]);
+        const trigger = vi.fn();
+        Reflect.set(controller, 'trigger', trigger);
+
+        expect(() => controller._updateTextToSpeechVoices()).not.toThrow();
+        expect(controller.getVoices()).toEqual([]);
+        expect(trigger).toHaveBeenCalledWith('voicesUpdated', {});
+    });
+});
+
 describe('AudioController consent refresh', () => {
     test('clears the consent token when a refresh fails', async ({window}) => {
         window.document.documentElement.dataset.browser = 'firefox';
