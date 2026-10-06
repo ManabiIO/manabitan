@@ -36,6 +36,8 @@ export class ProfileController {
         this._profileConditionsUI = new ProfileConditionsUI(settingsController);
         /** @type {?number} */
         this._profileConditionsIndex = null;
+        /** @type {?string} */
+        this._profileConditionsProfileId = null;
         /** @type {?import('core').TokenObject} */
         this._profileConditionsOpenToken = null;
         /** @type {HTMLSelectElement} */
@@ -431,6 +433,7 @@ export class ProfileController {
                 this._profileConditionsProfileName.textContent = profile.name;
             }
             this._profileConditionsIndex = profileIndex;
+            this._profileConditionsProfileId = profile.id;
             this._profileConditionsModal.setVisible(true);
         } catch (error) {
             if (this._profileConditionsOpenToken === token) { log.error(error); }
@@ -462,10 +465,27 @@ export class ProfileController {
         /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileCurrent}`;
 
         // Update profile conditions
+        this._profileConditionsOpenToken = null;
         this._profileConditionsUI.cleanup();
-        const conditionsProfile = this._getProfile(this._profileConditionsIndex !== null ? this._profileConditionsIndex : settingsProfileIndex);
+        let conditionsProfileIndex = settingsProfileIndex;
+        if (this._profileConditionsProfileId !== null) {
+            conditionsProfileIndex = profiles.findIndex(({id}) => id === this._profileConditionsProfileId);
+            if (conditionsProfileIndex < 0) {
+                this._profileConditionsIndex = null;
+                this._profileConditionsProfileId = null;
+                this._profileConditionsModal?.setVisible(false);
+            }
+        } else if (this._profileConditionsIndex !== null) {
+            conditionsProfileIndex = this._profileConditionsIndex;
+        }
+        const conditionsProfile = this._getProfile(conditionsProfileIndex);
         if (conditionsProfile !== null) {
-            void this._profileConditionsUI.prepare(this._profileConditionsIndex !== null ? this._profileConditionsIndex : settingsProfileIndex);
+            this._profileConditionsIndex = conditionsProfileIndex;
+            this._profileConditionsProfileId = conditionsProfile.id;
+            if (this._profileConditionsProfileName !== null) {
+                this._profileConditionsProfileName.textContent = conditionsProfile.name;
+            }
+            void this._profileConditionsUI.prepare(conditionsProfileIndex);
         }
 
         // Update profile entries
