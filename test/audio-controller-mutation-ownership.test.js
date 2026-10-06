@@ -249,3 +249,34 @@ test('the settings voice test owns asynchronous playback rejection', async ({win
     expect(play).toHaveBeenCalledOnce();
     expect(catchHandler).toHaveBeenCalledOnce();
 });
+
+
+test('rapid relative moves follow the same source instead of replaying a stale index', async ({window}) => {
+    const {controller, settingsController} = await setup(window, [
+        {type: 'custom', url: 'https://one.example', voice: ''},
+        {type: 'custom', url: 'https://two.example', voice: ''},
+        {type: 'custom', url: 'https://three.example', voice: ''},
+    ]);
+    const movedEntry = controller._audioSourceEntries[0];
+    const secondEntry = controller._audioSourceEntries[1];
+    const thirdEntry = controller._audioSourceEntries[2];
+
+    movedEntry._move(1);
+    movedEntry._move(1);
+    await controller._audioSourceMutationPromise;
+
+    expect(controller._audioSourceEntries).toEqual([secondEntry, thirdEntry, movedEntry]);
+    expect(controller._audioSourceEntries.map((entry) => entry.index)).toEqual([0, 1, 2]);
+    const modifyProfileSettings = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.modifyProfileSettings);
+    expect(modifyProfileSettings).toHaveBeenCalledTimes(2);
+    expect(modifyProfileSettings.mock.calls[0][0][0].value.map((source) => source.url)).toEqual([
+        'https://two.example',
+        'https://one.example',
+        'https://three.example',
+    ]);
+    expect(modifyProfileSettings.mock.calls[1][0][0].value.map((source) => source.url)).toEqual([
+        'https://two.example',
+        'https://three.example',
+        'https://one.example',
+    ]);
+});
