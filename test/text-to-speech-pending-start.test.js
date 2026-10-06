@@ -172,7 +172,7 @@ test('repeated play retires the previous promise and ignores its delayed events'
     expect(spoken[1].listeners.size).toBe(0);
 });
 
-for (const event of ['start', 'end', 'error']) {
+for (const event of ['start', 'end']) {
     test(`${event} settles the speech promise and removes all startup listeners`, async () => {
         const {audio, spoken} = setup();
         const promise = audio.play();
@@ -181,6 +181,30 @@ for (const event of ['start', 'end', 'error']) {
         expect(spoken[0].listeners.size).toBe(0);
     });
 }
+
+test('a pre-start error rejects playback and removes all startup listeners', async () => {
+    const {audio, spoken} = setup();
+    const promise = audio.play();
+    spoken[0].dispatchEvent(new Event('error'));
+    const error = await promise.then(() => null, (reason) => reason);
+    expect(error instanceof Error).toBe(true);
+    expect(error?.message).toBe('Speech synthesis failed before playback started');
+    expect(spoken[0].listeners.size).toBe(0);
+    expect(audio._utterance).toBe(null);
+});
+
+test('display does not confirm speech that errors before it starts', async () => {
+    const {player, spoken, overrides} = setupPlayer();
+    const request = player._playAudio(0, 0, player._audioSources, null);
+    await flush();
+    spoken[0].dispatchEvent(new Event('error'));
+    const result = await request;
+    expect(result.valid).toBe(false);
+    expect(player._audioPlaying).toBe(null);
+    expect(player._audioPlayPending).toBe(false);
+    expect(overrides.size).toBe(0);
+    expect(spoken[0].listeners.size).toBe(0);
+});
 
 test('pause settles a queued play even without an engine cancellation event', async () => {
     const {audio, spoken, queue} = setup();
@@ -191,14 +215,17 @@ test('pause settles a queued play even without an engine cancellation event', as
     expect(spoken[0].listeners.size).toBe(0);
 });
 
-test('synchronous speak failure keeps the existing non-throwing contract and cleans up', async () => {
+test('synchronous speak failure rejects with its cause and cleans up', async () => {
     const {audio, synthesis, spoken} = setup();
+    const failure = new Error('Speech service unavailable');
     synthesis.speak = (utterance) => {
         spoken.push(utterance);
-        throw new Error('Speech service unavailable');
+        throw failure;
     };
-    await audio.play();
+    const error = await audio.play().then(() => null, (reason) => reason);
+    expect(error).toBe(failure);
     expect(spoken[0].listeners.size).toBe(0);
+    expect(audio._utterance).toBe(null);
 });
 
 test('voice, text and volume are retained across a new speech attempt', async () => {
