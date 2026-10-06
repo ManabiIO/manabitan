@@ -618,9 +618,6 @@ export class AudioDownloader {
         let arrayBuffer;
         try {
             ({response, arrayBuffer} = await (timeout === null ? request() : Promise.race([request(), timeout])));
-        } catch (e) {
-            abortController?.abort(e);
-            throw e;
         } finally {
             active = false;
             if (idleTimer !== null) {
