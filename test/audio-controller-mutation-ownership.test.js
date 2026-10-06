@@ -240,7 +240,7 @@ test('the settings voice test owns asynchronous playback rejection', async ({win
     ]);
     const catchHandler = vi.fn();
     const play = vi.fn(() => ({catch: catchHandler}));
-    controller._audioSystem.createTextToSpeechAudio = vi.fn(() => ({play, volume: 0}));
+    controller._audioSystem.createTextToSpeechAudio = /** @type {any} */ (vi.fn(() => ({play, volume: 0})));
 
     controller._voiceTestTextInput.value = 'test';
     controller._voiceTestTextInput.dataset.voice = 'voice-a';
@@ -269,12 +269,12 @@ test('rapid relative moves follow the same source instead of replaying a stale i
     expect(controller._audioSourceEntries.map((entry) => entry.index)).toEqual([0, 1, 2]);
     const modifyProfileSettings = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.modifyProfileSettings);
     expect(modifyProfileSettings).toHaveBeenCalledTimes(2);
-    expect(modifyProfileSettings.mock.calls[0][0][0].value.map((source) => source.url)).toEqual([
+    expect(modifyProfileSettings.mock.calls[0][0][0].value.map((/** @type {import('settings').AudioSourceOptions} */ source) => source.url)).toEqual([
         'https://two.example',
         'https://one.example',
         'https://three.example',
     ]);
-    expect(modifyProfileSettings.mock.calls[1][0][0].value.map((source) => source.url)).toEqual([
+    expect(modifyProfileSettings.mock.calls[1][0][0].value.map((/** @type {import('settings').AudioSourceOptions} */ source) => source.url)).toEqual([
         'https://two.example',
         'https://three.example',
         'https://one.example',
