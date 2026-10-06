@@ -187,3 +187,23 @@ test('resuming one interrupted wrapper does not revive a cancelled peer sharing 
     assert.notEqual(second._bufferSource, null);
     second.pause();
 });
+
+
+test('a resolved resume that leaves the context interrupted rejects instead of confirming inaudible playback', async () => {
+    const {audio, context, stats} = setup('interrupted');
+    await audio.prepare();
+    const first = audio.play().then(() => null, (/** @type {unknown} */ error) => error);
+    context.resumes[0]?.resolve();
+    const error = await first;
+
+    assert.equal(error instanceof Error && error.message, 'Audio context did not resume');
+    assert.equal(stats.starts, 0);
+    assert.equal(audio._bufferSource, null);
+    assert.equal(audio._playCleanup, null);
+
+    context.state = 'running';
+    await audio.play();
+    assert.equal(stats.starts, 1);
+    assert.equal(stats.decodes, 1);
+    audio.pause();
+});
