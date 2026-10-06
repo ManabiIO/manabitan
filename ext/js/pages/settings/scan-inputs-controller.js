@@ -104,8 +104,9 @@ export class ScanInputsController {
 
     /** */
     async refresh() {
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         this._onOptionsChanged({options, optionsContext});
     }
 
