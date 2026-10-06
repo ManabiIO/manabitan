@@ -2802,6 +2802,9 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
     const extensionPageUrl = page.url();
     const send = async (action, params) => await evalSendMessage(page, 'readerBridgeRuntime', {action, params});
     const savedOptions = await send('optionsGetFull', undefined);
+    const installedTitles = (await send('getDictionaryInfo', undefined)).map(({title}) => title);
+    const expectedTitles = expectedDictionaryNames.map((name) => resolveInstalledDictionaryTitle(installedTitles, name));
+    assert.ok(expectedTitles.every((title) => title !== null), 'Reader test requires each expected dictionary to be installed');
     const mockState = createAnkiMockState();
     mockState.beginScenario('reader-lookup-only', []);
     const ankiServer = await startAnkiMockHttpServer(mockState);
@@ -2809,6 +2812,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
         /^(?:addNote|addNotes|updateNoteFields|storeMediaFile|deleteNotes|suspend)$/.test(action)
     ));
     const result = {clicks: [], hover: null, ankiActions: [], minedNote: null};
+    let stage = 'configure';
     try {
         const options = structuredClone(savedOptions);
         for (const {options: profileOptions} of options.profiles) {
@@ -2841,6 +2845,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
             {surface: '食べた', prefix: '私は', reading: 'たべるまなびたん', expectedStatus: 'no-exact-match'},
         ];
         for (const [index, scenario] of scenarios.entries()) {
+            stage = `scenario ${index}: activation`;
             await dismissVisiblePopupFrames(page);
             const sentence = `${scenario.prefix}${scenario.surface}。`;
             const request = {protocol: 1,
@@ -2886,6 +2891,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
             assert.equal(new URL(frame.url()).protocol, 'chrome-extension:', 'Popup must be an extension document');
             assert.equal(new URL(frame.url()).host, new URL(extensionPageUrl).host, 'Popup must belong to the installed extension');
             // Status can settle before rendering; require this operation's context and content together.
+            stage = `scenario ${index}: rendered content`;
             await frame.waitForFunction(({sentence, offset, request, expectedStatus, expectedDictionaryNames}) => {
                 const currentSentence = history.state?.state?.sentence;
                 if (currentSentence?.text !== sentence || currentSentence.offset !== offset ||
@@ -2906,7 +2912,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
                     return term.textContent === request.term && readingNode.textContent === request.reading;
                 }) && /\beat\b/i.test(glossary) &&
                 Array.from(entries.querySelectorAll('.definition-item[data-dictionary]')).some((node) => expectedDictionaryNames.includes(node.dataset.dictionary));
-            }, {sentence, offset: [...scenario.prefix].length, request, expectedStatus: scenario.expectedStatus, expectedDictionaryNames}, {timeout: 10000});
+            }, {sentence, offset: [...scenario.prefix].length, request, expectedStatus: scenario.expectedStatus, expectedDictionaryNames: expectedTitles}, {timeout: 10000});
             const content = await frame.evaluate(() => {
                 const entries = document.querySelector('#dictionary-entries');
                 return {
@@ -2934,7 +2940,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
                     assert.deepEqual(headword, {term: request.term, reading: request.reading}, 'Every rendered headword must be the exact requested lexical pair');
                 }
                 assert.match(content.glossary, /\beat\b/i, 'Reader popup must render the actual eating definition');
-                assert.ok(content.dictionaries.some((name) => expectedDictionaryNames.includes(name)), 'Reader popup must identify an imported dictionary');
+                assert.ok(content.dictionaries.some((name) => expectedTitles.includes(name)), 'Reader popup must identify an imported dictionary');
             } else {
                 assert.deepEqual(content.headwords, [], 'Wrong reading must not fall back to lemma or surface lookup');
                 assert.equal(content.glossary, '', 'Exact miss must not retain previous definitions');
@@ -2958,6 +2964,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
                     Back: `PREFIX[${scenario.prefix}]BODY[${request.surface}]SUFFIX[。]SENTENCE[${sentence}]`,
                 }, 'Mined expression must be the lemma; cloze must retain the original emoji, inflected surface, occurrence, and sentence');
                 // View-note publication precedes optional post-add work; wait for the whole mining flow.
+                stage = `scenario ${index}: mining completion`;
                 await frame.waitForFunction((noteId) => {
                     const entry = document.querySelector('#dictionary-entries .entry');
                     const button = entry?.querySelector('.note-actions-container .action-button-container[data-card-format-index="0"] .action-button[data-action="view-note"]');
@@ -2981,6 +2988,20 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
             'Ordinary cat hover must render the real reading',
         );
         assert.match(result.hover.entriesTextPreview, /猫/, 'Ordinary hover must show the cat headword');
+    } catch (error) {
+        const states = [];
+        for (const frame of page.frames()) {
+            if (frame.url().startsWith('chrome-extension:')) {
+                states.push(await frame.evaluate(() => ({
+                    url: location.href,
+                    sentence: history.state?.state?.sentence,
+                    text: document.querySelector('#dictionary-entries')?.textContent?.trim().slice(0, 800),
+                    progress: document.querySelector('#progress-indicator')?.getAttribute('data-active'),
+                    headwords: Array.from(document.querySelectorAll('.headword')).map((node) => ({term: node.querySelector('.headword-term')?.textContent, reading: node.querySelector('.headword-reading')?.textContent})),
+                })).catch(() => null));
+            }
+        }
+        throw new Error(`Reader bridge ${stage}: ${errorMessage(error)}; display=${JSON.stringify(states)}`, {cause: error});
     } finally {
         // Restore settings from an extension-origin page, even if an assertion failed on the lookup site.
         try {
