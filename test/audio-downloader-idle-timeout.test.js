@@ -166,7 +166,7 @@ describe('AudioDownloader idle timeout cleanup', () => {
             signal.addEventListener('abort', () => { reject(signal.reason); }, {once: true});
         }));
         const result = downloader._downloadAudioFromUrl('https://example.test/audio.mp3', 'custom', 5000);
-        const rejected = expect(result).rejects.toBe('Idle timeout');
+        const rejected = expect(result).rejects.toThrow('Audio download idle timeout');
 
         await vi.advanceTimersByTimeAsync(4999);
         expect(getSignal().aborted).toBe(false);
@@ -186,7 +186,7 @@ describe('AudioDownloader idle timeout cleanup', () => {
             },
         })));
         const result = downloader._downloadAudioFromUrl('https://example.test/audio.mp3', 'custom', 5000);
-        const rejected = expect(result).rejects.toBe('Idle timeout');
+        const rejected = expect(result).rejects.toThrow('Audio download idle timeout');
 
         await vi.advanceTimersByTimeAsync(4000);
         controllers[0].enqueue(new Uint8Array([1]));
