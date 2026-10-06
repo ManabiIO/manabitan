@@ -315,7 +315,9 @@ export class AudioController extends EventDispatcher {
             const voiceUri = input.dataset.voice;
             const audio = this._audioSystem.createTextToSpeechAudio(text, typeof voiceUri === 'string' ? voiceUri : '');
             audio.volume = 1;
-            void audio.play();
+            // Voice availability can change between selection and playback.
+            // The test button is best-effort and must not leak a rejection.
+            void audio.play().catch(() => {});
         } catch (e) {
             // NOP
         }
