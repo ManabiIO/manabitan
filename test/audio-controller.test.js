@@ -31,7 +31,6 @@ function createControllerForInternalTests() {
 }
 
 
-
 describe('AudioController voice language classification', () => {
     test.each([
         ['ja', true],
@@ -50,7 +49,6 @@ describe('AudioController voice language classification', () => {
         expect(controller._languageTagIsJapanese(languageTag)).toBe(expected);
     });
 });
-
 
 
 describe('AudioController speech voice discovery', () => {
