@@ -16,6 +16,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
+import {ProfileConditionsUI} from '../ext/js/pages/settings/profile-conditions-ui.js';
 import {ProfileController} from '../ext/js/pages/settings/profile-controller.js';
 
 /**
@@ -229,5 +230,112 @@ describe('ProfileController async ownership', () => {
         expect(Reflect.get(controller, '_profileActiveSelect').value).toBe('1');
         expect(cleanup).toHaveBeenCalledOnce();
         expect(prepare).toHaveBeenCalledOnce();
+    });
+});
+
+
+describe('ProfileController condition modal ownership', () => {
+    test('a slower first modal open cannot overwrite a newer profile open', async () => {
+        const controller = createControllerForInternalTests();
+        const profiles = [{name: 'First'}, {name: 'Second'}];
+        Reflect.set(controller, '_profiles', profiles);
+        const first = deferred();
+        const second = deferred();
+        const prepare = vi.fn()
+            .mockImplementationOnce(() => first.promise)
+            .mockImplementationOnce(() => second.promise);
+        const cleanup = vi.fn();
+        const setVisible = vi.fn();
+        const profileConditionsProfileName = {textContent: ''};
+        Reflect.set(controller, '_profileConditionsUI', {cleanup, prepare});
+        Reflect.set(controller, '_profileConditionsModal', {setVisible});
+        Reflect.set(controller, '_profileConditionsProfileName', profileConditionsProfileName);
+        Reflect.set(controller, '_profileConditionsIndex', null);
+
+        const older = controller.openProfileConditionsModal(0);
+        await flush();
+        const newer = controller.openProfileConditionsModal(1);
+        await flush();
+
+        second.resolve();
+        await newer;
+        expect(profileConditionsProfileName.textContent).toBe('Second');
+        expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(1);
+        expect(setVisible).toHaveBeenCalledTimes(1);
+
+        first.resolve();
+        await older;
+        expect(profileConditionsProfileName.textContent).toBe('Second');
+        expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(1);
+        expect(setVisible).toHaveBeenCalledTimes(1);
+    });
+
+    test('a modal open is dropped if its target profile moves while conditions load', async () => {
+        const controller = createControllerForInternalTests();
+        const firstProfile = {name: 'First'};
+        const secondProfile = {name: 'Second'};
+        Reflect.set(controller, '_profiles', [firstProfile, secondProfile]);
+        const pending = deferred();
+        const prepare = vi.fn(() => pending.promise);
+        const setVisible = vi.fn();
+        Reflect.set(controller, '_profileConditionsUI', {cleanup: vi.fn(), prepare});
+        Reflect.set(controller, '_profileConditionsModal', {setVisible});
+        Reflect.set(controller, '_profileConditionsProfileName', {textContent: ''});
+        Reflect.set(controller, '_profileConditionsIndex', null);
+
+        const operation = controller.openProfileConditionsModal(0);
+        await flush();
+        Reflect.set(controller, '_profiles', [secondProfile, firstProfile]);
+        pending.resolve();
+        await operation;
+
+        expect(setVisible).not.toHaveBeenCalled();
+        expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(null);
+    });
+});
+
+describe('ProfileConditionsUI prepare ownership', () => {
+    test('only the latest overlapping profile preparation can populate the shared UI', async () => {
+        const ui = /** @type {ProfileConditionsUI} */ (Object.create(ProfileConditionsUI.prototype));
+        /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
+        const first = deferred();
+        /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
+        const second = deferred();
+        const getOptionsFull = vi.fn()
+            .mockImplementationOnce(() => first.promise)
+            .mockImplementationOnce(() => second.promise);
+        const addConditionGroup = vi.fn();
+        const addEventListener = vi.fn();
+        Reflect.set(ui, '_settingsController', {getOptionsFull});
+        Reflect.set(ui, '_prepareToken', null);
+        Reflect.set(ui, '_profileIndex', 0);
+        Reflect.set(ui, '_addConditionGroup', addConditionGroup);
+        Reflect.set(ui, '_eventListeners', {addEventListener});
+        Reflect.set(ui, '_addConditionGroupButton', {});
+
+        const older = ui.prepare(0);
+        const newer = ui.prepare(1);
+        await flush();
+
+        second.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+            profiles: [
+                {conditionGroups: [{name: 'old'}]},
+                {conditionGroups: [{name: 'new'}]},
+            ],
+        })));
+        await newer;
+        first.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+            profiles: [
+                {conditionGroups: [{name: 'stale'}]},
+                {conditionGroups: []},
+            ],
+        })));
+        await older;
+
+        expect(addConditionGroup).toHaveBeenCalledTimes(1);
+        expect(addConditionGroup.mock.calls[0][0]).toEqual({name: 'new'});
+        expect(addConditionGroup.mock.calls[0][1]).toBe(0);
+        expect(Reflect.get(ui, '_profileIndex')).toBe(1);
+        expect(addEventListener).toHaveBeenCalledTimes(1);
     });
 });
