@@ -210,9 +210,20 @@ export class AudioController extends EventDispatcher {
         if (currentIndex < 0 || targetIndex < 0 || targetIndex >= this._audioSourceEntries.length || currentIndex === targetIndex) { return; }
 
         const optionsContext = this._settingsController.getOptionsContext();
-        // Mutations are serialized, so the owned entries are more current than
-        // getOptions(), whose broadcast-backed snapshot can lag the preceding
-        // successful write. Rebuild the persisted list from that owned state.
+        // Keep the asynchronous read as a profile-switch checkpoint, but do
+        // not trust its source ordering: option broadcasts can lag a preceding
+        // serialized write even after that write has completed.
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        currentIndex = this._audioSourceEntries.indexOf(entry);
+        if (
+            currentIndex < 0 ||
+            targetIndex >= options.audio.sources.length ||
+            this._audioSourceEntries.length !== options.audio.sources.length ||
+            currentIndex === targetIndex
+        ) {
+            return;
+        }
         const sources = this._audioSourceEntries.map((item) => item.getSourceOptions());
         const source = sources.splice(currentIndex, 1)[0];
         sources.splice(targetIndex, 0, source);
