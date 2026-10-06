@@ -88,21 +88,18 @@ export class TextToSpeechAudio {
             const onStart = () => {
                 if (cleanup()) { resolve(); }
             };
-            const onEnd = () => {
+            const finishWithoutStart = () => {
                 if (!cleanup()) { return; }
                 if (this._utterance === utterance) { this._utterance = null; }
                 resolve();
             };
+            const onEnd = finishWithoutStart;
             const onError = () => {
                 if (!cleanup()) { return; }
                 if (this._utterance === utterance) { this._utterance = null; }
                 reject(new Error('Speech synthesis failed before playback started'));
             };
-            const onCancel = () => {
-                if (!cleanup()) { return; }
-                if (this._utterance === utterance) { this._utterance = null; }
-                resolve();
-            };
+            const onCancel = finishWithoutStart;
             this._playCleanup = onCancel;
             pendingSpeechStarts.add(onCancel);
             // speak() only queues speech; DisplayAudio must keep this start
