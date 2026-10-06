@@ -235,8 +235,9 @@ export class KeyboardShortcutController {
 
     /** */
     async _updateOptions() {
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         await this._onOptionsChanged({options, optionsContext});
     }
 
