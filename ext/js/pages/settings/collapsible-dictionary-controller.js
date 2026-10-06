@@ -126,9 +126,14 @@ export class CollapsibleDictionaryController {
      * @param {import('core').TokenObject|null|import('settings-controller').EventArgument<'dictionarySettingsReordered'>} [token]
      */
     async _onDictionarySettingsReordered(token = null) {
-        const options = await this._settingsController.getOptions();
-        if (token !== null && this._getDictionaryInfoToken !== token) { return; }
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (
+            (token !== null && this._getDictionaryInfoToken !== token) ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            return;
+        }
         this._onOptionsChanged({options, optionsContext});
     }
 
