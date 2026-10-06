@@ -41,9 +41,11 @@ export class PermissionsToggleController {
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
         this._settingsController.on('permissionsChanged', this._onPermissionsChanged.bind(this));
 
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
-        this._onOptionsChanged({options, optionsContext});
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
+            this._onOptionsChanged({options, optionsContext});
+        }
     }
 
     // Private
