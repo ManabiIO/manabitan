@@ -107,9 +107,11 @@ export class AudioController extends EventDispatcher {
 
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
 
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
-        this._onOptionsChanged({options, optionsContext});
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
+            this._onOptionsChanged({options, optionsContext});
+        }
         void this._refreshDataTransmissionConsentState();
     }
 
@@ -254,7 +256,8 @@ export class AudioController extends EventDispatcher {
     /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
-    _onOptionsChanged({options}) {
+    _onOptionsChanged({options, optionsContext}) {
+        if (optionsContext.index !== this._settingsController.getOptionsContext().index) { return; }
         const {
             general: {language},
             audio: {sources},
@@ -452,8 +455,9 @@ export class AudioController extends EventDispatcher {
 
     /** */
     async _refreshAudioSources() {
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         this._onOptionsChanged({options, optionsContext});
     }
 
