@@ -32,6 +32,18 @@ async function flush() {
 }
 
 /**
+ * @param {import('settings').AudioSourceOptions[]} sources
+ * @param {string} [language]
+ * @returns {import('settings').ProfileOptions}
+ */
+function profileOptions(sources, language = 'en') {
+    return /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+        general: {language},
+        audio: {sources},
+    }));
+}
+
+/**
  * @param {any} window
  * @param {import('settings').AudioSourceOptions[]} sources
  * @returns {Promise<{
@@ -288,19 +300,13 @@ test('a stale options event cannot replace the current profile audio-source UI',
     ]);
     setProfileIndex(1);
     controller._onOptionsChanged({
-        options: {
-            general: {language: 'en'},
-            audio: {sources: [{type: 'custom', url: 'https://profile-b.example', voice: ''}]},
-        },
+        options: profileOptions([{type: 'custom', url: 'https://profile-b.example', voice: ''}]),
         optionsContext: {index: 1},
     });
     const profileBEntry = controller._audioSourceEntries[0];
 
     controller._onOptionsChanged({
-        options: {
-            general: {language: 'ja'},
-            audio: {sources: [{type: 'custom', url: 'https://stale-profile-a.example', voice: ''}]},
-        },
+        options: profileOptions([{type: 'custom', url: 'https://stale-profile-a.example', voice: ''}], 'ja'),
         optionsContext: {index: 0},
     });
 
@@ -321,18 +327,12 @@ test('a refresh that resolves after a profile switch cannot relabel the old snap
     await flush();
     setProfileIndex(1);
     controller._onOptionsChanged({
-        options: {
-            general: {language: 'en'},
-            audio: {sources: [{type: 'custom', url: 'https://profile-b.example', voice: ''}]},
-        },
+        options: profileOptions([{type: 'custom', url: 'https://profile-b.example', voice: ''}]),
         optionsContext: {index: 1},
     });
     const profileBEntry = controller._audioSourceEntries[0];
 
-    staleRead.resolve({
-        general: {language: 'ja'},
-        audio: {sources: [{type: 'custom', url: 'https://stale-profile-a.example', voice: ''}]},
-    });
+    staleRead.resolve(profileOptions([{type: 'custom', url: 'https://stale-profile-a.example', voice: ''}], 'ja'));
     await refresh;
 
     expect(controller._audioSourceEntries).toEqual([profileBEntry]);
@@ -349,19 +349,13 @@ test('a successful edit refreshes after a same-profile options rebuild races its
     const setProfileSetting = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.setProfileSetting);
     const getOptions = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.getOptions);
     setProfileSetting.mockImplementationOnce(() => write.promise);
-    getOptions.mockResolvedValue({
-        general: {language: 'en'},
-        audio: {sources: [{type: 'custom', url: 'https://new.example', voice: ''}]},
-    });
+    getOptions.mockResolvedValue(profileOptions([{type: 'custom', url: 'https://new.example', voice: ''}]));
 
     const entry = controller._audioSourceEntries[0];
     const edit = entry._setUrl('https://new.example');
     await flush();
     controller._onOptionsChanged({
-        options: {
-            general: {language: 'en'},
-            audio: {sources: [{type: 'custom', url: 'https://old.example', voice: ''}]},
-        },
+        options: profileOptions([{type: 'custom', url: 'https://old.example', voice: ''}]),
         optionsContext: {index: 0},
     });
     expect(controller._audioSourceEntries[0]._url).toBe('https://old.example');
@@ -383,15 +377,12 @@ test('a successful removal refreshes after a stale options rebuild reintroduces 
     const modifyProfileSettings = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.modifyProfileSettings);
     const getOptions = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.getOptions);
     modifyProfileSettings.mockImplementationOnce(() => write.promise);
-    getOptions.mockResolvedValue({
-        general: {language: 'en'},
-        audio: {sources: [originalSources[1]]},
-    });
+    getOptions.mockResolvedValue(profileOptions([originalSources[1]]));
 
     const removal = controller.removeSource(controller._audioSourceEntries[0]);
     await flush();
     controller._onOptionsChanged({
-        options: {general: {language: 'en'}, audio: {sources: originalSources}},
+        options: profileOptions(originalSources),
         optionsContext: {index: 0},
     });
     expect(controller._audioSourceEntries).toHaveLength(2);
@@ -417,12 +408,9 @@ test('a successful add refreshes after a stale options rebuild drops the pending
     const addition = controller._addAudioSource();
     await flush();
     const addedOptions = controller._audioSourceEntries[1].getSourceOptions();
-    getOptions.mockResolvedValue({
-        general: {language: 'en'},
-        audio: {sources: [originalSources[0], addedOptions]},
-    });
+    getOptions.mockResolvedValue(profileOptions([originalSources[0], addedOptions]));
     controller._onOptionsChanged({
-        options: {general: {language: 'en'}, audio: {sources: originalSources}},
+        options: profileOptions(originalSources),
         optionsContext: {index: 0},
     });
     expect(controller._audioSourceEntries).toHaveLength(1);
@@ -448,12 +436,9 @@ test('a successful move refreshes after a stale options rebuild wins the DOM rac
 
     const move = controller.moveAudioSourceOptions(0, 1);
     await flush();
-    getOptions.mockResolvedValue({
-        general: {language: 'en'},
-        audio: {sources: [originalSources[1], originalSources[0]]},
-    });
+    getOptions.mockResolvedValue(profileOptions([originalSources[1], originalSources[0]]));
     controller._onOptionsChanged({
-        options: {general: {language: 'en'}, audio: {sources: originalSources}},
+        options: profileOptions(originalSources),
         optionsContext: {index: 0},
     });
     expect(controller._audioSourceEntries.map((entry) => entry._url)).toEqual([
