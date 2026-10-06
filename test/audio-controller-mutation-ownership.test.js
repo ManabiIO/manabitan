@@ -280,3 +280,62 @@ test('rapid relative moves follow the same source instead of replaying a stale i
         'https://one.example',
     ]);
 });
+
+
+test('a stale options event cannot replace the current profile audio-source UI', async ({window}) => {
+    const {controller, setProfileIndex} = await setup(window, [
+        {type: 'custom', url: 'https://profile-a.example', voice: ''},
+    ]);
+    setProfileIndex(1);
+    controller._onOptionsChanged({
+        options: {
+            general: {language: 'en'},
+            audio: {sources: [{type: 'custom', url: 'https://profile-b.example', voice: ''}]},
+        },
+        optionsContext: {index: 1},
+    });
+    const profileBEntry = controller._audioSourceEntries[0];
+
+    controller._onOptionsChanged({
+        options: {
+            general: {language: 'ja'},
+            audio: {sources: [{type: 'custom', url: 'https://stale-profile-a.example', voice: ''}]},
+        },
+        optionsContext: {index: 0},
+    });
+
+    expect(controller._audioSourceEntries).toEqual([profileBEntry]);
+    expect(controller._audioSourceEntries[0]._url).toBe('https://profile-b.example');
+    expect(controller._language).toBe('en');
+});
+
+test('a refresh that resolves after a profile switch cannot relabel the old snapshot as current', async ({window}) => {
+    const {controller, settingsController, setProfileIndex} = await setup(window, [
+        {type: 'custom', url: 'https://profile-a.example', voice: ''},
+    ]);
+    const staleRead = deferred();
+    const getOptions = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.getOptions);
+    getOptions.mockImplementationOnce(() => staleRead.promise);
+
+    const refresh = controller._refreshAudioSources();
+    await flush();
+    setProfileIndex(1);
+    controller._onOptionsChanged({
+        options: {
+            general: {language: 'en'},
+            audio: {sources: [{type: 'custom', url: 'https://profile-b.example', voice: ''}]},
+        },
+        optionsContext: {index: 1},
+    });
+    const profileBEntry = controller._audioSourceEntries[0];
+
+    staleRead.resolve({
+        general: {language: 'ja'},
+        audio: {sources: [{type: 'custom', url: 'https://stale-profile-a.example', voice: ''}]},
+    });
+    await refresh;
+
+    expect(controller._audioSourceEntries).toEqual([profileBEntry]);
+    expect(controller._audioSourceEntries[0]._url).toBe('https://profile-b.example');
+    expect(controller._language).toBe('en');
+});
