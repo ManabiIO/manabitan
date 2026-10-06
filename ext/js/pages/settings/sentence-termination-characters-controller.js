@@ -59,7 +59,9 @@ export class SentenceTerminationCharactersController {
      * @param {import('settings').SentenceParsingTerminationCharacterOption} terminationCharacterEntry
      */
     async addEntry(terminationCharacterEntry) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {sentenceParsing: {terminationCharacters}} = options;
 
         await this._settingsController.modifyProfileSettings([{
@@ -78,7 +80,9 @@ export class SentenceTerminationCharactersController {
      * @returns {Promise<boolean>}
      */
     async deleteEntry(index) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return false; }
         const {sentenceParsing: {terminationCharacters}} = options;
 
         if (index < 0 || index >= terminationCharacters.length) { return false; }
