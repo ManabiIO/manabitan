@@ -45,21 +45,24 @@ export class ScanInputsSimpleController {
         this._mainScanModifierKeyInputHasOther = false;
         this._populateSelect(this._mainScanModifierKeyInput, this._mainScanModifierKeyInputHasOther);
 
-        const options = await this._settingsController.getOptions();
-        const optionsContext = this._settingsController.getOptionsContext();
-
         this._middleMouseButtonScan.addEventListener('change', this.onMiddleMouseButtonScanChange.bind(this), false);
         this._mainScanModifierKeyInput.addEventListener('change', this._onMainScanModifierKeyInputChange.bind(this), false);
 
         this._settingsController.on('scanInputsChanged', this._onScanInputsChanged.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
-        this._onOptionsChanged({options, optionsContext});
+
+        const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
+            this._onOptionsChanged({options, optionsContext});
+        }
     }
 
     /** */
     async refresh() {
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         this._onOptionsChanged({options, optionsContext});
     }
 
