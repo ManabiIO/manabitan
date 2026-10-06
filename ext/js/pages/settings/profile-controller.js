@@ -36,6 +36,8 @@ export class ProfileController {
         this._profileConditionsUI = new ProfileConditionsUI(settingsController);
         /** @type {?number} */
         this._profileConditionsIndex = null;
+        /** @type {?import('core').TokenObject} */
+        this._profileConditionsOpenToken = null;
         /** @type {HTMLSelectElement} */
         this._profileActiveSelect = querySelectorNotNull(document, '#profile-active-select');
         /** @type {HTMLSelectElement} */
@@ -413,16 +415,25 @@ export class ProfileController {
         if (profile === null) { return; }
 
         if (this._profileConditionsModal === null) { return; }
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._profileConditionsOpenToken = token;
         try {
             this._profileConditionsUI.cleanup();
             await this._profileConditionsUI.prepare(profileIndex);
+            if (
+                this._profileConditionsOpenToken !== token ||
+                this._profiles.indexOf(profile) !== profileIndex
+            ) {
+                return;
+            }
             if (this._profileConditionsProfileName !== null) {
                 this._profileConditionsProfileName.textContent = profile.name;
             }
             this._profileConditionsIndex = profileIndex;
             this._profileConditionsModal.setVisible(true);
         } catch (error) {
-            log.error(error);
+            if (this._profileConditionsOpenToken === token) { log.error(error); }
         }
     }
 
