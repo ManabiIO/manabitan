@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// The native queue is shared by every speech wrapper in this realm.
+/** @type {Set<() => void>} */
+const pendingSpeechStarts = new Set();
+
 export class TextToSpeechAudio {
     /**
      * @param {string} text
@@ -30,6 +34,8 @@ export class TextToSpeechAudio {
         this._utterance = null;
         /** @type {number} */
         this._volume = 1;
+        /** @type {?(() => void)} */
+        this._playCleanup = null;
     }
 
     /** @type {number} */
@@ -57,18 +63,43 @@ export class TextToSpeechAudio {
      * @returns {Promise<void>}
      */
     async play() {
+        this.pause();
         try {
-            if (this._utterance === null) {
-                this._utterance = new SpeechSynthesisUtterance(typeof this._text === 'string' ? this._text : '');
-                this._utterance.lang = this._voice.lang;
-                this._utterance.volume = this._volume;
-                this._utterance.voice = this._voice;
-            }
+            // A fresh utterance prevents late events from a cancelled attempt
+            // from confirming the next attempt using the same audio object.
+            const utterance = new SpeechSynthesisUtterance(typeof this._text === 'string' ? this._text : '');
+            utterance.lang = this._voice.lang;
+            utterance.volume = this._volume;
+            utterance.voice = this._voice;
+            this._utterance = utterance;
 
-            speechSynthesis.cancel();
-            speechSynthesis.speak(this._utterance);
+            /** @type {Promise<void>} */
+            const started = new Promise((resolve) => {
+                const finish = () => {
+                    utterance.removeEventListener('start', finish);
+                    utterance.removeEventListener('end', finish);
+                    utterance.removeEventListener('error', finish);
+                    pendingSpeechStarts.delete(finish);
+                    if (this._playCleanup === finish) { this._playCleanup = null; }
+                    resolve();
+                };
+                this._playCleanup = finish;
+                pendingSpeechStarts.add(finish);
+                // speak() only queues speech; DisplayAudio must keep this start
+                // cancellable until the engine actually begins speaking.
+                utterance.addEventListener('start', finish);
+                utterance.addEventListener('end', finish);
+                utterance.addEventListener('error', finish);
+                try {
+                    speechSynthesis.speak(utterance);
+                } catch (e) {
+                    finish();
+                }
+            });
+            await started;
         } catch (e) {
-            // NOP
+            // Preserve the non-throwing behavior when speech is unavailable.
+            this._playCleanup?.();
         }
     }
 
@@ -76,6 +107,10 @@ export class TextToSpeechAudio {
      * @returns {void}
      */
     pause() {
+        this._utterance = null;
+        // Native cancel() affects all wrappers, and some engines omit the
+        // cancellation event for queued speech. Release every affected start.
+        for (const cleanup of [...pendingSpeechStarts]) { cleanup(); }
         try {
             speechSynthesis.cancel();
         } catch (e) {

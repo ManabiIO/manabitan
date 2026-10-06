@@ -196,6 +196,11 @@ export class DisplayAudio {
      * @returns {import('display-audio').AudioMediaOptions}
      */
     getAnkiNoteMediaAudioDetails(term, reading) {
+        // Card creation is a separate consumer from pronunciation playback.
+        // Suppress defaults as well: an empty explicit list alone still downloads.
+        if (!this._canPlayAudio()) {
+            return {sources: [], preferredAudioIndex: null, enableDefaultAudioSources: false};
+        }
         /** @type {import('display-audio').AudioSourceShort[]} */
         const sources = [];
         let preferredAudioIndex = null;
