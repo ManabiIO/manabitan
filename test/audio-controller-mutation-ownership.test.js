@@ -232,3 +232,20 @@ test('a profile switch during a move read prevents writing the old source list i
     expect(controller._audioSourceEntries[0]._url).toBe('https://one.example');
     expect(controller._audioSourceEntries[1]._url).toBe('https://two.example');
 });
+
+
+test('the settings voice test owns asynchronous playback rejection', async ({window}) => {
+    const {controller} = await setup(window, [
+        {type: 'text-to-speech', url: '', voice: 'voice-a'},
+    ]);
+    const catchHandler = vi.fn();
+    const play = vi.fn(() => ({catch: catchHandler}));
+    controller._audioSystem.createTextToSpeechAudio = vi.fn(() => ({play, volume: 0}));
+
+    controller._voiceTestTextInput.value = 'test';
+    controller._voiceTestTextInput.dataset.voice = 'voice-a';
+    controller._onTestTextToSpeech();
+
+    expect(play).toHaveBeenCalledOnce();
+    expect(catchHandler).toHaveBeenCalledOnce();
+});
