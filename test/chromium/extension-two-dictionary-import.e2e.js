@@ -2677,8 +2677,12 @@ async function dismissVisiblePopupFrames(page) {
                 if (!await isPopupFrameHandleVisible(frameHandle)) { continue; }
                 const popupFrame = await frameHandle.contentFrame();
                 if (popupFrame === null) { continue; }
-                await popupFrame.locator('body').press('Escape', {timeout: 1500});
-            } catch (_) {
+                const closeButton = popupFrame.locator('#close-button');
+                await (await closeButton.isVisible() ?
+                    closeButton.click({timeout: 1500}) :
+                    popupFrame.locator('#content-scroll-focus').press('Escape', {timeout: 1500}));
+            } catch (error) {
+                console.warn(`${e2eLogTag} Popup dismissal attempt: ${errorMessage(error)}`);
                 // Popup frames can be hidden or replaced while Escape is propagating.
             }
         }
@@ -2846,6 +2850,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
         ];
         for (const [index, scenario] of scenarios.entries()) {
             stage = `scenario ${index}: activation`;
+            console.log(`${e2eLogTag} Reader bridge ${stage}`);
             await dismissVisiblePopupFrames(page);
             const sentence = `${scenario.prefix}${scenario.surface}。`;
             const request = {protocol: 1,
@@ -2892,6 +2897,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
             assert.equal(new URL(frame.url()).host, new URL(extensionPageUrl).host, 'Popup must belong to the installed extension');
             // Status can settle before rendering; require this operation's context and content together.
             stage = `scenario ${index}: rendered content`;
+            console.log(`${e2eLogTag} Reader bridge ${stage}`);
             await frame.waitForFunction(({sentence, offset, request, expectedStatus, expectedDictionaryNames}) => {
                 const currentSentence = history.state?.state?.sentence;
                 if (currentSentence?.text !== sentence || currentSentence.offset !== offset ||
@@ -2965,6 +2971,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
                 }, 'Mined expression must be the lemma; cloze must retain the original emoji, inflected surface, occurrence, and sentence');
                 // View-note publication precedes optional post-add work; wait for the whole mining flow.
                 stage = `scenario ${index}: mining completion`;
+                console.log(`${e2eLogTag} Reader bridge ${stage}`);
                 await frame.waitForFunction((noteId) => {
                     const entry = document.querySelector('#dictionary-entries .entry');
                     const button = entry?.querySelector('.note-actions-container .action-button-container[data-card-format-index="0"] .action-button[data-action="view-note"]');
@@ -3001,6 +3008,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
                 })).catch(() => null));
             }
         }
+        console.error(`${e2eLogTag} Reader bridge failure at ${stage}: ${errorMessage(error)}; display=${JSON.stringify(states)}`);
         throw new Error(`Reader bridge ${stage}: ${errorMessage(error)}; display=${JSON.stringify(states)}`, {cause: error});
     } finally {
         // Restore settings from an extension-origin page, even if an assertion failed on the lookup site.
