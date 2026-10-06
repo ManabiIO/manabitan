@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import {expect, test, vi} from 'vitest';
+import {afterEach, expect, test, vi} from 'vitest';
 import {AnkiDeckGeneratorController} from '../ext/js/pages/settings/anki-deck-generator-controller.js';
 import {AnkiController} from '../ext/js/pages/settings/anki-controller.js';
 import {CollapsibleDictionaryController} from '../ext/js/pages/settings/collapsible-dictionary-controller.js';
 import {KeyboardShortcutController} from '../ext/js/pages/settings/keyboard-shortcuts-controller.js';
+import {PermissionsToggleController} from '../ext/js/pages/settings/permissions-toggle-controller.js';
 import {PopupFrequencyBlurController} from '../ext/js/pages/settings/popup-frequency-blur-controller.js';
 import {ScanInputsController} from '../ext/js/pages/settings/scan-inputs-controller.js';
 import {ScanInputsSimpleController} from '../ext/js/pages/settings/scan-inputs-simple-controller.js';
@@ -389,5 +390,145 @@ const staleProfileWriteCases = [
 for (const [name, prototype, method, args, options] of staleProfileWriteCases) {
     test(name + ' cannot write an old-profile decision into the newly selected profile', async () => {
         await expectProfileWriteDropsAfterSwitch(prototype, method, args, options);
+    });
+}
+
+
+test('keyboard shortcut reset cannot write defaults into a profile selected while defaults load', async () => {
+    let profileIndex = 0;
+    /** @type {ReturnType<typeof deferred<import('settings').InputsHotkeyOptions[]>>} */
+    const pending = deferred();
+    const setProfileSetting = vi.fn().mockResolvedValue([]);
+    const controller = Object.assign(Object.create(KeyboardShortcutController.prototype), {
+        _settingsController: {
+            getOptionsContext: () => ({index: profileIndex}),
+            setProfileSetting,
+        },
+        getDefaultHotkeys: () => pending.promise,
+        _updateOptions: vi.fn(),
+    });
+
+    const operation = controller._reset();
+    await flush();
+    profileIndex = 1;
+    pending.resolve([]);
+    await operation;
+
+    expect(setProfileSetting).not.toHaveBeenCalled();
+});
+
+test('sentence termination reset cannot write defaults into a profile selected while defaults load', async () => {
+    let profileIndex = 0;
+    /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
+    const pending = deferred();
+    const setProfileSetting = vi.fn().mockResolvedValue([]);
+    const controller = Object.assign(Object.create(SentenceTerminationCharactersController.prototype), {
+        _settingsController: {
+            getOptionsContext: () => ({index: profileIndex}),
+            getDefaultOptions: () => pending.promise,
+            setProfileSetting,
+        },
+        _updateOptions: vi.fn(),
+    });
+
+    const operation = controller._reset();
+    await flush();
+    profileIndex = 1;
+    pending.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+        profiles: [{options: {sentenceParsing: {terminationCharacters: []}}}],
+    })));
+    await operation;
+
+    expect(setProfileSetting).not.toHaveBeenCalled();
+});
+
+test('sort-frequency auto detection cannot write its result into a newly selected profile', async () => {
+    let profileIndex = 0;
+    /** @type {ReturnType<typeof deferred<import('settings').SortFrequencyDictionaryOrder|null>>} */
+    const pending = deferred();
+    const setOrder = vi.fn().mockResolvedValue();
+    const controller = Object.assign(Object.create(SortFrequencyDictionaryController.prototype), {
+        _settingsController: {
+            getOptionsContext: () => ({index: profileIndex}),
+        },
+        _getFrequencyOrder: () => pending.promise,
+        _setSortFrequencyDictionaryOrderValue: setOrder,
+        _sortFrequencyDictionaryOrderSelect: {value: 'ascending'},
+    });
+
+    const operation = controller._autoUpdateOrder('dictionary');
+    await flush();
+    profileIndex = 1;
+    pending.resolve('descending');
+    await operation;
+
+    expect(setOrder).not.toHaveBeenCalled();
+});
+
+test('permission prompt completion cannot write its result into a newly selected profile', async () => {
+    let profileIndex = 0;
+    /** @type {((result: boolean) => void)|null} */
+    let permissionCallback = null;
+    vi.stubGlobal('chrome', {
+        runtime: {lastError: null},
+        permissions: {
+            request(_permissions, callback) {
+                permissionCallback = callback;
+            },
+        },
+    });
+    const setProfileSetting = vi.fn().mockResolvedValue([]);
+    const controller = Object.assign(Object.create(PermissionsToggleController.prototype), {
+        _settingsController: {
+            getOptionsContext: () => ({index: profileIndex}),
+            setProfileSetting,
+        },
+        _getRequiredPermissions: () => ['clipboardRead'],
+        _setToggleValid: vi.fn(),
+    });
+    const toggle = {
+        checked: true,
+        dataset: {permissionsSetting: 'general.enableYomitanApi'},
+    };
+
+    const operation = controller._onPermissionsToggleChange({currentTarget: toggle});
+    await flush();
+    profileIndex = 1;
+    if (permissionCallback === null) { throw new Error('Permission request was not started'); }
+    permissionCallback(true);
+    await operation;
+
+    expect(setProfileSetting).not.toHaveBeenCalled();
+});
+
+for (const [name, method, element] of [
+    ['middle mouse handler', '_handleMiddleMouseButtonScanChange', {checked: true}],
+    ['main scan modifier handler', '_handleMainScanModifierKeyInputChange', {value: 'shift'}],
+]) {
+    test(name + ' cannot hand a stale-profile event to a setter for the new profile', async () => {
+        let profileIndex = 0;
+        /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
+        const pending = deferred();
+        const middleSetter = vi.fn().mockResolvedValue();
+        const mainSetter = vi.fn().mockResolvedValue();
+        const controller = Object.assign(Object.create(ScanInputsSimpleController.prototype), {
+            _settingsController: {
+                getOptionsContext: () => ({index: profileIndex}),
+                getOptions: () => pending.promise,
+            },
+            _setMiddleMouseSuppported: middleSetter,
+            _setMainScanInputs: mainSetter,
+        });
+
+        const operation = method === '_handleMiddleMouseButtonScanChange' ?
+            controller._handleMiddleMouseButtonScanChange(element, true) :
+            controller._handleMainScanModifierKeyInputChange(element, ['shift']);
+        await flush();
+        profileIndex = 1;
+        pending.resolve(partialProfileOptions({scanning: {inputs: []}}));
+        await operation;
+
+        expect(middleSetter).not.toHaveBeenCalled();
+        expect(mainSetter).not.toHaveBeenCalled();
     });
 }
