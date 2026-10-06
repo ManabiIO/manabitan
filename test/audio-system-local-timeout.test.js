@@ -6,11 +6,14 @@
 import {afterEach, expect, test, vi} from 'vitest';
 import {AudioSystem} from '../ext/js/media/audio-system.js';
 import {DisplayAudio} from '../ext/js/display/display-audio.js';
+import {isLocalhostUrl} from '../ext/js/core/utilities.js';
 
 /** @type {{state: string}[]} */
 const contextsToClose = [];
 afterEach(() => {
-    for (const context of contextsToClose.splice(0)) { context.state = 'closed'; }
+    for (const context of contextsToClose.splice(0)) {
+        context.state = 'closed';
+    }
     vi.unstubAllGlobals();
 });
 
@@ -122,7 +125,11 @@ test('a stalled localhost bridge reaches its deadline without awaiting the bridg
     const fetch = deferred();
     api.fetchLocalAudioData = () => fetch.promise;
     let outcome = 'pending';
-    const request = system.createAudio('http://localhost:5050/a.mp3', 'custom').then(() => { outcome = 'fulfilled'; }, () => { outcome = 'rejected'; });
+    const request = system.createAudio('http://localhost:5050/a.mp3', 'custom').then(() => {
+        outcome = 'fulfilled';
+    }, () => {
+        outcome = 'rejected';
+    });
     expire();
     await flush();
     const atDeadline = outcome;
@@ -141,7 +148,11 @@ test('the same local preparation deadline includes decoding', async () => {
     const decode = deferred();
     stats.decode = () => decode.promise;
     let outcome = 'pending';
-    const request = system.createAudio('http://127.0.0.1/a.mp3', 'custom').then(() => { outcome = 'fulfilled'; }, () => { outcome = 'rejected'; });
+    const request = system.createAudio('http://127.0.0.1/a.mp3', 'custom').then(() => {
+        outcome = 'fulfilled';
+    }, () => {
+        outcome = 'rejected';
+    });
     await flush();
     const deadlines = [...timers.values()].map(({delay}) => delay);
     expire();
@@ -163,8 +174,7 @@ for (const phase of ['fetch', 'decode']) {
         const fetch = deferred();
         /** @type {ReturnType<typeof deferred<{duration: number}>>} */
         const decode = deferred();
-        if (phase === 'fetch') { api.fetchLocalAudioData = () => fetch.promise; }
-        else { stats.decode = () => decode.promise; }
+        if (phase === 'fetch') { api.fetchLocalAudioData = () => fetch.promise; } else { stats.decode = () => decode.promise; }
         let failure = /** @type {unknown} */ (null);
         const first = system.createAudio('http://localhost/a.mp3', 'custom').then(() => {}, (error) => { failure = error; });
         await flush();
@@ -172,8 +182,7 @@ for (const phase of ['fetch', 'decode']) {
         await flush();
         const failureAtDeadline = failure;
         const lateError = new Error(`Late ${phase} failure`);
-        if (phase === 'fetch') { fetch.reject(lateError); }
-        else { decode.reject(lateError); }
+        if (phase === 'fetch') { fetch.reject(lateError); } else { decode.reject(lateError); }
         await first;
         expect(failureAtDeadline instanceof Error).toBe(true);
         expect(failure === lateError).toBe(false);
@@ -187,24 +196,30 @@ for (const phase of ['fetch', 'decode']) {
     });
 }
 
-test('successful local preparation clears its deadline and preserves playback', async () => {
-    const {system, stats, timers, expire} = setup();
-    const audio = await system.createAudio('http://[::1]/a.mp3', 'custom');
-    expect(stats.requests).toBe(1);
-    expect(stats.decodes).toBe(1);
-    expect(timers.size).toBe(0);
-    expire();
-    await audio.play();
-    expect(stats.localStarts).toBe(1);
-    audio.pause();
-});
+for (const origin of ['http://localhost', 'https://localhost', 'http://127.0.0.1', 'http://[::1]', 'http://[0:0:0:0:0:0:0:1]']) {
+    test(`successful local preparation clears its deadline and preserves playback at ${origin}`, async () => {
+        const {system, stats, timers, expire} = setup();
+        const url = `${origin}/a.mp3`;
+        // Keep URL classification in this integration test rather than masking
+        // routing errors with a mocked helper or a direct private-method call.
+        expect(isLocalhostUrl(url)).toBe(true);
+        const audio = await system.createAudio(url, 'custom');
+        expect(stats.requests).toBe(1);
+        expect(stats.decodes).toBe(1);
+        expect(timers.size).toBe(0);
+        expire();
+        await audio.play();
+        expect(stats.localStarts).toBe(1);
+        expect(stats.remoteStarts).toBe(0);
+        audio.pause();
+    });
+}
 
 for (const phase of ['fetch', 'decode']) {
     test(`current ${phase} failures retain their original error and release the timer`, async () => {
         const {system, api, stats, timers} = setup();
         const expectedError = new Error(`${phase} failed`);
-        if (phase === 'fetch') { api.fetchLocalAudioData = async () => { throw expectedError; }; }
-        else { stats.decode = async () => { throw expectedError; }; }
+        if (phase === 'fetch') { api.fetchLocalAudioData = async () => { throw expectedError; }; } else { stats.decode = async () => { throw expectedError; }; }
         const error = await system.createAudio('http://localhost/a.mp3', 'custom').then(() => null, (reason) => reason);
         expect(error).toBe(expectedError);
         expect(timers.size).toBe(0);
@@ -225,7 +240,11 @@ test('a successful remote request is unaffected by an unrelated local deadline',
     const fetch = deferred();
     api.fetchLocalAudioData = () => fetch.promise;
     let outcome = 'pending';
-    const local = system.createAudio('http://localhost/a.mp3', 'custom').then(() => { outcome = 'fulfilled'; }, () => { outcome = 'rejected'; });
+    const local = system.createAudio('http://localhost/a.mp3', 'custom').then(() => {
+        outcome = 'fulfilled';
+    }, () => {
+        outcome = 'rejected';
+    });
     const remote = await system.createAudio('https://audio.example/a.mp3', 'custom');
     await remote.play();
     expire();

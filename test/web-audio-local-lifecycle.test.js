@@ -11,7 +11,9 @@ const contextsToClose = [];
 afterEach(() => {
     // Retire the module's shared context between tests without replacing the
     // implementation or relying on module-cache resets in the adapter.
-    for (const context of contextsToClose.splice(0)) { context.state = 'closed'; }
+    for (const context of contextsToClose.splice(0)) {
+        context.state = 'closed';
+    }
     vi.unstubAllGlobals();
 });
 
@@ -121,7 +123,11 @@ test('an obsolete resume rejection cannot reject an already cancelled play', asy
     const {audio, stats} = setup();
     await audio.prepare();
     let outcome = 'pending';
-    const request = audio.play().then(() => { outcome = 'fulfilled'; }, () => { outcome = 'rejected'; });
+    const request = audio.play().then(() => {
+        outcome = 'fulfilled';
+    }, () => {
+        outcome = 'rejected';
+    });
     audio.pause();
     await flush();
     const beforeRejection = outcome;
@@ -209,7 +215,11 @@ test('preparation recovers when its context closed before decoding started', asy
     const {audio, stats} = setup('running');
     stats.contexts[0].state = 'closed';
     let outcome = 'pending';
-    await audio.prepare().then(() => { outcome = 'fulfilled'; }, () => { outcome = 'rejected'; });
+    await audio.prepare().then(() => {
+        outcome = 'fulfilled';
+    }, () => {
+        outcome = 'rejected';
+    });
     expect(outcome).toBe('fulfilled');
     expect(stats.contexts.length).toBe(2);
     expect(audio.duration).toBe(1);
