@@ -116,7 +116,10 @@ function downloadSetup() {
     /** @type {string[]} */
     const requests = [];
     const transport = {
-        /** @param {string} url */
+        /**
+         * @param {string} url
+         * @returns {Promise<Response>}
+         */
         async fetchAnonymous(url) {
             requests.push(url);
             return url === sources[0].url ? stalled.response : new Response(Uint8Array.from([7, 8]), {headers: {'Content-Type': 'audio/wav'}});
