@@ -64,46 +64,64 @@ export class TextToSpeechAudio {
      */
     async play() {
         this.pause();
-        try {
-            // A fresh utterance prevents late events from a cancelled attempt
-            // from confirming the next attempt using the same audio object.
-            const utterance = new SpeechSynthesisUtterance(typeof this._text === 'string' ? this._text : '');
-            utterance.lang = this._voice.lang;
-            utterance.volume = this._volume;
-            utterance.voice = this._voice;
-            this._utterance = utterance;
+        // A fresh utterance prevents late events from a cancelled attempt
+        // from confirming the next attempt using the same audio object.
+        const utterance = new SpeechSynthesisUtterance(typeof this._text === 'string' ? this._text : '');
+        utterance.lang = this._voice.lang;
+        utterance.volume = this._volume;
+        utterance.voice = this._voice;
+        this._utterance = utterance;
 
-            /** @type {Promise<void>} */
-            const started = new Promise((resolve) => {
-                const finish = () => {
-                    utterance.removeEventListener('start', finish);
-                    utterance.removeEventListener('end', finish);
-                    utterance.removeEventListener('error', finish);
-                    pendingSpeechStarts.delete(finish);
-                    if (this._playCleanup === finish) { this._playCleanup = null; }
-                    resolve();
-                };
-                this._playCleanup = finish;
-                pendingSpeechStarts.add(finish);
-                // speak() only queues speech; DisplayAudio must keep this start
-                // cancellable until the engine actually begins speaking.
-                utterance.addEventListener('start', finish);
-                utterance.addEventListener('end', finish);
-                utterance.addEventListener('error', finish);
-                try {
-                    // cancel() clears the queue but preserves the paused state.
-                    // Resume before enqueueing so a failure cannot strand speech.
-                    if (speechSynthesis.paused) { speechSynthesis.resume(); }
-                    speechSynthesis.speak(utterance);
-                } catch (e) {
-                    finish();
-                }
-            });
-            await started;
-        } catch (e) {
-            // Preserve the non-throwing behavior when speech is unavailable.
-            this._playCleanup?.();
-        }
+        /** @type {Promise<void>} */
+        const started = new Promise((resolve, reject) => {
+            let settled = false;
+            const cleanup = () => {
+                if (settled) { return false; }
+                settled = true;
+                utterance.removeEventListener('start', onStart);
+                utterance.removeEventListener('end', onEnd);
+                utterance.removeEventListener('error', onError);
+                pendingSpeechStarts.delete(onCancel);
+                if (this._playCleanup === onCancel) { this._playCleanup = null; }
+                return true;
+            };
+            const onStart = () => {
+                if (cleanup()) { resolve(); }
+            };
+            const onEnd = () => {
+                if (!cleanup()) { return; }
+                if (this._utterance === utterance) { this._utterance = null; }
+                resolve();
+            };
+            const onError = () => {
+                if (!cleanup()) { return; }
+                if (this._utterance === utterance) { this._utterance = null; }
+                reject(new Error('Speech synthesis failed before playback started'));
+            };
+            const onCancel = () => {
+                if (!cleanup()) { return; }
+                if (this._utterance === utterance) { this._utterance = null; }
+                resolve();
+            };
+            this._playCleanup = onCancel;
+            pendingSpeechStarts.add(onCancel);
+            // speak() only queues speech; DisplayAudio must keep this start
+            // cancellable until the engine actually begins speaking.
+            utterance.addEventListener('start', onStart);
+            utterance.addEventListener('end', onEnd);
+            utterance.addEventListener('error', onError);
+            try {
+                // cancel() clears the queue but preserves the paused state.
+                // Resume before enqueueing so a failure cannot strand speech.
+                if (speechSynthesis.paused) { speechSynthesis.resume(); }
+                speechSynthesis.speak(utterance);
+            } catch (e) {
+                if (!cleanup()) { return; }
+                if (this._utterance === utterance) { this._utterance = null; }
+                reject(e);
+            }
+        });
+        await started;
     }
 
     /**
