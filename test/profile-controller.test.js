@@ -137,7 +137,7 @@ describe('ProfileController async ownership', () => {
         /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
         const defaults = deferred();
         const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
-        const refresh = vi.fn().mockResolvedValue();
+        const refresh = vi.fn(async () => {});
         Reflect.set(controller, '_settingsController', {
             getDefaultOptions: () => defaults.promise,
             modifyGlobalSettings,
@@ -166,7 +166,7 @@ describe('ProfileController async ownership', () => {
         /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
         const defaults = deferred();
         const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
-        const refresh = vi.fn().mockResolvedValue();
+        const refresh = vi.fn(async () => {});
         Reflect.set(controller, '_settingsController', {
             getDefaultOptions: () => defaults.promise,
             modifyGlobalSettings,
@@ -199,7 +199,7 @@ describe('ProfileController async ownership', () => {
             profileIndex: 1,
         });
         const cleanup = vi.fn();
-        const prepare = vi.fn().mockResolvedValue();
+        const prepare = vi.fn(async () => {});
         Reflect.set(controller, '_profileConditionsUI', {cleanup, prepare});
         Reflect.set(controller, '_profileConditionsIndex', null);
         Reflect.set(controller, '_profileEntryList', []);
@@ -258,13 +258,13 @@ describe('ProfileController condition modal ownership', () => {
         const newer = controller.openProfileConditionsModal(1);
         await flush();
 
-        second.resolve();
+        second.resolve(undefined);
         await newer;
         expect(profileConditionsProfileName.textContent).toBe('Second');
         expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(1);
         expect(setVisible).toHaveBeenCalledTimes(1);
 
-        first.resolve();
+        first.resolve(undefined);
         await older;
         expect(profileConditionsProfileName.textContent).toBe('Second');
         expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(1);
@@ -287,7 +287,7 @@ describe('ProfileController condition modal ownership', () => {
         const operation = controller.openProfileConditionsModal(0);
         await flush();
         Reflect.set(controller, '_profiles', [secondProfile, firstProfile]);
-        pending.resolve();
+        pending.resolve(undefined);
         await operation;
 
         expect(setVisible).not.toHaveBeenCalled();
@@ -345,7 +345,7 @@ describe('ProfileConditionsUI prepare ownership', () => {
 describe('ProfileController condition profile identity', () => {
     test('a tracked conditions profile follows its stable ID after profile reordering', async () => {
         const controller = createControllerForInternalTests();
-        const prepare = vi.fn().mockResolvedValue();
+        const prepare = vi.fn(async () => {});
         const cleanup = vi.fn();
         const setVisible = vi.fn();
         const profileName = {textContent: 'First'};
@@ -382,7 +382,7 @@ describe('ProfileController condition profile identity', () => {
 
     test('deleting the tracked conditions profile closes rather than retargeting the modal', async () => {
         const controller = createControllerForInternalTests();
-        const prepare = vi.fn().mockResolvedValue();
+        const prepare = vi.fn(async () => {});
         const cleanup = vi.fn();
         const setVisible = vi.fn();
         Reflect.set(controller, '_settingsController', {
