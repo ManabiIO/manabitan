@@ -165,6 +165,7 @@ export class DisplayAudio {
 
     /** */
     stopAudio() {
+        this.clearAutoPlayTimer();
         this._stopAudio(null);
     }
 
@@ -196,6 +197,11 @@ export class DisplayAudio {
      * @returns {import('display-audio').AudioMediaOptions}
      */
     getAnkiNoteMediaAudioDetails(term, reading) {
+        // Card creation is a separate consumer from pronunciation playback.
+        // Suppress defaults as well: an empty explicit list alone still downloads.
+        if (!this._canPlayAudio()) {
+            return {sources: [], preferredAudioIndex: null, enableDefaultAudioSources: false};
+        }
         /** @type {import('display-audio').AudioSourceShort[]} */
         const sources = [];
         let preferredAudioIndex = null;
@@ -760,20 +766,32 @@ export class DisplayAudio {
 
             this._audioPlaying = audio;
             this._audioPlayPending = true;
-            const playPromise = audio.play();
-
-            if (typeof playPromise !== 'undefined') {
-                try {
-                    await playPromise;
-                } catch (e) {
-                    // NOP
-                }
+            let started = false;
+            try {
+                const playPromise = audio.play();
+                if (typeof playPromise !== 'undefined') { await playPromise; }
+                started = true;
+            } catch (e) {
+                // A prepared recording is not necessarily playable: native
+                // play() can reject (for example until the next user gesture).
             }
 
             if (this._playbackToken !== token) {
                 return {audio: null, source: null, subIndex: 0, valid: false};
             }
             this._audioPlayPending = false;
+            if (!started) {
+                this._audioPlaying = null;
+                audio.pause();
+                if (this._playbackToken === token) {
+                    for (const button of buttons) {
+                        button.title = `${button.dataset.titleDefault || ''}\nCould not play audio`;
+                    }
+                }
+                // Do not pin an unheard recording. Keep its prepared cache
+                // entry available for a later explicit playback attempt.
+                return {audio: null, source: null, subIndex: 0, valid: false};
+            }
             return {audio, source, subIndex, valid};
         } finally {
             this._clearPlaybackProgress(overrideToken);

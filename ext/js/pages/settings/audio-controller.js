@@ -196,35 +196,57 @@ export class AudioController extends EventDispatcher {
         const token = this._audioSourcesToken;
         const optionsContext = this._settingsController.getOptionsContext();
         if (!this.isSourceCurrent(source)) { return; }
+        await this.queueSourceMutation(() => this._moveSource(source, target, token, optionsContext));
+    }
+
+    /**
+     * @param {AudioSourceEntry} source
+     * @param {number} offset
+     */
+    async moveAudioSource(source, offset) {
+        if (!this.isSourceCurrent(source) || !Number.isInteger(offset)) { return; }
         await this.queueSourceMutation(async () => {
-            if (!this._isAudioSourcesUpdateCurrent(token, optionsContext) || !this.isSourceCurrent(source) || !this.isSourceCurrent(target)) { return; }
-            // Earlier field writes settle before this snapshot is read. Later
-            // edits retire an unsent snapshot, or follow the optimistically
-            // moved row after this write finishes. Never send indices in parallel.
-            const options = await this._settingsController.getOptions();
-            if (!this._isAudioSourcesUpdateCurrent(token, optionsContext)) { return; }
-            const {audio} = options;
-            const sourceIndex = source.index;
-            const targetIndex2 = target.index;
-            if (sourceIndex >= audio.sources.length || targetIndex2 >= audio.sources.length) { return; }
-            const item = audio.sources.splice(sourceIndex, 1)[0];
-            audio.sources.splice(targetIndex2, 0, item);
-            this._audioSourceEntries.splice(sourceIndex, 1);
-            this._audioSourceEntries.splice(targetIndex2, 0, source);
-            this.invalidateSourceUpdates();
-            this._closeSourceMoveModal();
-            this._updateSourceOrder();
-            try {
-                await requireSuccessfulSettingsChange(this._settingsController.modifyProfileSettings([{
-                    action: 'set',
-                    path: 'audio.sources',
-                    value: audio.sources,
-                }]));
-            } catch (error) {
-                await this._refreshAudioSources(true);
-                throw error;
-            }
+            if (!this.isSourceCurrent(source)) { return; }
+            const target = this._audioSourceEntries[source.index + offset];
+            if (typeof target === 'undefined' || target === source) { return; }
+            await this._moveSource(source, target, this._audioSourcesToken, this._settingsController.getOptionsContext());
         });
+    }
+
+    /**
+     * @param {AudioSourceEntry} source
+     * @param {AudioSourceEntry} target
+     * @param {import('core').TokenObject} token
+     * @param {import('settings').OptionsContext} optionsContext
+     */
+    async _moveSource(source, target, token, optionsContext) {
+        if (!this._isAudioSourcesUpdateCurrent(token, optionsContext) || !this.isSourceCurrent(source) || !this.isSourceCurrent(target)) { return; }
+        // Earlier field writes settle before this snapshot is read. Later
+        // edits retire an unsent snapshot, or follow the optimistically
+        // moved row after this write finishes. Never send indices in parallel.
+        await this._settingsController.getOptions();
+        if (!this._isAudioSourcesUpdateCurrent(token, optionsContext)) { return; }
+        const audio = {sources: this._audioSourceEntries.map((entry) => entry.getSourceOptions())};
+        const sourceIndex = source.index;
+        const targetIndex2 = target.index;
+        if (sourceIndex >= audio.sources.length || targetIndex2 >= audio.sources.length) { return; }
+        const item = audio.sources.splice(sourceIndex, 1)[0];
+        audio.sources.splice(targetIndex2, 0, item);
+        this._audioSourceEntries.splice(sourceIndex, 1);
+        this._audioSourceEntries.splice(targetIndex2, 0, source);
+        this.invalidateSourceUpdates();
+        this._closeSourceMoveModal();
+        this._updateSourceOrder();
+        try {
+            await requireSuccessfulSettingsChange(this._settingsController.modifyProfileSettings([{
+                action: 'set',
+                path: 'audio.sources',
+                value: audio.sources,
+            }]));
+        } catch (error) {
+            await this._refreshAudioSources(true);
+            throw error;
+        }
     }
 
     /**
@@ -377,7 +399,9 @@ export class AudioController extends EventDispatcher {
             const voiceUri = input.dataset.voice;
             const audio = this._audioSystem.createTextToSpeechAudio(text, typeof voiceUri === 'string' ? voiceUri : '');
             audio.volume = 1;
-            void audio.play();
+            // Voice availability can change between selection and playback.
+            // The test button is best-effort and must not leak a rejection.
+            void audio.play().catch(() => {});
         } catch (e) {
             // NOP
         }
@@ -385,15 +409,20 @@ export class AudioController extends EventDispatcher {
 
     /** */
     _updateTextToSpeechVoices() {
-        const voices = (
-            typeof speechSynthesis !== 'undefined' ?
-            [...speechSynthesis.getVoices()].map((voice, index) => ({
-                voice,
-                isJapanese: this._languageTagIsJapanese(voice.lang),
-                index,
-            })) :
-            []
-        );
+        /** @type {import('audio-controller').VoiceInfo[]} */
+        let voices = [];
+        try {
+            if (typeof speechSynthesis !== 'undefined' && typeof speechSynthesis.getVoices === 'function') {
+                voices = [...speechSynthesis.getVoices()].map((voice, index) => ({
+                    voice,
+                    isJapanese: this._languageTagIsJapanese(voice.lang),
+                    index,
+                }));
+            }
+        } catch (e) {
+            // Voice discovery is best-effort; settings must remain usable when
+            // the browser speech service is temporarily unavailable.
+        }
         voices.sort(this._textToSpeechVoiceCompare.bind(this));
         this._voices = voices;
         this.trigger('voicesUpdated', {});
@@ -425,10 +454,13 @@ export class AudioController extends EventDispatcher {
      * @returns {boolean}
      */
     _languageTagIsJapanese(languageTag) {
+        const value = languageTag.toLowerCase();
         return (
-            languageTag.startsWith('ja_') ||
-            languageTag.startsWith('ja-') ||
-            languageTag.startsWith('jpn-')
+            value === 'ja' ||
+            value === 'jpn' ||
+            value.startsWith('ja_') ||
+            value.startsWith('ja-') ||
+            value.startsWith('jpn-')
         );
     }
 
@@ -637,6 +669,13 @@ class AudioSourceEntry {
         return this._type;
     }
 
+    /**
+     * @returns {import('settings').AudioSourceOptions}
+     */
+    getSourceOptions() {
+        return {type: this._type, url: this._url, voice: this._voice};
+    }
+
     /** */
     prepare() {
         this._updateTypeParameter();
@@ -697,7 +736,7 @@ class AudioSourceEntry {
      * @param {number} offset
      */
     _move(offset) {
-        void this._parent.moveAudioSourceOptions(this._index, this._index + offset).catch((error) => {
+        void this._parent.moveAudioSource(this, offset).catch((error) => {
             log.error(error);
         });
     }

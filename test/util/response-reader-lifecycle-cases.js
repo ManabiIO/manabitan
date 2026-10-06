@@ -54,7 +54,8 @@ for (const {label, chunks, length} of [
         const progress = []
         const result = await RequestBuilder.readFetchResponseArrayBuffer(response, (done) => { progress.push(done) })
         assert.deepEqual(result, Uint8Array.from(chunks.flat()))
-        assert.deepEqual(progress, [...chunks.map(() => false), true])
+        // Progress represents transferred bytes, not empty stream chunks.
+        assert.deepEqual(progress, [...chunks.filter((chunk) => chunk.length > 0).map(() => false), true])
         assert.equal(stream.locked, false)
         assert.deepEqual(cancellations, [])
         const nextReader = stream.getReader()
