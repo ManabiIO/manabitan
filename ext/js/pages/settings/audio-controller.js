@@ -663,6 +663,7 @@ class AudioSourceEntry {
         await this._parent.mutateAudioSourceEntry(this, async () => {
             const previousType = this._type;
             this._type = value;
+            this._typeSelect.value = value;
             this._updateTypeParameter();
             try {
                 await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].type`, value);
@@ -684,6 +685,7 @@ class AudioSourceEntry {
         await this._parent.mutateAudioSourceEntry(this, async () => {
             const previousValue = this._url;
             this._url = value;
+            this._urlInput.value = value;
             try {
                 await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].url`, value);
             } catch (error) {
@@ -703,6 +705,7 @@ class AudioSourceEntry {
         await this._parent.mutateAudioSourceEntry(this, async () => {
             const previousValue = this._voice;
             this._voice = value;
+            this._voiceSelect.value = value;
             try {
                 await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].voice`, value);
             } catch (error) {
