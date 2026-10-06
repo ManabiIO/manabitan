@@ -21,6 +21,7 @@ class FakeUtterance extends EventTarget {
         this.text = text;
         this.lang = '';
         this.volume = 1;
+        /** @type {SpeechSynthesisVoice|null} */
         this.voice = null;
         /** @type {Map<string, Set<EventListenerOrEventListenerObject|null>>} */
         this.listeners = new Map();
