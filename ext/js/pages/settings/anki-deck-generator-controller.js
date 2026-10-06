@@ -87,6 +87,10 @@ export class AnkiDeckGeneratorController {
         this._inProgress = false;
         /** @type {import('core').TokenObject} */
         this._parseToken = {};
+        /** @type {import('core').TokenObject} */
+        this._modelSelectionToken = {};
+        /** @type {import('core').TokenObject} */
+        this._exampleTextToken = {};
         /** @type {AnkiNoteBuilder} */
         this._ankiNoteBuilder = new AnkiNoteBuilder(settingsController.application.api, new TemplateRendererProxy());
     }
@@ -183,8 +187,19 @@ export class AnkiDeckGeneratorController {
 
     /** */
     async _setupModelSelection() {
-        const activeFlashcardFormat = /** @type {HTMLSelectElement} */ (this._activeFlashcardFormatSelect);
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._modelSelectionToken = token;
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (
+            this._modelSelectionToken !== token ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            return;
+        }
+
+        const activeFlashcardFormat = /** @type {HTMLSelectElement} */ (this._activeFlashcardFormatSelect);
         this._flashcardFormatDetails = options.anki.cardFormats;
 
         activeFlashcardFormat.innerHTML = '';
@@ -495,13 +510,22 @@ export class AnkiDeckGeneratorController {
     async _generateNoteData(word, addMedia) {
         const optionsContext = this._settingsController.getOptionsContext();
         const activeFlashcardFormatDetails = this._flashcardFormatDetails[Number(this._activeFlashcardFormatSelect.value)];
+        const activeNoteType = this._activeNoteType;
+        const activeAnkiDeck = this._activeAnkiDeck;
+        const assertProfileCurrent = () => {
+            if (this._settingsController.getOptionsContext().index !== optionsContext.index) {
+                throw new Error('Profile changed while generating Anki note');
+            }
+        };
         const data = await this._getDictionaryEntry(word, optionsContext, activeFlashcardFormatDetails.type);
+        assertProfileCurrent();
 
         if (data === null) {
             return null;
         }
         const {dictionaryEntry, text: sentenceText} = data;
         const options = await this._settingsController.getOptions();
+        assertProfileCurrent();
         const context = {
             url: window.location.href,
             sentence: {
@@ -513,6 +537,7 @@ export class AnkiDeckGeneratorController {
             fullQuery: sentenceText,
         };
         const template = await this._getAnkiTemplate(options);
+        assertProfileCurrent();
         const deckOptionsFields = activeFlashcardFormatDetails.fields;
         const {general: {resultOutputMode, glossaryLayoutMode, compactTags}} = options;
         const idleTimeout = (Number.isFinite(options.anki.downloadTimeout) && options.anki.downloadTimeout > 0 ? options.anki.downloadTimeout : null);
@@ -522,8 +547,8 @@ export class AnkiDeckGeneratorController {
         const requirements = addMedia ? [...getDictionaryEntryMedia(dictionaryEntry), {type: 'audio'}] : [];
         const dictionaryStylesMap = this._ankiNoteBuilder.getDictionaryStylesMap(options.dictionaries);
         const cardFormat = /** @type {import('settings').AnkiCardFormat} */ ({
-            deck: this._activeAnkiDeck,
-            model: this._activeNoteType,
+            deck: activeAnkiDeck,
+            model: activeNoteType,
             fields: deckOptionsFields,
             type: activeFlashcardFormatDetails.type,
             name: '',
@@ -544,6 +569,7 @@ export class AnkiDeckGeneratorController {
             duplicateScopeCheckAllModels: options.anki.duplicateScopeCheckAllModels,
             dictionaryStylesMap: dictionaryStylesMap,
         }));
+        assertProfileCurrent();
         return note;
     }
 
@@ -596,9 +622,20 @@ export class AnkiDeckGeneratorController {
 
     /** */
     async _updateExampleText() {
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._exampleTextToken = token;
+        const optionsContext = this._settingsController.getOptionsContext();
         const languageSummaries = await this._application.api.getLanguageSummaries();
         const options = await this._settingsController.getOptions();
-        const activeLanguage = /** @type {import('language').LanguageSummary} */ (languageSummaries.find(({iso}) => iso === options.general.language));
+        if (
+            this._exampleTextToken !== token ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            return;
+        }
+        const activeLanguage = languageSummaries.find(({iso}) => iso === options.general.language);
+        if (typeof activeLanguage === 'undefined') { return; }
         this._renderTextInput.lang = options.general.language;
         this._renderTextInput.value = activeLanguage.exampleText;
         this._renderResult.lang = options.general.language;
