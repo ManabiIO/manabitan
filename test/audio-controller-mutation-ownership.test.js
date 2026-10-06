@@ -32,11 +32,11 @@ async function flush() {
 }
 
 /**
- * @param {Window} window
+ * @param {any} window
  * @param {import('settings').AudioSourceOptions[]} sources
  * @returns {Promise<{
  *   controller: AudioController,
- *   settingsController: import('settings-controller').SettingsController,
+ *   settingsController: any,
  *   getProfileIndex: () => number,
  *   setProfileIndex: (value: number) => void
  * }>}
@@ -52,7 +52,7 @@ async function setup(window, sources) {
     window.document.documentElement.dataset.browser = 'firefox';
 
     let profileIndex = 0;
-    const settingsController = /** @type {import('settings-controller').SettingsController} */ (/** @type {unknown} */ ({
+    const settingsController = /** @type {any} */ ({
         application: {api: {}},
         getOptions: vi.fn().mockImplementation(async () => ({
             general: {language: 'en'},
@@ -89,7 +89,7 @@ async function setup(window, sources) {
         modifyProfileSettings: vi.fn().mockResolvedValue([]),
         setProfileSetting: vi.fn().mockResolvedValue([]),
         on: vi.fn(),
-    }));
+    };
     const modalController = /** @type {import('../ext/js/pages/settings/modal-controller.js').ModalController} */ (/** @type {unknown} */ ({
         getModal: vi.fn(() => ({node: window.document.createElement('div'), setVisible() {}})),
     }));
