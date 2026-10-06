@@ -107,7 +107,8 @@ test('SettingsController still emits a stable current-profile options snapshot',
     expect(trigger).toHaveBeenCalledWith('optionsChanged', {options, optionsContext: {index: 2}});
 });
 
-for (const [name, prototype, method, args] of [
+/** @type {[string, object, string, unknown[]][]} */
+const directRefreshCases = [
     ['scan input refresh', ScanInputsController.prototype, 'refresh', []],
     ['sentence termination refresh', SentenceTerminationCharactersController.prototype, '_updateOptions', []],
     ['translation replacement refresh', TranslationTextReplacementsController.prototype, '_updateOptions', []],
@@ -115,16 +116,21 @@ for (const [name, prototype, method, args] of [
     ['keyboard shortcut refresh', KeyboardShortcutController.prototype, '_updateOptions', []],
     ['secondary dictionary reorder refresh', SecondarySearchDictionaryController.prototype, '_onDictionarySettingsReordered', [null]],
     ['collapsible dictionary reorder refresh', CollapsibleDictionaryController.prototype, '_onDictionarySettingsReordered', [null]],
-]) {
+];
+
+for (const [name, prototype, method, args] of directRefreshCases) {
     test(`${name} drops a result when the selected profile changes during its read`, async () => {
         await expectDirectRefreshDropsStaleProfile(prototype, method, args);
     });
 }
 
-for (const [name, prototype] of [
+/** @type {[string, object][]} */
+const dictionaryRefreshCases = [
     ['sort-frequency dictionary refresh', SortFrequencyDictionaryController.prototype],
     ['popup-frequency dictionary refresh', PopupFrequencyBlurController.prototype],
-]) {
+];
+
+for (const [name, prototype] of dictionaryRefreshCases) {
     test(`${name} drops a result when the selected profile changes during its options read`, async () => {
         let profileIndex = 0;
         /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
