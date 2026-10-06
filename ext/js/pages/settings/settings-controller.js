@@ -332,6 +332,7 @@ export class SettingsController extends EventDispatcher {
             if (this.getOptionsContext().index !== optionsContext.index) { return; }
             this.trigger('optionsChanged', {options, optionsContext});
         } catch (e) {
+            if (this.getOptionsContext().index !== optionsContext.index) { return; }
             if (canUpdateProfileIndex) {
                 this._setProfileIndex(0, false);
                 return;
