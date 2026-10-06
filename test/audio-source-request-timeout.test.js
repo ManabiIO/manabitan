@@ -79,7 +79,8 @@ function setup(fetchAnonymous) {
      */
     const advance = async (elapsed) => {
         now += elapsed;
-        for (const [id, {at, callback}] of [...timers]) {
+        const pendingTimers = [...timers];
+        for (const [id, {at, callback}] of pendingTimers) {
             if (at > now) { continue; }
             timers.delete(id);
             callback();

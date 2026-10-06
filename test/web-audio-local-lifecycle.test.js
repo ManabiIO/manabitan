@@ -74,7 +74,6 @@ function setup(initialState = 'suspended') {
         }
 
         createBufferSource() {
-            const context = this;
             return {
                 buffer: null,
                 onended: null,
@@ -83,9 +82,9 @@ function setup(initialState = 'suspended') {
                  * @param {number} _when
                  * @param {number} offset
                  */
-                start(_when, offset) {
+                start: (_when, offset) => {
                     if (stats.failStart) { throw new Error('Start failed'); }
-                    stats.starts.push({context, offset});
+                    stats.starts.push({context: this, offset});
                 },
                 stop() { ++stats.stops; },
                 disconnect() { ++stats.sourceDisconnects; },

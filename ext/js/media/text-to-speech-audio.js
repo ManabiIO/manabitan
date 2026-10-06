@@ -110,7 +110,8 @@ export class TextToSpeechAudio {
         this._utterance = null;
         // Native cancel() affects all wrappers, and some engines omit the
         // cancellation event for queued speech. Release every affected start.
-        for (const cleanup of [...pendingSpeechStarts]) { cleanup(); }
+        const pendingStarts = [...pendingSpeechStarts];
+        for (const cleanup of pendingStarts) { cleanup(); }
         try {
             speechSynthesis.cancel();
         } catch (e) {

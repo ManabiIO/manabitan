@@ -99,7 +99,9 @@ function setup() {
             this.currentTime = 0;
             this.volume = 1;
         }
+
         async play() { ++stats.remoteStarts; }
+
         pause() {}
     });
     const payload = {data: 'AA==', contentType: 'audio/wav'};
@@ -174,7 +176,11 @@ for (const phase of ['fetch', 'decode']) {
         const fetch = deferred();
         /** @type {ReturnType<typeof deferred<{duration: number}>>} */
         const decode = deferred();
-        if (phase === 'fetch') { api.fetchLocalAudioData = () => fetch.promise; } else { stats.decode = () => decode.promise; }
+        if (phase === 'fetch') {
+            api.fetchLocalAudioData = () => fetch.promise;
+        } else {
+            stats.decode = () => decode.promise;
+        }
         let failure = /** @type {unknown} */ (null);
         const first = system.createAudio('http://localhost/a.mp3', 'custom').then(() => {}, (error) => { failure = error; });
         await flush();
@@ -182,7 +188,11 @@ for (const phase of ['fetch', 'decode']) {
         await flush();
         const failureAtDeadline = failure;
         const lateError = new Error(`Late ${phase} failure`);
-        if (phase === 'fetch') { fetch.reject(lateError); } else { decode.reject(lateError); }
+        if (phase === 'fetch') {
+            fetch.reject(lateError);
+        } else {
+            decode.reject(lateError);
+        }
         await first;
         expect(failureAtDeadline instanceof Error).toBe(true);
         expect(failure === lateError).toBe(false);
@@ -219,7 +229,11 @@ for (const phase of ['fetch', 'decode']) {
     test(`current ${phase} failures retain their original error and release the timer`, async () => {
         const {system, api, stats, timers} = setup();
         const expectedError = new Error(`${phase} failed`);
-        if (phase === 'fetch') { api.fetchLocalAudioData = async () => { throw expectedError; }; } else { stats.decode = async () => { throw expectedError; }; }
+        if (phase === 'fetch') {
+            api.fetchLocalAudioData = async () => { throw expectedError; };
+        } else {
+            stats.decode = async () => { throw expectedError; };
+        }
         const error = await system.createAudio('http://localhost/a.mp3', 'custom').then(() => null, (reason) => reason);
         expect(error).toBe(expectedError);
         expect(timers.size).toBe(0);
@@ -269,7 +283,11 @@ test('local timeout permits real display source fallback and the next click retr
     const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
         general: {language: 'ja'},
         audio: {
-            enabled: true, autoPlay: false, fallbackSoundType: 'none', volume: 70, enableDefaultAudioSources: false,
+            enabled: true,
+            autoPlay: false,
+            fallbackSoundType: 'none',
+            volume: 70,
+            enableDefaultAudioSources: false,
             sources: ['http://localhost/a.mp3', 'https://audio.example/a.mp3'].map((url) => ({type: 'custom', url, voice: ''})),
         },
     }));

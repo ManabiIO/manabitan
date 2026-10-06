@@ -228,8 +228,11 @@ for (const action of ['hide', 'content']) {
         expect((await request).valid).toBe(true);
         const active = stats.active;
         const cancels = stats.cancels;
-        if (action === 'hide') { player._onFrameVisibilityChange({value: false}); }
-        else { player._onContentClear(); }
+        if (action === 'hide') {
+            player._onFrameVisibilityChange({value: false});
+        } else {
+            player._onContentClear();
+        }
         expect(stats.active).toBe(active);
         expect(stats.cancels).toBe(cancels);
         expect(overrides.size).toBe(0);
