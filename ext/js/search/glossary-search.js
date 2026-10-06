@@ -168,7 +168,7 @@ export function createGlossarySearchQuery(query) {
  * @returns {string|null}
  */
 export function glossaryPrefixUpperBound(prefix) {
-    const points = Array.from(prefix);
+    const points = [...prefix];
     for (let i = points.length - 1; i >= 0; --i) {
         const value = points[i].codePointAt(0);
         if (typeof value !== 'number' || value >= 0x10ffff) { continue; }
@@ -189,7 +189,11 @@ export function scoreGlossarySearchMatch(glossary, query) {
         .replace(/\s+/gu, ' ')
         .trim();
     if (plain.length === 0) { return null; }
-    const phraseIndex = query.phrase.length > 0 ? plain.indexOf(query.phrase) : -1;
+    // A phrase match requires complete tokens at both edges. A live prefix
+    // inside a longer final token belongs to the prefix tier.
+    const phraseIndex = query.phrase.length > 0 ?
+        ` ${plain} `.indexOf(` ${query.phrase} `) :
+        -1;
     const tokens = glossarySearchTokensFromText(plain);
     const tokenSet = new Set(tokens);
     const required = query.tokens.slice(0, -1);

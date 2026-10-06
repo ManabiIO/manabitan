@@ -2827,6 +2827,9 @@ export class TermRecordOpfsStore {
         for (const id of ids) {
             const record = this._recordsById.get(id);
             if (typeof record !== 'undefined') {
+                // ID-only consumers (including glossary search) have not run an
+                // expression-index lookup that would decode these lazy bytes.
+                this._ensureDecodedRecordStrings(record);
                 result.set(id, record);
             }
         }

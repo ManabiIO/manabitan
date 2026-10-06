@@ -95,7 +95,10 @@ export class ManabiTanWebClient {
         this.pending.clear();
     }
 
-    /** The worker dispatches FIFO. Waiting requests do not own execution time. */
+    /**
+     * The worker dispatches FIFO. Waiting requests do not own execution time.
+     * @param refresh Whether progress restarts the active request deadline.
+     */
     private updateWatchdog(refresh = false) {
         const next = this.pending.entries().next().value;
         const id = next?.[0] ?? null;

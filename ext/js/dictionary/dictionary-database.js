@@ -3393,7 +3393,20 @@ null;
     async _ensureGlossarySearchIndexForDictionary(dictionaryName, onProgress = () => {}, isCancelled = () => false) {
         const existing = this._glossarySearchBuildPromiseByDictionary.get(dictionaryName);
         if (typeof existing !== 'undefined') {
-            await existing;
+            const generation = this._directTermIndexGeneration;
+            try {
+                await existing;
+            } catch (error) {
+                // Cancellation belongs to the initiating search. A live waiter
+                // may restart its build, but never after dictionary replacement.
+                if (!(error instanceof DOMException) || error.name !== 'AbortError' || isCancelled()) {
+                    throw error;
+                }
+                this._assertTermLookupGeneration(generation);
+                return this._ensureGlossarySearchIndexForDictionary(dictionaryName, onProgress, isCancelled);
+            }
+            this._assertTermLookupGeneration(generation);
+            if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
             return;
         }
         const build = (async () => {
@@ -3437,7 +3450,9 @@ null;
                 try {
                     for (const id of batch) {
                         const row = rows.get(id);
-                        if (typeof row === 'undefined' || row.dictionary !== dictionaryName) { continue; }
+                        if (typeof row === 'undefined' || row.dictionary !== dictionaryName) {
+                            throw new Error(`Cannot build glossary search index for ${dictionaryName}: missing authoritative term ${id}`);
+                        }
                         insertTerm.reset(true);
                         insertTerm.bind({
                             $dictionary: dictionaryName,

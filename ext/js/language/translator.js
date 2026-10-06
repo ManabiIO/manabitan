@@ -172,11 +172,9 @@ export class Translator {
             }
             return rank;
         };
-        result.sort((a, b) =>
-            reverseRank(a) - reverseRank(b) ||
-            (standardOrder.get(a) ?? Number.MAX_SAFE_INTEGER) -
-                (standardOrder.get(b) ?? Number.MAX_SAFE_INTEGER)
-        );
+        result.sort((a, b) => reverseRank(a) - reverseRank(b) ||
+        (standardOrder.get(a) ?? Number.MAX_SAFE_INTEGER) -
+        (standardOrder.get(b) ?? Number.MAX_SAFE_INTEGER));
         safePerformance.mark('translator:findTermsByGlossary:end');
         safePerformance.measure(
             'translator:findTermsByGlossary',

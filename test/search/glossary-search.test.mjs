@@ -93,3 +93,16 @@ test('match scoring prefers phrases then exact final tokens then live prefixes',
 
     assert.equal(scoreGlossarySearchMatch(['unrelated dog'], exact), null);
 });
+
+
+test('phrase ranking respects token edges in single and multiword searches', () => {
+    const single = createGlossarySearchQuery('cat');
+    assert.ok(single);
+    assert.equal(scoreGlossarySearchMatch(['catlike'], single)?.tier, 2);
+    assert.equal(scoreGlossarySearchMatch(['copycat'], single), null);
+    assert.deepEqual(scoreGlossarySearchMatch(['cat'], single), {tier: 0, phraseIndex: 0});
+    const phrase = createGlossarySearchQuery('house cat');
+    assert.ok(phrase);
+    assert.equal(scoreGlossarySearchMatch(['house catlike'], phrase)?.tier, 2);
+    assert.equal(scoreGlossarySearchMatch(['household cat'], phrase), null);
+});
