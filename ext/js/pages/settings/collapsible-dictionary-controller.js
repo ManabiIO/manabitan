@@ -206,7 +206,9 @@ export class CollapsibleDictionaryController {
      * @param {import('settings').DictionaryDefinitionsCollapsible} value
      */
     async _setDefinitionsCollapsibleAll(value) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         const {dictionaries} = options;
