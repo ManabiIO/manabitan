@@ -197,6 +197,35 @@ describe('Reader integration scanner lifecycle regressions', () => {
         }
     });
 
+    test('external lookup releases pointer admission without publishing its stale result', async () => {
+        const old = deferredLookup();
+        const current = deferredLookup();
+        const lookup = vi.fn().mockImplementationOnce(() => old.promise)
+            .mockImplementationOnce(() => current.promise);
+        const scanner = createScanner(lookup, [createFakeTextSource('猫'), createFakeTextSource('学校')]);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        try {
+            const active = searchAt(scanner, 1, 1, createInputInfo());
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
+            scanner.beginExternalLookup();
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(false);
+            const newer = searchAt(scanner, 2, 2, createInputInfo());
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledTimes(2); });
+            old.resolve(hit());
+            await active;
+            expect(success).not.toHaveBeenCalled();
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(true);
+            current.resolve(hit());
+            await newer;
+            expect(success).toHaveBeenCalledOnce();
+        } finally {
+            scanner.setEnabled(false);
+            old.resolve(hit());
+            current.resolve(hit());
+        }
+    });
+
     test('several queued pointer moves coalesce to the newest eligible position', async () => {
         const first = deferredLookup();
         const lookup = vi.fn().mockImplementationOnce(() => first.promise).mockResolvedValue(hit());

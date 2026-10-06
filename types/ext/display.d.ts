@@ -183,6 +183,13 @@ export type DirectApiSurface = {
     displaySetContent: {
         params: {
             details: ContentDetails;
+            publication?: import('./popup').PublicationToken;
+        };
+        return: void;
+    };
+    displayCancelPublication: {
+        params: {
+            publication: import('./popup').PublicationToken;
         };
         return: void;
     };

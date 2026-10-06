@@ -24,6 +24,15 @@ import type {EventNames, EventArgument as BaseEventArgument} from './core';
 
 export type PopupAny = Popup | PopupWindow | PopupProxy;
 
+/** A local-only guard; subscribe must synchronously notify request invalidation. */
+export type PublicationGuard = {
+    isCurrent: () => boolean;
+    subscribe?: (cancel: () => void) => (() => void);
+};
+
+/** Structured-clone-safe ordering for one proxy instance. */
+export type PublicationToken = {source: string, generation: number};
+
 /**
  * Information about how popup content should be shown, specifically related to the outer popup frame.
  */

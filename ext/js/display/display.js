@@ -84,6 +84,10 @@ export class Display extends EventDispatcher {
         this._eventListeners = new EventListenerCollection();
         /** @type {?import('core').TokenObject} */
         this._setContentToken = null;
+        /** @type {{publication: import('popup').PublicationToken, token: import('core').TokenObject|null}|null} */
+        this._activePublication = null;
+        /** @type {Map<string, {generation: number, cancelled: boolean}>} */
+        this._publicationGenerations = new Map();
         /** @type {DisplayContentManager} */
         this._contentManager = new DisplayContentManager(this);
         /** @type {DictionaryCssMediaResolver} */
@@ -235,6 +239,7 @@ export class Display extends EventDispatcher {
         this.registerDirectMessageHandlers([
             ['displaySetOptionsContext', this._onMessageSetOptionsContext.bind(this)],
             ['displaySetContent',        this._onMessageSetContent.bind(this)],
+            ['displayCancelPublication', this._onMessageCancelPublication.bind(this)],
             ['displaySetCustomCss',      this._onMessageSetCustomCss.bind(this)],
             ['displaySetContentScale',   this._onMessageSetContentScale.bind(this)],
             ['displayConfigure',         this._onMessageConfigure.bind(this)],
@@ -524,9 +529,10 @@ export class Display extends EventDispatcher {
     /**
      * Updates the content of the display.
      * @param {import('display').ContentDetails} details Information about the content to show.
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>} Whether the state-change handler completed before the timeout.
      */
     setContent(details) {
+        this._activePublication = null;
         const stateChangeCompletePromise = this._waitForStateChangeComplete(5000);
         const {focus, params, state, content} = details;
         const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
@@ -564,6 +570,7 @@ export class Display extends EventDispatcher {
 
     /** Invalidate stale results immediately when the search draft changes. */
     invalidateSearchDraft() {
+        this._activePublication = null;
         this._setContentToken = {};
         this._closePopups();
         this._closeAllPopupMenus();
@@ -797,9 +804,47 @@ export class Display extends EventDispatcher {
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetContent'>} */
-    async _onMessageSetContent({details}) {
+    async _onMessageSetContent({details, publication}) {
+        if (typeof publication !== 'undefined') {
+            if (!this._isPublicationValid(publication)) { return; }
+            const state = this._publicationGenerations.get(publication.source);
+            if (state && (state.generation > publication.generation || (state.generation === publication.generation && state.cancelled))) { return; }
+            this._publicationGenerations.set(publication.source, {generation: publication.generation, cancelled: false});
+        }
         safePerformance.mark('invokeDisplaySetContent:end');
-        await this.setContent(details);
+        const completion = this.setContent(details);
+        let activePublication = null;
+        if (typeof publication !== 'undefined') {
+            activePublication = {publication, token: this._setContentToken};
+            this._activePublication = activePublication;
+        }
+        const completed = await completion;
+        if (completed === false && activePublication !== null && this._activePublication === activePublication && activePublication.token === this._setContentToken) {
+            void this._onMessageCancelPublication({publication: activePublication.publication});
+            const error = new Error('Popup content rendering timed out');
+            error.name = 'PopupContentTimeoutError';
+            throw error;
+        }
+    }
+
+    /** @type {import('display').DirectApiHandler<'displayCancelPublication'>} */
+    _onMessageCancelPublication({publication}) {
+        if (!this._isPublicationValid(publication)) { return; }
+        const state = this._publicationGenerations.get(publication.source);
+        if (state && state.generation > publication.generation) { return; }
+        this._publicationGenerations.set(publication.source, {generation: publication.generation, cancelled: true});
+        const active = this._activePublication;
+        if (active === null || active.publication.source !== publication.source || active.publication.generation !== publication.generation || active.token !== this._setContentToken) { return; }
+        this.invalidateSearchDraft();
+    }
+
+    /**
+     * @param {import('popup').PublicationToken} publication
+     * @returns {boolean}
+     */
+    _isPublicationValid(publication) {
+        return publication !== null && typeof publication === 'object' && typeof publication.source === 'string' &&
+        publication.source.length > 0 && publication.source.length <= 64 && Number.isSafeInteger(publication.generation) && publication.generation > 0;
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetCustomCss'>} */
@@ -852,6 +897,8 @@ export class Display extends EventDispatcher {
     async _onStateChanged() {
         if (this._historyChangeIgnore) { return; }
 
+        // Claim this render's waiters before another history change can start.
+        const stateChangeCompleteResolvers = this._stateChangeCompleteResolvers.splice(0);
         safePerformance.mark('display:_onStateChanged:start');
 
         /** @type {?import('core').TokenObject} */
@@ -910,7 +957,7 @@ export class Display extends EventDispatcher {
         }
         safePerformance.mark('display:_onStateChanged:end');
         safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
-        this._resolveStateChangeCompleteWaiters();
+        this._resolveStateChangeCompleteWaiters(stateChangeCompleteResolvers);
     }
 
     /**
@@ -2655,17 +2702,17 @@ null;
 
     /**
      * @param {number} timeoutMs
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     _waitForStateChangeComplete(timeoutMs) {
         /** @type {import('core').Timeout|null} */
         let timeout = null;
-        /** @type {(value?: void) => void} */
+        /** @type {(value: boolean) => void} */
         let resolvePromise;
         const promise = new Promise((resolve) => {
             resolvePromise = resolve;
         });
-        const finish = () => {
+        const finish = (completed = true) => {
             const index = this._stateChangeCompleteResolvers.indexOf(finish);
             if (index >= 0) {
                 this._stateChangeCompleteResolvers.splice(index, 1);
@@ -2674,16 +2721,17 @@ null;
                 clearTimeout(timeout);
                 timeout = null;
             }
-            resolvePromise();
+            resolvePromise(completed);
         };
         this._stateChangeCompleteResolvers.push(finish);
-        timeout = setTimeout(finish, timeoutMs);
+        timeout = setTimeout(() => finish(false), timeoutMs);
         return promise;
     }
 
-    /** */
-    _resolveStateChangeCompleteWaiters() {
-        const resolvers = this._stateChangeCompleteResolvers.splice(0);
+    /**
+     * @param {(() => void)[]} resolvers
+     */
+    _resolveStateChangeCompleteWaiters(resolvers) {
         for (const resolve of resolvers) {
             resolve();
         }
