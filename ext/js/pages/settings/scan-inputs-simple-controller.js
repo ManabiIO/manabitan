@@ -170,7 +170,9 @@ export class ScanInputsSimpleController {
      */
     async _setMiddleMouseSuppported(value) {
         // Find target index
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {scanning: {inputs}} = options;
         const index = this._getIndexOfMiddleMouseButtonScanInput(inputs);
 
@@ -207,7 +209,9 @@ export class ScanInputsSimpleController {
         const value2 = value.join(', ');
 
         // Find target index
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {scanning: {inputs}} = options;
         const index = this._getIndexOfMainScanInput(inputs);
 
