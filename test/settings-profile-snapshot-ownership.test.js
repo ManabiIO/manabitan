@@ -10,6 +10,7 @@ import {CollapsibleDictionaryController} from '../ext/js/pages/settings/collapsi
 import {KeyboardShortcutController} from '../ext/js/pages/settings/keyboard-shortcuts-controller.js';
 import {PopupFrequencyBlurController} from '../ext/js/pages/settings/popup-frequency-blur-controller.js';
 import {ScanInputsController} from '../ext/js/pages/settings/scan-inputs-controller.js';
+import {ScanInputsSimpleController} from '../ext/js/pages/settings/scan-inputs-simple-controller.js';
 import {SecondarySearchDictionaryController} from '../ext/js/pages/settings/secondary-search-dictionary-controller.js';
 import {SentenceTerminationCharactersController} from '../ext/js/pages/settings/sentence-termination-characters-controller.js';
 import {SettingsController} from '../ext/js/pages/settings/settings-controller.js';
@@ -257,3 +258,136 @@ test('note generation aborts if the selected profile changes during dictionary l
     await expect(generating).rejects.toThrow('Profile changed while generating Anki note');
     expect(getOptions).not.toHaveBeenCalled();
 });
+
+
+/**
+ * @param {object} prototype
+ * @param {string} method
+ * @param {unknown[]} args
+ * @param {import('settings').ProfileOptions} options
+ */
+async function expectProfileWriteDropsAfterSwitch(prototype, method, args, options) {
+    let profileIndex = 0;
+    /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
+    const pending = deferred();
+    const modifyProfileSettings = vi.fn().mockResolvedValue([]);
+    const settingsController = {
+        getOptionsContext: () => ({index: profileIndex}),
+        getOptions: () => pending.promise,
+        modifyProfileSettings,
+        trigger: vi.fn(),
+    };
+    const controller = Object.assign(Object.create(prototype), {
+        _settingsController: settingsController,
+    });
+
+    const operation = Reflect.apply(Reflect.get(prototype, method), controller, args);
+    await flush();
+    profileIndex = 1;
+    pending.resolve(options);
+    await operation;
+
+    expect(modifyProfileSettings).not.toHaveBeenCalled();
+}
+
+/**
+ * @param {unknown} value
+ * @returns {import('settings').ProfileOptions}
+ */
+function partialProfileOptions(value) {
+    return /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ (value));
+}
+
+/** @type {[string, object, string, unknown[], import('settings').ProfileOptions][]} */
+const staleProfileWriteCases = [
+    [
+        'Anki card-format add',
+        AnkiController.prototype,
+        '_addNewFormat',
+        [],
+        partialProfileOptions({anki: {cardFormats: []}}),
+    ],
+    [
+        'dictionary reorder',
+        DictionaryController.prototype,
+        'moveDictionaryOptions',
+        [0, 1],
+        partialProfileOptions({dictionaries: [{name: 'a'}, {name: 'b'}]}),
+    ],
+    [
+        'dictionary enable-all',
+        DictionaryController.prototype,
+        '_setAllDictionariesEnabled',
+        [true],
+        partialProfileOptions({dictionaries: [{enabled: false}]}),
+    ],
+    [
+        'keyboard shortcut add',
+        KeyboardShortcutController.prototype,
+        'addEntry',
+        [{}],
+        partialProfileOptions({inputs: {hotkeys: []}}),
+    ],
+    [
+        'keyboard shortcut delete',
+        KeyboardShortcutController.prototype,
+        'deleteEntry',
+        [0],
+        partialProfileOptions({inputs: {hotkeys: [{}]}}),
+    ],
+    [
+        'collapsible dictionary set-all',
+        CollapsibleDictionaryController.prototype,
+        '_setDefinitionsCollapsibleAll',
+        ['collapsed'],
+        partialProfileOptions({dictionaries: [{definitionsCollapsible: 'expanded'}]}),
+    ],
+    [
+        'simple scan middle-mouse change',
+        ScanInputsSimpleController.prototype,
+        '_setMiddleMouseSuppported',
+        [true],
+        partialProfileOptions({scanning: {inputs: []}}),
+    ],
+    [
+        'simple scan main-input change',
+        ScanInputsSimpleController.prototype,
+        '_setMainScanInputs',
+        [['shift']],
+        partialProfileOptions({scanning: {inputs: []}}),
+    ],
+    [
+        'sentence terminator add',
+        SentenceTerminationCharactersController.prototype,
+        'addEntry',
+        [{}],
+        partialProfileOptions({sentenceParsing: {terminationCharacters: []}}),
+    ],
+    [
+        'sentence terminator delete',
+        SentenceTerminationCharactersController.prototype,
+        'deleteEntry',
+        [0],
+        partialProfileOptions({sentenceParsing: {terminationCharacters: [{}]}}),
+    ],
+    [
+        'translation replacement add',
+        TranslationTextReplacementsController.prototype,
+        'addGroup',
+        [],
+        partialProfileOptions({translation: {textReplacements: {groups: [[]]}}}),
+    ],
+    [
+        'translation replacement delete',
+        TranslationTextReplacementsController.prototype,
+        'deleteGroup',
+        [0],
+        partialProfileOptions({translation: {textReplacements: {groups: [[{}]]}}}),
+    ],
+];
+
+for (const [name, prototype, method, args, options] of staleProfileWriteCases) {
+    test(name + ' cannot write an old-profile decision into the newly selected profile', async () => {
+        await expectProfileWriteDropsAfterSwitch(prototype, method, args, options);
+    });
+}
