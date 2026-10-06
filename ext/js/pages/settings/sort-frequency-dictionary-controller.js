@@ -166,8 +166,14 @@ export class SortFrequencyDictionaryController {
      * @param {string} dictionary
      */
     async _autoUpdateOrder(dictionary) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const order = await this._getFrequencyOrder(dictionary);
-        if (order === null) { return; }
+        if (
+            order === null ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            return;
+        }
         const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
         /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = order;
         try {
