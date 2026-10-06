@@ -96,6 +96,40 @@ test('SettingsController never emits an old-profile options snapshot after the p
     expect(trigger).not.toHaveBeenCalled();
 });
 
+
+
+test('SettingsController ignores a stale old-profile refresh failure after the profile changes', async () => {
+    const controller = /** @type {SettingsController} */ (Object.create(SettingsController.prototype));
+    Reflect.set(controller, '_profileIndex', 1);
+    /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
+    const pending = deferred();
+    Reflect.set(controller, 'getOptions', () => pending.promise);
+    const setProfileIndex = vi.fn();
+    Reflect.set(controller, '_setProfileIndex', setProfileIndex);
+
+    const refresh = controller._onOptionsUpdatedInternal(true);
+    await flush();
+    Reflect.set(controller, '_profileIndex', 2);
+    pending.reject(new Error('old profile unavailable'));
+    await refresh;
+
+    expect(setProfileIndex).not.toHaveBeenCalled();
+    expect(Reflect.get(controller, '_profileIndex')).toBe(2);
+});
+
+test('SettingsController still falls back to profile zero when the current profile refresh fails', async () => {
+    const controller = /** @type {SettingsController} */ (Object.create(SettingsController.prototype));
+    Reflect.set(controller, '_profileIndex', 2);
+    Reflect.set(controller, 'getOptions', async () => { throw new Error('current profile unavailable'); });
+    const setProfileIndex = vi.fn();
+    Reflect.set(controller, '_setProfileIndex', setProfileIndex);
+
+    await controller._onOptionsUpdatedInternal(true);
+
+    expect(setProfileIndex).toHaveBeenCalledOnce();
+    expect(setProfileIndex).toHaveBeenCalledWith(0, false);
+});
+
 test('SettingsController still emits a stable current-profile options snapshot', async () => {
     const controller = /** @type {SettingsController} */ (Object.create(SettingsController.prototype));
     Reflect.set(controller, '_profileIndex', 2);
