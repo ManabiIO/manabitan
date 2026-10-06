@@ -3498,6 +3498,7 @@ describe('TermRecordOpfsStore', () => {
         const writerDirectory = createFakeDirectoryHandle(fileBytesByName);
         const writerStore = new TermRecordOpfsStore();
         Reflect.set(writerStore, '_recordsDirectoryHandle', writerDirectory);
+        await writerStore.beginImportSession();
         await writerStore.appendBatchFromArtifactChunkResolvedContent(
             {
                 dictionary: dictionaryName,
@@ -3528,7 +3529,7 @@ describe('TermRecordOpfsStore', () => {
             [8, 9],
             'raw',
         );
-        await writerStore._closeAllWritables();
+        await writerStore.endImportSession();
 
         const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
         if (typeof indexFileName !== 'string') { throw new Error('Expected lookup index'); }
