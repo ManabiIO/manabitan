@@ -91,6 +91,9 @@ export class TextToSpeechAudio {
                 utterance.addEventListener('end', finish);
                 utterance.addEventListener('error', finish);
                 try {
+                    // cancel() clears the queue but preserves the paused state.
+                    // Resume before enqueueing so a failure cannot strand speech.
+                    if (speechSynthesis.paused) { speechSynthesis.resume(); }
                     speechSynthesis.speak(utterance);
                 } catch (e) {
                     finish();

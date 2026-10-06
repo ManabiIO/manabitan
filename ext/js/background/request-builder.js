@@ -161,6 +161,8 @@ export class RequestBuilder {
                 const {done, value} = await reader.read();
                 checkAborted();
                 if (done) { break; }
+                // Empty chunks do not advance an idle download or need storage.
+                if (value.length === 0) { continue; }
                 if (onProgress !== null) {
                     onProgress(false);
                 }

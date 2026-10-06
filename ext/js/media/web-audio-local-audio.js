@@ -99,7 +99,8 @@ export class WebAudioLocalAudio {
             // Cached decoded buffers outlive a closed shared context and can
             // be reused by its replacement without fetching or decoding again.
             this._audioContext = getSharedAudioContext();
-            if (this._audioContext.state === 'suspended') {
+            // External interruptions also require resuming before playback.
+            if (this._audioContext.state !== 'running') {
                 /** @type {Promise<void>} */
                 const cancelled = new Promise((resolve) => { this._playCleanup = resolve; });
                 // Retiring a token prevents stale playback, but by itself does
