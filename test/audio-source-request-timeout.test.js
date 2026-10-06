@@ -352,8 +352,12 @@ test('Anki download proceeds to the next metadata provider after a discovery tim
         if (url === secondSource.url) { return Response.json(payload); }
         return new Response(new Uint8Array([1, 2, 3]), {headers: {'Content-Type': 'audio/mpeg'}});
     });
-    const result = observe(downloader.downloadTermAudio([firstSource, secondSource], null, '漢字', 'かんじ', null, language, false));
+    const download = downloader.downloadTermAudio([firstSource, secondSource], null, '漢字', 'かんじ', null, language, false);
+    const result = observe(download);
     await advance(15000);
+    // Node's real Response body may settle on an event-loop turn, after the
+    // synthetic deadline's microtasks. Await the actual fallback completion.
+    await download;
     expect(result.status).toBe('fulfilled');
     expect(result.value).toEqual({data: 'AQID', contentType: 'audio/mpeg'});
     expect(requests).toEqual([firstSource.url, secondSource.url, recording.url]);

@@ -19,6 +19,7 @@
 import {EventDispatcher} from '../../core/event-dispatcher.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {log} from '../../core/log.js';
+import {ExtensionError} from '../../core/extension-error.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {
     getDataTransmissionConsentStateFromOptionsFull,
@@ -26,6 +27,45 @@ import {
     normalizeDataTransmissionConsentState,
 } from '../../data/data-transmission-consent-util.js';
 import {AudioSystem} from '../../media/audio-system.js';
+
+/**
+ * The settings API resolves with per-target errors as well as rejecting transport
+ * failures. Both must reach the caller's rollback/reconciliation path.
+ * @param {Promise<import('settings-controller').ModifyResult[]>} promise
+ * @returns {Promise<void>}
+ * @throws {Error}
+ */
+async function requireSuccessfulSettingsChange(promise) {
+    const results = await promise;
+    for (const {error} of results) {
+        if (typeof error !== 'undefined') { throw ExtensionError.deserialize(error); }
+    }
+}
+
+/**
+ * Keep optimistic edits ordered and roll a failed latest edit back to the last
+ * acknowledged value, not to another edit which may also have failed.
+ * @template T
+ * @param {{savedValue: T, promise: ?Promise<void>}} state
+ * @param {T} value
+ * @param {(value: T) => void} apply
+ * @param {() => Promise<void>} save
+ * @returns {Promise<void>}
+ * @throws {unknown}
+ */
+async function changeAudioSetting(state, value, apply, save) {
+    const promise = save().then(() => { state.savedValue = value; });
+    state.promise = promise;
+    apply(value);
+    try {
+        await promise;
+    } catch (error) {
+        if (state.promise === promise) { apply(state.savedValue); }
+        throw error;
+    } finally {
+        if (state.promise === promise) { state.promise = null; }
+    }
+}
 
 /**
  * @augments EventDispatcher<import('audio-controller').Events>
@@ -50,7 +90,9 @@ export class AudioController extends EventDispatcher {
         /** @type {AudioSourceEntry[]} */
         this._audioSourceEntries = [];
         /** @type {import('core').TokenObject} */
-        this._audioSourceStateToken = {};
+        this._audioSourcesToken = {};
+        /** @type {?import('settings').OptionsContext} */
+        this._audioSourcesOptionsContext = null;
         /** @type {Promise<void>} */
         this._audioSourceMutationPromise = Promise.resolve();
         /** @type {HTMLInputElement} */
@@ -108,12 +150,9 @@ export class AudioController extends EventDispatcher {
         testButton.addEventListener('click', this._onTestTextToSpeech.bind(this), false);
 
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
+        this._settingsController.on('optionsContextChanged', this._onOptionsContextChanged.bind(this));
 
-        const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
-            this._onOptionsChanged({options, optionsContext});
-        }
+        await this._refreshAudioSources();
         void this._refreshDataTransmissionConsentState();
     }
 
@@ -121,29 +160,26 @@ export class AudioController extends EventDispatcher {
      * @param {AudioSourceEntry} entry
      */
     async removeSource(entry) {
-        await this._queueAudioSourceMutation(async () => {
-            const index = this._audioSourceEntries.indexOf(entry);
-            if (index < 0) { return; }
-            const stateToken = this._audioSourceStateToken;
+        if (!this.isSourceCurrent(entry)) { return; }
+        this.invalidateSourceUpdates();
+        this._closeSourceMoveModal();
+        await this.queueSourceMutation(async () => {
+            if (!this.isSourceCurrent(entry)) { return; }
+            const {index} = entry;
             this._audioSourceEntries.splice(index, 1);
             entry.cleanup();
-            for (let i = index, ii = this._audioSourceEntries.length; i < ii; ++i) {
-                this._audioSourceEntries[i].index = i;
-            }
+            this._updateSourceOrder();
             try {
-                await this._settingsController.modifyProfileSettings([{
+                await requireSuccessfulSettingsChange(this._settingsController.modifyProfileSettings([{
                     action: 'splice',
                     path: 'audio.sources',
                     start: index,
                     deleteCount: 1,
                     items: [],
-                }]);
+                }]));
             } catch (error) {
-                await this._refreshAudioSources();
+                await this._refreshAudioSources(true);
                 throw error;
-            }
-            if (this._audioSourceStateToken !== stateToken) {
-                await this._refreshAudioSources();
             }
         });
     }
@@ -153,38 +189,103 @@ export class AudioController extends EventDispatcher {
      * @param {number} targetIndex
      */
     async moveAudioSourceOptions(currentIndex, targetIndex) {
-        const entry = this._audioSourceEntries[currentIndex];
-        if (typeof entry === 'undefined') { return; }
-        await this._queueAudioSourceMutation(async () => {
-            await this._moveAudioSourceEntry(entry, targetIndex);
-        });
+        if (!Number.isInteger(currentIndex) || !Number.isInteger(targetIndex)) { return; }
+        const source = this._audioSourceEntries[currentIndex];
+        const target = this._audioSourceEntries[targetIndex];
+        if (typeof source === 'undefined' || typeof target === 'undefined' || source === target) { return; }
+        const token = this._audioSourcesToken;
+        const optionsContext = this._settingsController.getOptionsContext();
+        if (!this.isSourceCurrent(source)) { return; }
+        await this.queueSourceMutation(() => this._moveSource(source, target, token, optionsContext));
     }
 
     /**
-     * @param {AudioSourceEntry} entry
+     * @param {AudioSourceEntry} source
      * @param {number} offset
      */
-    async moveAudioSource(entry, offset) {
-        await this._queueAudioSourceMutation(async () => {
-            const currentIndex = this._audioSourceEntries.indexOf(entry);
-            if (currentIndex < 0) { return; }
-            await this._moveAudioSourceEntry(entry, currentIndex + offset);
+    async moveAudioSource(source, offset) {
+        if (!this.isSourceCurrent(source) || !Number.isInteger(offset)) { return; }
+        await this.queueSourceMutation(async () => {
+            if (!this.isSourceCurrent(source)) { return; }
+            const target = this._audioSourceEntries[source.index + offset];
+            if (typeof target === 'undefined' || target === source) { return; }
+            await this._moveSource(source, target, this._audioSourcesToken, this._settingsController.getOptionsContext());
         });
     }
 
     /**
-     * @param {AudioSourceEntry} entry
-     * @param {() => Promise<void>} callback
+     * @param {AudioSourceEntry} source
+     * @param {AudioSourceEntry} target
+     * @param {import('core').TokenObject} token
+     * @param {import('settings').OptionsContext} optionsContext
      */
-    async mutateAudioSourceEntry(entry, callback) {
-        await this._queueAudioSourceMutation(async () => {
-            if (!this._audioSourceEntries.includes(entry)) { return; }
-            const stateToken = this._audioSourceStateToken;
+    async _moveSource(source, target, token, optionsContext) {
+        if (!this._isAudioSourcesUpdateCurrent(token, optionsContext) || !this.isSourceCurrent(source) || !this.isSourceCurrent(target)) { return; }
+        // Earlier field writes settle before this snapshot is read. Later
+        // edits retire an unsent snapshot, or follow the optimistically
+        // moved row after this write finishes. Never send indices in parallel.
+        await this._settingsController.getOptions();
+        if (!this._isAudioSourcesUpdateCurrent(token, optionsContext)) { return; }
+        const audio = {sources: this._audioSourceEntries.map((entry) => entry.getSourceOptions())};
+        const sourceIndex = source.index;
+        const targetIndex2 = target.index;
+        if (sourceIndex >= audio.sources.length || targetIndex2 >= audio.sources.length) { return; }
+        const item = audio.sources.splice(sourceIndex, 1)[0];
+        audio.sources.splice(targetIndex2, 0, item);
+        this._audioSourceEntries.splice(sourceIndex, 1);
+        this._audioSourceEntries.splice(targetIndex2, 0, source);
+        this.invalidateSourceUpdates();
+        this._closeSourceMoveModal();
+        this._updateSourceOrder();
+        try {
+            await requireSuccessfulSettingsChange(this._settingsController.modifyProfileSettings([{
+                action: 'set',
+                path: 'audio.sources',
+                value: audio.sources,
+            }]));
+        } catch (error) {
+            await this._refreshAudioSources(true);
+            throw error;
+        }
+    }
+
+    /**
+     * Serialize field and structural writes together: a numeric index is only
+     * meaningful after the preceding list mutation succeeds or is reconciled.
+     * @param {() => Promise<void>} callback
+     * @returns {Promise<void>}
+     */
+    queueSourceMutation(callback) {
+        const promise = this._audioSourceMutationPromise.then(async () => {
+            const context = this._audioSourcesOptionsContext;
             await callback();
-            if (this._audioSourceStateToken !== stateToken) {
-                await this._refreshAudioSources();
+            // A profile can be revisited before an earlier in-flight save settles.
+            // Its newly loaded rows may predate that save, even though this queue
+            // serialized every write. Reconcile before admitting queued indices.
+            if (
+                context !== null && this._audioSourcesOptionsContext !== context &&
+                context.index === this._settingsController.getOptionsContext().index
+            ) {
+                await this._refreshAudioSources(true);
             }
         });
+        this._audioSourceMutationPromise = promise.catch(() => {});
+        return promise;
+    }
+
+    /**
+     * @param {AudioSourceEntry} entry
+     * @returns {boolean}
+     */
+    isSourceCurrent(entry) {
+        return this._audioSourceEntries[entry.index] === entry &&
+        this._audioSourcesOptionsContext !== null &&
+        this._audioSourcesOptionsContext.index === this._settingsController.getOptionsContext().index;
+    }
+
+    /** */
+    invalidateSourceUpdates() {
+        this._audioSourcesToken = {};
     }
 
     /**
@@ -204,79 +305,13 @@ export class AudioController extends EventDispatcher {
     // Private
 
     /**
-     * @param {() => Promise<void>} callback
-     * @returns {Promise<void>}
-     */
-    _queueAudioSourceMutation(callback) {
-        const operation = this._audioSourceMutationPromise.then(callback, callback);
-        this._audioSourceMutationPromise = operation.then(() => {}, () => {});
-        return operation;
-    }
-
-    /**
-     * @param {AudioSourceEntry} entry
-     * @param {number} targetIndex
-     */
-    async _moveAudioSourceEntry(entry, targetIndex) {
-        let currentIndex = this._audioSourceEntries.indexOf(entry);
-        if (currentIndex < 0 || targetIndex < 0 || targetIndex >= this._audioSourceEntries.length || currentIndex === targetIndex) { return; }
-
-        const optionsContext = this._settingsController.getOptionsContext();
-        const stateToken = this._audioSourceStateToken;
-        // Keep the asynchronous read as a profile-switch checkpoint, but do
-        // not trust its source ordering: option broadcasts can lag a preceding
-        // serialized write even after that write has completed.
-        const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        currentIndex = this._audioSourceEntries.indexOf(entry);
-        if (
-            currentIndex < 0 ||
-            targetIndex >= options.audio.sources.length ||
-            this._audioSourceEntries.length !== options.audio.sources.length ||
-            currentIndex === targetIndex
-        ) {
-            return;
-        }
-        const sources = this._audioSourceEntries.map((item) => item.getSourceOptions());
-        const source = sources.splice(currentIndex, 1)[0];
-        sources.splice(targetIndex, 0, source);
-
-        try {
-            await this._settingsController.modifyProfileSettings([{
-                action: 'set',
-                path: 'audio.sources',
-                value: sources,
-            }]);
-        } catch (error) {
-            await this._refreshAudioSources();
-            throw error;
-        }
-
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        if (this._audioSourceStateToken !== stateToken) {
-            await this._refreshAudioSources();
-            return;
-        }
-        currentIndex = this._audioSourceEntries.indexOf(entry);
-        if (currentIndex < 0) {
-            await this._refreshAudioSources();
-            return;
-        }
-        this._audioSourceEntries.splice(currentIndex, 1);
-        this._audioSourceEntries.splice(targetIndex, 0, entry);
-        for (let i = 0, ii = this._audioSourceEntries.length; i < ii; ++i) {
-            this._audioSourceEntries[i].index = i;
-        }
-        const nextEntry = this._audioSourceEntries[targetIndex + 1];
-        this._audioSourceContainer.insertBefore(entry.node, nextEntry?.node ?? null);
-    }
-
-    /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
     _onOptionsChanged({options, optionsContext}) {
         if (optionsContext.index !== this._settingsController.getOptionsContext().index) { return; }
-        this._audioSourceStateToken = {};
+        this._audioSourcesToken = {};
+        this._audioSourcesOptionsContext = {...optionsContext};
+        this._closeSourceMoveModal();
         const {
             general: {language},
             audio: {sources},
@@ -294,6 +329,23 @@ export class AudioController extends EventDispatcher {
         }
 
         void this._refreshDataTransmissionConsentState();
+    }
+
+    /** */
+    _onOptionsContextChanged() {
+        this._audioSourcesToken = {};
+        this._audioSourcesOptionsContext = null;
+        this._closeSourceMoveModal();
+    }
+
+    /**
+     * @param {import('core').TokenObject} token
+     * @param {import('settings').OptionsContext} optionsContext
+     * @returns {boolean}
+     */
+    _isAudioSourcesUpdateCurrent(token, optionsContext) {
+        return this._audioSourcesToken === token &&
+        optionsContext.index === this._settingsController.getOptionsContext().index;
     }
 
     /** */
@@ -459,42 +511,88 @@ export class AudioController extends EventDispatcher {
 
     /** */
     async _addAudioSource() {
-        await this._queueAudioSourceMutation(async () => {
-            const stateToken = this._audioSourceStateToken;
+        const context = this._audioSourcesOptionsContext;
+        if (context === null || context.index !== this._settingsController.getOptionsContext().index) { return; }
+        this.invalidateSourceUpdates();
+        this._closeSourceMoveModal();
+        await this.queueSourceMutation(async () => {
+            if (this._audioSourcesOptionsContext !== context || context.index !== this._settingsController.getOptionsContext().index) { return; }
             const type = this._getUnusedAudioSourceType();
             /** @type {import('settings').AudioSourceOptions} */
             const source = {type, url: '', voice: ''};
             const index = this._audioSourceEntries.length;
             this._createAudioSourceEntry(index, source);
             try {
-                await this._settingsController.modifyProfileSettings([{
+                await requireSuccessfulSettingsChange(this._settingsController.modifyProfileSettings([{
                     action: 'splice',
                     path: 'audio.sources',
                     start: index,
                     deleteCount: 0,
                     items: [source],
-                }]);
+                }]));
             } catch (error) {
-                await this._refreshAudioSources();
+                await this._refreshAudioSources(true);
                 throw error;
-            }
-            if (this._audioSourceStateToken !== stateToken) {
-                await this._refreshAudioSources();
             }
         });
     }
 
-    /** */
-    async _refreshAudioSources() {
+    /**
+     * @param {boolean} [recoveringMutation]
+     */
+    async _refreshAudioSources(recoveringMutation = false) {
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._audioSourcesToken = token;
         const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        this._onOptionsChanged({options, optionsContext});
+        const sourcesContext = this._audioSourcesOptionsContext;
+        let options;
+        try {
+            options = await this._settingsController.getOptions();
+        } catch (error) {
+            if (recoveringMutation && this._audioSourcesOptionsContext === sourcesContext) {
+                // Do not write through unverified indices after recovery itself
+                // fails. A later successful settings refresh re-enables the rows.
+                this._audioSourcesOptionsContext = null;
+                this._closeSourceMoveModal();
+            }
+            throw error;
+        }
+        // The mutation queue remains blocked until failed index changes are
+        // repaired. New speculative field edits must not cancel this repair;
+        // replacement profiles or authoritative notifications still supersede it.
+        if (
+            this._isAudioSourcesUpdateCurrent(token, optionsContext) ||
+            (
+                recoveringMutation && this._audioSourcesOptionsContext === sourcesContext &&
+                optionsContext.index === this._settingsController.getOptionsContext().index
+            )
+        ) {
+            this._onOptionsChanged({options, optionsContext});
+        }
+    }
+
+    /** */
+    _updateSourceOrder() {
+        for (let i = 0; i < this._audioSourceEntries.length; ++i) {
+            const entry = this._audioSourceEntries[i];
+            entry.index = i;
+            this._audioSourceContainer.appendChild(entry.node);
+        }
+    }
+
+    /** */
+    _closeSourceMoveModal() {
+        const modal = this._modalController.getModal('audio-source-move-location');
+        if (modal === null) { return; }
+        delete modal.node.dataset.index;
+        modal.setVisible(false);
     }
 
     /** */
     _onAudioSourceMoveButtonClick() {
-        const modal = /** @type {import('./modal.js').Modal} */ (this._modalController.getModal('audio-source-move-location'));
+        const modal = this._modalController.getModal('audio-source-move-location');
+        if (modal === null) { return; }
         const index = modal.node.dataset.index ?? '';
         const indexNumber = Number.parseInt(index, 10);
         if (Number.isNaN(indexNumber)) { return; }
@@ -530,6 +628,12 @@ class AudioSourceEntry {
         this._url = source.url;
         /** @type {string} */
         this._voice = source.voice;
+        /** @type {{savedValue: import('settings').AudioSourceType, promise: ?Promise<void>}} */
+        this._typeChangeState = {savedValue: source.type, promise: null};
+        /** @type {{savedValue: string, promise: ?Promise<void>}} */
+        this._urlChangeState = {savedValue: source.url, promise: null};
+        /** @type {{savedValue: string, promise: ?Promise<void>}} */
+        this._voiceChangeState = {savedValue: source.voice, promise: null};
         /** @type {HTMLElement} */
         this._node = node;
         /** @type {EventListenerCollection} */
@@ -546,6 +650,11 @@ class AudioSourceEntry {
         this._downButton = querySelectorNotNull(this._node, '#audio-source-move-down');
     }
 
+    /** @type {HTMLElement} */
+    get node() {
+        return this._node;
+    }
+
     /** @type {number} */
     get index() {
         return this._index;
@@ -558,11 +667,6 @@ class AudioSourceEntry {
     /** @type {import('settings').AudioSourceType} */
     get type() {
         return this._type;
-    }
-
-    /** @type {HTMLElement} */
-    get node() {
-        return this._node;
     }
 
     /**
@@ -600,6 +704,7 @@ class AudioSourceEntry {
         }
         this._eventListeners.removeAllEventListeners();
     }
+
 
     // Private
 
@@ -714,61 +819,49 @@ class AudioSourceEntry {
      * @param {import('settings').AudioSourceType} value
      */
     async _setType(value) {
-        await this._parent.mutateAudioSourceEntry(this, async () => {
-            const previousType = this._type;
-            this._type = value;
-            this._typeSelect.value = value;
+        if (!this._parent.isSourceCurrent(this)) { return; }
+        this._parent.invalidateSourceUpdates();
+        await changeAudioSetting(this._typeChangeState, value, (value2) => {
+            this._type = value2;
+            this._typeSelect.value = value2;
             this._updateTypeParameter();
-            try {
-                await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].type`, value);
-            } catch (error) {
-                this._type = previousType;
-                this._updateTypeParameter();
-                if (this._typeSelect !== null) {
-                    this._typeSelect.value = previousType;
-                }
-                throw error;
-            }
-        });
+        }, () => this._saveSetting('type', value));
     }
 
     /**
      * @param {string} value
      */
     async _setUrl(value) {
-        await this._parent.mutateAudioSourceEntry(this, async () => {
-            const previousValue = this._url;
-            this._url = value;
-            this._urlInput.value = value;
-            try {
-                await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].url`, value);
-            } catch (error) {
-                this._url = previousValue;
-                if (this._urlInput !== null) {
-                    this._urlInput.value = previousValue;
-                }
-                throw error;
-            }
-        });
+        if (!this._parent.isSourceCurrent(this)) { return; }
+        this._parent.invalidateSourceUpdates();
+        await changeAudioSetting(this._urlChangeState, value, (value2) => {
+            this._url = value2;
+            this._urlInput.value = value2;
+        }, () => this._saveSetting('url', value));
     }
 
     /**
      * @param {string} value
      */
     async _setVoice(value) {
-        await this._parent.mutateAudioSourceEntry(this, async () => {
-            const previousValue = this._voice;
-            this._voice = value;
-            this._voiceSelect.value = value;
-            try {
-                await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].voice`, value);
-            } catch (error) {
-                this._voice = previousValue;
-                if (this._voiceSelect !== null) {
-                    this._voiceSelect.value = previousValue;
-                }
-                throw error;
-            }
+        if (!this._parent.isSourceCurrent(this)) { return; }
+        this._parent.invalidateSourceUpdates();
+        await changeAudioSetting(this._voiceChangeState, value, (value2) => {
+            this._voice = value2;
+            this._voiceSelect.value = value2;
+        }, () => this._saveSetting('voice', value));
+    }
+
+    /**
+     * @param {'type'|'url'|'voice'} field
+     * @param {string} value
+     */
+    async _saveSetting(field, value) {
+        await this._parent.queueSourceMutation(async () => {
+            // A queued edit may outlive its source row or profile. Resolve the
+            // index only after earlier structural writes have settled.
+            if (!this._parent.isSourceCurrent(this)) { return; }
+            await requireSuccessfulSettingsChange(this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].${field}`, value));
         });
     }
 
@@ -811,6 +904,7 @@ class AudioSourceEntry {
 
     /** */
     _showMoveToModal() {
+        if (!this._parent.isSourceCurrent(this)) { return; }
         const modal = this._parent.modalController.getModal('audio-source-move-location');
         if (modal === null) { return; }
         const count = this._parent.audioSourceCount;
