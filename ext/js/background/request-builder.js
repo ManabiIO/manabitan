@@ -110,16 +110,17 @@ export class RequestBuilder {
     }
 
     /**
-     * Reads the array buffer body of a fetch response, with an optional `onProgress` callback.
+     * Reads the array buffer body of a fetch response, with optional progress and cancellation.
      * @param {Response} response The response of a `fetch` call.
      * @param {?(done: boolean) => void} onProgress The progress callback.
+     * @param {?AbortSignal} [signal] Cancels consumption as well as the underlying reader.
      * @returns {Promise<Uint8Array>} The resulting binary data.
      */
-    static async readFetchResponseArrayBuffer(response, onProgress) {
+    static async readFetchResponseArrayBuffer(response, onProgress, signal = null) {
         /** @type {ReadableStreamDefaultReader<Uint8Array>|undefined} */
         let reader;
         try {
-            if (onProgress !== null) {
+            if (onProgress !== null || signal !== null) {
                 const {body} = response;
                 if (body !== null) {
                     reader = body.getReader();
@@ -129,15 +130,22 @@ export class RequestBuilder {
             // Not supported
         }
 
-        if (typeof reader === 'undefined') {
-            const result = await response.arrayBuffer();
-            if (onProgress !== null) {
-                onProgress(true);
+        const checkAborted = () => {
+            if (signal !== null && signal.aborted) { throw signal.reason; }
+        };
+        /** @returns {Promise<Uint8Array>} */
+        const consume = async () => {
+            checkAborted();
+            if (typeof reader === 'undefined') {
+                const result = await response.arrayBuffer();
+                checkAborted();
+                if (onProgress !== null) {
+                    onProgress(true);
+                }
+                checkAborted();
+                return new Uint8Array(result);
             }
-            return new Uint8Array(result);
-        }
 
-        try {
             const contentLengthString = response.headers.get('Content-Length');
             const contentLength = contentLengthString !== null && /^\d+$/.test(contentLengthString) ?
                 Number(contentLengthString) :
@@ -151,10 +159,12 @@ export class RequestBuilder {
 
             while (true) {
                 const {done, value} = await reader.read();
+                checkAborted();
                 if (done) { break; }
                 if (onProgress !== null) {
                     onProgress(false);
                 }
+                checkAborted();
                 if (target === null) {
                     targets.push({array: value, length: value.length});
                 } else if (targetPosition + value.length > target.length) {
@@ -177,14 +187,34 @@ export class RequestBuilder {
                 onProgress(true);
             }
 
+            checkAborted();
             return /** @type {Uint8Array} */ (target);
+        };
+        /** @type {?(() => void)} */
+        let onAbort = null;
+        try {
+            if (signal === null) { return await consume(); }
+            /** @type {Promise<never>} */
+            const aborted = new Promise((_resolve, reject) => {
+                onAbort = () => { reject(signal.reason); };
+                signal.addEventListener('abort', onAbort);
+            });
+            // Native cancellation may settle late or not at all. Retire the
+            // caller independently; consume also checks before publishing data.
+            return await Promise.race([consume(), aborted]);
         } catch (error) {
-            // A failed consumer no longer needs the remaining download. Own
-            // cancellation failures without delaying the original rejection.
-            void reader.cancel(error).catch(() => {});
+            // Own cancellation failures without awaiting an uncooperative
+            // stream. This also covers the arrayBuffer fallback path.
+            try {
+                const cancellation = typeof reader === 'undefined' ? response.body?.cancel(error) : reader.cancel(error);
+                if (cancellation) { void cancellation.catch(() => {}); }
+            } catch (e) {
+                // Preserve the original read/consumer/cancellation error.
+            }
             throw error;
         } finally {
-            reader.releaseLock();
+            if (signal !== null && onAbort !== null) { signal.removeEventListener('abort', onAbort); }
+            if (typeof reader !== 'undefined') { reader.releaseLock(); }
         }
     }
 

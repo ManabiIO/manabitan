@@ -571,41 +571,58 @@ export class AudioDownloader {
      * @returns {Promise<import('audio-downloader').AudioBinaryBase64>}
      */
     async _downloadAudioFromUrl(url, sourceType, idleTimeout) {
-        let signal;
+        const abortController = typeof idleTimeout === 'number' ? new AbortController() : null;
+        const signal = abortController?.signal;
+        const timeoutError = new Error('Audio download idle timeout');
+        let active = true;
         /** @type {?import('request-builder.js').ProgressCallback} */
         let onProgress = null;
         /** @type {?import('core').Timeout} */
         let idleTimer = null;
-        if (typeof idleTimeout === 'number') {
-            const abortController = new AbortController();
-            ({signal} = abortController);
-            const onIdleTimeout = () => {
-                abortController.abort('Idle timeout');
-            };
-            onProgress = (done) => {
-                if (idleTimer !== null) {
-                    clearTimeout(idleTimer);
-                }
-                idleTimer = done ? null : setTimeout(onIdleTimeout, idleTimeout);
-            };
-            idleTimer = setTimeout(onIdleTimeout, idleTimeout);
+        /** @type {?Promise<never>} */
+        let timeout = null;
+        if (abortController !== null) {
+            timeout = new Promise((_resolve, reject) => {
+                const onIdleTimeout = () => {
+                    if (!active) { return; }
+                    active = false;
+                    // An extension bridge or response body may ignore abort.
+                    // Release fallback independently of transport settlement.
+                    reject(timeoutError);
+                    abortController.abort(timeoutError);
+                };
+                onProgress = (done) => {
+                    if (!active) { return; }
+                    if (idleTimer !== null) { clearTimeout(idleTimer); }
+                    active = !done;
+                    idleTimer = done ? null : setTimeout(onIdleTimeout, /** @type {number} */ (idleTimeout));
+                };
+                idleTimer = setTimeout(onIdleTimeout, /** @type {number} */ (idleTimeout));
+            });
         }
 
-        let response;
-        let arrayBuffer;
-        try {
-            response = await this._requestBuilder.fetchAnonymous(url, {
+        const request = async () => {
+            const response = await this._requestBuilder.fetchAnonymous(url, {
                 ...DEFAULT_REQUEST_INIT_PARAMS,
                 signal,
             });
-
-            if (!response.ok) {
+            if (signal?.aborted || !response.ok) {
+                // Do not consume a late response delivered after the timeout.
                 void response.body?.cancel().catch(() => {});
-                throw new Error(`Invalid response: ${response.status}`);
+                throw signal?.aborted ? timeoutError : new Error(`Invalid response: ${response.status}`);
             }
-
-            arrayBuffer = await RequestBuilder.readFetchResponseArrayBuffer(response, onProgress);
+            const arrayBuffer = await RequestBuilder.readFetchResponseArrayBuffer(response, onProgress, signal ?? null);
+            return {response, arrayBuffer};
+        };
+        let response;
+        let arrayBuffer;
+        try {
+            ({response, arrayBuffer} = await (timeout === null ? request() : Promise.race([request(), timeout])));
+        } catch (e) {
+            abortController?.abort(e);
+            throw e;
         } finally {
+            active = false;
             if (idleTimer !== null) {
                 clearTimeout(idleTimer);
                 idleTimer = null;
