@@ -49,6 +49,8 @@ export class AudioController extends EventDispatcher {
         this._audioSourceAddButton = querySelectorNotNull(document, '#audio-source-add');
         /** @type {AudioSourceEntry[]} */
         this._audioSourceEntries = [];
+        /** @type {Promise<void>} */
+        this._audioSourceMutationPromise = Promise.resolve();
         /** @type {HTMLInputElement} */
         this._voiceTestTextInput = querySelectorNotNull(document, '#text-to-speech-voice-test-text');
         /** @type {import('audio-controller').VoiceInfo[]} */
@@ -115,24 +117,27 @@ export class AudioController extends EventDispatcher {
      * @param {AudioSourceEntry} entry
      */
     async removeSource(entry) {
-        const {index} = entry;
-        this._audioSourceEntries.splice(index, 1);
-        entry.cleanup();
-        for (let i = index, ii = this._audioSourceEntries.length; i < ii; ++i) {
-            this._audioSourceEntries[i].index = i;
-        }
-        try {
-            await this._settingsController.modifyProfileSettings([{
-                action: 'splice',
-                path: 'audio.sources',
-                start: index,
-                deleteCount: 1,
-                items: [],
-            }]);
-        } catch (error) {
-            await this._refreshAudioSources();
-            throw error;
-        }
+        await this._queueAudioSourceMutation(async () => {
+            const index = this._audioSourceEntries.indexOf(entry);
+            if (index < 0) { return; }
+            this._audioSourceEntries.splice(index, 1);
+            entry.cleanup();
+            for (let i = index, ii = this._audioSourceEntries.length; i < ii; ++i) {
+                this._audioSourceEntries[i].index = i;
+            }
+            try {
+                await this._settingsController.modifyProfileSettings([{
+                    action: 'splice',
+                    path: 'audio.sources',
+                    start: index,
+                    deleteCount: 1,
+                    items: [],
+                }]);
+            } catch (error) {
+                await this._refreshAudioSources();
+                throw error;
+            }
+        });
     }
 
     /**
@@ -140,32 +145,34 @@ export class AudioController extends EventDispatcher {
      * @param {number} targetIndex
      */
     async moveAudioSourceOptions(currentIndex, targetIndex) {
-        const options = await this._settingsController.getOptions();
-        const optionsContext = this._settingsController.getOptionsContext();
-        const {audio} = options;
-        if (
-            currentIndex < 0 || currentIndex >= audio.sources.length ||
-            targetIndex < 0 || targetIndex >= audio.sources.length ||
-            currentIndex === targetIndex
-        ) {
-            return;
-        }
+        const entry = this._audioSourceEntries[currentIndex];
+        if (typeof entry === 'undefined') { return; }
+        await this._queueAudioSourceMutation(async () => {
+            await this._moveAudioSourceEntry(entry, targetIndex);
+        });
+    }
 
-        const item = audio.sources.splice(currentIndex, 1)[0];
-        audio.sources.splice(targetIndex, 0, item);
+    /**
+     * @param {AudioSourceEntry} entry
+     * @param {number} offset
+     */
+    async moveAudioSource(entry, offset) {
+        await this._queueAudioSourceMutation(async () => {
+            const currentIndex = this._audioSourceEntries.indexOf(entry);
+            if (currentIndex < 0) { return; }
+            await this._moveAudioSourceEntry(entry, currentIndex + offset);
+        });
+    }
 
-        try {
-            await this._settingsController.modifyProfileSettings([{
-                action: 'set',
-                path: 'audio.sources',
-                value: audio.sources,
-            }]);
-        } catch (error) {
-            await this._refreshAudioSources();
-            throw error;
-        }
-
-        this._onOptionsChanged({options, optionsContext});
+    /**
+     * @param {AudioSourceEntry} entry
+     * @param {() => Promise<void>} callback
+     */
+    async mutateAudioSourceEntry(entry, callback) {
+        await this._queueAudioSourceMutation(async () => {
+            if (!this._audioSourceEntries.includes(entry)) { return; }
+            await callback();
+        });
     }
 
     /**
@@ -183,6 +190,56 @@ export class AudioController extends EventDispatcher {
     }
 
     // Private
+
+    /**
+     * @param {() => Promise<void>} callback
+     * @returns {Promise<void>}
+     */
+    _queueAudioSourceMutation(callback) {
+        const operation = this._audioSourceMutationPromise.then(callback, callback);
+        this._audioSourceMutationPromise = operation.then(() => {}, () => {});
+        return operation;
+    }
+
+    /**
+     * @param {AudioSourceEntry} entry
+     * @param {number} targetIndex
+     */
+    async _moveAudioSourceEntry(entry, targetIndex) {
+        let currentIndex = this._audioSourceEntries.indexOf(entry);
+        if (currentIndex < 0 || targetIndex < 0 || targetIndex >= this._audioSourceEntries.length || currentIndex === targetIndex) { return; }
+
+        const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        currentIndex = this._audioSourceEntries.indexOf(entry);
+        if (currentIndex < 0 || currentIndex >= options.audio.sources.length || targetIndex >= options.audio.sources.length || currentIndex === targetIndex) { return; }
+
+        const item = options.audio.sources.splice(currentIndex, 1)[0];
+        options.audio.sources.splice(targetIndex, 0, item);
+
+        try {
+            await this._settingsController.modifyProfileSettings([{
+                action: 'set',
+                path: 'audio.sources',
+                value: options.audio.sources,
+            }]);
+        } catch (error) {
+            await this._refreshAudioSources();
+            throw error;
+        }
+
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        currentIndex = this._audioSourceEntries.indexOf(entry);
+        if (currentIndex < 0) { return; }
+        this._audioSourceEntries.splice(currentIndex, 1);
+        this._audioSourceEntries.splice(targetIndex, 0, entry);
+        for (let i = 0, ii = this._audioSourceEntries.length; i < ii; ++i) {
+            this._audioSourceEntries[i].index = i;
+        }
+        const nextEntry = this._audioSourceEntries[targetIndex + 1];
+        this._audioSourceContainer.insertBefore(entry.node, nextEntry?.node ?? null);
+    }
 
     /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
@@ -360,23 +417,25 @@ export class AudioController extends EventDispatcher {
 
     /** */
     async _addAudioSource() {
-        const type = this._getUnusedAudioSourceType();
-        /** @type {import('settings').AudioSourceOptions} */
-        const source = {type, url: '', voice: ''};
-        const index = this._audioSourceEntries.length;
-        this._createAudioSourceEntry(index, source);
-        try {
-            await this._settingsController.modifyProfileSettings([{
-                action: 'splice',
-                path: 'audio.sources',
-                start: index,
-                deleteCount: 0,
-                items: [source],
-            }]);
-        } catch (error) {
-            await this._refreshAudioSources();
-            throw error;
-        }
+        await this._queueAudioSourceMutation(async () => {
+            const type = this._getUnusedAudioSourceType();
+            /** @type {import('settings').AudioSourceOptions} */
+            const source = {type, url: '', voice: ''};
+            const index = this._audioSourceEntries.length;
+            this._createAudioSourceEntry(index, source);
+            try {
+                await this._settingsController.modifyProfileSettings([{
+                    action: 'splice',
+                    path: 'audio.sources',
+                    start: index,
+                    deleteCount: 0,
+                    items: [source],
+                }]);
+            } catch (error) {
+                await this._refreshAudioSources();
+                throw error;
+            }
+        });
     }
 
     /** */
@@ -454,6 +513,11 @@ class AudioSourceEntry {
         return this._type;
     }
 
+    /** @type {HTMLElement} */
+    get node() {
+        return this._node;
+    }
+
     /** */
     prepare() {
         this._updateTypeParameter();
@@ -513,7 +577,7 @@ class AudioSourceEntry {
      * @param {number} offset
      */
     _move(offset) {
-        void this._parent.moveAudioSourceOptions(this._index, this._index + offset).catch((error) => {
+        void this._parent.moveAudioSource(this, offset).catch((error) => {
             log.error(error);
         });
     }
@@ -596,53 +660,59 @@ class AudioSourceEntry {
      * @param {import('settings').AudioSourceType} value
      */
     async _setType(value) {
-        const previousType = this._type;
-        this._type = value;
-        this._updateTypeParameter();
-        try {
-            await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].type`, value);
-        } catch (error) {
-            this._type = previousType;
+        await this._parent.mutateAudioSourceEntry(this, async () => {
+            const previousType = this._type;
+            this._type = value;
             this._updateTypeParameter();
-            if (this._typeSelect !== null) {
-                this._typeSelect.value = previousType;
+            try {
+                await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].type`, value);
+            } catch (error) {
+                this._type = previousType;
+                this._updateTypeParameter();
+                if (this._typeSelect !== null) {
+                    this._typeSelect.value = previousType;
+                }
+                throw error;
             }
-            throw error;
-        }
+        });
     }
 
     /**
      * @param {string} value
      */
     async _setUrl(value) {
-        const previousValue = this._url;
-        this._url = value;
-        try {
-            await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].url`, value);
-        } catch (error) {
-            this._url = previousValue;
-            if (this._urlInput !== null) {
-                this._urlInput.value = previousValue;
+        await this._parent.mutateAudioSourceEntry(this, async () => {
+            const previousValue = this._url;
+            this._url = value;
+            try {
+                await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].url`, value);
+            } catch (error) {
+                this._url = previousValue;
+                if (this._urlInput !== null) {
+                    this._urlInput.value = previousValue;
+                }
+                throw error;
             }
-            throw error;
-        }
+        });
     }
 
     /**
      * @param {string} value
      */
     async _setVoice(value) {
-        const previousValue = this._voice;
-        this._voice = value;
-        try {
-            await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].voice`, value);
-        } catch (error) {
-            this._voice = previousValue;
-            if (this._voiceSelect !== null) {
-                this._voiceSelect.value = previousValue;
+        await this._parent.mutateAudioSourceEntry(this, async () => {
+            const previousValue = this._voice;
+            this._voice = value;
+            try {
+                await this._parent.settingsController.setProfileSetting(`audio.sources[${this._index}].voice`, value);
+            } catch (error) {
+                this._voice = previousValue;
+                if (this._voiceSelect !== null) {
+                    this._voiceSelect.value = previousValue;
+                }
+                throw error;
             }
-            throw error;
-        }
+        });
     }
 
     /** */
