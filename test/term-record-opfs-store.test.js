@@ -933,6 +933,36 @@ describe('TermRecordOpfsStore', () => {
         await store.endImportSession();
     });
 
+    test('ID reads decode lazy headwords without a prior expression lookup', async () => {
+        const encoder = new TextEncoder();
+        for (const asynchronous of [false, true]) {
+            const store = new TermRecordOpfsStore();
+            /** @type {[number, string, string][]} */
+            const terms = [[1, '猫', 'ねこ'], [2, '学校', '学校']];
+            for (const [id, expression, reading] of terms) {
+                store._storeRecord({
+                    id,
+                    dictionary: 'Lazy',
+                    expression: '',
+                    reading: '',
+                    expressionBytes: encoder.encode(expression),
+                    readingBytes: encoder.encode(reading),
+                    readingEqualsExpression: expression === reading,
+                    entryContentOffset: 0,
+                    entryContentLength: 16,
+                    entryContentDictName: 'raw',
+                    score: 1,
+                    sequence: id,
+                });
+            }
+            const ids = store.getDictionaryIdBatch('Lazy', 0, 2);
+            expect(ids).toEqual([1, 2]);
+            const records = asynchronous ? await store.getByIdsAsync(ids) : store.getByIds(ids);
+            expect([...records.values()].map(({expression, reading}) => [expression, reading]))
+                .toEqual([['猫', 'ねこ'], ['学校', '学校']]);
+        }
+    });
+
     test('keeps an unrelated persistent dictionary lookup-ready across an import', async () => {
         const textEncoder = new TextEncoder();
         const fileBytesByName = new Map();
@@ -3631,6 +3661,10 @@ describe('TermRecordOpfsStore', () => {
         await readerStore.ensureDictionariesLoaded([dictionaryName]);
 
         expect(readerStore.getDictionaryRecordCount(dictionaryName)).toBe(3);
+        expect(readerStore.getDictionaryIdBatch(dictionaryName, 0, 2)).toEqual([1, 2]);
+        expect(readerStore.getDictionaryIdBatch(dictionaryName, 1, 2)).toEqual([2, 3]);
+        expect(readerStore.getDictionaryIdBatch(dictionaryName, 3, 2)).toEqual([]);
+        expect(readerStore.getDictionaryIdBatch(dictionaryName, -1, 2)).toEqual([]);
         expect(readerStore.getDictionarySampleIds(dictionaryName, 2)).toEqual([1, 2]);
         expect(readerStore.getDictionarySampleIds(dictionaryName, 0)).toEqual([]);
         expect(Reflect.get(readerStore, '_recordsById').size).toBe(0);

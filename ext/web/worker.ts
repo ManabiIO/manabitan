@@ -173,7 +173,7 @@ async function dispatch(request: Request): Promise<unknown> {
             const query = text(p.text, 256).trim();
             if (typeof p.full !== 'boolean') {throw new WebRuntimeError('invalid_request', 'Expected a search presentation');}
             const options = await lookupOptions();
-            const {result, matchedQuery, matchType} = await findJapaneseSearch(query, async (candidate) => {
+            const japanese = await findJapaneseSearch(query, async (candidate) => {
                 // Explicit trailing wildcard remains an intentional prefix
                 // request. Implicit completion is attempted separately only
                 // after exact/deinflected candidates miss.
@@ -188,11 +188,32 @@ async function dispatch(request: Request): Promise<unknown> {
                 matchType: 'prefix',
                 deinflect: false}));
             abortIfCancelled();
+            let result = japanese.result;
+            let matchedQuery = japanese.matchedQuery;
+            let prefix = japanese.matchType === 'prefix' || matchedQuery.endsWith('*');
+            let glossary = false;
+            if (result === null) {
+                const reverse = await translator.findTermsByGlossary(
+                    'group',
+                    query,
+                    options,
+                    (progress) => reply(request.id, {progress: {phase: 'glossary-index', ...progress}}),
+                    () => closing || !!current?.cancelled,
+                );
+                abortIfCancelled();
+                if (reverse.dictionaryEntries.length > 0) {
+                    result = reverse;
+                    matchedQuery = query;
+                    prefix = false;
+                    glossary = true;
+                }
+            }
             const entries = result?.dictionaryEntries ?? [];
             return {version: 1,
                 query,
                 matchedQuery,
-                prefix: matchType === 'prefix' || matchedQuery.endsWith('*'),
+                prefix,
+                glossary,
                 dictionaryCount: options.enabledDictionaryMap.size,
                 preview: dictionaryPreview(entries),
                 ...p.full ? {lookup: {...result ?? {originalTextLength: 0}, dictionaryEntries: entries.slice(0, 100)}} : {}};
@@ -217,6 +238,8 @@ async function dispatch(request: Request): Promise<unknown> {
             if (!imported.result) {
                 throw new WebRuntimeError('import_failed', imported.errors.map((e) => e.message).slice(0, 8).join('; ') || 'Dictionary import did not commit');
             }
+            // Glossary reverse indexes are demand-built. Importing a large
+            // dictionary must not pay that cost unless the user searches definitions.
             // Cancellation during commit is not a rollback. Report the committed
             // result; the caller must not claim that this dictionary was removed.
             return {summary: imported.result, warnings: imported.errors.map((error) => error.message).slice(0, 8), cancelledAfterCommit: !!current?.cancelled, status: await status()};

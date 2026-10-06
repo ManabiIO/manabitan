@@ -2827,6 +2827,9 @@ export class TermRecordOpfsStore {
         for (const id of ids) {
             const record = this._recordsById.get(id);
             if (typeof record !== 'undefined') {
+                // ID-only consumers (including glossary search) have not run an
+                // expression-index lookup that would decode these lazy bytes.
+                this._ensureDecodedRecordStrings(record);
                 result.set(id, record);
             }
         }
@@ -4471,31 +4474,57 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Returns one authoritative ID page without materializing term records.
+     * Persistent chunks already describe contiguous ID ranges, so derived index
+     * builders can keep both ID and record hydration bounded.
      * @param {string} dictionaryName
+     * @param {number} offset
      * @param {number} limit
      * @returns {number[]}
      */
-    getDictionarySampleIds(dictionaryName, limit) {
-        if (!Number.isInteger(limit) || limit <= 0) { return []; }
+    getDictionaryIdBatch(dictionaryName, offset, limit) {
+        if (!Number.isInteger(offset) || offset < 0 || !Number.isInteger(limit) || limit <= 0) {
+            return [];
+        }
         const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
         if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
             const ids = [];
+            let remainingOffset = offset;
             for (const chunk of chunks) {
-                const count = Math.min(chunk.count, limit - ids.length);
-                for (let i = 0; i < count; ++i) { ids.push(chunk.firstId + i); }
+                if (remainingOffset >= chunk.count) {
+                    remainingOffset -= chunk.count;
+                    continue;
+                }
+                const start = remainingOffset;
+                const count = Math.min(chunk.count - start, limit - ids.length);
+                for (let i = 0; i < count; ++i) {
+                    ids.push(chunk.firstId + start + i);
+                }
+                remainingOffset = 0;
                 if (ids.length >= limit) { break; }
             }
             return ids;
         }
         const liveIds = this._getLiveRecordIdsForDictionary(dictionaryName);
-        if (typeof liveIds !== 'undefined') { return liveIds.slice(0, limit); }
+        if (typeof liveIds !== 'undefined') { return liveIds.slice(offset, offset + limit); }
         const ids = [];
+        let matched = 0;
         for (const record of this._recordsById.values()) {
             if (record.dictionary !== dictionaryName) { continue; }
+            if (matched++ < offset) { continue; }
             ids.push(record.id);
             if (ids.length >= limit) { break; }
         }
         return ids;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {number} limit
+     * @returns {number[]}
+     */
+    getDictionarySampleIds(dictionaryName, limit) {
+        return this.getDictionaryIdBatch(dictionaryName, 0, limit);
     }
 
     /**
