@@ -23,7 +23,9 @@ import {ProfileController} from '../ext/js/pages/settings/profile-controller.js'
  * @returns {ProfileController}
  */
 function createControllerForInternalTests() {
-    return /** @type {ProfileController} */ (Object.create(ProfileController.prototype));
+    const controller = /** @type {ProfileController} */ (Object.create(ProfileController.prototype));
+    Reflect.set(controller, '_profileConditionsProfileName', null);
+    return controller;
 }
 
 /**
@@ -258,13 +260,13 @@ describe('ProfileController condition modal ownership', () => {
         const newer = controller.openProfileConditionsModal(1);
         await flush();
 
-        second.resolve(undefined);
+        second.resolve(void 0);
         await newer;
         expect(profileConditionsProfileName.textContent).toBe('Second');
         expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(1);
         expect(setVisible).toHaveBeenCalledTimes(1);
 
-        first.resolve(undefined);
+        first.resolve(void 0);
         await older;
         expect(profileConditionsProfileName.textContent).toBe('Second');
         expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(1);
@@ -287,7 +289,7 @@ describe('ProfileController condition modal ownership', () => {
         const operation = controller.openProfileConditionsModal(0);
         await flush();
         Reflect.set(controller, '_profiles', [secondProfile, firstProfile]);
-        pending.resolve(undefined);
+        pending.resolve(void 0);
         await operation;
 
         expect(setVisible).not.toHaveBeenCalled();

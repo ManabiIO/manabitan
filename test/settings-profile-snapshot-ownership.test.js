@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import {afterEach, expect, test, vi} from 'vitest';
+import {expect, test, vi} from 'vitest';
 import {AnkiDeckGeneratorController} from '../ext/js/pages/settings/anki-deck-generator-controller.js';
 import {AnkiController} from '../ext/js/pages/settings/anki-controller.js';
 import {CollapsibleDictionaryController} from '../ext/js/pages/settings/collapsible-dictionary-controller.js';
@@ -95,9 +95,6 @@ test('SettingsController never emits an old-profile options snapshot after the p
 
     expect(trigger).not.toHaveBeenCalled();
 });
-
-
-
 
 
 test('SettingsController applies only the latest overlapping refresh for one profile', async () => {
