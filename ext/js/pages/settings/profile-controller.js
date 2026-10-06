@@ -468,7 +468,7 @@ export class ProfileController {
         this._profileConditionsOpenToken = null;
         this._profileConditionsUI.cleanup();
         let conditionsProfileIndex = settingsProfileIndex;
-        if (this._profileConditionsProfileId !== null) {
+        if (typeof this._profileConditionsProfileId === 'string') {
             conditionsProfileIndex = profiles.findIndex(({id}) => id === this._profileConditionsProfileId);
             if (conditionsProfileIndex < 0) {
                 this._profileConditionsIndex = null;
