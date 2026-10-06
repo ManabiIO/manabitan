@@ -179,7 +179,9 @@ export class SentenceTerminationCharactersController {
 
     /** */
     async _reset() {
+        const optionsContext = this._settingsController.getOptionsContext();
         const defaultOptions = await this._settingsController.getDefaultOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const value = defaultOptions.profiles[0].options.sentenceParsing.terminationCharacters;
         await this._settingsController.setProfileSetting('sentenceParsing.terminationCharacters', value);
         await this._updateOptions();
