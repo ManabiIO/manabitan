@@ -92,9 +92,11 @@ export class AnkiTemplatesController {
 
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
 
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
-        this._onOptionsChanged({options, optionsContext});
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
+            this._onOptionsChanged({options, optionsContext});
+        }
 
         void this._updateExampleText();
         this._mainSettingsEntry.addEventListener('click', this._updateExampleText.bind(this), false);

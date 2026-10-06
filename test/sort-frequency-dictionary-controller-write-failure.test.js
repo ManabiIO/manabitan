@@ -38,7 +38,10 @@ describe('SortFrequencyDictionaryController write failure rollback', () => {
         `;
 
         const setProfileSetting = vi.fn().mockRejectedValue(new Error('save failed'));
-        const controller = new SortFrequencyDictionaryController(/** @type {any} */ ({setProfileSetting}));
+        const controller = new SortFrequencyDictionaryController(/** @type {any} */ ({
+            setProfileSetting,
+            getOptionsContext: () => ({index: 0}),
+        }));
 
         await expect(controller._setSortFrequencyDictionaryValue('Dict B')).rejects.toThrow('save failed');
 
@@ -60,7 +63,10 @@ describe('SortFrequencyDictionaryController write failure rollback', () => {
         `;
 
         const setProfileSetting = vi.fn().mockRejectedValue(new Error('save failed'));
-        const controller = new SortFrequencyDictionaryController(/** @type {any} */ ({setProfileSetting}));
+        const controller = new SortFrequencyDictionaryController(/** @type {any} */ ({
+            setProfileSetting,
+            getOptionsContext: () => ({index: 0}),
+        }));
         Reflect.set(controller, '_getFrequencyOrder', vi.fn().mockResolvedValue('descending'));
 
         await expect(controller._autoUpdateOrder('Dict A')).rejects.toThrow('save failed');

@@ -39,13 +39,15 @@ export class NestedPopupsController {
 
     /** */
     async prepare() {
-        const options = await this._settingsController.getOptions();
-        const optionsContext = this._settingsController.getOptionsContext();
-
         this._nestedPopupsEnabled.addEventListener('change', this._onNestedPopupsEnabledChange.bind(this), false);
         this._nestedPopupsCount.addEventListener('change', this._onNestedPopupsCountChange.bind(this), false);
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
-        this._onOptionsChanged({options, optionsContext});
+
+        const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
+            this._onOptionsChanged({options, optionsContext});
+        }
     }
 
     // Private

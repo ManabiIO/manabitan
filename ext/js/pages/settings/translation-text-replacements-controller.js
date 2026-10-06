@@ -46,7 +46,9 @@ export class TranslationTextReplacementsController {
 
     /** */
     async addGroup() {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {groups} = options.translation.textReplacements;
         const newEntry = this._createNewEntry();
         /** @type {import('settings-modifications').Modification} */
@@ -77,7 +79,9 @@ export class TranslationTextReplacementsController {
      * @returns {Promise<boolean>}
      */
     async deleteGroup(index) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return false; }
         const {groups} = options.translation.textReplacements;
         if (groups.length === 0) { return false; }
 
@@ -145,8 +149,9 @@ export class TranslationTextReplacementsController {
 
     /** */
     async _updateOptions() {
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         this._onOptionsChanged({options, optionsContext});
     }
 

@@ -96,7 +96,9 @@ export class KeyboardShortcutController {
      * @param {import('settings').InputsHotkeyOptions} terminationCharacterEntry
      */
     async addEntry(terminationCharacterEntry) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {inputs: {hotkeys}} = options;
 
         await this._settingsController.modifyProfileSettings([{
@@ -117,7 +119,9 @@ export class KeyboardShortcutController {
      * @returns {Promise<boolean>}
      */
     async deleteEntry(index) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return false; }
         const {inputs: {hotkeys}} = options;
 
         if (index < 0 || index >= hotkeys.length) { return false; }
@@ -235,14 +239,17 @@ export class KeyboardShortcutController {
 
     /** */
     async _updateOptions() {
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         await this._onOptionsChanged({options, optionsContext});
     }
 
     /** */
     async _reset() {
+        const optionsContext = this._settingsController.getOptionsContext();
         const value = await this.getDefaultHotkeys();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         await this._settingsController.setProfileSetting('inputs.hotkeys', value);
         await this._updateOptions();
     }

@@ -48,6 +48,8 @@ export class ProfileConditionsUI extends EventDispatcher {
         this._defaultType = 'popupLevel';
         /** @type {number} */
         this._profileIndex = 0;
+        /** @type {?import('core').TokenObject} */
+        this._prepareToken = null;
         const validateInteger = this._validateInteger.bind(this);
         const normalizeInteger = this._normalizeInteger.bind(this);
         const validateFlags = this._validateFlags.bind(this);
@@ -138,7 +140,11 @@ export class ProfileConditionsUI extends EventDispatcher {
      * @param {number} profileIndex
      */
     async prepare(profileIndex) {
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._prepareToken = token;
         const options = await this._settingsController.getOptionsFull();
+        if (this._prepareToken !== token) { return; }
         const {profiles} = options;
         if (profileIndex < 0 || profileIndex >= profiles.length) { return; }
         const {conditionGroups} = profiles[profileIndex];
@@ -154,6 +160,7 @@ export class ProfileConditionsUI extends EventDispatcher {
 
     /** */
     cleanup() {
+        this._prepareToken = null;
         this._eventListeners.removeAllEventListeners();
 
         for (const child of this._children) {

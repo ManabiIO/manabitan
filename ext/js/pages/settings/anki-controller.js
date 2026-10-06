@@ -219,8 +219,9 @@ export class AnkiController {
 
     /** */
     async _updateOptions() {
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         this._onOptionsChanged({options, optionsContext});
     }
 
@@ -697,7 +698,9 @@ export class AnkiController {
 
     /** */
     async _addNewFormat() {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const ankiOptions = options.anki;
         const index = ankiOptions.cardFormats.length;
 
@@ -1167,6 +1170,7 @@ class AnkiCardController {
      */
     async _setModel(value) {
         const select = this._modelController.select;
+        const optionsContext = this._settingsController.getOptionsContext();
         if (this._modelChangingTo !== null) {
             // Revert
             select.value = this._modelChangingTo;
@@ -1194,13 +1198,32 @@ class AnkiCardController {
             this._modelChangingTo = null;
         }
 
+        if (
+            this._cleaned ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            select.value = this._modelController.value;
+            return;
+        }
+
         const cardFormat = this._getCardFormat(options.anki, this._cardFormatIndex);
-        const oldFields = cardFormat !== null ? cardFormat.fields : null;
+        if (cardFormat === null) {
+            select.value = this._modelController.value;
+            return;
+        }
+        const oldFields = cardFormat.fields;
         if (cardFormat.type === 'term') {
             try {
                 dictionaryInfo = await this._ankiController.settingsController.getDictionaryInfo();
             } catch (e) {
                 // If dictionary info is unavailable, presets can still be applied without a primary dictionary marker.
+            }
+            if (
+                this._cleaned ||
+                this._settingsController.getOptionsContext().index !== optionsContext.index
+            ) {
+                select.value = this._modelController.value;
+                return;
             }
         }
         const fields = buildAnkiFieldsForModel({
@@ -1228,6 +1251,14 @@ class AnkiCardController {
                 value: fields,
             },
         ];
+
+        if (
+            this._cleaned ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            select.value = this._modelController.value;
+            return;
+        }
 
         this._modelController.value = value;
         this._fields = fields;
