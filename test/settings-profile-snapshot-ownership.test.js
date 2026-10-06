@@ -7,6 +7,7 @@ import {afterEach, expect, test, vi} from 'vitest';
 import {AnkiDeckGeneratorController} from '../ext/js/pages/settings/anki-deck-generator-controller.js';
 import {AnkiController} from '../ext/js/pages/settings/anki-controller.js';
 import {CollapsibleDictionaryController} from '../ext/js/pages/settings/collapsible-dictionary-controller.js';
+import {DictionaryController} from '../ext/js/pages/settings/dictionary-controller.js';
 import {KeyboardShortcutController} from '../ext/js/pages/settings/keyboard-shortcuts-controller.js';
 import {PermissionsToggleController} from '../ext/js/pages/settings/permissions-toggle-controller.js';
 import {PopupFrequencyBlurController} from '../ext/js/pages/settings/popup-frequency-blur-controller.js';
@@ -446,7 +447,7 @@ test('sort-frequency auto detection cannot write its result into a newly selecte
     let profileIndex = 0;
     /** @type {ReturnType<typeof deferred<import('settings').SortFrequencyDictionaryOrder|null>>} */
     const pending = deferred();
-    const setOrder = vi.fn().mockResolvedValue();
+    const setOrder = vi.fn(async () => {});
     const controller = Object.assign(Object.create(SortFrequencyDictionaryController.prototype), {
         _settingsController: {
             getOptionsContext: () => ({index: profileIndex}),
@@ -472,6 +473,10 @@ test('permission prompt completion cannot write its result into a newly selected
     vi.stubGlobal('chrome', {
         runtime: {lastError: null},
         permissions: {
+            /**
+             * @param {chrome.permissions.Permissions} _permissions
+             * @param {(result: boolean) => void} callback
+             */
             request(_permissions, callback) {
                 permissionCallback = callback;
             },
@@ -495,7 +500,8 @@ test('permission prompt completion cannot write its result into a newly selected
     await flush();
     profileIndex = 1;
     if (permissionCallback === null) { throw new Error('Permission request was not started'); }
-    permissionCallback(true);
+    const resolvePermission = /** @type {(result: boolean) => void} */ (permissionCallback);
+    resolvePermission(true);
     await operation;
 
     expect(setProfileSetting).not.toHaveBeenCalled();
@@ -509,8 +515,8 @@ for (const [name, method, element] of [
         let profileIndex = 0;
         /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
         const pending = deferred();
-        const middleSetter = vi.fn().mockResolvedValue();
-        const mainSetter = vi.fn().mockResolvedValue();
+        const middleSetter = vi.fn(async () => {});
+        const mainSetter = vi.fn(async () => {});
         const controller = Object.assign(Object.create(ScanInputsSimpleController.prototype), {
             _settingsController: {
                 getOptionsContext: () => ({index: profileIndex}),
