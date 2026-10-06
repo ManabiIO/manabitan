@@ -698,7 +698,9 @@ export class AnkiController {
 
     /** */
     async _addNewFormat() {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const ankiOptions = options.anki;
         const index = ankiOptions.cardFormats.length;
 
