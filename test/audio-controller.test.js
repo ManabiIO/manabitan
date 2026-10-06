@@ -28,6 +28,27 @@ function createControllerForInternalTests() {
     return /** @type {AudioController} */ (Object.create(AudioController.prototype));
 }
 
+
+
+describe('AudioController voice language classification', () => {
+    test.each([
+        ['ja', true],
+        ['JA', true],
+        ['ja-JP', true],
+        ['JA-jp', true],
+        ['ja_JP', true],
+        ['jpn', true],
+        ['JPN', true],
+        ['jpn-Jpan', true],
+        ['en-JP', false],
+        ['zh-JP', false],
+        ['', false],
+    ])('%s Japanese classification is %s', (languageTag, expected) => {
+        const controller = createControllerForInternalTests();
+        expect(controller._languageTagIsJapanese(languageTag)).toBe(expected);
+    });
+});
+
 describe('AudioController consent refresh', () => {
     test('clears the consent token when a refresh fails', async ({window}) => {
         window.document.documentElement.dataset.browser = 'firefox';
