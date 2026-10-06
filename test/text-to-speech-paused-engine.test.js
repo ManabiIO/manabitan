@@ -172,7 +172,7 @@ test('another wrapper can replace paused speech without an old start confirming 
 test('a synchronous start after resuming is observed without retaining startup listeners', async () => {
     const {player, engine, stats, start} = setup();
     const speak = engine.speak.bind(engine);
-    engine.speak = (utterance) => {
+    engine.speak = (/** @type {SpeechSynthesisUtterance} */ utterance) => {
         speak(utterance);
         start();
     };
