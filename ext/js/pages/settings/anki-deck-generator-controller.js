@@ -85,6 +85,8 @@ export class AnkiDeckGeneratorController {
         this._cancel = false;
         /** @type {boolean} */
         this._inProgress = false;
+        /** @type {import('core').TokenObject} */
+        this._parseToken = {};
         /** @type {AnkiNoteBuilder} */
         this._ankiNoteBuilder = new AnkiNoteBuilder(settingsController.application.api, new TemplateRendererProxy());
     }
@@ -137,9 +139,27 @@ export class AnkiDeckGeneratorController {
 
     /** */
     async _onParse() {
-        const options = await this._settingsController.getOptions();
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._parseToken = token;
         const optionsContext = this._settingsController.getOptionsContext();
-        const parserResult = await this._application.api.parseText(this._wordInputTextarea.value, optionsContext, options.scanning.length, !options.parsing.enableMecabParser, options.parsing.enableMecabParser, options.parsing.useAllFrequencyDictionaries);
+        const inputText = this._wordInputTextarea.value;
+        const options = await this._settingsController.getOptions();
+        if (
+            this._parseToken !== token ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._wordInputTextarea.value !== inputText
+        ) {
+            return;
+        }
+        const parserResult = await this._application.api.parseText(inputText, optionsContext, options.scanning.length, !options.parsing.enableMecabParser, options.parsing.enableMecabParser, options.parsing.useAllFrequencyDictionaries);
+        if (
+            this._parseToken !== token ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._wordInputTextarea.value !== inputText
+        ) {
+            return;
+        }
         const parsedText = parserResult[0].content;
 
         const parsedParts = [];
