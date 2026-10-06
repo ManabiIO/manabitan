@@ -31,7 +31,10 @@ async function flush() {
     for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
 }
 
-/** @param {string} [initialState] */
+/**
+ * @param {string} [initialState]
+ * @returns {*}
+ */
 function setup(initialState = 'interrupted') {
     const stats = {starts: 0, stops: 0, decodes: 0, sourceDisconnects: 0, gainDisconnects: 0};
     class Context {
