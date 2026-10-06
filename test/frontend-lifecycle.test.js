@@ -389,11 +389,12 @@ for (const stage of ['options', 'ready']) {
         const pending = display._frontendPending;
         expect(display._frontend).toBeNull();
         expect(pending).not.toBeNull();
-        expect(Reflect.get(application.crossFrame, '_apiMap').size).toBe(18);
+        expect(Reflect.get(application.crossFrame, '_apiMap').size).toBe(19);
+        expect(Reflect.get(application.crossFrame, '_apiMap').has('popupFactoryCancelPublication')).toBe(true);
         await display._updateNestedFrontend(options(10));
         expect(display._frontend).toBe(pending?.frontend);
         expect(display._frontendPending).toBeNull();
-        expect(Reflect.get(application.crossFrame, '_apiMap').size).toBe(23);
+        expect(Reflect.get(application.crossFrame, '_apiMap').size).toBe(24);
         expect(added.mock.calls.filter(([name]) => name === 'message')).toHaveLength(1);
         expect(display._frontend?.popup).toBeNull();
     });

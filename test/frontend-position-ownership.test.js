@@ -24,7 +24,10 @@ function setup() {
     const visible = vi.fn().mockResolvedValue(true);
     for (const [key, value] of Object.entries({
         _optionsContext: {url: 'https://example.test/'},
-        _visible: {value: false},
+        _publicationGeneration: 0,
+        _publicationSource: 'position-test',
+        _cancelPendingPublication: null,
+        _visible: {value: true},
         _child: null,
         _hidePopupTimer: null,
         _frame: {dataset: {}, style: {}},
@@ -81,7 +84,7 @@ for (const phase of ['options', 'injection', 'delivery']) {
         pending.resolve();
         await Promise.all([show, reposition]);
         expect(showsWhilePending).toBe(0);
-        expect(popup._invokeSafe).toHaveBeenCalledExactlyOnceWith('displaySetContent', {details});
+        expect(popup._invokeSafe).toHaveBeenCalledExactlyOnceWith('displaySetContent', {details, publication: {source: 'position-test', generation: 1}});
         expect(popup._setVisible).toHaveBeenCalledWith(true);
     });
 }

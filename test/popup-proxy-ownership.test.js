@@ -185,7 +185,7 @@ test('direct proxy forwarding still works without an offset provider', async () 
     invoke.mockResolvedValueOnce(true);
     expect(await proxy.containsPoint(1, 2)).toBe(true);
     expect(offset).not.toHaveBeenCalled();
-    expect(invoke.mock.calls[0]).toStrictEqual([0, 'popupFactoryShowContent', {id: 'root', details: input, displayDetails: null}]);
+    expect(invoke.mock.calls[0]).toStrictEqual([0, 'popupFactoryShowContent', {id: 'root', details: input, displayDetails: null, publication: void 0}]);
 });
 
 test('hide invalidates a waiting show even when the remote hide fails', async () => {
@@ -198,7 +198,7 @@ test('hide invalidates a waiting show even when the remote hide fails', async ()
     await expect(proxy.hide(false)).rejects.toBe(error);
     pending.resolve([10, 20]);
     await show;
-    expect(invoke).toHaveBeenCalledExactlyOnceWith(0, 'popupFactoryHide', {id: 'root', changeFocus: false});
+    expect(invoke).toHaveBeenCalledExactlyOnceWith(0, 'popupFactoryHide', {id: 'root', changeFocus: false, publication: {source: Reflect.get(proxy, '_publicationSource'), generation: 1}});
 });
 
 test('show and hit testing share one fully published initial offset update', async () => {

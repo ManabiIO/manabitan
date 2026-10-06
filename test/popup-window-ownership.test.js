@@ -43,7 +43,7 @@ test('overlapping cold shows share creation and only deliver the latest content'
     opening.resolve({tabId: 7, windowId: 70});
     await Promise.all([first, second]);
     expect(create).toHaveBeenCalledExactlyOnceWith({focus: 'ifCreated'});
-    expect(invoke).toHaveBeenCalledExactlyOnceWith(7, 0, 'displayPopupMessage2', {action: 'displaySetContent', params: {details: content('newer')}});
+    expect(invoke).toHaveBeenCalledExactlyOnceWith(7, 0, 'displayPopupMessage2', {action: 'displaySetContent', params: {details: content('newer'), publication: {source: Reflect.get(popup, '_publicationSource'), generation: 2}}});
 });
 
 test('a stale failed show cannot reopen or overwrite a newer healthy show', async () => {
@@ -56,7 +56,12 @@ test('a stale failed show cannot reopen or overwrite a newer healthy show', asyn
     delivery.reject(new Error('Old delivery failed late'));
     await older;
     expect(create).toHaveBeenCalledTimes(1);
-    expect(invoke).toHaveBeenCalledTimes(3);
+    expect(invoke).toHaveBeenCalledTimes(4);
+    expect(invoke.mock.calls.map((call) => call[3].action)).toEqual([
+        'displaySetContent', 'displaySetContent', 'displayCancelPublication', 'displaySetContent',
+    ]);
+    expect(invoke.mock.calls[2][3].params.publication.generation).toBe(2);
+    expect(invoke.mock.calls[3][3].params.publication.generation).toBe(3);
 });
 
 for (const recoveredTabId of [7, 8]) {

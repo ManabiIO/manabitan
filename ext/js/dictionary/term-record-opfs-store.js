@@ -2852,7 +2852,8 @@ export class TermRecordOpfsStore {
         for (const id of ids) {
             const record = this._recordsById.get(id);
             if (typeof record !== 'undefined') {
-                // Persisted index hits need not have constructed a JavaScript index.
+                // ID-only consumers (including glossary search) have not run an
+                // expression-index lookup that would decode these lazy bytes.
                 this._ensureDecodedRecordStrings(record);
                 result.set(id, record);
             }
@@ -3714,19 +3715,22 @@ export class TermRecordOpfsStore {
                 ) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index size is implausible for ${state.fileName}`);
                 }
-                const content = new Uint8Array(await indexFile.arrayBuffer());
-                const view = new DataView(content.buffer, content.byteOffset, content.byteLength);
                 let cursor = LOOKUP_INDEX_FILE_HEADER_BYTES;
                 let actualRecordCount = 0;
                 for (let chunkIndex = 0; chunkIndex < chunkCount; ++chunkIndex) {
-                    if ((cursor + LOOKUP_INDEX_CHUNK_HEADER_BYTES) > content.byteLength) {
+                    const chunkHeaderStart = cursor;
+                    const chunkHeaderEnd = chunkHeaderStart + LOOKUP_INDEX_CHUNK_HEADER_BYTES;
+                    if (!Number.isSafeInteger(chunkHeaderEnd) || chunkHeaderEnd > indexFile.size) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk header is truncated for ${state.fileName}`);
                     }
-                    const firstId = view.getUint32(cursor, true); cursor += 4;
-                    const count = view.getUint32(cursor, true); cursor += 4;
+                    const chunkHeader = await this._readFileRange(indexFile, chunkHeaderStart, chunkHeaderEnd);
+                    if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
+                    const chunkView = new DataView(chunkHeader.buffer, chunkHeader.byteOffset, chunkHeader.byteLength);
+                    const firstId = chunkView.getUint32(0, true);
+                    const count = chunkView.getUint32(4, true);
                     let contentOffsetBase;
                     try {
-                        contentOffsetBase = readSafeU64Le(view, cursor);
+                        contentOffsetBase = readSafeU64Le(chunkView, 8);
                     } catch (error) {
                         throw new PersistentLookupIndexError(
                             'invalid',
@@ -3734,21 +3738,14 @@ export class TermRecordOpfsStore {
                             error,
                         );
                     }
-                    cursor += 8;
-                    const payloadLength = view.getUint32(cursor, true); cursor += 4;
-                    const baseLength = view.getUint32(cursor, true); cursor += 4;
-                    const baseHash = view.getUint32(cursor, true); cursor += 4;
-                    const derivedHash = view.getUint32(cursor, true); cursor += 4;
-                    const recordFieldsHash = view.getUint32(cursor, true); cursor += 4;
-                    const formatFlags = view.getUint32(cursor, true); cursor += 4;
-                    const payloadEnd = cursor + payloadLength;
-                    let recordFieldsLength;
-                    try {
-                        recordFieldsLength = getRecordFieldsByteLength(content, payloadEnd, count, formatFlags);
-                    } catch (error) {
-                        throw new PersistentLookupIndexError('invalid', `Lookup index record fields are invalid for ${state.fileName}`, error);
-                    }
-                    const recordFieldsEnd = payloadEnd + recordFieldsLength;
+                    const payloadLength = chunkView.getUint32(16, true);
+                    const baseLength = chunkView.getUint32(20, true);
+                    const baseHash = chunkView.getUint32(24, true);
+                    const derivedHash = chunkView.getUint32(28, true);
+                    const recordFieldsHash = chunkView.getUint32(32, true);
+                    const formatFlags = chunkView.getUint32(36, true);
+                    const payloadStart = chunkHeaderEnd;
+                    const recordFieldsStart = payloadStart + payloadLength;
                     if (
                         firstId <= 0 ||
                         count === 0 ||
@@ -3760,11 +3757,33 @@ export class TermRecordOpfsStore {
                             formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT &&
                             formatFlags !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE
                         ) ||
-                        recordFieldsEnd > content.byteLength
+                        !Number.isSafeInteger(recordFieldsStart) ||
+                        recordFieldsStart > indexFile.size
                     ) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk metadata is invalid for ${state.fileName}`);
                     }
-                    const payload = content.subarray(cursor, payloadEnd);
+                    let recordFieldsLength;
+                    try {
+                        if (formatFlags === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) {
+                            const compactHeaderEnd = recordFieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES;
+                            if (!Number.isSafeInteger(compactHeaderEnd) || compactHeaderEnd > indexFile.size) {
+                                throw new Error('Compact term-record fields header is truncated');
+                            }
+                            const compactHeader = await this._readFileRange(indexFile, recordFieldsStart, compactHeaderEnd);
+                            recordFieldsLength = getRecordFieldsByteLength(compactHeader, 0, count, formatFlags);
+                        } else {
+                            recordFieldsLength = getRecordFieldsByteLength(EMPTY_BYTES, 0, count, formatFlags);
+                        }
+                    } catch (error) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index record fields are invalid for ${state.fileName}`, error);
+                    }
+                    const chunkBodyEnd = recordFieldsStart + recordFieldsLength;
+                    if (!Number.isSafeInteger(chunkBodyEnd) || chunkBodyEnd > indexFile.size) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index chunk metadata is invalid for ${state.fileName}`);
+                    }
+                    const chunkBody = await this._readFileRange(indexFile, payloadStart, chunkBodyEnd);
+                    if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
+                    const payload = chunkBody.subarray(0, payloadLength);
                     let sections;
                     try {
                         sections = splitPersistedTermLookupIndex(payload);
@@ -3780,7 +3799,7 @@ export class TermRecordOpfsStore {
                     if (hashLookupIndexBytes(sections.derived) !== derivedHash) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index derived checksum failed for ${state.fileName}`);
                     }
-                    const recordFields = content.subarray(payloadEnd, recordFieldsEnd);
+                    const recordFields = chunkBody.subarray(payloadLength);
                     if (hashLookupIndexBytes(recordFields) !== recordFieldsHash) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index record fields checksum failed for ${state.fileName}`);
                     }
@@ -3821,9 +3840,9 @@ export class TermRecordOpfsStore {
                         lookupIndex,
                     });
                     actualRecordCount += count;
-                    cursor = recordFieldsEnd;
+                    cursor = chunkBodyEnd;
                 }
-                if (cursor !== content.byteLength || actualRecordCount !== expectedRecordCount) {
+                if (cursor !== indexFile.size || actualRecordCount !== expectedRecordCount) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index file length is invalid for ${state.fileName}`);
                 }
             }
@@ -4548,31 +4567,57 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Returns one authoritative ID page without materializing term records.
+     * Persistent chunks already describe contiguous ID ranges, so derived index
+     * builders can keep both ID and record hydration bounded.
      * @param {string} dictionaryName
+     * @param {number} offset
      * @param {number} limit
      * @returns {number[]}
      */
-    getDictionarySampleIds(dictionaryName, limit) {
-        if (!Number.isInteger(limit) || limit <= 0) { return []; }
+    getDictionaryIdBatch(dictionaryName, offset, limit) {
+        if (!Number.isInteger(offset) || offset < 0 || !Number.isInteger(limit) || limit <= 0) {
+            return [];
+        }
         const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
         if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
             const ids = [];
+            let remainingOffset = offset;
             for (const chunk of chunks) {
-                const count = Math.min(chunk.count, limit - ids.length);
-                for (let i = 0; i < count; ++i) { ids.push(chunk.firstId + i); }
+                if (remainingOffset >= chunk.count) {
+                    remainingOffset -= chunk.count;
+                    continue;
+                }
+                const start = remainingOffset;
+                const count = Math.min(chunk.count - start, limit - ids.length);
+                for (let i = 0; i < count; ++i) {
+                    ids.push(chunk.firstId + start + i);
+                }
+                remainingOffset = 0;
                 if (ids.length >= limit) { break; }
             }
             return ids;
         }
         const liveIds = this._getLiveRecordIdsForDictionary(dictionaryName);
-        if (typeof liveIds !== 'undefined') { return liveIds.slice(0, limit); }
+        if (typeof liveIds !== 'undefined') { return liveIds.slice(offset, offset + limit); }
         const ids = [];
+        let matched = 0;
         for (const record of this._recordsById.values()) {
             if (record.dictionary !== dictionaryName) { continue; }
+            if (matched++ < offset) { continue; }
             ids.push(record.id);
             if (ids.length >= limit) { break; }
         }
         return ids;
+    }
+
+    /**
+     * @param {string} dictionaryName
+     * @param {number} limit
+     * @returns {number[]}
+     */
+    getDictionarySampleIds(dictionaryName, limit) {
+        return this.getDictionaryIdBatch(dictionaryName, 0, limit);
     }
 
     /**

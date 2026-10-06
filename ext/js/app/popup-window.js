@@ -17,6 +17,8 @@
  */
 
 import {EventDispatcher} from '../core/event-dispatcher.js';
+import {log} from '../core/log.js';
+import {generateId} from '../core/utilities.js';
 
 /**
  * This class represents a popup that is hosted in a new native window.
@@ -31,6 +33,12 @@ export class PopupWindow extends EventDispatcher {
      */
     constructor(application, id, depth, frameId) {
         super();
+        /** @type {number} */
+        this._publicationGeneration = 0;
+        /** @type {string} */
+        this._publicationSource = generateId(16);
+        /** @type {?(() => void)} */
+        this._cancelPendingPublication = null;
         /** @type {import('../application.js').Application} */
         this._application = application;
         /** @type {string} */
@@ -129,6 +137,8 @@ export class PopupWindow extends EventDispatcher {
      * @returns {Promise<void>}
      */
     async setOptionsContext(optionsContext) {
+        this._cancelPendingPublication?.();
+        ++this._publicationGeneration;
         await this._invoke(false, 'displaySetOptionsContext', {optionsContext});
     }
 
@@ -144,7 +154,8 @@ export class PopupWindow extends EventDispatcher {
      * @param {boolean} _changeFocus Whether or not the parent popup or host frame should be focused.
      */
     hide(_changeFocus) {
-        // NOP
+        this._cancelPendingPublication?.();
+        ++this._publicationGeneration;
     }
 
     /**
@@ -190,13 +201,37 @@ export class PopupWindow extends EventDispatcher {
      * Shows and updates the positioning and content of the popup.
      * @param {import('popup').ContentDetails} _details Settings for the outer popup.
      * @param {?import('display').ContentDetails} displayDetails The details parameter passed to `Display.setContent`.
+     * @param {import('popup').PublicationGuard} [guard]
      * @returns {Promise<void>}
      */
-    async showContent(_details, displayDetails) {
+    async showContent(_details, displayDetails, guard) {
         if (displayDetails === null) { return; }
-        const token = {};
-        this._showContentToken = token;
-        await this._invoke(true, 'displaySetContent', {details: displayDetails}, token);
+        this._cancelPendingPublication?.();
+        const generation = ++this._publicationGeneration;
+        /** @type {import('popup').PublicationToken} */
+        const publication = {source: this._publicationSource, generation};
+        let dispatched = false;
+        let cancelled = false;
+        const cancel = () => {
+            if (cancelled) { return; }
+            cancelled = true;
+            if (dispatched) {
+                void this._invoke(false, 'displayCancelPublication', {publication}).catch((error) => {
+                    if (!this._application.webExtension.unloaded) { log.error(error); }
+                });
+            }
+        };
+        this._cancelPendingPublication = cancel;
+        const isCurrent = () => !cancelled && generation === this._publicationGeneration && (typeof guard === 'undefined' || guard.isCurrent());
+        const unsubscribe = guard?.subscribe?.(cancel);
+        try {
+            if (isCurrent()) {
+                await this._invoke(true, 'displaySetContent', {details: displayDetails, publication}, isCurrent, () => { dispatched = true; });
+            }
+        } finally {
+            if (this._cancelPendingPublication === cancel) { this._cancelPendingPublication = null; }
+            unsubscribe?.();
+        }
     }
 
     /**
@@ -291,11 +326,14 @@ export class PopupWindow extends EventDispatcher {
      * @param {boolean} open
      * @param {TName} action
      * @param {import('display').DirectApiParams<TName>} params
-     * @param {?object} [token]
+     * @param {() => boolean} [isCurrent]
+     * @param {() => void} [onDispatch]
      * @returns {Promise<import('display').DirectApiReturn<TName>|undefined>}
      */
-    async _invoke(open, action, params, token = null) {
-        if (!this._isInvocationActive(token)) { return void 0; }
+    async _invoke(open, action, params, isCurrent = () => true, onDispatch = () => {}) {
+        if (this._application.webExtension.unloaded || !isCurrent()) {
+            return void 0;
+        }
 
         const message = /** @type {import('display').DirectApiMessageAny} */ ({action, params});
 
@@ -303,6 +341,8 @@ export class PopupWindow extends EventDispatcher {
         let popupTab = this._popupTab;
         if (popupTab !== null) {
             try {
+                if (!isCurrent()) { return void 0; }
+                onDispatch();
                 return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
                     popupTab.id,
                     frameId,
@@ -310,19 +350,21 @@ export class PopupWindow extends EventDispatcher {
                     message,
                 ));
             } catch (e) {
-                if (!this._isInvocationActive(token)) { return void 0; }
+                if (e instanceof Error && e.name === 'PopupContentTimeoutError') { throw e; }
+                if (!this._isInvocationActive(isCurrent)) { return void 0; }
                 if (this._popupTab === popupTab) { this._popupTab = null; }
             }
         }
 
-        if (!open) {
+        if (!open || !isCurrent()) {
             return void 0;
         }
 
         popupTab = await this._getPopupTab();
-        if (popupTab === null || !this._isInvocationActive(token)) { return void 0; }
+        if (popupTab === null || !this._isInvocationActive(isCurrent)) { return void 0; }
 
         try {
+            onDispatch();
             return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
                 popupTab.id,
                 frameId,
@@ -330,18 +372,19 @@ export class PopupWindow extends EventDispatcher {
                 message,
             ));
         } catch (e) {
-            if (!this._isInvocationActive(token)) { return void 0; }
+            if (e instanceof Error && e.name === 'PopupContentTimeoutError') { throw e; }
+            if (!this._isInvocationActive(isCurrent)) { return void 0; }
             if (this._popupTab === popupTab) { this._popupTab = null; }
             throw e;
         }
     }
 
     /**
-     * @param {?object} token
+     * @param {() => boolean} isCurrent
      * @returns {boolean}
      */
-    _isInvocationActive(token) {
-        return !this._application.webExtension.unloaded && (token === null || this._showContentToken === token);
+    _isInvocationActive(isCurrent) {
+        return !this._application.webExtension.unloaded && isCurrent();
     }
 
     /** @returns {Promise<?{id: number}>} */

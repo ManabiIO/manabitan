@@ -13,6 +13,7 @@ let sqlite3;
 /** @type {import('@sqlite.org/sqlite-wasm').Database[]} */
 const connections = [];
 const metadataTables = ['termMeta', 'kanji', 'kanjiMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts'];
+const glossaryTables = ['termGlossaryTokens', 'termGlossarySearchTerms', 'dictionaryGlossarySearchIndex'];
 const stagingTitle = 'JMdict [update-staging health-test]';
 
 beforeAll(async () => { sqlite3 = await sqlite3InitModule(); });
@@ -31,6 +32,10 @@ function createDatabase() {
         CREATE TABLE termEntryContent(id INTEGER PRIMARY KEY);
         CREATE TABLE terms(entryContentId INTEGER);
     `);
+    for (const table of glossaryTables) {
+        connection.exec(`CREATE TABLE ${table}(dictionary TEXT)`);
+        connection.exec({sql: `INSERT INTO ${table} VALUES (?), (?)`, bind: ['JMdict', stagingTitle]});
+    }
     const oldSummary = {title: 'JMdict', revision: 'test', version: 3, sequenced: false, styles: '', importDate: 0, prefixWildcardsSupported: true, importSuccess: true, termRecordStorageName: 'old-storage', storageGenerationId: 'old-generation'};
     const newSummary = {...oldSummary, title: stagingTitle, termRecordStorageName: 'new-storage', storageGenerationId: 'new-generation'};
     connection.exec({sql: 'INSERT INTO dictionaries VALUES (1, ?, 3, ?), (2, ?, 3, ?)', bind: [oldSummary.title, JSON.stringify(oldSummary), stagingTitle, JSON.stringify(newSummary)]});
@@ -191,6 +196,9 @@ describe('generation-owned durable dictionary health', () => {
         expect(connection.selectObjects('SELECT * FROM dictionaryStorageHealth')).toEqual(beforeHealth);
         for (const table of metadataTables) {
             expect(connection.selectObjects(`SELECT * FROM ${table}`)).toEqual([{dictionary: 'JMdict', value: 'old'}, {dictionary: stagingTitle, value: 'new'}]);
+        }
+        for (const table of glossaryTables) {
+            expect(connection.selectValues(`SELECT dictionary FROM ${table}`)).toEqual(['JMdict', stagingTitle]);
         }
         expect(database._getTermRecordStorageName('JMdict')).toBe('old-storage');
     });

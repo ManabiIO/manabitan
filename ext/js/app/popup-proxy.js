@@ -18,6 +18,7 @@
 
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {log} from '../core/log.js';
+import {generateId} from '../core/utilities.js';
 
 /**
  * This class is a proxy for a Popup that is hosted in a different frame.
@@ -34,6 +35,10 @@ export class PopupProxy extends EventDispatcher {
      */
     constructor(application, id, depth, frameId, frameOffsetForwarder) {
         super();
+        /** @type {string} */
+        this._publicationSource = generateId(16);
+        /** @type {number} */
+        this._publicationGeneration = 0;
         /** @type {import('../application.js').Application} */
         this._application = application;
         /** @type {string} */
@@ -57,6 +62,8 @@ export class PopupProxy extends EventDispatcher {
         this._frameOffsetExpireTimeout = 1000;
         /** @type {?object} */
         this._showContentToken = null;
+        /** @type {?object} */
+        this._positionToken = null;
     }
 
     /**
@@ -159,7 +166,9 @@ export class PopupProxy extends EventDispatcher {
      */
     async hide(changeFocus) {
         this._showContentToken = null;
-        await this._invokeSafe('popupFactoryHide', {id: this._id, changeFocus}, void 0);
+        this._positionToken = null;
+        const publication = {source: this._publicationSource, generation: ++this._publicationGeneration};
+        await this._invokeSafe('popupFactoryHide', {id: this._id, changeFocus, publication}, void 0);
     }
 
     /**
@@ -210,24 +219,47 @@ export class PopupProxy extends EventDispatcher {
      * Shows and updates the positioning and content of the popup.
      * @param {import('popup').ContentDetails} details Settings for the outer popup.
      * @param {?import('display').ContentDetails} displayDetails The details parameter passed to `Display.setContent`.
+     * @param {import('popup').PublicationGuard} [guard]
      * @returns {Promise<void>}
      */
-    async showContent(details, displayDetails) {
+    async showContent(details, displayDetails, guard) {
         const token = {};
-        this._showContentToken = token;
-        if (this._frameOffsetForwarder !== null) {
-            const sourceRects = details.sourceRects.map((rect) => ({...rect}));
-            details = {...details, sourceRects};
-            await this._updateFrameOffset();
-            if (this._showContentToken !== token || this._frameOffsetUpdatedAt === null) { return; }
-            for (const sourceRect of sourceRects) {
-                sourceRect.left += this._frameOffsetX;
-                sourceRect.top += this._frameOffsetY;
-                sourceRect.right += this._frameOffsetX;
-                sourceRect.bottom += this._frameOffsetY;
-            }
+        if (displayDetails === null) { this._positionToken = token; } else {
+            this._showContentToken = token;
+            this._positionToken = null;
         }
-        await this._invokeSafe('popupFactoryShowContent', {id: this._id, details, displayDetails}, void 0);
+        const generation = displayDetails === null ? this._publicationGeneration : ++this._publicationGeneration;
+        const publication = generation > 0 ? {source: this._publicationSource, generation} : void 0;
+        const isCurrent = () => (displayDetails === null ? this._positionToken === token : this._showContentToken === token) && generation === this._publicationGeneration && (typeof guard === 'undefined' || guard.isCurrent());
+        if (!isCurrent()) { return; }
+        let cancelled = false;
+        const cancel = () => {
+            if (cancelled) { return; }
+            cancelled = true;
+            if (typeof publication === 'undefined') { return; }
+            void this._invokeSafe('popupFactoryCancelPublication', {id: this._id, publication}, void 0).catch((error) => {
+                if (!this._application.webExtension.unloaded) { log.error(error); }
+            });
+        };
+        const unsubscribe = guard?.subscribe?.(cancel);
+        try {
+            if (this._frameOffsetForwarder !== null) {
+                const sourceRects = details.sourceRects.map((rect) => ({...rect}));
+                details = {...details, sourceRects};
+                await this._updateFrameOffset();
+                if (cancelled || !isCurrent() || this._frameOffsetUpdatedAt === null) { return; }
+                for (const sourceRect of sourceRects) {
+                    sourceRect.left += this._frameOffsetX;
+                    sourceRect.top += this._frameOffsetY;
+                    sourceRect.right += this._frameOffsetX;
+                    sourceRect.bottom += this._frameOffsetY;
+                }
+            }
+            if (cancelled || !isCurrent()) { return; }
+            await this._invokeSafe('popupFactoryShowContent', {id: this._id, details, displayDetails, publication}, void 0);
+        } finally {
+            unsubscribe?.();
+        }
     }
 
     /**

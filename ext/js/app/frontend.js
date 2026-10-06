@@ -27,6 +27,7 @@ import {TextSourceElement} from '../dom/text-source-element.js';
 import {TextSourceGenerator} from '../dom/text-source-generator.js';
 import {TextSourceRange} from '../dom/text-source-range.js';
 import {TextScanner} from '../language/text-scanner.js';
+import {installReaderLookupIntegration} from './reader-lookup-integration.js';
 
 const JAPANESE_TEXT_PATTERN = /[\u3040-\u30ff\u3400-\u9fff]+/g;
 const JAPANESE_PARTICLE_BOUNDARY_PATTERN = /[はがをにへでとものや]/u;
@@ -125,6 +126,8 @@ export class Frontend {
         });
         /** @type {boolean} */
         this._textScannerHasBeenEnabled = false;
+        /** @type {import('./reader-lookup-bridge.js').ReaderLookupBridge|null} */
+        this._readerLookupBridge = null;
         /** @type {Map<'default'|'window'|'iframe'|'proxy', Promise<?import('popup').PopupAny>>} */
         this._popupCache = new Map();
         /** @type {EventListenerCollection} */
@@ -226,6 +229,14 @@ export class Frontend {
                 // Ignore exceptions which may occur due to being on an unsupported page (e.g. about:blank)
             }
 
+            if (this._readerLookupBridge === null) {
+                const bridge = installReaderLookupIntegration(this);
+                this._readerLookupBridge = bridge;
+                cleanups.push(() => {
+                    bridge.dispose();
+                    if (this._readerLookupBridge === bridge) { this._readerLookupBridge = null; }
+                });
+            }
             this._textScanner.prepare();
 
             listeners.addEventListener(window, 'resize', this._onResize.bind(this), false);
@@ -465,6 +476,7 @@ export class Frontend {
      * @returns {Promise<void>}
      */
     async _onOptionsUpdated() {
+        this._readerLookupBridge?.invalidate();
         this._updatePageDebugState({lastSearchState: 'options-updated'});
         this._optionsUpdateSearchCount = (this._optionsUpdateSearchCount ?? 0) + 1;
         let token;
@@ -491,6 +503,7 @@ export class Frontend {
      */
     async _onDatabaseUpdated({type}) {
         if (type !== 'dictionary') { return; }
+        this._readerLookupBridge?.invalidate();
         this._updatePageDebugState({lastSearchState: 'dictionary-updated'});
         this._dictionaryUpdateSearchCount = (this._dictionaryUpdateSearchCount ?? 0) + 1;
         let token;
@@ -543,6 +556,7 @@ export class Frontend {
      * @param {import('text-scanner').EventArgument<'searchSuccess'>} details
      */
     _onSearchSuccess({type, dictionaryEntries, dictionaryAvailability, sentence, inputInfo: {eventType, detail: inputInfoDetail}, textSource, optionsContext, detail, pageTheme}) {
+        this._readerLookupBridge?.invalidate();
         this._debugSearchSuccessCount += 1;
         const searchSuccessAt = safePerformance.now();
         this._updatePageDebugState({
@@ -558,7 +572,7 @@ export class Frontend {
             const focus2 = inputInfoDetail.focus;
             if (typeof focus2 === 'boolean') { focus = focus2; }
         }
-        this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme, searchSuccessAt, dictionaryAvailability);
+        this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme, searchSuccessAt, void 0, dictionaryAvailability);
     }
 
     /** */
@@ -619,6 +633,7 @@ export class Frontend {
      * @param {boolean} passive
      */
     _clearSelection(passive) {
+        this._readerLookupBridge?.invalidate();
         this._stopClearSelectionDelayed();
         if (this._popup !== null) {
             void this._popup.clearAutoPlayTimer();
@@ -1366,7 +1381,8 @@ export class Frontend {
      */
     async _ignorePoint(x, y) {
         try {
-            return this._popup !== null && await this._popup.containsPoint(x, y);
+            return this._readerLookupBridge?.ownsPoint(x, y) === true ||
+            (this._popup !== null && await this._popup.containsPoint(x, y));
         } catch (e) {
             if (!this._application.webExtension.unloaded) {
                 throw e;
@@ -1392,9 +1408,11 @@ export class Frontend {
      * @param {import('settings').OptionsContext} optionsContext
      * @param {'dark' | 'light'} pageTheme
      * @param {number} searchSuccessAt
+     * @param {import('popup').PublicationGuard} [guard]
      * @param {import('translator').DictionaryAvailability[]} [dictionaryAvailability]
      */
-    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now(), dictionaryAvailability) {
+    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now(), guard, dictionaryAvailability) {
+        if (guard && !guard.isCurrent()) { return; }
         const query = textSource.text();
         const {url} = optionsContext;
         /** @type {import('display').HistoryState} */
@@ -1434,7 +1452,7 @@ export class Frontend {
             details.params.full = textSource.fullContent;
             details.params['full-visible'] = 'true';
         }
-        void this._showPopupContent(textSource, optionsContext, details, searchSuccessAt);
+        void this._showPopupContent(textSource, optionsContext, details, searchSuccessAt, guard);
     }
 
     /**
@@ -1442,9 +1460,10 @@ export class Frontend {
      * @param {?import('settings').OptionsContext} optionsContext
      * @param {?import('display').ContentDetails} details
      * @param {number} searchSuccessAt
+     * @param {import('popup').PublicationGuard} [guard]
      * @returns {Promise<void>}
      */
-    _showPopupContent(textSource, optionsContext, details, searchSuccessAt = safePerformance.now()) {
+    _showPopupContent(textSource, optionsContext, details, searchSuccessAt = safePerformance.now(), guard) {
         const showRequestedAt = safePerformance.now();
         this._updatePageDebugState({
             popupShowRequestedAt: Math.round(showRequestedAt),
@@ -1465,6 +1484,7 @@ export class Frontend {
                     writingMode: textSource.getWritingMode(),
                 },
                 details,
+                guard,
             ) :
             Promise.resolve()
         );

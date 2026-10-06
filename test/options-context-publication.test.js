@@ -57,6 +57,8 @@ function createOwner(kind) {
     const fields = {
         _application: {api: {optionsGet}},
         _optionsContext: null,
+        _publicationGeneration: 0,
+        _cancelPendingPublication: null,
         _optionsContextRequest: null,
         _frameConnected: true,
         _themeController: {updateTheme: publish},

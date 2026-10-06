@@ -20,4 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.21.0'
-      - run: node --test test/search/search.test.mjs test/util/search-refresh-cases.js
+      - run: >-
+          node --test
+          test/search/search.test.mjs
+          test/search/glossary-search.test.mjs
+          test/util/search-refresh-cases.js

@@ -37,6 +37,8 @@ export class PopupFactory {
         this._frameOffsetForwarder = new FrameOffsetForwarder(application.crossFrame);
         /** @type {Map<string, import('popup').PopupAny>} */
         this._popups = new Map();
+        /** @type {Map<string, Map<string, {generation: number, cancelled: boolean, listeners: Set<() => void>}>>} */
+        this._publications = new Map();
         /** @type {Map<string, {popup: import('popup').PopupAny, token: string}[]>} */
         this._allPopupVisibilityTokenMap = new Map();
         /** @type {boolean} */
@@ -59,6 +61,7 @@ export class PopupFactory {
             ['popupFactoryClearVisibleOverride', this._onApiClearVisibleOverride.bind(this)],
             ['popupFactoryContainsPoint',        this._onApiContainsPoint.bind(this)],
             ['popupFactoryShowContent',          this._onApiShowContent.bind(this)],
+            ['popupFactoryCancelPublication',    this._onApiCancelPublication.bind(this)],
             ['popupFactorySetCustomCss',         this._onApiSetCustomCss.bind(this)],
             ['popupFactoryClearAutoPlayTimer',   this._onApiClearAutoPlayTimer.bind(this)],
             ['popupFactorySetContentScale',      this._onApiSetContentScale.bind(this)],
@@ -265,7 +268,8 @@ export class PopupFactory {
     }
 
     /** @type {import('cross-frame-api').ApiHandler<'popupFactoryHide'>} */
-    async _onApiHide({id, changeFocus}) {
+    async _onApiHide({id, changeFocus, publication}) {
+        if (!this._acceptPublication(id, publication)) { return; }
         const popup = this._getPopup(id);
         await popup.hide(changeFocus);
     }
@@ -298,7 +302,8 @@ export class PopupFactory {
     }
 
     /** @type {import('cross-frame-api').ApiHandler<'popupFactoryShowContent'>} */
-    async _onApiShowContent({id, details, displayDetails}) {
+    async _onApiShowContent({id, details, displayDetails, publication}) {
+        if (!this._acceptPublication(id, publication)) { return; }
         const popup = this._getPopup(id);
         if (!this._popupCanShow(popup)) { return; }
 
@@ -311,7 +316,60 @@ export class PopupFactory {
             sourceRect.bottom += offset.y;
         }
 
-        return await popup.showContent(details, displayDetails);
+        return await popup.showContent(details, displayDetails, {
+            isCurrent: () => {
+                if (typeof publication === 'undefined') { return true; }
+                const state = this._publications.get(id)?.get(publication.source);
+                return typeof state !== 'undefined' && state.generation === publication.generation && !state.cancelled;
+            },
+            subscribe: (cancel) => {
+                if (typeof publication === 'undefined') { return () => {}; }
+                const state = this._publications.get(id)?.get(publication.source);
+                if (typeof state === 'undefined' || state.generation !== publication.generation || state.cancelled) {
+                    cancel();
+                    return () => {};
+                }
+                state.listeners.add(cancel);
+                return () => { state.listeners.delete(cancel); };
+            },
+        });
+    }
+
+    /** @type {import('cross-frame-api').ApiHandler<'popupFactoryCancelPublication'>} */
+    _onApiCancelPublication({id, publication}) {
+        if (!this._acceptPublication(id, publication)) { return; }
+        const state = this._publications.get(id)?.get(publication.source);
+        if (typeof state === 'undefined') { return; }
+        state.cancelled = true;
+        for (const cancel of state.listeners) { cancel(); }
+        state.listeners.clear();
+    }
+
+    /**
+     * @param {string} id
+     * @param {import('popup').PublicationToken} [publication]
+     * @returns {boolean}
+     */
+    _acceptPublication(id, publication) {
+        if (typeof publication === 'undefined') { return true; }
+        if (publication === null || typeof publication.source !== 'string' || publication.source.length === 0 || publication.source.length > 64 || !Number.isSafeInteger(publication.generation) || publication.generation <= 0) { return false; }
+        this._getPopup(id); // Do not allocate state for unknown popups.
+        let sources = this._publications.get(id);
+        if (typeof sources === 'undefined') {
+            sources = new Map();
+            this._publications.set(id, sources);
+        }
+        const state = sources.get(publication.source);
+        // One entry per proxy, not lookup. Keep tombstones for the factory lifetime;
+        // eviction would admit late stale RPCs from a navigated frame.
+        if (typeof state !== 'undefined' && (state.generation > publication.generation || (state.generation === publication.generation && state.cancelled))) { return false; }
+        if (typeof state !== 'undefined' && state.generation === publication.generation) { return true; }
+        if (typeof state !== 'undefined') {
+            for (const cancel of state.listeners) { cancel(); }
+            state.listeners.clear();
+        }
+        sources.set(publication.source, {generation: publication.generation, cancelled: false, listeners: new Set()});
+        return true;
     }
 
     /** @type {import('cross-frame-api').ApiHandler<'popupFactorySetCustomCss'>} */

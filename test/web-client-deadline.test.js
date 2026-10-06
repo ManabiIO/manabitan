@@ -8,5 +8,5 @@ test('serialized web-client deadline regressions', () => {
         encoding: 'utf8',
         timeout: 10000,
     });
-    expect(output).toContain('11 cases; 0 failures');
+    expect(output).toContain('12 cases; 0 failures');
 });

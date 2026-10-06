@@ -21,8 +21,9 @@ import {DynamicProperty} from '../core/dynamic-property.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
+import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
-import {deepEqual} from '../core/utilities.js';
+import {deepEqual, generateId} from '../core/utilities.js';
 import {addFullscreenChangeEventListener, computeZoomScale, convertRectZoomCoordinates, getFullscreenElement} from '../dom/document-util.js';
 import {loadStyle} from '../dom/style-util.js';
 import {checkPopupPreviewURL} from '../pages/settings/popup-preview-controller.js';
@@ -42,6 +43,14 @@ export class Popup extends EventDispatcher {
      */
     constructor(application, id, depth, frameId, childrenSupported) {
         super();
+        /** @type {number} */
+        this._publicationGeneration = 0;
+        /** @type {string} */
+        this._publicationSource = generateId(16);
+        /** @type {number} */
+        this._optionsGeneration = 0;
+        /** @type {?(() => void)} */
+        this._cancelPendingPublication = null;
         /** @type {import('../application.js').Application} */
         this._application = application;
         /** @type {string} */
@@ -69,7 +78,7 @@ export class Popup extends EventDispatcher {
         /** @type {?import('settings').OptionsContext} */
         this._optionsContext = null;
         // Retain failed requests for existing waiters; new consumers retry them.
-        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
+        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean, isCurrent: () => boolean}} */
         this._optionsContextRequest = null;
         /** @type {number} */
         this._contentScale = 1;
@@ -232,10 +241,13 @@ export class Popup extends EventDispatcher {
      * @param {import('settings').OptionsContext} optionsContext The options context object.
      */
     async setOptionsContext(optionsContext) {
-        const promise = this._setOptionsContext(optionsContext);
+        this._cancelPendingPublication?.();
+        const generation = ++this._publicationGeneration;
+        const isCurrent = () => generation === this._publicationGeneration;
+        const promise = this._setOptionsContext(optionsContext, isCurrent);
         const request = this._optionsContextRequest;
         await promise;
-        if (this._optionsContextRequest === request && this._frameConnected) {
+        if (isCurrent() && this._optionsContextRequest === request && this._frameConnected) {
             await this._invokeSafe('displaySetOptionsContext', {optionsContext});
         }
     }
@@ -282,7 +294,8 @@ export class Popup extends EventDispatcher {
      * @param {boolean} changeFocus Whether or not the parent popup or host frame should be focused.
      */
     hide(changeFocus) {
-        this._showContentToken = null;
+        this._cancelPendingPublication?.();
+        ++this._publicationGeneration;
         this.stopHideDelayed();
         if (this._child !== null) {
             this._child.hide(false);
@@ -374,34 +387,58 @@ export class Popup extends EventDispatcher {
      * Shows and updates the positioning and content of the popup.
      * @param {import('popup').ContentDetails} details Settings for the outer popup.
      * @param {?import('display').ContentDetails} displayDetails The details parameter passed to `Display.setContent`.
+     * @param {import('popup').PublicationGuard} [guard]
      * @returns {Promise<void>}
      */
-    async showContent(details, displayDetails) {
-        if (this._optionsContext === null) { throw new Error('Options not assigned'); }
-        const token = {};
-        this._showContentToken = token;
-        this._updateHostPageDebugState({
-            popupShowAttemptCount: this._incrementHostDebugCounter('popupShowAttemptCount'),
-        });
+    async showContent(details, displayDetails, guard) {
+        if (displayDetails !== null) { this._cancelPendingPublication?.(); }
+        const generation = displayDetails === null ? this._publicationGeneration : ++this._publicationGeneration;
+        /** @type {import('popup').PublicationToken} */
+        const publication = {source: this._publicationSource, generation};
+        let dispatched = false;
+        let cancelled = false;
+        const cancel = () => {
+            if (cancelled) { return; }
+            cancelled = true;
+            if (dispatched) {
+                void this._invokeSafe('displayCancelPublication', {publication}).catch((error) => {
+                    if (!this._application.webExtension.unloaded) { log.error(error); }
+                });
+            }
+        };
+        if (displayDetails !== null) { this._cancelPendingPublication = cancel; }
+        const isCurrent = () => !cancelled && generation === this._publicationGeneration && (typeof guard === 'undefined' || guard.isCurrent());
+        const unsubscribe = guard?.subscribe?.(cancel);
+        try {
+            if (!isCurrent()) { return; }
+            if (displayDetails === null && !this.isVisibleSync()) { return; }
+            if (this._optionsContext === null) { throw new Error('Options not assigned'); }
+            this._updateHostPageDebugState({
+                popupShowAttemptCount: this._incrementHostDebugCounter('popupShowAttemptCount'),
+            });
 
-        const {optionsContext, sourceRects, writingMode} = details;
-        if (optionsContext !== null) {
-            await this._setOptionsContextIfDifferent(optionsContext);
+            const {optionsContext, sourceRects, writingMode} = details;
+            if (optionsContext !== null) {
+                await this._setOptionsContextIfDifferent(optionsContext, isCurrent);
+            }
+            if (!isCurrent()) { return; }
+
+            // If there's already a timer running on the same popup from a previous lookup, reset it
+            this.stopHideDelayed();
+
+            if (displayDetails !== null) {
+                safePerformance.mark('invokeDisplaySetContent:start');
+                const injected = await this._inject();
+                if (!injected || !isCurrent()) { return; }
+                dispatched = true;
+                await this._invokeSafe('displaySetContent', {details: displayDetails, publication});
+            }
+            if (!isCurrent()) { return; }
+            await this._show(sourceRects, writingMode, isCurrent);
+        } finally {
+            if (this._cancelPendingPublication === cancel) { this._cancelPendingPublication = null; }
+            unsubscribe?.();
         }
-        if (this._showContentToken !== token) { return; }
-
-        // If there's already a timer running on the same popup from a previous lookup, reset it
-        this.stopHideDelayed();
-
-        if (displayDetails !== null) {
-            safePerformance.mark('invokeDisplaySetContent:start');
-            const injected = await this._inject();
-            if (!injected || this._showContentToken !== token) { return; }
-            await this._invokeSafe('displaySetContent', {details: displayDetails});
-            if (this._showContentToken !== token) { return; }
-        }
-
-        await this._show(sourceRects, writingMode, token);
     }
 
     /**
@@ -410,9 +447,23 @@ export class Popup extends EventDispatcher {
      * @returns {Promise<void>}
      */
     async prewarmContent(displayDetails) {
+        if (this.isVisibleSync() || this._cancelPendingPublication !== null) { return; }
+        const generation = ++this._publicationGeneration;
         const injected = await this._inject();
-        if (!injected) { return; }
-        await this._invokeSafe('displaySetContent', {details: displayDetails});
+        if (!injected || generation !== this._publicationGeneration || this.isVisibleSync() || this._cancelPendingPublication !== null) { return; }
+        /** @type {import('popup').PublicationToken} */
+        const publication = {source: this._publicationSource, generation};
+        const cancel = () => {
+            void this._invokeSafe('displayCancelPublication', {publication}).catch((error) => {
+                if (!this._application.webExtension.unloaded) { log.error(error); }
+            });
+        };
+        this._cancelPendingPublication = cancel;
+        try {
+            await this._invokeSafe('displaySetContent', {details: displayDetails, publication});
+        } finally {
+            if (this._cancelPendingPublication === cancel) { this._cancelPendingPublication = null; }
+        }
     }
 
     /**
@@ -798,11 +849,11 @@ export class Popup extends EventDispatcher {
     /**
      * @param {import('popup').Rect[]} sourceRects
      * @param {import('document-util').NormalizedWritingMode} writingMode
-     * @param {object} token
+     * @param {() => boolean} [isCurrent]
      */
-    async _show(sourceRects, writingMode, token) {
+    async _show(sourceRects, writingMode, isCurrent = () => true) {
         const injected = await this._inject();
-        if (!injected || this._showContentToken !== token) { return; }
+        if (!injected || !isCurrent()) { return; }
 
         const viewport = this._getViewport(this._scaleRelativeToVisualViewport);
         let {left, top, width, height, after, below} = this._getPosition(sourceRects, writingMode, viewport);
@@ -1254,11 +1305,12 @@ export class Popup extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {() => boolean} [isCurrent]
      * @returns {Promise<void>}
      */
-    _setOptionsContext(optionsContext) {
-        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
-        const request = {optionsContext, promise: null, failed: false};
+    _setOptionsContext(optionsContext, isCurrent = () => true) {
+        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean, isCurrent: () => boolean}} */
+        const request = {optionsContext, promise: null, failed: false, isCurrent};
         this._optionsContextRequest = request;
         request.promise = this._loadOptionsContext(optionsContext, request).catch((error) => {
             request.failed = true;
@@ -1269,11 +1321,11 @@ export class Popup extends EventDispatcher {
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
-     * @param {object} request
+     * @param {{isCurrent: () => boolean}} request
      */
     async _loadOptionsContext(optionsContext, request) {
         const options = await this._application.api.optionsGet(optionsContext);
-        if (this._optionsContextRequest !== request) { return; }
+        if (this._optionsContextRequest !== request || !request.isCurrent()) { return; }
         const {general, scanning} = options;
         this._themeController.theme = general.popupTheme;
         this._themeController.themePreset = general.popupThemePreset;
@@ -1300,19 +1352,21 @@ export class Popup extends EventDispatcher {
         this._hidePopupOnCursorExit = scanning.hidePopupOnCursorExit;
         this._hidePopupOnCursorExitDelay = scanning.hidePopupOnCursorExitDelay;
         await this.updateTheme();
-        if (this._optionsContextRequest === request) {
+        if (this._optionsContextRequest === request && request.isCurrent()) {
             this._optionsContext = optionsContext;
         }
     }
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {() => boolean} [isCurrent]
      */
-    async _setOptionsContextIfDifferent(optionsContext) {
+    async _setOptionsContextIfDifferent(optionsContext, isCurrent = () => true) {
+        if (!isCurrent()) { return; }
         let request = this._optionsContextRequest;
         let promise;
-        if (request && !request.failed && deepEqual(request.optionsContext, optionsContext)) { promise = request.promise; } else {
-            promise = this._setOptionsContext(optionsContext);
+        if (request && !request.failed && request.isCurrent() && deepEqual(request.optionsContext, optionsContext)) { promise = request.promise; } else {
+            promise = this._setOptionsContext(optionsContext, isCurrent);
             request = this._optionsContextRequest;
         }
         for (;;) {

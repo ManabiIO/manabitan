@@ -76,6 +76,8 @@ export class TextScanner extends EventDispatcher {
 
         /** @type {boolean} */
         this._isPrepared = false;
+        /** @type {number} */
+        this._externalLookupGeneration = 0;
         /** @type {?string} */
         this._includeSelector = null;
         /** @type {?string} */
@@ -488,6 +490,25 @@ export class TextScanner extends EventDispatcher {
     }
 
     /**
+     * Cancel any queued/in-flight scanner result before an external exact lookup.
+     * @returns {void}
+     */
+    beginExternalLookup() {
+        ++this._externalLookupGeneration;
+        this._activeLookupSequence = null;
+        this._pendingLookup = false;
+        this._queuedLookup = null;
+        this._queuedMouseMoveLookup = null;
+        this._scanTimerClear();
+        if (this._mouseMoveLookupTimer !== null) {
+            clearTimeout(this._mouseMoveLookupTimer);
+            this._mouseMoveLookupTimer = null;
+        }
+        this._inputInfoCurrent = null;
+        this.clearSelection();
+    }
+
+    /**
      * @returns {Promise<boolean>}
      */
     async searchLast() {
@@ -567,11 +588,12 @@ export class TextScanner extends EventDispatcher {
         const isManual = searchRequest?.type === 'manual';
         let searchGeneration = this._searchGeneration;
         const searchStartedAt = safePerformance.now();
+        const externalLookupGeneration = this._externalLookupGeneration;
         let contextDurationMs = 0;
         let findDurationMs = 0;
         try {
             safePerformance.mark('scanner:_search:start');
-            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
             // Clone mutable range state, not ownership of creator-owned DOM
             // resources. Manual callers may reuse a source while a reader waits.
             if (isManual) {
@@ -617,7 +639,7 @@ export class TextScanner extends EventDispatcher {
             const getSearchContextPromise = this._getSearchContext();
             const getSearchContextResult = getSearchContextPromise instanceof Promise ? await getSearchContextPromise : getSearchContextPromise;
             contextDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
-            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
             const {detail} = getSearchContextResult;
             const optionsContext = this._createOptionsContextForInput(getSearchContextResult.optionsContext, inputInfo);
 
@@ -632,7 +654,7 @@ export class TextScanner extends EventDispatcher {
             phaseStartedAt = safePerformance.now();
             const result = await this._findDictionaryEntries(textSource, searchTerms, searchKanji, optionsContext);
             findDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
-            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
             if (result !== null) {
                 ({dictionaryEntries, sentence, type, dictionaryAvailability} = result);
             } else if (showEmpty || (textSource instanceof TextSourceElement && await this._isTextLookupWorthy(textSource.content))) {
@@ -640,7 +662,7 @@ export class TextScanner extends EventDispatcher {
                 dictionaryEntries = [];
                 sentence = {text: '', offset: 0};
             }
-            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
 
             if (dictionaryEntries !== null && sentence !== null) {
                 this._inputInfoCurrent = inputInfo;
@@ -688,7 +710,7 @@ export class TextScanner extends EventDispatcher {
                 return false;
             }
         } catch (error) {
-            if (this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
             this.allowCurrentTextSourceRetry(textSource);
             this.trigger('searchError', {
                 error: error instanceof Error ? error : new Error(`A search error occurred: ${error}`),

@@ -17,6 +17,9 @@ function createShowingPopup() {
     const popup = /** @type {Popup} */ (Object.create(Popup.prototype));
     for (const [name, value] of Object.entries({
         _optionsContext: {url: 'https://example.test'},
+        _publicationGeneration: 0,
+        _publicationSource: 'visibility-test',
+        _cancelPendingPublication: null,
         _visible: {value: false},
         _child: null,
         _hidePopupTimer: null,
@@ -60,7 +63,8 @@ describe('Popup visibility', () => {
         const popup = createShowingPopup();
         const injected = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
         const inject = vi.spyOn(popup, '_inject').mockReturnValue(injected.promise);
-        const shown = popup.showContent(contentDetails(), null);
+        const display = /** @type {import('display').ContentDetails} */ (/** @type {unknown} */ ({}));
+        const shown = popup.showContent(contentDetails(), display);
         expect(inject).toHaveBeenCalledTimes(1);
         popup.hide(false);
         injected.resolve(true);
@@ -79,7 +83,7 @@ describe('Popup visibility', () => {
         delivered.resolve();
         await shown;
         expect(popup._setVisible).not.toHaveBeenCalledWith(true);
-        await popup.showContent(contentDetails(), null);
+        await popup.showContent(contentDetails(), display);
         expect(popup._setVisible).toHaveBeenCalledExactlyOnceWith(true);
     });
 
@@ -87,8 +91,9 @@ describe('Popup visibility', () => {
         const popup = createShowingPopup();
         const older = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
         vi.spyOn(popup, '_inject').mockReturnValueOnce(older.promise).mockResolvedValue(true);
-        const first = popup.showContent(contentDetails(10), null);
-        await popup.showContent(contentDetails(50), null);
+        const display = /** @type {import('display').ContentDetails} */ (/** @type {unknown} */ ({}));
+        const first = popup.showContent(contentDetails(10), display);
+        await popup.showContent(contentDetails(50), display);
         expect(popup._frame.style.left).toBe('50px');
         older.resolve(true);
         await first;
@@ -100,7 +105,8 @@ describe('Popup visibility', () => {
         const popup = createShowingPopup();
         const options = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
         vi.spyOn(popup, '_setOptionsContextIfDifferent').mockReturnValue(options.promise);
-        const shown = popup.showContent({...contentDetails(), optionsContext: {url: 'https://other.test', depth: 0}}, null);
+        const display = /** @type {import('display').ContentDetails} */ (/** @type {unknown} */ ({}));
+        const shown = popup.showContent({...contentDetails(), optionsContext: {url: 'https://other.test', depth: 0}}, display);
         popup.hide(false);
         options.resolve();
         await shown;
@@ -115,10 +121,12 @@ describe('Popup visibility', () => {
         vi.spyOn(popup, '_inject').mockReturnValueOnce(older.promise).mockResolvedValue(true);
         const display = /** @type {import('display').ContentDetails} */ (/** @type {unknown} */ ({}));
         const first = popup.showContent(contentDetails(10), display);
-        await popup.showContent(contentDetails(50), null);
+        await popup.showContent(contentDetails(50), display);
         older.resolve(true);
         await first;
-        expect(popup._invokeSafe).not.toHaveBeenCalled();
+        expect(popup._invokeSafe).toHaveBeenCalledExactlyOnceWith('displaySetContent', {
+            details: display, publication: {source: 'visibility-test', generation: 2},
+        });
         expect(popup._frame.style.left).toBe('50px');
     });
 });

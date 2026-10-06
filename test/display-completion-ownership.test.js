@@ -68,7 +68,7 @@ function content(query, historyMode = 'new') {
 }
 
 /**
- * @param {Promise<void>} promise
+ * @param {Promise<boolean>} promise
  * @returns {{done: boolean}}
  */
 function observe(promise) {
