@@ -112,6 +112,21 @@ try {
             assert.equal((await queued).ok, true);
         });
     }
+    await scenario('active search progress renews its ordinary deadline', async ({clock, client, worker}) => {
+        let progress = 0;
+        const searched = track(client.search('house ca', false, {onProgress: () => progress++}));
+        const request = worker.request('search');
+        for (let i = 0; i < 4; i++) {
+            clock.advance(29_000);
+            assert.equal(worker.terminated, false);
+            worker.emit(request.id, {progress: {phase: 'glossary-index', processed: i + 1}});
+        }
+        assert.equal(progress, 4);
+        clock.advance(29_999);
+        assert.equal(worker.terminated, false);
+        worker.emit(request.id, {result: {version: 1, query: 'house ca'}});
+        assert.equal((await searched).ok, true);
+    });
     await scenario('queued request receives its full execution allowance', async ({clock, client, worker}) => {
         const imported = track(client.importDictionary(new Blob(['fixture'])));
         const queued = track(client.status());

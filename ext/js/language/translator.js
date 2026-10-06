@@ -113,10 +113,95 @@ export class Translator {
      */
     async findTerms(mode, text, options) {
         safePerformance.mark('translator:findTerms:start');
-        const {enabledDictionaryMap, excludeDictionaryDefinitions, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language, primaryReading, useAllFrequencyDictionaries} = options;
         const tagAggregator = new TranslatorTagAggregator();
-        let {dictionaryEntries, originalTextLength} = await this._findTermsInternal(text, options, tagAggregator, primaryReading);
+        const {dictionaryEntries, originalTextLength} = await this._findTermsInternal(text, options, tagAggregator, options.primaryReading);
+        const result = await this._finalizeTermDictionaryEntries(mode, dictionaryEntries, options, tagAggregator);
+        safePerformance.mark('translator:findTerms:end');
+        safePerformance.measure('translator:findTerms', 'translator:findTerms:start', 'translator:findTerms:end');
+        return {dictionaryEntries: result, originalTextLength};
+    }
 
+    /**
+     * Finds terms whose user-facing glossary matches Latin/English query text.
+     * Exact Japanese/deinflected lookup remains a separate, higher-priority path.
+     * @param {import('translator').FindTermsMode} mode
+     * @param {string} text
+     * @param {import('translation').FindTermsOptions} options
+     * @param {(progress: {dictionary: string, processed: number, total: number}) => void} [onProgress]
+     * @param {() => boolean} [isCancelled]
+     * @returns {Promise<{dictionaryEntries: import('dictionary').TermDictionaryEntry[], originalTextLength: number}>}
+     */
+    async findTermsByGlossary(mode, text, options, onProgress = () => {}, isCancelled = () => false) {
+        safePerformance.mark('translator:findTermsByGlossary:start');
+        const {enabledDictionaryMap, primaryReading} = options;
+        const databaseEntries = await this._database.findTermsByGlossary(
+            text,
+            enabledDictionaryMap,
+            100,
+            onProgress,
+            isCancelled,
+        );
+        const rankByDefinitionId = new Map(databaseEntries.map(({id}, index) => [id, index]));
+        const tagAggregator = new TranslatorTagAggregator();
+        const dictionaryEntries = databaseEntries.map((databaseEntry) => {
+            const source = databaseEntry.term;
+            return this._createTermDictionaryEntryFromDatabaseEntry(
+                databaseEntry,
+                source,
+                source,
+                source,
+                [],
+                [],
+                false,
+                enabledDictionaryMap,
+                tagAggregator,
+                primaryReading,
+            );
+        });
+        const result = await this._finalizeTermDictionaryEntries(mode, dictionaryEntries, options, tagAggregator);
+        const standardOrder = new Map(result.map((entry, index) => [entry, index]));
+        /**
+         * @param {import('dictionary').TermDictionaryEntry} entry
+         * @returns {number}
+         */
+        const reverseRank = (entry) => {
+            let rank = Number.MAX_SAFE_INTEGER;
+            for (const definition of entry.definitions) {
+                const value = rankByDefinitionId.get(definition.id);
+                if (typeof value === 'number') { rank = Math.min(rank, value); }
+            }
+            return rank;
+        };
+        result.sort((a, b) => reverseRank(a) - reverseRank(b) ||
+        (standardOrder.get(a) ?? Number.MAX_SAFE_INTEGER) -
+        (standardOrder.get(b) ?? Number.MAX_SAFE_INTEGER));
+        safePerformance.mark('translator:findTermsByGlossary:end');
+        safePerformance.measure(
+            'translator:findTermsByGlossary',
+            'translator:findTermsByGlossary:start',
+            'translator:findTermsByGlossary:end',
+        );
+        return {dictionaryEntries: result, originalTextLength: text.length};
+    }
+
+    /**
+     * Shared term post-processing for ordinary and glossary-reverse lookup.
+     * @param {import('translator').FindTermsMode} mode
+     * @param {import('translation-internal').TermDictionaryEntry[]} dictionaryEntries
+     * @param {import('translation').FindTermsOptions} options
+     * @param {TranslatorTagAggregator} tagAggregator
+     * @returns {Promise<import('dictionary').TermDictionaryEntry[]>}
+     */
+    async _finalizeTermDictionaryEntries(mode, dictionaryEntries, options, tagAggregator) {
+        const {
+            enabledDictionaryMap,
+            excludeDictionaryDefinitions,
+            sortFrequencyDictionary,
+            sortFrequencyDictionaryOrder,
+            language,
+            primaryReading,
+            useAllFrequencyDictionaries,
+        } = options;
         switch (mode) {
             case 'group':
                 dictionaryEntries = this._groupDictionaryEntriesByHeadword(language, dictionaryEntries, tagAggregator, primaryReading);
@@ -136,20 +221,22 @@ export class Translator {
         if (mode !== 'simple' || useAllFrequencyDictionaries) {
             await this._addTermMeta(dictionaryEntries, enabledDictionaryMap, tagAggregator);
             await this._expandTagGroupsAndGroup(tagAggregator.getTagExpansionTargets());
-        } else {
-            if (sortFrequencyDictionary !== null) {
-                /** @type {import('translation').TermEnabledDictionaryMap} */
-                const sortDictionaryMap = new Map();
-                const value = enabledDictionaryMap.get(sortFrequencyDictionary);
-                if (typeof value !== 'undefined') {
-                    sortDictionaryMap.set(sortFrequencyDictionary, value);
-                }
-                await this._addTermMeta(dictionaryEntries, sortDictionaryMap, tagAggregator);
+        } else if (sortFrequencyDictionary !== null) {
+            /** @type {import('translation').TermEnabledDictionaryMap} */
+            const sortDictionaryMap = new Map();
+            const value = enabledDictionaryMap.get(sortFrequencyDictionary);
+            if (typeof value !== 'undefined') {
+                sortDictionaryMap.set(sortFrequencyDictionary, value);
             }
+            await this._addTermMeta(dictionaryEntries, sortDictionaryMap, tagAggregator);
         }
 
         if (sortFrequencyDictionary !== null) {
-            this._updateSortFrequencies(dictionaryEntries, sortFrequencyDictionary, sortFrequencyDictionaryOrder === 'ascending');
+            this._updateSortFrequencies(
+                dictionaryEntries,
+                sortFrequencyDictionary,
+                sortFrequencyDictionaryOrder === 'ascending',
+            );
         }
         if (dictionaryEntries.length > 1) {
             this._sortTermDictionaryEntries(dictionaryEntries);
@@ -160,11 +247,7 @@ export class Translator {
             if (frequencies.length > 1) { this._sortTermDictionaryEntrySimpleData(frequencies); }
             if (pronunciations.length > 1) { this._sortTermDictionaryEntrySimpleData(pronunciations); }
         }
-        const withUserFacingInflections = this._addUserFacingInflections(language, dictionaryEntries);
-        safePerformance.mark('translator:findTerms:end');
-        safePerformance.measure('translator:findTerms', 'translator:findTerms:start', 'translator:findTerms:end');
-
-        return {dictionaryEntries: withUserFacingInflections, originalTextLength};
+        return this._addUserFacingInflections(language, dictionaryEntries);
     }
 
     /**

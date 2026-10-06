@@ -24,6 +24,13 @@ def write(name,title,banks,media=None):
         z.writestr('index.json',json.dumps({'title':title,'revision':'1','format':3,'sequenced':True}))
         for i,bank in enumerate(banks):z.writestr(f'term_bank_{i+1}.json',json.dumps(bank,ensure_ascii=False))
         for n,v in (media or {}).items():z.writestr(n,v)
+write('web-glossary.zip','Web Glossary',[[
+    ['猫','ねこ','','',20,['domestic house cat companion'],1,''],
+    ['学校','がっこう','','',15,['school educational institution'],2,''],
+    ['家','いえ','','',10,[{'type':'structured-content','content':[
+        {'tag':'span','content':'house or home'},
+        {'type':'image','path':'ignored.png','title':'home diagram','description':'residential building'}]}],3,''],
+]],None)
 write('web-interrupted.zip','Web Interrupted',(
     [[f'中断検査{bank*2000+i}','ちゅうだんけんさ','','',0,[f'Interrupted import fixture {bank*2000+i} '+('文書。'*80)],bank*2000+i,''] for i in range(2000)]
     for bank in range(80)))

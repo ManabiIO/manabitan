@@ -56,6 +56,10 @@ export class ManabiTanWebClient {
             const entry = this.pending.get(result.id);
             if (!entry) {return;}
             if ('progress' in result) {
+                // Progress from the active FIFO owner proves that the worker is
+                // still making forward progress. Give it another operation
+                // deadline without extending queued requests.
+                if (this.watchdogId === result.id) {this.updateWatchdog(true);}
                 if (!entry.callerCancelled) {entry.progress?.(result.progress);}
                 return;
             }
@@ -91,11 +95,14 @@ export class ManabiTanWebClient {
         this.pending.clear();
     }
 
-    /** The worker dispatches FIFO. Waiting requests do not own execution time. */
-    private updateWatchdog() {
+    /**
+     * The worker dispatches FIFO. Waiting requests do not own execution time.
+     * @param refresh Whether progress restarts the active request deadline.
+     */
+    private updateWatchdog(refresh = false) {
         const next = this.pending.entries().next().value;
         const id = next?.[0] ?? null;
-        if (id === this.watchdogId) {return;}
+        if (!refresh && id === this.watchdogId) {return;}
         if (this.watchdogTimer !== null) {
             clearTimeout(this.watchdogTimer);
             this.watchdogTimer = null;

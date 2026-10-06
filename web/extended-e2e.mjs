@@ -48,6 +48,42 @@ export async function runExtended({context, page, origin, fixtures, check, impor
         assert.equal(full.prefix, false);
         assert.ok(full.lookup.dictionaryEntries.length > 0);
     });
+    await check('English definition search is indexed, bounded and lower priority than Japanese lookup', async () => {
+        const imported = await importFile('web-glossary.zip');
+        const reverseTitle = imported.summary.title;
+        await page.evaluate(async (title) => {
+            await runtime.setEnabled(title, false);
+            await runtime.setEnabled('Web Frequency', false);
+        }, dictionary);
+        try {
+            const live = await page.evaluate(() => runtime.search('house ca', false));
+            assert.equal(live.glossary, true);
+            assert.equal(live.prefix, false);
+            assert.equal(live.matchedQuery, 'house ca');
+            assert.ok(live.preview.items.length > 0 && live.preview.items.length <= 2);
+            assert.equal(live.preview.items[0].term, '猫');
+
+            const full = await page.evaluate(() => runtime.search('school', true));
+            assert.equal(full.glossary, true);
+            assert.ok(full.lookup.dictionaryEntries.length > 0);
+            assert.equal(full.lookup.dictionaryEntries[0].headwords[0].term, '学校');
+
+            const japanese = await page.evaluate(() => runtime.search('gakkou', false));
+            assert.equal(japanese.glossary, false);
+            assert.equal(japanese.prefix, false);
+            assert.equal(japanese.preview.items[0].term, '学校');
+
+            const structural = await page.evaluate(() => runtime.search('ignored png', false));
+            assert.equal(structural.glossary, false);
+            assert.equal(structural.preview.items.length, 0);
+        } finally {
+            await page.evaluate(async (title) => {
+                await runtime.setEnabled(title, true);
+                await runtime.setEnabled('Web Frequency', true);
+            }, dictionary);
+            await page.evaluate((title) => runtime.deleteDictionary(title), reverseTitle);
+        }
+    });
     await check('recommendations reuse the existing ManabiTan Japanese catalog', async () => {
         const catalog = await page.evaluate(async () => (await import('/vendor/web/presets.js')).recommendedDictionaries());
         assert.ok(catalog.some((d) => d.name === 'Jitendex'));
