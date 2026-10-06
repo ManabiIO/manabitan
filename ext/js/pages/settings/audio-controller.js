@@ -49,6 +49,8 @@ export class AudioController extends EventDispatcher {
         this._audioSourceAddButton = querySelectorNotNull(document, '#audio-source-add');
         /** @type {AudioSourceEntry[]} */
         this._audioSourceEntries = [];
+        /** @type {import('core').TokenObject} */
+        this._audioSourceStateToken = {};
         /** @type {Promise<void>} */
         this._audioSourceMutationPromise = Promise.resolve();
         /** @type {HTMLInputElement} */
@@ -122,6 +124,7 @@ export class AudioController extends EventDispatcher {
         await this._queueAudioSourceMutation(async () => {
             const index = this._audioSourceEntries.indexOf(entry);
             if (index < 0) { return; }
+            const stateToken = this._audioSourceStateToken;
             this._audioSourceEntries.splice(index, 1);
             entry.cleanup();
             for (let i = index, ii = this._audioSourceEntries.length; i < ii; ++i) {
@@ -138,6 +141,9 @@ export class AudioController extends EventDispatcher {
             } catch (error) {
                 await this._refreshAudioSources();
                 throw error;
+            }
+            if (this._audioSourceStateToken !== stateToken) {
+                await this._refreshAudioSources();
             }
         });
     }
@@ -173,7 +179,11 @@ export class AudioController extends EventDispatcher {
     async mutateAudioSourceEntry(entry, callback) {
         await this._queueAudioSourceMutation(async () => {
             if (!this._audioSourceEntries.includes(entry)) { return; }
+            const stateToken = this._audioSourceStateToken;
             await callback();
+            if (this._audioSourceStateToken !== stateToken) {
+                await this._refreshAudioSources();
+            }
         });
     }
 
@@ -212,6 +222,7 @@ export class AudioController extends EventDispatcher {
         if (currentIndex < 0 || targetIndex < 0 || targetIndex >= this._audioSourceEntries.length || currentIndex === targetIndex) { return; }
 
         const optionsContext = this._settingsController.getOptionsContext();
+        const stateToken = this._audioSourceStateToken;
         // Keep the asynchronous read as a profile-switch checkpoint, but do
         // not trust its source ordering: option broadcasts can lag a preceding
         // serialized write even after that write has completed.
@@ -242,8 +253,15 @@ export class AudioController extends EventDispatcher {
         }
 
         if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        if (this._audioSourceStateToken !== stateToken) {
+            await this._refreshAudioSources();
+            return;
+        }
         currentIndex = this._audioSourceEntries.indexOf(entry);
-        if (currentIndex < 0) { return; }
+        if (currentIndex < 0) {
+            await this._refreshAudioSources();
+            return;
+        }
         this._audioSourceEntries.splice(currentIndex, 1);
         this._audioSourceEntries.splice(targetIndex, 0, entry);
         for (let i = 0, ii = this._audioSourceEntries.length; i < ii; ++i) {
@@ -258,6 +276,7 @@ export class AudioController extends EventDispatcher {
      */
     _onOptionsChanged({options, optionsContext}) {
         if (optionsContext.index !== this._settingsController.getOptionsContext().index) { return; }
+        this._audioSourceStateToken = {};
         const {
             general: {language},
             audio: {sources},
@@ -433,6 +452,7 @@ export class AudioController extends EventDispatcher {
     /** */
     async _addAudioSource() {
         await this._queueAudioSourceMutation(async () => {
+            const stateToken = this._audioSourceStateToken;
             const type = this._getUnusedAudioSourceType();
             /** @type {import('settings').AudioSourceOptions} */
             const source = {type, url: '', voice: ''};
@@ -449,6 +469,9 @@ export class AudioController extends EventDispatcher {
             } catch (error) {
                 await this._refreshAudioSources();
                 throw error;
+            }
+            if (this._audioSourceStateToken !== stateToken) {
+                await this._refreshAudioSources();
             }
         });
     }
