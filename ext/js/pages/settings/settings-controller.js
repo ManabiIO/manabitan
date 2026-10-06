@@ -47,6 +47,8 @@ export class SettingsController extends EventDispatcher {
         this._templates = new HtmlTemplateCollection();
         /** @type {import('settings').Options|null} */
         this._preparedOptionsFull = null;
+        /** @type {?import('core').TokenObject} */
+        this._optionsUpdateToken = null;
     }
 
     /** @type {import('../../application.js').Application} */
@@ -326,13 +328,26 @@ export class SettingsController extends EventDispatcher {
      * @param {boolean} canUpdateProfileIndex
      */
     async _onOptionsUpdatedInternal(canUpdateProfileIndex) {
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._optionsUpdateToken = token;
         const optionsContext = this.getOptionsContext();
         try {
             const options = await this.getOptions();
-            if (this.getOptionsContext().index !== optionsContext.index) { return; }
+            if (
+                this._optionsUpdateToken !== token ||
+                this.getOptionsContext().index !== optionsContext.index
+            ) {
+                return;
+            }
             this.trigger('optionsChanged', {options, optionsContext});
         } catch (e) {
-            if (this.getOptionsContext().index !== optionsContext.index) { return; }
+            if (
+                this._optionsUpdateToken !== token ||
+                this.getOptionsContext().index !== optionsContext.index
+            ) {
+                return;
+            }
             if (canUpdateProfileIndex) {
                 this._setProfileIndex(0, false);
                 return;
