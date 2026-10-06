@@ -247,7 +247,9 @@ export class KeyboardShortcutController {
 
     /** */
     async _reset() {
+        const optionsContext = this._settingsController.getOptionsContext();
         const value = await this.getDefaultHotkeys();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         await this._settingsController.setProfileSetting('inputs.hotkeys', value);
         await this._updateOptions();
     }
