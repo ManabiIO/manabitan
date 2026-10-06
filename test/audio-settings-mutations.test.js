@@ -41,7 +41,7 @@ function deferred() {
 
 /** @returns {TestElement} */
 function makeElement() {
-    return Object.assign(new EventTarget(), {
+    const element = Object.assign(new EventTarget(), {
         value: '',
         hidden: false,
         dataset: /** @type {Record<string, string>} */ ({}),
@@ -53,7 +53,7 @@ function makeElement() {
         appendChild(child) {
             child.parentNode?.removeChild(child);
             this.children.push(child);
-            child.parentNode = /** @type {TestElement} */ (this);
+            child.parentNode = element;
         },
         /** @param {TestElement} child */
         removeChild(child) {
@@ -74,6 +74,7 @@ function makeElement() {
         },
         querySelectorAll: () => [],
     });
+    return element;
 }
 
 /**
@@ -535,7 +536,11 @@ for (const operation of ['move', 'field']) {
         const pending = deferred();
         state.save = async () => {
             await pending.promise;
-            if (operation === 'move') { state.stored = options(['B', 'C', 'A']); } else { state.stored.audio.sources[0].url = 'saved-A'; }
+            if (operation === 'move') {
+                state.stored = options(['B', 'C', 'A']);
+            } else {
+                state.stored.audio.sources[0].url = 'saved-A';
+            }
             return [{result: true}];
         };
         const change = operation === 'move' ? controller.moveAudioSourceOptions(0, 2) : entries()[0]._setUrl('saved-A');
