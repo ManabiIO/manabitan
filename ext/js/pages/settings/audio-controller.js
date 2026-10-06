@@ -357,15 +357,20 @@ export class AudioController extends EventDispatcher {
 
     /** */
     _updateTextToSpeechVoices() {
-        const voices = (
-            typeof speechSynthesis !== 'undefined' ?
-            [...speechSynthesis.getVoices()].map((voice, index) => ({
-                voice,
-                isJapanese: this._languageTagIsJapanese(voice.lang),
-                index,
-            })) :
-            []
-        );
+        /** @type {import('audio-controller').VoiceInfo[]} */
+        let voices = [];
+        try {
+            if (typeof speechSynthesis !== 'undefined' && typeof speechSynthesis.getVoices === 'function') {
+                voices = [...speechSynthesis.getVoices()].map((voice, index) => ({
+                    voice,
+                    isJapanese: this._languageTagIsJapanese(voice.lang),
+                    index,
+                }));
+            }
+        } catch (e) {
+            // Voice discovery is best-effort; settings must remain usable when
+            // the browser speech service is temporarily unavailable.
+        }
         voices.sort(this._textToSpeechVoiceCompare.bind(this));
         this._voices = voices;
         this.trigger('voicesUpdated', {});
