@@ -15,11 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect, vi} from 'vitest';
+import {afterEach, describe, expect, vi} from 'vitest';
 import {AudioController} from '../ext/js/pages/settings/audio-controller.js';
 import {createDomTest} from './fixtures/dom-test.js';
 
 const test = createDomTest();
+
+afterEach(() => { vi.unstubAllGlobals(); });
 
 /**
  * @returns {AudioController}
@@ -52,8 +54,10 @@ describe('AudioController voice language classification', () => {
 
 
 describe('AudioController speech voice discovery', () => {
-    test('a speech-service failure yields an empty voice list without breaking settings', ({window}) => {
-        window.speechSynthesis.getVoices = () => { throw new Error('speech service unavailable'); };
+    test('a speech-service failure yields an empty voice list without breaking settings', () => {
+        vi.stubGlobal('speechSynthesis', {
+            getVoices() { throw new Error('speech service unavailable'); },
+        });
         const controller = createControllerForInternalTests();
         Reflect.set(controller, '_language', 'ja');
         Reflect.set(controller, '_voices', [{voice: /** @type {SpeechSynthesisVoice} */ ({}), isJapanese: false, index: 0}]);
