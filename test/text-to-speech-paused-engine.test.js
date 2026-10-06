@@ -115,13 +115,13 @@ test('stop does not itself resume globally paused speech', () => {
     assert.equal(stats.spoken.length, 0);
 });
 
-test('a resume failure releases the startup waiter and a later explicit play recovers', async () => {
+test('a resume failure rejects with its cause and a later explicit play recovers', async () => {
     const {player, engine, stats, start} = setup();
     stats.failResume = true;
-    let settled = false;
-    const first = player.play().then(() => { settled = true; });
+    let failure = /** @type {unknown} */ (null);
+    const first = player.play().catch((/** @type {unknown} */ error) => { failure = error; });
     await flush();
-    const atFailure = {settled, resumes: stats.resumes, cleanup: player._playCleanup, queued: stats.queued};
+    const atFailure = {failure, resumes: stats.resumes, cleanup: player._playCleanup, queued: stats.queued};
     player.pause();
     await first;
     stats.failResume = false;
@@ -131,7 +131,11 @@ test('a resume failure releases the startup waiter and a later explicit play rec
     const recovered = !engine.paused && stats.starts === 1;
     player.pause();
     await second;
-    assert.deepEqual(atFailure, {settled: true, resumes: 1, cleanup: null, queued: null});
+    assert.equal(failure instanceof Error && failure.message, 'Speech engine unavailable');
+    assert.deepEqual(
+        {...atFailure, failure: failure instanceof Error ? failure.message : failure},
+        {failure: 'Speech engine unavailable', resumes: 1, cleanup: null, queued: null},
+    );
     assert.equal(recovered, true);
     assert.equal(stats.resumes, 2);
 });
