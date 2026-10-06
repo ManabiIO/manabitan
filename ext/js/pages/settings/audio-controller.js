@@ -397,10 +397,13 @@ export class AudioController extends EventDispatcher {
      * @returns {boolean}
      */
     _languageTagIsJapanese(languageTag) {
+        const value = languageTag.toLowerCase();
         return (
-            languageTag.startsWith('ja_') ||
-            languageTag.startsWith('ja-') ||
-            languageTag.startsWith('jpn-')
+            value === 'ja' ||
+            value === 'jpn' ||
+            value.startsWith('ja_') ||
+            value.startsWith('ja-') ||
+            value.startsWith('jpn-')
         );
     }
 
