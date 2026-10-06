@@ -25,6 +25,23 @@ function createControllerForInternalTests() {
     return /** @type {ProfileController} */ (Object.create(ProfileController.prototype));
 }
 
+/**
+ * @template T
+ * @returns {{promise: Promise<T>, resolve: (value: T) => void}}
+ */
+function deferred() {
+    /** @type {(value: T) => void} */
+    let resolve = () => {};
+    /** @type {Promise<T>} */
+    const promise = new Promise((resolve2) => { resolve = resolve2; });
+    return {promise, resolve};
+}
+
+/** @returns {Promise<void>} */
+async function flush() {
+    for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
+}
+
 describe('ProfileController profile conditions modal', () => {
     test('openProfileConditionsModal only shows the modal after prepare succeeds', async () => {
         const controller = createControllerForInternalTests();
@@ -105,5 +122,112 @@ describe('ProfileController profile conditions modal', () => {
         expect(Reflect.get(controller, '_updateProfileSelectOptions')).toHaveBeenCalledOnce();
         expect(Reflect.get(controller, 'setDefaultProfile')).not.toHaveBeenCalled();
         expect(Reflect.get(controller, '_profileActiveSelect').value).toBe('1');
+    });
+});
+
+
+describe('ProfileController async ownership', () => {
+    test('reset follows the same profile object if profiles are reordered while defaults load', async () => {
+        const controller = createControllerForInternalTests();
+        const first = {name: 'First'};
+        const second = {name: 'Second'};
+        Reflect.set(controller, '_profiles', [first, second]);
+        /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
+        const defaults = deferred();
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
+        const refresh = vi.fn().mockResolvedValue();
+        Reflect.set(controller, '_settingsController', {
+            getDefaultOptions: () => defaults.promise,
+            modifyGlobalSettings,
+            refresh,
+        });
+
+        const operation = controller.resetProfile(0);
+        await flush();
+        Reflect.set(controller, '_profiles', [second, first]);
+        defaults.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+            profiles: [{name: 'Default', options: {}}],
+        })));
+        await operation;
+
+        expect(modifyGlobalSettings).toHaveBeenCalledOnce();
+        expect(modifyGlobalSettings.mock.calls[0][0][0].path).toBe('profiles[1]');
+        expect(modifyGlobalSettings.mock.calls[0][0][0].value.name).toBe('First');
+        expect(refresh).toHaveBeenCalledOnce();
+    });
+
+    test('reset does not overwrite a replacement profile if the original profile was removed', async () => {
+        const controller = createControllerForInternalTests();
+        const first = {name: 'First'};
+        const second = {name: 'Second'};
+        Reflect.set(controller, '_profiles', [first, second]);
+        /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
+        const defaults = deferred();
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
+        const refresh = vi.fn().mockResolvedValue();
+        Reflect.set(controller, '_settingsController', {
+            getDefaultOptions: () => defaults.promise,
+            modifyGlobalSettings,
+            refresh,
+        });
+
+        const operation = controller.resetProfile(0);
+        await flush();
+        Reflect.set(controller, '_profiles', [second]);
+        defaults.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+            profiles: [{name: 'Default', options: {}}],
+        })));
+        await operation;
+
+        expect(modifyGlobalSettings).not.toHaveBeenCalled();
+        expect(refresh).not.toHaveBeenCalled();
+    });
+
+    test('a slower full-options refresh cannot overwrite a newer profile snapshot', async () => {
+        const controller = createControllerForInternalTests();
+        /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
+        const older = deferred();
+        /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
+        const newer = deferred();
+        const getOptionsFull = vi.fn()
+            .mockImplementationOnce(() => older.promise)
+            .mockImplementationOnce(() => newer.promise);
+        Reflect.set(controller, '_settingsController', {
+            getOptionsFull,
+            profileIndex: 1,
+        });
+        const cleanup = vi.fn();
+        const prepare = vi.fn().mockResolvedValue();
+        Reflect.set(controller, '_profileConditionsUI', {cleanup, prepare});
+        Reflect.set(controller, '_profileConditionsIndex', null);
+        Reflect.set(controller, '_profileEntryList', []);
+        Reflect.set(controller, '_profileEntriesSupported', false);
+        Reflect.set(controller, '_profileActiveSelect', {value: ''});
+        Reflect.set(controller, '_updateProfileSelectOptions', vi.fn());
+        Reflect.set(controller, 'setDefaultProfile', vi.fn());
+
+        const onOptionsChanged = /** @type {(this: ProfileController) => Promise<void>} */ (
+            Reflect.get(ProfileController.prototype, '_onOptionsChanged')
+        );
+        const first = onOptionsChanged.call(controller);
+        const second = onOptionsChanged.call(controller);
+        await flush();
+
+        newer.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+            profiles: [{name: 'New A'}, {name: 'New B'}],
+            profileCurrent: 1,
+        })));
+        await second;
+        older.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+            profiles: [{name: 'Old A'}, {name: 'Old B'}],
+            profileCurrent: 0,
+        })));
+        await first;
+
+        expect(Reflect.get(controller, '_profiles').map((profile) => profile.name)).toEqual(['New A', 'New B']);
+        expect(Reflect.get(controller, '_profileCurrent')).toBe(1);
+        expect(Reflect.get(controller, '_profileActiveSelect').value).toBe('1');
+        expect(cleanup).toHaveBeenCalledOnce();
+        expect(prepare).toHaveBeenCalledOnce();
     });
 });
