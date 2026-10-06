@@ -329,6 +329,7 @@ export class SettingsController extends EventDispatcher {
         const optionsContext = this.getOptionsContext();
         try {
             const options = await this.getOptions();
+            if (this.getOptionsContext().index !== optionsContext.index) { return; }
             this.trigger('optionsChanged', {options, optionsContext});
         } catch (e) {
             if (canUpdateProfileIndex) {
