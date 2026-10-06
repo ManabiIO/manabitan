@@ -165,6 +165,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         const setDictionaryImportMode = vi.fn().mockResolvedValue(void 0);
         vi.stubGlobal('document', {querySelectorAll: vi.fn().mockReturnValue([])});
         Reflect.set(controller, '_activeImportRunGeneration', 4);
+        Reflect.set(controller, '_activeImportOwnerId', 'mdx-owner');
         Reflect.set(controller, '_activeMdx', {disconnect});
         Reflect.set(controller, '_setRecommendedError', vi.fn());
         Reflect.set(controller, '_errorToString', vi.fn().mockReturnValue('timed out'));
@@ -187,7 +188,8 @@ describe('DictionaryImportController staged update profile rewrites', () => {
 
         expect(disconnect).toHaveBeenCalledOnce();
         expect(Reflect.get(controller, '_activeMdx')).toBeNull();
-        expect(setDictionaryImportMode).toHaveBeenCalledWith(false);
+        expect(setDictionaryImportMode).toHaveBeenCalledWith(false, 'mdx-owner');
+        expect(Reflect.get(controller, '_activeImportOwnerId')).toBeUndefined();
         expect(Reflect.get(controller, '_activeImportRunGeneration')).toBe(5);
     });
 

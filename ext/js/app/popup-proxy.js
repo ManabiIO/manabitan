@@ -54,12 +54,16 @@ export class PopupProxy extends EventDispatcher {
         this._frameOffsetX = 0;
         /** @type {number} */
         this._frameOffsetY = 0;
-        /** @type {?Promise<?[x: number, y: number]>} */
+        /** @type {?Promise<void>} */
         this._frameOffsetPromise = null;
         /** @type {?number} */
         this._frameOffsetUpdatedAt = null;
         /** @type {number} */
         this._frameOffsetExpireTimeout = 1000;
+        /** @type {?object} */
+        this._showContentToken = null;
+        /** @type {?object} */
+        this._positionToken = null;
     }
 
     /**
@@ -161,6 +165,8 @@ export class PopupProxy extends EventDispatcher {
      * @returns {Promise<void>}
      */
     async hide(changeFocus) {
+        this._showContentToken = null;
+        this._positionToken = null;
         const publication = {source: this._publicationSource, generation: ++this._publicationGeneration};
         await this._invokeSafe('popupFactoryHide', {id: this._id, changeFocus, publication}, void 0);
     }
@@ -202,6 +208,7 @@ export class PopupProxy extends EventDispatcher {
     async containsPoint(x, y) {
         if (this._frameOffsetForwarder !== null) {
             await this._updateFrameOffset();
+            if (this._frameOffsetUpdatedAt === null) { return false; }
             x += this._frameOffsetX;
             y += this._frameOffsetY;
         }
@@ -216,9 +223,14 @@ export class PopupProxy extends EventDispatcher {
      * @returns {Promise<void>}
      */
     async showContent(details, displayDetails, guard) {
+        const token = {};
+        if (displayDetails === null) { this._positionToken = token; } else {
+            this._showContentToken = token;
+            this._positionToken = null;
+        }
         const generation = displayDetails === null ? this._publicationGeneration : ++this._publicationGeneration;
         const publication = generation > 0 ? {source: this._publicationSource, generation} : void 0;
-        const isCurrent = () => generation === this._publicationGeneration && (typeof guard === 'undefined' || guard.isCurrent());
+        const isCurrent = () => (displayDetails === null ? this._positionToken === token : this._showContentToken === token) && generation === this._publicationGeneration && (typeof guard === 'undefined' || guard.isCurrent());
         if (!isCurrent()) { return; }
         let cancelled = false;
         const cancel = () => {
@@ -232,8 +244,10 @@ export class PopupProxy extends EventDispatcher {
         const unsubscribe = guard?.subscribe?.(cancel);
         try {
             if (this._frameOffsetForwarder !== null) {
-                const {sourceRects} = details;
+                const sourceRects = details.sourceRects.map((rect) => ({...rect}));
+                details = {...details, sourceRects};
                 await this._updateFrameOffset();
+                if (cancelled || !isCurrent() || this._frameOffsetUpdatedAt === null) { return; }
                 for (const sourceRect of sourceRects) {
                     sourceRect.left += this._frameOffsetX;
                     sourceRect.top += this._frameOffsetY;
@@ -381,7 +395,10 @@ export class PopupProxy extends EventDispatcher {
             return;
         }
 
-        const promise = this._updateFrameOffsetInner(now);
+        const promise = this._updateFrameOffsetInner(now).finally(() => {
+            if (this._frameOffsetPromise === promise) { this._frameOffsetPromise = null; }
+        });
+        this._frameOffsetPromise = promise;
         if (firstRun) {
             await promise;
         }
@@ -391,23 +408,21 @@ export class PopupProxy extends EventDispatcher {
      * @param {number} now
      */
     async _updateFrameOffsetInner(now) {
-        this._frameOffsetPromise = /** @type {import('../comm/frame-offset-forwarder.js').FrameOffsetForwarder} */ (this._frameOffsetForwarder).getOffset();
         try {
-            const offset = await this._frameOffsetPromise;
-            if (offset !== null) {
+            const offset = await /** @type {import('../comm/frame-offset-forwarder.js').FrameOffsetForwarder} */ (this._frameOffsetForwarder).getOffset();
+            if (offset !== null && Number.isFinite(offset[0]) && Number.isFinite(offset[1])) {
                 this._frameOffsetX = offset[0];
                 this._frameOffsetY = offset[1];
             } else {
                 this._frameOffsetX = 0;
                 this._frameOffsetY = 0;
+                this._frameOffsetUpdatedAt = null;
                 this.trigger('offsetNotFound', {});
                 return;
             }
             this._frameOffsetUpdatedAt = now;
         } catch (e) {
             log.error(e);
-        } finally {
-            this._frameOffsetPromise = null;
         }
     }
 }

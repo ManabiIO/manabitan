@@ -112,6 +112,7 @@ describe('DictionaryDatabase import cleanup', () => {
         });
         Reflect.set(database, '_db', {
             exec,
+            close: vi.fn(),
             selectObject: vi.fn((_sql, bind) => {
                 return bind.$title === row.title ? row : null;
             }),
@@ -133,6 +134,7 @@ describe('DictionaryDatabase import cleanup', () => {
             });
         expect(Reflect.get(database, '_termRecordStore').replaceDictionaryName).not.toHaveBeenCalled();
         expect(Reflect.get(database, '_termRecordStore').rollbackPreservedDictionaryRename).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_db')).toBeNull();
     });
 
     test.each(['JMdict', ' \ufeffJMdict '])('publishes an update with exact titles: %j', async (dictionaryTitle) => {
@@ -1071,7 +1073,10 @@ describe('DictionaryDatabase import cleanup', () => {
             throw new Error('runtime cleanup failed');
         }));
 
-        await expect(database.finishBulkImport()).rejects.toThrow('Dictionary import finalization and cleanup failed');
+        await expect(database.finishBulkImport()).resolves.toMatchObject({
+            published: true,
+            housekeepingErrors: expect.arrayContaining([expect.objectContaining({message: 'runtime cleanup failed'})]),
+        });
 
         expect(exec).toHaveBeenCalledWith('COMMIT');
         expect(exec).not.toHaveBeenCalledWith('ROLLBACK');
@@ -1389,6 +1394,107 @@ describe('DictionaryDatabase import cleanup', () => {
         await Reflect.get(database, '_recoverInterruptedImportSession').call(database);
 
         expect(exec).not.toHaveBeenCalled();
+    });
+
+    test.each([JSON.stringify({importSuccess: false}), '{invalid', 'null', '[]'])('restores a recovery copy over invalid replacement metadata %s without deleting its storage', async (summaryJson) => {
+        const database = new DictionaryDatabase();
+        const originalTitle = 'JMdict';
+        const replacedTitle = `${originalTitle} [replaced update-token]`;
+        const deleteDictionary = vi.spyOn(database, 'deleteDictionary').mockResolvedValue();
+        const restore = vi.spyOn(database, 'replaceDictionaryTitle').mockResolvedValue();
+        const exec = vi.fn();
+        Reflect.set(database, '_db', {
+            selectObjects: vi.fn(() => [
+                {id: 1, title: originalTitle, summaryJson},
+                {id: 2,
+                    title: replacedTitle,
+                    summaryJson: JSON.stringify({
+                        title: replacedTitle,
+                        importSuccess: true,
+                        termRecordStorageName: 'immutable-old',
+                        transientUpdateStage: 'replaced',
+                        updateSessionToken: 'update-token',
+                    })},
+            ]),
+            exec,
+        });
+
+        const summary = await database._cleanupIncompleteImports();
+
+        expect(deleteDictionary).not.toHaveBeenCalled();
+        expect(restore).toHaveBeenCalledWith(replacedTitle, originalTitle, expect.objectContaining({
+            title: originalTitle, termRecordStorageName: 'immutable-old', importSuccess: true,
+        }), null);
+        expect(exec).toHaveBeenCalledWith(expect.objectContaining({
+            sql: 'DELETE FROM dictionaries WHERE title = $title', bind: {$title: originalTitle},
+        }));
+        expect(summary.restoredTitles).toEqual([originalTitle]);
+        expect(summary.removedTitles).toEqual([originalTitle]);
+    });
+
+    test('keeps a healthy installed replacement and removes its obsolete backup', async () => {
+        const database = new DictionaryDatabase();
+        const originalTitle = 'JMdict';
+        const replacedTitle = `${originalTitle} [replaced update-token]`;
+        const remove = vi.spyOn(database, 'deleteDictionary').mockResolvedValue();
+        const restore = vi.spyOn(database, 'replaceDictionaryTitle').mockResolvedValue();
+        Reflect.set(database, '_db', {
+            selectObjects: vi.fn(() => [
+                {id: 1, title: originalTitle, summaryJson: JSON.stringify({title: originalTitle, importSuccess: true})},
+                {id: 2,
+                    title: replacedTitle,
+                    summaryJson: JSON.stringify({
+                        title: replacedTitle, importSuccess: true, transientUpdateStage: 'replaced', updateSessionToken: 'update-token',
+                    })},
+            ]),
+            exec: vi.fn(),
+        });
+        await database._cleanupIncompleteImports();
+        expect(restore).not.toHaveBeenCalled();
+        expect(remove).toHaveBeenCalledExactlyOnceWith(replacedTitle, 1000, expect.any(Function));
+    });
+
+    test('does not restore an incomplete replaced copy', async () => {
+        const database = new DictionaryDatabase();
+        const title = 'JMdict [replaced update-token]';
+        const remove = vi.spyOn(database, 'deleteDictionary').mockResolvedValue();
+        const restore = vi.spyOn(database, 'replaceDictionaryTitle').mockResolvedValue();
+        Reflect.set(database, '_db', {
+            selectObjects: vi.fn(() => [{id: 1,
+                title,
+                summaryJson: JSON.stringify({
+                    title, importSuccess: false, transientUpdateStage: 'replaced', updateSessionToken: 'update-token',
+                })}]),
+            exec: vi.fn(),
+        });
+        await database._cleanupIncompleteImports();
+        expect(restore).not.toHaveBeenCalled();
+        expect(remove).toHaveBeenCalledExactlyOnceWith(title, 1000, expect.any(Function));
+    });
+
+    test('preserves both copies when discarding invalid replacement metadata fails', async () => {
+        const database = new DictionaryDatabase();
+        const originalTitle = 'JMdict';
+        const replacedTitle = `${originalTitle} [replaced update-token]`;
+        const remove = vi.spyOn(database, 'deleteDictionary').mockResolvedValue();
+        const restore = vi.spyOn(database, 'replaceDictionaryTitle').mockResolvedValue();
+        Reflect.set(database, '_db', {
+            selectObjects: vi.fn(() => [
+                {id: 1, title: originalTitle, summaryJson: '{invalid'},
+                {id: 2,
+                    title: replacedTitle,
+                    summaryJson: JSON.stringify({
+                        title: replacedTitle, importSuccess: true, transientUpdateStage: 'replaced', updateSessionToken: 'update-token',
+                    })},
+            ]),
+            exec: vi.fn((value) => {
+                if (value === 'BEGIN IMMEDIATE') { throw new Error('busy'); }
+            }),
+        });
+        const summary = await database._cleanupIncompleteImports();
+        expect(restore).not.toHaveBeenCalled();
+        expect(remove).not.toHaveBeenCalled();
+        expect(summary.failedTitles).toEqual([replacedTitle]);
     });
 
     test('preserves a replaced recovery copy when startup restoration fails', async () => {

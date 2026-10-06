@@ -39,6 +39,39 @@ function backendWithResponse(response, lastError) {
 afterEach(() => { vi.unstubAllGlobals(); });
 
 describe('extension dictionary transport adapter', () => {
+    describe.each(['delete', 'counts'])('%s asynchronous response', (action) => {
+        test.each(['malformed-error', 'last-error'])('contains %s callback failure and permits the next request', async (fault) => {
+            /** @type {Array<(response: unknown) => void>} */
+            const callbacks = [];
+            const inspectionError = new Error('lastError inspection failed');
+            const runtime = {
+                get lastError() {
+                    if (fault === 'last-error' && callbacks.length === 1) { throw inspectionError; }
+                    return void 0;
+                },
+                sendMessage: vi.fn((_message, callback) => { callbacks.push(callback); }),
+            };
+            const backend = new ExtensionDictionaryWorkerBackend(/** @type {typeof chrome.runtime} */ (/** @type {unknown} */ (runtime)));
+            const start = () => (action === 'delete' ? backend.deleteDictionaryByTitle('test') : backend.getDictionaryCounts([], false));
+            /** @type {unknown[]} */
+            const errors = [];
+            const pending = start().catch((error) => { errors.push(error); });
+            const malformed = {error: {hasValue: true, value: {toString: null, valueOf: null}}};
+            expect(() => { callbacks[0](malformed); }).not.toThrow();
+            await pending;
+            expect(errors).toHaveLength(1);
+            if (fault === 'last-error') {
+                expect(errors[0]).toBe(inspectionError);
+            } else {
+                expect(errors[0]).toBeInstanceOf(TypeError);
+            }
+            const next = start();
+            callbacks[1]({result: {counts: []}});
+            await expect(next).resolves.toEqual(action === 'delete' ? void 0 : {counts: []});
+            expect(runtime.sendMessage).toHaveBeenCalledTimes(2);
+        });
+    });
+
     test('sends only the existing delete action and its parameters', async () => {
         const {runtime, backend} = backendWithResponse({result: null});
         await backend.deleteDictionaryByTitle('Jitendex');

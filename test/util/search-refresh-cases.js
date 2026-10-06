@@ -16,7 +16,7 @@ import {SearchDisplayController} from '../../ext/js/display/search-display-contr
  *   display: Display,
  *   input: {value: string, selectionStart: number, selectionEnd: number},
  *   optionsGate: PromiseWithResolvers<void>,
- *   lookupGate: PromiseWithResolvers<[]>,
+ *   lookupGate: PromiseWithResolvers<import('display').DictionarySearchResult>,
  *   readonly renders: number,
  *   readonly blurs: number,
  *   readonly refreshes: number,
@@ -28,7 +28,7 @@ function fixture(type = 'terms') {
     const controller = Object.create(SearchDisplayController.prototype);
     /** @type {PromiseWithResolvers<void>} */
     const optionsGate = Promise.withResolvers();
-    /** @type {PromiseWithResolvers<[]>} */
+    /** @type {PromiseWithResolvers<import('display').DictionarySearchResult>} */
     const lookupGate = Promise.withResolvers();
     const input = {
         value: type === 'clear' ? '' : '猫',
@@ -168,7 +168,7 @@ for (const method of refreshMethods) {
             f.optionsGate.resolve();
             await refresh;
             assert.equal(f.renders, 1, 'visible results must still be refreshed');
-            f.lookupGate.resolve([]);
+            f.lookupGate.resolve({dictionaryEntries: []});
             await f.rendered();
             assert.equal(f.input.value, draft);
             assert.equal(f.input.selectionStart, Math.min(1, draft.length));
@@ -182,7 +182,7 @@ for (const method of refreshMethods) {
         await f.controller[method]();
         await Promise.resolve();
         f.input.value = 'typed after refresh started';
-        f.lookupGate.resolve([]);
+        f.lookupGate.resolve({dictionaryEntries: []});
         await f.rendered();
         assert.equal(f.input.value, 'typed after refresh started');
         assert.equal(f.renders, 1);
@@ -191,7 +191,7 @@ for (const method of refreshMethods) {
     test(`${method}: unloaded pages do not request options or rerun`, async () => {
         const f = fixture('unloaded');
         f.optionsGate.resolve();
-        f.lookupGate.resolve([]);
+        f.lookupGate.resolve({dictionaryEntries: []});
         await f.controller[method]();
         await f.rendered();
         assert.equal(f.refreshes, 0);
@@ -203,7 +203,7 @@ for (const method of refreshMethods) {
         const refresh = f.controller[method]();
         f.display._contentType = 'unloaded';
         f.optionsGate.resolve();
-        f.lookupGate.resolve([]);
+        f.lookupGate.resolve({dictionaryEntries: []});
         await refresh;
         await f.rendered();
         assert.equal(f.renders, 0);
@@ -218,7 +218,7 @@ test('the preservation marker is consumed before lookup and does not suppress la
     assert.ok(historyContent);
     assert.equal(Object.hasOwn(historyContent, 'preserveSearchInput'), false);
     f.input.value = 'draft';
-    f.lookupGate.resolve([]);
+    f.lookupGate.resolve({dictionaryEntries: []});
     await f.rendered();
     assert.equal(f.input.value, 'draft');
 

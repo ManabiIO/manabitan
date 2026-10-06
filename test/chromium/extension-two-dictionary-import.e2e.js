@@ -2990,6 +2990,23 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
         assert.ok(result.hover.hasDictionaryEntries, 'Ordinary hover must still render entries after Reader clicks');
         const hoverFrameHandle = await waitForVisiblePopupFrameHandle(page);
         const hoverFrame = await hoverFrameHandle.contentFrame();
+        // A reused popup can become visible before its previous entries are replaced.
+        // Wait for the ordinary hover's query and lexical content together.
+        await hoverFrame.waitForFunction(() => {
+            if (new URL(location.href).searchParams.get('query') !== '猫') { return false; }
+            const entries = document.querySelector('#dictionary-entries');
+            if (!(entries instanceof HTMLElement)) { return false; }
+            const hasCatHeadword = Array.from(entries.querySelectorAll('.headword')).some((node) => {
+                const term = node.querySelector('.headword-term')?.cloneNode(true);
+                for (const annotation of term?.querySelectorAll('rt,rp,rtc') ?? []) { annotation.remove(); }
+                return term?.textContent === '猫' && node.querySelector('.headword-reading')?.textContent === 'ねこ';
+            });
+            const glossary = Array.from(entries.querySelectorAll('.gloss-content')).map((node) => node.textContent).join(' ');
+            return hasCatHeadword && /\bcat\b/i.test(glossary);
+        }, null, {timeout: 10000});
+        result.hover.entriesTextPreview = await hoverFrame.locator('#dictionary-entries').evaluate((node) => (
+            (node.textContent || '').replaceAll(/\s+/g, ' ').trim().slice(0, 200)
+        ));
         assert.ok(
             await hoverFrame.locator('.headword-reading').evaluateAll((nodes) => nodes.some((node) => node.textContent === 'ねこ')),
             'Ordinary cat hover must render the real reading',

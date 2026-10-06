@@ -19,7 +19,7 @@
 /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 
-import {initWasm, Resvg} from '../../lib/resvg-wasm.js';
+import {DictionaryMediaRenderer} from './dictionary-media-renderer.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {ExtensionError} from '../core/extension-error.js';
@@ -55,6 +55,7 @@ import {
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
 } from './raw-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
+import {isZstdResourceError} from './zstd-resource-error.js';
 import {TermContentOpfsStore} from './term-content-opfs-store.js';
 import {TermContentBlockStore} from './term-content-block-store.js';
 import {createTermImportMetrics} from './term-import-metrics.js';
@@ -712,6 +713,8 @@ export class DictionaryDatabase {
         this._termRecordStorageNameByDictionary = new Map();
         /** @type {Map<string, string>} */
         this._dictionaryNameByTermRecordStorage = new Map();
+        /** @type {Map<string, string>} Publication identity, separate from display/storage names. */
+        this._termRecordGenerationByStorage = new Map();
         /** @type {import('@sqlite.org/sqlite-wasm').sqlite3_module|null} */
         this._termsVtabModule = null;
         /** @type {boolean} */
@@ -770,10 +773,8 @@ export class DictionaryDatabase {
          */
         this._worker = null;
 
-        /**
-         * @type {Uint8Array?}
-         */
-        this._resvgFontBuffer = null;
+        /** @type {DictionaryMediaRenderer} */
+        this._mediaRenderer = new DictionaryMediaRenderer();
 
         /** @type {import('dictionary-database').ApiMap} */
         this._apiMap = createApiMap([
@@ -797,15 +798,15 @@ export class DictionaryDatabase {
         if (this._closingPromise !== null) {
             await this._closingPromise;
         }
-        if (this._db !== null) {
-            throw new Error('Database already open');
-        }
         if (this._isOpening) {
             if (this._openingPromise !== null) {
                 await this._openingPromise;
                 return;
             }
             throw new Error('Already opening');
+        }
+        if (this._db !== null) {
+            throw new Error('Database already open');
         }
 
         this._openingPromise = (async () => {
@@ -830,19 +831,6 @@ export class DictionaryDatabase {
                     this._worker.addEventListener('unhandledrejection', (event) => {
                         log.log('Unhandled promise rejection in worker:', event);
                     });
-                } else if (isWorker && this._resvgFontBuffer === null) {
-                    try {
-                        await initWasm(fetch(new URL('../../lib/resvg.wasm', import.meta.url)));
-                    } catch (error) {
-                        const message = (error instanceof Error) ? error.message : String(error);
-                        if (!/Already initialized/i.test(message)) {
-                            throw error;
-                        }
-                    }
-
-                    const font = await fetch(new URL('../../fonts/NotoSansJP-Regular.ttf', import.meta.url));
-                    const fontData = await font.arrayBuffer();
-                    this._resvgFontBuffer = new Uint8Array(fontData);
                 }
             } catch (error) {
                 const cleanupErrors = await this._cleanupAfterPrepareFailure(preserveBulkImportLifecycle);
@@ -942,6 +930,7 @@ export class DictionaryDatabase {
         this._termsVtabModuleRegistered = false;
         const db = this._db;
         this._db = null;
+        this._bulkImportTransactionOpen = false;
         if (db !== null) {
             try {
                 db.close();
@@ -1059,7 +1048,8 @@ export class DictionaryDatabase {
                 errors.push(rollbackError);
             }
         }
-        this._bulkImportTransactionOpen = false;
+        // A failed ROLLBACK may leave staged rows visible until quarantine closes this connection.
+        if (succeeded) { this._bulkImportTransactionOpen = false; }
         return succeeded;
     }
 
@@ -1144,9 +1134,7 @@ export class DictionaryDatabase {
         this._termEntryContentIdByHash.clear();
         this._clearTermEntryContentMetaCaches();
         this._termEntryContentCache.clear();
-        this._termExactPresenceCache.clear();
-        this._termPrefixNegativeCache.clear();
-        this._clearDirectTermIndexCaches();
+        this._invalidateTermLookupCaches();
     }
 
     /**
@@ -1400,9 +1388,7 @@ export class DictionaryDatabase {
                 this._termContentBlockImportSession?.close();
                 this._termContentBlockImportSession = this._termContentBlockStore.beginImportSession();
                 this._termEntryContentCache.clear();
-                this._termExactPresenceCache.clear();
-                this._termPrefixNegativeCache.clear();
-                this._clearDirectTermIndexCaches();
+                this._invalidateTermLookupCaches();
                 await this._beginImmediateTransaction(db, false);
                 this._bulkImportTransactionOpen = true;
                 return this._bulkImportJournalRecord.sessionId;
@@ -1460,7 +1446,7 @@ export class DictionaryDatabase {
      * @param {((index: number, count: number) => void)?} [onCheckpoint]
      * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
      * @param {string|null} [expectedSessionId] When supplied, only this owner may publish.
-     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|null>}
+     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|{published: true, housekeepingErrors: Error[]}|null>}
      */
     async finishBulkImport(onCheckpoint = null, publication = null, expectedSessionId = null) {
         await this._waitForBulkImportSetup();
@@ -1604,17 +1590,18 @@ export class DictionaryDatabase {
                 createIndexesMs = safePerformance.now() - tCreateIndexesStart;
                 createIndexesCheckpointCount = createIndexStatements.length;
                 if (this._bulkImportTransactionOpen) {
+                    const sessionId = this._bulkImportJournalRecord?.sessionId;
+                    if (typeof sessionId !== 'string') {
+                        throw new Error('Missing dictionary import journal before publication');
+                    }
                     if (publication !== null) {
+                        publication.summary.storageGenerationId = sessionId;
                         await this.bulkUpdate(
                             'dictionaries',
                             [{data: publication.summary, primaryKey: publication.primaryKey}],
                             0,
                             1,
                         );
-                    }
-                    const sessionId = this._bulkImportJournalRecord?.sessionId;
-                    if (typeof sessionId !== 'string') {
-                        throw new Error('Missing dictionary import journal before publication');
                     }
                     db.exec({
                         sql: 'INSERT OR REPLACE INTO dictionaryImportPublications (sessionId, publishedAt) VALUES (?, ?)',
@@ -1625,6 +1612,9 @@ export class DictionaryDatabase {
                     commitMs = safePerformance.now() - tCommitStart;
                     this._bulkImportTransactionOpen = false;
                     sqlitePublished = true;
+                    if (publication !== null) {
+                        this._termRecordGenerationByStorage.set(this._getSummaryTermRecordStorageName(publication.summary, publication.summary.title), sessionId);
+                    }
                     // SQLite now owns the published state. A failed journal
                     // deletion must not let close() roll the committed OPFS
                     // data back in this process.
@@ -1634,6 +1624,7 @@ export class DictionaryDatabase {
                         this._deleteImportPublicationMarkerBestEffort(sessionId);
                     } catch (error) {
                         this._importJournalRecoveryPending = true;
+                        cleanupErrors.push(toError(error));
                         reportDiagnostics('dictionary-import-publication-cleanup-failed', {
                             sessionId,
                             error: toError(error).message,
@@ -1761,9 +1752,14 @@ export class DictionaryDatabase {
                         !termRecordSessionEnded,
                     );
                 }
-                if (operationError !== null) {
-                    this._restoreRuntimeAfterBulkImportFailure(db, cleanupErrors);
-                } else {
+                try {
+                    if (operationError !== null) {
+                        this._restoreRuntimeAfterBulkImportFailure(db, cleanupErrors);
+                    } else {
+                        this._closeBulkImportBlockSession(cleanupErrors);
+                    }
+                } catch (error) {
+                    cleanupErrors.push(toError(error));
                     this._closeBulkImportBlockSession(cleanupErrors);
                 }
                 if (this._bulkImportJournalRecord !== null) {
@@ -1773,6 +1769,15 @@ export class DictionaryDatabase {
                     this._quarantineBulkImportConnection(cleanupErrors);
                 }
                 this._endBulkImportLifecycle();
+            }
+            if (sqlitePublished) {
+                // COMMIT is the durable publication boundary. Runtime repair
+                // and disposal errors are warnings, not unpublished imports.
+                return {
+                    ...result,
+                    published: true,
+                    housekeepingErrors: operationError === null ? cleanupErrors : [operationError, ...cleanupErrors],
+                };
             }
             if (operationError !== null) {
                 if (cleanupErrors.length > 0) {
@@ -2007,11 +2012,11 @@ export class DictionaryDatabase {
         // deletion first: a crash can then leave only an orphan shard, which
         // startup integrity cleanup can safely remove. The opposite order can
         // leave an installed dictionary pointing at records that no longer exist.
-        const deletedTerms = await this._termRecordStore.deleteByDictionary(termRecordStorageName);
-        this._unregisterTermRecordStorageName(dictionaryName);
+        // Commit is the public deletion boundary. Invalidate before any fallible
+        // cleanup so callers can reconcile even when orphan bytes remain in OPFS.
         this._termsVirtualTableDirty = true;
-        progressData.processed += deletedTerms;
-        ++progressData.storesProcesed;
+        this._clearBulkImportRuntimeCaches();
+        this._clearSharedGlossaryArtifactCaches();
         /**
          * Progress delivery is not part of the durable deletion boundary. Once
          * SQLite has committed, a callback failure must not skip required OPFS
@@ -2029,19 +2034,41 @@ export class DictionaryDatabase {
                 });
             }
         };
+        /**
+         * Cleanup failure must not report a committed mutation as failed and
+         * bypass backend refresh/settings reconciliation. Startup can retry
+         * orphan cleanup; pre-commit errors above still reject normally.
+         * @param {string} phase
+         * @param {unknown} error
+         */
+        const reportCleanupFailure = (phase, error) => {
+            reportDiagnostics('dictionary-delete-cleanup-failed', {
+                dictionaryName,
+                termRecordStorageName,
+                phase,
+                committed: true,
+                error: toError(error).message,
+            });
+            log.warn(toError(error));
+        };
+        try {
+            progressData.processed += await this._termRecordStore.deleteByDictionary(termRecordStorageName);
+        } catch (error) {
+            reportCleanupFailure('term-record-delete', error);
+            progressData.processed += termCount;
+        } finally {
+            // Health callbacks during deletion still need the logical identity.
+            this._unregisterTermRecordStorageName(dictionaryName);
+        }
+        ++progressData.storesProcesed;
         reportPostCommitProgress('term-record-delete');
 
-        await this._cleanupTermContentAfterDictionaryDelete();
-
+        try {
+            await this._cleanupTermContentAfterDictionaryDelete();
+        } catch (error) {
+            reportCleanupFailure('term-content-cleanup', error);
+        }
         reportPostCommitProgress('term-content-cleanup');
-        this._termEntryContentCache.clear();
-        this._termEntryContentIdByHash.clear();
-        this._clearTermEntryContentMetaCaches();
-        this._termExactPresenceCache.clear();
-        this._termPrefixNegativeCache.clear();
-        this._clearDirectTermIndexCaches();
-        this._termEntryContentIdByKey.clear();
-        this._clearSharedGlossaryArtifactCaches();
         try {
             this._requireDb().exec('PRAGMA wal_checkpoint(TRUNCATE)');
         } catch (_) {
@@ -2114,9 +2141,10 @@ null;
          * @param {object} summaryRow
          * @param {string} title
          * @param {object|null} [summaryValue]
+         * @param {string} [sourceTitle]
          * @returns {Record<string, unknown>}
          */
-        const buildSummaryForTitle = (summaryRow, title, summaryValue = null) => {
+        const buildSummaryForTitle = (summaryRow, title, summaryValue = null, sourceTitle = title) => {
             const parsedSummary = (() => {
                 const summaryJson = this._asString(Reflect.get(summaryRow, 'summaryJson'));
                 if (summaryJson.length === 0) { return null; }
@@ -2130,13 +2158,19 @@ null;
             /** @type {Record<string, unknown>} */
             const nextSummary = (
                 summaryValue && typeof summaryValue === 'object' && !Array.isArray(summaryValue) ?
-                    {...summaryValue, title} :
+                    {...parsedSummary, ...summaryValue, title} :
                     (parsedSummary !== null ? {...parsedSummary, title} : {title, version: this._asNumber(Reflect.get(summaryRow, 'version'), 0)})
             );
             const fallbackStorageName = parsedSummary !== null ?
-                this._getSummaryTermRecordStorageName(parsedSummary, this._asString(Reflect.get(parsedSummary, 'title')) || title) :
-                title;
-            nextSummary.termRecordStorageName = this._getSummaryTermRecordStorageName(nextSummary, fallbackStorageName);
+                this._getSummaryTermRecordStorageName(parsedSummary, sourceTitle) :
+                this._getTermRecordStorageName(sourceTitle);
+            nextSummary.termRecordStorageName = fallbackStorageName;
+            nextSummary.storageGenerationId = this._getSummaryStorageGenerationId(parsedSummary, fallbackStorageName);
+            if (parsedSummary !== null && typeof Reflect.get(parsedSummary, 'storageImportOperationId') === 'string') {
+                nextSummary.storageImportOperationId = Reflect.get(parsedSummary, 'storageImportOperationId');
+            } else {
+                delete nextSummary.storageImportOperationId;
+            }
             return nextSummary;
         };
         /**
@@ -2144,21 +2178,25 @@ null;
          * @param {string} title
          * @param {string} stage
          * @param {object|null} [summaryValue]
+         * @param {string} [sourceTitle]
          * @returns {Record<string, unknown>}
          */
-        const buildTransientSummaryForTitle = (summaryRow, title, stage, summaryValue = null) => ({
-            ...buildSummaryForTitle(summaryRow, title, summaryValue),
+        const buildTransientSummaryForTitle = (summaryRow, title, stage, summaryValue = null, sourceTitle = title) => ({
+            ...buildSummaryForTitle(summaryRow, title, summaryValue, sourceTitle),
             transientUpdateStage: stage,
             updateSessionToken: transientSessionToken,
         });
+        const metadataRenames = /** @type {Array<{sourceTitle: string, targetTitle: string, storageName: string, generationId: string}>} */ ([]);
         /**
          * @param {string} sourceTitle
          * @param {string} targetTitle
          * @param {object|null} summaryValue
          * @param {string} debugKey
-         * @returns {Promise<void>}
+         * @param {boolean} [finalPublication]
+         * @returns {void}
+         * @throws {Error} If the source metadata is missing or invalid.
          */
-        const renameDictionaryData = async (sourceTitle, targetTitle, summaryValue, debugKey) => {
+        const renameDictionaryData = (sourceTitle, targetTitle, summaryValue, debugKey, finalPublication = false) => {
             const db = this._requireDb();
             const summaryRow = getSummaryRowByTitle(sourceTitle);
             if (!(summaryRow && typeof summaryRow === 'object')) {
@@ -2168,50 +2206,43 @@ null;
             if (summaryId < 0) {
                 throw new Error(`Invalid dictionary row id for replacement: ${sourceTitle}`);
             }
-            const nextSummary = buildSummaryForTitle(summaryRow, targetTitle, summaryValue);
+            const nextSummary = buildSummaryForTitle(summaryRow, targetTitle, summaryValue, sourceTitle);
+            if (finalPublication) {
+                delete nextSummary.transientUpdateStage;
+                // Explicit updates retain their completion receipt; recovery must
+                // not inherit the interrupted generation's staging token.
+                if (explicitTransientSessionToken !== null) {
+                    nextSummary.updateSessionToken = explicitTransientSessionToken;
+                } else {
+                    delete nextSummary.updateSessionToken;
+                }
+            }
             const termRecordStorageName = this._getSummaryTermRecordStorageName(
                 nextSummary,
                 this._getTermRecordStorageName(sourceTitle),
             );
             nextSummary.termRecordStorageName = termRecordStorageName;
-            await this._beginImmediateTransaction(db);
-            try {
-                db.exec({sql: 'UPDATE dictionaries SET title = $toTitle, version = $version, summaryJson = $summaryJson WHERE id = $id',
-                    bind: {
-                        $id: summaryId,
-                        $toTitle: targetTitle,
-                        $version: this._asNumber(Reflect.get(nextSummary, 'version'), 0),
-                        $summaryJson: JSON.stringify(nextSummary),
-                    }});
-                for (const table of ['termMeta', 'kanji', 'kanjiMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts']) {
-                    db.exec({sql: `UPDATE ${table} SET dictionary = $toTitle WHERE dictionary = $fromTitle`, bind: {$fromTitle: sourceTitle, $toTitle: targetTitle}});
-                }
-                // Reverse indexes are derived data. Invalidate both identities
-                // rather than risking a collision with a pre-existing target index.
-                for (const table of ['termGlossaryTokens', 'termGlossarySearchTerms', 'dictionaryGlossarySearchIndex']) {
-                    db.exec({
-                        sql: `DELETE FROM ${table} WHERE dictionary = $fromTitle OR dictionary = $toTitle`,
-                        bind: {$fromTitle: sourceTitle, $toTitle: targetTitle},
-                    });
-                }
-                db.exec('COMMIT');
-            } catch (e) {
-                let rollbackError = null;
-                try {
-                    db.exec('ROLLBACK');
-                } catch (error) {
-                    rollbackError = toError(error);
-                }
-                if (rollbackError !== null) {
-                    throw new AggregateError(
-                        [toError(e), rollbackError],
-                        `Dictionary title metadata replacement and rollback failed for ${sourceTitle} to ${targetTitle}`,
-                    );
-                }
-                throw e;
+            db.exec({sql: 'UPDATE dictionaries SET title = $toTitle, version = $version, summaryJson = $summaryJson WHERE id = $id',
+                bind: {
+                    $id: summaryId,
+                    $toTitle: targetTitle,
+                    $version: this._asNumber(Reflect.get(nextSummary, 'version'), 0),
+                    $summaryJson: JSON.stringify(nextSummary),
+                }});
+            for (const table of ['termMeta', 'kanji', 'kanjiMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts']) {
+                db.exec({sql: `UPDATE ${table} SET dictionary = $toTitle WHERE dictionary = $fromTitle`, bind: {$fromTitle: sourceTitle, $toTitle: targetTitle}});
             }
-            this._unregisterTermRecordStorageName(sourceTitle);
-            this._registerTermRecordStorageName(targetTitle, termRecordStorageName);
+            // Keep glossary indexes derived from the original identity out of
+            // the transaction's newly published dictionary names.
+            for (const table of ['termGlossaryTokens', 'termGlossarySearchTerms', 'dictionaryGlossarySearchIndex']) {
+                db.exec({sql: `DELETE FROM ${table} WHERE dictionary = $fromTitle OR dictionary = $toTitle`,
+                    bind: {$fromTitle: sourceTitle, $toTitle: targetTitle}});
+            }
+            if (sourceTitle !== targetTitle) {
+                db.exec({sql: 'DELETE FROM dictionaryStorageHealth WHERE title = $title', bind: {$title: targetTitle}});
+                db.exec({sql: 'UPDATE dictionaryStorageHealth SET title = $toTitle WHERE title = $fromTitle', bind: {$fromTitle: sourceTitle, $toTitle: targetTitle}});
+            }
+            metadataRenames.push({sourceTitle, targetTitle, storageName: termRecordStorageName, generationId: this._getSummaryStorageGenerationId(nextSummary, targetTitle)});
             this._lastReplaceDictionaryTitleDebug = {
                 ...this._lastReplaceDictionaryTitleDebug,
                 [debugKey]: snapshotRows(),
@@ -2221,179 +2252,91 @@ null;
                 [`${debugKey}AfterTermRecordRows`]: snapshotRows(),
             };
         };
-        /**
-         * @param {string} dictionaryTitle
-         * @returns {Promise<void>}
-         */
-        const forceCleanupTransientDictionaryTitle = async (dictionaryTitle) => {
-            const title = `${dictionaryTitle}`;
-            if (title.length === 0) { return; }
-            const summaryRow = getSummaryRowByTitle(title);
-            const parsedSummary = (() => {
-                if (!(summaryRow && typeof summaryRow === 'object')) { return null; }
-                const summaryJson = this._asString(Reflect.get(summaryRow, 'summaryJson'));
-                if (summaryJson.length === 0) { return null; }
-                try {
-                    const value = parseJson(summaryJson);
-                    return (typeof value === 'object' && value !== null && !Array.isArray(value)) ? value : null;
-                } catch (_) {
-                    return null;
+        const db = this._requireDb();
+        const temporaryReplacedTitle = replacedTitle !== null && replacedTitle.length > 0 && replacedTitle !== fromTitle ?
+            `${replacedTitle} [replaced ${transientSessionToken}]` :
+            null;
+        await this._beginImmediateTransaction(db);
+        try {
+            const summaryRow = getSummaryRowByTitle(fromTitle);
+            if (!(summaryRow && typeof summaryRow === 'object')) {
+                throw new Error(`Dictionary title not found for replacement: ${fromTitle}`);
+            }
+            if (temporaryReplacedTitle !== null && replacedTitle !== null) {
+                if (getSummaryRowByTitle(temporaryReplacedTitle)) {
+                    throw new Error(`Dictionary replacement backup already exists: ${temporaryReplacedTitle}`);
                 }
-            })();
-            if (!isRecognizedTransientUpdateTitle(title, parsedSummary)) {
-                throw new Error(`Refusing fallback cleanup for non-transient dictionary title: ${title}`);
-            }
-            /** @type {unknown} */
-            let originalDeleteError = null;
-            try {
-                await this.deleteDictionary(title, 1000, () => {});
-                return;
-            } catch (e) {
-                originalDeleteError = e;
-                // Fall through to direct transient cleanup.
-            }
-            try {
-                const db = this._requireDb();
-                this._lastReplaceDictionaryTitleDebug = {
-                    ...this._lastReplaceDictionaryTitleDebug,
-                    forcedCleanupStart: {
-                        title,
-                        originalDeleteError: originalDeleteError instanceof Error ? originalDeleteError.message : String(originalDeleteError),
-                        rows: snapshotRows(),
-                    },
-                };
-                await this._termRecordStore.deleteByDictionary(this._getTermRecordStorageName(title));
-                await this.cleanupTransientTermRecordShards((dictionaryName) => String(dictionaryName || '') === title);
-                await this._beginImmediateTransaction(db);
-                try {
-                    for (const [table, keyColumn] of [
-                        ['kanji', 'dictionary'],
-                        ['kanjiMeta', 'dictionary'],
-                        ['termMeta', 'dictionary'],
-                        ['tagMeta', 'dictionary'],
-                        ['media', 'dictionary'],
-                        ['sharedGlossaryArtifacts', 'dictionary'],
-                        ['termGlossaryTokens', 'dictionary'],
-                        ['termGlossarySearchTerms', 'dictionary'],
-                        ['dictionaryGlossarySearchIndex', 'dictionary'],
-                        ['dictionaries', 'title'],
-                    ]) {
-                        db.exec({sql: `DELETE FROM ${table} WHERE ${keyColumn} = $value`, bind: {$value: title}});
-                    }
-                    db.exec('COMMIT');
-                } catch (e) {
-                    try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
-                    throw e;
-                }
-                this._unregisterTermRecordStorageName(title);
-                await this._cleanupTermContentAfterDictionaryDelete();
-                this._lastReplaceDictionaryTitleDebug = {
-                    ...this._lastReplaceDictionaryTitleDebug,
-                    forcedCleanupEnd: {
-                        title,
-                        rows: snapshotRows(),
-                    },
-                };
-            } catch (fallbackError) {
-                const originalMessage = originalDeleteError instanceof Error ? originalDeleteError.message : String(originalDeleteError);
-                const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
-                this._lastReplaceDictionaryTitleDebug = {
-                    ...this._lastReplaceDictionaryTitleDebug,
-                    forcedCleanupFailure: {
-                        title,
-                        originalDeleteError: originalMessage,
-                        fallbackError: fallbackMessage,
-                        rows: snapshotRows(),
-                    },
-                };
-                throw new Error(`Failed transient dictionary cleanup for ${title}. deleteDictionary error=${originalMessage}; fallback cleanup error=${fallbackMessage}`);
-            }
-        };
-        const summaryRow = getSummaryRowByTitle(fromTitle);
-        if (!(summaryRow && typeof summaryRow === 'object')) {
-            throw new Error(`Dictionary title not found for replacement: ${fromTitle}`);
-        }
-
-        if (replacedTitle !== null && replacedTitle.length > 0 && replacedTitle === toTitle && replacedTitle !== fromTitle) {
-            const temporaryReplacedTitle = `${replacedTitle} [replaced ${transientSessionToken}]`;
-            let replacedDictionaryMovedAside = false;
-            try {
                 const replacedSummaryRow = getSummaryRowByTitle(replacedTitle);
                 if (!(replacedSummaryRow && typeof replacedSummaryRow === 'object')) {
                     throw new Error(`Dictionary title not found for replacement delete stage: ${replacedTitle}`);
                 }
-                await renameDictionaryData(
+                renameDictionaryData(
                     replacedTitle,
                     temporaryReplacedTitle,
-                    buildTransientSummaryForTitle(replacedSummaryRow, temporaryReplacedTitle, 'replaced', null),
+                    buildTransientSummaryForTitle(replacedSummaryRow, temporaryReplacedTitle, 'replaced', null, replacedTitle),
                     'afterTemporaryReplacedRows',
                 );
-                replacedDictionaryMovedAside = true;
                 this._lastReplaceDictionaryTitleDebug = {
                     ...this._lastReplaceDictionaryTitleDebug,
                     afterDeleteRows: snapshotRows(),
                 };
-
-                const finalSummary = buildSummaryForTitle(summaryRow, toTitle, summaryOverride);
-                await renameDictionaryData(fromTitle, toTitle, finalSummary, 'afterRenameRows');
-            } catch (e) {
-                if (replacedDictionaryMovedAside) {
-                    try {
-                        const movedAsideSummaryRow = getSummaryRowByTitle(temporaryReplacedTitle);
-                        if (movedAsideSummaryRow && typeof movedAsideSummaryRow === 'object') {
-                            await renameDictionaryData(
-                                temporaryReplacedTitle,
-                                replacedTitle,
-                                buildSummaryForTitle(movedAsideSummaryRow, replacedTitle, null),
-                                'afterRestoreReplacedRows',
-                            );
-                        }
-                    } catch (_) {
-                        // NOP - preserve the original failure, but leave debug breadcrumbs.
-                    }
-                }
-                throw e;
             }
+            if (fromTitle !== toTitle && getSummaryRowByTitle(toTitle)) {
+                throw new Error(`Dictionary replacement target already exists: ${toTitle}`);
+            }
+            const finalSummary = buildSummaryForTitle(summaryRow, toTitle, summaryOverride, fromTitle);
+            // Completed generations no longer carry staging/recovery labels.
+            renameDictionaryData(fromTitle, toTitle, finalSummary, 'afterRenameRows', true);
+            // Mapping publication must not fail after the durable cutover.
+            const owners = new Map(this._dictionaryNameByTermRecordStorage);
+            const sources = new Set(metadataRenames.map(({sourceTitle}) => sourceTitle));
+            for (const [storageName, owner] of owners) {
+                if (sources.has(owner)) { owners.delete(storageName); }
+            }
+            for (const {targetTitle, storageName} of metadataRenames) {
+                const owner = owners.get(storageName);
+                if (typeof owner !== 'undefined' && owner !== targetTitle) {
+                    throw new Error(`Term-record storage name collision: ${storageName}`);
+                }
+                owners.set(storageName, targetTitle);
+            }
+            db.exec('COMMIT');
+        } catch (error) {
             try {
-                await forceCleanupTransientDictionaryTitle(temporaryReplacedTitle);
-            } catch (e) {
-                const cleanupMessage = e instanceof Error ? e.message : String(e);
+                db.exec('ROLLBACK');
+            } catch (rollbackError) {
+                const errors = [toError(error), toError(rollbackError)];
+                this._quarantineBulkImportConnection(errors);
+                throw new AggregateError(errors, `Dictionary title metadata replacement and rollback failed for ${fromTitle} to ${toTitle}`);
+            }
+            throw error;
+        }
+        // Publish all mappings only after COMMIT, removing prior owners first.
+        for (const {sourceTitle} of metadataRenames) { this._unregisterTermRecordStorageName(sourceTitle); }
+        for (const {targetTitle, storageName, generationId} of metadataRenames) {
+            this._registerTermRecordStorageName(targetTitle, storageName, generationId);
+        }
+        this._termsVirtualTableDirty = true;
+        this._clearBulkImportRuntimeCaches();
+        this._clearSharedGlossaryArtifactCaches();
+        if (temporaryReplacedTitle !== null) {
+            try {
+                await this.deleteDictionary(temporaryReplacedTitle, 1000, () => {});
+            } catch (error) {
                 this._lastReplaceDictionaryTitleDebug = {
                     ...this._lastReplaceDictionaryTitleDebug,
-                    postCutoverCleanupWarning: {
-                        title: temporaryReplacedTitle,
-                        message: cleanupMessage,
-                        rows: snapshotRows(),
-                    },
+                    postCutoverCleanupWarning: {title: temporaryReplacedTitle, message: toError(error).message},
                 };
-                log.warn(new Error(`Post-cutover transient cleanup failed for ${temporaryReplacedTitle}: ${cleanupMessage}`));
+                try {
+                    log.warn(new Error(`Post-cutover transient cleanup failed for ${temporaryReplacedTitle}`, {cause: error}));
+                } catch (_) { /* The metadata cutover already committed. */ }
             }
-            this._lastReplaceDictionaryTitleDebug = {
-                ...this._lastReplaceDictionaryTitleDebug,
-                afterDeleteRows: snapshotRows(),
-            };
-        } else {
-            if (replacedTitle !== null && replacedTitle.length > 0 && replacedTitle !== fromTitle) {
-                await this.deleteDictionary(replacedTitle, 1000, () => {});
-            }
-            this._lastReplaceDictionaryTitleDebug = {
-                ...this._lastReplaceDictionaryTitleDebug,
-                afterDeleteRows: snapshotRows(),
-            };
-
-            const finalSummary = buildSummaryForTitle(summaryRow, toTitle, summaryOverride);
-            await renameDictionaryData(fromTitle, toTitle, finalSummary, 'afterRenameRows');
         }
-
-        this._termsVirtualTableDirty = true;
-        this._termEntryContentCache.clear();
-        this._termEntryContentIdByHash.clear();
-        this._clearTermEntryContentMetaCaches();
-        this._termExactPresenceCache.clear();
-        this._termPrefixNegativeCache.clear();
-        this._clearDirectTermIndexCaches();
-        this._termEntryContentIdByKey.clear();
-        this._clearSharedGlossaryArtifactCaches();
+        try {
+            this._lastReplaceDictionaryTitleDebug = {...this._lastReplaceDictionaryTitleDebug, afterDeleteRows: snapshotRows()};
+        } catch (error) {
+            this._lastReplaceDictionaryTitleDebug = {...this._lastReplaceDictionaryTitleDebug, postCutoverDiagnosticsWarning: toError(error).message};
+        }
     }
 
     /**
@@ -2484,9 +2427,7 @@ null;
         this._termRowCache.clear();
         this._termEntryContentIdByHash.clear();
         this._clearTermEntryContentMetaCaches();
-        this._termExactPresenceCache.clear();
-        this._termPrefixNegativeCache.clear();
-        this._clearDirectTermIndexCaches();
+        this._invalidateTermLookupCaches();
     }
 
     /**
@@ -2549,6 +2490,24 @@ null;
     }
 
     /**
+     * Keep negative results, decoded rows and index readiness coherent. Health
+     * transitions retire only the affected index; structural mutations fence all.
+     * @param {string|null} [dictionaryName=null]
+     */
+    _invalidateTermLookupCaches(dictionaryName = null) {
+        this._termExactPresenceCache.clear();
+        this._termPrefixNegativeCache.clear();
+        if (dictionaryName === null) {
+            this._clearDirectTermIndexCaches();
+        } else {
+            this._directTermIndexLoadedDictionaryNames.delete(dictionaryName);
+            this._directTermIndexByDictionary.delete(dictionaryName);
+            this._termExactMatchCache.clear();
+            this._termRowCache.clear();
+        }
+    }
+
+    /**
      * @param {unknown} summary
      * @param {string} fallbackTitle
      * @returns {string}
@@ -2566,9 +2525,10 @@ null;
     /**
      * @param {string} dictionaryName
      * @param {string} storageName
+     * @param {string} [generationId]
      * @throws {Error} If a physical storage name is already owned by another dictionary.
      */
-    _registerTermRecordStorageName(dictionaryName, storageName) {
+    _registerTermRecordStorageName(dictionaryName, storageName, generationId = storageName) {
         // UI input normalization must not rewrite logical or physical storage identity.
         const logicalName = `${dictionaryName}`;
         const physicalName = `${storageName}`;
@@ -2580,9 +2540,11 @@ null;
         const previousStorageName = this._termRecordStorageNameByDictionary.get(logicalName);
         if (typeof previousStorageName !== 'undefined' && previousStorageName !== physicalName) {
             this._dictionaryNameByTermRecordStorage.delete(previousStorageName);
+            this._termRecordGenerationByStorage.delete(previousStorageName);
         }
         this._termRecordStorageNameByDictionary.set(logicalName, physicalName);
         this._dictionaryNameByTermRecordStorage.set(physicalName, logicalName);
+        this._termRecordGenerationByStorage.set(physicalName, generationId);
     }
 
     /**
@@ -2593,6 +2555,7 @@ null;
         this._termRecordStorageNameByDictionary.delete(dictionaryName);
         if (typeof storageName !== 'undefined' && this._dictionaryNameByTermRecordStorage.get(storageName) === dictionaryName) {
             this._dictionaryNameByTermRecordStorage.delete(storageName);
+            this._termRecordGenerationByStorage.delete(storageName);
         }
     }
 
@@ -2602,13 +2565,20 @@ null;
         const rows = db.selectObjects('SELECT title, summaryJson FROM dictionaries ORDER BY id ASC');
         this._termRecordStorageNameByDictionary.clear();
         this._dictionaryNameByTermRecordStorage.clear();
+        this._termRecordGenerationByStorage.clear();
         for (const row of rows) {
             const title = this._asString(row.title);
             if (title.length === 0) { continue; }
             const summary = this._safeParseJson(this._asString(row.summaryJson), null);
+            // Incomplete replacements cannot claim the recovery generation's
+            // immutable storage before startup has reconciled their metadata.
+            if (typeof summary !== 'object' || summary === null || Array.isArray(summary) || Reflect.get(summary, 'importSuccess') === false) {
+                continue;
+            }
             this._registerTermRecordStorageName(
                 title,
                 this._getSummaryTermRecordStorageName(summary, title),
+                this._getSummaryStorageGenerationId(summary, title),
             );
         }
     }
@@ -2627,6 +2597,21 @@ null;
      */
     _getDictionaryNameForTermRecordStorage(storageName) {
         return this._dictionaryNameByTermRecordStorage.get(storageName) ?? storageName;
+    }
+
+    /**
+     * Older installed summaries retain their exact physical identity until their
+     * next import receives a unique publication ID; no record-format migration.
+     * @param {unknown} summary
+     * @param {string} title
+     * @returns {string}
+     */
+    _getSummaryStorageGenerationId(summary, title) {
+        if (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) {
+            const value = /** @type {unknown} */ (Reflect.get(summary, 'storageGenerationId'));
+            if (typeof value === 'string' && value.length > 0) { return value; }
+        }
+        return this._getSummaryTermRecordStorageName(summary, title);
     }
 
     /**
@@ -2829,6 +2814,23 @@ null;
     }
 
     /**
+     * Snapshot availability for this response, not ambient last-lookup state.
+     * Healthy dictionaries are omitted so ordinary misses stay small.
+     * @param {Iterable<string>} dictionaryNames
+     * @returns {import('dictionary-database').DictionaryAvailability[]}
+     */
+    getDictionaryAvailability(dictionaryNames) {
+        const result = /** @type {import('dictionary-database').DictionaryAvailability[]} */ ([]);
+        for (const dictionary of this._getUniqueDictionaryNames(dictionaryNames)) {
+            const storageName = this._getTermRecordStorageName(dictionary);
+            const {status, reason} = this._termRecordStore.getDictionaryHealth(storageName);
+            if (status === 'available') { continue; }
+            result.push({dictionary, generationId: this._termRecordGenerationByStorage.get(storageName) ?? storageName, status, reason});
+        }
+        return result;
+    }
+
+    /**
      * @param {Iterable<string>} dictionaryNames
      * @returns {Promise<void>}
      */
@@ -2869,7 +2871,7 @@ null;
             const generation = this._directTermIndexGeneration;
             const promise = (async () => {
                 const storageNamesToLoad = namesToLoad.map((name) => this._getTermRecordStorageName(name));
-                await this._termRecordStore.ensureDictionariesLoaded(storageNamesToLoad);
+                await this._termRecordStore.ensureDictionariesLoaded(storageNamesToLoad, {repairMode: 'background'});
                 if (generation !== this._directTermIndexGeneration) {
                     return;
                 }
@@ -3085,9 +3087,10 @@ null;
      * @param {string[]} termList
      * @param {import('dictionary-database').DictionarySet} dictionaries
      * @param {import('dictionary-database').MatchType} matchType
+     * @param {import('dictionary-database').DictionaryAvailability[]} [observedAvailability]
      * @returns {Promise<import('dictionary-database').TermEntry[]>}
      */
-    async findTermsBulk(termList, dictionaries, matchType) {
+    async findTermsBulk(termList, dictionaries, matchType, observedAvailability) {
         const generation = this._directTermIndexGeneration;
         this._requireDb();
         if (termList.length === 0 || dictionaries.size === 0) {
@@ -3108,6 +3111,9 @@ null;
         }
         await this._ensureDirectTermIndexesLoaded(requestedDictionaryNames);
         this._assertTermLookupGeneration(generation);
+        if (typeof observedAvailability !== 'undefined') {
+            observedAvailability.push(...this.getDictionaryAvailability(requestedDictionaryNames));
+        }
         const isDictionaryAvailable = Reflect.get(this._termRecordStore, 'isDictionaryAvailable');
         const dictionaryNames = typeof isDictionaryAvailable === 'function' ?
             requestedDictionaryNames.filter(
@@ -3280,17 +3286,19 @@ null;
             return results;
         }
 
-        const visited = new Set();
-        /** @type {Map<number, {matchSource: import('dictionary-database').MatchSource, matchType: import('dictionary-database').MatchType, itemIndex: number}>} */
+        /** @type {Map<number, Array<{matchSource: import('dictionary-database').MatchSource, matchType: import('dictionary-database').MatchType, itemIndex: number}>>} */
         const idMatches = new Map();
-        /** @type {Map<string, {term: string, query: string, itemIndex: number}>} */
+        /** @type {Map<string, {term: string, query: string, itemIndexes: number[]}>} */
         const uniqueQueryMap = new Map();
         for (let itemIndex = 0; itemIndex < termList.length; ++itemIndex) {
             const term = termList[itemIndex];
             const query = matchType === 'suffix' ? stringReverse(term) : term;
             if (query.length === 0) { continue; }
-            if (!uniqueQueryMap.has(query)) {
-                uniqueQueryMap.set(query, {term, query, itemIndex});
+            const existingQuery = uniqueQueryMap.get(query);
+            if (typeof existingQuery === 'undefined') {
+                uniqueQueryMap.set(query, {term, query, itemIndexes: [itemIndex]});
+            } else {
+                existingQuery.itemIndexes.push(itemIndex);
             }
         }
         const dictionaryCacheKey = this._getDictionaryCacheKey(dictionaryNames);
@@ -3300,6 +3308,8 @@ null;
         const foundQueries = new Set();
         const directFindForDictionaries = Reflect.get(this._termRecordStore, 'findTermPrefixIdMatchesForDictionaries');
         for (const queryData of queriesToCheck) {
+            // Deduplicate postings within one query, not its associations with other queries.
+            const visited = new Set();
             const directQuery = matchType === 'suffix' ? queryData.term : queryData.query;
             const matchesByDictionary = typeof directFindForDictionaries === 'function' ?
                 /** @type {(dictionaryNames: string[], query: string, reverse: boolean) => Array<{expression: Array<{id: number, exact: boolean}>, reading: Array<{id: number, exact: boolean}>}>} */ (
@@ -3323,7 +3333,14 @@ null;
                         visited.add(id);
                         const matchSource = (indexIndex === 0) ? 'term' : 'reading';
                         const matchType2 = exact ? 'exact' : matchType;
-                        idMatches.set(id, {matchSource, matchType: matchType2, itemIndex: queryData.itemIndex});
+                        let matches = idMatches.get(id);
+                        if (typeof matches === 'undefined') {
+                            matches = [];
+                            idMatches.set(id, matches);
+                        }
+                        for (const itemIndex of queryData.itemIndexes) {
+                            matches.push({matchSource, matchType: matchType2, itemIndex});
+                        }
                     }
                 }
             }
@@ -3353,10 +3370,12 @@ null;
                 matchedRowCount: rowsById.size,
             }));
         }
-        for (const [id, {matchSource, matchType: matchType2, itemIndex}] of idMatches) {
+        for (const [id, matches] of idMatches) {
             const row = rowsById.get(id);
             if (typeof row === 'undefined') { continue; }
-            results.push(this._createTerm(matchSource, matchType2, row, itemIndex));
+            for (const {matchSource, matchType: matchType2, itemIndex} of matches) {
+                results.push(this._createTerm(matchSource, matchType2, row, itemIndex));
+            }
         }
         if (results.length === 0 && shouldReportDiagnostics) {
             reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
@@ -3619,9 +3638,10 @@ null;
     /**
      * @param {import('dictionary-database').TermExactRequest[]} termList
      * @param {import('dictionary-database').DictionarySet} dictionaries
+     * @param {import('dictionary-database').DictionaryAvailability[]} [observedAvailability]
      * @returns {Promise<import('dictionary-database').TermEntry[]>}
      */
-    async findTermsExactBulk(termList, dictionaries) {
+    async findTermsExactBulk(termList, dictionaries, observedAvailability) {
         const generation = this._directTermIndexGeneration;
         this._requireDb();
         if (termList.length === 0 || dictionaries.size === 0) {
@@ -3632,6 +3652,9 @@ null;
         const dictionaryNames = this._getDictionaryNames(dictionaries);
         await this._ensureDirectTermIndexesLoaded(dictionaryNames);
         this._assertTermLookupGeneration(generation);
+        if (typeof observedAvailability !== 'undefined') {
+            observedAvailability.push(...this.getDictionaryAvailability(dictionaryNames));
+        }
         /** @type {Map<string, {reading: string, itemIndex: number}[]>} */
         const requestsByTerm = new Map();
         for (let itemIndex = 0; itemIndex < termList.length; ++itemIndex) {
@@ -3686,9 +3709,10 @@ null;
 
     /**
      * @param {import('dictionary-database').DictionaryAndQueryRequest[]} items
+     * @param {import('dictionary-database').DictionaryAvailability[]} [observedAvailability]
      * @returns {Promise<import('dictionary-database').TermEntry[]>}
      */
-    async findTermsBySequenceBulk(items) {
+    async findTermsBySequenceBulk(items, observedAvailability) {
         const generation = this._directTermIndexGeneration;
         this._requireDb();
         if (items.length === 0) {
@@ -3716,6 +3740,9 @@ null;
         const dictionaryNames = [...new Set(items.map((item) => item.dictionary))];
         await this._ensureDirectTermIndexesLoaded(dictionaryNames);
         this._assertTermLookupGeneration(generation);
+        if (typeof observedAvailability !== 'undefined') {
+            observedAvailability.push(...this.getDictionaryAvailability(dictionaryNames));
+        }
         const sequenceValues = [...new Set(items.map((item) => this._asNumber(item.query, -1)).filter((value) => value >= 0))];
         /** @type {Map<number, number[]>} */
         const idMatches = new Map();
@@ -4031,29 +4058,9 @@ null;
             try {
                 if (m.mediaType === 'image/svg+xml') {
                     safePerformance.mark('drawMedia:draw:svg:start');
-                    /** @type {import('@resvg/resvg-wasm').ResvgRenderOptions} */
-                    const opts = {
-                        fitTo: {
-                            mode: 'width',
-                            value: m.canvasWidth,
-                        },
-                        font: {
-                            fontBuffers: this._resvgFontBuffer !== null ? [this._resvgFontBuffer] : [],
-                        },
-                    };
-                    const resvgJS = new Resvg(new Uint8Array(m.content), opts);
-                    try {
-                        const render = resvgJS.render();
-                        try {
-                        // The getter copies pixels; transfer the same copy carried by the message.
-                            const buffer = render.pixels.buffer;
-                            source.postMessage({action: 'drawBufferToCanvases', params: {buffer, width: render.width, height: render.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [buffer]);
-                        } finally {
-                            render.free();
-                        }
-                    } finally {
-                        resvgJS.free();
-                    }
+                    const render = await this._mediaRenderer.renderSvg(m.content, m.canvasWidth);
+                    const buffer = /** @type {ArrayBuffer} */ (render.pixels.buffer);
+                    source.postMessage({action: 'drawBufferToCanvases', params: {buffer, width: render.width, height: render.height, canvasIndexes: m.canvasIndexes, generation: m.generation}}, [buffer]);
                     safePerformance.mark('drawMedia:draw:svg:end');
                     safePerformance.measure('drawMedia:draw:svg', 'drawMedia:draw:svg:start', 'drawMedia:draw:svg:end');
                 } else {
@@ -4133,6 +4140,30 @@ null;
     }
 
     /**
+     * Durable reconciliation after a runtime restart. A title match alone is
+     * never evidence that this operation published; require its exact receipt.
+     * @param {string} operationId
+     * @returns {import('dictionary-importer').ImportResult|null}
+     */
+    getPublishedDictionaryImport(operationId) {
+        // Control/status requests can bypass the mutation queue. This owning
+        // connection sees staged summary rows before COMMIT, not durable receipts.
+        if (operationId.length === 0 || this._bulkImportTransactionOpen) { return null; }
+        const rows = this._requireDb().selectObjects('SELECT title, summaryJson FROM dictionaries');
+        for (const row of rows) {
+            const summary = /** @type {import('dictionary-importer').Summary|null} */ (this._safeParseJson(this._asString(row.summaryJson), null));
+            if (
+                summary === null || typeof summary !== 'object' || Array.isArray(summary) ||
+                summary.importSuccess !== true || summary.storageImportOperationId !== operationId ||
+                typeof summary.storageGenerationId !== 'string' || summary.storageGenerationId.length === 0 ||
+                summary.title !== this._asString(row.title)
+            ) { continue; }
+            return {result: summary, errors: [], outcome: {status: 'published', generationId: summary.storageGenerationId}};
+        }
+        return null;
+    }
+
+    /**
      * Persists only terminal record-storage failures. Repairing and transient
      * states are runtime details and must not outlive the current worker.
      * @param {string} termRecordStorageName
@@ -4146,25 +4177,29 @@ null;
             case 'reimportRequired':
             // A lookup may have populated these caches immediately before a
             // concurrent integrity failure invalidated the backing shard.
-                this._clearDirectTermIndexCaches();
+                this._invalidateTermLookupCaches(dictionaryName);
                 this._db.exec({
                     sql: `
-                    INSERT INTO dictionaryStorageHealth (title, reason)
-                    VALUES (?, ?)
-                    ON CONFLICT(title) DO UPDATE SET reason = excluded.reason
+                    INSERT INTO dictionaryStorageHealth (title, generationId, reason)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT(title) DO UPDATE SET generationId = excluded.generationId, reason = excluded.reason
                 `,
-                    bind: [dictionaryName, reason ?? 'Dictionary record data is damaged'],
+                    bind: [dictionaryName, this._termRecordGenerationByStorage.get(termRecordStorageName) ?? termRecordStorageName, reason ?? 'Dictionary record data is damaged'],
                 });
                 break;
             case 'temporarilyUnavailable':
             // A loaded marker suppresses ensureDictionariesLoaded on later
             // lookups. Drop it so a transient storage failure can recover on
             // the next lookup without requiring a separate cache warm-up.
-                this._directTermIndexLoadedDictionaryNames.delete(dictionaryName);
-                this._directTermIndexByDictionary.delete(dictionaryName);
+                this._invalidateTermLookupCaches(dictionaryName);
                 break;
             case 'available':
+                this._invalidateTermLookupCaches(dictionaryName);
                 this._db.exec({sql: 'DELETE FROM dictionaryStorageHealth WHERE title = ?', bind: [dictionaryName]});
+                break;
+            case 'repairPending':
+            case 'repairing':
+                this._invalidateTermLookupCaches(dictionaryName);
                 break;
             default:
                 break;
@@ -4175,7 +4210,7 @@ null;
     _restoreTermRecordDictionaryHealth() {
         const db = this._requireDb();
         const rows = db.selectObjects(`
-            SELECT h.title, h.reason
+            SELECT h.title, h.reason, h.generationId, d.summaryJson
             FROM dictionaryStorageHealth h
             INNER JOIN dictionaries d ON d.title = h.title
             ORDER BY d.id ASC
@@ -4183,6 +4218,12 @@ null;
         for (const row of rows) {
             const title = this._asString(row.title);
             if (title.length === 0) { continue; }
+            const summary = this._safeParseJson(this._asString(row.summaryJson), null);
+            // Old title-scoped failures must never bind to newly imported data.
+            const generationId = this._getSummaryStorageGenerationId(summary, title);
+            if (typeof row.generationId === 'string' ? row.generationId !== generationId : generationId !== this._getSummaryTermRecordStorageName(summary, title)) {
+                continue;
+            }
             const reason = this._asString(row.reason).trim() || 'Dictionary record data is damaged';
             this._termRecordStore.markDictionaryReimportRequired(this._getTermRecordStorageName(title), reason);
         }
@@ -4311,14 +4352,15 @@ null;
             if (summaryParseFailed) {
                 parseErrorCount += 1;
             }
-            const importSuccess = (
+            const summaryObject = (
                 typeof summary === 'object' &&
                 summary !== null &&
                 !Array.isArray(summary)
             ) ?
-                /** @type {unknown} */ (Reflect.get(summary, 'importSuccess')) :
-                void 0;
-            if (title.length > 0 && !TRANSIENT_UPDATE_TITLE_PATTERN.test(title)) {
+                summary :
+                null;
+            const validSummary = summaryObject !== null && Reflect.get(summaryObject, 'importSuccess') !== false;
+            if (title.length > 0 && !TRANSIENT_UPDATE_TITLE_PATTERN.test(title) && validSummary) {
                 installedTitles.add(title);
             }
             if (title.length > 0 && isRecognizedTransientUpdateTitle(title, summary)) {
@@ -4328,11 +4370,10 @@ null;
                     transientInfo !== null &&
                     transientInfo.stage === 'replaced' &&
                     originalTitle.length > 0 &&
-                    typeof summary === 'object' &&
-                    summary !== null &&
-                    !Array.isArray(summary)
+                    validSummary &&
+                    summaryObject !== null
                 ) {
-                    const restoredSummary = {...summary, title: originalTitle};
+                    const restoredSummary = {...summaryObject, title: originalTitle};
                     delete restoredSummary.transientUpdateStage;
                     delete restoredSummary.updateSessionToken;
                     restorableReplacedTitles.push({title, originalTitle, summary: restoredSummary});
@@ -4340,7 +4381,7 @@ null;
                 dictionaryTitlesToDelete.add(title);
                 continue;
             }
-            if (summary !== null && importSuccess !== false) {
+            if (validSummary) {
                 continue;
             }
             if (title.length === 0) {
@@ -4356,9 +4397,19 @@ null;
         const restoredTitles = [];
         /** @type {string[]} */
         const failedTitles = [];
+        /** @type {string[]} */
+        const removedTitles = [];
         for (const {title, originalTitle, summary} of restorableReplacedTitles) {
             if (installedTitles.has(originalTitle)) { continue; }
+            const discardIncompleteReplacement = dictionaryTitlesToDelete.delete(originalTitle);
             try {
+                if (discardIncompleteReplacement) {
+                    // Invalid replacement metadata may alias the backup's immutable
+                    // record storage. Remove metadata only; startup integrity cleanup
+                    // can reclaim any truly unreferenced shards after restoration.
+                    await this._discardIncompleteReplacementMetadata(originalTitle);
+                    removedTitles.push(originalTitle);
+                }
                 // Term-record storage has immutable identity. Restoring the
                 // logical title is a SQLite-only cutover and must retain the
                 // storage name recorded by the moved-aside summary.
@@ -4378,8 +4429,6 @@ null;
             }
         }
 
-        /** @type {string[]} */
-        const removedTitles = [];
         for (const dictionaryTitle of dictionaryTitlesToDelete) {
             try {
                 await this.deleteDictionary(dictionaryTitle, 1000, () => {});
@@ -4405,6 +4454,33 @@ null;
         this._startupCleanupIncompleteImportsSummary = summary;
         reportDiagnostics('dictionary-startup-cleanup-summary', summary);
         return summary;
+    }
+
+    /**
+     * @param {string} title
+     * @returns {Promise<void>}
+     */
+    async _discardIncompleteReplacementMetadata(title) {
+        const db = this._requireDb();
+        await this._beginImmediateTransaction(db);
+        try {
+            for (const table of ['termMeta', 'kanji', 'kanjiMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts']) {
+                db.exec({sql: `DELETE FROM ${table} WHERE dictionary = $title`, bind: {$title: title}});
+            }
+            db.exec({sql: 'DELETE FROM dictionaries WHERE title = $title', bind: {$title: title}});
+            db.exec('COMMIT');
+        } catch (error) {
+            try {
+                db.exec('ROLLBACK');
+            } catch (rollbackError) {
+                throw new AggregateError([toError(error), toError(rollbackError)], 'Failed to discard incomplete replacement metadata and roll back');
+            }
+            throw error;
+        }
+        this._unregisterTermRecordStorageName(title);
+        this._termsVirtualTableDirty = true;
+        this._clearCachedStatements();
+        this._clearSharedGlossaryArtifactCaches();
     }
 
     /**
@@ -4622,9 +4698,7 @@ null;
                 this._termEntryContentIdByKey.clear();
                 this._clearTermEntryContentMetaCaches();
             }
-            this._termExactPresenceCache.clear();
-            this._termPrefixNegativeCache.clear();
-            this._clearDirectTermIndexCaches();
+            this._invalidateTermLookupCaches();
         }
 
         if (objectStoreName === 'terms') {
@@ -4663,9 +4737,7 @@ null;
             this._termEntryContentIdByKey.clear();
             this._clearTermEntryContentMetaCaches();
         }
-        this._termExactPresenceCache.clear();
-        this._termPrefixNegativeCache.clear();
-        this._clearDirectTermIndexCaches();
+        this._invalidateTermLookupCaches();
         if (this._enableTermEntryContentDedup) {
             const hasHashArrays = (
                 (Array.isArray(chunk.contentHash1List) || chunk.contentHash1List instanceof Uint32Array) &&
@@ -4891,7 +4963,11 @@ null;
                 }
                 inflatedBytes = decoded;
             } catch (error) {
-                throw new TermContentLookupReadError('corrupt', 'Shared glossary decompression failed', {cause: error});
+                throw new TermContentLookupReadError(
+                    isZstdResourceError(error) ? 'temporarilyUnavailable' : 'corrupt',
+                    'Shared glossary decompression failed',
+                    {cause: error},
+                );
             }
         }
         if (meta.uncompressedLength > 0 && inflatedBytes.byteLength !== meta.uncompressedLength) {
@@ -5226,6 +5302,7 @@ null;
             this._registerTermRecordStorageName(
                 summary.title,
                 this._getSummaryTermRecordStorageName(summary, summary.title),
+                this._getSummaryStorageGenerationId(summary, summary.title),
             );
         }
         return this._asNumber(db.selectValue('SELECT last_insert_rowid()'), -1);
@@ -9427,6 +9504,7 @@ null :
 
             CREATE TABLE IF NOT EXISTS dictionaryStorageHealth (
                 title TEXT PRIMARY KEY,
+                generationId TEXT,
                 reason TEXT NOT NULL
             );
 
@@ -9451,6 +9529,7 @@ null :
                 completedAt INTEGER NOT NULL
             ) WITHOUT ROWID;
         `);
+        this._migrateDictionaryStorageHealthSchema();
         await this._ensureTermsVirtualTable();
         await this._migrateTermsContentSchema();
         await this._migrateMediaSchema();
@@ -9461,6 +9540,15 @@ null :
         }
         for (const createIndexSql of this._createIndexesSql()) {
             db.exec(createIndexSql);
+        }
+    }
+
+    /** Additive metadata migration; never rewrites or removes dictionary files. */
+    _migrateDictionaryStorageHealthSchema() {
+        const db = this._requireDb();
+        const columns = db.selectObjects('PRAGMA table_info(dictionaryStorageHealth)');
+        if (!columns.some((column) => column.name === 'generationId')) {
+            db.exec('ALTER TABLE dictionaryStorageHealth ADD COLUMN generationId TEXT');
         }
     }
 
@@ -9574,13 +9662,7 @@ null :
             throw e;
         }
 
-        this._termEntryContentCache.clear();
-        this._termEntryContentIdByHash.clear();
-        this._clearTermEntryContentMetaCaches();
-        this._termExactPresenceCache.clear();
-        this._termPrefixNegativeCache.clear();
-        this._clearDirectTermIndexCaches();
-        this._termEntryContentIdByKey.clear();
+        this._clearBulkImportRuntimeCaches();
         this._clearSharedGlossaryArtifactCaches();
         this._termsVirtualTableDirty = false;
         this._deferTermsVirtualTableSync = false;

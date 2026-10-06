@@ -15,13 +15,133 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect, test, vi} from 'vitest';
+import {afterEach, describe, expect, test, vi} from 'vitest';
 
 const {Backend} = await import('../ext/js/background/backend.js');
 
 /** @typedef {import('dictionary-importer').ImportDetails} ImportDetails */
 
+class PendingArchiveRequest {
+    static HEADERS_RECEIVED = 2;
+    /** @type {PendingArchiveRequest[]} */
+    static instances = [];
+    /** @type {(() => void)|null} */
+    onload = null;
+    /** @type {(() => void)|null} */
+    onerror = null;
+    /** @type {(() => void)|null} */
+    onabort = null;
+    /** @type {(() => void)|null} */
+    ontimeout = null;
+    /** @type {((event: ProgressEvent) => void)|null} */
+    onprogress = null;
+    /** @type {(() => void)|null} */
+    onreadystatechange = null;
+    readyState = 1;
+    status = 200;
+    response = new Blob(['dictionary']);
+    open = vi.fn();
+    send = vi.fn();
+    abort = vi.fn(() => { this.onabort?.(); });
+    getResponseHeader = vi.fn(() => null);
+    constructor() { PendingArchiveRequest.instances.push(this); }
+}
+
+afterEach(() => {
+    PendingArchiveRequest.instances = [];
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+});
+
 describe('Backend URL import progress', () => {
+    test('closing one settings owner aborts only its pending archive download and prevents admission', async () => {
+        vi.stubGlobal('XMLHttpRequest', PendingArchiveRequest);
+        const backend = /** @type {InstanceType<typeof Backend>} */ (Object.create(Backend.prototype));
+        Reflect.set(backend, '_dictionaryImportOwners', new Set(['page-A', 'page-B']));
+        Reflect.set(backend, '_ownedDictionaryImports', new Map());
+        Reflect.set(backend, '_setDictionaryImportModePromise', null);
+        Reflect.set(backend, '_offscreen', null);
+        Reflect.set(backend, '_localDictionaryRuntime', {sendMessagePromise: vi.fn().mockResolvedValue(void 0)});
+        const forward = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(backend, '_forwardDictionaryImportToRuntime', forward);
+        const port = () => /** @type {MessagePort} */ (/** @type {unknown} */ ({postMessage: vi.fn(), close: vi.fn()}));
+        const portA = port();
+        const portB = port();
+        const params = {url: 'https://example.com/dictionary.zip', details: /** @type {ImportDetails} */ ({})};
+        const pendingA = backend._onPmImportDictionaryUrlOffscreen({...params, operationId: 'download-A', ownerId: 'page-A'}, [portA]);
+        const pendingB = backend._onPmImportDictionaryUrlOffscreen({...params, operationId: 'download-B', ownerId: 'page-B'}, [portB]);
+        const [requestA, requestB] = PendingArchiveRequest.instances;
+        await backend._setDictionaryImportMode(false, 'page-A');
+        const stopped = requestA.abort.mock.calls.length === 1;
+        // Always drain the old implementation too so a red test cannot leak pending work.
+        if (!stopped) { requestA.onerror?.(); }
+        requestB.onload?.();
+        await Promise.all([pendingA, pendingB]);
+        expect(stopped).toBe(true);
+        expect(requestB.abort).not.toHaveBeenCalled();
+        expect(forward).toHaveBeenCalledExactlyOnceWith(requestB.response, {}, portB, 'download-B', 'page-B');
+        expect(portA.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'}));
+        expect(portA.close).toHaveBeenCalledOnce();
+        expect(Reflect.get(backend, '_ownedDictionaryImports').has('download-A')).toBe(false);
+        expect(Reflect.get(backend, '_ownedDictionaryImports').get('download-B')?.downloadAbortController).toBeUndefined();
+    });
+
+    test.each(['success', 'failure', 'abort'])('archive download removes its abort listener after %s', async (outcome) => {
+        vi.stubGlobal('XMLHttpRequest', PendingArchiveRequest);
+        const backend = /** @type {InstanceType<typeof Backend>} */ (Object.create(Backend.prototype));
+        const controller = new AbortController();
+        const remove = vi.spyOn(controller.signal, 'removeEventListener');
+        const pending = Reflect.get(backend, '_downloadDictionaryArchiveBlobViaXhr').call(backend, 'https://example.com/dictionary.zip', 120_000, vi.fn(), undefined, controller.signal);
+        const observed = outcome === 'success' ? expect(pending).resolves.toBeInstanceOf(Blob) : expect(pending).rejects.toThrow();
+        const [request] = PendingArchiveRequest.instances;
+        if (outcome === 'success') { request.onload?.(); }
+        if (outcome === 'failure') { request.onerror?.(); }
+        if (outcome === 'abort') { controller.abort(); }
+        // Drain the unmodified downloader without hanging the red test.
+        if (outcome === 'abort' && request.abort.mock.calls.length === 0) { request.onerror?.(); }
+        await observed;
+        expect(remove).toHaveBeenCalledWith('abort', expect.any(Function));
+        expect(request.onload).toBeNull();
+        expect(request.onerror).toBeNull();
+        expect(request.onabort).toBeNull();
+        controller.abort();
+        expect(request.abort).toHaveBeenCalledTimes(outcome === 'abort' ? 1 : 0);
+    });
+
+    test('an already-cancelled download never sends a request', async () => {
+        vi.stubGlobal('XMLHttpRequest', PendingArchiveRequest);
+        const backend = /** @type {InstanceType<typeof Backend>} */ (Object.create(Backend.prototype));
+        const controller = new AbortController();
+        controller.abort();
+        const pending = Reflect.get(backend, '_downloadDictionaryArchiveBlobViaXhr').call(backend, 'https://example.com/dictionary.zip', 120_000, vi.fn(), undefined, controller.signal);
+        const [request] = PendingArchiveRequest.instances;
+        const sent = request?.send.mock.calls.length ?? 0;
+        // Drain an uncancelled baseline request before asserting.
+        request?.onerror?.();
+        await expect(pending).rejects.toThrow();
+        expect(sent).toBe(0);
+    });
+
+    test('a synchronous send failure detaches download handlers and cancellation', async () => {
+        vi.stubGlobal('XMLHttpRequest', class extends PendingArchiveRequest {
+            constructor() {
+                super();
+                this.send.mockImplementation(() => { throw new Error('Request could not be sent'); });
+            }
+        });
+        const backend = /** @type {InstanceType<typeof Backend>} */ (Object.create(Backend.prototype));
+        const controller = new AbortController();
+        const remove = vi.spyOn(controller.signal, 'removeEventListener');
+        await expect(Reflect.get(backend, '_downloadDictionaryArchiveBlobViaXhr').call(backend, 'https://example.com/dictionary.zip', 120_000, vi.fn(), undefined, controller.signal)).rejects.toThrow('Request could not be sent');
+        const [request] = PendingArchiveRequest.instances;
+        expect(remove).toHaveBeenCalledWith('abort', expect.any(Function));
+        expect(request.onload).toBeNull();
+        expect(request.onerror).toBeNull();
+        expect(request.onabort).toBeNull();
+        controller.abort();
+        expect(request.abort).not.toHaveBeenCalled();
+    });
+
     test('_onPmImportDictionaryOffscreen does not throw when error delivery to a dead response port fails', async () => {
         const responsePort = {
             postMessage: vi.fn(() => {
@@ -33,6 +153,8 @@ describe('Backend URL import progress', () => {
         };
         const responsePorts = /** @type {MessagePort[]} */ (/** @type {unknown} */ ([responsePort]));
         const context = /** @type {any} */ ({
+            _registerDictionaryImportOwner: vi.fn(),
+            _settleDictionaryImportOwnership: vi.fn(),
             _forwardDictionaryImportToRuntime: vi.fn(async () => {
                 throw new Error('dictionary runtime unavailable');
             }),
@@ -40,7 +162,7 @@ describe('Backend URL import progress', () => {
 
         await expect(Reflect.get(Backend.prototype, '_onPmImportDictionaryOffscreen').call(
             context,
-            {archiveContent: new Blob(['dictionary']), details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
+            {operationId: `${Date.now()}:file`, archiveContent: new Blob(['dictionary']), details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
             responsePorts,
         )).resolves.toBeUndefined();
 
@@ -64,6 +186,8 @@ describe('Backend URL import progress', () => {
             return archiveBlob;
         });
         const context = /** @type {any} */ ({
+            _registerDictionaryImportOwner: vi.fn(),
+            _settleDictionaryImportOwnership: vi.fn(),
             _lastDictionaryUrlImportDebug: null,
             _downloadDictionaryArchiveBlobViaXhr: downloadDictionaryArchiveBlobViaXhr,
             _forwardDictionaryImportToRuntime: forwardDictionaryImportToRuntime,
@@ -71,7 +195,7 @@ describe('Backend URL import progress', () => {
 
         await Reflect.get(Backend.prototype, '_onPmImportDictionaryUrlOffscreen').call(
             context,
-            {url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
+            {operationId: 'url-operation', url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
             responsePorts,
         );
 
@@ -87,7 +211,7 @@ describe('Backend URL import progress', () => {
             type: 'progress',
             progress: {nextStep: false, index: 100, count: 100},
         });
-        expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort);
+        expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort, 'url-operation', undefined);
         expect(responsePort.close).not.toHaveBeenCalled();
     });
 
@@ -106,6 +230,8 @@ describe('Backend URL import progress', () => {
             return archiveBlob;
         });
         const context = /** @type {any} */ ({
+            _registerDictionaryImportOwner: vi.fn(),
+            _settleDictionaryImportOwnership: vi.fn(),
             _lastDictionaryUrlImportDebug: null,
             _downloadDictionaryArchiveBlobViaXhr: downloadDictionaryArchiveBlobViaXhr,
             _forwardDictionaryImportToRuntime: forwardDictionaryImportToRuntime,
@@ -113,12 +239,12 @@ describe('Backend URL import progress', () => {
 
         await Reflect.get(Backend.prototype, '_onPmImportDictionaryUrlOffscreen').call(
             context,
-            {url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
+            {operationId: 'url-operation', url: 'https://example.com/jitendex.zip', details: /** @type {ImportDetails} */ (/** @type {unknown} */ ({}))},
             responsePorts,
         );
 
         expect(responsePort.postMessage).toHaveBeenCalledTimes(2);
-        expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort);
+        expect(forwardDictionaryImportToRuntime).toHaveBeenCalledWith(archiveBlob, {}, responsePort, 'url-operation', undefined);
         expect(responsePort.close).not.toHaveBeenCalled();
     });
 });

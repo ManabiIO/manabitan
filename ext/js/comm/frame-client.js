@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {deferPromise, generateId} from '../core/utilities.js';
 
@@ -87,10 +89,14 @@ export class FrameClient {
             const tokenMap = new Map();
             /** @type {?import('core').Timeout} */
             let timer = null;
+            let done = false;
+            const eventListeners = new EventListenerCollection();
             const deferPromiseDetails = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
             const frameLoadedPromise = deferPromiseDetails.promise;
             let frameLoadedResolve = /** @type {?() => void} */ (deferPromiseDetails.resolve);
             let frameLoadedReject = /** @type {?(reason?: import('core').RejectionReason) => void} */ (deferPromiseDetails.reject);
+            // Setup can fail before listeners or the timeout have been installed.
+            void frameLoadedPromise.catch(() => {});
 
             /**
              * @param {string} action
@@ -123,18 +129,22 @@ export class FrameClient {
              */
             const onMessageInner = async (message) => {
                 try {
-                    if (!isObjectNotArray(message)) { return; }
+                    if (done || !isObjectNotArray(message)) { return; }
                     const {action, params} = message;
+                    if (action !== 'frameEndpointReady' && action !== 'frameEndpointConnected') { return; }
                     if (!isObjectNotArray(params)) { return; }
                     await frameLoadedPromise;
-                    if (timer === null) { return; } // Done
+                    if (done) { return; }
 
                     switch (action) {
                         case 'frameEndpointReady':
                             {
                                 const {secret} = params;
-                                const token = generateId(16);
-                                tokenMap.set(secret, token);
+                                let token = tokenMap.get(secret);
+                                if (typeof token === 'undefined') {
+                                    token = generateId(16);
+                                    tokenMap.set(secret, token);
+                                }
                                 postMessage('frameEndpointConnect', {secret, token, hostFrameId});
                             }
                             break;
@@ -151,15 +161,14 @@ export class FrameClient {
                             break;
                     }
                 } catch (e) {
-                    cleanup();
-                    reject(e);
+                    fail(e);
                 }
             };
 
             const onLoad = () => {
+                if (done) { return; }
                 if (frameLoadedResolve === null) {
-                    cleanup();
-                    reject(new Error('Unexpected load event'));
+                    fail(new Error('Unexpected load event'));
                     return;
                 }
 
@@ -173,8 +182,9 @@ export class FrameClient {
             };
 
             const cleanup = () => {
-                if (timer === null) { return; } // Done
-                clearTimeout(timer);
+                if (done) { return; }
+                done = true;
+                if (timer !== null) { clearTimeout(timer); }
                 timer = null;
 
                 frameLoadedResolve = null;
@@ -183,27 +193,31 @@ export class FrameClient {
                     frameLoadedReject = null;
                 }
 
-                chrome.runtime.onMessage.removeListener(onMessage);
-                frame.removeEventListener('load', onLoad);
+                try {
+                    eventListeners.removeAllEventListeners();
+                } catch (error) {
+                    try {
+                        log.warn(error);
+                    } catch (e) {
+                        // Diagnostics cannot prevent the handshake from settling.
+                    }
+                }
             };
 
-            // Start
-            timer = setTimeout(() => {
+            /** @param {unknown} error */
+            const fail = (error) => {
+                if (done) { return; }
                 cleanup();
-                reject(new Error('Timeout'));
-            }, timeout);
-
-            chrome.runtime.onMessage.addListener(onMessage);
-            frame.addEventListener('load', onLoad);
-
-            // Prevent unhandled rejections
-            frameLoadedPromise.catch(() => {}); // NOP
+                reject(error);
+            };
 
             try {
+                timer = setTimeout(() => fail(new Error('Timeout')), timeout);
+                eventListeners.addListener(chrome.runtime.onMessage, onMessage);
+                eventListeners.addEventListener(frame, 'load', onLoad);
                 setupFrame(frame);
             } catch (e) {
-                cleanup();
-                reject(e);
+                fail(e);
             }
         });
     }

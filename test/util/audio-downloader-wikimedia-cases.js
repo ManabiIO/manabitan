@@ -172,3 +172,35 @@ test('empty source results and lookup errors retain existing behavior', async (c
     context.mock.method(builder, 'fetchAnonymous', async () => { throw new Error('Unavailable') })
     assert.deepEqual(await downloader.getTermAudioInfoList({type: 'wiktionary', url: '', voice: ''}, 'word', '', language), [])
 })
+
+for (const type of sourceTypes) {
+    for (const failure of ['missing-file', 'network', 'invalid-json', 'http-error']) {
+        test(`${type}: ${failure} metadata does not discard other recordings`, async (context) => {
+            const builder = new RequestBuilder()
+            const titles = type === 'wiktionary' ?
+                ['File:en-word.ogg', 'File:en-us-word.ogg', 'File:en-gb-word.ogg'] :
+                ['First', 'Broken', 'Last'].map((user) => titleFor(type, 'word', user))
+            context.mock.method(builder, 'fetchAnonymous', async (/** @type {string} */ input) => {
+                const url = new URL(input)
+                if (url.searchParams.get('list') === 'search') {
+                    return jsonResponse({query: {search: titles.map((title) => ({title}))}})
+                }
+                const index = titles.indexOf(url.searchParams.get('titles') ?? '')
+                if (index === 1) {
+                    switch (failure) {
+                        case 'missing-file': return jsonResponse({query: {pages: {'-1': {missing: ''}}}})
+                        case 'network': throw new Error('Temporary network failure')
+                        case 'invalid-json': return new Response('not JSON')
+                        case 'http-error': return new Response(JSON.stringify({query: {pages: {'1': {imageinfo: [{url: 'https://upload.wikimedia.org/error', user: 'Broken'}]}}}}), {status: 503})
+                    }
+                }
+                return jsonResponse({query: {pages: {'1': {imageinfo: [{url: `https://upload.wikimedia.org/${index}`, user: index === 0 ? 'First' : 'Last'}]}}}})
+            })
+            const result = await new AudioDownloader(builder).getTermAudioInfoList({type, url: '', voice: ''}, 'word', '', language)
+            assert.deepEqual(result.map((info) => Reflect.get(info, 'url')), [
+                'https://upload.wikimedia.org/0',
+                'https://upload.wikimedia.org/2',
+            ])
+        })
+    }
+}

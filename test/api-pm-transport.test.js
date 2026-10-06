@@ -16,6 +16,7 @@
  */
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
+import {deferPromise} from '../ext/js/core/utilities.js';
 
 const {API} = await import('../ext/js/comm/api.js');
 
@@ -657,6 +658,84 @@ describe('API PM transport reliability', () => {
 
         await expect(pending).rejects.toThrow(/Media drawing worker changed while connecting/);
         expect(api._mediaDrawingWorkerConnected).toBe(false);
+    });
+
+    test('obsolete media connection cleanup cannot discard the replacement single-flight', async () => {
+        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {serviceWorker: {}}});
+        vi.stubGlobal('MessageChannel', class {
+            constructor() {
+                this.port1 = {close: vi.fn()};
+                this.port2 = {close: vi.fn()};
+            }
+        });
+        const staleWorker = {addEventListener: vi.fn(), postMessage: vi.fn()};
+        const currentWorker = {addEventListener: vi.fn(), postMessage: vi.fn()};
+        const api = new API(
+            /** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})),
+            /** @type {Worker} */ (/** @type {unknown} */ (staleWorker)),
+        );
+        const stale = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+        const current = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+        const invoke = vi.spyOn(api, '_pmInvoke').mockImplementationOnce(() => stale.promise).mockImplementation(() => current.promise);
+        const stalePending = api.ensureMediaDrawingWorkerConnected();
+        const staleFailure = expect(stalePending).rejects.toThrow(/Media drawing worker changed while connecting/);
+        api.setMediaDrawingWorker(/** @type {Worker} */ (/** @type {unknown} */ (currentWorker)));
+        const currentPending = api.ensureMediaDrawingWorkerConnected();
+        try {
+            stale.resolve();
+            await staleFailure;
+            const joined = api.ensureMediaDrawingWorkerConnected();
+            expect(invoke).toHaveBeenCalledTimes(2);
+            expect(currentWorker.postMessage).toHaveBeenCalledTimes(1);
+            current.resolve();
+            await Promise.all([currentPending, joined]);
+            expect(api._mediaDrawingWorkerConnected).toBe(true);
+            expect(api._mediaDrawingWorkerConnectPromise).toBeNull();
+        } finally {
+            current.resolve();
+            await currentPending;
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test('queued draw cannot use a replacement worker before its bridge is connected', async () => {
+        const staleWorker = {addEventListener: vi.fn(), postMessage: vi.fn()};
+        const currentWorker = {addEventListener: vi.fn(), postMessage: vi.fn()};
+        const api = new API(
+            /** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})),
+            /** @type {Worker} */ (/** @type {unknown} */ (staleWorker)),
+        );
+        api._mediaDrawingWorkerConnected = true;
+        const requests = /** @type {import('api').PmApiParam<'drawMedia', 'requests'>} */ (/** @type {unknown} */ ([{
+            path: 'cover.png', dictionary: 'Images', canvas: {width: 1, height: 1},
+        }]));
+        api.drawMedia(requests, []);
+        api.setMediaDrawingWorker(/** @type {Worker} */ (/** @type {unknown} */ (currentWorker)));
+        await new Promise(setImmediate);
+        expect(currentWorker.postMessage).not.toHaveBeenCalled();
+        expect(api._mediaDrawingWorkerConnected).toBe(false);
+    });
+
+    test('obsolete Firefox backend-port errors preserve the replacement transport', () => {
+        const stalePort = {postMessage: vi.fn(), close: vi.fn(), onmessageerror: /** @type {((event: Event) => void)|null} */ (null)};
+        const currentPort = {postMessage: vi.fn(), close: vi.fn(), onmessageerror: /** @type {((event: Event) => void)|null} */ (null)};
+        const api = new API(
+            /** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})),
+            null,
+            /** @type {MessagePort} */ (/** @type {unknown} */ (stalePort)),
+        );
+        const staleError = stalePort.onmessageerror;
+        api._setBackendPort(/** @type {MessagePort} */ (/** @type {unknown} */ (currentPort)));
+        api._mediaDrawingWorkerConnected = true;
+        staleError?.(new Event('messageerror'));
+        expect(api._backendPort).toBe(currentPort);
+        expect(api._mediaDrawingWorkerConnected).toBe(true);
+        expect(stalePort.close).toHaveBeenCalledTimes(1);
+        expect(currentPort.close).not.toHaveBeenCalled();
+        currentPort.onmessageerror?.(new Event('messageerror'));
+        expect(api._backendPort).toBeNull();
+        expect(api._mediaDrawingWorkerConnected).toBe(false);
+        expect(currentPort.close).toHaveBeenCalledTimes(1);
     });
 
     test('shutdownRuntimeConnections clears stale backend and media worker state', () => {

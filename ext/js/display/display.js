@@ -37,7 +37,8 @@ import {TextSourceGenerator} from '../dom/text-source-generator.js';
 import {HotkeyHelpController} from '../input/hotkey-help-controller.js';
 import {TextScanner} from '../language/text-scanner.js';
 import {checkPopupPreviewURL} from '../pages/settings/popup-preview-controller.js';
-import {DictionaryCssMediaResolver, getMdictMediaPathsFromComputedCss, getMdictMediaPathsFromCss} from './dictionary-css-media-resolver.js';
+import {DictionaryCssMediaResolver} from './dictionary-css-media-resolver.js';
+import {collectDictionaryCssMediaTargets} from './dictionary-css-media-targets.js';
 import {DisplayContentManager} from './display-content-manager.js';
 import {DisplayGenerator} from './display-generator.js';
 import {DisplayHistory} from './display-history.js';
@@ -74,6 +75,11 @@ export class Display extends EventDispatcher {
         this._dictionaryEntryNodes = [];
         /** @type {import('settings').OptionsContext} */
         this._optionsContext = {depth: 0, url: window.location.href};
+        // Retain failed requests for existing waiters; new consumers retry them.
+        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
+        this._optionsContextRequest = null;
+        /** @type {?object} */
+        this._nestedFrontendUpdateToken = null;
         /** @type {?import('settings').ProfileOptions} */
         this._options = null;
         /** @type {number} */
@@ -160,6 +166,8 @@ export class Display extends EventDispatcher {
         this._navigationNextButton = document.querySelector('#navigate-next-button');
         /** @type {?import('../app/frontend.js').Frontend} */
         this._frontend = null;
+        /** @type {?{frontend: import('../app/frontend.js').Frontend, popupFactory: import('../app/popup-factory.js').PopupFactory}} */
+        this._frontendPending = null;
         /** @type {?Promise<void>} */
         this._frontendSetupPromise = null;
         /** @type {number} */
@@ -186,6 +194,8 @@ export class Display extends EventDispatcher {
         this._contentTextScanner = null;
         /** @type {?import('./display-notification.js').DisplayNotification} */
         this._tagNotification = null;
+        /** @type {?DisplayNotification} */
+        this._dictionaryAvailabilityNotification = null;
         /** @type {?import('./display-notification.js').DisplayNotification} */
         this._inflectionNotification = null;
         /** @type {HTMLElement} */
@@ -476,9 +486,25 @@ export class Display extends EventDispatcher {
         await this.updateOptions();
     }
 
-    /** */
-    async updateOptions() {
-        const options = await this._application.api.optionsGet(this.getOptionsContext());
+    /** @returns {Promise<void>} */
+    updateOptions() {
+        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
+        const request = {optionsContext: this.getOptionsContext(), promise: null, failed: false};
+        this._optionsContextRequest = request;
+        request.promise = this._updateOptionsInner(request.optionsContext, request).catch((error) => {
+            request.failed = true;
+            throw error;
+        });
+        return request.promise;
+    }
+
+    /**
+     * @param {import('settings').OptionsContext} optionsContext
+     * @param {object} request
+     */
+    async _updateOptionsInner(optionsContext, request) {
+        const options = await this._application.api.optionsGet(optionsContext);
+        if (this._optionsContextRequest !== request) { return; }
         const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
         this._options = options;
         this._dictionaryCssMediaResolver.prune(options.dictionaries);
@@ -520,7 +546,7 @@ export class Display extends EventDispatcher {
             },
         });
 
-        void this._updateNestedFrontend(options);
+        void this._updateNestedFrontend(options).catch((e) => { log.error(e); });
         this._updateContentTextScanner(options);
 
         this.trigger('optionsUpdated', {options});
@@ -529,49 +555,56 @@ export class Display extends EventDispatcher {
     /**
      * Updates the content of the display.
      * @param {import('display').ContentDetails} details Information about the content to show.
-     * @returns {Promise<boolean>} Whether the state-change handler completed before the timeout.
+     * @returns {Promise<boolean>}
+     * @throws {Error} If request setup or history publication fails.
      */
     setContent(details) {
         this._activePublication = null;
-        const stateChangeCompletePromise = this._waitForStateChangeComplete(5000);
-        const {focus, params, state, content} = details;
-        const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
+        const {promise, finish} = this._createStateChangeCompletion(5000);
+        try {
+            const {focus, params, state, content} = details;
+            const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
 
-        if (focus) {
-            window.focus();
-        }
+            if (focus) {
+                window.focus();
+            }
 
-        const urlSearchParams = new URLSearchParams();
-        for (const [key, value] of Object.entries(params)) {
-            if (typeof value !== 'string') { continue; }
-            urlSearchParams.append(key, value);
-        }
-        const url = `${location.protocol}//${location.host}${location.pathname}?${urlSearchParams.toString()}`;
+            const urlSearchParams = new URLSearchParams();
+            for (const [key, value] of Object.entries(params)) {
+                if (typeof value !== 'string') { continue; }
+                urlSearchParams.append(key, value);
+            }
+            const url = `${location.protocol}//${location.host}${location.pathname}?${urlSearchParams.toString()}`;
 
-        switch (historyMode) {
-            case 'clear':
-                this._history.clear();
-                this._history.replaceState(state, content, url);
-                break;
-            case 'overwrite':
-                this._history.replaceState(state, content, url);
-                break;
-            case 'new':
-                this._updateHistoryState();
-                this._history.pushState(state, content, url);
-                break;
-        }
+            switch (historyMode) {
+                case 'clear':
+                    this._history.clear();
+                    this._history.replaceState(state, content, url);
+                    break;
+                case 'overwrite':
+                    this._history.replaceState(state, content, url);
+                    break;
+                case 'new':
+                    this._updateHistoryState();
+                    this._history.pushState(state, content, url);
+                    break;
+            }
 
-        if (this._options) {
-            this._setTheme(this._options);
+            if (this._options) {
+                this._setTheme(this._options);
+            }
+        } catch (e) {
+            finish();
+            throw e;
         }
-        return stateChangeCompletePromise;
+        return promise;
     }
 
     /** Invalidate stale results immediately when the search draft changes. */
     invalidateSearchDraft() {
         this._activePublication = null;
         this._setContentToken = {};
+        this._dictionaryAvailabilityNotification?.close(false);
         this._closePopups();
         this._closeAllPopupMenus();
         this._eventListeners.removeAllEventListeners();
@@ -897,14 +930,15 @@ export class Display extends EventDispatcher {
     async _onStateChanged() {
         if (this._historyChangeIgnore) { return; }
 
-        // Claim this render's waiters before another history change can start.
-        const stateChangeCompleteResolvers = this._stateChangeCompleteResolvers.splice(0);
-        safePerformance.mark('display:_onStateChanged:start');
+        // History events are synchronous; later requests belong to later renders.
+        const completions = this._stateChangeCompleteResolvers.splice(0);
 
         /** @type {?import('core').TokenObject} */
         const token = {}; // Unique identifier token
         this._setContentToken = token;
         try {
+            safePerformance.mark('display:_onStateChanged:start');
+            this._dictionaryAvailabilityNotification?.close(false);
             // Clear
             safePerformance.mark('display:_onStateChanged:clear:start');
             this._closePopups();
@@ -953,17 +987,27 @@ export class Display extends EventDispatcher {
             safePerformance.mark('display:_onStateChanged:setContent:end');
             safePerformance.measure('display:_onStateChanged:setContent', 'display:_onStateChanged:setContent:start', 'display:_onStateChanged:setContent:end');
         } catch (e) {
-            this.onError(toError(e));
+            try {
+                this.onError(toError(e));
+            } catch (error) {
+                // Reporting must not reject the unawaited history event handler.
+            }
+        } finally {
+            try {
+                safePerformance.mark('display:_onStateChanged:end');
+                safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
+            } catch (error) {
+                // Profiling failures cannot strand completion or reject history events.
+            } finally {
+                for (const finish of completions) { finish(); }
+            }
         }
-        safePerformance.mark('display:_onStateChanged:end');
-        safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
-        this._resolveStateChangeCompleteWaiters(stateChangeCompleteResolvers);
     }
 
     /**
      * @param {import('query-parser').EventArgument<'searched'>} details
      */
-    _onQueryParserSearch({type, dictionaryEntries, sentence, inputInfo: {eventType}, textSource, optionsContext, sentenceOffset}) {
+    _onQueryParserSearch({type, dictionaryEntries, dictionaryAvailability, sentence, inputInfo: {eventType}, textSource, optionsContext, sentenceOffset}) {
         const query = textSource.text();
         const historyState = this._history.state;
         const historyMode = (
@@ -985,6 +1029,7 @@ export class Display extends EventDispatcher {
             },
             content: {
                 dictionaryEntries,
+                ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
                 contentOrigin: this.getContentOrigin(),
             },
         };
@@ -1410,7 +1455,6 @@ export class Display extends EventDispatcher {
                 customCss += '\n' + addScopeToCss(resolvedStyles, `[data-dictionary="${escapedTitle}"]`);
             }
         }
-        this.setCustomCss(customCss);
         return customCss;
     }
 
@@ -1425,94 +1469,31 @@ export class Display extends EventDispatcher {
         const options = this._options;
         if (options === null || this._setContentToken !== token) { return; }
 
-        const dictionariesWithMediaStyles = new Set();
-        for (const {name, enabled, styles = ''} of options.dictionaries) {
-            if (enabled && styles.includes('mdict-media/')) {
-                dictionariesWithMediaStyles.add(name);
-            }
-        }
-
-        /** @type {Array<{element: HTMLElement, dictionary: string}>} */
-        const inlineStyleElements = [];
-        /** @type {Array<{dictionary: string, path: string}>} */
-        const targets = [];
-        const targetKeys = new Set();
-        const baseUrl = window.location.href;
-        const imageBearingProperties = [
-            'background-image',
-            'border-image-source',
-            'list-style-image',
-            'mask-image',
-            '-webkit-mask-image',
-            'content',
-            'cursor',
-            'filter',
-            'clip-path',
-            'shape-outside',
-        ];
-
-        /**
-         * @param {string} dictionary
-         * @param {string} path
-         */
-        const addTarget = (dictionary, path) => {
-            const key = JSON.stringify([dictionary, path]);
-            if (targetKeys.has(key)) { return; }
-            targetKeys.add(key);
-            targets.push({dictionary, path});
-        };
-
-        for (const element of /** @type {NodeListOf<HTMLElement>} */ (this._container.querySelectorAll('[data-sc-class], [style*="mdict-media/"]'))) {
-            const dictionaryContainer = /** @type {HTMLElement|null} */ (element.closest('[data-dictionary]'));
-            const dictionary = dictionaryContainer?.dataset.dictionary;
-            if (typeof dictionary !== 'string' || dictionary.length === 0) { continue; }
-
-            const inlineCss = element.style.cssText;
-            if (inlineCss.includes('mdict-media/')) {
-                inlineStyleElements.push({element, dictionary});
-                for (const path of getMdictMediaPathsFromCss(inlineCss)) {
-                    addTarget(dictionary, path);
-                }
-            }
-
-            if (!dictionariesWithMediaStyles.has(dictionary)) { continue; }
-            for (const pseudoElement of [null, '::before', '::after']) {
-                const style = getComputedStyle(element, pseudoElement);
-                for (const property of imageBearingProperties) {
-                    const value = style.getPropertyValue(property);
-                    if (!value.includes('url(')) { continue; }
-                    for (const path of getMdictMediaPathsFromComputedCss(value, baseUrl)) {
-                        addTarget(dictionary, path);
-                    }
-                }
-            }
-        }
-
-        if (targets.length === 0) { return; }
         try {
+            const {targets, inlineStyleElements} = collectDictionaryCssMediaTargets(this._container, options.dictionaries, window.location.href);
+            if (targets.length === 0) { return; }
             await this._dictionaryCssMediaResolver.resolve(targets);
+            if (this._setContentToken !== token) { return; }
+
+            for (const {element, dictionary} of inlineStyleElements) {
+                const source = element.style.cssText;
+                const resolved = this._dictionaryCssMediaResolver.rewriteStyles(dictionary, source);
+                if (resolved !== source) {
+                    element.style.cssText = resolved;
+                }
+            }
+
+            // An obsolete render may have populated the cache without publishing
+            // its stylesheet. The current render must apply those cached URLs too.
+            if (this._options !== null && this._options.dictionaries.some(({name, enabled, styles = ''}) => (
+                enabled && this._dictionaryCssMediaResolver.rewriteStyles(name, styles) !== styles
+            ))) {
+                this._setTheme(this._options);
+            }
         } catch (error) {
-            if (!this._application.webExtension.unloaded) {
+            if (this._setContentToken === token && !this._application.webExtension.unloaded) {
                 log.error(error);
             }
-            return;
-        }
-        if (this._setContentToken !== token) { return; }
-
-        for (const {element, dictionary} of inlineStyleElements) {
-            const source = element.style.cssText;
-            const resolved = this._dictionaryCssMediaResolver.rewriteStyles(dictionary, source);
-            if (resolved !== source) {
-                element.style.cssText = resolved;
-            }
-        }
-
-        // An obsolete render may have populated the cache without publishing
-        // its stylesheet. The current render must apply those cached URLs too.
-        if (this._options !== null && this._options.dictionaries.some(({name, enabled, styles = ''}) => (
-            enabled && this._dictionaryCssMediaResolver.rewriteStyles(name, styles) !== styles
-        ))) {
-            this._setTheme(this._options);
         }
     }
 
@@ -1522,37 +1503,31 @@ export class Display extends EventDispatcher {
      * @param {string} primaryReading
      * @param {boolean} wildcardsEnabled
      * @param {import('settings').OptionsContext} optionsContext
-     * @returns {Promise<import('dictionary').DictionaryEntry[]>}
+     * @returns {Promise<import('display').DictionarySearchResult>}
      */
     async _findDictionaryEntries(isKanji, source, primaryReading, wildcardsEnabled, optionsContext) {
-        /** @type {import('dictionary').DictionaryEntry[]} */
-        let dictionaryEntries = [];
         const {findDetails, source: source2} = this._getFindDetails(source, primaryReading, wildcardsEnabled);
         if (isKanji) {
-            dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
-            if (dictionaryEntries.length > 0) { return dictionaryEntries; }
-
-            const termEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
-            dictionaryEntries = termEntries;
-            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, termEntries);
-        } else {
-            const search = this._pageType === 'search' && source2.length <= 256 && this.getLanguageSummary().iso === 'ja';
-            const found = search ?
-await findJapaneseSearch(
-    source2,
-    (query) => this._application.api.termsFind(query, findDetails, optionsContext),
-) :
-null;
-            const termEntries = search ?
-(found?.result?.dictionaryEntries ?? []) :
-                (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
-            dictionaryEntries = termEntries;
-            this._reportTermsFindSnapshot(source, found?.matchedQuery ?? source2, isKanji, findDetails, optionsContext, termEntries);
-            if (dictionaryEntries.length > 0) { return dictionaryEntries; }
-
-            dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
+            const dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
+            if (dictionaryEntries.length > 0) { return {dictionaryEntries}; }
         }
-        return dictionaryEntries;
+        const search = !isKanji && this._pageType === 'search' && source2.length <= 256 && this.getLanguageSummary().iso === 'ja';
+        const found = search ?
+            await findJapaneseSearch(
+                source2,
+                (query) => this._application.api.termsFind(query, findDetails, optionsContext),
+            ) :
+            null;
+        /** @type {Pick<import('translator').FindTermsResult, 'dictionaryEntries'|'dictionaryAvailability'>} */
+        const result = search ?
+            (found?.result ?? {dictionaryEntries: []}) :
+            await this._application.api.termsFind(source2, findDetails, optionsContext);
+        const {dictionaryEntries, dictionaryAvailability} = result;
+        this._reportTermsFindSnapshot(source, found?.matchedQuery ?? source2, isKanji, findDetails, optionsContext, dictionaryEntries);
+        if (isKanji || dictionaryEntries.length > 0 || dictionaryAvailability?.length) {
+            return {dictionaryEntries, ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {})};
+        }
+        return {dictionaryEntries: await this._application.api.kanjiFind(source, optionsContext)};
     }
 
     /**
@@ -1660,7 +1635,7 @@ null;
             delete content.preserveSearchInput;
             changeHistory = true;
         }
-        let {dictionaryEntries} = content;
+        let {dictionaryEntries, dictionaryAvailability} = content;
 
         let contentOriginValid = false;
         const {contentOrigin} = content;
@@ -1693,11 +1668,15 @@ null;
         }
         if (!Array.isArray(dictionaryEntries)) {
             safePerformance.mark('display:findDictionaryEntries:start');
-            dictionaryEntries = hasEnabledDictionaries && lookup && query.length > 0 ? await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext) : [];
+            const result = hasEnabledDictionaries && lookup && query.length > 0 ?
+                await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext) :
+                {dictionaryEntries: []};
+            ({dictionaryEntries, dictionaryAvailability} = result);
             safePerformance.mark('display:findDictionaryEntries:end');
             safePerformance.measure('display:findDictionaryEntries', 'display:findDictionaryEntries:start', 'display:findDictionaryEntries:end');
             if (this._setContentToken !== token) { return; }
             content.dictionaryEntries = void 0;
+            content.dictionaryAvailability = void 0;
             changeHistory = true;
         }
 
@@ -1712,7 +1691,8 @@ null;
         safePerformance.mark('display:updateNavigationAuto:end');
         safePerformance.measure('display:updateNavigationAuto', 'display:updateNavigationAuto:start', 'display:updateNavigationAuto:end');
 
-        this._setNoContentVisible(hasEnabledDictionaries && dictionaryEntries.length === 0 && lookup);
+        this._updateDictionaryAvailability(dictionaryAvailability, token);
+        this._setNoContentVisible(hasEnabledDictionaries && dictionaryEntries.length === 0 && lookup && !dictionaryAvailability?.length);
         this._setNoDictionariesVisible(!hasEnabledDictionaries);
 
         const container = this._container;
@@ -1780,6 +1760,7 @@ null;
 
     /** */
     _setContentExtensionUnloaded() {
+        this._dictionaryAvailabilityNotification?.close(false);
         /** @type {?HTMLElement} */
         const errorExtensionUnloaded = document.querySelector('#error-extension-unloaded');
 
@@ -1802,6 +1783,7 @@ null;
 
     /** */
     _clearContent() {
+        this._dictionaryAvailabilityNotification?.close(false);
         this._container.textContent = '';
         this._updateNavigationAuto();
         this._setQuery('', '', 0);
@@ -1820,6 +1802,42 @@ null;
         if (noResults !== null) {
             noResults.hidden = !visible;
         }
+    }
+
+    /**
+     * @param {import('translator').DictionaryAvailability[]|undefined} availability
+     * @param {import('core').TokenObject} token
+     */
+    _updateDictionaryAvailability(availability, token) {
+        if (this._setContentToken !== token) { return; }
+        if (!availability?.length) {
+            this._dictionaryAvailabilityNotification?.close(false);
+            return;
+        }
+        if (!this._dictionaryAvailabilityNotification) {
+            this._dictionaryAvailabilityNotification = this.createNotification(false);
+        }
+        const content = document.createElement('ul');
+        for (const {dictionary, status} of availability) {
+            const item = document.createElement('li');
+            let message;
+            switch (status) {
+                case 'repairPending':
+                case 'repairing':
+                    message = 'Dictionary data is being repaired. Results may be incomplete; retry shortly.';
+                    break;
+                case 'reimportRequired':
+                    message = 'Dictionary data is damaged. Reimport this dictionary.';
+                    break;
+                default:
+                    message = 'Dictionary is temporarily unavailable. Results may be incomplete; retry shortly.';
+                    break;
+            }
+            item.textContent = `${dictionary}: ${message}`;
+            content.appendChild(item);
+        }
+        this._dictionaryAvailabilityNotification.setContent(content);
+        this._dictionaryAvailabilityNotification.open();
     }
 
     /**
@@ -1852,7 +1870,7 @@ null;
         const text = this._fullQuery;
         const visible = this._isQueryParserVisible();
         this._queryParserContainer.hidden = !visible || text.length === 0;
-        if (visible && this._queryParser.text !== text) {
+        if (visible && (this._queryParser.text !== text || this._queryParser.needsTextUpdate)) {
             void this._setQueryParserText(text);
         }
     }
@@ -1864,6 +1882,12 @@ null;
         const overrideToken = this._progressIndicatorVisible.setOverride(true);
         try {
             await this._queryParser.setText(text);
+        } catch (error) {
+            try {
+                this.onError(toError(error));
+            } catch (e) {
+                // Reporting cannot reject this fire-and-forget refresh.
+            }
         } finally {
             this._progressIndicatorVisible.clearOverride(overrideToken);
         }
@@ -2185,8 +2209,22 @@ null;
      * @param {import('settings').OptionsContext} optionsContext
      */
     async _setOptionsContextIfDifferent(optionsContext) {
-        if (deepEqual(this._optionsContext, optionsContext)) { return; }
-        await this.setOptionsContext(optionsContext);
+        let request = this._optionsContextRequest;
+        let promise;
+        if (request && !request.failed && deepEqual(request.optionsContext, optionsContext)) { promise = request.promise; } else {
+            promise = this.setOptionsContext(optionsContext);
+            request = this._optionsContextRequest;
+        }
+        for (;;) {
+            try { await promise; } catch (error) {
+                const next = this._optionsContextRequest;
+                if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { throw error; }
+            }
+            const next = this._optionsContextRequest;
+            if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { return; }
+            request = next;
+            promise = next.promise;
+        }
     }
 
     /**
@@ -2202,6 +2240,8 @@ null;
      * @param {import('settings').ProfileOptions} options
      */
     async _updateNestedFrontend(options) {
+        const token = {};
+        this._nestedFrontendUpdateToken = token;
         const {tabId, frameId} = this._application;
         if (tabId === null || frameId === null) { return; }
 
@@ -2215,55 +2255,61 @@ null;
             )
         );
 
-        if (this._frontend === null) {
-            if (!isEnabled) { return; }
+        if (this._frontend === null || this._frontendSetupPromise !== null) {
+            if (!isEnabled && this._frontendSetupPromise === null) { return; }
 
+            const promise = this._frontendSetupPromise ?? this._setupNestedFrontend();
+            this._frontendSetupPromise = promise;
             try {
-                if (this._frontendSetupPromise === null) {
-                    this._frontendSetupPromise = this._setupNestedFrontend();
-                }
-                await this._frontendSetupPromise;
+                await promise;
             } catch (e) {
-                log.error(e);
+                if (this._nestedFrontendUpdateToken === token) { log.error(e); }
                 return;
             } finally {
-                this._frontendSetupPromise = null;
+                if (this._frontendSetupPromise === promise) { this._frontendSetupPromise = null; }
             }
         }
 
+        if (this._nestedFrontendUpdateToken !== token) { return; }
         /** @type {import('../app/frontend.js').Frontend} */ (this._frontend).setDisabledOverride(!isEnabled);
     }
 
     /** */
     async _setupNestedFrontend() {
-        const useProxyPopup = this._parentFrameId !== null;
-        const parentPopupId = this._parentPopupId;
-        const parentFrameId = this._parentFrameId;
+        if (this._frontendPending === null) {
+            const useProxyPopup = this._parentFrameId !== null;
+            const parentPopupId = this._parentPopupId;
+            const parentFrameId = this._parentFrameId;
 
-        const [{PopupFactory}, {Frontend}] = await Promise.all([
-            import('../app/popup-factory.js'),
-            import('../app/frontend.js'),
-        ]);
+            const [{PopupFactory}, {Frontend}] = await Promise.all([
+                import('../app/popup-factory.js'),
+                import('../app/frontend.js'),
+            ]);
 
-        const popupFactory = new PopupFactory(this._application);
+            const popupFactory = new PopupFactory(this._application);
+
+            const frontend = new Frontend({
+                application: this._application,
+                useProxyPopup,
+                parentPopupId,
+                parentFrameId,
+                depth: this._depth + 1,
+                popupFactory,
+                pageType: this._pageType,
+                allowRootFramePopupProxy: true,
+                childrenSupported: this._childrenSupported,
+                hotkeyHandler: this._hotkeyHandler,
+                canUseWindowPopup: true,
+                browser: this._browser,
+            });
+            frontend.setDisabledOverride(true);
+            this._frontendPending = {frontend, popupFactory};
+        }
+        const {frontend, popupFactory} = this._frontendPending;
         popupFactory.prepare();
-
-        const frontend = new Frontend({
-            application: this._application,
-            useProxyPopup,
-            parentPopupId,
-            parentFrameId,
-            depth: this._depth + 1,
-            popupFactory,
-            pageType: this._pageType,
-            allowRootFramePopupProxy: true,
-            childrenSupported: this._childrenSupported,
-            hotkeyHandler: this._hotkeyHandler,
-            canUseWindowPopup: true,
-            browser: this._browser,
-        });
-        this._frontend = frontend;
         await frontend.prepare();
+        this._frontend = frontend;
+        this._frontendPending = null;
     }
 
     /**
@@ -2431,7 +2477,7 @@ null;
     /**
      * @param {import('text-scanner').EventArgument<'searchSuccess'>} details
      */
-    _onContentTextScannerSearchSuccess({type, dictionaryEntries, sentence, textSource, optionsContext}) {
+    _onContentTextScannerSearchSuccess({type, dictionaryEntries, dictionaryAvailability, sentence, textSource, optionsContext}) {
         const query = textSource.text();
         const url = window.location.href;
         const documentTitle = document.title;
@@ -2454,6 +2500,7 @@ null;
             },
             content: {
                 dictionaryEntries: dictionaryEntries !== null ? dictionaryEntries : void 0,
+                ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
                 contentOrigin: this.getContentOrigin(),
             },
         };
@@ -2702,13 +2749,14 @@ null;
 
     /**
      * @param {number} timeoutMs
-     * @returns {Promise<boolean>}
+     * @returns {{promise: Promise<boolean>, finish: (completed?: boolean) => void}}
      */
-    _waitForStateChangeComplete(timeoutMs) {
+    _createStateChangeCompletion(timeoutMs) {
         /** @type {import('core').Timeout|null} */
         let timeout = null;
         /** @type {(value: boolean) => void} */
         let resolvePromise;
+        /** @type {Promise<boolean>} */
         const promise = new Promise((resolve) => {
             resolvePromise = resolve;
         });
@@ -2725,16 +2773,7 @@ null;
         };
         this._stateChangeCompleteResolvers.push(finish);
         timeout = setTimeout(() => finish(false), timeoutMs);
-        return promise;
-    }
-
-    /**
-     * @param {(() => void)[]} resolvers
-     */
-    _resolveStateChangeCompleteWaiters(resolvers) {
-        for (const resolve of resolvers) {
-            resolve();
-        }
+        return {promise, finish};
     }
 
     /**

@@ -64,16 +64,17 @@ describe('DictionaryRuntimeWorkerProxy', () => {
         vi.stubGlobal('Worker', FakeWorker);
         const proxy = new DictionaryRuntimeWorkerProxy('/dictionary-worker.js');
         const port = /** @type {MessagePort} */ (/** @type {unknown} */ ({name: 'response-port'}));
+        const operationId = `${Date.now()}:test`;
 
         await proxy.sendMessageViaPort(
-            {action: 'importDictionaryOffscreen', params: {archiveContent: new Blob([]), details: {}}},
+            {action: 'importDictionaryOffscreen', params: {operationId, archiveContent: new Blob([]), details: {}}},
             [port],
         );
 
         const client = Reflect.get(proxy, '_client');
         const worker = Reflect.get(client, '_worker');
         expect(worker.postMessage).toHaveBeenCalledWith(
-            {id: 1, action: 'importDictionaryOffscreen', params: {archiveContent: expect.any(Blob), details: {}}},
+            {id: 1, action: 'importDictionaryOffscreen', params: {operationId, archiveContent: expect.any(Blob), details: {}}},
             [port],
         );
     });

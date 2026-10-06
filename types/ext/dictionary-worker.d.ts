@@ -64,12 +64,14 @@ export type MessageCompleteResultSerialized = {
     result: DictionaryImporter.Summary | null;
     errors: Core.SerializedError[];
     debug?: ImportDebug | null;
+    outcome?: DictionaryImporter.ImportOutcome;
 };
 
 export type MessageCompleteResult = {
     result: DictionaryImporter.Summary | null;
     errors: Error[];
     debug?: ImportDebug | null;
+    outcome?: DictionaryImporter.ImportOutcome;
 };
 
 export type ImportDebug = {

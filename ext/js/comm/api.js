@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {createFirefoxBackendPort} from './firefox-backend-port.js';
 
 const pmTransportTimeoutMs = 10_000;
 const apiInvokeTimeoutMs = 30_000;
@@ -82,6 +83,82 @@ function createDictionaryRuntimeImportRejectionState(shutdownRejectors, response
     };
     shutdownRejectors.add(shutdownReject);
     return {state, shutdownReject};
+}
+
+/**
+ * @param {Set<(error: Error) => void>} shutdownRejectors
+ * @param {MessagePort} responsePort
+ * @param {(value: unknown) => void} resolve
+ * @param {(reason?: unknown) => void} reject
+ * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+ * @param {string} label
+ * @returns {(error: Error) => void}
+ */
+function configureDictionaryRuntimeImportResponse(shutdownRejectors, responsePort, resolve, reject, onProgress, label) {
+    const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(shutdownRejectors, responsePort, (error) => {
+        const transportError = new Error(error instanceof Error ? error.message : 'Dictionary runtime import transport failed');
+        transportError.name = 'DictionaryImportTransportError';
+        transportError.cause = error;
+        reject(transportError);
+    });
+    const resetInactivityTimeout = () => {
+        state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
+            shutdownReject(new Error(`${label} response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
+        });
+    };
+    resetInactivityTimeout();
+    responsePort.onmessage = (event) => {
+        if (state.settled) { return; }
+        try {
+            const eventData = /** @type {unknown} */ (event.data);
+            const data = (
+                typeof eventData === 'object' && eventData !== null && !Array.isArray(eventData)
+            ) ?
+                /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
+                null;
+            switch (data?.type) {
+                case 'progress':
+                    resetInactivityTimeout();
+                    try {
+                        onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
+                    } catch (_) {
+                        // A UI observer does not own the live backend mutation.
+                    }
+                    return;
+                case 'complete':
+                    if (data.result && typeof data.result === 'object' && !Array.isArray(data.result)) {
+                        const result = /** @type {{errors?: unknown[]}} */ (data.result);
+                        if (Array.isArray(result.errors)) {
+                            result.errors = result.errors.map((error) => {
+                                if (error && typeof error === 'object' && !Array.isArray(error)) {
+                                    return ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error));
+                                }
+                                return error;
+                            });
+                        }
+                    }
+                    if (!finalizeDictionaryRuntimeImportResponse(state, shutdownRejectors, shutdownReject, responsePort)) { return; }
+                    resolve(data.result ?? null);
+                    return;
+                case 'error': {
+                    const error = ExtensionError.deserialize(data.error ?? {name: 'Error', message: `${label} failed`, stack: ''});
+                    if (!finalizeDictionaryRuntimeImportResponse(state, shutdownRejectors, shutdownReject, responsePort)) { return; }
+                    reject(error);
+                    return;
+                }
+                default:
+                    return;
+            }
+        } catch (error) {
+            // Decode before releasing ownership so a malformed terminal reply
+            // can reconcile durable status instead of stranding the import.
+            shutdownReject(error instanceof Error ? error : new Error('Invalid dictionary import response', {cause: error}));
+        }
+    };
+    responsePort.onmessageerror = () => {
+        shutdownReject(new Error(`${label} response channel failed`));
+    };
+    return shutdownReject;
 }
 
 export class API {
@@ -433,10 +510,48 @@ export class API {
 
     /**
      * @param {import('api').ApiParam<'setDictionaryImportMode', 'active'>} active
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<import('api').ApiReturn<'setDictionaryImportMode'>>}
      */
-    setDictionaryImportMode(active) {
-        return this._invoke('setDictionaryImportMode', {active});
+    setDictionaryImportMode(active, ownerId) {
+        return this._invoke('setDictionaryImportMode', {active, ownerId});
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {string|undefined} [workerGeneration]
+     * @returns {Promise<import('offscreen').ImportOperationStatus>}
+     */
+    getDictionaryImportOperationStatus(operationId, workerGeneration) {
+        return this._invoke('getDictionaryImportOperationStatus', {operationId, workerGeneration});
+    }
+
+    /**
+     * @param {Promise<unknown>} response
+     * @param {string} operationId
+     * @returns {Promise<unknown>}
+     */
+    async _reconcileDictionaryImport(response, operationId) {
+        try {
+            return await response;
+        } catch (error) {
+            if (!(error instanceof Error) || !['DictionaryImportTransportError', 'OffscreenControlTransportError', 'DictionaryWorkerTransportError'].includes(error.name)) { throw error; }
+            let status;
+            try { status = await this.getDictionaryImportOperationStatus(operationId); } catch (_) { /* Outcome remains unknown. */ }
+            if (status?.operationId === operationId) {
+                if (status.state === 'completed') {
+                    const result = /** @type {{errors?: unknown[]}|null} */ (status.result);
+                    if (Array.isArray(result?.errors)) {
+                        result.errors = result.errors.map((item) => ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (item)));
+                    }
+                    return result;
+                }
+                if (status.error && ['failed', 'cancelled'].includes(status.state)) { throw ExtensionError.deserialize(status.error); }
+            }
+            const outcomeError = new Error(`Dictionary import outcome unknown (${operationId}); import was not retried: ${error.message}`);
+            outcomeError.cause = error;
+            throw outcomeError;
+        }
     }
 
     /**
@@ -459,9 +574,12 @@ export class API {
      * @param {Transferable[]} transferables
      */
     drawMedia(requests, transferables) {
-        if (this._mediaDrawingWorker === null) { return; }
+        const worker = this._mediaDrawingWorker;
+        const generation = this._mediaDrawingWorkerGeneration;
+        if (worker === null) { return; }
         void this._ensureMediaDrawingWorkerConnected().then(() => {
-            this._mediaDrawingWorker?.postMessage({action: 'drawMedia', params: {requests}}, transferables);
+            if (worker !== this._mediaDrawingWorker || generation !== this._mediaDrawingWorkerGeneration) { return; }
+            worker.postMessage({action: 'drawMedia', params: {requests}}, transferables);
         }).catch(() => {
             // Ignore media draw failures here; the runtime error paths above now surface backend/bridge failures explicitly.
         });
@@ -606,154 +724,52 @@ export class API {
      * @param {Blob} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {string} [operationId]
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<unknown>}
      */
-    importDictionaryOffscreen(archiveContent, details, onProgress) {
+    importDictionaryOffscreen(archiveContent, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
         const pmTransportError = this._getPmTransportError();
         if (pmTransportError !== null) {
             return Promise.reject(pmTransportError);
         }
         const channel = new MessageChannel();
-        return new Promise((resolve, reject) => {
-            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, reject);
-            const resetInactivityTimeout = () => {
-                state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
-                    shutdownReject(new Error(`Dictionary runtime import response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
-                });
-            };
-            resetInactivityTimeout();
-            channel.port1.onmessage = (event) => {
-                if (state.settled) { return; }
-                const eventData = /** @type {unknown} */ (event.data);
-                const data = (
-                    typeof eventData === 'object' &&
-                    eventData !== null &&
-                    !Array.isArray(eventData)
-                ) ?
-                    /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
-                    null;
-                switch (data?.type) {
-                    case 'progress':
-                        resetInactivityTimeout();
-                        onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
-                        return;
-                    case 'complete':
-                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
-                        if (
-                            data.result &&
-                            typeof data.result === 'object' &&
-                            !Array.isArray(data.result)
-                        ) {
-                            const result = /** @type {{errors?: unknown[]}} */ (data.result);
-                            if (Array.isArray(result.errors)) {
-                                result.errors = result.errors.map((error) => {
-                                    if (error && typeof error === 'object' && !Array.isArray(error)) {
-                                        return ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error));
-                                    }
-                                    return error;
-                                });
-                            }
-                        }
-                        resolve(data.result ?? null);
-                        return;
-                    case 'error':
-                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
-                        reject(ExtensionError.deserialize(
-                            data.error ?? {name: 'Error', message: 'Dictionary runtime import failed', stack: ''},
-                        ));
-                        return;
-                    default:
-                        return;
-                }
-            };
-            channel.port1.onmessageerror = () => {
-                shutdownReject(new Error('Dictionary runtime import response channel failed'));
-            };
+        return this._reconcileDictionaryImport(new Promise((resolve, reject) => {
+            const shutdownReject = configureDictionaryRuntimeImportResponse(this._shutdownRejectors, channel.port1, resolve, reject, onProgress, 'Dictionary runtime import');
             try {
-                void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details}, [channel.port2]).catch((error) => {
+                void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details, operationId, ownerId}, [channel.port2]).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {
                 shutdownReject(error instanceof Error ? error : new Error(String(error)));
             }
-        });
+        }), operationId);
     }
 
     /**
      * @param {string} url
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {string} [operationId]
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<unknown>}
      */
-    importDictionaryUrlOffscreen(url, details, onProgress) {
+    importDictionaryUrlOffscreen(url, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
         const pmTransportError = this._getPmTransportError();
         if (pmTransportError !== null) {
             return Promise.reject(pmTransportError);
         }
         const channel = new MessageChannel();
-        return new Promise((resolve, reject) => {
-            const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(this._shutdownRejectors, channel.port1, reject);
-            const resetInactivityTimeout = () => {
-                state.timeoutId = resetDictionaryRuntimeImportInactivityTimeout(state.timeoutId, () => {
-                    shutdownReject(new Error(`Dictionary runtime URL import response was inactive for ${String(dictionaryRuntimeImportInactivityTimeoutMs)}ms`));
-                });
-            };
-            resetInactivityTimeout();
-            channel.port1.onmessage = (event) => {
-                if (state.settled) { return; }
-                const eventData = /** @type {unknown} */ (event.data);
-                const data = (
-                    typeof eventData === 'object' &&
-                    eventData !== null &&
-                    !Array.isArray(eventData)
-                ) ?
-                    /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
-                    null;
-                switch (data?.type) {
-                    case 'progress':
-                        resetInactivityTimeout();
-                        onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
-                        return;
-                    case 'complete':
-                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
-                        if (
-                            data.result &&
-                            typeof data.result === 'object' &&
-                            !Array.isArray(data.result)
-                        ) {
-                            const result = /** @type {{errors?: unknown[]}} */ (data.result);
-                            if (Array.isArray(result.errors)) {
-                                result.errors = result.errors.map((error) => {
-                                    if (error && typeof error === 'object' && !Array.isArray(error)) {
-                                        return ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error));
-                                    }
-                                    return error;
-                                });
-                            }
-                        }
-                        resolve(data.result ?? null);
-                        return;
-                    case 'error':
-                        if (!finalizeDictionaryRuntimeImportResponse(state, this._shutdownRejectors, shutdownReject, channel.port1)) { return; }
-                        reject(ExtensionError.deserialize(
-                            data.error ?? {name: 'Error', message: 'Dictionary runtime URL import failed', stack: ''},
-                        ));
-                        return;
-                    default:
-                        return;
-                }
-            };
-            channel.port1.onmessageerror = () => {
-                shutdownReject(new Error('Dictionary runtime URL import response channel failed'));
-            };
+        return this._reconcileDictionaryImport(new Promise((resolve, reject) => {
+            const shutdownReject = configureDictionaryRuntimeImportResponse(this._shutdownRejectors, channel.port1, resolve, reject, onProgress, 'Dictionary runtime URL import');
             try {
-                void this._pmInvoke('importDictionaryUrlOffscreen', {url, details}, [channel.port2]).catch((error) => {
+                void this._pmInvoke('importDictionaryUrlOffscreen', {url, details, operationId, ownerId}, [channel.port2]).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {
                 shutdownReject(error instanceof Error ? error : new Error(String(error)));
             }
-        });
+        }), operationId);
     }
 
     /**
@@ -836,13 +852,17 @@ export class API {
         return new Promise((resolve, reject) => {
             let settled = false;
             let retriedTransientFailure = false;
-            /** @param {Error} error */
-            const shutdownReject = (error) => {
-                if (settled) { return; }
+            /** @returns {boolean} */
+            const finalizeRequest = () => {
+                if (settled) { return false; }
                 settled = true;
                 this._shutdownRejectors.delete(shutdownReject);
                 globalThis.clearTimeout(timeoutId);
-                reject(error);
+                return true;
+            };
+            /** @param {unknown} error */
+            const shutdownReject = (error) => {
+                if (finalizeRequest()) { reject(error); }
             };
             const timeoutMs = this._getInvokeTimeoutMs(action);
             const timeoutId = globalThis.setTimeout(() => {
@@ -857,48 +877,45 @@ export class API {
                 try {
                     this._webExtension.sendMessage(data, (response) => {
                         if (settled) { return; }
-                        const runtimeError = this._webExtension.getLastError();
-                        if (runtimeError !== null) {
-                            if (!retriedTransientFailure && this._shouldRetryInvokeAfterRuntimeError(action, runtimeError)) {
-                                retriedTransientFailure = true;
-                                setTimeout(() => {
-                                    if (settled) { return; }
-                                    if (this._runtimeConnectionsShutdown) {
-                                        shutdownReject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
-                                        return;
-                                    }
-                                    attemptSend();
-                                }, 100);
+                        // Browser callbacks run after sendMessage returns. Their
+                        // failures must settle here, not escape the outer catch.
+                        try {
+                            const runtimeError = this._webExtension.getLastError();
+                            if (settled) { return; }
+                            if (runtimeError !== null) {
+                                if (!retriedTransientFailure && this._shouldRetryInvokeAfterRuntimeError(action, runtimeError)) {
+                                    retriedTransientFailure = true;
+                                    setTimeout(() => {
+                                        if (settled) { return; }
+                                        if (this._runtimeConnectionsShutdown) {
+                                            shutdownReject(new Error('Runtime connections have been shut down. Refresh the page to reconnect.'));
+                                            return;
+                                        }
+                                        attemptSend();
+                                    }, 100);
+                                    return;
+                                }
+                                shutdownReject(runtimeError);
                                 return;
                             }
-                            settled = true;
-                            this._shutdownRejectors.delete(shutdownReject);
-                            globalThis.clearTimeout(timeoutId);
-                            reject(runtimeError);
-                            return;
-                        }
-                        settled = true;
-                        this._shutdownRejectors.delete(shutdownReject);
-                        globalThis.clearTimeout(timeoutId);
-                        if (response !== null && typeof response === 'object') {
-                            const {error} = /** @type {import('core').UnknownObject} */ (response);
-                            if (typeof error !== 'undefined') {
-                                reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */(error)));
+                            if (response !== null && typeof response === 'object') {
+                                const {error} = /** @type {import('core').UnknownObject} */ (response);
+                                if (typeof error !== 'undefined') {
+                                    shutdownReject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */(error)));
+                                } else {
+                                    const {result} = /** @type {import('core').UnknownObject} */ (response);
+                                    if (finalizeRequest()) { resolve(/** @type {import('api').ApiReturn<TAction>} */(result)); }
+                                }
                             } else {
-                                const {result} = /** @type {import('core').UnknownObject} */ (response);
-                                resolve(/** @type {import('api').ApiReturn<TAction>} */(result));
+                                const message = response === null ? 'Unexpected null response. You may need to refresh the page.' : `Unexpected response of type ${typeof response}. You may need to refresh the page.`;
+                                shutdownReject(new Error(`${message} (${JSON.stringify(data)})`));
                             }
-                        } else {
-                            const message = response === null ? 'Unexpected null response. You may need to refresh the page.' : `Unexpected response of type ${typeof response}. You may need to refresh the page.`;
-                            reject(new Error(`${message} (${JSON.stringify(data)})`));
+                        } catch (error) {
+                            shutdownReject(error);
                         }
                     });
                 } catch (e) {
-                    if (settled) { return; }
-                    settled = true;
-                    this._shutdownRejectors.delete(shutdownReject);
-                    globalThis.clearTimeout(timeoutId);
-                    reject(e);
+                    shutdownReject(e);
                 }
             };
             attemptSend();
@@ -1095,6 +1112,7 @@ export class API {
         this._backendPort = backendPort;
         if (this._backendPort !== null) {
             this._backendPort.onmessageerror = () => {
+                if (this._backendPort !== backendPort) { return; }
                 this._setBackendPort(null);
             };
         }
@@ -1150,31 +1168,7 @@ export class API {
      * @throws {Error} If the Firefox backend channel cannot be initialized.
      */
     _createFirefoxBackendPort() {
-        const sharedWorkerBridge = new SharedWorker(new URL('shared-worker-bridge.js', import.meta.url), {type: 'module'});
-        const backendChannel = new MessageChannel();
-        try {
-            sharedWorkerBridge.port.postMessage({action: 'connectToBackend1'}, [backendChannel.port1]);
-            sharedWorkerBridge.port.close();
-            return backendChannel.port2;
-        } catch (error) {
-            try {
-                sharedWorkerBridge.port.close();
-            } catch (_) {
-                // Ignore close failures for broken shared-worker bridge setup.
-            }
-            try {
-                backendChannel.port1.close();
-            } catch (_) {
-                // Ignore close failures for unused bridge ports.
-            }
-            try {
-                backendChannel.port2.close();
-            } catch (_) {
-                // Ignore close failures for unused bridge ports.
-            }
-            const normalizedError = error instanceof Error ? error : new Error(String(error));
-            throw new Error(`Failed to initialize Firefox backend bridge. You may need to refresh the page. ${normalizedError.message}`);
-        }
+        return createFirefoxBackendPort();
     }
 
     /**
@@ -1205,7 +1199,7 @@ export class API {
             }
         }
         this._mediaDrawingWorkerConnectGeneration = this._mediaDrawingWorkerGeneration;
-        this._mediaDrawingWorkerConnectPromise = (async () => {
+        const connectPromise = (async () => {
             const mediaDrawingWorker = this._mediaDrawingWorker;
             const mediaDrawingWorkerGeneration = this._mediaDrawingWorkerGeneration;
             const mediaDrawingWorkerToBackendChannel = new MessageChannel();
@@ -1213,18 +1207,21 @@ export class API {
                 mediaDrawingWorker?.postMessage({action: 'connectToDatabaseWorker'}, [mediaDrawingWorkerToBackendChannel.port2]);
                 await this.connectToDatabaseWorker(mediaDrawingWorkerToBackendChannel.port1, {expectedMediaDrawingWorkerGeneration: mediaDrawingWorkerGeneration});
             } catch (error) {
-                try {
-                    mediaDrawingWorkerToBackendChannel.port1.close();
-                } catch (_) {
-                    // Ignore close failures for failed media bridge setup.
+                for (const port of [mediaDrawingWorkerToBackendChannel.port1, mediaDrawingWorkerToBackendChannel.port2]) {
+                    try {
+                        port.close();
+                    } catch (_) {
+                        // Ignore close failures for failed media bridge setup.
+                    }
                 }
                 throw error;
             }
         })();
+        this._mediaDrawingWorkerConnectPromise = connectPromise;
         try {
-            await this._mediaDrawingWorkerConnectPromise;
+            await connectPromise;
         } finally {
-            if (this._mediaDrawingWorkerConnectGeneration === this._mediaDrawingWorkerGeneration) {
+            if (this._mediaDrawingWorkerConnectPromise === connectPromise) {
                 this._mediaDrawingWorkerConnectPromise = null;
             }
         }

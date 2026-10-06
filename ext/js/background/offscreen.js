@@ -382,7 +382,7 @@ export class Offscreen {
     }
 
     /** @type {import('offscreen').McApiHandler<'importDictionaryOffscreen'>} */
-    _importDictionaryOffscreenHandler({archiveContent, details}, ports) {
+    _importDictionaryOffscreenHandler({archiveContent, details, operationId}, ports) {
         if (ports.length === 0) {
             throw new Error('Offscreen import response port missing');
         }
@@ -427,23 +427,31 @@ export class Offscreen {
             postResponse(message, type === 'complete' || type === 'error');
         };
         workerChannel.port1.onmessageerror = () => {
+            const error = new Error('Dictionary worker import response channel failed');
+            error.name = 'DictionaryImportTransportError';
             postResponse({
                 type: 'error',
-                error: ExtensionError.serialize(new Error('Dictionary worker import response channel failed')),
+                error: ExtensionError.serialize(error),
             }, true);
         };
         void this._invokeDictionaryWorker(
             'importDictionaryOffscreen',
-            {archiveContent, details},
+            {archiveContent, details, operationId},
             [workerChannel.port2],
         ).catch((error) => {
-            postResponse({type: 'error', error: ExtensionError.serialize(error)}, true);
+            if (error instanceof Error && error.name === 'DictionaryWorkerTransportError') {
+                const transportError = new Error(error.message);
+                transportError.name = 'DictionaryImportTransportError';
+                postResponse({type: 'error', error: ExtensionError.serialize(transportError)}, true);
+            } else {
+                postResponse({type: 'error', error: ExtensionError.serialize(error)}, true);
+            }
         });
     }
 
-    /** @returns {Promise<void>} */
-    async _cancelDictionaryImportHandler() {
-        await this._invokeDictionaryWorker('cancelDictionaryImportOffscreen', {});
+    /** @type {import('offscreen').ApiHandler<'cancelDictionaryImportOffscreen'>} */
+    async _cancelDictionaryImportHandler(params) {
+        return /** @type {import('offscreen').ImportOperationStatus|void} */ (await this._invokeDictionaryWorker('cancelDictionaryImportOffscreen', params ?? {}));
     }
 
     /** @type {import('offscreen').ApiHandler<'sanitizeCSSOffscreen'>} */

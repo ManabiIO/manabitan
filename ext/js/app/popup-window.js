@@ -47,8 +47,12 @@ export class PopupWindow extends EventDispatcher {
         this._depth = depth;
         /** @type {number} */
         this._frameId = frameId;
-        /** @type {?number} */
-        this._popupTabId = null;
+        /** @type {?{id: number}} */
+        this._popupTab = null;
+        /** @type {?Promise<?{id: number}>} */
+        this._popupTabPromise = null;
+        /** @type {?object} */
+        this._showContentToken = null;
     }
 
     /**
@@ -159,7 +163,8 @@ export class PopupWindow extends EventDispatcher {
      * @returns {Promise<boolean>} `true` if the popup is visible, `false` otherwise.
      */
     async isVisible() {
-        return (this._popupTabId !== null && await this._application.api.isTabSearchPopup(this._popupTabId));
+        const popupTab = this._popupTab;
+        return (!this._application.webExtension.unloaded && popupTab !== null && await this._application.api.isTabSearchPopup(popupTab.id));
     }
 
     /**
@@ -333,39 +338,76 @@ export class PopupWindow extends EventDispatcher {
         const message = /** @type {import('display').DirectApiMessageAny} */ ({action, params});
 
         const frameId = 0;
-        if (this._popupTabId !== null) {
+        let popupTab = this._popupTab;
+        if (popupTab !== null) {
             try {
                 if (!isCurrent()) { return void 0; }
                 onDispatch();
                 return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
-                    this._popupTabId,
+                    popupTab.id,
                     frameId,
                     'displayPopupMessage2',
                     message,
                 ));
             } catch (e) {
                 if (e instanceof Error && e.name === 'PopupContentTimeoutError') { throw e; }
-                if (this._application.webExtension.unloaded) {
-                    open = false;
-                }
+                if (!this._isInvocationActive(isCurrent)) { return void 0; }
+                if (this._popupTab === popupTab) { this._popupTab = null; }
             }
-            if (!isCurrent()) { return void 0; }
-            this._popupTabId = null;
         }
 
         if (!open || !isCurrent()) {
             return void 0;
         }
 
+        popupTab = await this._getPopupTab();
+        if (popupTab === null || !this._isInvocationActive(isCurrent)) { return void 0; }
+
+        try {
+            onDispatch();
+            return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
+                popupTab.id,
+                frameId,
+                'displayPopupMessage2',
+                message,
+            ));
+        } catch (e) {
+            if (e instanceof Error && e.name === 'PopupContentTimeoutError') { throw e; }
+            if (!this._isInvocationActive(isCurrent)) { return void 0; }
+            if (this._popupTab === popupTab) { this._popupTab = null; }
+            throw e;
+        }
+    }
+
+    /**
+     * @param {() => boolean} isCurrent
+     * @returns {boolean}
+     */
+    _isInvocationActive(isCurrent) {
+        return !this._application.webExtension.unloaded && isCurrent();
+    }
+
+    /** @returns {Promise<?{id: number}>} */
+    async _getPopupTab() {
+        if (this._popupTab !== null) { return this._popupTab; }
+        if (this._popupTabPromise === null) {
+            const promise = this._createPopupTab().finally(() => {
+                if (this._popupTabPromise === promise) { this._popupTabPromise = null; }
+            });
+            this._popupTabPromise = promise;
+        }
+        return await this._popupTabPromise;
+    }
+
+    /** @returns {Promise<?{id: number}>} */
+    async _createPopupTab() {
         const {tabId} = await this._application.api.getOrCreateSearchPopup({focus: 'ifCreated'});
-        if (!isCurrent()) { return void 0; }
-        this._popupTabId = tabId;
-        onDispatch();
-        return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
-            this._popupTabId,
-            frameId,
-            'displayPopupMessage2',
-            message,
-        ));
+        if (this._application.webExtension.unloaded) { return null; }
+        if (typeof tabId !== 'number' || !Number.isSafeInteger(tabId) || tabId < 0) {
+            throw new Error('Invalid popup tab ID');
+        }
+        const popupTab = {id: tabId};
+        this._popupTab = popupTab;
+        return popupTab;
     }
 }

@@ -23,6 +23,7 @@ import type * as Environment from './environment';
 import type * as Input from './input';
 import type * as Settings from './settings';
 import type * as TextSource from './text-source';
+import type {DictionaryAvailability} from './translator';
 import type {EventNames, EventArgument as BaseEventArgument} from './core';
 import {PageType} from 'frontend';
 
@@ -125,6 +126,7 @@ export type Events = {
     searchSuccess: {
         type: 'terms' | 'kanji';
         dictionaryEntries: Dictionary.DictionaryEntry[];
+        dictionaryAvailability?: DictionaryAvailability[];
         sentence: Display.HistoryStateSentence;
         inputInfo: InputInfo;
         textSource: TextSource.TextSource;
@@ -181,12 +183,14 @@ export type TermSearchResults = {
     type: 'terms';
     dictionaryEntries: Dictionary.TermDictionaryEntry[];
     sentence: Sentence;
+    dictionaryAvailability?: DictionaryAvailability[];
 };
 
 export type KanjiSearchResults = {
     type: 'kanji';
     dictionaryEntries: Dictionary.KanjiDictionaryEntry[];
     sentence: Sentence;
+    dictionaryAvailability?: DictionaryAvailability[];
 };
 
 export type SearchResults = TermSearchResults | KanjiSearchResults;

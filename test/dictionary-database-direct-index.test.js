@@ -9,6 +9,9 @@
 
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
+import {Translator} from '../ext/js/language/translator.js';
+
+const partialMatchTypes = /** @type {const} */ (['prefix', 'suffix']);
 
 /**
  * @param {{expression?: Map<string, number[]>, reading?: Map<string, number[]>, expressionReverse?: Map<string, number[]>, readingReverse?: Map<string, number[]>} } [index={}]
@@ -34,7 +37,10 @@ function createDatabase(index = {}) {
         matchType,
         itemIndex,
     })));
-    Reflect.set(database, '_termRecordStore', {ensureDictionaryReverseIndex: vi.fn()});
+    Reflect.set(database, '_termRecordStore', {
+        ensureDictionaryReverseIndex: vi.fn(),
+        getDictionaryHealth: vi.fn(() => ({status: 'available', reason: null})),
+    });
     return database;
 }
 
@@ -210,5 +216,101 @@ describe('DictionaryDatabase direct term indexes', () => {
         expect(results).toEqual([
             {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 0},
         ]);
+    });
+
+    test.each(partialMatchTypes)('%s lookup preserves overlapping and repeated query associations', async (matchType) => {
+        const reverse = matchType === 'suffix';
+        const expression = 'helpful';
+        const shortQuery = reverse ? 'ful' : 'help';
+        const key = reverse ? [...expression].reverse().join('') : expression;
+        const database = createDatabase({[reverse ? 'expressionReverse' : 'expression']: new Map([[key, [7, 7]]])});
+        const terms = [shortQuery, expression, shortQuery];
+        const expected = [];
+        for (let itemIndex = 0; itemIndex < terms.length; ++itemIndex) {
+            const single = await database.findTermsBulk([terms[itemIndex]], new Set(['Test']), matchType);
+            expected.push(...single.map((result) => ({...result, itemIndex})));
+        }
+
+        vi.mocked(database._fetchTermRowsByIds).mockClear();
+        const results = await database.findTermsBulk(terms, new Set(['Test']), matchType);
+
+        expect([...results].sort((a, b) => Reflect.get(a, 'itemIndex') - Reflect.get(b, 'itemIndex'))).toEqual(expected);
+        expect(results).toHaveLength(3);
+        expect(results).toContainEqual({id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 1});
+        expect(Reflect.get(database, '_fetchTermRowsByIds')).toHaveBeenCalledOnce();
+    });
+
+    test.each(partialMatchTypes)('%s lookup does not let an earlier reading match hide a later expression match', async (matchType) => {
+        const reverse = matchType === 'suffix';
+        const transform = (/** @type {string} */ value) => (reverse ? [...value].reverse().join('') : value);
+        const database = createDatabase({
+            [reverse ? 'expressionReverse' : 'expression']: new Map([[transform('猫'), [7, 7]]]),
+            [reverse ? 'readingReverse' : 'reading']: new Map([[transform('ねこ'), [7, 7]]]),
+        });
+
+        const results = await database.findTermsBulk(['ねこ', '猫'], new Set(['Test']), matchType);
+
+        expect(results).toEqual([
+            {id: 7, matchSource: 'reading', matchType: 'exact', itemIndex: 0},
+            {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 1},
+        ]);
+        expect(Reflect.get(database, '_fetchTermRowsByIds')).toHaveBeenCalledOnce();
+    });
+
+    test.each(partialMatchTypes)('%s lookup shares persistent probes and record reads without dropping associations', async (matchType) => {
+        const database = createDatabase();
+        const shortQuery = matchType === 'suffix' ? 'ful' : 'help';
+        const find = vi.fn((/** @type {string[]} */ dictionaryNames, /** @type {string} */ query) => [{
+            expression: [{id: 7, exact: query === 'helpful'}, {id: 7, exact: query === 'helpful'}],
+            reading: [{id: 7, exact: false}],
+        }]);
+        Reflect.set(database, '_termRecordStore', {findTermPrefixIdMatchesForDictionaries: find});
+
+        const results = await database.findTermsBulk([shortQuery, 'helpful', shortQuery], new Set(['Test']), matchType);
+
+        expect(results).toHaveLength(3);
+        expect(results).toContainEqual({id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 1});
+        expect(results.map((result) => Reflect.get(result, 'itemIndex')).sort((a, b) => a - b)).toEqual([0, 1, 2]);
+        expect(find).toHaveBeenCalledTimes(2);
+        expect(find).toHaveBeenNthCalledWith(1, ['Test'], shortQuery, matchType === 'suffix');
+        expect(find).toHaveBeenNthCalledWith(2, ['Test'], 'helpful', matchType === 'suffix');
+        expect(Reflect.get(database, '_fetchTermRowsByIds')).toHaveBeenCalledOnce();
+    });
+
+    test('prefix lookup retains a valid deinflection when the first overlapping query fails POS filtering', async () => {
+        const database = createDatabase({expression: new Map([['help', [7]]])});
+        Reflect.set(database, '_createTerm', DictionaryDatabase.prototype._createTerm.bind(database));
+        Reflect.set(database, '_fetchTermRowsByIds', vi.fn(async () => new Map([[7, {
+            id: 7,
+            expression: 'help',
+            reading: '',
+            dictionary: 'Test',
+            definitionTags: '',
+            termTags: '',
+            rules: 'v',
+            glossary: ['assist'],
+            score: 0,
+            sequence: -1,
+        }]])));
+        const translator = new Translator(database);
+        translator.prepare();
+        const transformer = Reflect.get(translator, '_multiLanguageTransformer');
+        const nounConditions = transformer.getConditionFlagsFromPartsOfSpeech('en', ['n']);
+        const verbConditions = transformer.getConditionFlagsFromPartsOfSpeech('en', ['v']);
+        expect(nounConditions).not.toBe(0);
+        expect(verbConditions).not.toBe(0);
+        const createDeinflection = Reflect.get(translator, '_createDeinflection').bind(translator);
+        const deinflections = [
+            createDeinflection('helped', 'helped', 'hel', nounConditions, [], []),
+            createDeinflection('helped', 'helped', 'help', verbConditions, [], []),
+        ];
+        const dictionaries = new Map([['Test', {
+            index: 0, alias: 'Test', allowSecondarySearches: false, partsOfSpeechFilter: true, useDeinflections: true,
+        }]]);
+
+        await Reflect.get(translator, '_addEntriesToDeinflections').call(translator, 'en', deinflections, dictionaries, 'prefix');
+
+        expect(deinflections[0].databaseEntries).toEqual([]);
+        expect(deinflections[1].databaseEntries).toMatchObject([{id: 7, term: 'help', matchType: 'exact', index: 1}]);
     });
 });

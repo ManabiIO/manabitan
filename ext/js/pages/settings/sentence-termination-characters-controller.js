@@ -59,7 +59,9 @@ export class SentenceTerminationCharactersController {
      * @param {import('settings').SentenceParsingTerminationCharacterOption} terminationCharacterEntry
      */
     async addEntry(terminationCharacterEntry) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {sentenceParsing: {terminationCharacters}} = options;
 
         await this._settingsController.modifyProfileSettings([{
@@ -78,7 +80,9 @@ export class SentenceTerminationCharactersController {
      * @returns {Promise<boolean>}
      */
     async deleteEntry(index) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return false; }
         const {sentenceParsing: {terminationCharacters}} = options;
 
         if (index < 0 || index >= terminationCharacters.length) { return false; }
@@ -167,14 +171,17 @@ export class SentenceTerminationCharactersController {
 
     /** */
     async _updateOptions() {
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         this._onOptionsChanged({options, optionsContext});
     }
 
     /** */
     async _reset() {
+        const optionsContext = this._settingsController.getOptionsContext();
         const defaultOptions = await this._settingsController.getDefaultOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const value = defaultOptions.profiles[0].options.sentenceParsing.terminationCharacters;
         await this._settingsController.setProfileSetting('sentenceParsing.terminationCharacters', value);
         await this._updateOptions();

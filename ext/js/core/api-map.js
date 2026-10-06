@@ -35,10 +35,32 @@ export function createApiMap(init) {
  * @throws {Error}
  */
 export function extendApiMap(map, init) {
-    for (const [key, value] of init) {
-        if (map.has(key)) { throw new Error(`The handler for ${String(key)} has already been registered`); }
-        map.set(key, value);
+    const keys = new Set();
+    for (const [key] of init) {
+        if (map.has(key) || keys.has(key)) { throw new Error(`The handler for ${String(key)} has already been registered`); }
+        keys.add(key);
     }
+    for (const [key, value] of init) { map.set(key, value); }
+}
+
+/**
+ * @template {import('api-map').ApiSurface} [TApiSurface=never]
+ * @template {unknown[]} [TExtraParams=[]]
+ * @param {import('api-map').ApiMap<TApiSurface, TExtraParams>} map
+ * @param {import('api-map').ApiMapInit<TApiSurface, TExtraParams>} init
+ * @returns {() => void}
+ */
+export function registerApiMapScope(map, init) {
+    const entries = /** @type {import('api-map').ApiMapInit<TApiSurface, TExtraParams>} */ (init.map(([key, value]) => [key, value]));
+    extendApiMap(map, entries);
+    let active = true;
+    return () => {
+        if (!active) { return; }
+        active = false;
+        for (const [key, value] of entries) {
+            if (map.get(key) === value) { map.delete(key); }
+        }
+    };
 }
 
 /**

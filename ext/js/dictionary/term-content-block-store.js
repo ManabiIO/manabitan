@@ -36,6 +36,7 @@ import {
 } from './term-content-block-envelope.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
+import {isZstdResourceError} from './zstd-resource-error.js';
 
 export {wrapCompressedTermContentBlock} from './term-content-block-envelope.js';
 
@@ -646,7 +647,10 @@ export class TermContentBlockStore {
                 compressedPrefix: [...compressed.subarray(0, 8)],
                 error: `${error}`,
             });
-            throw new TermContentReadError('corrupt', 'Term content block decompression failed');
+            throw new TermContentReadError(
+                isZstdResourceError(error) ? 'temporarilyUnavailable' : 'corrupt',
+                'Term content block decompression failed',
+            );
         }
         if (block.byteLength !== reference.blockUncompressedLength) {
             this._recordError('term-content-block-length-mismatch', {

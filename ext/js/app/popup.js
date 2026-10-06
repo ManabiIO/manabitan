@@ -69,12 +69,17 @@ export class Popup extends EventDispatcher {
         this._injectPromise = null;
         /** @type {boolean} */
         this._injectPromiseComplete = false;
+        /** @type {?object} */
+        this._showContentToken = null;
         /** @type {DynamicProperty<boolean>} */
         this._visible = new DynamicProperty(false);
         /** @type {boolean} */
         this._visibleValue = false;
         /** @type {?import('settings').OptionsContext} */
         this._optionsContext = null;
+        // Retain failed requests for existing waiters; new consumers retry them.
+        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean, isCurrent: () => boolean}} */
+        this._optionsContextRequest = null;
         /** @type {number} */
         this._contentScale = 1;
         /** @type {string} */
@@ -239,8 +244,10 @@ export class Popup extends EventDispatcher {
         this._cancelPendingPublication?.();
         const generation = ++this._publicationGeneration;
         const isCurrent = () => generation === this._publicationGeneration;
-        await this._setOptionsContext(optionsContext, isCurrent);
-        if (isCurrent() && this._frameConnected) {
+        const promise = this._setOptionsContext(optionsContext, isCurrent);
+        const request = this._optionsContextRequest;
+        await promise;
+        if (isCurrent() && this._optionsContextRequest === request && this._frameConnected) {
             await this._invokeSafe('displaySetOptionsContext', {optionsContext});
         }
     }
@@ -641,7 +648,7 @@ export class Popup extends EventDispatcher {
             });
             return true;
         } catch (e) {
-            this._resetFrame();
+            this._resetFrame(this._useSecureFrameUrl);
             this._updateHostPageDebugState({
                 popupInjected: false,
                 popupConnected: false,
@@ -712,12 +719,6 @@ export class Popup extends EventDispatcher {
         await frameClient.connect(this._frame, this._targetOrigin, this._frameId, setupFrame);
         this._frameConnected = true;
 
-        // Reattach mouse event listeners after frame injection
-        const boundMouseOver = this._onFrameMouseOver.bind(this);
-        const boundMouseOut = this._onFrameMouseOut.bind(this);
-        this._frame.addEventListener('mouseover', boundMouseOver);
-        this._frame.addEventListener('mouseout', boundMouseOut);
-
         // Configure
         /** @type {import('display').DirectApiParams<'displayConfigure'>} */
         const configureParams = {
@@ -740,9 +741,10 @@ export class Popup extends EventDispatcher {
     }
 
     /**
+     * @param {boolean} [preserveInjection]
      * @returns {void}
      */
-    _resetFrame() {
+    _resetFrame(preserveInjection = false) {
         const parent = this._container.parentNode;
         if (parent !== null) {
             parent.removeChild(this._container);
@@ -752,8 +754,11 @@ export class Popup extends EventDispatcher {
 
         this._frameClient = null;
         this._frameConnected = false;
-        this._injectPromise = null;
-        this._injectPromiseComplete = false;
+        // A secure-URL retry is still owned by the original injection request.
+        if (!preserveInjection) {
+            this._injectPromise = null;
+            this._injectPromiseComplete = false;
+        }
     }
 
     /**
@@ -1301,12 +1306,26 @@ export class Popup extends EventDispatcher {
     /**
      * @param {import('settings').OptionsContext} optionsContext
      * @param {() => boolean} [isCurrent]
+     * @returns {Promise<void>}
      */
-    async _setOptionsContext(optionsContext, isCurrent = () => true) {
-        const generation = ++this._optionsGeneration;
+    _setOptionsContext(optionsContext, isCurrent = () => true) {
+        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean, isCurrent: () => boolean}} */
+        const request = {optionsContext, promise: null, failed: false, isCurrent};
+        this._optionsContextRequest = request;
+        request.promise = this._loadOptionsContext(optionsContext, request).catch((error) => {
+            request.failed = true;
+            throw error;
+        });
+        return request.promise;
+    }
+
+    /**
+     * @param {import('settings').OptionsContext} optionsContext
+     * @param {{isCurrent: () => boolean}} request
+     */
+    async _loadOptionsContext(optionsContext, request) {
         const options = await this._application.api.optionsGet(optionsContext);
-        if (!isCurrent() || generation !== this._optionsGeneration) { return; }
-        this._optionsContext = optionsContext;
+        if (this._optionsContextRequest !== request || !request.isCurrent()) { return; }
         const {general, scanning} = options;
         this._themeController.theme = general.popupTheme;
         this._themeController.themePreset = general.popupThemePreset;
@@ -1332,16 +1351,34 @@ export class Popup extends EventDispatcher {
         this._customOuterCss = general.customPopupOuterCss;
         this._hidePopupOnCursorExit = scanning.hidePopupOnCursorExit;
         this._hidePopupOnCursorExitDelay = scanning.hidePopupOnCursorExitDelay;
-        void this.updateTheme();
+        await this.updateTheme();
+        if (this._optionsContextRequest === request && request.isCurrent()) {
+            this._optionsContext = optionsContext;
+        }
     }
 
     /**
      * @param {import('settings').OptionsContext} optionsContext
      * @param {() => boolean} [isCurrent]
      */
-    async _setOptionsContextIfDifferent(optionsContext, isCurrent) {
-        if (deepEqual(this._optionsContext, optionsContext)) { return; }
-        await this._setOptionsContext(optionsContext, isCurrent);
+    async _setOptionsContextIfDifferent(optionsContext, isCurrent = () => true) {
+        if (!isCurrent()) { return; }
+        let request = this._optionsContextRequest;
+        let promise;
+        if (request && !request.failed && request.isCurrent() && deepEqual(request.optionsContext, optionsContext)) { promise = request.promise; } else {
+            promise = this._setOptionsContext(optionsContext, isCurrent);
+            request = this._optionsContextRequest;
+        }
+        for (;;) {
+            try { await promise; } catch (error) {
+                const next = this._optionsContextRequest;
+                if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { throw error; }
+            }
+            const next = this._optionsContextRequest;
+            if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { return; }
+            request = next;
+            promise = next.promise;
+        }
     }
 
     /**

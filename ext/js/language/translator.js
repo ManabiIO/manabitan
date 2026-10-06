@@ -109,16 +109,31 @@ export class Translator {
      * @param {import('translator').FindTermsMode} mode The mode to use for finding terms, which determines the format of the resulting array.
      * @param {string} text The text to find terms for.
      * @param {import('translation').FindTermsOptions} options A object describing settings about the lookup.
-     * @returns {Promise<{dictionaryEntries: import('dictionary').TermDictionaryEntry[], originalTextLength: number}>} An object containing dictionary entries and the length of the original source text.
+     * @returns {Promise<import('translator').FindTermsResult>} Entries, source span, and any degraded dictionaries for this lookup.
      */
     async findTerms(mode, text, options) {
         safePerformance.mark('translator:findTerms:start');
         const tagAggregator = new TranslatorTagAggregator();
-        const {dictionaryEntries, originalTextLength} = await this._findTermsInternal(text, options, tagAggregator, options.primaryReading);
-        const result = await this._finalizeTermDictionaryEntries(mode, dictionaryEntries, options, tagAggregator);
+        /** @type {import('translator').DictionaryAvailability[]} */
+        const observedAvailability = [];
+        const {dictionaryEntries, originalTextLength} = await this._findTermsInternal(text, options, tagAggregator, options.primaryReading, observedAvailability);
+        const result = await this._finalizeTermDictionaryEntries(mode, dictionaryEntries, options, tagAggregator, observedAvailability);
         safePerformance.mark('translator:findTerms:end');
         safePerformance.measure('translator:findTerms', 'translator:findTerms:start', 'translator:findTerms:end');
-        return {dictionaryEntries: result, originalTextLength};
+        const currentAvailability = typeof this._database.getDictionaryAvailability === 'function' ?
+            this._database.getDictionaryAvailability(options.enabledDictionaryMap.keys()) :
+            [];
+        /** @type {Map<string, import('translator').DictionaryAvailability>} */
+        const availabilityByGeneration = new Map();
+        for (const availability of [...observedAvailability, ...currentAvailability]) {
+            availabilityByGeneration.set(JSON.stringify([availability.dictionary, availability.generationId]), availability);
+        }
+        const dictionaryAvailability = [...availabilityByGeneration.values()];
+        return {
+            dictionaryEntries: result,
+            originalTextLength,
+            ...(dictionaryAvailability.length > 0 ? {dictionaryAvailability} : {}),
+        };
     }
 
     /**
@@ -190,9 +205,10 @@ export class Translator {
      * @param {import('translation-internal').TermDictionaryEntry[]} dictionaryEntries
      * @param {import('translation').FindTermsOptions} options
      * @param {TranslatorTagAggregator} tagAggregator
+     * @param {import('translator').DictionaryAvailability[]} [observedAvailability]
      * @returns {Promise<import('dictionary').TermDictionaryEntry[]>}
      */
-    async _finalizeTermDictionaryEntries(mode, dictionaryEntries, options, tagAggregator) {
+    async _finalizeTermDictionaryEntries(mode, dictionaryEntries, options, tagAggregator, observedAvailability = []) {
         const {
             enabledDictionaryMap,
             excludeDictionaryDefinitions,
@@ -210,7 +226,7 @@ export class Translator {
                 dictionaryEntries = this._groupDictionaryEntriesByTerm(language, dictionaryEntries, tagAggregator, primaryReading);
                 break;
             case 'merge':
-                dictionaryEntries = await this._getRelatedDictionaryEntries(dictionaryEntries, options, tagAggregator);
+                dictionaryEntries = await this._getRelatedDictionaryEntries(dictionaryEntries, options, tagAggregator, observedAvailability);
                 break;
         }
 
@@ -348,9 +364,10 @@ export class Translator {
      * @param {import('translation').FindTermsOptions} options
      * @param {TranslatorTagAggregator} tagAggregator
      * @param {string} primaryReading
+     * @param {import('translator').DictionaryAvailability[]} [observedAvailability]
      * @returns {Promise<{dictionaryEntries: import('translation-internal').TermDictionaryEntry[], originalTextLength: number}>}
      */
-    async _findTermsInternal(text, options, tagAggregator, primaryReading) {
+    async _findTermsInternal(text, options, tagAggregator, primaryReading, observedAvailability = []) {
         const {removeNonJapaneseCharacters, enabledDictionaryMap} = options;
         if (removeNonJapaneseCharacters && (['ja', 'zh', 'yue', 'ko'].includes(options.language))) {
             text = this._getJapaneseChineseKoreanOnlyText(text);
@@ -359,7 +376,7 @@ export class Translator {
             return {dictionaryEntries: [], originalTextLength: 0};
         }
 
-        const deinflections = await this._getDeinflections(text, options);
+        const deinflections = await this._getDeinflections(text, options, observedAvailability);
 
         return this._getDictionaryEntries(deinflections, enabledDictionaryMap, tagAggregator, primaryReading);
     }
@@ -482,9 +499,10 @@ export class Translator {
     /**
      * @param {string} text
      * @param {import('translation').FindTermsOptions} options
+     * @param {import('translator').DictionaryAvailability[]} [observedAvailability]
      * @returns {Promise<import('translation-internal').DatabaseDeinflection[]>}
      */
-    async _getDeinflections(text, options) {
+    async _getDeinflections(text, options, observedAvailability = []) {
         safePerformance.mark('translator:getDeinflections:start');
         let deinflections = (
             options.deinflect ?
@@ -495,9 +513,9 @@ export class Translator {
 
         const {matchType, language, enabledDictionaryMap} = options;
 
-        await this._addEntriesToDeinflections(language, deinflections, enabledDictionaryMap, matchType);
+        await this._addEntriesToDeinflections(language, deinflections, enabledDictionaryMap, matchType, observedAvailability);
 
-        const dictionaryDeinflections = await this._getDictionaryDeinflections(language, deinflections, enabledDictionaryMap, matchType);
+        const dictionaryDeinflections = await this._getDictionaryDeinflections(language, deinflections, enabledDictionaryMap, matchType, observedAvailability);
         deinflections.push(...dictionaryDeinflections);
 
         for (const deinflection of deinflections) {
@@ -518,9 +536,10 @@ export class Translator {
      * @param {import('translation-internal').DatabaseDeinflection[]} deinflections
      * @param {Map<string, import('translation').FindTermDictionary>} enabledDictionaryMap
      * @param {import('dictionary').TermSourceMatchType} matchType
+     * @param {import('translator').DictionaryAvailability[]} [observedAvailability]
      * @returns {Promise<import('translation-internal').DatabaseDeinflection[]>}
      */
-    async _getDictionaryDeinflections(language, deinflections, enabledDictionaryMap, matchType) {
+    async _getDictionaryDeinflections(language, deinflections, enabledDictionaryMap, matchType, observedAvailability = []) {
         safePerformance.mark('translator:getDictionaryDeinflections:start');
         /** @type {import('translation-internal').DatabaseDeinflection[]} */
         const dictionaryDeinflections = [];
@@ -550,7 +569,7 @@ export class Translator {
             }
         }
 
-        await this._addEntriesToDeinflections(language, dictionaryDeinflections, enabledDictionaryMap, matchType);
+        await this._addEntriesToDeinflections(language, dictionaryDeinflections, enabledDictionaryMap, matchType, observedAvailability);
 
         safePerformance.mark('translator:getDictionaryDeinflections:end');
         safePerformance.measure('translator:getDictionaryDeinflections', 'translator:getDictionaryDeinflections:start', 'translator:getDictionaryDeinflections:end');
@@ -562,13 +581,14 @@ export class Translator {
      * @param {import('translation-internal').DatabaseDeinflection[]} deinflections
      * @param {Map<string, import('translation').FindTermDictionary>} enabledDictionaryMap
      * @param {import('dictionary').TermSourceMatchType} matchType
+     * @param {import('translator').DictionaryAvailability[]} [observedAvailability]
      */
-    async _addEntriesToDeinflections(language, deinflections, enabledDictionaryMap, matchType) {
+    async _addEntriesToDeinflections(language, deinflections, enabledDictionaryMap, matchType, observedAvailability = []) {
         const uniqueDeinflectionsMap = this._groupDeinflectionsByTerm(deinflections);
         const uniqueDeinflectionArrays = [...uniqueDeinflectionsMap.values()];
         const uniqueDeinflectionTerms = [...uniqueDeinflectionsMap.keys()];
 
-        const databaseEntries = await this._database.findTermsBulk(uniqueDeinflectionTerms, enabledDictionaryMap, matchType);
+        const databaseEntries = await this._database.findTermsBulk(uniqueDeinflectionTerms, enabledDictionaryMap, matchType, observedAvailability);
         reportDiagnosticsLazy('dictionary-lookup-translator-stage', () => ({
             stage: 'findTermsBulk',
             language,
@@ -822,9 +842,10 @@ export class Translator {
      * @param {import('translation-internal').TermDictionaryEntry[]} dictionaryEntries
      * @param {import('translation').FindTermsOptions} options
      * @param {TranslatorTagAggregator} tagAggregator
+     * @param {import('translator').DictionaryAvailability[]} [observedAvailability]
      * @returns {Promise<import('translation-internal').TermDictionaryEntry[]>}
      */
-    async _getRelatedDictionaryEntries(dictionaryEntries, options, tagAggregator) {
+    async _getRelatedDictionaryEntries(dictionaryEntries, options, tagAggregator, observedAvailability = []) {
         const {mainDictionary, enabledDictionaryMap, language, primaryReading} = options;
         /** @type {import('translator').SequenceQuery[]} */
         const sequenceList = [];
@@ -856,12 +877,12 @@ export class Translator {
 
         if (sequenceList.length > 0) {
             const secondarySearchDictionaryMap = this._getSecondarySearchDictionaryMap(enabledDictionaryMap);
-            await this._addRelatedDictionaryEntries(groupedDictionaryEntries, ungroupedDictionaryEntriesMap, sequenceList, enabledDictionaryMap, tagAggregator, primaryReading);
+            await this._addRelatedDictionaryEntries(groupedDictionaryEntries, ungroupedDictionaryEntriesMap, sequenceList, enabledDictionaryMap, tagAggregator, primaryReading, observedAvailability);
             for (const group of groupedDictionaryEntries) {
                 this._sortTermDictionaryEntriesById(group.dictionaryEntries);
             }
             if (ungroupedDictionaryEntriesMap.size > 0 || secondarySearchDictionaryMap.size > 0) {
-                await this._addSecondaryRelatedDictionaryEntries(language, groupedDictionaryEntries, ungroupedDictionaryEntriesMap, enabledDictionaryMap, secondarySearchDictionaryMap, tagAggregator, primaryReading);
+                await this._addSecondaryRelatedDictionaryEntries(language, groupedDictionaryEntries, ungroupedDictionaryEntriesMap, enabledDictionaryMap, secondarySearchDictionaryMap, tagAggregator, primaryReading, observedAvailability);
             }
         }
 
@@ -880,9 +901,10 @@ export class Translator {
      * @param {import('translation').TermEnabledDictionaryMap} enabledDictionaryMap
      * @param {TranslatorTagAggregator} tagAggregator
      * @param {string} primaryReading
+     * @param {import('translator').DictionaryAvailability[]} [observedAvailability]
      */
-    async _addRelatedDictionaryEntries(groupedDictionaryEntries, ungroupedDictionaryEntriesMap, sequenceList, enabledDictionaryMap, tagAggregator, primaryReading) {
-        const databaseEntries = await this._database.findTermsBySequenceBulk(sequenceList);
+    async _addRelatedDictionaryEntries(groupedDictionaryEntries, ungroupedDictionaryEntriesMap, sequenceList, enabledDictionaryMap, tagAggregator, primaryReading, observedAvailability = []) {
+        const databaseEntries = await this._database.findTermsBySequenceBulk(sequenceList, observedAvailability);
         for (const databaseEntry of databaseEntries) {
             const {dictionaryEntries, ids} = groupedDictionaryEntries[databaseEntry.index];
             const {id} = databaseEntry;
@@ -904,8 +926,9 @@ export class Translator {
      * @param {import('translation').TermEnabledDictionaryMap} secondarySearchDictionaryMap
      * @param {TranslatorTagAggregator} tagAggregator
      * @param {string} primaryReading
+     * @param {import('translator').DictionaryAvailability[]} [observedAvailability]
      */
-    async _addSecondaryRelatedDictionaryEntries(language, groupedDictionaryEntries, ungroupedDictionaryEntriesMap, enabledDictionaryMap, secondarySearchDictionaryMap, tagAggregator, primaryReading) {
+    async _addSecondaryRelatedDictionaryEntries(language, groupedDictionaryEntries, ungroupedDictionaryEntriesMap, enabledDictionaryMap, secondarySearchDictionaryMap, tagAggregator, primaryReading, observedAvailability = []) {
         // Prepare grouping info
         /** @type {import('dictionary-database').TermExactRequest[]} */
         const termList = [];
@@ -953,7 +976,7 @@ export class Translator {
         // Search database for additional secondary terms
         if (termList.length === 0 || secondarySearchDictionaryMap.size === 0) { return; }
 
-        const databaseEntries = await this._database.findTermsExactBulk(termList, secondarySearchDictionaryMap);
+        const databaseEntries = await this._database.findTermsExactBulk(termList, secondarySearchDictionaryMap, observedAvailability);
         this._sortDatabaseEntriesByIndex(databaseEntries);
 
         for (const databaseEntry of databaseEntries) {

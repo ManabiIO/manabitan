@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {extendApiMap, invokeApiMapHandler} from '../core/api-map.js';
+import {extendApiMap, invokeApiMapHandler, registerApiMapScope} from '../core/api-map.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
@@ -114,13 +114,24 @@ export class CrossFrameAPIPort extends EventDispatcher {
                 this._port.postMessage(/** @type {import('cross-frame-api').InvokeMessage} */ ({type: 'invoke', id, data: {action, params}}));
             } catch (e) {
                 this._onError(id, e);
+                this.disconnect();
             }
         });
     }
 
     /** */
     disconnect() {
-        this._onDisconnect();
+        const port = this._port;
+        if (port === null) { return; }
+        try {
+            this._onDisconnect();
+        } finally {
+            try {
+                port.disconnect();
+            } catch (e) {
+                // The browser may have already invalidated the transport.
+            }
+        }
     }
 
     // Private
@@ -131,7 +142,7 @@ export class CrossFrameAPIPort extends EventDispatcher {
     _onResume(e) {
         // Page Resumed after being frozen
         log.log('Yomitan cross frame reset. Resuming after page frozen.', e);
-        this._onDisconnect();
+        this.disconnect();
     }
 
     /**
@@ -141,25 +152,31 @@ export class CrossFrameAPIPort extends EventDispatcher {
         // Page restored from BFCache
         if (e.persisted) {
             log.log('Yomitan cross frame reset. Page restored from BFCache.', e);
-            this._onDisconnect();
+            this.disconnect();
         }
     }
 
     /** */
     _onDisconnect() {
         if (this._port === null) { return; }
-        this._eventListeners.removeAllEventListeners();
         this._port = null;
-        for (const id of this._activeInvocations.keys()) {
-            this._onError(id, 'Disconnected');
+        try {
+            this._eventListeners.removeAllEventListeners();
+        } catch (error) {
+            log.warn(error);
+        } finally {
+            for (const id of this._activeInvocations.keys()) {
+                this._onError(id, 'Disconnected');
+            }
+            this.trigger('disconnect', this);
         }
-        this.trigger('disconnect', this);
     }
 
     /**
      * @param {import('cross-frame-api').Message} details
      */
     _onMessage(details) {
+        if (this._port === null) { return; }
         const {type, id} = details;
         switch (type) {
             case 'invoke':
@@ -231,11 +248,17 @@ export class CrossFrameAPIPort extends EventDispatcher {
             invocation.timer = null;
         }
 
-        const error = data.error;
-        if (typeof error !== 'undefined') {
-            invocation.reject(ExtensionError.deserialize(error));
-        } else {
-            invocation.resolve(data.result);
+        // The invocation is no longer registered. Decoding failures must still
+        // reject it rather than escape the listener with no timeout remaining.
+        try {
+            const error = data.error;
+            if (typeof error !== 'undefined') {
+                invocation.reject(ExtensionError.deserialize(error));
+            } else {
+                invocation.resolve(data.result);
+            }
+        } catch (error) {
+            invocation.reject(error instanceof Error ? error : new Error('Failed to decode cross-frame API response', {cause: error}));
         }
     }
 
@@ -264,7 +287,7 @@ export class CrossFrameAPIPort extends EventDispatcher {
      * @param {import('cross-frame-api').ApiMessageAny} details
      */
     _onInvoke(id, {action, params}) {
-        this._sendAck(id);
+        if (!this._sendAck(id)) { return; }
         invokeApiMapHandler(
             this._apiMap,
             action,
@@ -277,21 +300,25 @@ export class CrossFrameAPIPort extends EventDispatcher {
 
     /**
      * @param {import('cross-frame-api').Message} data
+     * @returns {boolean}
      */
     _sendResponse(data) {
-        if (this._port === null) { return; }
+        if (this._port === null) { return false; }
         try {
             this._port.postMessage(data);
+            return true;
         } catch (e) {
-            // NOP
+            this.disconnect();
+            return false;
         }
     }
 
     /**
      * @param {number} id
+     * @returns {boolean}
      */
     _sendAck(id) {
-        this._sendResponse({type: 'ack', id});
+        return this._sendResponse({type: 'ack', id});
     }
 
     /**
@@ -326,6 +353,8 @@ export class CrossFrameAPI {
         this._responseTimeout = 10000; // 10 seconds
         /** @type {Map<number, Map<number, CrossFrameAPIPort>>} */
         this._commPorts = new Map();
+        /** @type {Map<number, Map<number, Promise<CrossFrameAPIPort>>>} */
+        this._pendingCommPorts = new Map();
         /** @type {import('cross-frame-api').ApiMap} */
         this._apiMap = new Map();
         /** @type {(port: CrossFrameAPIPort) => void} */
@@ -392,6 +421,14 @@ export class CrossFrameAPI {
         extendApiMap(this._apiMap, handlers);
     }
 
+    /**
+     * @param {import('cross-frame-api').ApiMapInit} handlers
+     * @returns {() => void}
+     */
+    registerHandlersScoped(handlers) {
+        return registerApiMapScope(this._apiMap, handlers);
+    }
+
     // Private
 
     /**
@@ -448,7 +485,24 @@ export class CrossFrameAPI {
                 return commPort;
             }
         }
-        return await this._createCommPort(otherTabId, otherFrameId);
+        let pendingTabPorts = this._pendingCommPorts.get(otherTabId);
+        if (typeof pendingTabPorts === 'undefined') {
+            pendingTabPorts = new Map();
+            this._pendingCommPorts.set(otherTabId, pendingTabPorts);
+        }
+        let pending = pendingTabPorts.get(otherFrameId);
+        if (typeof pending === 'undefined') {
+            // Reserve ownership before opening a port, including synchronous API callbacks.
+            const ownedTabPorts = pendingTabPorts;
+            pending = Promise.resolve().then(() => this._createCommPort(otherTabId, otherFrameId)).finally(() => {
+                ownedTabPorts.delete(otherFrameId);
+                if (ownedTabPorts.size === 0 && this._pendingCommPorts.get(otherTabId) === ownedTabPorts) {
+                    this._pendingCommPorts.delete(otherTabId);
+                }
+            });
+            pendingTabPorts.set(otherFrameId, pending);
+        }
+        return await pending;
     }
 
     /**
@@ -457,6 +511,8 @@ export class CrossFrameAPI {
      * @returns {Promise<CrossFrameAPIPort>}
      */
     async _createCommPort(otherTabId, otherFrameId) {
+        const existing = this._commPorts.get(otherTabId)?.get(otherFrameId);
+        if (typeof existing !== 'undefined') { return existing; }
         await this._api.openCrossFramePort(otherTabId, otherFrameId);
 
         const tabPorts = this._commPorts.get(otherTabId);
@@ -474,17 +530,23 @@ export class CrossFrameAPI {
      * @param {number} otherFrameId
      * @param {chrome.runtime.Port} port
      * @returns {CrossFrameAPIPort}
+     * @throws {Error}
      */
     _setupCommPort(otherTabId, otherFrameId, port) {
         const commPort = new CrossFrameAPIPort(otherTabId, otherFrameId, port, this._apiMap);
+        commPort.on('disconnect', this._onDisconnectBind);
+        try {
+            commPort.prepare();
+        } catch (error) {
+            commPort.disconnect();
+            throw error;
+        }
         let tabPorts = this._commPorts.get(otherTabId);
         if (typeof tabPorts === 'undefined') {
             tabPorts = new Map();
             this._commPorts.set(otherTabId, tabPorts);
         }
         tabPorts.set(otherFrameId, commPort);
-        commPort.prepare();
-        commPort.on('disconnect', this._onDisconnectBind);
         return commPort;
     }
 }

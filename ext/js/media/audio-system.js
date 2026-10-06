@@ -22,6 +22,8 @@ import {isLocalhostUrl} from '../core/utilities.js';
 import {TextToSpeechAudio} from './text-to-speech-audio.js';
 import {WebAudioLocalAudio} from './web-audio-local-audio.js';
 
+const AUDIO_LOAD_TIMEOUT_MS = 15000;
+
 /**
  * @augments EventDispatcher<import('audio-system').Events>
  */
@@ -82,24 +84,23 @@ export class AudioSystem extends EventDispatcher {
      */
     async createAudio(url, sourceType) {
         if (isLocalhostUrl(url) && this._api) {
-            /** @type {{data: string, contentType: string}|null} */
-            const response = await this._api.fetchLocalAudioData(url);
-
-            if (!response) {
-                throw new Error('Failed to fetch local audio from background context');
-            }
-
-            const localAudio = new WebAudioLocalAudio(response.data, response.contentType || 'audio/mpeg');
-            await localAudio.prepare();
-            return localAudio;
+            return await this._createLocalAudio(url);
         }
 
         const audio = new Audio(url);
-        await this._waitForData(audio);
-        if (!this._isAudioValid(audio, sourceType)) {
-            throw new Error('Could not retrieve audio');
+        try {
+            await this._waitForData(audio);
+            if (!this._isAudioValid(audio, sourceType)) {
+                throw new Error('Could not retrieve audio');
+            }
+            return audio;
+        } catch (e) {
+            // Do not leave failed or timed-out elements fetching in the background.
+            audio.pause();
+            audio.removeAttribute('src');
+            audio.load();
+            throw e;
         }
-        return audio;
     }
 
     /**
@@ -119,6 +120,46 @@ export class AudioSystem extends EventDispatcher {
     // Private
 
     /**
+     * @param {string} url
+     * @returns {Promise<WebAudioLocalAudio>}
+     */
+    async _createLocalAudio(url) {
+        const api = this._api;
+        if (api === null) { throw new Error('Local audio API unavailable'); }
+        const timeoutError = new Error('Local audio loading timed out');
+        let expired = false;
+        /** @type {?import('core').Timeout} */
+        let timer = null;
+        /** @type {Promise<never>} */
+        const timeout = new Promise((_resolve, reject) => {
+            timer = setTimeout(() => {
+                expired = true;
+                reject(timeoutError);
+            }, AUDIO_LOAD_TIMEOUT_MS);
+        });
+        /** @returns {Promise<WebAudioLocalAudio>} */
+        const prepare = async () => {
+            const response = await api.fetchLocalAudioData(url);
+            // The bridge has no cancellation parameter. Ignore a late response
+            // before allocating a context or starting another decode operation.
+            if (expired) { throw timeoutError; }
+            if (!response) { throw new Error('Failed to fetch local audio from background context'); }
+            const audio = new WebAudioLocalAudio(response.data, response.contentType || 'audio/mpeg');
+            await audio.prepare();
+            if (expired) { throw timeoutError; }
+            return audio;
+        };
+        try {
+            // Use one budget for transport and decoding so either stall can
+            // fall through to another source without poisoning future retries.
+            return await Promise.race([prepare(), timeout]);
+        } finally {
+            expired = true;
+            if (timer !== null) { clearTimeout(timer); }
+        }
+    }
+
+    /**
      * @param {Event} event
      */
     _onVoicesChanged(event) {
@@ -130,9 +171,38 @@ export class AudioSystem extends EventDispatcher {
      * @returns {Promise<void>}
      */
     _waitForData(audio) {
+        if (audio.error !== null) { return Promise.reject(audio.error); }
+        if (audio.readyState >= 2) { return Promise.resolve(); } // HAVE_CURRENT_DATA
         return new Promise((resolve, reject) => {
-            audio.addEventListener('loadeddata', () => resolve());
-            audio.addEventListener('error', () => reject(audio.error));
+            let settled = false;
+            /** @type {?import('core').Timeout} */
+            let timer = null;
+            const cleanup = () => {
+                if (settled) { return false; }
+                settled = true;
+                if (timer !== null) { clearTimeout(timer); }
+                audio.removeEventListener('loadeddata', onLoadedData);
+                audio.removeEventListener('error', onError);
+                audio.removeEventListener('abort', onAbort);
+                return true;
+            };
+            const onLoadedData = () => {
+                if (cleanup()) { resolve(); }
+            };
+            const onError = () => {
+                if (cleanup()) { reject(audio.error ?? new Error('Failed to load audio')); }
+            };
+            const onAbort = () => {
+                if (cleanup()) { reject(new Error('Audio loading aborted')); }
+            };
+            const onTimeout = () => {
+                if (cleanup()) { reject(new Error('Audio loading timed out')); }
+            };
+            audio.addEventListener('loadeddata', onLoadedData);
+            audio.addEventListener('error', onError);
+            audio.addEventListener('abort', onAbort);
+            // A silent/stalled provider must not prevent trying the next source.
+            timer = setTimeout(onTimeout, AUDIO_LOAD_TIMEOUT_MS);
         });
     }
 

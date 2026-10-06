@@ -39,6 +39,8 @@ export class AnkiConnect {
         this._remoteVersion = 0;
         /** @type {?Promise<number>} */
         this._versionCheckPromise = null;
+        /** @type {number} */
+        this._connectionGeneration = 0;
         /** @type {?string} */
         this._apiKey = null;
     }
@@ -56,7 +58,9 @@ export class AnkiConnect {
      * @param {string} value The new server URL to assign.
      */
     set server(value) {
+        if (this._server === value) { return; }
         this._server = value;
+        this._invalidateVersionCheck();
     }
 
     /**
@@ -72,7 +76,9 @@ export class AnkiConnect {
      * @param {boolean} value The enabled state.
      */
     set enabled(value) {
+        if (this._enabled === value) { return; }
         this._enabled = value;
+        this._invalidateVersionCheck();
     }
 
     /**
@@ -89,7 +95,9 @@ export class AnkiConnect {
      * @param {?string} value The API key to use, or `null` if no API key should be used.
      */
     set apiKey(value) {
+        if (this._apiKey === value) { return; }
         this._apiKey = value;
+        this._invalidateVersionCheck();
     }
 
     /**
@@ -97,8 +105,10 @@ export class AnkiConnect {
      * @returns {Promise<boolean>} `true` if the connection was made, `false` otherwise.
      */
     async isConnected() {
+        const generation = this._connectionGeneration;
         try {
-            await this._getVersion();
+            await this._getVersion(generation);
+            this._assertConnectionGeneration(generation);
             return true;
         } catch (e) {
             return false;
@@ -111,8 +121,10 @@ export class AnkiConnect {
      */
     async getVersion() {
         if (!this._enabled) { return null; }
-        await this._checkVersion();
-        return await this._getVersion();
+        const generation = await this._checkVersion();
+        const result = await this._getVersion(generation);
+        this._assertConnectionGeneration(generation);
+        return result;
     }
 
     /**
@@ -121,8 +133,9 @@ export class AnkiConnect {
      */
     async addNote(note) {
         if (!this._enabled) { return null; }
-        await this._checkVersion();
-        const result = await this._invoke('addNote', {note});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('addNote', {note}, generation);
+        this._assertConnectionGeneration(generation);
         if (result !== null && typeof result !== 'number') {
             throw this._createUnexpectedResultError('number|null', result);
         }
@@ -135,8 +148,9 @@ export class AnkiConnect {
      */
     async addNotes(notes) {
         if (!this._enabled) { return null; }
-        await this._checkVersion();
-        const result = await this._invoke('addNotes', {notes});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('addNotes', {notes}, generation);
+        this._assertConnectionGeneration(generation);
         if (result !== null && !Array.isArray(result)) {
             throw this._createUnexpectedResultError('(number | null)[] | null', result);
         }
@@ -149,8 +163,9 @@ export class AnkiConnect {
      */
     async updateNoteFields(noteWithId) {
         if (!this._enabled) { return null; }
-        await this._checkVersion();
-        const result = await this._invoke('updateNoteFields', {note: noteWithId});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('updateNoteFields', {note: noteWithId}, generation);
+        this._assertConnectionGeneration(generation);
         if (result !== null) {
             throw this._createUnexpectedResultError('null', result);
         }
@@ -164,8 +179,9 @@ export class AnkiConnect {
      */
     async canAddNotes(notes) {
         if (!this._enabled) { return new Array(notes.length).fill(false); }
-        await this._checkVersion();
-        const result = await this._invoke('canAddNotes', {notes});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('canAddNotes', {notes}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeArray(result, notes.length, 'boolean');
     }
 
@@ -175,8 +191,9 @@ export class AnkiConnect {
      */
     async canAddNotesWithErrorDetail(notes) {
         if (!this._enabled) { return notes.map(() => ({canAdd: false, error: null})); }
-        await this._checkVersion();
-        const result = await this._invoke('canAddNotesWithErrorDetail', {notes});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('canAddNotesWithErrorDetail', {notes}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeCanAddNotesWithErrorDetailArray(result, notes.length);
     }
 
@@ -186,8 +203,9 @@ export class AnkiConnect {
      */
     async notesInfo(noteIds) {
         if (!this._enabled) { return []; }
-        await this._checkVersion();
-        const result = await this._invoke('notesInfo', {notes: noteIds});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('notesInfo', {notes: noteIds}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeNoteInfoArray(result);
     }
 
@@ -197,8 +215,9 @@ export class AnkiConnect {
      */
     async cardsInfo(cardIds) {
         if (!this._enabled) { return []; }
-        await this._checkVersion();
-        const result = await this._invoke('cardsInfo', {cards: cardIds});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('cardsInfo', {cards: cardIds}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeCardInfoArray(result);
     }
 
@@ -207,8 +226,9 @@ export class AnkiConnect {
      */
     async getDeckNames() {
         if (!this._enabled) { return []; }
-        await this._checkVersion();
-        const result = await this._invoke('deckNames', {});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('deckNames', {}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeArray(result, -1, 'string');
     }
 
@@ -217,8 +237,9 @@ export class AnkiConnect {
      */
     async getModelNames() {
         if (!this._enabled) { return []; }
-        await this._checkVersion();
-        const result = await this._invoke('modelNames', {});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('modelNames', {}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeArray(result, -1, 'string');
     }
 
@@ -228,8 +249,9 @@ export class AnkiConnect {
      */
     async getModelFieldNames(modelName) {
         if (!this._enabled) { return []; }
-        await this._checkVersion();
-        const result = await this._invoke('modelFieldNames', {modelName});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('modelFieldNames', {modelName}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeArray(result, -1, 'string');
     }
 
@@ -239,8 +261,9 @@ export class AnkiConnect {
      */
     async guiBrowse(query) {
         if (!this._enabled) { return []; }
-        await this._checkVersion();
-        const result = await this._invoke('guiBrowse', {query});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('guiBrowse', {query}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeArray(result, -1, 'number');
     }
 
@@ -249,7 +272,10 @@ export class AnkiConnect {
      * @returns {Promise<import('anki').CardId[]>}
      */
     async guiBrowseNote(noteId) {
-        return await this.guiBrowse(`nid:${noteId}`);
+        const generation = this._connectionGeneration;
+        const result = await this.guiBrowse(`nid:${noteId}`);
+        this._assertConnectionGeneration(generation);
+        return result;
     }
 
     /**
@@ -257,7 +283,10 @@ export class AnkiConnect {
      * @returns {Promise<import('anki').CardId[]>}
      */
     async guiBrowseNotes(noteIds) {
-        return await this.guiBrowse(`nid:${noteIds.join(',')}`);
+        const generation = this._connectionGeneration;
+        const result = await this.guiBrowse(`nid:${noteIds.join(',')}`);
+        this._assertConnectionGeneration(generation);
+        return result;
     }
 
     /**
@@ -266,7 +295,9 @@ export class AnkiConnect {
      * @returns {Promise<void>} Nothing is returned.
      */
     async guiEditNote(noteId) {
-        await this._invoke('guiEditNote', {note: noteId});
+        const generation = this._connectionGeneration;
+        await this._invoke('guiEditNote', {note: noteId}, generation);
+        this._assertConnectionGeneration(generation);
     }
 
     /**
@@ -280,8 +311,9 @@ export class AnkiConnect {
         if (!this._enabled) {
             throw new Error('AnkiConnect not enabled');
         }
-        await this._checkVersion();
-        const result = await this._invoke('storeMediaFile', {filename: fileName, data: content});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('storeMediaFile', {filename: fileName, data: content}, generation);
+        this._assertConnectionGeneration(generation);
         if (result !== null && typeof result !== 'string') {
             throw this._createUnexpectedResultError('string|null', result);
         }
@@ -296,8 +328,9 @@ export class AnkiConnect {
      */
     async findNotes(query) {
         if (!this._enabled) { return []; }
-        await this._checkVersion();
-        const result = await this._invoke('findNotes', {query});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('findNotes', {query}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeArray(result, -1, 'number');
     }
 
@@ -307,7 +340,7 @@ export class AnkiConnect {
      */
     async findNoteIds(notes) {
         if (!this._enabled) { return []; }
-        await this._checkVersion();
+        const generation = await this._checkVersion();
 
         const queries = [];
         const actionsTargetsList = [];
@@ -345,7 +378,8 @@ export class AnkiConnect {
         } else {
             // Find the union once, then constrain each original query to the candidate notes.
             const unionQuery = queries.map((query) => `(${query})`).join(' or ');
-            const unionResult = await this._invoke('findNotes', {query: unionQuery});
+            const unionResult = await this._invoke('findNotes', {query: unionQuery}, generation);
+            this._assertConnectionGeneration(generation);
             const candidateNoteIds = /** @type {number[]} */ (this._normalizeArray(unionResult, -1, 'number'));
             if (candidateNoteIds.length === 0) { return allNoteIds; }
 
@@ -356,7 +390,8 @@ export class AnkiConnect {
             }));
         }
 
-        const result = await this._invokeMulti(actions);
+        const result = await this._invokeMulti(actions, generation);
+        this._assertConnectionGeneration(generation);
         for (let i = 0, ii = Math.min(result.length, actionsTargetsList.length); i < ii; ++i) {
             const noteIds = /** @type {number[]} */ (this._normalizeArray(result[i], -1, 'number'));
             for (const actionsTargets of actionsTargetsList[i]) {
@@ -374,8 +409,9 @@ export class AnkiConnect {
      */
     async suspendCards(cardIds) {
         if (!this._enabled) { return false; }
-        await this._checkVersion();
-        const result = await this._invoke('suspend', {cards: cardIds});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('suspend', {cards: cardIds}, generation);
+        this._assertConnectionGeneration(generation);
         return typeof result === 'boolean' && result;
     }
 
@@ -385,8 +421,9 @@ export class AnkiConnect {
      */
     async findCards(query) {
         if (!this._enabled) { return []; }
-        await this._checkVersion();
-        const result = await this._invoke('findCards', {query});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('findCards', {query}, generation);
+        this._assertConnectionGeneration(generation);
         return this._normalizeArray(result, -1, 'number');
     }
 
@@ -395,7 +432,10 @@ export class AnkiConnect {
      * @returns {Promise<import('anki').CardId[]>}
      */
     async findCardsForNote(noteId) {
-        return await this.findCards(`nid:${noteId}`);
+        const generation = this._connectionGeneration;
+        const result = await this.findCards(`nid:${noteId}`);
+        this._assertConnectionGeneration(generation);
+        return result;
     }
 
     /**
@@ -405,7 +445,9 @@ export class AnkiConnect {
      * @returns {Promise<import('anki').ApiReflectResult>} Information about the APIs.
      */
     async apiReflect(scopes, actions = null) {
-        const result = await this._invoke('apiReflect', {scopes, actions});
+        const generation = this._connectionGeneration;
+        const result = await this._invoke('apiReflect', {scopes, actions}, generation);
+        this._assertConnectionGeneration(generation);
         if (!(typeof result === 'object' && result !== null)) {
             throw this._createUnexpectedResultError('object', result);
         }
@@ -424,7 +466,9 @@ export class AnkiConnect {
      * @returns {Promise<boolean>} Whether or not the action exists.
      */
     async apiExists(action) {
+        const generation = this._connectionGeneration;
         const {actions} = await this.apiReflect(['actions'], [action]);
+        this._assertConnectionGeneration(generation);
         return actions.includes(action);
     }
 
@@ -449,38 +493,71 @@ export class AnkiConnect {
      */
     async makeAnkiSync() {
         if (!this._enabled) { return null; }
-        const version = await this._checkVersion();
-        const result = await this._invoke('sync', {version});
+        const generation = await this._checkVersion();
+        const result = await this._invoke('sync', {}, generation);
+        this._assertConnectionGeneration(generation);
         return result === null;
     }
 
     // Private
 
+    /** */
+    _invalidateVersionCheck() {
+        ++this._connectionGeneration;
+        this._remoteVersion = 0;
+        this._versionCheckPromise = null;
+    }
+
     /**
-     * @returns {Promise<void>}
+     * @param {number} generation
+     * @throws {Error} The connection changed while the operation was pending.
+     */
+    _assertConnectionGeneration(generation) {
+        if (generation !== this._connectionGeneration) {
+            throw new Error('Anki connection settings changed during request');
+        }
+    }
+
+    /**
+     * @returns {Promise<number>} The generation of the verified connection.
      */
     async _checkVersion() {
-        if (this._remoteVersion < this._localVersion) {
+        const generation = this._connectionGeneration;
+        while (this._remoteVersion < this._localVersion) {
             if (this._versionCheckPromise === null) {
-                const promise = this._getVersion();
+                const promise = this._getVersion(generation);
+                this._versionCheckPromise = promise;
                 promise
                     .catch(() => {})
-                    .finally(() => { this._versionCheckPromise = null; });
-                this._versionCheckPromise = promise;
+                    .finally(() => {
+                        if (this._versionCheckPromise === promise) { this._versionCheckPromise = null; }
+                    });
             }
-            this._remoteVersion = await this._versionCheckPromise;
+            let version;
+            try {
+                version = await this._versionCheckPromise;
+            } catch (error) {
+                this._assertConnectionGeneration(generation);
+                throw error;
+            }
+            // Never reissue the caller's operation against a newly selected connection.
+            this._assertConnectionGeneration(generation);
+            this._remoteVersion = version;
             if (this._remoteVersion < this._localVersion) {
                 throw new Error('Extension and plugin versions incompatible');
             }
         }
+        return generation;
     }
 
     /**
      * @param {string} action
      * @param {import('core').SerializableObject} params
+     * @param {number} [generation]
      * @returns {Promise<unknown>}
      */
-    async _invoke(action, params) {
+    async _invoke(action, params, generation = this._connectionGeneration) {
+        this._assertConnectionGeneration(generation);
         /** @type {import('anki').MessageBody} */
         const body = {action, params, version: this._localVersion};
         if (this._apiKey !== null) { body.key = this._apiKey; }
@@ -500,11 +577,13 @@ export class AnkiConnect {
                 body: JSON.stringify(body),
             });
         } catch (e) {
+            this._assertConnectionGeneration(generation);
             const error = new ExtensionError('Anki connection failure');
             error.data = {action, params, originalError: e};
             throw error;
         }
 
+        this._assertConnectionGeneration(generation);
         if (!response.ok) {
             const error = new ExtensionError(`Anki connection error: ${response.status}`);
             error.data = {action, params, status: response.status};
@@ -518,11 +597,13 @@ export class AnkiConnect {
             responseText = await response.text();
             result = parseJson(responseText);
         } catch (e) {
+            this._assertConnectionGeneration(generation);
             const error = new ExtensionError('Invalid Anki response');
             error.data = {action, params, status: response.status, responseText, originalError: e};
             throw error;
         }
 
+        this._assertConnectionGeneration(generation);
         if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
             const apiError = /** @type {import('core').SerializableObject} */ (result).error;
             if (typeof apiError !== 'undefined') {
@@ -539,11 +620,14 @@ export class AnkiConnect {
 
     /**
      * @param {{action: string, params: import('core').SerializableObject}[]} actions
+     * @param {number} [generation]
      * @returns {Promise<unknown[]>}
      */
-    async _invokeMulti(actions) {
+    async _invokeMulti(actions, generation = this._connectionGeneration) {
+        this._assertConnectionGeneration(generation);
         const modifiedActions = this._apiKey !== null ? actions.map((action) => ({...action, key: this._apiKey})) : actions;
-        const result = await this._invoke('multi', {actions: modifiedActions});
+        const result = await this._invoke('multi', {actions: modifiedActions}, generation);
+        this._assertConnectionGeneration(generation);
         if (!Array.isArray(result)) {
             throw this._createUnexpectedResultError('array', result);
         }
@@ -551,10 +635,12 @@ export class AnkiConnect {
     }
 
     /**
+     * @param {number} [generation]
      * @returns {Promise<number>}
      */
-    async _getVersion() {
-        const version = await this._invoke('version', {});
+    async _getVersion(generation = this._connectionGeneration) {
+        const version = await this._invoke('version', {}, generation);
+        this._assertConnectionGeneration(generation);
         return typeof version === 'number' ? version : 0;
     }
 

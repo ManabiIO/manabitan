@@ -17,6 +17,7 @@
  */
 
 import {EventDispatcher} from '../core/event-dispatcher.js';
+import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {trimTrailingWhitespacePlusSpace} from '../data/string-util.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
@@ -42,6 +43,8 @@ export class QueryParser extends EventDispatcher {
         this._text = '';
         /** @type {?import('core').TokenObject} */
         this._setTextToken = null;
+        /** @type {boolean} */
+        this._needsTextUpdate = false;
         /** @type {?string} */
         this._selectedParser = null;
         /** @type {import('settings').ParsingReadingMode} */
@@ -84,6 +87,11 @@ export class QueryParser extends EventDispatcher {
         return this._text;
     }
 
+    /** @type {boolean} Whether a failed or invalidated parse needs a later retry. */
+    get needsTextUpdate() {
+        return this._needsTextUpdate;
+    }
+
     /** */
     prepare() {
         this._textScanner.prepare();
@@ -97,6 +105,12 @@ export class QueryParser extends EventDispatcher {
      * @param {import('display').QueryParserOptions} display
      */
     setOptions({selectedParser, termSpacing, readingMode, useInternalParser, useMecabParser, useAllFrequencyDictionaries, language, scanning}) {
+        const previousUseInternalParser = this._useInternalParser;
+        const previousUseMecabParser = this._useMecabParser;
+        const previousUseAllFrequencyDictionaries = this._useAllFrequencyDictionaries;
+        const previousScanLength = this._scanLength;
+        const previousLanguage = this._queryParser.lang;
+        const previousReadingMode = this._readingMode;
         let selectedParserChanged = false;
         if (selectedParser === null || typeof selectedParser === 'string') {
             selectedParserChanged = (this._selectedParser !== selectedParser);
@@ -127,7 +141,21 @@ export class QueryParser extends EventDispatcher {
             this._textScanner.setEnabled(true);
         }
 
-        if (selectedParserChanged && this._parseResults.length > 0) {
+        const parsingEnabled = this._useInternalParser || this._useMecabParser;
+        const parsingChanged = (
+            previousUseInternalParser !== this._useInternalParser ||
+            previousUseMecabParser !== this._useMecabParser ||
+            previousUseAllFrequencyDictionaries !== this._useAllFrequencyDictionaries ||
+            previousScanLength !== this._scanLength ||
+            previousLanguage !== language
+        );
+        if (parsingChanged || !parsingEnabled) {
+            this._setTextToken = null;
+            this._needsTextUpdate = parsingEnabled && this._text.length > 0;
+            this._setPreview(this._text);
+        } else if ((selectedParserChanged || previousReadingMode !== this._readingMode) && this._parseResults.length > 0) {
+            this._refreshSelectedParser(false);
+            this._renderParserSelect();
             this._renderParseResult();
         }
 
@@ -136,24 +164,35 @@ export class QueryParser extends EventDispatcher {
 
     /**
      * @param {string} text
+     * @returns {Promise<void>}
+     * @throws {Error} If the current parse or rendering fails.
      */
     async setText(text) {
-        this._text = text;
-        this._setPreview(text);
-
-        if (this._useInternalParser === false && this._useMecabParser === false) {
-            return;
-        }
-        /** @type {?import('core').TokenObject} */
+        /** @type {import('core').TokenObject} */
         const token = {};
         this._setTextToken = token;
-        this._parseResults = await this._api.parseText(text, this._getOptionsContext(), this._scanLength, this._useInternalParser, this._useMecabParser, this._useAllFrequencyDictionaries);
-        if (this._setTextToken !== token) { return; }
-
-        this._refreshSelectedParser();
-
-        this._renderParserSelect();
-        this._renderParseResult();
+        this._needsTextUpdate = false;
+        this._text = text;
+        try {
+            this._setPreview(text);
+            if (this._useInternalParser === false && this._useMecabParser === false) { return; }
+            const parseResults = await this._api.parseText(text, this._getOptionsContext(), this._scanLength, this._useInternalParser, this._useMecabParser, this._useAllFrequencyDictionaries);
+            if (this._setTextToken !== token) { return; }
+            this._parseResults = parseResults;
+            this._refreshSelectedParser();
+            this._renderParserSelect();
+            this._renderParseResult();
+        } catch (error) {
+            if (this._setTextToken !== token) { return; }
+            this._parseResults = [];
+            this._needsTextUpdate = true;
+            try {
+                this._setPreview(text);
+            } catch (e) {
+                // Preserve the original failure if even the text preview cannot render.
+            }
+            throw error;
+        }
     }
 
     // Private
@@ -166,11 +205,12 @@ export class QueryParser extends EventDispatcher {
     /**
      * @param {import('text-scanner').EventArgument<'searchSuccess'>} details
      */
-    _onSearchSuccess({type, dictionaryEntries, sentence, inputInfo, textSource, optionsContext, pageTheme}) {
+    _onSearchSuccess({type, dictionaryEntries, dictionaryAvailability, sentence, inputInfo, textSource, optionsContext, pageTheme}) {
         this.trigger('searched', {
             textScanner: this._textScanner,
             type,
             dictionaryEntries,
+            ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
             sentence,
             inputInfo,
             textSource,
@@ -193,7 +233,8 @@ export class QueryParser extends EventDispatcher {
     _onParserChange(e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         const value = element.value;
-        this._setSelectedParser(value);
+        void this._setSelectedParser(value);
+        this._renderParseResult();
     }
 
     /**
@@ -203,28 +244,47 @@ export class QueryParser extends EventDispatcher {
         return this._getSearchContext().optionsContext;
     }
 
-    /** */
-    _refreshSelectedParser() {
+    /**
+     * @param {boolean} [persist] Whether a fallback should be saved, rather than applied locally.
+     */
+    _refreshSelectedParser(persist = true) {
         if (this._parseResults.length > 0 && !this._getParseResult()) {
             const value = this._parseResults[0].id;
-            this._setSelectedParser(value);
+            if (persist) {
+                void this._setSelectedParser(value);
+            } else {
+                // Receiving settings must not trigger another settings broadcast.
+                this._selectedParser = value;
+            }
         }
     }
 
     /**
      * @param {string} value
      */
-    _setSelectedParser(value) {
-        const optionsContext = this._getOptionsContext();
-        /** @type {import('settings-modifications').ScopedModificationSet} */
-        const modification = {
-            action: 'set',
-            path: 'parsing.selectedParser',
-            value,
-            scope: 'profile',
-            optionsContext,
-        };
-        void this._api.modifySettings([modification], 'search');
+    async _setSelectedParser(value) {
+        this._selectedParser = value;
+        try {
+            const optionsContext = this._getOptionsContext();
+            /** @type {import('settings-modifications').ScopedModificationSet} */
+            const modification = {
+                action: 'set',
+                path: 'parsing.selectedParser',
+                value,
+                scope: 'profile',
+                optionsContext,
+            };
+            const results = await this._api.modifySettings([modification], 'search');
+            for (const {error} of results) {
+                if (typeof error !== 'undefined') { throw ExtensionError.deserialize(error); }
+            }
+        } catch (error) {
+            try {
+                log.error(error);
+            } catch (e) {
+                // A failed settings write/report cannot reject an unawaited UI handler.
+            }
+        }
     }
 
     /**
@@ -239,6 +299,8 @@ export class QueryParser extends EventDispatcher {
      * @param {string} text
      */
     _setPreview(text) {
+        this._parseResults = [];
+        this._renderParserSelect();
         const terms = [[{text, reading: ''}]];
         this._queryParser.textContent = '';
         this._queryParser.dataset.parsed = 'false';
@@ -257,10 +319,13 @@ export class QueryParser extends EventDispatcher {
     /** */
     _renderParseResult() {
         const parseResult = this._getParseResult();
-        this._queryParser.textContent = '';
+        if (!parseResult) {
+            this._setPreview(this._text);
+            return;
+        }
+        const fragment = this._createParseResult(parseResult.content);
+        this._queryParser.replaceChildren(fragment);
         this._queryParser.dataset.parsed = 'true';
-        if (!parseResult) { return; }
-        this._queryParser.appendChild(this._createParseResult(parseResult.content));
     }
 
     /**
@@ -422,14 +487,29 @@ export class QueryParser extends EventDispatcher {
     _setReadingMode(value) {
         this._readingMode = value;
         if (value === 'romaji') {
-            this._loadJapaneseWanakanaModule();
+            void this._loadJapaneseWanakanaModule();
         }
     }
 
     /** */
-    _loadJapaneseWanakanaModule() {
-        if (this._japaneseWanakanaModuleImport !== null) { return; }
+    async _loadJapaneseWanakanaModule() {
+        if (this._japaneseWanakanaModule !== null || this._japaneseWanakanaModuleImport !== null) { return; }
         this._japaneseWanakanaModuleImport = import('../language/ja/japanese-wanakana.js');
-        void this._japaneseWanakanaModuleImport.then((value) => { this._japaneseWanakanaModule = value; });
+        try {
+            this._japaneseWanakanaModule = await this._japaneseWanakanaModuleImport;
+            if (this._readingMode === 'romaji' && this._parseResults.length > 0) {
+                this._renderParseResult();
+            }
+        } catch (error) {
+            // A loaded converter can still fail while rendering; retain the previous DOM for a later retry.
+            if (this._japaneseWanakanaModule !== null) { this._needsTextUpdate = true; }
+            try {
+                log.error(error);
+            } catch (e) {
+                // Reporting must not reject this fire-and-forget initialization.
+            }
+        } finally {
+            this._japaneseWanakanaModuleImport = null;
+        }
     }
 }

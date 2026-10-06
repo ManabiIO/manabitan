@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {toError} from '../core/to-error.js';
 import {base64ToArrayBuffer} from '../data/array-buffer-util.js';
 
 /**
@@ -93,11 +94,28 @@ export class DisplayContentManager {
      * @param {Window} window
      */
     async openMediaInTab(path, dictionary, window) {
-        const data = await this._display.application.api.getMedia([{path, dictionary}]);
-        const buffer = base64ToArrayBuffer(data[0].content);
-        const blob = new Blob([buffer], {type: data[0].mediaType});
-        const blobUrl = URL.createObjectURL(blob);
-        window.open(blobUrl, '_blank')?.focus();
+        const token = this._token;
+        try {
+            const data = await this._display.application.api.getMedia([{path, dictionary}]);
+            if (token !== this._token) { return; }
+            const media = data[0];
+            if (typeof media === 'undefined' || media.path !== path || media.dictionary !== dictionary) {
+                throw new Error(`Could not find media at path ${JSON.stringify(path)} in ${dictionary}`);
+            }
+            const buffer = base64ToArrayBuffer(media.content);
+            const blob = new Blob([buffer], {type: media.mediaType});
+            const blobUrl = URL.createObjectURL(blob);
+            try {
+                // Noopener may return null even when navigation succeeds. Keep
+                // the URL alive across lookup changes so the new tab can load it.
+                window.open(blobUrl, '_blank', 'noopener,noreferrer');
+            } catch (error) {
+                URL.revokeObjectURL(blobUrl);
+                throw error;
+            }
+        } catch (error) {
+            if (token === this._token) { this._display.onError(toError(error)); }
+        }
     }
 
     /**

@@ -855,7 +855,9 @@ export class DictionaryController {
      * @param {number} targetIndex
      */
     async moveDictionaryOptions(currentIndex, targetIndex) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {dictionaries} = options;
         if (
             currentIndex < 0 || currentIndex >= dictionaries.length ||
@@ -1997,7 +1999,9 @@ export class DictionaryController {
      * @param {boolean} value
      */
     async _setAllDictionariesEnabled(value) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {dictionaries} = options;
 
         /** @type {import('settings-modifications').Modification[]} */

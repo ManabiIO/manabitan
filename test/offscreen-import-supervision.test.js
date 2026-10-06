@@ -44,7 +44,7 @@ describe('Offscreen import supervision', () => {
         const messagePromise = nextMessage(caller.port1);
         const handlerResult = Reflect.get(offscreen, '_importDictionaryOffscreenHandler').call(
             offscreen,
-            {archiveContent: new Blob(['dictionary']), details: {}},
+            {operationId: `${Date.now()}:test`, archiveContent: new Blob(['dictionary']), details: {}},
             [caller.port2],
         );
         expect(handlerResult).toBeUndefined();
@@ -74,7 +74,7 @@ describe('Offscreen import supervision', () => {
         const progressPromise = nextMessage(caller.port1);
         const handlerResult = Reflect.get(offscreen, '_importDictionaryOffscreenHandler').call(
             offscreen,
-            {archiveContent: new Blob(['dictionary']), details: {}},
+            {operationId: `${Date.now()}:test`, archiveContent: new Blob(['dictionary']), details: {}},
             [caller.port2],
         );
         expect(handlerResult).toBeUndefined();

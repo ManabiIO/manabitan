@@ -134,12 +134,20 @@ export class MediaDrawingWorker {
             return;
         }
         const dbPort = ports[0];
+        if (dbPort === this._dbPort) { return; }
+        this._dbPort?.close();
         this._dbPort = dbPort;
         dbPort.addEventListener('message', (/** @type {MessageEvent<import('api').PmApiMessageAny>} */ event) => {
             const message = event.data;
+            if (dbPort !== this._dbPort) {
+                // A queued response can outlive its replaced port and still own a frame.
+                if (message.action === 'drawDecodedImageToCanvases') { message.params.decodedImage.close(); }
+                return;
+            }
             return invokeApiMapHandler(this._fromDatabaseApiMap, message.action, message.params, [event.ports], () => {});
         });
         dbPort.addEventListener('messageerror', (event) => {
+            if (dbPort !== this._dbPort) { return; }
             const error = new ExtensionError('MediaDrawingWorker: Error receiving message from database worker');
             error.data = event;
             this._handleDatabasePortClosed(error);
@@ -152,6 +160,7 @@ export class MediaDrawingWorker {
      * @returns {void}
      */
     _handleDatabasePortClosed(error) {
+        this._dbPort?.close();
         this._dbPort = null;
         log.error(error);
         this._notifyDatabasePortClosed();

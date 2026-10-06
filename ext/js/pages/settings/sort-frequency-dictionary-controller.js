@@ -61,9 +61,14 @@ export class SortFrequencyDictionaryController {
 
             this._updateDictionaryOptions(dictionaries);
 
-            const options = await this._settingsController.getOptions();
-            if (this._getDictionaryInfoToken !== token) { return; }
             const optionsContext = this._settingsController.getOptionsContext();
+            const options = await this._settingsController.getOptions();
+            if (
+                this._getDictionaryInfoToken !== token ||
+                this._settingsController.getOptionsContext().index !== optionsContext.index
+            ) {
+                return;
+            }
             this._onOptionsChanged({options, optionsContext});
         } finally {
             if (this._getDictionaryInfoToken === token) {
@@ -161,8 +166,14 @@ export class SortFrequencyDictionaryController {
      * @param {string} dictionary
      */
     async _autoUpdateOrder(dictionary) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const order = await this._getFrequencyOrder(dictionary);
-        if (order === null) { return; }
+        if (
+            order === null ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            return;
+        }
         const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
         /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = order;
         try {

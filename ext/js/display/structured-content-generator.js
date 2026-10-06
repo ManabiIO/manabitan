@@ -97,17 +97,21 @@ export class StructuredContentGenerator {
             sizeUnits,
         } = data;
 
-        const hasPreferredWidth = (typeof preferredWidth === 'number');
-        const hasPreferredHeight = (typeof preferredHeight === 'number');
+        const hasPreferredWidth = (typeof preferredWidth === 'number' && Number.isFinite(preferredWidth) && preferredWidth > 0);
+        const hasPreferredHeight = (typeof preferredHeight === 'number' && Number.isFinite(preferredHeight) && preferredHeight > 0);
+        // Metadata decoding can fail while the image bytes remain usable.
+        const hasIntrinsicSize = Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0;
+        const intrinsicWidth = hasIntrinsicSize ? width : 100;
+        const intrinsicHeight = hasIntrinsicSize ? height : 100;
         const invAspectRatio = (
             hasPreferredWidth && hasPreferredHeight ?
                 preferredHeight / preferredWidth :
-                height / width
+                intrinsicHeight / intrinsicWidth
         );
         const usedWidth = (
             hasPreferredWidth ?
                 preferredWidth :
-                (hasPreferredHeight ? preferredHeight / invAspectRatio : width)
+                (hasPreferredHeight ? preferredHeight / invAspectRatio : intrinsicWidth)
         );
 
         const node = /** @type {HTMLAnchorElement} */ (this._createElement('a', 'gloss-image-link'));
@@ -170,16 +174,16 @@ export class StructuredContentGenerator {
             const image = this._contentManager instanceof DisplayContentManager ?
                 /** @type {HTMLCanvasElement} */ (this._createElement('canvas', 'gloss-image')) :
                 /** @type {HTMLImageElement} */ (this._createElement('img', 'gloss-image'));
+            let rasterWidth = usedWidth;
             if (sizeUnits === 'em' && (hasPreferredWidth || hasPreferredHeight)) {
                 const emSize = 14; // We could Number.parseFloat(getComputedStyle(document.documentElement).fontSize); here for more accuracy but it would cause a layout and be extremely slow; possible improvement would be to calculate and cache the value
                 const scaleFactor = 2 * this._window.devicePixelRatio;
                 image.style.width = `${usedWidth}em`;
                 image.style.height = `${usedWidth * invAspectRatio}em`;
-                image.width = usedWidth * emSize * scaleFactor;
-            } else {
-                image.width = usedWidth;
+                rasterWidth *= emSize * scaleFactor;
             }
-            image.height = image.width * invAspectRatio;
+            image.width = Math.max(1, Math.ceil(rasterWidth));
+            image.height = Math.max(1, Math.ceil(rasterWidth * invAspectRatio));
 
             // Anki will not render images correctly without specifying to use 100% width and height
             image.style.width = '100%';

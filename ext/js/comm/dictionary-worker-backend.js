@@ -65,28 +65,33 @@ export class ExtensionDictionaryWorkerBackend {
         }
         return await new Promise((resolve, reject) => {
             runtime.sendMessage({action, params}, (responseRaw) => {
-                // lastError is scoped to this callback and must be read here.
-                const runtimeError = runtime.lastError;
-                if (typeof runtimeError !== 'undefined') {
-                    reject(new Error(runtimeError.message));
-                    return;
-                }
-                const response = /** @type {unknown} */ (responseRaw);
-                if (!(typeof response === 'object' && response !== null && !Array.isArray(response))) {
-                    reject(new Error(`Dictionary action ${action} returned invalid response`));
-                    return;
-                }
-                const responseRecord = /** @type {Record<string, unknown>} */ (response);
-                const error = Reflect.get(responseRecord, 'error');
-                if (typeof error !== 'undefined' && error !== null) {
-                    if (typeof error === 'object' && !Array.isArray(error)) {
-                        reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error)));
-                    } else {
-                        reject(new Error(`Dictionary action ${action} returned invalid error payload`));
+                try {
+                    // lastError is scoped to this callback and must be read here.
+                    const runtimeError = runtime.lastError;
+                    if (typeof runtimeError !== 'undefined') {
+                        reject(new Error(runtimeError.message));
+                        return;
                     }
-                    return;
+                    const response = /** @type {unknown} */ (responseRaw);
+                    if (!(typeof response === 'object' && response !== null && !Array.isArray(response))) {
+                        reject(new Error(`Dictionary action ${action} returned invalid response`));
+                        return;
+                    }
+                    const responseRecord = /** @type {Record<string, unknown>} */ (response);
+                    const error = Reflect.get(responseRecord, 'error');
+                    if (typeof error !== 'undefined' && error !== null) {
+                        if (typeof error === 'object' && !Array.isArray(error)) {
+                            reject(ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error)));
+                        } else {
+                            reject(new Error(`Dictionary action ${action} returned invalid error payload`));
+                        }
+                        return;
+                    }
+                    resolve(/** @type {T} */ (Reflect.get(responseRecord, 'result')));
+                } catch (error) {
+                    // Browser callbacks run after the promise executor returns.
+                    reject(error);
                 }
-                resolve(/** @type {T} */ (Reflect.get(responseRecord, 'result')));
             });
         });
     }

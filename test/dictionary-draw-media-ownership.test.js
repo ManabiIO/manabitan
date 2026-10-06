@@ -14,7 +14,10 @@ vi.mock('../ext/lib/resvg-wasm.js', () => ({
     },
 }));
 
-beforeEach(() => { vi.resetAllMocks(); });
+beforeEach(() => {
+    vi.resetAllMocks();
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([0]))));
+});
 afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();

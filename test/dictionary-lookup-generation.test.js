@@ -204,7 +204,7 @@ describe('zero-term dictionary lookup state', () => {
 
         await database._ensureDirectTermIndexesLoaded(['Legacy']);
 
-        expect(load).toHaveBeenCalledWith(['Legacy']);
+        expect(load).toHaveBeenCalledWith(['Legacy'], {repairMode: 'background'});
     });
 });
 

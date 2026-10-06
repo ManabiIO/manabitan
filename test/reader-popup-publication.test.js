@@ -297,12 +297,12 @@ describe('popup publication cancellation', () => {
             crossFrame: {invokeTab},
             api: {getOrCreateSearchPopup},
         }), 'p', 0, 0);
-        p._popupTabId = 10;
+        p._popupTab = {id: 10};
         const g = guard();
         await expect(p.showContent(details(), displayDetails(), g)).rejects.toBe(receivedError);
         expect(invokeTab).toHaveBeenCalledOnce();
         expect(getOrCreateSearchPopup).not.toHaveBeenCalled();
-        expect(p._popupTabId).toBe(10);
+        expect(p._popupTab?.id).toBe(10);
         expect(g.unsubscribe).toHaveBeenCalledOnce();
         expect(p._cancelPendingPublication).toBeNull();
     });
@@ -315,7 +315,7 @@ describe('popup publication cancellation', () => {
             crossFrame: {invokeTab},
             api: {getOrCreateSearchPopup},
         }), 'p', 0, 0);
-        p._popupTabId = 10;
+        p._popupTab = {id: 10};
         const g = guard();
         await p.showContent(details(), displayDetails(), g);
         expect(getOrCreateSearchPopup).toHaveBeenCalledExactlyOnceWith({focus: 'ifCreated'});
@@ -335,7 +335,7 @@ describe('popup publication cancellation', () => {
             crossFrame: {invokeTab: async () => { await wait.promise; throw new Error('closed'); }},
             api: {getOrCreateSearchPopup},
         }), 'p', 0, 0);
-        p._popupTabId = 10;
+        p._popupTab = {id: 10};
         const g = guard();
         const result = p.showContent(details(), displayDetails(), g);
         g.invalidate();
@@ -387,7 +387,7 @@ describe('popup publication cancellation', () => {
         const wait = deferred();
         const invokeTab = vi.fn().mockImplementation(async () => {}).mockImplementationOnce(async () => { await wait.promise; });
         const p = new PopupWindow(fakeApplication({webExtension: {unloaded: false}, crossFrame: {invokeTab}}), 'p', 0, 0);
-        p._popupTabId = 1;
+        p._popupTab = {id: 1};
         const g = guard();
         const result = p.showContent(details(), displayDetails(), g);
         const publication = invokeTab.mock.calls[0][3].params.publication;
