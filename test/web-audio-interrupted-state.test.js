@@ -117,7 +117,7 @@ test('an interrupted resume failure rejects with its cause and the same decoded 
     const {audio, context, stats} = setup();
     await audio.prepare();
     const failure = new Error('Audio device unavailable');
-    const observed = audio.play().then(() => null, (error) => error);
+    const observed = audio.play().then(() => null, (/** @type {unknown} */ error) => error);
     context.resumes[0]?.reject(failure);
     const error = await observed;
     const startsBeforeRetry = stats.starts;
