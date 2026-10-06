@@ -89,7 +89,7 @@ async function setup(window, sources) {
         modifyProfileSettings: vi.fn().mockResolvedValue([]),
         setProfileSetting: vi.fn().mockResolvedValue([]),
         on: vi.fn(),
-    };
+    });
     const modalController = /** @type {import('../ext/js/pages/settings/modal-controller.js').ModalController} */ (/** @type {unknown} */ ({
         getModal: vi.fn(() => ({node: window.document.createElement('div'), setVisible() {}})),
     }));
