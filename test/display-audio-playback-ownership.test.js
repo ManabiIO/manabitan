@@ -371,6 +371,35 @@ test('a cancelled source rejection is contained without admitting fallback reque
     expect(progress.size).toBe(0);
 });
 
+test('stop cancels an armed autoplay before its delayed callback can run', () => {
+    const {player, options} = setup();
+    options.audio.autoPlay = true;
+    player._onOptionsUpdated({options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ (options))});
+    player.autoPlayAudioDelay = 100;
+
+    /** @type {?(() => void)} */
+    let scheduled = null;
+    let clearCalls = 0;
+    vi.stubGlobal('setTimeout', (/** @type {() => void} */ callback) => {
+        scheduled = callback;
+        return 1;
+    });
+    vi.stubGlobal('clearTimeout', () => {
+        ++clearCalls;
+        scheduled = null;
+    });
+
+    let requests = 0;
+    Reflect.set(player, 'playAudio', async () => { ++requests; });
+    player._onContentUpdateComplete();
+    expect(typeof scheduled).toBe('function');
+
+    player.stopAudio();
+    expect(clearCalls).toBe(1);
+    expect(scheduled).toBe(null);
+    expect(requests).toBe(0);
+});
+
 for (const consent of ['accepted', 'declined']) {
     test(`autoplay rechecks ${consent} consent after options initialize with unknown consent`, () => {
         const {player, options} = setup();
