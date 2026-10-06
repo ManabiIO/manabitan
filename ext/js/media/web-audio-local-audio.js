@@ -53,6 +53,8 @@ export class WebAudioLocalAudio {
         this._decodedBuffer = null;
         /** @type {?import('core').TokenObject} */
         this._playToken = null;
+        /** @type {?(() => void)} */
+        this._playCleanup = null;
     }
 
     /** @type {number} */
@@ -73,6 +75,7 @@ export class WebAudioLocalAudio {
 
     /** */
     async prepare() {
+        this._audioContext = getSharedAudioContext();
         const byteCharacters = atob(this._base64Data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -93,11 +96,24 @@ export class WebAudioLocalAudio {
         const token = {};
         this._playToken = token;
         try {
-            if (this._audioContext.state === 'suspended') {
-                await this._audioContext.resume();
+            // Cached decoded buffers outlive a closed shared context and can
+            // be reused by its replacement without fetching or decoding again.
+            this._audioContext = getSharedAudioContext();
+            // External interruptions also require resuming before playback.
+            if (this._audioContext.state !== 'running') {
+                /** @type {Promise<void>} */
+                const cancelled = new Promise((resolve) => { this._playCleanup = resolve; });
+                // Retiring a token prevents stale playback, but by itself does
+                // not release callers waiting for an unrelated user gesture.
+                await Promise.race([this._audioContext.resume(), cancelled]);
             }
             // A pause or newer play request can supersede this one during resume.
             if (this._playToken !== token) { return; }
+            // Safari can remain interrupted around resume attempts. Do not
+            // report an inaudible start as successful unless time is running.
+            if (this._audioContext.state !== 'running') {
+                throw new Error('Audio context did not resume');
+            }
 
             const bufferSource = this._audioContext.createBufferSource();
             this._bufferSource = bufferSource;
@@ -115,6 +131,8 @@ export class WebAudioLocalAudio {
         } catch (e) {
             if (this._playToken === token) { this.pause(); }
             throw e;
+        } finally {
+            if (this._playToken === token) { this._playCleanup = null; }
         }
     }
 
@@ -123,6 +141,9 @@ export class WebAudioLocalAudio {
      */
     pause() {
         this._playToken = null;
+        const cleanup = this._playCleanup;
+        this._playCleanup = null;
+        if (cleanup !== null) { cleanup(); }
         const bufferSource = this._bufferSource;
         const gainNode = this._gainNode;
         this._bufferSource = null;

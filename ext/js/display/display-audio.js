@@ -41,6 +41,14 @@ export class DisplayAudio {
         this._modalController = modalController;
         /** @type {?import('display-audio').GenericAudio} */
         this._audioPlaying = null;
+        /** @type {boolean} */
+        this._audioPlayPending = false;
+        /** @type {?import('core').TokenObject} */
+        this._playbackToken = null;
+        /** @type {?import('core').TokenString} */
+        this._playbackProgressToken = null;
+        /** @type {import('core').TokenObject} */
+        this._primaryCardAudioToken = {};
         /** @type {AudioSystem} */
         this._audioSystem = new AudioSystem(this._display.application.api);
         /** @type {number} */
@@ -87,6 +95,8 @@ export class DisplayAudio {
         this._dataTransmissionConsentState = 'unknown';
         /** @type {import('core').TokenObject} */
         this._consentStateToken = {};
+        /** @type {?Promise<boolean>} */
+        this._consentUpdatePromise = null;
         /** @type {?import('../pages/settings/modal.js').Modal} */
         this._firefoxDataTransmissionModal = null;
         /** @type {?HTMLButtonElement} */
@@ -155,9 +165,8 @@ export class DisplayAudio {
 
     /** */
     stopAudio() {
-        if (this._audioPlaying === null) { return; }
-        this._audioPlaying.pause();
-        this._audioPlaying = null;
+        this.clearAutoPlayTimer();
+        this._stopAudio(null);
     }
 
     /**
@@ -188,6 +197,11 @@ export class DisplayAudio {
      * @returns {import('display-audio').AudioMediaOptions}
      */
     getAnkiNoteMediaAudioDetails(term, reading) {
+        // Card creation is a separate consumer from pronunciation playback.
+        // Suppress defaults as well: an empty explicit list alone still downloads.
+        if (!this._canPlayAudio()) {
+            return {sources: [], preferredAudioIndex: null, enableDefaultAudioSources: false};
+        }
         /** @type {import('display-audio').AudioSourceShort[]} */
         const sources = [];
         let preferredAudioIndex = null;
@@ -210,14 +224,53 @@ export class DisplayAudio {
     // Private
 
     /**
+     * @param {?import('core').TokenObject} token
+     */
+    _stopAudio(token) {
+        const audio = this._audioPlaying;
+        this._audioPlaying = null;
+        this._invalidatePlayback(token);
+        if (audio !== null) { audio.pause(); }
+    }
+
+    /**
+     * @param {?import('core').TokenObject} [token]
+     */
+    _invalidatePlayback(token = null) {
+        this._playbackToken = token;
+        const progressToken = this._playbackProgressToken;
+        const audio = this._audioPlayPending ? this._audioPlaying : null;
+        this._audioPlayPending = false;
+        if (audio !== null) {
+            // A pending play/resume promise is not already-started playback.
+            this._audioPlaying = null;
+            audio.pause();
+        }
+        this._clearPlaybackProgress(progressToken);
+    }
+
+    /**
+     * @param {?import('core').TokenString} [token]
+     */
+    _clearPlaybackProgress(token = this._playbackProgressToken) {
+        if (token === null || token !== this._playbackProgressToken) { return; }
+        this._playbackProgressToken = null;
+        this._display.progressIndicatorVisible.clearOverride(token);
+    }
+
+    /**
      * @param {import('display').EventArgument<'optionsUpdated'>} details
      */
     _onOptionsUpdated({options}) {
+        this._invalidatePlayback();
+        this._closeOpenMenus();
+        this.clearAutoPlayTimer();
         const {
             general: {language},
             audio: {enabled, autoPlay, fallbackSoundType, volume, sources, enableDefaultAudioSources},
         } = options;
-        this._autoPlay = enabled && autoPlay && this._canPlayAudio();
+        // Consent can finish loading after options; check it when scheduling.
+        this._autoPlay = enabled && autoPlay;
         this._fallbackSoundType = fallbackSoundType;
         this._playbackVolume = Number.isFinite(volume) ? Math.max(0, Math.min(1, volume / 100)) : 1;
         this._enableDefaultAudioSources = enableDefaultAudioSources;
@@ -250,6 +303,8 @@ export class DisplayAudio {
 
     /** */
     _onContentClear() {
+        this._invalidatePlayback();
+        this._closeOpenMenus();
         this._entriesToken = {};
         this._cache.clear();
         this.clearAutoPlayTimer();
@@ -300,8 +355,9 @@ export class DisplayAudio {
      */
     _onFrameVisibilityChange({value}) {
         if (!value) {
-            // The auto-play timer is stopped, but any audio that has already started playing
+            // Pending playback is retired, but audio that has already started playing
             // is not stopped, as this is a valid use case for some users.
+            this._invalidatePlayback();
             this.clearAutoPlayTimer();
         }
     }
@@ -400,6 +456,7 @@ export class DisplayAudio {
 
     /** */
     async _refreshDataTransmissionConsentState() {
+        if (this._consentUpdatePromise !== null) { return; }
         /** @type {import('core').TokenObject} */
         const token = {};
         this._consentStateToken = token;
@@ -416,7 +473,12 @@ export class DisplayAudio {
      * @param {unknown} value
      */
     _setDataTransmissionConsentState(value) {
+        this._consentStateToken = {};
         this._dataTransmissionConsentState = normalizeDataTransmissionConsentState(value);
+        if (!this._canPlayAudio()) {
+            this._invalidatePlayback();
+            this.clearAutoPlayTimer();
+        }
         this._syncAudioConsentDataset();
     }
 
@@ -456,20 +518,45 @@ export class DisplayAudio {
      * @param {boolean} audioEnabled
      */
     async _updateDataTransmissionConsent(state, audioEnabled) {
-        const optionsContext = this._display.getOptionsContext();
-        try {
-            const results = await this._display.application.api.modifySettings(
-                getDataTransmissionConsentUpdateTargets(state, audioEnabled, optionsContext),
-                'display-audio',
-            );
-            for (const {error} of results) {
-                if (typeof error !== 'undefined') {
-                    throw toError(error);
+        const optionsContext = {...this._display.getOptionsContext()};
+        /** @returns {Promise<boolean>} */
+        const update = async () => {
+            // Serialize persistence, but do not send superseded queued choices.
+            if (this._consentUpdatePromise !== promise) { return false; }
+            try {
+                const results = await this._display.application.api.modifySettings(
+                    getDataTransmissionConsentUpdateTargets(state, audioEnabled, optionsContext),
+                    'display-audio',
+                );
+                for (const {error} of results) {
+                    if (typeof error !== 'undefined') { throw toError(error); }
                 }
+                if (this._consentUpdatePromise !== promise) { return false; }
+                this._setDataTransmissionConsentState(state);
+                return true;
+            } catch (_) {
+                if (this._consentUpdatePromise === promise) {
+                    this._showNotification('Failed to update audio consent. Check extension settings and try again.', true);
+                }
+                return false;
             }
-            this._setDataTransmissionConsentState(state);
-        } catch (_) {
-            this._showNotification('Failed to update audio consent. Check extension settings and try again.', true);
+        };
+        const promise = (this._consentUpdatePromise ?? Promise.resolve(false)).then(update, update);
+        this._consentUpdatePromise = promise;
+        this._consentStateToken = {};
+        // Revocation takes effect locally without waiting for storage or older
+        // requests. Granting consent still requires a successful current save.
+        if (state === 'declined') { this._setDataTransmissionConsentState(state); }
+        let applied = false;
+        try {
+            applied = await promise;
+        } finally {
+            if (this._consentUpdatePromise === promise) {
+                this._consentUpdatePromise = null;
+                // Reconcile broadcasts skipped during persistence, including
+                // changes made by another settings context in the meantime.
+                if (applied) { void this._refreshDataTransmissionConsentState(); }
+            }
         }
     }
 
@@ -530,7 +617,7 @@ export class DisplayAudio {
         const headwordIndex = this._getAudioPlayButtonHeadwordIndex(button);
         const dictionaryEntryIndex = this._display.getElementDictionaryEntryIndex(button);
 
-        const {detail: {action, item, menu, shiftKey}} = e;
+        const {detail: {action, item, shiftKey}} = e;
         switch (action) {
             case 'playAudioFromSource':
                 if (shiftKey) {
@@ -540,7 +627,9 @@ export class DisplayAudio {
                 break;
             case 'setPrimaryAudio':
                 e.preventDefault();
-                this._setPrimaryAudio(dictionaryEntryIndex, headwordIndex, item, menu, true);
+                if (item !== null) {
+                    this._setPrimaryAudio(dictionaryEntryIndex, headwordIndex, this._getMenuItemSourceInfo(item), true);
+                }
                 break;
         }
     }
@@ -610,8 +699,20 @@ export class DisplayAudio {
      * @returns {Promise<import('display-audio').PlayAudioResult>}
      */
     async _playAudio(dictionaryEntryIndex, headwordIndex, sources, audioInfoListIndex) {
-        this.stopAudio();
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        // Publish admission before cleanup can synchronously dispatch a stop
+        // or a newer request through progress observers.
+        this._stopAudio(token);
+        if (this._playbackToken !== token) {
+            return {audio: null, source: null, subIndex: 0, valid: false};
+        }
         this.clearAutoPlayTimer();
+        if (!this._canPlayAudio()) {
+            this._showDataTransmissionConsentModal();
+            return {audio: null, source: null, subIndex: 0, valid: false};
+        }
+        sources = [...sources];
 
         const headword = this._getHeadword(dictionaryEntryIndex, headwordIndex);
         if (headword === null) {
@@ -624,6 +725,13 @@ export class DisplayAudio {
 
         const progressIndicatorVisible = this._display.progressIndicatorVisible;
         const overrideToken = progressIndicatorVisible.setOverride(true);
+        // Setting an override emits a synchronous change event. Do not retain
+        // progress or start a lookup if that event already retired this request.
+        if (this._playbackToken !== token) {
+            progressIndicatorVisible.clearOverride(overrideToken);
+            return {audio: null, source: null, subIndex: 0, valid: false};
+        }
+        this._playbackProgressToken = overrideToken;
         try {
             // Create audio
             let audio;
@@ -631,6 +739,9 @@ export class DisplayAudio {
             let source = null;
             let subIndex = 0;
             const info = await this._createTermAudio(term, reading, sources, audioInfoListIndex);
+            if (this._playbackToken !== token) {
+                return {audio: null, source: null, subIndex: 0, valid: false};
+            }
             const valid = (info !== null);
             if (valid) {
                 ({audio, source, subIndex} = info);
@@ -640,9 +751,6 @@ export class DisplayAudio {
                 audio = this._audioSystem.getFallbackAudio(this._fallbackSoundType);
                 title = 'Could not find audio';
             }
-
-            // Stop any currently playing audio
-            this.stopAudio();
 
             // Update details
             const potentialAvailableAudioCount = this._getPotentialAvailableAudioCount(term, reading);
@@ -656,20 +764,37 @@ export class DisplayAudio {
             audio.currentTime = 0;
             audio.volume = this._playbackVolume;
 
-            const playPromise = audio.play();
             this._audioPlaying = audio;
-
-            if (typeof playPromise !== 'undefined') {
-                try {
-                    await playPromise;
-                } catch (e) {
-                    // NOP
-                }
+            this._audioPlayPending = true;
+            let started = false;
+            try {
+                const playPromise = audio.play();
+                if (typeof playPromise !== 'undefined') { await playPromise; }
+                started = true;
+            } catch (e) {
+                // A prepared recording is not necessarily playable: native
+                // play() can reject (for example until the next user gesture).
             }
 
+            if (this._playbackToken !== token) {
+                return {audio: null, source: null, subIndex: 0, valid: false};
+            }
+            this._audioPlayPending = false;
+            if (!started) {
+                this._audioPlaying = null;
+                audio.pause();
+                if (this._playbackToken === token) {
+                    for (const button of buttons) {
+                        button.title = `${button.dataset.titleDefault || ''}\nCould not play audio`;
+                    }
+                }
+                // Do not pin an unheard recording. Keep its prepared cache
+                // entry available for a later explicit playback attempt.
+                return {audio: null, source: null, subIndex: 0, valid: false};
+            }
             return {audio, source, subIndex, valid};
         } finally {
-            progressIndicatorVisible.clearOverride(overrideToken);
+            this._clearPlaybackProgress(overrideToken);
         }
     }
 
@@ -685,9 +810,14 @@ export class DisplayAudio {
 
         try {
             const token = this._entriesToken;
-            const {valid} = await this._playAudio(dictionaryEntryIndex, headwordIndex, [source], subIndex);
-            if (valid && token === this._entriesToken) {
-                this._setPrimaryAudio(dictionaryEntryIndex, headwordIndex, item, null, false);
+            const primaryCardAudioToken = this._primaryCardAudioToken;
+            const playPromise = this._playAudio(dictionaryEntryIndex, headwordIndex, [source], subIndex);
+            const playbackToken = this._playbackToken;
+            const result = await playPromise;
+            if (result.valid && token === this._entriesToken && playbackToken === this._playbackToken && primaryCardAudioToken === this._primaryCardAudioToken) {
+                // Menu rows may be reused while audio loads; select the recording
+                // that actually played, not the row's current source/index.
+                this._setPrimaryAudio(dictionaryEntryIndex, headwordIndex, result, false);
             }
         } catch (e) {
             // NOP
@@ -697,13 +827,11 @@ export class DisplayAudio {
     /**
      * @param {number} dictionaryEntryIndex
      * @param {number} headwordIndex
-     * @param {?HTMLElement} item
-     * @param {?PopupMenu} menu
+     * @param {import('display-audio').SourceInfo} sourceInfo
      * @param {boolean} canToggleOff
      */
-    _setPrimaryAudio(dictionaryEntryIndex, headwordIndex, item, menu, canToggleOff) {
-        if (item === null) { return; }
-        const {source, subIndex} = this._getMenuItemSourceInfo(item);
+    _setPrimaryAudio(dictionaryEntryIndex, headwordIndex, sourceInfo, canToggleOff) {
+        const {source, subIndex} = sourceInfo;
         if (source === null || !source.downloadable) { return; }
 
         const headword = this._getHeadword(dictionaryEntryIndex, headwordIndex);
@@ -724,9 +852,13 @@ export class DisplayAudio {
             null
         );
         cacheEntry.primaryCardAudio = primaryCardAudio;
+        this._primaryCardAudioToken = {};
 
-        if (menu !== null) {
-            this._updateMenuPrimaryCardAudio(menu.bodyNode, term, reading);
+        for (const menu of this._openMenus) {
+            const {dataset} = menu.containerNode;
+            if (dataset.term === term && dataset.reading === reading) {
+                this._updateMenuPrimaryCardAudio(menu.bodyNode, term, reading);
+            }
         }
     }
 
@@ -772,16 +904,20 @@ export class DisplayAudio {
      * @returns {Promise<?import('display-audio').TermAudio>}
      */
     async _createTermAudio(term, reading, sources, audioInfoListIndex) {
+        const token = this._playbackToken;
         const cacheItem = this._getCacheItem(term, reading, true);
         if (typeof cacheItem === 'undefined') { return null; }
         const {sourceMap} = cacheItem;
 
         for (const source of sources) {
+            if (this._playbackToken !== token) { return null; }
             const {index} = source;
 
             let cacheUpdated = false;
             let sourceInfo = sourceMap.get(index);
-            if (typeof sourceInfo === 'undefined') {
+            // Empty lists can also represent a provider/HTTP failure. Preserve
+            // their badges, but retry discovery on a later playback request.
+            if (typeof sourceInfo === 'undefined' || sourceInfo.infoList?.length === 0) {
                 const infoListPromise = this._getTermAudioInfoList(source, term, reading);
                 sourceInfo = {infoListPromise, infoList: null};
                 sourceMap.set(index, sourceInfo);
@@ -790,11 +926,20 @@ export class DisplayAudio {
 
             let {infoList} = sourceInfo;
             if (infoList === null) {
-                infoList = await sourceInfo.infoListPromise;
+                try {
+                    infoList = await sourceInfo.infoListPromise;
+                } catch (e) {
+                    // A failed lookup must not poison later attempts. Retire only
+                    // the flight observed here, never a newer cache replacement.
+                    if (sourceMap.get(index) === sourceInfo) { sourceMap.delete(index); }
+                    continue;
+                }
                 sourceInfo.infoList = infoList;
             }
+            if (this._playbackToken !== token) { return null; }
 
             const {audio, index: subIndex, cacheUpdated: cacheUpdated2} = await this._createAudioFromInfoList(source, infoList, audioInfoListIndex);
+            if (this._playbackToken !== token) { return null; }
             if (cacheUpdated || cacheUpdated2) { this._updateOpenMenu(); }
             if (audio !== null) {
                 return {audio, source, subIndex};
@@ -811,6 +956,7 @@ export class DisplayAudio {
      * @returns {Promise<import('display-audio').CreateAudioResult>}
      */
     async _createAudioFromInfoList(source, infoList, audioInfoListIndex) {
+        const token = this._playbackToken;
         let start = 0;
         let end = infoList.length;
         if (audioInfoListIndex !== null) {
@@ -825,15 +971,17 @@ export class DisplayAudio {
             cacheUpdated: false,
         };
         for (let i = start; i < end; ++i) {
+            if (this._playbackToken !== token) { break; }
             const item = infoList[i];
 
-            let {audio, audioResolved} = item;
+            let {audio} = item;
 
-            if (!audioResolved) {
+            if (audio === null) {
                 let {audioPromise} = item;
                 if (audioPromise === null) {
                     audioPromise = this._createAudioFromInfo(item.info, source);
                     item.audioPromise = audioPromise;
+                    item.audioResolved = false;
                 }
 
                 result.cacheUpdated = true;
@@ -841,12 +989,20 @@ export class DisplayAudio {
                 try {
                     audio = await audioPromise;
                 } catch (e) {
+                    // Keep the failure visible, but let a later request retry.
+                    // A late observer must not retire a newer decode attempt.
+                    if (item.audioPromise === audioPromise) {
+                        item.audioPromise = null;
+                        item.audioResolved = true;
+                    }
                     continue;
-                } finally {
-                    item.audioResolved = true;
                 }
 
-                item.audio = audio;
+                if (item.audioPromise === audioPromise) {
+                    item.audio = audio;
+                    item.audioPromise = null;
+                    item.audioResolved = true;
+                }
             }
 
             if (audio !== null) {
@@ -1064,15 +1220,19 @@ export class DisplayAudio {
                 const cardButton = querySelectorNotNull(node, '.popup-menu-item-set-primary-audio-button');
                 cardButton.hidden = !downloadable;
 
-                if (valid !== null) {
-                    /** @type {HTMLElement} */
-                    const icon = querySelectorNotNull(node, '.popup-menu-item-audio-button .popup-menu-item-icon');
+                /** @type {HTMLElement} */
+                const icon = querySelectorNotNull(node, '.popup-menu-item-audio-button .popup-menu-item-icon');
+                if (valid === null) {
+                    delete icon.dataset.icon;
+                } else {
                     icon.dataset.icon = valid ? 'checkmark' : 'cross';
                     showIcons = true;
                 }
                 node.dataset.index = `${index}`;
                 if (subIndex !== null) {
                     node.dataset.subIndex = `${subIndex}`;
+                } else {
+                    delete node.dataset.subIndex;
                 }
                 node.dataset.valid = `${valid}`;
                 node.dataset.sourceInOptions = `${isInOptions}`;
@@ -1177,12 +1337,20 @@ export class DisplayAudio {
     }
 
     /** */
+    _closeOpenMenus() {
+        for (const menu of this._openMenus) { menu.close(false); }
+        this._openMenus.clear();
+    }
+
+    /** */
     _updateOpenMenu() {
         for (const menu of this._openMenus) {
             const menuContainerNode = menu.containerNode;
             const {term, reading} = menuContainerNode.dataset;
             if (typeof term === 'string' && typeof reading === 'string') {
                 this._createMenuItems(menuContainerNode, menu.bodyNode, term, reading);
+                this._updateMenuPrimaryCardAudio(menu.bodyNode, term, reading);
+                menu.updateMenuItems();
             }
             menu.updatePosition();
         }
