@@ -250,7 +250,9 @@ export class ScanInputsSimpleController {
      * @param {boolean} middleMouseSupported
      */
     async _handleMiddleMouseButtonScanChange(element, middleMouseSupported) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {scanning: {inputs}} = options;
         const previousValue = (this._getIndexOfMiddleMouseButtonScanInput(inputs) >= 0);
         try {
@@ -265,7 +267,9 @@ export class ScanInputsSimpleController {
      * @param {string[]} mainScanInputs
      */
     async _handleMainScanModifierKeyInputChange(element, mainScanInputs) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {scanning: {inputs}} = options;
         const previousIndex = this._getIndexOfMainScanInput(inputs);
         const previousHasOther = (previousIndex < 0);
