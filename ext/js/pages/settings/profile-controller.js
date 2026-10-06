@@ -70,6 +70,8 @@ export class ProfileController {
         this._profiles = [];
         /** @type {number} */
         this._profileCurrent = 0;
+        /** @type {?import('core').TokenObject} */
+        this._optionsUpdateToken = null;
     }
 
     /** @type {number} */
@@ -217,12 +219,14 @@ export class ProfileController {
         if (profile === null) { return; }
 
         const defaultOptions = await this._settingsController.getDefaultOptions();
+        const currentIndex = this._profiles.indexOf(profile);
+        if (currentIndex < 0) { return; }
         const defaultProfileOptions = defaultOptions.profiles[0];
         defaultProfileOptions.name = profile.name;
 
         await this._settingsController.modifyGlobalSettings([{
             action: 'set',
-            path: `profiles[${profileIndex}]`,
+            path: `profiles[${currentIndex}]`,
             value: defaultProfileOptions,
         }]);
 
@@ -426,8 +430,12 @@ export class ProfileController {
 
     /** */
     async _onOptionsChanged() {
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._optionsUpdateToken = token;
         // Update state
         const {profiles, profileCurrent} = await this._settingsController.getOptionsFull();
+        if (this._optionsUpdateToken !== token) { return; }
         this._profiles = profiles;
         this._profileCurrent = profileCurrent;
 
