@@ -143,7 +143,10 @@ for (const failure of ['rejected', 'thrown']) {
         };
         setCreate(async () => info(audio));
         let thrown = false;
-        const result = await player._playAudio(0, 0, sources, null).catch(() => { thrown = true; return null; });
+        const result = await player._playAudio(0, 0, sources, null).catch(() => {
+            thrown = true;
+            return null;
+        });
         expect(thrown).toBe(false);
         expect(result?.valid).toBe(false);
         expect(player._audioPlaying).toBe(null);
@@ -181,7 +184,10 @@ test('a rejected native play promise leaves cached preparation usable by a later
         ++metadata;
         return [{type: 'url', url: 'https://audio.example/0'}];
     });
-    Reflect.set(player._audioSystem, 'createAudio', async () => { ++preparations; return audio; });
+    Reflect.set(player._audioSystem, 'createAudio', async () => {
+        ++preparations;
+        return audio;
+    });
     await player._playAudioFromSource(0, 0, item(0));
     expect(player._getCacheItem('first', 'first', false)?.primaryCardAudio).toBe(null);
     await player._playAudioFromSource(0, 0, item(0));
@@ -190,7 +196,7 @@ test('a rejected native play promise leaves cached preparation usable by a later
     expect(preparations).toBe(1);
     expect(attempts).toBe(2);
     expect(progress.size).toBe(0);
-    expect(player._audioPlaying === audio).toBe(true);
+    expect(player._audioPlaying).toBe(audio);
     expect(player._audioPlayPending).toBe(false);
     expect(sources[0].downloadable).toBe(true);
 });
@@ -209,7 +215,7 @@ test('a rejected older play cannot pause or clear the winning pronunciation', as
     rejected.reject(new Error('Obsolete failure'));
     expect((await old).valid).toBe(false);
     expect(latestAudio.pauses).toBe(0);
-    expect(player._audioPlaying === latestAudio).toBe(true);
+    expect(player._audioPlaying).toBe(latestAudio);
     expect(player._audioPlayPending).toBe(false);
     expect(progress.size).toBe(0);
 });
@@ -218,7 +224,9 @@ test('confirmed playback still survives hide after an earlier failed attempt', a
     const {player, sources, info, setCreate} = setup();
     const audio = makeAudio();
     let fails = true;
-    audio.play = async () => { if (fails) { throw new Error('Try again'); } };
+    audio.play = async () => {
+        if (fails) { throw new Error('Try again'); }
+    };
     setCreate(async () => info(audio));
     expect((await player._playAudio(0, 0, sources, null)).valid).toBe(false);
     fails = false;
@@ -246,7 +254,7 @@ test('a legacy synchronous successful play remains a confirmed success', async (
     Reflect.set(audio, 'play', () => {});
     setCreate(async () => info(audio));
     expect((await player._playAudio(0, 0, sources, null)).valid).toBe(true);
-    expect(player._audioPlaying === audio).toBe(true);
+    expect(player._audioPlaying).toBe(audio);
     expect(player._audioPlayPending).toBe(false);
 });
 
@@ -268,7 +276,7 @@ test('failure cleanup cannot overwrite a reentrant winner or its button title', 
     expect((await player._playAudio(0, 0, sources, null)).valid).toBe(false);
     await winner;
     expect(buttons[0].title).toBe('new request');
-    expect(player._audioPlaying === winnerAudio).toBe(true);
+    expect(player._audioPlaying).toBe(winnerAudio);
     expect(winnerAudio.pauses).toBe(0);
     expect(progress.size).toBe(0);
 });

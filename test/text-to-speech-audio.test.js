@@ -19,11 +19,12 @@
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {TextToSpeechAudio} from '../ext/js/media/text-to-speech-audio.js';
 
-class MockSpeechSynthesisUtterance {
+class MockSpeechSynthesisUtterance extends EventTarget {
     /**
      * @param {string} text
      */
     constructor(text) {
+        super();
         /** @type {string} */
         this.text = text;
         /** @type {string} */
@@ -57,7 +58,9 @@ describe('TextToSpeechAudio', () => {
 
     beforeEach(() => {
         cancel = vi.fn();
-        speak = vi.fn();
+        speak = vi.fn((/** @type {MockSpeechSynthesisUtterance} */ utterance) => {
+            queueMicrotask(() => { utterance.dispatchEvent(new Event('start')); });
+        });
         vi.stubGlobal('SpeechSynthesisUtterance', MockSpeechSynthesisUtterance);
         vi.stubGlobal('speechSynthesis', {cancel, speak});
     });

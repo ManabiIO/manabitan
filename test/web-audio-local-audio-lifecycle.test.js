@@ -201,18 +201,22 @@ test('same-order overlapping resume completions create only the latest source', 
     audio.pause()
 })
 
-test('an obsolete resume rejection propagates without stopping the newer source', async () => {
+test('a cancelled start settles before an obsolete resume rejection and preserves the newer source', async () => {
     const audio = await preparedAudio()
     context.state = 'suspended'
     const first = audio.play()
-    const rejected = assert.rejects(first, failure)
+    const cancelled = assert.doesNotReject(first)
     const second = audio.play()
+    // Cancellation must settle without either resume needing a user gesture.
+    await cancelled
+    assert.equal(context.state, 'suspended')
+    assert.equal(context.sources.length, 0)
     context.state = 'running'
     context.resumes[1].resolve()
     await second
     const source = context.sources[0]
     context.resumes[0].reject(failure)
-    await rejected
+    await Promise.resolve()
     assert.equal(audio._bufferSource, source)
     assert.equal(source.stops, 0)
     audio.pause()

@@ -20,7 +20,10 @@ function deferred() {
     let resolve = (/** @type {T} */ _value) => {};
     let reject = (/** @type {unknown} */ _error) => {};
     /** @type {Promise<T>} */
-    const promise = new Promise((resolve2, reject2) => { resolve = resolve2; reject = reject2; });
+    const promise = new Promise((resolve2, reject2) => {
+        resolve = resolve2;
+        reject = reject2;
+    });
     return {promise, resolve, reject};
 }
 
@@ -32,14 +35,24 @@ async function flush() {
 /**
  * @template T
  * @param {Promise<T>} promise
+ * @returns {{status: string, value: T|null, error: unknown}}
  */
 function observe(promise) {
     const result = {status: 'pending', value: /** @type {T|null} */ (null), error: /** @type {unknown} */ (null)};
-    void promise.then((value) => { result.status = 'fulfilled'; result.value = value; }, (error) => { result.status = 'rejected'; result.error = error; });
+    void promise.then((value) => {
+        result.status = 'fulfilled';
+        result.value = value;
+    }, (error) => {
+        result.status = 'rejected';
+        result.error = error;
+    });
     return result;
 }
 
-/** @param {boolean} [stalledCancel] */
+/**
+ * @param {boolean} [stalledCancel]
+ * @returns {{response: Response, stats: {cancels: number, reason: unknown}, close: () => void, complete: () => void, chunk: () => void, fail: (error: unknown) => void}}
+ */
 function body(stalledCancel = false) {
     /** @type {ReadableStreamDefaultController<Uint8Array>} */
     let controller;
@@ -53,8 +66,15 @@ function body(stalledCancel = false) {
         },
     });
     const response = new Response(stream, {headers: {'Content-Type': 'audio/wav'}});
-    const close = () => { try { controller.close(); } catch (e) { /* Already cancelled */ } };
-    const complete = () => { try { controller.enqueue(wavBytes); controller.close(); } catch (e) { /* Already cancelled */ } };
+    const close = () => {
+        try { controller.close(); } catch (e) { /* Already cancelled */ }
+    };
+    const complete = () => {
+        try {
+            controller.enqueue(wavBytes);
+            controller.close();
+        } catch (e) { /* Already cancelled */ }
+    };
     const chunk = () => { controller.enqueue(wavBytes); };
     const fail = (/** @type {unknown} */ error) => { controller.error(error); };
     return {response, stats, close, complete, chunk, fail};
@@ -63,7 +83,10 @@ function body(stalledCancel = false) {
 /** @returns {Response} */
 function healthy() { return new Response(wavBytes, {headers: {'Content-Type': 'audio/wav'}}); }
 
-/** @param {(url: string, init: RequestInit) => Promise<Response>} [fetcher] */
+/**
+ * @param {(url: string, init: RequestInit) => Promise<Response>} [fetcher]
+ * @returns {{downloader: AudioDownloader, download: (idleTimeout?: number|null) => Promise<import('audio-downloader').AudioBinaryBase64>, fallback: () => Promise<import('audio-downloader').AudioBinaryBase64>, requests: {url: string, signal: AbortSignal|null|undefined}[], timers: Map<number, {callback: () => void, delay: number}>, expire: (id?: number) => void}}
+ */
 function setup(fetcher = async () => healthy()) {
     let nextId = 0;
     /** @type {Map<number, {callback: () => void, delay: number}>} */
@@ -103,8 +126,11 @@ for (const lateResult of ['response', 'error']) {
         await flush();
         const atDeadline = {...result};
         const late = body();
-        if (lateResult === 'response') { gate.resolve(late.response); }
-        else { gate.reject(new Error('Late transport failure')); }
+        if (lateResult === 'response') {
+            gate.resolve(late.response);
+        } else {
+            gate.reject(new Error('Late transport failure'));
+        }
         await flush();
         const lateCancels = late.stats.cancels;
         late.complete();
@@ -213,7 +239,7 @@ test('a null idle timeout preserves an explicitly unbounded download', async () 
     expire();
     expect(result.status).toBe('pending');
     expect(timers.size).toBe(0);
-    expect(requests[0].signal == null).toBe(true);
+    expect(typeof requests[0].signal).toBe('undefined');
     stream.complete();
     await flush();
     expect(result.status).toBe('fulfilled');
@@ -241,7 +267,7 @@ for (const phase of ['transport', 'body']) {
 test('an HTTP error is cancelled and fallback still succeeds', async () => {
     const failed = body();
     const errorResponse = new Response(failed.response.body, {status: 503});
-    const {fallback, requests, timers} = setup(async (url) => url === sources[0].url ? errorResponse : healthy());
+    const {fallback, requests, timers} = setup(async (url) => (url === sources[0].url ? errorResponse : healthy()));
     expect(await fallback()).toEqual({data: wav, contentType: 'audio/wav'});
     expect(failed.stats.cancels).toBe(1);
     expect(requests.map(({url}) => url)).toEqual(sources.map(({url}) => url));
@@ -267,7 +293,7 @@ test('a timed-out stream cannot renew timers after its late completion', async (
 test('one stalled request does not cancel a concurrent healthy response', async () => {
     const failed = body();
     const good = body();
-    const {downloader, requests, timers, expire} = setup(async (url) => url === sources[0].url ? failed.response : good.response);
+    const {downloader, requests, timers, expire} = setup(async (url) => (url === sources[0].url ? failed.response : good.response));
     const first = observe(downloader._downloadAudioFromUrl(sources[0].url, 'custom', 100));
     const second = observe(downloader._downloadAudioFromUrl(sources[1].url, 'custom', 100));
     await flush();

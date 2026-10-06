@@ -20,11 +20,20 @@ async function flush() {
  */
 function observe(promise) {
     const result = {status: 'pending', value: /** @type {T|null} */ (null), error: /** @type {unknown} */ (null)};
-    void promise.then((value) => { result.status = 'fulfilled'; result.value = value; }, (error) => { result.status = 'rejected'; result.error = error; });
+    void promise.then((value) => {
+        result.status = 'fulfilled';
+        result.value = value;
+    }, (error) => {
+        result.status = 'rejected';
+        result.error = error;
+    });
     return result;
 }
 
-/** @param {boolean} [stalledCancel] */
+/**
+ * @param {boolean} [stalledCancel]
+ * @returns {{response: Response, abort: AbortController, stats: {cancels: number, reason: unknown, progress: boolean[]}, progress: (done: boolean) => void, close: () => void, chunk: (bytes: number[]) => void, listeners: () => number}}
+ */
 function setup(stalledCancel = false) {
     /** @type {ReadableStreamDefaultController<Uint8Array>} */
     let streamController;
@@ -42,11 +51,31 @@ function setup(stalledCancel = false) {
     let listeners = 0;
     const add = signal.addEventListener.bind(signal);
     const remove = signal.removeEventListener.bind(signal);
-    signal.addEventListener = (...args) => { if (args[0] === 'abort') { ++listeners; } add(...args); };
-    signal.removeEventListener = (...args) => { if (args[0] === 'abort') { --listeners; } remove(...args); };
+    /**
+     * @param {string} type
+     * @param {EventListenerOrEventListenerObject} listener
+     * @param {boolean|AddEventListenerOptions} [options]
+     */
+    const addListener = (type, listener, options) => {
+        if (type === 'abort') { ++listeners; }
+        add(type, listener, options);
+    };
+    /**
+     * @param {string} type
+     * @param {EventListenerOrEventListenerObject} listener
+     * @param {boolean|EventListenerOptions} [options]
+     */
+    const removeListener = (type, listener, options) => {
+        if (type === 'abort') { --listeners; }
+        remove(type, listener, options);
+    };
+    signal.addEventListener = addListener;
+    signal.removeEventListener = removeListener;
     /** @param {boolean} done */
     const progress = (done) => { stats.progress.push(done); };
-    const close = () => { try { streamController.close(); } catch (e) { /* Already cancelled */ } };
+    const close = () => {
+        try { streamController.close(); } catch (e) { /* Already cancelled */ }
+    };
     /** @param {number[]} bytes */
     const chunk = (bytes) => { streamController.enqueue(Uint8Array.from(bytes)); };
     return {response, abort, stats, progress, close, chunk, listeners: () => listeners};
@@ -136,7 +165,7 @@ for (const contentLength of [null, '0', '2', '100', '-1', '999999999999999999999
         chunk([1, 2]);
         chunk([3, 4, 5]);
         close();
-        expect(Array.from(await promise)).toEqual([1, 2, 3, 4, 5]);
+        expect([...await promise]).toEqual([1, 2, 3, 4, 5]);
         expect(stats.progress).toEqual([false, false, true]);
         expect(listeners()).toBe(0);
         expect(response.body?.locked).toBe(false);
@@ -160,7 +189,7 @@ test('a cancellation does not stop an unrelated response reader', async () => {
     first.close();
     await flush();
     expect(statusAtAbort).toBe('rejected');
-    expect(Array.from(await healthy)).toEqual([8, 9]);
+    expect([...await healthy]).toEqual([8, 9]);
     expect(second.stats.cancels).toBe(0);
     expect(first.listeners()).toBe(0);
     expect(second.listeners()).toBe(0);
@@ -183,6 +212,7 @@ test('an unavailable stream reader still permits prompt cancellation of arrayBuf
     const {response, abort, stats, close, listeners} = setup();
     let finish = (/** @type {ArrayBuffer} */ _value) => {};
     const pending = new Promise((resolve) => { finish = resolve; });
+    if (response.body === null) { throw new Error('Expected a streamed response'); }
     Reflect.set(response.body, 'getReader', () => { throw new Error('Unavailable'); });
     response.arrayBuffer = () => /** @type {Promise<ArrayBuffer>} */ (pending);
     const observed = observe(RequestBuilder.readFetchResponseArrayBuffer(response, null, abort.signal));
@@ -202,5 +232,5 @@ test('an unavailable stream reader still permits prompt cancellation of arrayBuf
 
 test('the existing two-argument reader remains supported without cancellation', async () => {
     const response = new Response(Uint8Array.from([2, 4, 6]));
-    expect(Array.from(await RequestBuilder.readFetchResponseArrayBuffer(response, null))).toEqual([2, 4, 6]);
+    expect([...await RequestBuilder.readFetchResponseArrayBuffer(response, null)]).toEqual([2, 4, 6]);
 });
