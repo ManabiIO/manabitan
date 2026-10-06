@@ -109,6 +109,11 @@ export class WebAudioLocalAudio {
             }
             // A pause or newer play request can supersede this one during resume.
             if (this._playToken !== token) { return; }
+            // Safari can remain interrupted around resume attempts. Do not
+            // report an inaudible start as successful unless time is running.
+            if (this._audioContext.state !== 'running') {
+                throw new Error('Audio context did not resume');
+            }
 
             const bufferSource = this._audioContext.createBufferSource();
             this._bufferSource = bufferSource;
