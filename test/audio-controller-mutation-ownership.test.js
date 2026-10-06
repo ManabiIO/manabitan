@@ -339,3 +339,134 @@ test('a refresh that resolves after a profile switch cannot relabel the old snap
     expect(controller._audioSourceEntries[0]._url).toBe('https://profile-b.example');
     expect(controller._language).toBe('en');
 });
+
+
+test('a successful edit refreshes after a same-profile options rebuild races its write', async ({window}) => {
+    const {controller, settingsController} = await setup(window, [
+        {type: 'custom', url: 'https://old.example', voice: ''},
+    ]);
+    const write = deferred();
+    const setProfileSetting = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.setProfileSetting);
+    const getOptions = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.getOptions);
+    setProfileSetting.mockImplementationOnce(() => write.promise);
+    getOptions.mockResolvedValue({
+        general: {language: 'en'},
+        audio: {sources: [{type: 'custom', url: 'https://new.example', voice: ''}]},
+    });
+
+    const entry = controller._audioSourceEntries[0];
+    const edit = entry._setUrl('https://new.example');
+    await flush();
+    controller._onOptionsChanged({
+        options: {
+            general: {language: 'en'},
+            audio: {sources: [{type: 'custom', url: 'https://old.example', voice: ''}]},
+        },
+        optionsContext: {index: 0},
+    });
+    expect(controller._audioSourceEntries[0]._url).toBe('https://old.example');
+
+    write.resolve([]);
+    await edit;
+
+    expect(controller._audioSourceEntries).toHaveLength(1);
+    expect(controller._audioSourceEntries[0]._url).toBe('https://new.example');
+});
+
+test('a successful removal refreshes after a stale options rebuild reintroduces the row', async ({window}) => {
+    const originalSources = [
+        {type: /** @type {const} */ ('custom'), url: 'https://one.example', voice: ''},
+        {type: /** @type {const} */ ('custom'), url: 'https://two.example', voice: ''},
+    ];
+    const {controller, settingsController} = await setup(window, originalSources);
+    const write = deferred();
+    const modifyProfileSettings = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.modifyProfileSettings);
+    const getOptions = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.getOptions);
+    modifyProfileSettings.mockImplementationOnce(() => write.promise);
+    getOptions.mockResolvedValue({
+        general: {language: 'en'},
+        audio: {sources: [originalSources[1]]},
+    });
+
+    const removal = controller.removeSource(controller._audioSourceEntries[0]);
+    await flush();
+    controller._onOptionsChanged({
+        options: {general: {language: 'en'}, audio: {sources: originalSources}},
+        optionsContext: {index: 0},
+    });
+    expect(controller._audioSourceEntries).toHaveLength(2);
+
+    write.resolve([]);
+    await removal;
+
+    expect(controller._audioSourceEntries).toHaveLength(1);
+    expect(controller._audioSourceEntries[0]._url).toBe('https://two.example');
+    expect(controller._audioSourceEntries[0].index).toBe(0);
+});
+
+test('a successful add refreshes after a stale options rebuild drops the pending row', async ({window}) => {
+    const originalSources = [
+        {type: /** @type {const} */ ('custom'), url: 'https://one.example', voice: ''},
+    ];
+    const {controller, settingsController} = await setup(window, originalSources);
+    const write = deferred();
+    const modifyProfileSettings = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.modifyProfileSettings);
+    const getOptions = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.getOptions);
+    modifyProfileSettings.mockImplementationOnce(() => write.promise);
+
+    const addition = controller._addAudioSource();
+    await flush();
+    const addedOptions = controller._audioSourceEntries[1].getSourceOptions();
+    getOptions.mockResolvedValue({
+        general: {language: 'en'},
+        audio: {sources: [originalSources[0], addedOptions]},
+    });
+    controller._onOptionsChanged({
+        options: {general: {language: 'en'}, audio: {sources: originalSources}},
+        optionsContext: {index: 0},
+    });
+    expect(controller._audioSourceEntries).toHaveLength(1);
+
+    write.resolve([]);
+    await addition;
+
+    expect(controller._audioSourceEntries).toHaveLength(2);
+    expect(controller._audioSourceEntries[0]._url).toBe('https://one.example');
+    expect(controller._audioSourceEntries[1].getSourceOptions()).toEqual(addedOptions);
+});
+
+test('a successful move refreshes after a stale options rebuild wins the DOM race', async ({window}) => {
+    const originalSources = [
+        {type: /** @type {const} */ ('custom'), url: 'https://one.example', voice: ''},
+        {type: /** @type {const} */ ('custom'), url: 'https://two.example', voice: ''},
+    ];
+    const {controller, settingsController} = await setup(window, originalSources);
+    const write = deferred();
+    const modifyProfileSettings = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.modifyProfileSettings);
+    const getOptions = /** @type {ReturnType<typeof vi.fn>} */ (settingsController.getOptions);
+    modifyProfileSettings.mockImplementationOnce(() => write.promise);
+
+    const move = controller.moveAudioSourceOptions(0, 1);
+    await flush();
+    getOptions.mockResolvedValue({
+        general: {language: 'en'},
+        audio: {sources: [originalSources[1], originalSources[0]]},
+    });
+    controller._onOptionsChanged({
+        options: {general: {language: 'en'}, audio: {sources: originalSources}},
+        optionsContext: {index: 0},
+    });
+    expect(controller._audioSourceEntries.map((entry) => entry._url)).toEqual([
+        'https://one.example',
+        'https://two.example',
+    ]);
+
+    write.resolve([]);
+    await move;
+
+    expect(controller._audioSourceEntries.map((entry) => entry._url)).toEqual([
+        'https://two.example',
+        'https://one.example',
+    ]);
+    expect(controller._audioSourceEntries.map((entry) => entry.index)).toEqual([0, 1]);
+});
