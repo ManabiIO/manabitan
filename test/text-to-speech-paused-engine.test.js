@@ -19,7 +19,10 @@ async function flush() {
     for (let i = 0; i < 20; ++i) { await Promise.resolve(); }
 }
 
-/** @param {boolean} [paused] */
+/**
+ * @param {boolean} [paused]
+ * @returns {*}
+ */
 function setup(paused = true) {
     class Utterance extends EventTarget {
         /** @param {string} text */
