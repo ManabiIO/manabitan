@@ -50,7 +50,7 @@ describe('ProfileController profile conditions modal', () => {
         const cleanup = vi.fn();
         const prepare = vi.fn().mockResolvedValue(void 0);
         const profileConditionsProfileName = {textContent: ''};
-        Reflect.set(controller, '_profiles', [{name: 'Default profile'}]);
+        Reflect.set(controller, '_profiles', [{id: 'profile-0', name: 'Default profile'}]);
         Reflect.set(controller, '_profileConditionsModal', {setVisible});
         Reflect.set(controller, '_profileConditionsUI', {cleanup, prepare});
         Reflect.set(controller, '_profileConditionsProfileName', profileConditionsProfileName);
@@ -96,8 +96,8 @@ describe('ProfileController profile conditions modal', () => {
         Reflect.set(controller, '_settingsController', {
             getOptionsFull: vi.fn().mockResolvedValue({
                 profiles: [
-                    {name: 'First'},
-                    {name: 'Second'},
+                    {id: 'profile-0', name: 'First'},
+                    {id: 'profile-1', name: 'Second'},
                 ],
                 profileCurrent: 1,
             }),
@@ -105,6 +105,7 @@ describe('ProfileController profile conditions modal', () => {
         });
         Reflect.set(controller, '_profileConditionsUI', {cleanup, prepare});
         Reflect.set(controller, '_profileConditionsIndex', 0);
+        Reflect.set(controller, '_profileConditionsProfileId', 'profile-0');
         Reflect.set(controller, '_profileEntryList', []);
         Reflect.set(controller, '_profileEntriesSupported', false);
         Reflect.set(controller, '_profileActiveSelect', {value: ''});
@@ -337,5 +338,79 @@ describe('ProfileConditionsUI prepare ownership', () => {
         expect(addConditionGroup.mock.calls[0][1]).toBe(0);
         expect(Reflect.get(ui, '_profileIndex')).toBe(1);
         expect(addEventListener).toHaveBeenCalledTimes(1);
+    });
+});
+
+
+describe('ProfileController condition profile identity', () => {
+    test('a tracked conditions profile follows its stable ID after profile reordering', async () => {
+        const controller = createControllerForInternalTests();
+        const prepare = vi.fn().mockResolvedValue();
+        const cleanup = vi.fn();
+        const setVisible = vi.fn();
+        const profileName = {textContent: 'First'};
+        Reflect.set(controller, '_settingsController', {
+            getOptionsFull: vi.fn().mockResolvedValue({
+                profiles: [
+                    {id: 'profile-b', name: 'Second'},
+                    {id: 'profile-a', name: 'First'},
+                ],
+                profileCurrent: 0,
+            }),
+            profileIndex: 0,
+        });
+        Reflect.set(controller, '_profileConditionsUI', {cleanup, prepare});
+        Reflect.set(controller, '_profileConditionsIndex', 0);
+        Reflect.set(controller, '_profileConditionsProfileId', 'profile-a');
+        Reflect.set(controller, '_profileConditionsOpenToken', null);
+        Reflect.set(controller, '_profileConditionsModal', {setVisible});
+        Reflect.set(controller, '_profileConditionsProfileName', profileName);
+        Reflect.set(controller, '_profileEntryList', []);
+        Reflect.set(controller, '_profileEntriesSupported', false);
+        Reflect.set(controller, '_profileActiveSelect', {value: ''});
+        Reflect.set(controller, '_updateProfileSelectOptions', vi.fn());
+        Reflect.set(controller, 'setDefaultProfile', vi.fn());
+
+        await controller._onOptionsChanged();
+
+        expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(1);
+        expect(Reflect.get(controller, '_profileConditionsProfileId')).toBe('profile-a');
+        expect(profileName.textContent).toBe('First');
+        expect(prepare).toHaveBeenCalledWith(1);
+        expect(setVisible).not.toHaveBeenCalled();
+    });
+
+    test('deleting the tracked conditions profile closes rather than retargeting the modal', async () => {
+        const controller = createControllerForInternalTests();
+        const prepare = vi.fn().mockResolvedValue();
+        const cleanup = vi.fn();
+        const setVisible = vi.fn();
+        Reflect.set(controller, '_settingsController', {
+            getOptionsFull: vi.fn().mockResolvedValue({
+                profiles: [
+                    {id: 'profile-b', name: 'Second'},
+                ],
+                profileCurrent: 0,
+            }),
+            profileIndex: 0,
+        });
+        Reflect.set(controller, '_profileConditionsUI', {cleanup, prepare});
+        Reflect.set(controller, '_profileConditionsIndex', 0);
+        Reflect.set(controller, '_profileConditionsProfileId', 'profile-a');
+        Reflect.set(controller, '_profileConditionsOpenToken', null);
+        Reflect.set(controller, '_profileConditionsModal', {setVisible});
+        Reflect.set(controller, '_profileConditionsProfileName', {textContent: 'First'});
+        Reflect.set(controller, '_profileEntryList', []);
+        Reflect.set(controller, '_profileEntriesSupported', false);
+        Reflect.set(controller, '_profileActiveSelect', {value: ''});
+        Reflect.set(controller, '_updateProfileSelectOptions', vi.fn());
+        Reflect.set(controller, 'setDefaultProfile', vi.fn());
+
+        await controller._onOptionsChanged();
+
+        expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(null);
+        expect(Reflect.get(controller, '_profileConditionsProfileId')).toBe(null);
+        expect(setVisible).toHaveBeenCalledWith(false);
+        expect(prepare).not.toHaveBeenCalled();
     });
 });
