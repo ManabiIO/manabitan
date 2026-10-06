@@ -165,6 +165,7 @@ export class DisplayAudio {
 
     /** */
     stopAudio() {
+        this.clearAutoPlayTimer();
         this._stopAudio(null);
     }
 
