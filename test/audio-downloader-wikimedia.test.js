@@ -106,3 +106,20 @@ describe('AudioDownloader Wikimedia Commons lookups', () => {
         expect(fetchAnonymous).toHaveBeenCalledTimes(4);
     });
 });
+
+describe('AudioDownloader Jisho URL handling', () => {
+    test('encodes special search characters as a single path segment', async () => {
+        const fetchAnonymous = vi.fn().mockRejectedValue(new Error('Stop before parsing'));
+        const downloader = createDownloader(fetchAnonymous);
+        const source = /** @type {any} */ ({type: 'jisho'});
+
+        await expect(downloader.getTermAudioInfoList(source, 'A/B? # +漢字', '', /** @type {any} */ ({})))
+            .resolves.toStrictEqual([]);
+
+        expect(fetchAnonymous).toHaveBeenCalledOnce();
+        expect(fetchAnonymous).toHaveBeenCalledWith(
+            'https://jisho.org/search/A%2FB%3F%20%23%20%2B%E6%BC%A2%E5%AD%97',
+            expect.anything(),
+        );
+    });
+});
