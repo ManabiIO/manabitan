@@ -77,7 +77,8 @@ test('rendered media have a cumulative blob budget, with coalescing and cleanup'
          */
         constructor(parts) { this.size = parts[0].byteLength; }
     });
-    const created = vi.spyOn(URL, 'createObjectURL').mockImplementation(() => `blob:fixture-${requests.mock.calls.length}`);
+    let objectUrlId = 0;
+    const created = vi.spyOn(URL, 'createObjectURL').mockImplementation(() => `blob:fixture-${++objectUrlId}`);
     const revoked = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
     const manager = new ReaderMedia(media, () => {});
     const loaded = vi.fn();
