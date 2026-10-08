@@ -466,8 +466,10 @@ export class ProfileController {
         // Update UI
         this._updateProfileSelectOptions();
 
-        if (this._settingsController.profileIndex !== profileCurrent) {
-            void this.setDefaultProfile(profileCurrent);
+        // Viewing a non-default profile in Settings is intentional. Only
+        // recover an index that is no longer valid after profiles are deleted.
+        if (settingsProfileIndex < 0 || settingsProfileIndex >= profiles.length) {
+            this._settingsController.profileIndex = profileCurrent;
         }
 
         /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileCurrent}`;
