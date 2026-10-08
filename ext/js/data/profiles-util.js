@@ -15,23 +15,54 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {ExtensionError} from '../core/extension-error.js';
+
+/** @type {WeakMap<import('../application.js').Application, Promise<void>>} */
+const profileWriteTails = new WeakMap();
+
 /**
  * @param {number} direction
  * @param {import('../application.js').Application} application
  */
-export async function setProfile(direction, application) {
-    const optionsFull = await application.api.optionsGetFull();
+export function setProfile(direction, application) {
+    if (!Number.isSafeInteger(direction)) {
+        return Promise.reject(new TypeError('Profile direction must be an integer'));
+    }
 
-    const profileCount = optionsFull.profiles.length;
-    const newProfile = (optionsFull.profileCurrent + direction + profileCount) % profileCount;
+    // Each hotkey press must observe the previous press's completed write.
+    // Otherwise fast repeated presses can read one index and persist the same
+    // next profile, effectively dropping user input.
+    const previous = profileWriteTails.get(application) ?? Promise.resolve();
+    const operation = previous.catch(() => {}).then(async () => {
+        const {profileCurrent, profiles} = await application.api.optionsGetFull();
+        const profileCount = profiles.length;
+        if (profileCount === 0) { return; }
+        if (!Number.isSafeInteger(profileCurrent) || profileCurrent < 0 || profileCurrent >= profileCount) {
+            throw new RangeError('Current profile index is invalid');
+        }
+        const step = ((direction % profileCount) + profileCount) % profileCount;
+        const newProfile = (profileCurrent + step) % profileCount;
+        if (newProfile === profileCurrent) { return; }
 
-    /** @type {import('settings-modifications').ScopedModificationSet} */
-    const modification = {
-        action: 'set',
-        path: 'profileCurrent',
-        value: newProfile,
-        scope: 'global',
-        optionsContext: null,
-    };
-    await application.api.modifySettings([modification], 'search');
+        /** @type {import('settings-modifications').ScopedModificationSet} */
+        const modification = {
+            action: 'set',
+            path: 'profileCurrent',
+            value: newProfile,
+            scope: 'global',
+            optionsContext: null,
+        };
+        const results = await application.api.modifySettings([modification], 'search');
+        if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
+            throw new Error('Profile change returned an invalid result');
+        }
+        if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+    });
+    profileWriteTails.set(application, operation);
+    void operation.finally(() => {
+        if (profileWriteTails.get(application) === operation) {
+            profileWriteTails.delete(application);
+        }
+    }).catch(() => {});
+    return operation;
 }
