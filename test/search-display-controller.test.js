@@ -225,7 +225,6 @@ describe('Keyboard Event Handling', () => {
         searchSpy.mockRestore();
     });
 
-
     test('dictionary database updates refresh options and rerun the active display search', async () => {
         const updateOptionsSpy = vi.spyOn(display, 'updateOptions').mockResolvedValue(void 0);
         const searchLastSpy = vi.spyOn(display, 'searchLast').mockImplementation(() => {});
