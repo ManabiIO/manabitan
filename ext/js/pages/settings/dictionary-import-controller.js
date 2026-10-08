@@ -1721,6 +1721,9 @@ export class DictionaryImportController {
                         sizeBytes: this._getImportSourceSize(source),
                         sourceType: source.type,
                     });
+                    // The download is complete; importing the yielded file may
+                    // take longer than the network timeout. Retire that timer now.
+                    globalThis.clearTimeout(timeoutId);
                     yield source;
                 } catch (error) {
                     const abortReason = /** @type {unknown} */ (abortController.signal.reason);
