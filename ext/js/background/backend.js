@@ -188,8 +188,6 @@ export class Backend {
         /** @type {?import('settings').Options} */
         this._options = null;
         /** @type {Promise<void>|null} */
-        this._optionsSaveTail = null;
-        /** @type {Promise<void>|null} */
         this._optionsMutationTail = null;
         /** @type {import('../data/json-schema.js').JsonSchema[]} */
         this._profileConditionsSchemaCache = [];
@@ -4411,29 +4409,18 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @param {string} source
      */
     async _saveOptions(source) {
-        // Modification handlers mutate live options before awaiting persistence.
-        // If their storage writes overlap, an older snapshot can otherwise
-        // finish last and overwrite newer user settings on disk.
+        // The mutation queue owns ordering for both incremental changes and
+        // full replacements. A second storage-only queue is unnecessary.
         this._clearProfileConditionsSchemaCache();
-        const previous = this._optionsSaveTail ?? Promise.resolve();
-        const save = previous.then(async () => {
-            // Read the latest in-memory options when this write reaches the
-            // front of the queue; never re-persist a stale snapshot.
-            const options = this._getOptionsFull(false);
-            await this._optionsUtil.save(options);
-            // Persistence has committed. A failure while notifying/updating
-            // runtime consumers cannot safely be treated as a failed save:
-            // rolling memory back would disagree with the stored options.
-            try {
-                this._applyOptions(source);
-            } catch (error) {
-                try { log.error(error); } catch (_) { /* Persistence is already committed. */ }
-            }
-        });
-        // A failed write must reject its own caller but not poison future
-        // saves; keep the tail always fulfilled.
-        this._optionsSaveTail = save.catch(() => {});
-        await save;
+        const options = this._getOptionsFull(false);
+        await this._optionsUtil.save(options);
+        // Persistence has committed. A runtime notification failure must not
+        // roll back memory to disagree with the stored settings.
+        try {
+            this._applyOptions(source);
+        } catch (error) {
+            try { log.error(error); } catch (_) { /* Persistence is already committed. */ }
+        }
     }
 
     /**
