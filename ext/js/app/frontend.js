@@ -407,7 +407,7 @@ export class Frontend {
 
     /**
      * @param {import('application').EventArgument<'databaseUpdated'>} details
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     async _onDatabaseUpdated({type}) {
         if (type !== 'dictionary') { return; }
