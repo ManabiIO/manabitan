@@ -25,6 +25,7 @@
  */
 export function readCodePointsForward(text, position, count) {
     const textLength = text.length;
+    if (!Number.isSafeInteger(position) || position < 0 || position >= textLength) { return ''; }
     let result = '';
     for (; count > 0; --count) {
         const char = text[position];
@@ -51,6 +52,7 @@ export function readCodePointsForward(text, position, count) {
  * @returns {string} The code points from the string.
  */
 export function readCodePointsBackward(text, position, count) {
+    if (!Number.isSafeInteger(position) || position < 0 || position >= text.length) { return ''; }
     let result = '';
     for (; count > 0; --count) {
         const char = text[position];
