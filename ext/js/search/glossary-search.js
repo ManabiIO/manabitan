@@ -147,6 +147,9 @@ export function glossarySearchTokens(glossary) {
  * @returns {{folded: string, phrase: string, tokens: string[], prefix: string}|null}
  */
 export function createGlossarySearchQuery(query) {
+    // Reject oversized submitted text before normalization or tokenization.
+    // Only the most recent eight words are considered for live reverse search.
+    if (query.length > 1024) { return null; }
     const folded = foldGlossarySearchText(query.trim());
     if (
         folded.length === 0 ||
@@ -155,14 +158,34 @@ export function createGlossarySearchQuery(query) {
     ) {
         return null;
     }
-    const tokens = glossarySearchTokensFromText(folded).slice(0, MAX_GLOSSARY_QUERY_TOKENS);
-    if (tokens.length === 0) { return null; }
-    const prefix = tokens[tokens.length - 1];
-    if ([...prefix].length < MIN_INDEX_TOKEN_CODEPOINTS) { return null; }
-    const phrase = [...folded.matchAll(TOKEN_PATTERN)]
-        .map((match) => match[0].replace(/’/gu, "'"))
-        .slice(0, MAX_GLOSSARY_QUERY_TOKENS)
-        .join(' ');
+    const queryWords = [...folded.matchAll(TOKEN_PATTERN)]
+        .map((match) => match[0])
+        .slice(-MAX_GLOSSARY_QUERY_TOKENS);
+    const prefix = queryWords.at(-1);
+    if (typeof prefix !== 'string') { return null; }
+    const prefixLength = [...prefix].length;
+    if (prefixLength < MIN_INDEX_TOKEN_CODEPOINTS || prefixLength > MAX_INDEX_TOKEN_CODEPOINTS) { return null; }
+
+    // Index postings are unique per term. Keep the final *typed* token as the
+    // live prefix even if it appeared earlier; deduplicate only prerequisites.
+    // Otherwise "dog cat dog" mistakenly searches for a "cat" prefix, and
+    // repeated prerequisite tokens make the SQL HAVING count impossible.
+    const requiredTokens = [];
+    const seen = new Set([prefix]);
+    for (const token of queryWords.slice(0, -1)) {
+        const length = [...token].length;
+        if (
+            length < MIN_INDEX_TOKEN_CODEPOINTS ||
+            length > MAX_INDEX_TOKEN_CODEPOINTS ||
+            seen.has(token)
+        ) {
+            continue;
+        }
+        seen.add(token);
+        requiredTokens.push(token);
+    }
+    const tokens = [...requiredTokens, prefix];
+    const phrase = queryWords.join(' ');
     return {folded, phrase, tokens, prefix};
 }
 
