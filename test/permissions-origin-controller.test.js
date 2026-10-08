@@ -183,5 +183,4 @@ describe('PermissionsOriginController', () => {
         expect(setPermissionsGranted).toHaveBeenCalledWith({origins: ['https://example.com/*']}, true);
         expect(logError).toHaveBeenCalledOnce();
     });
-
 });
