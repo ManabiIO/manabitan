@@ -54,11 +54,15 @@ export function glossarySearchText(glossary) {
      */
     const append = (value) => {
         if (codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS) { return; }
-        const points = [...value];
         const available = MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS - codepoints;
         if (available <= 0) { return; }
-        parts.push(points.slice(0, available).join(''));
-        codepoints += Math.min(points.length, available);
+        // Only inspect the code units needed to fill the remaining budget.
+        // Expanding a multi-megabyte definition before slicing defeats the
+        // indexer's bound and can exhaust memory during dictionary import.
+        const prefix = value.slice(0, available * 2);
+        const points = [...prefix].slice(0, available);
+        parts.push(points.join(''));
+        codepoints += points.length;
     };
     /**
      * @param {unknown} value
