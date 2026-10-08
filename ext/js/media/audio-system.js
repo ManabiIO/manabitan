@@ -109,9 +109,43 @@ export class AudioSystem extends EventDispatcher {
      * @returns {Promise<void>}
      */
     _waitForData(audio) {
+        if (audio.error !== null) {
+            return Promise.reject(audio.error);
+        }
+        // HAVE_CURRENT_DATA: a cached resource can finish before listeners are installed.
+        if (audio.readyState >= 2) {
+            return Promise.resolve();
+        }
         return new Promise((resolve, reject) => {
-            audio.addEventListener('loadeddata', () => resolve());
-            audio.addEventListener('error', () => reject(audio.error));
+            /** @type {?import('core').Timeout} */
+            let timer = null;
+            const cleanup = () => {
+                if (timer !== null) {
+                    clearTimeout(timer);
+                    timer = null;
+                }
+                audio.removeEventListener('loadeddata', onLoaded);
+                audio.removeEventListener('error', onError);
+            };
+            const onLoaded = () => {
+                cleanup();
+                resolve();
+            };
+            const onError = () => {
+                cleanup();
+                reject(audio.error ?? new Error('Could not retrieve audio'));
+            };
+            audio.addEventListener('loadeddata', onLoaded);
+            audio.addEventListener('error', onError);
+            timer = setTimeout(() => {
+                cleanup();
+                reject(new Error('Audio loading timed out'));
+            }, 30000);
+            if (audio.error !== null) {
+                onError();
+            } else if (audio.readyState >= 2) {
+                onLoaded();
+            }
         });
     }
 
