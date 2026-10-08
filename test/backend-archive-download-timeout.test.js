@@ -28,17 +28,18 @@ describe('Backend archive download deadline', () => {
 
     test('keeps the deadline active when the fetch completes but the body stalls', async () => {
         vi.useFakeTimers();
-        /** @type {AbortSignal|null} */
-        let signal = null;
+        /** @type {{signal: AbortSignal|null}} */
+        const captured = {signal: null};
         vi.stubGlobal('fetch', vi.fn(async (/** @type {string} */ _url, /** @type {RequestInit} */ options) => {
-            signal = options.signal instanceof AbortSignal ? options.signal : null;
+            captured.signal = options.signal instanceof AbortSignal ? options.signal : null;
             return new Response('pending');
         }));
         vi.spyOn(RequestBuilder, 'readFetchResponseArrayBuffer').mockImplementation(async () => (
-            await new Promise((_resolve, reject) => {
+            await /** @type {Promise<Uint8Array>} */ (new Promise((_resolve, reject) => {
+                const signal = captured.signal;
                 if (signal === null) { throw new Error('Missing fetch abort signal'); }
-                signal.addEventListener('abort', () => reject(signal?.reason), {once: true});
-            })
+                signal.addEventListener('abort', () => reject(signal.reason), {once: true});
+            }))
         ));
         const request = createBackend()._onApiDownloadDictionaryArchive({url: 'https://example.test/dictionary.zip'});
         const assertion = expect(request).rejects.toThrow('Timed out fetching dictionary archive');
