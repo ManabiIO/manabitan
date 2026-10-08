@@ -70,6 +70,9 @@ function createValidatorFunctionFromTypeScript(path, type, jsconfigType) {
         minify: false,
         expose: 'none',
         strictTuples: true,
+        // TypeScript correctness is a separate required CI matrix job. Avoid
+        // rechecking the entire project for every JSON fixture schema.
+        skipTypeCheck: true,
     };
     const schema = createGenerator(config).createSchema(config.type);
     const ajv = createAjv();
@@ -96,7 +99,9 @@ function normalizePathDirectorySeparators(value) {
 }
 
 
-describe.concurrent('JSON validation', () => {
+// Schema generation constructs TypeScript programs; running many generators
+// concurrently exhausts the CI runner heap. Validate fixtures sequentially.
+describe('JSON validation', () => {
     const ignoreDirectories = new Set([
         'builds',
         'dictionaries',
