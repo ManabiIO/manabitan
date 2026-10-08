@@ -9,6 +9,7 @@
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {ExtensionError} from '../ext/js/core/extension-error.js';
+import {log} from '../ext/js/core/log.js';
 import {DictionaryWorker} from '../ext/js/dictionary/dictionary-worker.js';
 
 class MockWorker {
@@ -68,6 +69,28 @@ function installWorkerMock() {
 afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+});
+
+describe('DictionaryWorker progress observer isolation', () => {
+    test.each([false, true])('a throwing progress observer cannot abort import-like mutation (reuse=%s)', async (reuseWorker) => {
+        const workers = installWorkerMock();
+        const report = vi.spyOn(log, 'error').mockImplementation(() => {});
+        const client = new DictionaryWorker({reuseWorker});
+        const failure = new Error('Detached settings view');
+        const onProgress = vi.fn(() => { throw failure; });
+        const pending = client.deleteDictionary('Test', onProgress);
+        const worker = workers[0];
+
+        expect(() => worker.emitMessage({action: 'progress', params: {args: ['progress']}})).not.toThrow();
+        expect(onProgress).toHaveBeenCalledWith('progress');
+        expect(report).toHaveBeenCalledWith(failure);
+        expect(worker.terminate).not.toHaveBeenCalled();
+
+        worker.emitMessage({action: 'complete', params: {result: undefined}});
+        await expect(pending).resolves.toBeUndefined();
+        expect(worker.terminate).toHaveBeenCalledTimes(reuseWorker ? 0 : 1);
+        client.destroy();
+    });
 });
 
 describe('DictionaryWorker lifecycle', () => {
