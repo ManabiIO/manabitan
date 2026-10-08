@@ -18,6 +18,9 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
+      # Keep independent checks running so a known baseline failure does not
+      # conceal regressions in unrelated jobs.
+      fail-fast: false
       matrix:
         include:
           - name: JavaScript
