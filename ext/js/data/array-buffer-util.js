@@ -45,15 +45,15 @@ export function arrayBufferToBase64(arrayBuffer) {
  */
 export function arrayBufferToBinaryString(arrayBuffer) {
     const bytes = new Uint8Array(arrayBuffer);
-    try {
-        return String.fromCharCode(...bytes);
-    } catch (e) {
-        let binary = '';
-        for (let i = 0, ii = bytes.byteLength; i < ii; ++i) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return binary;
+    // Passing the entire buffer as arguments overflows the call stack for
+    // dictionary/media exports. Build bounded chunks instead of falling back
+    // to character-by-character string concatenation on large files.
+    const chunkSize = 0x8000;
+    const chunks = [];
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        chunks.push(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
     }
+    return chunks.join('');
 }
 
 /**
