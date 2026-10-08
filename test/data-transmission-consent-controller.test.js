@@ -33,6 +33,7 @@ describe('DataTransmissionConsentController', () => {
     test('consent actions wait for their async save rather than declaring an immediate modal dismissal', async ({window}) => {
         const html = await readFile(new URL('../ext/templates-modals.html', import.meta.url), 'utf8');
         const container = window.document.createElement('div');
+        // eslint-disable-next-line no-unsanitized/property -- Parse the trusted, shipped template for DOM behavior coverage.
         container.innerHTML = html;
         const template = /** @type {HTMLTemplateElement|null} */ (container.querySelector('#settings-modals-template'));
         expect(template).not.toBeNull();
