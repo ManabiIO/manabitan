@@ -70,6 +70,7 @@ function setup() {
         _updatePageDebugState: vi.fn(),
     })) { Reflect.set(frontend, key, value); }
     scanner.on('searchSuccess', frontend._onSearchSuccess.bind(frontend));
+    scanner.on('searchSame', frontend._onSearchSame.bind(frontend));
     scanner.on('searchError', frontend._onSearchError.bind(frontend));
     const report = vi.spyOn(log, 'error').mockImplementation(() => {});
     /** @param {TextSourceElement} selected */
@@ -80,7 +81,7 @@ function setup() {
     return {frontend, scanner, lookup, show, report, scan};
 }
 
-test('returning to the same word during auto-hide initiates a fresh lookup', async () => {
+test('returning to the same word cancels pending auto-hide without a redundant lookup', async () => {
     const {frontend, scanner, lookup, scan} = setup();
     const word = source('cat');
     Reflect.set(frontend, '_options', {scanning: {autoHideResults: true, hideDelay: 100}});
@@ -88,8 +89,10 @@ test('returning to the same word during auto-hide initiates a fresh lookup', asy
     const hide = vi.spyOn(frontend, '_clearSelectionDelayed').mockResolvedValue(void 0);
     scanner.on('searchEmpty', frontend._onSearchEmpty.bind(frontend));
 
+    const cancelHide = vi.spyOn(frontend, '_stopClearSelectionDelayed');
     await scan(word);
     await frontend.showContentCompleted();
+    cancelHide.mockClear();
     expect(lookup).toHaveBeenCalledTimes(1);
     expect(scanner.hasSelection()).toBe(true);
 
@@ -99,11 +102,13 @@ test('returning to the same word during auto-hide initiates a fresh lookup', asy
     expect(hide).toHaveBeenCalledWith(100, false, false);
     expect(scanner.hasSelection()).toBe(true);
 
-    // Without a retry marker the same-start fast path incorrectly no-ops,
-    // letting the pending hide dismiss the popup under the returning cursor.
+    // A repeated hover must cancel hiding immediately without any redundant
+    // dictionary lookup or loss of the existing selection.
     await scan(word);
     await frontend.showContentCompleted();
-    expect(lookup).toHaveBeenCalledTimes(2);
+    expect(lookup).toHaveBeenCalledTimes(1);
+    expect(cancelHide).toHaveBeenCalledOnce();
+    expect(scanner.hasSelection()).toBe(true);
 });
 
 test('same-word no-op remains intact when automatic hiding is disabled', async () => {
