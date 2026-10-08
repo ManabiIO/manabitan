@@ -34,11 +34,15 @@ export class RecommendedSettingsController {
         this._applyButton = querySelectorNotNull(document, '#recommended-settings-apply-button');
         /** @type {Map<string, import('settings-controller').RecommendedSetting>} */
         this._recommendedSettings = new Map();
+        /** @type {number} */
+        this._languageRequestGeneration = 0;
+        /** @type {Promise<import('settings-controller').RecommendedSettingsByLanguage>|null} */
+        this._recommendedSettingsLoadPromise = null;
     }
 
     /** */
     async prepare() {
-        this._languageSelect.addEventListener('change', this._onLanguageSelectChanged.bind(this), false);
+        this._languageSelect.addEventListener('change', this._onLanguageSelectChangedEvent.bind(this), false);
         this._applyButton.addEventListener('click', this._onApplyButtonClickedEvent.bind(this), false);
     }
 
@@ -46,10 +50,18 @@ export class RecommendedSettingsController {
      * @param {Event} _e
      */
     async _onLanguageSelectChanged(_e) {
+        const request = ++this._languageRequestGeneration;
         const setLanguage = this._languageSelect.value;
         if (typeof setLanguage !== 'string') { return; }
 
-        const recommendedSettings = await this._getRecommendedSettings(setLanguage);
+        let recommendedSettings;
+        try {
+            recommendedSettings = await this._getRecommendedSettings(setLanguage);
+        } catch (error) {
+            if (request !== this._languageRequestGeneration || this._languageSelect.value !== setLanguage) { return; }
+            throw error;
+        }
+        if (request !== this._languageRequestGeneration || this._languageSelect.value !== setLanguage) { return; }
         const settingsList = querySelectorNotNull(document, '#recommended-settings-list');
         settingsList.innerHTML = '';
         this._recommendedSettings = new Map();
@@ -82,16 +94,36 @@ export class RecommendedSettingsController {
     }
 
     /**
+     * @param {Event} event
+     */
+    _onLanguageSelectChangedEvent(event) {
+        void this._onLanguageSelectChanged(event).catch((error) => {
+            log.error(error);
+        });
+    }
+
+    /**
      *
      * @param {string} language
      * @returns {Promise<import('settings-controller').RecommendedSetting[]>}
      */
     async _getRecommendedSettings(language) {
         if (typeof this._recommendedSettingsByLanguage === 'undefined') {
-            /** @type {import('settings-controller').RecommendedSettingsByLanguage} */
-            this._recommendedSettingsByLanguage = await fetchJson('/data/recommended-settings.json');
+            let promise = this._recommendedSettingsLoadPromise;
+            if (promise === null) {
+                promise = /** @type {Promise<import('settings-controller').RecommendedSettingsByLanguage>} */ (
+                    fetchJson('/data/recommended-settings.json')
+                );
+                this._recommendedSettingsLoadPromise = promise;
+            }
+            try {
+                this._recommendedSettingsByLanguage = await promise;
+            } finally {
+                if (this._recommendedSettingsLoadPromise === promise) {
+                    this._recommendedSettingsLoadPromise = null;
+                }
+            }
         }
-
         return this._recommendedSettingsByLanguage[language];
     }
 
