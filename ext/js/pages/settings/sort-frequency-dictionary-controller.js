@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class SortFrequencyDictionaryController {
@@ -95,7 +96,9 @@ export class SortFrequencyDictionaryController {
     /** */
     _onSortFrequencyDictionarySelectChange() {
         const {value} = /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect);
-        void this._setSortFrequencyDictionaryValue(value !== '' ? value : null);
+        void this._setSortFrequencyDictionaryValue(value !== '' ? value : null).catch((error) => {
+            log.error(error);
+        });
     }
 
     /** */
@@ -103,14 +106,18 @@ export class SortFrequencyDictionaryController {
         const {value} = /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect);
         const value2 = this._normalizeSortFrequencyDictionaryOrder(value);
         if (value2 === null) { return; }
-        void this._setSortFrequencyDictionaryOrderValue(value2);
+        void this._setSortFrequencyDictionaryOrderValue(value2).catch((error) => {
+            log.error(error);
+        });
     }
 
     /** */
     _onSortFrequencyDictionaryOrderAutoButtonClick() {
         const {value} = /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect);
         if (value === '') { return; }
-        void this._autoUpdateOrder(value);
+        void this._autoUpdateOrder(value).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -139,6 +146,7 @@ export class SortFrequencyDictionaryController {
      * @param {?string} value
      */
     async _setSortFrequencyDictionaryValue(value) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const previousValue = this._sortFrequencyDictionarySelect.value;
         const previousHidden = this._sortFrequencyDictionaryOrderContainerNode.hidden;
         /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = (value === null);
@@ -149,7 +157,11 @@ export class SortFrequencyDictionaryController {
             /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = previousHidden;
             throw e;
         }
-        if (value !== null) {
+        if (
+            value !== null &&
+            this._sortFrequencyDictionarySelect.value === value &&
+            this._settingsController.getOptionsContext().index === optionsContext.index
+        ) {
             await this._autoUpdateOrder(value);
         }
     }
@@ -175,7 +187,8 @@ export class SortFrequencyDictionaryController {
         const order = await this._getFrequencyOrder(dictionary);
         if (
             order === null ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._sortFrequencyDictionarySelect.value !== dictionary
         ) {
             return;
         }
