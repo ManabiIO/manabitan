@@ -47,6 +47,14 @@ test('untrusted glossary strings are limited by code points, including surrogate
     assert.equal([...text].length, 16384);
 });
 
+test('very large definition strings are clipped before allocating Unicode code points', () => {
+    const source = 'a' + '🐈'.repeat(250_000);
+    const text = glossarySearchText(source);
+    assert.equal([...text].length, 16384);
+    assert(text.startsWith('a🐈'));
+    assert.equal(text.length, 32767);
+});
+
 test('tokenization normalizes width case apostrophes and bounds duplicate tokens', () => {
     assert.deepEqual(
         glossarySearchTokens(['ＣＡＴ cat', 'Owner’s companion', "owner's companion"]),
@@ -82,6 +90,37 @@ test('the final typed word owns completion even if it repeats an earlier word', 
     assert.equal(createGlossarySearchQuery(`cat ${'x'.repeat(65)}`), null);
     assert.equal(createGlossarySearchQuery(`${'x'.repeat(65)} cat`), null);
     assert.equal(createGlossarySearchQuery('one two three four five six seven eight nine'), null);
+});
+
+test('reverse glossary search uses the actual last token as live prefix', () => {
+    const repeatedLast = createGlossarySearchQuery('dog cat dog');
+    assert.deepEqual(repeatedLast, {
+        folded: 'dog cat dog',
+        phrase: 'dog cat dog',
+        tokens: ['cat', 'dog'],
+        prefix: 'dog',
+    });
+    assert.equal(scoreGlossarySearchMatch(['a cat and a dogwood tree'], repeatedLast)?.tier, 2);
+    assert.equal(scoreGlossarySearchMatch(['dogwood without cats'], repeatedLast), null);
+
+    const repeatedPrerequisite = createGlossarySearchQuery('dog dog cat');
+    assert.deepEqual(repeatedPrerequisite?.tokens, ['dog', 'cat']);
+    assert.equal(scoreGlossarySearchMatch(['a dog and a cat'], repeatedPrerequisite)?.tier, 1);
+    assert.equal(scoreGlossarySearchMatch(['a cat and another dog'], repeatedLast)?.tier, 1);
+});
+
+test('unfinished terminal words do not fall back to the preceding word', () => {
+    assert.equal(createGlossarySearchQuery('house c'), null);
+    assert.equal(createGlossarySearchQuery('house a'), null);
+    assert.equal(createGlossarySearchQuery('house ca')?.prefix, 'ca');
+    assert.equal(createGlossarySearchQuery('house cat')?.prefix, 'cat');
+    assert.equal(createGlossarySearchQuery('a'.repeat(1025)), null);
+    assert.equal(createGlossarySearchQuery('house ' + 'c'.repeat(65)), null);
+});
+
+test('reverse glossary input budget rejects large gaps and ninth words', () => {
+    assert.equal(createGlossarySearchQuery(`house ${' '.repeat(1025)}cat`), null);
+    assert.equal(createGlossarySearchQuery('alpha bravo charlie delta echo foxtrot golf hotel india'), null);
 });
 
 test('prefix upper bounds cover the prefix and exclude its lexical successor', () => {
