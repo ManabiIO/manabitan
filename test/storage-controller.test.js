@@ -188,4 +188,37 @@ describe('StorageController runtime check', () => {
         });
     });
 
+
+    test.each([
+        {mode: 'unknown', usesFallbackStorage: false},
+        {mode: 'opfs-sahpool-unavailable', usesFallbackStorage: false},
+        {mode: 'fallback-memory', usesFallbackStorage: false},
+        {mode: 'opfs-sahpool', usesFallbackStorage: true},
+    ])('never calls dictionary storage usable for $mode (fallback=$usesFallbackStorage)', async ({mode, usesFallbackStorage}) => {
+        const application = {
+            api: {
+                debugDictionaryStorageState: vi.fn(async () => ({
+                    usesFallbackStorage,
+                    openStorageDiagnostics: {mode},
+                    dictionaryRows: [],
+                    offscreenDictionaryRows: [],
+                })),
+            },
+            on: vi.fn(),
+        };
+        const persistentStorageController = {
+            application,
+            isStoragePeristent: vi.fn(async () => false),
+        };
+
+        controller = new StorageController(/** @type {any} */ (persistentStorageController));
+        controller.prepare();
+        await vi.waitFor(() => {
+            const text = document.querySelector('#storage-runtime-check')?.textContent ?? '';
+            expect(text).toContain('backend reachable=true');
+            expect(text).toContain('dictionary backend usable=false');
+            expect(text).toContain(`backend mode=${mode}`);
+        });
+    });
+
 });
