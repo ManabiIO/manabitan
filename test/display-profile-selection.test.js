@@ -59,8 +59,8 @@ describe('DisplayProfileSelection options refresh handling', () => {
     });
 
     test('stale profile-name refresh does not overwrite newer state', async () => {
-        let resolveFirst;
-        let resolveSecond;
+        const firstRequest = /** @type {import('core').DeferredPromiseDetails<{profileCurrent: number, profiles: {name: string}[]}>} */ (deferPromise());
+        const secondRequest = /** @type {import('core').DeferredPromiseDetails<{profileCurrent: number, profiles: {name: string}[]}>} */ (deferPromise());
         const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
         Reflect.set(selection, '_profileNameRefreshGeneration', 0);
         Reflect.set(selection, '_profileButton', {style: {}});
@@ -70,24 +70,20 @@ describe('DisplayProfileSelection options refresh handling', () => {
                 api: {
                     optionsGetFull: vi
                         .fn()
-                        .mockImplementationOnce(() => new Promise((resolve) => {
-                            resolveFirst = resolve;
-                        }))
-                        .mockImplementationOnce(() => new Promise((resolve) => {
-                            resolveSecond = resolve;
-                        })),
+                        .mockImplementationOnce(() => firstRequest.promise)
+                        .mockImplementationOnce(() => secondRequest.promise),
                 },
             },
         });
 
         const firstRefresh = DisplayProfileSelection.prototype._updateCurrentProfileName.call(selection);
         const secondRefresh = DisplayProfileSelection.prototype._updateCurrentProfileName.call(selection);
-        resolveSecond({
+        secondRequest.resolve({
             profileCurrent: 1,
             profiles: [{name: 'Default'}, {name: 'Mining'}],
         });
         await secondRefresh;
-        resolveFirst({
+        firstRequest.resolve({
             profileCurrent: 0,
             profiles: [{name: 'Default'}, {name: 'Mining'}],
         });
@@ -157,7 +153,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
     });
 
     test('profile name refresh is independent of an in-flight profile list request', async () => {
-        let resolveList;
+        const listRequest = /** @type {import('core').DeferredPromiseDetails<{profileCurrent: number, profiles: {name: string}[]}>} */ (deferPromise());
         const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
         Reflect.set(selection, '_profileNameRefreshGeneration', 0);
         Reflect.set(selection, '_profileListRefreshGeneration', 0);
@@ -171,7 +167,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
             application: {
                 api: {
                     optionsGetFull: vi.fn()
-                        .mockImplementationOnce(() => new Promise((resolve) => { resolveList = resolve; }))
+                        .mockImplementationOnce(() => listRequest.promise)
                         .mockResolvedValueOnce({profileCurrent: 0, profiles: [{name: 'One'}]}),
                 },
             },
@@ -183,7 +179,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
         expect(Reflect.get(selection, '_profileName').textContent).toBe('One');
         expect(Reflect.get(selection, '_profileButton').style.display).toBe('none');
 
-        resolveList({profileCurrent: 0, profiles: []});
+        listRequest.resolve({profileCurrent: 0, profiles: []});
         await updateList;
         expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(false);
         vi.unstubAllGlobals();
@@ -272,6 +268,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
     test('rapid selections serialize writes and only the newest selection refreshes UI', async () => {
         const firstWriteStarted = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
         const firstWriteCompletion = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+        /** @type {number[]} */
         const writes = [];
         const setProfileCurrent = vi.fn().mockImplementation((/** @type {number} */ index) => {
             writes.push(index);
@@ -308,7 +305,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
     test('superseded profile-save errors do not overwrite the latest selection', async () => {
         const firstWriteStarted = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
         const firstWriteCompletion = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
-        const setProfileCurrent = vi.fn().mockImplementation((index) => {
+        const setProfileCurrent = vi.fn().mockImplementation((/** @type {number} */ index) => {
             if (index === 1) {
                 firstWriteStarted.resolve();
                 return firstWriteCompletion.promise;
@@ -328,7 +325,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
         Reflect.set(selection, '_updateCurrentProfileName', updateName);
         Reflect.set(selection, '_updateProfileList', updateList);
         const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        const select = (index) => DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index,
+        const select = (/** @type {number} */ index) => DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index,
             /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
         select(1);
         await firstWriteStarted.promise;
