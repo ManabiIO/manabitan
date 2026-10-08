@@ -101,6 +101,8 @@ export class SearchDisplayController {
         /** @type {number} */
         this._searchRequestSequence = 0;
         /** @type {number} */
+        this._clipboardUpdateSequence = 0;
+        /** @type {number} */
         this._contentUpdateSequence = 0;
         /** @type {string} */
         this._contentUpdateQuery = '';
@@ -196,6 +198,7 @@ export class SearchDisplayController {
         this._searchButton.addEventListener('click', this._onSearch.bind(this), false);
         this._clearButton.addEventListener('click', this._onClear.bind(this), false);
         this._queryInput.addEventListener('compositionstart', () => {
+            ++this._clipboardUpdateSequence;
             this._composing = true;
             this._cancelLiveSearch();
             this._display.invalidateSearchDraft();
@@ -425,6 +428,7 @@ export class SearchDisplayController {
      * @param {InputEvent} e
      */
     _onSearchInput(e) {
+        ++this._clipboardUpdateSequence;
         this._updateSearchHeight(true);
 
         const element = /** @type {HTMLTextAreaElement} */ (e.currentTarget);
@@ -523,23 +527,24 @@ export class SearchDisplayController {
 
     /** */
     async _onCopy() {
-        // Ignore copy from search page
-        this._clipboardMonitor.setPreviousText(document.hasFocus() ? await this._clipboardReaderLike.getText(false) : '');
+        // Ignore copy from search page; clipboard access can be denied.
+        try {
+            this._clipboardMonitor.setPreviousText(document.hasFocus() ? await this._clipboardReaderLike.getText(false) : '');
+        } catch (error) {
+            if (!this._display.application.webExtension.unloaded) { log.error(error); }
+        }
     }
 
     /**
      * @param {ClipboardEvent} e
      */
     _onPaste(e) {
-        if (e.target === this._queryInput) {
-            return;
-        }
+        // Keep native paste working in inputs and editable result content.
+        if (e.defaultPrevented || (e.target instanceof Element && this._isElementInput(e.target))) { return; }
+        const text = e.clipboardData?.getData('text');
+        if (!text) { return; }
         e.stopPropagation();
         e.preventDefault();
-        const text = e.clipboardData?.getData('text');
-        if (!text) {
-            return;
-        }
         if (this._queryInput.value !== text) {
             this._queryInput.value = text;
             this._updateSearchHeight(true);
@@ -555,14 +560,14 @@ export class SearchDisplayController {
                 animate,
             },
         });
-        void this._updateSearchFromClipboard(text, animate, false);
+        void this._updateSearchFromClipboard(text, animate, false).catch((error) => { log.error(error); });
     }
 
     /**
      * @param {import('clipboard-monitor').Events['change']} event
      */
     _onClipboardMonitorChange({text}) {
-        void this._updateSearchFromClipboard(text, true, true);
+        void this._updateSearchFromClipboard(text, true, true).catch((error) => { log.error(error); });
     }
 
     /**
@@ -571,9 +576,16 @@ export class SearchDisplayController {
      * @param {boolean} checkText
      */
     async _updateSearchFromClipboard(text, animate, checkText) {
+        const generation = ++this._clipboardUpdateSequence;
+        const searchSequence = this._searchRequestSequence;
+        const currentQuery = this._queryInput.value;
         const options = this._display.getOptions();
         if (options === null) { return; }
         if (checkText && !await this._display.application.api.isTextLookupWorthy(text, options.general.language)) { return; }
+        // Validation crosses an async boundary: a newer clipboard event, user
+        // edit, search, or disabled monitor must retire this older candidate.
+        if (generation !== this._clipboardUpdateSequence || searchSequence !== this._searchRequestSequence ||
+        currentQuery !== this._queryInput.value || this._composing || (checkText && !this._clipboardMonitorEnabled)) { return; }
         const {clipboard: {autoSearchContent, maximumSearchLength}} = options;
         if (text.length > maximumSearchLength) {
             text = text.substring(0, maximumSearchLength);
@@ -836,6 +848,7 @@ export class SearchDisplayController {
      * @param {boolean} [preserveSearchInput]
      */
     _search(animate, historyMode, lookup, flags, preserveSearchInput = false) {
+        ++this._clipboardUpdateSequence;
         this._cancelLiveSearch();
         if (!preserveSearchInput) { this._updateSearchText(); }
 
