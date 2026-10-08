@@ -237,9 +237,12 @@ function createSchemaPopupLevelGreaterThanOrEqual(value) {
  */
 function createSchemaUrlMatchDomain(value) {
     const oneOf = [];
+    const seen = new Set();
     for (let domain of split(value)) {
         if (domain.length === 0) { continue; }
         domain = domain.toLowerCase();
+        if (seen.has(domain)) { continue; }
+        seen.add(domain);
         oneOf.push({const: domain});
     }
     return {
@@ -351,8 +354,10 @@ function createSchemaFlagsNotInclude(value) {
 function createSchemaArrayCheck(key, value, exact, none) {
     /** @type {import('ext/json-schema').Schema[]} */
     const containsList = [];
+    const seen = new Set();
     for (const item of split(value)) {
-        if (item.length === 0) { continue; }
+        if (item.length === 0 || seen.has(item)) { continue; }
+        seen.add(item);
         containsList.push({
             contains: {
                 const: item,
