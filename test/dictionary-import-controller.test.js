@@ -607,10 +607,10 @@ describe('Dictionary import archive source validation', () => {
             _activeImportRunGeneration: 0,
             _modifying: false,
             _statusFooter: null,
-            _setModifying(value) {
+            _setModifying(/** @type {boolean} */ value) {
                 this._modifying = value;
             },
-            _isImportRunCurrent(generation) {
+            _isImportRunCurrent(/** @type {number} */ generation) {
                 return this._activeImportRunGeneration === generation;
             },
             _hideErrors: vi.fn(),
