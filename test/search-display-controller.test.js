@@ -20,6 +20,7 @@ import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
 import {Application} from '../ext/js/application.js';
 import {API} from '../ext/js/comm/api.js';
 import {CrossFrameAPI} from '../ext/js/comm/cross-frame-api.js';
+import {ExtensionError} from '../ext/js/core/extension-error.js';
 import {DisplayAudio} from '../ext/js/display/display-audio.js';
 import {Display} from '../ext/js/display/display.js';
 import {SearchDisplayController} from '../ext/js/display/search-display-controller.js';
@@ -330,6 +331,59 @@ describe('Keyboard Event Handling', () => {
         })));
 
         expect(setDefaultProfileIndexSpy).not.toHaveBeenCalled();
+    });
+
+
+    test('profile selection propagates a per-setting backend rejection', async () => {
+        const failure = ExtensionError.serialize(new Error('invalid profile'));
+        vi.spyOn(display.application.api, 'modifySettings').mockResolvedValue([{error: failure}]);
+
+        await expect(searchDisplayController._setDefaultProfileIndex(1)).rejects.toThrow('invalid profile');
+    });
+
+    test('overlapping profile selections persist in order with the newest choice last', async () => {
+        const pending = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const started = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(createOptions(0));
+        const saveSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex')
+            .mockImplementationOnce(async () => {
+                started.resolve();
+                await pending.promise;
+            })
+            .mockResolvedValueOnce(void 0);
+
+        const first = searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({
+            currentTarget: {value: '1'},
+        })));
+        await started.promise;
+        const second = searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({
+            currentTarget: {value: '0'},
+        })));
+        pending.resolve();
+        await Promise.all([first, second]);
+
+        expect(saveSpy.mock.calls).toStrictEqual([[1], [0]]);
+    });
+
+    test('superseded selection is retired while waiting on profile options', async () => {
+        const pending = /** @type {PromiseWithResolvers<import('settings').Options>} */ (Promise.withResolvers());
+        vi.spyOn(display.application.api, 'optionsGetFull')
+            .mockReturnValueOnce(pending.promise)
+            .mockResolvedValueOnce(createOptions(0));
+        const saveSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockResolvedValue(void 0);
+
+        const first = searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({
+            currentTarget: {value: '1'},
+        })));
+        await Promise.resolve();
+        const second = searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({
+            currentTarget: {value: '0'},
+        })));
+        pending.resolve(createOptions(0));
+        await Promise.all([first, second]);
+
+        expect(saveSpy).toHaveBeenCalledOnce();
+        expect(saveSpy).toHaveBeenCalledWith(0);
     });
 
     test('stale search-page profile-select refresh does not overwrite newer options', async () => {
