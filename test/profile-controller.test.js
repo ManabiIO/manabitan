@@ -279,6 +279,51 @@ describe('ProfileController name save ownership', () => {
     });
 });
 
+describe('ProfileController reset preserves identity', () => {
+    test('reset keeps the original ID and name while restoring default settings', async () => {
+        const controller = createControllerForInternalTests();
+        const original = {
+            id: 'my-stable-profile',
+            name: 'Reading',
+            options: {general: {enable: false}},
+            conditionGroups: [{conditions: []}],
+        };
+        Reflect.set(controller, '_profiles', [
+            {id: 'another-profile', name: 'Other'},
+            original,
+        ]);
+        const defaults = /** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+            profiles: [{
+                name: 'Default',
+                options: {general: {enable: true}},
+                conditionGroups: [],
+            }],
+        }));
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([{result: true}]);
+        const refresh = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_settingsController', {
+            getDefaultOptions: vi.fn().mockResolvedValue(defaults),
+            modifyGlobalSettings,
+            refresh,
+        });
+
+        await controller.resetProfile(1);
+
+        expect(modifyGlobalSettings).toHaveBeenCalledOnce();
+        expect(modifyGlobalSettings.mock.calls[0][0][0]).toStrictEqual({
+            action: 'set',
+            path: 'profiles[1]',
+            value: {
+                id: 'my-stable-profile',
+                name: 'Reading',
+                options: {general: {enable: true}},
+                conditionGroups: [],
+            },
+        });
+        expect(refresh).toHaveBeenCalledOnce();
+    });
+});
+
 describe('ProfileController async ownership', () => {
     test('reset follows the same profile object if profiles are reordered while defaults load', async () => {
         const controller = createControllerForInternalTests();
