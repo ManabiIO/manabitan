@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class CollapsibleDictionaryController {
@@ -109,7 +110,7 @@ export class CollapsibleDictionaryController {
 
     /** */
     _onDefinitionsCollapsibleChange() {
-        void this._updateAllSelectFresh();
+        void this._updateAllSelectFresh().catch((error) => { log.error(error); });
     }
 
     /**
@@ -119,7 +120,7 @@ export class CollapsibleDictionaryController {
         const {value} = /** @type {HTMLSelectElement} */ (e.currentTarget);
         const value2 = this._normalizeDictionaryDefinitionsCollapsible(value);
         if (value2 === null) { return; }
-        void this._setDefinitionsCollapsibleAll(value2);
+        void this._setDefinitionsCollapsibleAll(value2).catch((error) => { log.error(error); });
     }
 
     /** */
@@ -217,7 +218,13 @@ export class CollapsibleDictionaryController {
             const path = `dictionaries[${i}].definitionsCollapsible`;
             targets.push({action: 'set', path, value});
         }
-        await this._settingsController.modifyProfileSettings(targets);
+        try {
+            await this._settingsController.modifyProfileSettings(targets);
+        } catch (error) {
+            // The All select has already changed before this handler runs.
+            this._updateAllSelect(options);
+            throw error;
+        }
         for (const select of this._selects) {
             select.value = value;
         }
