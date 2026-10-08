@@ -158,6 +158,12 @@ export function constrainStyles(container: HTMLElement) {
     }
 }
 
+/** Clip user-imported labels without splitting surrogate pairs. */
+function clipDisplayText(value: string, maximum: number): string {
+    const text = value.slice(0, maximum);
+    return /[\uD800-\uDBFF]$/.test(text) ? text.slice(0, -1) : text;
+}
+
 /**
  * Real ManabiTan structured glossary renderer; no raw HTML or copied importer.
  * @param container
@@ -176,13 +182,19 @@ export function renderDictionaryResults(container: HTMLElement, result: LookupRe
         article.className = 'dictionary-entry';
         const heading = document.createElement('h3');
         heading.className = 'headword';
-        for (const [index, headword] of entry.headwords.entries()) {
+        if (entry.headwords.length > 32 || entry.definitions.length > 30 || entry.frequencies.length > 30) {
+            truncated = true;
+        }
+        for (const [index, headword] of entry.headwords.slice(0, 32).entries()) {
             if (index) {heading.append(' / ');}
+            const term = clipDisplayText(headword.term, 256);
+            const reading = clipDisplayText(headword.reading, 256);
+            if (term.length !== headword.term.length || reading.length !== headword.reading.length) {truncated = true;}
             const ruby = document.createElement('ruby');
-            ruby.append(headword.term);
+            ruby.append(term);
             if (headword.reading !== headword.term) {
                 const rt = document.createElement('rt');
-                rt.textContent = headword.reading;
+                rt.textContent = reading;
                 ruby.append(rt);
             }
             heading.append(ruby);
@@ -191,13 +203,19 @@ export function renderDictionaryResults(container: HTMLElement, result: LookupRe
         if (entry.frequencies.length > 0) {
             const frequencies = document.createElement('p');
             frequencies.className = 'frequency';
-            frequencies.textContent = entry.frequencies.slice(0, 30).map((f) => `${f.dictionary}: ${f.displayValue ?? f.frequency}`).join(' · ');
+            frequencies.textContent = entry.frequencies.slice(0, 30).map((f) => {
+                const dictionary = f.dictionary;
+                const value = String(f.displayValue ?? f.frequency);
+                if (dictionary.length > 128 || value.length > 64) {truncated = true;}
+                return `${clipDisplayText(dictionary, 128)}: ${clipDisplayText(value, 64)}`;
+            }).join(' · ');
             article.append(frequencies);
         }
         for (const definition of entry.definitions.slice(0, 30)) {
             const label = document.createElement('p');
             label.className = 'dictionary-name';
-            label.textContent = definition.dictionary;
+            label.textContent = clipDisplayText(definition.dictionary, 256);
+            if (definition.dictionary.length > 256 || definition.entries.length > 100) {truncated = true;}
             article.append(label);
             const list = document.createElement('ol');
             for (const value of definition.entries.slice(0, 100)) {
@@ -242,7 +260,7 @@ export function renderDictionaryResults(container: HTMLElement, result: LookupRe
     }
     if (truncated) {
         const note = document.createElement('p');
-        note.textContent = 'Some definitions were omitted because this result exceeds the display complexity limit.';
+        note.textContent = 'Some dictionary content was omitted because this result exceeds the display complexity limit.';
         fragment.append(note);
     }
     container.replaceChildren(fragment);
