@@ -859,6 +859,33 @@ describe('OptionsUtil', () => {
         });
     });
 
+    test('fresh defaults have stable profile IDs and normalizing them is idempotent', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const defaults = optionsUtil.getDefault();
+        expect(defaults.profiles[0].id).toBe('profile-0');
+        const updated = await optionsUtil.update(structuredClone(defaults));
+        expect(updated).toStrictEqual(defaults);
+    });
+
+    test('current-version options repair missing and duplicate IDs without replacing existing identities', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const options = optionsUtil.getDefault();
+        const original = options.profiles[0];
+        options.profiles = [
+            {...structuredClone(original), id: '', name: 'Missing'},
+            {...structuredClone(original), id: 'saved-id', name: 'Existing'},
+            {...structuredClone(original), id: 'saved-id', name: 'Duplicate'},
+            {...structuredClone(original), id: 'profile-0', name: 'Reserved'},
+        ];
+        const updated = await optionsUtil.update(options);
+        expect(updated.profiles.map(({id}) => id)).toStrictEqual([
+            'profile-0-1', 'saved-id', 'profile-2', 'profile-0',
+        ]);
+        expect(await optionsUtil.update(structuredClone(updated))).toStrictEqual(updated);
+    });
+
     describe('Default', () => {
         /** @type {((options: import('options-util').IntermediateOptions) => void)[]} */
         const data = [
