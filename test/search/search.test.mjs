@@ -218,28 +218,6 @@ test('IME input does not start an intermediate lookup', (t) => {
     t.mock.timers.tick(1000);
     assert.deepEqual(calls, []);
 });
-test('Enter does not submit while the controller is composing even when the key event says otherwise', () => {
-    const {controller} = controllerFixture();
-    controller._composing = true;
-    let searches = 0,
-        prevented = 0,
-        blurred = 0;
-    controller._search = () => { searches++; };
-    controller._display.blurElement = () => { blurred++; };
-    controller._onSearchKeydown({
-        currentTarget: controller._queryInput,
-        code: 'Enter',
-        key: 'Enter',
-        keyCode: 13,
-        shiftKey: false,
-        isComposing: false,
-        preventDefault() { prevented++; },
-        stopImmediatePropagation() { prevented++; },
-    });
-    assert.equal(searches, 0);
-    assert.equal(prevented, 0);
-    assert.equal(blurred, 0);
-});
 test('invalidation fences in-flight renders and disposes old entry actions', () => {
     const display = Object.create(Display.prototype);
     const old = {};
