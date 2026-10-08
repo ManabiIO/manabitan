@@ -17,6 +17,7 @@
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {ExtensionError} from '../ext/js/core/extension-error.js';
+import {log} from '../ext/js/core/log.js';
 import {DictionaryWorkerHandler} from '../ext/js/dictionary/dictionary-worker-handler.js';
 
 afterEach(() => { vi.unstubAllGlobals(); });
@@ -71,6 +72,33 @@ describe('DictionaryWorkerHandler completion transport', () => {
         const message = /** @type {{action: string, params: {error: import('core').SerializedError}}} */ (messages[0]);
         expect(message.action).toBe('complete');
         expect(() => ExtensionError.deserialize(message.params.error)).not.toThrow();
+    });
+
+    test.each([false, true])('uncloneable progress does not turn a successful import into failure (logger fails=%s)', async (loggerFails) => {
+        const {messages, postMessage} = installStructuredCloneWorker();
+        const handler = new DictionaryWorkerHandler();
+        const reported = vi.spyOn(log, 'error').mockImplementation(() => {
+            if (loggerFails) { throw new Error('Log unavailable'); }
+        });
+        const result = {published: true};
+        try {
+            /**
+             * @param {unknown} _details
+             * @param {import('dictionary-worker-handler').OnProgressCallback} onProgress
+             * @returns {Promise<{published: boolean}>}
+             */
+            const publish = async (_details, onProgress) => {
+                onProgress({invalid: () => {}});
+                return result;
+            };
+            await Reflect.get(handler, '_onMessageWithProgress').call(handler, {}, publish);
+
+            expect(postMessage).toHaveBeenCalledTimes(2);
+            expect(reported).toHaveBeenCalledOnce();
+            expect(messages).toStrictEqual([{action: 'complete', params: {result}}]);
+        } finally {
+            reported.mockRestore();
+        }
     });
 
     test('keeps a serializable successful result unchanged', async () => {

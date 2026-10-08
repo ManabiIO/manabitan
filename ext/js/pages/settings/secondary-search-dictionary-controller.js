@@ -28,6 +28,8 @@ export class SecondarySearchDictionaryController {
         this._settingsController = settingsController;
         /** @type {?import('core').TokenObject} */
         this._getDictionaryInfoToken = null;
+        /** @type {number} */
+        this._optionsRenderRequest = 0;
         /** @type {Map<string, import('dictionary-importer').Summary>} */
         this._dictionaryInfoMap = new Map();
         /** @type {EventListenerCollection} */
@@ -74,6 +76,7 @@ export class SecondarySearchDictionaryController {
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
     _onOptionsChanged({options}) {
+        ++this._optionsRenderRequest;
         this._eventListeners.removeAllEventListeners();
 
         const fragment = document.createDocumentFragment();
@@ -120,9 +123,11 @@ export class SecondarySearchDictionaryController {
      * @param {import('core').TokenObject|null|import('settings-controller').EventArgument<'dictionarySettingsReordered'>} [token]
      */
     async _onDictionarySettingsReordered(token = null) {
+        const request = ++this._optionsRenderRequest;
         const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
         if (
+            request !== this._optionsRenderRequest ||
             (token !== null && this._getDictionaryInfoToken !== token) ||
             this._settingsController.getOptionsContext().index !== optionsContext.index
         ) {
