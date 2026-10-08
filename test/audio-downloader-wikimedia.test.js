@@ -152,7 +152,7 @@ describe('AudioDownloader download idle deadline cleanup', () => {
 
     test('clears the idle timer if reading the response body fails', async () => {
         vi.useFakeTimers();
-        const fetchAnonymous = vi.fn().mockResolvedValue(new Response(new Uint8Array([1, 2, 3])));
+        const fetchAnonymous = vi.fn().mockResolvedValue(new Response('sample'));
         vi.spyOn(RequestBuilder, 'readFetchResponseArrayBuffer').mockRejectedValueOnce(new Error('body read failed'));
         const downloader = createDownloader(fetchAnonymous);
 
@@ -163,7 +163,7 @@ describe('AudioDownloader download idle deadline cleanup', () => {
 
     test('encodes the downloaded Uint8Array without including unrelated bytes', async () => {
         vi.useFakeTimers();
-        const fetchAnonymous = vi.fn().mockResolvedValue(new Response(new Uint8Array([1, 2, 3])));
+        const fetchAnonymous = vi.fn().mockResolvedValue(new Response('sample'));
         vi.spyOn(RequestBuilder, 'readFetchResponseArrayBuffer').mockResolvedValueOnce(new Uint8Array([88, 1, 2, 89]).subarray(1, 3));
         const downloader = createDownloader(fetchAnonymous);
 
