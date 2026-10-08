@@ -384,7 +384,7 @@ export class DictionaryWorker {
             // Progress observers are outside the import transaction. A removed
             // settings view or failing UI callback must not terminate the worker
             // and turn an otherwise successful import into an unknown outcome.
-            log.error(error);
+            try { log.error(error); } catch (_) { /* NOP */ }
         }
     }
 
