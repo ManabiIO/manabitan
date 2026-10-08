@@ -1411,6 +1411,7 @@ export class DictionaryImportController {
                 request.onprogress = null;
                 abortSignal.removeEventListener('abort', onAbortSignal);
             };
+            /** @param {unknown} error */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -1554,7 +1555,7 @@ export class DictionaryImportController {
     }
 
     /**
-     * @param {AsyncGenerator<File, void, void>} dictionaries
+     * @param {AsyncGenerator<File|{downloadUrl: string}, void, void>} dictionaries
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
      * @param {ImportProgressTracker} importProgressTracker
@@ -2031,6 +2032,13 @@ export class DictionaryImportController {
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const localPhaseTimings = [];
+        /**
+         * @param {string} phase
+         * @param {number} startTime
+         * @param {number} endTime
+         * @param {Record<string, string|number|boolean|null>} [details]
+         * @returns {void}
+         */
         const recordLocalPhase = (phase, startTime, endTime, details = {}) => {
             const elapsedMs = Math.max(0, endTime - startTime);
             localPhaseTimings.push({phase, elapsedMs, details});
