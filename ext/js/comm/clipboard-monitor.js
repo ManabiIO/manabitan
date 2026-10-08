@@ -78,7 +78,7 @@ export class ClipboardMonitor extends EventDispatcher {
                             this.trigger('change', {text});
                         } catch (error) {
                             // A failing subscriber must not terminate polling.
-                            log.error(error);
+                            try { log.error(error); } catch (_) { /* Polling must survive diagnostics failures. */ }
                         }
                     }
                 }

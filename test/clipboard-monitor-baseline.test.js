@@ -4,6 +4,7 @@
  */
 
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
+import {log} from '../ext/js/core/log.js';
 import {ClipboardMonitor} from '../ext/js/comm/clipboard-monitor.js';
 
 describe('Clipboard monitor read baseline', () => {
@@ -69,6 +70,25 @@ describe('Clipboard monitor read baseline', () => {
         expect(onChange).toHaveBeenCalledOnce();
         expect(onChange).toHaveBeenCalledWith({text: 'changed'});
         monitor.stop();
+    });
+
+    test('throwing diagnostics cannot stop polling after a subscriber failure', async () => {
+        const getText = vi.fn()
+            .mockResolvedValueOnce('initial')
+            .mockResolvedValueOnce('first')
+            .mockResolvedValueOnce('second');
+        vi.spyOn(log, 'error').mockImplementation(() => { throw new Error('logger failed'); });
+        const monitor = new ClipboardMonitor({getText});
+        monitor.on('change', () => { throw new Error('subscriber failed'); });
+        try {
+            monitor.start();
+            await Promise.resolve();
+            await vi.advanceTimersByTimeAsync(500);
+            expect(getText).toHaveBeenCalledTimes(3);
+            expect(vi.getTimerCount()).toBe(1);
+        } finally {
+            monitor.stop();
+        }
     });
 
     test('throwing subscriber is logged without stopping subsequent polls', async () => {
