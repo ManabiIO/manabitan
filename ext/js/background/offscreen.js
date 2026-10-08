@@ -58,6 +58,7 @@ export class Offscreen {
             ['getDictionaryCountsOffscreen',   this._getDictionaryCountsHandler.bind(this)],
             ['getDictionaryTermProbeOffscreen', this._getDictionaryTermProbeHandler.bind(this)],
             ['findTermsBulkOffscreen',         this._findTermsBulkHandler.bind(this)],
+            ['warmTermLookupCachesOffscreen',  this._warmTermLookupCachesHandler.bind(this)],
             ['debugDictionaryStorageStateOffscreen', this._debugDictionaryStorageStateHandler.bind(this)],
             ['debugDictionaryLookupStateOffscreen', this._debugDictionaryLookupStateHandler.bind(this)],
             ['databasePurgeOffscreen',         this._purgeDatabaseHandler.bind(this)],
@@ -288,6 +289,11 @@ export class Offscreen {
     /** @type {import('offscreen').ApiHandler<'findTermsBulkOffscreen'>} */
     async _findTermsBulkHandler({termList, dictionaryNames, matchType}) {
         return await this._invokeDictionaryWorker('findTermsBulkOffscreen', {termList, dictionaryNames, matchType});
+    }
+
+    /** @type {import('offscreen').ApiHandler<'warmTermLookupCachesOffscreen'>} */
+    async _warmTermLookupCachesHandler({dictionaryNames}) {
+        await this._invokeDictionaryWorker('warmTermLookupCachesOffscreen', {dictionaryNames});
     }
 
     /** @type {import('offscreen').ApiHandler<'debugDictionaryStorageStateOffscreen'>} */
