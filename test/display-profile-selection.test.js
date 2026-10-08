@@ -385,3 +385,65 @@ describe('DisplayProfileSelection options refresh handling', () => {
 
 
 });
+
+
+describe('DisplayProfileSelection row identity', () => {
+    test.each([true, false])('selection follows a reordered row (stable ID=%s)', async (withId) => {
+        const selected = {name: 'Selected', ...(withId ? {id: 'selected'} : {})};
+        const other = {name: 'Other', ...(withId ? {id: 'other'} : {})};
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        const save = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(selection, '_profileWriteGeneration', 0);
+        Reflect.set(selection, '_profileWriteTail', Promise.resolve());
+        Reflect.set(selection, '_profileListRefreshGeneration', 0);
+        Reflect.set(selection, '_display', {application: {api: {optionsGetFull: vi.fn().mockResolvedValue({profiles: [other, selected]})}}});
+        Reflect.set(selection, '_setProfileCurrent', save);
+        Reflect.set(selection, '_setProfilePanelVisible', vi.fn());
+        Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
+        selection._onProfileRadioChange(0, /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})),
+            /** @type {import('settings').Profile} */ (/** @type {unknown} */ (selected)));
+        await Reflect.get(selection, '_profileWriteTail');
+        expect(save).toHaveBeenCalledExactlyOnceWith(1);
+    });
+
+    test('a replacement at the old index cannot receive a removed row selection', async () => {
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        const save = vi.fn();
+        const report = vi.spyOn(console, 'error').mockImplementation(() => {});
+        try {
+            Reflect.set(selection, '_profileWriteGeneration', 0);
+            Reflect.set(selection, '_profileWriteTail', Promise.resolve());
+            Reflect.set(selection, '_profileListRefreshGeneration', 0);
+            Reflect.set(selection, '_display', {application: {api: {optionsGetFull: vi.fn().mockResolvedValue({profiles: [{id: 'replacement', name: 'Other'}]})}}});
+            Reflect.set(selection, '_setProfileCurrent', save);
+            Reflect.set(selection, '_updateProfileList', vi.fn().mockResolvedValue(void 0));
+            Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
+            selection._onProfileRadioChange(0, /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})),
+                /** @type {import('settings').Profile} */ (/** @type {unknown} */ ({id: 'removed', name: 'Selected'})));
+            await Reflect.get(selection, '_profileWriteTail');
+            expect(save).not.toHaveBeenCalled();
+        } finally {
+            report.mockRestore();
+        }
+    });
+    test('ambiguous legacy snapshots cannot select the first matching row', async () => {
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        const save = vi.fn();
+        const report = vi.spyOn(console, 'error').mockImplementation(() => {});
+        try {
+            Reflect.set(selection, '_profileWriteGeneration', 0);
+            Reflect.set(selection, '_profileWriteTail', Promise.resolve());
+            Reflect.set(selection, '_profileListRefreshGeneration', 0);
+            Reflect.set(selection, '_display', {application: {api: {optionsGetFull: vi.fn().mockResolvedValue({profiles: [{name: 'Selected'}, {name: 'Selected'}]})}}});
+            Reflect.set(selection, '_setProfileCurrent', save);
+            Reflect.set(selection, '_updateProfileList', vi.fn().mockResolvedValue(void 0));
+            Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
+            selection._onProfileRadioChange(0, /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})),
+                /** @type {import('settings').Profile} */ (/** @type {unknown} */ ({name: 'Selected'})));
+            await Reflect.get(selection, '_profileWriteTail');
+            expect(save).not.toHaveBeenCalled();
+        } finally {
+            report.mockRestore();
+        }
+    });
+});

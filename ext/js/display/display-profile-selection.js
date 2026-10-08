@@ -146,7 +146,7 @@ export class DisplayProfileSelection {
             const displayGenerator = this._display.displayGenerator;
             const {profileCurrent, profiles} = options;
             const fragment = document.createDocumentFragment();
-            /** @type {Array<{radio: HTMLInputElement, index: number}>} */
+            /** @type {Array<{radio: HTMLInputElement, index: number, profile: import('settings').Profile}>} */
             const radios = [];
             for (let i = 0, ii = profiles.length; i < ii; ++i) {
                 const {name} = profiles[i];
@@ -158,13 +158,13 @@ export class DisplayProfileSelection {
                 const nameNode = querySelectorNotNull(entry, '.profile-list-item-name');
                 nameNode.textContent = name;
                 fragment.appendChild(entry);
-                radios.push({radio, index: i});
+                radios.push({radio, index: i, profile: profiles[i]});
             }
             this._eventListeners.removeAllEventListeners();
             this._profileList.textContent = '';
             this._profileList.appendChild(fragment);
-            for (const {radio, index} of radios) {
-                this._eventListeners.addEventListener(radio, 'change', this._onProfileRadioChange.bind(this, index), false);
+            for (const {radio, index, profile} of radios) {
+                this._eventListeners.addEventListener(radio, 'change', (event) => this._onProfileRadioChange(index, event, profile), false);
             }
             this._profileListNeedsUpdate = false;
         } catch (error) {
@@ -178,11 +178,16 @@ export class DisplayProfileSelection {
     /**
      * @param {number} index
      * @param {Event} e
+     * @param {?import('settings').Profile} [selectedProfile]
      */
-    _onProfileRadioChange(index, e) {
+    _onProfileRadioChange(index, e, selectedProfile = null) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         if (!element.checked) { return; }
 
+        // The row owns the selection, even if a queued save sees a reordered
+        // snapshot. Older profiles without IDs require an unchanged snapshot.
+        const selectedId = selectedProfile?.id;
+        const selectedSnapshot = selectedProfile === null ? null : JSON.stringify(selectedProfile);
         const generation = ++this._profileWriteGeneration;
         // Wait for an earlier write to settle, but skip selections superseded
         // before their turn. This prevents slow writes from winning out of order.
@@ -190,10 +195,18 @@ export class DisplayProfileSelection {
             if (generation !== this._profileWriteGeneration) { return; }
             const {profiles} = await this._display.application.api.optionsGetFull();
             if (generation !== this._profileWriteGeneration) { return; }
-            if (!Number.isSafeInteger(index) || index < 0 || index >= profiles.length) {
+            const matchingIndices = selectedProfile === null ? [index] : profiles.flatMap((profile, profileIndex) => {
+                const matches = typeof selectedId === 'string' && selectedId.length > 0 ?
+                    profile.id === selectedId : JSON.stringify(profile) === selectedSnapshot;
+                return matches ? [profileIndex] : [];
+            });
+            // Ambiguous legacy snapshots or duplicate IDs cannot safely select
+            // a row. Refresh rather than silently choosing the first match.
+            const currentIndex = matchingIndices.length === 1 ? matchingIndices[0] : -1;
+            if (!Number.isSafeInteger(currentIndex) || currentIndex < 0 || currentIndex >= profiles.length) {
                 throw new RangeError('Selected profile is no longer available');
             }
-            await this._setProfileCurrent(index);
+            await this._setProfileCurrent(currentIndex);
             if (generation !== this._profileWriteGeneration) { return; }
             // Local settings events are filtered by source; fetch persisted
             // radio selection on the next open instead of reusing old markup.
