@@ -82,7 +82,9 @@ export function isJapanesePrefixCandidate(query) {
     if (/\p{Script=Latin}/u.test(query)) { return false; }
     let count = 0;
     for (const character of query) {
-        if (!/[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(character)) { continue; }
+        // The Japanese prolonged sound mark is Script=Common, but is part
+        // of legitimate kana prefixes such as カー and こー.
+        if (!/[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}\u30fc]/u.test(character)) { continue; }
         if (++count >= 2) { return true; }
     }
     return false;
