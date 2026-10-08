@@ -33,6 +33,10 @@ export class SortFrequencyDictionaryController {
         this._sortFrequencyDictionaryOrderAutoButton = querySelectorNotNull(document, '#sort-frequency-dictionary-order-auto');
         /** @type {HTMLElement} */
         this._sortFrequencyDictionaryOrderContainerNode = querySelectorNotNull(document, '#sort-frequency-dictionary-order-container');
+        /** @type {string} */
+        this._confirmedDictionary = this._sortFrequencyDictionarySelect.value;
+        /** @type {string} */
+        this._confirmedOrder = this._sortFrequencyDictionaryOrderSelect.value;
         /** @type {?import('core').TokenObject} */
         this._getDictionaryInfoToken = null;
     }
@@ -82,8 +86,10 @@ export class SortFrequencyDictionaryController {
      */
     _onOptionsChanged({options}) {
         const {sortFrequencyDictionary, sortFrequencyDictionaryOrder} = options.general;
-        /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect).value = (sortFrequencyDictionary !== null ? sortFrequencyDictionary : '');
-        /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = sortFrequencyDictionaryOrder;
+        this._confirmedDictionary = sortFrequencyDictionary !== null ? sortFrequencyDictionary : '';
+        this._confirmedOrder = sortFrequencyDictionaryOrder;
+        /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect).value = this._confirmedDictionary;
+        /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = this._confirmedOrder;
         /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = (sortFrequencyDictionary === null);
     }
 
@@ -134,7 +140,7 @@ export class SortFrequencyDictionaryController {
      * @param {?string} value
      */
     async _setSortFrequencyDictionaryValue(value) {
-        const previousValue = this._sortFrequencyDictionarySelect.value;
+        const previousValue = this._confirmedDictionary;
         const previousHidden = this._sortFrequencyDictionaryOrderContainerNode.hidden;
         /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = (value === null);
         try {
@@ -144,6 +150,7 @@ export class SortFrequencyDictionaryController {
             /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = previousHidden;
             throw e;
         }
+        this._confirmedDictionary = value !== null ? value : '';
         if (value !== null) {
             await this._autoUpdateOrder(value);
         }
@@ -153,9 +160,10 @@ export class SortFrequencyDictionaryController {
      * @param {import('settings').SortFrequencyDictionaryOrder} value
      */
     async _setSortFrequencyDictionaryOrderValue(value) {
-        const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
+        const previousValue = this._confirmedOrder;
         try {
             await this._settingsController.setProfileSetting('general.sortFrequencyDictionaryOrder', value);
+            this._confirmedOrder = value;
         } catch (e) {
             this._sortFrequencyDictionaryOrderSelect.value = previousValue;
             throw e;
