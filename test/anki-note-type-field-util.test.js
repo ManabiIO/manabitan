@@ -102,6 +102,37 @@ describe('buildAnkiFieldsForModel', () => {
         });
     });
 
+    test('falls back instead of crashing on malformed saved field mappings', () => {
+        const fields = buildAnkiFieldsForModel({
+            modelName: 'Custom Model',
+            fieldNames: ['Front', 'Reading', 'Meaning', 'Notes'],
+            dictionaryEntryType: 'term',
+            oldFields: /** @type {import('settings').AnkiFields} */ (/** @type {unknown} */ ({
+                Reading: null,
+                Meaning: {value: 123, overwriteMode: 'skip'},
+                Notes: {value: 'keep me', overwriteMode: 'skip'},
+            })),
+        });
+
+        expect(fields.Front.value).toBe('{expression}');
+        expect(fields.Reading.value).toBe('{reading}');
+        expect(fields.Meaning.value).toBe('{glossary}');
+        expect(fields.Notes.value).toBe('keep me');
+    });
+
+    test('preserves __proto__ as an own serializable field in custom note mappings', () => {
+        const fields = buildAnkiFieldsForModel({
+            modelName: 'Custom Model',
+            fieldNames: ['__proto__', 'Reading'],
+            dictionaryEntryType: 'term',
+        });
+
+        expect(Object.prototype.hasOwnProperty.call(fields, '__proto__')).toBe(true);
+        expect(fields['__proto__']).toStrictEqual({value: '{expression}', overwriteMode: 'coalesce'});
+        expect(Object.getPrototypeOf(fields)).toBe(Object.prototype);
+        expect(JSON.parse(JSON.stringify(fields))['__proto__']).toStrictEqual({value: '{expression}', overwriteMode: 'coalesce'});
+    });
+
     test('uses the first available single glossary marker for primary dictionary fields', () => {
         const fields = buildAnkiFieldsForModel({
             modelName: 'Lapis',
