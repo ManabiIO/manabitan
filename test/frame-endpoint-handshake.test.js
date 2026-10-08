@@ -67,7 +67,7 @@ describe('FrameEndpoint handshake lifecycle', () => {
         expect(Reflect.get(endpoint, '_eventListeners').size).toBe(0);
     });
 
-    test.each([NaN, Infinity, -1, 1.5, Number.MAX_SAFE_INTEGER + 1, '3'])(
+    test.each([Number.NaN, Infinity, -1, 1.5, Number.MAX_SAFE_INTEGER + 1, '3'])(
         'invalid host frame id %s does not lock the endpoint',
         async (frameId) => {
             const broadcastTab = vi.fn().mockResolvedValue(void 0);
@@ -133,16 +133,12 @@ describe('FrameEndpoint handshake lifecycle', () => {
     test('persistent acknowledgement failures stop automatic retrying after a bounded backoff', async () => {
         vi.useFakeTimers();
         try {
-            /** @type {FrameEndpoint | undefined} */
-            let endpoint;
             let attempts = 0;
             const broadcastTab = vi.fn().mockImplementation(async () => {
-                if (typeof endpoint !== 'undefined') {
-                    connect(endpoint, `attempt-${++attempts}`, 3);
-                }
+                connect(endpoint, `attempt-${++attempts}`, 3);
             });
             const sendMessageToFrame = vi.fn().mockRejectedValue(new Error('persistent failure'));
-            endpoint = createEndpoint(broadcastTab, sendMessageToFrame);
+            const endpoint = createEndpoint(broadcastTab, sendMessageToFrame);
             endpoint.signal();
             await vi.advanceTimersByTimeAsync(10_000);
 
