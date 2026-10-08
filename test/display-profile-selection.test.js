@@ -191,17 +191,14 @@ describe('DisplayProfileSelection options refresh handling', () => {
     });
 
     test('rapid selections serialize writes and only the newest selection refreshes UI', async () => {
-        /** @type {(value: [{error?: unknown}]) => void} */
-        let completeFirst;
-        /** @type {() => void} */
-        let firstWriteStarted;
-        const firstWriteStartedPromise = new Promise((resolve) => { firstWriteStarted = resolve; });
+        const firstWriteStarted = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const firstWriteCompletion = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
         const writes = [];
-        const setProfileCurrent = vi.fn().mockImplementation((index) => {
+        const setProfileCurrent = vi.fn().mockImplementation((/** @type {number} */ index) => {
             writes.push(index);
             if (index === 1) {
-                firstWriteStarted();
-                return new Promise((resolve) => { completeFirst = resolve; });
+                firstWriteStarted.resolve();
+                return firstWriteCompletion.promise;
             }
             return Promise.resolve();
         });
@@ -216,13 +213,13 @@ describe('DisplayProfileSelection options refresh handling', () => {
         Reflect.set(selection, '_setProfileCurrent', setProfileCurrent);
         Reflect.set(selection, '_setProfilePanelVisible', closePanel);
         Reflect.set(selection, '_updateCurrentProfileName', updateName);
-        const select = (index) => DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index,
+        const select = (/** @type {number} */ index) => DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index,
             /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
         select(1);
-        await firstWriteStartedPromise;
+        await firstWriteStarted.promise;
         select(2);
         expect(writes).toEqual([1]);
-        completeFirst([{}]);
+        firstWriteCompletion.resolve();
         await Reflect.get(selection, '_profileWriteTail');
         expect(writes).toEqual([1, 2]);
         expect(closePanel).toHaveBeenCalledOnce();
@@ -230,15 +227,12 @@ describe('DisplayProfileSelection options refresh handling', () => {
     });
 
     test('superseded profile-save errors do not overwrite the latest selection', async () => {
-        /** @type {(error: Error) => void} */
-        let failFirst;
-        /** @type {() => void} */
-        let firstWriteStarted;
-        const firstWriteStartedPromise = new Promise((resolve) => { firstWriteStarted = resolve; });
+        const firstWriteStarted = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const firstWriteCompletion = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
         const setProfileCurrent = vi.fn().mockImplementation((index) => {
             if (index === 1) {
-                firstWriteStarted();
-                return new Promise((_resolve, reject) => { failFirst = reject; });
+                firstWriteStarted.resolve();
+                return firstWriteCompletion.promise;
             }
             return Promise.resolve();
         });
@@ -258,10 +252,11 @@ describe('DisplayProfileSelection options refresh handling', () => {
         const select = (index) => DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index,
             /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
         select(1);
-        await firstWriteStartedPromise;
+        await firstWriteStarted.promise;
         select(2);
-        failFirst(new Error('earlier save failed'));
+        firstWriteCompletion.reject(new Error('earlier save failed'));
         await Reflect.get(selection, '_profileWriteTail');
+        await new Promise((resolve) => setTimeout(resolve, 0));
         expect(setProfileCurrent).toHaveBeenCalledTimes(2);
         expect(updateList).not.toHaveBeenCalled();
         expect(updateName).toHaveBeenCalledOnce();
