@@ -151,14 +151,17 @@ export function createGlossarySearchQuery(query) {
     ) {
         return null;
     }
-    const tokens = glossarySearchTokensFromText(folded).slice(0, MAX_GLOSSARY_QUERY_TOKENS);
-    if (tokens.length === 0) { return null; }
-    const prefix = tokens[tokens.length - 1];
-    if ([...prefix].length < MIN_INDEX_TOKEN_CODEPOINTS) { return null; }
-    const phrase = [...folded.matchAll(TOKEN_PATTERN)]
-        .map((match) => match[0].replace(/’/gu, "'"))
-        .slice(0, MAX_GLOSSARY_QUERY_TOKENS)
-        .join(' ');
+    const words = [...folded.matchAll(TOKEN_PATTERN)].map((match) => match[0]);
+    // The last typed word owns live-prefix completion. Index tokens are
+    // deduplicated, so taking their last item loses this when a word repeats.
+    if (words.length === 0 || words.length > MAX_GLOSSARY_QUERY_TOKENS) { return null; }
+    const prefix = words[words.length - 1];
+    const prefixLength = [...prefix].length;
+    if (prefixLength < MIN_INDEX_TOKEN_CODEPOINTS || prefixLength > MAX_INDEX_TOKEN_CODEPOINTS) { return null; }
+    const phrase = words.join(' ');
+    const uniqueTokens = glossarySearchTokensFromText(phrase);
+    // Keep required tokens distinct for the posting-list HAVING count.
+    const tokens = [...uniqueTokens.filter((token) => token !== prefix), prefix];
     return {folded, phrase, tokens, prefix};
 }
 

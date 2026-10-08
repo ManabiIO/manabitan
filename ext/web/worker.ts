@@ -4,6 +4,7 @@ import {DictionaryImporter} from '../js/dictionary/dictionary-importer.js';
 import {DictionaryImporterMediaLoader} from '../js/dictionary/dictionary-importer-media-loader.js';
 import {Translator} from '../js/language/translator.js';
 import {findJapaneseSearch} from '../js/search/japanese-search.js';
+import {preferencesAfterDeletion, recoverMissingDefault} from './preferences.js';
 import {dictionaryPreview} from '../js/search/dictionary-preview.js';
 import {parseJson} from '../js/core/json.js';
 import {API_VERSION, STORAGE_LOCK, MAX_ARCHIVE_BYTES, WebRuntimeError, isRequest, record, text, type Preferences, type Request, type Reply, type Status} from './protocol.js';
@@ -117,6 +118,10 @@ error);
  */
 async function status(): Promise<Status> {
     const dictionaries = await database.getDictionaryInfo();
+    // Recover a delete interrupted between the database commit and its
+    // preference write, without undoing an explicitly declined default.
+    const next = recoverMissingDefault(preferences, new Set(dictionaries.map((d) => d.title)));
+    if (next !== preferences) {await writePreferences(next);}
     const [counts, estimate, persisted] = await Promise.all([
         database.getDictionaryCounts(dictionaries.map((d) => d.title), true),
         navigator.storage.estimate(),
@@ -246,9 +251,12 @@ async function dispatch(request: Request): Promise<unknown> {
         }
         case 'delete': {
             const title = text(p.title);
-            if (title === preferences.defaultTitle) {await writePreferences({...preferences, defaultChoice: 'deleted'});}
             await database.deleteDictionary(title, 1000, (progress) => reply(request.id, {progress}));
             translator.clearDatabaseCaches();
+            // Only change deletion preferences after storage commits. A
+            // reinstall of the same title must not inherit a disabled flag.
+            const next = preferencesAfterDeletion(preferences, title);
+            if (next !== preferences) {await writePreferences(next);}
             return status();
         }
         case 'enable': {

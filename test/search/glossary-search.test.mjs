@@ -60,6 +60,23 @@ test('English query admission rejects Japanese and one-character noise', () => {
     assert.equal(createGlossarySearchQuery(''), null);
 });
 
+test('the final typed word owns completion even if it repeats an earlier word', () => {
+    const repeated = createGlossarySearchQuery('cat dog cat');
+    assert.deepEqual(repeated, {
+        folded: 'cat dog cat',
+        phrase: 'cat dog cat',
+        tokens: ['dog', 'cat'],
+        prefix: 'cat',
+    });
+    assert.equal(scoreGlossarySearchMatch(['a dog and a cat'], repeated)?.tier, 1);
+    assert.equal(scoreGlossarySearchMatch(['the doghouse has caterpillars'], repeated), null);
+
+    assert.deepEqual(createGlossarySearchQuery('a cat')?.tokens, ['cat']);
+    assert.equal(createGlossarySearchQuery('cat a'), null);
+    assert.equal(createGlossarySearchQuery(`cat ${'x'.repeat(65)}`), null);
+    assert.equal(createGlossarySearchQuery('one two three four five six seven eight nine'), null);
+});
+
 test('prefix upper bounds cover the prefix and exclude its lexical successor', () => {
     const upper = glossaryPrefixUpperBound('cat');
     if (upper === null) { assert.fail('Expected a finite prefix upper bound'); }

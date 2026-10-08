@@ -143,11 +143,13 @@ function bounded(value: unknown, budget: {nodes: number, characters: number}): b
  *
  * @param container
  */
-function constrainStyles(container: HTMLElement) {
+export function constrainStyles(container: HTMLElement) {
     // The shared renderer creates DOM safely, but dictionary presentation values
     // may include CSS resource functions. A webpage must not fetch them.
     for (const node of container.querySelectorAll<HTMLElement>('[style]')) {
-        for (const property of node.style) {
+        // CSSStyleDeclaration is live; removing an entry during iteration
+        // skips the next declaration, including an adjacent unsafe URL.
+        for (const property of [...node.style]) {
             const value = node.style.getPropertyValue(property);
             if (property === 'background-image' || property === 'list-style-image' || /url\s*\(|image-set\s*\(|var\s*\(|[\\<>@]/i.test(value)) {
                 node.style.removeProperty(property);
