@@ -79,9 +79,11 @@ export function japaneseSearchQueries(value) {
  * @returns {boolean}
  */
 export function isJapanesePrefixCandidate(query) {
-    return [...query].length >= 2 &&
-    /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(query) &&
-    !/[a-zāīūēōâîûêô]/i.test(query);
+    if (/[a-zāīūēōâîûêô]/i.test(query)) { return false; }
+    const japaneseLetters = query.match(/[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}ー]/gu);
+    return japaneseLetters !== null &&
+        japaneseLetters.length >= 2 &&
+        /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(query);
 }
 
 /**
