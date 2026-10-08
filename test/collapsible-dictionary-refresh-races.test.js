@@ -5,6 +5,7 @@
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {deferPromise} from '../ext/js/core/utilities.js';
+import {log} from '../ext/js/core/log.js';
 import {CollapsibleDictionaryController} from '../ext/js/pages/settings/collapsible-dictionary-controller.js';
 
 /**
@@ -110,6 +111,32 @@ describe('collapsible dictionary asynchronous settings refresh', () => {
         await controller._setDefinitionsCollapsibleAll('force-expanded');
         expect(mutate).toHaveBeenCalledOnce();
         expect(select.value).toBe('force-expanded');
+    });
+
+    test('an all-selector write failure is logged and reconciled with persisted options', async () => {
+        const {controller} = createHarness(async () => /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: []})));
+        const failure = new Error('Could not save dictionary setting');
+        const setAll = vi.fn().mockRejectedValueOnce(failure);
+        const refresh = vi.fn().mockResolvedValue(void 0);
+        const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
+        Reflect.set(controller, '_setDefinitionsCollapsibleAll', setAll);
+        Reflect.set(controller, '_updateAllSelectFresh', refresh);
+        controller._onAllSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({
+            currentTarget: {value: 'force-expanded'},
+        })));
+        await vi.waitFor(() => { expect(refresh).toHaveBeenCalledOnce(); });
+        expect(setAll).toHaveBeenCalledExactlyOnceWith('force-expanded');
+        expect(logError).toHaveBeenCalledExactlyOnceWith(failure);
+    });
+
+    test('a failed per-dictionary selector refresh does not create an unhandled rejection', async () => {
+        const {controller} = createHarness(async () => /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: []})));
+        const failure = new Error('Could not read dictionary settings');
+        const refresh = vi.fn().mockRejectedValueOnce(failure);
+        const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
+        Reflect.set(controller, '_updateAllSelectFresh', refresh);
+        controller._onDefinitionsCollapsibleChange();
+        await vi.waitFor(() => { expect(logError).toHaveBeenCalledExactlyOnceWith(failure); });
     });
 
     test('rebuilding the all-selector invalidates a pending refresh', async () => {
