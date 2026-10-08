@@ -54,6 +54,11 @@ export class RecommendedSettingsController {
         const setLanguage = this._languageSelect.value;
         if (typeof setLanguage !== 'string') { return; }
 
+        // Hide the previous language's recommendations while the new request is
+        // pending. Applying those stale checkboxes would change the wrong settings.
+        this._recommendedSettingsModal.hidden = true;
+        this._recommendedSettings = new Map();
+
         let recommendedSettings;
         try {
             recommendedSettings = await this._getRecommendedSettings(setLanguage);
