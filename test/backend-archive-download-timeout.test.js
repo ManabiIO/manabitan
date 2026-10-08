@@ -111,3 +111,20 @@ describe('backend dictionary archive filename detection', () => {
         expect(vi.getTimerCount()).toBe(0);
     });
 });
+
+describe('backend dictionary archive URL filename fallback', () => {
+    test.each([
+        ['https://example.test/dictionaries/%E6%97%A5%E6%9C%AC%E8%AA%9E.zip', '日本語.zip'],
+        ['https://example.test/dictionaries/dir%2Farchive.zip', 'archive.zip'],
+        ['https://example.test/dictionaries/unknown%ZZ.zip', 'unknown%ZZ.zip'],
+    ])('decodes and normalizes fallback filename for %s', async (url, expected) => {
+        vi.useFakeTimers();
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('data')));
+        vi.spyOn(RequestBuilder, 'readFetchResponseArrayBuffer').mockResolvedValue(new ArrayBuffer(0));
+
+        const result = await downloadArchive(url);
+
+        expect(result.fileName).toBe(expected);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+});
