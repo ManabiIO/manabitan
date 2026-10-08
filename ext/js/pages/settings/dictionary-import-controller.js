@@ -1221,7 +1221,7 @@ export class DictionaryImportController {
         const timeoutError = new Error(`${label} did not complete within ${String(timeoutMs)}ms`);
         /** @type {ReturnType<typeof setTimeout>|undefined} */
         let timer;
-        const timeoutPromise = new Promise((resolve, reject) => {
+        const timeoutPromise = new Promise((_resolve, reject) => {
             timer = setTimeout(() => reject(timeoutError), timeoutMs);
         });
         try {
