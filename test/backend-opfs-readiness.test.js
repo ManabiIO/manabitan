@@ -20,7 +20,7 @@ import {Backend} from '../ext/js/background/backend.js';
 import {reportDiagnostics} from '../ext/js/core/diagnostics-reporter.js';
 
 vi.mock('../ext/js/core/diagnostics-reporter.js', async (importOriginal) => ({
-    .../** @type {Record<string, unknown>} */ (await importOriginal()),
+    ...(/** @type {Record<string, unknown>} */ (await importOriginal())),
     reportDiagnostics: vi.fn(),
 }));
 
