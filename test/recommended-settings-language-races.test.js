@@ -48,6 +48,29 @@ describe('recommended settings language selection ownership', () => {
         expect(recommendations).toHaveBeenCalledTimes(2);
     });
 
+    test('changing language immediately hides old recommendations until the new fetch finishes', async () => {
+        const deferred = /** @type {import('core').DeferredPromiseDetails<import('settings-controller').RecommendedSetting[]>} */ (deferPromise());
+        const controller = createController();
+        const oldSettings = new Map([['0', /** @type {import('settings-controller').RecommendedSetting} */ ({
+            description: 'Old language',
+            modification: {action: 'set', path: 'general.language', value: 'ja'},
+        })]]);
+        const modal = {hidden: false};
+        Reflect.set(controller, '_languageSelect', {value: 'en'});
+        Reflect.set(controller, '_recommendedSettingsModal', modal);
+        Reflect.set(controller, '_recommendedSettings', oldSettings);
+        Reflect.set(controller, '_getRecommendedSettings', () => deferred.promise);
+        const pending = controller._onLanguageSelectChanged(/** @type {Event} */ (/** @type {unknown} */ ({})));
+        expect(modal.hidden).toBe(true);
+        expect(Reflect.get(controller, '_recommendedSettings')).toEqual(new Map());
+        const list = {};
+        Object.defineProperty(list, 'innerHTML', {set: () => {}});
+        vi.stubGlobal('document', {querySelector: () => list});
+        deferred.resolve([]);
+        await pending;
+        expect(modal.hidden).toBe(true);
+    });
+
     test('concurrent language requests share one recommended-settings fetch', async () => {
         const response = new Response(JSON.stringify({ja: [], en: []}), {headers: {'Content-Type': 'application/json'}});
         const fetch = vi.fn().mockResolvedValue(response);
