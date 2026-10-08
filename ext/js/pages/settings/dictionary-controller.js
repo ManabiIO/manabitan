@@ -879,20 +879,23 @@ export class DictionaryController {
         const {profiles} = optionsFull;
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
             let modified = false;
-            const missingDictionaries = [...dictionaries];
+            const installedDictionaryNames = new Set(dictionaries.map(({title}) => title));
+            const existingDictionaryNames = new Set();
             const dictionaryOptionsArray = profiles[i].options.dictionaries;
             for (let j = dictionaryOptionsArray.length - 1; j >= 0; --j) {
                 const {name} = dictionaryOptionsArray[j];
-                const missingDictionariesNameIndex = missingDictionaries.findIndex((x) => x.title === name);
-                if (missingDictionariesNameIndex !== -1) {
-                    missingDictionaries.splice(missingDictionariesNameIndex, 1);
+                if (installedDictionaryNames.has(name)) {
+                    // A dictionary can intentionally have multiple entries with
+                    // different aliases and enablement. Preserve each one.
+                    existingDictionaryNames.add(name);
                 } else {
                     dictionaryOptionsArray.splice(j, 1);
                     modified = true;
                 }
             }
 
-            for (const {title, styles} of missingDictionaries) {
+            for (const {title, styles} of dictionaries) {
+                if (existingDictionaryNames.has(title)) { continue; }
                 const value = DictionaryController.createDefaultDictionarySettings(title, newDictionariesEnabled, styles);
                 dictionaryOptionsArray.push(value);
                 modified = true;
