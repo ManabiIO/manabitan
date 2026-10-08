@@ -893,7 +893,7 @@ describe('OptionsUtil', () => {
 
         expect(options.profiles[0].id).toBe('profile-0');
         expect(writtenOptions).not.toBeNull();
-        expect(JSON.parse(/** @type {string} */ (writtenOptions)).profiles[0].id).toBe('profile-0');
+        expect(JSON.parse(/** @type {string} */ (/** @type {unknown} */ (writtenOptions))).profiles[0].id).toBe('profile-0');
     });
 
     describe('Default', () => {
