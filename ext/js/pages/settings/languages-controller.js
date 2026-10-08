@@ -43,6 +43,9 @@ export class LanguagesController {
      */
     _fillSelect(languages) {
         const selectElement = querySelectorNotNull(document, '#language-select');
+        if (!(selectElement instanceof HTMLSelectElement)) {
+            throw new Error('Expected #language-select to be a select input');
+        }
         const previousValue = selectElement.value;
         selectElement.textContent = '';
         let hasPreviousValue = false;
