@@ -19,6 +19,7 @@
 import {ClipboardMonitor} from '../comm/clipboard-monitor.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
@@ -98,6 +99,10 @@ export class SearchDisplayController {
         ]);
         /** @type {number} */
         this._profileSelectRefreshGeneration = 0;
+        /** @type {number} */
+        this._profileSelectWriteGeneration = 0;
+        /** @type {Promise<void>} */
+        this._profileSelectWriteTail = Promise.resolve();
         /** @type {number} */
         this._searchRequestSequence = 0;
         /** @type {number} */
@@ -665,16 +670,25 @@ export class SearchDisplayController {
      * @param {Event} event
      */
     async _onProfileSelectChange(event) {
-        const node = /** @type {HTMLInputElement} */ (event.currentTarget);
-        const value = Number.parseInt(node.value, 10);
-        const optionsFull = await this._display.application.api.optionsGetFull();
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < optionsFull.profiles.length) {
-            try {
+        const node = /** @type {HTMLSelectElement} */ (event.currentTarget);
+        const value = Number(node.value);
+        const generation = ++this._profileSelectWriteGeneration;
+        // Writes must finish in the user's order; obsolete queued selections
+        // should not write after a newer choice or restore stale UI on error.
+        const operation = this._profileSelectWriteTail.then(async () => {
+            if (generation !== this._profileSelectWriteGeneration) { return; }
+            const {profiles} = await this._display.application.api.optionsGetFull();
+            if (generation !== this._profileSelectWriteGeneration) { return; }
+            if (Number.isSafeInteger(value) && value >= 0 && value < profiles.length) {
                 await this._setDefaultProfileIndex(value);
-            } catch (error) {
-                await this._updateProfileSelect();
-                throw error;
             }
+        });
+        this._profileSelectWriteTail = operation.catch(() => {});
+        try {
+            await operation;
+        } catch (error) {
+            if (generation === this._profileSelectWriteGeneration) { await this._updateProfileSelect(); }
+            throw error;
         }
     }
 
@@ -690,7 +704,11 @@ export class SearchDisplayController {
             scope: 'global',
             optionsContext: null,
         };
-        await this._display.application.api.modifySettings([modification], 'search');
+        const results = await this._display.application.api.modifySettings([modification], 'search');
+        if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
+            throw new Error('Search profile update returned an invalid result');
+        }
+        if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
     }
 
     /**
