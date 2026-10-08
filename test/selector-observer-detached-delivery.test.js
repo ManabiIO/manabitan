@@ -28,7 +28,7 @@ test('detached attribute mutation cannot resurrect an observer removed in the sa
         observer.observe(root, true);
         expect([...observer.entries()]).toHaveLength(1);
         child.remove();
-        child.setAttribute('data-state', 'detached');
+        child.dataset.state = 'detached';
         await Promise.resolve();
         expect(onAdded).toHaveBeenCalledTimes(1);
         expect(onRemoved).toHaveBeenCalledTimes(1);
