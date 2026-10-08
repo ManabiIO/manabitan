@@ -407,6 +407,10 @@ describe('Keyboard Event Handling', () => {
 
     test('paste only takes over noneditable surfaces with usable text', () => {
         const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        /**
+         * @param {Element} target
+         * @param {string} text
+         */
         const createEvent = (target, text) => /** @type {ClipboardEvent} */ (/** @type {unknown} */ ({
             target,
             defaultPrevented: false,
