@@ -40,11 +40,12 @@ describe('Option toggle hotkey serialization', () => {
         const firstWriteStarted = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
         const allowFirstWrite = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
         let enabled = false;
+        let writeCount = 0;
         const getSettings = vi.fn(async () => [{result: enabled}]);
         const modifySettings = vi.fn(async (/** @type {import('settings-modifications').ScopedModificationSet[]} */ modifications) => {
             const value = modifications[0].value;
             if (typeof value !== 'boolean') { throw new Error('Expected boolean'); }
-            if (modifySettings.mock.calls.length === 1) {
+            if (++writeCount === 1) {
                 firstWriteStarted.resolve();
                 await allowFirstWrite.promise;
             }
