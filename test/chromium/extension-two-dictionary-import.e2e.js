@@ -3186,6 +3186,17 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                 });
                 attemptTiming.popupStateReadMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 timing.lastAttempt = attemptTiming;
+                // A subsequent hover may clear the previous result between
+                // waitForPopupContentState and this read. An unresolved popup is
+                // not a completed negative lookup; retry until a terminal state.
+                if (
+                    popupState?.hasDictionaryEntries !== true &&
+                    popupState?.noResultsVisible !== true &&
+                    popupState?.noDictionariesVisible !== true
+                ) {
+                    attemptTiming.popupContentInvalidatedDuringRead = true;
+                    continue;
+                }
                 return {
                     popupText,
                     usedModifier: modifier,
@@ -5328,7 +5339,8 @@ async function main() {
                             throw new Error(
                                 `Hover iteration ${String(i + 1)} (${selector}, ${motionProfile.label}) did not show dictionary results. ` +
                                 `entries=${JSON.stringify(hoverResult.entriesTextPreview)} popup=${JSON.stringify(hoverResult.popupText.slice(0, 200))} ` +
-                                `noResults=${String(hoverResult.noResultsVisible)} noDictionaries=${String(hoverResult.noDictionariesVisible)}`,
+                                `noResults=${String(hoverResult.noResultsVisible)} noDictionaries=${String(hoverResult.noDictionariesVisible)} ` +
+                                `lastAttempt=${JSON.stringify(hoverResult.timing?.lastAttempt ?? null)}`,
                             );
                         }
                         await page.mouse.move(8, 8, {steps: 4});
