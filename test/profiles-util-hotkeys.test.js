@@ -16,6 +16,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
+import {deferPromise} from '../ext/js/core/utilities.js';
 import {setProfile} from '../ext/js/data/profiles-util.js';
 
 /**
@@ -30,8 +31,8 @@ function createApplication(getOptions, modifySettings) {
 
 describe('Profile hotkey writes', () => {
     test('two fast Next actions persist successive profiles rather than losing a press', async () => {
-        const started = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
-        const allowFirstWrite = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const started = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+        const allowFirstWrite = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
         let current = 0;
         /** @type {number[]} */
         const writes = [];
