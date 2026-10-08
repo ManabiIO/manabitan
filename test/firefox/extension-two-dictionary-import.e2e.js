@@ -2664,6 +2664,9 @@ async function main() {
     await mkdir(diagnosticsArtifactPaths.crashDumpDir, {recursive: true});
     geckodriverLogFd = openSync(diagnosticsArtifactPaths.geckodriverLogPath, 'a');
     const firefoxService = new firefox.ServiceBuilder();
+    // Firefox 138+ requires explicit geckodriver permission for privileged
+    // extension browsing contexts; browser capability flags are insufficient.
+    firefoxService.addArguments('--allow-system-access');
     firefoxService.enableVerboseLogging(true);
     firefoxService.setEnvironment({
         ...process.env,
