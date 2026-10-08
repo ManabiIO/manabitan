@@ -37,6 +37,126 @@ function createControllerForInternalTests() {
     return /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
 }
 
+describe('DictionaryController installed-dictionary setting reconciliation', () => {
+    test('preserves intentional duplicate aliases and removes only truly missing dictionaries', async () => {
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
+        const optionsFull = {
+            profiles: [{
+                options: {
+                    dictionaries: [
+                        {name: 'JMdict', alias: 'Primary', enabled: true},
+                        {name: 'Unknown', alias: 'Orphan', enabled: true},
+                        {name: 'JMdict', alias: 'Secondary', enabled: false},
+                    ],
+                },
+            }],
+        };
+        const dictionaries = [
+            {title: 'JMdict', styles: 'old'},
+            {title: 'Jitendex', styles: 'new'},
+        ];
+        await DictionaryController.ensureDictionarySettings(
+            /** @type {any} */ ({modifyGlobalSettings}),
+            /** @type {any} */ (dictionaries),
+            /** @type {any} */ (optionsFull),
+            true,
+            false,
+        );
+
+        expect(optionsFull.profiles[0].options.dictionaries).toStrictEqual([
+            {name: 'JMdict', alias: 'Primary', enabled: true},
+            {name: 'JMdict', alias: 'Secondary', enabled: false},
+            DictionaryController.createDefaultDictionarySettings('Jitendex', false, 'new'),
+        ]);
+        expect(modifyGlobalSettings).toHaveBeenCalledOnce();
+        expect(modifyGlobalSettings).toHaveBeenCalledWith([
+            {
+                action: 'splice',
+                path: 'profiles[0].options.dictionaries',
+                start: 1,
+                deleteCount: 1,
+                items: [],
+            },
+            {
+                action: 'push',
+                path: 'profiles[0].options.dictionaries',
+                items: [DictionaryController.createDefaultDictionarySettings('Jitendex', false, 'new')],
+            },
+        ]);
+    });
+
+    test('does not overwrite a newer enablement change from a stale options snapshot', async () => {
+        /** @type {unknown[]} */
+        const backendDictionaries = [
+            {name: 'JMdict', alias: 'My alias', enabled: true},
+            {name: 'Unknown', alias: 'Stale', enabled: true},
+        ];
+        const modifyGlobalSettings = vi.fn(async (/** @type {import('settings-modifications').Modification[]} */ modifications) => {
+            for (const modification of modifications) {
+                if (modification.action === 'splice') {
+                    backendDictionaries.splice(modification.start, modification.deleteCount, ...modification.items);
+                } else if (modification.action === 'push') {
+                    backendDictionaries.push(...modification.items);
+                } else {
+                    throw new Error('Unexpected whole-array replacement');
+                }
+            }
+            return [];
+        });
+        const staleOptions = {
+            profiles: [{
+                options: {
+                    dictionaries: [
+                        {name: 'JMdict', alias: 'My alias', enabled: false},
+                        {name: 'Unknown', alias: 'Stale', enabled: true},
+                    ],
+                },
+            }],
+        };
+
+        await DictionaryController.ensureDictionarySettings(
+            /** @type {any} */ ({modifyGlobalSettings}),
+            /** @type {any} */ ([{title: 'JMdict', styles: ''}]),
+            /** @type {any} */ (staleOptions),
+            true,
+            false,
+        );
+
+        expect(backendDictionaries).toStrictEqual([{name: 'JMdict', alias: 'My alias', enabled: true}]);
+        expect(modifyGlobalSettings).toHaveBeenCalledWith([{
+            action: 'splice',
+            path: 'profiles[0].options.dictionaries',
+            start: 1,
+            deleteCount: 1,
+            items: [],
+        }]);
+    });
+
+    test('does not write when all installed dictionary aliases are present', async () => {
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
+        const optionsFull = {
+            profiles: [{
+                options: {
+                    dictionaries: [
+                        {name: 'JMdict', alias: 'Primary', enabled: true},
+                        {name: 'JMdict', alias: 'Secondary', enabled: false},
+                    ],
+                },
+            }],
+        };
+        await DictionaryController.ensureDictionarySettings(
+            /** @type {any} */ ({modifyGlobalSettings}),
+            /** @type {any} */ ([{title: 'JMdict', styles: ''}]),
+            /** @type {any} */ (optionsFull),
+            true,
+            false,
+        );
+
+        expect(modifyGlobalSettings).not.toHaveBeenCalled();
+        expect(optionsFull.profiles[0].options.dictionaries).toHaveLength(2);
+    });
+});
+
 describe('DictionaryController task queue', () => {
     const isDictionaryInTaskQueue = /** @type {(this: DictionaryController, dictionaryTitle: string) => boolean} */ (getDictionaryControllerMethod('isDictionaryInTaskQueue'));
     const enqueueTask = /** @type {(this: DictionaryController, task: {type: 'delete'|'update', dictionaryTitle: string, downloadUrl?: string}) => Promise<void>} */ (getDictionaryControllerMethod('_enqueueTask'));
