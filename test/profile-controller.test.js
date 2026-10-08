@@ -416,3 +416,43 @@ describe('ProfileController condition profile identity', () => {
         expect(prepare).not.toHaveBeenCalled();
     });
 });
+
+describe('ProfileController profile deletion indices', () => {
+    test.each([
+        {name: 'removing the active first profile with one survivor', count: 2, active: 0, viewed: 0, deleted: 0, nextActive: 0, nextViewed: 0},
+        {name: 'removing the first profile while a later one is active', count: 3, active: 1, viewed: 2, deleted: 0, nextActive: 0, nextViewed: 1},
+        {name: 'removing the active last profile', count: 3, active: 2, viewed: 2, deleted: 2, nextActive: 1, nextViewed: 1},
+        {name: 'removing an unrelated later profile', count: 3, active: 0, viewed: 0, deleted: 2, nextActive: 0, nextViewed: 0},
+        {name: 'removing a profile before the one selected in settings', count: 3, active: 0, viewed: 2, deleted: 1, nextActive: 0, nextViewed: 1},
+    ])('$name', async ({count, active, viewed, deleted, nextActive, nextViewed}) => {
+        const controller = createControllerForInternalTests();
+        const profiles = Array.from({length: count}, (_, i) => ({id: `p${i}`, name: `Profile ${i}`}));
+        const calls = [];
+        const refreshProfileIndex = vi.fn(() => { calls.push('refresh'); });
+        const modifyGlobalSettings = vi.fn(async () => {
+            calls.push('persist');
+            return [{result: true}];
+        });
+        const settingsController = {profileIndex: viewed, refreshProfileIndex, modifyGlobalSettings};
+        Reflect.set(controller, '_profiles', profiles);
+        Reflect.set(controller, '_profileCurrent', active);
+        Reflect.set(controller, '_profileEntryList', []);
+        Reflect.set(controller, '_settingsController', settingsController);
+        Reflect.set(controller, '_updateProfileSelectOptions', vi.fn());
+
+        await controller.deleteProfile(deleted);
+
+        expect(Reflect.get(controller, '_profileCurrent')).toBe(nextActive);
+        expect(settingsController.profileIndex).toBe(nextViewed);
+        expect(settingsController.profileIndex).toBeGreaterThanOrEqual(0);
+        expect(Reflect.get(controller, '_profiles')).toHaveLength(count - 1);
+        expect(modifyGlobalSettings).toHaveBeenCalledOnce();
+        expect(calls[0]).toBe('persist');
+        expect(refreshProfileIndex).toHaveBeenCalledTimes(nextViewed === viewed ? 1 : 0);
+        if (active >= deleted) {
+            expect(modifyGlobalSettings.mock.calls[0][0]).toContainEqual({
+                action: 'set', path: 'profileCurrent', value: nextActive,
+            });
+        }
+    });
+});
