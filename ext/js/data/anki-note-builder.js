@@ -34,14 +34,15 @@ const htmlEscapeMap = {
 };
 
 /**
- * Set a note field as an own data property even for prototype setter names.
- * @param {import('anki').NoteFields} fields
+ * Assign dynamic keys without invoking inherited prototype setters.
+ * @template T
+ * @param {Record<string, T>} object
  * @param {string} name
- * @param {string} value
+ * @param {T} value
  * @returns {void}
  */
-function setNoteField(fields, name, value) {
-    Object.defineProperty(fields, name, {value, enumerable: true, configurable: true, writable: true});
+function setOwnProperty(object, name, value) {
+    Object.defineProperty(object, name, {value, enumerable: true, configurable: true, writable: true});
 }
 
 export class AnkiNoteBuilder {
@@ -110,7 +111,7 @@ export class AnkiNoteBuilder {
         for (let i = 0, ii = fields.length; i < ii; ++i) {
             const fieldName = fields[i][0];
             const {value, errors: fieldErrors, requirements: fieldRequirements} = formattedFieldValues[i];
-            setNoteField(noteFields, fieldName, value);
+            setOwnProperty(noteFields, fieldName, value);
             allErrors.push(...fieldErrors);
             for (const requirement of fieldRequirements) {
                 const key = JSON.stringify(requirement);
@@ -171,7 +172,7 @@ export class AnkiNoteBuilder {
                 dictionaryStylesMap,
             );
             const {value} = await this._formatField(fieldValue, commonData, template);
-            setNoteField(noteFields, fieldName, value);
+            setOwnProperty(noteFields, fieldName, value);
         }
 
         return this._createBaseNote(cardFormat, tags, duplicateScope, duplicateScopeCheckAllModels, noteFields);
@@ -204,9 +205,9 @@ export class AnkiNoteBuilder {
             const [fieldName, {value: fieldValue}] = fields[0];
             const fastValue = this._getFastDuplicateCheckFieldValue(fieldValue, dictionaryEntry, resultOutputMode);
             if (typeof fastValue === 'string') {
-                setNoteField(noteFields, fieldName, fastValue);
+                setOwnProperty(noteFields, fieldName, fastValue);
             } else if (!stringContainsAnyFieldMarker(fieldValue)) {
-                setNoteField(noteFields, fieldName, fieldValue);
+                setOwnProperty(noteFields, fieldName, fieldValue);
             } else {
                 return null;
             }
@@ -661,12 +662,13 @@ export class AnkiNoteBuilder {
         const dictionaryMedia = {};
         for (const {dictionary, path, fileName} of dictionaryMediaArray) {
             if (fileName === null) { continue; }
-            const dictionaryMedia2 = (
-                Object.prototype.hasOwnProperty.call(dictionaryMedia, dictionary) ?
-                (dictionaryMedia[dictionary]) :
-                (dictionaryMedia[dictionary] = {})
-            );
-            dictionaryMedia2[path] = {value: fileName};
+            const dictionaryMedia2 = Object.prototype.hasOwnProperty.call(dictionaryMedia, dictionary) ?
+                dictionaryMedia[dictionary] :
+                {};
+            if (!Object.prototype.hasOwnProperty.call(dictionaryMedia, dictionary)) {
+                setOwnProperty(dictionaryMedia, dictionary, dictionaryMedia2);
+            }
+            setOwnProperty(dictionaryMedia2, path, {value: fileName});
         }
         const media = {
             audio: (typeof audioFileName === 'string' ? {value: audioFileName} : void 0),
