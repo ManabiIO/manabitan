@@ -38,6 +38,10 @@ export class CollapsibleDictionaryController {
         this._selects = [];
         /** @type {?HTMLSelectElement} */
         this._allSelect = null;
+        /** @type {number} */
+        this._optionsRenderRequest = 0;
+        /** @type {number} */
+        this._allSelectRefreshRequest = 0;
     }
 
     /** */
@@ -78,6 +82,9 @@ export class CollapsibleDictionaryController {
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
     _onOptionsChanged({options}) {
+        // An options event supersedes any older asynchronous settings snapshot.
+        ++this._optionsRenderRequest;
+        ++this._allSelectRefreshRequest;
         this._eventListeners.removeAllEventListeners();
         this._selects = [];
 
@@ -126,9 +133,11 @@ export class CollapsibleDictionaryController {
      * @param {import('core').TokenObject|null|import('settings-controller').EventArgument<'dictionarySettingsReordered'>} [token]
      */
     async _onDictionarySettingsReordered(token = null) {
+        const request = ++this._optionsRenderRequest;
         const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
         if (
+            request !== this._optionsRenderRequest ||
             (token !== null && this._getDictionaryInfoToken !== token) ||
             this._settingsController.getOptionsContext().index !== optionsContext.index
         ) {
@@ -179,7 +188,18 @@ export class CollapsibleDictionaryController {
 
     /** */
     async _updateAllSelectFresh() {
-        this._updateAllSelect(await this._settingsController.getOptions());
+        const request = ++this._allSelectRefreshRequest;
+        const select = this._allSelect;
+        const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (
+            request !== this._allSelectRefreshRequest ||
+            this._allSelect !== select ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            return;
+        }
+        this._updateAllSelect(options);
     }
 
     /**
