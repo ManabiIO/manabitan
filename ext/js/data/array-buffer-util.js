@@ -18,7 +18,7 @@
 
 /**
  * Decodes the contents of an ArrayBuffer using UTF8.
- * @param {ArrayBuffer} arrayBuffer The input ArrayBuffer.
+ * @param {ArrayBuffer|Uint8Array} arrayBuffer The input binary data.
  * @returns {string} A UTF8-decoded string.
  */
 export function arrayBufferUtf8Decode(arrayBuffer) {
@@ -31,7 +31,7 @@ export function arrayBufferUtf8Decode(arrayBuffer) {
 
 /**
  * Converts the contents of an ArrayBuffer to a base64 string.
- * @param {ArrayBuffer} arrayBuffer The input ArrayBuffer.
+ * @param {ArrayBuffer|Uint8Array} arrayBuffer The input binary data.
  * @returns {string} A base64 string representing the binary content.
  */
 export function arrayBufferToBase64(arrayBuffer) {
@@ -40,7 +40,7 @@ export function arrayBufferToBase64(arrayBuffer) {
 
 /**
  * Converts the contents of an ArrayBuffer to a binary string.
- * @param {ArrayBuffer} arrayBuffer The input ArrayBuffer.
+ * @param {ArrayBuffer|Uint8Array} arrayBuffer The input binary data.
  * @returns {string} A string representing the binary content.
  */
 export function arrayBufferToBinaryString(arrayBuffer) {
