@@ -97,7 +97,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
     });
 
     test('an external change while a hidden list refresh is in flight keeps the list dirty', async () => {
-        const oldRequest = /** @type {import('core').DeferredPromiseDetails<import('settings').Options>} */ (deferPromise());
+        const oldRequest = /** @type {import('core').DeferredPromiseDetails<{profileCurrent: number, profiles: {name: string}[]}>} */ (deferPromise());
         const optionsGetFull = vi.fn()
             .mockImplementationOnce(() => oldRequest.promise)
             .mockResolvedValueOnce({profileCurrent: 0, profiles: []});
