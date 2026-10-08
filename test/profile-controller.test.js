@@ -167,7 +167,8 @@ describe('ProfileController displayed profile ownership', () => {
         expect(select.value).toBe('0');
         expect(setDefaultProfile).not.toHaveBeenCalled();
         expect(cleanup).toHaveBeenCalledOnce();
-        if (viewed === 1) { expect(prepare).toHaveBeenCalledWith(1); }
+        expect(prepare).toHaveBeenCalledOnce();
+        expect(prepare).toHaveBeenCalledWith(expected);
     });
 });
 
