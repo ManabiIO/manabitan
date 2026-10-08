@@ -177,6 +177,49 @@ try {
         assert.equal((await imported).code, 'worker_timeout');
         assert.equal((await queued).code, 'worker_timeout');
     });
+    await scenario('pre-aborted non-Error reason is a predictable AbortError and never posted', async ({client, worker}) => {
+        const controller = new AbortController();
+        controller.abort('cancelled by user');
+        const rejected = await track(client.status({signal: controller.signal}));
+        assert.equal(rejected.ok, false);
+        assert.equal(rejected.name, 'AbortError');
+        assert.equal(worker.request('status'), undefined);
+    });
+    await scenario('cancelled search progress cannot renew deadline or block queued requests', async ({clock, client, worker}) => {
+        const controller = new AbortController();
+        let progress = 0;
+        const searched = track(client.search('house ca', false, {signal: controller.signal, onProgress: () => progress++}));
+        const queued = track(client.status());
+        const request = worker.request('search');
+        clock.advance(5_000);
+        controller.abort('cancelled by user');
+        assert.equal((await searched).name, 'AbortError');
+        for (let i = 0; i < 2; ++i) {
+            clock.advance(10_000);
+            worker.emit(request.id, {progress: {phase: 'glossary-index', processed: i + 1}});
+        }
+        assert.equal(progress, 0);
+        assert.equal(worker.terminated, false);
+        clock.advance(5_000);
+        assert.equal(worker.terminated, true);
+        assert.equal((await queued).code, 'worker_timeout');
+    });
+    await scenario('cancelled import cannot be kept alive forever by stale progress', async ({clock, client, worker}) => {
+        const controller = new AbortController();
+        const imported = track(client.importDictionary(new Blob(['fixture']), {signal: controller.signal}));
+        const queued = track(client.lookup('猫'));
+        const request = worker.request('import');
+        controller.abort();
+        for (let i = 0; i < 4; ++i) {
+            clock.advance(180_000);
+            assert.equal(worker.terminated, false);
+            worker.emit(request.id, {progress: {count: i + 1}});
+        }
+        clock.advance(180_000);
+        assert.equal(worker.terminated, true);
+        assert.equal((await imported).code, 'worker_timeout');
+        assert.equal((await queued).code, 'worker_timeout');
+    });
     await scenario('cancelled active caller retains watchdog until worker acknowledgement', async ({clock, client, worker}) => {
         const controller = new AbortController();
         const active = track(client.status({signal: controller.signal}));
