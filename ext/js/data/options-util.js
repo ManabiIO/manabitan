@@ -178,6 +178,9 @@ export class OptionsUtil {
      * @returns {Promise<void>}
      */
     save(options) {
+        // Whole-options replacement (such as restoring a backup) can bypass
+        // update(). Enforce stable IDs at the persistence boundary as well.
+        ensureProfileIds(options.profiles);
         return new Promise((resolve, reject) => {
             chrome.storage.local.set({options: JSON.stringify(options)}, () => {
                 const error = chrome.runtime.lastError;
