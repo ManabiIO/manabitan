@@ -629,6 +629,9 @@ export class TextScanner extends EventDispatcher {
             }
 
             if (!isManual && rescanRequest === null && !this._textSourceCurrentIncomplete && this._textSourceCurrent !== null && this._textSourceCurrent.hasSameStart(textSource)) {
+                // A repeated hover is not a new lookup, but the frontend must
+                // still know that the pointer returned to cancel pending hide.
+                this.trigger('searchSame', {inputInfo});
                 return null;
             }
             // A refresh is lower priority than user input, and repeated hover

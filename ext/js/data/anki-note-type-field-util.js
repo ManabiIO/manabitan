@@ -63,14 +63,19 @@ export function buildAnkiFieldsForModel({
     const fields = {};
     for (let i = 0, ii = fieldNames.length; i < ii; ++i) {
         const fieldName = fieldNames[i];
-        fields[fieldName] = {
-            value: (
-                preset !== null ?
-                getPresetFieldValue(preset, fieldName) :
-                getDefaultAnkiFieldValue(fieldName, i, dictionaryEntryType, oldFields)
-            ),
-            overwriteMode: 'coalesce',
-        };
+        Object.defineProperty(fields, fieldName, {
+            value: {
+                value: (
+                    preset !== null ?
+                        getPresetFieldValue(preset, fieldName) :
+                        getDefaultAnkiFieldValue(fieldName, i, dictionaryEntryType, oldFields)
+                ),
+                overwriteMode: 'coalesce',
+            },
+            enumerable: true,
+            configurable: true,
+            writable: true,
+        });
     }
     return fields;
 }
@@ -88,7 +93,10 @@ export function getDefaultAnkiFieldValue(fieldName, index, dictionaryEntryType, 
         oldFields !== null &&
         Object.prototype.hasOwnProperty.call(oldFields, fieldName)
     ) {
-        return oldFields[fieldName].value;
+        const field = oldFields[fieldName];
+        if (field !== null && typeof field === 'object' && typeof field.value === 'string') {
+            return field.value;
+        }
     }
 
     if (index === 0) {

@@ -133,12 +133,22 @@ export class SharedWorkerBridge {
             backendPort.postMessage(void 0, [port]); // connectToBackend2
             return true;
         } catch (error) {
-            if (this._backendPort === backendPort) {
-                this._setBackendPort(null);
-            }
             log.error(new ExtensionError(
                 `SharedWorkerBridge: failed to forward frontend backend connection: ${String(error)}`,
             ));
+            // A detached/previously transferred frontend port causes DataCloneError.
+            // It cannot be retried, and the backend is still usable by other tabs.
+            if (error instanceof Error && error.name === 'DataCloneError') {
+                try {
+                    port.close();
+                } catch (_) {
+                    // The frontend may already have transferred or closed the port.
+                }
+                return true;
+            }
+            if (this._backendPort === backendPort) {
+                this._setBackendPort(null);
+            }
             return false;
         }
     }

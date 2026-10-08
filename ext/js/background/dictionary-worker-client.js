@@ -26,6 +26,16 @@ const timeoutByClass = Object.freeze({
     'streamed-import': null,
 });
 
+/**
+ * Serialization failures occur before a request is delivered. They are local
+ * to that request and do not indicate that the shared worker is unhealthy.
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+function isDataCloneError(error) {
+    return typeof error === 'object' && error !== null && 'name' in error && error.name === 'DataCloneError';
+}
+
 export class DictionaryWorkerTransportError extends Error {
     /**
      * @param {string} message
@@ -173,7 +183,9 @@ export class DictionaryWorkerClient {
                     `${this._context} failed to send ${action}`,
                     {cause: error, retryable: false},
                 );
-                this._setFatalError(transportError, worker);
+                if (!isDataCloneError(error)) {
+                    this._setFatalError(transportError, worker);
+                }
                 reject(transportError);
             }
         });
@@ -199,7 +211,9 @@ export class DictionaryWorkerClient {
                 `${this._context} failed to send ${action}`,
                 {cause: error, retryable: false},
             );
-            this._setFatalError(transportError, worker);
+            if (!isDataCloneError(error)) {
+                this._setFatalError(transportError, worker);
+            }
             throw transportError;
         }
     }
