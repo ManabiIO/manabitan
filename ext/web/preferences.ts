@@ -9,8 +9,11 @@ export function preferencesAfterDeletion(current: Preferences, title: string): P
     return {...current, disabled, defaultChoice};
 }
 
-/** Repair the default flag after a crash between deletion and preference write. */
-export function recoverMissingDefault(current: Preferences, installed: ReadonlySet<string>): Preferences {
-    if (current.defaultChoice !== 'installed' || current.defaultTitle === null || installed.has(current.defaultTitle)) {return current;}
-    return {...current, defaultChoice: 'deleted'};
+/** Reconcile an interrupted delete before disabled names can affect a reinstall. */
+export function reconcilePreferences(current: Preferences, installed: ReadonlySet<string>): Preferences {
+    const disabled = current.disabled.filter((name) => installed.has(name));
+    const defaultDeleted = current.defaultChoice === 'installed' &&
+        current.defaultTitle !== null && !installed.has(current.defaultTitle);
+    if (!defaultDeleted && disabled.length === current.disabled.length) {return current;}
+    return {...current, disabled, defaultChoice: defaultDeleted ? 'deleted' : current.defaultChoice};
 }

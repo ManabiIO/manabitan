@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 import {describe, expect, test} from 'vitest';
-import {preferencesAfterDeletion, recoverMissingDefault} from '../ext/web/preferences.js';
+import {preferencesAfterDeletion, reconcilePreferences} from '../ext/web/preferences.js';
 
 /** @type {import('../ext/web/protocol.js').Preferences} */
 const configured = {version: 1, disabled: ['Jitendex', 'Other'], defaultChoice: 'installed', defaultTitle: 'Jitendex'};
@@ -22,13 +22,18 @@ describe('web dictionary preference persistence', () => {
     });
 
     test('status recovers a deleted default after a crash but never undoes user decline', () => {
-        expect(recoverMissingDefault(configured, new Set(['Other']))).toEqual({
+        expect(reconcilePreferences(configured, new Set(['Other']))).toEqual({
             ...configured,
+            disabled: ['Other'],
             defaultChoice: 'deleted',
         });
-        expect(recoverMissingDefault(configured, new Set(['Jitendex']))).toBe(configured);
+        expect(reconcilePreferences(configured, new Set(['Jitendex', 'Other']))).toBe(configured);
         /** @type {import('../ext/web/protocol.js').Preferences} */
         const declined = {...configured, defaultChoice: 'declined'};
-        expect(recoverMissingDefault(declined, new Set())).toBe(declined);
+        expect(reconcilePreferences(declined, new Set(['Other']))).toEqual({
+            ...declined,
+            disabled: ['Other'],
+        });
+        expect(reconcilePreferences(declined, new Set(['Jitendex', 'Other']))).toBe(declined);
     });
 });
