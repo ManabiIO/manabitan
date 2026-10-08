@@ -58,6 +58,7 @@ describe('DataTransmissionConsentController', () => {
         expect(settingsController.modifySettings).toHaveBeenCalledOnce();
         expect(logError).toHaveBeenCalled();
     });
+
     test('consent modal stays open when the backend reports a per-target error', async ({window}) => {
         vi.resetModules();
         vi.clearAllMocks();
@@ -69,10 +70,9 @@ describe('DataTransmissionConsentController', () => {
         const {DataTransmissionConsentController} = await import('../ext/js/pages/settings/data-transmission-consent-controller.js');
         const modal = {setVisible: vi.fn()};
         const settingsController = {
-            modifySettings: vi.fn().mockResolvedValue([
-                {result: null}, {result: null},
-                {error: {name: 'Error', message: 'audio update denied', stack: ''}},
-            ]),
+            modifySettings: vi.fn()
+                .mockResolvedValueOnce([{result: null}, {result: null}])
+                .mockResolvedValueOnce([{error: {name: 'Error', message: 'audio update denied', stack: ''}}]),
             getOptionsContext: vi.fn(() => ({})),
         };
         const controller = new DataTransmissionConsentController(
@@ -101,7 +101,9 @@ describe('DataTransmissionConsentController', () => {
         const {DataTransmissionConsentController} = await import('../ext/js/pages/settings/data-transmission-consent-controller.js');
         const pending = /** @type {PromiseWithResolvers<Array<{result: null}>>} */ (Promise.withResolvers());
         const settingsController = {
-            modifySettings: vi.fn(() => pending.promise),
+            modifySettings: vi.fn()
+                .mockReturnValueOnce(pending.promise)
+                .mockResolvedValueOnce([{result: null}, {result: null}]),
             getOptionsContext: vi.fn(() => ({})),
         };
         const modal = {setVisible: vi.fn()};
@@ -120,13 +122,17 @@ describe('DataTransmissionConsentController', () => {
         await controller._onAccept();
         expect(settingsController.modifySettings).toHaveBeenCalledOnce();
 
-        pending.resolve([{result: null}, {result: null}, {result: null}]);
+        pending.resolve([{result: null}]);
         await save;
+        expect(settingsController.modifySettings).toHaveBeenCalledTimes(2);
         expect(modal.setVisible).toHaveBeenCalledOnce();
         expect(modal.setVisible).toHaveBeenCalledWith(false);
         expect(accept.disabled).toBe(false);
         expect(decline.disabled).toBe(false);
         expect(settingsController.modifySettings.mock.calls[0][0][0]).toMatchObject({
+            path: 'audio.enabled', value: false,
+        });
+        expect(settingsController.modifySettings.mock.calls[1][0][0]).toMatchObject({
             path: 'global.dataTransmissionConsentState', value: 'declined',
         });
     });
@@ -145,8 +151,7 @@ describe('DataTransmissionConsentController', () => {
             /** @type {any} */ ({getModal: () => modal}),
         );
         await controller.prepare();
-        await expect(controller._onDecline()).rejects.toThrow('incomplete response');
+        await expect(controller._onAccept()).rejects.toThrow('incomplete response');
         expect(modal.setVisible).not.toHaveBeenCalled();
     });
-
 });
