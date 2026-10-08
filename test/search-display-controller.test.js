@@ -464,6 +464,7 @@ describe('Keyboard Event Handling', () => {
         /**
          * @param {Element} target
          * @param {string} text
+         * @returns {ClipboardEvent}
          */
         const createEvent = (target, text) => /** @type {ClipboardEvent} */ (/** @type {unknown} */ ({
             target,
@@ -490,5 +491,4 @@ describe('Keyboard Event Handling', () => {
         expect(searchSpy).toHaveBeenCalledOnce();
         expect(queryInput.value).toBe('lookup this');
     });
-
 });
