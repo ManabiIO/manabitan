@@ -236,8 +236,17 @@ export class CollapsibleDictionaryController {
             const path = `dictionaries[${i}].definitionsCollapsible`;
             targets.push({action: 'set', path, value});
         }
+        const selects = this._selects;
         await this._settingsController.modifyProfileSettings(targets);
-        for (const select of this._selects) {
+        // A profile change or options rerender can replace these controls while
+        // the mutation is in flight. Never update the new controls with old state.
+        if (
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._selects !== selects
+        ) {
+            return;
+        }
+        for (const select of selects) {
             select.value = value;
         }
     }
