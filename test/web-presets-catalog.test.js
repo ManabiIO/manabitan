@@ -10,6 +10,8 @@ describe('static web recommended dictionary catalog', () => {
             {name: 'Broken archive', description: 'Broken', homepage: valid.homepage, downloadUrl: 'not a URL'},
             {name: 'Unsafe scheme', description: 'Unsafe', homepage: 'javascript:alert(1)', downloadUrl: valid.downloadUrl},
             {name: 'Credentials', description: 'Unsafe', homepage: 'https://user:secret@example.test/', downloadUrl: valid.downloadUrl},
+            {name: 'Password-only homepage', description: 'Unsafe', homepage: 'https://:secret@example.test/', downloadUrl: valid.downloadUrl},
+            {name: 'Password-only archive', description: 'Unsafe', homepage: valid.homepage, downloadUrl: 'https://:secret@example.test/dict.zip'},
             valid,
         ]}};
         expect(recommendedDictionariesFromCatalog(catalog)).toEqual([{

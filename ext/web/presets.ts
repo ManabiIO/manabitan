@@ -42,7 +42,7 @@ export function recommendedDictionariesFromCatalog(catalog: unknown): Recommende
             } catch {
                 continue;
             }
-            if (homepage.protocol !== 'https:' || download.protocol !== 'https:' || homepage.username || download.username) {continue;}
+            if (homepage.protocol !== 'https:' || download.protocol !== 'https:' || homepage.username || homepage.password || download.username || download.password) {continue;}
             result.push({name: String(item.name),
                 description: String(item.description),
                 homepage: homepage.href,
@@ -67,28 +67,63 @@ export async function downloadDefaultDictionary(url: URL, options: {
         throw new WebRuntimeError('source_invalid', 'The default dictionary must be served by this static Reader host');
     }
     options.signal?.throwIfAborted();
-    const response = await fetch(url, {signal: options.signal, credentials: 'omit', cache: 'no-store', redirect: 'error'});
-    if (!response.ok || !response.body) {throw new WebRuntimeError('download_failed', `Dictionary download failed (${response.status})`);}
-    const reader = response.body.getReader();
-    const chunks: Uint8Array<ArrayBuffer>[] = [];
-    let count = 0;
+    // Fetch and ReadableStream reads may wait indefinitely if the archive host
+    // stops responding. Use an idle deadline plus a hard whole-transfer bound,
+    // including the initial response headers. Neither extends into import.
+    const controller = new AbortController();
+    const propagateAbort = () => controller.abort(options.signal?.reason);
+    options.signal?.addEventListener('abort', propagateAbort, {once: true});
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
+    let timedOut = false;
+    const timeout = () => {
+        if (controller.signal.aborted) {return;}
+        timedOut = true;
+        controller.abort(new WebRuntimeError('download_timeout', 'Dictionary download stalled or exceeded its time limit'));
+    };
+    const refreshIdleDeadline = () => {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(timeout, 60_000);
+    };
+    const totalTimer = setTimeout(timeout, 20 * 60_000);
+    refreshIdleDeadline();
     try {
-        while (true) {
-            options.signal?.throwIfAborted();
-            const {done, value} = await reader.read();
-            if (done) {break;}
-            count += value.byteLength;
-            if (count > DEFAULT_DICTIONARY.bytes) {throw new WebRuntimeError('integrity', 'Dictionary exceeds its verified archive size');}
-            chunks.push(value); options.onProgress?.(count, DEFAULT_DICTIONARY.bytes);
+        const response = await fetch(url, {signal: controller.signal, credentials: 'omit', cache: 'no-store', redirect: 'error'});
+        if (!response.ok || !response.body) {throw new WebRuntimeError('download_failed', `Dictionary download failed (${response.status})`);}
+        const reader = response.body.getReader();
+        const chunks: Uint8Array<ArrayBuffer>[] = [];
+        let count = 0;
+        try {
+            while (true) {
+                options.signal?.throwIfAborted();
+                const {done, value} = await reader.read();
+                if (done) {break;}
+                count += value.byteLength;
+                if (count > DEFAULT_DICTIONARY.bytes) {throw new WebRuntimeError('integrity', 'Dictionary exceeds its verified archive size');}
+                // Empty chunks are not proof of download progress.
+                if (value.byteLength > 0) {refreshIdleDeadline();}
+                chunks.push(value);
+                options.onProgress?.(count, DEFAULT_DICTIONARY.bytes);
+            }
+        } finally {
+            await reader.cancel().catch(() => {});
+            reader.releaseLock();
         }
+        // The deadlines apply to network transfer only, not checksum work.
+        clearTimeout(idleTimer);
+        clearTimeout(totalTimer);
+        if (count !== DEFAULT_DICTIONARY.bytes) {throw new WebRuntimeError('integrity', 'Dictionary download is incomplete or has changed');}
+        const blob = new Blob(chunks, {type: 'application/zip'});
+        const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()));
+        options.signal?.throwIfAborted();
+        const actual = Array.from(hash, (byte) => byte.toString(16).padStart(2, '0')).join('');
+        if (actual !== DEFAULT_DICTIONARY.sha256) {throw new WebRuntimeError('integrity', 'Dictionary checksum does not match the verified release');}
+        return blob;
+    } catch (error) {
+        if (timedOut) {throw controller.signal.reason;}
+        throw error;
     } finally {
-        await reader.cancel().catch(() => {}); reader.releaseLock();
+        clearTimeout(idleTimer);
+        clearTimeout(totalTimer);
+        options.signal?.removeEventListener('abort', propagateAbort);
     }
-    if (count !== DEFAULT_DICTIONARY.bytes) {throw new WebRuntimeError('integrity', 'Dictionary download is incomplete or has changed');}
-    const blob = new Blob(chunks, {type: 'application/zip'});
-    const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()));
-    options.signal?.throwIfAborted();
-    const actual = Array.from(hash, (byte) => byte.toString(16).padStart(2, '0')).join('');
-    if (actual !== DEFAULT_DICTIONARY.sha256) {throw new WebRuntimeError('integrity', 'Dictionary checksum does not match the verified release');}
-    return blob;
 }
