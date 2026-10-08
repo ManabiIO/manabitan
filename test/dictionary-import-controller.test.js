@@ -1067,6 +1067,66 @@ describe('Dictionary import entrypoints', () => {
     });
 });
 
+describe('Dictionary import watchdog timer lifecycle', () => {
+    const runImportWithWatchdog = /** @type {(this: DictionaryImportController, operation: Promise<void>, label: string) => Promise<void>} */ (
+        getDictionaryImportControllerMethod('_runImportWithWatchdog')
+    );
+
+    test('successful imports release the watchdog timer', async () => {
+        vi.useFakeTimers();
+        try {
+            const recover = vi.fn();
+            const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+                _forceRecoverHungImportSession: recover,
+            }));
+            await runImportWithWatchdog.call(controller, Promise.resolve(), 'Successful import');
+
+            expect(vi.getTimerCount()).toBe(0);
+            expect(recover).not.toHaveBeenCalled();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    test('ordinary import failures release the watchdog timer', async () => {
+        vi.useFakeTimers();
+        try {
+            const recover = vi.fn();
+            const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+                _forceRecoverHungImportSession: recover,
+            }));
+            await expect(runImportWithWatchdog.call(controller, Promise.reject(new Error('Invalid archive')), 'Failed import'))
+                .rejects.toThrow('Invalid archive');
+
+            expect(vi.getTimerCount()).toBe(0);
+            expect(recover).not.toHaveBeenCalled();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    test('hung imports trigger watchdog recovery exactly once', async () => {
+        vi.useFakeTimers();
+        try {
+            const recover = vi.fn();
+            const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+                _forceRecoverHungImportSession: recover,
+            }));
+            const neverCompletes = new Promise(() => {});
+            const pending = runImportWithWatchdog.call(controller, neverCompletes, 'Hung import');
+            const assertion = expect(pending).rejects.toThrow('did not complete within 180000ms');
+
+            await vi.advanceTimersByTimeAsync(180_000);
+            await assertion;
+
+            expect(recover).toHaveBeenCalledOnce();
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+});
+
 describe('Dictionary import watchdog recovery', () => {
     const forceRecoverHungImportSession = /** @type {(this: DictionaryImportController, error: Error, label: string) => void} */ (
         getDictionaryImportControllerMethod('_forceRecoverHungImportSession')
