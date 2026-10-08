@@ -116,7 +116,9 @@ export class PermissionsOriginController {
 
         const {origin} = node.dataset;
         if (typeof origin !== 'string') { return; }
-        void this._setOriginPermissionEnabled(origin, value);
+        void this._setOriginPermissionEnabled(origin, value).catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
