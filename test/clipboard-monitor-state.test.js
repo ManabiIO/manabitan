@@ -25,6 +25,7 @@ describe('ClipboardMonitor observed state', () => {
 
     afterEach(() => {
         vi.useRealTimers();
+        vi.restoreAllMocks();
     });
 
     test('a failed first clipboard read does not turn unchanged text into a new copy', async () => {
@@ -128,4 +129,22 @@ describe('ClipboardMonitor observed state', () => {
         monitor.stop();
         expect(vi.getTimerCount()).toBe(0);
     });
+    test('a throwing listener is logged without terminating future polling', async () => {
+        const getText = vi.fn()
+            .mockResolvedValueOnce('initial')
+            .mockResolvedValueOnce('first change')
+            .mockResolvedValueOnce('second change');
+        const monitor = new ClipboardMonitor({getText});
+        const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        monitor.on('change', () => { throw new Error('listener failed'); });
+
+        monitor.start();
+        await Promise.resolve();
+        await vi.advanceTimersByTimeAsync(500);
+        expect(getText).toHaveBeenCalledTimes(3);
+        expect(logErrorSpy).toHaveBeenCalledTimes(2);
+        expect(vi.getTimerCount()).toBe(1);
+        monitor.stop();
+    });
+
 });
