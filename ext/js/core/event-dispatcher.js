@@ -47,10 +47,11 @@ export class EventDispatcher {
         const callbacks = this._eventMap.get(eventName);
         if (typeof callbacks === 'undefined') { return false; }
 
-        // Handlers can register or remove other handlers synchronously.
-        // Iterate a snapshot so mutations cannot skip listeners or run newly
-        // registered listeners during the emission that registered them.
+        // Keep the set of handlers eligible for this emission stable.
+        // Subscriptions added mid-dispatch wait for the next emission, while
+        // callbacks removed before their turn remain suppressed.
         for (const callback of [...callbacks]) {
+            if (!callbacks.includes(callback)) { continue; }
             callback(details);
         }
         return true;
