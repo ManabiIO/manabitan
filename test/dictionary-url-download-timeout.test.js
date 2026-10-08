@@ -22,7 +22,10 @@ describe('dictionary URL download timeout ownership', () => {
         vi.useFakeTimers();
         const controller = createController();
         const observed = {signal: /** @type {AbortSignal|null} */ (null)};
-        /** @param {...unknown} args */
+        /**
+         * @param {...unknown} args
+         * @returns {Promise<{type: string, file: File}>}
+         */
         const download = async (...args) => {
             observed.signal = /** @type {AbortSignal} */ (args[3]);
             return {type: 'zip', file: new File(['archive'], 'dictionary.zip')};
@@ -43,7 +46,10 @@ describe('dictionary URL download timeout ownership', () => {
     test('a stalled download still times out and rejects its source', async () => {
         vi.useFakeTimers();
         const controller = createController();
-        /** @param {...unknown} args */
+        /**
+         * @param {...unknown} args
+         * @returns {Promise<never>}
+         */
         const download = async (...args) => {
             const signal = /** @type {AbortSignal} */ (args[3]);
             return await new Promise((_resolve, reject) => {
