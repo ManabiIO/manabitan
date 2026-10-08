@@ -48,9 +48,9 @@ describe('AudioDownloader Wikimedia Commons lookups', () => {
         });
         const downloader = createDownloader(fetchAnonymous);
 
-        const result = await downloader.getTermAudioInfoList(
-            /** @type {any} */ ({type: 'wiktionary'}), 'C++', '', /** @type {any} */ ({iso: 'en'}),
-        );
+        const source = /** @type {any} */ ({type: 'wiktionary'});
+        const languageSummary = /** @type {any} */ ({iso: 'en'});
+        const result = await downloader.getTermAudioInfoList(source, 'C++', '', languageSummary);
 
         expect(result).toStrictEqual([{type: 'url', url: 'https://example.test/cpp.ogg', name: '(United States) Speaker'}]);
         expect(fetchAnonymous).toHaveBeenCalledTimes(2);
@@ -70,9 +70,9 @@ describe('AudioDownloader Wikimedia Commons lookups', () => {
         });
         const downloader = createDownloader(fetchAnonymous);
 
-        const result = await downloader.getTermAudioInfoList(
-            /** @type {any} */ ({type: 'lingua-libre'}), 'a&b', '', /** @type {any} */ ({iso639_3: 'eng'}),
-        );
+        const source = /** @type {any} */ ({type: 'lingua-libre'});
+        const languageSummary = /** @type {any} */ ({iso639_3: 'eng'});
+        const result = await downloader.getTermAudioInfoList(source, 'a&b', '', languageSummary);
 
         expect(result).toStrictEqual([{type: 'url', url: 'https://example.test/a-b.wav', name: 'Uploader+(one)'}]);
         expect(fetchAnonymous).toHaveBeenCalledTimes(2);
@@ -98,9 +98,9 @@ describe('AudioDownloader Wikimedia Commons lookups', () => {
         });
         const downloader = createDownloader(fetchAnonymous);
 
-        const result = await downloader.getTermAudioInfoList(
-            /** @type {any} */ ({type: 'wiktionary'}), 'test', '', /** @type {any} */ ({iso: 'en'}),
-        );
+        const source = /** @type {any} */ ({type: 'wiktionary'});
+        const languageSummary = /** @type {any} */ ({iso: 'en'});
+        const result = await downloader.getTermAudioInfoList(source, 'test', '', languageSummary);
 
         expect(result).toStrictEqual([{type: 'url', url: 'https://example.test/test.ogg', name: 'Author'}]);
         expect(fetchAnonymous).toHaveBeenCalledTimes(4);
