@@ -237,6 +237,7 @@ function createSchemaPopupLevelGreaterThanOrEqual(value) {
  */
 function createSchemaUrlMatchDomain(value) {
     const oneOf = [];
+    /** @type {Set<string>} */
     const seen = new Set();
     for (let domain of split(value)) {
         if (domain.length === 0) { continue; }
@@ -354,6 +355,7 @@ function createSchemaFlagsNotInclude(value) {
 function createSchemaArrayCheck(key, value, exact, none) {
     /** @type {import('ext/json-schema').Schema[]} */
     const containsList = [];
+    /** @type {Set<string>} */
     const seen = new Set();
     for (const item of split(value)) {
         if (item.length === 0 || seen.has(item)) { continue; }
