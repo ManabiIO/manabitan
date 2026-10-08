@@ -4421,7 +4421,14 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             // front of the queue; never re-persist a stale snapshot.
             const options = this._getOptionsFull(false);
             await this._optionsUtil.save(options);
-            this._applyOptions(source);
+            // Persistence has committed. A failure while notifying/updating
+            // runtime consumers cannot safely be treated as a failed save:
+            // rolling memory back would disagree with the stored options.
+            try {
+                this._applyOptions(source);
+            } catch (error) {
+                try { log.error(error); } catch (_) { /* Persistence is already committed. */ }
+            }
         });
         // A failed write must reject its own caller but not poison future
         // saves; keep the tail always fulfilled.
