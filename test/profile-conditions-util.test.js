@@ -1109,6 +1109,43 @@ describe('Profile conditions utilities', () => {
             }
         });
     });
+    describe('Unsupported profile conditions', () => {
+        test('an unknown condition type cannot make a profile match every URL', () => {
+            const unknown = /** @type {import('settings').ProfileCondition} */ (/** @type {unknown} */ ({
+                type: 'future-type', operator: 'equal', value: 'anything',
+            }));
+            const schema = createSchema([{conditions: [unknown]}]);
+            expect(schema.schema).toStrictEqual({not: {}});
+            expect(schema.isValid(normalizeContext({depth: 0, url: 'https://example.com/'}))).toBe(false);
+        });
+
+        test('an unknown operator cannot make a profile match every URL', () => {
+            const schema = createSchema([{conditions: [
+                {type: 'url', operator: 'future-operator', value: 'example.com'},
+            ]}]);
+            expect(schema.schema).toStrictEqual({not: {}});
+            expect(schema.isValid(normalizeContext({depth: 0, url: 'https://example.com/'}))).toBe(false);
+        });
+
+        test('unknown constraints invalidate their entire conjunction rather than dropping just one rule', () => {
+            const schema = createSchema([{conditions: [
+                {type: 'url', operator: 'matchDomain', value: 'example.com'},
+                {type: 'url', operator: 'future-operator', value: 'other.com'},
+            ]}]);
+            expect(schema.schema).toStrictEqual({not: {}});
+            expect(schema.isValid(normalizeContext({depth: 0, url: 'https://example.com/'}))).toBe(false);
+        });
+
+        test('a valid alternative condition group remains usable when another group is unsupported', () => {
+            const schema = createSchema([
+                {conditions: [{type: 'url', operator: 'future-operator', value: 'other.com'}]},
+                {conditions: [{type: 'url', operator: 'matchDomain', value: 'example.com'}]},
+            ]);
+            expect(schema.isValid(normalizeContext({depth: 0, url: 'https://example.com/'}))).toBe(true);
+            expect(schema.isValid(normalizeContext({depth: 0, url: 'https://other.com/'}))).toBe(false);
+        });
+    });
+
     describe('Repeated condition tokens', () => {
         test('duplicate domains do not make a oneOf match impossible', () => {
             const schema = createSchema([{conditions: [{
