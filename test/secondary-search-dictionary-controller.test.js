@@ -72,5 +72,4 @@ describe('SecondarySearchDictionaryController database updates', () => {
         expect(settingsController.getOptions).toHaveBeenCalledOnce();
         expect(onOptionsChanged).toHaveBeenCalledWith({options, optionsContext: {index: 0}});
     });
-
 });
