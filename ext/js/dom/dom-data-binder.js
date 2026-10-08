@@ -139,7 +139,18 @@ export class DOMDataBinder {
             });
             targets.push([observer, task]);
         }
-        const responses = await this._setValues(args);
+        let responses;
+        try {
+            responses = await this._setValues(args);
+        } catch (error) {
+            // An exception ends this assignment batch even though the task
+            // accumulator logs the failure. Do not leave the UI permanently
+            // immune to future reads after a failed write.
+            for (const [observer, task] of targets) {
+                if (observer.onChange !== null && (task === null || !task.stale)) { observer.pendingAssign = false; }
+            }
+            throw error;
+        }
         this._applyValues(targets, responses, false);
     }
 
@@ -174,15 +185,17 @@ export class DOMDataBinder {
             const {error, result} = response[i];
             const stale = (task !== null && task.stale);
 
+            if (stale && !ignoreStale) { continue; }
+            // Both success and failure are terminal for this write. The input
+            // can be refreshed again unless a newer assignment superseded it.
+            if (!ignoreStale) { observer.pendingAssign = false; }
+
             if (error) {
                 if (typeof this._onError === 'function') {
                     this._onError(error, stale, observer.element, observer.metadata);
                 }
                 continue;
             }
-
-            if (stale && !ignoreStale) { continue; }
-            if (!ignoreStale) { observer.pendingAssign = false; }
 
             observer.value = result;
             observer.hasValue = true;

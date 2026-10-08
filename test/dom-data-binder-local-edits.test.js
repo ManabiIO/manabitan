@@ -28,7 +28,7 @@ test('an old settings read never overwrites an input edited while it was pending
     const getValues = vi.fn()
         .mockImplementationOnce(() => new Promise((resolve) => { finishRead = resolve; }))
         .mockResolvedValue([{result: 'user value'}]);
-    const setValues = vi.fn(async (args) => args.map(({value}) => ({result: value})));
+    const setValues = vi.fn(async (/** @type {import('../types/ext/dom-data-binder.d.ts').SetValuesDetails<string>[]} */ args) => args.map(({value}) => ({result: value})));
     const binder = new DOMDataBinder(['input'], () => 'setting', (a, b) => a === b, getValues, setValues);
     try {
         binder.observe(root);
@@ -66,7 +66,11 @@ test('a refresh started during a pending save cannot restore the previous settin
         await binder.refresh();
         expect(input.value).toBe('new');
         finishWrite([{result: 'new'}]);
-        await vi.waitFor(() => { expect(binder._selectorObservers[0].datas().next().value.pendingAssign).toBe(false); });
+        await vi.waitFor(() => {
+            const active = binder._selectorObservers[0].datas().next().value;
+            if (!active) { throw new Error('No active binding'); }
+            expect(active.pendingAssign).toBe(false);
+        });
         expect(input.value).toBe('new');
     } finally {
         binder.disconnect();
@@ -86,13 +90,43 @@ test('changing input type invalidates the old observer and rebinds the new type'
     try {
         binder.observe(root);
         const first = binder._selectorObservers[0].datas().next().value;
+        if (!first) { throw new Error('No initial binding'); }
         expect(first.type).toBe('text');
         input.type = 'checkbox';
         await vi.waitFor(() => {
             const current = binder._selectorObservers[0].datas().next().value;
+            if (!current) { throw new Error('No current binding'); }
             expect(current.type).toBe('checkbox');
             expect(current).not.toBe(first);
         });
+    } finally {
+        binder.disconnect();
+        dom.window.close();
+    }
+});
+
+test('a failed write releases the pending mark so a future refresh can recover', async () => {
+    const dom = new JSDOM('<div id="root"><input id="setting" type="text"></div>');
+    prepareDom(dom);
+    const root = dom.window.document.getElementById('root');
+    const input = dom.window.document.getElementById('setting');
+    if (!root || !(input instanceof dom.window.HTMLInputElement)) { throw new Error('Missing input fixture'); }
+    const getValues = vi.fn(async () => [{result: 'saved'}]);
+    const setValues = vi.fn(async () => [{error: new Error('Write rejected')}]);
+    const binder = new DOMDataBinder(['input'], () => 'setting', (a, b) => a === b, getValues, setValues);
+    try {
+        binder.observe(root);
+        await vi.waitFor(() => { expect(input.value).toBe('saved'); });
+        input.value = 'unsaved';
+        input.dispatchEvent(new dom.window.Event('change'));
+        await vi.waitFor(() => { expect(setValues).toHaveBeenCalledTimes(1); });
+        await vi.waitFor(() => {
+            const active = binder._selectorObservers[0].datas().next().value;
+            if (!active) { throw new Error('No active binding'); }
+            expect(active.pendingAssign).toBe(false);
+        });
+        await binder.refresh();
+        expect(input.value).toBe('saved');
     } finally {
         binder.disconnect();
         dom.window.close();
