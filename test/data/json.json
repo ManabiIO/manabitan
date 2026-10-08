@@ -1,36 +1,125 @@
 {
     "files": [
-        {"path": "package.json", "ignore": true},
-        {"path": "package-lock.json", "ignore": true},
-        {"path": "jsconfig.json", "ignore": true},
-        {"path": ".stylelintrc.json", "ignore": true},
-        {"path": ".htmlvalidate.json", "ignore": true},
-        {"path": ".vscode/settings.json", "ignore": true},
-        {"path": ".vscode/extensions.json", "ignore": true},
-        {"path": ".vscode/launch.json", "ignore": true},
-        {"path": ".claude/settings.local.json", "ignore": true},
-        {"path": ".github/actionlint-matcher.json", "ignore": true},
-        {"path": "dev/jsconfig.json", "ignore": true},
-        {"path": "ext/manifest.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary1/index.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary2/kanji_bank_1.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary2/index.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary3/kanji_meta_bank_1.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary3/index.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary4/tag_bank_1.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary4/index.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary5/term_bank_1.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary5/index.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary6/term_meta_bank_1.json", "ignore": true},
-        {"path": "test/data/dictionaries/invalid-dictionary6/index.json", "ignore": true},
-        {"path": "test/jsconfig.json", "ignore": true},
-        {"path": "test/jsconfig.typecheck.json", "ignore": true},
-        {"path": "test/data/vitest.write.config.json", "ignore": true},
-        {"path": "test/data/vitest.options.config.json", "ignore": true},
-        {"path": "test/data/vitest.json.config.json", "ignore": true},
-        {"path": "benches/jsconfig.json", "ignore": true},
-        {"path": "dev/data/chrome-manifest-schema.json", "ignore": true},
-
+        {
+            "path": "package.json",
+            "ignore": true
+        },
+        {
+            "path": "package-lock.json",
+            "ignore": true
+        },
+        {
+            "path": "jsconfig.json",
+            "ignore": true
+        },
+        {
+            "path": ".stylelintrc.json",
+            "ignore": true
+        },
+        {
+            "path": ".htmlvalidate.json",
+            "ignore": true
+        },
+        {
+            "path": ".vscode/settings.json",
+            "ignore": true
+        },
+        {
+            "path": ".vscode/extensions.json",
+            "ignore": true
+        },
+        {
+            "path": ".vscode/launch.json",
+            "ignore": true
+        },
+        {
+            "path": ".claude/settings.local.json",
+            "ignore": true
+        },
+        {
+            "path": ".github/actionlint-matcher.json",
+            "ignore": true
+        },
+        {
+            "path": "dev/jsconfig.json",
+            "ignore": true
+        },
+        {
+            "path": "ext/manifest.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary1/index.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary2/kanji_bank_1.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary2/index.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary3/kanji_meta_bank_1.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary3/index.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary4/tag_bank_1.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary4/index.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary5/term_bank_1.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary5/index.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary6/term_meta_bank_1.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/dictionaries/invalid-dictionary6/index.json",
+            "ignore": true
+        },
+        {
+            "path": "test/jsconfig.json",
+            "ignore": true
+        },
+        {
+            "path": "test/jsconfig.typecheck.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/vitest.write.config.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/vitest.options.config.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/vitest.json.config.json",
+            "ignore": true
+        },
+        {
+            "path": "benches/jsconfig.json",
+            "ignore": true
+        },
+        {
+            "path": "dev/data/chrome-manifest-schema.json",
+            "ignore": true
+        },
         {
             "path": "dev/data/manifest-variants.json",
             "typeFile": "types/dev/manifest.d.ts",
@@ -129,6 +218,14 @@
             "typeFile": "types/test/translator.d.ts",
             "type": "AnkiNoteBuilderTestResults",
             "jsconfig": "test"
+        },
+        {
+            "path": "test/data/anki-note-types/contracts.json",
+            "ignore": true
+        },
+        {
+            "path": "test/data/anki-note-types/upstream-snapshot.json",
+            "ignore": true
         },
         {
             "path": "test/data/database-test-cases.json",
