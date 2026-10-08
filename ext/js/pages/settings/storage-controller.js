@@ -173,15 +173,11 @@ export class StorageController {
                 /** @type {Record<string, unknown>} */ (summary.startupDiagnosticsSnapshot) :
                 null;
             const mode = typeof openStorageDiagnostics?.mode === 'string' ? openStorageDiagnostics.mode : 'unknown';
-            const dictionaryBackendUsable = (
-                mode !== 'opfs-unavailable' &&
-                mode !== 'fallback-memory' &&
-                mode !== 'fallback-memory-open-failed'
-            );
+            const usesFallbackStorage = summary.usesFallbackStorage === true;
+            const dictionaryBackendUsable = mode === 'opfs-sahpool' && !usesFallbackStorage;
             const startupError = typeof startupDiagnosticsSnapshot?.dictionaryPrepareError === 'string' ? startupDiagnosticsSnapshot.dictionaryPrepareError : '';
             const dictionaryRows = Array.isArray(summary.dictionaryRows) ? summary.dictionaryRows.length : 0;
             const offscreenDictionaryRows = Array.isArray(summary.offscreenDictionaryRows) ? summary.offscreenDictionaryRows.length : 0;
-            const usesFallbackStorage = summary.usesFallbackStorage === true;
             this._storageRuntimeCheckNode.textContent = (
                 `${browserLabel} check:\n` +
                 'backend reachable=true\n' +
