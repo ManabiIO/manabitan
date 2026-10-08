@@ -4679,7 +4679,8 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         if (typeof openStorageDiagnostics === 'object' && openStorageDiagnostics !== null && !Array.isArray(openStorageDiagnostics)) {
             const mode = /** @type {unknown} */ (Reflect.get(openStorageDiagnostics, 'mode'));
             if (typeof mode === 'string') {
-                opfsReady = (mode !== 'opfs-unavailable' && mode !== 'fallback-memory' && mode !== 'fallback-memory-open-failed');
+                // An unrecognized or failed storage mode is not evidence of readiness.
+                opfsReady = (mode === 'opfs-sahpool');
             }
         }
         if (usesFallbackStorage === true) {

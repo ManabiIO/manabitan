@@ -22,7 +22,9 @@ import {SecondarySearchDictionaryController} from '../ext/js/pages/settings/seco
  * @returns {SecondarySearchDictionaryController}
  */
 function createControllerForInternalTests() {
-    return /** @type {SecondarySearchDictionaryController} */ (Object.create(SecondarySearchDictionaryController.prototype));
+    const controller = /** @type {SecondarySearchDictionaryController} */ (Object.create(SecondarySearchDictionaryController.prototype));
+    Reflect.set(controller, '_optionsRenderRequest', 0);
+    return controller;
 }
 
 describe('SecondarySearchDictionaryController database updates', () => {
@@ -43,5 +45,33 @@ describe('SecondarySearchDictionaryController database updates', () => {
         await expect(onDatabaseUpdated.call(controller)).rejects.toThrow('lookup failed');
         expect(getDictionaryInfo).toHaveBeenCalledOnce();
         expect(Reflect.get(controller, '_getDictionaryInfoToken')).toBeNull();
+    });
+
+    test('responds to dictionary reorder event payloads, not just internal refresh tokens', async () => {
+        const controller = createControllerForInternalTests();
+        const options = {dictionaries: []};
+        const onOptionsChanged = vi.fn();
+        /** @type {(details: {source: object}) => Promise<void>} */
+        let onReordered = async () => {};
+        const settingsController = {
+            application: {on: vi.fn()},
+            on: vi.fn((name, callback) => {
+                if (name === 'dictionarySettingsReordered') {
+                    onReordered = callback;
+                }
+            }),
+            getOptions: vi.fn(async () => options),
+            getOptionsContext: vi.fn(() => ({index: 0})),
+        };
+        Reflect.set(controller, '_settingsController', settingsController);
+        Reflect.set(controller, '_getDictionaryInfoToken', null);
+        Reflect.set(controller, '_onDatabaseUpdated', vi.fn(async () => {}));
+        Reflect.set(controller, '_onOptionsChanged', onOptionsChanged);
+
+        await controller.prepare();
+        await onReordered({source: {}});
+
+        expect(settingsController.getOptions).toHaveBeenCalledOnce();
+        expect(onOptionsChanged).toHaveBeenCalledWith({options, optionsContext: {index: 0}});
     });
 });

@@ -27,12 +27,10 @@ export class StorageController {
     constructor(persistentStorageController) {
     /** @type {import('./persistent-storage-controller.js').PersistentStorageController} */
         this._persistentStorageController = persistentStorageController;
-        /** @type {?StorageEstimate} */
-        this._mostRecentStorageEstimate = null;
-        /** @type {boolean} */
-        this._storageEstimateFailed = false;
         /** @type {boolean} */
         this._isUpdating = false;
+        /** @type {boolean} */
+        this._updatePending = false;
         /** @type {?NodeListOf<HTMLElement>} */
         this._storageUsageNodes = null;
         /** @type {?NodeListOf<HTMLElement>} */
@@ -84,45 +82,55 @@ export class StorageController {
 
     /** */
     async _updateStats() {
-        if (this._isUpdating) { return; }
+        if (this._isUpdating) {
+            this._updatePending = true;
+            return;
+        }
 
+        this._isUpdating = true;
         try {
-            this._isUpdating = true;
-
-            const estimate = await this._storageEstimate();
-            const valid = (estimate !== null);
-            let storageIsLow = false;
-
-            // Firefox reports usage as 0 when persistent storage is enabled.
-            const finite = valid && ((typeof estimate.usage === 'number' && estimate.usage > 0) || !(await this._persistentStorageController.isStoragePeristent()));
-            if (finite) {
-                let {usage, quota} = estimate;
-
-                if (typeof usage !== 'number') { usage = 0; }
-                if (typeof quota !== 'number') {
-                    quota = 0;
-                } else {
-                    storageIsLow = quota <= (3 * 1000000000);
-                }
-                const usageString = this._bytesToLabeledString(usage);
-                const quotaString = this._bytesToLabeledString(quota);
-                for (const node of /** @type {NodeListOf<HTMLElement>} */ (this._storageUsageNodes)) {
-                    node.textContent = usageString;
-                }
-                for (const node of /** @type {NodeListOf<HTMLElement>} */ (this._storageQuotaNodes)) {
-                    node.textContent = quotaString;
-                }
-            }
-
-            this._setElementsVisible(this._storageUseFiniteNodes, valid && finite);
-            this._setElementsVisible(this._storageUseInfiniteNodes, valid && !finite);
-            this._setElementsVisible(this._storageUseValidNodes, valid);
-            this._setElementsVisible(this._storageUseInvalidNodes, !valid);
-            this._setElementsVisible(this._storageUseExhaustWarnNodes, storageIsLow);
-            await this._updateRuntimeCheck();
+            do {
+                this._updatePending = false;
+                await this._updateStatsOnce();
+            } while (this._updatePending);
         } finally {
             this._isUpdating = false;
         }
+    }
+
+    /** */
+    async _updateStatsOnce() {
+        const estimate = await this._storageEstimate();
+        const valid = (estimate !== null);
+        let storageIsLow = false;
+
+        // Firefox reports usage as 0 when persistent storage is enabled.
+        const finite = valid && ((typeof estimate.usage === 'number' && estimate.usage > 0) || !(await this._persistentStorageController.isStoragePeristent()));
+        if (finite) {
+            let {usage, quota} = estimate;
+
+            if (typeof usage !== 'number') { usage = 0; }
+            if (typeof quota !== 'number') {
+                quota = 0;
+            } else {
+                storageIsLow = quota <= (3 * 1000000000);
+            }
+            const usageString = this._bytesToLabeledString(usage);
+            const quotaString = this._bytesToLabeledString(quota);
+            for (const node of /** @type {NodeListOf<HTMLElement>} */ (this._storageUsageNodes)) {
+                node.textContent = usageString;
+            }
+            for (const node of /** @type {NodeListOf<HTMLElement>} */ (this._storageQuotaNodes)) {
+                node.textContent = quotaString;
+            }
+        }
+
+        this._setElementsVisible(this._storageUseFiniteNodes, valid && finite);
+        this._setElementsVisible(this._storageUseInfiniteNodes, valid && !finite);
+        this._setElementsVisible(this._storageUseValidNodes, valid);
+        this._setElementsVisible(this._storageUseInvalidNodes, !valid);
+        this._setElementsVisible(this._storageUseExhaustWarnNodes, storageIsLow);
+        await this._updateRuntimeCheck();
     }
 
     /** */
@@ -165,15 +173,11 @@ export class StorageController {
                 /** @type {Record<string, unknown>} */ (summary.startupDiagnosticsSnapshot) :
                 null;
             const mode = typeof openStorageDiagnostics?.mode === 'string' ? openStorageDiagnostics.mode : 'unknown';
-            const dictionaryBackendUsable = (
-                mode !== 'opfs-unavailable' &&
-                mode !== 'fallback-memory' &&
-                mode !== 'fallback-memory-open-failed'
-            );
+            const usesFallbackStorage = summary.usesFallbackStorage === true;
+            const dictionaryBackendUsable = mode === 'opfs-sahpool' && !usesFallbackStorage;
             const startupError = typeof startupDiagnosticsSnapshot?.dictionaryPrepareError === 'string' ? startupDiagnosticsSnapshot.dictionaryPrepareError : '';
             const dictionaryRows = Array.isArray(summary.dictionaryRows) ? summary.dictionaryRows.length : 0;
             const offscreenDictionaryRows = Array.isArray(summary.offscreenDictionaryRows) ? summary.offscreenDictionaryRows.length : 0;
-            const usesFallbackStorage = summary.usesFallbackStorage === true;
             this._storageRuntimeCheckNode.textContent = (
                 `${browserLabel} check:\n` +
                 'backend reachable=true\n' +
@@ -214,17 +218,11 @@ startupFailure.errorMessage :
      * @returns {Promise<?StorageEstimate>}
      */
     async _storageEstimate() {
-        if (this._storageEstimateFailed && this._mostRecentStorageEstimate === null) {
+        try {
+            return await navigator.storage.estimate();
+        } catch (e) {
             return null;
         }
-        try {
-            const value = await navigator.storage.estimate();
-            this._mostRecentStorageEstimate = value;
-            return value;
-        } catch (e) {
-            this._storageEstimateFailed = true;
-        }
-        return null;
     }
 
     /**
