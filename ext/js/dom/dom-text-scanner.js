@@ -202,7 +202,9 @@ export class DOMTextScanner {
         const nodeValue = /** @type {string} */ (textNode.nodeValue);
         const nodeValueLength = nodeValue.length;
         const {preserveNewlines, preserveWhitespace} = this._getWhitespaceSettings(textNode);
-        if (resetOffset) { this._offset = 0; }
+        // The text node can shrink between range creation and scanning.
+        // Never pass an invalid offset to a code-point reader.
+        this._offset = resetOffset ? 0 : Math.max(0, Math.min(this._offset, nodeValueLength));
 
         while (this._offset < nodeValueLength) {
             const char = readCodePointsForward(nodeValue, this._offset, 1);
@@ -231,7 +233,7 @@ export class DOMTextScanner {
         const nodeValue = /** @type {string} */ (textNode.nodeValue);
         const nodeValueLength = nodeValue.length;
         const {preserveNewlines, preserveWhitespace} = this._getWhitespaceSettings(textNode);
-        if (resetOffset) { this._offset = nodeValueLength; }
+        this._offset = resetOffset ? nodeValueLength : Math.max(0, Math.min(this._offset, nodeValueLength));
         while (this._offset > 0) {
             const char = readCodePointsBackward(nodeValue, this._offset - 1, 1);
             if (this._stopAtWordBoundary && DOMTextScanner.isWordDelimiter(char)) {

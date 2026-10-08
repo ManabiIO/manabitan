@@ -3077,6 +3077,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
     const hoverSteps = Math.max(4, Number(motionProfile?.hoverSteps ?? 16) || 16);
     const settleDelayMs = Math.max(0, Number(motionProfile?.settleDelayMs ?? 35) || 35);
     const popupTimeoutMs = Math.max(800, Number(motionProfile?.popupTimeoutMs ?? 3000) || 3000);
+    const requireRecognizedDictionaryResult = motionProfile?.requireRecognizedDictionaryResult === true;
     await page.evaluate(({hoverX, hoverY}) => {
         const root = document.documentElement;
         const element = document.elementFromPoint(hoverX, hoverY);
@@ -3189,6 +3190,30 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                 });
                 attemptTiming.popupStateReadMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 timing.lastAttempt = attemptTiming;
+                // A newly visible popup can still contain an earlier hover's
+                // no-results state (or be cleared during this read). Stress
+                // cases require real dictionary entries for the fresh hover;
+                // retry an intermediate/negative state rather than accepting
+                // it as the response. Exhausting bounded attempts still fails.
+                if (
+                    popupState?.hasDictionaryEntries !== true &&
+                    popupState?.noResultsVisible !== true &&
+                    popupState?.noDictionariesVisible !== true
+                ) {
+                    attemptTiming.popupContentInvalidatedDuringRead = true;
+                    continue;
+                }
+                if (
+                    requireRecognizedDictionaryResult &&
+                    (popupState.hasDictionaryEntries !== true || !/jmdict|jitendex/i.test(popupText))
+                ) {
+                    attemptTiming.nonDictionaryPopupState = {
+                        noResultsVisible: popupState.noResultsVisible,
+                        noDictionariesVisible: popupState.noDictionariesVisible,
+                        entriesTextPreview: popupState.entriesTextPreview,
+                    };
+                    continue;
+                }
                 return {
                     popupText,
                     usedModifier: modifier,
@@ -3226,7 +3251,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
             })(),
         };
     }, targetSelector);
-    throw new Error(`Hover scan did not produce a visible popup for selector ${targetSelector}; state=${JSON.stringify(hoverFailureState)}`);
+    throw new Error(`Hover scan did not produce a verified popup for selector ${targetSelector}; state=${JSON.stringify(hoverFailureState)} timing=${JSON.stringify(timing.lastAttempt ?? null)}`);
 }
 
 async function setWagahaiHoverFixtureTerms(page, terms) {
@@ -5302,9 +5327,9 @@ async function main() {
                         '#target-word',
                     ];
                     const motionProfiles = [
-                        {label: 'slow', moveAwaySteps: 10, hoverSteps: 28, settleDelayMs: 70, popupTimeoutMs: 3400},
-                        {label: 'medium', moveAwaySteps: 6, hoverSteps: 16, settleDelayMs: 35, popupTimeoutMs: 3000},
-                        {label: 'fast', moveAwaySteps: 3, hoverSteps: 7, settleDelayMs: 5, popupTimeoutMs: 2600},
+                        {label: 'slow', moveAwaySteps: 10, hoverSteps: 28, settleDelayMs: 70, popupTimeoutMs: 3400, requireRecognizedDictionaryResult: true},
+                        {label: 'medium', moveAwaySteps: 6, hoverSteps: 16, settleDelayMs: 35, popupTimeoutMs: 3000, requireRecognizedDictionaryResult: true},
+                        {label: 'fast', moveAwaySteps: 3, hoverSteps: 7, settleDelayMs: 5, popupTimeoutMs: 2600, requireRecognizedDictionaryResult: true},
                     ];
                     const iterations = [];
                     for (let i = 0; i < 18; ++i) {
@@ -5331,7 +5356,8 @@ async function main() {
                             throw new Error(
                                 `Hover iteration ${String(i + 1)} (${selector}, ${motionProfile.label}) did not show dictionary results. ` +
                                 `entries=${JSON.stringify(hoverResult.entriesTextPreview)} popup=${JSON.stringify(hoverResult.popupText.slice(0, 200))} ` +
-                                `noResults=${String(hoverResult.noResultsVisible)} noDictionaries=${String(hoverResult.noDictionariesVisible)}`,
+                                `noResults=${String(hoverResult.noResultsVisible)} noDictionaries=${String(hoverResult.noDictionariesVisible)} ` +
+                                `lastAttempt=${JSON.stringify(hoverResult.timing?.lastAttempt ?? null)}`,
                             );
                         }
                         await page.mouse.move(8, 8, {steps: 4});
@@ -5420,7 +5446,7 @@ async function main() {
                     for (let i = 0; i < 12; ++i) {
                         const selector = scanTargets[i % scanTargets.length];
                         const iterationStart = safePerformance.now();
-                        const {popupText, usedModifier, timing} = await hoverLookupOnWagahai(page, selector);
+                        const {popupText, usedModifier, timing} = await hoverLookupOnWagahai(page, selector, {requireRecognizedDictionaryResult: true});
                         const iterationEnd = safePerformance.now();
                         const hasDictionaryResult = /jmdict|jitendex/i.test(popupText);
                         iterations.push({

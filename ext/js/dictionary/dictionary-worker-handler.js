@@ -92,10 +92,16 @@ export class DictionaryWorkerHandler {
          * @param {...unknown} args
          */
         const onProgress = (...args) => {
-            self.postMessage({
-                action: 'progress',
-                params: {args},
-            });
+            try {
+                self.postMessage({
+                    action: 'progress',
+                    params: {args},
+                });
+            } catch (error) {
+                // Progress is advisory and may fail structured cloning. Never
+                // abort a storage mutation because its progress report failed.
+                try { log.error(error); } catch (_) { /* NOP */ }
+            }
         };
         let response;
         try {
