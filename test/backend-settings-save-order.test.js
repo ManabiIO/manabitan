@@ -86,8 +86,11 @@ describe('Backend settings persistence ordering', () => {
         const laterTarget = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'second write'};
 
         const failed = backend._modifySettings([failedTarget], 'first');
-        const later = backend._modifySettings([laterTarget], 'second');
         await expect(failed).rejects.toThrow('disk full');
+        expect(Reflect.get(backend, '_options')).toBe(options);
+        expect(options.value).toBe('persisted');
+
+        const later = backend._modifySettings([laterTarget], 'second');
         await expect(later).resolves.toEqual([{result: 'second write'}]);
 
         expect(save).toHaveBeenCalledTimes(2);
@@ -107,7 +110,6 @@ describe('Backend settings persistence ordering', () => {
             }
         });
         const {backend, applyOptions} = createBackend(save);
-        const setAllSettings = vi.fn();
         const validate = vi.fn();
         Reflect.set(backend, '_optionsUtil', {save, validate});
         Reflect.set(backend, '_getCurrentProfileEnabledDictionaryNames', () => []);
@@ -118,7 +120,6 @@ describe('Backend settings persistence ordering', () => {
             if (target.action === 'set') { current.value = /** @type {string} */ (target.value); }
             return true;
         });
-        Reflect.set(backend, '_setAllSettingsTestHook', setAllSettings);
         /** @type {import('settings-modifications').ScopedModification} */
         const target = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'before replacement'};
 
