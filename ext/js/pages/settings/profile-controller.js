@@ -18,6 +18,7 @@
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {log} from '../../core/log.js';
+import {ExtensionError} from '../../core/extension-error.js';
 import {clone, generateId} from '../../core/utilities.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {ProfileConditionsUI} from './profile-conditions-ui.js';
@@ -76,6 +77,10 @@ export class ProfileController {
         this._profileCurrent = 0;
         /** @type {?import('core').TokenObject} */
         this._optionsUpdateToken = null;
+        /** @type {?Promise<void>} */
+        this._profileNameSaveTail = null;
+        /** @type {Map<string|import('settings').Profile, {value: string}>} */
+        this._profileNameSaveEdits = new Map();
     }
 
     /** @type {number} */
@@ -131,14 +136,60 @@ export class ProfileController {
     async setProfileName(profileIndex, value) {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
+        // Use stable identity across profile reordering. Older settings may not
+        // have IDs, so retain the object itself as a fallback edit key.
+        const id = typeof profile.id === 'string' && profile.id.length > 0 ? profile.id : null;
+        const key = id ?? profile;
+        const currentIndex = () => this._profiles.findIndex((item) => item === profile || (id !== null && item.id === id));
 
         profile.name = value;
         this._updateSelectName(profileIndex, value);
-
         const profileEntry = this._getProfileEntry(profileIndex);
         if (profileEntry !== null) { profileEntry.setName(value); }
 
-        await this._settingsController.setGlobalSetting(`profiles[${profileIndex}].name`, value);
+        // Fast typing produces multiple overlapping requests. Coalesce edits
+        // that have not started, and serialize any already in flight. A stale
+        // completion must never overwrite the most recent name.
+        this._profileNameSaveEdits ??= new Map();
+        const edit = {value};
+        this._profileNameSaveEdits.set(key, edit);
+        const previous = this._profileNameSaveTail ?? Promise.resolve();
+        const save = previous.then(async () => {
+            const index = currentIndex();
+            if (index < 0 || this._profileNameSaveEdits.get(key) !== edit) { return; }
+            // A failed predecessor's refresh may have replaced the optimistic
+            // profile object. Restore this still-current edit before dispatch.
+            this._profiles[index].name = value;
+            this._updateSelectName(index, value);
+            const entry = this._getProfileEntry(index);
+            if (entry !== null) { entry.setName(value); }
+            try {
+                const results = await this._settingsController.setGlobalSetting(`profiles[${index}].name`, value);
+                if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                    throw new Error('Profile name update returned an invalid result');
+                }
+                if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+            } catch (error) {
+                if (currentIndex() >= 0 && this._profileNameSaveEdits.get(key) === edit) {
+                    try {
+                        // Recovery reads all profiles, so every name write shares this queue.
+                        // A newer save waits until this read has settled.
+                        await this._settingsController.refresh();
+                    } catch (refreshError) {
+                        log.error(refreshError);
+                    }
+                }
+                throw error;
+            }
+        });
+        const tail = save.catch(() => {});
+        this._profileNameSaveTail = tail;
+        try {
+            await save;
+        } finally {
+            if (this._profileNameSaveTail === tail) { this._profileNameSaveTail = null; }
+            if (this._profileNameSaveEdits.get(key) === edit) { this._profileNameSaveEdits.delete(key); }
+        }
     }
 
     /**
@@ -226,6 +277,8 @@ export class ProfileController {
         const currentIndex = this._profiles.indexOf(profile);
         if (currentIndex < 0) { return; }
         const defaultProfileOptions = defaultOptions.profiles[0];
+        // Reset settings without replacing the profile identity.
+        defaultProfileOptions.id = profile.id;
         defaultProfileOptions.name = profile.name;
 
         await this._settingsController.modifyGlobalSettings([{
@@ -839,7 +892,7 @@ class ProfileEntry {
     _onNameInputInput(e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         const name = element.value;
-        void this._profileController.setProfileName(this._index, name);
+        void this._profileController.setProfileName(this._index, name).catch((error) => { log.error(error); });
     }
 
     /** */

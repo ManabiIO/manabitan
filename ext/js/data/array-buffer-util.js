@@ -35,7 +35,16 @@ export function arrayBufferUtf8Decode(arrayBuffer) {
  * @returns {string} A base64 string representing the binary content.
  */
 export function arrayBufferToBase64(arrayBuffer) {
-    return btoa(arrayBufferToBinaryString(arrayBuffer));
+    // Stay below typical function argument limits and avoid allocating a second
+    // archive-sized intermediate binary string before the base64 result.
+    // The chunk size is divisible by 3, so only the final chunk is padded.
+    const bytes = new Uint8Array(arrayBuffer);
+    const chunkSize = 24_576;
+    const parts = [];
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        parts.push(btoa(String.fromCharCode(...bytes.subarray(i, i + chunkSize))));
+    }
+    return parts.join('');
 }
 
 /**
@@ -45,15 +54,12 @@ export function arrayBufferToBase64(arrayBuffer) {
  */
 export function arrayBufferToBinaryString(arrayBuffer) {
     const bytes = new Uint8Array(arrayBuffer);
-    try {
-        return String.fromCharCode(...bytes);
-    } catch (e) {
-        let binary = '';
-        for (let i = 0, ii = bytes.byteLength; i < ii; ++i) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return binary;
+    const chunkSize = 32_768;
+    const parts = [];
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        parts.push(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
     }
+    return parts.join('');
 }
 
 /**

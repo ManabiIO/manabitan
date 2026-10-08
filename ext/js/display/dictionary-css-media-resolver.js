@@ -32,7 +32,9 @@ function readCssEscape(value, startIndex) {
     if (/[\n\r\f]/u.test(character)) {
         return {value: '', endIndex: index + (character === '\r' && value[index + 1] === '\n' ? 2 : 1)};
     }
-    const hex = /^[0-9a-f]{1,6}/iu.exec(value.slice(index));
+    // CSS hexadecimal escapes have at most six digits; never copy the entire
+    // stylesheet tail for each escape in an imported dictionary stylesheet.
+    const hex = /^[0-9a-f]{1,6}/iu.exec(value.slice(index, index + 6));
     if (hex === null) { return {value: character, endIndex: index + 1}; }
     const codePoint = Number.parseInt(hex[0], 16);
     index += hex[0].length;
