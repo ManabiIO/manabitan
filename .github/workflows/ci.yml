@@ -18,6 +18,9 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
+      # Baseline type-check failures must not cancel independent unit/lint jobs.
+      # Run every matrix leg so a PR can distinguish regressions from debt.
+      fail-fast: false
       matrix:
         include:
           - name: JavaScript
