@@ -28,7 +28,7 @@ describe('recommended settings language selection ownership', () => {
         const recommendations = vi.fn().mockReturnValueOnce(earlier.promise).mockReturnValueOnce(latest.promise);
         const list = {};
         const clear = vi.fn();
-        Object.defineProperty(list, 'innerHTML', {set: clear});
+        Object.defineProperty(list, 'innerHTML', {get: () => '', set: clear});
         vi.stubGlobal('document', {querySelector: () => list});
         const select = {value: 'ja'};
         const modal = {hidden: false};
@@ -64,7 +64,7 @@ describe('recommended settings language selection ownership', () => {
         expect(modal.hidden).toBe(true);
         expect(Reflect.get(controller, '_recommendedSettings')).toEqual(new Map());
         const list = {};
-        Object.defineProperty(list, 'innerHTML', {set: () => {}});
+        Object.defineProperty(list, 'innerHTML', {get: () => '', set: () => {}});
         vi.stubGlobal('document', {querySelector: () => list});
         deferred.resolve([]);
         await pending;
@@ -98,6 +98,7 @@ describe('recommended settings language selection ownership', () => {
         const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
         const controller = createController();
         Reflect.set(controller, '_languageSelect', {value: 'ja'});
+        Reflect.set(controller, '_recommendedSettingsModal', {hidden: false});
         Reflect.set(controller, '_getRecommendedSettings', vi.fn().mockRejectedValueOnce(failure));
         controller._onLanguageSelectChangedEvent(/** @type {Event} */ (/** @type {unknown} */ ({})));
         await vi.waitFor(() => { expect(logError).toHaveBeenCalledExactlyOnceWith(failure); });
