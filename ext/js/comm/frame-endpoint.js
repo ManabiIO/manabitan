@@ -35,6 +35,8 @@ export class FrameEndpoint {
         this._eventListeners = new EventListenerCollection();
         /** @type {boolean} */
         this._eventListenersSetup = false;
+        /** @type {number} */
+        this._acknowledgementRetryCount = 0;
     }
 
     /**
@@ -115,7 +117,16 @@ export class FrameEndpoint {
                 if (this._token !== token) { return; }
                 this._token = null;
                 log.error(error);
-                this.signal();
+                const retryCount = ++this._acknowledgementRetryCount;
+                if (retryCount > 5) { return; }
+                // The first retry is immediate; persistent transport failure
+                // must not produce an unbounded ready/connect message loop.
+                if (retryCount === 1) {
+                    this.signal();
+                } else {
+                    const delay = Math.min(2000, 250 * 2 ** (retryCount - 2));
+                    setTimeout(() => { this.signal(); }, delay);
+                }
             });
     }
 }
