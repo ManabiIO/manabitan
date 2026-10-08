@@ -19,23 +19,26 @@ describe('Binary string encoding', () => {
     });
 
     test('all byte values round-trip without Unicode reinterpretation', () => {
-        const bytes = Uint8Array.from({length: 256}, (_value, i) => i);
-        const binary = arrayBufferToBinaryString(bytes.buffer);
+        const buffer = new ArrayBuffer(256);
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < bytes.length; ++i) { bytes[i] = i; }
+        const binary = arrayBufferToBinaryString(buffer);
         expect(binary.length).toBe(bytes.length);
         for (let i = 0; i < bytes.length; ++i) {
             expect(binary.charCodeAt(i)).toBe(i);
         }
-        expect(new Uint8Array(base64ToArrayBuffer(arrayBufferToBase64(bytes.buffer)))).toStrictEqual(bytes);
+        expect(new Uint8Array(base64ToArrayBuffer(arrayBufferToBase64(buffer)))).toStrictEqual(bytes);
     });
 
     test.each([0x7fff, 0x8000, 0x8001, 0x10000, 0x10001, 1_000_000])(
         'large buffer of %i bytes is converted exactly',
         (length) => {
-            const bytes = new Uint8Array(length);
+            const buffer = new ArrayBuffer(length);
+            const bytes = new Uint8Array(buffer);
             for (let i = 0; i < length; ++i) {
                 bytes[i] = (i * 73 + 41) & 0xff;
             }
-            const binary = arrayBufferToBinaryString(bytes.buffer);
+            const binary = arrayBufferToBinaryString(buffer);
             expect(binary.length).toBe(length);
             let mismatchIndex = -1;
             for (let i = 0; i < length; ++i) {
@@ -49,7 +52,8 @@ describe('Binary string encoding', () => {
     );
 
     test('base64 round-trips a buffer exceeding engine argument limits', () => {
-        const bytes = new Uint8Array(200_000);
+        const buffer = new ArrayBuffer(200_000);
+        const bytes = new Uint8Array(buffer);
         for (let i = 0; i < bytes.length; ++i) {
             bytes[i] = i & 0xff;
         }
