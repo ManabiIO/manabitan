@@ -45,15 +45,16 @@ export function arrayBufferToBase64(arrayBuffer) {
  */
 export function arrayBufferToBinaryString(arrayBuffer) {
     const bytes = new Uint8Array(arrayBuffer);
-    try {
-        return String.fromCharCode(...bytes);
-    } catch (e) {
-        let binary = '';
-        for (let i = 0, ii = bytes.byteLength; i < ii; ++i) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return binary;
+    // A single spread over a large buffer exceeds the engine's maximum
+    // argument count. Encode bounded chunks instead of falling back to
+    // character-by-character string concatenation.
+    const chunkSize = 0x8000;
+    /** @type {string[]} */
+    const chunks = [];
+    for (let i = 0, ii = bytes.byteLength; i < ii; i += chunkSize) {
+        chunks.push(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
     }
+    return chunks.join('');
 }
 
 /**
