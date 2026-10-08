@@ -1875,13 +1875,21 @@ export class Backend {
         }
         const fileName = (() => {
             const contentDisposition = response.headers.get('Content-Disposition') || '';
-            const match = /filename\\*?=(?:UTF-8''|\"?)([^\";]+)/i.exec(contentDisposition);
-            if (match) {
+            // RFC 5987 filename* takes priority over legacy filename when both
+            // are present. Do not interpret percent-encoding in plain filename.
+            const extendedMatch = /(?:^|;)\s*filename\*\s*=\s*"?UTF-8'[^']*'([^";]+)/i.exec(contentDisposition);
+            if (extendedMatch !== null) {
                 try {
-                    return decodeURIComponent(match[1].replace(/^\"|\"$/g, ''));
+                    const name = decodeURIComponent(extendedMatch[1].trim());
+                    if (name.length > 0) { return name; }
                 } catch (_) {
-                    return match[1].replace(/^\"|\"$/g, '');
+                    // Malformed extended name: use a legacy name or URL fallback.
                 }
+            }
+            const plainMatch = /(?:^|;)\s*filename\s*=\s*(?:"([^"]*)"|([^;]+))/i.exec(contentDisposition);
+            if (plainMatch !== null) {
+                const name = (plainMatch[1] ?? plainMatch[2] ?? '').trim();
+                if (name.length > 0) { return name; }
             }
             try {
                 const parsed = new URL(normalizedUrl);
