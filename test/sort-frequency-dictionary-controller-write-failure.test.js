@@ -122,4 +122,78 @@ describe('SortFrequencyDictionaryController write failure rollback', () => {
 
         expect(select.value).toBe('ascending');
     });
+
+    test('ignores auto-detected order when the user selects another dictionary meanwhile', async ({window}) => {
+        window.document.body.innerHTML = `
+            <select id="sort-frequency-dictionary">
+                <option value="Dict A" selected>Dict A</option>
+                <option value="Dict B">Dict B</option>
+            </select>
+            <select id="sort-frequency-dictionary-order">
+                <option value="ascending" selected>Ascending</option>
+                <option value="descending">Descending</option>
+            </select>
+            <button id="sort-frequency-dictionary-order-auto"></button>
+            <div id="sort-frequency-dictionary-order-container"></div>
+        `;
+
+        /** @type {(value: 'ascending'|'descending') => void} */
+        let resolveOrder = () => {};
+        /** @type {Promise<'ascending'|'descending'>} */
+        const orderPromise = new Promise((resolve) => { resolveOrder = resolve; });
+        const setProfileSetting = vi.fn().mockResolvedValue(undefined);
+        const controller = new SortFrequencyDictionaryController(/** @type {any} */ ({
+            setProfileSetting,
+            getOptionsContext: () => ({index: 0}),
+        }));
+        Reflect.set(controller, '_getFrequencyOrder', vi.fn(() => orderPromise));
+
+        const pending = controller._autoUpdateOrder('Dict A');
+        const select = /** @type {HTMLSelectElement} */ (window.document.querySelector('#sort-frequency-dictionary'));
+        select.value = 'Dict B';
+        resolveOrder('descending');
+        await pending;
+
+        expect(setProfileSetting).not.toHaveBeenCalled();
+    });
+
+    test('manual frequency order overrides an older pending auto-detection result', async ({window}) => {
+        window.document.body.innerHTML = `
+            <select id="sort-frequency-dictionary">
+                <option value="Dict A" selected>Dict A</option>
+            </select>
+            <select id="sort-frequency-dictionary-order">
+                <option value="ascending" selected>Ascending</option>
+                <option value="descending">Descending</option>
+            </select>
+            <button id="sort-frequency-dictionary-order-auto"></button>
+            <div id="sort-frequency-dictionary-order-container"></div>
+        `;
+
+        /** @type {(value: 'ascending'|'descending') => void} */
+        let resolveOrder = () => {};
+        /** @type {Promise<'ascending'|'descending'>} */
+        const orderPromise = new Promise((resolve) => { resolveOrder = resolve; });
+        const setProfileSetting = vi.fn().mockResolvedValue(undefined);
+        const controller = new SortFrequencyDictionaryController(/** @type {any} */ ({
+            setProfileSetting,
+            getOptionsContext: () => ({index: 0}),
+        }));
+        Reflect.set(controller, '_getFrequencyOrder', vi.fn(() => orderPromise));
+
+        const pending = controller._autoUpdateOrder('Dict A');
+        const select = /** @type {HTMLSelectElement} */ (window.document.querySelector('#sort-frequency-dictionary-order'));
+        select.value = 'descending';
+        controller._onSortFrequencyDictionaryOrderSelectChange();
+        await vi.waitFor(() => {
+            expect(setProfileSetting).toHaveBeenCalledWith('general.sortFrequencyDictionaryOrder', 'descending');
+        });
+
+        resolveOrder('ascending');
+        await pending;
+
+        expect(select.value).toBe('descending');
+        expect(setProfileSetting).toHaveBeenCalledTimes(1);
+    });
+
 });
