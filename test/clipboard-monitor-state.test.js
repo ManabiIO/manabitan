@@ -41,7 +41,8 @@ describe('ClipboardMonitor observed state', () => {
         await vi.advanceTimersByTimeAsync(250);
         expect(onChange).not.toHaveBeenCalled();
         await vi.advanceTimersByTimeAsync(250);
-        expect(onChange).toHaveBeenCalledExactlyOnceWith({text: 'new'});
+        expect(onChange).toHaveBeenCalledOnce();
+        expect(onChange).toHaveBeenCalledWith({text: 'new'});
         monitor.stop();
     });
 
@@ -52,6 +53,7 @@ describe('ClipboardMonitor observed state', () => {
             .mockResolvedValueOnce(' ')
             .mockResolvedValueOnce('copied');
         const monitor = new ClipboardMonitor({getText});
+        /** @type {string[]} */
         const texts = [];
         monitor.on('change', ({text}) => { texts.push(text); });
 
@@ -70,6 +72,7 @@ describe('ClipboardMonitor observed state', () => {
             .mockResolvedValueOnce('initial')
             .mockResolvedValueOnce('changed');
         const monitor = new ClipboardMonitor({getText});
+        /** @type {string[]} */
         const texts = [];
         monitor.on('change', ({text}) => { texts.push(text); });
 
