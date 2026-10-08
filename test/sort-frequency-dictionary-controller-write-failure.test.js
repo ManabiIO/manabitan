@@ -195,13 +195,12 @@ describe('SortFrequencyDictionaryController write failure rollback', () => {
         expect(select.value).toBe('descending');
         expect(setProfileSetting).toHaveBeenCalledTimes(1);
     });
-
 });
 
 
 describe('Frequency setting mutation ownership', () => {
     /**
-     * @param {Window} window
+     * @param {Pick<Window, 'document'>} window
      * @returns {{controller: SortFrequencyDictionaryController, settings: {setProfileSetting: ReturnType<typeof vi.fn>, getOptionsContext: () => {index: number}}, setIndex: (value: number) => void}}
      */
     function createHarness(window) {

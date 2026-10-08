@@ -204,7 +204,7 @@ export class SortFrequencyDictionaryController {
     /**
      * @param {string} path
      * @param {unknown} value
-     * @param {number} index
+     * @param {number|undefined} index
      * @param {() => boolean} isCurrent
      * @returns {Promise<boolean>}
      */
