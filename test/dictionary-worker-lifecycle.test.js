@@ -72,9 +72,13 @@ afterEach(() => {
 });
 
 describe('DictionaryWorker progress observer isolation', () => {
-    test.each([false, true])('a throwing progress observer cannot abort import-like mutation (reuse=%s)', async (reuseWorker) => {
+    test.each([[false, false], [false, true], [true, false], [true, true]])(
+        'a throwing progress observer cannot abort mutation (reuse=%s, logger fails=%s)',
+        async (reuseWorker, loggerFails) => {
         const workers = installWorkerMock();
-        const report = vi.spyOn(log, 'error').mockImplementation(() => {});
+        const report = vi.spyOn(log, 'error').mockImplementation(() => {
+            if (loggerFails) { throw new Error('Logger unavailable'); }
+        });
         const client = new DictionaryWorker({reuseWorker});
         const failure = new Error('Detached settings view');
         const onProgress = vi.fn(() => { throw failure; });
