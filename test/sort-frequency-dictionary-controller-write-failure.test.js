@@ -122,5 +122,4 @@ describe('SortFrequencyDictionaryController write failure rollback', () => {
 
         expect(select.value).toBe('ascending');
     });
-
 });
