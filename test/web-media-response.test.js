@@ -12,7 +12,7 @@ function media(content, mediaType = 'image/png') {
 }
 
 test('web media omits unsupported and empty content without exposing extra database metadata', () => {
-    expect(webMediaResponse(undefined)).toBeNull();
+    expect(webMediaResponse()).toBeNull();
     expect(webMediaResponse(media(new ArrayBuffer(1), 'text/html'))).toBeNull();
     expect(webMediaResponse(media(new ArrayBuffer(0)))).toBeNull();
     const content = new ArrayBuffer(5);

@@ -8,7 +8,7 @@ export const MAX_WEB_IMAGE_BYTES = 32 * 1024 * 1024;
  * Never structured-clone arbitrary imported media into the Reader page.
  * @param media
  */
-export function webMediaResponse(media: Media | undefined): {content: ArrayBuffer, mediaType: string} | null {
+export function webMediaResponse(media?: Media): {content: ArrayBuffer, mediaType: string} | null {
     if (!media || !/^image\/(?:png|jpeg|webp|gif|avif|svg\+xml)$/.test(media.mediaType)) {return null;}
     if (media.content.byteLength > MAX_WEB_IMAGE_BYTES) {
         throw new WebRuntimeError('image_too_large', 'Dictionary image exceeds display size limit');

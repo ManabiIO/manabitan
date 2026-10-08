@@ -57,7 +57,7 @@ export function glossarySearchText(glossary) {
         const available = MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS - codepoints;
         // Never materialize all code points of an untrusted glossary string.
         // A code point uses at most two UTF-16 units, so this prefix suffices.
-        const points = [...value.slice(0, available * 2)].slice(0, available);
+        const points = Array.from(value.slice(0, available * 2)).slice(0, available);
         parts.push(points.join(''));
         codepoints += points.length;
     };

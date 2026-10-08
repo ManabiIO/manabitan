@@ -20,11 +20,13 @@ test('one render bounds concurrent media requests and preserves duplicate coales
     const manager = new ReaderMedia(media, () => {});
     let loaded = 0;
     let failed = 0;
+    const loadedCallback = () => { loaded++; };
+    const failedCallback = () => { failed++; };
     try {
         for (let i = 0; i < 9; ++i) {
-            manager.loadMediaUrl(`media-${i}.png`, 'A', () => { loaded++; }, () => { failed++; });
+            manager.loadMediaUrl(`media-${i}.png`, 'A', loadedCallback, failedCallback);
         }
-        manager.loadMediaUrl('media-0.png', 'A', () => { loaded++; }, () => { failed++; });
+        manager.loadMediaUrl('media-0.png', 'A', loadedCallback, failedCallback);
         await vi.waitFor(() => { expect(requests).toHaveBeenCalledTimes(4); });
         for (let i = 0; i < 9; ++i) {
             await vi.waitFor(() => { expect(resolvers.length).toBeGreaterThan(i); });

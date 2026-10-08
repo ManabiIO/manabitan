@@ -198,7 +198,7 @@ export class ManabiTanWebClient {
             if (!this.stopped && error instanceof WebRuntimeError && error.code === 'storage_busy') {
                 // The lock was never acquired. Keep this worker available so
                 // the same client can retry after another Reader tab releases it.
-                this.opened = undefined;
+                delete this.opened;
             } else {
                 // Failed initialization may still own storage resources.
                 this.fail(error);
