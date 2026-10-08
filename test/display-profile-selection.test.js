@@ -86,7 +86,8 @@ describe('DisplayProfileSelection options refresh handling', () => {
         Reflect.set(selection, '_profileButton', {style: {}});
         Reflect.set(selection, '_profileName', {textContent: ''});
         Reflect.set(selection, '_eventListeners', {removeAllEventListeners: vi.fn()});
-        Reflect.set(selection, '_profileList', {set textContent(value) {}, appendChild: vi.fn()});
+        Reflect.set(selection, '_profileList', {textContent: '', appendChild: vi.fn()});
+        vi.stubGlobal('document', {createDocumentFragment: () => ({})});
         Reflect.set(selection, '_display', {
             application: {
                 api: {
@@ -106,6 +107,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
         resolveList({profileCurrent: 0, profiles: []});
         await updateList;
         expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(false);
+        vi.unstubAllGlobals();
     });
 
     test('profile selector becomes visible again after a second profile is added', async () => {
