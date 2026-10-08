@@ -191,11 +191,12 @@ describe('AnkiNoteBuilder dictionary media safety', () => {
         );
 
         const resultMedia = result.media.dictionaryMedia;
+        if (typeof resultMedia === 'undefined') { throw new Error('Dictionary media was not returned'); }
         expect(Object.prototype.hasOwnProperty.call(resultMedia, '__proto__')).toBe(true);
-        expect(Object.prototype.hasOwnProperty.call(resultMedia['__proto__'], '__proto__')).toBe(true);
-        expect(resultMedia['__proto__']['__proto__']).toStrictEqual({value: 'first.png'});
-        expect(resultMedia['__proto__'].normal).toStrictEqual({value: 'second.png'});
-        expect(resultMedia.normal['__proto__']).toStrictEqual({value: 'third.png'});
+        expect(Object.prototype.hasOwnProperty.call(resultMedia.__proto__, '__proto__')).toBe(true);
+        expect(resultMedia.__proto__.__proto__).toStrictEqual({value: 'first.png'});
+        expect(resultMedia.__proto__.normal).toStrictEqual({value: 'second.png'});
+        expect(resultMedia.normal.__proto__).toStrictEqual({value: 'third.png'});
         expect(Object.getPrototypeOf(resultMedia)).toBe(Object.prototype);
         expect(JSON.stringify(resultMedia)).toContain('"__proto__":');
     });
@@ -227,7 +228,7 @@ describe('AnkiNoteBuilder.createDuplicateCheckNote', () => {
             template: 'unused',
         }));
         expect(Object.prototype.hasOwnProperty.call(note.fields, '__proto__')).toBe(true);
-        expect(note.fields['__proto__']).toBe('[first]');
+        expect(note.fields.__proto__).toBe('[first]');
         expect(Object.getPrototypeOf(note.fields)).toBe(Object.prototype);
 
         const renderedDuplicate = await ankiNoteBuilder.createDuplicateCheckNote(/** @type {import('anki-note-builder').CreateDuplicateCheckNoteDetails} */ ({
@@ -237,7 +238,7 @@ describe('AnkiNoteBuilder.createDuplicateCheckNote', () => {
             template: 'unused',
         }));
         expect(Object.prototype.hasOwnProperty.call(renderedDuplicate.fields, '__proto__')).toBe(true);
-        expect(renderedDuplicate.fields['__proto__']).toBe('[first]');
+        expect(renderedDuplicate.fields.__proto__).toBe('[first]');
 
         Object.defineProperty(cardFormat.fields, '__proto__', {
             value: {value: 'literal', overwriteMode: 'overwrite'},
@@ -250,8 +251,8 @@ describe('AnkiNoteBuilder.createDuplicateCheckNote', () => {
             cardFormat,
         });
         expect(Object.prototype.hasOwnProperty.call(fastDuplicate?.fields, '__proto__')).toBe(true);
-        expect(fastDuplicate?.fields['__proto__']).toBe('literal');
-    })
+        expect(fastDuplicate?.fields.__proto__).toBe('literal');
+    });
 
     test.each([
         ['term', createTermEntry()],

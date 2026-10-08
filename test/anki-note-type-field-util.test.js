@@ -128,7 +128,7 @@ describe('buildAnkiFieldsForModel', () => {
         });
 
         expect(Object.prototype.hasOwnProperty.call(fields, '__proto__')).toBe(true);
-        expect(fields['__proto__']).toStrictEqual({value: '{expression}', overwriteMode: 'coalesce'});
+        expect(fields.__proto__).toStrictEqual({value: '{expression}', overwriteMode: 'coalesce'});
         expect(Object.getPrototypeOf(fields)).toBe(Object.prototype);
         expect(JSON.stringify(fields)).toContain('"__proto__":');
     });
