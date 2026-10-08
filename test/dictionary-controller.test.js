@@ -90,7 +90,7 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
             {name: 'JMdict', alias: 'My alias', enabled: true},
             {name: 'Unknown', alias: 'Stale', enabled: true},
         ];
-        const modifyGlobalSettings = vi.fn(async (modifications) => {
+        const modifyGlobalSettings = vi.fn(async (/** @type {import('settings-modifications').Modification[]} */ modifications) => {
             for (const modification of modifications) {
                 if (modification.action === 'splice') {
                     backendDictionaries.splice(modification.start, modification.deleteCount, ...modification.items);
