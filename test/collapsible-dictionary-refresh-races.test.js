@@ -85,9 +85,8 @@ describe('collapsible dictionary asynchronous settings refresh', () => {
         const {controller} = createHarness(async () => options, () => profileIndex);
         const previous = {value: 'collapsed'};
         Reflect.set(controller, '_selects', [previous]);
-        const settings = /** @type {Record<string, unknown>} */ (Reflect.get(controller, '_settingsController'));
         const mutate = vi.fn(() => deferred.promise);
-        settings.modifyProfileSettings = mutate;
+        Reflect.set(Reflect.get(controller, '_settingsController'), 'modifyProfileSettings', mutate);
         const pending = controller._setDefinitionsCollapsibleAll('force-expanded');
         await vi.waitFor(() => { expect(mutate).toHaveBeenCalledOnce(); });
         const replacement = {value: 'collapsed'};
@@ -105,9 +104,8 @@ describe('collapsible dictionary asynchronous settings refresh', () => {
         const {controller} = createHarness(async () => options);
         const select = {value: 'collapsed'};
         Reflect.set(controller, '_selects', [select]);
-        const settings = /** @type {Record<string, unknown>} */ (Reflect.get(controller, '_settingsController'));
         const mutate = vi.fn(async () => []);
-        settings.modifyProfileSettings = mutate;
+        Reflect.set(Reflect.get(controller, '_settingsController'), 'modifyProfileSettings', mutate);
         await controller._setDefinitionsCollapsibleAll('force-expanded');
         expect(mutate).toHaveBeenCalledOnce();
         expect(select.value).toBe('force-expanded');
