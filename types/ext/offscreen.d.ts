@@ -93,6 +93,12 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.TermEntry[];
     };
+    warmTermLookupCachesOffscreen: {
+        params: {
+            dictionaryNames: string[];
+        };
+        return: void;
+    };
     debugDictionaryStorageStateOffscreen: {
         params: void;
         return: {
