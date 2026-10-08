@@ -102,7 +102,10 @@ export class DisplayProfileSelection {
         this._profileButton.classList.toggle('sidebar-button-highlight', visible);
         document.documentElement.dataset.profilePanelVisible = `${visible}`;
         if (visible && this._profileListNeedsUpdate) {
-            void this._updateProfileList();
+            void this._updateProfileList().catch((error) => {
+                this._profileListNeedsUpdate = true;
+                log.error(error);
+            });
         }
     }
 
