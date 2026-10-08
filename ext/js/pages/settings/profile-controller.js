@@ -299,7 +299,8 @@ export class ProfileController {
 
         // Get indices
         let profileCurrentNew = this._profileCurrent;
-        const settingsProfileIndex = this._profileCurrent;
+        const settingsProfileIndex = this._settingsController.profileIndex;
+        const remainingProfileCount = this._profiles.length - 1;
 
         // Construct settings modifications
         /** @type {import('settings-modifications').Modification[]} */
@@ -311,7 +312,9 @@ export class ProfileController {
             items: [],
         }];
         if (profileCurrentNew >= profileIndex) {
-            profileCurrentNew = Math.min(profileCurrentNew - 1, this._profiles.length - 1);
+            // Deleting the active first profile must select the new index 0,
+            // never the invalid index -1.
+            profileCurrentNew = Math.max(0, Math.min(profileCurrentNew - 1, remainingProfileCount - 1));
             modifications.push({
                 action: 'set',
                 path: 'profileCurrent',
@@ -341,15 +344,39 @@ export class ProfileController {
 
         this._updateProfileSelectOptions();
 
-        // Update profile index
-        if (settingsProfileIndex >= profileIndex) {
-            this._settingsController.profileIndex = settingsProfileIndex - 1;
-        } else {
-            this._settingsController.refreshProfileIndex();
+        // Persist before refreshing the settings context: the profile at the
+        // same numeric index may now refer to a different profile object.
+        try {
+            const results = await this._settingsController.modifyGlobalSettings(modifications);
+            if (!Array.isArray(results) || results.length !== modifications.length) {
+                throw new Error('Profile deletion returned an incomplete response');
+            }
+            for (const result of results) {
+                if (typeof result !== 'object' || result === null) {
+                    throw new Error('Profile deletion returned an invalid response');
+                }
+                if (result.error) { throw ExtensionError.deserialize(result.error); }
+            }
+        } catch (error) {
+            // Reconcile the optimistic list with durable settings after rejection.
+            try {
+                await this._settingsController.refresh();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
         }
 
-        // Modify settings
-        await this._settingsController.modifyGlobalSettings(modifications);
+        // Update profile index after deletion, including index 0. Refresh even
+        // when its numeric value is unchanged because the profile identity moved.
+        const settingsProfileIndexNew = settingsProfileIndex >= profileIndex ?
+            Math.max(0, Math.min(settingsProfileIndex - 1, remainingProfileCount - 1)) :
+            settingsProfileIndex;
+        if (settingsProfileIndexNew === settingsProfileIndex) {
+            this._settingsController.refreshProfileIndex();
+        } else {
+            this._settingsController.profileIndex = settingsProfileIndexNew;
+        }
     }
 
     /**
@@ -506,13 +533,16 @@ export class ProfileController {
         this._profiles = profiles;
         this._profileCurrent = profileCurrent;
 
-        const settingsProfileIndex = this._settingsController.profileIndex;
+        let settingsProfileIndex = this._settingsController.profileIndex;
 
         // Update UI
         this._updateProfileSelectOptions();
 
-        if (this._settingsController.profileIndex !== profileCurrent) {
-            void this.setDefaultProfile(profileCurrent);
+        // Viewing a non-default profile in Settings is intentional. Only
+        // recover an index that is no longer valid after profiles are deleted.
+        if (settingsProfileIndex < 0 || settingsProfileIndex >= profiles.length) {
+            this._settingsController.profileIndex = profileCurrent;
+            settingsProfileIndex = profileCurrent;
         }
 
         /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileCurrent}`;
