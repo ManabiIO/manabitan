@@ -18,6 +18,7 @@
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {log} from '../../core/log.js';
+import {ExtensionError} from '../../core/extension-error.js';
 import {clone, generateId} from '../../core/utilities.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {ProfileConditionsUI} from './profile-conditions-ui.js';
@@ -76,6 +77,8 @@ export class ProfileController {
         this._profileCurrent = 0;
         /** @type {?import('core').TokenObject} */
         this._optionsUpdateToken = null;
+        /** @type {Map<string|import('settings').Profile, Promise<void>>} */
+        this._profileNameSaveTails = new Map();
     }
 
     /** @type {number} */
@@ -131,14 +134,44 @@ export class ProfileController {
     async setProfileName(profileIndex, value) {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
+        // Use stable identity across profile reordering. Older settings may not
+        // have IDs, so retain the object itself as a fallback queue key.
+        const id = typeof profile.id === 'string' && profile.id.length > 0 ? profile.id : null;
+        const key = id ?? profile;
+        const currentIndex = () => this._profiles.findIndex((item) => item === profile || (id !== null && item.id === id));
 
         profile.name = value;
         this._updateSelectName(profileIndex, value);
-
         const profileEntry = this._getProfileEntry(profileIndex);
         if (profileEntry !== null) { profileEntry.setName(value); }
 
-        await this._settingsController.setGlobalSetting(`profiles[${profileIndex}].name`, value);
+        // Fast typing produces multiple overlapping requests. Coalesce edits
+        // that have not started, and serialize any already in flight. A stale
+        // completion must never overwrite the most recent name.
+        this._profileNameSaveTails ??= new Map();
+        const previous = this._profileNameSaveTails.get(key) ?? Promise.resolve();
+        const save = previous.then(async () => {
+            const index = currentIndex();
+            if (index < 0 || this._profiles[index].name !== value) { return; }
+            const results = await this._settingsController.setGlobalSetting(`profiles[${index}].name`, value);
+            if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                throw new Error('Profile name update returned an invalid result');
+            }
+            if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+        });
+        const tail = save.catch(() => {});
+        this._profileNameSaveTails.set(key, tail);
+        try {
+            await save;
+        } catch (error) {
+            const index = currentIndex();
+            if (index >= 0 && this._profiles[index].name === value) {
+                try { await this._settingsController.refresh(); } catch (refreshError) { log.error(refreshError); }
+            }
+            throw error;
+        } finally {
+            if (this._profileNameSaveTails.get(key) === tail) { this._profileNameSaveTails.delete(key); }
+        }
     }
 
     /**
@@ -839,7 +872,7 @@ class ProfileEntry {
     _onNameInputInput(e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         const name = element.value;
-        void this._profileController.setProfileName(this._index, name);
+        void this._profileController.setProfileName(this._index, name).catch((error) => { log.error(error); });
     }
 
     /** */
