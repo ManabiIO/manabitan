@@ -877,20 +877,22 @@ export class DictionaryController {
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         const {profiles} = optionsFull;
+        const installedDictionaryNames = new Set(dictionaries.map(({title}) => title));
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
-            let modified = false;
-            const installedDictionaryNames = new Set(dictionaries.map(({title}) => title));
             const existingDictionaryNames = new Set();
             const dictionaryOptionsArray = profiles[i].options.dictionaries;
+            const path = `profiles[${i}].options.dictionaries`;
             for (let j = dictionaryOptionsArray.length - 1; j >= 0; --j) {
                 const {name} = dictionaryOptionsArray[j];
                 if (installedDictionaryNames.has(name)) {
-                    // A dictionary can intentionally have multiple entries with
-                    // different aliases and enablement. Preserve each one.
+                    // Preserve distinct aliases and enablement flags for the
+                    // same installed dictionary, including disabled entries.
                     existingDictionaryNames.add(name);
                 } else {
                     dictionaryOptionsArray.splice(j, 1);
-                    modified = true;
+                    // Never write a stale whole-array snapshot: a concurrent
+                    // import may have just enabled an entry in the backend.
+                    targets.push({action: 'splice', path, start: j, deleteCount: 1, items: []});
                 }
             }
 
@@ -898,15 +900,7 @@ export class DictionaryController {
                 if (existingDictionaryNames.has(title)) { continue; }
                 const value = DictionaryController.createDefaultDictionarySettings(title, newDictionariesEnabled, styles);
                 dictionaryOptionsArray.push(value);
-                modified = true;
-            }
-
-            if (modified) {
-                targets.push({
-                    action: 'set',
-                    path: `profiles[${i}].options.dictionaries`,
-                    value: dictionaryOptionsArray,
-                });
+                targets.push({action: 'push', path, items: [value]});
             }
         }
 
