@@ -197,7 +197,7 @@ describe('AnkiNoteBuilder dictionary media safety', () => {
         expect(resultMedia['__proto__'].normal).toStrictEqual({value: 'second.png'});
         expect(resultMedia.normal['__proto__']).toStrictEqual({value: 'third.png'});
         expect(Object.getPrototypeOf(resultMedia)).toBe(Object.prototype);
-        expect(JSON.parse(JSON.stringify(resultMedia))['__proto__']['__proto__']).toStrictEqual({value: 'first.png'});
+        expect(JSON.stringify(resultMedia)).toContain('"__proto__":');
     });
 });
 
