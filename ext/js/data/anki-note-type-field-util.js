@@ -95,7 +95,10 @@ export function getDefaultAnkiFieldValue(fieldName, index, dictionaryEntryType, 
         oldFields !== null &&
         Object.prototype.hasOwnProperty.call(oldFields, fieldName)
     ) {
-        return oldFields[fieldName].value;
+        const field = oldFields[fieldName];
+        if (field !== null && typeof field === 'object' && typeof field.value === 'string') {
+            return field.value;
+        }
     }
 
     if (index === 0) {
