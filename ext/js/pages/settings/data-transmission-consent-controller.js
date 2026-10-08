@@ -35,7 +35,7 @@ export class DataTransmissionConsentController {
         this._acceptDataTransmissionButton = null;
         /** @type {?HTMLButtonElement} */
         this._declineDataTransmissionButton = null;
-        /** @type {Modal|null} */
+        /** @type {import('./modal.js').Modal|null} */
         this._consentModal = null;
         /** @type {boolean} */
         this._decisionPending = false;
