@@ -15,7 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect, test, vi} from 'vitest';
+import {afterEach, describe, expect, test, vi} from 'vitest';
+import {RequestBuilder} from '../ext/js/background/request-builder.js';
 import {AudioDownloader} from '../ext/js/media/audio-downloader.js';
 
 /**
@@ -121,5 +122,53 @@ describe('AudioDownloader Jisho URL handling', () => {
             'https://jisho.org/search/A%2FB%3F%20%23%20%2B%E6%BC%A2%E5%AD%97',
             expect.anything(),
         );
+    });
+});
+
+describe('AudioDownloader download idle deadline cleanup', () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.useRealTimers();
+    });
+
+    test('clears the idle timer when the fetch rejects', async () => {
+        vi.useFakeTimers();
+        const downloader = createDownloader(vi.fn().mockRejectedValue(new Error('offline')));
+
+        await expect(downloader._downloadAudioFromUrl('https://example.test/offline.mp3', 'custom', 500))
+            .rejects.toThrow('offline');
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('clears the idle timer when the server rejects the request', async () => {
+        vi.useFakeTimers();
+        const fetchAnonymous = vi.fn().mockResolvedValue(new Response('', {status: 503}));
+        const downloader = createDownloader(fetchAnonymous);
+
+        await expect(downloader._downloadAudioFromUrl('https://example.test/failed.mp3', 'custom', 500))
+            .rejects.toThrow('Invalid response: 503');
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('clears the idle timer if reading the response body fails', async () => {
+        vi.useFakeTimers();
+        const fetchAnonymous = vi.fn().mockResolvedValue(new Response(new Uint8Array([1, 2, 3])));
+        vi.spyOn(RequestBuilder, 'readFetchResponseArrayBuffer').mockRejectedValueOnce(new Error('body read failed'));
+        const downloader = createDownloader(fetchAnonymous);
+
+        await expect(downloader._downloadAudioFromUrl('https://example.test/broken.mp3', 'custom', 500))
+            .rejects.toThrow('body read failed');
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('encodes the downloaded Uint8Array without including unrelated bytes', async () => {
+        vi.useFakeTimers();
+        const fetchAnonymous = vi.fn().mockResolvedValue(new Response(new Uint8Array([1, 2, 3])));
+        vi.spyOn(RequestBuilder, 'readFetchResponseArrayBuffer').mockResolvedValueOnce(new Uint8Array([88, 1, 2, 89]).subarray(1, 3));
+        const downloader = createDownloader(fetchAnonymous);
+
+        const audio = await downloader._downloadAudioFromUrl('https://example.test/audio.mp3', 'custom', 500);
+        expect(audio.data).toBe('AQI=');
+        expect(vi.getTimerCount()).toBe(0);
     });
 });
