@@ -2523,7 +2523,8 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             // Settings mutations are synchronous, but persistence is not.
             // Keep the whole mutation+save operation exclusive so a failed
             // write can roll back safely without discarding a newer mutation.
-            const previousOptions = clone(this._getOptionsFull(false));
+            const previousOptions = this._getOptionsFull(false);
+            this._options = clone(previousOptions);
             /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
             const results = [];
             for (const target of targets) {
