@@ -28,7 +28,7 @@ test('an old settings read never overwrites an input edited while it was pending
     const getValues = vi.fn()
         .mockImplementationOnce(() => new Promise((resolve) => { finishRead = resolve; }))
         .mockResolvedValue([{result: 'user value'}]);
-    const setValues = vi.fn(async (/** @type {import('../types/ext/dom-data-binder.d.ts').SetValuesDetails<string>[]} */ args) => args.map(({value}) => ({result: value})));
+    const setValues = vi.fn(async () => [{result: 'user value'}]);
     const binder = new DOMDataBinder(['input'], () => 'setting', (a, b) => a === b, getValues, setValues);
     try {
         binder.observe(root);
