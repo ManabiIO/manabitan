@@ -187,7 +187,7 @@ describe('DictionaryWorkerClient', () => {
         expect(FakeWorker.instances).toHaveLength(1);
     });
 
-    test('does not retry a request that cannot be serialized', async () => {
+    test('does not retry a request that cannot be serialized or terminate its healthy worker', async () => {
         const client = new DictionaryWorkerClient('/dictionary-worker.js');
         FakeWorker.instances[0].postMessage.mockImplementationOnce(() => {
             throw new DOMException('Value could not be cloned', 'DataCloneError');
@@ -195,7 +195,43 @@ describe('DictionaryWorkerClient', () => {
 
         await expect(client.invoke('findTermsOffscreen', {text: '日本'})).rejects.toThrow('failed to send findTermsOffscreen');
         expect(FakeWorker.instances).toHaveLength(1);
-        expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
+        expect(FakeWorker.instances[0].terminate).not.toHaveBeenCalled();
+    });
+
+    test('invalid request serialization does not reject unrelated in-flight lookups', async () => {
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const pendingLookup = client.invoke('findTermsOffscreen', {text: '日本'});
+        const worker = FakeWorker.instances[0];
+        worker.postMessage.mockImplementationOnce(() => {
+            throw new DOMException('Uncloneable mutation argument', 'DataCloneError');
+        });
+        await expect(client.invoke('deleteDictionaryOffscreen', {dictionaryTitle: 'Test'}))
+            .rejects.toThrow('failed to send deleteDictionaryOffscreen');
+
+        expect(worker.terminate).not.toHaveBeenCalled();
+        expect(FakeWorker.instances).toHaveLength(1);
+        worker.emit('message', {data: {id: 1, result: {dictionaryEntries: [1]}}});
+        await expect(pendingLookup).resolves.toEqual({dictionaryEntries: [1]});
+
+        const nextLookup = client.invoke('findKanjiOffscreen', {text: '日'});
+        worker.emit('message', {data: {id: 3, result: {dictionaryEntries: [2]}}});
+        await expect(nextLookup).resolves.toEqual({dictionaryEntries: [2]});
+        expect(FakeWorker.instances).toHaveLength(1);
+    });
+
+    test('one-way import send serialization failure does not terminate unrelated worker requests', async () => {
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const pendingLookup = client.invoke('findTermsOffscreen', {text: '猫'});
+        const worker = FakeWorker.instances[0];
+        worker.postMessage.mockImplementationOnce(() => {
+            throw new DOMException('Detached transfer port', 'DataCloneError');
+        });
+
+        expect(() => client.post('importDictionaryOffscreen', {operationId: 'bad'}, []))
+            .toThrow('failed to send importDictionaryOffscreen');
+        expect(worker.terminate).not.toHaveBeenCalled();
+        worker.emit('message', {data: {id: 1, result: {ok: true}}});
+        await expect(pendingLookup).resolves.toEqual({ok: true});
     });
 
     test('does not replay a mutation rejected by a shared worker failure', async () => {

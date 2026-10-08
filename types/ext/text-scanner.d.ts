@@ -134,6 +134,9 @@ export type Events = {
         detail: SearchResultDetail;
         pageTheme: 'dark' | 'light';
     };
+    searchSame: {
+        inputInfo: InputInfo;
+    };
     searchEmpty: {
         inputInfo: InputInfo;
     };

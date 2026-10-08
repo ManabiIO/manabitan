@@ -150,6 +150,8 @@ export function glossarySearchTokens(glossary) {
  * @returns {{folded: string, phrase: string, tokens: string[], prefix: string}|null}
  */
 export function createGlossarySearchQuery(query) {
+    // Bound the raw request before normalization or Unicode token allocation.
+    if (query.length > 1024) { return null; }
     const folded = foldGlossarySearchText(query.trim());
     if (
         folded.length === 0 ||
