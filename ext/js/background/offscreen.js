@@ -58,6 +58,7 @@ export class Offscreen {
             ['getDictionaryCountsOffscreen',   this._getDictionaryCountsHandler.bind(this)],
             ['getDictionaryTermProbeOffscreen', this._getDictionaryTermProbeHandler.bind(this)],
             ['findTermsBulkOffscreen',         this._findTermsBulkHandler.bind(this)],
+            ['warmTermLookupCachesOffscreen',  this._warmTermLookupCachesHandler.bind(this)],
             ['debugDictionaryStorageStateOffscreen', this._debugDictionaryStorageStateHandler.bind(this)],
             ['debugDictionaryLookupStateOffscreen', this._debugDictionaryLookupStateHandler.bind(this)],
             ['databasePurgeOffscreen',         this._purgeDatabaseHandler.bind(this)],
@@ -290,6 +291,11 @@ export class Offscreen {
         return await this._invokeDictionaryWorker('findTermsBulkOffscreen', {termList, dictionaryNames, matchType});
     }
 
+    /** @type {import('offscreen').ApiHandler<'warmTermLookupCachesOffscreen'>} */
+    async _warmTermLookupCachesHandler({dictionaryNames}) {
+        await this._invokeDictionaryWorker('warmTermLookupCachesOffscreen', {dictionaryNames});
+    }
+
     /** @type {import('offscreen').ApiHandler<'debugDictionaryStorageStateOffscreen'>} */
     async _debugDictionaryStorageStateHandler() {
         return await this._invokeDictionaryWorker('debugDictionaryStorageStateOffscreen', {});
@@ -467,7 +473,12 @@ export class Offscreen {
                 const normalizedError = error instanceof Error ?
                     new ExtensionError(error.message) :
                     new ExtensionError(String(error));
-                this._rejectPendingDictionaryWorkerResponses(normalizedError);
+                // A DataCloneError means this particular message was not
+                // transferable; it does not imply the dictionary worker died.
+                const isDataCloneError = typeof error === 'object' && error !== null && Reflect.get(error, 'name') === 'DataCloneError';
+                if (!isDataCloneError) {
+                    this._rejectPendingDictionaryWorkerResponses(normalizedError);
+                }
                 reject(normalizedError);
             }
         });

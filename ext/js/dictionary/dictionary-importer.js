@@ -212,6 +212,7 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
 
     /**
      * @param {number} h1
+     * @param {number} h2
      * @param {number} byteLength
      * @returns {number|number[]|undefined}
      */
@@ -585,11 +586,11 @@ export class DictionaryImporter {
         const artifactFixedPackMinTotalRows = Number.isFinite(details.artifactFixedPackMinTotalRows) ?
             Math.max(0, Math.min(4_000_000, Math.trunc(/** @type {number} */ (details.artifactFixedPackMinTotalRows)))) :
             null;
+        const updateSessionToken = typeof details.updateSessionToken === 'string' ? details.updateSessionToken.trim() : '';
         const isStagedDictionaryUpdate = (
             typeof details.dictionaryTitleOverride === 'string' &&
             /\[update-staging [^\]]+\]$/.test(details.dictionaryTitleOverride) &&
-            typeof details.updateSessionToken === 'string' &&
-            details.updateSessionToken.trim().length > 0
+            updateSessionToken.length > 0
         );
         this._wasmPreallocateChunkRows = details.wasmPreallocateChunkRows !== false;
         this._pendingImageMediaByPath.clear();
@@ -1024,7 +1025,7 @@ export class DictionaryImporter {
         }
         if (isStagedDictionaryUpdate) {
             summary.transientUpdateStage = 'update-staging';
-            summary.updateSessionToken = details.updateSessionToken.trim();
+            summary.updateSessionToken = updateSessionToken;
         }
         const dictionarySummaryPrimaryKey = await dictionaryDatabase.addWithResult('dictionaries', summary);
         let styles = '';
@@ -4104,6 +4105,15 @@ export class DictionaryImporter {
          * @returns {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}}
          */
         const createDirectArtifactChunkPayload = (streamedRowCount, termRecordPreinternedPlan) => {
+            if (
+                !(chunkReadingEqualsExpression instanceof Uint8Array) ||
+                !(chunkScores instanceof Int32Array) ||
+                !(chunkSequences instanceof Int32Array) ||
+                !(chunkContentHash1 instanceof Uint32Array) ||
+                !(chunkContentHash2 instanceof Uint32Array)
+            ) {
+                throw new Error('Invalid direct artifact chunk buffers');
+            }
             const useFullChunkArrays = streamedRowCount === chunkSize;
             return {
                 dictionary: dictionaryTitle,

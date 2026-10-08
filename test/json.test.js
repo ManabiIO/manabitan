@@ -70,6 +70,9 @@ function createValidatorFunctionFromTypeScript(path, type, jsconfigType) {
         minify: false,
         expose: 'none',
         strictTuples: true,
+        // Schema generation must not fail on unrelated project-wide TS errors.
+        // The separate TypeScript CI jobs still enforce those errors.
+        skipTypeCheck: true,
     };
     const schema = createGenerator(config).createSchema(config.type);
     const ajv = createAjv();
@@ -96,7 +99,8 @@ function normalizePathDirectorySeparators(value) {
 }
 
 
-describe.concurrent('JSON validation', () => {
+// Schema compilation is memory-intensive; avoid running all generators in parallel.
+describe('JSON validation', () => {
     const ignoreDirectories = new Set([
         'builds',
         'dictionaries',

@@ -30,6 +30,7 @@ import * as firefox from 'selenium-webdriver/firefox.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
+import {getUnsupportedRuntimeSkipReason} from './unsupported-runtime-classifier.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -711,33 +712,6 @@ const strictUnsupportedRuntime = parseBooleanEnv(
 );
 
 /**
- * @param {string} message
- * @returns {string}
- */
-function getUnsupportedRuntimeSkipReason(message) {
-    const text = String(message);
-    if (
-        text.includes('OPFS is required but unavailable') ||
-        text.includes('no such vfs: opfs') ||
-        text.includes('opfs-sahpool') ||
-        text.includes('createSyncAccessHandle') ||
-        text.includes('DedicatedWorkerGlobalScope')
-    ) {
-        return 'Firefox automation runtime does not expose the required OPFS SyncAccessHandle worker surface in this local Selenium stack; skipping this lane locally without enabling any SQLite fallback.';
-    }
-    if (text.includes('background.service_worker is currently disabled')) {
-        return 'Firefox automation runtime does not support MV3 background service workers in this local Selenium/browser stack; skipping this lane locally.';
-    }
-    if (
-        text.includes('Failed to read marionette port') ||
-        text.includes('Failed to decode response from marionette')
-    ) {
-        return 'Firefox automation runtime failed before extension startup in this local Selenium/Marionette stack; skipping this lane locally.';
-    }
-    return '';
-}
-
-/**
  * @param {unknown} runtimeDiagnostics
  * @returns {boolean}
  */
@@ -1165,7 +1139,7 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
 
         if (sawStepText && currentLabel.length === 0) {
             emptySince ??= now;
-            if ((now - emptySince) >= emptyStabilityMs) {
+            if ((now - emptySince) >= emptyStabilityMs && lastCountsText === expectedCounts) {
                 clearedAfterStep = true;
                 if (previousLabel.length > 0) {
                     await addReportPhase(
@@ -1237,7 +1211,8 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
         );
         return;
     }
-    fail(`Timed out waiting for ${dictionaryName} completion. sawStepText=${String(sawStepText)} clearedAfterStep=${String(clearedAfterStep)}. Last label="${previousLabel}" counts=${countsText} dictionary-error="${errorText}"`);
+    const diagnostics = await getBackendLookupDiagnostics(driver, '暗記');
+    fail(`Timed out waiting for ${dictionaryName} completion. sawStepText=${String(sawStepText)} clearedAfterStep=${String(clearedAfterStep)}. Last label="${previousLabel}" counts=${countsText} dictionary-error="${errorText}" profileDictionaries=${JSON.stringify(diagnostics.profileDictionaries ?? null)} debugLookup=${JSON.stringify(diagnostics.debugLookupState ?? null)} importDebug=${JSON.stringify(await getLastImportDebug(driver))}`);
 }
 
 /**
@@ -1324,14 +1299,19 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
 
 /**
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @param {string} [expectedExtensionUuid]
  * @returns {Promise<string>}
  * @throws {Error}
  */
-async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
-    const normalizedAddonId = String(installedAddonId || '').trim();
-    const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
+async function waitForExtensionBaseUrl(driver, expectedExtensionUuid = '') {
+    const normalizedUuid = String(expectedExtensionUuid || '').trim();
+    if (normalizedUuid.length > 0) {
+        // This UUID is fixed by extensions.webextensions.uuids in the test profile.
+        // Readiness is verified by navigating to the extension page below; do
+        // not enumerate privileged Firefox tabs just to rediscover this origin.
+        return `moz-extension://${normalizedUuid}`;
+    }
     const deadline = Date.now() + 30_000;
-    let fallbackBaseUrl = '';
     while (Date.now() < deadline) {
         const handlesUnknown = /** @type {unknown} */ (await driver.getAllWindowHandles());
         const handles = Array.isArray(handlesUnknown) ? handlesUnknown.map(String) : [];
@@ -1340,19 +1320,10 @@ async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
             const url = String(await driver.getCurrentUrl());
             const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/.exec(url);
             if (match !== null) {
-                fallbackBaseUrl = match[1];
-                if (expectedBaseUrl.length === 0 || expectedBaseUrl === match[1]) {
-                    return match[1];
-                }
+                return match[1];
             }
         }
         await driver.sleep(500);
-    }
-    if (fallbackBaseUrl.length > 0) {
-        return fallbackBaseUrl;
-    }
-    if (expectedBaseUrl.length > 0) {
-        return expectedBaseUrl;
     }
     fail('Failed to discover moz-extension base URL from open tabs.');
 }
@@ -2013,24 +1984,24 @@ async function getBackendLookupDiagnostics(driver, term) {
                 }
                 const optionsFull = await send('optionsGetFull', undefined);
                 const profileDictionaries = Array.isArray(optionsFull?.profiles) ?
-                    optionsFull.profiles.map((profile) => ({
+                    optionsFull.profiles.map((profile, index) => ({
                         id: profile?.id ?? null,
+                        index,
+                        selected: index === optionsFull.profileCurrent,
                         dictionaries: Array.isArray(profile?.options?.dictionaries) ?
-                            profile.options.dictionaries.map((dictionary) => String(dictionary?.name || '')) :
+                            profile.options.dictionaries.map((dictionary) => ({
+                                name: String(dictionary?.name || ''),
+                                enabled: dictionary?.enabled === true,
+                            })) :
                             [],
                     })) :
                     null;
-                const enabledInstalledExactMatches = Array.isArray(optionsFull?.profiles?.[0]?.options?.dictionaries) ?
-                    optionsFull.profiles[0].options.dictionaries
-                        .filter((dictionary) => dictionary?.enabled === true)
-                        .map((dictionary) => String(dictionary?.name || '').trim())
-                        .filter((name) => name.length > 0 && installedTitles.includes(name)) :
-                    [];
+                // Probe installed storage separately from profile activation.
                 let debugLookupState = null;
                 try {
                     debugLookupState = await send('debugDictionaryLookupState', {
                         text: term,
-                        dictionaryNames: [...new Set(enabledInstalledExactMatches)],
+                        dictionaryNames: installedTitles,
                     });
                 } catch (e) {
                     debugLookupState = {
@@ -2098,11 +2069,12 @@ async function waitForBackendDictionaryContentIntegrity(driver, dictionaryNames,
                 targetDictionaryNames = [...new Set(resolvedNames.length > 0 ? resolvedNames : dictionaryNames)];
             }
             const debugLookupState = diagnostics.debugLookupState;
-            const store = (debugLookupState && typeof debugLookupState === 'object' && !Array.isArray(debugLookupState)) ?
-                debugLookupState.termContentStoreDebugState :
-                null;
+            const workerState = (
+                debugLookupState && typeof debugLookupState === 'object' && !Array.isArray(debugLookupState)
+            ) ? (debugLookupState.workerState ?? debugLookupState) : null;
+            const store = workerState?.termContentStoreDebugState ?? null;
             const totalLength = Number(store?.totalLength ?? -1);
-            const rowSample = Array.isArray(debugLookupState?.rowSample) ? debugLookupState.rowSample : [];
+            const rowSample = Array.isArray(workerState?.rowSample) ? workerState.rowSample : [];
             let inBoundsRowCount = 0;
             let outOfBoundsRowCount = 0;
             let glossaryReadyRowCount = 0;
@@ -2664,6 +2636,9 @@ async function main() {
     await mkdir(diagnosticsArtifactPaths.crashDumpDir, {recursive: true});
     geckodriverLogFd = openSync(diagnosticsArtifactPaths.geckodriverLogPath, 'a');
     const firefoxService = new firefox.ServiceBuilder();
+    // Firefox 138+ requires explicit geckodriver permission for privileged
+    // extension browsing contexts; browser capability flags are insufficient.
+    firefoxService.addArguments('--allow-system-access');
     firefoxService.enableVerboseLogging(true);
     firefoxService.setEnvironment({
         ...process.env,
@@ -2726,7 +2701,7 @@ async function main() {
         const baseUrlStart = safePerformance.now();
         heartbeat.setActiveOperation('wait for extension base URL');
         installedAddonId = await driver.installAddon(xpiPath, true);
-        const extensionBaseUrl = await waitForExtensionBaseUrl(driver, installedAddonId);
+        const extensionBaseUrl = await waitForExtensionBaseUrl(driver, firefoxDevExtensionUuid);
         const baseUrlEnd = safePerformance.now();
         await addReportPhase(report, driver, 'Install extension and discover base URL', `Extension installed via webdriver addon API and moz-extension base URL discovered; addonId=${installedAddonId}`, baseUrlStart, baseUrlEnd);
         const firefoxPidStart = safePerformance.now();
@@ -3233,7 +3208,7 @@ async function main() {
                 await driver.sleep(1_000);
                 const reinstallExtensionStart = safePerformance.now();
                 const reinstalledAddonId = await driver.installAddon(xpiPath, true);
-                const reinstalledExtensionBaseUrl = await waitForExtensionBaseUrl(driver, reinstalledAddonId);
+                const reinstalledExtensionBaseUrl = await waitForExtensionBaseUrl(driver, firefoxDevExtensionUuid);
                 const reinstallExtensionEnd = safePerformance.now();
                 await addReportPhase(
                     report,
@@ -4121,7 +4096,8 @@ async function main() {
         report.status = 'success';
         console.log('[firefox-e2e] PASS: Recommended dictionary imports installed Jitendex and JMdict.');
     } catch (e) {
-        let failureReason = errorMessage(e);
+        const primaryFailureReason = errorMessage(e);
+        let failureReason = primaryFailureReason;
         try {
             const backendStorageDiagnostics = await getBackendStorageDiagnostics(driver);
             if (backendStorageDiagnostics !== null) {
@@ -4135,7 +4111,9 @@ async function main() {
         } catch (diagnosticsError) {
             failureReason += ` backendStorageDiagnosticsError=${errorMessage(diagnosticsError)}`;
         }
-        const skipReason = strictUnsupportedRuntime ? '' : getUnsupportedRuntimeSkipReason(failureReason);
+        // Appended storage diagnostics can mention opfs-sahpool even when OPFS
+        // works. Never treat a later dictionary-integrity failure as unsupported.
+        const skipReason = strictUnsupportedRuntime ? '' : getUnsupportedRuntimeSkipReason(primaryFailureReason);
         if (skipReason.length > 0) {
             report.status = 'success-with-skips';
             report.failureReason = '';
