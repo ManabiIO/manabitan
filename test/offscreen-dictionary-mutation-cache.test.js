@@ -5,10 +5,15 @@
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
 
+/** @type {Array<{
+ *   action: string,
+ *   params: import('core').SerializableObject,
+ *   method: 'deleteDictionary'|'replaceDictionaryTitle'|'purge',
+ * }>} */
 const mutationCases = [
-    ['deleteDictionaryOffscreen', {dictionaryTitle: 'Old'}, 'deleteDictionary'],
-    ['replaceDictionaryTitleOffscreen', {fromDictionaryTitle: 'Old', toDictionaryTitle: 'New'}, 'replaceDictionaryTitle'],
-    ['databasePurgeOffscreen', {}, 'purge'],
+    {action: 'deleteDictionaryOffscreen', params: {dictionaryTitle: 'Old'}, method: 'deleteDictionary'},
+    {action: 'replaceDictionaryTitleOffscreen', params: {fromDictionaryTitle: 'Old', toDictionaryTitle: 'New'}, method: 'replaceDictionaryTitle'},
+    {action: 'databasePurgeOffscreen', params: {}, method: 'purge'},
 ];
 
 /**
@@ -49,32 +54,33 @@ afterEach(() => {
 });
 
 describe('offscreen dictionary mutation cache coherence', () => {
-    test.each(mutationCases)('%s invalidates translator caches after mutation succeeds', async (action, params, method) => {
+    test.each(mutationCases)('$action invalidates translator caches after mutation succeeds', async ({action, params, method}) => {
         const {worker, database, translator} = await createHarness();
         await worker._invokeAction(action, params, []);
         expect(database[method]).toHaveBeenCalledOnce();
         expect(translator.clearDatabaseCaches).toHaveBeenCalledOnce();
     });
 
-    test.each(mutationCases)('%s invalidates caches even when mutation fails after partial changes', async (action, params, method) => {
+    test.each(mutationCases)('$action invalidates caches even when mutation fails after partial changes', async ({action, params, method}) => {
         const {worker, database, translator} = await createHarness();
-        database[method].mockRejectedValueOnce(new Error('storage mutation failed'));
+        const mutation = /** @type {ReturnType<typeof vi.fn>} */ (/** @type {unknown} */ (database[method]));
+        mutation.mockRejectedValueOnce(new Error('storage mutation failed'));
         await expect(worker._invokeAction(action, params, [])).rejects.toThrow('storage mutation failed');
         expect(translator.clearDatabaseCaches).toHaveBeenCalledOnce();
     });
 
-    test.each(mutationCases)('%s does not clear caches before the mutation settles', async (action, params, method) => {
+    test.each(mutationCases)('$action does not clear caches before the mutation settles', async ({action, params, method}) => {
         const {worker, database, translator} = await createHarness();
-        /** @type {(() => void)|null} */
-        let release = null;
-        database[method].mockImplementationOnce(() => new Promise((resolve) => {
+        /** @type {() => void} */
+        let release = () => { throw new Error('Mutation did not start'); };
+        const mutation = /** @type {ReturnType<typeof vi.fn>} */ (/** @type {unknown} */ (database[method]));
+        mutation.mockImplementationOnce(() => new Promise((resolve) => {
             release = () => { resolve(method === 'purge'); };
         }));
         const pending = worker._invokeAction(action, params, []);
         await Promise.resolve();
-        expect(database[method]).toHaveBeenCalledOnce();
+        expect(mutation).toHaveBeenCalledOnce();
         expect(translator.clearDatabaseCaches).not.toHaveBeenCalled();
-        if (release === null) { throw new Error('Mutation did not start'); }
         release();
         await pending;
         expect(translator.clearDatabaseCaches).toHaveBeenCalledOnce();
