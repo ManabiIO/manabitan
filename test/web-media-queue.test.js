@@ -22,15 +22,15 @@ test('one render bounds concurrent media requests and preserves duplicate coales
     let failed = 0;
     try {
         for (let i = 0; i < 9; ++i) {
-            manager.loadMediaUrl(`media-${i}.png`, 'A', () => {loaded++;}, () => {failed++;});
+            manager.loadMediaUrl(`media-${i}.png`, 'A', () => { loaded++; }, () => { failed++; });
         }
-        manager.loadMediaUrl('media-0.png', 'A', () => {loaded++;}, () => {failed++;});
-        await vi.waitFor(() => {expect(requests).toHaveBeenCalledTimes(4);});
+        manager.loadMediaUrl('media-0.png', 'A', () => { loaded++; }, () => { failed++; });
+        await vi.waitFor(() => { expect(requests).toHaveBeenCalledTimes(4); });
         for (let i = 0; i < 9; ++i) {
-            await vi.waitFor(() => {expect(resolvers.length).toBeGreaterThan(i);});
+            await vi.waitFor(() => { expect(resolvers.length).toBeGreaterThan(i); });
             resolvers[i]();
         }
-        await vi.waitFor(() => {expect(loaded).toBe(10);});
+        await vi.waitFor(() => { expect(loaded).toBe(10); });
         expect(requests).toHaveBeenCalledTimes(9);
         expect(failed).toBe(0);
     } finally {
@@ -46,10 +46,10 @@ test('media queue refuses excess unique URLs and does not start requests after d
         manager.loadMediaUrl(`media-${i}.png`, 'A', () => {}, failed);
     }
     manager.loadMediaUrl('overflow.png', 'A', () => {}, failed);
-    await vi.waitFor(() => {expect(failed).toHaveBeenCalledTimes(1);});
+    await vi.waitFor(() => { expect(failed).toHaveBeenCalledTimes(1); });
     expect(requests).toHaveBeenCalledTimes(4);
     manager.dispose();
-    for (const resolve of resolvers) {resolve();}
+    for (const resolve of resolvers) { resolve(); }
     await Promise.resolve();
     await Promise.resolve();
     expect(requests).toHaveBeenCalledTimes(4);
