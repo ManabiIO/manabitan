@@ -35,6 +35,7 @@ export class ManabiTanWebClient {
      */
     private watchdogId: number | null = null;
     private watchdogTimer: ReturnType<typeof setTimeout> | null = null;
+    private watchdogGeneration = 0;
     private stopped = false;
     /**
      *
@@ -108,11 +109,13 @@ export class ManabiTanWebClient {
             this.watchdogTimer = null;
         }
         this.watchdogId = id;
+        const generation = ++this.watchdogGeneration;
         if (!next) {return;}
         const entry = next[1];
         this.watchdogTimer = setTimeout(() => {
-            // A callback already queued by the host cannot terminate a successor.
-            if (this.watchdogId !== id) {return;}
+            // A cleared callback may already be queued. It must not terminate
+            // either a successor or the same operation after fresh progress.
+            if (this.watchdogId !== id || this.watchdogGeneration !== generation) {return;}
             this.fail(new WebRuntimeError('worker_timeout', 'Dictionary operation timed out. Reopen to recover interrupted work.'));
         }, entry.timeout);
     }
@@ -192,7 +195,14 @@ export class ManabiTanWebClient {
     open(): Promise<Status> {
         if (this.stopped) {return Promise.reject(new WebRuntimeError('closed', 'Dictionary runtime is closed'));}
         this.opened ??= this.call<Status>('open', {}).catch((error: Error) => {
-            this.fail(error);
+            if (!this.stopped && error instanceof WebRuntimeError && error.code === 'storage_busy') {
+                // The lock was never acquired. Keep this worker available so
+                // the same client can retry after another Reader tab releases it.
+                delete this.opened;
+            } else {
+                // Failed initialization may still own storage resources.
+                this.fail(error);
+            }
             throw error;
         });
         return this.opened;

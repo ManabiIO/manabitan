@@ -55,14 +55,17 @@ export function glossarySearchText(glossary) {
     const append = (value) => {
         if (codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS) { return; }
         const available = MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS - codepoints;
-        if (available <= 0) { return; }
-        // Only inspect the code units needed to fill the remaining budget.
-        // Expanding a multi-megabyte definition before slicing defeats the
-        // indexer's bound and can exhaust memory during dictionary import.
-        const prefix = value.slice(0, available * 2);
-        const points = [...prefix].slice(0, available);
-        parts.push(points.join(''));
-        codepoints += points.length;
+        // Walk only the permitted code points. Do not materialize an array
+        // proportional to the length of an untrusted glossary string.
+        let end = 0;
+        let count = 0;
+        while (end < value.length && count < available) {
+            const point = value.codePointAt(end);
+            end += typeof point === 'number' && point > 0xffff ? 2 : 1;
+            ++count;
+        }
+        parts.push(value.slice(0, end));
+        codepoints += count;
     };
     /**
      * @param {unknown} value
@@ -147,8 +150,7 @@ export function glossarySearchTokens(glossary) {
  * @returns {{folded: string, phrase: string, tokens: string[], prefix: string}|null}
  */
 export function createGlossarySearchQuery(query) {
-    // Reject oversized submitted text before normalization or tokenization.
-    // Only the most recent eight words are considered for live reverse search.
+    // Bound the raw request before normalization or Unicode token allocation.
     if (query.length > 1024) { return null; }
     const folded = foldGlossarySearchText(query.trim());
     if (
@@ -158,34 +160,24 @@ export function createGlossarySearchQuery(query) {
     ) {
         return null;
     }
-    const queryWords = [...folded.matchAll(TOKEN_PATTERN)]
-        .map((match) => match[0])
-        .slice(-MAX_GLOSSARY_QUERY_TOKENS);
-    const prefix = queryWords.at(-1);
-    if (typeof prefix !== 'string') { return null; }
-    const prefixLength = [...prefix].length;
-    if (prefixLength < MIN_INDEX_TOKEN_CODEPOINTS || prefixLength > MAX_INDEX_TOKEN_CODEPOINTS) { return null; }
-
-    // Index postings are unique per term. Keep the final *typed* token as the
-    // live prefix even if it appeared earlier; deduplicate only prerequisites.
-    // Otherwise "dog cat dog" mistakenly searches for a "cat" prefix, and
-    // repeated prerequisite tokens make the SQL HAVING count impossible.
-    const requiredTokens = [];
-    const seen = new Set([prefix]);
-    for (const token of queryWords.slice(0, -1)) {
-        const length = [...token].length;
-        if (
-            length < MIN_INDEX_TOKEN_CODEPOINTS ||
-            length > MAX_INDEX_TOKEN_CODEPOINTS ||
-            seen.has(token)
-        ) {
-            continue;
-        }
-        seen.add(token);
-        requiredTokens.push(token);
+    const words = [...folded.matchAll(TOKEN_PATTERN)].map((match) => match[0]);
+    // The last typed word owns live-prefix completion. Index tokens are
+    // deduplicated, so taking their last item loses this when a word repeats.
+    if (
+        words.length === 0 ||
+        words.length > MAX_GLOSSARY_QUERY_TOKENS ||
+        words.some((word) => [...word].length > MAX_INDEX_TOKEN_CODEPOINTS)
+    ) {
+        // Otherwise a long non-final word is silently discarded by the token
+        // index, yielding false matches for the remaining short words.
+        return null;
     }
-    const tokens = [...requiredTokens, prefix];
-    const phrase = queryWords.join(' ');
+    const prefix = words[words.length - 1];
+    if ([...prefix].length < MIN_INDEX_TOKEN_CODEPOINTS) { return null; }
+    const phrase = words.join(' ');
+    const uniqueTokens = glossarySearchTokensFromText(phrase);
+    // Keep required tokens distinct for the posting-list HAVING count.
+    const tokens = [...uniqueTokens.filter((token) => token !== prefix), prefix];
     return {folded, phrase, tokens, prefix};
 }
 
