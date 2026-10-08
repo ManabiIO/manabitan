@@ -85,6 +85,7 @@ describe('DictionaryWorkerHandler completion transport', () => {
             /**
              * @param {unknown} _details
              * @param {import('dictionary-worker-handler').OnProgressCallback} onProgress
+             * @returns {Promise<{published: boolean}>}
              */
             const publish = async (_details, onProgress) => {
                 onProgress({invalid: () => {}});
