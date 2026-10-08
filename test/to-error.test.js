@@ -17,7 +17,7 @@ describe('toError', () => {
         expect(toError(42).message).toBe('42');
         expect(toError(123n).message).toBe('123');
         expect(toError(null).message).toBe('null');
-        expect(toError(undefined).message).toBe('undefined');
+        expect(toError(void 0).message).toBe('undefined');
     });
 
     test('converts symbols without a secondary TypeError', () => {

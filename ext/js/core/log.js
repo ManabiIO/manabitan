@@ -97,7 +97,7 @@ class Logger extends EventDispatcher {
             // toString()/toJSON(). Error reporting must not throw again.
             try {
                 errorString = String(error);
-            } catch (e2) {
+            } catch (error_) {
                 errorString = 'Unknown error';
             }
         }
