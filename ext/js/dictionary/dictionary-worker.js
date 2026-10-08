@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {log} from '../core/log.js';
 import {toError} from '../core/to-error.js';
 import {DictionaryImporterMediaLoader} from './dictionary-importer-media-loader.js';
 
@@ -377,7 +378,14 @@ export class DictionaryWorker {
     _onMessageProgress(params, onProgress) {
         if (typeof onProgress !== 'function') { return; }
         const {args} = params;
-        onProgress(...args);
+        try {
+            onProgress(...args);
+        } catch (error) {
+            // Progress observers are outside the import transaction. A removed
+            // settings view or failing UI callback must not terminate the worker
+            // and turn an otherwise successful import into an unknown outcome.
+            log.error(error);
+        }
     }
 
     /**
