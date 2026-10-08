@@ -6,6 +6,7 @@ import {Translator} from '../js/language/translator.js';
 import {findJapaneseSearch} from '../js/search/japanese-search.js';
 import {preferencesAfterDeletion, reconcilePreferences} from './preferences.js';
 import {webMediaResponse} from './media-response.js';
+import {webStorageDiagnostics} from './storage-diagnostics.js';
 import {dictionaryPreview} from '../js/search/dictionary-preview.js';
 import {parseJson} from '../js/core/json.js';
 import {API_VERSION, STORAGE_LOCK, MAX_ARCHIVE_BYTES, WebRuntimeError, isRequest, record, text, type Preferences, type Request, type Reply, type Status} from './protocol.js';
@@ -123,12 +124,14 @@ async function status(): Promise<Status> {
     // preference write, without undoing an explicitly declined default.
     const next = reconcilePreferences(preferences, new Set(dictionaries.map((d) => d.title)));
     if (next !== preferences) {await writePreferences(next);}
-    const [counts, estimate, persisted] = await Promise.all([
+    // Database contents are authoritative. Browser storage estimates and
+    // persistence flags are optional telemetry: their failure after a commit
+    // must not make the UI report that a dictionary import failed.
+    const [counts, storage] = await Promise.all([
         database.getDictionaryCounts(dictionaries.map((d) => d.title), true),
-        navigator.storage.estimate(),
-        navigator.storage.persisted(),
+        webStorageDiagnostics(navigator.storage),
     ]);
-    return {dictionaries, counts, preferences, storage: {usage: estimate.usage, quota: estimate.quota, persisted}};
+    return {dictionaries, counts, preferences, storage};
 }
 /**
  *
