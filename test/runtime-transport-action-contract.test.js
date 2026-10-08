@@ -43,7 +43,9 @@ describe('runtime transport action contracts', () => {
     const offscreen = source('background/offscreen.js');
     const worker = source('background/offscreen-dictionary-worker.js');
 
+    /** @type {(text: string) => Set<string>} */
     const registeredNames = (text) => actionNames(text, /\['([^']+)',\s*this\./g);
+    /** @type {(text: string, start: string, end: string) => string} */
     const between = (text, start, end) => text.slice(text.indexOf(start), text.indexOf(end));
 
     test('all literal extension API actions have background handlers', () => {
