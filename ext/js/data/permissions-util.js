@@ -75,8 +75,13 @@ export function setPermissionsGranted(permissions, shouldHave) {
                 const e = chrome.runtime.lastError;
                 if (e) {
                     reject(new Error(e.message));
+                } else if (result) {
+                    resolve(false);
                 } else {
-                    resolve(!result);
+                    // "Nothing removed" does not mean permission is still
+                    // granted: it can already have been revoked elsewhere.
+                    // Query its actual state before updating the UI.
+                    void hasPermissions(permissions).then(resolve, reject);
                 }
             });
         })

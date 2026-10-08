@@ -36,6 +36,59 @@ vi.mock('../ext/js/core/log.js', () => ({
 const test = createDomTest();
 
 describe('PermissionsOriginController', () => {
+    test('successfully removed origin permissions refresh and uncheck the UI', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <div id="permissions-origin-list"></div>
+            <div id="permissions-origin-list-empty"></div>
+            <input id="permissions-origin-new-input">
+            <div id="permissions-origin-list-error" hidden></div>
+            <button id="permissions-origin-add"></button>
+            <input class="permissions-origin-toggle" data-origin="<all_urls>" type="checkbox">
+        `;
+        getAllPermissions
+            .mockResolvedValueOnce({origins: ['<all_urls>'], permissions: []})
+            .mockResolvedValueOnce({origins: [], permissions: []});
+        // The utility returns whether the permission remains granted;
+        // successful removal is false, not a failed operation.
+        setPermissionsGranted.mockResolvedValue(false);
+
+        const {PermissionsOriginController} = await import('../ext/js/pages/settings/permissions-origin-controller.js');
+        const settingsController = {on: vi.fn()};
+        const controller = new PermissionsOriginController(/** @type {any} */ (settingsController));
+        await controller.prepare();
+
+        const toggle = /** @type {HTMLInputElement} */ (window.document.querySelector('.permissions-origin-toggle'));
+        expect(toggle.checked).toBe(true);
+        expect(await controller._setOriginPermissionEnabled('<all_urls>', false)).toBe(true);
+
+        expect(setPermissionsGranted).toHaveBeenCalledWith({origins: ['<all_urls>']}, false);
+        expect(getAllPermissions).toHaveBeenCalledTimes(2);
+        expect(toggle.checked).toBe(false);
+    });
+
+    test('unsuccessful origin permission removal is not reported as success', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <div id="permissions-origin-list"></div>
+            <div id="permissions-origin-list-empty"></div>
+            <input id="permissions-origin-new-input">
+            <div id="permissions-origin-list-error" hidden></div>
+            <button id="permissions-origin-add"></button>
+        `;
+        getAllPermissions.mockResolvedValue({origins: [], permissions: []});
+        // A true returned state means permission still granted after removal.
+        setPermissionsGranted.mockResolvedValue(true);
+        const {PermissionsOriginController} = await import('../ext/js/pages/settings/permissions-origin-controller.js');
+        const controller = new PermissionsOriginController(/** @type {any} */ ({on: vi.fn()}));
+        await controller.prepare();
+
+        expect(await controller._setOriginPermissionEnabled('https://example.com/*', false)).toBe(false);
+        expect(getAllPermissions).toHaveBeenCalledOnce();
+    });
+
     test('blank origin input is ignored instead of attempting a permission grant', async ({window}) => {
         vi.resetModules();
         vi.clearAllMocks();
@@ -150,5 +203,37 @@ describe('PermissionsOriginController', () => {
         await new Promise((resolve) => { window.setTimeout(resolve, 0); });
 
         expect(logError).toHaveBeenCalled();
+    });
+    test('origin toggle logs asynchronous permission refresh failures', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <div id="permissions-origin-list"></div>
+            <div id="permissions-origin-list-empty"></div>
+            <input id="permissions-origin-new-input">
+            <div id="permissions-origin-list-error" hidden></div>
+            <button id="permissions-origin-add"></button>
+            <input class="permissions-origin-toggle" data-origin="https://example.com/*" type="checkbox">
+        `;
+        getAllPermissions
+            .mockResolvedValueOnce({origins: [], permissions: []})
+            .mockRejectedValueOnce(new Error('could not refresh permissions'));
+        setPermissionsGranted.mockResolvedValue(true);
+
+        const {PermissionsOriginController} = await import('../ext/js/pages/settings/permissions-origin-controller.js');
+        const settingsController = {
+            on: vi.fn(),
+            instantiateTemplateFragment: vi.fn(),
+        };
+        const controller = new PermissionsOriginController(/** @type {any} */ (settingsController));
+        await controller.prepare();
+
+        const toggle = /** @type {HTMLInputElement} */ (window.document.querySelector('.permissions-origin-toggle'));
+        toggle.checked = true;
+        controller._onOriginToggleChangeEvent(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: toggle})));
+        await new Promise((resolve) => { window.setTimeout(resolve, 0); });
+
+        expect(setPermissionsGranted).toHaveBeenCalledWith({origins: ['https://example.com/*']}, true);
+        expect(logError).toHaveBeenCalledOnce();
     });
 });
