@@ -36,10 +36,6 @@ export class ProfileController {
         this._profileConditionsUI = new ProfileConditionsUI(settingsController);
         /** @type {?number} */
         this._profileConditionsIndex = null;
-        /** @type {?string} */
-        this._profileConditionsProfileId = null;
-        /** @type {?import('core').TokenObject} */
-        this._profileConditionsOpenToken = null;
         /** @type {HTMLSelectElement} */
         this._profileActiveSelect = querySelectorNotNull(document, '#profile-active-select');
         /** @type {HTMLSelectElement} */
@@ -74,8 +70,6 @@ export class ProfileController {
         this._profiles = [];
         /** @type {number} */
         this._profileCurrent = 0;
-        /** @type {?import('core').TokenObject} */
-        this._optionsUpdateToken = null;
     }
 
     /** @type {number} */
@@ -223,17 +217,14 @@ export class ProfileController {
         if (profile === null) { return; }
 
         const defaultOptions = await this._settingsController.getDefaultOptions();
-        const currentIndex = this._profiles.indexOf(profile);
-        if (currentIndex < 0) { return; }
         const defaultProfileOptions = defaultOptions.profiles[0];
-        // Reset the profile settings, not the profile identity. Its stable ID
-        // owns profile-condition modals and cross-profile references.
+        // Reset profile settings without invalidating this profile's identity.
         defaultProfileOptions.id = profile.id;
         defaultProfileOptions.name = profile.name;
 
         await this._settingsController.modifyGlobalSettings([{
             action: 'set',
-            path: `profiles[${currentIndex}]`,
+            path: `profiles[${profileIndex}]`,
             value: defaultProfileOptions,
         }]);
 
@@ -420,26 +411,16 @@ export class ProfileController {
         if (profile === null) { return; }
 
         if (this._profileConditionsModal === null) { return; }
-        /** @type {import('core').TokenObject} */
-        const token = {};
-        this._profileConditionsOpenToken = token;
         try {
             this._profileConditionsUI.cleanup();
             await this._profileConditionsUI.prepare(profileIndex);
-            if (
-                this._profileConditionsOpenToken !== token ||
-                this._profiles.indexOf(profile) !== profileIndex
-            ) {
-                return;
-            }
             if (this._profileConditionsProfileName !== null) {
                 this._profileConditionsProfileName.textContent = profile.name;
             }
             this._profileConditionsIndex = profileIndex;
-            this._profileConditionsProfileId = profile.id;
             this._profileConditionsModal.setVisible(true);
         } catch (error) {
-            if (this._profileConditionsOpenToken === token) { log.error(error); }
+            log.error(error);
         }
     }
 
@@ -447,12 +428,8 @@ export class ProfileController {
 
     /** */
     async _onOptionsChanged() {
-        /** @type {import('core').TokenObject} */
-        const token = {};
-        this._optionsUpdateToken = token;
         // Update state
         const {profiles, profileCurrent} = await this._settingsController.getOptionsFull();
-        if (this._optionsUpdateToken !== token) { return; }
         this._profiles = profiles;
         this._profileCurrent = profileCurrent;
 
@@ -460,35 +437,15 @@ export class ProfileController {
 
         // Update UI
         this._updateProfileSelectOptions();
-
-        if (this._settingsController.profileIndex !== profileCurrent) {
-            void this.setDefaultProfile(profileCurrent);
-        }
+        void this.setDefaultProfile(profileCurrent);
 
         /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileCurrent}`;
 
         // Update profile conditions
-        this._profileConditionsOpenToken = null;
         this._profileConditionsUI.cleanup();
-        let conditionsProfileIndex = settingsProfileIndex;
-        if (typeof this._profileConditionsProfileId === 'string') {
-            conditionsProfileIndex = profiles.findIndex(({id}) => id === this._profileConditionsProfileId);
-            if (conditionsProfileIndex < 0) {
-                this._profileConditionsIndex = null;
-                this._profileConditionsProfileId = null;
-                this._profileConditionsModal?.setVisible(false);
-            }
-        } else if (this._profileConditionsIndex !== null) {
-            conditionsProfileIndex = this._profileConditionsIndex;
-        }
-        const conditionsProfile = this._getProfile(conditionsProfileIndex);
+        const conditionsProfile = this._getProfile(this._profileConditionsIndex !== null ? this._profileConditionsIndex : settingsProfileIndex);
         if (conditionsProfile !== null) {
-            this._profileConditionsIndex = conditionsProfileIndex;
-            this._profileConditionsProfileId = conditionsProfile.id;
-            if (this._profileConditionsProfileName !== null) {
-                this._profileConditionsProfileName.textContent = conditionsProfile.name;
-            }
-            void this._profileConditionsUI.prepare(conditionsProfileIndex);
+            void this._profileConditionsUI.prepare(this._profileConditionsIndex !== null ? this._profileConditionsIndex : settingsProfileIndex);
         }
 
         // Update profile entries
