@@ -134,6 +134,15 @@ function createMockTermEntry() {
 }
 
 describe('TextScanner lookup robustness', () => {
+    test('consumes the latest lookup queued during an asynchronous scan exactly once', () => {
+        const scanner = /** @type {TextScanner} */ (Object.create(TextScanner.prototype));
+        const queued = {x: 12, y: 34, inputInfo: createInputInfo()};
+        Reflect.set(scanner, '_queuedLookup', queued);
+
+        expect(scanner._consumeQueuedLookup()).toBe(queued);
+        expect(scanner._consumeQueuedLookup()).toBeNull();
+    });
+
     const {teardown} = testEnv;
     const searchAt = getSearchAtMethod();
 
