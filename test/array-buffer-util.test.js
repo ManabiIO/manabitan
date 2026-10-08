@@ -29,7 +29,8 @@ describe('ArrayBuffer conversion across chunk boundaries', () => {
             const bytes = fixture(length);
             const expected = Buffer.from(bytes).toString('base64');
 
-            const encoded = arrayBufferToBase64(bytes.buffer);
+            const buffer = /** @type {ArrayBuffer} */ (bytes.buffer);
+            const encoded = arrayBufferToBase64(buffer);
 
             expect(encoded).toBe(expected);
             expect(new Uint8Array(base64ToArrayBuffer(encoded))).toStrictEqual(bytes);
@@ -39,7 +40,7 @@ describe('ArrayBuffer conversion across chunk boundaries', () => {
     for (const length of [0, 1, 32_767, 32_768, 32_769, 150_001]) {
         test(`binary string encodes ${length} bytes without spreading the entire buffer`, () => {
             const bytes = fixture(length);
-            const binary = arrayBufferToBinaryString(bytes.buffer);
+            const binary = arrayBufferToBinaryString(/** @type {ArrayBuffer} */ (bytes.buffer));
             expect(binary).toBe(Buffer.from(bytes).toString('latin1'));
         });
     }
