@@ -27,7 +27,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
         Reflect.set(selection, '_profileNameRefreshGeneration', 0);
         Reflect.set(selection, '_profilePanel', {isVisible: vi.fn().mockReturnValue(true)});
         Reflect.set(selection, '_updateProfileList', vi.fn().mockRejectedValue(new Error('refresh failed')));
-        Reflect.set(selection, '_updateCurrentProfileName', vi.fn());
+        Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
         const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         const onOptionsUpdatedEvent = /** @type {(details: {source: string}) => void} */ (Reflect.get(DisplayProfileSelection.prototype, '_onOptionsUpdatedEvent'));
