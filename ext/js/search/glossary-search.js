@@ -55,11 +55,17 @@ export function glossarySearchText(glossary) {
     const append = (value) => {
         if (codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS) { return; }
         const available = MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS - codepoints;
-        // Never materialize all code points of an untrusted glossary string.
-        // A code point uses at most two UTF-16 units, so this prefix suffices.
-        const points = Array.from(value.slice(0, available * 2)).slice(0, available);
-        parts.push(points.join(''));
-        codepoints += points.length;
+        // Walk only the permitted code points. Do not materialize an array
+        // proportional to the length of an untrusted glossary string.
+        let end = 0;
+        let count = 0;
+        while (end < value.length && count < available) {
+            const point = value.codePointAt(end);
+            end += typeof point === 'number' && point > 0xffff ? 2 : 1;
+            ++count;
+        }
+        parts.push(value.slice(0, end));
+        codepoints += count;
     };
     /**
      * @param {unknown} value
