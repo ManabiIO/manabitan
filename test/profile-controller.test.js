@@ -200,6 +200,58 @@ describe('ProfileController name save ownership', () => {
         expect(Reflect.get(controller, '_profiles')[0].name).toBe('Original');
     });
 
+    test('typing during failed-save recovery survives refreshed profile objects', async () => {
+        const {controller, setGlobalSetting, refresh} = makeController();
+        const refreshStarted = deferred();
+        const finishRefresh = deferred();
+        setGlobalSetting
+            .mockResolvedValueOnce([{error: {name: 'Error', message: 'rejected', stack: ''}}])
+            .mockResolvedValueOnce([{result: null}]);
+        refresh.mockImplementation(async () => {
+            refreshStarted.resolve(void 0);
+            await finishRefresh.promise;
+            Reflect.set(controller, '_profiles', [{id: 'second', name: 'Other'}, {id: 'first', name: 'Original'}]);
+        });
+        const first = controller.setProfileName(0, 'Failed');
+        const rejected = expect(first).rejects.toThrow('rejected');
+        await refreshStarted.promise;
+        const latest = controller.setProfileName(0, 'Latest');
+        await flush();
+        expect(setGlobalSetting).toHaveBeenCalledTimes(1);
+        finishRefresh.resolve(void 0);
+        await rejected;
+        await latest;
+        expect(setGlobalSetting.mock.calls[1]).toStrictEqual(['profiles[1].name', 'Latest']);
+        expect(Reflect.get(controller, '_profiles')[1].name).toBe('Latest');
+        expect(Reflect.get(controller, '_updateSelectName')).toHaveBeenLastCalledWith(1, 'Latest');
+    });
+
+    test('another profile edit waits for full-settings recovery', async () => {
+        const {controller, setGlobalSetting, refresh} = makeController();
+        const refreshStarted = deferred();
+        const finishRefresh = deferred();
+        setGlobalSetting
+            .mockResolvedValueOnce([{error: {name: 'Error', message: 'rejected', stack: ''}}])
+            .mockResolvedValueOnce([{result: null}]);
+        refresh.mockImplementation(async () => {
+            refreshStarted.resolve(void 0);
+            await finishRefresh.promise;
+            Reflect.set(controller, '_profiles', [{id: 'second', name: 'Other'}, {id: 'first', name: 'Original'}]);
+        });
+        const first = controller.setProfileName(0, 'Failed');
+        const rejected = expect(first).rejects.toThrow('rejected');
+        await refreshStarted.promise;
+        const latest = controller.setProfileName(1, 'Latest');
+        await flush();
+        expect(setGlobalSetting).toHaveBeenCalledTimes(1);
+        finishRefresh.resolve(void 0);
+        await rejected;
+        await latest;
+        expect(setGlobalSetting.mock.calls[1]).toStrictEqual(['profiles[0].name', 'Latest']);
+        expect(Reflect.get(controller, '_profiles')[0].name).toBe('Latest');
+        expect(Reflect.get(controller, '_updateSelectName')).toHaveBeenLastCalledWith(0, 'Latest');
+    });
+
     test('an older failed save does not restore the UI over a newer edit', async () => {
         const {controller, profiles, setGlobalSetting, refresh} = makeController();
         /** @type {ReturnType<typeof deferred<import('settings-controller').ModifyResult[]>>} */
