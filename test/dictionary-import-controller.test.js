@@ -596,6 +596,90 @@ describe('Dictionary import settings carry-over', () => {
     });
 });
 
+describe('Dictionary import archive source validation', () => {
+    /**
+     * @param {ReturnType<typeof vi.fn>} importDictionaryFromZip
+     * @param {ReturnType<typeof vi.fn>} onImportDone
+     * @returns {DictionaryImportController}
+     */
+    function controllerForSourceTest(importDictionaryFromZip, onImportDone) {
+        return /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _activeImportRunGeneration: 0,
+            _modifying: false,
+            _statusFooter: null,
+            _setModifying(value) {
+                this._modifying = value;
+            },
+            _isImportRunCurrent(generation) {
+                return this._activeImportRunGeneration === generation;
+            },
+            _hideErrors: vi.fn(),
+            _showErrors: vi.fn(),
+            _triggerStorageChanged: vi.fn(),
+            _preventPageExit: () => ({end() {}}),
+            _getUseImportSession: () => false,
+            _getImportPerformanceFlags: () => ({
+                skipImageMetadata: false,
+                mediaResolutionConcurrency: 4,
+                debugImportLogging: false,
+                enableTermEntryContentDedup: true,
+                termContentStorageMode: 'baseline',
+            }),
+            _settingsController: {
+                getOptionsFull: vi.fn().mockResolvedValue({global: {database: {prefixWildcardsSupported: false}}}),
+                application: {api: {setDictionaryImportMode: vi.fn().mockResolvedValue(void 0)}},
+            },
+            _importDictionaryFromZip: importDictionaryFromZip,
+            _onImportDone: onImportDone,
+        }));
+    }
+
+    test('rejects arbitrary objects instead of treating them as BlobParts', async () => {
+        const method = /** @type {(this: DictionaryImportController, ...args: any[]) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_importDictionaries')
+        );
+        const importZip = vi.fn().mockResolvedValue({errors: [], importedTitle: 'Unexpected'});
+        const onImportDone = vi.fn();
+        const controller = controllerForSourceTest(importZip, onImportDone);
+
+        await method.call(
+            controller,
+            (async function* invalidArchive() { yield /** @type {any} */ ({notAnArchive: true}); })(),
+            null,
+            onImportDone,
+            {dictionaryCount: 1, onProgress() {}, onNextDictionary() {}, onImportComplete() {}, getStepTimingHistory() { return []; }},
+            null,
+        );
+
+        expect(importZip).not.toHaveBeenCalled();
+        expect(onImportDone).toHaveBeenCalledOnce();
+        expect(onImportDone.mock.calls[0][0].ok).toBe(false);
+        expect(onImportDone.mock.calls[0][0].errors[0].message).toContain('Failed to read file 1');
+    });
+
+    test('wraps a valid Blob as an archive File', async () => {
+        const method = /** @type {(this: DictionaryImportController, ...args: any[]) => Promise<void>} */ (
+            getDictionaryImportControllerMethod('_importDictionaries')
+        );
+        const importZip = vi.fn().mockResolvedValue({errors: [], importedTitle: 'Dictionary'});
+        const onImportDone = vi.fn();
+        const controller = controllerForSourceTest(importZip, onImportDone);
+
+        await method.call(
+            controller,
+            (async function* blobArchive() { yield /** @type {any} */ (new Blob(['archive'])); })(),
+            null,
+            onImportDone,
+            {dictionaryCount: 1, onProgress() {}, onNextDictionary() {}, onImportComplete() {}, getStepTimingHistory() { return []; }},
+            null,
+        );
+
+        expect(importZip).toHaveBeenCalledOnce();
+        expect(importZip.mock.calls[0][0]).toBeInstanceOf(File);
+        expect(onImportDone).toHaveBeenCalledWith({ok: true, errors: [], importedTitles: ['Dictionary']});
+    });
+});
+
 describe('Dictionary import error rendering', () => {
     const {window} = testEnv;
 
