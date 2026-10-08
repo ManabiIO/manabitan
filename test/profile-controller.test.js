@@ -130,6 +130,47 @@ describe('ProfileController profile conditions modal', () => {
 });
 
 
+describe('ProfileController displayed profile ownership', () => {
+    test.each([
+        {name: 'preserves a valid non-default settings selection', viewed: 1, expected: 1},
+        {name: 'repairs an invalid viewed index after profile deletion', viewed: 7, expected: 0},
+    ])('$name', async ({viewed, expected}) => {
+        const controller = createControllerForInternalTests();
+        const settingsController = {
+            profileIndex: viewed,
+            getOptionsFull: vi.fn().mockResolvedValue({
+                profiles: [
+                    {id: 'profile-a', name: 'Default'},
+                    {id: 'profile-b', name: 'Editing'},
+                ],
+                profileCurrent: 0,
+            }),
+        };
+        const cleanup = vi.fn();
+        const prepare = vi.fn().mockResolvedValue(void 0);
+        const select = {value: ''};
+        const setDefaultProfile = vi.fn();
+        Reflect.set(controller, '_settingsController', settingsController);
+        Reflect.set(controller, '_profileConditionsUI', {cleanup, prepare});
+        Reflect.set(controller, '_profileConditionsIndex', null);
+        Reflect.set(controller, '_profileConditionsProfileId', null);
+        Reflect.set(controller, '_profileEntryList', []);
+        Reflect.set(controller, '_profileEntriesSupported', false);
+        Reflect.set(controller, '_profileActiveSelect', select);
+        Reflect.set(controller, '_updateProfileSelectOptions', vi.fn());
+        Reflect.set(controller, 'setDefaultProfile', setDefaultProfile);
+
+        await controller._onOptionsChanged();
+
+        expect(settingsController.profileIndex).toBe(expected);
+        expect(Reflect.get(controller, '_profileCurrent')).toBe(0);
+        expect(select.value).toBe('0');
+        expect(setDefaultProfile).not.toHaveBeenCalled();
+        expect(cleanup).toHaveBeenCalledOnce();
+        if (viewed === 1) { expect(prepare).toHaveBeenCalledWith(1); }
+    });
+});
+
 describe('ProfileController async ownership', () => {
     test('reset follows the same profile object if profiles are reordered while defaults load', async () => {
         const controller = createControllerForInternalTests();
