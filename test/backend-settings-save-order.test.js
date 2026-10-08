@@ -50,13 +50,21 @@ describe('Backend settings persistence ordering', () => {
             }
             persisted.push(String(snapshot));
         });
-        const {backend, options, applyOptions, clearCache} = createBackend(save);
+        const {backend, applyOptions, clearCache} = createBackend(save);
+        Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
+            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            if (target.action !== 'set' || target.path !== 'value') { throw new Error('Unexpected mutation'); }
+            current.value = /** @type {string} */ (target.value);
+            return target.value;
+        });
+        /** @type {import('settings-modifications').ScopedModification} */
+        const firstTarget = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'first'};
+        /** @type {import('settings-modifications').ScopedModification} */
+        const secondTarget = {...firstTarget, value: 'second'};
 
-        options.value = 'first';
-        const earlier = backend._saveOptions('first');
+        const earlier = backend._modifySettings([firstTarget], 'first');
         await firstEntered.promise;
-        options.value = 'second';
-        const later = backend._saveOptions('second');
+        const later = backend._modifySettings([secondTarget], 'second');
         await Promise.resolve();
 
         expect(save).toHaveBeenCalledOnce();
@@ -182,19 +190,30 @@ describe('Backend settings persistence ordering', () => {
         expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('replacement');
     });
 
-    test('a failed storage write rejects its caller but does not block the next save', async () => {
+    test('an earlier storage failure does not poison an already queued edit', async () => {
         const save = vi.fn()
             .mockRejectedValueOnce(new Error('storage unavailable'))
             .mockResolvedValueOnce(void 0);
         const {backend, applyOptions} = createBackend(save);
+        Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
+            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            if (target.action !== 'set') { throw new Error('Unexpected mutation'); }
+            current.value = /** @type {string} */ (target.value);
+            return target.value;
+        });
+        /** @type {import('settings-modifications').ScopedModification} */
+        const failedTarget = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'failed'};
+        /** @type {import('settings-modifications').ScopedModification} */
+        const retryTarget = {...failedTarget, value: 'retry'};
 
-        const earlier = backend._saveOptions('failed');
-        const later = backend._saveOptions('retry');
+        const earlier = backend._modifySettings([failedTarget], 'failed');
+        const later = backend._modifySettings([retryTarget], 'retry');
 
         await expect(earlier).rejects.toThrow('storage unavailable');
-        await expect(later).resolves.toBeUndefined();
+        await expect(later).resolves.toEqual([{result: 'retry'}]);
         expect(save).toHaveBeenCalledTimes(2);
         expect(applyOptions).toHaveBeenCalledOnce();
         expect(applyOptions).toHaveBeenCalledWith('retry');
+        expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('retry');
     });
 });
