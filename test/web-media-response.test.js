@@ -2,7 +2,11 @@
 import {expect, test} from 'vitest';
 import {MAX_WEB_IMAGE_BYTES, webMediaResponse} from '../ext/web/media-response.js';
 
-/** @param {ArrayBuffer} content @param {string} mediaType */
+/**
+ * @param {ArrayBuffer} content
+ * @param {string} [mediaType]
+ * @returns {import('../types/ext/dictionary-database.d.ts').Media}
+ */
 function media(content, mediaType = 'image/png') {
     return {dictionary: 'Test', path: 'cat.png', mediaType, width: 1, height: 1, content, index: 0};
 }
