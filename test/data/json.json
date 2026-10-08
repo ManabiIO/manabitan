@@ -28,6 +28,8 @@
         {"path": "test/data/vitest.write.config.json", "ignore": true},
         {"path": "test/data/vitest.options.config.json", "ignore": true},
         {"path": "test/data/vitest.json.config.json", "ignore": true},
+        {"path": "test/data/anki-note-types/contracts.json", "ignore": true},
+        {"path": "test/data/anki-note-types/upstream-snapshot.json", "ignore": true},
         {"path": "benches/jsconfig.json", "ignore": true},
         {"path": "dev/data/chrome-manifest-schema.json", "ignore": true},
 
