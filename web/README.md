@@ -16,7 +16,7 @@ Preferences are origin-local and independent of an installed extension. Deleting
 
 ## Security and scope
 
-Only a narrow, versioned worker protocol is exposed. External dictionary ZIPs stay local. Renderer limits bound displayed content complexity and retain at most 64 MiB of live media blobs per rendered result (in addition to per-image and request-count caps); links are constrained and imported media is image-only, never a top-level same-origin SVG document. The current web UI supports term lookup/deinflection, structured definitions and frequency information; full extension Anki/audio/kanji-stroke-order interfaces are not included. The unused stroke-order font is omitted from the web target. Fonts needed by shared dictionary media conversion remain optional runtime assets.
+Only a narrow, versioned worker protocol is exposed. External dictionary ZIPs stay local. Renderer limits bound displayed content complexity; links are constrained and imported media is image-only, never a top-level same-origin SVG document. The current web UI supports term lookup/deinflection, structured definitions and frequency information; full extension Anki/audio/kanji-stroke-order interfaces are not included. The unused stroke-order font is omitted from the web target. Fonts needed by shared dictionary media conversion remain optional runtime assets.
 
 The compressed archive cap and renderer caps are not a complete bound on every dictionary decoder's expanded allocation. Do not advertise arbitrary-ZIP denial-of-service resistance or universal device compatibility on this basis. No COOP/COEP requirement is added. Target-browser qualification and the Reader application's cold-offline cache integration are separate acceptance gates.
 
