@@ -16,6 +16,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
+import {deferPromise} from '../ext/js/core/utilities.js';
 import {DisplayProfileSelection} from '../ext/js/display/display-profile-selection.js';
 
 describe('DisplayProfileSelection options refresh handling', () => {
@@ -40,7 +41,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
     });
 
     test('pending dropdown refresh does not delay the active profile name', async () => {
-        const pendingList = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const pendingList = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
         const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
         const updateProfileList = vi.fn(() => pendingList.promise);
         const updateCurrentProfileName = vi.fn().mockResolvedValue(void 0);
@@ -209,8 +210,8 @@ describe('DisplayProfileSelection options refresh handling', () => {
     });
 
     test('rapid selections serialize writes and only the newest selection refreshes UI', async () => {
-        const firstWriteStarted = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
-        const firstWriteCompletion = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const firstWriteStarted = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+        const firstWriteCompletion = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
         const writes = [];
         const setProfileCurrent = vi.fn().mockImplementation((/** @type {number} */ index) => {
             writes.push(index);
@@ -245,8 +246,8 @@ describe('DisplayProfileSelection options refresh handling', () => {
     });
 
     test('superseded profile-save errors do not overwrite the latest selection', async () => {
-        const firstWriteStarted = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
-        const firstWriteCompletion = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const firstWriteStarted = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+        const firstWriteCompletion = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
         const setProfileCurrent = vi.fn().mockImplementation((index) => {
             if (index === 1) {
                 firstWriteStarted.resolve();
