@@ -49,7 +49,7 @@ describe('Offscreen dictionary worker invocation isolation', () => {
         Reflect.set(offscreen, '_dictionaryWorkerResponseHandlers', new Map());
 
         const pending = offscreen._invokeDictionaryWorker('getDictionaryInfoOffscreen', {});
-        const rejected = offscreen._invokeDictionaryWorker('getDictionaryCountsOffscreen', {callback: () => {}});
+        const rejected = offscreen._invokeDictionaryWorker('getDictionaryCountsOffscreen', {});
 
         await expect(rejected).rejects.toThrow('Function cannot be cloned');
         expect(worker.terminate).not.toHaveBeenCalled();
