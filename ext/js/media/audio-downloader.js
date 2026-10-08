@@ -280,7 +280,7 @@ export class AudioDownloader {
 
     /** @type {import('audio-downloader').GetInfoHandler} */
     async _getInfoJisho(term, reading) {
-        const fetchUrl = `https://jisho.org/search/${term}`;
+        const fetchUrl = `https://jisho.org/search/${encodeURIComponent(term)}`;
         const response = await this._requestBuilder.fetchAnonymous(fetchUrl, DEFAULT_REQUEST_INIT_PARAMS);
         const responseText = await response.text();
 
