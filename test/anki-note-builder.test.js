@@ -161,6 +161,46 @@ function createContext() {
     };
 }
 
+describe('AnkiNoteBuilder dictionary media safety', () => {
+    test('keeps dictionary titles and paths named __proto__ as serializable own fields', async () => {
+        const dictionaryMedia = [
+            {dictionary: '__proto__', path: '__proto__', fileName: 'first.png'},
+            {dictionary: '__proto__', path: 'normal', fileName: 'second.png'},
+            {dictionary: 'normal', path: '__proto__', fileName: 'third.png'},
+        ];
+        const api = {
+            injectAnkiNoteMedia: vi.fn().mockResolvedValue({
+                audioFileName: null,
+                screenshotFileName: null,
+                clipboardImageFileName: null,
+                clipboardText: null,
+                dictionaryMedia,
+                errors: [],
+            }),
+        };
+        const builder = new AnkiNoteBuilder(/** @type {any} */ (api), asTemplateRenderer(createTemplateRenderer()));
+        const requirements = dictionaryMedia.map(({dictionary, path}) => ({
+            type: /** @type {'dictionaryMedia'} */ ('dictionaryMedia'),
+            dictionary,
+            path,
+        }));
+        const result = await builder._injectMedia(
+            createTermEntry(),
+            requirements,
+            /** @type {any} */ ({}),
+        );
+
+        const resultMedia = result.media.dictionaryMedia;
+        expect(Object.prototype.hasOwnProperty.call(resultMedia, '__proto__')).toBe(true);
+        expect(Object.prototype.hasOwnProperty.call(resultMedia['__proto__'], '__proto__')).toBe(true);
+        expect(resultMedia['__proto__']['__proto__']).toStrictEqual({value: 'first.png'});
+        expect(resultMedia['__proto__'].normal).toStrictEqual({value: 'second.png'});
+        expect(resultMedia.normal['__proto__']).toStrictEqual({value: 'third.png'});
+        expect(Object.getPrototypeOf(resultMedia)).toBe(Object.prototype);
+        expect(JSON.parse(JSON.stringify(resultMedia))['__proto__']['__proto__']).toStrictEqual({value: 'first.png'});
+    });
+});
+
 describe('AnkiNoteBuilder.createDuplicateCheckNote', () => {
     test('preserves __proto__ as an ordinary note field in full and duplicate notes', async () => {
         const api = {
