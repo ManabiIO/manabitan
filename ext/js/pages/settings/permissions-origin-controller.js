@@ -180,15 +180,18 @@ export class PermissionsOriginController {
      * @returns {Promise<boolean>}
      */
     async _setOriginPermissionEnabled(origin, enabled) {
-        let added = false;
+        /** @type {boolean|null} */
+        let permissionGranted = null;
         try {
-            added = await setPermissionsGranted({origins: [origin]}, enabled);
+            permissionGranted = await setPermissionsGranted({origins: [origin]}, enabled);
         } catch (e) {
             const errorContainer = /** @type {HTMLElement} */ (this._errorContainer);
             errorContainer.hidden = false;
             errorContainer.textContent = toError(e).message;
         }
-        if (!added) { return false; }
+        // The permissions utility returns the resulting granted state, not
+        // whether a permission API call succeeded. Successful removal is false.
+        if (permissionGranted !== enabled) { return false; }
         await this._updatePermissions();
         return true;
     }
