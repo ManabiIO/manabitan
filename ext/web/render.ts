@@ -4,8 +4,11 @@ import {MAX_WEB_IMAGE_BYTES} from './media-response.js';
 import type {ManabiTanWebClient, LookupResult} from './client.js';
 import type {UrlContentManager} from '../../types/ext/structured-content';
 
+const MAX_READER_MEDIA_REQUESTS = 128;
+const MAX_CONCURRENT_READER_MEDIA = 4;
+
 /** Only URL media created by this render lifetime can be displayed by its nodes. */
-class ReaderMedia implements UrlContentManager {
+export class ReaderMedia implements UrlContentManager {
     /**
      *
      */
@@ -14,6 +17,11 @@ class ReaderMedia implements UrlContentManager {
      *
      */
     private readonly urls = new Map<string, Promise<string>>();
+    /**
+     * Keep imported images from flooding the worker's bounded FIFO queue.
+     */
+    private readonly mediaSlots: Promise<void>[] = Array.from({length: MAX_CONCURRENT_READER_MEDIA}, () => Promise.resolve());
+    private nextMediaSlot = 0;
     /**
      *
      */
@@ -47,7 +55,14 @@ class ReaderMedia implements UrlContentManager {
         const key = JSON.stringify([path, dictionary]);
         let pending = this.urls.get(key);
         if (!pending) {
-            pending = this.client.media(dictionary, path, {signal: this.controller.signal}).then((data) => {
+            if (this.disposed || this.urls.size >= MAX_READER_MEDIA_REQUESTS) {
+                return Promise.reject(new Error('Dictionary media request limit reached'));
+            }
+            const slot = this.nextMediaSlot++ % this.mediaSlots.length;
+            pending = this.mediaSlots[slot].then(() => {
+                if (this.disposed) {throw new Error('Dictionary media request cancelled');}
+                return this.client.media(dictionary, path, {signal: this.controller.signal});
+            }).then((data) => {
                 if (this.disposed || !data || !/^image\/(?:png|jpeg|webp|gif|avif|svg\+xml)$/.test(data.mediaType)) {throw new Error('Dictionary image unavailable');}
                 const blob = new Blob([data.content], {type: data.mediaType});
                 if (blob.size > MAX_WEB_IMAGE_BYTES) {throw new Error('Dictionary image exceeds display size limit');}
@@ -55,6 +70,8 @@ class ReaderMedia implements UrlContentManager {
                 this.created.add(url);
                 return url;
             });
+            // Retire this lane even on failure, without unhandled rejections.
+            this.mediaSlots[slot] = pending.then(() => {}, () => {});
             this.urls.set(key, pending);
         }
         return pending;
