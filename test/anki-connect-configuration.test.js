@@ -54,8 +54,8 @@ describe('AnkiConnect configuration-scoped version checks', () => {
     });
 
     test('ignores a previous server version response after the endpoint switches', async () => {
-        /** @type {((value: Response) => void)|null} */
-        let releaseOldVersion = null;
+        /** @type {{resolve: ((value: Response) => void)|null}} */
+        const oldVersion = {resolve: null};
         /** @type {string[]} */
         const versionServers = [];
         vi.stubGlobal('fetch', async (/** @type {string} */ url, /** @type {RequestInit} */ init) => {
@@ -64,7 +64,7 @@ describe('AnkiConnect configuration-scoped version checks', () => {
                 versionServers.push(url);
                 if (url === 'http://old-anki.test') {
                     return await new Promise((resolve) => {
-                        releaseOldVersion = resolve;
+                        oldVersion.resolve = resolve;
                     });
                 }
                 return ankiResponse(2);
@@ -78,8 +78,8 @@ describe('AnkiConnect configuration-scoped version checks', () => {
         const firstRequest = client.getDeckNames();
         client.server = 'http://new-anki.test';
         await expect(client.getDeckNames()).resolves.toStrictEqual([]);
-        if (releaseOldVersion === null) { throw new Error('Old version request was not started'); }
-        releaseOldVersion(ankiResponse(1));
+        if (oldVersion.resolve === null) { throw new Error('Old version request was not started'); }
+        oldVersion.resolve(ankiResponse(1));
         await expect(firstRequest).resolves.toStrictEqual([]);
         await expect(client.getDeckNames()).resolves.toStrictEqual([]);
         expect(versionServers).toStrictEqual(['http://old-anki.test', 'http://new-anki.test']);
