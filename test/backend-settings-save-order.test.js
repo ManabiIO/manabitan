@@ -67,6 +67,79 @@ describe('Backend settings persistence ordering', () => {
         expect(clearCache).toHaveBeenCalledTimes(2);
     });
 
+    test('failed mutation persistence restores the previous in-memory settings', async () => {
+        const options = {value: 'persisted'};
+        const save = vi.fn()
+            .mockRejectedValueOnce(new Error('disk full'))
+            .mockResolvedValueOnce(void 0);
+        const {backend, applyOptions} = createBackend(save);
+        Reflect.set(backend, '_options', options);
+        Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
+            if (target.action !== 'set' || target.path !== 'value') { throw new Error('Unexpected mutation'); }
+            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            current.value = /** @type {string} */ (target.value);
+            return target.value;
+        });
+        /** @type {import('settings-modifications').ScopedModification} */
+        const failedTarget = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'unpersisted'};
+        /** @type {import('settings-modifications').ScopedModification} */
+        const laterTarget = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'second write'};
+
+        const failed = backend._modifySettings([failedTarget], 'first');
+        const later = backend._modifySettings([laterTarget], 'second');
+        await expect(failed).rejects.toThrow('disk full');
+        await expect(later).resolves.toEqual([{result: 'second write'}]);
+
+        expect(save).toHaveBeenCalledTimes(2);
+        expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('second write');
+        expect(applyOptions).toHaveBeenCalledOnce();
+        expect(applyOptions).toHaveBeenCalledWith('second');
+    });
+
+    test('full-options replacement waits for an earlier mutation to settle', async () => {
+        const firstEntered = Promise.withResolvers();
+        const releaseFirst = Promise.withResolvers();
+        let attempts = 0;
+        const save = vi.fn(async () => {
+            if (++attempts === 1) {
+                firstEntered.resolve(void 0);
+                await releaseFirst.promise;
+            }
+        });
+        const {backend, applyOptions} = createBackend(save);
+        const setAllSettings = vi.fn();
+        const validate = vi.fn();
+        Reflect.set(backend, '_optionsUtil', {save, validate});
+        Reflect.set(backend, '_getCurrentProfileEnabledDictionaryNames', () => []);
+        Reflect.set(backend, '_areStringArraysEqual', () => true);
+        Reflect.set(backend, '_warmEnabledDictionaryLookupCaches', vi.fn());
+        Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
+            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            if (target.action === 'set') { current.value = /** @type {string} */ (target.value); }
+            return true;
+        });
+        Reflect.set(backend, '_setAllSettingsTestHook', setAllSettings);
+        /** @type {import('settings-modifications').ScopedModification} */
+        const target = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'before replacement'};
+
+        const earlier = backend._modifySettings([target], 'mutate');
+        await firstEntered.promise;
+        const replacement = backend._onApiSetAllSettings({
+            value: /** @type {import('settings').Options} */ (/** @type {unknown} */ ({value: 'replacement'})),
+            source: 'replace',
+        });
+        await Promise.resolve();
+        expect(validate).not.toHaveBeenCalled();
+        expect(save).toHaveBeenCalledOnce();
+        releaseFirst.resolve(void 0);
+        await Promise.all([earlier, replacement]);
+
+        expect(validate).toHaveBeenCalledOnce();
+        expect(save).toHaveBeenCalledTimes(2);
+        expect(applyOptions.mock.calls).toStrictEqual([['mutate'], ['replace']]);
+        expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('replacement');
+    });
+
     test('a failed storage write rejects its caller but does not block the next save', async () => {
         const save = vi.fn()
             .mockRejectedValueOnce(new Error('storage unavailable'))
