@@ -22,6 +22,7 @@ import {setProfile} from '../ext/js/data/profiles-util.js';
 /**
  * @param {ReturnType<typeof vi.fn>} getOptions
  * @param {ReturnType<typeof vi.fn>} modifySettings
+ * @returns {import('../ext/js/application.js').Application}
  */
 function createApplication(getOptions, modifySettings) {
     return /** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ ({
