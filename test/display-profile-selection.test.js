@@ -155,6 +155,11 @@ describe('DisplayProfileSelection options refresh handling', () => {
         Reflect.set(selection, '_updateProfileList', updateProfileList);
         Reflect.set(selection, '_updateCurrentProfileName', updateCurrentProfileName);
         Reflect.set(selection, '_setProfileCurrent', setProfileCurrent);
+        Reflect.set(selection, '_profileWriteGeneration', 0);
+        Reflect.set(selection, '_profileWriteTail', Promise.resolve());
+        Reflect.set(selection, '_display', {application: {api: {optionsGetFull: vi.fn().mockResolvedValue({
+            profiles: [{name: 'One'}, {name: 'Two'}],
+        })}}});
         const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, 1, /** @type {Event} */ (/** @type {unknown} */ ({
@@ -167,4 +172,122 @@ describe('DisplayProfileSelection options refresh handling', () => {
         expect(updateCurrentProfileName).toHaveBeenCalledOnce();
         expect(logErrorSpy).toHaveBeenCalled();
     });
+
+    test('profile selection rejects per-setting failures instead of closing the panel', async () => {
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        const modifySettings = vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'backend rejected', stack: ''}}]);
+        Reflect.set(selection, '_source', 'source');
+        Reflect.set(selection, '_display', {application: {api: {modifySettings}}});
+        await expect(DisplayProfileSelection.prototype._setProfileCurrent.call(selection, 1)).rejects.toThrow('backend rejected');
+        expect(modifySettings).toHaveBeenCalledOnce();
+    });
+
+    test('profile selection rejects malformed backend responses', async () => {
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        const modifySettings = vi.fn().mockResolvedValue([]);
+        Reflect.set(selection, '_source', 'source');
+        Reflect.set(selection, '_display', {application: {api: {modifySettings}}});
+        await expect(DisplayProfileSelection.prototype._setProfileCurrent.call(selection, 1)).rejects.toThrow('invalid result');
+    });
+
+    test('rapid selections serialize writes and only the newest selection refreshes UI', async () => {
+        /** @type {(value: [{error?: unknown}]) => void} */
+        let completeFirst;
+        /** @type {() => void} */
+        let firstWriteStarted;
+        const firstWriteStartedPromise = new Promise((resolve) => { firstWriteStarted = resolve; });
+        const writes = [];
+        const setProfileCurrent = vi.fn().mockImplementation((index) => {
+            writes.push(index);
+            if (index === 1) {
+                firstWriteStarted();
+                return new Promise((resolve) => { completeFirst = resolve; });
+            }
+            return Promise.resolve();
+        });
+        const closePanel = vi.fn();
+        const updateName = vi.fn().mockResolvedValue(void 0);
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        Reflect.set(selection, '_profileWriteGeneration', 0);
+        Reflect.set(selection, '_profileWriteTail', Promise.resolve());
+        Reflect.set(selection, '_display', {application: {api: {optionsGetFull: vi.fn().mockResolvedValue({
+            profiles: [{name: 'Zero'}, {name: 'One'}, {name: 'Two'}],
+        })}}});
+        Reflect.set(selection, '_setProfileCurrent', setProfileCurrent);
+        Reflect.set(selection, '_setProfilePanelVisible', closePanel);
+        Reflect.set(selection, '_updateCurrentProfileName', updateName);
+        const select = (index) => DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
+        select(1);
+        await firstWriteStartedPromise;
+        select(2);
+        expect(writes).toEqual([1]);
+        completeFirst([{}]);
+        await Reflect.get(selection, '_profileWriteTail');
+        expect(writes).toEqual([1, 2]);
+        expect(closePanel).toHaveBeenCalledOnce();
+        expect(updateName).toHaveBeenCalledOnce();
+    });
+
+    test('superseded profile-save errors do not overwrite the latest selection', async () => {
+        /** @type {(error: Error) => void} */
+        let failFirst;
+        /** @type {() => void} */
+        let firstWriteStarted;
+        const firstWriteStartedPromise = new Promise((resolve) => { firstWriteStarted = resolve; });
+        const setProfileCurrent = vi.fn().mockImplementation((index) => {
+            if (index === 1) {
+                firstWriteStarted();
+                return new Promise((_resolve, reject) => { failFirst = reject; });
+            }
+            return Promise.resolve();
+        });
+        const updateList = vi.fn().mockResolvedValue(void 0);
+        const updateName = vi.fn().mockResolvedValue(void 0);
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        Reflect.set(selection, '_profileWriteGeneration', 0);
+        Reflect.set(selection, '_profileWriteTail', Promise.resolve());
+        Reflect.set(selection, '_display', {application: {api: {optionsGetFull: vi.fn().mockResolvedValue({
+            profiles: [{name: 'Zero'}, {name: 'One'}, {name: 'Two'}],
+        })}}});
+        Reflect.set(selection, '_setProfileCurrent', setProfileCurrent);
+        Reflect.set(selection, '_setProfilePanelVisible', vi.fn());
+        Reflect.set(selection, '_updateCurrentProfileName', updateName);
+        Reflect.set(selection, '_updateProfileList', updateList);
+        const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const select = (index) => DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
+        select(1);
+        await firstWriteStartedPromise;
+        select(2);
+        failFirst(new Error('earlier save failed'));
+        await Reflect.get(selection, '_profileWriteTail');
+        expect(setProfileCurrent).toHaveBeenCalledTimes(2);
+        expect(updateList).not.toHaveBeenCalled();
+        expect(updateName).toHaveBeenCalledOnce();
+        expect(logErrorSpy).toHaveBeenCalled();
+    });
+
+    test('deleted profile indices are not persisted from a stale dropdown', async () => {
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        const setProfileCurrent = vi.fn();
+        const updateList = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(selection, '_profileWriteGeneration', 0);
+        Reflect.set(selection, '_profileWriteTail', Promise.resolve());
+        Reflect.set(selection, '_display', {application: {api: {optionsGetFull: vi.fn().mockResolvedValue({
+            profiles: [{name: 'Default'}],
+        })}}});
+        Reflect.set(selection, '_setProfileCurrent', setProfileCurrent);
+        Reflect.set(selection, '_updateProfileList', updateList);
+        Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, 1,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
+        await Reflect.get(selection, '_profileWriteTail');
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(setProfileCurrent).not.toHaveBeenCalled();
+        expect(updateList).toHaveBeenCalledOnce();
+    });
+
 });
