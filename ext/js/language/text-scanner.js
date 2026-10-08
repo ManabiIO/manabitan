@@ -1489,12 +1489,21 @@ export class TextScanner extends EventDispatcher {
                 this._activeLookupSequence = null;
             }
             this._pendingLookup = false;
-            const queuedLookup = this._queuedLookup;
-            this._queuedLookup = null;
+            const queuedLookup = this._consumeQueuedLookup();
             if (replayQueuedLookup && queuedLookup !== null) {
                 void this._searchAt(queuedLookup.x, queuedLookup.y, queuedLookup.inputInfo);
             }
         }
+    }
+
+    /**
+     * Retrieve the latest lookup queued by another event during an async search.
+     * @returns {{x: number, y: number, inputInfo: import('text-scanner').InputInfo}|null}
+     */
+    _consumeQueuedLookup() {
+        const queuedLookup = this._queuedLookup;
+        this._queuedLookup = null;
+        return queuedLookup;
     }
 
     /**
