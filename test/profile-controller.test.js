@@ -427,6 +427,7 @@ describe('ProfileController profile deletion indices', () => {
     ])('$name', async ({count, active, viewed, deleted, nextActive, nextViewed}) => {
         const controller = createControllerForInternalTests();
         const profiles = Array.from({length: count}, (_, i) => ({id: `p${i}`, name: `Profile ${i}`}));
+        /** @type {string[]} */
         const calls = [];
         const refreshProfileIndex = vi.fn(() => { calls.push('refresh'); });
         const modifyGlobalSettings = vi.fn(async () => {
