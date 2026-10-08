@@ -189,6 +189,8 @@ export class Backend {
         this._options = null;
         /** @type {Promise<void>|null} */
         this._optionsSaveTail = null;
+        /** @type {Promise<void>|null} */
+        this._optionsMutationTail = null;
         /** @type {import('../data/json-schema.js').JsonSchema[]} */
         this._profileConditionsSchemaCache = [];
         /** @type {WeakMap<import('settings').ProfileOptions, {enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>, textReplacements: (?(import('translation').FindTermsTextReplacement[]))[]}>} */
@@ -2120,20 +2122,23 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
 
     /** @type {import('api').ApiHandler<'setAllSettings'>} */
     async _onApiSetAllSettings({value, source}) {
-        this._optionsUtil.validate(value);
-        const previousOptions = this._options;
-        const previousEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(previousOptions);
-        this._options = clone(value);
-        try {
-            await this._saveOptions(source);
-        } catch (e) {
-            this._options = previousOptions;
-            throw e;
-        }
-        const nextEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(this._options);
-        if (!this._areStringArraysEqual(previousEnabledDictionaries, nextEnabledDictionaries)) {
-            this._warmEnabledDictionaryLookupCaches('settings-enabled-dictionaries-changed');
-        }
+        await this._runOptionsMutation(async () => {
+            this._optionsUtil.validate(value);
+            const previousOptions = this._options;
+            const previousEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(previousOptions);
+            this._options = clone(value);
+            try {
+                await this._saveOptions(source);
+            } catch (e) {
+                this._options = previousOptions;
+                this._clearProfileConditionsSchemaCache();
+                throw e;
+            }
+            const nextEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(this._options);
+            if (!this._areStringArraysEqual(previousEnabledDictionaries, nextEnabledDictionaries)) {
+                this._warmEnabledDictionaryLookupCaches('settings-enabled-dictionaries-changed');
+            }
+        });
     }
 
     /** @type {import('api').ApiHandlerNoExtraArgs<'getOrCreateSearchPopup'>} */
@@ -2514,18 +2519,44 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
      */
     async _modifySettings(targets, source) {
-        /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
-        const results = [];
-        for (const target of targets) {
-            try {
-                const result = this._modifySetting(target);
-                results.push({result: clone(result)});
-            } catch (e) {
-                results.push({error: ExtensionError.serialize(e)});
+        return await this._runOptionsMutation(async () => {
+            // Settings mutations are synchronous, but persistence is not.
+            // Keep the whole mutation+save operation exclusive so a failed
+            // write can roll back safely without discarding a newer mutation.
+            const previousOptions = clone(this._getOptionsFull(false));
+            /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
+            const results = [];
+            for (const target of targets) {
+                try {
+                    const result = this._modifySetting(target);
+                    results.push({result: clone(result)});
+                } catch (e) {
+                    results.push({error: ExtensionError.serialize(e)});
+                }
             }
-        }
-        await this._saveOptions(source);
-        return results;
+            try {
+                await this._saveOptions(source);
+            } catch (e) {
+                this._options = previousOptions;
+                this._clearProfileConditionsSchemaCache();
+                throw e;
+            }
+            return results;
+        });
+    }
+
+    /**
+     * Serialize settings mutations, not just storage operations. A transport
+     * error must not let an older rollback clobber a newer user change.
+     * @template T
+     * @param {() => Promise<T>} operation
+     * @returns {Promise<T>}
+     */
+    _runOptionsMutation(operation) {
+        const previous = this._optionsMutationTail ?? Promise.resolve();
+        const current = previous.then(operation);
+        this._optionsMutationTail = current.then(() => {}, () => {});
+        return current;
     }
 
     /**
