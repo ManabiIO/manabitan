@@ -453,7 +453,7 @@ export class Backend {
      * @param {(loaded: number, total: number) => void} [onProgress]
      * @returns {Promise<Blob>}
      */
-    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = null) {
+    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = void 0) {
         return await new Promise((resolve, reject) => {
             const request = new XMLHttpRequest();
             const cleanup = () => {
@@ -464,6 +464,7 @@ export class Backend {
                 request.onprogress = null;
                 request.onreadystatechange = null;
             };
+            /** @param {unknown} error */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -1148,37 +1149,25 @@ export class Backend {
             hasExactHeadwordMatch,
             resultDictionaryCount: dictionaryEntries.length,
             resultDictionaries: [...new Set(dictionaryEntries.flatMap((entry) => (
-                entry.type === 'term' ?
-                    entry.definitions.map(({dictionary}) => dictionary) :
-                    [entry.dictionary]
+                entry.definitions.map(({dictionary}) => dictionary)
             )))],
             resultDictionaryAliases: [...new Set(dictionaryEntries.flatMap((entry) => (
-                entry.type === 'term' ?
-                    entry.definitions.map(({dictionaryAlias}) => dictionaryAlias) :
-                [entry.dictionaryAlias]
+                entry.definitions.map(({dictionaryAlias}) => dictionaryAlias)
             )))],
             debugLookupState,
             resultEntries: includeDetailedLookupSnapshot ?
-                dictionaryEntries.map((entry) => (
-                    entry.type === 'term' ?
-                        {
-                            type: entry.type,
-                            dictionaryIndex: entry.dictionaryIndex,
-                            dictionaryAlias: entry.dictionaryAlias,
-                            headwords: entry.headwords.map(({term, reading}) => ({term, reading})),
-                            definitions: entry.definitions.map(({dictionary, dictionaryAlias, sequences, isPrimary}) => ({
-                                dictionary,
-                                dictionaryAlias,
-                                sequences,
-                                isPrimary,
-                            })),
-                        } :
-                        {
-                            type: entry.type,
-                            dictionary: entry.dictionary,
-                            dictionaryAlias: entry.dictionaryAlias,
-                        }
-                )) :
+                dictionaryEntries.map((entry) => ({
+                    type: entry.type,
+                    dictionaryIndex: entry.dictionaryIndex,
+                    dictionaryAlias: entry.dictionaryAlias,
+                    headwords: entry.headwords.map(({term, reading}) => ({term, reading})),
+                    definitions: entry.definitions.map(({dictionary, dictionaryAlias, sequences, isPrimary}) => ({
+                        dictionary,
+                        dictionaryAlias,
+                        sequences,
+                        isPrimary,
+                    })),
+                })) :
                 void 0,
         }));
         return {dictionaryEntries, originalTextLength};
