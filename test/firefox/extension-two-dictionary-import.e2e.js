@@ -1139,6 +1139,10 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
 
         if (sawStepText && currentLabel.length === 0) {
             emptySince ??= now;
+            if ((now - emptySince) >= 20_000 && lastCountsText !== expectedCounts) {
+                const diagnostics = await getBackendLookupDiagnostics(driver, '暗記');
+                fail(`${dictionaryName} import progress completed but counts did not reach ${expectedCounts}: current=${lastCountsText} profiles=${JSON.stringify(diagnostics.profileDictionaries ?? null)}`);
+            }
             if ((now - emptySince) >= emptyStabilityMs && lastCountsText === expectedCounts) {
                 clearedAfterStep = true;
                 if (previousLabel.length > 0) {
@@ -1983,10 +1987,15 @@ async function getBackendLookupDiagnostics(driver, term) {
                 }
                 const optionsFull = await send('optionsGetFull', undefined);
                 const profileDictionaries = Array.isArray(optionsFull?.profiles) ?
-                    optionsFull.profiles.map((profile) => ({
+                    optionsFull.profiles.map((profile, index) => ({
                         id: profile?.id ?? null,
+                        index,
+                        selected: index === optionsFull.profileCurrent,
                         dictionaries: Array.isArray(profile?.options?.dictionaries) ?
-                            profile.options.dictionaries.map((dictionary) => String(dictionary?.name || '')) :
+                            profile.options.dictionaries.map((dictionary) => ({
+                                name: String(dictionary?.name || ''),
+                                enabled: dictionary?.enabled === true,
+                            })) :
                             [],
                     })) :
                     null;
