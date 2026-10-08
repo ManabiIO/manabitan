@@ -166,7 +166,11 @@ export class ProfileController {
         } catch (error) {
             const index = currentIndex();
             if (index >= 0 && this._profiles[index].name === value) {
-                try { await this._settingsController.refresh(); } catch (refreshError) { log.error(refreshError); }
+                try {
+                    await this._settingsController.refresh();
+                } catch (refreshError) {
+                    log.error(refreshError);
+                }
             }
             throw error;
         } finally {
