@@ -41,6 +41,7 @@ export class FrameEndpoint {
      * @returns {void}
      */
     signal() {
+        if (this._token !== null) { return; }
         if (!this._eventListenersSetup) {
             this._eventListeners.addEventListener(window, 'message', this._onMessage.bind(this), false);
             this._eventListenersSetup = true;
@@ -103,6 +104,7 @@ export class FrameEndpoint {
 
         this._token = token;
         this._eventListeners.removeAllEventListeners();
+        this._eventListenersSetup = false;
         /** @type {import('frame-client').FrameEndpointConnectedDetails} */
         const details = {secret, token};
         void Promise.resolve()
