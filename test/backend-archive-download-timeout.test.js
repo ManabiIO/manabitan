@@ -95,6 +95,8 @@ describe('backend dictionary archive filename detection', () => {
         ['attachment; filename="fallback.zip"; filename*=UTF-8\'\'%E6%97%A5%E6%9C%AC%E8%AA%9E.zip', '日本語.zip'],
         ['attachment; filename*=UTF-8\'ja\'%E6%97%A5%E6%9C%AC%E8%AA%9E.zip; filename="fallback.zip"', '日本語.zip'],
         ['attachment; filename="file name.zip"', 'file name.zip'],
+        ['attachment; filename="dir/unsafe.zip"', 'unsafe.zip'],
+        ['attachment; filename*=UTF-8\'\'..%2Fsecret.zip', 'secret.zip'],
         ['attachment; filename*=UTF-8\'\'%ZZ; filename="safe.zip"', 'safe.zip'],
     ])('selects the supported Content-Disposition filename from %s', async (disposition, expected) => {
         vi.useFakeTimers();
