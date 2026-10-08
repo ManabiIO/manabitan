@@ -76,6 +76,37 @@ describe('Backend settings persistence ordering', () => {
         expect(clearCache).toHaveBeenCalledTimes(2);
     });
 
+    test('settings reads see only committed state until an asynchronous save finishes', async () => {
+        const saveStarted = Promise.withResolvers();
+        const releaseSave = Promise.withResolvers();
+        const save = vi.fn(async () => {
+            saveStarted.resolve(void 0);
+            await releaseSave.promise;
+        });
+        const {backend, options} = createBackend(save);
+        Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
+            const draft = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            if (target.action === 'set') { draft.value = /** @type {string} */ (target.value); }
+            return true;
+        });
+        Reflect.set(backend, '_getSetting', () => /** @type {{value: string}} */ (Reflect.get(backend, '_options')).value);
+        /** @type {import('settings-modifications').ScopedModification} */
+        const modification = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'not yet committed'};
+        /** @type {import('settings-modifications').ScopedRead} */
+        const read = {scope: 'global', optionsContext: null, path: 'value'};
+
+        const pending = backend._modifySettings([modification], 'settings');
+        await saveStarted.promise;
+
+        expect(Reflect.get(backend, '_options')).toBe(options);
+        expect(backend._onApiGetSettings({targets: [read]})).toEqual([{result: 'initial'}]);
+        releaseSave.resolve(void 0);
+        await pending;
+
+        expect(Reflect.get(backend, '_options')).not.toBe(options);
+        expect(backend._onApiGetSettings({targets: [read]})).toEqual([{result: 'not yet committed'}]);
+    });
+
     test('failed mutation persistence restores the previous in-memory settings', async () => {
         const options = {value: 'persisted'};
         const save = vi.fn()
