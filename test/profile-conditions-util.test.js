@@ -1109,4 +1109,65 @@ describe('Profile conditions utilities', () => {
             }
         });
     });
+    describe('Repeated condition tokens', () => {
+        test('duplicate domains do not make a oneOf match impossible', () => {
+            const schema = createSchema([{conditions: [{
+                type: 'url',
+                operator: 'matchDomain',
+                value: 'Example.COM, example.com; EXAMPLE.com',
+            }]}]);
+            expect(schema.schema).toStrictEqual({
+                required: ['domain'],
+                properties: {domain: {oneOf: [{const: 'example.com'}]}},
+            });
+            expect(schema.isValid(normalizeContext({depth: 0, url: 'https://example.com/'}))).toBe(true);
+            expect(schema.isValid(normalizeContext({depth: 0, url: 'https://other.example.com/'}))).toBe(false);
+        });
+
+        test('exact modifier conditions ignore repeated values rather than requiring extra keys', () => {
+            const exact = createSchema([{conditions: [{
+                type: 'modifierKeys', operator: 'are', value: 'alt, alt, shift',
+            }]}]);
+            expect(exact.schema).toStrictEqual({
+                required: ['modifierKeys'],
+                properties: {modifierKeys: {
+                    type: 'array',
+                    minItems: 2,
+                    maxItems: 2,
+                    allOf: [{contains: {const: 'alt'}}, {contains: {const: 'shift'}}],
+                }},
+            });
+            expect(exact.isValid(normalizeContext({depth: 0, url: 'https://example.com', modifierKeys: ['alt', 'shift']}))).toBe(true);
+            expect(exact.isValid(normalizeContext({depth: 0, url: 'https://example.com', modifierKeys: ['alt', 'ctrl']}))).toBe(false);
+
+            const inverse = createSchema([{conditions: [{
+                type: 'modifierKeys', operator: 'areNot', value: 'alt, alt, shift',
+            }]}]);
+            expect(inverse.isValid(normalizeContext({depth: 0, url: 'https://example.com', modifierKeys: ['alt', 'shift']}))).toBe(false);
+            expect(inverse.isValid(normalizeContext({depth: 0, url: 'https://example.com', modifierKeys: ['alt', 'ctrl']}))).toBe(true);
+        });
+
+        test('duplicate included flags do not require multiple copies of the same flag', () => {
+            const include = createSchema([{conditions: [{
+                type: 'flags', operator: 'include', value: 'clipboard clipboard clipboard',
+            }]}]);
+            expect(include.schema).toStrictEqual({
+                required: ['flags'],
+                properties: {flags: {
+                    type: 'array',
+                    minItems: 1,
+                    allOf: [{contains: {const: 'clipboard'}}],
+                }},
+            });
+            expect(include.isValid(normalizeContext({depth: 0, url: 'https://example.com', flags: ['clipboard']}))).toBe(true);
+            expect(include.isValid(normalizeContext({depth: 0, url: 'https://example.com', flags: []}))).toBe(false);
+
+            const notInclude = createSchema([{conditions: [{
+                type: 'flags', operator: 'notInclude', value: 'clipboard, clipboard',
+            }]}]);
+            expect(notInclude.isValid(normalizeContext({depth: 0, url: 'https://example.com', flags: ['clipboard']}))).toBe(false);
+            expect(notInclude.isValid(normalizeContext({depth: 0, url: 'https://example.com', flags: []}))).toBe(true);
+        });
+    });
+
 });
