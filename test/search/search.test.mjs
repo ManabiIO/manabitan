@@ -34,8 +34,10 @@ test('unfinished syllables and English are not stripped into misleading partial 
     assert.throws(() => japaneseSearchQueries('a\0'), RangeError);
 });
 test('implicit prefix candidates require completed Japanese and at least two code points', () => {
-    for (const query of ['たべ', '食べ', 'ガッ']) { assert.equal(isJapanesePrefixCandidate(query), true, query); }
-    for (const query of ['食', 'た', 'ny', 'hello', 'たbe']) { assert.equal(isJapanesePrefixCandidate(query), false, query); }
+    for (const query of ['たべ', '食べ', 'ガッ', 'カー', 'あー']) { assert.equal(isJapanesePrefixCandidate(query), true, query); }
+    for (const query of ['食', 'た', 'ny', 'hello', 'たbe', '猫!', '猫🐈', '猫3', 'ー?']) {
+        assert.equal(isJapanesePrefixCandidate(query), false, query);
+    }
 });
 test('prefix completion runs only after all exact and spelling alternatives miss', async () => {
     const exact = [],
@@ -215,6 +217,28 @@ test('IME input does not start an intermediate lookup', (t) => {
     controller._onSearchInput({currentTarget: input, isComposing: true});
     t.mock.timers.tick(1000);
     assert.deepEqual(calls, []);
+});
+test('Enter does not submit while the controller is composing even when the key event says otherwise', () => {
+    const {controller} = controllerFixture();
+    controller._composing = true;
+    let searches = 0,
+        prevented = 0,
+        blurred = 0;
+    controller._search = () => { searches++; };
+    controller._display.blurElement = () => { blurred++; };
+    controller._onSearchKeydown({
+        currentTarget: controller._queryInput,
+        code: 'Enter',
+        key: 'Enter',
+        keyCode: 13,
+        shiftKey: false,
+        isComposing: false,
+        preventDefault() { prevented++; },
+        stopImmediatePropagation() { prevented++; },
+    });
+    assert.equal(searches, 0);
+    assert.equal(prevented, 0);
+    assert.equal(blurred, 0);
 });
 test('invalidation fences in-flight renders and disposes old entry actions', () => {
     const display = Object.create(Display.prototype);
