@@ -1870,6 +1870,7 @@ export class DictionaryImportController {
                 dictionaryTitle: normalizedTitle,
                 activeProfileIndex,
             });
+            throw new Error(`Dictionary "${normalizedTitle}" was imported but is not enabled for the selected profile`);
         }
         reportDiagnostics('dictionary-import-visibility-verified', {
             dictionaryTitle: normalizedTitle,
@@ -2416,7 +2417,19 @@ export class DictionaryImportController {
 
             const profileDictionarySettings = profilesDictionarySettings?.[profileId];
             if (!Array.isArray(profileDictionarySettings) || profileDictionarySettings.length === 0) {
-                targets.push({action: 'push', path: path1, items: [defaultSettings]});
+                const existingIndex = options.dictionaries.findIndex((dictionary) => dictionary.name === title);
+                if (existingIndex < 0) {
+                    targets.push({action: 'push', path: path1, items: [defaultSettings]});
+                } else if (enabled && !options.dictionaries.some((dictionary) => dictionary.name === title && dictionary.enabled)) {
+                    // A databaseUpdated refresh can auto-create this entry with
+                    // enabled=false before the import finishes. Enable it in
+                    // place rather than inserting another entry with the same name.
+                    targets.push({
+                        action: 'set',
+                        path: `${path1}[${existingIndex}].enabled`,
+                        value: true,
+                    });
+                }
                 if (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle) {
                     targets.push({
                         action: 'set',
