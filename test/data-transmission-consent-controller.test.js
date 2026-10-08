@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {readFile} from 'node:fs/promises';
 import {describe, expect, vi} from 'vitest';
 import {createDomTest} from './fixtures/dom-test.js';
 
@@ -29,6 +30,15 @@ vi.mock('../ext/js/core/log.js', () => ({
 const test = createDomTest();
 
 describe('DataTransmissionConsentController', () => {
+    test('consent actions do not dismiss the modal before their async save finishes', async () => {
+        const html = await readFile(new URL('../ext/templates-modals.html', import.meta.url), 'utf8');
+        for (const id of ['accept-data-transmission', 'decline-data-transmission']) {
+            const button = html.match(new RegExp(`<button[^>]*id="${id}"[^>]*>`));
+            expect(button).not.toBeNull();
+            expect(button?.[0]).not.toContain('data-modal-action');
+        }
+    });
+
     test('accept click logs consent-write failures instead of rejecting', async ({window}) => {
         vi.resetModules();
         vi.clearAllMocks();
