@@ -32,7 +32,8 @@ function createChunkedResponse(chunks, contentLength) {
 }
 
 describe('RequestBuilder streaming response assembly', () => {
-    test.each([
+    /** @type {[string|null, number[][]][]} */
+    const responseCases = [
         ['3', [[1, 2], [3, 4]]],
         ['1', [[1, 2, 3, 4]]],
         ['0', [[1, 2], [3, 4]]],
@@ -40,7 +41,8 @@ describe('RequestBuilder streaming response assembly', () => {
         ['1000000000', [[1, 2], [3, 4]]],
         [null, [[1, 2], [3, 4]]],
         ['4', [[1, 2], [3, 4]]],
-    ])('preserves all chunks with Content-Length %s', async (length, chunks) => {
+    ];
+    test.each(responseCases)('preserves all chunks with Content-Length %s', async (length, chunks) => {
         const onProgress = vi.fn();
         const response = createChunkedResponse(chunks, length);
 
