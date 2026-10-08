@@ -13,7 +13,7 @@ import {arrayBufferToBase64, arrayBufferToBinaryString, base64ToArrayBuffer} fro
 
 /**
  * @param {number} length
- * @returns {Uint8Array<ArrayBuffer>}
+ * @returns {Uint8Array}
  */
 function fixture(length) {
     const bytes = new Uint8Array(length);
@@ -24,8 +24,8 @@ function fixture(length) {
 }
 
 describe('ArrayBuffer conversion across chunk boundaries', () => {
-    test.each([0, 1, 2, 3, 24_575, 24_576, 24_577, 49_152, 49_153, 131_073])(
-        'base64 encodes %i bytes identically to Node', (length) => {
+    for (const length of [0, 1, 2, 3, 24_575, 24_576, 24_577, 49_152, 49_153, 131_073]) {
+        test(`base64 encodes ${length} bytes identically to Node`, () => {
             const bytes = fixture(length);
             const expected = Buffer.from(bytes).toString('base64');
 
@@ -33,14 +33,14 @@ describe('ArrayBuffer conversion across chunk boundaries', () => {
 
             expect(encoded).toBe(expected);
             expect(new Uint8Array(base64ToArrayBuffer(encoded))).toStrictEqual(bytes);
-        },
-    );
+        });
+    }
 
-    test.each([0, 1, 32_767, 32_768, 32_769, 150_001])(
-        'binary string encodes %i bytes without spreading the entire buffer', (length) => {
+    for (const length of [0, 1, 32_767, 32_768, 32_769, 150_001]) {
+        test(`binary string encodes ${length} bytes without spreading the entire buffer`, () => {
             const bytes = fixture(length);
             const binary = arrayBufferToBinaryString(bytes.buffer);
             expect(binary).toBe(Buffer.from(bytes).toString('latin1'));
-        },
-    );
+        });
+    }
 });
