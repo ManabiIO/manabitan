@@ -22,6 +22,7 @@ describe('Firefox dictionary import backend reconnect', () => {
         vi.stubGlobal('navigator', {});
         vi.stubGlobal('window', {location: {protocol: 'file:'}});
         vi.stubGlobal('SharedWorker', FakeSharedWorker);
+        /** @type {string[]} */
         const sentActions = [];
         const backendPort = {
             postMessage: vi.fn((/** @type {{action: string}} */ message, /** @type {MessagePort[]} */ ports) => {
