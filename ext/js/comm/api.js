@@ -578,6 +578,7 @@ export class API {
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
             let settled = false;
+            /** @param {Error} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
@@ -669,6 +670,7 @@ export class API {
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
             let settled = false;
+            /** @param {Error} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
@@ -818,6 +820,7 @@ export class API {
         return new Promise((resolve, reject) => {
             let settled = false;
             let retriedTransientFailure = false;
+            /** @param {Error} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
@@ -967,6 +970,9 @@ export class API {
                 throw transportError;
             }
             try {
+                if (this._backendPort === null) {
+                    throw new Error('Backend message port is not available');
+                }
                 this._backendPort.postMessage({action, params}, transferables);
             } catch (error) {
                 this._setBackendPort(null);
