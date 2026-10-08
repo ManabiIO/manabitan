@@ -79,15 +79,9 @@ export function japaneseSearchQueries(value) {
  * @returns {boolean}
  */
 export function isJapanesePrefixCandidate(query) {
-    if (/\p{Script=Latin}/u.test(query)) { return false; }
-    let count = 0;
-    for (const character of query) {
-        // The Japanese prolonged sound mark is Script=Common, but is part
-        // of legitimate kana prefixes such as カー and こー.
-        if (!/[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}\u30fc]/u.test(character)) { continue; }
-        if (++count >= 2) { return true; }
-    }
-    return false;
+    return [...query].length >= 2 &&
+    /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(query) &&
+    !/[a-zāīūēōâîûêô]/i.test(query);
 }
 
 /**
