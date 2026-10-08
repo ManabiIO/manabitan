@@ -430,9 +430,9 @@ describe('ProfileController profile deletion indices', () => {
         /** @type {string[]} */
         const calls = [];
         const refreshProfileIndex = vi.fn(() => { calls.push('refresh'); });
-        const modifyGlobalSettings = vi.fn(async () => {
+        const modifyGlobalSettings = vi.fn(async (/** @type {import('settings-modifications').Modification[]} */ targets) => {
             calls.push('persist');
-            return [{result: true}];
+            return targets.map(() => ({result: true}));
         });
         const settingsController = {profileIndex: viewed, refreshProfileIndex, modifyGlobalSettings};
         Reflect.set(controller, '_profiles', profiles);
