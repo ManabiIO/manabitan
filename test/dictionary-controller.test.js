@@ -86,6 +86,7 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
     });
 
     test('does not overwrite a newer enablement change from a stale options snapshot', async () => {
+        /** @type {unknown[]} */
         const backendDictionaries = [
             {name: 'JMdict', alias: 'My alias', enabled: true},
             {name: 'Unknown', alias: 'Stale', enabled: true},
