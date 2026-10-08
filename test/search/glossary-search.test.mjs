@@ -68,6 +68,39 @@ test('English query admission rejects Japanese and one-character noise', () => {
     assert.equal(createGlossarySearchQuery(''), null);
 });
 
+test('reverse glossary search uses the actual last token as live prefix', () => {
+    const repeatedLast = createGlossarySearchQuery('dog cat dog');
+    assert.deepEqual(repeatedLast, {
+        folded: 'dog cat dog',
+        phrase: 'dog cat dog',
+        tokens: ['cat', 'dog'],
+        prefix: 'dog',
+    });
+    assert.equal(scoreGlossarySearchMatch(['a cat and a dogwood tree'], repeatedLast)?.tier, 2);
+    assert.equal(scoreGlossarySearchMatch(['dogwood without cats'], repeatedLast), null);
+
+    const repeatedPrerequisite = createGlossarySearchQuery('dog dog cat');
+    assert.deepEqual(repeatedPrerequisite?.tokens, ['dog', 'cat']);
+    assert.equal(scoreGlossarySearchMatch(['a dog and a cat'], repeatedPrerequisite)?.tier, 1);
+    assert.equal(scoreGlossarySearchMatch(['a cat and another dog'], repeatedLast)?.tier, 1);
+});
+
+test('unfinished terminal words do not fall back to the preceding word', () => {
+    assert.equal(createGlossarySearchQuery('house c'), null);
+    assert.equal(createGlossarySearchQuery('house a'), null);
+    assert.equal(createGlossarySearchQuery('house ca')?.prefix, 'ca');
+    assert.equal(createGlossarySearchQuery('house cat')?.prefix, 'cat');
+    assert.equal(createGlossarySearchQuery('a'.repeat(1025)), null);
+    assert.equal(createGlossarySearchQuery('house ' + 'c'.repeat(65)), null);
+});
+
+test('bounded queries track the most recently typed word', () => {
+    const query = createGlossarySearchQuery('alpha bravo charlie delta echo foxtrot golf hotel india');
+    assert.deepEqual(query?.tokens, ['bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'india']);
+    assert.equal(query?.prefix, 'india');
+    assert.equal(query?.phrase, 'bravo charlie delta echo foxtrot golf hotel india');
+});
+
 test('prefix upper bounds cover the prefix and exclude its lexical successor', () => {
     const upper = glossaryPrefixUpperBound('cat');
     if (upper === null) { assert.fail('Expected a finite prefix upper bound'); }
