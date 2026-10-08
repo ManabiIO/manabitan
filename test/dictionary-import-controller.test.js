@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {afterAll, describe, expect, test, vi} from 'vitest';
+import {afterAll, afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {DictionaryImportController, ImportProgressTracker} from '../ext/js/pages/settings/dictionary-import-controller.js';
 import {setupDomTest} from './fixtures/dom-test.js';
 
@@ -597,6 +597,13 @@ describe('Dictionary import settings carry-over', () => {
 });
 
 describe('Dictionary import archive source validation', () => {
+    beforeEach(() => {
+        vi.stubGlobal('chrome', {runtime: {getManifest: () => ({version: '0.0.0-test'})}});
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
     /**
      * @param {ReturnType<typeof vi.fn>} importDictionaryFromZip
      * @param {ReturnType<typeof vi.fn>} onImportDone
