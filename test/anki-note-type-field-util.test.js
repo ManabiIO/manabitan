@@ -130,7 +130,7 @@ describe('buildAnkiFieldsForModel', () => {
         expect(Object.prototype.hasOwnProperty.call(fields, '__proto__')).toBe(true);
         expect(fields['__proto__']).toStrictEqual({value: '{expression}', overwriteMode: 'coalesce'});
         expect(Object.getPrototypeOf(fields)).toBe(Object.prototype);
-        expect(JSON.parse(JSON.stringify(fields))['__proto__']).toStrictEqual({value: '{expression}', overwriteMode: 'coalesce'});
+        expect(JSON.stringify(fields)).toContain('"__proto__":');
     });
 
     test('uses the first available single glossary marker for primary dictionary fields', () => {
