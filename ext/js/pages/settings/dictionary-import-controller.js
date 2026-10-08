@@ -22,7 +22,7 @@ import {parseJson, readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {safePerformance} from '../../core/safe-performance.js';
 import {toError} from '../../core/to-error.js';
-import {promiseTimeout} from '../../core/utilities.js';
+
 import {getKebabCase} from '../../data/anki-template-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {DictionaryController} from './dictionary-controller.js';
@@ -1219,11 +1219,15 @@ export class DictionaryImportController {
      */
     async _runImportWithWatchdog(importPromise, label) {
         const timeoutMs = 180_000;
+        /** @type {?ReturnType<typeof setTimeout>} */
+        let timeoutId = null;
         try {
             await Promise.race([
                 importPromise,
-                promiseTimeout(timeoutMs).then(() => {
-                    throw new Error(`${label} did not complete within ${String(timeoutMs)}ms`);
+                new Promise((_resolve, reject) => {
+                    timeoutId = setTimeout(() => {
+                        reject(new Error(`${label} did not complete within ${String(timeoutMs)}ms`));
+                    }, timeoutMs);
                 }),
             ]);
         } catch (error) {
@@ -1232,6 +1236,10 @@ export class DictionaryImportController {
                 this._forceRecoverHungImportSession(normalizedError, label);
             }
             throw normalizedError;
+        } finally {
+            if (timeoutId !== null) {
+                clearTimeout(timeoutId);
+            }
         }
     }
 
