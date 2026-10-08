@@ -75,6 +75,43 @@ describe('collapsible dictionary asynchronous settings refresh', () => {
         expect(updateAll).toHaveBeenCalledExactlyOnceWith(newOptions);
     });
 
+    test.each(['profile', 'rerender'])('an in-flight bulk change cannot overwrite a new %s selector', async (cause) => {
+        const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+            dictionaries: [{name: 'Old', definitionsCollapsible: 'collapsed'}],
+        }));
+        const deferred = /** @type {import('core').DeferredPromiseDetails<import('settings-controller').ModifyResult[]>} */ (deferPromise());
+        let profileIndex = 0;
+        const {controller} = createHarness(async () => options, () => profileIndex);
+        const previous = {value: 'collapsed'};
+        Reflect.set(controller, '_selects', [previous]);
+        const settings = /** @type {Record<string, unknown>} */ (Reflect.get(controller, '_settingsController'));
+        const mutate = vi.fn(() => deferred.promise);
+        settings.modifyProfileSettings = mutate;
+        const pending = controller._setDefinitionsCollapsibleAll('force-expanded');
+        await vi.waitFor(() => { expect(mutate).toHaveBeenCalledOnce(); });
+        const replacement = {value: 'collapsed'};
+        Reflect.set(controller, '_selects', [replacement]);
+        if (cause === 'profile') { profileIndex = 1; }
+        deferred.resolve([]);
+        await pending;
+        expect(replacement.value).toBe('collapsed');
+    });
+
+    test('bulk changes update the original selectors after a successful mutation', async () => {
+        const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+            dictionaries: [{name: 'Old', definitionsCollapsible: 'collapsed'}],
+        }));
+        const {controller} = createHarness(async () => options);
+        const select = {value: 'collapsed'};
+        Reflect.set(controller, '_selects', [select]);
+        const settings = /** @type {Record<string, unknown>} */ (Reflect.get(controller, '_settingsController'));
+        const mutate = vi.fn(async () => []);
+        settings.modifyProfileSettings = mutate;
+        await controller._setDefinitionsCollapsibleAll('force-expanded');
+        expect(mutate).toHaveBeenCalledOnce();
+        expect(select.value).toBe('force-expanded');
+    });
+
     test('rebuilding the all-selector invalidates a pending refresh', async () => {
         const deferred = /** @type {import('core').DeferredPromiseDetails<import('settings').ProfileOptions>} */ (deferPromise());
         const {controller, updateAll} = createHarness(() => deferred.promise);
