@@ -19,6 +19,7 @@
 import {ClipboardMonitor} from '../comm/clipboard-monitor.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
@@ -98,8 +99,16 @@ export class SearchDisplayController {
         ]);
         /** @type {number} */
         this._profileSelectRefreshGeneration = 0;
+        /** @type {import('settings').Profile[]} */
+        this._profileSelectProfiles = [];
+        /** @type {number} */
+        this._profileSelectWriteGeneration = 0;
+        /** @type {Promise<void>} */
+        this._profileSelectWriteTail = Promise.resolve();
         /** @type {number} */
         this._searchRequestSequence = 0;
+        /** @type {number} */
+        this._clipboardUpdateSequence = 0;
         /** @type {number} */
         this._contentUpdateSequence = 0;
         /** @type {string} */
@@ -196,6 +205,7 @@ export class SearchDisplayController {
         this._searchButton.addEventListener('click', this._onSearch.bind(this), false);
         this._clearButton.addEventListener('click', this._onClear.bind(this), false);
         this._queryInput.addEventListener('compositionstart', () => {
+            ++this._clipboardUpdateSequence;
             this._composing = true;
             this._cancelLiveSearch();
             this._display.invalidateSearchDraft();
@@ -425,6 +435,7 @@ export class SearchDisplayController {
      * @param {InputEvent} e
      */
     _onSearchInput(e) {
+        ++this._clipboardUpdateSequence;
         this._updateSearchHeight(true);
 
         const element = /** @type {HTMLTextAreaElement} */ (e.currentTarget);
@@ -523,23 +534,24 @@ export class SearchDisplayController {
 
     /** */
     async _onCopy() {
-        // Ignore copy from search page
-        this._clipboardMonitor.setPreviousText(document.hasFocus() ? await this._clipboardReaderLike.getText(false) : '');
+        // Ignore copy from search page; clipboard access can be denied.
+        try {
+            this._clipboardMonitor.setPreviousText(document.hasFocus() ? await this._clipboardReaderLike.getText(false) : '');
+        } catch (error) {
+            if (!this._display.application.webExtension.unloaded) { log.error(error); }
+        }
     }
 
     /**
      * @param {ClipboardEvent} e
      */
     _onPaste(e) {
-        if (e.target === this._queryInput) {
-            return;
-        }
+        // Keep native paste working in inputs and editable result content.
+        if (e.defaultPrevented || (e.target instanceof Element && this._isElementInput(e.target))) { return; }
+        const text = e.clipboardData?.getData('text');
+        if (!text) { return; }
         e.stopPropagation();
         e.preventDefault();
-        const text = e.clipboardData?.getData('text');
-        if (!text) {
-            return;
-        }
         if (this._queryInput.value !== text) {
             this._queryInput.value = text;
             this._updateSearchHeight(true);
@@ -555,14 +567,14 @@ export class SearchDisplayController {
                 animate,
             },
         });
-        void this._updateSearchFromClipboard(text, animate, false);
+        void this._updateSearchFromClipboard(text, animate, false).catch((error) => { log.error(error); });
     }
 
     /**
      * @param {import('clipboard-monitor').Events['change']} event
      */
     _onClipboardMonitorChange({text}) {
-        void this._updateSearchFromClipboard(text, true, true);
+        void this._updateSearchFromClipboard(text, true, true).catch((error) => { log.error(error); });
     }
 
     /**
@@ -571,9 +583,16 @@ export class SearchDisplayController {
      * @param {boolean} checkText
      */
     async _updateSearchFromClipboard(text, animate, checkText) {
+        const generation = ++this._clipboardUpdateSequence;
+        const searchSequence = this._searchRequestSequence;
+        const currentQuery = this._queryInput.value;
         const options = this._display.getOptions();
         if (options === null) { return; }
         if (checkText && !await this._display.application.api.isTextLookupWorthy(text, options.general.language)) { return; }
+        // Validation crosses an async boundary: a newer clipboard event, user
+        // edit, search, or disabled monitor must retire this older candidate.
+        if (generation !== this._clipboardUpdateSequence || searchSequence !== this._searchRequestSequence ||
+        currentQuery !== this._queryInput.value || this._composing || (checkText && !this._clipboardMonitorEnabled)) { return; }
         const {clipboard: {autoSearchContent, maximumSearchLength}} = options;
         if (text.length > maximumSearchLength) {
             text = text.substring(0, maximumSearchLength);
@@ -653,16 +672,36 @@ export class SearchDisplayController {
      * @param {Event} event
      */
     async _onProfileSelectChange(event) {
-        const node = /** @type {HTMLInputElement} */ (event.currentTarget);
-        const value = Number.parseInt(node.value, 10);
-        const optionsFull = await this._display.application.api.optionsGetFull();
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < optionsFull.profiles.length) {
-            try {
-                await this._setDefaultProfileIndex(value);
-            } catch (error) {
-                await this._updateProfileSelect();
-                throw error;
+        const node = /** @type {HTMLSelectElement} */ (event.currentTarget);
+        const value = Number(node.value);
+        if (!Number.isSafeInteger(value) || value < 0 || value >= this._profileSelectProfiles.length) { return; }
+        const selectedProfile = this._profileSelectProfiles[value];
+        const selectedId = selectedProfile?.id;
+        const selectedSnapshot = typeof selectedProfile === 'undefined' ? null : JSON.stringify(selectedProfile);
+        const generation = ++this._profileSelectWriteGeneration;
+        // Writes must finish in the user's order; obsolete queued selections
+        // should not write after a newer choice or restore stale UI on error.
+        const operation = this._profileSelectWriteTail.then(async () => {
+            if (generation !== this._profileSelectWriteGeneration) { return; }
+            const {profiles} = await this._display.application.api.optionsGetFull();
+            if (generation !== this._profileSelectWriteGeneration) { return; }
+            const matchingIndices = profiles.flatMap((profile, index) => {
+                const matches = typeof selectedId === 'string' && selectedId.length > 0 ?
+                    profile.id === selectedId :
+                    selectedSnapshot !== null && JSON.stringify(profile) === selectedSnapshot;
+                return matches ? [index] : [];
+            });
+            if (matchingIndices.length !== 1) {
+                throw new RangeError('Selected search profile is no longer available');
             }
+            await this._setDefaultProfileIndex(matchingIndices[0]);
+        });
+        this._profileSelectWriteTail = operation.catch(() => {});
+        try {
+            await operation;
+        } catch (error) {
+            if (generation === this._profileSelectWriteGeneration) { await this._updateProfileSelect(); }
+            throw error;
         }
     }
 
@@ -678,7 +717,11 @@ export class SearchDisplayController {
             scope: 'global',
             optionsContext: null,
         };
-        await this._display.application.api.modifySettings([modification], 'search');
+        const results = await this._display.application.api.modifySettings([modification], 'search');
+        if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
+            throw new Error('Search profile update returned an invalid result');
+        }
+        if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
     }
 
     /**
@@ -836,6 +879,7 @@ export class SearchDisplayController {
      * @param {boolean} [preserveSearchInput]
      */
     _search(animate, historyMode, lookup, flags, preserveSearchInput = false) {
+        ++this._clipboardUpdateSequence;
         this._cancelLiveSearch();
         if (!preserveSearchInput) { this._updateSearchText(); }
 
@@ -943,6 +987,7 @@ export class SearchDisplayController {
             optionGroup.removeChild(optionGroup.firstChild);
         }
 
+        this._profileSelectProfiles = profiles;
         this._profileSelectContainer.hidden = profiles.length <= 1;
 
         const fragment = document.createDocumentFragment();
