@@ -35,8 +35,26 @@ describe('DisplayProfileSelection options refresh handling', () => {
 
         expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(true);
         expect(Reflect.get(selection, '_updateProfileList')).toHaveBeenCalledTimes(1);
-        expect(Reflect.get(selection, '_updateCurrentProfileName')).not.toHaveBeenCalled();
+        expect(Reflect.get(selection, '_updateCurrentProfileName')).toHaveBeenCalledOnce();
         expect(logErrorSpy).toHaveBeenCalled();
+    });
+
+    test('pending dropdown refresh does not delay the active profile name', async () => {
+        const pendingList = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        const updateProfileList = vi.fn(() => pendingList.promise);
+        const updateCurrentProfileName = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(selection, '_source', 'local');
+        Reflect.set(selection, '_profileListNeedsUpdate', false);
+        Reflect.set(selection, '_profilePanel', {isVisible: () => true});
+        Reflect.set(selection, '_updateProfileList', updateProfileList);
+        Reflect.set(selection, '_updateCurrentProfileName', updateCurrentProfileName);
+
+        const update = DisplayProfileSelection.prototype._onOptionsUpdated.call(selection, {source: 'external'});
+        expect(updateProfileList).toHaveBeenCalledOnce();
+        expect(updateCurrentProfileName).toHaveBeenCalledOnce();
+        pendingList.resolve();
+        await update;
     });
 
     test('stale profile-name refresh does not overwrite newer state', async () => {
