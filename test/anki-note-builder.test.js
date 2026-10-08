@@ -162,6 +162,58 @@ function createContext() {
 }
 
 describe('AnkiNoteBuilder.createDuplicateCheckNote', () => {
+    test('preserves __proto__ as an ordinary note field in full and duplicate notes', async () => {
+        const api = {
+            injectAnkiNoteMedia: vi.fn(async () => {
+                throw new Error('Media injection is not expected');
+            }),
+            parseText: vi.fn(async () => []),
+        };
+        const ankiNoteBuilder = new AnkiNoteBuilder(api, asTemplateRenderer(createTemplateRenderer()));
+        const cardFormat = createSingleFieldCardFormat('term', 'unused');
+        const dictionaryEntry = createTermEntry();
+        cardFormat.fields = {};
+        Object.defineProperty(cardFormat.fields, '__proto__', {
+            value: {value: '{first}', overwriteMode: 'overwrite'},
+            enumerable: true,
+            configurable: true,
+            writable: true,
+        });
+
+        const {note} = await ankiNoteBuilder.createNote(/** @type {import('anki-note-builder').CreateNoteDetails} */ ({
+            dictionaryEntry,
+            cardFormat,
+            context: createContext(),
+            template: 'unused',
+        }));
+        expect(Object.prototype.hasOwnProperty.call(note.fields, '__proto__')).toBe(true);
+        expect(note.fields['__proto__']).toBe('[first]');
+        expect(Object.getPrototypeOf(note.fields)).toBe(Object.prototype);
+
+        const renderedDuplicate = await ankiNoteBuilder.createDuplicateCheckNote(/** @type {import('anki-note-builder').CreateDuplicateCheckNoteDetails} */ ({
+            dictionaryEntry,
+            cardFormat,
+            context: createContext(),
+            template: 'unused',
+        }));
+        expect(Object.prototype.hasOwnProperty.call(renderedDuplicate.fields, '__proto__')).toBe(true);
+        expect(renderedDuplicate.fields['__proto__']).toBe('[first]');
+
+        Object.defineProperty(cardFormat.fields, '__proto__', {
+            value: {value: 'literal', overwriteMode: 'overwrite'},
+            enumerable: true,
+            configurable: true,
+            writable: true,
+        });
+        const fastDuplicate = ankiNoteBuilder.createDuplicateCheckNoteFast({
+            dictionaryEntry,
+            cardFormat,
+        });
+        expect(Object.prototype.hasOwnProperty.call(fastDuplicate?.fields, '__proto__')).toBe(true);
+        expect(fastDuplicate?.fields['__proto__']).toBe('literal');
+    });
+
+
     test.each([
         ['term', createTermEntry()],
         ['kanji', createKanjiEntry()],
