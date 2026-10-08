@@ -30,12 +30,17 @@ vi.mock('../ext/js/core/log.js', () => ({
 const test = createDomTest();
 
 describe('DataTransmissionConsentController', () => {
-    test('consent actions do not dismiss the modal before their async save finishes', async () => {
+    test('consent actions wait for their async save rather than declaring an immediate modal dismissal', async ({window}) => {
         const html = await readFile(new URL('../ext/templates-modals.html', import.meta.url), 'utf8');
+        const container = window.document.createElement('div');
+        container.innerHTML = html;
+        const template = /** @type {HTMLTemplateElement|null} */ (container.querySelector('#settings-modals-template'));
+        expect(template).not.toBeNull();
+        if (template === null) { throw new Error('Missing consent template'); }
         for (const id of ['accept-data-transmission', 'decline-data-transmission']) {
-            const button = html.match(new RegExp(`<button[^>]*id="${id}"[^>]*>`));
+            const button = template.content.querySelector(`#${id}`);
             expect(button).not.toBeNull();
-            expect(button?.[0]).not.toContain('data-modal-action');
+            expect(button?.hasAttribute('data-modal-action')).toBe(false);
         }
     });
 
