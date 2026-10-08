@@ -102,6 +102,26 @@ describe('buildAnkiFieldsForModel', () => {
         });
     });
 
+    test('falls back when saved custom fields have malformed values', () => {
+        const fields = buildAnkiFieldsForModel({
+            modelName: 'Custom Model',
+            fieldNames: ['Front', 'Reading', 'Meaning', 'Notes'],
+            dictionaryEntryType: 'term',
+            oldFields: {
+                Reading: null,
+                Meaning: {value: 123},
+                Notes: {value: 'keep me', overwriteMode: 'skip'},
+            },
+        });
+
+        expect(fields).toStrictEqual({
+            Front: {value: '{expression}', overwriteMode: 'coalesce'},
+            Reading: {value: '{reading}', overwriteMode: 'coalesce'},
+            Meaning: {value: '{glossary}', overwriteMode: 'coalesce'},
+            Notes: {value: 'keep me', overwriteMode: 'coalesce'},
+        });
+    });
+
     test('uses the first available single glossary marker for primary dictionary fields', () => {
         const fields = buildAnkiFieldsForModel({
             modelName: 'Lapis',
