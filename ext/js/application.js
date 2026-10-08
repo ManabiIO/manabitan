@@ -185,7 +185,8 @@ function showStartupFailureUi(error) {
         if (document.body !== null) {
             document.body.hidden = false;
         }
-        let container = document.querySelector('#startup-error-message');
+        /** @type {HTMLElement|null} */
+        let container = /** @type {HTMLElement|null} */ (document.querySelector('#startup-error-message'));
         if (!(container instanceof HTMLElement)) {
             container = document.createElement('div');
             container.id = 'startup-error-message';
@@ -223,7 +224,8 @@ function showRuntimeDisconnectedUi(message) {
         if (document.body !== null) {
             document.body.hidden = false;
         }
-        let container = document.querySelector('#startup-error-message');
+        /** @type {HTMLElement|null} */
+        let container = /** @type {HTMLElement|null} */ (document.querySelector('#startup-error-message'));
         if (!(container instanceof HTMLElement)) {
             container = document.createElement('div');
             container.id = 'startup-error-message';
@@ -428,6 +430,7 @@ export class Application extends EventDispatcher {
         /** @type {Promise<void>|null} */
         let restartingMediaDrawingWorkerPromise = null;
         /** @type {number|null} */
+        /** @type {ReturnType<typeof setInterval>|null} */
         let heartbeatInterval = null;
         /** @type {boolean} */
         let runtimeResourcesClosed = false;
