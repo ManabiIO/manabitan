@@ -575,7 +575,12 @@ export class API {
      */
     importDictionaryOffscreen(archiveContent, details, onProgress) {
         const pmTransportError = this._getPmTransportError();
-        if (pmTransportError !== null) {
+        // The Firefox bridge may be temporarily absent after a native port
+        // disconnect. _pmInvoke can recreate it before transferring the archive.
+        if (
+            pmTransportError !== null &&
+            (this._runtimeConnectionsShutdown || !this._canReconnectBackendPort())
+        ) {
             return Promise.reject(pmTransportError);
         }
         const channel = new MessageChannel();
@@ -666,7 +671,12 @@ export class API {
      */
     importDictionaryUrlOffscreen(url, details, onProgress) {
         const pmTransportError = this._getPmTransportError();
-        if (pmTransportError !== null) {
+        // The Firefox bridge may be temporarily absent after a native port
+        // disconnect. _pmInvoke can recreate it before transferring the archive.
+        if (
+            pmTransportError !== null &&
+            (this._runtimeConnectionsShutdown || !this._canReconnectBackendPort())
+        ) {
             return Promise.reject(pmTransportError);
         }
         const channel = new MessageChannel();
