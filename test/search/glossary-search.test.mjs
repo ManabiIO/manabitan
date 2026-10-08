@@ -118,13 +118,6 @@ test('unfinished terminal words do not fall back to the preceding word', () => {
     assert.equal(createGlossarySearchQuery('house ' + 'c'.repeat(65)), null);
 });
 
-test('bounded queries track the most recently typed word', () => {
-    const query = createGlossarySearchQuery('alpha bravo charlie delta echo foxtrot golf hotel india');
-    assert.deepEqual(query?.tokens, ['bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'india']);
-    assert.equal(query?.prefix, 'india');
-    assert.equal(query?.phrase, 'bravo charlie delta echo foxtrot golf hotel india');
-});
-
 test('reverse glossary input budget rejects large gaps and ninth words', () => {
     assert.equal(createGlossarySearchQuery(`house ${' '.repeat(1025)}cat`), null);
     assert.equal(createGlossarySearchQuery('alpha bravo charlie delta echo foxtrot golf hotel india'), null);
