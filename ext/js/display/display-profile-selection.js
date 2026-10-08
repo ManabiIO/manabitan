@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {generateId} from '../core/utilities.js';
 import {PanelElement} from '../dom/panel-element.js';
@@ -46,7 +47,13 @@ export class DisplayProfileSelection {
         /** @type {HTMLElement} */
         this._profileName = querySelectorNotNull(document, '#profile-name');
         /** @type {number} */
-        this._optionsRefreshGeneration = 0;
+        this._profileNameRefreshGeneration = 0;
+        /** @type {number} */
+        this._profileListRefreshGeneration = 0;
+        /** @type {number} */
+        this._profileWriteGeneration = 0;
+        /** @type {Promise<void>} */
+        this._profileWriteTail = Promise.resolve();
     }
 
     /** */
@@ -72,15 +79,18 @@ export class DisplayProfileSelection {
      */
     async _onOptionsUpdated({source}) {
         if (source === this._source) { return; }
-        try {
-            this._profileListNeedsUpdate = true;
-            if (this._profilePanel.isVisible()) {
-                await this._updateProfileList();
-            }
-            await this._updateCurrentProfileName();
-        } catch (error) {
+        this._invalidateProfileList();
+        // The dropdown and label are independent: a blocked list refresh must
+        // not prevent the active profile name from updating.
+        const updates = [this._updateCurrentProfileName().catch((error) => {
             log.error(error);
+        })];
+        if (this._profilePanel.isVisible()) {
+            updates.push(this._updateProfileList().catch((error) => {
+                log.error(error);
+            }));
         }
+        await Promise.all(updates);
     }
 
     /**
@@ -100,49 +110,69 @@ export class DisplayProfileSelection {
         this._profileButton.classList.toggle('sidebar-button-highlight', visible);
         document.documentElement.dataset.profilePanelVisible = `${visible}`;
         if (visible && this._profileListNeedsUpdate) {
-            void this._updateProfileList();
+            void this._updateProfileList().catch((error) => {
+                log.error(error);
+            });
         }
+    }
+
+    /**
+     * Invalidate a pending dropdown snapshot even when the panel is hidden.
+     * Otherwise an older response can clear the dirty flag after an options
+     * event, leaving stale radio items on the next open.
+     */
+    _invalidateProfileList() {
+        ++this._profileListRefreshGeneration;
+        this._profileListNeedsUpdate = true;
     }
 
     /** */
     async _updateCurrentProfileName() {
-        const refreshGeneration = ++this._optionsRefreshGeneration;
+        const refreshGeneration = ++this._profileNameRefreshGeneration;
         const {profileCurrent, profiles} = await this._display.application.api.optionsGetFull();
-        if (refreshGeneration !== this._optionsRefreshGeneration) { return; }
-        if (profiles.length === 1) {
-            this._profileButton.style.display = 'none';
-            return;
-        }
+        if (refreshGeneration !== this._profileNameRefreshGeneration) { return; }
+        this._profileButton.style.display = profiles.length <= 1 ? 'none' : '';
         const currentProfile = profiles[profileCurrent];
-        this._profileName.textContent = currentProfile.name;
+        this._profileName.textContent = currentProfile?.name ?? '';
     }
 
     /** */
     async _updateProfileList() {
-        this._profileListNeedsUpdate = false;
-        const refreshGeneration = ++this._optionsRefreshGeneration;
-        const options = await this._display.application.api.optionsGetFull();
-        if (refreshGeneration !== this._optionsRefreshGeneration) { return; }
+        const refreshGeneration = ++this._profileListRefreshGeneration;
+        try {
+            const options = await this._display.application.api.optionsGetFull();
+            if (refreshGeneration !== this._profileListRefreshGeneration) { return; }
 
-        this._eventListeners.removeAllEventListeners();
-        const displayGenerator = this._display.displayGenerator;
-
-        const {profileCurrent, profiles} = options;
-        const fragment = document.createDocumentFragment();
-        for (let i = 0, ii = profiles.length; i < ii; ++i) {
-            const {name} = profiles[i];
-            const entry = displayGenerator.createProfileListItem();
-            /** @type {HTMLInputElement} */
-            const radio = querySelectorNotNull(entry, '.profile-entry-is-default-radio');
-            radio.checked = (i === profileCurrent);
-            /** @type {Element} */
-            const nameNode = querySelectorNotNull(entry, '.profile-list-item-name');
-            nameNode.textContent = name;
-            fragment.appendChild(entry);
-            this._eventListeners.addEventListener(radio, 'change', this._onProfileRadioChange.bind(this, i), false);
+            const displayGenerator = this._display.displayGenerator;
+            const {profileCurrent, profiles} = options;
+            const fragment = document.createDocumentFragment();
+            /** @type {Array<{radio: HTMLInputElement, index: number}>} */
+            const radios = [];
+            for (let i = 0, ii = profiles.length; i < ii; ++i) {
+                const {name} = profiles[i];
+                const entry = displayGenerator.createProfileListItem();
+                /** @type {HTMLInputElement} */
+                const radio = querySelectorNotNull(entry, '.profile-entry-is-default-radio');
+                radio.checked = (i === profileCurrent);
+                /** @type {Element} */
+                const nameNode = querySelectorNotNull(entry, '.profile-list-item-name');
+                nameNode.textContent = name;
+                fragment.appendChild(entry);
+                radios.push({radio, index: i});
+            }
+            this._eventListeners.removeAllEventListeners();
+            this._profileList.textContent = '';
+            this._profileList.appendChild(fragment);
+            for (const {radio, index} of radios) {
+                this._eventListeners.addEventListener(radio, 'change', this._onProfileRadioChange.bind(this, index), false);
+            }
+            this._profileListNeedsUpdate = false;
+        } catch (error) {
+            if (refreshGeneration === this._profileListRefreshGeneration) {
+                this._profileListNeedsUpdate = true;
+            }
+            throw error;
         }
-        this._profileList.textContent = '';
-        this._profileList.appendChild(fragment);
     }
 
     /**
@@ -151,17 +181,39 @@ export class DisplayProfileSelection {
      */
     _onProfileRadioChange(index, e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
-        if (element.checked) {
-            void this._setProfileCurrent(index).catch(async (error) => {
+        if (!element.checked) { return; }
+
+        const generation = ++this._profileWriteGeneration;
+        // Wait for an earlier write to settle, but skip selections superseded
+        // before their turn. This prevents slow writes from winning out of order.
+        const operation = this._profileWriteTail.then(async () => {
+            if (generation !== this._profileWriteGeneration) { return; }
+            const {profiles} = await this._display.application.api.optionsGetFull();
+            if (generation !== this._profileWriteGeneration) { return; }
+            if (!Number.isSafeInteger(index) || index < 0 || index >= profiles.length) {
+                throw new RangeError('Selected profile is no longer available');
+            }
+            await this._setProfileCurrent(index);
+            if (generation !== this._profileWriteGeneration) { return; }
+            // Local settings events are filtered by source; fetch persisted
+            // radio selection on the next open instead of reusing old markup.
+            this._invalidateProfileList();
+            this._setProfilePanelVisible(false);
+            await this._updateCurrentProfileName();
+        });
+        this._profileWriteTail = operation.catch(() => {});
+        void operation.catch(async (error) => {
+            if (generation === this._profileWriteGeneration) {
+                this._invalidateProfileList();
                 try {
                     await this._updateProfileList();
                     await this._updateCurrentProfileName();
                 } catch (refreshError) {
                     log.error(refreshError);
                 }
-                log.error(error);
-            });
-        }
+            }
+            log.error(error);
+        });
     }
 
     /**
@@ -176,8 +228,10 @@ export class DisplayProfileSelection {
             scope: 'global',
             optionsContext: null,
         };
-        await this._display.application.api.modifySettings([modification], this._source);
-        this._setProfilePanelVisible(false);
-        await this._updateCurrentProfileName();
+        const results = await this._display.application.api.modifySettings([modification], this._source);
+        if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
+            throw new Error('Profile update returned an invalid result');
+        }
+        if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
     }
 }
