@@ -32,6 +32,36 @@ describe('Offscreen dictionary cache warming', () => {
     });
 });
 
+describe('Offscreen dictionary worker invocation isolation', () => {
+    test('DataCloneError rejects only the offending call, leaving the worker and other requests alive', async () => {
+        const offscreen = /** @type {Offscreen} */ (Object.create(Offscreen.prototype));
+        const worker = {
+            postMessage: vi.fn()
+                .mockImplementationOnce(() => {})
+                .mockImplementationOnce(() => {
+                    throw new DOMException('Function cannot be cloned', 'DataCloneError');
+                }),
+            terminate: vi.fn(),
+        };
+        Reflect.set(offscreen, '_dictionaryWorker', worker);
+        Reflect.set(offscreen, '_dictionaryWorkerFatalError', null);
+        Reflect.set(offscreen, '_dictionaryWorkerRequestId', 0);
+        Reflect.set(offscreen, '_dictionaryWorkerResponseHandlers', new Map());
+
+        const pending = offscreen._invokeDictionaryWorker('getDictionaryInfoOffscreen', {});
+        const rejected = offscreen._invokeDictionaryWorker('getDictionaryCountsOffscreen', {callback: () => {}});
+
+        await expect(rejected).rejects.toThrow('Function cannot be cloned');
+        expect(worker.terminate).not.toHaveBeenCalled();
+        expect(Reflect.get(offscreen, '_dictionaryWorkerFatalError')).toBeNull();
+        expect(Reflect.get(offscreen, '_dictionaryWorkerResponseHandlers').size).toBe(1);
+
+        offscreen._onDictionaryWorkerMessage(/** @type {any} */ ({data: {id: 1, result: ['JMdict']}}));
+        await expect(pending).resolves.toStrictEqual(['JMdict']);
+        expect(Reflect.get(offscreen, '_dictionaryWorkerResponseHandlers').size).toBe(0);
+    });
+});
+
 describe('Dictionary archive API contract', () => {
     test('passes the archive URL to the backend command', async () => {
         const api = /** @type {API} */ (Object.create(API.prototype));
