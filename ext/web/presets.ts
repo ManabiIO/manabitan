@@ -20,14 +20,28 @@ export interface RecommendedDictionary { name: string, description: string, home
 /** Reuse the extension catalog rather than maintain a competing Reader recommendation list. */
 export async function recommendedDictionaries(): Promise<RecommendedDictionary[]> {
     const catalog: unknown = await fetchJson('/data/recommended-dictionaries.json');
+    return recommendedDictionariesFromCatalog(catalog);
+}
+
+/**
+ * Invalid links in an otherwise valid catalog should not hide valid dictionaries.
+ * @param catalog
+ */
+export function recommendedDictionariesFromCatalog(catalog: unknown): RecommendedDictionary[] {
     if (!record(catalog) || !record(catalog.ja)) {throw new WebRuntimeError('catalog_invalid', 'Invalid Japanese dictionary catalog');}
     const result: RecommendedDictionary[] = [];
     for (const [category, items] of Object.entries(catalog.ja)) {
         if (!Array.isArray(items)) {continue;}
         for (const item of items) {
             if (!record(item) || !['name', 'description', 'homepage', 'downloadUrl'].every((k) => typeof item[k] === 'string')) {continue;}
-            const homepage = new URL(String(item.homepage));
-            const download = new URL(String(item.downloadUrl));
+            let homepage: URL;
+            let download: URL;
+            try {
+                homepage = new URL(String(item.homepage));
+                download = new URL(String(item.downloadUrl));
+            } catch {
+                continue;
+            }
             if (homepage.protocol !== 'https:' || download.protocol !== 'https:' || homepage.username || download.username) {continue;}
             result.push({name: String(item.name),
                 description: String(item.description),
