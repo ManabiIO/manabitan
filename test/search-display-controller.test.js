@@ -16,7 +16,7 @@
  */
 
 import {readFile} from 'node:fs/promises';
-import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
+import {afterAll, afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {Application} from '../ext/js/application.js';
 import {API} from '../ext/js/comm/api.js';
 import {CrossFrameAPI} from '../ext/js/comm/cross-frame-api.js';
@@ -86,6 +86,9 @@ const queryInput = querySelectorNotNull(document, '#search-textbox');
 const focusSpy = vi.spyOn(queryInput, 'focus');
 
 describe('Keyboard Event Handling', () => {
+    beforeEach(() => {
+        Reflect.set(searchDisplayController, '_profileSelectProfiles', createOptions(0).profiles);
+    });
     afterAll(() => teardown(global));
     afterEach(() => {
         vi.restoreAllMocks();
@@ -310,6 +313,7 @@ describe('Keyboard Event Handling', () => {
         const updateProfileSelectSpy = vi.spyOn(searchDisplayController, '_updateProfileSelect').mockResolvedValue(void 0);
         const setDefaultProfileIndexSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockRejectedValue(new Error('profile save failed'));
         const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        Reflect.set(searchDisplayController, '_profileSelectProfiles', createOptions(0).profiles);
         vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(createOptions(0));
 
         searchDisplayController._onProfileSelectChangeEvent(/** @type {Event} */ (/** @type {unknown} */ ({
@@ -324,6 +328,7 @@ describe('Keyboard Event Handling', () => {
 
     test('search-page profile selection ignores out-of-range indices', async () => {
         const setDefaultProfileIndexSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockResolvedValue(void 0);
+        Reflect.set(searchDisplayController, '_profileSelectProfiles', createOptions(0).profiles);
         vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(createOptions(0));
 
         await searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({
@@ -344,6 +349,7 @@ describe('Keyboard Event Handling', () => {
     test('overlapping profile selections persist in order with the newest choice last', async () => {
         const pending = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
         const started = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        Reflect.set(searchDisplayController, '_profileSelectProfiles', createOptions(0).profiles);
         vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(createOptions(0));
         const saveSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex')
             .mockImplementationOnce(async () => {
@@ -366,6 +372,7 @@ describe('Keyboard Event Handling', () => {
     });
 
     test('superseded selection is retired while waiting on profile options', async () => {
+        Reflect.set(searchDisplayController, '_profileSelectProfiles', createOptions(0).profiles);
         const pending = /** @type {PromiseWithResolvers<import('settings').Options>} */ (Promise.withResolvers());
         vi.spyOn(display.application.api, 'optionsGetFull')
             .mockReturnValueOnce(pending.promise)
@@ -490,5 +497,26 @@ describe('Keyboard Event Handling', () => {
         expect(pagePaste.stopPropagation).toHaveBeenCalledOnce();
         expect(searchSpy).toHaveBeenCalledOnce();
         expect(queryInput.value).toBe('lookup this');
+    });
+
+    test.each([true, false])('a reordered rendered profile is selected by identity (stable ID=%s)', async (withId) => {
+        const selected = {name: 'Selected', ...(withId ? {id: 'selected'} : {})};
+        const other = {name: 'Other', ...(withId ? {id: 'other'} : {})};
+        Reflect.set(searchDisplayController, '_profileSelectProfiles', [selected, other]);
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({profiles: [other, selected]})));
+        const save = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockResolvedValue(void 0);
+        await searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {value: '0'}})));
+        expect(save).toHaveBeenCalledExactlyOnceWith(1);
+    });
+
+    test('a replacement at the same index cannot receive a removed rendered selection', async () => {
+        Reflect.set(searchDisplayController, '_profileSelectProfiles', [{id: 'removed', name: 'Selected'}]);
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({profiles: [{id: 'replacement', name: 'Other'}]})));
+        const save = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockResolvedValue(void 0);
+        const refresh = vi.spyOn(searchDisplayController, '_updateProfileSelect').mockResolvedValue(void 0);
+        await expect(searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {value: '0'}}))))
+            .rejects.toThrow('Selected search profile is no longer available');
+        expect(save).not.toHaveBeenCalled();
+        expect(refresh).toHaveBeenCalledOnce();
     });
 });

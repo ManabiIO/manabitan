@@ -99,6 +99,8 @@ export class SearchDisplayController {
         ]);
         /** @type {number} */
         this._profileSelectRefreshGeneration = 0;
+        /** @type {import('settings').Profile[]} */
+        this._profileSelectProfiles = [];
         /** @type {number} */
         this._profileSelectWriteGeneration = 0;
         /** @type {Promise<void>} */
@@ -672,6 +674,10 @@ export class SearchDisplayController {
     async _onProfileSelectChange(event) {
         const node = /** @type {HTMLSelectElement} */ (event.currentTarget);
         const value = Number(node.value);
+        if (!Number.isSafeInteger(value) || value < 0 || value >= this._profileSelectProfiles.length) { return; }
+        const selectedProfile = this._profileSelectProfiles[value];
+        const selectedId = selectedProfile?.id;
+        const selectedSnapshot = typeof selectedProfile === 'undefined' ? null : JSON.stringify(selectedProfile);
         const generation = ++this._profileSelectWriteGeneration;
         // Writes must finish in the user's order; obsolete queued selections
         // should not write after a newer choice or restore stale UI on error.
@@ -679,9 +685,16 @@ export class SearchDisplayController {
             if (generation !== this._profileSelectWriteGeneration) { return; }
             const {profiles} = await this._display.application.api.optionsGetFull();
             if (generation !== this._profileSelectWriteGeneration) { return; }
-            if (Number.isSafeInteger(value) && value >= 0 && value < profiles.length) {
-                await this._setDefaultProfileIndex(value);
+            const matchingIndices = profiles.flatMap((profile, index) => {
+                const matches = typeof selectedId === 'string' && selectedId.length > 0 ?
+                    profile.id === selectedId :
+                    selectedSnapshot !== null && JSON.stringify(profile) === selectedSnapshot;
+                return matches ? [index] : [];
+            });
+            if (matchingIndices.length !== 1) {
+                throw new RangeError('Selected search profile is no longer available');
             }
+            await this._setDefaultProfileIndex(matchingIndices[0]);
         });
         this._profileSelectWriteTail = operation.catch(() => {});
         try {
@@ -974,6 +987,7 @@ export class SearchDisplayController {
             optionGroup.removeChild(optionGroup.firstChild);
         }
 
+        this._profileSelectProfiles = profiles;
         this._profileSelectContainer.hidden = profiles.length <= 1;
 
         const fragment = document.createDocumentFragment();
