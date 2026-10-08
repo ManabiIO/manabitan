@@ -11,7 +11,8 @@ import {describe, expect, test} from 'vitest';
 import {readCodePointsBackward, readCodePointsForward} from '../ext/js/data/string-util.js';
 
 describe('Unicode code point scanner boundaries', () => {
-    test.each([
+    /** @type {Array<[string, string, number, number]>} */
+    const invalidForwardCases = [
         ['empty input', '', 0, 1],
         ['at end of text', '日本語', 3, 1],
         ['before start', '日本語', -1, 1],
@@ -20,11 +21,13 @@ describe('Unicode code point scanner boundaries', () => {
         ['NaN index', 'abc', Number.NaN, 1],
         ['negative count', 'abc', 0, -1],
         ['zero count', 'abc', 0, 0],
-    ])('returns empty for invalid forward range: %s', (_name, text, position, count) => {
+    ];
+    test.each(invalidForwardCases)('returns empty for invalid forward range: %s', (_name, text, position, count) => {
         expect(readCodePointsForward(text, position, count)).toBe('');
     });
 
-    test.each([
+    /** @type {Array<[string, string, number, number]>} */
+    const invalidBackwardCases = [
         ['empty input', '', 0, 1],
         ['before start', '日本語', -1, 1],
         ['at end', '日本語', 3, 1],
@@ -33,7 +36,8 @@ describe('Unicode code point scanner boundaries', () => {
         ['NaN index', 'abc', Number.NaN, 1],
         ['negative count', 'abc', 2, -1],
         ['zero count', 'abc', 2, 0],
-    ])('returns empty for invalid backward range: %s', (_name, text, position, count) => {
+    ];
+    test.each(invalidBackwardCases)('returns empty for invalid backward range: %s', (_name, text, position, count) => {
         expect(readCodePointsBackward(text, position, count)).toBe('');
     });
 
