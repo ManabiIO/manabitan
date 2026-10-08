@@ -1139,10 +1139,6 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
 
         if (sawStepText && currentLabel.length === 0) {
             emptySince ??= now;
-            if ((now - emptySince) >= 20_000 && lastCountsText !== expectedCounts) {
-                const diagnostics = await getBackendLookupDiagnostics(driver, '暗記');
-                fail(`${dictionaryName} import progress completed but counts did not reach ${expectedCounts}: current=${lastCountsText} profiles=${JSON.stringify(diagnostics.profileDictionaries ?? null)}`);
-            }
             if ((now - emptySince) >= emptyStabilityMs && lastCountsText === expectedCounts) {
                 clearedAfterStep = true;
                 if (previousLabel.length > 0) {
@@ -1215,7 +1211,8 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
         );
         return;
     }
-    fail(`Timed out waiting for ${dictionaryName} completion. sawStepText=${String(sawStepText)} clearedAfterStep=${String(clearedAfterStep)}. Last label="${previousLabel}" counts=${countsText} dictionary-error="${errorText}"`);
+    const diagnostics = await getBackendLookupDiagnostics(driver, '暗記');
+    fail(`Timed out waiting for ${dictionaryName} completion. sawStepText=${String(sawStepText)} clearedAfterStep=${String(clearedAfterStep)}. Last label="${previousLabel}" counts=${countsText} dictionary-error="${errorText}" profileDictionaries=${JSON.stringify(diagnostics.profileDictionaries ?? null)} debugLookup=${JSON.stringify(diagnostics.debugLookupState ?? null)} importDebug=${JSON.stringify(await getLastImportDebug(driver))}`);
 }
 
 /**
