@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class CollapsibleDictionaryController {
@@ -38,6 +39,10 @@ export class CollapsibleDictionaryController {
         this._selects = [];
         /** @type {?HTMLSelectElement} */
         this._allSelect = null;
+        /** @type {number} */
+        this._optionsRenderRequest = 0;
+        /** @type {number} */
+        this._allSelectRefreshRequest = 0;
     }
 
     /** */
@@ -78,6 +83,9 @@ export class CollapsibleDictionaryController {
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
     _onOptionsChanged({options}) {
+        // An options event supersedes any older asynchronous settings snapshot.
+        ++this._optionsRenderRequest;
+        ++this._allSelectRefreshRequest;
         this._eventListeners.removeAllEventListeners();
         this._selects = [];
 
@@ -108,7 +116,9 @@ export class CollapsibleDictionaryController {
 
     /** */
     _onDefinitionsCollapsibleChange() {
-        void this._updateAllSelectFresh();
+        void this._updateAllSelectFresh().catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -118,7 +128,13 @@ export class CollapsibleDictionaryController {
         const {value} = /** @type {HTMLSelectElement} */ (e.currentTarget);
         const value2 = this._normalizeDictionaryDefinitionsCollapsible(value);
         if (value2 === null) { return; }
-        void this._setDefinitionsCollapsibleAll(value2);
+        void this._setDefinitionsCollapsibleAll(value2).catch((error) => {
+            log.error(error);
+            // Reconcile the all-selector with persisted settings after failure.
+            void this._updateAllSelectFresh().catch((refreshError) => {
+                log.error(refreshError);
+            });
+        });
     }
 
     /** */
@@ -126,9 +142,11 @@ export class CollapsibleDictionaryController {
      * @param {import('core').TokenObject|null|import('settings-controller').EventArgument<'dictionarySettingsReordered'>} [token]
      */
     async _onDictionarySettingsReordered(token = null) {
+        const request = ++this._optionsRenderRequest;
         const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
         if (
+            request !== this._optionsRenderRequest ||
             (token !== null && this._getDictionaryInfoToken !== token) ||
             this._settingsController.getOptionsContext().index !== optionsContext.index
         ) {
@@ -179,7 +197,18 @@ export class CollapsibleDictionaryController {
 
     /** */
     async _updateAllSelectFresh() {
-        this._updateAllSelect(await this._settingsController.getOptions());
+        const request = ++this._allSelectRefreshRequest;
+        const select = this._allSelect;
+        const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (
+            request !== this._allSelectRefreshRequest ||
+            this._allSelect !== select ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            return;
+        }
+        this._updateAllSelect(options);
     }
 
     /**
@@ -216,8 +245,17 @@ export class CollapsibleDictionaryController {
             const path = `dictionaries[${i}].definitionsCollapsible`;
             targets.push({action: 'set', path, value});
         }
+        const selects = this._selects;
         await this._settingsController.modifyProfileSettings(targets);
-        for (const select of this._selects) {
+        // A profile change or options rerender can replace these controls while
+        // the mutation is in flight. Never update the new controls with old state.
+        if (
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._selects !== selects
+        ) {
+            return;
+        }
+        for (const select of selects) {
             select.value = value;
         }
     }

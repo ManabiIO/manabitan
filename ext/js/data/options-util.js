@@ -29,6 +29,33 @@ import {JsonSchema} from './json-schema.js';
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
+/**
+ * The legacy schema does not generate stable profile IDs. Assign them on
+ * creation and repair missing/duplicate IDs when reading existing options.
+ * Reserve existing IDs first so a new default never steals an existing
+ * profile's identity.
+ * @param {import('settings').Profile[]} profiles
+ */
+function ensureProfileIds(profiles) {
+    const reserved = new Set(profiles.map(({id}) => id).filter((id) => typeof id === 'string' && id.trim().length > 0));
+    const used = new Set();
+    for (let i = 0; i < profiles.length; ++i) {
+        const {id} = profiles[i];
+        if (typeof id === 'string' && id.trim().length > 0 && !used.has(id)) {
+            used.add(id);
+            continue;
+        }
+        let replacement = `profile-${i}`;
+        let suffix = 1;
+        while (reserved.has(replacement) || used.has(replacement)) {
+            replacement = `profile-${i}-${suffix++}`;
+        }
+        profiles[i].id = replacement;
+        reserved.add(replacement);
+        used.add(replacement);
+    }
+}
+
 export class OptionsUtil {
     constructor() {
         /** @type {?TemplatePatcher} */
@@ -107,31 +134,36 @@ export class OptionsUtil {
         options = await this._applyUpdates(options, this._getVersionUpdates(targetVersion));
 
         // Validation
-        return /** @type {import('settings').Options} */ (/** @type {JsonSchema} */ (this._optionsSchema).getValidValueOrDefault(options));
+        const result = /** @type {import('settings').Options} */ (/** @type {JsonSchema} */ (this._optionsSchema).getValidValueOrDefault(options));
+        ensureProfileIds(result.profiles);
+        return result;
     }
 
     /**
      * @returns {Promise<import('settings').Options>}
      */
     async load() {
+        // An unavailable storage service is not equivalent to a new install.
+        // Reject transport errors rather than allowing defaults to mask saved
+        // settings (which a subsequent user edit could overwrite).
+        const optionsStr = await new Promise((resolve, reject) => {
+            chrome.storage.local.get(['options'], (store) => {
+                const error = chrome.runtime.lastError;
+                if (error) {
+                    reject(new Error(error.message));
+                } else {
+                    resolve(store?.options);
+                }
+            });
+        });
         let options;
         try {
-            const optionsStr = await new Promise((resolve, reject) => {
-                chrome.storage.local.get(['options'], (store) => {
-                    const error = chrome.runtime.lastError;
-                    if (error) {
-                        reject(new Error(error.message));
-                    } else {
-                        resolve(store.options);
-                    }
-                });
-            });
             if (typeof optionsStr !== 'string') {
                 throw new Error('Invalid value for options');
             }
             options = parseJson(optionsStr);
         } catch (e) {
-            // NOP
+            // Missing or invalid stored values still use first-install defaults.
         }
 
         if (typeof options !== 'undefined') {
@@ -149,6 +181,8 @@ export class OptionsUtil {
      * @returns {Promise<void>}
      */
     save(options) {
+        // Backup restores can bypass update() entirely.
+        ensureProfileIds(options.profiles);
         return new Promise((resolve, reject) => {
             chrome.storage.local.set({options: JSON.stringify(options)}, () => {
                 const error = chrome.runtime.lastError;
@@ -168,6 +202,7 @@ export class OptionsUtil {
         const optionsVersion = this._getVersionUpdates(null).length;
         const options = /** @type {import('settings').Options} */ (/** @type {JsonSchema} */ (this._optionsSchema).getValidValueOrDefault());
         options.version = optionsVersion;
+        ensureProfileIds(options.profiles);
         return options;
     }
 
