@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {ExtensionError} from '../../core/extension-error.js';
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class SortFrequencyDictionaryController {
@@ -33,6 +35,20 @@ export class SortFrequencyDictionaryController {
         this._sortFrequencyDictionaryOrderAutoButton = querySelectorNotNull(document, '#sort-frequency-dictionary-order-auto');
         /** @type {HTMLElement} */
         this._sortFrequencyDictionaryOrderContainerNode = querySelectorNotNull(document, '#sort-frequency-dictionary-order-container');
+        /** @type {string} */
+        this._confirmedDictionary = this._sortFrequencyDictionarySelect.value;
+        /** @type {string} */
+        this._confirmedOrder = this._sortFrequencyDictionaryOrderSelect.value;
+        /** @type {number} */
+        this._autoOrderRequestId = 0;
+        /** @type {number} */
+        this._dictionaryWriteRequest = 0;
+        /** @type {number} */
+        this._orderWriteRequest = 0;
+        /** @type {number} */
+        this._optionsRevision = 0;
+        /** @type {Promise<void>} */
+        this._settingWriteTail = Promise.resolve();
         /** @type {?import('core').TokenObject} */
         this._getDictionaryInfoToken = null;
         /** @type {number} */
@@ -86,16 +102,21 @@ export class SortFrequencyDictionaryController {
      */
     _onOptionsChanged({options}) {
         ++this._optionsRenderRequest;
+        ++this._optionsRevision;
+        ++this._autoOrderRequestId;
         const {sortFrequencyDictionary, sortFrequencyDictionaryOrder} = options.general;
-        /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect).value = (sortFrequencyDictionary !== null ? sortFrequencyDictionary : '');
-        /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = sortFrequencyDictionaryOrder;
+        this._confirmedDictionary = sortFrequencyDictionary !== null ? sortFrequencyDictionary : '';
+        this._confirmedOrder = sortFrequencyDictionaryOrder;
+        /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect).value = this._confirmedDictionary;
+        /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = this._confirmedOrder;
         /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = (sortFrequencyDictionary === null);
     }
 
     /** */
     _onSortFrequencyDictionarySelectChange() {
         const {value} = /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect);
-        void this._setSortFrequencyDictionaryValue(value !== '' ? value : null);
+        ++this._autoOrderRequestId;
+        void this._setSortFrequencyDictionaryValue(value !== '' ? value : null).catch((error) => { log.error(error); });
     }
 
     /** */
@@ -103,14 +124,15 @@ export class SortFrequencyDictionaryController {
         const {value} = /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect);
         const value2 = this._normalizeSortFrequencyDictionaryOrder(value);
         if (value2 === null) { return; }
-        void this._setSortFrequencyDictionaryOrderValue(value2);
+        ++this._autoOrderRequestId;
+        void this._setSortFrequencyDictionaryOrderValue(value2).catch((error) => { log.error(error); });
     }
 
     /** */
     _onSortFrequencyDictionaryOrderAutoButtonClick() {
         const {value} = /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect);
         if (value === '') { return; }
-        void this._autoUpdateOrder(value);
+        void this._autoUpdateOrder(value).catch((error) => { log.error(error); });
     }
 
     /**
@@ -139,18 +161,23 @@ export class SortFrequencyDictionaryController {
      * @param {?string} value
      */
     async _setSortFrequencyDictionaryValue(value) {
-        const previousValue = this._sortFrequencyDictionarySelect.value;
-        const previousHidden = this._sortFrequencyDictionaryOrderContainerNode.hidden;
-        /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = (value === null);
+        const request = ++this._dictionaryWriteRequest;
+        const revision = this._optionsRevision;
+        const {index} = this._settingsController.getOptionsContext();
+        this._sortFrequencyDictionaryOrderContainerNode.hidden = (value === null);
         try {
-            await this._settingsController.setProfileSetting('general.sortFrequencyDictionary', value);
-        } catch (e) {
-            this._sortFrequencyDictionarySelect.value = previousValue;
-            /** @type {HTMLElement} */ (this._sortFrequencyDictionaryOrderContainerNode).hidden = previousHidden;
-            throw e;
-        }
-        if (value !== null) {
-            await this._autoUpdateOrder(value);
+            const saved = await this._saveProfileSetting('general.sortFrequencyDictionary', value, index, () => request === this._dictionaryWriteRequest);
+            if (!saved || this._settingsController.getOptionsContext().index !== index || revision !== this._optionsRevision) { return; }
+            this._confirmedDictionary = value !== null ? value : '';
+            if (request === this._dictionaryWriteRequest && value !== null) {
+                await this._autoUpdateOrder(value);
+            }
+        } catch (error) {
+            if (request === this._dictionaryWriteRequest && revision === this._optionsRevision && this._settingsController.getOptionsContext().index === index) {
+                this._sortFrequencyDictionarySelect.value = this._confirmedDictionary;
+                this._sortFrequencyDictionaryOrderContainerNode.hidden = this._confirmedDictionary === '';
+            }
+            throw error;
         }
     }
 
@@ -158,35 +185,61 @@ export class SortFrequencyDictionaryController {
      * @param {import('settings').SortFrequencyDictionaryOrder} value
      */
     async _setSortFrequencyDictionaryOrderValue(value) {
-        const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
+        const request = ++this._orderWriteRequest;
+        const revision = this._optionsRevision;
+        const {index} = this._settingsController.getOptionsContext();
         try {
-            await this._settingsController.setProfileSetting('general.sortFrequencyDictionaryOrder', value);
-        } catch (e) {
-            this._sortFrequencyDictionaryOrderSelect.value = previousValue;
-            throw e;
+            const saved = await this._saveProfileSetting('general.sortFrequencyDictionaryOrder', value, index, () => request === this._orderWriteRequest);
+            if (saved && revision === this._optionsRevision && this._settingsController.getOptionsContext().index === index) {
+                this._confirmedOrder = value;
+            }
+        } catch (error) {
+            if (request === this._orderWriteRequest && revision === this._optionsRevision && this._settingsController.getOptionsContext().index === index) {
+                this._sortFrequencyDictionaryOrderSelect.value = this._confirmedOrder;
+            }
+            throw error;
         }
+    }
+
+    /**
+     * @param {string} path
+     * @param {unknown} value
+     * @param {number|undefined} index
+     * @param {() => boolean} isCurrent
+     * @returns {Promise<boolean>}
+     */
+    async _saveProfileSetting(path, value, index, isCurrent) {
+        const operation = this._settingWriteTail.then(async () => {
+            if (!isCurrent() || this._settingsController.getOptionsContext().index !== index) { return false; }
+            const results = await this._settingsController.setProfileSetting(path, value);
+            if (!Array.isArray(results) || results.length !== 1 || typeof results[0] !== 'object' || results[0] === null) {
+                throw new Error('Frequency setting update returned an invalid result');
+            }
+            if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+            return true;
+        });
+        this._settingWriteTail = operation.then(() => {}, () => {});
+        return await operation;
     }
 
     /**
      * @param {string} dictionary
      */
     async _autoUpdateOrder(dictionary) {
+        const requestId = ++this._autoOrderRequestId;
         const optionsContext = this._settingsController.getOptionsContext();
         const order = await this._getFrequencyOrder(dictionary);
         if (
             order === null ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index
+            requestId !== this._autoOrderRequestId ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._confirmedDictionary !== dictionary ||
+            this._sortFrequencyDictionarySelect.value !== dictionary
         ) {
             return;
         }
-        const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
-        /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = order;
-        try {
-            await this._setSortFrequencyDictionaryOrderValue(order);
-        } catch (e) {
-            this._sortFrequencyDictionaryOrderSelect.value = previousValue;
-            throw e;
-        }
+        this._sortFrequencyDictionaryOrderSelect.value = order;
+        await this._setSortFrequencyDictionaryOrderValue(order);
     }
 
     /**
