@@ -558,7 +558,7 @@ export class AudioDownloader {
 
         /** @type {Response} */
         let response;
-        /** @type {ArrayBuffer} */
+        /** @type {Uint8Array} */
         let arrayBuffer;
         try {
             response = await this._requestBuilder.fetchAnonymous(url, {
@@ -589,7 +589,7 @@ export class AudioDownloader {
     }
 
     /**
-     * @param {ArrayBuffer} arrayBuffer
+     * @param {Uint8Array} arrayBuffer
      * @param {import('settings').AudioSourceType} sourceType
      * @returns {Promise<boolean>}
      */
@@ -611,7 +611,7 @@ export class AudioDownloader {
     }
 
     /**
-     * @param {ArrayBuffer} arrayBuffer
+     * @param {Uint8Array} arrayBuffer
      * @returns {Promise<string>}
      */
     async _arrayBufferDigest(arrayBuffer) {
