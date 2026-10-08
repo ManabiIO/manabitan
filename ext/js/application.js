@@ -163,10 +163,10 @@ async function waitForBackendReady(webExtension) {
                 }).catch(() => {});
             }, backendReadyTimeoutMs);
         });
-        const response = await Promise.race([
+        const response = /** @type {unknown} */ (await Promise.race([
             sendExtensionMessageWithRetry(webExtension, {action: 'requestBackendReadySignal'}),
             timeoutPromise,
-        ]);
+        ]));
         if (typeof response === 'object' && response !== null && 'error' in response && typeof response.error !== 'undefined') {
             throw ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (response.error));
         }
