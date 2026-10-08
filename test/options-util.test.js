@@ -886,6 +886,35 @@ describe('OptionsUtil', () => {
         expect(await optionsUtil.update(structuredClone(updated))).toStrictEqual(updated);
     });
 
+    test('saving a restored full-options snapshot repairs its missing IDs', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const options = optionsUtil.getDefault();
+        options.profiles[0].id = '';
+        /** @type {string|null} */
+        let writtenOptions = null;
+        const storage = Reflect.get(chrome, 'storage');
+        Reflect.set(chrome, 'storage', {local: {
+            set: (/** @type {{options: string}} */ value, /** @type {() => void} */ callback) => {
+                writtenOptions = value.options;
+                callback();
+            },
+        }});
+        try {
+            await optionsUtil.save(options);
+        } finally {
+            if (typeof storage === 'undefined') {
+                Reflect.deleteProperty(chrome, 'storage');
+            } else {
+                Reflect.set(chrome, 'storage', storage);
+            }
+        }
+
+        expect(options.profiles[0].id).toBe('profile-0');
+        expect(writtenOptions).not.toBeNull();
+        expect(JSON.parse(/** @type {string} */ (writtenOptions)).profiles[0].id).toBe('profile-0');
+    });
+
     describe('Default', () => {
         /** @type {((options: import('options-util').IntermediateOptions) => void)[]} */
         const data = [
