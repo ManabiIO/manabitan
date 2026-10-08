@@ -421,7 +421,8 @@ export class AudioDownloader {
             return /** @type {import('audio-downloader').Info1[]} */ (results);
         });
 
-        return (await Promise.allSettled(fetchFileInfos)).flatMap((result) => result.status === 'fulfilled' ? result.value : []);
+        const fileInfos = await Promise.allSettled(fetchFileInfos);
+        return fileInfos.flatMap((result) => result.status === 'fulfilled' ? result.value : []);
     }
 
     /** @type {import('audio-downloader').GetInfoHandler} */
