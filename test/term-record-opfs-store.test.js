@@ -107,6 +107,42 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
 }
 
 describe('TermRecordOpfsStore', () => {
+    /**
+     * @param {string[]} dictionaries
+     * @returns {Promise<string[][]>}
+     */
+    async function captureSqlTermRowAppend(dictionaries) {
+        const store = new TermRecordOpfsStore();
+        /** @type {string[][]} */
+        const appended = [];
+        Reflect.set(store, '_getOrCreateShardState', async () => ({}));
+        Reflect.set(store, '_encodeAndAppendChunkRunsForState', async (
+            /** @type {unknown} */ _state,
+            /** @type {{dictionary: string}[]} */ records,
+            /** @type {unknown} */ plan = null,
+        ) => {
+            expect(plan).toBeNull();
+            appended.push(records.map(({dictionary}) => dictionary));
+        });
+        const rows = dictionaries.map((dictionary) => [
+            dictionary, '猫', 'ねこ', null, null, null, 0, 10, 'raw', null, null, null, 0, null, null,
+        ]);
+        await store.appendBatchFromTermRows(rows, 0, rows.length);
+        return appended;
+    }
+
+    test('appends SQL term rows in a single shard without an undeclared preintern plan', async () => {
+        expect(await captureSqlTermRowAppend(['Dictionary A'])).toStrictEqual([['Dictionary A']]);
+    });
+
+    test('appends SQL term rows across multiple shards without an undeclared preintern plan', async () => {
+        expect(await captureSqlTermRowAppend(['Dictionary A', 'Dictionary B', 'Dictionary A'])).toStrictEqual([
+            ['Dictionary A', 'Dictionary A'],
+            ['Dictionary B'],
+        ]);
+    });
+
+
     test('encodes and decodes raw-v4 entry content dict names without falling back to custom strings', () => {
         const store = new TermRecordOpfsStore();
         const {meta, bytes} = store._encodeEntryContentDictNameMeta(RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME);
