@@ -44,15 +44,21 @@ export class FrameEndpoint {
      */
     signal() {
         if (this._token !== null) { return; }
-        if (!this._eventListenersSetup) {
-            this._eventListeners.addEventListener(window, 'message', this._onMessage.bind(this), false);
-            this._eventListenersSetup = true;
-        }
+        this._ensureMessageListener();
         /** @type {import('frame-client').FrameEndpointReadyDetails} */
         const details = {secret: this._secret};
         void Promise.resolve()
             .then(() => this._api.broadcastTab({action: 'frameEndpointReady', params: details}))
             .catch((error) => { log.error(error); });
+    }
+
+    /**
+     * @returns {void}
+     */
+    _ensureMessageListener() {
+        if (this._eventListenersSetup) { return; }
+        this._eventListeners.addEventListener(window, 'message', this._onMessage.bind(this), false);
+        this._eventListenersSetup = true;
     }
 
     /**
@@ -118,7 +124,12 @@ export class FrameEndpoint {
                 this._token = null;
                 log.error(error);
                 const retryCount = ++this._acknowledgementRetryCount;
-                if (retryCount > 5) { return; }
+                if (retryCount > 5) {
+                    // Stop automatic announcements, but retain a listener so
+                    // a subsequent explicit connection can still succeed.
+                    this._ensureMessageListener();
+                    return;
+                }
                 // The first retry is immediate; persistent transport failure
                 // must not produce an unbounded ready/connect message loop.
                 if (retryCount === 1) {
