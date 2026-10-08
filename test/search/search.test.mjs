@@ -184,6 +184,26 @@ function controllerFixture() {
             }}});
     return {controller, input, calls};
 }
+test('Enter during an active IME composition is never treated as explicit submit', () => {
+    const {controller, calls} = controllerFixture();
+    controller._composing = true;
+    let preventCount = 0;
+    let stopCount = 0;
+    controller._onSearchKeydown({
+        isComposing: false,
+        keyCode: 13,
+        key: 'Enter',
+        code: 'Enter',
+        shiftKey: false,
+        currentTarget: {},
+        preventDefault() { ++preventCount; },
+        stopImmediatePropagation() { ++stopCount; },
+    });
+    assert.equal(preventCount, 0);
+    assert.equal(stopCount, 0);
+    assert.deepEqual(calls, []);
+});
+
 test('live input debounces, replaces history and preserves the caret', (t) => {
     t.mock.timers.enable({apis: ['setTimeout']});
     const oldWindow = globalThis.window,
