@@ -35,7 +35,9 @@ test('unfinished syllables and English are not stripped into misleading partial 
 });
 test('implicit prefix candidates require completed Japanese and at least two code points', () => {
     for (const query of ['たべ', '食べ', 'ガッ']) { assert.equal(isJapanesePrefixCandidate(query), true, query); }
-    for (const query of ['食', 'た', 'ny', 'hello', 'たbe']) { assert.equal(isJapanesePrefixCandidate(query), false, query); }
+    for (const query of ['食', 'た', 'ny', 'hello', 'たbe', '食べé', 'たべÑ', 'たべＡ']) {
+        assert.equal(isJapanesePrefixCandidate(query), false, query);
+    }
 });
 test('prefix completion runs only after all exact and spelling alternatives miss', async () => {
     const exact = [],
@@ -101,6 +103,17 @@ test('English and unfinished romaji never trigger implicit prefix enumeration', 
         });
         assert.equal(found.result, null, query);
         assert.equal(prefixes, 0, query);
+    }
+});
+test('foreign Latin script in a mixed Japanese query never triggers implicit prefix enumeration', async () => {
+    for (const query of ['食べé', 'たべñ', 'たべＸ']) {
+        let prefixCalls = 0;
+        const found = await findJapaneseSearch(query, async () => ({dictionaryEntries: []}), () => {}, async () => {
+            prefixCalls++;
+            return {dictionaryEntries: [{id: 1}]};
+        });
+        assert.equal(found.result, null, query);
+        assert.equal(prefixCalls, 0, query);
     }
 });
 test('literal results preserve original dictionary entry identity and order', async () => {
