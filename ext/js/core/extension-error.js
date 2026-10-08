@@ -71,14 +71,26 @@ export class ExtensionError extends Error {
      * @returns {ExtensionError} A new `Error` instance.
      */
     static deserialize(serializedError) {
+        if (typeof serializedError !== 'object' || serializedError === null) {
+            return new ExtensionError('Invalid serialized error');
+        }
         if (serializedError.hasValue) {
             const {value} = serializedError;
-            return new ExtensionError(`Error of type ${typeof value}: ${value}`);
+            let description;
+            try {
+                // Unlike template interpolation, String() accepts Symbol values.
+                description = String(value);
+            } catch (e) {
+                // Error reporting must not fail when an arbitrary thrown value
+                // has no usable string representation.
+                description = '[unprintable]';
+            }
+            return new ExtensionError(`Error of type ${typeof value}: ${description}`);
         }
         const {message, name, stack, data} = serializedError;
-        const error = new ExtensionError(message);
-        error.name = name;
-        error.stack = stack;
+        const error = new ExtensionError(typeof message === 'string' ? message : 'Unknown error');
+        if (typeof name === 'string') { error.name = name; }
+        if (typeof stack === 'string') { error.stack = stack; }
         if (typeof data !== 'undefined') {
             error.data = data;
         }
