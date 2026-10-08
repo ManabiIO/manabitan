@@ -127,6 +127,19 @@ try {
         worker.emit(request.id, {result: {version: 1, query: 'house ca'}});
         assert.equal((await searched).ok, true);
     });
+    await scenario('stale progress watchdog cannot terminate the renewed same owner', async ({clock, client, worker}) => {
+        const searched = track(client.search('house ca'));
+        const request = worker.request('search');
+        const oldCallback = [...clock.timers.values()][0].callback;
+        clock.advance(10_000);
+        worker.emit(request.id, {progress: {phase: 'glossary-index', processed: 1}});
+        oldCallback();
+        assert.equal(worker.terminated, false);
+        clock.advance(29_999);
+        assert.equal(worker.terminated, false);
+        worker.emit(request.id, {result: {version: 1, query: 'house ca'}});
+        assert.equal((await searched).ok, true);
+    });
     await scenario('queued request receives its full execution allowance', async ({clock, client, worker}) => {
         const imported = track(client.importDictionary(new Blob(['fixture'])));
         const queued = track(client.status());
