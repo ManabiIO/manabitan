@@ -6,6 +6,7 @@ import type {UrlContentManager} from '../../types/ext/structured-content';
 
 const MAX_READER_MEDIA_REQUESTS = 128;
 const MAX_CONCURRENT_READER_MEDIA = 4;
+const MAX_READER_MEDIA_BYTES = 64 * 1024 * 1024;
 
 /** Only URL media created by this render lifetime can be displayed by its nodes. */
 export class ReaderMedia implements UrlContentManager {
@@ -17,6 +18,7 @@ export class ReaderMedia implements UrlContentManager {
      *
      */
     private readonly urls = new Map<string, Promise<string>>();
+    private mediaBytes = 0;
     /**
      * Keep imported images from flooding the worker's bounded FIFO queue.
      */
@@ -66,7 +68,13 @@ export class ReaderMedia implements UrlContentManager {
                 if (this.disposed || !data || !/^image\/(?:png|jpeg|webp|gif|avif|svg\+xml)$/.test(data.mediaType)) {throw new Error('Dictionary image unavailable');}
                 const blob = new Blob([data.content], {type: data.mediaType});
                 if (blob.size > MAX_WEB_IMAGE_BYTES) {throw new Error('Dictionary image exceeds display size limit');}
+                // Individual images are capped at 32 MiB, but 128 live object
+                // URLs could otherwise retain up to 4 GiB in one popup.
+                if (this.mediaBytes + blob.size > MAX_READER_MEDIA_BYTES) {
+                    throw new Error('Dictionary images exceed the total display size limit');
+                }
                 const url = URL.createObjectURL(blob);
+                this.mediaBytes += blob.size;
                 this.created.add(url);
                 return url;
             });

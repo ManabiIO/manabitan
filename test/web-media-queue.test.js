@@ -56,3 +56,45 @@ test('media queue refuses excess unique URLs and does not start requests after d
     await Promise.resolve();
     expect(requests).toHaveBeenCalledTimes(4);
 });
+
+test('rendered media have a cumulative blob budget, with coalescing and cleanup', async () => {
+    const mebibyte = 1024 * 1024;
+    const sizes = new Map([
+        ['large-a.png', 30 * mebibyte],
+        ['large-b.png', 30 * mebibyte],
+        ['small.png', 2 * mebibyte],
+        ['excess.png', 10 * mebibyte],
+    ]);
+    const requests = vi.fn((_dictionary, path) => Promise.resolve({
+        content: {byteLength: sizes.get(path)},
+        mediaType: 'image/png',
+    }));
+    const media = /** @type {import('../ext/web/client.js').ManabiTanWebClient} */ (/** @type {unknown} */ ({media: requests}));
+    // Simulate large media sizes without allocating hundreds of MiB in CI.
+    vi.stubGlobal('Blob', class {
+        /**
+         * @param {Array<{byteLength: number}>} parts
+         */
+        constructor(parts) { this.size = parts[0].byteLength; }
+    });
+    const created = vi.spyOn(URL, 'createObjectURL').mockImplementation(() => `blob:fixture-${requests.mock.calls.length}`);
+    const revoked = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    const manager = new ReaderMedia(media, () => {});
+    const loaded = vi.fn();
+    const failed = vi.fn();
+    try {
+        for (const name of sizes.keys()) {
+            manager.loadMediaUrl(name, 'Test', loaded, failed);
+        }
+        manager.loadMediaUrl('large-a.png', 'Test', loaded, failed);
+        await vi.waitFor(() => { expect(loaded).toHaveBeenCalledTimes(4); });
+        await vi.waitFor(() => { expect(failed).toHaveBeenCalledTimes(1); });
+        expect(requests).toHaveBeenCalledTimes(4);
+        expect(created).toHaveBeenCalledTimes(3);
+    } finally {
+        manager.dispose();
+        expect(revoked).toHaveBeenCalledTimes(3);
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+    }
+});
