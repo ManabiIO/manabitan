@@ -1845,7 +1845,10 @@ export class Backend {
         const timeoutId = globalThis.setTimeout(() => {
             abortController.abort(new Error(`Timed out fetching dictionary archive after ${String(downloadTimeoutMs)}ms: ${normalizedUrl}`));
         }, downloadTimeoutMs);
+        /** @type {Response} */
         let response;
+        /** @type {Uint8Array} */
+        let content;
         try {
             response = await fetch(normalizedUrl, {
                 method: 'GET',
@@ -1855,6 +1858,12 @@ export class Backend {
                 referrerPolicy: 'no-referrer',
                 signal: abortController.signal,
             });
+            if (!response.ok) {
+                throw new Error(`Failed to fetch dictionary archive: ${normalizedUrl} (status=${String(response.status)})`);
+            }
+            // Fetch can resolve after headers while the archive body remains stalled.
+            // Keep the same deadline active until all response bytes are received.
+            content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
         } catch (error) {
             const abortReason = /** @type {unknown} */ (abortController.signal.reason);
             if (abortController.signal.aborted && abortReason instanceof Error) {
@@ -1864,10 +1873,6 @@ export class Backend {
         } finally {
             globalThis.clearTimeout(timeoutId);
         }
-        if (!response.ok) {
-            throw new Error(`Failed to fetch dictionary archive: ${normalizedUrl} (status=${String(response.status)})`);
-        }
-        const content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
         const fileName = (() => {
             const contentDisposition = response.headers.get('Content-Disposition') || '';
             const match = /filename\\*?=(?:UTF-8''|\"?)([^\";]+)/i.exec(contentDisposition);
