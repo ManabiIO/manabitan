@@ -246,7 +246,8 @@ export class ProfileController {
 
         // Get indices
         let profileCurrentNew = this._profileCurrent;
-        const settingsProfileIndex = this._profileCurrent;
+        const settingsProfileIndex = this._settingsController.profileIndex;
+        const remainingProfileCount = this._profiles.length - 1;
 
         // Construct settings modifications
         /** @type {import('settings-modifications').Modification[]} */
@@ -258,7 +259,9 @@ export class ProfileController {
             items: [],
         }];
         if (profileCurrentNew >= profileIndex) {
-            profileCurrentNew = Math.min(profileCurrentNew - 1, this._profiles.length - 1);
+            // Deleting the active first profile must select the new index 0,
+            // never the invalid index -1.
+            profileCurrentNew = Math.max(0, Math.min(profileCurrentNew - 1, remainingProfileCount - 1));
             modifications.push({
                 action: 'set',
                 path: 'profileCurrent',
@@ -288,15 +291,20 @@ export class ProfileController {
 
         this._updateProfileSelectOptions();
 
-        // Update profile index
-        if (settingsProfileIndex >= profileIndex) {
-            this._settingsController.profileIndex = settingsProfileIndex - 1;
-        } else {
-            this._settingsController.refreshProfileIndex();
-        }
-
-        // Modify settings
+        // Persist before refreshing the settings context: the profile at the
+        // same numeric index may now refer to a different profile object.
         await this._settingsController.modifyGlobalSettings(modifications);
+
+        // Update profile index after deletion, including index 0. Refresh even
+        // when its numeric value is unchanged because the profile identity moved.
+        const settingsProfileIndexNew = settingsProfileIndex >= profileIndex ?
+            Math.max(0, Math.min(settingsProfileIndex - 1, remainingProfileCount - 1)) :
+            settingsProfileIndex;
+        if (settingsProfileIndexNew === settingsProfileIndex) {
+            this._settingsController.refreshProfileIndex();
+        } else {
+            this._settingsController.profileIndex = settingsProfileIndexNew;
+        }
     }
 
     /**
