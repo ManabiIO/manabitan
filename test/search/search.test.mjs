@@ -34,7 +34,9 @@ test('unfinished syllables and English are not stripped into misleading partial 
     assert.throws(() => japaneseSearchQueries('a\0'), RangeError);
 });
 test('implicit prefix candidates require completed Japanese and at least two code points', () => {
-    for (const query of ['たべ', '食べ', 'ガッ', 'あ・い']) { assert.equal(isJapanesePrefixCandidate(query), true, query); }
+    for (const query of ['たべ', '食べ', 'ガッ', 'あ・い', 'カー', 'こー']) {
+        assert.equal(isJapanesePrefixCandidate(query), true, query);
+    }
     for (const query of ['食', 'た', 'ny', 'hello', 'たbe', '食べé', 'たべÑ', 'たべＡ', '猫1', '猫🍵', 'あ!']) {
         assert.equal(isJapanesePrefixCandidate(query), false, query);
     }
