@@ -597,12 +597,17 @@ describe('Dictionary import settings carry-over', () => {
 });
 
 describe('Dictionary import archive source validation', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
     /**
      * @param {ReturnType<typeof vi.fn>} importDictionaryFromZip
      * @param {ReturnType<typeof vi.fn>} onImportDone
      * @returns {DictionaryImportController}
      */
     function controllerForSourceTest(importDictionaryFromZip, onImportDone) {
+        vi.stubGlobal('chrome', {runtime: {getManifest: () => ({version: '0.0.0'})}});
         return /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _activeImportRunGeneration: 0,
             _modifying: false,
