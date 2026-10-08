@@ -30,6 +30,7 @@ import * as firefox from 'selenium-webdriver/firefox.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
+import {getUnsupportedRuntimeSkipReason} from './unsupported-runtime-classifier.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -709,33 +710,6 @@ const strictUnsupportedRuntime = parseBooleanEnv(
     process.env.MANABITAN_E2E_STRICT_RUNTIME,
     parseBooleanEnv(process.env.CI, false),
 );
-
-/**
- * @param {string} message
- * @returns {string}
- */
-function getUnsupportedRuntimeSkipReason(message) {
-    const text = String(message);
-    if (
-        text.includes('OPFS is required but unavailable') ||
-        text.includes('no such vfs: opfs') ||
-        text.startsWith('Firefox runtime does not satisfy opfs-sahpool prerequisites:') ||
-        text.includes('opfs-sahpool runtime prerequisites are unavailable') ||
-        text.includes('opfs-sahpool requires a DedicatedWorkerGlobalScope')
-    ) {
-        return 'Firefox automation runtime does not expose the required OPFS SyncAccessHandle worker surface in this local Selenium stack; skipping this lane locally without enabling any SQLite fallback.';
-    }
-    if (text.includes('background.service_worker is currently disabled')) {
-        return 'Firefox automation runtime does not support MV3 background service workers in this local Selenium/browser stack; skipping this lane locally.';
-    }
-    if (
-        text.includes('Failed to read marionette port') ||
-        text.includes('Failed to decode response from marionette')
-    ) {
-        return 'Firefox automation runtime failed before extension startup in this local Selenium/Marionette stack; skipping this lane locally.';
-    }
-    return '';
-}
 
 /**
  * @param {unknown} runtimeDiagnostics
