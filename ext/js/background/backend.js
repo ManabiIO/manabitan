@@ -187,6 +187,8 @@ export class Backend {
         this._clipboardMonitor = new ClipboardMonitor(this._clipboardReader);
         /** @type {?import('settings').Options} */
         this._options = null;
+        /** @type {Promise<void>|null} */
+        this._optionsSaveTail = null;
         /** @type {import('../data/json-schema.js').JsonSchema[]} */
         this._profileConditionsSchemaCache = [];
         /** @type {WeakMap<import('settings').ProfileOptions, {enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>, textReplacements: (?(import('translation').FindTermsTextReplacement[]))[]}>} */
@@ -4371,10 +4373,22 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @param {string} source
      */
     async _saveOptions(source) {
+        // Modification handlers mutate live options before awaiting persistence.
+        // If their storage writes overlap, an older snapshot can otherwise
+        // finish last and overwrite newer user settings on disk.
         this._clearProfileConditionsSchemaCache();
-        const options = this._getOptionsFull(false);
-        await this._optionsUtil.save(options);
-        this._applyOptions(source);
+        const previous = this._optionsSaveTail ?? Promise.resolve();
+        const save = previous.then(async () => {
+            // Read the latest in-memory options when this write reaches the
+            // front of the queue; never re-persist a stale snapshot.
+            const options = this._getOptionsFull(false);
+            await this._optionsUtil.save(options);
+            this._applyOptions(source);
+        });
+        // A failed write must reject its own caller but not poison future
+        // saves; keep the tail always fulfilled.
+        this._optionsSaveTail = save.catch(() => {});
+        await save;
     }
 
     /**
