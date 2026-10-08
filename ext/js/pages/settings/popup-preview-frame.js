@@ -95,7 +95,7 @@ export class PopupPreviewFrame {
 
         this._languageSummaries = await this._application.api.getLanguageSummaries();
         const options = await this._application.api.optionsGet({current: true});
-        void this._setLanguageExampleText({language: options.general.language}).catch((error) => {
+        void Promise.resolve(this._setLanguageExampleText({language: options.general.language})).catch((error) => {
             log.error(error);
         });
 
