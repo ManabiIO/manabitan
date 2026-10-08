@@ -139,6 +139,7 @@ function bounded(value: unknown, budget: {nodes: number, characters: number}): b
     }
     return true;
 }
+
 /**
  *
  * @param container
@@ -147,9 +148,10 @@ export function constrainStyles(container: HTMLElement) {
     // The shared renderer creates DOM safely, but dictionary presentation values
     // may include CSS resource functions. A webpage must not fetch them.
     for (const node of container.querySelectorAll<HTMLElement>('[style]')) {
-        // CSSStyleDeclaration is live; removing an entry during iteration
-        // skips the next declaration, including an adjacent unsafe URL.
-        for (const property of [...node.style]) {
+        // Iterate backwards: deleting the current entry cannot shift an
+        // unvisited index. CSSStyleDeclaration is not always iterable.
+        for (let i = node.style.length - 1; i >= 0; --i) {
+            const property = node.style.item(i);
             const value = node.style.getPropertyValue(property);
             if (property === 'background-image' || property === 'list-style-image' || /url\s*\(|image-set\s*\(|var\s*\(|[\\<>@]/i.test(value)) {
                 node.style.removeProperty(property);
@@ -158,7 +160,11 @@ export function constrainStyles(container: HTMLElement) {
     }
 }
 
-/** Clip user-imported labels without splitting surrogate pairs. */
+/**
+ * Clip user-imported labels without splitting surrogate pairs.
+ * @param value
+ * @param maximum
+ */
 function clipDisplayText(value: string, maximum: number): string {
     const text = value.slice(0, maximum);
     return /[\uD800-\uDBFF]$/.test(text) ? text.slice(0, -1) : text;

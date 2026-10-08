@@ -23,7 +23,10 @@ export async function recommendedDictionaries(): Promise<RecommendedDictionary[]
     return recommendedDictionariesFromCatalog(catalog);
 }
 
-/** Invalid links in an otherwise valid catalog should not hide valid dictionaries. */
+/**
+ * Invalid links in an otherwise valid catalog should not hide valid dictionaries.
+ * @param catalog
+ */
 export function recommendedDictionariesFromCatalog(catalog: unknown): RecommendedDictionary[] {
     if (!record(catalog) || !record(catalog.ja)) {throw new WebRuntimeError('catalog_invalid', 'Invalid Japanese dictionary catalog');}
     const result: RecommendedDictionary[] = [];
