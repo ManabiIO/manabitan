@@ -51,7 +51,7 @@ describe('EventDispatcher listener mutation', () => {
         expect(calls).toEqual(['first', 'late']);
     });
 
-    test('unsubscribing a peer during dispatch does not mutate the current snapshot', () => {
+    test('unsubscribing a peer suppresses that callback without skipping other listeners', () => {
         const dispatcher = createDispatcher();
         /** @type {string[]} */
         const calls = [];
@@ -61,12 +61,13 @@ describe('EventDispatcher listener mutation', () => {
             dispatcher.off('event', second);
         });
         dispatcher.on('event', second);
+        dispatcher.on('event', () => { calls.push('third'); });
 
         dispatcher.trigger('event', void 0);
-        expect(calls).toEqual(['first', 'second']);
+        expect(calls).toEqual(['first', 'third']);
         calls.length = 0;
         dispatcher.trigger('event', void 0);
-        expect(calls).toEqual(['first']);
+        expect(calls).toEqual(['first', 'third']);
     });
 
     test('no subscribed event preserves the false return contract', () => {
