@@ -349,4 +349,88 @@ describe('Keyboard Event Handling', () => {
 
         expect(searchDisplayController._profileSelect.value).toBe('1');
     });
+    test('delayed clipboard validation cannot replace a query edited by the user', async () => {
+        const check = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+        vi.spyOn(display.application.api, 'isTextLookupWorthy').mockReturnValue(check.promise);
+        vi.spyOn(display, 'getOptions').mockReturnValue(/** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+            general: {language: 'ja'},
+            clipboard: {autoSearchContent: true, maximumSearchLength: 100},
+        })));
+        const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        const previousMonitor = searchDisplayController._clipboardMonitorEnabled;
+        searchDisplayController._clipboardMonitorEnabled = true;
+        try {
+            queryInput.value = 'earlier text';
+            const pending = searchDisplayController._updateSearchFromClipboard('clipboard', true, true);
+            queryInput.value = 'user typing';
+            searchDisplayController._onSearchInput(/** @type {InputEvent} */ (/** @type {unknown} */ ({
+                currentTarget: queryInput,
+                isComposing: false,
+            })));
+            check.resolve(true);
+            await pending;
+            expect(queryInput.value).toBe('user typing');
+            expect(searchSpy).not.toHaveBeenCalled();
+        } finally {
+            searchDisplayController._cancelLiveSearch();
+            searchDisplayController._clipboardMonitorEnabled = previousMonitor;
+        }
+    });
+
+    test('a newer clipboard lookup wins even when its validation resolves first', async () => {
+        const first = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+        const second = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+        vi.spyOn(display.application.api, 'isTextLookupWorthy')
+            .mockReturnValueOnce(first.promise)
+            .mockReturnValueOnce(second.promise);
+        vi.spyOn(display, 'getOptions').mockReturnValue(/** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+            general: {language: 'ja'},
+            clipboard: {autoSearchContent: true, maximumSearchLength: 100},
+        })));
+        const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        const previousMonitor = searchDisplayController._clipboardMonitorEnabled;
+        searchDisplayController._clipboardMonitorEnabled = true;
+        try {
+            queryInput.value = '';
+            const older = searchDisplayController._updateSearchFromClipboard('old', true, true);
+            const newer = searchDisplayController._updateSearchFromClipboard('new', true, true);
+            second.resolve(true);
+            await newer;
+            first.resolve(true);
+            await older;
+            expect(queryInput.value).toBe('new');
+            expect(searchSpy).toHaveBeenCalledOnce();
+        } finally {
+            searchDisplayController._clipboardMonitorEnabled = previousMonitor;
+        }
+    });
+
+    test('paste only takes over noneditable surfaces with usable text', () => {
+        const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        const createEvent = (target, text) => /** @type {ClipboardEvent} */ (/** @type {unknown} */ ({
+            target,
+            defaultPrevented: false,
+            preventDefault: vi.fn(),
+            stopPropagation: vi.fn(),
+            clipboardData: {getData: vi.fn(() => text)},
+        }));
+        const editable = document.createElement('input');
+        const editablePaste = createEvent(editable, 'should stay in the input');
+        searchDisplayController._onPaste(editablePaste);
+        expect(editablePaste.preventDefault).not.toHaveBeenCalled();
+        expect(searchSpy).not.toHaveBeenCalled();
+
+        const emptyPaste = createEvent(document.body, '');
+        searchDisplayController._onPaste(emptyPaste);
+        expect(emptyPaste.preventDefault).not.toHaveBeenCalled();
+        expect(searchSpy).not.toHaveBeenCalled();
+
+        const pagePaste = createEvent(document.body, 'lookup this');
+        searchDisplayController._onPaste(pagePaste);
+        expect(pagePaste.preventDefault).toHaveBeenCalledOnce();
+        expect(pagePaste.stopPropagation).toHaveBeenCalledOnce();
+        expect(searchSpy).toHaveBeenCalledOnce();
+        expect(queryInput.value).toBe('lookup this');
+    });
+
 });
