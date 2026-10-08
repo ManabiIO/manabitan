@@ -47,7 +47,9 @@ export class FrameEndpoint {
         }
         /** @type {import('frame-client').FrameEndpointReadyDetails} */
         const details = {secret: this._secret};
-        void this._api.broadcastTab({action: 'frameEndpointReady', params: details});
+        void Promise.resolve()
+            .then(() => this._api.broadcastTab({action: 'frameEndpointReady', params: details}))
+            .catch((error) => { log.error(error); });
     }
 
     /**
@@ -94,16 +96,24 @@ export class FrameEndpoint {
         }
 
         const {token, hostFrameId} = /** @type {import('core').SerializableObject} */ (params);
-        if (typeof token !== 'string' || typeof hostFrameId !== 'number') {
+        if (typeof token !== 'string' || token.length === 0 || !Number.isSafeInteger(hostFrameId) || hostFrameId < 0) {
             log.error('Invalid target');
             return;
         }
 
         this._token = token;
-
         this._eventListeners.removeAllEventListeners();
         /** @type {import('frame-client').FrameEndpointConnectedDetails} */
         const details = {secret, token};
-        void this._api.sendMessageToFrame(hostFrameId, {action: 'frameEndpointConnected', params: details});
+        void Promise.resolve()
+            .then(() => this._api.sendMessageToFrame(hostFrameId, {action: 'frameEndpointConnected', params: details}))
+            .catch((error) => {
+                // An unsuccessful acknowledgement must not permanently lock
+                // this endpoint to a connection that the client never saw.
+                if (this._token !== token) { return; }
+                this._token = null;
+                log.error(error);
+                this.signal();
+            });
     }
 }
