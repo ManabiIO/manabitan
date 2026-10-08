@@ -172,3 +172,39 @@ test('backend readiness request errors reject startup even if a ready broadcast 
     expect(window.document.querySelector('#startup-error-message')?.textContent).toContain('bridge registration failed');
     expect(vi.getTimerCount()).toBe(0);
 });
+
+
+test('a stalled backend-ready handshake times out and releases runtime resources', async ({window}) => {
+    const {shutdown} = setupApplication(window);
+    vi.mocked(WebExtension.prototype.sendMessagePromise).mockImplementation(
+        () => new Promise(() => {}),
+    );
+    const main = vi.fn(async () => {});
+    const pending = Application.main(false, main);
+    const rejection = expect(pending).rejects.toThrow('Timed out waiting for backend ready signal after 15000ms.');
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(15_000);
+    await rejection;
+    expect(shutdown).toHaveBeenCalledOnce();
+    expect(main).not.toHaveBeenCalled();
+    expect(window.document.querySelector('#startup-error-message')?.textContent).toContain('Timed out waiting');
+    expect(vi.getTimerCount()).toBe(0);
+});
+
+test('the backend deadline rejects even if reading the stored startup failure hangs', async ({window}) => {
+    const {shutdown} = setupApplication(window);
+    const storageGet = vi.fn(() => new Promise(() => {}));
+    Reflect.set(chrome, 'storage', {session: {get: storageGet}});
+    vi.mocked(WebExtension.prototype.sendMessagePromise).mockResolvedValue(void 0);
+    const main = vi.fn(async () => {});
+    const pending = Application.main(false, main);
+    const rejection = expect(pending).rejects.toThrow('Timed out waiting for backend ready signal after 15000ms.');
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(15_000);
+    await rejection;
+    expect(storageGet).toHaveBeenCalledOnce();
+    expect(shutdown).toHaveBeenCalledOnce();
+    expect(main).not.toHaveBeenCalled();
+    expect(window.document.querySelector('#startup-error-message')?.textContent).toContain('Timed out waiting');
+    expect(vi.getTimerCount()).toBe(0);
+});
