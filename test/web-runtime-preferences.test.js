@@ -13,6 +13,14 @@ describe('web dictionary preference persistence', () => {
         expect(configured.defaultChoice).toBe('installed');
     });
 
+    test('deleting an old default does not override a deliberate declined choice', () => {
+        const declined = {...configured, defaultChoice: /** @type {const} */ ('declined')};
+        expect(preferencesAfterDeletion(declined, 'Jitendex')).toEqual({
+            ...declined,
+            disabled: ['Other'],
+        });
+    });
+
     test('unrelated deletion preserves default choice and skips unnecessary writes', () => {
         expect(preferencesAfterDeletion(configured, 'Unknown')).toBe(configured);
         expect(preferencesAfterDeletion(configured, 'Other')).toEqual({

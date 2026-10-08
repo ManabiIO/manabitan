@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 import {StructuredContentGenerator} from '../js/display/structured-content-generator.js';
+import {MAX_WEB_IMAGE_BYTES} from './media-response.js';
 import type {ManabiTanWebClient, LookupResult} from './client.js';
 import type {UrlContentManager} from '../../types/ext/structured-content';
 
@@ -49,7 +50,7 @@ class ReaderMedia implements UrlContentManager {
             pending = this.client.media(dictionary, path, {signal: this.controller.signal}).then((data) => {
                 if (this.disposed || !data || !/^image\/(?:png|jpeg|webp|gif|avif|svg\+xml)$/.test(data.mediaType)) {throw new Error('Dictionary image unavailable');}
                 const blob = new Blob([data.content], {type: data.mediaType});
-                if (blob.size > 32 * 1024 * 1024) {throw new Error('Dictionary image exceeds display size limit');}
+                if (blob.size > MAX_WEB_IMAGE_BYTES) {throw new Error('Dictionary image exceeds display size limit');}
                 const url = URL.createObjectURL(blob);
                 this.created.add(url);
                 return url;

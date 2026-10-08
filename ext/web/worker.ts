@@ -5,6 +5,7 @@ import {DictionaryImporterMediaLoader} from '../js/dictionary/dictionary-importe
 import {Translator} from '../js/language/translator.js';
 import {findJapaneseSearch} from '../js/search/japanese-search.js';
 import {preferencesAfterDeletion, reconcilePreferences} from './preferences.js';
+import {webMediaResponse} from './media-response.js';
 import {dictionaryPreview} from '../js/search/dictionary-preview.js';
 import {parseJson} from '../js/core/json.js';
 import {API_VERSION, STORAGE_LOCK, MAX_ARCHIVE_BYTES, WebRuntimeError, isRequest, record, text, type Preferences, type Request, type Reply, type Status} from './protocol.js';
@@ -283,7 +284,10 @@ async function dispatch(request: Request): Promise<unknown> {
         }
         case 'media': {
             const result = await database.getMedia([{dictionary: text(p.dictionary), path: text(p.path, 4096)}]);
-            return result[0] ?? null;
+            abortIfCancelled();
+            // The renderer's blob-size check is too late to prevent a huge
+            // worker-to-main-thread structured clone. Bound it before reply.
+            return webMediaResponse(result[0]);
         }
         default: throw new WebRuntimeError('invalid_request', 'Unsupported dictionary operation');
     }

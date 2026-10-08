@@ -8,7 +8,7 @@ import type {Preferences} from './protocol.js';
  */
 export function preferencesAfterDeletion(current: Preferences, title: string): Preferences {
     const disabled = current.disabled.filter((name) => name !== title);
-    const defaultChoice = title === current.defaultTitle ? 'deleted' : current.defaultChoice;
+    const defaultChoice = title === current.defaultTitle && current.defaultChoice === 'installed' ? 'deleted' : current.defaultChoice;
     if (disabled.length === current.disabled.length && defaultChoice === current.defaultChoice) {return current;}
     return {...current, disabled, defaultChoice};
 }
