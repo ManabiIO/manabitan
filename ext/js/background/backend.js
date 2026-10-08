@@ -1897,7 +1897,14 @@ export class Backend {
                 const parsed = new URL(normalizedUrl);
                 const pathPart = parsed.pathname.split('/').filter((part) => part.length > 0).pop();
                 if (typeof pathPart === 'string' && pathPart.length > 0) {
-                    return pathPart;
+                    let decodedName = pathPart;
+                    try {
+                        decodedName = decodeURIComponent(pathPart);
+                    } catch (_) {
+                        // Preserve the encoded URL name when decoding is malformed.
+                    }
+                    const name = basename(decodedName);
+                    if (name.length > 0) { return name; }
                 }
             } catch (_) {
                 // Ignore malformed URL parsing here; we already attempted the request.
