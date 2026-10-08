@@ -915,6 +915,62 @@ describe('OptionsUtil', () => {
         });
     });
 
+    test('fresh defaults have stable profile IDs and normalizing them is idempotent', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const defaults = optionsUtil.getDefault();
+        expect(defaults.profiles[0].id).toBe('profile-0');
+        const updated = await optionsUtil.update(structuredClone(defaults));
+        expect(updated).toStrictEqual(defaults);
+    });
+
+    test('current-version options repair missing and duplicate IDs without replacing existing identities', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const options = optionsUtil.getDefault();
+        const original = options.profiles[0];
+        options.profiles = [
+            {...structuredClone(original), id: '', name: 'Missing'},
+            {...structuredClone(original), id: 'saved-id', name: 'Existing'},
+            {...structuredClone(original), id: 'saved-id', name: 'Duplicate'},
+            {...structuredClone(original), id: 'profile-0', name: 'Reserved'},
+        ];
+        const updated = await optionsUtil.update(options);
+        expect(updated.profiles.map(({id}) => id)).toStrictEqual([
+            'profile-0-1', 'saved-id', 'profile-2', 'profile-0',
+        ]);
+        expect(await optionsUtil.update(structuredClone(updated))).toStrictEqual(updated);
+    });
+
+    test('saving a restored full-options snapshot repairs its missing IDs', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const options = optionsUtil.getDefault();
+        options.profiles[0].id = '';
+        /** @type {string|null} */
+        let writtenOptions = null;
+        const storage = Reflect.get(chrome, 'storage');
+        Reflect.set(chrome, 'storage', {local: {
+            set: (/** @type {{options: string}} */ value, /** @type {() => void} */ callback) => {
+                writtenOptions = value.options;
+                callback();
+            },
+        }});
+        try {
+            await optionsUtil.save(options);
+        } finally {
+            if (typeof storage === 'undefined') {
+                Reflect.deleteProperty(chrome, 'storage');
+            } else {
+                Reflect.set(chrome, 'storage', storage);
+            }
+        }
+
+        expect(options.profiles[0].id).toBe('profile-0');
+        expect(writtenOptions).not.toBeNull();
+        expect(JSON.parse(/** @type {string} */ (/** @type {unknown} */ (writtenOptions))).profiles[0].id).toBe('profile-0');
+    });
+
     describe('Default', () => {
         /** @type {((options: import('options-util').IntermediateOptions) => void)[]} */
         const data = [
