@@ -96,7 +96,7 @@ export class FrameEndpoint {
         }
 
         const {token, hostFrameId} = /** @type {import('core').SerializableObject} */ (params);
-        if (typeof token !== 'string' || token.length === 0 || !Number.isSafeInteger(hostFrameId) || hostFrameId < 0) {
+        if (typeof token !== 'string' || token.length === 0 || typeof hostFrameId !== 'number' || !Number.isSafeInteger(hostFrameId) || hostFrameId < 0) {
             log.error('Invalid target');
             return;
         }
