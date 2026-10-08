@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 export class SortFrequencyDictionaryController {
@@ -37,6 +38,8 @@ export class SortFrequencyDictionaryController {
         this._confirmedDictionary = this._sortFrequencyDictionarySelect.value;
         /** @type {string} */
         this._confirmedOrder = this._sortFrequencyDictionaryOrderSelect.value;
+        /** @type {number} */
+        this._autoOrderRequestId = 0;
         /** @type {?import('core').TokenObject} */
         this._getDictionaryInfoToken = null;
     }
@@ -96,7 +99,8 @@ export class SortFrequencyDictionaryController {
     /** */
     _onSortFrequencyDictionarySelectChange() {
         const {value} = /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect);
-        void this._setSortFrequencyDictionaryValue(value !== '' ? value : null);
+        ++this._autoOrderRequestId;
+        void this._setSortFrequencyDictionaryValue(value !== '' ? value : null).catch((error) => { log.error(error); });
     }
 
     /** */
@@ -104,14 +108,15 @@ export class SortFrequencyDictionaryController {
         const {value} = /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect);
         const value2 = this._normalizeSortFrequencyDictionaryOrder(value);
         if (value2 === null) { return; }
-        void this._setSortFrequencyDictionaryOrderValue(value2);
+        ++this._autoOrderRequestId;
+        void this._setSortFrequencyDictionaryOrderValue(value2).catch((error) => { log.error(error); });
     }
 
     /** */
     _onSortFrequencyDictionaryOrderAutoButtonClick() {
         const {value} = /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect);
         if (value === '') { return; }
-        void this._autoUpdateOrder(value);
+        void this._autoUpdateOrder(value).catch((error) => { log.error(error); });
     }
 
     /**
@@ -174,15 +179,19 @@ export class SortFrequencyDictionaryController {
      * @param {string} dictionary
      */
     async _autoUpdateOrder(dictionary) {
+        const requestId = ++this._autoOrderRequestId;
         const optionsContext = this._settingsController.getOptionsContext();
         const order = await this._getFrequencyOrder(dictionary);
         if (
             order === null ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index
+            requestId !== this._autoOrderRequestId ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._confirmedDictionary !== dictionary ||
+            this._sortFrequencyDictionarySelect.value !== dictionary
         ) {
             return;
         }
-        const previousValue = this._sortFrequencyDictionaryOrderSelect.value;
+        const previousValue = this._confirmedOrder;
         /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = order;
         try {
             await this._setSortFrequencyDictionaryOrderValue(order);
