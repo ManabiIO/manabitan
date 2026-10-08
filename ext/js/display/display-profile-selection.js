@@ -79,15 +79,19 @@ export class DisplayProfileSelection {
      */
     async _onOptionsUpdated({source}) {
         if (source === this._source) { return; }
-        try {
-            this._profileListNeedsUpdate = true;
-            if (this._profilePanel.isVisible()) {
-                await this._updateProfileList();
-            }
-            await this._updateCurrentProfileName();
-        } catch (error) {
+        this._profileListNeedsUpdate = true;
+        // The dropdown and label are independent: a blocked list refresh must
+        // not prevent the active profile name from updating.
+        const updates = [this._updateCurrentProfileName().catch((error) => {
             log.error(error);
+        })];
+        if (this._profilePanel.isVisible()) {
+            updates.push(this._updateProfileList().catch((error) => {
+                this._profileListNeedsUpdate = true;
+                log.error(error);
+            }));
         }
+        await Promise.all(updates);
     }
 
     /**
