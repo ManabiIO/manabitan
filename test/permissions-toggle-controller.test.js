@@ -111,7 +111,7 @@ describe('PermissionsToggleController', () => {
             on: vi.fn(),
         }));
         await controller.prepare();
-        controller._onOptionsChanged({options: /** @type {any} */ ({anki: {enable: true}})});
+        controller._onOptionsChanged({options: /** @type {any} */ ({anki: {enable: true}}), optionsContext: /** @type {any} */ ({})});
         await new Promise((resolve) => { window.setTimeout(resolve, 0); });
         expect(report).toHaveBeenCalledOnce();
         report.mockRestore();
