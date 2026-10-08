@@ -943,7 +943,10 @@ export class DictionaryController {
         void this._onDatabaseUpdated(details);
     }
 
-    /** */
+    /**
+     * @param {import('application').EventArgument<'databaseUpdated'>|undefined} [_details]
+     * @returns {Promise<void>}
+     */
     async _onDatabaseUpdated(_details = void 0) {
         /** @type {?import('core').TokenObject} */
         const token = {};
