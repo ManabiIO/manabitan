@@ -17,6 +17,7 @@
  */
 
 import {EventDispatcher} from '../core/event-dispatcher.js';
+import {log} from '../core/log.js';
 
 /**
  * @augments EventDispatcher<import('clipboard-monitor').Events>
@@ -72,7 +73,13 @@ export class ClipboardMonitor extends EventDispatcher {
                 } else if (text !== this._previousText) {
                     this._previousText = text;
                     if (canChange) {
-                        this.trigger('change', {text});
+                        try {
+                            this.trigger('change', {text});
+                        } catch (error) {
+                            // This callback is fire-and-forget; a subscriber
+                            // exception must not silently terminate polling.
+                            log.error(error);
+                        }
                     }
                 }
                 // A failed initial read is not an observed clipboard baseline.
