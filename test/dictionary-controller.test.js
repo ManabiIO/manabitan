@@ -69,10 +69,65 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
             DictionaryController.createDefaultDictionarySettings('Jitendex', false, 'new'),
         ]);
         expect(modifyGlobalSettings).toHaveBeenCalledOnce();
+        expect(modifyGlobalSettings).toHaveBeenCalledWith([
+            {
+                action: 'splice',
+                path: 'profiles[0].options.dictionaries',
+                start: 1,
+                deleteCount: 1,
+                items: [],
+            },
+            {
+                action: 'push',
+                path: 'profiles[0].options.dictionaries',
+                items: [DictionaryController.createDefaultDictionarySettings('Jitendex', false, 'new')],
+            },
+        ]);
+    });
+
+    test('does not overwrite a newer enablement change from a stale options snapshot', async () => {
+        const backendDictionaries = [
+            {name: 'JMdict', alias: 'My alias', enabled: true},
+            {name: 'Unknown', alias: 'Stale', enabled: true},
+        ];
+        const modifyGlobalSettings = vi.fn(async (modifications) => {
+            for (const modification of modifications) {
+                if (modification.action === 'splice') {
+                    backendDictionaries.splice(modification.start, modification.deleteCount, ...modification.items);
+                } else if (modification.action === 'push') {
+                    backendDictionaries.push(...modification.items);
+                } else {
+                    throw new Error('Unexpected whole-array replacement');
+                }
+            }
+            return [];
+        });
+        const staleOptions = {
+            profiles: [{
+                options: {
+                    dictionaries: [
+                        {name: 'JMdict', alias: 'My alias', enabled: false},
+                        {name: 'Unknown', alias: 'Stale', enabled: true},
+                    ],
+                },
+            }],
+        };
+
+        await DictionaryController.ensureDictionarySettings(
+            /** @type {any} */ ({modifyGlobalSettings}),
+            /** @type {any} */ ([{title: 'JMdict', styles: ''}]),
+            /** @type {any} */ (staleOptions),
+            true,
+            false,
+        );
+
+        expect(backendDictionaries).toStrictEqual([{name: 'JMdict', alias: 'My alias', enabled: true}]);
         expect(modifyGlobalSettings).toHaveBeenCalledWith([{
-            action: 'set',
+            action: 'splice',
             path: 'profiles[0].options.dictionaries',
-            value: optionsFull.profiles[0].options.dictionaries,
+            start: 1,
+            deleteCount: 1,
+            items: [],
         }]);
     });
 
