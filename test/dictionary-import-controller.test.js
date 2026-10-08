@@ -1105,6 +1105,23 @@ describe('Dictionary import watchdog timer lifecycle', () => {
         }
     });
 
+    test('normal errors containing timeout-like wording do not trigger forced recovery', async () => {
+        vi.useFakeTimers();
+        try {
+            const recover = vi.fn();
+            const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+                _forceRecoverHungImportSession: recover,
+            }));
+            await expect(runImportWithWatchdog.call(controller, Promise.reject(new Error('Import did not complete within malformed metadata')), 'Import'))
+                .rejects.toThrow('malformed metadata');
+
+            expect(recover).not.toHaveBeenCalled();
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
     test('hung imports trigger watchdog recovery exactly once', async () => {
         vi.useFakeTimers();
         try {
