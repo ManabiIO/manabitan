@@ -70,6 +70,7 @@ function setup() {
         _updatePageDebugState: vi.fn(),
     })) { Reflect.set(frontend, key, value); }
     scanner.on('searchSuccess', frontend._onSearchSuccess.bind(frontend));
+    scanner.on('searchSame', frontend._onSearchSame.bind(frontend));
     scanner.on('searchError', frontend._onSearchError.bind(frontend));
     const report = vi.spyOn(log, 'error').mockImplementation(() => {});
     /** @param {TextSourceElement} selected */
@@ -79,6 +80,52 @@ function setup() {
     };
     return {frontend, scanner, lookup, show, report, scan};
 }
+
+test('returning to the same word cancels pending auto-hide without a redundant lookup', async () => {
+    const {frontend, scanner, lookup, scan} = setup();
+    const word = source('cat');
+    Reflect.set(frontend, '_options', {scanning: {autoHideResults: true, hideDelay: 100}});
+    Reflect.set(frontend, '_debugSearchEmptyCount', 0);
+    const hide = vi.spyOn(frontend, '_clearSelectionDelayed').mockResolvedValue(void 0);
+    scanner.on('searchEmpty', frontend._onSearchEmpty.bind(frontend));
+
+    const cancelHide = vi.spyOn(frontend, '_stopClearSelectionDelayed');
+    await scan(word);
+    await frontend.showContentCompleted();
+    cancelHide.mockClear();
+    expect(lookup).toHaveBeenCalledTimes(1);
+    expect(scanner.hasSelection()).toBe(true);
+
+    // The scanner has no text under this coordinate; the frontend schedules
+    // automatic hiding but intentionally retains the old selected anchor.
+    await Reflect.get(scanner, '_searchAt').call(scanner, 1, 1, input());
+    expect(hide).toHaveBeenCalledWith(100, false, false);
+    expect(scanner.hasSelection()).toBe(true);
+
+    // A repeated hover must cancel hiding immediately without any redundant
+    // dictionary lookup or loss of the existing selection.
+    await scan(word);
+    await frontend.showContentCompleted();
+    expect(lookup).toHaveBeenCalledTimes(1);
+    expect(cancelHide).toHaveBeenCalledOnce();
+    expect(scanner.hasSelection()).toBe(true);
+});
+
+test('same-word no-op remains intact when automatic hiding is disabled', async () => {
+    const {frontend, scanner, lookup, scan} = setup();
+    const word = source('cat');
+    Reflect.set(frontend, '_options', {scanning: {autoHideResults: false, hideDelay: 100}});
+    Reflect.set(frontend, '_debugSearchEmptyCount', 0);
+    const hide = vi.spyOn(frontend, '_clearSelectionDelayed').mockResolvedValue(void 0);
+    scanner.on('searchEmpty', frontend._onSearchEmpty.bind(frontend));
+
+    await scan(word);
+    await Reflect.get(scanner, '_searchAt').call(scanner, 1, 1, input());
+    await scan(word);
+
+    expect(lookup).toHaveBeenCalledTimes(1);
+    expect(hide).not.toHaveBeenCalled();
+});
 
 test('failed content delivery allows the same word to be hovered again without clearing its anchor', async () => {
     const {frontend, scanner, lookup, show, report, scan} = setup();
