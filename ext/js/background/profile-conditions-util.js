@@ -76,17 +76,31 @@ const descriptors = new Map([
  */
 export function createSchema(conditionGroups) {
     const anyOf = [];
+    let hasUnsupportedConditions = false;
     for (const {conditions} of conditionGroups) {
         const allOf = [];
+        let unsupported = false;
         for (const {type, operator, value} of conditions) {
             const conditionDescriptor = descriptors.get(type);
-            if (typeof conditionDescriptor === 'undefined') { continue; }
+            if (typeof conditionDescriptor === 'undefined') {
+                unsupported = true;
+                break;
+            }
 
             const createSchema2 = conditionDescriptor.operators.get(operator);
-            if (typeof createSchema2 === 'undefined') { continue; }
+            if (typeof createSchema2 === 'undefined') {
+                unsupported = true;
+                break;
+            }
 
             const schema = createSchema2(value);
             allOf.push(schema);
+        }
+        if (unsupported) {
+            // An unknown condition must not turn a restricted profile into an
+            // unconditional match or silently weaken a conjunction.
+            hasUnsupportedConditions = true;
+            continue;
         }
         switch (allOf.length) {
             case 0: break;
@@ -96,7 +110,7 @@ export function createSchema(conditionGroups) {
     }
     let schema;
     switch (anyOf.length) {
-        case 0: schema = {}; break;
+        case 0: schema = hasUnsupportedConditions ? {not: {}} : {}; break;
         case 1: schema = anyOf[0]; break;
         default: schema = {anyOf}; break;
     }
