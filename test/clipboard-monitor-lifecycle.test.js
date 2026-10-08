@@ -162,11 +162,11 @@ test('ordinary polling still trims text, ignores initial content, blanks and dup
     assert.equal(timers.size, 0)
 })
 
-test('a failed clipboard read remains retryable', async () => {
+test('a failed initial read retries silently and later copies still notify', async () => {
     let reads = 0
     const monitor = new ClipboardMonitor({getText: async () => {
         if (++reads === 1) { throw new Error('Permission unavailable') }
-        return 'second'
+        return reads === 2 ? 'second' : 'third'
     }})
     /** @type {string[]} */
     const changes = []
@@ -174,7 +174,12 @@ test('a failed clipboard read remains retryable', async () => {
     monitor.start()
     await Promise.resolve()
     await tick()
-    assert.deepEqual(changes, ['second'])
+    assert.equal(reads, 2)
+    assert.deepEqual(changes, [])
+    assert.equal(timers.size, 1)
+    await tick()
+    assert.equal(reads, 3)
+    assert.deepEqual(changes, ['third'])
     monitor.stop()
     assert.equal(timers.size, 0)
 })
