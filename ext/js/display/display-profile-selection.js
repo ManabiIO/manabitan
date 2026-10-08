@@ -176,6 +176,9 @@ export class DisplayProfileSelection {
             }
             await this._setProfileCurrent(index);
             if (generation !== this._profileWriteGeneration) { return; }
+            // Local settings events are filtered by source; fetch persisted
+            // radio selection on the next open instead of reusing old markup.
+            this._profileListNeedsUpdate = true;
             this._setProfilePanelVisible(false);
             await this._updateCurrentProfileName();
         });
