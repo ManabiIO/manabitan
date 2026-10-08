@@ -54,11 +54,18 @@ export function glossarySearchText(glossary) {
      */
     const append = (value) => {
         if (codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS) { return; }
-        const points = [...value];
         const available = MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS - codepoints;
-        if (available <= 0) { return; }
-        parts.push(points.slice(0, available).join(''));
-        codepoints += Math.min(points.length, available);
+        // Walk only the permitted code points. Do not materialize an array
+        // proportional to the length of an untrusted glossary string.
+        let end = 0;
+        let count = 0;
+        while (end < value.length && count < available) {
+            const point = value.codePointAt(end);
+            end += typeof point === 'number' && point > 0xffff ? 2 : 1;
+            ++count;
+        }
+        parts.push(value.slice(0, end));
+        codepoints += count;
     };
     /**
      * @param {unknown} value
@@ -143,6 +150,8 @@ export function glossarySearchTokens(glossary) {
  * @returns {{folded: string, phrase: string, tokens: string[], prefix: string}|null}
  */
 export function createGlossarySearchQuery(query) {
+    // Bound the raw request before normalization or Unicode token allocation.
+    if (query.length > 1024) { return null; }
     const folded = foldGlossarySearchText(query.trim());
     if (
         folded.length === 0 ||
@@ -151,14 +160,24 @@ export function createGlossarySearchQuery(query) {
     ) {
         return null;
     }
-    const tokens = glossarySearchTokensFromText(folded).slice(0, MAX_GLOSSARY_QUERY_TOKENS);
-    if (tokens.length === 0) { return null; }
-    const prefix = tokens[tokens.length - 1];
+    const words = [...folded.matchAll(TOKEN_PATTERN)].map((match) => match[0]);
+    // The last typed word owns live-prefix completion. Index tokens are
+    // deduplicated, so taking their last item loses this when a word repeats.
+    if (
+        words.length === 0 ||
+        words.length > MAX_GLOSSARY_QUERY_TOKENS ||
+        words.some((word) => [...word].length > MAX_INDEX_TOKEN_CODEPOINTS)
+    ) {
+        // Otherwise a long non-final word is silently discarded by the token
+        // index, yielding false matches for the remaining short words.
+        return null;
+    }
+    const prefix = words[words.length - 1];
     if ([...prefix].length < MIN_INDEX_TOKEN_CODEPOINTS) { return null; }
-    const phrase = [...folded.matchAll(TOKEN_PATTERN)]
-        .map((match) => match[0].replace(/’/gu, "'"))
-        .slice(0, MAX_GLOSSARY_QUERY_TOKENS)
-        .join(' ');
+    const phrase = words.join(' ');
+    const uniqueTokens = glossarySearchTokensFromText(phrase);
+    // Keep required tokens distinct for the posting-list HAVING count.
+    const tokens = [...uniqueTokens.filter((token) => token !== prefix), prefix];
     return {folded, phrase, tokens, prefix};
 }
 

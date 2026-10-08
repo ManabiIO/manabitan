@@ -320,6 +320,17 @@ describe('getMdictMediaPathFromComputedUrl', () => {
         expect(getMdictMediaPathFromComputedUrl('blob:https://example.invalid/id', baseUrl)).toBeNull();
     });
 
+    test('large stylesheets with repeated CSS escapes retain correct media targets', () => {
+        // Repeated escapes in unrelated quoted content must not force the parser
+        // to copy the full remaining stylesheet for each escape.
+        const escaped = '\\41'.repeat(10_000);
+        const css = '.unused{content:"' + escaped + '"} .wanted{background:url("mdict-media/\\67reen.png")}';
+        expect(getMdictMediaPathsFromComputedCss(
+            css,
+            'chrome-extension://example/search.html',
+        )).toStrictEqual(['mdict-media/green.png']);
+    });
+
     test('extracts active MDict URLs from multi-layer computed CSS values', () => {
         expect(getMdictMediaPathsFromComputedCss(
             [

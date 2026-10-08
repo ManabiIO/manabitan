@@ -17,6 +17,7 @@
  */
 
 import {EventDispatcher} from '../core/event-dispatcher.js';
+import {log} from '../core/log.js';
 
 /**
  * @augments EventDispatcher<import('clipboard-monitor').Events>
@@ -65,20 +66,28 @@ export class ClipboardMonitor extends EventDispatcher {
             }
             if (this._timerToken !== token) { return; }
 
-            if (
-                typeof text === 'string' &&
-                (text = text.trim()).length > 0 &&
-                text !== this._previousText
-            ) {
-                this._previousText = text;
-                if (canChange) {
-                    this.trigger('change', {text});
+            if (typeof text === 'string') {
+                text = text.trim();
+                if (text.length === 0) {
+                    // Clearing then copying identical text is a new clipboard change.
+                    this._previousText = null;
+                } else if (text !== this._previousText) {
+                    this._previousText = text;
+                    if (canChange) {
+                        try {
+                            this.trigger('change', {text});
+                        } catch (error) {
+                            // A failing subscriber must not terminate polling.
+                            try { log.error(error); } catch (_) { /* Polling must survive diagnostics failures. */ }
+                        }
+                    }
                 }
+                // A failed first read is not a valid clipboard baseline.
+                canChange = true;
             }
 
             // A change listener can stop or restart the monitor synchronously.
             if (this._timerToken !== token) { return; }
-            canChange = true;
             this._timerId = setTimeout(intervalCallback, this._interval);
         };
 

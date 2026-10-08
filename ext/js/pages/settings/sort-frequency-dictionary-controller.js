@@ -35,6 +35,8 @@ export class SortFrequencyDictionaryController {
         this._sortFrequencyDictionaryOrderContainerNode = querySelectorNotNull(document, '#sort-frequency-dictionary-order-container');
         /** @type {?import('core').TokenObject} */
         this._getDictionaryInfoToken = null;
+        /** @type {number} */
+        this._optionsRenderRequest = 0;
     }
 
     /** */
@@ -61,9 +63,11 @@ export class SortFrequencyDictionaryController {
 
             this._updateDictionaryOptions(dictionaries);
 
+            const request = ++this._optionsRenderRequest;
             const optionsContext = this._settingsController.getOptionsContext();
             const options = await this._settingsController.getOptions();
             if (
+                request !== this._optionsRenderRequest ||
                 this._getDictionaryInfoToken !== token ||
                 this._settingsController.getOptionsContext().index !== optionsContext.index
             ) {
@@ -81,6 +85,7 @@ export class SortFrequencyDictionaryController {
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
     _onOptionsChanged({options}) {
+        ++this._optionsRenderRequest;
         const {sortFrequencyDictionary, sortFrequencyDictionaryOrder} = options.general;
         /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionarySelect).value = (sortFrequencyDictionary !== null ? sortFrequencyDictionary : '');
         /** @type {HTMLSelectElement} */ (this._sortFrequencyDictionaryOrderSelect).value = sortFrequencyDictionaryOrder;

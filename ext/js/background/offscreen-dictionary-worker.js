@@ -518,16 +518,26 @@ export class OffscreenDictionaryWorkerHandler {
                 return await this._dictionaryDatabase.getDictionaryInfo();
             case 'deleteDictionaryOffscreen':
                 await this._ensureDatabasePrepared();
-                await this._dictionaryDatabase.deleteDictionary(/** @type {string} */ (params.dictionaryTitle ?? ''), 1000, () => {});
+                try {
+                    await this._dictionaryDatabase.deleteDictionary(/** @type {string} */ (params.dictionaryTitle ?? ''), 1000, () => {});
+                } finally {
+                    // A successful or partially failed mutation can change dictionary
+                    // metadata; make the next lookup observe the new generation.
+                    this._translator.clearDatabaseCaches();
+                }
                 return;
             case 'replaceDictionaryTitleOffscreen':
                 await this._ensureDatabasePrepared();
-                await this._dictionaryDatabase.replaceDictionaryTitle(
-                    /** @type {string} */ (params.fromDictionaryTitle ?? ''),
-                    /** @type {string} */ (params.toDictionaryTitle ?? ''),
-                    /** @type {import('dictionary-importer').Summary|null} */ (params.summaryOverride ?? null),
-                    /** @type {string|null} */ (params.replacedDictionaryTitle ?? null),
-                );
+                try {
+                    await this._dictionaryDatabase.replaceDictionaryTitle(
+                        /** @type {string} */ (params.fromDictionaryTitle ?? ''),
+                        /** @type {string} */ (params.toDictionaryTitle ?? ''),
+                        /** @type {import('dictionary-importer').Summary|null} */ (params.summaryOverride ?? null),
+                        /** @type {string|null} */ (params.replacedDictionaryTitle ?? null),
+                    );
+                } finally {
+                    this._translator.clearDatabaseCaches();
+                }
                 return;
             case 'getDictionaryCountsOffscreen':
                 await this._ensureDatabasePrepared();
@@ -591,7 +601,11 @@ export class OffscreenDictionaryWorkerHandler {
             case 'databasePurgeOffscreen':
                 await this._ensureDatabasePrepared();
                 this._databaseReady = false;
-                return await this._dictionaryDatabase.purge();
+                try {
+                    return await this._dictionaryDatabase.purge();
+                } finally {
+                    this._translator.clearDatabaseCaches();
+                }
             case 'databaseRefreshOffscreen':
                 this._databaseReady = false;
                 if (this._dictionaryDatabase.isPrepared()) {

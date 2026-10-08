@@ -80,12 +80,13 @@ export class SelectorObserver {
             throw new Error('Instance is already observing an element');
         }
 
-        this._observingElement = element;
         this._mutationObserver.observe(element, {
             attributes: !!attributes,
             childList: true,
             subtree: true,
         });
+        // A failed observer registration must not leave a phantom active root.
+        this._observingElement = element;
 
         const {parentNode} = element;
         this._onMutation([{
@@ -216,6 +217,10 @@ export class SelectorObserver {
      * @param {Element} element
      */
     _createObserver(element) {
+        // MutationObserver can deliver attribute records for a detached
+        // subtree after its removal record in the same batch. Never revive
+        // that node (or a newly-added node already moved outside this root).
+        if (this._observingElement === null || !this._observingElement.contains(element)) { return; }
         if (this._elementMap.has(element) || this._shouldIgnoreElement(element) || this._onAdded === null) { return; }
 
         const data = this._onAdded(element);
