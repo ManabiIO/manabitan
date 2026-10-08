@@ -631,6 +631,9 @@ export class AnkiConnect {
         if (!Array.isArray(result)) {
             throw this._createUnexpectedResultError('array', result);
         }
+        if (result.length !== actions.length) {
+            throw this._createError(`Unexpected multi response size: expected ${actions.length}, received ${result.length}`, result);
+        }
         return result;
     }
 
