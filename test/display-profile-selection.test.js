@@ -128,6 +128,25 @@ describe('DisplayProfileSelection options refresh handling', () => {
         expect(Reflect.get(selection, '_profileName').textContent).toBe('Two');
     });
 
+    test('failed dropdown refresh stays retryable and is logged', async () => {
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        const updateProfileList = vi.fn().mockRejectedValue(new Error('list fetch failed'));
+        Reflect.set(selection, '_profilePanel', {setVisible: vi.fn()});
+        Reflect.set(selection, '_profileButton', {classList: {toggle: vi.fn()}});
+        Reflect.set(selection, '_profileListNeedsUpdate', true);
+        Reflect.set(selection, '_updateProfileList', updateProfileList);
+        const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.stubGlobal('document', {documentElement: {dataset: {}}});
+
+        DisplayProfileSelection.prototype._setProfilePanelVisible.call(selection, true);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(updateProfileList).toHaveBeenCalledOnce();
+        expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(true);
+        expect(logErrorSpy).toHaveBeenCalled();
+        vi.unstubAllGlobals();
+    });
+
     test('failed profile change refreshes persisted state and logs the error', async () => {
         const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
         const updateProfileList = vi.fn().mockResolvedValue(void 0);
