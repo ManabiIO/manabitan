@@ -89,3 +89,23 @@ describe('backend dictionary archive download deadline', () => {
         expect(vi.getTimerCount()).toBe(0);
     });
 });
+
+describe('backend dictionary archive filename detection', () => {
+    test.each([
+        ['attachment; filename="fallback.zip"; filename*=UTF-8\'\'%E6%97%A5%E6%9C%AC%E8%AA%9E.zip', '日本語.zip'],
+        ['attachment; filename*=UTF-8\'ja\'%E6%97%A5%E6%9C%AC%E8%AA%9E.zip; filename="fallback.zip"', '日本語.zip'],
+        ['attachment; filename="file name.zip"', 'file name.zip'],
+        ['attachment; filename*=UTF-8\'\'%ZZ; filename="safe.zip"', 'safe.zip'],
+    ])('selects the supported Content-Disposition filename from %s', async (disposition, expected) => {
+        vi.useFakeTimers();
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('data', {
+            headers: {'Content-Disposition': disposition},
+        })));
+        vi.spyOn(RequestBuilder, 'readFetchResponseArrayBuffer').mockResolvedValue(new ArrayBuffer(0));
+
+        const result = await downloadArchive();
+
+        expect(result.fileName).toBe(expected);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+});
