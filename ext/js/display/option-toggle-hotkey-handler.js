@@ -35,6 +35,8 @@ export class OptionToggleHotkeyHandler {
         this._notificationHideTimeout = 5000;
         /** @type {string} */
         this._source = `option-toggle-hotkey-handler-${generateId(16)}`;
+        /** @type {Promise<void>} */
+        this._toggleTail = Promise.resolve();
     }
 
     /** @type {number} */
@@ -67,10 +69,25 @@ export class OptionToggleHotkeyHandler {
      * @param {string} path
      */
     async _toggleOption(path) {
+        const optionsContext = this._display.getOptionsContext();
+        // A rapid second hotkey must read the state after the first write.
+        // Queue the read-modify-write cycle, not just the writes themselves.
+        const operation = this._toggleTail.then(async () => {
+            if (this._display.getOptionsContext() !== optionsContext) { return; }
+            await this._toggleOptionNow(path, optionsContext);
+        });
+        this._toggleTail = operation.then(() => {}, () => {});
+        await operation;
+    }
+
+    /**
+     * @param {string} path
+     * @param {import('settings').OptionsContext} optionsContext
+     * @returns {Promise<void>}
+     */
+    async _toggleOptionNow(path, optionsContext) {
         let value;
         try {
-            const optionsContext = this._display.getOptionsContext();
-
             const getSettingsResponse = (await this._display.application.api.getSettings([{
                 scope: 'profile',
                 path,
@@ -86,6 +103,9 @@ export class OptionToggleHotkeyHandler {
                 throw new Error(`Option value of type ${typeof value} cannot be toggled`);
             }
 
+            // A navigation or profile-context change makes the pending
+            // action obsolete, even if the earlier read has now completed.
+            if (this._display.getOptionsContext() !== optionsContext) { return; }
             value = !value;
 
             /** @type {import('settings-modifications').ScopedModificationSet} */
@@ -102,7 +122,9 @@ export class OptionToggleHotkeyHandler {
                 throw ExtensionError.deserialize(modifySettingsError);
             }
 
-            this._showNotification(this._createSuccessMessage(path, value), true);
+            if (this._display.getOptionsContext() === optionsContext) {
+                this._showNotification(this._createSuccessMessage(path, value), true);
+            }
         } catch (e) {
             this._showNotification(this._createErrorMessage(path, e), false);
         }
