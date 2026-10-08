@@ -5,11 +5,13 @@
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
 
-/** @type {Array<{
+/**
+ * @type {Array<{
  *   action: string,
  *   params: import('core').SerializableObject,
  *   method: 'deleteDictionary'|'replaceDictionaryTitle'|'purge',
- * }>} */
+ * }>}
+ */
 const mutationCases = [
     {action: 'deleteDictionaryOffscreen', params: {dictionaryTitle: 'Old'}, method: 'deleteDictionary'},
     {action: 'replaceDictionaryTitleOffscreen', params: {fromDictionaryTitle: 'Old', toDictionaryTitle: 'New'}, method: 'replaceDictionaryTitle'},
