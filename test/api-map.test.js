@@ -111,10 +111,10 @@ describe('api-map', () => {
     });
 
     test('invokeApiMapHandler awaits plain thenables rather than exposing noncloneable handlers', async () => {
-        const thenable = {
-            /** @param {(value: string) => void} resolve */
-            then(resolve) { resolve('thenable-ok'); },
-        };
+        const thenable = {};
+        /** @param {(value: string) => void} resolve */
+        const settle = (resolve) => { resolve('thenable-ok'); };
+        Reflect.set(thenable, 'then', settle);
         const map = /** @type {any} */ (createApiMap([['thenable', () => thenable]]));
         const callback = vi.fn();
 
