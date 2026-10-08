@@ -2987,7 +2987,6 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
         }
         await dismissVisiblePopupFrames(page);
         result.hover = await hoverLookupOnWagahai(page, '#target-cat');
-        assert.ok(result.hover.hasDictionaryEntries, 'Ordinary hover must still render entries after Reader clicks');
         const hoverFrameHandle = await waitForVisiblePopupFrameHandle(page);
         const hoverFrame = await hoverFrameHandle.contentFrame();
         // A reused popup can become visible before its previous entries are replaced.
@@ -3004,6 +3003,10 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
             const glossary = Array.from(entries.querySelectorAll('.gloss-content')).map((node) => node.textContent).join(' ');
             return hasCatHeadword && /\bcat\b/i.test(glossary);
         }, null, {timeout: 10000});
+        // The hover helper can observe a newly visible but not yet populated
+        // popup. Only assert entries after the fresh lexical content is ready.
+        result.hover.hasDictionaryEntries = await hoverFrame.locator('#dictionary-entries .entry').count() > 0;
+        assert.ok(result.hover.hasDictionaryEntries, 'Ordinary hover must still render entries after Reader clicks');
         result.hover.entriesTextPreview = await hoverFrame.locator('#dictionary-entries').evaluate((node) => (
             (node.textContent || '').replaceAll(/\s+/g, ' ').trim().slice(0, 200)
         ));
