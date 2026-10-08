@@ -130,6 +130,38 @@ describe('FrameEndpoint handshake lifecycle', () => {
         expect(endpoint.authenticate({secret: Reflect.get(endpoint, '_secret'), token: 'second'})).toBe(true);
     });
 
+    test('persistent acknowledgement failures stop automatic retrying after a bounded backoff', async () => {
+        vi.useFakeTimers();
+        try {
+            /** @type {FrameEndpoint | undefined} */
+            let endpoint;
+            let attempts = 0;
+            const broadcastTab = vi.fn().mockImplementation(async () => {
+                if (typeof endpoint !== 'undefined') {
+                    connect(endpoint, `attempt-${++attempts}`, 3);
+                }
+            });
+            const sendMessageToFrame = vi.fn().mockRejectedValue(new Error('persistent failure'));
+            endpoint = createEndpoint(broadcastTab, sendMessageToFrame);
+            endpoint.signal();
+            await vi.advanceTimersByTimeAsync(10_000);
+
+            // Initial handshake plus at most five automatic retries.
+            expect(broadcastTab).toHaveBeenCalledTimes(6);
+            expect(sendMessageToFrame).toHaveBeenCalledTimes(6);
+            expect(Reflect.get(endpoint, '_eventListeners').size).toBe(1);
+            expect(vi.getTimerCount()).toBe(0);
+
+            // The endpoint remains usable if the host reconnects explicitly.
+            sendMessageToFrame.mockResolvedValueOnce(void 0);
+            connect(endpoint, 'recovered', 3);
+            await vi.advanceTimersByTimeAsync(0);
+            expect(endpoint.authenticate({secret: Reflect.get(endpoint, '_secret'), token: 'recovered'})).toBe(true);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
     test('a failed ready broadcast is logged and does not cause an unhandled rejection', async () => {
         const broadcastTab = vi.fn().mockRejectedValue(new Error('broadcast failed'));
         const sendMessageToFrame = vi.fn().mockResolvedValue(void 0);
