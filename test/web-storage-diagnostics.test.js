@@ -15,17 +15,23 @@ test('quota estimate failure does not hide a successful persistence check', asyn
         estimate: async () => {throw new Error('Quota API temporarily blocked');},
         persisted: async () => true,
     });
-    expect(data).toEqual({usage: undefined, quota: undefined, persisted: true});
+    expect(data.usage).toBeUndefined();
+    expect(data.quota).toBeUndefined();
+    expect(data.persisted).toBe(true);
 });
 
 test('missing or rejected persistence status is reported conservatively', async () => {
     const missing = await webStorageDiagnostics({});
-    expect(missing).toEqual({usage: undefined, quota: undefined, persisted: false});
+    expect(missing.usage).toBeUndefined();
+    expect(missing.quota).toBeUndefined();
+    expect(missing.persisted).toBe(false);
     const rejected = await webStorageDiagnostics({
         estimate: async () => ({usage: 1024}),
         persisted: async () => {throw new DOMException('Blocked', 'SecurityError');},
     });
-    expect(rejected).toEqual({usage: 1024, quota: undefined, persisted: false});
+    expect(rejected.usage).toBe(1024);
+    expect(rejected.quota).toBeUndefined();
+    expect(rejected.persisted).toBe(false);
 });
 
 test('synchronous diagnostic errors are also isolated', async () => {
@@ -33,5 +39,7 @@ test('synchronous diagnostic errors are also isolated', async () => {
         estimate() {throw new Error('Sync failure');},
         persisted() {throw new Error('Sync failure');},
     });
-    expect(data).toEqual({usage: undefined, quota: undefined, persisted: false});
+    expect(data.usage).toBeUndefined();
+    expect(data.quota).toBeUndefined();
+    expect(data.persisted).toBe(false);
 });

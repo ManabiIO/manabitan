@@ -11,9 +11,10 @@ export async function webStorageDiagnostics(storage: Partial<Pick<StorageManager
         Promise.resolve().then(() => storage.estimate?.()),
         Promise.resolve().then(() => storage.persisted?.()),
     ]);
+    const measured = estimate.status === 'fulfilled' ? estimate.value : null;
     return {
-        usage: estimate.status === 'fulfilled' ? estimate.value?.usage : undefined,
-        quota: estimate.status === 'fulfilled' ? estimate.value?.quota : undefined,
+        usage: measured?.usage,
+        quota: measured?.quota,
         persisted: persisted.status === 'fulfilled' && persisted.value === true,
     };
 }
