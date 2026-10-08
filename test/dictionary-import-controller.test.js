@@ -597,7 +597,7 @@ describe('Dictionary import settings carry-over', () => {
 });
 
 describe('Dictionary import profile visibility', () => {
-    const addDictionarySettings = /** @type {(this: DictionaryImportController, summary: import('dictionary-importer').Summary, profilesDictionarySettings: null) => Promise<Error[]>} */ (
+    const addDictionarySettings = /** @type {(this: DictionaryImportController, summary: import('dictionary-importer').Summary, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings) => Promise<Error[]>} */ (
         getDictionaryImportControllerMethod('_addDictionarySettings')
     );
     const verifyImportedDictionaryVisible = /** @type {(this: DictionaryImportController, title: string, requireEnabled: boolean) => Promise<void>} */ (
@@ -647,6 +647,33 @@ describe('Dictionary import profile visibility', () => {
             path: 'profiles[0].options.dictionaries[0].enabled',
             value: true,
         }]);
+    });
+
+    test('preserves an explicitly disabled existing dictionary during an update', async () => {
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _settingsController: {
+                profileIndex: 0,
+                getOptionsFull: vi.fn().mockResolvedValue({
+                    profiles: [{
+                        id: 'selected',
+                        options: {
+                            dictionaries: [{name: 'JMdict', enabled: false, alias: 'Disabled by user'}],
+                            general: {mainDictionary: '', sortFrequencyDictionary: null},
+                        },
+                    }],
+                }),
+            },
+            _modifyGlobalSettings: modifyGlobalSettings,
+        }));
+
+        await addDictionarySettings.call(controller, /** @type {import('dictionary-importer').Summary} */ ({
+            title: 'JMdict', sequenced: false, styles: '',
+        }), {
+            'another-profile': [{name: 'JMdict-old', enabled: true, alias: 'Another profile', index: 0}],
+        });
+
+        expect(modifyGlobalSettings).toHaveBeenCalledWith([]);
     });
 
     test('does not add another entry if the dictionary is already enabled', async () => {
