@@ -96,6 +96,66 @@ describe('DisplayProfileSelection options refresh handling', () => {
         expect(Reflect.get(selection, '_profileName').textContent).toBe('Mining');
     });
 
+    test('an external change while a hidden list refresh is in flight keeps the list dirty', async () => {
+        const oldRequest = /** @type {import('core').DeferredPromiseDetails<import('settings').Options>} */ (deferPromise());
+        const optionsGetFull = vi.fn()
+            .mockImplementationOnce(() => oldRequest.promise)
+            .mockResolvedValueOnce({profileCurrent: 0, profiles: []});
+        const listeners = {removeAllEventListeners: vi.fn()};
+        const profileList = {textContent: 'existing', appendChild: vi.fn()};
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        Reflect.set(selection, '_profileListRefreshGeneration', 0);
+        Reflect.set(selection, '_profileListNeedsUpdate', true);
+        Reflect.set(selection, '_source', 'local');
+        Reflect.set(selection, '_profilePanel', {isVisible: () => false});
+        Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(selection, '_eventListeners', listeners);
+        Reflect.set(selection, '_profileList', profileList);
+        Reflect.set(selection, '_display', {application: {api: {optionsGetFull}}, displayGenerator: {}});
+        vi.stubGlobal('document', {createDocumentFragment: () => ({})});
+        try {
+            const stale = DisplayProfileSelection.prototype._updateProfileList.call(selection);
+            await DisplayProfileSelection.prototype._onOptionsUpdated.call(selection, {source: 'external'});
+            oldRequest.resolve({profileCurrent: 0, profiles: []});
+            await stale;
+            expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(true);
+            expect(profileList.textContent).toBe('existing');
+            expect(listeners.removeAllEventListeners).not.toHaveBeenCalled();
+
+            await DisplayProfileSelection.prototype._updateProfileList.call(selection);
+            expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(false);
+            expect(optionsGetFull).toHaveBeenCalledTimes(2);
+            expect(listeners.removeAllEventListeners).toHaveBeenCalledOnce();
+        } finally {
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test('failed list rendering preserves old listeners and stays retryable', async () => {
+        const listeners = {removeAllEventListeners: vi.fn()};
+        const profileList = {textContent: 'existing', appendChild: vi.fn()};
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        Reflect.set(selection, '_profileListRefreshGeneration', 0);
+        Reflect.set(selection, '_profileListNeedsUpdate', true);
+        Reflect.set(selection, '_eventListeners', listeners);
+        Reflect.set(selection, '_profileList', profileList);
+        Reflect.set(selection, '_display', {
+            application: {api: {optionsGetFull: vi.fn().mockResolvedValue({
+                profileCurrent: 0, profiles: [{name: 'One'}],
+            })}},
+            displayGenerator: {createProfileListItem: () => { throw new Error('render failed'); }},
+        });
+        vi.stubGlobal('document', {createDocumentFragment: () => ({appendChild: vi.fn()})});
+        try {
+            await expect(DisplayProfileSelection.prototype._updateProfileList.call(selection)).rejects.toThrow('render failed');
+            expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(true);
+            expect(profileList.textContent).toBe('existing');
+            expect(listeners.removeAllEventListeners).not.toHaveBeenCalled();
+        } finally {
+            vi.unstubAllGlobals();
+        }
+    });
+
     test('profile name refresh is independent of an in-flight profile list request', async () => {
         let resolveList;
         const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
