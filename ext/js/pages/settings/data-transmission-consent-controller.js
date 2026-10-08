@@ -96,15 +96,24 @@ export class DataTransmissionConsentController {
         }
         try {
             const targets = getDataTransmissionConsentUpdateTargets(state, audioEnabled, this._settingsController.getOptionsContext());
-            const results = await this._settingsController.modifySettings(targets);
-            if (!Array.isArray(results) || results.length !== targets.length) {
-                throw new Error('Consent update returned an incomplete response');
-            }
-            for (const result of results) {
-                if (typeof result !== 'object' || result === null) {
-                    throw new Error('Consent update returned an invalid response');
+            // The backend reports per-target failures but still saves successful
+            // mutations from the same batch. Split the consent/audio changes:
+            // acceptance must persist before audio can be enabled, and declining
+            // must disable audio before the consent state is updated.
+            const globalTargets = targets.slice(0, 2);
+            const audioTargets = targets.slice(2);
+            const batches = state === 'accepted' ? [globalTargets, audioTargets] : [audioTargets, globalTargets];
+            for (const batch of batches) {
+                const results = await this._settingsController.modifySettings(batch);
+                if (!Array.isArray(results) || results.length !== batch.length) {
+                    throw new Error('Consent update returned an incomplete response');
                 }
-                if (result.error) { throw ExtensionError.deserialize(result.error); }
+                for (const result of results) {
+                    if (typeof result !== 'object' || result === null) {
+                        throw new Error('Consent update returned an invalid response');
+                    }
+                    if (result.error) { throw ExtensionError.deserialize(result.error); }
+                }
             }
             this._consentModal?.setVisible(false);
         } catch (error) {
