@@ -129,7 +129,15 @@ export class RequestBuilder {
 
         const contentLengthString = response.headers.get('Content-Length');
         const contentLength = contentLengthString !== null ? Number.parseInt(contentLengthString, 10) : null;
-        let target = contentLength !== null && Number.isFinite(contentLength) ? new Uint8Array(contentLength) : null;
+        // Do not trust malformed or arbitrarily large Content-Length values for
+        // preallocation. Large responses can be buffered by their actual chunks.
+        const maxPreallocatedBytes = 64 * 1024 * 1024;
+        let target = (
+            contentLength !== null &&
+            Number.isSafeInteger(contentLength) &&
+            contentLength > 0 &&
+            contentLength <= maxPreallocatedBytes
+        ) ? new Uint8Array(contentLength) : null;
         let targetPosition = 0;
         let totalLength = 0;
         const targets = [];
@@ -144,6 +152,7 @@ export class RequestBuilder {
                 targets.push({array: value, length: value.length});
             } else if (targetPosition + value.length > target.length) {
                 targets.push({array: target, length: targetPosition});
+                targets.push({array: value, length: value.length});
                 target = null;
             } else {
                 target.set(value, targetPosition);
@@ -331,7 +340,7 @@ export class RequestBuilder {
         const result = new Uint8Array(totalLength);
         let position = 0;
         for (const {array, length} of items) {
-            result.set(array, position);
+            result.set(array.subarray(0, length), position);
             position += length;
         }
         return result;
