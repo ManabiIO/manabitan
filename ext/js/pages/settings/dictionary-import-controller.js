@@ -22,7 +22,6 @@ import {parseJson, readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {safePerformance} from '../../core/safe-performance.js';
 import {toError} from '../../core/to-error.js';
-import {promiseTimeout} from '../../core/utilities.js';
 import {getKebabCase} from '../../data/anki-template-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {DictionaryController} from './dictionary-controller.js';
@@ -1219,19 +1218,22 @@ export class DictionaryImportController {
      */
     async _runImportWithWatchdog(importPromise, label) {
         const timeoutMs = 180_000;
+        const timeoutError = new Error(`${label} did not complete within ${String(timeoutMs)}ms`);
+        /** @type {ReturnType<typeof setTimeout>|undefined} */
+        let timer;
+        const timeoutPromise = new Promise((resolve, reject) => {
+            timer = setTimeout(() => reject(timeoutError), timeoutMs);
+        });
         try {
-            await Promise.race([
-                importPromise,
-                promiseTimeout(timeoutMs).then(() => {
-                    throw new Error(`${label} did not complete within ${String(timeoutMs)}ms`);
-                }),
-            ]);
+            await Promise.race([importPromise, timeoutPromise]);
         } catch (error) {
             const normalizedError = toError(error);
-            if (normalizedError.message.includes('did not complete within')) {
+            if (error === timeoutError) {
                 this._forceRecoverHungImportSession(normalizedError, label);
             }
             throw normalizedError;
+        } finally {
+            clearTimeout(timer);
         }
     }
 
