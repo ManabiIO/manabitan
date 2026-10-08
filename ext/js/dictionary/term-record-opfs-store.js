@@ -731,7 +731,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(singleDictionaryName, singleContentDictName);
             if (state !== null) {
-                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
+                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords);
             }
             return;
         }
@@ -739,7 +739,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
+            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords);
         }
     }
 
