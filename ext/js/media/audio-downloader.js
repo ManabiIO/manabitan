@@ -422,7 +422,7 @@ export class AudioDownloader {
         });
 
         const fileInfos = await Promise.allSettled(fetchFileInfos);
-        return fileInfos.flatMap((result) => result.status === 'fulfilled' ? result.value : []);
+        return fileInfos.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
     }
 
     /** @type {import('audio-downloader').GetInfoHandler} */
