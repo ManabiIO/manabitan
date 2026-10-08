@@ -41,6 +41,12 @@ test('glossary traversal is bounded even when structured content contains little
     assert.doesNotMatch(text, /unreachable sentinel/);
 });
 
+test('untrusted glossary strings are limited by code points, including surrogate pairs', () => {
+    const text = glossarySearchText(['🐈'.repeat(200000), 'unreachable sentinel']);
+    assert.equal(text, '🐈'.repeat(16384));
+    assert.equal([...text].length, 16384);
+});
+
 test('tokenization normalizes width case apostrophes and bounds duplicate tokens', () => {
     assert.deepEqual(
         glossarySearchTokens(['ＣＡＴ cat', 'Owner’s companion', "owner's companion"]),
@@ -74,6 +80,7 @@ test('the final typed word owns completion even if it repeats an earlier word', 
     assert.deepEqual(createGlossarySearchQuery('a cat')?.tokens, ['cat']);
     assert.equal(createGlossarySearchQuery('cat a'), null);
     assert.equal(createGlossarySearchQuery(`cat ${'x'.repeat(65)}`), null);
+    assert.equal(createGlossarySearchQuery(`${'x'.repeat(65)} cat`), null);
     assert.equal(createGlossarySearchQuery('one two three four five six seven eight nine'), null);
 });
 

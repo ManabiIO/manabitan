@@ -54,11 +54,12 @@ export function glossarySearchText(glossary) {
      */
     const append = (value) => {
         if (codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS) { return; }
-        const points = [...value];
         const available = MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS - codepoints;
-        if (available <= 0) { return; }
-        parts.push(points.slice(0, available).join(''));
-        codepoints += Math.min(points.length, available);
+        // Never materialize all code points of an untrusted glossary string.
+        // A code point uses at most two UTF-16 units, so this prefix suffices.
+        const points = [...value.slice(0, available * 2)].slice(0, available);
+        parts.push(points.join(''));
+        codepoints += points.length;
     };
     /**
      * @param {unknown} value
@@ -154,10 +155,17 @@ export function createGlossarySearchQuery(query) {
     const words = [...folded.matchAll(TOKEN_PATTERN)].map((match) => match[0]);
     // The last typed word owns live-prefix completion. Index tokens are
     // deduplicated, so taking their last item loses this when a word repeats.
-    if (words.length === 0 || words.length > MAX_GLOSSARY_QUERY_TOKENS) { return null; }
+    if (
+        words.length === 0 ||
+        words.length > MAX_GLOSSARY_QUERY_TOKENS ||
+        words.some((word) => [...word].length > MAX_INDEX_TOKEN_CODEPOINTS)
+    ) {
+        // Otherwise a long non-final word is silently discarded by the token
+        // index, yielding false matches for the remaining short words.
+        return null;
+    }
     const prefix = words[words.length - 1];
-    const prefixLength = [...prefix].length;
-    if (prefixLength < MIN_INDEX_TOKEN_CODEPOINTS || prefixLength > MAX_INDEX_TOKEN_CODEPOINTS) { return null; }
+    if ([...prefix].length < MIN_INDEX_TOKEN_CODEPOINTS) { return null; }
     const phrase = words.join(' ');
     const uniqueTokens = glossarySearchTokensFromText(phrase);
     // Keep required tokens distinct for the posting-list HAVING count.
