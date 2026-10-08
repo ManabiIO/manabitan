@@ -1875,12 +1875,14 @@ export class Backend {
         }
         const fileName = (() => {
             const contentDisposition = response.headers.get('Content-Disposition') || '';
+            /** @type {(name: string) => string} */
+            const basename = (name) => name.replaceAll('\\', '/').split('/').pop()?.trim() ?? '';
             // RFC 5987 filename* takes priority over legacy filename when both
             // are present. Do not interpret percent-encoding in plain filename.
             const extendedMatch = /(?:^|;)\s*filename\*\s*=\s*"?UTF-8'[^']*'([^";]+)/i.exec(contentDisposition);
             if (extendedMatch !== null) {
                 try {
-                    const name = decodeURIComponent(extendedMatch[1].trim());
+                    const name = basename(decodeURIComponent(extendedMatch[1].trim()));
                     if (name.length > 0) { return name; }
                 } catch (_) {
                     // Malformed extended name: use a legacy name or URL fallback.
@@ -1888,7 +1890,7 @@ export class Backend {
             }
             const plainMatch = /(?:^|;)\s*filename\s*=\s*(?:"([^"]*)"|([^;]+))/i.exec(contentDisposition);
             if (plainMatch !== null) {
-                const name = (plainMatch[1] ?? plainMatch[2] ?? '').trim();
+                const name = basename((plainMatch[1] ?? plainMatch[2] ?? '').trim());
                 if (name.length > 0) { return name; }
             }
             try {
