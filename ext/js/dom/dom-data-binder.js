@@ -109,12 +109,18 @@ export class DOMDataBinder {
             }
         }
 
+        // Snapshot ownership before fetching. A user edit during the read,
+        // or a write already in flight, must not be replaced by stale settings.
+        const updateSnapshot = targets.map(([observer]) => ({
+            editVersion: observer.editVersion,
+            pendingAssign: observer.pendingAssign,
+        }));
         const args = targets.map(([observer]) => ({
             element: observer.element,
             metadata: observer.metadata,
         }));
         const responses = await this._getValues(args);
-        this._applyValues(targets, responses, true);
+        this._applyValues(targets, responses, true, updateSnapshot);
     }
 
     /**
@@ -144,6 +150,8 @@ export class DOMDataBinder {
         const value = this._getElementValue(observer.element);
         observer.value = value;
         observer.hasValue = true;
+        ++observer.editVersion;
+        observer.pendingAssign = true;
         void this._assignTasks.enqueue(observer, {value});
     }
 
@@ -151,10 +159,18 @@ export class DOMDataBinder {
      * @param {import('dom-data-binder').ApplyTarget<T>[]} targets
      * @param {import('dom-data-binder').TaskResult[]} response
      * @param {boolean} ignoreStale
+     * @param {{editVersion: number, pendingAssign: boolean}[]|null} [updateSnapshot]
      */
-    _applyValues(targets, response, ignoreStale) {
+    _applyValues(targets, response, ignoreStale, updateSnapshot = null) {
         for (let i = 0, ii = targets.length; i < ii; ++i) {
             const [observer, task] = targets[i];
+            // An input detached while the async request ran no longer belongs
+            // to this binding. Do not dispatch settingChanged into dead DOM.
+            if (observer.onChange === null) { continue; }
+            if (updateSnapshot !== null) {
+                const state = updateSnapshot[i];
+                if (state.pendingAssign || observer.pendingAssign || state.editVersion !== observer.editVersion) { continue; }
+            }
             const {error, result} = response[i];
             const stale = (task !== null && task.stale);
 
@@ -166,6 +182,7 @@ export class DOMDataBinder {
             }
 
             if (stale && !ignoreStale) { continue; }
+            if (!ignoreStale) { observer.pendingAssign = false; }
 
             observer.value = result;
             observer.hasValue = true;
@@ -188,6 +205,8 @@ export class DOMDataBinder {
             type,
             value: null,
             hasValue: false,
+            editVersion: 0,
+            pendingAssign: false,
             eventType,
             onChange: null,
             metadata,
@@ -227,7 +246,7 @@ export class DOMDataBinder {
      */
     _isObserverStale(element, observer) {
         const {type, metadata} = observer;
-        if (type !== this._getNormalizedElementType(element)) { return false; }
+        if (type !== this._getNormalizedElementType(element)) { return true; }
         const newMetadata = this._createElementMetadata(element);
         return typeof newMetadata === 'undefined' || !this._compareElementMetadata(metadata, newMetadata);
     }
