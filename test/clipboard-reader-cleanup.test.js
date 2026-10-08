@@ -12,7 +12,10 @@ import {ClipboardReader} from '../ext/js/comm/clipboard-reader.js';
 function createReader() {
     const attributes = new Map([['src', 'data:image/png;base64,OLD'], ['srcset', 'old 1x']]);
     const image = {
-        /** @param {string} name */
+        /**
+         * @param {string} name
+         * @returns {string|null}
+         */
         getAttribute: (name) => attributes.get(name) ?? null,
         /** @param {string} name */
         removeAttribute: (name) => { attributes.delete(name); },
