@@ -51,7 +51,8 @@ export class CollapsibleDictionaryController {
 
         this._settingsController.application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
-        this._settingsController.on('dictionarySettingsReordered', this._onDictionarySettingsReordered.bind(this));
+        // Event payload is not the internal database refresh token.
+        this._settingsController.on('dictionarySettingsReordered', this._onDictionarySettingsReordered.bind(this, null));
     }
 
     // Private
@@ -246,7 +247,14 @@ export class CollapsibleDictionaryController {
             targets.push({action: 'set', path, value});
         }
         const selects = this._selects;
-        await this._settingsController.modifyProfileSettings(targets);
+        try {
+            await this._settingsController.modifyProfileSettings(targets);
+        } catch (error) {
+            if (this._selects === selects && this._settingsController.getOptionsContext().index === optionsContext.index) {
+                this._updateAllSelect(options);
+            }
+            throw error;
+        }
         // A profile change or options rerender can replace these controls while
         // the mutation is in flight. Never update the new controls with old state.
         if (

@@ -44,7 +44,8 @@ export class SecondarySearchDictionaryController {
 
         this._settingsController.application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
-        this._settingsController.on('dictionarySettingsReordered', this._onDictionarySettingsReordered.bind(this));
+        // Reorder events carry {source}, not the internal database refresh token.
+        this._settingsController.on('dictionarySettingsReordered', this._onDictionarySettingsReordered.bind(this, null));
     }
 
     // Private

@@ -22,7 +22,9 @@ import {CollapsibleDictionaryController} from '../ext/js/pages/settings/collapsi
  * @returns {CollapsibleDictionaryController}
  */
 function createControllerForInternalTests() {
-    return /** @type {CollapsibleDictionaryController} */ (Object.create(CollapsibleDictionaryController.prototype));
+    const controller = /** @type {CollapsibleDictionaryController} */ (Object.create(CollapsibleDictionaryController.prototype));
+    Reflect.set(controller, '_optionsRenderRequest', 0);
+    return controller;
 }
 
 describe('CollapsibleDictionaryController database updates', () => {
@@ -43,5 +45,59 @@ describe('CollapsibleDictionaryController database updates', () => {
         await expect(onDatabaseUpdated.call(controller)).rejects.toThrow('lookup failed');
         expect(getDictionaryInfo).toHaveBeenCalledOnce();
         expect(Reflect.get(controller, '_getDictionaryInfoToken')).toBeNull();
+    });
+
+    test('rebuilds the collapsible dictionary list for reorder event payloads', async () => {
+        const controller = createControllerForInternalTests();
+        const options = {dictionaries: []};
+        const onOptionsChanged = vi.fn();
+        /** @type {(details: {source: object}) => Promise<void>} */
+        let onReordered = async () => {};
+        const settingsController = {
+            application: {on: vi.fn()},
+            on: vi.fn((name, callback) => {
+                if (name === 'dictionarySettingsReordered') {
+                    onReordered = callback;
+                }
+            }),
+            getOptions: vi.fn(async () => options),
+            getOptionsContext: vi.fn(() => ({index: 0})),
+        };
+        Reflect.set(controller, '_settingsController', settingsController);
+        Reflect.set(controller, '_getDictionaryInfoToken', null);
+        Reflect.set(controller, '_onDatabaseUpdated', vi.fn(async () => {}));
+        Reflect.set(controller, '_onOptionsChanged', onOptionsChanged);
+
+        await controller.prepare();
+        await onReordered({source: {}});
+
+        expect(settingsController.getOptions).toHaveBeenCalledOnce();
+        expect(onOptionsChanged).toHaveBeenCalledWith({options, optionsContext: {index: 0}});
+    });
+
+    test('restores the All dropdown after saving collapsible definitions fails', async () => {
+        const controller = createControllerForInternalTests();
+        const options = {
+            dictionaries: [
+                {definitionsCollapsible: 'expanded'},
+                {definitionsCollapsible: 'collapsed'},
+            ],
+        };
+        const modifyProfileSettings = vi.fn().mockRejectedValue(new Error('save failed'));
+        const allSelect = {value: 'collapsed'};
+        const selects = [{value: 'expanded'}, {value: 'collapsed'}];
+        Reflect.set(controller, '_settingsController', {
+            getOptions: vi.fn(async () => options),
+            getOptionsContext: vi.fn(() => ({index: 0})),
+            modifyProfileSettings,
+        });
+        Reflect.set(controller, '_allSelect', allSelect);
+        Reflect.set(controller, '_selects', selects);
+
+        await expect(controller._setDefinitionsCollapsibleAll('collapsed')).rejects.toThrow('save failed');
+
+        expect(modifyProfileSettings).toHaveBeenCalledOnce();
+        expect(allSelect.value).toBe('varies');
+        expect(selects.map((select) => select.value)).toStrictEqual(['expanded', 'collapsed']);
     });
 });

@@ -124,4 +124,101 @@ describe('StorageController runtime check', () => {
         expect(text).toContain('backendError=Receiving end does not exist.');
         expect(text).toContain('startupError=Failed to initialize OPFS runtime');
     });
+
+    test('retries a failed storage estimate on the next manual refresh', async () => {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div class="storage-use-valid" hidden></div>
+            <div class="storage-use-invalid" hidden></div>
+        `);
+        storageMock.estimate.mockRejectedValueOnce(new Error('Transient storage failure'));
+        const application = {
+            api: {debugDictionaryStorageState: vi.fn(async () => null)},
+            on: vi.fn(),
+        };
+        const persistentStorageController = {
+            application,
+            isStoragePeristent: vi.fn(async () => false),
+        };
+        controller = new StorageController(/** @type {any} */ (persistentStorageController));
+        controller.prepare();
+
+        await vi.waitFor(() => {
+            expect((/** @type {HTMLElement} */ (document.querySelector('.storage-use-invalid'))).hidden).toBe(false);
+            expect(application.api.debugDictionaryStorageState).toHaveBeenCalledOnce();
+        });
+
+        document.querySelector('#storage-refresh')?.dispatchEvent(new MouseEvent('click'));
+        await vi.waitFor(() => {
+            expect(storageMock.estimate).toHaveBeenCalledTimes(2);
+            expect((/** @type {HTMLElement} */ (document.querySelector('.storage-use-valid'))).hidden).toBe(false);
+        });
+    });
+
+    test('applies the latest storage estimate after changes during an in-flight refresh', async () => {
+        document.body.insertAdjacentHTML('beforeend', '<div class="storage-usage"></div>');
+        /** @type {() => void} */
+        let releaseFirstEstimate = () => {};
+        /** @type {Promise<void>} */
+        const firstEstimateGate = new Promise((resolve) => {
+            releaseFirstEstimate = () => resolve();
+        });
+        storageMock.estimate.mockImplementationOnce(async () => {
+            await firstEstimateGate;
+            return {usage: 100, quota: 5000000000};
+        }).mockResolvedValue({usage: 2500, quota: 5000000000});
+
+        const application = {
+            api: {debugDictionaryStorageState: vi.fn(async () => null)},
+            on: vi.fn(),
+        };
+        const persistentStorageController = {
+            application,
+            isStoragePeristent: vi.fn(async () => false),
+        };
+        controller = new StorageController(/** @type {any} */ (persistentStorageController));
+        controller.prepare();
+
+        const onStorageChanged = /** @type {() => void} */ (application.on.mock.calls[0][1]);
+        onStorageChanged();
+        onStorageChanged();
+        releaseFirstEstimate();
+
+        await vi.waitFor(() => {
+            expect(storageMock.estimate).toHaveBeenCalledTimes(2);
+            expect(document.querySelector('.storage-usage')?.textContent).toBe('2.5KB');
+        });
+    });
+
+
+    test.each([
+        {mode: 'unknown', usesFallbackStorage: false},
+        {mode: 'opfs-sahpool-unavailable', usesFallbackStorage: false},
+        {mode: 'fallback-memory', usesFallbackStorage: false},
+        {mode: 'opfs-sahpool', usesFallbackStorage: true},
+    ])('never calls dictionary storage usable for $mode (fallback=$usesFallbackStorage)', async ({mode, usesFallbackStorage}) => {
+        const application = {
+            api: {
+                debugDictionaryStorageState: vi.fn(async () => ({
+                    usesFallbackStorage,
+                    openStorageDiagnostics: {mode},
+                    dictionaryRows: [],
+                    offscreenDictionaryRows: [],
+                })),
+            },
+            on: vi.fn(),
+        };
+        const persistentStorageController = {
+            application,
+            isStoragePeristent: vi.fn(async () => false),
+        };
+
+        controller = new StorageController(/** @type {any} */ (persistentStorageController));
+        controller.prepare();
+        await vi.waitFor(() => {
+            const text = document.querySelector('#storage-runtime-check')?.textContent ?? '';
+            expect(text).toContain('backend reachable=true');
+            expect(text).toContain('dictionary backend usable=false');
+            expect(text).toContain(`backend mode=${mode}`);
+        });
+    });
 });
