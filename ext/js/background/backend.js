@@ -2535,6 +2535,12 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                     results.push({error: ExtensionError.serialize(e)});
                 }
             }
+            if (!results.some((result) => Object.hasOwn(result, 'result'))) {
+                // Invalid/empty batches must not persist a staged copy or
+                // restart popup/clipboard/lookup runtime state for no change.
+                this._options = previousOptions;
+                return results;
+            }
             try {
                 await this._saveOptions(source);
             } catch (e) {
