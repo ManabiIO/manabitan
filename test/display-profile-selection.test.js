@@ -304,4 +304,27 @@ describe('DisplayProfileSelection options refresh handling', () => {
         expect(updateList).toHaveBeenCalledOnce();
     });
 
+    test('successful local profile changes invalidate cached radio selection', async () => {
+        const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
+        const save = vi.fn().mockResolvedValue(void 0);
+        const hidePanel = vi.fn();
+        Reflect.set(selection, '_profileWriteGeneration', 0);
+        Reflect.set(selection, '_profileWriteTail', Promise.resolve());
+        Reflect.set(selection, '_profileListNeedsUpdate', false);
+        Reflect.set(selection, '_display', {application: {api: {optionsGetFull: vi.fn().mockResolvedValue({
+            profiles: [{name: 'One'}, {name: 'Two'}],
+        })}}});
+        Reflect.set(selection, '_setProfileCurrent', save);
+        Reflect.set(selection, '_setProfilePanelVisible', hidePanel);
+        Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
+
+        DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, 1,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
+        await Reflect.get(selection, '_profileWriteTail');
+        expect(save).toHaveBeenCalledWith(1);
+        expect(hidePanel).toHaveBeenCalledWith(false);
+        expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(true);
+    });
+
+
 });
