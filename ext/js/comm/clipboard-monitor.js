@@ -64,18 +64,23 @@ export class ClipboardMonitor extends EventDispatcher {
             }
             if (this._timerToken !== token) { return; }
 
-            if (
-                typeof text === 'string' &&
-                (text = text.trim()).length > 0 &&
-                text !== this._previousText
-            ) {
-                this._previousText = text;
-                if (canChange) {
-                    this.trigger('change', {text});
+            if (typeof text === 'string') {
+                text = text.trim();
+                if (text.length === 0) {
+                    // Copying the same text after a clear is a new change.
+                    this._previousText = null;
+                } else if (text !== this._previousText) {
+                    this._previousText = text;
+                    if (canChange) {
+                        this.trigger('change', {text});
+                    }
                 }
+                // A failed initial read is not an observed clipboard baseline.
+                canChange = true;
             }
 
-            canChange = true;
+            // Change handlers may stop or restart the monitor synchronously.
+            if (this._timerToken !== token) { return; }
             this._timerId = setTimeout(intervalCallback, this._interval);
         };
 
