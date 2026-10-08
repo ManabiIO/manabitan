@@ -99,8 +99,16 @@ export function invokeApiMapHandler(map, name, params, extraParams, callback, ha
     }
     try {
         const promiseOrResult = handler(/** @type {import('core').SafeAny} */ (params), ...extraParams);
-        if (promiseOrResult instanceof Promise) {
-            /** @type {Promise<unknown>} */ (promiseOrResult).then(
+        // Realm-local instanceof rejects foreign Promise instances, and API
+        // handlers may return PromiseLike results. Both must be awaited before
+        // the response crosses an extension message boundary.
+        const asyncResult = (
+            promiseOrResult !== null &&
+            (typeof promiseOrResult === 'object' || typeof promiseOrResult === 'function') &&
+            typeof Reflect.get(promiseOrResult, 'then') === 'function'
+        );
+        if (asyncResult) {
+            void Promise.resolve(promiseOrResult).then(
                 (result) => { callback({result}); },
                 (error) => { callback({error: ExtensionError.serialize(error)}); },
             );
