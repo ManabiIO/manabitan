@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {runInNewContext} from 'node:vm';
 import {describe, expect, test, vi} from 'vitest';
 import {createApiMap, extendApiMap, getApiMapHandler, invokeApiMapHandler} from '../ext/js/core/api-map.js';
 import {ExtensionError} from '../ext/js/core/extension-error.js';
@@ -97,6 +98,29 @@ describe('api-map', () => {
         await Promise.resolve();
 
         expect(callback).toHaveBeenCalledWith({result: {ok: true}});
+    });
+
+    test('invokeApiMapHandler awaits promises from another JavaScript realm', async () => {
+        const foreignPromise = runInNewContext('Promise.resolve("foreign-ok")');
+        const map = /** @type {any} */ (createApiMap([['foreign', () => foreignPromise]]));
+        const callback = vi.fn();
+
+        expect(invokeApiHandler(map, 'foreign', {}, [], callback)).toBe(true);
+        expect(callback).not.toHaveBeenCalled();
+        await vi.waitFor(() => expect(callback).toHaveBeenCalledWith({result: 'foreign-ok'}));
+    });
+
+    test('invokeApiMapHandler awaits plain thenables rather than exposing noncloneable handlers', async () => {
+        const thenable = {
+            /** @param {(value: string) => void} resolve */
+            then(resolve) { resolve('thenable-ok'); },
+        };
+        const map = /** @type {any} */ (createApiMap([['thenable', () => thenable]]));
+        const callback = vi.fn();
+
+        expect(invokeApiHandler(map, 'thenable', {}, [], callback)).toBe(true);
+        expect(callback).not.toHaveBeenCalled();
+        await vi.waitFor(() => expect(callback).toHaveBeenCalledWith({result: 'thenable-ok'}));
     });
 
     test('invokeApiMapHandler serializes asynchronous handler rejections', async () => {
