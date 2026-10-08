@@ -51,7 +51,15 @@ export class DisplayNotification {
 
     /** */
     open() {
-        if (!this.isClosed()) { return; }
+        if (!this.isClosed()) {
+            // close(true) keeps the node attached while its exit animation
+            // runs. A new notification must cancel that scheduled removal.
+            if (this._closeTimer !== null) {
+                this._clearTimer();
+                this._node.hidden = false;
+            }
+            return;
+        }
 
         this._clearTimer();
 
