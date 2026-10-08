@@ -15,23 +15,58 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {ExtensionError} from '../core/extension-error.js';
+
+/** @type {WeakMap<import('../application.js').Application, Promise<void>>} */
+const profileWriteTails = new WeakMap();
+
 /**
  * @param {number} direction
  * @param {import('../application.js').Application} application
+ * @returns {Promise<void>}
  */
-export async function setProfile(direction, application) {
-    const optionsFull = await application.api.optionsGetFull();
+export function setProfile(direction, application) {
+    if (!Number.isSafeInteger(direction)) {
+        return Promise.reject(new TypeError('Profile direction must be an integer'));
+    }
 
-    const profileCount = optionsFull.profiles.length;
-    const newProfile = (optionsFull.profileCurrent + direction + profileCount) % profileCount;
+    // Each hotkey reads the index after earlier hotkeys have completed.
+    // Otherwise rapid presses can all write the same next profile.
+    const previous = profileWriteTails.get(application) ?? Promise.resolve();
+    const operation = previous.then(async () => {
+        const {profileCurrent, profiles} = await application.api.optionsGetFull();
+        const profileCount = profiles.length;
+        if (profileCount === 0) { return; }
+        if (!Number.isSafeInteger(profileCurrent) || profileCurrent < 0 || profileCurrent >= profileCount) {
+            throw new RangeError('Current profile index is invalid');
+        }
+        const step = ((direction % profileCount) + profileCount) % profileCount;
+        const newProfile = (profileCurrent + step) % profileCount;
+        if (newProfile === profileCurrent) { return; }
 
-    /** @type {import('settings-modifications').ScopedModificationSet} */
-    const modification = {
-        action: 'set',
-        path: 'profileCurrent',
-        value: newProfile,
-        scope: 'global',
-        optionsContext: null,
-    };
-    await application.api.modifySettings([modification], 'search');
+        /** @type {import('settings-modifications').ScopedModificationSet} */
+        const modification = {
+            action: 'set',
+            path: 'profileCurrent',
+            value: newProfile,
+            scope: 'global',
+            optionsContext: null,
+        };
+        const results = await application.api.modifySettings([modification], 'search');
+        if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
+            throw new Error('Profile change returned an invalid result');
+        }
+        if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+    });
+
+    // A rejected operation reports its error to its caller but does not poison
+    // the queue. The settled tail is released when no later writes depend on it.
+    const tail = operation.catch(() => {});
+    profileWriteTails.set(application, tail);
+    void tail.then(() => {
+        if (profileWriteTails.get(application) === tail) {
+            profileWriteTails.delete(application);
+        }
+    });
+    return operation;
 }

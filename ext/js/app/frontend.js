@@ -258,6 +258,7 @@ export class Frontend {
 
             listeners.on(this._textScanner, 'clear', this._onTextScannerClear.bind(this));
             listeners.on(this._textScanner, 'searchSuccess', this._onSearchSuccess.bind(this));
+            listeners.on(this._textScanner, 'searchSame', this._onSearchSame.bind(this));
             listeners.on(this._textScanner, 'searchEmpty', this._onSearchEmpty.bind(this));
             listeners.on(this._textScanner, 'searchError', this._onSearchError.bind(this));
 
@@ -573,6 +574,13 @@ export class Frontend {
             if (typeof focus2 === 'boolean') { focus = focus2; }
         }
         this._showContent(textSource, focus, dictionaryEntries, type, sentence, detail !== null ? detail.documentTitle : null, optionsContext, pageTheme, searchSuccessAt, void 0, dictionaryAvailability);
+    }
+
+    /** */
+    _onSearchSame() {
+        // A same-start scan normally skips redundant dictionary work, but
+        // still means the pointer returned before automatic hiding completed.
+        this._stopClearSelectionDelayed();
     }
 
     /** */
