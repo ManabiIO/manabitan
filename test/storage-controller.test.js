@@ -158,8 +158,9 @@ describe('StorageController runtime check', () => {
         document.body.insertAdjacentHTML('beforeend', '<div class="storage-usage"></div>');
         /** @type {() => void} */
         let releaseFirstEstimate = () => {};
+        /** @type {Promise<void>} */
         const firstEstimateGate = new Promise((resolve) => {
-            releaseFirstEstimate = () => resolve(undefined);
+            releaseFirstEstimate = () => resolve();
         });
         storageMock.estimate.mockImplementationOnce(async () => {
             await firstEstimateGate;
@@ -220,5 +221,4 @@ describe('StorageController runtime check', () => {
             expect(text).toContain(`backend mode=${mode}`);
         });
     });
-
 });
