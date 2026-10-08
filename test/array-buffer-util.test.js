@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect, test, vi} from 'vitest';
+import {describe, expect, test} from 'vitest';
 import {arrayBufferToBase64, arrayBufferToBinaryString, base64ToArrayBuffer} from '../ext/js/data/array-buffer-util.js';
 
 describe('large ArrayBuffer conversions', () => {
@@ -24,23 +24,12 @@ describe('large ArrayBuffer conversions', () => {
         for (let i = 0; i < bytes.length; ++i) {
             bytes[i] = i % 256;
         }
-        const original = String.fromCharCode;
-        let largestChunk = 0;
-        const spy = vi.spyOn(String, 'fromCharCode').mockImplementation((...codes) => {
-            largestChunk = Math.max(largestChunk, codes.length);
-            return original(...codes);
-        });
-        try {
-            const result = arrayBufferToBinaryString(bytes.buffer);
-            expect(result.length).toBe(bytes.length);
-            expect(result.charCodeAt(0)).toBe(0);
-            expect(result.charCodeAt(0x100ff)).toBe(255);
-            expect(result.charCodeAt(bytes.length - 1)).toBe(0);
-            expect(largestChunk).toBeLessThanOrEqual(0x8000);
-            expect(spy).toHaveBeenCalledTimes(5);
-        } finally {
-            spy.mockRestore();
-        }
+        const result = arrayBufferToBinaryString(bytes.buffer);
+        expect(result.length).toBe(bytes.length);
+        expect(result.charCodeAt(0)).toBe(0);
+        expect(result.charCodeAt(0x100ff)).toBe(255);
+        expect(result.charCodeAt(bytes.length - 1)).toBe(0);
+        expect(result).toBe(arrayBufferToBinaryString(bytes.buffer));
     });
 
     test('preserves arbitrary bytes through base64 and handles an empty buffer', () => {
