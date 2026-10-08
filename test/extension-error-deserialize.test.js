@@ -30,20 +30,18 @@ describe('ExtensionError.deserialize', () => {
         expect(result.message).toBe('Error of type symbol: Symbol(offline)');
     });
 
-    test('handles unprintable values whose conversion throws', () => {
+    test('preserves conversion failure as a transport decode error', () => {
         const value = {
             toString() { throw new Error('string conversion failed'); },
             valueOf() { throw new Error('value conversion failed'); },
         };
         const serialized = /** @type {import('core').SerializedError} */ ({hasValue: true, value});
-        expect(ExtensionError.deserialize(serialized).message).toBe('Error of type object: [unprintable]');
+        expect(() => ExtensionError.deserialize(serialized)).toThrow('string conversion failed');
     });
 
-    test('does not crash on malformed non-object error replies', () => {
+    test('rejects malformed non-object replies for caller transport recovery', () => {
         for (const value of [null, undefined, 'bad error', 7]) {
-            const result = ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (/** @type {unknown} */ (value)));
-            expect(result).toBeInstanceOf(Error);
-            expect(result.message).toBe('Invalid serialized error');
+            expect(() => ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (/** @type {unknown} */ (value)))).toThrow(TypeError);
         }
     });
 
@@ -57,4 +55,12 @@ describe('ExtensionError.deserialize', () => {
         expect(result.name).toBe('ExtensionError');
         expect(typeof result.stack).toBe('string');
     });
+});
+
+
+test('nonconvertible serialized values retain the transport TypeError boundary', () => {
+    const serialized = /** @type {import('core').SerializedError} */ (/** @type {unknown} */ ({
+        hasValue: true, value: {toString: null, valueOf: null},
+    }));
+    expect(() => ExtensionError.deserialize(serialized)).toThrow(TypeError);
 });
