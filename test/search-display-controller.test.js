@@ -225,6 +225,34 @@ describe('Keyboard Event Handling', () => {
         searchSpy.mockRestore();
     });
 
+
+    test('composing controller suppresses Enter even if the browser key event reports not composing', () => {
+        const searchSpy = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        const blurSpy = vi.spyOn(display, 'blurElement').mockImplementation(() => {});
+        const preventDefault = vi.fn();
+        const stopImmediatePropagation = vi.fn();
+        const event = /** @type {KeyboardEvent} */ (/** @type {unknown} */ ({
+            isComposing: false,
+            keyCode: 13,
+            code: 'Enter',
+            key: 'Enter',
+            shiftKey: false,
+            currentTarget: queryInput,
+            preventDefault,
+            stopImmediatePropagation,
+        }));
+        Reflect.set(searchDisplayController, '_composing', true);
+        try {
+            onSearchKeydownMethod(event);
+            expect(preventDefault).not.toHaveBeenCalled();
+            expect(stopImmediatePropagation).not.toHaveBeenCalled();
+            expect(blurSpy).not.toHaveBeenCalled();
+            expect(searchSpy).not.toHaveBeenCalled();
+        } finally {
+            Reflect.set(searchDisplayController, '_composing', false);
+        }
+    });
+
     test('dictionary database updates refresh options and rerun the active display search', async () => {
         const updateOptionsSpy = vi.spyOn(display, 'updateOptions').mockResolvedValue(void 0);
         const searchLastSpy = vi.spyOn(display, 'searchLast').mockImplementation(() => {});
