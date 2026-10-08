@@ -104,6 +104,6 @@ test('explicit caller cancellation is not misreported as a download timeout', as
     controller.abort(new DOMException('User cancelled download', 'AbortError'));
     const error = await result;
     expect(error.name).toBe('AbortError');
-    expect(error.code).toBeUndefined();
+    expect(error.message).toBe('User cancelled download');
     expect(request.signal?.aborted).toBe(true);
 });
