@@ -42,7 +42,7 @@ export function recommendedDictionariesFromCatalog(catalog: unknown): Recommende
             } catch {
                 continue;
             }
-            if (homepage.protocol !== 'https:' || download.protocol !== 'https:' || homepage.username || download.username) {continue;}
+            if (homepage.protocol !== 'https:' || download.protocol !== 'https:' || homepage.username || homepage.password || download.username || download.password) {continue;}
             result.push({name: String(item.name),
                 description: String(item.description),
                 homepage: homepage.href,
