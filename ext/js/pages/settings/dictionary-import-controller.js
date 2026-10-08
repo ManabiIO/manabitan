@@ -1706,7 +1706,16 @@ export class DictionaryImportController {
                 message: toError(error).message,
             });
         } finally {
-            importProgressTracker.onImportComplete(errors.length);
+            try {
+                importProgressTracker.onImportComplete(errors.length);
+            } catch (error) {
+                const normalizedError = toError(error);
+                errors.push(normalizedError);
+                reportDiagnostics('dictionary-import-progress-finalization-failed', {
+                    message: normalizedError.message,
+                    importRunGeneration,
+                });
+            }
             Reflect.set(globalThis, '__manabitanImportStepTimingHistory', importProgressTracker.getStepTimingHistory());
             const importEndTime = safePerformance.now();
             log.log(`[ImportTiming] import session complete in ${formatDurationMs(importEndTime - importStartTime)} (errors=${errors.length})`);
