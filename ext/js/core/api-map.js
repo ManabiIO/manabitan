@@ -97,6 +97,15 @@ export function invokeApiMapHandler(map, name, params, extraParams, callback, ha
         }
         return false;
     }
+    /**
+     * A response port can disappear while an async handler is running. Never
+     * mistake delivery failure for a handler failure (or publish twice), and
+     * never leave an unhandled rejection from an async response callback.
+     * @param {import('core').Response<import('api-map').ApiReturnAny<TApiSurface>>} response
+     */
+    const deliver = (response) => {
+        try { callback(response); } catch (_) { /* NOP */ }
+    };
     try {
         const promiseOrResult = handler(/** @type {import('core').SafeAny} */ (params), ...extraParams);
         // Realm-local instanceof rejects foreign Promise instances, and API
@@ -109,16 +118,16 @@ export function invokeApiMapHandler(map, name, params, extraParams, callback, ha
         );
         if (asyncResult) {
             void Promise.resolve(promiseOrResult).then(
-                (result) => { callback({result}); },
-                (error) => { callback({error: ExtensionError.serialize(error)}); },
+                (result) => { deliver({result}); },
+                (error) => { deliver({error: ExtensionError.serialize(error)}); },
             );
             return true;
         } else {
-            callback({result: promiseOrResult});
+            deliver({result: promiseOrResult});
             return false;
         }
     } catch (error) {
-        callback({error: ExtensionError.serialize(error)});
+        deliver({error: ExtensionError.serialize(error)});
         return false;
     }
 }
