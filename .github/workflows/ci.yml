@@ -18,6 +18,9 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
+      # Temporarily keep the JSON validation lane running despite baseline type failures.
+      # This converges with PR #417 when its CI improvement lands.
+      fail-fast: false
       matrix:
         include:
           - name: JavaScript
