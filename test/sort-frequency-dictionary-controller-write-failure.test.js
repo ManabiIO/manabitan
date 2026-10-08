@@ -73,4 +73,54 @@ describe('SortFrequencyDictionaryController write failure rollback', () => {
 
         expect((/** @type {HTMLSelectElement} */ (window.document.querySelector('#sort-frequency-dictionary-order'))).value).toBe('ascending');
     });
+
+    test('reverts a dictionary dropdown that was already changed by the browser before the save', async ({window}) => {
+        window.document.body.innerHTML = `
+            <select id="sort-frequency-dictionary">
+                <option value="">None</option>
+                <option value="Dict A" selected>Dict A</option>
+                <option value="Dict B">Dict B</option>
+            </select>
+            <select id="sort-frequency-dictionary-order">
+                <option value="ascending" selected>Ascending</option>
+                <option value="descending">Descending</option>
+            </select>
+            <button id="sort-frequency-dictionary-order-auto"></button>
+            <div id="sort-frequency-dictionary-order-container"></div>
+        `;
+
+        const setProfileSetting = vi.fn().mockRejectedValue(new Error('save failed'));
+        const controller = new SortFrequencyDictionaryController(/** @type {any} */ ({setProfileSetting}));
+        const select = /** @type {HTMLSelectElement} */ (window.document.querySelector('#sort-frequency-dictionary'));
+
+        select.value = 'Dict B';
+        await expect(controller._setSortFrequencyDictionaryValue(select.value)).rejects.toThrow('save failed');
+
+        expect(select.value).toBe('Dict A');
+        expect(/** @type {HTMLElement} */ (window.document.querySelector('#sort-frequency-dictionary-order-container')).hidden).toBe(false);
+    });
+
+    test('reverts an order dropdown that was already changed by the browser before the save', async ({window}) => {
+        window.document.body.innerHTML = `
+            <select id="sort-frequency-dictionary">
+                <option value="Dict A" selected>Dict A</option>
+            </select>
+            <select id="sort-frequency-dictionary-order">
+                <option value="ascending" selected>Ascending</option>
+                <option value="descending">Descending</option>
+            </select>
+            <button id="sort-frequency-dictionary-order-auto"></button>
+            <div id="sort-frequency-dictionary-order-container"></div>
+        `;
+
+        const setProfileSetting = vi.fn().mockRejectedValue(new Error('save failed'));
+        const controller = new SortFrequencyDictionaryController(/** @type {any} */ ({setProfileSetting}));
+        const select = /** @type {HTMLSelectElement} */ (window.document.querySelector('#sort-frequency-dictionary-order'));
+
+        select.value = 'descending';
+        await expect(controller._setSortFrequencyDictionaryOrderValue(select.value)).rejects.toThrow('save failed');
+
+        expect(select.value).toBe('ascending');
+    });
+
 });
