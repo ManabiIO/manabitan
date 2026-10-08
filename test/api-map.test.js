@@ -71,6 +71,24 @@ describe('api-map', () => {
         expect(callback).toHaveBeenCalledWith({result: 'p-x'});
     });
 
+    test('a closed synchronous response port never receives a duplicate error response', () => {
+        const callback = vi.fn(() => { throw new Error('Response port closed'); });
+        const handler = vi.fn(() => 'value');
+        const map = /** @type {any} */ (createApiMap([['closed-port', handler]]));
+
+        expect(invokeApiHandler(map, 'closed-port', {}, [], callback)).toBe(false);
+        expect(handler).toHaveBeenCalledOnce();
+        expect(callback).toHaveBeenCalledExactlyOnceWith({result: 'value'});
+    });
+
+    test('a closed async response port does not cause an unhandled rejection', async () => {
+        const callback = vi.fn(() => { throw new Error('Response port closed'); });
+        const map = /** @type {any} */ (createApiMap([['closed-port', async () => 'value']]));
+
+        expect(invokeApiHandler(map, 'closed-port', {}, [], callback)).toBe(true);
+        await vi.waitFor(() => expect(callback).toHaveBeenCalledExactlyOnceWith({result: 'value'}));
+    });
+
     test('invokeApiMapHandler serializes synchronous handler errors', () => {
         const error = new Error('sync failure');
         error.name = 'SyncFailure';
