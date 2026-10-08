@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {generateId} from '../core/utilities.js';
 import {PanelElement} from '../dom/panel-element.js';
@@ -49,6 +50,10 @@ export class DisplayProfileSelection {
         this._profileNameRefreshGeneration = 0;
         /** @type {number} */
         this._profileListRefreshGeneration = 0;
+        /** @type {number} */
+        this._profileWriteGeneration = 0;
+        /** @type {Promise<void>} */
+        this._profileWriteTail = Promise.resolve();
     }
 
     /** */
@@ -153,17 +158,36 @@ export class DisplayProfileSelection {
      */
     _onProfileRadioChange(index, e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
-        if (element.checked) {
-            void this._setProfileCurrent(index).catch(async (error) => {
+        if (!element.checked) { return; }
+
+        const generation = ++this._profileWriteGeneration;
+        // Wait for an earlier write to settle, but skip selections superseded
+        // before their turn. This prevents slow writes from winning out of order.
+        const operation = this._profileWriteTail.then(async () => {
+            if (generation !== this._profileWriteGeneration) { return; }
+            const {profiles} = await this._display.application.api.optionsGetFull();
+            if (generation !== this._profileWriteGeneration) { return; }
+            if (!Number.isSafeInteger(index) || index < 0 || index >= profiles.length) {
+                throw new RangeError('Selected profile is no longer available');
+            }
+            await this._setProfileCurrent(index);
+            if (generation !== this._profileWriteGeneration) { return; }
+            this._setProfilePanelVisible(false);
+            await this._updateCurrentProfileName();
+        });
+        this._profileWriteTail = operation.catch(() => {});
+        void operation.catch(async (error) => {
+            if (generation === this._profileWriteGeneration) {
+                this._profileListNeedsUpdate = true;
                 try {
                     await this._updateProfileList();
                     await this._updateCurrentProfileName();
                 } catch (refreshError) {
                     log.error(refreshError);
                 }
-                log.error(error);
-            });
-        }
+            }
+            log.error(error);
+        });
     }
 
     /**
@@ -178,8 +202,10 @@ export class DisplayProfileSelection {
             scope: 'global',
             optionsContext: null,
         };
-        await this._display.application.api.modifySettings([modification], this._source);
-        this._setProfilePanelVisible(false);
-        await this._updateCurrentProfileName();
+        const results = await this._display.application.api.modifySettings([modification], this._source);
+        if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
+            throw new Error('Profile update returned an invalid result');
+        }
+        if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
     }
 }
