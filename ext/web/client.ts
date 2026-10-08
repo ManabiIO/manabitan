@@ -195,7 +195,14 @@ export class ManabiTanWebClient {
     open(): Promise<Status> {
         if (this.stopped) {return Promise.reject(new WebRuntimeError('closed', 'Dictionary runtime is closed'));}
         this.opened ??= this.call<Status>('open', {}).catch((error: Error) => {
-            this.fail(error);
+            if (!this.stopped && error instanceof WebRuntimeError && error.code === 'storage_busy') {
+                // The lock was never acquired. Keep this worker available so
+                // the same client can retry after another Reader tab releases it.
+                this.opened = undefined;
+            } else {
+                // Failed initialization may still own storage resources.
+                this.fail(error);
+            }
             throw error;
         });
         return this.opened;
