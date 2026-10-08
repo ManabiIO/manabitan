@@ -50,9 +50,9 @@ describe('Backend settings persistence ordering', () => {
             }
             persisted.push(String(snapshot));
         });
-        const {backend, applyOptions, clearCache} = createBackend(save);
+        const {backend, applyOptions, clearCache} = createBackend(async (options) => { await save(options); });
         Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
-            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            const current = /** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
             if (target.action !== 'set' || target.path !== 'value') { throw new Error('Unexpected mutation'); }
             current.value = /** @type {string} */ (target.value);
             return target.value;
@@ -85,11 +85,11 @@ describe('Backend settings persistence ordering', () => {
         });
         const {backend, options} = createBackend(save);
         Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
-            const draft = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            const draft = /** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
             if (target.action === 'set') { draft.value = /** @type {string} */ (target.value); }
             return true;
         });
-        Reflect.set(backend, '_getSetting', () => /** @type {{value: string}} */ (Reflect.get(backend, '_options')).value);
+        Reflect.set(backend, '_getSetting', () => /** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options'))).value);
         /** @type {import('settings-modifications').ScopedModification} */
         const modification = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'not yet committed'};
         /** @type {import('settings-modifications').ScopedRead} */
@@ -99,12 +99,12 @@ describe('Backend settings persistence ordering', () => {
         await saveStarted.promise;
 
         expect(Reflect.get(backend, '_options')).toBe(options);
-        expect(backend._onApiGetSettings({targets: [read]})).toEqual([{result: 'initial'}]);
+        expect(backend._onApiGetSettings({targets: [read]}, /** @type {chrome.runtime.MessageSender} */ ({}))).toEqual([{result: 'initial'}]);
         releaseSave.resolve(void 0);
         await pending;
 
         expect(Reflect.get(backend, '_options')).not.toBe(options);
-        expect(backend._onApiGetSettings({targets: [read]})).toEqual([{result: 'not yet committed'}]);
+        expect(backend._onApiGetSettings({targets: [read]}, /** @type {chrome.runtime.MessageSender} */ ({}))).toEqual([{result: 'not yet committed'}]);
     });
 
     test('failed mutation persistence restores the previous in-memory settings', async () => {
@@ -116,7 +116,7 @@ describe('Backend settings persistence ordering', () => {
         Reflect.set(backend, '_options', options);
         Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
             if (target.action !== 'set' || target.path !== 'value') { throw new Error('Unexpected mutation'); }
-            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            const current = /** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
             current.value = /** @type {string} */ (target.value);
             return target.value;
         });
@@ -134,7 +134,7 @@ describe('Backend settings persistence ordering', () => {
         await expect(later).resolves.toEqual([{result: 'second write'}]);
 
         expect(save).toHaveBeenCalledTimes(2);
-        expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('second write');
+        expect(/** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options'))).value).toBe('second write');
         expect(applyOptions).toHaveBeenCalledOnce();
         expect(applyOptions).toHaveBeenCalledWith('second');
     });
@@ -145,7 +145,7 @@ describe('Backend settings persistence ordering', () => {
         const report = vi.spyOn(log, 'error').mockImplementation(() => {});
         Reflect.set(backend, '_applyOptions', () => { throw new Error('runtime listener failed'); });
         Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
-            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            const current = /** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
             if (target.action === 'set') { current.value = /** @type {string} */ (target.value); }
             return true;
         });
@@ -154,7 +154,7 @@ describe('Backend settings persistence ordering', () => {
         try {
             await expect(backend._modifySettings([target], 'settings')).resolves.toEqual([{result: true}]);
             expect(Reflect.get(backend, '_options')).not.toBe(options);
-            expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('committed');
+            expect(/** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options'))).value).toBe('committed');
             expect(save).toHaveBeenCalledOnce();
             expect(report).toHaveBeenCalledOnce();
         } finally {
@@ -172,7 +172,7 @@ describe('Backend settings persistence ordering', () => {
         const response = await backend._modifySettings([target], 'invalid');
 
         expect(response).toHaveLength(1);
-        expect(response[0].error?.message).toBe('invalid setting');
+        expect(response[0].error).toMatchObject({message: 'invalid setting'});
         expect(Reflect.get(backend, '_options')).toBe(options);
         expect(save).not.toHaveBeenCalled();
         expect(applyOptions).not.toHaveBeenCalled();
@@ -196,7 +196,7 @@ describe('Backend settings persistence ordering', () => {
         Reflect.set(backend, '_areStringArraysEqual', () => true);
         Reflect.set(backend, '_warmEnabledDictionaryLookupCaches', vi.fn());
         Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
-            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            const current = /** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
             if (target.action === 'set') { current.value = /** @type {string} */ (target.value); }
             return true;
         });
@@ -208,7 +208,7 @@ describe('Backend settings persistence ordering', () => {
         const replacement = backend._onApiSetAllSettings({
             value: /** @type {import('settings').Options} */ (/** @type {unknown} */ ({value: 'replacement'})),
             source: 'replace',
-        });
+        }, /** @type {chrome.runtime.MessageSender} */ ({}));
         await Promise.resolve();
         expect(validate).not.toHaveBeenCalled();
         expect(save).toHaveBeenCalledOnce();
@@ -218,7 +218,7 @@ describe('Backend settings persistence ordering', () => {
         expect(validate).toHaveBeenCalledOnce();
         expect(save).toHaveBeenCalledTimes(2);
         expect(applyOptions.mock.calls).toStrictEqual([['mutate'], ['replace']]);
-        expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('replacement');
+        expect(/** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options'))).value).toBe('replacement');
     });
 
     test('an earlier storage failure does not poison an already queued edit', async () => {
@@ -227,7 +227,7 @@ describe('Backend settings persistence ordering', () => {
             .mockResolvedValueOnce(void 0);
         const {backend, applyOptions} = createBackend(save);
         Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
-            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            const current = /** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
             if (target.action !== 'set') { throw new Error('Unexpected mutation'); }
             current.value = /** @type {string} */ (target.value);
             return target.value;
@@ -245,6 +245,6 @@ describe('Backend settings persistence ordering', () => {
         expect(save).toHaveBeenCalledTimes(2);
         expect(applyOptions).toHaveBeenCalledOnce();
         expect(applyOptions).toHaveBeenCalledWith('retry');
-        expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('retry');
+        expect(/** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options'))).value).toBe('retry');
     });
 });
