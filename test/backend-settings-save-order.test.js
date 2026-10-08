@@ -99,6 +99,23 @@ describe('Backend settings persistence ordering', () => {
         expect(applyOptions).toHaveBeenCalledWith('second');
     });
 
+    test('fully rejected modification batches do not save or apply options', async () => {
+        const save = vi.fn().mockResolvedValue(void 0);
+        const {backend, options, applyOptions, clearCache} = createBackend(save);
+        Reflect.set(backend, '_modifySetting', () => { throw new Error('invalid setting'); });
+        /** @type {import('settings-modifications').ScopedModification} */
+        const target = {action: 'set', scope: 'global', optionsContext: null, path: 'invalid', value: 1};
+
+        const response = await backend._modifySettings([target], 'invalid');
+
+        expect(response).toHaveLength(1);
+        expect(response[0].error?.message).toBe('invalid setting');
+        expect(Reflect.get(backend, '_options')).toBe(options);
+        expect(save).not.toHaveBeenCalled();
+        expect(applyOptions).not.toHaveBeenCalled();
+        expect(clearCache).not.toHaveBeenCalled();
+    });
+
     test('full-options replacement waits for an earlier mutation to settle', async () => {
         const firstEntered = Promise.withResolvers();
         const releaseFirst = Promise.withResolvers();
