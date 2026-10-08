@@ -1221,18 +1221,20 @@ export class DictionaryImportController {
         const timeoutMs = 180_000;
         /** @type {?ReturnType<typeof setTimeout>} */
         let timeoutId = null;
+        let timedOut = false;
         try {
             await Promise.race([
                 importPromise,
                 new Promise((_resolve, reject) => {
                     timeoutId = setTimeout(() => {
+                        timedOut = true;
                         reject(new Error(`${label} did not complete within ${String(timeoutMs)}ms`));
                     }, timeoutMs);
                 }),
             ]);
         } catch (error) {
             const normalizedError = toError(error);
-            if (normalizedError.message.includes('did not complete within')) {
+            if (timedOut) {
                 this._forceRecoverHungImportSession(normalizedError, label);
             }
             throw normalizedError;
