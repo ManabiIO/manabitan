@@ -19,6 +19,7 @@
 import {getAllPermissions, hasPermissions, setPermissionsGranted} from '../../data/permissions-util.js';
 import {ObjectPropertyAccessor} from '../../general/object-property-accessor.js';
 import {log} from '../../core/log.js';
+import {ExtensionError} from '../../core/extension-error.js';
 
 export class PermissionsToggleController {
     /**
@@ -72,7 +73,7 @@ export class PermissionsToggleController {
             }
             toggle.checked = !!value;
         }
-        void this._updateValidity();
+        void this._updateValidity().catch((error) => { log.error(error); });
     }
 
     /**
@@ -106,7 +107,11 @@ export class PermissionsToggleController {
             if (optionsContext === null || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
             this._setToggleValid(toggle, true);
             try {
-                await this._settingsController.setProfileSetting(permissionsSetting, value);
+                const results = await this._settingsController.setProfileSetting(permissionsSetting, value);
+                if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                    throw new Error('Permission setting update returned an invalid result');
+                }
+                if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
             } catch (error) {
                 toggle.checked = valuePre;
                 this._setToggleValid(toggle, !valuePre || await hasPermissions({permissions: this._getRequiredPermissions(toggle)}));
