@@ -33,6 +33,17 @@ const htmlEscapeMap = {
     '=': '&#x3D;',
 };
 
+/**
+ * Set a note field as an own data property even for prototype setter names.
+ * @param {import('anki').NoteFields} fields
+ * @param {string} name
+ * @param {string} value
+ * @returns {void}
+ */
+function setNoteField(fields, name, value) {
+    Object.defineProperty(fields, name, {value, enumerable: true, configurable: true, writable: true});
+}
+
 export class AnkiNoteBuilder {
     /**
      * Initiate an instance of AnkiNoteBuilder.
@@ -99,7 +110,7 @@ export class AnkiNoteBuilder {
         for (let i = 0, ii = fields.length; i < ii; ++i) {
             const fieldName = fields[i][0];
             const {value, errors: fieldErrors, requirements: fieldRequirements} = formattedFieldValues[i];
-            noteFields[fieldName] = value;
+            setNoteField(noteFields, fieldName, value);
             allErrors.push(...fieldErrors);
             for (const requirement of fieldRequirements) {
                 const key = JSON.stringify(requirement);
@@ -160,7 +171,7 @@ export class AnkiNoteBuilder {
                 dictionaryStylesMap,
             );
             const {value} = await this._formatField(fieldValue, commonData, template);
-            noteFields[fieldName] = value;
+            setNoteField(noteFields, fieldName, value);
         }
 
         return this._createBaseNote(cardFormat, tags, duplicateScope, duplicateScopeCheckAllModels, noteFields);
@@ -193,9 +204,9 @@ export class AnkiNoteBuilder {
             const [fieldName, {value: fieldValue}] = fields[0];
             const fastValue = this._getFastDuplicateCheckFieldValue(fieldValue, dictionaryEntry, resultOutputMode);
             if (typeof fastValue === 'string') {
-                noteFields[fieldName] = fastValue;
+                setNoteField(noteFields, fieldName, fastValue);
             } else if (!stringContainsAnyFieldMarker(fieldValue)) {
-                noteFields[fieldName] = fieldValue;
+                setNoteField(noteFields, fieldName, fieldValue);
             } else {
                 return null;
             }
