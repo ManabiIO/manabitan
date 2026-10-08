@@ -73,4 +73,19 @@ describe('Anki batched duplicate search integration', () => {
         expect(invoke).toHaveBeenCalledWith('multi', {actions: [{action: 'findNotes', key: 'test-key', params: {query: createAnkiNoteDuplicateSearchDetails(value)?.query}}]}, expect.any(Number));
         expect(invoke).toHaveBeenCalledOnce();
     });
+
+    test.each([
+        {result: [[11]], description: 'omitted'},
+        {result: [[11], [22], [33]], description: 'extra'},
+    ])('rejects $description multi results rather than misclassifying duplicates', async ({result}) => {
+        const invoke = vi.fn().mockResolvedValueOnce([11, 22]).mockResolvedValueOnce(result);
+        await expect(client(invoke).findNoteIds([note('猫'), note('犬')])).rejects.toThrow('Unexpected multi response size');
+        expect(invoke).toHaveBeenCalledTimes(2);
+    });
+
+    test('rejects an empty multi result for a single note rather than silently treating it as unique', async () => {
+        const invoke = vi.fn().mockResolvedValue([]);
+        await expect(client(invoke).findNoteIds([note('猫')])).rejects.toThrow('Unexpected multi response size');
+    });
+
 });
