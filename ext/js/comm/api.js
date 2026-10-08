@@ -22,6 +22,10 @@ const pmTransportTimeoutMs = 10_000;
 const apiInvokeTimeoutMs = 30_000;
 const apiInvokeExtendedTimeoutMs = 180_000;
 
+/**
+ * @param {number} delayMs
+ * @returns {Promise<void>}
+ */
 function sleep(delayMs) {
     return new Promise((resolve) => {
         globalThis.setTimeout(resolve, delayMs);
@@ -348,13 +352,6 @@ export class API {
      */
     getDictionaryTermProbe(dictionaryTitle) {
         return this._invoke('getDictionaryTermProbe', {dictionaryTitle});
-    }
-
-    /**
-     * @returns {Promise<import('api').ApiReturn<'debugDictionaryStorageState'>>}
-     */
-    debugDictionaryStorageState() {
-        return this._invoke('debugDictionaryStorageState', void 0);
     }
 
     /**
