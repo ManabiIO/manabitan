@@ -73,6 +73,36 @@ describe('SharedWorkerBridge', () => {
         expect(bridge._pendingBackendConnectionPorts).toStrictEqual([frontend]);
     });
 
+    test('a detached frontend channel does not poison the live backend or its queue', () => {
+        const report = vi.spyOn(log, 'error').mockImplementation(() => {});
+        const bridge = new SharedWorkerBridge();
+        const invalidFrontend = {close: vi.fn()};
+        const validFrontend = {close: vi.fn()};
+        const backend = {
+            close: vi.fn(),
+            addEventListener: vi.fn(),
+            postMessage: vi.fn()
+                .mockImplementationOnce(() => { throw new DOMException('Port is detached', 'DataCloneError'); }),
+        };
+        bridge._onRegisterBackendPort(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ (backend)), []);
+        bridge._onConnectToBackend1(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ ({})), [
+            /** @type {MessagePort} */ (/** @type {unknown} */ (invalidFrontend)),
+        ]);
+
+        expect(invalidFrontend.close).toHaveBeenCalledTimes(1);
+        expect(bridge._backendPort).toBe(backend);
+        expect(bridge._pendingBackendConnectionPorts).toStrictEqual([]);
+        expect(backend.close).not.toHaveBeenCalled();
+
+        bridge._onConnectToBackend1(undefined, /** @type {MessagePort} */ (/** @type {unknown} */ ({})), [
+            /** @type {MessagePort} */ (/** @type {unknown} */ (validFrontend)),
+        ]);
+        expect(backend.postMessage).toHaveBeenCalledTimes(2);
+        expect(backend.postMessage).toHaveBeenLastCalledWith(void 0, [validFrontend]);
+        expect(validFrontend.close).not.toHaveBeenCalled();
+        expect(report).toHaveBeenCalledTimes(1);
+    });
+
     test('large failed flush retains every queued port without argument-limit failure', () => {
         vi.spyOn(log, 'error').mockImplementation(() => {});
         const bridge = new SharedWorkerBridge();
