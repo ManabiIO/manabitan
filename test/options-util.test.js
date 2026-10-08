@@ -43,6 +43,7 @@ function createProfileOptionsTestData1() {
             maxResults: 32,
             showAdvanced: false,
             popupDisplayMode: 'default',
+            popupFullWidthPosition: 'bottom',
             popupWidth: 400,
             popupHeight: 250,
             popupHorizontalOffset: 0,
@@ -275,6 +276,7 @@ function createProfileOptionsUpdatedTestData1() {
             lineHeight: '1.5',
             showAdvanced: false,
             popupDisplayMode: 'default',
+            popupFullWidthPosition: 'bottom',
             popupWidth: 400,
             popupHeight: 250,
             popupHorizontalOffset: 0,
@@ -710,7 +712,7 @@ function createOptionsUpdatedTestData1() {
             },
         ],
         profileCurrent: 0,
-        version: 74,
+        version: 78,
         global: {
             database: {
                 prefixWildcardsSupported: false,
@@ -802,6 +804,23 @@ describe('OptionsUtil', () => {
         expect(partialsUpdated).toStrictEqual(partialsExpected);
     });
 
+    test('UpstreamMigrationsPreserveManabitanConsentAndCustomTemplates', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const options = optionsUtil.getDefault();
+        options.version = 75;
+        options.global.dataTransmissionConsentState = 'declined';
+        options.profiles[0].options.anki.fieldTemplates = '{{#*inline "custom"}}keep me{{/inline}}';
+        const updated = await optionsUtil.update(options);
+        expect(updated.version).toBe(78);
+        expect(updated.global.dataTransmissionConsentState).toBe('declined');
+        expect(updated.profiles[0].options.general.popupFullWidthPosition).toBe('bottom');
+        const templates = updated.profiles[0].options.anki.fieldTemplates;
+        expect(templates).toContain('{{#*inline "custom"}}keep me{{/inline}}');
+        expect(templates).toContain('url-plain');
+        expect(await optionsUtil.update(structuredClone(updated))).toEqual(updated);
+    });
+
     test('Version75And76MigrationsAddDictionaryOptions', async () => {
         const optionsUtil = new OptionsUtil();
         await optionsUtil.prepare();
@@ -838,6 +857,62 @@ describe('OptionsUtil', () => {
             sortFrequencyDictionary: 'Sort Dictionary',
             sortFrequencyDictionaryOrder: 'ascending',
         });
+    });
+
+    test('fresh defaults have stable profile IDs and normalizing them is idempotent', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const defaults = optionsUtil.getDefault();
+        expect(defaults.profiles[0].id).toBe('profile-0');
+        const updated = await optionsUtil.update(structuredClone(defaults));
+        expect(updated).toStrictEqual(defaults);
+    });
+
+    test('current-version options repair missing and duplicate IDs without replacing existing identities', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const options = optionsUtil.getDefault();
+        const original = options.profiles[0];
+        options.profiles = [
+            {...structuredClone(original), id: '', name: 'Missing'},
+            {...structuredClone(original), id: 'saved-id', name: 'Existing'},
+            {...structuredClone(original), id: 'saved-id', name: 'Duplicate'},
+            {...structuredClone(original), id: 'profile-0', name: 'Reserved'},
+        ];
+        const updated = await optionsUtil.update(options);
+        expect(updated.profiles.map(({id}) => id)).toStrictEqual([
+            'profile-0-1', 'saved-id', 'profile-2', 'profile-0',
+        ]);
+        expect(await optionsUtil.update(structuredClone(updated))).toStrictEqual(updated);
+    });
+
+    test('saving a restored full-options snapshot repairs its missing IDs', async () => {
+        const optionsUtil = new OptionsUtil();
+        await optionsUtil.prepare();
+        const options = optionsUtil.getDefault();
+        options.profiles[0].id = '';
+        /** @type {string|null} */
+        let writtenOptions = null;
+        const storage = Reflect.get(chrome, 'storage');
+        Reflect.set(chrome, 'storage', {local: {
+            set: (/** @type {{options: string}} */ value, /** @type {() => void} */ callback) => {
+                writtenOptions = value.options;
+                callback();
+            },
+        }});
+        try {
+            await optionsUtil.save(options);
+        } finally {
+            if (typeof storage === 'undefined') {
+                Reflect.deleteProperty(chrome, 'storage');
+            } else {
+                Reflect.set(chrome, 'storage', storage);
+            }
+        }
+
+        expect(options.profiles[0].id).toBe('profile-0');
+        expect(writtenOptions).not.toBeNull();
+        expect(JSON.parse(/** @type {string} */ (writtenOptions)).profiles[0].id).toBe('profile-0');
     });
 
     describe('Default', () => {
@@ -2096,6 +2171,77 @@ describe('OptionsUtil', () => {
             </li>
         {{~/each~}}
         </ul>
+    {{~/if~}}
+{{/inline}}
+`.trimStart(),
+            },
+            {
+                oldVersion: 75,
+                newVersion: 76,
+                old: `
+{{#*inline "frequency-harmonic-rank"}}
+    {{~#if (op "===" definition.frequencyHarmonic -1) ~}}
+        9999999
+    {{~else ~}}
+        {{definition.frequencyHarmonic}}
+    {{~/if~}}
+{{/inline}}
+
+{{#*inline "frequency-harmonic-occurrence"}}
+    {{~#if (op "===" definition.frequencyHarmonic -1) ~}}
+        0
+    {{~else ~}}
+        {{definition.frequencyHarmonic}}
+    {{~/if~}}
+{{/inline}}
+
+{{#*inline "frequency-average-rank"}}
+    {{~#if (op "===" definition.frequencyAverage -1) ~}}
+        9999999
+    {{~else ~}}
+        {{definition.frequencyAverage}}
+    {{~/if~}}
+{{/inline}}
+
+{{#*inline "frequency-average-occurrence"}}
+    {{~#if (op "===" definition.frequencyAverage -1) ~}}
+        0
+    {{~else ~}}
+        {{definition.frequencyAverage}}
+    {{~/if~}}
+{{/inline}}
+`.trimStart(),
+
+                expected: `
+{{#*inline "frequency-harmonic-rank"}}
+    {{~#if (op "===" definition.frequencyHarmonicRank -1) ~}}
+        9999999
+    {{~else ~}}
+        {{definition.frequencyHarmonicRank}}
+    {{~/if~}}
+{{/inline}}
+
+{{#*inline "frequency-harmonic-occurrence"}}
+    {{~#if (op "===" definition.frequencyHarmonicOccurrence -1) ~}}
+        0
+    {{~else ~}}
+        {{definition.frequencyHarmonicOccurrence}}
+    {{~/if~}}
+{{/inline}}
+
+{{#*inline "frequency-average-rank"}}
+    {{~#if (op "===" definition.frequencyAverageRank -1) ~}}
+        9999999
+    {{~else ~}}
+        {{definition.frequencyAverageRank}}
+    {{~/if~}}
+{{/inline}}
+
+{{#*inline "frequency-average-occurrence"}}
+    {{~#if (op "===" definition.frequencyAverageOccurrence -1) ~}}
+        0
+    {{~else ~}}
+        {{definition.frequencyAverageOccurrence}}
     {{~/if~}}
 {{/inline}}
 `.trimStart(),
