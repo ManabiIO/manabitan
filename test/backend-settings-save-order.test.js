@@ -17,6 +17,7 @@
 
 import {describe, expect, test, vi} from 'vitest';
 import {Backend} from '../ext/js/background/backend.js';
+import {log} from '../ext/js/core/log.js';
 
 /**
  * @param {(options: import('settings').Options) => Promise<void>} save
@@ -97,6 +98,29 @@ describe('Backend settings persistence ordering', () => {
         expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('second write');
         expect(applyOptions).toHaveBeenCalledOnce();
         expect(applyOptions).toHaveBeenCalledWith('second');
+    });
+
+    test('an apply-time failure after persistence does not roll committed state back', async () => {
+        const save = vi.fn().mockResolvedValue(void 0);
+        const {backend, options} = createBackend(save);
+        const report = vi.spyOn(log, 'error').mockImplementation(() => {});
+        Reflect.set(backend, '_applyOptions', () => { throw new Error('runtime listener failed'); });
+        Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
+            const current = /** @type {{value: string}} */ (Reflect.get(backend, '_options'));
+            if (target.action === 'set') { current.value = /** @type {string} */ (target.value); }
+            return true;
+        });
+        /** @type {import('settings-modifications').ScopedModification} */
+        const target = {action: 'set', scope: 'global', optionsContext: null, path: 'value', value: 'committed'};
+        try {
+            await expect(backend._modifySettings([target], 'settings')).resolves.toEqual([{result: true}]);
+            expect(Reflect.get(backend, '_options')).not.toBe(options);
+            expect(/** @type {{value: string}} */ (Reflect.get(backend, '_options')).value).toBe('committed');
+            expect(save).toHaveBeenCalledOnce();
+            expect(report).toHaveBeenCalledOnce();
+        } finally {
+            report.mockRestore();
+        }
     });
 
     test('fully rejected modification batches do not save or apply options', async () => {
