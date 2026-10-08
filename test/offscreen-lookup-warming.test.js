@@ -19,10 +19,8 @@ describe('Offscreen dictionary cache warming', () => {
 
         await offscreen._warmTermLookupCachesHandler({dictionaryNames: ['JMdict', 'Names']});
 
-        expect(invokeDictionaryWorker).toHaveBeenCalledExactlyOnceWith(
-            'warmTermLookupCachesOffscreen',
-            {dictionaryNames: ['JMdict', 'Names']},
-        );
+        expect(invokeDictionaryWorker).toHaveBeenCalledOnce();
+        expect(invokeDictionaryWorker).toHaveBeenCalledWith('warmTermLookupCachesOffscreen', {dictionaryNames: ['JMdict', 'Names']});
     });
 
     test('propagates worker failures to the caller', async () => {
@@ -42,8 +40,7 @@ describe('Dictionary archive API contract', () => {
         Reflect.set(api, '_invoke', invoke);
 
         await expect(api.downloadDictionaryArchive('https://example.test/dictionary.zip')).resolves.toBe(result);
-        expect(invoke).toHaveBeenCalledExactlyOnceWith('downloadDictionaryArchive', {
-            url: 'https://example.test/dictionary.zip',
-        });
+        expect(invoke).toHaveBeenCalledOnce();
+        expect(invoke).toHaveBeenCalledWith('downloadDictionaryArchive', {url: 'https://example.test/dictionary.zip'});
     });
 });
