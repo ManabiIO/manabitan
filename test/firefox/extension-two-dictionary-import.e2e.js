@@ -719,9 +719,9 @@ function getUnsupportedRuntimeSkipReason(message) {
     if (
         text.includes('OPFS is required but unavailable') ||
         text.includes('no such vfs: opfs') ||
-        text.includes('opfs-sahpool') ||
-        text.includes('createSyncAccessHandle') ||
-        text.includes('DedicatedWorkerGlobalScope')
+        text.startsWith('Firefox runtime does not satisfy opfs-sahpool prerequisites:') ||
+        text.includes('opfs-sahpool runtime prerequisites are unavailable') ||
+        text.includes('opfs-sahpool requires a DedicatedWorkerGlobalScope')
     ) {
         return 'Firefox automation runtime does not expose the required OPFS SyncAccessHandle worker surface in this local Selenium stack; skipping this lane locally without enabling any SQLite fallback.';
     }
@@ -1165,7 +1165,7 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
 
         if (sawStepText && currentLabel.length === 0) {
             emptySince ??= now;
-            if ((now - emptySince) >= emptyStabilityMs) {
+            if ((now - emptySince) >= emptyStabilityMs && lastCountsText === expectedCounts) {
                 clearedAfterStep = true;
                 if (previousLabel.length > 0) {
                     await addReportPhase(
@@ -2016,17 +2016,12 @@ async function getBackendLookupDiagnostics(driver, term) {
                             [],
                     })) :
                     null;
-                const enabledInstalledExactMatches = Array.isArray(optionsFull?.profiles?.[0]?.options?.dictionaries) ?
-                    optionsFull.profiles[0].options.dictionaries
-                        .filter((dictionary) => dictionary?.enabled === true)
-                        .map((dictionary) => String(dictionary?.name || '').trim())
-                        .filter((name) => name.length > 0 && installedTitles.includes(name)) :
-                    [];
+                // Probe installed storage separately from profile activation.
                 let debugLookupState = null;
                 try {
                     debugLookupState = await send('debugDictionaryLookupState', {
                         text: term,
-                        dictionaryNames: [...new Set(enabledInstalledExactMatches)],
+                        dictionaryNames: installedTitles,
                     });
                 } catch (e) {
                     debugLookupState = {
@@ -2094,11 +2089,12 @@ async function waitForBackendDictionaryContentIntegrity(driver, dictionaryNames,
                 targetDictionaryNames = [...new Set(resolvedNames.length > 0 ? resolvedNames : dictionaryNames)];
             }
             const debugLookupState = diagnostics.debugLookupState;
-            const store = (debugLookupState && typeof debugLookupState === 'object' && !Array.isArray(debugLookupState)) ?
-                debugLookupState.termContentStoreDebugState :
-                null;
+            const workerState = (
+                debugLookupState && typeof debugLookupState === 'object' && !Array.isArray(debugLookupState)
+            ) ? (debugLookupState.workerState ?? debugLookupState) : null;
+            const store = workerState?.termContentStoreDebugState ?? null;
             const totalLength = Number(store?.totalLength ?? -1);
-            const rowSample = Array.isArray(debugLookupState?.rowSample) ? debugLookupState.rowSample : [];
+            const rowSample = Array.isArray(workerState?.rowSample) ? workerState.rowSample : [];
             let inBoundsRowCount = 0;
             let outOfBoundsRowCount = 0;
             let glossaryReadyRowCount = 0;
@@ -4120,7 +4116,8 @@ async function main() {
         report.status = 'success';
         console.log('[firefox-e2e] PASS: Recommended dictionary imports installed Jitendex and JMdict.');
     } catch (e) {
-        let failureReason = errorMessage(e);
+        const primaryFailureReason = errorMessage(e);
+        let failureReason = primaryFailureReason;
         try {
             const backendStorageDiagnostics = await getBackendStorageDiagnostics(driver);
             if (backendStorageDiagnostics !== null) {
@@ -4134,7 +4131,9 @@ async function main() {
         } catch (diagnosticsError) {
             failureReason += ` backendStorageDiagnosticsError=${errorMessage(diagnosticsError)}`;
         }
-        const skipReason = strictUnsupportedRuntime ? '' : getUnsupportedRuntimeSkipReason(failureReason);
+        // Appended storage diagnostics can mention opfs-sahpool even when OPFS
+        // works. Never treat a later dictionary-integrity failure as unsupported.
+        const skipReason = strictUnsupportedRuntime ? '' : getUnsupportedRuntimeSkipReason(primaryFailureReason);
         if (skipReason.length > 0) {
             report.status = 'success-with-skips';
             report.failureReason = '';
