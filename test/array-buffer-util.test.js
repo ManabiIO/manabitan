@@ -57,7 +57,7 @@ describe('Binary string encoding', () => {
         for (let i = 0; i < bytes.length; ++i) {
             bytes[i] = i & 0xff;
         }
-        const output = new Uint8Array(base64ToArrayBuffer(arrayBufferToBase64(bytes.buffer)));
+        const output = new Uint8Array(base64ToArrayBuffer(arrayBufferToBase64(buffer)));
         expect(output).toStrictEqual(bytes);
     });
 });
