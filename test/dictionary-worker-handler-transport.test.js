@@ -82,14 +82,15 @@ describe('DictionaryWorkerHandler completion transport', () => {
         });
         const result = {published: true};
         try {
-            await Reflect.get(handler, '_onMessageWithProgress').call(
-                handler,
-                {},
-                async (_details, onProgress) => {
-                    onProgress({invalid: () => {}});
-                    return result;
-                },
-            );
+            /**
+             * @param {unknown} _details
+             * @param {import('dictionary-worker-handler').OnProgressCallback} onProgress
+             */
+            const publish = async (_details, onProgress) => {
+                onProgress({invalid: () => {}});
+                return result;
+            };
+            await Reflect.get(handler, '_onMessageWithProgress').call(handler, {}, publish);
 
             expect(postMessage).toHaveBeenCalledTimes(2);
             expect(reported).toHaveBeenCalledOnce();
