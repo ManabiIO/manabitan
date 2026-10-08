@@ -19,6 +19,14 @@ import {describe, expect, test, vi} from 'vitest';
 import {deferPromise} from '../ext/js/core/utilities.js';
 import {DisplayProfileSelection} from '../ext/js/display/display-profile-selection.js';
 
+/**
+ * @param {DisplayProfileSelection} selection
+ * @param {number} index
+ */
+function selectProfile(selection, index) {
+    DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index, /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
+}
+
 describe('DisplayProfileSelection options refresh handling', () => {
     test('options updates log refresh failures instead of escaping', async () => {
         const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
@@ -32,7 +40,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
 
         const onOptionsUpdatedEvent = /** @type {(details: {source: string}) => void} */ (Reflect.get(DisplayProfileSelection.prototype, '_onOptionsUpdatedEvent'));
         onOptionsUpdatedEvent.call(selection, {source: 'external'});
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(true);
         expect(Reflect.get(selection, '_updateProfileList')).toHaveBeenCalledTimes(1);
@@ -214,7 +222,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
         vi.stubGlobal('document', {documentElement: {dataset: {}}});
 
         DisplayProfileSelection.prototype._setProfilePanelVisible.call(selection, true);
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(updateProfileList).toHaveBeenCalledOnce();
         expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(true);
@@ -240,7 +248,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
         DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, 1, /** @type {Event} */ (/** @type {unknown} */ ({
             currentTarget: {checked: true},
         })));
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(setProfileCurrent).toHaveBeenCalledWith(1);
         expect(updateProfileList).toHaveBeenCalledOnce();
@@ -289,8 +297,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
         Reflect.set(selection, '_setProfileCurrent', setProfileCurrent);
         Reflect.set(selection, '_setProfilePanelVisible', closePanel);
         Reflect.set(selection, '_updateCurrentProfileName', updateName);
-        const select = (/** @type {number} */ index) => DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index,
-            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
+        const select = selectProfile.bind(null, selection);
         select(1);
         await firstWriteStarted.promise;
         select(2);
@@ -325,14 +332,13 @@ describe('DisplayProfileSelection options refresh handling', () => {
         Reflect.set(selection, '_updateCurrentProfileName', updateName);
         Reflect.set(selection, '_updateProfileList', updateList);
         const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        const select = (/** @type {number} */ index) => DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, index,
-            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
+        const select = selectProfile.bind(null, selection);
         select(1);
         await firstWriteStarted.promise;
         select(2);
         firstWriteCompletion.reject(new Error('earlier save failed'));
         await Reflect.get(selection, '_profileWriteTail');
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
         expect(setProfileCurrent).toHaveBeenCalledTimes(2);
         expect(updateList).not.toHaveBeenCalled();
         expect(updateName).toHaveBeenCalledOnce();
@@ -353,10 +359,13 @@ describe('DisplayProfileSelection options refresh handling', () => {
         Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
         vi.spyOn(console, 'error').mockImplementation(() => {});
 
-        DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, 1,
-            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
+        DisplayProfileSelection.prototype._onProfileRadioChange.call(
+            selection,
+            1,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})),
+        );
         await Reflect.get(selection, '_profileWriteTail');
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
         expect(setProfileCurrent).not.toHaveBeenCalled();
         expect(updateList).toHaveBeenCalledOnce();
     });
@@ -375,15 +384,16 @@ describe('DisplayProfileSelection options refresh handling', () => {
         Reflect.set(selection, '_setProfilePanelVisible', hidePanel);
         Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
 
-        DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, 1,
-            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})));
+        DisplayProfileSelection.prototype._onProfileRadioChange.call(
+            selection,
+            1,
+            /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})),
+        );
         await Reflect.get(selection, '_profileWriteTail');
         expect(save).toHaveBeenCalledWith(1);
         expect(hidePanel).toHaveBeenCalledWith(false);
         expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(true);
     });
-
-
 });
 
 
@@ -400,8 +410,11 @@ describe('DisplayProfileSelection row identity', () => {
         Reflect.set(selection, '_setProfileCurrent', save);
         Reflect.set(selection, '_setProfilePanelVisible', vi.fn());
         Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
-        selection._onProfileRadioChange(0, /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})),
-            /** @type {import('settings').Profile} */ (/** @type {unknown} */ (selected)));
+        selection._onProfileRadioChange(
+            0, /** @type {Event} */ (/** @type {unknown} */ (
+                {currentTarget: {checked: true}})),
+            /** @type {import('settings').Profile} */ (/** @type {unknown} */ (selected)),
+        );
         await Reflect.get(selection, '_profileWriteTail');
         expect(save).toHaveBeenCalledExactlyOnceWith(1);
     });
@@ -418,8 +431,11 @@ describe('DisplayProfileSelection row identity', () => {
             Reflect.set(selection, '_setProfileCurrent', save);
             Reflect.set(selection, '_updateProfileList', vi.fn().mockResolvedValue(void 0));
             Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
-            selection._onProfileRadioChange(0, /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})),
-                /** @type {import('settings').Profile} */ (/** @type {unknown} */ ({id: 'removed', name: 'Selected'})));
+            selection._onProfileRadioChange(
+                0, /** @type {Event} */ (/** @type {unknown} */ (
+                    {currentTarget: {checked: true}})),
+                /** @type {import('settings').Profile} */ (/** @type {unknown} */ ({id: 'removed', name: 'Selected'})),
+            );
             await Reflect.get(selection, '_profileWriteTail');
             expect(save).not.toHaveBeenCalled();
         } finally {
@@ -438,8 +454,11 @@ describe('DisplayProfileSelection row identity', () => {
             Reflect.set(selection, '_setProfileCurrent', save);
             Reflect.set(selection, '_updateProfileList', vi.fn().mockResolvedValue(void 0));
             Reflect.set(selection, '_updateCurrentProfileName', vi.fn().mockResolvedValue(void 0));
-            selection._onProfileRadioChange(0, /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {checked: true}})),
-                /** @type {import('settings').Profile} */ (/** @type {unknown} */ ({name: 'Selected'})));
+            selection._onProfileRadioChange(
+                0, /** @type {Event} */ (/** @type {unknown} */ (
+                    {currentTarget: {checked: true}})),
+                /** @type {import('settings').Profile} */ (/** @type {unknown} */ ({name: 'Selected'})),
+            );
             await Reflect.get(selection, '_profileWriteTail');
             expect(save).not.toHaveBeenCalled();
         } finally {

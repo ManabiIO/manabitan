@@ -195,11 +195,14 @@ export class DisplayProfileSelection {
             if (generation !== this._profileWriteGeneration) { return; }
             const {profiles} = await this._display.application.api.optionsGetFull();
             if (generation !== this._profileWriteGeneration) { return; }
-            const matchingIndices = selectedProfile === null ? [index] : profiles.flatMap((profile, profileIndex) => {
-                const matches = typeof selectedId === 'string' && selectedId.length > 0 ?
-                    profile.id === selectedId : JSON.stringify(profile) === selectedSnapshot;
-                return matches ? [profileIndex] : [];
-            });
+            const matchingIndices = selectedProfile === null ?
+                [index] :
+                profiles.flatMap((profile, profileIndex) => {
+                    const matches = typeof selectedId === 'string' && selectedId.length > 0 ?
+                        profile.id === selectedId :
+                        JSON.stringify(profile) === selectedSnapshot;
+                    return matches ? [profileIndex] : [];
+                });
             // Ambiguous legacy snapshots or duplicate IDs cannot safely select
             // a row. Refresh rather than silently choosing the first match.
             const currentIndex = matchingIndices.length === 1 ? matchingIndices[0] : -1;
