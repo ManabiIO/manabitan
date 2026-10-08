@@ -473,7 +473,11 @@ export class Offscreen {
                 const normalizedError = error instanceof Error ?
                     new ExtensionError(error.message) :
                     new ExtensionError(String(error));
-                this._rejectPendingDictionaryWorkerResponses(normalizedError);
+                // A DataCloneError means this particular message was not
+                // transferable; it does not imply the dictionary worker died.
+                if (!(error instanceof Error && error.name === 'DataCloneError')) {
+                    this._rejectPendingDictionaryWorkerResponses(normalizedError);
+                }
                 reject(normalizedError);
             }
         });
