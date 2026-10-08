@@ -23,6 +23,7 @@ const profileWriteTails = new WeakMap();
 /**
  * @param {number} direction
  * @param {import('../application.js').Application} application
+ * @returns {Promise<void>}
  */
 export function setProfile(direction, application) {
     if (!Number.isSafeInteger(direction)) {
