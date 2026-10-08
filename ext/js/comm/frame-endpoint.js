@@ -35,19 +35,30 @@ export class FrameEndpoint {
         this._eventListeners = new EventListenerCollection();
         /** @type {boolean} */
         this._eventListenersSetup = false;
+        /** @type {number} */
+        this._acknowledgementRetryCount = 0;
     }
 
     /**
      * @returns {void}
      */
     signal() {
-        if (!this._eventListenersSetup) {
-            this._eventListeners.addEventListener(window, 'message', this._onMessage.bind(this), false);
-            this._eventListenersSetup = true;
-        }
+        if (this._token !== null) { return; }
+        this._ensureMessageListener();
         /** @type {import('frame-client').FrameEndpointReadyDetails} */
         const details = {secret: this._secret};
-        void this._api.broadcastTab({action: 'frameEndpointReady', params: details});
+        void Promise.resolve()
+            .then(() => this._api.broadcastTab({action: 'frameEndpointReady', params: details}))
+            .catch((error) => { log.error(error); });
+    }
+
+    /**
+     * @returns {void}
+     */
+    _ensureMessageListener() {
+        if (this._eventListenersSetup) { return; }
+        this._eventListeners.addEventListener(window, 'message', this._onMessage.bind(this), false);
+        this._eventListenersSetup = true;
     }
 
     /**
@@ -94,16 +105,39 @@ export class FrameEndpoint {
         }
 
         const {token, hostFrameId} = /** @type {import('core').SerializableObject} */ (params);
-        if (typeof token !== 'string' || typeof hostFrameId !== 'number') {
+        if (typeof token !== 'string' || token.length === 0 || typeof hostFrameId !== 'number' || !Number.isSafeInteger(hostFrameId) || hostFrameId < 0) {
             log.error('Invalid target');
             return;
         }
 
         this._token = token;
-
         this._eventListeners.removeAllEventListeners();
+        this._eventListenersSetup = false;
         /** @type {import('frame-client').FrameEndpointConnectedDetails} */
         const details = {secret, token};
-        void this._api.sendMessageToFrame(hostFrameId, {action: 'frameEndpointConnected', params: details});
+        void Promise.resolve()
+            .then(() => this._api.sendMessageToFrame(hostFrameId, {action: 'frameEndpointConnected', params: details}))
+            .catch((error) => {
+                // An unsuccessful acknowledgement must not permanently lock
+                // this endpoint to a connection that the client never saw.
+                if (this._token !== token) { return; }
+                this._token = null;
+                log.error(error);
+                const retryCount = ++this._acknowledgementRetryCount;
+                if (retryCount > 5) {
+                    // Stop automatic announcements, but retain a listener so
+                    // a subsequent explicit connection can still succeed.
+                    this._ensureMessageListener();
+                    return;
+                }
+                // The first retry is immediate; persistent transport failure
+                // must not produce an unbounded ready/connect message loop.
+                if (retryCount === 1) {
+                    this.signal();
+                } else {
+                    const delay = Math.min(2000, 250 * 2 ** (retryCount - 2));
+                    setTimeout(() => { this.signal(); }, delay);
+                }
+            });
     }
 }
