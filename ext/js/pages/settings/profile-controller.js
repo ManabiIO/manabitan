@@ -226,6 +226,9 @@ export class ProfileController {
         const currentIndex = this._profiles.indexOf(profile);
         if (currentIndex < 0) { return; }
         const defaultProfileOptions = defaultOptions.profiles[0];
+        // Reset the profile settings, not the profile identity. Its stable ID
+        // owns profile-condition modals and cross-profile references.
+        defaultProfileOptions.id = profile.id;
         defaultProfileOptions.name = profile.name;
 
         await this._settingsController.modifyGlobalSettings([{
