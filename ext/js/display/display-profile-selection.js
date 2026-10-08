@@ -164,7 +164,7 @@ export class DisplayProfileSelection {
             this._profileList.textContent = '';
             this._profileList.appendChild(fragment);
             for (const {radio, index, profile} of radios) {
-                this._eventListeners.addEventListener(radio, 'change', (event) => this._onProfileRadioChange(index, event, profile), false);
+                this._eventListeners.addEventListener(radio, 'change', (/** @type {Event} */ event) => this._onProfileRadioChange(index, event, profile), false);
             }
             this._profileListNeedsUpdate = false;
         } catch (error) {
