@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
-import {expect, test} from 'vitest';
+import {expect, test, vi} from 'vitest';
 import {webStorageDiagnostics} from '../ext/web/storage-diagnostics.js';
 
 test('origin storage telemetry returns measured values when available', async () => {
@@ -42,4 +42,21 @@ test('synchronous diagnostic errors are also isolated', async () => {
     expect(data.usage).toBeUndefined();
     expect(data.quota).toBeUndefined();
     expect(data.persisted).toBe(false);
+});
+
+test('a hanging quota estimate cannot block known persistence or dictionary status', async () => {
+    vi.useFakeTimers();
+    try {
+        const pending = webStorageDiagnostics({
+            estimate: () => new Promise(() => {}),
+            persisted: async () => true,
+        });
+        await vi.advanceTimersByTimeAsync(2000);
+        const data = await pending;
+        expect(data.usage).toBeUndefined();
+        expect(data.quota).toBeUndefined();
+        expect(data.persisted).toBe(true);
+    } finally {
+        vi.useRealTimers();
+    }
 });
