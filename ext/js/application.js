@@ -147,17 +147,29 @@ async function waitForBackendReady(webExtension) {
     let timeoutId = null;
     let unloaded = false;
     try {
-        const response = await sendExtensionMessageWithRetry(webExtension, {action: 'requestBackendReadySignal'});
+        // Start the deadline before the handshake itself: a stalled runtime
+        // message must not make the page wait indefinitely for startup.
+        const timeoutPromise = new Promise((_, reject) => {
+            timeoutId = setTimeout(() => {
+                const timeoutMessage = `Timed out waiting for backend ready signal after ${String(backendReadyTimeoutMs)}ms.`;
+                reject(new Error(timeoutMessage));
+
+                // Failure storage is diagnostic only. A hung storage API must
+                // never delay rejecting the startup timeout.
+                void getStoredBackendStartupFailureMessage().then((message) => {
+                    if (message.length > 0 && !webExtension.unloaded) {
+                        showStartupFailureUi(new Error(`${timeoutMessage} Startup failure: ${message}`));
+                    }
+                }).catch(() => {});
+            }, backendReadyTimeoutMs);
+        });
+        const response = await Promise.race([
+            sendExtensionMessageWithRetry(webExtension, {action: 'requestBackendReadySignal'}),
+            timeoutPromise,
+        ]);
         if (typeof response === 'object' && response !== null && 'error' in response && typeof response.error !== 'undefined') {
             throw ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (response.error));
         }
-        const timeoutPromise = new Promise((_, reject) => {
-            timeoutId = setTimeout(async () => {
-                const storedFailureMessage = await getStoredBackendStartupFailureMessage();
-                const suffix = storedFailureMessage.length > 0 ? ` Startup failure: ${storedFailureMessage}` : '';
-                reject(new Error(`Timed out waiting for backend ready signal after ${String(backendReadyTimeoutMs)}ms.${suffix}`));
-            }, backendReadyTimeoutMs);
-        });
         await Promise.race([
             promise.then(() => {
                 unloaded = webExtension.unloaded;
