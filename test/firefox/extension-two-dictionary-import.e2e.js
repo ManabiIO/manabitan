@@ -1324,14 +1324,19 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
 
 /**
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @param {string} [expectedExtensionUuid]
  * @returns {Promise<string>}
  * @throws {Error}
  */
-async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
-    const normalizedAddonId = String(installedAddonId || '').trim();
-    const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
+async function waitForExtensionBaseUrl(driver, expectedExtensionUuid = '') {
+    const normalizedUuid = String(expectedExtensionUuid || '').trim();
+    if (normalizedUuid.length > 0) {
+        // This UUID is fixed by extensions.webextensions.uuids in the test profile.
+        // Readiness is verified by navigating to the extension page below; do
+        // not enumerate privileged Firefox tabs just to rediscover this origin.
+        return `moz-extension://${normalizedUuid}`;
+    }
     const deadline = Date.now() + 30_000;
-    let fallbackBaseUrl = '';
     while (Date.now() < deadline) {
         const handlesUnknown = /** @type {unknown} */ (await driver.getAllWindowHandles());
         const handles = Array.isArray(handlesUnknown) ? handlesUnknown.map(String) : [];
@@ -1340,19 +1345,10 @@ async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
             const url = String(await driver.getCurrentUrl());
             const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/.exec(url);
             if (match !== null) {
-                fallbackBaseUrl = match[1];
-                if (expectedBaseUrl.length === 0 || expectedBaseUrl === match[1]) {
-                    return match[1];
-                }
+                return match[1];
             }
         }
         await driver.sleep(500);
-    }
-    if (fallbackBaseUrl.length > 0) {
-        return fallbackBaseUrl;
-    }
-    if (expectedBaseUrl.length > 0) {
-        return expectedBaseUrl;
     }
     fail('Failed to discover moz-extension base URL from open tabs.');
 }
@@ -2729,7 +2725,7 @@ async function main() {
         const baseUrlStart = safePerformance.now();
         heartbeat.setActiveOperation('wait for extension base URL');
         installedAddonId = await driver.installAddon(xpiPath, true);
-        const extensionBaseUrl = await waitForExtensionBaseUrl(driver, installedAddonId);
+        const extensionBaseUrl = await waitForExtensionBaseUrl(driver, firefoxDevExtensionUuid);
         const baseUrlEnd = safePerformance.now();
         await addReportPhase(report, driver, 'Install extension and discover base URL', `Extension installed via webdriver addon API and moz-extension base URL discovered; addonId=${installedAddonId}`, baseUrlStart, baseUrlEnd);
         const firefoxPidStart = safePerformance.now();
@@ -3236,7 +3232,7 @@ async function main() {
                 await driver.sleep(1_000);
                 const reinstallExtensionStart = safePerformance.now();
                 const reinstalledAddonId = await driver.installAddon(xpiPath, true);
-                const reinstalledExtensionBaseUrl = await waitForExtensionBaseUrl(driver, reinstalledAddonId);
+                const reinstalledExtensionBaseUrl = await waitForExtensionBaseUrl(driver, firefoxDevExtensionUuid);
                 const reinstallExtensionEnd = safePerformance.now();
                 await addReportPhase(
                     report,
