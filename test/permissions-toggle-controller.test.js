@@ -116,5 +116,4 @@ describe('PermissionsToggleController', () => {
         expect(report).toHaveBeenCalledOnce();
         report.mockRestore();
     });
-
 });
