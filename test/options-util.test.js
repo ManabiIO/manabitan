@@ -785,6 +785,62 @@ describe('OptionsUtil', () => {
         });
     });
 
+    test('storage transport failures abort startup instead of replacing saved settings with defaults', async () => {
+        const get = vi.fn((/** @type {string[]} */ _keys, /** @type {(store: Record<string, unknown>) => void} */ callback) => {
+            const runtime = /** @type {Record<string, unknown>} */ (mockChrome.runtime);
+            runtime.lastError = {message: 'Storage temporarily unavailable'};
+            try {
+                callback({});
+            } finally {
+                runtime.lastError = null;
+            }
+        });
+        const mockChrome = {
+            ...chrome,
+            runtime: {...chrome.runtime, lastError: null},
+            storage: {local: {get}},
+        };
+        vi.stubGlobal('chrome', mockChrome);
+        try {
+            const optionsUtil = new OptionsUtil();
+            await optionsUtil.prepare();
+            const save = vi.spyOn(optionsUtil, 'save').mockResolvedValue(void 0);
+
+            await expect(optionsUtil.load()).rejects.toThrow('Storage temporarily unavailable');
+            expect(get).toHaveBeenCalledOnce();
+            expect(save).not.toHaveBeenCalled();
+        } finally {
+            vi.stubGlobal('chrome', chrome);
+        }
+    });
+
+    test('missing or invalid stored options still use first-install defaults', async () => {
+        /** @type {unknown[]} */
+        const stored = [void 0, 'not JSON'];
+        const get = vi.fn((/** @type {string[]} */ _keys, /** @type {(store: Record<string, unknown>) => void} */ callback) => {
+            callback({options: stored.shift()});
+        });
+        vi.stubGlobal('chrome', {
+            ...chrome,
+            runtime: {...chrome.runtime, lastError: null},
+            storage: {local: {get}},
+        });
+        try {
+            const optionsUtil = new OptionsUtil();
+            await optionsUtil.prepare();
+            const save = vi.spyOn(optionsUtil, 'save').mockResolvedValue(void 0);
+
+            const firstInstall = await optionsUtil.load();
+            const malformedInstall = await optionsUtil.load();
+
+            expect(firstInstall).toStrictEqual(optionsUtil.getDefault());
+            expect(malformedInstall).toStrictEqual(optionsUtil.getDefault());
+            expect(save).not.toHaveBeenCalled();
+        } finally {
+            vi.stubGlobal('chrome', chrome);
+        }
+    });
+
     test('CumulativeFieldTemplatesUpdates', async () => {
         const optionsUtil = new OptionsUtil();
         await optionsUtil.prepare();

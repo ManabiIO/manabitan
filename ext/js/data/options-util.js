@@ -114,24 +114,27 @@ export class OptionsUtil {
      * @returns {Promise<import('settings').Options>}
      */
     async load() {
+        // An unavailable storage service is not equivalent to a new install.
+        // Reject transport errors rather than allowing defaults to mask saved
+        // settings (which a subsequent user edit could overwrite).
+        const optionsStr = await new Promise((resolve, reject) => {
+            chrome.storage.local.get(['options'], (store) => {
+                const error = chrome.runtime.lastError;
+                if (error) {
+                    reject(new Error(error.message));
+                } else {
+                    resolve(store?.options);
+                }
+            });
+        });
         let options;
         try {
-            const optionsStr = await new Promise((resolve, reject) => {
-                chrome.storage.local.get(['options'], (store) => {
-                    const error = chrome.runtime.lastError;
-                    if (error) {
-                        reject(new Error(error.message));
-                    } else {
-                        resolve(store.options);
-                    }
-                });
-            });
             if (typeof optionsStr !== 'string') {
                 throw new Error('Invalid value for options');
             }
             options = parseJson(optionsStr);
         } catch (e) {
-            // NOP
+            // Missing or invalid stored values still use first-install defaults.
         }
 
         if (typeof options !== 'undefined') {
