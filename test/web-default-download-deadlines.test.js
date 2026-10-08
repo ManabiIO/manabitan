@@ -20,7 +20,7 @@ test('default archive fetch aborts when response headers stall', async () => {
     const request = {};
     vi.stubGlobal('fetch', vi.fn((_url, init) => new Promise((_resolve, reject) => {
         const signal = /** @type {AbortSignal | undefined} */ (init.signal);
-        if (!signal) {throw new Error('Missing fetch AbortSignal');}
+        if (!signal) { throw new Error('Missing fetch AbortSignal'); }
         request.signal = signal;
         signal.addEventListener('abort', () => reject(signal.reason), {once: true});
     })));
@@ -37,7 +37,7 @@ test('default archive read aborts after initial body progress stalls', async () 
     const request = {};
     vi.stubGlobal('fetch', vi.fn(async (_url, init) => {
         const signal = /** @type {AbortSignal | undefined} */ (init.signal);
-        if (!signal) {throw new Error('Missing fetch AbortSignal');}
+        if (!signal) { throw new Error('Missing fetch AbortSignal'); }
         request.signal = signal;
         const stream = new ReadableStream({
             start(controller) {
@@ -61,7 +61,7 @@ test('slow trickle cannot bypass the total archive transfer deadline', async () 
     let sent = 0;
     vi.stubGlobal('fetch', vi.fn(async (_url, init) => {
         const signal = /** @type {AbortSignal | undefined} */ (init.signal);
-        if (!signal) {throw new Error('Missing fetch AbortSignal');}
+        if (!signal) { throw new Error('Missing fetch AbortSignal'); }
         request.signal = signal;
         /** @type {ReturnType<typeof setInterval> | undefined} */
         let ticker;
@@ -95,7 +95,7 @@ test('explicit caller cancellation is not misreported as a download timeout', as
     const request = {};
     vi.stubGlobal('fetch', vi.fn((_url, init) => new Promise((_resolve, reject) => {
         const signal = /** @type {AbortSignal | undefined} */ (init.signal);
-        if (!signal) {throw new Error('Missing fetch AbortSignal');}
+        if (!signal) { throw new Error('Missing fetch AbortSignal'); }
         request.signal = signal;
         signal.addEventListener('abort', () => reject(signal.reason), {once: true});
     })));
