@@ -461,7 +461,7 @@ export class ProfileController {
         this._profiles = profiles;
         this._profileCurrent = profileCurrent;
 
-        const settingsProfileIndex = this._settingsController.profileIndex;
+        let settingsProfileIndex = this._settingsController.profileIndex;
 
         // Update UI
         this._updateProfileSelectOptions();
@@ -470,6 +470,7 @@ export class ProfileController {
         // recover an index that is no longer valid after profiles are deleted.
         if (settingsProfileIndex < 0 || settingsProfileIndex >= profiles.length) {
             this._settingsController.profileIndex = profileCurrent;
+            settingsProfileIndex = profileCurrent;
         }
 
         /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileCurrent}`;
