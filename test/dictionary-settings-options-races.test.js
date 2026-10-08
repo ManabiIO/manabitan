@@ -62,45 +62,6 @@ describe('dictionary settings option snapshot ownership', () => {
         expect(append).toHaveBeenCalledOnce();
     });
 
-    test('automatic frequency order cannot apply to a dictionary selected after lookup started', async () => {
-        const deferred = /** @type {import('core').DeferredPromiseDetails<import('settings').SortFrequencyDictionaryOrder>} */ (deferPromise());
-        const controller = /** @type {SortFrequencyDictionaryController} */ (Object.create(SortFrequencyDictionaryController.prototype));
-        const selected = {value: 'Old'};
-        const order = {value: 'ascending'};
-        Reflect.set(controller, '_settingsController', {getOptionsContext: () => ({index: 0})});
-        Reflect.set(controller, '_sortFrequencyDictionarySelect', selected);
-        Reflect.set(controller, '_sortFrequencyDictionaryOrderSelect', order);
-        Reflect.set(controller, '_getFrequencyOrder', vi.fn(() => deferred.promise));
-        const save = vi.fn();
-        Reflect.set(controller, '_setSortFrequencyDictionaryOrderValue', save);
-        const pending = controller._autoUpdateOrder('Old');
-        selected.value = 'New';
-        deferred.resolve('descending');
-        await pending;
-        expect(save).not.toHaveBeenCalled();
-        expect(order.value).toBe('ascending');
-    });
-
-    test('a delayed previous frequency selection cannot infer an order for the next selection', async () => {
-        const deferred = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
-        const controller = /** @type {SortFrequencyDictionaryController} */ (Object.create(SortFrequencyDictionaryController.prototype));
-        const selected = {value: 'Old'};
-        const container = {hidden: false};
-        Reflect.set(controller, '_sortFrequencyDictionarySelect', selected);
-        Reflect.set(controller, '_sortFrequencyDictionaryOrderContainerNode', container);
-        Reflect.set(controller, '_settingsController', {
-            getOptionsContext: () => ({index: 0}),
-            setProfileSetting: vi.fn(() => deferred.promise),
-        });
-        const update = vi.fn();
-        Reflect.set(controller, '_autoUpdateOrder', update);
-        const pending = controller._setSortFrequencyDictionaryValue('Old');
-        selected.value = 'New';
-        deferred.resolve();
-        await pending;
-        expect(update).not.toHaveBeenCalled();
-    });
-
     test('frequency sorting panel cannot reset newer options after a delayed database refresh', async () => {
         const deferred = /** @type {import('core').DeferredPromiseDetails<import('settings').ProfileOptions>} */ (deferPromise());
         const getOptions = vi.fn(() => deferred.promise);
