@@ -50,7 +50,8 @@ describe('Backend settings persistence ordering', () => {
             }
             persisted.push(String(snapshot));
         });
-        const {backend, applyOptions, clearCache} = createBackend(async (options) => { await save(options); });
+        const saveOptions = /** @type {(options: import('settings').Options) => Promise<void>} */ (/** @type {unknown} */ (save));
+        const {backend, applyOptions, clearCache} = createBackend(saveOptions);
         Reflect.set(backend, '_modifySetting', (/** @type {import('settings-modifications').ScopedModification} */ target) => {
             const current = /** @type {{value: string}} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
             if (target.action !== 'set' || target.path !== 'value') { throw new Error('Unexpected mutation'); }
