@@ -46,7 +46,9 @@ export class DisplayProfileSelection {
         /** @type {HTMLElement} */
         this._profileName = querySelectorNotNull(document, '#profile-name');
         /** @type {number} */
-        this._optionsRefreshGeneration = 0;
+        this._profileNameRefreshGeneration = 0;
+        /** @type {number} */
+        this._profileListRefreshGeneration = 0;
     }
 
     /** */
@@ -106,23 +108,20 @@ export class DisplayProfileSelection {
 
     /** */
     async _updateCurrentProfileName() {
-        const refreshGeneration = ++this._optionsRefreshGeneration;
+        const refreshGeneration = ++this._profileNameRefreshGeneration;
         const {profileCurrent, profiles} = await this._display.application.api.optionsGetFull();
-        if (refreshGeneration !== this._optionsRefreshGeneration) { return; }
-        if (profiles.length === 1) {
-            this._profileButton.style.display = 'none';
-            return;
-        }
+        if (refreshGeneration !== this._profileNameRefreshGeneration) { return; }
+        this._profileButton.style.display = profiles.length <= 1 ? 'none' : '';
         const currentProfile = profiles[profileCurrent];
-        this._profileName.textContent = currentProfile.name;
+        this._profileName.textContent = currentProfile?.name ?? '';
     }
 
     /** */
     async _updateProfileList() {
-        this._profileListNeedsUpdate = false;
-        const refreshGeneration = ++this._optionsRefreshGeneration;
+        const refreshGeneration = ++this._profileListRefreshGeneration;
         const options = await this._display.application.api.optionsGetFull();
-        if (refreshGeneration !== this._optionsRefreshGeneration) { return; }
+        if (refreshGeneration !== this._profileListRefreshGeneration) { return; }
+        this._profileListNeedsUpdate = false;
 
         this._eventListeners.removeAllEventListeners();
         const displayGenerator = this._display.displayGenerator;
