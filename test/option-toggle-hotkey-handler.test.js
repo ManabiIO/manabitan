@@ -129,4 +129,23 @@ describe('Option toggle hotkey serialization', () => {
         expect(modifySettings).not.toHaveBeenCalled();
         expect(notifications).not.toHaveBeenCalled();
     });
+    test.each(['read', 'write'])('a rejected %s from an obsolete context cannot show an error', async (phase) => {
+        const started = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+        const complete = /** @type {import('core').DeferredPromiseDetails<Array<{result: boolean}>>} */ (deferPromise());
+        const pending = () => {
+            started.resolve();
+            return complete.promise;
+        };
+        const getSettings = vi.fn(phase === 'read' ? pending : async () => [{result: false}]);
+        const modifySettings = vi.fn(phase === 'write' ? pending : async () => [{result: false}]);
+        const {handler, setContext, notifications} = createHarness(getSettings, modifySettings);
+        const operation = handler._toggleOption('general.enable');
+        await started.promise;
+        setContext({index: 1});
+        complete.reject(new Error('Old context failed'));
+        await operation;
+        expect(notifications).not.toHaveBeenCalled();
+        expect(modifySettings).toHaveBeenCalledTimes(phase === 'write' ? 1 : 0);
+    });
+
 });

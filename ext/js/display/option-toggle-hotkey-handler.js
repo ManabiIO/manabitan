@@ -126,7 +126,9 @@ export class OptionToggleHotkeyHandler {
                 this._showNotification(this._createSuccessMessage(path, value), true);
             }
         } catch (e) {
-            this._showNotification(this._createErrorMessage(path, e), false);
+            if (this._display.getOptionsContext() === optionsContext) {
+                this._showNotification(this._createErrorMessage(path, e), false);
+            }
         }
     }
 
