@@ -99,3 +99,50 @@ test('rendered media have a cumulative blob budget, with coalescing and cleanup'
         vi.unstubAllGlobals();
     }
 });
+
+test('transient media errors do not poison the URL cache or duplicate a recovered blob', async () => {
+    const requests = vi.fn()
+        .mockRejectedValueOnce(new Error('busy'))
+        .mockResolvedValue({content: new ArrayBuffer(1), mediaType: 'image/png'});
+    const client = /** @type {import('../ext/web/client.js').ManabiTanWebClient} */ (/** @type {unknown} */ ({media: requests}));
+    const created = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:media-retry');
+    const revoked = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    const manager = new ReaderMedia(client, () => {});
+    const loaded = vi.fn();
+    const failed = vi.fn();
+    try {
+        manager.loadMediaUrl('retry.png', 'Test', loaded, failed);
+        await vi.waitFor(() => { expect(failed).toHaveBeenCalledTimes(1); });
+        manager.loadMediaUrl('retry.png', 'Test', loaded, failed);
+        manager.loadMediaUrl('retry.png', 'Test', loaded, failed);
+        await vi.waitFor(() => { expect(loaded).toHaveBeenCalledTimes(2); });
+        expect(requests).toHaveBeenCalledTimes(2);
+        expect(created).toHaveBeenCalledTimes(1);
+        expect(failed).toHaveBeenCalledTimes(1);
+    } finally {
+        manager.dispose();
+        expect(revoked).toHaveBeenCalledTimes(1);
+        vi.restoreAllMocks();
+    }
+});
+
+test('repeated failed image retries cannot bypass the render request cap', async () => {
+    const requests = vi.fn().mockRejectedValue(new Error('worker busy'));
+    const client = /** @type {import('../ext/web/client.js').ManabiTanWebClient} */ (/** @type {unknown} */ ({media: requests}));
+    const manager = new ReaderMedia(client, () => {});
+    const failed = vi.fn();
+    try {
+        for (let i = 0; i < 129; ++i) {
+            await new Promise((resolve) => {
+                manager.loadMediaUrl('retry.png', 'Test', () => resolve(null), () => {
+                    failed();
+                    resolve(null);
+                });
+            });
+        }
+        expect(requests).toHaveBeenCalledTimes(128);
+        expect(failed).toHaveBeenCalledTimes(129);
+    } finally {
+        manager.dispose();
+    }
+});
