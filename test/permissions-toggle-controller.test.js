@@ -63,4 +63,58 @@ describe('PermissionsToggleController', () => {
         expect(toggle.checked).toBe(false);
         expect((/** @type {HTMLElement} */ (toggle.closest('.settings-item'))).dataset.invalid).toBe('false');
     });
+    test('per-target profile setting errors also revert the permission toggle', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <div class="settings-item">
+                <input class="permissions-toggle" type="checkbox" data-permissions-setting="anki.enable" data-required-permissions="clipboardRead">
+            </div>
+        `;
+
+        getAllPermissions.mockResolvedValue({permissions: []});
+        hasPermissions.mockResolvedValue(true);
+
+        const {PermissionsToggleController} = await import('../ext/js/pages/settings/permissions-toggle-controller.js');
+        const settingsController = {
+            getOptions: vi.fn().mockResolvedValue({anki: {enable: false}}),
+            getOptionsContext: vi.fn(() => ({})),
+            setProfileSetting: vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'invalid setting', stack: ''}}]),
+            on: vi.fn(),
+        };
+        const controller = new PermissionsToggleController(/** @type {any} */ (settingsController));
+        await controller.prepare();
+
+        const toggle = /** @type {HTMLInputElement} */ (window.document.querySelector('.permissions-toggle'));
+        toggle.checked = true;
+        await expect(controller._onPermissionsToggleChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: toggle}))))
+            .rejects.toThrow('invalid setting');
+        expect(toggle.checked).toBe(false);
+        expect(/** @type {HTMLElement} */ (toggle.closest('.settings-item')).dataset.invalid).toBe('false');
+    });
+
+    test('failed asynchronous validity refresh is logged and does not reject the options event', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <div class="settings-item">
+                <input class="permissions-toggle" type="checkbox" data-permissions-setting="anki.enable" data-required-permissions="clipboardRead">
+            </div>
+        `;
+        getAllPermissions.mockResolvedValueOnce({permissions: []}).mockRejectedValueOnce(new Error('permission query failed'));
+        const {PermissionsToggleController} = await import('../ext/js/pages/settings/permissions-toggle-controller.js');
+        const {log} = await import('../ext/js/core/log.js');
+        const report = vi.spyOn(log, 'error').mockImplementation(() => {});
+        const controller = new PermissionsToggleController(/** @type {any} */ ({
+            getOptions: vi.fn().mockResolvedValue({anki: {enable: false}}),
+            getOptionsContext: () => ({}),
+            on: vi.fn(),
+        }));
+        await controller.prepare();
+        controller._onOptionsChanged({options: /** @type {any} */ ({anki: {enable: true}})});
+        await new Promise((resolve) => { window.setTimeout(resolve, 0); });
+        expect(report).toHaveBeenCalledOnce();
+        report.mockRestore();
+    });
+
 });
