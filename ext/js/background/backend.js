@@ -2122,16 +2122,9 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
     async _onApiSetAllSettings({value, source}) {
         await this._runOptionsMutation(async () => {
             this._optionsUtil.validate(value);
-            const previousOptions = this._options;
-            const previousEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(previousOptions);
-            this._options = clone(value);
-            try {
-                await this._saveOptions(source);
-            } catch (e) {
-                this._options = previousOptions;
-                this._clearProfileConditionsSchemaCache();
-                throw e;
-            }
+            const previousEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(this._options);
+            // Do not expose the replacement to read APIs before persistence.
+            await this._saveOptions(source, clone(value));
             const nextEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(this._options);
             if (!this._areStringArraysEqual(previousEnabledDictionaries, nextEnabledDictionaries)) {
                 this._warmEnabledDictionaryLookupCaches('settings-enabled-dictionaries-changed');
@@ -2518,34 +2511,32 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      */
     async _modifySettings(targets, source) {
         return await this._runOptionsMutation(async () => {
-            // Settings mutations are synchronous, but persistence is not.
-            // Keep the whole mutation+save operation exclusive so a failed
-            // write can roll back safely without discarding a newer mutation.
+            // Stage synchronous mutations on an isolated copy. Read APIs
+            // continue to observe the last committed options while storage is
+            // pending, including when a write eventually fails.
             const previousOptions = this._getOptionsFull(false);
-            this._options = clone(previousOptions);
+            const stagedOptions = clone(previousOptions);
             /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
             const results = [];
-            for (const target of targets) {
-                try {
-                    const result = this._modifySetting(target);
-                    results.push({result: clone(result)});
-                } catch (e) {
-                    results.push({error: ExtensionError.serialize(e)});
+            this._options = stagedOptions;
+            try {
+                for (const target of targets) {
+                    try {
+                        const result = this._modifySetting(target);
+                        results.push({result: clone(result)});
+                    } catch (e) {
+                        results.push({error: ExtensionError.serialize(e)});
+                    }
                 }
+            } finally {
+                this._options = previousOptions;
             }
             if (!results.some((result) => Object.hasOwn(result, 'result'))) {
-                // Invalid/empty batches must not persist a staged copy or
-                // restart popup/clipboard/lookup runtime state for no change.
-                this._options = previousOptions;
+                // No successful mutation: keep the previous state and skip
+                // persistence, notifications, and runtime cache resets.
                 return results;
             }
-            try {
-                await this._saveOptions(source);
-            } catch (e) {
-                this._options = previousOptions;
-                this._clearProfileConditionsSchemaCache();
-                throw e;
-            }
+            await this._saveOptions(source, stagedOptions);
             return results;
         });
     }
@@ -4406,14 +4397,15 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
     }
 
     /**
+     * Persist a staged snapshot, then publish it atomically to read APIs.
+     * Call only from _runOptionsMutation so saves cannot overlap.
      * @param {string} source
+     * @param {import('settings').Options} options
      */
-    async _saveOptions(source) {
-        // The mutation queue owns ordering for both incremental changes and
-        // full replacements. A second storage-only queue is unnecessary.
-        this._clearProfileConditionsSchemaCache();
-        const options = this._getOptionsFull(false);
+    async _saveOptions(source, options) {
         await this._optionsUtil.save(options);
+        this._options = options;
+        this._clearProfileConditionsSchemaCache();
         // Persistence has committed. A runtime notification failure must not
         // roll back memory to disagree with the stored settings.
         try {
