@@ -386,7 +386,7 @@ export class RequestBuilder {
         const result = new Uint8Array(totalLength);
         let position = 0;
         for (const {array, length} of items) {
-            result.set(array, position);
+            result.set(array.subarray(0, length), position);
             position += length;
         }
         return result;
