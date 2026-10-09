@@ -2,6 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later */
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryImportController} from '../ext/js/pages/settings/dictionary-import-controller.js';
+import {DictionaryController} from '../ext/js/pages/settings/dictionary-controller.js';
 /**
  * @param {string} name
  * @returns {Function}
@@ -86,7 +87,7 @@ describe('Dictionary import profile visibility', () => {
         await addDictionarySettings.call(controller, /** @type {import('dictionary-importer').Summary} */ ({
             title: 'JMdict', sequenced: false, styles: '',
         }), {
-            'another-profile': [{name: 'JMdict-old', enabled: true, alias: 'Another profile', index: 0}],
+            'another-profile': [{...DictionaryController.createDefaultDictionarySettings('JMdict-old', true, ''), alias: 'Another profile', index: 0}],
         });
 
         expect(modifyGlobalSettings).toHaveBeenCalledWith([]);
