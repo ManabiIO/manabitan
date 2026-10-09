@@ -62,6 +62,32 @@ test('a structured glossary render error disposes media and preserves previous c
     expect(container.querySelector('#previous')?.textContent).toBe('previous search');
 });
 
+test('queued dictionary images cannot start new worker reads after a render exception', async () => {
+    const media = vi.fn(async () => ({content: new ArrayBuffer(1), mediaType: 'image/png'}));
+    const clientWithMedia = /** @type {import('../ext/web/client.js').ManabiTanWebClient} */ (/** @type {unknown} */ ({media}));
+    const queued = vi.spyOn(ReaderMedia.prototype, 'loadMediaUrl');
+    vi.spyOn(StructuredContentGenerator.prototype, 'createStructuredContent').mockImplementation(() => {
+        throw new Error('later definition failed');
+    });
+
+    const entries = [{
+        headwords: [{term: '猫', reading: 'ねこ'}],
+        frequencies: [],
+        definitions: [{
+            dictionary: 'Fixture',
+            entries: [
+                {type: 'image', path: 'queued.png', width: 1, height: 1},
+                {type: 'structured-content', content: 'bad'},
+            ],
+        }],
+    }];
+    expect(() => renderDictionaryResults(getContainer(), result(entries), clientWithMedia, () => {})).toThrow('later definition failed');
+    expect(queued).toHaveBeenCalledOnce();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(media).not.toHaveBeenCalled();
+});
+
 test('a failed final DOM publication disposes the render lifetime', () => {
     const dispose = vi.spyOn(ReaderMedia.prototype, 'dispose');
     const container = getContainer();
