@@ -27,17 +27,22 @@ export function glossaryPreview(value, maximum = 220) {
     maximum = Math.max(1, Math.min(220, Math.trunc(maximum) || 220));
     const stack = [{value, depth: 0}];
     let output = '',
-        visited = 0;
+        visited = 0,
+        omitted = false;
     while (stack.length > 0 && visited++ < 256 && output.length <= maximum) {
         const item = stack.pop();
-        if (!item || item.depth > 24) {
+        if (!item) {continue;}
+        if (item.depth > 24) {
+            omitted = true;
             continue;
         }
         const content = item.value;
         if (typeof content === 'string') {
             output += content.slice(0, maximum + 1) + ' ';
         } else if (Array.isArray(content)) {
-            for (let index = Math.min(content.length, 256 - visited, 256 - stack.length) - 1; index >= 0; --index) {
+            const permitted = Math.max(0, Math.min(content.length, 256 - visited, 256 - stack.length));
+            if (permitted < content.length) {omitted = true;}
+            for (let index = permitted - 1; index >= 0; --index) {
                 stack.push({value: content[index], depth: item.depth + 1});
             }
         } else if (content && typeof content === 'object') {
@@ -53,7 +58,7 @@ export function glossaryPreview(value, maximum = 220) {
         }
     }
     output = output.replace(/\s+/g, ' ').trim();
-    const truncated = output.length > maximum || stack.length > 0;
+    const truncated = omitted || output.length > maximum || stack.length > 0;
     let clipped = output.slice(0, maximum);
     if (/[\uD800-\uDBFF]$/.test(clipped)) {
         clipped = clipped.slice(0, -1);
