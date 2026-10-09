@@ -100,12 +100,12 @@ export async function downloadDefaultDictionary(url: URL, options: {
                 controller.signal.throwIfAborted();
                 if (done) {break;}
                 // Zero-byte chunks can loop through microtasks fast enough to
-                // starve timeout callbacks, while retaining unbounded entries.
+                // starve timeout callbacks. Bound them across the whole transfer,
+                // even when a malicious stream interleaves occasional real bytes.
                 if (value.byteLength === 0) {
                     if (++emptyChunks > 1024) {throw new WebRuntimeError('download_failed', 'Dictionary archive did not make byte progress');}
                     continue;
                 }
-                emptyChunks = 0;
                 count += value.byteLength;
                 if (count > DEFAULT_DICTIONARY.bytes) {throw new WebRuntimeError('integrity', 'Dictionary exceeds its verified archive size');}
                 // Keep fragmentation memory bounded independently of byte count.

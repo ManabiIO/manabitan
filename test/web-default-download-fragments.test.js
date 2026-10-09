@@ -29,6 +29,20 @@ test('repeated empty chunks cannot starve the download idle deadline or accumula
     expect(reads).toBeLessThanOrEqual(1100);
 });
 
+test('interleaved empty chunks cannot evade the total no-progress budget', async () => {
+    let reads = 0;
+    const body = new ReadableStream({
+        pull(controller) {
+            ++reads;
+            if (reads > 2200) {controller.error(new Error('Unbounded interleaved reads'));}
+            else {controller.enqueue(reads % 2 ? new Uint8Array(0) : new Uint8Array([1]));}
+        },
+    });
+    const rejected = await downloadStream(body).then(() => null, (error) => error);
+    expect(rejected.code).toBe('download_failed');
+    expect(reads).toBeLessThan(2200);
+});
+
 test('fragment-count limit bounds storage for a slowly fragmented archive', async () => {
     const part = new Uint8Array([1]);
     let reads = 0;
