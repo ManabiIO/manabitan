@@ -65,13 +65,16 @@ describe('dictionary search preview Unicode clipping', () => {
         expect(JSON.parse(items[0].id)).toEqual([0, 'Jitendex', 1, '猫', 'ねこ']);
     });
     test('glossary preview reports content skipped by the node budget', () => {
+        /** @type {unknown[]} */
         const oversized = Array.from({length: 300}, () => ({type: 'image'}));
         oversized.push({type: 'text', text: 'late definition'});
         expect(glossaryPreview(oversized)).toBe('…');
     });
 
     test('glossary preview reports content skipped by the depth budget', () => {
-        const nested = Array.from({length: 26}).reduce((value) => [value], 'deep definition');
+        /** @type {unknown} */
+        let nested = 'deep definition';
+        for (let i = 0; i < 26; ++i) {nested = [nested];}
         expect(glossaryPreview(nested)).toBe('…');
     });
 
