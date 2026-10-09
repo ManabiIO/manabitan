@@ -660,6 +660,9 @@ class DictionaryExtraInfo {
     }
 }
 
+/** @type {WeakMap<import('./settings-controller.js').SettingsController, Promise<void>>} */
+const dictionarySettingsReconciliations = new WeakMap();
+
 export class DictionaryController {
     /**
      * @param {import('./settings-controller.js').SettingsController} settingsController
@@ -932,6 +935,28 @@ export class DictionaryController {
      * @param {boolean} newDictionariesEnabled
      */
     static async ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled) {
+        const previous = dictionarySettingsReconciliations.get(settingsController) ?? Promise.resolve();
+        const operation = previous.catch(() => {}).then(() => (
+            DictionaryController._ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled)
+        ));
+        dictionarySettingsReconciliations.set(settingsController, operation);
+        try {
+            await operation;
+        } finally {
+            if (dictionarySettingsReconciliations.get(settingsController) === operation) {
+                dictionarySettingsReconciliations.delete(settingsController);
+            }
+        }
+    }
+
+    /**
+     * @param {import('./settings-controller.js').SettingsController} settingsController
+     * @param {import('dictionary-importer').Summary[]|undefined} dictionaries
+     * @param {import('settings').Options|undefined} optionsFull
+     * @param {boolean} modifyGlobalSettings
+     * @param {boolean} newDictionariesEnabled
+     */
+    static async _ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled) {
         if (typeof dictionaries === 'undefined') {
             dictionaries = await settingsController.getDictionaryInfo();
         }

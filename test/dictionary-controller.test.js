@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 Manabitan authors
  * SPDX-License-Identifier: GPL-3.0-or-later */
 import {describe, expect, test, vi} from 'vitest';
+import {deferPromise} from '../ext/js/core/utilities.js';
 import {DictionaryController} from '../ext/js/pages/settings/dictionary-controller.js';
 /**
  * @param {string} name
@@ -130,4 +131,37 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
         expect(modifyGlobalSettings).not.toHaveBeenCalled();
         expect(optionsFull.profiles[0].options.dictionaries).toHaveLength(2);
     });
+});
+
+
+test('concurrent dictionary refreshes cannot remove the next installed entry using the same stale index', async () => {
+    const options = {profiles: [{options: {dictionaries: [
+        {name: 'Deleted', alias: 'Deleted', enabled: true},
+        {name: 'JMdict', alias: 'Mine', enabled: true},
+    ]}}]};
+    /** @type {import('core').DeferredPromiseDetails<void>} */
+    const entered = deferPromise();
+    /** @type {import('core').DeferredPromiseDetails<void>} */
+    const resume = deferPromise();
+    const getOptionsFull = vi.fn(async () => structuredClone(options));
+    const modifyGlobalSettings = vi.fn(async (/** @type {import('settings-modifications').Modification[]} */ modifications) => {
+        entered.resolve();
+        await resume.promise;
+        for (const modification of modifications) {
+            if (modification.action !== 'splice') { throw new Error('Unexpected modification'); }
+            options.profiles[0].options.dictionaries.splice(modification.start, modification.deleteCount);
+        }
+        return [];
+    });
+    const settings = /** @type {any} */ ({getOptionsFull, modifyGlobalSettings});
+    const installed = /** @type {any} */ ([{title: 'JMdict', styles: ''}]);
+    const first = DictionaryController.ensureDictionarySettings(settings, installed, void 0, true, false);
+    await entered.promise;
+    const second = DictionaryController.ensureDictionarySettings(settings, installed, void 0, true, false);
+    await Promise.resolve();
+    expect(getOptionsFull).toHaveBeenCalledOnce();
+    resume.resolve();
+    await Promise.all([first, second]);
+    expect(modifyGlobalSettings).toHaveBeenCalledOnce();
+    expect(options.profiles[0].options.dictionaries).toEqual([{name: 'JMdict', alias: 'Mine', enabled: true}]);
 });
