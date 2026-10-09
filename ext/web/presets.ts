@@ -92,22 +92,35 @@ export async function downloadDefaultDictionary(url: URL, options: {
         const reader = response.body.getReader();
         const chunks: Uint8Array<ArrayBuffer>[] = [];
         let count = 0;
+        let emptyChunks = 0;
         try {
             while (true) {
                 options.signal?.throwIfAborted();
                 const {done, value} = await reader.read();
+                controller.signal.throwIfAborted();
                 if (done) {break;}
+                // Zero-byte chunks can loop through microtasks fast enough to
+                // starve timeout callbacks. Bound them across the whole transfer,
+                // even when a malicious stream interleaves occasional real bytes.
+                if (value.byteLength === 0) {
+                    if (++emptyChunks > 1024) {throw new WebRuntimeError('download_failed', 'Dictionary archive did not make byte progress');}
+                    continue;
+                }
                 count += value.byteLength;
                 if (count > DEFAULT_DICTIONARY.bytes) {throw new WebRuntimeError('integrity', 'Dictionary exceeds its verified archive size');}
-                // Empty chunks are not proof of download progress.
-                if (value.byteLength > 0) {refreshIdleDeadline();}
+                // Keep fragmentation memory bounded independently of byte count.
+                if (chunks.length >= 65536) {throw new WebRuntimeError('download_failed', 'Dictionary archive contains too many fragments');}
+                refreshIdleDeadline();
                 chunks.push(value);
                 options.onProgress?.(count, DEFAULT_DICTIONARY.bytes);
             }
         } finally {
-            await reader.cancel().catch(() => {});
+            // A custom stream source may never settle its cancel promise.
+            // Issue cancellation, but do not let cleanup block the error.
+            void reader.cancel().catch(() => {});
             reader.releaseLock();
         }
+        controller.signal.throwIfAborted();
         // The deadlines apply to network transfer only, not checksum work.
         clearTimeout(idleTimer);
         clearTimeout(totalTimer);
@@ -120,6 +133,8 @@ export async function downloadDefaultDictionary(url: URL, options: {
         return blob;
     } catch (error) {
         if (timedOut) {throw controller.signal.reason;}
+        // Abort any remaining network activity on early integrity/size errors.
+        if (!controller.signal.aborted) {controller.abort(error);}
         throw error;
     } finally {
         clearTimeout(idleTimer);
