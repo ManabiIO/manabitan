@@ -98,4 +98,22 @@ describe('backend dictionary archive filenames', () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(new Uint8Array([1]), {headers: {'Content-Disposition': disposition}})));
         expect((await download()).fileName).toBe(expected);
     });
+
+    test.each([
+        ['https://example.com/%E6%97%A5%E6%9C%AC%E8%AA%9E.zip', '日本語.zip'],
+        ['https://example.com/archive%2FDictionary.zip', 'Dictionary.zip'],
+        ['https://example.com/archive%5CDictionary.zip', 'Dictionary.zip'],
+        ['https://example.com/%broken.zip', '%broken.zip'],
+        ['https://example.com/100%2525.zip', '100%25.zip'],
+    ])('decodes a URL fallback once and preserves a safe basename: %s', async (url, expected) => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(new Uint8Array([1]))));
+        expect((await download(url)).fileName).toBe(expected);
+    });
+
+    test('header filenames retain precedence over the decoded URL fallback', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(new Uint8Array([1]), {
+            headers: {'Content-Disposition': 'attachment; filename="100%25.zip"'},
+        })));
+        expect((await download('https://example.com/%E6%97%A5.zip')).fileName).toBe('100%25.zip');
+    });
 });
