@@ -22,7 +22,6 @@ import {parseJson, readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {safePerformance} from '../../core/safe-performance.js';
 import {toError} from '../../core/to-error.js';
-import {promiseTimeout} from '../../core/utilities.js';
 import {getKebabCase} from '../../data/anki-template-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {Mdx} from '../../comm/mdx.js';
@@ -1558,35 +1557,38 @@ export class DictionaryImportController {
         const timeoutMs = 180_000;
         const absoluteTimeoutMs = 2 * 60 * 60 * 1000;
         const startedAt = safePerformance.now();
-        let settled = false;
-        const watchdogPromise = (async () => {
-            while (!settled) {
+        const idleError = new Error(`${label} did not complete within ${String(timeoutMs)}ms without progress`);
+        const absoluteError = new Error(`${label} did not complete within ${String(absoluteTimeoutMs)}ms`);
+        /** @type {?import('core').Timeout} */
+        let timer = null;
+        const watchdogPromise = new Promise((_resolve, reject) => {
+            const check = () => {
                 const now = safePerformance.now();
                 if ((now - startedAt) >= absoluteTimeoutMs) {
-                    throw new Error(`${label} did not complete within ${String(absoluteTimeoutMs)}ms`);
+                    reject(absoluteError);
+                    return;
                 }
                 const lastActivityTime = progressTracker?.lastForwardProgressTime ?? progressTracker?.lastActivityTime ?? startedAt;
                 const idleMs = Math.max(0, now - lastActivityTime);
                 const remainingMs = timeoutMs - idleMs;
                 if (remainingMs <= 0) {
-                    throw new Error(`${label} did not complete within ${String(timeoutMs)}ms without progress`);
+                    reject(idleError);
+                    return;
                 }
-                await promiseTimeout(Math.min(1_000, remainingMs));
-            }
-        })();
+                timer = setTimeout(check, Math.min(1_000, remainingMs));
+            };
+            check();
+        });
         try {
-            await Promise.race([
-                importPromise,
-                watchdogPromise,
-            ]);
+            await Promise.race([importPromise, watchdogPromise]);
         } catch (error) {
             const normalizedError = toError(error);
-            if (normalizedError.message.includes('did not complete within')) {
+            if (error === idleError || error === absoluteError) {
                 this._forceRecoverHungImportSession(normalizedError, label);
             }
             throw normalizedError;
         } finally {
-            settled = true;
+            if (timer !== null) { clearTimeout(timer); }
         }
     }
 
