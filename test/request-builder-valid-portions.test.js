@@ -14,7 +14,7 @@ test.each([
     {name: 'exact buffers', items: [{array: [1, 2], length: 2}, {array: [3], length: 1}], expected: [1, 2, 3]},
 ])('joins only valid bytes: $name', ({items, expected}) => {
     const buffers = items.map(({array, length}) => ({array: Uint8Array.from(array), length}));
-    const originals = buffers.map(({array}) => array.slice());
+    const originals = buffers.map(({array}) => Uint8Array.from(array));
     expect(RequestBuilder._joinUint8Arrays(buffers, expected.length)).toEqual(Uint8Array.from(expected));
     for (let i = 0; i < buffers.length; ++i) {
         expect(buffers[i].array).toEqual(originals[i]);
