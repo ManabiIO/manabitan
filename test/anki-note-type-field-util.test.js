@@ -154,4 +154,32 @@ describe('buildAnkiFieldsForModel', () => {
 
         expect(fields.definition.value).toBe('');
     });
+
+    test('Kiku keeps sentence furigana while Lapis keeps its field blank', () => {
+        const fieldNames = ['SentenceFurigana', 'RelatedExpression', 'SentenceTranslation', 'MainDefinition'];
+        const details = {fieldNames, dictionaryEntryType: /** @type {const} */ ('term'), dynamicFieldMarkers: ['single-glossary-primary']};
+        const kiku = buildAnkiFieldsForModel({modelName: 'Kiku', ...details});
+        const lapis = buildAnkiFieldsForModel({modelName: 'Lapis', ...details});
+        expect(kiku.SentenceFurigana.value).toBe('{sentence-furigana-plain}');
+        expect(lapis.SentenceFurigana.value).toBe('');
+        expect(kiku.RelatedExpression.value).toBe('');
+        expect(kiku.SentenceTranslation.value).toBe('');
+        expect(kiku.MainDefinition.value).toBe('{single-glossary-primary}');
+        expect(lapis.MainDefinition.value).toBe('{single-glossary-primary}');
+    });
+
+    test('Kiku preserves every requested field including special own-property names', () => {
+        const fieldNames = ['SentenceFurigana', '__proto__', 'constructor', 'Mystery'];
+        const fields = buildAnkiFieldsForModel({modelName: 'Kiku', fieldNames, dictionaryEntryType: 'term'});
+        expect(Object.keys(fields)).toEqual(fieldNames);
+        expect(Object.getPrototypeOf(fields)).toBe(Object.prototype);
+        for (const name of fieldNames) {
+            expect(Object.hasOwn(fields, name)).toBe(true);
+            expect(fields[name].overwriteMode).toBe('coalesce');
+        }
+        expect(fields.SentenceFurigana.value).toBe('{sentence-furigana-plain}');
+        for (const name of ['__proto__', 'constructor', 'Mystery']) {
+            expect(fields[name].value).toBe('');
+        }
+    });
 });
