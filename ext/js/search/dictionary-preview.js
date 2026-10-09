@@ -31,9 +31,8 @@ export function glossaryPreview(value, maximum = 220) {
         omitted = false;
     while (stack.length > 0 && visited++ < 256 && output.length <= maximum) {
         const item = stack.pop();
-        if (!item) {continue;}
-        if (item.depth > 24) {
-            omitted = true;
+        if (!item || item.depth > 24) {
+            // Malformed/cyclic nested content still yields no preview text.
             continue;
         }
         const content = item.value;
