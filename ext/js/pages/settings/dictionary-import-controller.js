@@ -2403,7 +2403,16 @@ export class DictionaryImportController {
                 }
             }
             if (this._isImportRunCurrent(importRunGeneration)) {
-                importProgressTracker.onImportComplete(errors.length);
+                try {
+                    importProgressTracker.onImportComplete(errors.length);
+                } catch (error) {
+                    const normalizedError = toError(error);
+                    errors.push(normalizedError);
+                    reportDiagnostics('dictionary-import-progress-finalization-failed', {
+                        message: normalizedError.message,
+                        importRunGeneration,
+                    });
+                }
                 Reflect.set(globalThis, '__manabitanImportStepTimingHistory', importProgressTracker.getStepTimingHistory());
             }
             const importEndTime = safePerformance.now();

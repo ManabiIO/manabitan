@@ -230,3 +230,24 @@ test('late progress from a recovered import cannot overwrite the current progres
     expect(observedLabel).toBe(currentLabel);
     expect(currentLabel).toContain(currentTracker.currentStep.label);
 });
+
+
+test('progress finalization failure still releases import ownership and reports the error', async () => {
+    const {controller, mode, completion, showErrors} = setup();
+    const end = vi.fn();
+    Reflect.set(controller, '_preventPageExit', vi.fn(() => ({end})));
+    const done = vi.fn();
+    const failure = new Error('Progress renderer failed');
+    const tracker = new ImportProgressTracker([{label: 'Import'}], 1);
+    vi.spyOn(tracker, 'onImportComplete').mockImplementation(() => { throw failure; });
+
+    await expect(controller._importDictionaries(files(), null, done, tracker)).resolves.toBeUndefined();
+
+    expect(end).toHaveBeenCalledOnce();
+    expect(mode.mock.calls.map(([active]) => active)).toEqual([true, false]);
+    expect(Reflect.get(controller, '_activeImportOwnerId')).toBeUndefined();
+    expect(Reflect.get(controller, '_modifying')).toBe(false);
+    expect(showErrors).toHaveBeenCalledWith([failure]);
+    expect(done).toHaveBeenCalledWith({ok: false, errors: [failure], importedTitles: ['Test']});
+    expect(completion).toHaveBeenCalledWith(expect.objectContaining({errorCount: 1, importRunCurrent: true}));
+});
