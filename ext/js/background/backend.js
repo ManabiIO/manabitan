@@ -86,7 +86,15 @@ function getDictionaryArchiveFileName(url, contentDisposition) {
     if (typeof ordinaryName === 'string') { candidates.push(ordinaryName); }
     try {
         const pathPart = new URL(url).pathname.split('/').reverse().find((part) => part.length > 0);
-        if (typeof pathPart === 'string') { candidates.push(pathPart); }
+        if (typeof pathPart === 'string') {
+            let decodedName = pathPart;
+            try {
+                decodedName = decodeURIComponent(pathPart);
+            } catch (_) {
+                // Preserve malformed URL names without failing the completed download.
+            }
+            candidates.push(decodedName);
+        }
     } catch (_) {
         // The request has already validated its URL; this is only a naming fallback.
     }
