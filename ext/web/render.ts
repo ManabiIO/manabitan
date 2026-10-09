@@ -212,6 +212,23 @@ function clipDisplayText(value: string, maximum: number): string {
  */
 export function renderDictionaryResults(container: HTMLElement, result: LookupResult, client: ManabiTanWebClient, lookup: (text: string) => void): () => void {
     const manager = new ReaderMedia(client, lookup);
+    try {
+        renderResultsWithManager(container, result, manager);
+    } catch (error) {
+        // The disposal callback is not returned when rendering throws. Cancel
+        // media requests and retire any object URLs created before the error.
+        manager.dispose();
+        throw error;
+    }
+    return () => manager.dispose();
+}
+
+/**
+ * @param container
+ * @param result
+ * @param manager
+ */
+function renderResultsWithManager(container: HTMLElement, result: LookupResult, manager: ReaderMedia) {
     const generator = new StructuredContentGenerator(manager, container.ownerDocument, window);
     const fragment = document.createDocumentFragment();
     const budget = {nodes: 0, characters: 0};
@@ -303,5 +320,4 @@ export function renderDictionaryResults(container: HTMLElement, result: LookupRe
         fragment.append(note);
     }
     container.replaceChildren(fragment);
-    return () => manager.dispose();
 }
