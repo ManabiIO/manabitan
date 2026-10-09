@@ -74,7 +74,7 @@ describe('dictionary search preview Unicode clipping', () => {
     test('malformed over-deep glossary content stays safely excluded', () => {
         /** @type {unknown} */
         let nested = 'deep definition';
-        for (let i = 0; i < 26; ++i) {nested = [nested];}
+        for (let i = 0; i < 26; ++i) { nested = [nested]; }
         expect(glossaryPreview(nested)).toBe('');
     });
 
@@ -82,5 +82,4 @@ describe('dictionary search preview Unicode clipping', () => {
         expect(glossaryPreview([{type: 'image'}, 'short definition'])).toBe('short definition');
         expect(glossaryPreview('')).toBe('');
     });
-
 });
