@@ -40,7 +40,7 @@ export function glossaryPreview(value, maximum = 220) {
             output += content.slice(0, maximum + 1) + ' ';
         } else if (Array.isArray(content)) {
             const permitted = Math.max(0, Math.min(content.length, 256 - visited, 256 - stack.length));
-            if (permitted < content.length) {omitted = true;}
+            if (permitted < content.length) { omitted = true; }
             for (let index = permitted - 1; index >= 0; --index) {
                 stack.push({value: content[index], depth: item.depth + 1});
             }
@@ -105,7 +105,7 @@ export function dictionaryPreview(entries) {
         const definition = entry.definitions[0];
         const term = clipPreviewText(headword.term, 256);
         const reading = clipPreviewText(headword.reading, 256);
-        items.push({id: JSON.stringify([items.length, definition ? clipPreviewText(definition.dictionary, 256) : undefined, definition?.id, term, reading]),
+        items.push({id: JSON.stringify([items.length, definition ? clipPreviewText(definition.dictionary, 256) : null, definition?.id, term, reading]),
             term,
             reading,
             senses});
