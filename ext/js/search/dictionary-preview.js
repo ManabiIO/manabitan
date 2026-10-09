@@ -27,17 +27,21 @@ export function glossaryPreview(value, maximum = 220) {
     maximum = Math.max(1, Math.min(220, Math.trunc(maximum) || 220));
     const stack = [{value, depth: 0}];
     let output = '',
-        visited = 0;
+        visited = 0,
+        omitted = false;
     while (stack.length > 0 && visited++ < 256 && output.length <= maximum) {
         const item = stack.pop();
         if (!item || item.depth > 24) {
+            // Malformed/cyclic nested content still yields no preview text.
             continue;
         }
         const content = item.value;
         if (typeof content === 'string') {
             output += content.slice(0, maximum + 1) + ' ';
         } else if (Array.isArray(content)) {
-            for (let index = Math.min(content.length, 256 - visited, 256 - stack.length) - 1; index >= 0; --index) {
+            const permitted = Math.max(0, Math.min(content.length, 256 - visited, 256 - stack.length));
+            if (permitted < content.length) { omitted = true; }
+            for (let index = permitted - 1; index >= 0; --index) {
                 stack.push({value: content[index], depth: item.depth + 1});
             }
         } else if (content && typeof content === 'object') {
@@ -53,12 +57,23 @@ export function glossaryPreview(value, maximum = 220) {
         }
     }
     output = output.replace(/\s+/g, ' ').trim();
-    const truncated = output.length > maximum || stack.length > 0;
+    const truncated = omitted || output.length > maximum || stack.length > 0;
     let clipped = output.slice(0, maximum);
     if (/[\uD800-\uDBFF]$/.test(clipped)) {
         clipped = clipped.slice(0, -1);
     }
     return clipped + (truncated ? '…' : '');
+}
+
+/**
+ * Keep UTF-16 display limits without cutting a supplementary character in half.
+ * @param {string} value
+ * @param {number} maximum
+ * @returns {string}
+ */
+function clipPreviewText(value, maximum) {
+    const clipped = value.slice(0, maximum);
+    return /[\uD800-\uDBFF]$/.test(clipped) ? clipped.slice(0, -1) : clipped;
 }
 
 /**
@@ -81,16 +96,18 @@ export function dictionaryPreview(entries) {
             }
             const text = glossaryPreview(definition.entries);
             if (text) {
-                senses.push({source: definition.dictionary.slice(0, 256), text, tags: definition.tags.slice(0, 4).map((tag) => tag.name.slice(0, 40))});
+                senses.push({source: clipPreviewText(definition.dictionary, 256), text, tags: definition.tags.slice(0, 4).map((tag) => clipPreviewText(tag.name, 40))});
             }
             if (senses.length === 2) {
                 break;
             }
         }
         const definition = entry.definitions[0];
-        items.push({id: JSON.stringify([items.length, definition?.dictionary.slice(0, 256), definition?.id, headword.term.slice(0, 256), headword.reading.slice(0, 256)]),
-            term: headword.term.slice(0, 256),
-            reading: headword.reading.slice(0, 256),
+        const term = clipPreviewText(headword.term, 256);
+        const reading = clipPreviewText(headword.reading, 256);
+        items.push({id: JSON.stringify([items.length, definition ? clipPreviewText(definition.dictionary, 256) : null, definition?.id, term, reading]),
+            term,
+            reading,
             senses});
     }
     return {items, hasMore: entries.length > 2};
