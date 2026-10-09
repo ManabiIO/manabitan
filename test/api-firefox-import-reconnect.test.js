@@ -54,7 +54,7 @@ describe('Firefox dictionary import backend reconnect', () => {
     test('preserves the immediate error if the backend cannot be reconnected', async () => {
         vi.stubGlobal('navigator', {});
         vi.stubGlobal('window', {location: {protocol: 'file:'}});
-        vi.stubGlobal('SharedWorker', undefined);
+        vi.stubGlobal('SharedWorker', null);
         const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
         const reconnect = vi.spyOn(api, '_createFirefoxBackendPort');
 
