@@ -199,7 +199,16 @@ test.each([
     Reflect.set(controller, '_dictionaryEntries', [{dictionaryTitle: title}]);
     Reflect.set(controller, '_statusFooter', null);
     const end = vi.fn();
-    const modifyGlobalSettings = vi.fn().mockResolvedValue(void 0);
+    const optionsFull = {profiles: [{options: {
+        dictionaries: [{name: title, enabled: true}, {name: 'Fixture', enabled: true}],
+        general: {mainDictionary: title, sortFrequencyDictionary: title},
+    }}]};
+    Reflect.set(backend, '_getModifySettingObject', () => optionsFull);
+    const modifyGlobalSettings = vi.fn(async (/** @type {import('settings-modifications').Modification[]} */ targets) => {
+        for (const target of targets) {
+            backend._modifySetting({...target, scope: 'global', optionsContext: null});
+        }
+    });
     Reflect.set(controller, '_settingsController', {
         preventPageExit: () => ({end}),
         application: {api: {
@@ -209,10 +218,7 @@ test.each([
              */
             deleteDictionaryByTitle: async (dictionaryTitle) => await backend._onApiDeleteDictionaryByTitle({dictionaryTitle}, {}),
         }},
-        getOptionsFull: async () => ({profiles: [{options: {
-            dictionaries: [{name: title, enabled: true}, {name: 'Fixture', enabled: true}],
-            general: {mainDictionary: title, sortFrequencyDictionary: title},
-        }}]}),
+        getOptionsFull: async () => optionsFull,
         modifyGlobalSettings,
     });
     for (const method of ['_clearMutationErrors', '_setButtonsEnabled', '_triggerStorageChanged']) {
@@ -234,10 +240,12 @@ test.each([
     expect(removeShard).toHaveBeenCalledWith(storageName);
     expect(refresh).toHaveBeenCalledOnce();
     expect(settingsRefresh).toHaveBeenCalledWith(title, 'delete');
-    expect(modifyGlobalSettings).toHaveBeenCalledWith([
-        {action: 'splice', path: 'profiles[0].options.dictionaries', start: 0, deleteCount: 1, items: []},
-        {action: 'set', path: 'profiles[0].options.general.mainDictionary', value: ''},
-        {action: 'set', path: 'profiles[0].options.general.sortFrequencyDictionary', value: null},
-    ]);
+    expect(optionsFull.profiles[0].options).toEqual({
+        dictionaries: [{name: 'Fixture', enabled: true}],
+        general: {mainDictionary: '', sortFrequencyDictionary: null},
+    });
+    // An independent page can replay the same cleanup after the indices shift.
+    await controller._deleteDictionarySettings(title);
+    expect(optionsFull.profiles[0].options.dictionaries).toEqual([{name: 'Fixture', enabled: true}]);
     expect(end).toHaveBeenCalledOnce();
 });

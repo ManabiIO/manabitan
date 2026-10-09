@@ -660,6 +660,9 @@ class DictionaryExtraInfo {
     }
 }
 
+/** @type {WeakMap<import('./settings-controller.js').SettingsController, Promise<void>>} */
+const dictionarySettingsReconciliations = new WeakMap();
+
 export class DictionaryController {
     /**
      * @param {import('./settings-controller.js').SettingsController} settingsController
@@ -932,6 +935,28 @@ export class DictionaryController {
      * @param {boolean} newDictionariesEnabled
      */
     static async ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled) {
+        const previous = dictionarySettingsReconciliations.get(settingsController) ?? Promise.resolve();
+        const operation = previous.catch(() => {}).then(() => (
+            DictionaryController.#ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled)
+        ));
+        dictionarySettingsReconciliations.set(settingsController, operation);
+        try {
+            await operation;
+        } finally {
+            if (dictionarySettingsReconciliations.get(settingsController) === operation) {
+                dictionarySettingsReconciliations.delete(settingsController);
+            }
+        }
+    }
+
+    /**
+     * @param {import('./settings-controller.js').SettingsController} settingsController
+     * @param {import('dictionary-importer').Summary[]|undefined} dictionaries
+     * @param {import('settings').Options|undefined} optionsFull
+     * @param {boolean} modifyGlobalSettings
+     * @param {boolean} newDictionariesEnabled
+     */
+    static async #ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled) {
         if (typeof dictionaries === 'undefined') {
             dictionaries = await settingsController.getDictionaryInfo();
         }
@@ -942,33 +967,30 @@ export class DictionaryController {
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         const {profiles} = optionsFull;
+        const installedDictionaryNames = new Set(dictionaries.map(({title}) => title));
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
-            let modified = false;
-            const missingDictionaries = [...dictionaries];
+            const existingDictionaryNames = new Set();
             const dictionaryOptionsArray = profiles[i].options.dictionaries;
+            const path = `profiles[${i}].options.dictionaries`;
             for (let j = dictionaryOptionsArray.length - 1; j >= 0; --j) {
                 const {name} = dictionaryOptionsArray[j];
-                const missingDictionariesNameIndex = missingDictionaries.findIndex((x) => x.title === name);
-                if (missingDictionariesNameIndex !== -1) {
-                    missingDictionaries.splice(missingDictionariesNameIndex, 1);
+                if (installedDictionaryNames.has(name)) {
+                    // Preserve distinct aliases and enablement flags for the
+                    // same installed dictionary, including disabled entries.
+                    existingDictionaryNames.add(name);
                 } else {
                     dictionaryOptionsArray.splice(j, 1);
-                    modified = true;
+                    // Never write a stale whole-array snapshot: a concurrent
+                    // import may have just enabled an entry in the backend.
+                    targets.push({action: 'removeDictionary', path, name});
                 }
             }
 
-            for (const {title, styles} of missingDictionaries) {
+            for (const {title, styles} of dictionaries) {
+                if (existingDictionaryNames.has(title)) { continue; }
                 const value = DictionaryController.createDefaultDictionarySettings(title, newDictionariesEnabled, styles);
                 dictionaryOptionsArray.push(value);
-                modified = true;
-            }
-
-            if (modified) {
-                targets.push({
-                    action: 'set',
-                    path: `profiles[${i}].options.dictionaries`,
-                    value: dictionaryOptionsArray,
-                });
+                targets.push({action: 'push', path, items: [value]});
             }
         }
 
@@ -1921,15 +1943,11 @@ export class DictionaryController {
         const targets = [];
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
             const {options: {dictionaries, general}} = profiles[i];
-            for (let j = dictionaries.length - 1; j >= 0; --j) {
-                if (dictionaries[j].name !== dictionaryTitle) { continue; }
-                const path = `profiles[${i}].options.dictionaries`;
+            if (dictionaries.some(({name}) => name === dictionaryTitle)) {
                 targets.push({
-                    action: 'splice',
-                    path,
-                    start: j,
-                    deleteCount: 1,
-                    items: [],
+                    action: 'removeDictionary',
+                    path: `profiles[${i}].options.dictionaries`,
+                    name: dictionaryTitle,
                 });
             }
             if (general.mainDictionary === dictionaryTitle) {

@@ -229,6 +229,14 @@ export class RecommendedSettingsController {
                 label.appendChild(document.createTextNode(` at ${start} deleting ${deleteCount} items and inserting ${items.length} items`));
                 break;
             }
+            case 'removeDictionary': {
+                const {path, name} = modification;
+                const pathCodeElement = document.createElement('code');
+                pathCodeElement.textContent = path;
+                label.appendChild(document.createTextNode(`Removing dictionary ${name} from `));
+                label.appendChild(pathCodeElement);
+                break;
+            }
             case 'push': {
                 const {path, items} = modification;
                 const pathCodeElement = document.createElement('code');

@@ -59,12 +59,19 @@ export type ModificationPush = {
     items: unknown[];
 };
 
+export type ModificationRemoveDictionary = {
+    action: 'removeDictionary';
+    path: string;
+    name: string;
+};
+
 export type Modification = (
     ModificationSet |
     ModificationDelete |
     ModificationSwap |
     ModificationSplice |
-    ModificationPush
+    ModificationPush |
+    ModificationRemoveDictionary
 );
 
 export type ScopedRead = Read & OptionsScope;
@@ -79,12 +86,15 @@ export type ScopedModificationSplice = ModificationSplice & OptionsScope;
 
 export type ScopedModificationPush = ModificationPush & OptionsScope;
 
+export type ScopedModificationRemoveDictionary = ModificationRemoveDictionary & OptionsScope;
+
 export type ScopedModification = (
     ScopedModificationSet |
     ScopedModificationDelete |
     ScopedModificationSwap |
     ScopedModificationSplice |
-    ScopedModificationPush
+    ScopedModificationPush |
+    ScopedModificationRemoveDictionary
 );
 
 export type ModificationSetResult = unknown;

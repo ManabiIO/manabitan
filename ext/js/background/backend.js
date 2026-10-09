@@ -3157,6 +3157,24 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                 if (!Array.isArray(array)) { throw new Error('Invalid target type'); }
                 return array.splice(start, deleteCount, ...items);
             }
+            case 'removeDictionary':
+            {
+                const {path, name} = target;
+                if (typeof path !== 'string' || !/^profiles\[\d+\]\.options\.dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
+                if (typeof name !== 'string') { throw new Error('Invalid dictionary name'); }
+                const array = accessor.get(ObjectPropertyAccessor.getPathArray(path));
+                if (!Array.isArray(array)) { throw new Error('Invalid target type'); }
+                /** @type {unknown[]} */
+                const removed = [];
+                for (let i = array.length - 1; i >= 0; --i) {
+                    const entry = /** @type {unknown} */ (array[i]);
+                    if (isObjectNotArray(entry) && entry.name === name) {
+                        array.splice(i, 1);
+                        removed.unshift(entry);
+                    }
+                }
+                return removed;
+            }
             case 'push':
             {
                 const {path, items} = target;
