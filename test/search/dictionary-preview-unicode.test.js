@@ -4,7 +4,7 @@
  */
 
 import {describe, expect, test} from 'vitest';
-import {dictionaryPreview} from '../../ext/js/search/dictionary-preview.js';
+import {dictionaryPreview, glossaryPreview} from '../../ext/js/search/dictionary-preview.js';
 
 /**
  * @param {string} term
@@ -64,4 +64,20 @@ describe('dictionary search preview Unicode clipping', () => {
         expect(items[0].senses[0]).toEqual({source: 'Jitendex', text: 'Japanese dictionary gloss', tags: ['noun']});
         expect(JSON.parse(items[0].id)).toEqual([0, 'Jitendex', 1, '猫', 'ねこ']);
     });
+    test('glossary preview reports content skipped by the node budget', () => {
+        const oversized = Array.from({length: 300}, () => ({type: 'image'}));
+        oversized.push({type: 'text', text: 'late definition'});
+        expect(glossaryPreview(oversized)).toBe('…');
+    });
+
+    test('glossary preview reports content skipped by the depth budget', () => {
+        const nested = Array.from({length: 26}).reduce((value) => [value], 'deep definition');
+        expect(glossaryPreview(nested)).toBe('…');
+    });
+
+    test('glossary preview does not show truncation for content within its limits', () => {
+        expect(glossaryPreview([{type: 'image'}, 'short definition'])).toBe('short definition');
+        expect(glossaryPreview('')).toBe('');
+    });
+
 });
