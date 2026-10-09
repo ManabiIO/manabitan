@@ -62,6 +62,17 @@ export function glossaryPreview(value, maximum = 220) {
 }
 
 /**
+ * Keep UTF-16 display limits without cutting a supplementary character in half.
+ * @param {string} value
+ * @param {number} maximum
+ * @returns {string}
+ */
+function clipPreviewText(value, maximum) {
+    const clipped = value.slice(0, maximum);
+    return /[\uD800-\uDBFF]$/.test(clipped) ? clipped.slice(0, -1) : clipped;
+}
+
+/**
  * @param {import('dictionary').TermDictionaryEntry[]} entries
  * @returns {{items: {id: string, term: string, reading: string, senses: {source: string, text: string, tags: string[]}[]}[], hasMore: boolean}}
  */
@@ -81,16 +92,18 @@ export function dictionaryPreview(entries) {
             }
             const text = glossaryPreview(definition.entries);
             if (text) {
-                senses.push({source: definition.dictionary.slice(0, 256), text, tags: definition.tags.slice(0, 4).map((tag) => tag.name.slice(0, 40))});
+                senses.push({source: clipPreviewText(definition.dictionary, 256), text, tags: definition.tags.slice(0, 4).map((tag) => clipPreviewText(tag.name, 40))});
             }
             if (senses.length === 2) {
                 break;
             }
         }
         const definition = entry.definitions[0];
-        items.push({id: JSON.stringify([items.length, definition?.dictionary.slice(0, 256), definition?.id, headword.term.slice(0, 256), headword.reading.slice(0, 256)]),
-            term: headword.term.slice(0, 256),
-            reading: headword.reading.slice(0, 256),
+        const term = clipPreviewText(headword.term, 256);
+        const reading = clipPreviewText(headword.reading, 256);
+        items.push({id: JSON.stringify([items.length, definition ? clipPreviewText(definition.dictionary, 256) : undefined, definition?.id, term, reading]),
+            term,
+            reading,
             senses});
     }
     return {items, hasMore: entries.length > 2};
