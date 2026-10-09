@@ -982,7 +982,7 @@ export class DictionaryController {
                     dictionaryOptionsArray.splice(j, 1);
                     // Never write a stale whole-array snapshot: a concurrent
                     // import may have just enabled an entry in the backend.
-                    targets.push({action: 'splice', path, start: j, deleteCount: 1, items: []});
+                    targets.push({action: 'removeDictionary', path, name});
                 }
             }
 
@@ -1943,15 +1943,11 @@ export class DictionaryController {
         const targets = [];
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
             const {options: {dictionaries, general}} = profiles[i];
-            for (let j = dictionaries.length - 1; j >= 0; --j) {
-                if (dictionaries[j].name !== dictionaryTitle) { continue; }
-                const path = `profiles[${i}].options.dictionaries`;
+            if (dictionaries.some(({name}) => name === dictionaryTitle)) {
                 targets.push({
-                    action: 'splice',
-                    path,
-                    start: j,
-                    deleteCount: 1,
-                    items: [],
+                    action: 'removeDictionary',
+                    path: `profiles[${i}].options.dictionaries`,
+                    name: dictionaryTitle,
                 });
             }
             if (general.mainDictionary === dictionaryTitle) {

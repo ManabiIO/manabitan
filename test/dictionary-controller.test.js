@@ -47,11 +47,9 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
         expect(modifyGlobalSettings).toHaveBeenCalledOnce();
         expect(modifyGlobalSettings).toHaveBeenCalledWith([
             {
-                action: 'splice',
+                action: 'removeDictionary',
                 path: 'profiles[0].options.dictionaries',
-                start: 1,
-                deleteCount: 1,
-                items: [],
+                name: 'Unknown',
             },
             {
                 action: 'push',
@@ -69,8 +67,10 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
         ];
         const modifyGlobalSettings = vi.fn(async (/** @type {import('settings-modifications').Modification[]} */ modifications) => {
             for (const modification of modifications) {
-                if (modification.action === 'splice') {
-                    backendDictionaries.splice(modification.start, modification.deleteCount, ...modification.items);
+                if (modification.action === 'removeDictionary') {
+                    for (let i = backendDictionaries.length - 1; i >= 0; --i) {
+                        if (Reflect.get(/** @type {object} */ (backendDictionaries[i]), 'name') === modification.name) { backendDictionaries.splice(i, 1); }
+                    }
                 } else if (modification.action === 'push') {
                     backendDictionaries.push(...modification.items);
                 } else {
@@ -100,11 +100,9 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
 
         expect(backendDictionaries).toStrictEqual([{name: 'JMdict', alias: 'My alias', enabled: true}]);
         expect(modifyGlobalSettings).toHaveBeenCalledWith([{
-            action: 'splice',
+            action: 'removeDictionary',
             path: 'profiles[0].options.dictionaries',
-            start: 1,
-            deleteCount: 1,
-            items: [],
+            name: 'Unknown',
         }]);
     });
 
@@ -148,8 +146,11 @@ test('concurrent dictionary refreshes cannot remove the next installed entry usi
         entered.resolve();
         await resume.promise;
         for (const modification of modifications) {
-            if (modification.action !== 'splice') { throw new Error('Unexpected modification'); }
-            options.profiles[0].options.dictionaries.splice(modification.start, modification.deleteCount);
+            if (modification.action !== 'removeDictionary') { throw new Error('Unexpected modification'); }
+            const dictionaries = options.profiles[0].options.dictionaries;
+            for (let i = dictionaries.length - 1; i >= 0; --i) {
+                if (dictionaries[i].name === modification.name) { dictionaries.splice(i, 1); }
+            }
         }
         return [];
     });
