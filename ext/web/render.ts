@@ -19,6 +19,7 @@ export class ReaderMedia implements UrlContentManager {
      */
     private readonly urls = new Map<string, Promise<string>>();
     private mediaBytes = 0;
+    private mediaRequestCount = 0;
     /**
      * Keep imported images from flooding the worker's bounded FIFO queue.
      */
@@ -57,9 +58,12 @@ export class ReaderMedia implements UrlContentManager {
         const key = JSON.stringify([path, dictionary]);
         let pending = this.urls.get(key);
         if (!pending) {
-            if (this.disposed || this.urls.size >= MAX_READER_MEDIA_REQUESTS) {
+            if (this.disposed || this.mediaRequestCount >= MAX_READER_MEDIA_REQUESTS) {
                 return Promise.reject(new Error('Dictionary media request limit reached'));
             }
+            // A rejected URL promise must not poison future retries, but every
+            // attempt still counts toward this render lifetime's admission cap.
+            ++this.mediaRequestCount;
             const slot = this.nextMediaSlot++ % this.mediaSlots.length;
             pending = this.mediaSlots[slot].then(() => {
                 if (this.disposed) {throw new Error('Dictionary media request cancelled');}
@@ -77,6 +81,9 @@ export class ReaderMedia implements UrlContentManager {
                 this.mediaBytes += blob.size;
                 this.created.add(url);
                 return url;
+            }).catch((error: unknown) => {
+                this.urls.delete(key);
+                throw error;
             });
             // Retire this lane even on failure, without unhandled rejections.
             this.mediaSlots[slot] = pending.then(() => {}, () => {});
