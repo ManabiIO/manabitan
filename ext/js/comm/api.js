@@ -730,7 +730,7 @@ export class API {
      */
     importDictionaryOffscreen(archiveContent, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
         const pmTransportError = this._getPmTransportError();
-        if (pmTransportError !== null) {
+        if (pmTransportError !== null && (this._runtimeConnectionsShutdown || !this._canReconnectBackendPort())) {
             return Promise.reject(pmTransportError);
         }
         const channel = new MessageChannel();
@@ -756,7 +756,7 @@ export class API {
      */
     importDictionaryUrlOffscreen(url, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
         const pmTransportError = this._getPmTransportError();
-        if (pmTransportError !== null) {
+        if (pmTransportError !== null && (this._runtimeConnectionsShutdown || !this._canReconnectBackendPort())) {
             return Promise.reject(pmTransportError);
         }
         const channel = new MessageChannel();
