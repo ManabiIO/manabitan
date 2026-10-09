@@ -8,6 +8,7 @@ afterEach(() => { vi.unstubAllGlobals(); });
 
 /**
  * @param {ReadableStream<Uint8Array>} body
+ * @returns {Promise<Blob>}
  */
 function downloadStream(body) {
     vi.stubGlobal('location', new URL(origin));
@@ -20,8 +21,11 @@ test('repeated empty chunks cannot starve the download idle deadline or accumula
     const body = new ReadableStream({
         pull(controller) {
             ++reads;
-            if (reads > 1100) {controller.error(new Error('Unbounded empty archive reads'));}
-            else {controller.enqueue(new Uint8Array(0));}
+            if (reads > 1100) {
+                controller.error(new Error('Unbounded empty archive reads'));
+            } else {
+                controller.enqueue(new Uint8Array(0));
+            }
         },
     });
     const rejected = await downloadStream(body).then(() => null, (error) => error);
@@ -34,8 +38,11 @@ test('interleaved empty chunks cannot evade the total no-progress budget', async
     const body = new ReadableStream({
         pull(controller) {
             ++reads;
-            if (reads > 2200) {controller.error(new Error('Unbounded interleaved reads'));}
-            else {controller.enqueue(reads % 2 ? new Uint8Array(0) : new Uint8Array([1]));}
+            if (reads > 2200) {
+                controller.error(new Error('Unbounded interleaved reads'));
+            } else {
+                controller.enqueue(reads % 2 ? new Uint8Array(0) : new Uint8Array([1]));
+            }
         },
     });
     const rejected = await downloadStream(body).then(() => null, (error) => error);
@@ -53,7 +60,7 @@ test('fragment-count limit bounds storage for a slowly fragmented archive', asyn
         ok: true,
         body: {getReader: () => ({
             async read() {
-                if (++reads > 66_000) {throw new Error('Unbounded fragment admission');}
+                if (++reads > 66_000) { throw new Error('Unbounded fragment admission'); }
                 return {done: false, value: part};
             },
             cancel,
