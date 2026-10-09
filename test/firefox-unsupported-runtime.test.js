@@ -13,14 +13,14 @@ import {getUnsupportedRuntimeSkipReason} from './firefox/unsupported-runtime-cla
 describe('Firefox E2E unsupported-runtime classification', () => {
     test('does not skip failed dictionary import because diagnostics say opfs-sahpool', () => {
         const failure = 'Jitendex backend content integrity failed after import: ' +
-            '{"reason":"no-readable-entry-content","openStorageMode":"opfs-sahpool","hasCreateSyncAccessHandle":true}';
+        '{"reason":"no-readable-entry-content","openStorageMode":"opfs-sahpool","hasCreateSyncAccessHandle":true}';
 
         expect(getUnsupportedRuntimeSkipReason(failure)).toBe('');
     });
 
     test('does not skip an unexpected lookup failure after successful OPFS initialization', () => {
         const failure = 'Term lookup failed: empty result. backendStorageDiagnostics=' +
-            '{"mode":"opfs-sahpool","runtimeContext":{"globalConstructor":"DedicatedWorkerGlobalScope"}}';
+        '{"mode":"opfs-sahpool","runtimeContext":{"globalConstructor":"DedicatedWorkerGlobalScope"}}';
 
         expect(getUnsupportedRuntimeSkipReason(failure)).toBe('');
     });
