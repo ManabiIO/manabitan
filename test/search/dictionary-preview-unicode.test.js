@@ -71,11 +71,11 @@ describe('dictionary search preview Unicode clipping', () => {
         expect(glossaryPreview(oversized)).toBe('…');
     });
 
-    test('glossary preview reports content skipped by the depth budget', () => {
+    test('malformed over-deep glossary content stays safely excluded', () => {
         /** @type {unknown} */
         let nested = 'deep definition';
         for (let i = 0; i < 26; ++i) {nested = [nested];}
-        expect(glossaryPreview(nested)).toBe('…');
+        expect(glossaryPreview(nested)).toBe('');
     });
 
     test('glossary preview does not show truncation for content within its limits', () => {
