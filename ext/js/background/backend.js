@@ -3169,7 +3169,8 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                 for (let i = array.length - 1; i >= 0; --i) {
                     const entry = /** @type {unknown} */ (array[i]);
                     if (isObjectNotArray(entry) && entry.name === name) {
-                        removed.unshift(...array.splice(i, 1));
+                        array.splice(i, 1);
+                        removed.unshift(entry);
                     }
                 }
                 return removed;
