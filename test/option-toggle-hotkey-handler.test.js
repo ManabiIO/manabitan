@@ -147,5 +147,4 @@ describe('Option toggle hotkey serialization', () => {
         expect(notifications).not.toHaveBeenCalled();
         expect(modifySettings).toHaveBeenCalledTimes(phase === 'write' ? 1 : 0);
     });
-
 });
