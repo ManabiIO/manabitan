@@ -28,7 +28,7 @@ afterEach(() => {
  */
 function getContainer() {
     const element = dom.window.document.getElementById('results');
-    if (element === null) {throw new Error('Missing test container');}
+    if (element === null) { throw new Error('Missing test container'); }
     return element;
 }
 
@@ -65,7 +65,7 @@ test('a structured glossary render error disposes media and preserves previous c
 test('a failed final DOM publication disposes the render lifetime', () => {
     const dispose = vi.spyOn(ReaderMedia.prototype, 'dispose');
     const container = getContainer();
-    vi.spyOn(container, 'replaceChildren').mockImplementation(() => {throw new Error('Detached DOM');});
+    vi.spyOn(container, 'replaceChildren').mockImplementation(() => { throw new Error('Detached DOM'); });
 
     expect(() => renderDictionaryResults(container, result([]), client, () => {})).toThrow('Detached DOM');
     expect(dispose).toHaveBeenCalledOnce();
