@@ -937,7 +937,7 @@ export class DictionaryController {
     static async ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled) {
         const previous = dictionarySettingsReconciliations.get(settingsController) ?? Promise.resolve();
         const operation = previous.catch(() => {}).then(() => (
-            DictionaryController._ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled)
+            DictionaryController.#ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled)
         ));
         dictionarySettingsReconciliations.set(settingsController, operation);
         try {
@@ -956,7 +956,7 @@ export class DictionaryController {
      * @param {boolean} modifyGlobalSettings
      * @param {boolean} newDictionariesEnabled
      */
-    static async _ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled) {
+    static async #ensureDictionarySettings(settingsController, dictionaries, optionsFull, modifyGlobalSettings, newDictionariesEnabled) {
         if (typeof dictionaries === 'undefined') {
             dictionaries = await settingsController.getDictionaryInfo();
         }
