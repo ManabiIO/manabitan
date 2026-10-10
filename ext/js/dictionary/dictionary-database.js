@@ -2036,7 +2036,7 @@ export class DictionaryDatabase {
                             if (id <= 0 || visited.has(id)) { continue; }
                             visited.add(id);
                             const matchSource = (indexIndex === 0) ? 'term' : 'reading';
-                            const matchType2 = (value === queryData.term) ? 'exact' : matchType;
+                            const matchType2 = (value === queryData.query) ? 'exact' : matchType;
                             idMatches.set(id, {matchSource, matchType: matchType2, itemIndex: queryData.itemIndex});
                         }
                     }
