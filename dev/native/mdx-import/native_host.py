@@ -174,11 +174,16 @@ class HostState:
 
     def upload_chunk(self, upload_id: str, offset: int, data_b64: str) -> bool:
         upload = self._uploads[upload_id]
-        data = base64.b64decode(data_b64.encode("ascii"))
+        data = base64.b64decode(data_b64.encode("ascii"), validate=True)
+        offset = int(offset)
+        if offset != upload.received_bytes:
+            raise ValueError(f"upload {upload_id} invalid chunk offset: {offset}/{upload.received_bytes}")
+        if len(data) > upload.total_bytes - upload.received_bytes:
+            raise ValueError(f"upload {upload_id} chunk exceeds declared size")
         with upload.path.open("r+b") as handle:
-            handle.seek(int(offset))
+            handle.seek(offset)
             handle.write(data)
-        upload.received_bytes = max(upload.received_bytes, int(offset) + len(data))
+        upload.received_bytes += len(data)
         return True
 
     def finish_upload(self, upload_id: str) -> bool:

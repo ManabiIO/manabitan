@@ -399,6 +399,47 @@ class NativeHostTests(unittest.TestCase):
         finally:
             state.cleanup()
 
+    def test_upload_rejects_a_gap_without_creating_sparse_dictionary_bytes(self) -> None:
+        state = native_host.HostState()
+        try:
+            upload_id = state.begin_upload("fixture.mdx", 4)["uploadId"]
+            with self.assertRaisesRegex(ValueError, "offset"):
+                state.upload_chunk(upload_id, 3, base64.b64encode(b"D").decode("ascii"))
+            self.assertEqual(state._uploads[upload_id].path.read_bytes(), b"")
+            with self.assertRaisesRegex(ValueError, "incomplete"):
+                state.finish_upload(upload_id)
+            state.upload_chunk(upload_id, 0, base64.b64encode(b"AB").decode("ascii"))
+            state.upload_chunk(upload_id, 2, base64.b64encode(b"CD").decode("ascii"))
+            self.assertTrue(state.finish_upload(upload_id))
+            self.assertEqual(state._uploads[upload_id].path.read_bytes(), b"ABCD")
+        finally:
+            state.cleanup()
+
+    def test_upload_rejects_overruns_and_replayed_chunks_before_writing(self) -> None:
+        state = native_host.HostState()
+        try:
+            upload_id = state.begin_upload("fixture.mdx", 4)["uploadId"]
+            with self.assertRaisesRegex(ValueError, "size"):
+                state.upload_chunk(upload_id, 0, base64.b64encode(b"ABCDE").decode("ascii"))
+            state.upload_chunk(upload_id, 0, base64.b64encode(b"AB").decode("ascii"))
+            with self.assertRaisesRegex(ValueError, "offset"):
+                state.upload_chunk(upload_id, 0, base64.b64encode(b"XX").decode("ascii"))
+            self.assertEqual(state._uploads[upload_id].path.read_bytes(), b"AB")
+            self.assertEqual(state._uploads[upload_id].received_bytes, 2)
+        finally:
+            state.cleanup()
+
+    def test_upload_rejects_invalid_base64_before_advancing_progress(self) -> None:
+        state = native_host.HostState()
+        try:
+            upload_id = state.begin_upload("fixture.mdx", 1)["uploadId"]
+            with self.assertRaises(ValueError):
+                state.upload_chunk(upload_id, 0, "QQ==!")
+            self.assertEqual(state._uploads[upload_id].path.read_bytes(), b"")
+            self.assertEqual(state._uploads[upload_id].received_bytes, 0)
+        finally:
+            state.cleanup()
+
     def test_convert_stages_workspace_and_passes_description_override(self) -> None:
         state = native_host.HostState()
         calls: List[Dict[str, object]] = []
