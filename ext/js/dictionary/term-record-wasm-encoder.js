@@ -245,14 +245,21 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
         metasI32[metaIndex + 5] = record.sequence ?? -1;
         ++recordIndex;
     }
-    if (!usePreinternedPlan && interner === null) { return null; }
-    const stringLengthsU16 = interner === null ? preinternedPlan.stringLengths : Uint16Array.from(interner.stringLengths);
+    let stringLengthsU16;
+    let stringsBuffer;
+    if (interner !== null) {
+        stringLengthsU16 = Uint16Array.from(interner.stringLengths);
+        stringsBuffer = interner.buildStringsBuffer();
+    } else {
+        if (preinternedPlan === null) { return null; }
+        stringLengthsU16 = preinternedPlan.stringLengths;
+        stringsBuffer = preinternedPlan.stringsBuffer;
+    }
     const stringLengthsBuffer = new Uint8Array(
         stringLengthsU16.buffer,
         stringLengthsU16.byteOffset,
         stringLengthsU16.byteLength,
     );
-    const stringsBuffer = interner === null ? preinternedPlan.stringsBuffer : interner.buildStringsBuffer();
     wasm.wasm_reset_heap();
     const metasPtr = wasm.wasm_alloc(metasBuffer.byteLength);
     const stringLengthsPtr = wasm.wasm_alloc(stringLengthsBuffer.byteLength);
@@ -339,14 +346,21 @@ export async function encodeTermRecordArtifactChunkWithWasmPreinterned(chunk, co
         metasI32[metaIndex + 4] = (chunk.scoreList[i] ?? 0) | 0;
         metasI32[metaIndex + 5] = chunk.sequenceList[i] ?? -1;
     }
-    if (!usePreinternedPlan && interner === null) { return null; }
-    const stringLengthsU16 = interner === null ? preinternedPlan.stringLengths : Uint16Array.from(interner.stringLengths);
+    let stringLengthsU16;
+    let stringsBuffer;
+    if (interner !== null) {
+        stringLengthsU16 = Uint16Array.from(interner.stringLengths);
+        stringsBuffer = interner.buildStringsBuffer();
+    } else {
+        if (preinternedPlan === null) { return null; }
+        stringLengthsU16 = preinternedPlan.stringLengths;
+        stringsBuffer = preinternedPlan.stringsBuffer;
+    }
     const stringLengthsBuffer = new Uint8Array(
         stringLengthsU16.buffer,
         stringLengthsU16.byteOffset,
         stringLengthsU16.byteLength,
     );
-    const stringsBuffer = interner === null ? preinternedPlan.stringsBuffer : interner.buildStringsBuffer();
     wasm.wasm_reset_heap();
     const metasPtr = wasm.wasm_alloc(metasBuffer.byteLength);
     const stringLengthsPtr = wasm.wasm_alloc(stringLengthsBuffer.byteLength);
