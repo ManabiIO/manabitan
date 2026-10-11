@@ -3453,6 +3453,9 @@ async function main() {
                 `--disable-extensions-except=${extensionDir}`,
                 `--load-extension=${extensionDir}`,
             ];
+            if (process.platform === 'darwin') {
+                launchArgs.push('--disable-features=MacAppCodeSignClone');
+            }
             if (!headless && hideWindowForHeaded) {
                 launchArgs.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
             }
