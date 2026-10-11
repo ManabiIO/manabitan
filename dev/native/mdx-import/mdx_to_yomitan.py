@@ -445,16 +445,43 @@ def _decode_stylesheet_asset(raw_bytes: bytes) -> Optional[str]:
     if not raw_bytes:
         return None
 
-    for encoding in ("utf-8-sig", "utf-16", "utf-16-le", "utf-16-be"):
+    def decode(encoding: str) -> Optional[str]:
         try:
-            value = raw_bytes.decode(encoding)
+            value = raw_bytes.decode(encoding).lstrip("\ufeff")
+        except (UnicodeError, LookupError):
+            return None
+        value = re.sub(r'^@charset[\t\n\f\r ]+"[^"\r\n]+"[\t\n\f\r ]*;[\t\n\f\r ]*',
+                       "", value, count=1, flags=re.IGNORECASE).strip()
+        return value if value and "\x00" not in value else None
+
+    if raw_bytes.startswith(b"\xef\xbb\xbf"):
+        return decode("utf-8-sig")
+    if raw_bytes.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return decode("utf-16")
+    declared = re.match(rb'^@charset[\t\n\f\r ]+"([^"\r\n]+)"[\t\n\f\r ]*;',
+                        raw_bytes[:128], flags=re.IGNORECASE)
+    if declared is not None:
+        try:
+            encoding = declared.group(1).decode("ascii")
         except UnicodeDecodeError:
-            continue
-        if "\x00" in value:
-            continue
-        value = value.strip()
-        if value:
-            return value
+            return None
+        return decode(encoding)
+
+    value = decode("utf-8")
+    if value is not None:
+        return value
+    # Match the browser's bounded ASCII-NUL pattern; do not guess UTF-16
+    # merely because arbitrary single-byte data happens to decode that way.
+    pair_count = min(len(raw_bytes) // 2, 32)
+    if pair_count < 2:
+        return None
+    even_zeros = raw_bytes[:pair_count * 2:2].count(0)
+    odd_zeros = raw_bytes[1:pair_count * 2:2].count(0)
+    threshold = max(2, (pair_count + 2) // 3)
+    if odd_zeros >= threshold and even_zeros == 0:
+        return decode("utf-16-le")
+    if even_zeros >= threshold and odd_zeros == 0:
+        return decode("utf-16-be")
     return None
 
 

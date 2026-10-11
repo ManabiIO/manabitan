@@ -87,6 +87,46 @@ def _register_mdd(path: Path, items: Iterable[Tuple[bytes, bytes]]) -> None:
 
 
 class MdxToYomitanTests(unittest.TestCase):
+    def test_stylesheet_encoding_preserves_declared_and_utf16_text(self) -> None:
+        css = '.entry { font-family: "日本語"; }'
+        for raw in [
+            ('@charset "shift_jis";\n' + css).encode("shift_jis"),
+            css.encode("utf-16-be"),
+            css.encode("utf-16-le"),
+            css.encode("utf-8-sig"),
+            css.encode("utf-16"),
+            ('@charset "shift_jis";\n' + css).encode("utf-8-sig"),
+            b"\xfe\xff" + ('@charset "utf-8";\n' + css).encode("utf-16-be"),
+        ]:
+            with self.subTest(raw=raw):
+                self.assertEqual(mdx_to_yomitan._decode_stylesheet_asset(raw), css)
+
+    def test_stylesheet_encoding_rejects_unknown_or_mismatched_declaration(self) -> None:
+        for raw in [b'@charset "unknown-codec"; body { color: red; }',
+                    b'@charset "utf-8"; body { content: "\xff"; }']:
+            with self.subTest(raw=raw):
+                self.assertIsNone(mdx_to_yomitan._decode_stylesheet_asset(raw))
+
+    def test_declared_stylesheet_survives_archive_migration(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "fixture.mdx"
+            companion = root / "fixture.mdd"
+            output = root / "fixture.zip"
+            source.write_bytes(b"MDX")
+            companion.write_bytes(b"MDD")
+            raw_css = '@charset "shift_jis";\nbody { font-family: "日本語"; background: url(../image.png); }'.encode("shift_jis")
+            _register_mdx(source, header={b"Title": b"CSS"}, items=[("entry", "definition")])
+            _register_mdd(companion, [(b"styles/main.css", raw_css), (b"image.png", b"IMAGE")])
+            mdx_to_yomitan.convert_mdx_to_yomitan_zip(source, output, options=mdx_to_yomitan.ConvertOptions())
+            with zipfile.ZipFile(output) as archive:
+                stylesheet = archive.read("styles.css").decode("utf-8")
+                self.assertIn('font-family: "日本語"', stylesheet)
+                self.assertIn('url("mdict-media/image.png")', stylesheet)
+                self.assertNotIn("@charset", stylesheet)
+                self.assertEqual(archive.read("mdict-media/styles/main.css"), raw_css)
+                self.assertEqual(archive.read("mdict-media/image.png"), b"IMAGE")
+
     def test_discover_mdds_uses_numbered_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
