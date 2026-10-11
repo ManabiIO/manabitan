@@ -13,6 +13,7 @@ import types
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 from typing import Dict, Iterable, Iterator, List, Tuple
 from urllib.parse import unquote
 
@@ -373,6 +374,57 @@ class MdxToYomitanTests(unittest.TestCase):
 
 
 class NativeHostTests(unittest.TestCase):
+    def test_failed_job_cleanup_preserves_uploads_and_retry(self) -> None:
+        for failure_phase in ["staging", "options", "conversion", "archive-stat"]:
+            with self.subTest(phase=failure_phase):
+                state = native_host.HostState()
+                try:
+                    existing_archive = state._tmpdir / "jobs" / "existing" / "archive.zip"
+                    existing_archive.parent.mkdir(parents=True)
+                    existing_archive.write_bytes(b"existing archive")
+                    existing_job = native_host.Job(existing_archive, "archive.zip", 16)
+                    state._jobs["existing"] = existing_job
+                    upload_id = state.begin_upload("fixture.mdx", 3)["uploadId"]
+                    state.upload_chunk(upload_id, 0, base64.b64encode(b"MDX").decode("ascii"))
+                    upload_path = state._uploads[upload_id].path
+                    real_copy = native_host.shutil.copyfile
+
+                    def copy_then_fail(source: Path, target: Path) -> None:
+                        real_copy(source, target)
+                        if failure_phase == "staging":
+                            raise OSError("staging failed")
+
+                    def failed_convert(mdx: Path, archive: Path, **_kwargs: object) -> None:
+                        if failure_phase == "archive-stat":
+                            return
+                        archive.write_bytes(b"partial archive")
+                        raise RuntimeError("conversion failed")
+
+                    options = {"termBankSize": "invalid"} if failure_phase == "options" else {}
+                    expected_error = {"staging": OSError, "options": ValueError,
+                                      "conversion": RuntimeError, "archive-stat": FileNotFoundError}[failure_phase]
+                    with patch.object(native_host.shutil, "copyfile", side_effect=copy_then_fail), patch.object(
+                        native_host, "convert_mdx_to_yomitan_zip", side_effect=failed_convert
+                    ):
+                        with self.assertRaises(expected_error):
+                            state.convert(upload_id, [], options)
+                    self.assertFalse((state._tmpdir / "jobs" / "j1").exists())
+                    self.assertEqual(state._jobs, {"existing": existing_job})
+                    self.assertEqual(existing_archive.read_bytes(), b"existing archive")
+                    self.assertEqual(upload_path.read_bytes(), b"MDX")
+
+                    def successful_convert(mdx: Path, archive: Path, **_kwargs: object) -> None:
+                        self.assertEqual(mdx.read_bytes(), b"MDX")
+                        archive.write_bytes(b"healthy archive")
+
+                    with patch.object(native_host, "convert_mdx_to_yomitan_zip", side_effect=successful_convert):
+                        job_id = state.convert(upload_id, [], {})
+                    self.assertEqual(job_id, "j2")
+                    self.assertEqual(state._jobs[job_id].archive_path.read_bytes(), b"healthy archive")
+                    self.assertTrue(state.download_end(job_id))
+                finally:
+                    state.cleanup()
+
     def test_classify_conversion_errors_returns_structured_codes(self) -> None:
         encrypted = native_host._classify_conversion_error(RuntimeError("encrypted mdx payload"))
         unsupported = native_host._classify_conversion_error(RuntimeError("unsupported compression: lzo"))
