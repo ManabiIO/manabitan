@@ -13,6 +13,7 @@ import types
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 from typing import Dict, Iterable, Iterator, List, Tuple
 from urllib.parse import unquote
 
@@ -373,6 +374,40 @@ class MdxToYomitanTests(unittest.TestCase):
 
 
 class NativeHostTests(unittest.TestCase):
+    def test_download_rejects_invalid_ranges_before_open(self) -> None:
+        state = native_host.HostState()
+        try:
+            archive = state._tmpdir / "archive.zip"
+            archive.write_bytes(b"ARCHIVE")
+            job = native_host.Job(archive, "archive.zip", 7)
+            state._jobs["j1"] = job
+            for offset, size in [(0, -1), (0, 0), (-1, 2), (8, 2)]:
+                with self.subTest(offset=offset, size=size), patch.object(
+                    Path, "open", autospec=True, side_effect=Path.open
+                ) as open_file:
+                    with self.assertRaises(ValueError):
+                        state.download_chunk("j1", offset, size)
+                    open_file.assert_not_called()
+            self.assertIs(state._jobs["j1"], job)
+            self.assertEqual(archive.read_bytes(), b"ARCHIVE")
+        finally:
+            state.cleanup()
+
+    def test_download_ranges_preserve_chunk_bytes_and_clip_to_remaining(self) -> None:
+        state = native_host.HostState()
+        try:
+            archive = state._tmpdir / "archive.zip"
+            archive.write_bytes(b"ARCHIVE")
+            state._jobs["j1"] = native_host.Job(archive, "archive.zip", 7)
+            for offset, size, expected in [(0, 3, b"ARC"), (3, 3, b"HIV"),
+                                           (6, 3, b"E"), (7, 3, b""),
+                                           (3, sys.maxsize + 1, b"HIVE")]:
+                with self.subTest(offset=offset, size=size):
+                    result = state.download_chunk("j1", offset, size)
+                    self.assertEqual(base64.b64decode(result["data"]), expected)
+        finally:
+            state.cleanup()
+
     def test_classify_conversion_errors_returns_structured_codes(self) -> None:
         encrypted = native_host._classify_conversion_error(RuntimeError("encrypted mdx payload"))
         unsupported = native_host._classify_conversion_error(RuntimeError("unsupported compression: lzo"))
