@@ -450,7 +450,7 @@ export class Backend {
      * @param {string} url
      * @param {number} timeoutMs
      * @param {(details: Record<string, string|number|null>) => void} onPhase
-     * @param {(loaded: number, total: number) => void} [onProgress]
+     * @param {((loaded: number, total: number) => void)|null} [onProgress]
      * @returns {Promise<Blob>}
      */
     async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = null) {
@@ -464,6 +464,7 @@ export class Backend {
                 request.onprogress = null;
                 request.onreadystatechange = null;
             };
+            /** @param {unknown} error */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -1148,14 +1149,10 @@ export class Backend {
             hasExactHeadwordMatch,
             resultDictionaryCount: dictionaryEntries.length,
             resultDictionaries: [...new Set(dictionaryEntries.flatMap((entry) => (
-                entry.type === 'term' ?
-                    entry.definitions.map(({dictionary}) => dictionary) :
-                    [entry.dictionary]
+                entry.definitions.map(({dictionary}) => dictionary)
             )))],
             resultDictionaryAliases: [...new Set(dictionaryEntries.flatMap((entry) => (
-                entry.type === 'term' ?
-                    entry.definitions.map(({dictionaryAlias}) => dictionaryAlias) :
-                [entry.dictionaryAlias]
+                entry.definitions.map(({dictionaryAlias}) => dictionaryAlias)
             )))],
             debugLookupState,
             resultEntries: includeDetailedLookupSnapshot ?

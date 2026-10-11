@@ -1328,6 +1328,9 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
  * @throws {Error}
  */
 async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
+    // Add-on installation can leave Marionette in privileged chrome scope.
+    // Window enumeration and extension pages require ordinary content scope.
+    await driver.setContext(firefox.Context.CONTENT);
     const normalizedAddonId = String(installedAddonId || '').trim();
     const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
     const deadline = Date.now() + 30_000;
