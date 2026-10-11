@@ -14,7 +14,7 @@ import unittest
 import zipfile
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, List, Tuple
-from urllib.parse import unquote
+from urllib.parse import parse_qs, unquote, urlsplit
 
 
 _MODULE_DIR = Path(__file__).resolve().parent
@@ -87,6 +87,94 @@ def _register_mdd(path: Path, items: Iterable[Tuple[bytes, bytes]]) -> None:
 
 
 class MdxToYomitanTests(unittest.TestCase):
+    def test_reference_html_nesting_survives_unmatched_endtags(self) -> None:
+        glossary, _, _ = mdx_to_yomitan._convert_definition_to_structured_content(
+            '<div class="outer"><span class="inner">one</ghost>two</span>three</div>',
+            enable_audio=False, asset_prefix="mdict-media/",
+        )
+        content = glossary["content"]["content"]
+        self.assertEqual(len(content), 1)
+        outer = content[0]
+        inner = outer["content"][0]
+        self.assertEqual(outer["data"]["class"], "outer")
+        self.assertEqual(inner["data"]["class"], "inner")
+        self.assertEqual(inner["content"], ["onetwo"])
+        self.assertEqual(outer["content"][1], "three")
+
+    def test_reference_html_ancestor_close_and_transparent_tags_keep_behavior(self) -> None:
+        glossary, _, _ = mdx_to_yomitan._convert_definition_to_structured_content(
+            '<div><custom><span>one</div>two', enable_audio=False, asset_prefix="mdict-media/",
+        )
+        content = glossary["content"]["content"]
+        self.assertEqual(content[0]["content"][0]["content"], ["one"])
+        self.assertEqual(content[1], "two")
+
+    def test_search_references_preserve_exact_headword(self) -> None:
+        for prefix in ["entry://", "bword://", "d:", "x:"]:
+            for raw, expected in [("A&B#C?D+E", "A&B#C?D+E"),
+                                  ("日本 語", "日本 語"), ("A%26B", "A&B"),
+                                  ("A%2BB%2526C", "A+B%26C")]:
+                with self.subTest(prefix=prefix, raw=raw):
+                    glossary, _, _ = mdx_to_yomitan._convert_definition_to_structured_content(
+                        f'<a href="{prefix}{raw}">jump</a>', enable_audio=False, asset_prefix="mdict-media/",
+                    )
+                    href = glossary["content"]["content"][0]["href"]
+                    parsed = urlsplit(href)
+                    self.assertEqual(parse_qs(parsed.query), {"query": [expected]})
+                    self.assertEqual(parsed.fragment, "")
+
+    def test_stylesheet_relative_references_preserve_root_and_prefix_controls(self) -> None:
+        for raw, expected in [
+            ("images/a.png", "styles/images/a.png"),
+            ("./images/a.png", "styles/images/a.png"),
+            ("../images/a.png", "images/a.png"),
+            ("/images/a.png", "images/a.png"),
+            ("file://images/a.png", "images/a.png"),
+            ("mdict-media/images/a.png", "images/a.png"),
+            ("画像.png", "styles/画像.png"),
+            ("images/a.png?cache=1#part", "styles/images/a.png?cache=1#part"),
+        ]:
+            with self.subTest(raw=raw):
+                self.assertEqual(
+                    mdx_to_yomitan._rewrite_css_asset_urls(f"url({raw})", "mdict-media/", "styles/main.css"),
+                    f'url("mdict-media/{expected}")',
+                )
+
+    def test_inline_reference_rewrite_accepts_css_function_case(self) -> None:
+        for function in ["url", "URL", "uRl"]:
+            with self.subTest(function=function):
+                glossary, _, _ = mdx_to_yomitan._convert_definition_to_structured_content(
+                    f'<div style="background-image: {function}(images/a.png)">text</div>',
+                    enable_audio=False, asset_prefix="mdict-media/",
+                )
+                node = glossary["content"]["content"][0]
+                self.assertEqual(node["style"]["background"], 'url("mdict-media/images/a.png")')
+
+    def test_reference_archive_uses_stylesheet_sibling_asset_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "fixture.mdx"
+            companion = root / "fixture.mdd"
+            output = root / "fixture.zip"
+            source.write_bytes(b"MDX")
+            companion.write_bytes(b"MDD")
+            _register_mdx(source, header={b"Title": b"References"}, items=[
+                ("entry", '<a href="entry://A%26B">jump</a>'),
+            ])
+            css = b'body { background: url(images/a.png); }'
+            _register_mdd(companion, [(b"styles/main.css", css),
+                                      (b"styles/images/a.png", b"SIBLING"), (b"images/a.png", b"ROOT")])
+            mdx_to_yomitan.convert_mdx_to_yomitan_zip(source, output, options=mdx_to_yomitan.ConvertOptions())
+            with zipfile.ZipFile(output) as archive:
+                stylesheet = archive.read("styles.css").decode()
+                self.assertIn('url("mdict-media/styles/images/a.png")', stylesheet)
+                self.assertEqual(archive.read("mdict-media/styles/images/a.png"), b"SIBLING")
+                self.assertEqual(archive.read("mdict-media/images/a.png"), b"ROOT")
+                self.assertEqual(archive.read("mdict-media/styles/main.css"), css)
+                row = json.loads(archive.read("term_bank_1.json"))[0]
+                href = row[5][0]["content"]["content"][0]["href"]
+                self.assertEqual(parse_qs(urlsplit(href).query), {"query": ["A&B"]})
+
     def test_discover_mdds_uses_numbered_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
