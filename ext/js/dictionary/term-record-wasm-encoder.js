@@ -208,8 +208,10 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
         if (planExpressionIndexes instanceof Uint32Array) {
             expressionIndex = planExpressionIndexes[recordIndex];
         } else if (record.expressionBytes instanceof Uint8Array) {
+            if (interner === null) { return null; }
             expressionIndex = interner.internStringBytes(getInternKey(expression, record.expressionBytes), record.expressionBytes);
         } else {
+            if (interner === null) { return null; }
             expressionIndex = interner.internString(expression);
         }
         const readingEqualsExpression = record.readingEqualsExpression ?? (reading === expression);
@@ -219,8 +221,10 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
         } else if (readingEqualsExpression) {
             readingIndex = expressionIndex;
         } else if (record.readingBytes instanceof Uint8Array) {
+            if (interner === null) { return null; }
             readingIndex = interner.internStringBytes(getInternKey(reading, record.readingBytes), record.readingBytes);
         } else {
+            if (interner === null) { return null; }
             readingIndex = interner.internString(reading);
         }
         if (
@@ -278,8 +282,8 @@ export async function encodeTermRecordsWithWasmPreinterned(records, textEncoder,
 
 /**
  * @param {{rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
- * @param {number[]} contentOffsets
- * @param {number[]} contentLengths
+ * @param {number[]|Uint32Array} contentOffsets
+ * @param {number[]|Uint32Array} contentLengths
  * @param {TextEncoder} textEncoder
  * @param {PreinternedTermRecordPlan|null} preinternedPlan
  * @returns {Promise<Uint8Array|null>}
