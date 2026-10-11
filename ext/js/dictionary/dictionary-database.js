@@ -178,8 +178,9 @@ function isRecognizedTransientUpdateTitle(title, summary) {
     if (!(typeof summary === 'object' && summary !== null && !Array.isArray(summary))) {
         return false;
     }
-    const summaryToken = typeof Reflect.get(summary, 'updateSessionToken') === 'string' ? Reflect.get(summary, 'updateSessionToken').trim() : '';
-    const summaryStage = typeof Reflect.get(summary, 'transientUpdateStage') === 'string' ? Reflect.get(summary, 'transientUpdateStage').trim() : '';
+    const {updateSessionToken, transientUpdateStage} = /** @type {Record<string, unknown>} */ (summary);
+    const summaryToken = typeof updateSessionToken === 'string' ? updateSessionToken.trim() : '';
+    const summaryStage = typeof transientUpdateStage === 'string' ? transientUpdateStage.trim() : '';
     return summaryToken === transientInfo.token && summaryStage === transientInfo.stage;
 }
 
@@ -340,6 +341,7 @@ export class DictionaryDatabase {
         this._termContentCompressionMinBytes = 1048576;
         /** @type {number} */
         this._rawTermContentPackTargetBytes = DEFAULT_RAW_TERM_CONTENT_PACK_TARGET_BYTES;
+        /** @type {number} */
         this._artifactFixedPackMinTotalRows = DEFAULT_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS;
         /** @type {boolean} */
         this._importDebugLogging = false;
@@ -866,16 +868,7 @@ export class DictionaryDatabase {
                     totalMs,
                 };
             } finally {
-                if (this._bulkImportTransactionOpen) {
-                    try {
-                        db.exec('ROLLBACK');
-                    } catch (e) {
-                        if (!this._isNoActiveTransactionError(toError(e))) {
-                            throw e;
-                        }
-                    }
-                    this._bulkImportTransactionOpen = false;
-                }
+                this._rollbackBulkImportTransaction(db);
                 await this._termContentStore.endImportSession();
                 await this._termRecordStore.endImportSession();
             }
@@ -1145,6 +1138,97 @@ export class DictionaryDatabase {
     }
 
     /**
+     * @param {string} text
+     * @param {string[]} dictionaryNames
+     * @returns {Promise<unknown>}
+     */
+    async debugDictionaryLookupState(text, dictionaryNames) {
+        await this._ensureDirectTermIndexesLoaded(dictionaryNames);
+        /** @type {Map<number, {dictionary: string, matchSource: string}>} */
+        const ids = new Map();
+        /** @type {Array<Record<string, unknown>>} */
+        const directHits = [];
+        const textDecoder = new TextDecoder();
+        for (const dictionaryNameRaw of dictionaryNames) {
+            const dictionaryName = String(dictionaryNameRaw || '').trim();
+            if (dictionaryName.length === 0) { continue; }
+            const index = this._ensureDirectTermIndex(dictionaryName);
+            const expressionIds = index.expression.get(text) ?? [];
+            const readingIds = index.reading.get(text) ?? [];
+            for (const id of expressionIds) {
+                if (typeof id === 'number' && id > 0 && !ids.has(id)) {
+                    ids.set(id, {dictionary: dictionaryName, matchSource: 'expression'});
+                }
+            }
+            for (const id of readingIds) {
+                if (typeof id === 'number' && id > 0 && !ids.has(id)) {
+                    ids.set(id, {dictionary: dictionaryName, matchSource: 'reading'});
+                }
+            }
+            directHits.push({
+                dictionary: dictionaryName,
+                expressionHitCount: expressionIds.length,
+                readingHitCount: readingIds.length,
+                firstExpressionIds: expressionIds.slice(0, 5),
+                firstReadingIds: readingIds.slice(0, 5),
+            });
+        }
+        const rowsById = await this._fetchTermRowsByIds(ids.keys());
+        const rows = [];
+        for (const [id, match] of ids) {
+            const row = rowsById.get(id);
+            const rawRecord = this._termRecordStore.getById(id);
+            let rawContentPreview = null;
+            let readErrorDetails = null;
+            if (
+                rawRecord &&
+                typeof rawRecord.entryContentOffset === 'number' &&
+                rawRecord.entryContentOffset >= 0 &&
+                typeof rawRecord.entryContentLength === 'number' &&
+                rawRecord.entryContentLength > 0
+            ) {
+                try {
+                    const bytes = await this._termContentStore.readSlice(
+                        rawRecord.entryContentOffset,
+                        Math.min(rawRecord.entryContentLength, 120),
+                    );
+                    if (!(bytes instanceof Uint8Array)) {
+                        rawContentPreview = '<read-null>';
+                        readErrorDetails = this._termContentStore.getLastReadErrorDetails();
+                    } else {
+                        rawContentPreview = textDecoder.decode(bytes).replaceAll(/\s+/g, ' ').slice(0, 120);
+                    }
+                } catch (_) {
+                    rawContentPreview = '<read-failed>';
+                    readErrorDetails = this._termContentStore.getLastReadErrorDetails();
+                }
+            }
+            rows.push({
+                id,
+                dictionary: row?.dictionary ?? match.dictionary,
+                matchSource: match.matchSource,
+                expression: row?.expression ?? '',
+                reading: row?.reading ?? '',
+                glossaryLength: Array.isArray(row?.glossary) ? row.glossary.length : null,
+                rawEntryContentOffset: rawRecord?.entryContentOffset ?? null,
+                rawEntryContentLength: rawRecord?.entryContentLength ?? null,
+                rawEntryContentDictName: rawRecord?.entryContentDictName ?? null,
+                rawContentPreview,
+                readErrorDetails,
+            });
+            if (rows.length >= 10) { break; }
+        }
+        return {
+            ok: true,
+            text,
+            dictionaryNames,
+            directHits,
+            rowSample: rows,
+            termContentStoreDebugState: this._termContentStore.getDebugState(),
+        };
+    }
+
+    /**
      * @param {string} fromDictionaryTitle
      * @param {string} toDictionaryTitle
      * @param {import('dictionary-importer').Summary|null} [summaryOverride]
@@ -1155,18 +1239,19 @@ export class DictionaryDatabase {
         const fromTitle = `${fromDictionaryTitle}`.trim();
         const toTitle = `${toDictionaryTitle}`.trim();
         const replacedTitle = typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle.trim() : null;
-        const explicitTransientSessionToken = (
-            summaryOverride &&
-            typeof summaryOverride === 'object' &&
-            !Array.isArray(summaryOverride) &&
-            typeof Reflect.get(summaryOverride, 'updateSessionToken') === 'string' &&
-            Reflect.get(summaryOverride, 'updateSessionToken').trim().length > 0
-        ) ? Reflect.get(summaryOverride, 'updateSessionToken').trim() : null;
+        const updateSessionToken = /** @type {unknown} */ (summaryOverride !== null ? Reflect.get(summaryOverride, 'updateSessionToken') : null);
+        const explicitTransientSessionToken = typeof updateSessionToken === 'string' && updateSessionToken.trim().length > 0 ?
+            updateSessionToken.trim() :
+            null;
         const matchTransientToken = fromTitle.match(/\[(?:update-staging|cutover|replaced) ([^\]]+)\]$/);
         const transientSessionToken = explicitTransientSessionToken ?? (matchTransientToken ? matchTransientToken[1] : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`);
         if (fromTitle.length === 0 || toTitle.length === 0) {
             throw new Error('Dictionary titles must be non-empty');
         }
+        /**
+         * @param {string} title
+         * @returns {Record<string, unknown>|undefined}
+         */
         const getSummaryRowByTitle = (title) => {
             const db = this._requireDb();
             return db.selectObject('SELECT id, version, summaryJson FROM dictionaries WHERE title = $title ORDER BY id DESC LIMIT 1', {$title: title});
@@ -1181,13 +1266,13 @@ export class DictionaryDatabase {
                 } catch (_) {
                     summary = null;
                 }
-                const summaryObject = (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) ? summary : null;
+                const summaryObject = (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) ? /** @type {Record<string, unknown>} */ (summary) : null;
                 return {
                     id: this._asNumber(row.id, 0),
                     titleColumn: this._asString(row.title),
                     versionColumn: this._asNumber(row.version, 0),
-                    summaryTitle: summaryObject !== null && typeof Reflect.get(summaryObject, 'title') === 'string' ? Reflect.get(summaryObject, 'title') : null,
-                    summaryImportSuccess: summaryObject !== null && typeof Reflect.get(summaryObject, 'importSuccess') === 'boolean' ? Reflect.get(summaryObject, 'importSuccess') : null,
+                    summaryTitle: summaryObject !== null && typeof summaryObject.title === 'string' ? summaryObject.title : null,
+                    summaryImportSuccess: summaryObject !== null && typeof summaryObject.importSuccess === 'boolean' ? summaryObject.importSuccess : null,
                 };
             });
         };
@@ -1199,9 +1284,15 @@ export class DictionaryDatabase {
             beforeDeleteRows: snapshotRows(),
         };
 
+        /**
+         * @param {Record<string, unknown>} summaryRow
+         * @param {string} title
+         * @param {import('dictionary-importer').Summary|Record<string, unknown>|null} [summaryValue]
+         * @returns {Record<string, unknown>}
+         */
         const buildSummaryForTitle = (summaryRow, title, summaryValue = null) => {
             const parsedSummary = (() => {
-                const summaryJson = this._asString(Reflect.get(summaryRow, 'summaryJson'));
+                const summaryJson = this._asString(summaryRow.summaryJson);
                 if (summaryJson.length === 0) { return null; }
                 try {
                     const value = parseJson(summaryJson);
@@ -1213,33 +1304,51 @@ export class DictionaryDatabase {
             return (
                 summaryValue && typeof summaryValue === 'object' && !Array.isArray(summaryValue) ?
                     {...summaryValue, title} :
-                    (parsedSummary !== null ? {...parsedSummary, title} : {title, version: this._asNumber(Reflect.get(summaryRow, 'version'), 0)})
+                    (parsedSummary !== null ? {...parsedSummary, title} : {title, version: this._asNumber(summaryRow.version, 0)})
             );
         };
+        /**
+         * @param {Record<string, unknown>} summaryRow
+         * @param {string} title
+         * @param {string} stage
+         * @param {import('dictionary-importer').Summary|Record<string, unknown>|null} [summaryValue]
+         * @returns {Record<string, unknown>}
+         */
         const buildTransientSummaryForTitle = (summaryRow, title, stage, summaryValue = null) => ({
             ...buildSummaryForTitle(summaryRow, title, summaryValue),
             transientUpdateStage: stage,
             updateSessionToken: transientSessionToken,
         });
+        /**
+         * @param {string} sourceTitle
+         * @param {string} targetTitle
+         * @param {import('dictionary-importer').Summary|Record<string, unknown>|null} summaryValue
+         * @param {string} debugKey
+         * @returns {Promise<void>}
+         * @throws {Error} When the source dictionary cannot be renamed.
+         */
         const renameDictionaryData = async (sourceTitle, targetTitle, summaryValue, debugKey) => {
             const db = this._requireDb();
             const summaryRow = getSummaryRowByTitle(sourceTitle);
             if (!(summaryRow && typeof summaryRow === 'object')) {
                 throw new Error(`Dictionary title not found for replacement: ${sourceTitle}`);
             }
-            const summaryId = this._asNumber(Reflect.get(summaryRow, 'id'), -1);
+            const summaryId = this._asNumber(summaryRow.id, -1);
             if (summaryId < 0) {
                 throw new Error(`Invalid dictionary row id for replacement: ${sourceTitle}`);
             }
             const nextSummary = buildSummaryForTitle(summaryRow, targetTitle, summaryValue);
             await this._beginImmediateTransaction(db);
             try {
-                db.exec({sql: 'UPDATE dictionaries SET title = $toTitle, version = $version, summaryJson = $summaryJson WHERE id = $id', bind: {
-                    $id: summaryId,
-                    $toTitle: targetTitle,
-                    $version: this._asNumber(Reflect.get(nextSummary, 'version'), 0),
-                    $summaryJson: JSON.stringify(nextSummary),
-                }});
+                db.exec({
+                    sql: 'UPDATE dictionaries SET title = $toTitle, version = $version, summaryJson = $summaryJson WHERE id = $id',
+                    bind: {
+                        $id: summaryId,
+                        $toTitle: targetTitle,
+                        $version: this._asNumber(nextSummary.version, 0),
+                        $summaryJson: JSON.stringify(nextSummary),
+                    },
+                });
                 for (const table of ['termMeta', 'kanji', 'kanjiMeta', 'tagMeta', 'media', 'sharedGlossaryArtifacts']) {
                     db.exec({sql: `UPDATE ${table} SET dictionary = $toTitle WHERE dictionary = $fromTitle`, bind: {$fromTitle: sourceTitle, $toTitle: targetTitle}});
                 }
@@ -1250,21 +1359,26 @@ export class DictionaryDatabase {
                 throw e;
             }
             this._lastReplaceDictionaryTitleDebug = {
-                ...(this._lastReplaceDictionaryTitleDebug ?? {}),
+                ...this._lastReplaceDictionaryTitleDebug,
                 [debugKey]: snapshotRows(),
             };
             this._lastReplaceDictionaryTitleDebug = {
-                ...(this._lastReplaceDictionaryTitleDebug ?? {}),
+                ...this._lastReplaceDictionaryTitleDebug,
                 [`${debugKey}AfterTermRecordRows`]: snapshotRows(),
             };
         };
+        /**
+         * @param {string} dictionaryTitle
+         * @returns {Promise<void>}
+         * @throws {Error} When transient dictionary cleanup cannot complete safely.
+         */
         const forceCleanupTransientDictionaryTitle = async (dictionaryTitle) => {
             const title = `${dictionaryTitle}`.trim();
             if (title.length === 0) { return; }
             const summaryRow = getSummaryRowByTitle(title);
             const parsedSummary = (() => {
                 if (!(summaryRow && typeof summaryRow === 'object')) { return null; }
-                const summaryJson = this._asString(Reflect.get(summaryRow, 'summaryJson'));
+                const summaryJson = this._asString(summaryRow.summaryJson);
                 if (summaryJson.length === 0) { return null; }
                 try {
                     const value = parseJson(summaryJson);
@@ -1288,7 +1402,7 @@ export class DictionaryDatabase {
             try {
                 const db = this._requireDb();
                 this._lastReplaceDictionaryTitleDebug = {
-                    ...(this._lastReplaceDictionaryTitleDebug ?? {}),
+                    ...this._lastReplaceDictionaryTitleDebug,
                     forcedCleanupStart: {
                         title,
                         originalDeleteError: originalDeleteError instanceof Error ? originalDeleteError.message : String(originalDeleteError),
@@ -1317,7 +1431,7 @@ export class DictionaryDatabase {
                 }
                 await this._cleanupTermContentAfterDictionaryDelete();
                 this._lastReplaceDictionaryTitleDebug = {
-                    ...(this._lastReplaceDictionaryTitleDebug ?? {}),
+                    ...this._lastReplaceDictionaryTitleDebug,
                     forcedCleanupEnd: {
                         title,
                         rows: snapshotRows(),
@@ -1327,7 +1441,7 @@ export class DictionaryDatabase {
                 const originalMessage = originalDeleteError instanceof Error ? originalDeleteError.message : String(originalDeleteError);
                 const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
                 this._lastReplaceDictionaryTitleDebug = {
-                    ...(this._lastReplaceDictionaryTitleDebug ?? {}),
+                    ...this._lastReplaceDictionaryTitleDebug,
                     forcedCleanupFailure: {
                         title,
                         originalDeleteError: originalMessage,
@@ -1364,7 +1478,7 @@ export class DictionaryDatabase {
                 );
                 replacedDictionaryMovedAside = true;
                 this._lastReplaceDictionaryTitleDebug = {
-                    ...(this._lastReplaceDictionaryTitleDebug ?? {}),
+                    ...this._lastReplaceDictionaryTitleDebug,
                     afterDeleteRows: snapshotRows(),
                 };
 
@@ -1409,7 +1523,7 @@ export class DictionaryDatabase {
             } catch (e) {
                 const cleanupMessage = e instanceof Error ? e.message : String(e);
                 this._lastReplaceDictionaryTitleDebug = {
-                    ...(this._lastReplaceDictionaryTitleDebug ?? {}),
+                    ...this._lastReplaceDictionaryTitleDebug,
                     postCutoverCleanupWarning: {
                         title: temporaryReplacedTitle,
                         message: cleanupMessage,
@@ -1419,7 +1533,7 @@ export class DictionaryDatabase {
                 log.warn(new Error(`Post-cutover transient cleanup failed for ${temporaryReplacedTitle}: ${cleanupMessage}`));
             }
             this._lastReplaceDictionaryTitleDebug = {
-                ...(this._lastReplaceDictionaryTitleDebug ?? {}),
+                ...this._lastReplaceDictionaryTitleDebug,
                 afterDeleteRows: snapshotRows(),
             };
         } else {
@@ -1427,7 +1541,7 @@ export class DictionaryDatabase {
                 await this.deleteDictionary(replacedTitle, 1000, () => {});
             }
             this._lastReplaceDictionaryTitleDebug = {
-                ...(this._lastReplaceDictionaryTitleDebug ?? {}),
+                ...this._lastReplaceDictionaryTitleDebug,
                 afterDeleteRows: snapshotRows(),
             };
 
@@ -2590,12 +2704,12 @@ export class DictionaryDatabase {
             } catch (_) {
                 summary = null;
             }
-            const summaryObject = (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) ? summary : null;
-            const summaryTitle = summaryObject !== null && typeof Reflect.get(summaryObject, 'title') === 'string' ?
-                /** @type {string} */ (Reflect.get(summaryObject, 'title')) :
+            const summaryObject = (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) ? /** @type {Record<string, unknown>} */ (summary) : null;
+            const summaryTitle = summaryObject !== null && typeof summaryObject.title === 'string' ?
+                /** @type {string} */ (summaryObject.title) :
                 null;
-            const summaryImportSuccess = summaryObject !== null && typeof Reflect.get(summaryObject, 'importSuccess') === 'boolean' ?
-                /** @type {boolean} */ (Reflect.get(summaryObject, 'importSuccess')) :
+            const summaryImportSuccess = summaryObject !== null && typeof summaryObject.importSuccess === 'boolean' ?
+                /** @type {boolean} */ (summaryObject.importSuccess) :
                 null;
             return {
                 id: this._asNumber(row.id, 0),
@@ -2853,11 +2967,9 @@ export class DictionaryDatabase {
     async getDictionaryCounts(dictionaryNames, getTotal) {
         const db = this._requireDb();
         const tables = ['kanji', 'kanjiMeta', 'termMeta', 'tagMeta', 'media'];
-        if (getTotal) {
-            await this._termRecordStore.ensureAllDictionariesLoaded();
-        } else {
-            await this._termRecordStore.ensureDictionariesLoaded(dictionaryNames);
-        }
+        await (getTotal ?
+            this._termRecordStore.ensureAllDictionariesLoaded() :
+            this._termRecordStore.ensureDictionariesLoaded(dictionaryNames));
 
         /** @type {import('dictionary-database').DictionaryCountGroup[]} */
         const counts = [];
@@ -3717,7 +3829,6 @@ export class DictionaryDatabase {
                 const precomputedHash = (typeof row.termEntryContentHash === 'string' && row.termEntryContentHash.length > 0) ? row.termEntryContentHash : null;
                 const precomputedHash1 = Number.isInteger(row.termEntryContentHash1) ? (/** @type {number} */ (row.termEntryContentHash1) >>> 0) : -1;
                 const precomputedHash2 = Number.isInteger(row.termEntryContentHash2) ? (/** @type {number} */ (row.termEntryContentHash2) >>> 0) : -1;
-                const hasPrecomputedHashPair = precomputedHash1 >= 0 && precomputedHash2 >= 0;
                 const precomputedBytes = row.termEntryContentBytes instanceof Uint8Array ? row.termEntryContentBytes : this._getRawTermContentBytesIfAvailable(row);
                 let contentHash = precomputedHash;
                 let contentHash1 = precomputedHash1;
@@ -4510,6 +4621,7 @@ export class DictionaryDatabase {
                     return resolvedContentDictNames;
                 }
                 const uniformDictName = resolvedContentDictNames;
+                /** @type {(string|null)[]} */
                 const values = new Array(count);
                 if (fillUntil > 0) {
                     values.fill(uniformDictName, 0, fillUntil);
@@ -6549,7 +6661,7 @@ export class DictionaryDatabase {
             if (typeof uniformRawContentDictName === 'string' && uniformRawContentDictName.length > 0) {
                 return {
                     storedChunks: packed.packedChunks,
-                    contentDictNames: new Array(contentBytesList.length).fill(uniformRawContentDictName),
+                    contentDictNames: Array.from({length: contentBytesList.length}, () => uniformRawContentDictName),
                     entryToStoredChunkIndexes,
                     entryToStoredChunkOffsets,
                 };
@@ -6633,6 +6745,23 @@ export class DictionaryDatabase {
     }
 
     /**
+     * @param {import('@sqlite.org/sqlite-wasm').Database} db
+     * @returns {void}
+     * @throws {Error} When an open bulk import transaction cannot be rolled back.
+     */
+    _rollbackBulkImportTransaction(db) {
+        if (!this._bulkImportTransactionOpen) { return; }
+        try {
+            db.exec('ROLLBACK');
+        } catch (error) {
+            if (!this._isNoActiveTransactionError(toError(error))) {
+                throw error;
+            }
+        }
+        this._bulkImportTransactionOpen = false;
+    }
+
+    /**
      * @param {Error} error
      * @returns {boolean}
      */
@@ -6710,7 +6839,10 @@ export class DictionaryDatabase {
     /** */
     _applyImportPragmas() {
         const db = this._requireDb();
-        /** @param {string} sql */
+        /**
+         * @param {string} sql
+         * @throws {Error} When a pragma fails for a reason unrelated to the active transaction.
+         */
         const execBestEffort = (sql) => {
             try {
                 db.exec(sql);

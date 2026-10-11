@@ -201,6 +201,7 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
         }
         const nextStringLengths = new Uint16Array(nextCapacity);
         nextStringLengths.set(stringLengths.subarray(0, stringCount));
+        /** @type {Uint8Array[]} */
         const nextStringBytesList = createSparseArray(nextCapacity);
         for (let i = 0; i < stringCount; ++i) {
             nextStringBytesList[i] = stringBytesList[i];
@@ -1206,7 +1207,7 @@ export class DictionaryImporter {
                         );
                         continue;
                     } else if (useArtifactMediaManifestFastPath) {
-                        media = new Array(chunkEntries.length);
+                        media = /** @type {import('dictionary-database').MediaDataArrayBufferContent[]} */ (new Array(chunkEntries.length));
                         for (let j = 0, jj = chunkEntries.length; j < jj; ++j) {
                             const {path, mediaType, packedOffset, packedLength, compressionMethod, uncompressedLength} = chunkEntries[j];
                             const start = /** @type {number} */ (packedOffset);
@@ -1586,11 +1587,11 @@ export class DictionaryImporter {
              * @returns {number}
              */
             const getTermFileEstimatedBytes = (termFile) => {
-                const uncompressedSize = Reflect.get(termFile, 'uncompressedSize');
+                const uncompressedSize = /** @type {unknown} */ (Reflect.get(termFile, 'uncompressedSize'));
                 if (typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) && uncompressedSize > 0) {
                     return Math.trunc(uncompressedSize);
                 }
-                const size = Reflect.get(termFile, 'size');
+                const size = /** @type {unknown} */ (Reflect.get(termFile, 'size'));
                 return (typeof size === 'number' && Number.isFinite(size) && size > 0) ? Math.trunc(size) : 0;
             };
             /**
@@ -3358,9 +3359,9 @@ export class DictionaryImporter {
             }
         } else {
             for (const termArtifactFile of termArtifactFiles) {
-                const uncompressedSize = typeof Reflect.get(termArtifactFile, 'uncompressedSize') === 'number' ?
-                    Reflect.get(termArtifactFile, 'uncompressedSize') :
-                    (typeof Reflect.get(termArtifactFile, 'bytes') !== 'undefined' ? Reflect.get(/** @type {{bytes: Uint8Array}} */ (termArtifactFile), 'bytes').byteLength : 0);
+                const archiveSize = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'uncompressedSize'));
+                const memoryBytes = /** @type {Uint8Array|undefined} */ (Reflect.get(termArtifactFile, 'bytes'));
+                const uncompressedSize = typeof archiveSize === 'number' ? archiveSize : (typeof memoryBytes !== 'undefined' ? memoryBytes.byteLength : 0);
                 const size = typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) ?
                     Math.max(0, Math.trunc(uncompressedSize)) :
                     0;
@@ -3632,10 +3633,10 @@ export class DictionaryImporter {
                         };
                         /**
                          * @param {string} value
-                         * @param {Uint8Array} bytes
+                         * @param {Uint8Array} stringBytes
                          * @returns {string}
                          */
-                        const getStringValue = (value, bytes) => value.length > 0 ? value : this._textDecoder.decode(bytes);
+                        const getStringValue = (value, stringBytes) => (value.length > 0 ? value : this._textDecoder.decode(stringBytes));
                         for (let i = 0; i < rowCount; ++i) {
                             const row = /** @type {ParsedTermBankChunkRow} */ (parsedRows[i]);
                             const expressionBytes = row.expressionBytes instanceof Uint8Array ?
@@ -3955,23 +3956,15 @@ export class DictionaryImporter {
             throw new Error(`Invalid term artifact payload in '${filename}': too small`);
         }
         const magic = textDecoder.decode(bytes.subarray(0, TERM_BANK_ARTIFACT_MAGIC_BYTES));
-        const artifactVersion = (
-            magic === TERM_BANK_ARTIFACT_MAGIC_V5 ?
-                5 :
-                (
-                    magic === TERM_BANK_ARTIFACT_MAGIC_V4 ?
-                        4 :
-                        (
-                            magic === TERM_BANK_ARTIFACT_MAGIC_V3 ?
-                                3 :
-                                (
-                                    magic === TERM_BANK_ARTIFACT_MAGIC_V2 ?
-                                        2 :
-                                        (magic === TERM_BANK_ARTIFACT_MAGIC_V1 ? 1 : 0)
-                                )
-                        )
-                )
-        );
+        let artifactVersion = 0;
+        switch (magic) {
+            case TERM_BANK_ARTIFACT_MAGIC_V5: artifactVersion = 5; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V4: artifactVersion = 4; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V3: artifactVersion = 3; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V2: artifactVersion = 2; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V1: artifactVersion = 1; break;
+            default: break;
+        }
         if (artifactVersion === 0) {
             throw new Error(`Invalid term artifact payload in '${filename}': bad magic`);
         }
@@ -4119,7 +4112,9 @@ export class DictionaryImporter {
                 contentHash1List: useFullChunkArrays ? chunkContentHash1 : (Array.isArray(chunkContentHash1) ? chunkContentHash1.slice(0, streamedRowCount) : chunkContentHash1.subarray(0, streamedRowCount)),
                 contentHash2List: useFullChunkArrays ? chunkContentHash2 : (Array.isArray(chunkContentHash2) ? chunkContentHash2.slice(0, streamedRowCount) : chunkContentHash2.subarray(0, streamedRowCount)),
                 contentDictNameList: chunkContentDictNames === null ? null : (
-                    useFullChunkArrays ? chunkContentDictNames : chunkContentDictNames.slice(0, streamedRowCount)
+                    useFullChunkArrays ?
+                        chunkContentDictNames :
+                        chunkContentDictNames.slice(0, streamedRowCount)
                 ),
                 uniformContentDictName: chunkUniformContentDictName,
                 termRecordPreinternedPlan,
@@ -4147,7 +4142,9 @@ export class DictionaryImporter {
                 artifactTermContentMode === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME ||
                 artifactTermContentMode === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME
             )
-        ) ? artifactTermContentMode : null;
+        ) ?
+            artifactTermContentMode :
+            null;
         for (let i = 0; i < rowCount; ++i) {
             /** @type {Uint8Array} */
             let expressionBytes;
@@ -4287,13 +4284,11 @@ export class DictionaryImporter {
                 const contentInfo = this._normalizeArtifactTermContent(contentBytes, sharedGlossaryBaseOffset);
                 contentBytes = contentInfo.contentBytes;
                 contentDictName = contentInfo.contentDictName;
-                if (
+                if ((
                     contentDictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||
                     contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME
-                ) {
-                    if (collectArtifactRowProfile) {
-                        ++sharedGlossaryRowCount;
-                    }
+                ) && collectArtifactRowProfile) {
+                    ++sharedGlossaryRowCount;
                 }
             } else {
                 contentBytes = this._normalizeArtifactTermContentBytes(contentBytes, termContentStorageMode);
@@ -4480,17 +4475,19 @@ export class DictionaryImporter {
             chunkCount: streamToChunkHandler ? chunkIndex : 0,
             totalRows: rowCount,
             rowChunkSize: chunkSize,
-            ...(collectArtifactRowProfile ? {
-                readingEqualsExpressionCount,
-                sequencePresentCount,
-                zeroScoreCount,
-                nonZeroScoreCount,
-                sharedGlossaryRowCount,
-                contentLengthExtendedCount,
-                avgContentLength: rowCount > 0 ? (contentLengthTotal / rowCount) : 0,
-                avgExpressionLength: rowCount > 0 ? (expressionLengthTotal / rowCount) : 0,
-                avgReadingLength: rowCount > 0 ? (readingLengthTotal / rowCount) : 0,
-            } : {}),
+            ...(collectArtifactRowProfile ?
+                {
+                    readingEqualsExpressionCount,
+                    sequencePresentCount,
+                    zeroScoreCount,
+                    nonZeroScoreCount,
+                    sharedGlossaryRowCount,
+                    contentLengthExtendedCount,
+                    avgContentLength: rowCount > 0 ? (contentLengthTotal / rowCount) : 0,
+                    avgExpressionLength: rowCount > 0 ? (expressionLengthTotal / rowCount) : 0,
+                    avgReadingLength: rowCount > 0 ? (readingLengthTotal / rowCount) : 0,
+                } :
+                {}),
         };
         return {termList: streamToChunkHandler ? [] : termList, requirements: null};
     }
@@ -4777,11 +4774,10 @@ export class DictionaryImporter {
             }
             throw new Error(`Unsupported writer for ${entry.filename}`);
         }
-        const getData = Reflect.get(entry, 'getData');
+        const getData = /** @type {unknown} */ (Reflect.get(entry, 'getData'));
         if (typeof getData !== 'function') {
             throw new Error(`Cannot read ${entry.filename}`);
         }
-        return await getData.call(entry, writer);
+        return await /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter) => Promise<T>} */ (getData).call(entry, writer);
     }
-
 }

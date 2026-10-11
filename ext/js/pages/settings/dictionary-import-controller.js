@@ -404,7 +404,7 @@ export class DictionaryImportController {
      * @param {string} url
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}}>}
+     * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}>}
      */
     async _tryImportDictionaryUrlOffscreen(url, details, onProgress) {
         return /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
@@ -1411,6 +1411,7 @@ export class DictionaryImportController {
                 request.onprogress = null;
                 abortSignal.removeEventListener('abort', onAbortSignal);
             };
+            /** @param {unknown} error */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -1430,7 +1431,7 @@ export class DictionaryImportController {
                     fail(new Error(`Failed to fetch dictionary archive: ${url} (status=${String(request.status)})`));
                     return;
                 }
-                const response = request.response;
+                const response = /** @type {unknown} */ (request.response);
                 const contentBytes = response instanceof ArrayBuffer ? new Uint8Array(response) : new Uint8Array(0);
                 if (contentBytes.byteLength === 0) {
                     fail(new Error(`Fetched dictionary archive had no content: ${url}`));
@@ -1554,7 +1555,7 @@ export class DictionaryImportController {
     }
 
     /**
-     * @param {AsyncGenerator<File, void, void>} dictionaries
+     * @param {AsyncGenerator<File|{downloadUrl: string}, void, void>} dictionaries
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
      * @param {ImportProgressTracker} importProgressTracker
@@ -2031,6 +2032,12 @@ export class DictionaryImportController {
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const localPhaseTimings = [];
+        /**
+         * @param {string} phase
+         * @param {number} startTime
+         * @param {number} endTime
+         * @param {Record<string, string|number|boolean|null>} [details]
+         */
         const recordLocalPhase = (phase, startTime, endTime, details = {}) => {
             const elapsedMs = Math.max(0, endTime - startTime);
             localPhaseTimings.push({phase, elapsedMs, details});

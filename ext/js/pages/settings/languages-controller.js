@@ -42,7 +42,7 @@ export class LanguagesController {
      * @param {import('language').LanguageSummary[]} languages
      */
     _fillSelect(languages) {
-        const selectElement = querySelectorNotNull(document, '#language-select');
+        const selectElement = /** @type {HTMLSelectElement} */ (querySelectorNotNull(document, '#language-select'));
         const previousValue = selectElement.value;
         selectElement.textContent = '';
         let hasPreviousValue = false;

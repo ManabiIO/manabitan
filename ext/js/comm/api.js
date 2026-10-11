@@ -22,6 +22,10 @@ const pmTransportTimeoutMs = 10_000;
 const apiInvokeTimeoutMs = 30_000;
 const apiInvokeExtendedTimeoutMs = 180_000;
 
+/**
+ * @param {number} delayMs
+ * @returns {Promise<void>}
+ */
 function sleep(delayMs) {
     return new Promise((resolve) => {
         globalThis.setTimeout(resolve, delayMs);
@@ -367,13 +371,6 @@ export class API {
     }
 
     /**
-     * @returns {Promise<import('api').ApiReturn<'debugDictionaryStorageState'>>}
-     */
-    debugDictionaryStorageState() {
-        return this._invoke('debugDictionaryStorageState', void 0);
-    }
-
-    /**
      * @param {string} url
      * @returns {Promise<{contentBase64: string, fileName: string, contentType: string|null}>}
      */
@@ -581,6 +578,7 @@ export class API {
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
             let settled = false;
+            /** @param {unknown} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
@@ -672,6 +670,7 @@ export class API {
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
             let settled = false;
+            /** @param {unknown} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
@@ -821,6 +820,7 @@ export class API {
         return new Promise((resolve, reject) => {
             let settled = false;
             let retriedTransientFailure = false;
+            /** @param {unknown} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
@@ -969,8 +969,12 @@ export class API {
             if (transportError !== null) {
                 throw transportError;
             }
+            const backendPort = this._backendPort;
+            if (backendPort === null) {
+                throw new Error('Backend message port is not available. You may need to refresh the page.');
+            }
             try {
-                this._backendPort.postMessage({action, params}, transferables);
+                backendPort.postMessage({action, params}, transferables);
             } catch (error) {
                 this._setBackendPort(null);
                 await this._reconnectBackendPort();

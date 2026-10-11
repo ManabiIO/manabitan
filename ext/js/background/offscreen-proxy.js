@@ -489,7 +489,7 @@ export class DictionaryDatabaseProxy {
         if (this._openStorageDiagnostics === null || typeof this._openStorageDiagnostics !== 'object') {
             return null;
         }
-        return {.../** @type {Record<string, unknown>} */ (this._openStorageDiagnostics)};
+        return {...(/** @type {Record<string, unknown>} */ (this._openStorageDiagnostics))};
     }
 
     /**

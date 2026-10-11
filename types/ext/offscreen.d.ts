@@ -164,6 +164,12 @@ type ApiSurface = {
         };
         return: Translator.TermFrequencySimple[];
     };
+    warmTermLookupCachesOffscreen: {
+        params: {
+            dictionaryNames: string[];
+        };
+        return: void;
+    };
     clearDatabaseCachesOffscreen: {
         params: void;
         return: void;

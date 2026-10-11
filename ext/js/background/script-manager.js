@@ -121,7 +121,7 @@ export async function unregisterContentScript(id) {
  */
 function createContentScriptRegistrationOptions(details, id) {
     const {css, js, allFrames, matches, runAt, world} = details;
-    /** @type {chrome.scripting.RegisteredContentScript} */
+    /** @type {Partial<chrome.scripting.RegisteredContentScript>} */
     const options = {
         id: id,
         persistAcrossSessions: true,
@@ -144,7 +144,7 @@ function createContentScriptRegistrationOptions(details, id) {
     if (typeof world !== 'undefined') {
         options.world = world;
     }
-    return options;
+    return /** @type {chrome.scripting.RegisteredContentScript} */ (options);
 }
 
 /**

@@ -487,7 +487,7 @@ export class Backend {
                     fail(new Error(`Failed to fetch dictionary archive: ${url} (status=${String(request.status)})`));
                     return;
                 }
-                const response = request.response;
+                const response = /** @type {unknown} */ (request.response);
                 const content = response instanceof Blob ? response : new Blob([]);
                 if (content.size === 0) {
                     fail(new Error(`Fetched dictionary archive had no content: ${url}`));
@@ -624,12 +624,10 @@ export class Backend {
                 this._setupSharedWorkerBridge();
                 recordPhase('sharedWorkerBridge.setup', startedAt);
             }
-            try {
+            {
                 const startedAt = safePerformance.now();
                 await this._ensureDictionaryDatabaseReady();
                 recordPhase('dictionaryDatabase.prepare', startedAt);
-            } catch (e) {
-                throw e;
             }
 
             void this._translator.prepare();
@@ -848,6 +846,7 @@ export class Backend {
 
     /**
      * @returns {void}
+     * @throws {Error} When the shared worker bridge cannot be created.
      */
     _setupSharedWorkerBridge() {
         const sharedWorkerBridge = new SharedWorker(new URL('../comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
@@ -856,7 +855,7 @@ export class Backend {
             // connectToBackend2
             e.ports[0].onmessage = this._onPmMessage.bind(this);
         });
-        sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent} */ event) => {
+        sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent<import('api').PmApiMessageAny>} */ event) => {
             this._onPmMessageError(event);
             this._resetSharedWorkerBridge(sharedWorkerBridge, 'messageerror', new Error('Shared worker backend bridge message deserialization failed'));
         });
@@ -925,7 +924,7 @@ export class Backend {
 
 
     /**
-     * @param {chrome.tabs.ZoomChangeInfo} event
+     * @param {chrome.tabs.OnZoomChangeInfo} event
      */
     _onZoomChange({tabId, oldZoomFactor, newZoomFactor}) {
         this._sendMessageTabIgnoreResponse(tabId, {action: 'applicationZoomChanged', params: {oldZoomFactor, newZoomFactor}}, {});
@@ -1156,26 +1155,18 @@ export class Backend {
             )))],
             debugLookupState,
             resultEntries: includeDetailedLookupSnapshot ?
-                dictionaryEntries.map((entry) => (
-                    entry.type === 'term' ?
-                        {
-                            type: entry.type,
-                            dictionaryIndex: entry.dictionaryIndex,
-                            dictionaryAlias: entry.dictionaryAlias,
-                            headwords: entry.headwords.map(({term, reading}) => ({term, reading})),
-                            definitions: entry.definitions.map(({dictionary, dictionaryAlias, sequences, isPrimary}) => ({
-                                dictionary,
-                                dictionaryAlias,
-                                sequences,
-                                isPrimary,
-                            })),
-                        } :
-                        {
-                            type: entry.type,
-                            dictionary: entry.dictionary,
-                            dictionaryAlias: entry.dictionaryAlias,
-                        }
-                )) :
+                dictionaryEntries.map((entry) => ({
+                    type: entry.type,
+                    dictionaryIndex: entry.dictionaryIndex,
+                    dictionaryAlias: entry.dictionaryAlias,
+                    headwords: entry.headwords.map(({term, reading}) => ({term, reading})),
+                    definitions: entry.definitions.map(({dictionary, dictionaryAlias, sequences, isPrimary}) => ({
+                        dictionary,
+                        dictionaryAlias,
+                        sequences,
+                        isPrimary,
+                    })),
+                })) :
                 void 0,
         }));
         return {dictionaryEntries, originalTextLength};
@@ -1603,6 +1594,7 @@ export class Backend {
 
     /**
      * @param {{text: string, dictionaryNames: string[]}} params
+     * @returns {Promise<unknown>}
      */
     async _onApiDebugDictionaryLookupState({text, dictionaryNames}) {
         await this._awaitDictionaryMutationSettled();
@@ -1661,61 +1653,38 @@ export class Backend {
         return await this._debugDictionaryLookupStateLocal(text, dictionaryNames);
     }
 
+    /** @type {import('api').ApiHandler<'debugDictionaryStorageState'>} */
     async _onApiDebugDictionaryStorageState() {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
-        const usesFallbackStorageValue = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'usesFallbackStorage'));
-        const getOpenStorageDiagnosticsValue = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'getOpenStorageDiagnostics'));
-        const rowsMethod = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'debugGetDictionaryRows'));
-        const dictionaryRows = (typeof rowsMethod === 'function') ?
-            await /** @type {() => Promise<unknown>} */ (rowsMethod).call(this._dictionaryDatabase) :
+        const dictionaryRows = await this._dictionaryDatabase.debugGetDictionaryRows();
+        const offscreenDictionaryRowsResult = this._offscreen !== null ?
+            await this._offscreen.sendMessagePromise({action: 'debugDictionaryStorageStateOffscreen'}) :
             null;
-        const offscreenDictionaryRows = (this._offscreen !== null) ? (() => this._offscreen.sendMessagePromise({
-            action: 'debugDictionaryStorageStateOffscreen',
-        }))() : null;
-        const offscreenDictionaryRowsResult = (offscreenDictionaryRows !== null) ? await offscreenDictionaryRows : null;
-        const usesFallbackStorage = typeof usesFallbackStorageValue === 'function' ?
-            /** @type {() => boolean} */ (usesFallbackStorageValue).call(this._dictionaryDatabase) :
-            null;
-        const openStorageDiagnostics = typeof getOpenStorageDiagnosticsValue === 'function' ?
-            /** @type {() => unknown} */ (getOpenStorageDiagnosticsValue).call(this._dictionaryDatabase) :
-            null;
+        const usesFallbackStorage = this._dictionaryDatabase.usesFallbackStorage();
+        const openStorageDiagnostics = this._dictionaryDatabase.getOpenStorageDiagnostics();
         return {
             usesFallbackStorage: typeof usesFallbackStorage === 'boolean' ? usesFallbackStorage : null,
             openStorageDiagnostics: (
                 typeof openStorageDiagnostics === 'object' &&
                 openStorageDiagnostics !== null &&
                 !Array.isArray(openStorageDiagnostics)
-            ) ? openStorageDiagnostics : null,
+            ) ?
+                openStorageDiagnostics :
+                null,
             startupDiagnosticsSnapshot: this._startupDiagnosticsSnapshot,
             lastDictionaryUrlImportDebug: this._lastDictionaryUrlImportDebug,
-            dictionaryRows: Array.isArray(dictionaryRows) ? dictionaryRows : [],
-            offscreenDictionaryRows: Array.isArray(offscreenDictionaryRowsResult?.dictionaryRows) ? offscreenDictionaryRowsResult.dictionaryRows : [],
-            offscreenLastReplaceDictionaryTitleDebug: (
-                offscreenDictionaryRowsResult !== null &&
-                typeof offscreenDictionaryRowsResult === 'object' &&
-                !Array.isArray(offscreenDictionaryRowsResult)
-            ) ? (offscreenDictionaryRowsResult.lastReplaceDictionaryTitleDebug ?? null) : null,
-            offscreenStartupCleanupIncompleteImportsSummary: (
-                offscreenDictionaryRowsResult !== null &&
-                typeof offscreenDictionaryRowsResult === 'object' &&
-                !Array.isArray(offscreenDictionaryRowsResult)
-            ) ? (offscreenDictionaryRowsResult.startupCleanupIncompleteImportsSummary ?? null) : null,
-            offscreenStartupCleanupMissingTermRecordShardsSummary: (
-                offscreenDictionaryRowsResult !== null &&
-                typeof offscreenDictionaryRowsResult === 'object' &&
-                !Array.isArray(offscreenDictionaryRowsResult)
-            ) ? (offscreenDictionaryRowsResult.startupCleanupMissingTermRecordShardsSummary ?? null) : null,
-            offscreenTermRecordShardFileNames: (
-                offscreenDictionaryRowsResult !== null &&
-                typeof offscreenDictionaryRowsResult === 'object' &&
-                !Array.isArray(offscreenDictionaryRowsResult) &&
-                Array.isArray(offscreenDictionaryRowsResult.termRecordShardFileNames)
-            ) ? offscreenDictionaryRowsResult.termRecordShardFileNames : [],
+            dictionaryRows,
+            offscreenDictionaryRows: offscreenDictionaryRowsResult?.dictionaryRows ?? [],
+            offscreenLastReplaceDictionaryTitleDebug: offscreenDictionaryRowsResult?.lastReplaceDictionaryTitleDebug ?? null,
+            offscreenStartupCleanupIncompleteImportsSummary: offscreenDictionaryRowsResult?.startupCleanupIncompleteImportsSummary ?? null,
+            offscreenStartupCleanupMissingTermRecordShardsSummary: offscreenDictionaryRowsResult?.startupCleanupMissingTermRecordShardsSummary ?? null,
+            offscreenTermRecordShardFileNames: offscreenDictionaryRowsResult?.termRecordShardFileNames ?? [],
         };
     }
 
+    /** @returns {Promise<void>} */
     async _awaitDictionaryRefreshSettled() {
         while (true) {
             const importModePromise = this._setDictionaryImportModePromise;
@@ -1765,6 +1734,7 @@ export class Backend {
         }
     }
 
+    /** @returns {Promise<void>} */
     async _awaitDictionaryMutationSettled() {
         while (true) {
             const promise = this._dictionaryMutationPromise;
@@ -1867,17 +1837,17 @@ export class Backend {
         const content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
         const fileName = (() => {
             const contentDisposition = response.headers.get('Content-Disposition') || '';
-            const match = /filename\\*?=(?:UTF-8''|\"?)([^\";]+)/i.exec(contentDisposition);
+            const match = /filename\\*?=(?:UTF-8''|"?)([^";]+)/i.exec(contentDisposition);
             if (match) {
                 try {
-                    return decodeURIComponent(match[1].replace(/^\"|\"$/g, ''));
+                    return decodeURIComponent(match[1].replace(/^"|"$/g, ''));
                 } catch (_) {
-                    return match[1].replace(/^\"|\"$/g, '');
+                    return match[1].replace(/^"|"$/g, '');
                 }
             }
             try {
                 const parsed = new URL(normalizedUrl);
-                const pathPart = parsed.pathname.split('/').filter((part) => part.length > 0).pop();
+                const pathPart = parsed.pathname.split('/').findLast((part) => part.length > 0);
                 if (typeof pathPart === 'string' && pathPart.length > 0) {
                     return pathPart;
                 }
@@ -3872,6 +3842,7 @@ export class Backend {
      */
     async _probeDictionaryVisibilityTranslator(dictionaryTitle, probe, options) {
         const enabledDictionary = options.dictionaries.find((dictionary) => dictionary.name === dictionaryTitle);
+        /** @type {import('translation').TermEnabledDictionaryMap} */
         const enabledDictionaryMap = new Map();
         enabledDictionaryMap.set(dictionaryTitle, {
             index: 0,
@@ -3995,7 +3966,7 @@ export class Backend {
             }
         }
         /** @type {string[]} */
-        let failedAfterRefresh = [];
+        const failedAfterRefresh = [];
         let refreshed = false;
         if (failedBeforeRefresh.length > 0) {
             refreshed = true;
@@ -4741,114 +4712,7 @@ export class Backend {
      * @returns {Promise<unknown>}
      */
     async _debugDictionaryLookupStateLocal(text, dictionaryNames) {
-        const database = this._dictionaryDatabase;
-        const ensureIndex = Reflect.get(database, '_ensureDirectTermIndex');
-        const fetchTermRowsByIds = Reflect.get(database, '_fetchTermRowsByIds');
-        const ensureRecordDictionariesLoaded = Reflect.get(database, '_ensureDirectTermIndexesLoaded');
-        if (typeof ensureIndex !== 'function' || typeof fetchTermRowsByIds !== 'function') {
-            return {
-                ok: false,
-                reason: 'debug lookup unavailable',
-                text,
-                dictionaryNames,
-            };
-        }
-        if (typeof ensureRecordDictionariesLoaded === 'function') {
-            await ensureRecordDictionariesLoaded.call(database, dictionaryNames);
-        }
-        /** @type {Map<number, {dictionary: string, matchSource: string}>} */
-        const ids = new Map();
-        /** @type {Array<Record<string, unknown>>} */
-        const directHits = [];
-        const getRecordById = Reflect.get(database, '_termRecordStore')?.getById?.bind(Reflect.get(database, '_termRecordStore'));
-        const termContentStore = Reflect.get(database, '_termContentStore');
-        const readSlice = Reflect.get(termContentStore, 'readSlice');
-        const getLastReadErrorDetails = Reflect.get(termContentStore, 'getLastReadErrorDetails');
-        const getDebugState = Reflect.get(termContentStore, 'getDebugState');
-        const textDecoder = new TextDecoder();
-        for (const dictionaryNameRaw of dictionaryNames) {
-            const dictionaryName = String(dictionaryNameRaw || '').trim();
-            if (dictionaryName.length === 0) { continue; }
-            const index = ensureIndex.call(database, dictionaryName);
-            const expressionIds = Array.isArray(index?.expression?.get?.(text)) ? index.expression.get(text) : [];
-            const readingIds = Array.isArray(index?.reading?.get?.(text)) ? index.reading.get(text) : [];
-            for (const id of expressionIds) {
-                if (typeof id === 'number' && id > 0 && !ids.has(id)) {
-                    ids.set(id, {dictionary: dictionaryName, matchSource: 'expression'});
-                }
-            }
-            for (const id of readingIds) {
-                if (typeof id === 'number' && id > 0 && !ids.has(id)) {
-                    ids.set(id, {dictionary: dictionaryName, matchSource: 'reading'});
-                }
-            }
-            directHits.push({
-                dictionary: dictionaryName,
-                expressionHitCount: expressionIds.length,
-                readingHitCount: readingIds.length,
-                firstExpressionIds: expressionIds.slice(0, 5),
-                firstReadingIds: readingIds.slice(0, 5),
-            });
-        }
-        const rowsById = await fetchTermRowsByIds.call(database, ids.keys());
-        const rows = [];
-        for (const [id, match] of ids) {
-            const row = rowsById.get(id);
-            const rawRecord = typeof getRecordById === 'function' ? getRecordById(id) : null;
-            let rawContentPreview = null;
-            let readErrorDetails = null;
-            if (
-                rawRecord &&
-                typeof rawRecord.entryContentOffset === 'number' &&
-                rawRecord.entryContentOffset >= 0 &&
-                typeof rawRecord.entryContentLength === 'number' &&
-                rawRecord.entryContentLength > 0 &&
-                typeof readSlice === 'function'
-            ) {
-                try {
-                    const bytes = await readSlice.call(
-                        termContentStore,
-                        rawRecord.entryContentOffset,
-                        Math.min(rawRecord.entryContentLength, 120),
-                    );
-                    if (!(bytes instanceof Uint8Array)) {
-                        rawContentPreview = '<read-null>';
-                        readErrorDetails = typeof getLastReadErrorDetails === 'function' ?
-                            getLastReadErrorDetails.call(termContentStore) :
-                            null;
-                    } else {
-                        rawContentPreview = textDecoder.decode(bytes).replaceAll(/\s+/g, ' ').slice(0, 120);
-                    }
-                } catch (_) {
-                    rawContentPreview = '<read-failed>';
-                    readErrorDetails = typeof getLastReadErrorDetails === 'function' ?
-                        getLastReadErrorDetails.call(termContentStore) :
-                        null;
-                }
-            }
-            rows.push({
-                id,
-                dictionary: row?.dictionary ?? match.dictionary,
-                matchSource: match.matchSource,
-                expression: row?.expression ?? '',
-                reading: row?.reading ?? '',
-                glossaryLength: Array.isArray(row?.glossary) ? row.glossary.length : null,
-                rawEntryContentOffset: rawRecord?.entryContentOffset ?? null,
-                rawEntryContentLength: rawRecord?.entryContentLength ?? null,
-                rawEntryContentDictName: rawRecord?.entryContentDictName ?? null,
-                rawContentPreview,
-                readErrorDetails,
-            });
-            if (rows.length >= 10) { break; }
-        }
-        return {
-            ok: true,
-            text,
-            dictionaryNames,
-            directHits,
-            rowSample: rows,
-            termContentStoreDebugState: typeof getDebugState === 'function' ? getDebugState.call(termContentStore) : null,
-        };
+        return await this._dictionaryDatabase.debugDictionaryLookupState(text, dictionaryNames);
     }
 
     /**

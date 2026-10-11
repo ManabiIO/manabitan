@@ -98,6 +98,7 @@ export class RecommendedPermissionsController {
         const node = /** @type {HTMLInputElement} */ (e.currentTarget);
         const value = node.checked;
         node.checked = !value;
+        /** @type {chrome.runtime.ManifestPermission[]} */
         const permissions = ['clipboardRead', 'nativeMessaging'];
         try {
             await setPermissionsGranted({permissions}, value);

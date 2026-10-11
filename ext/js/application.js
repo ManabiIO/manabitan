@@ -177,7 +177,7 @@ async function waitForBackendReady(webExtension) {
  * @returns {void}
  */
 function showStartupFailureUi(error) {
-    if (!(window.location.protocol === new URL(import.meta.url).protocol)) { return; }
+    if (window.location.protocol !== new URL(import.meta.url).protocol) { return; }
     const message = error instanceof Error ? error.message : String(error);
     try {
         document.documentElement.dataset.loadingStalled = 'true';
@@ -217,7 +217,7 @@ function showStartupFailureUi(error) {
  * @returns {void}
  */
 function showRuntimeDisconnectedUi(message) {
-    if (!(window.location.protocol === new URL(import.meta.url).protocol)) { return; }
+    if (window.location.protocol !== new URL(import.meta.url).protocol) { return; }
     try {
         document.documentElement.dataset.loadingStalled = 'true';
         document.documentElement.dataset.loadingError = 'true';
@@ -267,6 +267,7 @@ function waitForDomContentLoaded() {
 
 /**
  * @returns {MessagePort}
+ * @throws {Error} When the Firefox backend bridge cannot be connected.
  */
 function createFirefoxBackendPort() {
     const sharedWorkerBridge = new SharedWorker(new URL('comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});

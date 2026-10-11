@@ -112,7 +112,7 @@ export class DisplayController {
     }
 
     /**
-     * @param {{source?: string}} details
+     * @param {{source?: string}} _details
      * @returns {void}
      */
     _onOptionsUpdated(_details) {
@@ -415,7 +415,7 @@ export class DisplayController {
      * @param {import('settings').ProfileOptions} options
      */
     async _updateDictionariesEnabledWarnings(options, generation = this._optionsSetupGeneration) {
-        const tooltip = document.querySelectorAll('.tooltip');
+        const tooltip = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tooltip'));
         const dictionaries = await this._api.getDictionaryInfo();
         if (generation !== this._optionsSetupGeneration) { return; }
 
@@ -446,7 +446,7 @@ export class DisplayController {
         if (generation !== this._optionsSetupGeneration) { return; }
         if (hasRequiredPermissionsForOptions(permissions, options)) { return; }
 
-        const tooltip = document.querySelectorAll('.tooltip');
+        const tooltip = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tooltip'));
         for (let i = 0; i < tooltip.length; i++) {
             tooltip[i].innerHTML = '<a class="action-open-permissions">Please enable permissions</a>';
         }
