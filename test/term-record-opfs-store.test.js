@@ -27,6 +27,11 @@ import {
     RAW_TERM_CONTENT_TOKEN_DICT_NAME,
 } from '../ext/js/dictionary/raw-term-content.js';
 
+vi.mock('../ext/js/dictionary/zstd-term-content.js', async (importOriginal) => ({
+    .../** @type {typeof import('../ext/js/dictionary/zstd-term-content.js')} */(await importOriginal()),
+    initializeTermContentZstd: vi.fn(async () => {}),
+}));
+
 /** @typedef {ReturnType<TermRecordOpfsStore['_createShardState']>} TermRecordShardState */
 
 /**
@@ -4035,21 +4040,198 @@ describe('TermRecordOpfsStore', () => {
                 }
             },
         });
-        const firstReader = new TermRecordOpfsStore();
-        Reflect.set(firstReader, '_recordsDirectoryHandle', failedRecoveryDirectory);
-        await firstReader._loadShardFiles(false);
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', failedRecoveryDirectory);
+        const database = new DictionaryDatabase();
+        /** @type {unknown[][]} */
+        const terminalHealthWrites = [];
+        Reflect.set(database, '_termRecordStore', readerStore);
+        const connection = {
+            selectObjects: () => [{title: dictionaryName, summaryJson: JSON.stringify({counts: {terms: {total: 1}}})}],
+            exec(/** @type {{sql: string, bind: unknown[]}} */ statement) {
+                if (statement.sql.includes('INSERT INTO dictionaryStorageHealth')) {
+                    terminalHealthWrites.push(statement.bind);
+                }
+            },
+            close: vi.fn(),
+        };
+        readerStore.setDictionaryHealthChangeHandler(database._onTermRecordDictionaryHealthChanged.bind(database));
+        const originalNavigator = globalThis.navigator;
+        const originalSelf = globalThis.self;
+        vi.stubGlobal('navigator', {storage: {getDirectory: async () => ({getDirectoryHandle: async () => failedRecoveryDirectory})}});
+        vi.stubGlobal('self', {constructor: {name: 'DedicatedWorkerGlobalScope'}});
+        const open = vi.spyOn(database, '_openConnection').mockImplementation(async () => {
+            Reflect.set(database, '_db', connection);
+            await readerStore.prepare();
+        });
+        const deleteLegacy = vi.spyOn(database, '_deleteLegacyIndexedDb').mockResolvedValue();
+        const refreshMappings = vi.spyOn(database, '_refreshTermRecordStorageNameMappings').mockImplementation(() => {});
+        const cleanupImports = vi.spyOn(database, '_cleanupIncompleteImports').mockResolvedValue();
+        try {
+            const startupError = await database.prepare().then(() => null, (error) => error);
+            expect(terminalHealthWrites).toEqual([]);
+            expect(startupError).toEqual(expect.objectContaining({message: 'Injected descriptor recovery write failure'}));
+            expect(database.isPrepared()).toBe(false);
+            expect(Reflect.get(database, '_openingPromise')).toBeNull();
+            expect(Reflect.get(database, '_isOpening')).toBe(false);
+            expect(connection.close).toHaveBeenCalledOnce();
+            expect(fileBytesByName.has(descriptorFileName)).toBe(true);
+            expect(fileBytesByName.get(descriptorFileName)).toHaveLength(0);
 
-        expect(fileBytesByName.has(descriptorFileName)).toBe(true);
-        expect(fileBytesByName.get(descriptorFileName)).toHaveLength(0);
+            await database.prepare();
+            expect(database.isPrepared()).toBe(true);
+            expect(open).toHaveBeenCalledTimes(2);
+            await readerStore.ensureDictionariesLoaded([dictionaryName]);
+            expect(new TextDecoder().decode(fileBytesByName.get(descriptorFileName)?.subarray(0, 8))).toBe('MBTRD16X');
+            expect(readerStore.findTermIds(dictionaryName, '再試行', 'expression')).toHaveLength(1);
+            expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
+            expect(terminalHealthWrites).toEqual([]);
+        } finally {
+            open.mockRestore();
+            deleteLegacy.mockRestore();
+            refreshMappings.mockRestore();
+            cleanupImports.mockRestore();
+            vi.stubGlobal('navigator', originalNavigator);
+            vi.stubGlobal('self', originalSelf);
+        }
+    });
 
-        const retryReader = new TermRecordOpfsStore();
-        Reflect.set(retryReader, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
-        await retryReader._loadShardFiles(false);
-        await retryReader.ensureDictionariesLoaded([dictionaryName]);
+    test.each(['unsafe-length', 'bad-magic', 'truncated'])('isolates a %s orphan container from a healthy dictionary during prepare', async (corruption) => {
+        const encoder = new TextEncoder();
+        const dictionaryName = 'Corrupt orphan';
+        const healthyName = 'Healthy neighbor';
+        const fileBytesByName = new Map();
+        const recordsDirectory = createFakeDirectoryHandle(fileBytesByName);
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectory);
+        for (const dictionary of [dictionaryName, healthyName]) {
+            await writerStore.appendBatchFromArtifactChunkResolvedContent({
+                dictionary,
+                dictionaryTotalRows: 1_000_000,
+                rowCount: 1,
+                expressionBytesList: [encoder.encode('健全')],
+                readingBytesList: [encoder.encode('けんぜん')],
+                readingEqualsExpressionList: new Uint8Array([0]),
+                scoreList: new Int32Array([1]),
+                sequenceList: new Int32Array([1]),
+            }, [0], [8], 'raw');
+        }
+        await writerStore._closeAllWritables();
+        const descriptorFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
+        if (typeof descriptorFileName !== 'string') { throw new Error('Expected descriptor'); }
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const originalBytes = fileBytesByName.get(indexFileName);
+        if (typeof originalBytes === 'undefined') { throw new Error('Expected container'); }
+        const invalidBytes = new Uint8Array(originalBytes);
+        if (corruption === 'unsafe-length') {
+            new DataView(invalidBytes.buffer).setUint32(12, 0x200000, true);
+        } else if (corruption === 'bad-magic') {
+            invalidBytes[0] = 0;
+        }
+        fileBytesByName.set(indexFileName, corruption === 'truncated' ? invalidBytes.subarray(0, 12) : invalidBytes);
+        fileBytesByName.delete(descriptorFileName);
 
-        expect(new TextDecoder().decode(fileBytesByName.get(descriptorFileName)?.subarray(0, 8))).toBe('MBTRD16X');
-        expect(retryReader.findTermIds(dictionaryName, '再試行', 'expression')).toHaveLength(1);
-        expect(retryReader.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
+        const readerStore = new TermRecordOpfsStore();
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_termRecordStore', readerStore);
+        /** @type {unknown[][]} */
+        const healthWrites = [];
+        const connection = {
+            selectObjects: () => [dictionaryName, healthyName].map((title) => ({title, summaryJson: JSON.stringify({title, counts: {terms: {total: 1}}})})),
+            exec(/** @type {{sql: string, bind: unknown[]}} */ statement) {
+                if (statement.sql.includes('INSERT INTO dictionaryStorageHealth')) { healthWrites.push(statement.bind); }
+            },
+            close: vi.fn(),
+        };
+        readerStore.setDictionaryHealthChangeHandler(database._onTermRecordDictionaryHealthChanged.bind(database));
+        const originalNavigator = globalThis.navigator;
+        const originalSelf = globalThis.self;
+        vi.stubGlobal('navigator', {storage: {getDirectory: async () => ({getDirectoryHandle: async () => recordsDirectory})}});
+        vi.stubGlobal('self', {constructor: {name: 'DedicatedWorkerGlobalScope'}});
+        const open = vi.spyOn(database, '_openConnection').mockImplementation(async () => {
+            Reflect.set(database, '_db', connection);
+            await readerStore.prepare();
+        });
+        const deleteLegacy = vi.spyOn(database, '_deleteLegacyIndexedDb').mockResolvedValue();
+        const refreshMappings = vi.spyOn(database, '_refreshTermRecordStorageNameMappings').mockImplementation(() => {});
+        const cleanupImports = vi.spyOn(database, '_cleanupIncompleteImports').mockResolvedValue();
+        try {
+            await database.prepare();
+            expect(database.isPrepared()).toBe(true);
+            expect(healthWrites).toEqual([[dictionaryName, dictionaryName, 'Dictionary record data is missing']]);
+            await readerStore.ensureDictionariesLoaded([healthyName]);
+            expect(readerStore.findTermIds(healthyName, '健全', 'expression')).toHaveLength(1);
+            expect(readerStore.getDictionaryHealth(healthyName)).toEqual({status: 'available', reason: null});
+            expect(readerStore.getDictionaryHealth(dictionaryName).status).toBe('reimportRequired');
+            expect(await database.getDictionaryInfo()).toEqual([
+                expect.objectContaining({title: dictionaryName, storageHealth: 'reimportRequired'}),
+                expect.objectContaining({title: healthyName, storageHealth: 'available'}),
+            ]);
+            expect(fileBytesByName.has(descriptorFileName)).toBe(false);
+            expect(connection.close).not.toHaveBeenCalled();
+        } finally {
+            open.mockRestore();
+            deleteLegacy.mockRestore();
+            refreshMappings.mockRestore();
+            cleanupImports.mockRestore();
+            vi.stubGlobal('navigator', originalNavigator);
+            vi.stubGlobal('self', originalSelf);
+        }
+    });
+
+    test.each(['stat', 'header'])('retries missing descriptor recovery after a transient container %s failure', async (failureStage) => {
+        const textEncoder = new TextEncoder();
+        const dictionaryName = 'Transient container recovery';
+        const fileBytesByName = new Map();
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', createFakeDirectoryHandle(fileBytesByName));
+        await writerStore.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: dictionaryName,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [textEncoder.encode('復旧')],
+            readingBytesList: [textEncoder.encode('ふくきゅう')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await writerStore._closeAllWritables();
+        const descriptorFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbtr'));
+        if (typeof descriptorFileName !== 'string') { throw new Error('Expected descriptor'); }
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const indexBytes = fileBytesByName.get(indexFileName);
+        fileBytesByName.delete(descriptorFileName);
+
+        let failHeaderRead = failureStage === 'header';
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            getFileFailures: new Map(failureStage === 'stat' ? [[indexFileName, 1]] : []),
+            fileFactory: (name, bytes) => {
+                if (name !== indexFileName || !failHeaderRead) { return null; }
+                return /** @type {File} */ (/** @type {unknown} */ ({
+                    size: bytes.byteLength,
+                    slice() {
+                        return {
+                            async arrayBuffer() {
+                                failHeaderRead = false;
+                                throw new Error('Injected container header read failure');
+                            },
+                        };
+                    },
+                }));
+            },
+        });
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await expect(readerStore._loadShardFiles(false)).rejects.toThrow(
+            failureStage === 'stat' ? 'Injected getFile failure' : 'Injected container header read failure',
+        );
+        expect(fileBytesByName.has(descriptorFileName)).toBe(false);
+        expect(fileBytesByName.get(indexFileName)).toEqual(indexBytes);
+
+        await readerStore._loadShardFiles(false);
+        await readerStore.ensureDictionariesLoaded([dictionaryName]);
+        expect(readerStore.findTermIds(dictionaryName, '復旧', 'expression')).toHaveLength(1);
+        expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
     });
 
     test('retries a transient descriptor stat failure without requesting reimport', async () => {
