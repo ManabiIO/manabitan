@@ -27,7 +27,7 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 from typing import Dict, Iterable, List, Optional
-from urllib.parse import quote, unquote_to_bytes
+from urllib.parse import quote, unquote, unquote_to_bytes
 
 from pyglossary.plugin_lib.readmdict import MDD, MDX  # type: ignore
 
@@ -40,8 +40,10 @@ _RE_RELATIVE_RESOURCE = re.compile(
     r'(?P<prefix>\b(?:src|href)=["\'])(?P<path>\.?/?[^"\']+)(?P<suffix>["\'])',
     re.IGNORECASE,
 )
+# Consume literal regions before matching URL functions; only URLs set path.
 _RE_CSS_URL = re.compile(
-    r'url\(\s*(?P<quote>["\']?)(?P<path>.*?)(?P=quote)\s*\)',
+    r'/\*.*?(?:\*/|$)|"(?:\\.|[^"\\])*(?:"|$)|\'(?:\\.|[^\'\\])*(?:\'|$)|'
+    r'(?<![-\w])(?<![^\x00-\x7f])url\(\s*(?P<quote>["\']?)(?P<path>.*?)(?P=quote)\s*\)',
     re.IGNORECASE | re.DOTALL,
 )
 _RE_CSS_IDENTIFIER = re.compile(r"-?(?:[A-Za-z_]|[^\x00-\x7F])(?:[A-Za-z0-9_-]|[^\x00-\x7F])*")
@@ -221,6 +223,7 @@ class _HtmlParseContext:
 class _EmbeddedAssetCollector:
     asset_prefix: str
     assets: Dict[str, bytes]
+    reserved_paths: Optional[set[str]] = None
 
     def register_data_url(self, data_url: str) -> Optional[str]:
         decoded = _decode_data_url(data_url)
@@ -231,6 +234,10 @@ class _EmbeddedAssetCollector:
         category = media_type.split("/", 1)[0].strip().lower() or "asset"
         digest = hashlib.sha1(data).hexdigest()
         archive_path = f"{self.asset_prefix}embedded/{category}/{digest}{extension}"
+        suffix = 0
+        while self.reserved_paths is not None and archive_path.casefold() in self.reserved_paths:
+            suffix += 1
+            archive_path = f"{self.asset_prefix}embedded/{category}/{digest}-{suffix}{extension}"
         self.assets.setdefault(archive_path, data)
         return archive_path
 
@@ -260,6 +267,20 @@ def _build_redirect_map(mdx: MDX) -> Dict[str, List[str]]:
         if definition.startswith("@@@LINK="):
             redirects.setdefault(definition[8:], []).append(term)
     return redirects
+
+
+def _get_redirect_expressions(term: str, redirects: Dict[str, List[str]]) -> List[str]:
+    expressions = [term]
+    seen = {term}
+    index = 0
+    while index < len(expressions):
+        for alias in redirects.get(expressions[index], []):
+            if alias in seen:
+                continue
+            seen.add(alias)
+            expressions.append(alias)
+        index += 1
+    return expressions
 
 
 def _normalize_asset_key(raw_key: str) -> str:
@@ -312,6 +333,7 @@ def _collapse_posix_path(path: str) -> str:
 def _normalize_relative_asset_path(
     path: str,
     source_asset_path: Optional[str] = None,
+    asset_prefix: str = "",
 ) -> Optional[str]:
     value = path.strip().replace("\\", "/")
     if not value:
@@ -333,11 +355,13 @@ def _normalize_relative_asset_path(
         return None
     if value.startswith("//"):
         return None
+    from_root = value.startswith("/") or lowered.startswith("file://")
     if lowered.startswith("file://"):
         value = value[7:]
 
     value = value.lstrip("/")
-    if source_asset_path is not None and value.startswith(("./", "../")):
+    already_prefixed = bool(asset_prefix) and value.startswith(asset_prefix)
+    if source_asset_path is not None and not from_root and not already_prefixed:
         source_parent = PurePosixPath(source_asset_path).parent.as_posix()
         value = f"{source_parent}/{value}" if source_parent != "." else value
     value = _collapse_posix_path(value)
@@ -349,7 +373,7 @@ def _prefix_relative_asset_path(
     asset_prefix: str,
     source_asset_path: Optional[str] = None,
 ) -> Optional[str]:
-    normalized_path = _normalize_relative_asset_path(path, source_asset_path)
+    normalized_path = _normalize_relative_asset_path(path, source_asset_path, asset_prefix)
     if normalized_path is None:
         return None
     if normalized_path.startswith(asset_prefix):
@@ -363,11 +387,11 @@ def _decode_data_url(value: str) -> Optional[tuple[str, bytes]]:
     header, separator, payload = value[5:].partition(",")
     if separator == "":
         return None
-    parts = [part.strip() for part in header.split(";") if part.strip()]
-    media_type = parts[0].lower() if parts else "text/plain"
+    parts = [part.strip() for part in header.split(";")]
+    media_type = parts[0].lower() or "text/plain"
     is_base64 = any(part.lower() == "base64" for part in parts[1:])
     try:
-        data = base64.b64decode(payload, validate=False) if is_base64 else unquote_to_bytes(payload)
+        data = base64.b64decode(unquote_to_bytes(payload), validate=False) if is_base64 else unquote_to_bytes(payload)
     except (binascii.Error, ValueError):
         return None
     return media_type, data
@@ -407,6 +431,7 @@ def _convert_definition_to_structured_content(
     *,
     enable_audio: bool,
     asset_prefix: str,
+    reserved_asset_paths: Optional[set[str]] = None,
 ) -> tuple[dict[str, object], List[str], Dict[str, bytes]]:
     value = _RE_INTERNAL_LINK.sub(r"href=\1bword://", definition)
     value = _rewrite_relative_resources(value, asset_prefix)
@@ -414,7 +439,8 @@ def _convert_definition_to_structured_content(
     parser = _MdxHtmlToStructuredContentParser(
         asset_prefix=asset_prefix,
         enable_audio=enable_audio,
-        embedded_assets=_EmbeddedAssetCollector(asset_prefix=asset_prefix, assets=embedded_assets),
+        embedded_assets=_EmbeddedAssetCollector(asset_prefix=asset_prefix, assets=embedded_assets,
+                                               reserved_paths=reserved_asset_paths),
     )
     parser.feed(value)
     parser.close()
@@ -445,16 +471,43 @@ def _decode_stylesheet_asset(raw_bytes: bytes) -> Optional[str]:
     if not raw_bytes:
         return None
 
-    for encoding in ("utf-8-sig", "utf-16", "utf-16-le", "utf-16-be"):
+    def decode(encoding: str) -> Optional[str]:
         try:
-            value = raw_bytes.decode(encoding)
+            value = raw_bytes.decode(encoding).lstrip("\ufeff")
+        except (UnicodeError, LookupError):
+            return None
+        value = re.sub(r'^@charset[\t\n\f\r ]+"[^"\r\n]+"[\t\n\f\r ]*;[\t\n\f\r ]*',
+                       "", value, count=1, flags=re.IGNORECASE).strip()
+        return value if value and "\x00" not in value else None
+
+    if raw_bytes.startswith(b"\xef\xbb\xbf"):
+        return decode("utf-8-sig")
+    if raw_bytes.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return decode("utf-16")
+    declared = re.match(rb'^@charset[\t\n\f\r ]+"([^"\r\n]+)"[\t\n\f\r ]*;',
+                        raw_bytes[:128], flags=re.IGNORECASE)
+    if declared is not None:
+        try:
+            encoding = declared.group(1).decode("ascii")
         except UnicodeDecodeError:
-            continue
-        if "\x00" in value:
-            continue
-        value = value.strip()
-        if value:
-            return value
+            return None
+        return decode(encoding)
+
+    value = decode("utf-8")
+    if value is not None:
+        return value
+    # Match the browser's bounded ASCII-NUL pattern; do not guess UTF-16
+    # merely because arbitrary single-byte data happens to decode that way.
+    pair_count = min(len(raw_bytes) // 2, 32)
+    if pair_count < 2:
+        return None
+    even_zeros = raw_bytes[:pair_count * 2:2].count(0)
+    odd_zeros = raw_bytes[1:pair_count * 2:2].count(0)
+    threshold = max(2, (pair_count + 2) // 3)
+    if odd_zeros >= threshold and even_zeros == 0:
+        return decode("utf-16-le")
+    if even_zeros >= threshold and odd_zeros == 0:
+        return decode("utf-16-be")
     return None
 
 
@@ -540,7 +593,7 @@ def _convert_inline_style(style_text: Optional[str], asset_prefix: str) -> Optio
         value = raw_value.strip()
         if not property_name or not value:
             continue
-        if "url(" in value:
+        if "url(" in value.lower():
             value = _rewrite_css_asset_urls(value, asset_prefix, None)
 
         if property_name in {"text-decoration", "text-decoration-line"}:
@@ -564,6 +617,25 @@ def _convert_inline_style(style_text: Optional[str], asset_prefix: str) -> Optio
         style[structured_property_name] = value
 
     return style or None
+
+
+def _convert_legacy_font_size(value: Optional[str]) -> Optional[str]:
+    """Translate HTML's legacy font-size hint to a CSS keyword."""
+    if value is None:
+        return None
+    match = re.match(r"[\t\n\f\r ]*([+-]?)([0-9]+)", value)
+    if match is None:
+        return None
+    # Values above seven clamp to an endpoint, including signed relative sizes.
+    # Bound conversion so arbitrary-length digit strings cannot trip int's limit.
+    digits = match.group(2).lstrip("0") or "0"
+    size = int(digits) if len(digits) == 1 else 7
+    if match.group(1) == "+":
+        size += 3
+    elif match.group(1) == "-":
+        size = 3 - size
+    sizes = ("x-small", "small", "medium", "large", "x-large", "xx-large", "xxx-large")
+    return sizes[max(1, min(7, size)) - 1]
 
 
 def _build_structured_data(original_tag: str, attrs: dict[str, str]) -> Optional[dict[str, str]]:
@@ -594,11 +666,11 @@ def _convert_html_link_href(
     value = href.strip()
     lowered = value.lower()
     if lowered.startswith("entry://"):
-        return f"?query={value[8:]}"
+        return f"?query={quote(unquote(value[8:]), safe='')}"
     if lowered.startswith("bword://"):
-        return f"?query={value[8:]}"
+        return f"?query={quote(unquote(value[8:]), safe='')}"
     if lowered.startswith(("d:", "x:")):
-        return f"?query={value[2:]}"
+        return f"?query={quote(unquote(value[2:]), safe='')}"
     if lowered.startswith("sound://"):
         sound_path = _prefix_relative_asset_path(value[8:], asset_prefix)
         if enable_audio and sound_path is not None:
@@ -733,7 +805,7 @@ def _create_structured_element(
             element["open"] = True
     elif normalized_tag == "font":
         font_color = attrs.get("color")
-        font_size = attrs.get("size")
+        font_size = _convert_legacy_font_size(attrs.get("size"))
         font_face = attrs.get("face")
         extra_style: dict[str, object] = {}
         if font_color:
@@ -742,7 +814,7 @@ def _create_structured_element(
             extra_style["fontSize"] = font_size
         if font_face:
             extra_style["fontFamily"] = font_face
-        merged_style = _merge_structured_styles(element.get("style"), extra_style)
+        merged_style = _merge_structured_styles(extra_style, element.get("style"))
         if merged_style is not None:
             element["style"] = merged_style
 
@@ -780,6 +852,8 @@ class _MdxHtmlToStructuredContentParser(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         normalized_tag = tag.lower()
+        if not any(context.tag == normalized_tag for context in reversed(self._stack)):
+            return
         while self._stack:
             context = self._stack.pop()
             if context.mode == "style" and context.text_parts is not None:
@@ -1079,6 +1153,54 @@ def _migrate_css_selector(selector: str, glossary_root_selector: str) -> str:
     return re.sub(r"\s+", " ", migrated_selector).strip()
 
 
+def _scope_css_selector_subject(selector: str, glossary_root_selector: str) -> str:
+    """Guard the matched element within its definition without adding specificity."""
+    parts = _split_selector_by_combinators(selector)
+    subject_index = len(parts) - 1
+    while subject_index >= 0:
+        part = parts[subject_index]
+        if part.strip() and part not in {">", "+", "~"}:
+            break
+        subject_index -= 1
+    if subject_index < 0:
+        return selector
+    subject = parts[subject_index]
+    insertion_index = len(subject)
+    quote_char = ""
+    bracket_depth = 0
+    paren_depth = 0
+    index = 0
+    while index < len(subject):
+        char = subject[index]
+        if char == "\\":
+            index += 2
+            continue
+        if quote_char:
+            if char == quote_char:
+                quote_char = ""
+        elif char in ("'", '"'):
+            quote_char = char
+        elif char == "[":
+            bracket_depth += 1
+        elif char == "]":
+            bracket_depth = max(0, bracket_depth - 1)
+        elif char == "(":
+            paren_depth += 1
+        elif char == ")":
+            paren_depth = max(0, paren_depth - 1)
+        elif char == ":" and bracket_depth == 0 and paren_depth == 0:
+            pseudo, _ = _read_css_identifier(subject, index + 1)
+            if subject[index:index + 2] == "::" or (pseudo and pseudo.lower() in {
+                "before", "after", "first-line", "first-letter",
+            }):
+                insertion_index = index
+                break
+        index += 1
+    guard = f":where({glossary_root_selector}, {glossary_root_selector} *)"
+    parts[subject_index] = subject[:insertion_index] + guard + subject[insertion_index:]
+    return "".join(parts)
+
+
 def _find_matching_css_brace(stylesheet: str, block_start_index: int) -> int:
     depth = 0
     quote_char = ""
@@ -1113,7 +1235,9 @@ def _find_matching_css_brace(stylesheet: str, block_start_index: int) -> int:
     return len(stylesheet) - 1
 
 
-def _rewrite_css_rule_selectors(stylesheet: str, glossary_root_selector: str) -> str:
+def _rewrite_css_rule_selectors(
+    stylesheet: str, glossary_root_selector: str, *, scope_selectors: bool = False,
+) -> str:
     parts: List[str] = []
     index = 0
     while index < len(stylesheet):
@@ -1180,13 +1304,15 @@ def _rewrite_css_rule_selectors(stylesheet: str, glossary_root_selector: str) ->
                 if stripped_prelude.startswith("@"):
                     at_rule_name = stripped_prelude[1:].split(None, 1)[0].lower()
                     if at_rule_name in {"media", "supports", "layer", "container", "document"}:
-                        body = _rewrite_css_rule_selectors(body, glossary_root_selector)
+                        body = _rewrite_css_rule_selectors(body, glossary_root_selector, scope_selectors=scope_selectors)
                     parts.append(f"{prelude}{{{body}}}")
                 else:
                     migrated_selectors: List[str] = []
                     seen_selectors = set()
                     for selector in _split_css_selector_list(prelude):
                         migrated_selector = _migrate_css_selector(selector, glossary_root_selector)
+                        if scope_selectors and migrated_selector:
+                            migrated_selector = _scope_css_selector_subject(migrated_selector, glossary_root_selector)
                         if not migrated_selector or migrated_selector in seen_selectors:
                             continue
                         seen_selectors.add(migrated_selector)
@@ -1211,6 +1337,8 @@ def _rewrite_css_asset_urls(
     source_asset_path: Optional[str],
 ) -> str:
     def replace(match: re.Match[str]) -> str:
+        if match.group("path") is None:
+            return match.group(0)
         raw_path = match.group("path").strip()
         prefixed_path = _prefix_relative_asset_path(raw_path, asset_prefix, source_asset_path)
         if prefixed_path is None:
@@ -1224,15 +1352,18 @@ def _migrate_stylesheet_for_yomitan(
     stylesheet: str,
     asset_prefix: str,
     source_asset_path: Optional[str],
+    *,
+    glossary_root_selector: str = _STRUCTURED_ROOT_SELECTOR,
+    scope_selectors: bool = False,
 ) -> str:
     migrated = _rewrite_css_asset_urls(stylesheet, asset_prefix, source_asset_path)
-    return _rewrite_css_rule_selectors(migrated, _STRUCTURED_ROOT_SELECTOR)
+    return _rewrite_css_rule_selectors(migrated, glossary_root_selector, scope_selectors=scope_selectors)
 
 
 def _build_root_stylesheet(
     assets: Dict[str, bytes],
     asset_prefix: str,
-    inline_stylesheets: Optional[List[tuple[str, str]]] = None,
+    inline_stylesheets: Optional[List[tuple[str, str, str]]] = None,
 ) -> Optional[str]:
     css_sections: List[str] = []
     prefix_length = len(asset_prefix)
@@ -1246,8 +1377,12 @@ def _build_root_stylesheet(
         stylesheet = _migrate_stylesheet_for_yomitan(stylesheet, asset_prefix, source_name)
         css_sections.append(f"/* Source: {source_name} */\n{stylesheet}")
 
-    for source_name, stylesheet in inline_stylesheets or []:
-        migrated_stylesheet = _migrate_stylesheet_for_yomitan(stylesheet, asset_prefix, None)
+    for source_name, stylesheet, scope_class in inline_stylesheets or []:
+        scope_selector = f'[data-sc-class~="{scope_class}"]'
+        migrated_stylesheet = _migrate_stylesheet_for_yomitan(
+            stylesheet, asset_prefix, None,
+            glossary_root_selector=scope_selector, scope_selectors=True,
+        )
         css_sections.append(f"/* Source: {source_name} */\n{migrated_stylesheet}")
 
     if not css_sections:
@@ -1270,9 +1405,11 @@ def convert_mdx_to_yomitan_zip(
     description = _extract_description(mdx, options.description_override)
     mdd_paths = explicit_mdds if explicit_mdds is not None else _discover_mdds(mdx_path)
     assets = _iter_assets(mdd_paths, options.asset_prefix) if options.include_assets else {}
-    inline_stylesheets: List[tuple[str, str]] = []
+    reserved_asset_paths = {path.casefold() for path in assets} if assets else None
+    inline_stylesheets: List[tuple[str, str, str]] = []
 
     sequence = 0
+    has_source_entries = False
     bank_index = 1
     bank: List[list] = []
 
@@ -1287,6 +1424,7 @@ def convert_mdx_to_yomitan_zip(
         archive.writestr("index.json", json.dumps(index, ensure_ascii=False))
 
         for raw_term, raw_definition in mdx.items():
+            has_source_entries = True
             term = raw_term.decode("utf-8", errors="ignore").strip()
             definition = raw_definition.decode("utf-8", errors="ignore").strip()
             if not term or definition.startswith("@@@LINK="):
@@ -1296,12 +1434,16 @@ def convert_mdx_to_yomitan_zip(
                 definition,
                 enable_audio=options.enable_audio,
                 asset_prefix=options.asset_prefix,
+                reserved_asset_paths=reserved_asset_paths,
             )
             for archive_path, data in definition_assets.items():
                 assets.setdefault(archive_path, data)
+            scope_class = f"mdict-yomitan-entry-{sequence}"
+            if definition_inline_stylesheets:
+                fixed_definition["content"]["data"]["class"] += f" {scope_class}"
             for stylesheet_index, stylesheet in enumerate(definition_inline_stylesheets, 1):
-                inline_stylesheets.append((f"inline/{term}-{stylesheet_index}.css", stylesheet))
-            expressions = [term, *redirects.get(term, [])]
+                inline_stylesheets.append((f"inline/{term}-{stylesheet_index}.css", stylesheet, scope_class))
+            expressions = _get_redirect_expressions(term, redirects)
             for expression in expressions:
                 bank.append([
                     expression,
@@ -1322,6 +1464,9 @@ def convert_mdx_to_yomitan_zip(
                 )
                 bank.clear()
                 bank_index += 1
+
+        if has_source_entries and sequence == 0:
+            raise ValueError("MDX import failed: no usable non-redirect entries were found")
 
         root_stylesheet = _build_root_stylesheet(assets, options.asset_prefix, inline_stylesheets)
         if bank:
@@ -1375,3 +1520,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
