@@ -40,8 +40,10 @@ _RE_RELATIVE_RESOURCE = re.compile(
     r'(?P<prefix>\b(?:src|href)=["\'])(?P<path>\.?/?[^"\']+)(?P<suffix>["\'])',
     re.IGNORECASE,
 )
+# Consume literal regions before matching URL functions; only URLs set path.
 _RE_CSS_URL = re.compile(
-    r'url\(\s*(?P<quote>["\']?)(?P<path>.*?)(?P=quote)\s*\)',
+    r'/\*.*?(?:\*/|$)|"(?:\\.|[^"\\])*(?:"|$)|\'(?:\\.|[^\'\\])*(?:\'|$)|'
+    r'(?<![-\w])(?<![^\x00-\x7f])url\(\s*(?P<quote>["\']?)(?P<path>.*?)(?P=quote)\s*\)',
     re.IGNORECASE | re.DOTALL,
 )
 _RE_CSS_IDENTIFIER = re.compile(r"-?(?:[A-Za-z_]|[^\x00-\x7F])(?:[A-Za-z0-9_-]|[^\x00-\x7F])*")
@@ -1211,6 +1213,8 @@ def _rewrite_css_asset_urls(
     source_asset_path: Optional[str],
 ) -> str:
     def replace(match: re.Match[str]) -> str:
+        if match.group("path") is None:
+            return match.group(0)
         raw_path = match.group("path").strip()
         prefixed_path = _prefix_relative_asset_path(raw_path, asset_prefix, source_asset_path)
         if prefixed_path is None:

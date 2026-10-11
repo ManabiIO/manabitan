@@ -87,6 +87,22 @@ def _register_mdd(path: Path, items: Iterable[Tuple[bytes, bytes]]) -> None:
 
 
 class MdxToYomitanTests(unittest.TestCase):
+    def test_css_url_rewrite_preserves_literals_and_identifier_boundaries(self) -> None:
+        for literal in [
+            'content: "url(example.png)"',
+            r'''content: 'say \'url(example.png)\''; /* url(comment.png) */''',
+            'custom: myurl(example.png); custom: 変url(example.png)',
+        ]:
+            with self.subTest(literal=literal):
+                css = literal + "; background: URL(images/real.png)"
+                expected = literal + '; background: url("mdict-media/images/real.png")'
+                self.assertEqual(mdx_to_yomitan._rewrite_css_asset_urls(css, "mdict-media/", None), expected)
+
+    def test_css_url_rewrite_preserves_unterminated_literal_regions(self) -> None:
+        for css in ['/* url(comment.png)', 'content: "url(literal.png)']:
+            with self.subTest(css=css):
+                self.assertEqual(mdx_to_yomitan._rewrite_css_asset_urls(css, "mdict-media/", None), css)
+
     def test_discover_mdds_uses_numbered_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
