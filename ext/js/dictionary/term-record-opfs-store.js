@@ -5910,6 +5910,9 @@ export class TermRecordOpfsStore {
                     indexFileName,
                     error: error instanceof Error ? error.message : String(error),
                 });
+                // An incomplete scan must not let startup persist a missing-data
+                // verdict for a container whose recovery failed transiently.
+                throw error;
             }
         }
     }
