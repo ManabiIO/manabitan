@@ -226,28 +226,34 @@ class HostState:
         companion_uploads = self._get_companion_mdd_uploads(mdx_upload_id, mdd_upload_ids)
         job_id = f"j{self._next_job_id}"
         self._next_job_id += 1
-        staged_mdx_path = self._prepare_conversion_workspace(job_id, mdx_upload, companion_uploads)
-        archive_file_name = f"{staged_mdx_path.stem}.zip"
-        archive_path = self._tmpdir / "jobs" / job_id / archive_file_name
-        convert_options = ConvertOptions(
-            title_override=options.get("titleOverride") or None,
-            description_override=options.get("descriptionOverride") or None,
-            revision=options.get("revision") or "mdx import",
-            term_bank_size=int(options.get("termBankSize") or 10_000),
-            enable_audio=bool(options.get("enableAudio")),
-            include_assets=bool(options.get("includeAssets", True)),
-        )
-        convert_mdx_to_yomitan_zip(
-            staged_mdx_path,
-            archive_path,
-            options=convert_options,
-            explicit_mdds=None,
-        )
-        self._jobs[job_id] = Job(
-            archive_path=archive_path,
-            archive_file_name=archive_file_name,
-            total_bytes=archive_path.stat().st_size,
-        )
+        workspace = self._tmpdir / "jobs" / job_id
+        try:
+            staged_mdx_path = self._prepare_conversion_workspace(job_id, mdx_upload, companion_uploads)
+            archive_file_name = f"{staged_mdx_path.stem}.zip"
+            archive_path = self._tmpdir / "jobs" / job_id / archive_file_name
+            convert_options = ConvertOptions(
+                title_override=options.get("titleOverride") or None,
+                description_override=options.get("descriptionOverride") or None,
+                revision=options.get("revision") or "mdx import",
+                term_bank_size=int(options.get("termBankSize") or 10_000),
+                enable_audio=bool(options.get("enableAudio")),
+                include_assets=bool(options.get("includeAssets", True)),
+            )
+            convert_mdx_to_yomitan_zip(
+                staged_mdx_path,
+                archive_path,
+                options=convert_options,
+                explicit_mdds=None,
+            )
+            self._jobs[job_id] = Job(
+                archive_path=archive_path,
+                archive_file_name=archive_file_name,
+                total_bytes=archive_path.stat().st_size,
+            )
+        except Exception:
+            # A failed job is never published; release only its staged copies.
+            shutil.rmtree(workspace, ignore_errors=True)
+            raise
         return job_id
 
     def download_begin(self, job_id: str, _chunk_bytes: int) -> Dict[str, Any]:
