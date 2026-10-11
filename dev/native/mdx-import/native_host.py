@@ -126,10 +126,19 @@ def read_message() -> Dict[str, Any]:
     return value
 
 
+def _write_all(data: bytes) -> None:
+    remaining = memoryview(data)
+    while remaining:
+        written = os.write(1, remaining)
+        if written == 0:
+            raise EOFError("native messaging pipe closed during write")
+        remaining = remaining[written:]
+
+
 def write_message(message: Dict[str, Any]) -> None:
     payload = json.dumps(message, separators=(",", ":")).encode("utf-8")
-    os.write(1, struct.pack("<I", len(payload)))
-    os.write(1, payload)
+    _write_all(struct.pack("<I", len(payload)))
+    _write_all(payload)
 
 
 @dataclass

@@ -13,6 +13,7 @@ import types
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 from typing import Dict, Iterable, Iterator, List, Tuple
 from urllib.parse import unquote
 
@@ -373,6 +374,63 @@ class MdxToYomitanTests(unittest.TestCase):
 
 
 class NativeHostTests(unittest.TestCase):
+    def test_framed_read_preserves_fragmented_message(self) -> None:
+        message = {"sequence": 3, "action": "get_version", "params": {}}
+        payload = json.dumps(message).encode("utf-8")
+        frame = native_host.struct.pack("<I", len(payload)) + payload
+        position = 0
+
+        def short_read(fd: int, length: int) -> bytes:
+            nonlocal position
+            self.assertEqual(fd, 0)
+            chunk = frame[position:position + min(length, 2)]
+            position += len(chunk)
+            return chunk
+
+        with patch.object(native_host.os, "read", side_effect=short_read):
+            self.assertEqual(native_host.read_message(), message)
+        self.assertEqual(position, len(frame))
+
+    def test_framed_read_rejects_truncated_frame(self) -> None:
+        for chunks in [[b"\x01", b""], [native_host.struct.pack("<I", 2), b"{", b""]]:
+            with self.subTest(chunks=chunks), patch.object(native_host.os, "read", side_effect=chunks):
+                with self.assertRaises(EOFError):
+                    native_host.read_message()
+
+    def test_framed_write_preserves_short_writes(self) -> None:
+        message = {"sequence": 7, "data": {"text": "辞書"}}
+        output = bytearray()
+
+        def short_write(fd: int, data: bytes) -> int:
+            self.assertEqual(fd, 1)
+            count = min(2, len(data))
+            output.extend(data[:count])
+            return count
+
+        with patch.object(native_host.os, "write", side_effect=short_write):
+            native_host.write_message(message)
+        length = native_host.struct.unpack("<I", output[:4])[0]
+        self.assertEqual(length, len(output) - 4)
+        self.assertEqual(json.loads(output[4:]), message)
+
+    def test_framed_write_stops_on_disconnect(self) -> None:
+        for outcome in [0, BrokenPipeError("disconnected")]:
+            with self.subTest(outcome=outcome):
+                writer = {"return_value": outcome} if outcome == 0 else {"side_effect": outcome}
+                with patch.object(native_host.os, "write", **writer) as write:
+                    with self.assertRaises((BrokenPipeError, EOFError)):
+                        native_host.write_message({"sequence": 1, "data": True})
+                    self.assertEqual(write.call_count, 1)
+
+    def test_framed_write_disconnect_cleans_host_state(self) -> None:
+        state = native_host.HostState()
+        with patch.object(native_host, "HostState", return_value=state), patch.object(
+            native_host, "read_message", return_value={"sequence": 1, "action": "get_version", "params": {}}
+        ), patch.object(native_host.os, "write", side_effect=BrokenPipeError("disconnected")):
+            with self.assertRaises(BrokenPipeError):
+                native_host.main()
+        self.assertFalse(state._tmpdir.exists())
+
     def test_classify_conversion_errors_returns_structured_codes(self) -> None:
         encrypted = native_host._classify_conversion_error(RuntimeError("encrypted mdx payload"))
         unsupported = native_host._classify_conversion_error(RuntimeError("unsupported compression: lzo"))
