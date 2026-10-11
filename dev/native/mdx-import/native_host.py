@@ -241,7 +241,10 @@ class HostState:
             staged_mdx_path,
             archive_path,
             options=convert_options,
-            explicit_mdds=None,
+            explicit_mdds=[
+                staged_mdx_path.parent / Path(_normalize_logical_file_name(upload.file_name)).name
+                for upload in companion_uploads
+            ],
         )
         self._jobs[job_id] = Job(
             archive_path=archive_path,

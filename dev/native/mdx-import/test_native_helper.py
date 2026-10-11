@@ -444,7 +444,7 @@ class NativeHostTests(unittest.TestCase):
             self.assertEqual(len(calls), 1)
             call = calls[0]
             options = call["options"]
-            self.assertEqual(call["explicit_mdds"], None)
+            self.assertEqual(call["explicit_mdds"], [call["mdx_path"].parent / "fixture.mdd"])
             self.assertEqual(call["workspace_files"], ["fixture.mdd", "fixture.mdx"])
             self.assertEqual(call["mdx_bytes"], b"MDX")
             self.assertEqual(call["mdd_bytes"], b"MDD!")
@@ -457,6 +457,32 @@ class NativeHostTests(unittest.TestCase):
             self.assertGreater(download_info["totalBytes"], 0)
             self.assertTrue(state.download_end(job_id))
             self.assertFalse((state._tmpdir / "jobs" / "j1").exists())
+        finally:
+            native_host.convert_mdx_to_yomitan_zip = original_convert
+            state.cleanup()
+
+    def test_convert_preserves_explicit_noncontiguous_mdd_selection(self) -> None:
+        state = native_host.HostState()
+        original_convert = native_host.convert_mdx_to_yomitan_zip
+        try:
+            mdx_id = state.begin_upload("fixture.mdx", 3)["uploadId"]
+            first_id = state.begin_upload("fixture.1.mdd", 1)["uploadId"]
+            third_id = state.begin_upload("fixture.3.mdd", 1)["uploadId"]
+            for upload_id, data in [(mdx_id, b"MDX"), (first_id, b"1"), (third_id, b"3")]:
+                state.upload_chunk(upload_id, 0, base64.b64encode(data).decode("ascii"))
+                state.finish_upload(upload_id)
+
+            def register_staged_readers(mdx_path: Path, out_zip_path: Path, *, options: object, explicit_mdds: object = None) -> Path:
+                _register_mdx(mdx_path, header={b"Title": b"Selected resources"}, items=[("entry", "definition")])
+                for volume in [1, 3]:
+                    _register_mdd(mdx_path.parent / f"fixture.{volume}.mdd", [(f"volume-{volume}.bin".encode(), bytes([volume]))])
+                return original_convert(mdx_path, out_zip_path, options=options, explicit_mdds=explicit_mdds)
+
+            native_host.convert_mdx_to_yomitan_zip = register_staged_readers
+            job_id = state.convert(mdx_id, [third_id, first_id], {})
+            with zipfile.ZipFile(state._jobs[job_id].archive_path) as archive:
+                self.assertEqual(archive.read("mdict-media/volume-1.bin"), bytes([1]))
+                self.assertEqual(archive.read("mdict-media/volume-3.bin"), bytes([3]))
         finally:
             native_host.convert_mdx_to_yomitan_zip = original_convert
             state.cleanup()
