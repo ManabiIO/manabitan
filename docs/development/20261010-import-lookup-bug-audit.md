@@ -38,18 +38,23 @@ restores it on subsequent startup. Successful later descriptor reconstruction
 therefore does not by itself remove the persisted reimport requirement.
 
 The regression uses existing fake OPFS handles and a single actual term row.
-It executes the real database cleanup and health callback with a tiny SQL
-adapter, in the same scan-before-cleanup order as startup. Before the fix the
+It now executes public `DictionaryDatabase.prepare()` and
+`TermRecordOpfsStore.prepare()`, real failure cleanup, database integrity cleanup
+and the health callback with fake OPFS and a tiny SQL adapter. SQLite connection
+opening, unrelated migration/legacy-import cleanup and zstd worker initialization
+are mocked. Before the fix the
 descriptor-write case records the health insertion bind values
 `["Retry descriptor recovery", "Retry descriptor recovery", "Dictionary record data is missing"]`.
 The container-stat and header-read cases also incorrectly fulfill the scan
 instead of reporting their errors. All three regression cases fail on the
 unmodified develop source.
 
-The minimal fix rethrows the original recovery error after existing diagnostics.
-An incomplete scan can no longer reach startup's missing-data inference. The
-write-failure regression also retries the same store, verifies the rebuilt
-descriptor signature and successful lookup, and asserts no terminal health
+The fix rethrows recovery I/O errors after existing diagnostics and explicitly
+skips malformed or unsafe header metadata. An incomplete I/O scan can no longer
+reach startup's missing-data inference. The write-failure regression retries
+public `prepare()` on the same database and record store, verifies that failed
+startup closes its connection and clears `_isOpening`/`_openingPromise`, and
+checks successful descriptor reconstruction and lookup with no terminal health
 insertions. Two additional tiny cases cover a transient authoritative-container
 stat or header-read failure, unchanged authoritative bytes, and successful
 same-store retry. Existing neighboring cases retain successful descriptor
@@ -57,24 +62,56 @@ reconstruction, retryable descriptor stat failure, and the genuine both-files-
 missing reimport verdict. All fixtures are constructed in memory using the
 existing test helpers; no external fixture or dictionary download is needed.
 
+### Review correction: permanent corruption stays dictionary-local
+
+Review identified that the initial blanket throw also propagated the deterministic
+`RangeError` from `readSafeU64Le(header, 8)` when descriptor-length metadata
+exceeded the safe integer range. A new two-dictionary public-prepare regression
+failed on PR head `732cce382`: the corrupt orphan prevented preparation despite
+the healthy neighbor. Bad-magic and truncated-header variants already passed.
+Explicit header-length and safe-integer checks now skip invalid metadata just
+like the existing magic/count/length checks, while rejected stat/read/write
+operations still propagate. The corrupt dictionary receives the existing local
+reimport verdict; healthy-neighbor lookup and public dictionary-info listing
+remain available in all three corruption cases. No files are deleted by this
+new validation.
+
+`DictionaryDatabase._prepareOnce` (794–856) clears `_openingPromise` in `finally`;
+`_cleanupAfterPrepareFailure` (9375–9401) ends sessions and releases/nulls the
+connection through `_releaseRuntimeConnection` (920–942). The public retry test
+exercises those actual methods rather than only repeating a private shard scan.
+At the backend boundary, `_ensureDictionaryDatabaseReady` (5078–5101) also clears
+its promise in `finally`, and `Backend.prepare` (381–408) resets its preparation
+promise after rejection. There is no retained rejected database promise in the
+tested path. However, startup awaits readiness (backend line 863), and extension
+message dispatch is gated by backend preparation (1032–1043), so permanent
+metadata failures must not escape into global startup: otherwise dictionary
+listing/removal requests can be blocked too. These UI implications are source
+traces; no browser UI was run.
+
 ### Performance and availability implications
 
-The change adds only an exceptional-path throw: no healthy-path allocation,
-comparison, additional OPFS/SQLite I/O, streaming change, batching change,
+The change adds an exceptional-path throw plus scalar length/safe-integer checks
+only while recovering a missing/empty descriptor. It adds no I/O, retained data,
+new healthy-lookup allocation, streaming change, batching change,
 compression/dedup change or new retained data. It stops subsequent startup work
 on the failed scan rather than publishing a falsely complete scan. A transient
 recovery failure now rejects startup, potentially delaying other dictionary
 availability until a later retry. No automatic retry policy is added. This is
 an intentional availability tradeoff to avoid a durable false corruption
-verdict. Same-store retry is exercised; no benchmark supports a claim of zero
+verdict. Same-database public preparation retry is exercised; no benchmark supports a claim of zero
 performance regression.
 
 ## Actual validation
 
-- Baseline: the three focused new/strengthened cases failed (162 other cases
-  skipped); the write case demonstrated the false persisted health insertion.
-- Fixed: six focused cases passed, 159 skipped, with Vitest 3.0.9 and existing
-  Node 22.22.0. The final run spent 34 ms in those cases, 1.75 s total.
+- Develop baseline: the three focused cases failed again using the strengthened
+  public preparation regression (165 other cases skipped); the write case
+  demonstrated the false persisted health insertion.
+- Review baseline: unsafe-length orphan preparation failed at `732cce382`, while
+  the public same-database transient retry, bad-magic and truncated cases passed
+  (one failure, three passes, 164 skipped).
+- Fixed: nine focused cases passed, 159 skipped, with Vitest 3.0.9 and existing
+  Node 22.22.0. Only this focused selection was run.
 - Scoped ESLint for the source and test passed. Its config emitted an existing
   CommonJS-in-ESM warning from the excluded MDX pako vendor file; that file was
   not changed. `git diff --check` passed.
@@ -83,7 +120,7 @@ Reproducible focused command:
 
 ```sh
 node node_modules/vitest/vitest.mjs run test/term-record-opfs-store.test.js \
-  -t 'retries descriptor recovery after|retries missing descriptor recovery after|recreates a missing descriptor|retries a transient descriptor stat|requires reimport when both descriptor' \
+  -t 'isolates a .* orphan container|retries descriptor recovery after|retries missing descriptor recovery after|recreates a missing descriptor|retries a transient descriptor stat|requires reimport when both descriptor' \
   --maxWorkers=1 --minWorkers=1 --reporter=dot
 ```
 
@@ -91,7 +128,8 @@ Existing dependency packages and generated libraries were reused through local
 links; nothing was installed or rebuilt. No full tests, builds, native builds,
 browser/e2e/soak suites, benchmarks, user database or large dictionaries were
 used. The SQL adapter records the real health callback's write but does not
-exercise SQLite persistence or the full public browser startup. Real OPFS,
+exercise SQLite persistence or browser startup. Public database/record-store
+preparation and same-instance failure cleanup/retry are covered with adapters. Real OPFS,
 restart behavior and the broad runtime remain uncovered by this bounded check.
 
 CI inspection found broad PR-triggered tests/builds/e2e in

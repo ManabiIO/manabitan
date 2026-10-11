@@ -5873,11 +5873,15 @@ export class TermRecordOpfsStore {
                 const indexFile = await indexFileHandle.getFile();
                 if (indexFile.size < LOOKUP_INDEX_FILE_HEADER_BYTES) { continue; }
                 const header = await this._readFileRange(indexFile, 0, LOOKUP_INDEX_FILE_HEADER_BYTES);
+                if (header.byteLength !== LOOKUP_INDEX_FILE_HEADER_BYTES) { continue; }
                 if (this._textDecoder.decode(header.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
                     continue;
                 }
                 const view = new DataView(header.buffer, header.byteOffset, header.byteLength);
-                const expectedDescriptorLength = readSafeU64Le(view, 8);
+                // Invalid metadata is dictionary-local; only failed I/O should
+                // leave this scan incomplete and block startup verification.
+                const expectedDescriptorLength = view.getUint32(8, true) + (view.getUint32(12, true) * U32_RANGE);
+                if (!Number.isSafeInteger(expectedDescriptorLength)) { continue; }
                 if (view.getUint32(16, true) === 0 || view.getUint32(20, true) === 0) { continue; }
                 const generationId = new Uint8Array(header.subarray(24, LOOKUP_INDEX_FILE_HEADER_BYTES));
                 const descriptor = this._createBinaryHeader(shardInfo.contentDictName, generationId);
