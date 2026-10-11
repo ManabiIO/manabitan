@@ -731,7 +731,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(singleDictionaryName, singleContentDictName);
             if (state !== null) {
-                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
+                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords);
             }
             return;
         }
@@ -739,7 +739,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
+            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords);
         }
     }
 
@@ -1250,8 +1250,8 @@ export class TermRecordOpfsStore {
      * @param {TermRecordShardState} state
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
      * @param {number} firstId
-     * @param {number[]} contentOffsets
-     * @param {number[]} contentLengths
+     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {string} [contentDictName='raw']
      * @returns {Promise<{encodeMs: number, appendWriteMs: number}>}

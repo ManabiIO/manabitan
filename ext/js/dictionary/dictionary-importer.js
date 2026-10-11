@@ -212,6 +212,7 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
 
     /**
      * @param {number} h1
+     * @param {number} h2
      * @param {number} byteLength
      * @returns {number|number[]|undefined}
      */
@@ -1024,7 +1025,7 @@ export class DictionaryImporter {
         }
         if (isStagedDictionaryUpdate) {
             summary.transientUpdateStage = 'update-staging';
-            summary.updateSessionToken = details.updateSessionToken.trim();
+            summary.updateSessionToken = typeof details.updateSessionToken === 'string' ? details.updateSessionToken.trim() : '';
         }
         const dictionarySummaryPrimaryKey = await dictionaryDatabase.addWithResult('dictionaries', summary);
         let styles = '';
@@ -4111,12 +4112,12 @@ export class DictionaryImporter {
                 dictionaryTotalRows,
                 expressionBytesList: useFullChunkArrays ? chunkExpressionBytes : chunkExpressionBytes.slice(0, streamedRowCount),
                 readingBytesList: useFullChunkArrays ? chunkReadingBytes : chunkReadingBytes.slice(0, streamedRowCount),
-                readingEqualsExpressionList: useFullChunkArrays ? chunkReadingEqualsExpression : chunkReadingEqualsExpression.subarray(0, streamedRowCount),
-                scoreList: useFullChunkArrays ? chunkScores : chunkScores.subarray(0, streamedRowCount),
-                sequenceList: useFullChunkArrays ? chunkSequences : chunkSequences.subarray(0, streamedRowCount),
+                readingEqualsExpressionList: useFullChunkArrays ? chunkReadingEqualsExpression : (Array.isArray(chunkReadingEqualsExpression) ? chunkReadingEqualsExpression.slice(0, streamedRowCount) : chunkReadingEqualsExpression.subarray(0, streamedRowCount)),
+                scoreList: useFullChunkArrays ? chunkScores : (Array.isArray(chunkScores) ? chunkScores.slice(0, streamedRowCount) : chunkScores.subarray(0, streamedRowCount)),
+                sequenceList: useFullChunkArrays ? chunkSequences : (Array.isArray(chunkSequences) ? chunkSequences.slice(0, streamedRowCount) : chunkSequences.subarray(0, streamedRowCount)),
                 contentBytesList: useFullChunkArrays ? chunkContentBytes : chunkContentBytes.slice(0, streamedRowCount),
-                contentHash1List: useFullChunkArrays ? chunkContentHash1 : chunkContentHash1.subarray(0, streamedRowCount),
-                contentHash2List: useFullChunkArrays ? chunkContentHash2 : chunkContentHash2.subarray(0, streamedRowCount),
+                contentHash1List: useFullChunkArrays ? chunkContentHash1 : (Array.isArray(chunkContentHash1) ? chunkContentHash1.slice(0, streamedRowCount) : chunkContentHash1.subarray(0, streamedRowCount)),
+                contentHash2List: useFullChunkArrays ? chunkContentHash2 : (Array.isArray(chunkContentHash2) ? chunkContentHash2.slice(0, streamedRowCount) : chunkContentHash2.subarray(0, streamedRowCount)),
                 contentDictNameList: chunkContentDictNames === null ? null : (
                     useFullChunkArrays ? chunkContentDictNames : chunkContentDictNames.slice(0, streamedRowCount)
                 ),
