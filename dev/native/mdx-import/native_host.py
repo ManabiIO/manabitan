@@ -259,9 +259,15 @@ class HostState:
 
     def download_chunk(self, job_id: str, offset: int, chunk_bytes: int) -> Dict[str, Any]:
         job = self._jobs[job_id]
+        offset = int(offset)
+        chunk_bytes = int(chunk_bytes)
+        if offset < 0 or offset > job.total_bytes:
+            raise ValueError("download offset outside archive")
+        if chunk_bytes <= 0:
+            raise ValueError("download chunk size must be positive")
         with job.archive_path.open("rb") as handle:
-            handle.seek(int(offset))
-            chunk = handle.read(int(chunk_bytes))
+            handle.seek(offset)
+            chunk = handle.read(min(chunk_bytes, job.total_bytes - offset))
         return {"data": base64.b64encode(chunk).decode("ascii")}
 
     def download_end(self, job_id: str) -> bool:
