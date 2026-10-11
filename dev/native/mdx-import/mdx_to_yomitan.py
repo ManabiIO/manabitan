@@ -27,7 +27,7 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
 from typing import Dict, Iterable, List, Optional
-from urllib.parse import quote, unquote_to_bytes
+from urllib.parse import quote, unquote, unquote_to_bytes
 
 from pyglossary.plugin_lib.readmdict import MDD, MDX  # type: ignore
 
@@ -312,6 +312,7 @@ def _collapse_posix_path(path: str) -> str:
 def _normalize_relative_asset_path(
     path: str,
     source_asset_path: Optional[str] = None,
+    asset_prefix: str = "",
 ) -> Optional[str]:
     value = path.strip().replace("\\", "/")
     if not value:
@@ -333,11 +334,13 @@ def _normalize_relative_asset_path(
         return None
     if value.startswith("//"):
         return None
+    from_root = value.startswith("/") or lowered.startswith("file://")
     if lowered.startswith("file://"):
         value = value[7:]
 
     value = value.lstrip("/")
-    if source_asset_path is not None and value.startswith(("./", "../")):
+    already_prefixed = bool(asset_prefix) and value.startswith(asset_prefix)
+    if source_asset_path is not None and not from_root and not already_prefixed:
         source_parent = PurePosixPath(source_asset_path).parent.as_posix()
         value = f"{source_parent}/{value}" if source_parent != "." else value
     value = _collapse_posix_path(value)
@@ -349,7 +352,7 @@ def _prefix_relative_asset_path(
     asset_prefix: str,
     source_asset_path: Optional[str] = None,
 ) -> Optional[str]:
-    normalized_path = _normalize_relative_asset_path(path, source_asset_path)
+    normalized_path = _normalize_relative_asset_path(path, source_asset_path, asset_prefix)
     if normalized_path is None:
         return None
     if normalized_path.startswith(asset_prefix):
@@ -540,7 +543,7 @@ def _convert_inline_style(style_text: Optional[str], asset_prefix: str) -> Optio
         value = raw_value.strip()
         if not property_name or not value:
             continue
-        if "url(" in value:
+        if "url(" in value.lower():
             value = _rewrite_css_asset_urls(value, asset_prefix, None)
 
         if property_name in {"text-decoration", "text-decoration-line"}:
@@ -594,11 +597,11 @@ def _convert_html_link_href(
     value = href.strip()
     lowered = value.lower()
     if lowered.startswith("entry://"):
-        return f"?query={value[8:]}"
+        return f"?query={quote(unquote(value[8:]), safe='')}"
     if lowered.startswith("bword://"):
-        return f"?query={value[8:]}"
+        return f"?query={quote(unquote(value[8:]), safe='')}"
     if lowered.startswith(("d:", "x:")):
-        return f"?query={value[2:]}"
+        return f"?query={quote(unquote(value[2:]), safe='')}"
     if lowered.startswith("sound://"):
         sound_path = _prefix_relative_asset_path(value[8:], asset_prefix)
         if enable_audio and sound_path is not None:
@@ -780,6 +783,8 @@ class _MdxHtmlToStructuredContentParser(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         normalized_tag = tag.lower()
+        if not any(context.tag == normalized_tag for context in reversed(self._stack)):
+            return
         while self._stack:
             context = self._stack.pop()
             if context.mode == "style" and context.text_parts is not None:
