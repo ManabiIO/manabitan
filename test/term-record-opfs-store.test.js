@@ -4079,7 +4079,16 @@ describe('TermRecordOpfsStore', () => {
         });
         const deleteLegacy = vi.spyOn(database, '_deleteLegacyIndexedDb').mockResolvedValue();
         const refreshMappings = vi.spyOn(database, '_refreshTermRecordStorageNameMappings').mockImplementation(() => {});
-        const cleanupImports = vi.spyOn(database, '_cleanupIncompleteImports').mockResolvedValue();
+        const cleanupImports = vi.spyOn(database, '_cleanupIncompleteImports').mockResolvedValue({
+            scannedCount: 0,
+            removedCount: 0,
+            removedTitles: [],
+            restoredTitles: [],
+            removedEmptyTitleRows: 0,
+            failedCount: 0,
+            failedTitles: [],
+            parseErrorCount: 0,
+        });
         try {
             const startupError = await database.prepare().then(() => null, (error) => error);
             expect(terminalHealthWrites).toEqual([]);
@@ -4168,7 +4177,16 @@ describe('TermRecordOpfsStore', () => {
         });
         const deleteLegacy = vi.spyOn(database, '_deleteLegacyIndexedDb').mockResolvedValue();
         const refreshMappings = vi.spyOn(database, '_refreshTermRecordStorageNameMappings').mockImplementation(() => {});
-        const cleanupImports = vi.spyOn(database, '_cleanupIncompleteImports').mockResolvedValue();
+        const cleanupImports = vi.spyOn(database, '_cleanupIncompleteImports').mockResolvedValue({
+            scannedCount: 0,
+            removedCount: 0,
+            removedTitles: [],
+            restoredTitles: [],
+            removedEmptyTitleRows: 0,
+            failedCount: 0,
+            failedTitles: [],
+            parseErrorCount: 0,
+        });
         try {
             await database.prepare();
             expect(database.isPrepared()).toBe(true);
