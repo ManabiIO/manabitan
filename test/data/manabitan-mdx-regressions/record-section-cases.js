@@ -54,7 +54,7 @@ test('valid unused MDD blocks remain lazy and preserve converted text', async ()
     let lookups = 0;
     /**
      * @param {unknown} item
-     * @returns {unknown}
+     * @returns {Uint8Array|null}
      */
     MDD.prototype.lookupRecordByKeyBlock = function countRecordLookup(item) {
         lookups += 1;
