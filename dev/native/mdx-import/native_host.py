@@ -223,7 +223,14 @@ class HostState:
 
     def convert(self, mdx_upload_id: str, mdd_upload_ids: List[str], options: Dict[str, Any]) -> str:
         mdx_upload = self._uploads[mdx_upload_id]
+        self.finish_upload(mdx_upload_id)
         companion_uploads = self._get_companion_mdd_uploads(mdx_upload_id, mdd_upload_ids)
+        for upload in companion_uploads:
+            if upload.received_bytes != upload.total_bytes:
+                raise ValueError(
+                    f"upload {upload.file_name} incomplete: "
+                    f"{upload.received_bytes}/{upload.total_bytes}",
+                )
         job_id = f"j{self._next_job_id}"
         self._next_job_id += 1
         staged_mdx_path = self._prepare_conversion_workspace(job_id, mdx_upload, companion_uploads)

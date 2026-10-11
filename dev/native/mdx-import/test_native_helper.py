@@ -13,6 +13,7 @@ import types
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 from typing import Dict, Iterable, Iterator, List, Tuple
 from urllib.parse import unquote
 
@@ -373,6 +374,40 @@ class MdxToYomitanTests(unittest.TestCase):
 
 
 class NativeHostTests(unittest.TestCase):
+    def test_conversion_rejects_incomplete_selected_uploads_and_allows_retry(self) -> None:
+        for incomplete_source in ["mdx", "explicit-mdd", "automatic-mdd"]:
+            with self.subTest(source=incomplete_source):
+                state = native_host.HostState()
+                try:
+                    mdx_id = state.begin_upload("fixture.mdx", 3)["uploadId"]
+                    mdd_id = state.begin_upload("fixture.mdd", 3)["uploadId"]
+                    pending_id = mdx_id if incomplete_source == "mdx" else mdd_id
+                    for upload_id in [mdx_id, mdd_id]:
+                        data = b"AB" if upload_id == pending_id else b"ABC"
+                        state.upload_chunk(upload_id, 0, base64.b64encode(data).decode("ascii"))
+                    selected = [] if incomplete_source == "automatic-mdd" else [mdd_id]
+
+                    def fake_convert(source: Path, archive: Path, **_kwargs: object) -> None:
+                        archive.write_bytes(b"archive")
+
+                    with patch.object(native_host.shutil, "copyfile", wraps=native_host.shutil.copyfile) as copy, patch.object(
+                        native_host, "convert_mdx_to_yomitan_zip", side_effect=fake_convert
+                    ) as convert:
+                        with self.assertRaisesRegex(ValueError, "incomplete"):
+                            state.convert(mdx_id, selected, {})
+                        copy.assert_not_called()
+                        convert.assert_not_called()
+                    self.assertFalse((state._tmpdir / "jobs").exists())
+                    self.assertEqual(state._jobs, {})
+                    state.upload_chunk(pending_id, 2, base64.b64encode(b"C").decode("ascii"))
+                    with patch.object(native_host, "convert_mdx_to_yomitan_zip", side_effect=fake_convert):
+                        job_id = state.convert(mdx_id, selected, {})
+                    self.assertEqual(job_id, "j1")
+                    self.assertEqual((state._jobs[job_id].archive_path.parent / "fixture.mdx").read_bytes(), b"ABC")
+                    self.assertEqual((state._jobs[job_id].archive_path.parent / "fixture.mdd").read_bytes(), b"ABC")
+                finally:
+                    state.cleanup()
+
     def test_classify_conversion_errors_returns_structured_codes(self) -> None:
         encrypted = native_host._classify_conversion_error(RuntimeError("encrypted mdx payload"))
         unsupported = native_host._classify_conversion_error(RuntimeError("unsupported compression: lzo"))
