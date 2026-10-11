@@ -87,6 +87,35 @@ def _register_mdd(path: Path, items: Iterable[Tuple[bytes, bytes]]) -> None:
 
 
 class MdxToYomitanTests(unittest.TestCase):
+    def test_data_url_decoding_preserves_omitted_type_and_escaped_base64(self) -> None:
+        for value, media_type, expected in [
+            ("data:;base64,UE5H", "text/plain", b"PNG"),
+            ("data:;charset=utf-8;base64,UE5H", "text/plain", b"PNG"),
+            ("data:image/png;base64,%2B%2F8%3D", "image/png", b"\xfb\xff"),
+            ("data:image/png;base64,UE5H", "image/png", b"PNG"),
+            ("data:,hello%20world", "text/plain", b"hello world"),
+        ]:
+            with self.subTest(value=value):
+                self.assertEqual(mdx_to_yomitan._decode_data_url(value), (media_type, expected))
+
+    def test_escaped_base64_image_keeps_exact_archive_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "image.mdx"
+            output = root / "image.zip"
+            source.write_bytes(b"MDX")
+            _register_mdx(source, header={b"Title": b"Image"}, items=[
+                ("image", '<img src="data:image/png;base64,%2B%2F8%3D">'),
+            ])
+            mdx_to_yomitan.convert_mdx_to_yomitan_zip(
+                source, output, options=mdx_to_yomitan.ConvertOptions(include_assets=False),
+            )
+            with zipfile.ZipFile(output) as archive:
+                rows = json.loads(archive.read("term_bank_1.json"))
+                image = rows[0][5][0]["content"]["content"][0]
+                self.assertEqual(image["tag"], "img")
+                self.assertEqual(archive.read(image["path"]), b"\xfb\xff")
+
     def test_discover_mdds_uses_numbered_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)

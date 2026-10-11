@@ -363,11 +363,11 @@ def _decode_data_url(value: str) -> Optional[tuple[str, bytes]]:
     header, separator, payload = value[5:].partition(",")
     if separator == "":
         return None
-    parts = [part.strip() for part in header.split(";") if part.strip()]
-    media_type = parts[0].lower() if parts else "text/plain"
+    parts = [part.strip() for part in header.split(";")]
+    media_type = parts[0].lower() or "text/plain"
     is_base64 = any(part.lower() == "base64" for part in parts[1:])
     try:
-        data = base64.b64decode(payload, validate=False) if is_base64 else unquote_to_bytes(payload)
+        data = base64.b64decode(unquote_to_bytes(payload), validate=False) if is_base64 else unquote_to_bytes(payload)
     except (binascii.Error, ValueError):
         return None
     return media_type, data
