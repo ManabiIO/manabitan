@@ -1658,7 +1658,9 @@ export class Backend {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
-        const dictionaryRows = await this._dictionaryDatabase.debugGetDictionaryRows();
+        const dictionaryRows = this._dictionaryDatabase instanceof DictionaryDatabase ?
+            await this._dictionaryDatabase.debugGetDictionaryRows() :
+            [];
         const offscreenDictionaryRowsResult = this._offscreen !== null ?
             await this._offscreen.sendMessagePromise({action: 'debugDictionaryStorageStateOffscreen'}) :
             null;
@@ -1847,7 +1849,7 @@ export class Backend {
             }
             try {
                 const parsed = new URL(normalizedUrl);
-                const pathPart = parsed.pathname.split('/').findLast((part) => part.length > 0);
+                const pathPart = parsed.pathname.split('/').reverse().find((part) => part.length > 0);
                 if (typeof pathPart === 'string' && pathPart.length > 0) {
                     return pathPart;
                 }
@@ -4712,6 +4714,9 @@ export class Backend {
      * @returns {Promise<unknown>}
      */
     async _debugDictionaryLookupStateLocal(text, dictionaryNames) {
+        if (!(this._dictionaryDatabase instanceof DictionaryDatabase)) {
+            throw new Error('Local dictionary lookup diagnostics require the direct database');
+        }
         return await this._dictionaryDatabase.debugDictionaryLookupState(text, dictionaryNames);
     }
 

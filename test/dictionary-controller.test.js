@@ -419,9 +419,9 @@ describe('DictionaryController task queue', () => {
         const hidden = [];
         const shown = [];
         Reflect.set(controller, '_dictionaryEntries', [
-            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('a')), _showUpdatesAvailableButton: vi.fn(() => shown.push('a'))},
-            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('b')), _showUpdatesAvailableButton: vi.fn(() => shown.push('b'))},
-            {dictionaryTitle: 'JMdict', hideUpdatesAvailableButton: vi.fn(() => hidden.push('c')), _showUpdatesAvailableButton: vi.fn(() => shown.push('c'))},
+            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('a')), showUpdatesAvailableButton: vi.fn(() => shown.push('a'))},
+            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('b')), showUpdatesAvailableButton: vi.fn(() => shown.push('b'))},
+            {dictionaryTitle: 'JMdict', hideUpdatesAvailableButton: vi.fn(() => hidden.push('c')), showUpdatesAvailableButton: vi.fn(() => shown.push('c'))},
         ]);
 
         hideUpdatesAvailableButton.call(controller, 'Jitendex');

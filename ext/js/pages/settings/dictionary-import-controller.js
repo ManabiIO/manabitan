@@ -1656,7 +1656,7 @@ export class DictionaryImportController {
                     downloadUrl = /** @type {string} */ (Reflect.get(fileValue, 'downloadUrl')).trim();
                     file = new File([], 'fileFromURL.zip', {type: 'application/zip'});
                 } else if (fileValue && typeof fileValue === 'object') {
-                    const blobPart = /** @type {BlobPart} */ (fileValue);
+                    const blobPart = /** @type {BlobPart} */ (/** @type {unknown} */ (fileValue));
                     file = new File([blobPart], 'fileFromURL.zip', {type: 'application/zip'});
                 } else {
                     errors.push(new Error(`Failed to read file ${i + 1} of ${importProgressTracker.dictionaryCount} (value-type=${typeof fileValue}, value=${String(fileValue)}).`));
