@@ -340,6 +340,10 @@ def _normalize_relative_asset_path(
         return None
 
     value, suffix = _split_asset_reference_suffix(value)
+    # Fragments and query-only URLs refer to the current stylesheet/document.
+    # They must not acquire the external stylesheet's directory as an asset.
+    if not value:
+        return None
     lowered = value.lower()
     if lowered.startswith((
         "entry://",

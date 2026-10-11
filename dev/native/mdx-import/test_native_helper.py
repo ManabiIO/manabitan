@@ -266,6 +266,25 @@ class MdxToYomitanTests(unittest.TestCase):
                 self.assertEqual(archive.read("mdict-media/image.png"), b"IMAGE")
 
 
+    def test_nested_stylesheet_preserves_local_references_in_archive(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "fixture.mdx"
+            companion = root / "fixture.mdd"
+            output = root / "fixture.zip"
+            source.write_bytes(b"MDX")
+            companion.write_bytes(b"MDD")
+            css = b'body { filter: url(#mask); cursor: url(?variant=1); background: url(image.png); }'
+            _register_mdx(source, header={b"Title": b"CSS"}, items=[("entry", "definition")])
+            _register_mdd(companion, [(b"styles/main.css", css), (b"styles/image.png", b"IMAGE")])
+            mdx_to_yomitan.convert_mdx_to_yomitan_zip(source, output, options=mdx_to_yomitan.ConvertOptions())
+            with zipfile.ZipFile(output) as archive:
+                stylesheet = archive.read("styles.css").decode("utf-8")
+                self.assertIn('url(#mask)', stylesheet)
+                self.assertIn('url(?variant=1)', stylesheet)
+                self.assertIn('url("mdict-media/styles/image.png")', stylesheet)
+                self.assertEqual(archive.read("mdict-media/styles/image.png"), b"IMAGE")
+
     def test_css_url_rewrite_preserves_literals_and_identifier_boundaries(self) -> None:
         for literal in [
             'content: "url(example.png)"',
