@@ -566,6 +566,25 @@ def _convert_inline_style(style_text: Optional[str], asset_prefix: str) -> Optio
     return style or None
 
 
+def _convert_legacy_font_size(value: Optional[str]) -> Optional[str]:
+    """Translate HTML's legacy font-size hint to a CSS keyword."""
+    if value is None:
+        return None
+    match = re.match(r"[\t\n\f\r ]*([+-]?)([0-9]+)", value)
+    if match is None:
+        return None
+    # Values above seven clamp to an endpoint, including signed relative sizes.
+    # Bound conversion so arbitrary-length digit strings cannot trip int's limit.
+    digits = match.group(2).lstrip("0") or "0"
+    size = int(digits) if len(digits) == 1 else 7
+    if match.group(1) == "+":
+        size += 3
+    elif match.group(1) == "-":
+        size = 3 - size
+    sizes = ("x-small", "small", "medium", "large", "x-large", "xx-large", "xxx-large")
+    return sizes[max(1, min(7, size)) - 1]
+
+
 def _build_structured_data(original_tag: str, attrs: dict[str, str]) -> Optional[dict[str, str]]:
     data = {"tag": original_tag}
     class_name = _normalize_css_class_list(attrs.get("class"))
@@ -733,7 +752,7 @@ def _create_structured_element(
             element["open"] = True
     elif normalized_tag == "font":
         font_color = attrs.get("color")
-        font_size = attrs.get("size")
+        font_size = _convert_legacy_font_size(attrs.get("size"))
         font_face = attrs.get("face")
         extra_style: dict[str, object] = {}
         if font_color:
@@ -742,7 +761,7 @@ def _create_structured_element(
             extra_style["fontSize"] = font_size
         if font_face:
             extra_style["fontFamily"] = font_face
-        merged_style = _merge_structured_styles(element.get("style"), extra_style)
+        merged_style = _merge_structured_styles(extra_style, element.get("style"))
         if merged_style is not None:
             element["style"] = merged_style
 
