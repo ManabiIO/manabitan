@@ -162,3 +162,63 @@ The current exact dedup fallback needs arbitrary earlier-content reads
 Trimming that overlay without providing readable committed snapshots can break
 dedup correctness. This audit makes no speculative retention change; evaluating
 that design requires separate ownership and measurements.
+
+## Independent continuation review (2026-10-10, America/Toronto)
+
+The visible local continuation reviewed PR #485 at
+`a2d2cf539266f01b85741fdb88bbc345348ca6a5` in a separate clone. A fresh GitHub
+read and fetch confirmed the PR head and develop base
+`e05294d263582b58bbe92c5e9f97349f6f60df31`. The parent benchmark checkout,
+dependency pins, preserved task-21 worktree, MDX work and native workers were
+not changed. The earlier audit's date is retained as historical evidence.
+
+This review traced descriptor reconstruction, scalar header validation,
+write/close/abort error propagation, public prepare failure cleanup, and lazy
+lookup validation. No additional reproducible correctness defect was found in
+that bounded review. The existing nine focused record-store cases were executed
+again in the isolated checkout: nine passed, 159 skipped. This is new local
+adapter verification, not new browser/SQLite/OPFS qualification.
+
+The content overlay is a separate lifetime from pending/queued/in-flight writes.
+`_appendBatchInternal` retains every nonempty OPFS-backed import chunk;
+`_drainQueuedWrites` releases queued write references but does not release those
+overlay references. `flushImportWrites` does not close the writable or publish
+a new snapshot. The overlay remains readable after writeback so exact dedup can
+compare arbitrarily early content after recent/in-flight source caches miss.
+It includes stored content blocks and reference slabs, rather than necessarily
+the uncompressed source archive. Its logical byte counter is not a measurement
+of heap or unique retained backing-buffer capacity.
+
+Successful `endImportSession` clears the overlay after closing the writable;
+validated rollback clears it before abandoning pending writes and restoring the
+checkpoint. Draining or capping it independently would risk reading an old File
+snapshot or reporting missing content during exact dedup. No eviction, stream
+rollover policy, new copies or storage protocol change was introduced. The
+queued-write budget therefore still does not bound cumulative overlay retention;
+no throughput, heap reduction or zero-regression claim is made.
+
+Five existing focused content-store cases were also run: five passed, 30 skipped.
+They cover batch overlay reads (including a cross-chunk span), old-snapshot
+reads while writes are pending and overlay release at successful finalization,
+sticky queued-write errors, residual write admission, and rejected-write
+rollback. Reproduction:
+
+```sh
+node node_modules/vitest/vitest.mjs run test/term-content-opfs-store.test.js \
+  -t 'reads an import-overlay batch|keeps queued write failures sticky|queues a residual import write|rollback survives a rejected queued write|reads the pre-import snapshot' \
+  --maxWorkers=1 --minWorkers=1 --reporter=dot
+```
+
+Both selections used Node 22.22.0 and Vitest 3.0.9.
+Scoped ESLint passed for both source/test pairs (with the existing excluded MDX
+vendor CommonJS warning); Markdown formatting and `git diff --check` passed.
+Existing dependency packages were reused through a local directory of package
+links; runner caches were local
+to the clone. An initial runner launch was blocked when its whole-directory link
+would have placed a config cache in shared dependencies; no test executed in that
+attempt. Nothing was installed or rebuilt. Real recovery close/abort failures,
+browser startup/message gating, durable SQLite health writes across restart,
+and large-import retained heap remain unqualified. No broad suites, builds,
+browser captures, benchmarks, merges or deployment ran. A future retention change
+needs a measured readable-snapshot design that preserves exact dedup and existing
+write/publication order.
