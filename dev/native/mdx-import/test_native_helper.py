@@ -87,6 +87,82 @@ def _register_mdd(path: Path, items: Iterable[Tuple[bytes, bytes]]) -> None:
 
 
 class MdxToYomitanTests(unittest.TestCase):
+    def test_inline_stylesheets_are_scoped_to_exported_definitions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            mdx = root / "scopes.mdx"
+            mdd = root / "scopes.mdd"
+            output = root / "scopes.zip"
+            mdx.write_bytes(b"mdx")
+            mdd.write_bytes(b"mdd")
+            _register_mdx(mdx, header={}, items=[
+                ("first", '<style>.shared {color:red} @media screen {body .shared::before {content:"first"}}</style><div class="shared">first</div>'),
+                ("alias", "@@@LINK=first"),
+                ("second", '<style>.shared {color:blue} :root {color:blue}</style><div class="shared">second</div>'),
+                ("unstyled", '<div class="shared">unstyled</div>'),
+            ])
+            external = b".shared {font-weight:bold}"
+            _register_mdd(mdd, [(b"styles/global.css", external)])
+            mdx_to_yomitan.convert_mdx_to_yomitan_zip(
+                mdx, output, options=mdx_to_yomitan.ConvertOptions(), explicit_mdds=[mdd],
+            )
+            with zipfile.ZipFile(output) as archive:
+                entries = {row[0]: row for row in json.loads(archive.read("term_bank_1.json"))}
+                css = archive.read("styles.css").decode()
+                self.assertEqual(archive.read("mdict-media/styles/global.css"), external)
+            for term, sequence in (("first", 0), ("second", 1)):
+                with self.subTest(term=term):
+                    scope = f'mdict-yomitan-entry-{sequence}'
+                    selector = f'[data-sc-class~="{scope}"]'
+                    guard = f':where({selector}, {selector} *)'
+                    self.assertEqual(entries[term][5][0]["content"]["data"]["class"],
+                                     f"mdict-yomitan-content {scope}")
+                    color = "red" if sequence == 0 else "blue"
+                    self.assertIn(f'[data-sc-class~="shared"]{guard}{{color:{color}}}', css)
+            first = '[data-sc-class~="mdict-yomitan-entry-0"]'
+            first_guard = f':where({first}, {first} *)'
+            self.assertIn(f'@media screen {{{first} [data-sc-class~="shared"]{first_guard}::before{{content:"first"}}}}', css)
+            second = '[data-sc-class~="mdict-yomitan-entry-1"]'
+            self.assertIn(f'{second}:where({second}, {second} *){{color:blue}}', css)
+            self.assertEqual(entries["alias"][5], entries["first"][5])
+            self.assertEqual(entries["alias"][6], entries["first"][6])
+            self.assertEqual(entries["unstyled"][5][0]["content"]["data"]["class"], "mdict-yomitan-content")
+            self.assertIn('[data-sc-class~="shared"]{font-weight:bold}', css)
+
+    def test_inline_scope_guards_subject_before_pseudo_elements(self) -> None:
+        def export_css(stylesheet: str) -> str:
+            with tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                mdx = root / "scope.mdx"
+                output = root / "scope.zip"
+                mdx.write_bytes(b"mdx")
+                _register_mdx(mdx, header={}, items=[("term", f'<style>{stylesheet}</style><div>text</div>')])
+                mdx_to_yomitan.convert_mdx_to_yomitan_zip(mdx, output, options=mdx_to_yomitan.ConvertOptions(), explicit_mdds=[])
+                with zipfile.ZipFile(output) as archive:
+                    return archive.read("styles.css").decode()
+
+        scope = '[data-sc-class~="mdict-yomitan-entry-0"]'
+        guard = f':where({scope}, {scope} *)'
+        for selector, migrated in (
+            ("body + .outside::after", f'{scope} + [data-sc-class~="outside"]{guard}::after'),
+            ("body ~ .outside:before", f'{scope} ~ [data-sc-class~="outside"]{guard}:before'),
+            ('.shared:hover', f'[data-sc-class~="shared"]:hover{guard}'),
+            ('[title="::before"]:not(.x)::first-letter', f'[title="::before"]:not([data-sc-class~="x"]){guard}::first-letter'),
+            ('.shared:first-line', f'[data-sc-class~="shared"]{guard}:first-line'),
+            ('.shared:after', f'[data-sc-class~="shared"]{guard}:after'),
+        ):
+            with self.subTest(selector=selector):
+                css = export_css(selector + " {color:red}")
+                self.assertIn(migrated + "{color:red}", css)
+        css = export_css('@font-face {font-family:test} @keyframes spin {from {opacity:0} to {opacity:1}}')
+        self.assertIn('@font-face {font-family:test}', css)
+        self.assertIn('@keyframes spin {from {opacity:0} to {opacity:1}}', css)
+        self.assertNotIn(':where(', css)
+        for grouping in ('@media screen', '@supports (display: grid)', '@layer entries', '@container entry', '@document url-prefix("https://example.com/")'):
+            with self.subTest(grouping=grouping):
+                css = export_css(grouping + ' { .shared {color:red} }')
+                self.assertIn(f'{grouping} {{ [data-sc-class~="shared"]{guard}{{color:red}} }}', css)
+
     def test_discover_mdds_uses_numbered_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -273,7 +349,7 @@ class MdxToYomitanTests(unittest.TestCase):
             self.assertEqual(glossary["type"], "structured-content")
             root = glossary["content"]
             self.assertEqual(root["tag"], "div")
-            self.assertEqual(root["data"]["class"], "mdict-yomitan-content")
+            self.assertEqual(root["data"]["class"], "mdict-yomitan-content mdict-yomitan-entry-0")
             entry = root["content"][0]
             self.assertEqual(entry["tag"], "div")
             self.assertEqual(entry["data"]["id"], "entry")
@@ -311,9 +387,11 @@ class MdxToYomitanTests(unittest.TestCase):
                 '@font-face { src: url("mdict-media/fonts/test.woff2"); }',
                 stylesheet,
             )
-            self.assertIn('[data-sc-class~="entry"] [data-sc-class~="jump"]{ color: blue; }', stylesheet)
-            self.assertIn('[data-sc-id="entry"] [data-sc-tag="img"][data-sc-class~="icon"]{ border-width: 1px; }', stylesheet)
-            self.assertIn('[data-sc-tag="table"][data-sc-class~="tbl"] [data-sc-tag="td"][data-sc-class~="cell"]{ padding: 2px; }', stylesheet)
+            scope = '[data-sc-class~="mdict-yomitan-entry-0"]'
+            guard = f':where({scope}, {scope} *)'
+            self.assertIn(f'[data-sc-class~="entry"] [data-sc-class~="jump"]{guard}{{ color: blue; }}', stylesheet)
+            self.assertIn(f'[data-sc-id="entry"] [data-sc-tag="img"][data-sc-class~="icon"]{guard}{{ border-width: 1px; }}', stylesheet)
+            self.assertIn(f'[data-sc-tag="table"][data-sc-class~="tbl"] [data-sc-tag="td"][data-sc-class~="cell"]{guard}{{ padding: 2px; }}', stylesheet)
             self.assertIn('[data-sc-class~="entry"]{ color: red; }', stylesheet)
             self.assertEqual(image_bytes, b"JPEG")
             self.assertEqual(audio_bytes, b"MP3")
