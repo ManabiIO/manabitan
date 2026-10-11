@@ -87,6 +87,35 @@ def _register_mdd(path: Path, items: Iterable[Tuple[bytes, bytes]]) -> None:
 
 
 class MdxToYomitanTests(unittest.TestCase):
+    def test_embedded_assets_preserve_source_collisions_and_deduplicate(self) -> None:
+        data = b"PNG"
+        digest = mdx_to_yomitan.hashlib.sha1(data).hexdigest()
+        key = f"embedded/image/{digest}.png"
+        for source_key in [key, key.upper()]:
+            with self.subTest(source_key=source_key), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                source = root / "fixture.mdx"
+                companion = root / "fixture.mdd"
+                output = root / "fixture.zip"
+                source.write_bytes(b"MDX")
+                companion.write_bytes(b"MDD")
+                definition = '<img src="data:image/png;base64,UE5H">'
+                _register_mdx(source, header={b"Title": b"Collision"}, items=[
+                    ("one", definition), ("two", definition),
+                ])
+                _register_mdd(companion, [(source_key.encode(), b"SOURCE"),
+                                          ((key[:-4] + "-1.png").encode(), b"SECOND SOURCE")])
+                mdx_to_yomitan.convert_mdx_to_yomitan_zip(source, output, options=mdx_to_yomitan.ConvertOptions())
+                with zipfile.ZipFile(output) as archive:
+                    rows = json.loads(archive.read("term_bank_1.json"))
+                    paths = [row[5][0]["content"]["content"][0]["path"] for row in rows]
+                    self.assertEqual(paths[0], paths[1])
+                    self.assertEqual(archive.read(paths[0]), data)
+                    self.assertNotEqual(paths[0].casefold(), ("mdict-media/" + source_key).casefold())
+                    self.assertEqual(archive.read("mdict-media/" + source_key), b"SOURCE")
+                    self.assertEqual(archive.read("mdict-media/" + key[:-4] + "-1.png"), b"SECOND SOURCE")
+                    self.assertEqual(sum(name == paths[0] for name in archive.namelist()), 1)
+
     def test_discover_mdds_uses_numbered_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)

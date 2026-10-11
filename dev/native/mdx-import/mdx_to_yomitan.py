@@ -221,6 +221,7 @@ class _HtmlParseContext:
 class _EmbeddedAssetCollector:
     asset_prefix: str
     assets: Dict[str, bytes]
+    reserved_paths: Optional[set[str]] = None
 
     def register_data_url(self, data_url: str) -> Optional[str]:
         decoded = _decode_data_url(data_url)
@@ -231,6 +232,10 @@ class _EmbeddedAssetCollector:
         category = media_type.split("/", 1)[0].strip().lower() or "asset"
         digest = hashlib.sha1(data).hexdigest()
         archive_path = f"{self.asset_prefix}embedded/{category}/{digest}{extension}"
+        suffix = 0
+        while self.reserved_paths is not None and archive_path.casefold() in self.reserved_paths:
+            suffix += 1
+            archive_path = f"{self.asset_prefix}embedded/{category}/{digest}-{suffix}{extension}"
         self.assets.setdefault(archive_path, data)
         return archive_path
 
@@ -407,6 +412,7 @@ def _convert_definition_to_structured_content(
     *,
     enable_audio: bool,
     asset_prefix: str,
+    reserved_asset_paths: Optional[set[str]] = None,
 ) -> tuple[dict[str, object], List[str], Dict[str, bytes]]:
     value = _RE_INTERNAL_LINK.sub(r"href=\1bword://", definition)
     value = _rewrite_relative_resources(value, asset_prefix)
@@ -414,7 +420,8 @@ def _convert_definition_to_structured_content(
     parser = _MdxHtmlToStructuredContentParser(
         asset_prefix=asset_prefix,
         enable_audio=enable_audio,
-        embedded_assets=_EmbeddedAssetCollector(asset_prefix=asset_prefix, assets=embedded_assets),
+        embedded_assets=_EmbeddedAssetCollector(asset_prefix=asset_prefix, assets=embedded_assets,
+                                               reserved_paths=reserved_asset_paths),
     )
     parser.feed(value)
     parser.close()
@@ -1270,6 +1277,7 @@ def convert_mdx_to_yomitan_zip(
     description = _extract_description(mdx, options.description_override)
     mdd_paths = explicit_mdds if explicit_mdds is not None else _discover_mdds(mdx_path)
     assets = _iter_assets(mdd_paths, options.asset_prefix) if options.include_assets else {}
+    reserved_asset_paths = {path.casefold() for path in assets} if assets else None
     inline_stylesheets: List[tuple[str, str]] = []
 
     sequence = 0
@@ -1296,6 +1304,7 @@ def convert_mdx_to_yomitan_zip(
                 definition,
                 enable_audio=options.enable_audio,
                 asset_prefix=options.asset_prefix,
+                reserved_asset_paths=reserved_asset_paths,
             )
             for archive_path, data in definition_assets.items():
                 assets.setdefault(archive_path, data)
