@@ -13,6 +13,7 @@ import types
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 from typing import Dict, Iterable, Iterator, List, Tuple
 from urllib.parse import unquote
 
@@ -87,6 +88,44 @@ def _register_mdd(path: Path, items: Iterable[Tuple[bytes, bytes]]) -> None:
 
 
 class MdxToYomitanTests(unittest.TestCase):
+    def test_nonempty_source_rejects_zero_usable_definitions(self) -> None:
+        cases = [
+            [("alias", "@@@LINK=missing")],
+            [("a", "@@@LINK=b"), ("b", "@@@LINK=a")],
+            [(" ", "definition")],
+        ]
+        for items in cases:
+            with self.subTest(items=items), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                source = root / "fixture.mdx"
+                source.write_bytes(b"MDX")
+                _register_mdx(source, header={b"Title": b"No definitions"}, items=items)
+                with self.assertRaisesRegex(ValueError, "no usable non-redirect entries"):
+                    mdx_to_yomitan.convert_mdx_to_yomitan_zip(
+                        source, root / "fixture.zip",
+                        options=mdx_to_yomitan.ConvertOptions(include_assets=False),
+                    )
+
+    def test_zero_usable_guard_preserves_empty_source_and_mixed_entries(self) -> None:
+        cases = [([], []), (
+            [("alias", "@@@LINK=missing"), (" ", "ignored"), ("healthy", "")],
+            ["healthy"],
+        )]
+        for items, expressions in cases:
+            with self.subTest(items=items), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                source = root / "fixture.mdx"
+                output = root / "fixture.zip"
+                source.write_bytes(b"MDX")
+                _register_mdx(source, header={b"Title": b"Control"}, items=items)
+                mdx_to_yomitan.convert_mdx_to_yomitan_zip(
+                    source, output, options=mdx_to_yomitan.ConvertOptions(include_assets=False),
+                )
+                with zipfile.ZipFile(output) as archive:
+                    rows = json.loads(archive.read("term_bank_1.json")) if expressions else []
+                    self.assertEqual([row[0] for row in rows], expressions)
+                    self.assertIn("index.json", archive.namelist())
+
     def test_discover_mdds_uses_numbered_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -373,6 +412,25 @@ class MdxToYomitanTests(unittest.TestCase):
 
 
 class NativeHostTests(unittest.TestCase):
+    def test_zero_usable_conversion_does_not_publish_native_job(self) -> None:
+        state = native_host.HostState()
+        original_convert = native_host.convert_mdx_to_yomitan_zip
+        try:
+            upload_id = state.begin_upload("fixture.mdx", 3)["uploadId"]
+            state.upload_chunk(upload_id, 0, base64.b64encode(b"MDX").decode("ascii"))
+
+            def register_staged_source(source: Path, output: Path, **kwargs: object) -> Path:
+                _register_mdx(source, header={b"Title": b"Dangling"}, items=[("alias", "@@@LINK=missing")])
+                return original_convert(source, output, **kwargs)
+
+            with patch.object(native_host, "convert_mdx_to_yomitan_zip", side_effect=register_staged_source):
+                with self.assertRaisesRegex(ValueError, "no usable non-redirect entries"):
+                    state.convert(upload_id, [], {"includeAssets": False})
+            self.assertEqual(state._jobs, {})
+            self.assertEqual(state._uploads[upload_id].path.read_bytes(), b"MDX")
+        finally:
+            state.cleanup()
+
     def test_classify_conversion_errors_returns_structured_codes(self) -> None:
         encrypted = native_host._classify_conversion_error(RuntimeError("encrypted mdx payload"))
         unsupported = native_host._classify_conversion_error(RuntimeError("unsupported compression: lzo"))
