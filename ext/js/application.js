@@ -226,20 +226,21 @@ function showRuntimeDisconnectedUi(message) {
         }
         let container = document.querySelector('#startup-error-message');
         if (!(container instanceof HTMLElement)) {
-            container = document.createElement('div');
-            container.id = 'startup-error-message';
-            container.style.whiteSpace = 'pre-wrap';
-            container.style.margin = '16px';
-            container.style.padding = '12px 16px';
-            container.style.border = '1px solid rgba(208, 2, 27, 0.35)';
-            container.style.background = 'rgba(208, 2, 27, 0.08)';
-            container.style.color = '#7a1020';
-            container.style.fontFamily = 'monospace';
-            container.style.fontSize = '13px';
-            container.style.lineHeight = '1.5';
+            const errorContainer = document.createElement('div');
+            errorContainer.id = 'startup-error-message';
+            errorContainer.style.whiteSpace = 'pre-wrap';
+            errorContainer.style.margin = '16px';
+            errorContainer.style.padding = '12px 16px';
+            errorContainer.style.border = '1px solid rgba(208, 2, 27, 0.35)';
+            errorContainer.style.background = 'rgba(208, 2, 27, 0.08)';
+            errorContainer.style.color = '#7a1020';
+            errorContainer.style.fontFamily = 'monospace';
+            errorContainer.style.fontSize = '13px';
+            errorContainer.style.lineHeight = '1.5';
             if (document.body !== null) {
-                document.body.prepend(container);
+                document.body.prepend(errorContainer);
             }
+            container = errorContainer;
         }
         container.textContent = message;
     } catch (_) {
@@ -532,7 +533,7 @@ export class Application extends EventDispatcher {
             if (mediaDrawingWorker !== null) {
                 await api.ensureMediaDrawingWorkerConnected();
             }
-            heartbeatInterval = setInterval(() => {
+            heartbeatInterval = window.setInterval(() => {
                 void api.heartbeat().then(() => {
                     heartbeatFailureLogged = false;
                 }).catch((error) => {
