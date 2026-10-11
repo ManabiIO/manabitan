@@ -87,6 +87,69 @@ def _register_mdd(path: Path, items: Iterable[Tuple[bytes, bytes]]) -> None:
 
 
 class MdxToYomitanTests(unittest.TestCase):
+    def test_legacy_font_sizes_become_css_keywords(self) -> None:
+        for value, expected in (
+            ("1", "x-small"), ("2", "small"), ("3", "medium"),
+            ("4", "large"), ("5", "x-large"), ("6", "xx-large"), ("7", "xxx-large"),
+            ("0", "x-small"), ("9", "xxx-large"),
+            ("+1", "large"), ("+0", "medium"), ("+9", "xxx-large"),
+            ("-1", "small"), ("-0", "medium"), ("-9", "x-small"),
+            (" \t4trailing", "large"), ("003", "medium"), ("+0002", "x-large"),
+            ("9" * 100, "xxx-large"), ("-" + "9" * 100, "x-small"),
+            ("invalid", None), ("+", None), ("+ 2", None), ("４", None),
+        ):
+            with self.subTest(value=value):
+                result, styles, assets = mdx_to_yomitan._convert_definition_to_structured_content(
+                    f'<font size="{value}">text</font>', enable_audio=False, asset_prefix="mdict-media/",
+                )
+                font = result["content"]["content"][0]
+                self.assertEqual(font.get("style", {}).get("fontSize"), expected)
+                self.assertEqual(font["content"], ["text"])
+                self.assertEqual(styles, [])
+                self.assertEqual(assets, {})
+
+    def test_legacy_font_hints_yield_to_inline_styles(self) -> None:
+        for inline, expected in (
+            ("", {"color": "red", "fontSize": "large", "fontFamily": "Legacy Serif"}),
+            ("color: blue", {"color": "blue", "fontSize": "large", "fontFamily": "Legacy Serif"}),
+            ("font-size: 18px", {"color": "red", "fontSize": "18px", "fontFamily": "Legacy Serif"}),
+            ("font-family: Modern Serif", {"color": "red", "fontSize": "large", "fontFamily": "Modern Serif"}),
+            ("color: blue; font-size: 120%; font-family: Modern Serif; font-weight: bold",
+             {"color": "blue", "fontSize": "120%", "fontFamily": "Modern Serif", "fontWeight": "bold"}),
+        ):
+            with self.subTest(inline=inline):
+                result, _, _ = mdx_to_yomitan._convert_definition_to_structured_content(
+                    f'<font color="red" size="4" face="Legacy Serif" style="{inline}">outer<font size="-1">inner</font></font>',
+                    enable_audio=False, asset_prefix="mdict-media/",
+                )
+                outer = result["content"]["content"][0]
+                self.assertEqual(outer["style"], expected)
+                self.assertEqual(outer["content"][1]["style"], {"fontSize": "small"})
+
+    def test_legacy_font_hints_survive_archive_export_and_aliases(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            mdx = root / "font.mdx"
+            output = root / "font.zip"
+            mdx.write_bytes(b"mdx")
+            _register_mdx(mdx, header={}, items=[
+                ("main", '<font color="red" size="+2" face="Legacy" style="color: blue; font-family: Modern">text</font>'),
+                ("alias", "@@@LINK=main"),
+                ("plain", '<font size="invalid" style="font-size: 16px">plain</font>'),
+            ])
+            mdx_to_yomitan.convert_mdx_to_yomitan_zip(mdx, output, options=mdx_to_yomitan.ConvertOptions(), explicit_mdds=[])
+            with zipfile.ZipFile(output) as archive:
+                entries = {row[0]: row for row in json.loads(archive.read("term_bank_1.json"))}
+                self.assertNotIn("styles.css", archive.namelist())
+            font = entries["main"][5][0]["content"]["content"][0]
+            self.assertEqual(font["tag"], "span")
+            self.assertEqual(font["data"]["tag"], "font")
+            self.assertEqual(font["style"], {"color": "blue", "fontSize": "x-large", "fontFamily": "Modern"})
+            self.assertEqual(font["content"], ["text"])
+            self.assertEqual(entries["alias"][5], entries["main"][5])
+            self.assertEqual(entries["alias"][6], entries["main"][6])
+            self.assertEqual(entries["plain"][5][0]["content"]["content"][0]["style"], {"fontSize": "16px"})
+
     def test_discover_mdds_uses_numbered_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
