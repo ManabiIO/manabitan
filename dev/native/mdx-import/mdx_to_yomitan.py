@@ -262,6 +262,20 @@ def _build_redirect_map(mdx: MDX) -> Dict[str, List[str]]:
     return redirects
 
 
+def _get_redirect_expressions(term: str, redirects: Dict[str, List[str]]) -> List[str]:
+    expressions = [term]
+    seen = {term}
+    index = 0
+    while index < len(expressions):
+        for alias in redirects.get(expressions[index], []):
+            if alias in seen:
+                continue
+            seen.add(alias)
+            expressions.append(alias)
+        index += 1
+    return expressions
+
+
 def _normalize_asset_key(raw_key: str) -> str:
     key = raw_key.replace("\\", "/").lstrip("/")
     return key
@@ -1301,7 +1315,7 @@ def convert_mdx_to_yomitan_zip(
                 assets.setdefault(archive_path, data)
             for stylesheet_index, stylesheet in enumerate(definition_inline_stylesheets, 1):
                 inline_stylesheets.append((f"inline/{term}-{stylesheet_index}.css", stylesheet))
-            expressions = [term, *redirects.get(term, [])]
+            expressions = _get_redirect_expressions(term, redirects)
             for expression in expressions:
                 bank.append([
                     expression,

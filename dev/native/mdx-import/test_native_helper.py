@@ -87,6 +87,37 @@ def _register_mdd(path: Path, items: Iterable[Tuple[bytes, bytes]]) -> None:
 
 
 class MdxToYomitanTests(unittest.TestCase):
+    def test_convert_preserves_chained_redirect_aliases(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "redirects.mdx"
+            output = root / "redirects.zip"
+            source.write_bytes(b"MDX")
+            _register_mdx(source, header={b"Title": b"Redirects"}, items=[
+                ("main", "first definition"),
+                ("main", "second definition"),
+                ("direct", "@@@LINK=main"),
+                ("chain", "@@@LINK=direct"),
+                ("chain", "@@@LINK=direct"),
+                ("deep", "@@@LINK=chain"),
+                ("direct", "@@@LINK=deep"),
+                ("cycle-a", "@@@LINK=cycle-b"),
+                ("cycle-b", "@@@LINK=cycle-a"),
+                ("missing", "@@@LINK=absent"),
+                ("other", "other definition"),
+            ])
+            mdx_to_yomitan.convert_mdx_to_yomitan_zip(
+                source, output, options=mdx_to_yomitan.ConvertOptions(include_assets=False)
+            )
+            with zipfile.ZipFile(output) as archive:
+                rows = json.loads(archive.read("term_bank_1.json"))
+            self.assertEqual([row[0] for row in rows],
+                             ["main", "direct", "chain", "deep"] * 2 + ["other"])
+            self.assertEqual([row[6] for row in rows], [0] * 4 + [1] * 4 + [2])
+            for group in [rows[:4], rows[4:8]]:
+                for row in group[1:]:
+                    self.assertEqual(row[5], group[0][5])
+
     def test_discover_mdds_uses_numbered_suffixes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
