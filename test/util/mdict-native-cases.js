@@ -146,12 +146,7 @@ describe('MDict v2 binary records', () => {
 
     test('a truncated final block is rejected rather than silently shortened', () => {
         const fixture = makeMdictFixture([{key: 'entry', value: 'nonempty final record'}], {compression: 'raw'});
-        const mdx = new MDX('truncated.mdx', fixture.bytes.slice(0, -1));
-        try {
-            assert.throws(() => mdx.fetch_definition(mdx.keywordList[0]));
-        } finally {
-            mdx.close();
-        }
+        assert.throws(() => new MDX('truncated.mdx', fixture.bytes.slice(0, -1)), /MDict read exceeds/u);
     });
 
     test('an unsupported record codec is rejected', () => {

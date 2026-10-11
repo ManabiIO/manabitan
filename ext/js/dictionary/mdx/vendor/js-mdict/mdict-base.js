@@ -908,6 +908,9 @@ class MDictBase {
         this._recordInfoEndOffset = this._recordInfoStartOffset + this.recordHeader.recordInfoCompSize;
         // avoid user not invoke the _decodeRecordBlock method
         this._recordBlockStartOffset = this._recordInfoEndOffset;
+        // Lazy record lookup must not hide a truncated, unreferenced block.
+        // Validate the section endpoint without copying or decompressing data.
+        this.scanner.readBuffer(this._recordBlockStartOffset + compressedAdder, 0);
     }
     /**
      * STEP 7.
