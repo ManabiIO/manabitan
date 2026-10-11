@@ -31,3 +31,11 @@ The Playwright coverage for this lives in [`integration.spec.js`](../../test/pla
 - URL import still accepts a direct `.mdx` URL or a simple HTML directory listing that exposes one `.mdx` file plus matching `.mdd` links.
 - Unsupported, encrypted, or unhandled MDX variants should fail with parser/import errors instead of helper-install errors.
 - The browser path currently targets the same experimental compatibility band as the old helper flow; it is not meant as a blanket promise for every MDX variant in the wild.
+
+## Reference native-helper contracts
+
+The experimental Python helper remains outside the extension runtime. Uploads must be contiguous and verified before conversion; selected MDD inputs must remain selected through staging and cleanup. Ambiguous staged filenames fail instead of choosing an arbitrary source. Failed conversions publish no job, and framed responses complete short writes without replaying earlier bytes.
+
+Conversion resolves redirect chains before publishing entries, preserves resource bytes, and scopes reference HTML/CSS to the converted entry. Local CSS fragments and query-only references remain local; relative assets in external stylesheets resolve against their source directory. Declared stylesheet encodings are decoded conservatively; unsupported or mismatched declarations fail rather than silently damaging text. These rules do not promise full browser CSS compatibility.
+
+Run the helper behavior suite with `python3 -m unittest discover -s dev/native/mdx-import -p 'test_native_helper.py'`. Its in-memory reader fixtures do not qualify real PyGlossary MDX/MDD parsing, framed native pipes, or generated ZIP import/media rendering. Those require separate real-parser and browser verification.

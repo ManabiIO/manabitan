@@ -52,8 +52,11 @@ test('valid unused MDD blocks remain lazy and preserve converted text', async ()
     const mdd = makeMdictFixture([{key: 'unused.bin', value: new Uint8Array([1, 2, 3])}], {mdd: true, compression: 'raw'});
     const originalLookup = MDD.prototype.lookupRecordByKeyBlock;
     let lookups = 0;
-    /** @param {unknown} item */
-    MDD.prototype.lookupRecordByKeyBlock = function (item) {
+    /**
+     * @param {unknown} item
+     * @returns {Uint8Array|null}
+     */
+    MDD.prototype.lookupRecordByKeyBlock = function countRecordLookup(item) {
         lookups += 1;
         return originalLookup.call(this, item);
     };

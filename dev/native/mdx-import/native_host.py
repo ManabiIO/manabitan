@@ -126,10 +126,19 @@ def read_message() -> Dict[str, Any]:
     return value
 
 
+def _write_all(data: bytes) -> None:
+    remaining = memoryview(data)
+    while remaining:
+        written = os.write(1, remaining)
+        if written == 0:
+            raise EOFError("native messaging pipe closed during write")
+        remaining = remaining[written:]
+
+
 def write_message(message: Dict[str, Any]) -> None:
     payload = json.dumps(message, separators=(",", ":")).encode("utf-8")
-    os.write(1, struct.pack("<I", len(payload)))
-    os.write(1, payload)
+    _write_all(struct.pack("<I", len(payload)))
+    _write_all(payload)
 
 
 @dataclass
@@ -174,11 +183,16 @@ class HostState:
 
     def upload_chunk(self, upload_id: str, offset: int, data_b64: str) -> bool:
         upload = self._uploads[upload_id]
-        data = base64.b64decode(data_b64.encode("ascii"))
+        data = base64.b64decode(data_b64.encode("ascii"), validate=True)
+        offset = int(offset)
+        if offset != upload.received_bytes:
+            raise ValueError(f"upload {upload_id} invalid chunk offset: {offset}/{upload.received_bytes}")
+        if len(data) > upload.total_bytes - upload.received_bytes:
+            raise ValueError(f"upload {upload_id} chunk exceeds declared size")
         with upload.path.open("r+b") as handle:
-            handle.seek(int(offset))
+            handle.seek(offset)
             handle.write(data)
-        upload.received_bytes = max(upload.received_bytes, int(offset) + len(data))
+        upload.received_bytes += len(data)
         return True
 
     def finish_upload(self, upload_id: str) -> bool:
@@ -210,9 +224,15 @@ class HostState:
         return companion_uploads
 
     def _prepare_conversion_workspace(self, job_id: str, mdx_upload: Upload, companion_uploads: List[Upload]) -> Path:
+        mdx_name = Path(_normalize_logical_file_name(mdx_upload.file_name)).name
+        staged_names = {mdx_name.casefold()}
+        for upload in companion_uploads:
+            name = Path(_normalize_logical_file_name(upload.file_name)).name.casefold()
+            if name in staged_names:
+                raise ValueError(f"colliding staged file name: {upload.file_name}")
+            staged_names.add(name)
         workspace = self._tmpdir / "jobs" / job_id
         workspace.mkdir(parents=True, exist_ok=True)
-        mdx_name = Path(_normalize_logical_file_name(mdx_upload.file_name)).name
         staged_mdx_path = workspace / mdx_name
         shutil.copyfile(mdx_upload.path, staged_mdx_path)
         for upload in companion_uploads:
@@ -223,31 +243,47 @@ class HostState:
 
     def convert(self, mdx_upload_id: str, mdd_upload_ids: List[str], options: Dict[str, Any]) -> str:
         mdx_upload = self._uploads[mdx_upload_id]
+        self.finish_upload(mdx_upload_id)
         companion_uploads = self._get_companion_mdd_uploads(mdx_upload_id, mdd_upload_ids)
+        for upload in companion_uploads:
+            if upload.received_bytes != upload.total_bytes:
+                raise ValueError(
+                    f"upload {upload.file_name} incomplete: "
+                    f"{upload.received_bytes}/{upload.total_bytes}",
+                )
         job_id = f"j{self._next_job_id}"
         self._next_job_id += 1
-        staged_mdx_path = self._prepare_conversion_workspace(job_id, mdx_upload, companion_uploads)
-        archive_file_name = f"{staged_mdx_path.stem}.zip"
-        archive_path = self._tmpdir / "jobs" / job_id / archive_file_name
-        convert_options = ConvertOptions(
-            title_override=options.get("titleOverride") or None,
-            description_override=options.get("descriptionOverride") or None,
-            revision=options.get("revision") or "mdx import",
-            term_bank_size=int(options.get("termBankSize") or 10_000),
-            enable_audio=bool(options.get("enableAudio")),
-            include_assets=bool(options.get("includeAssets", True)),
-        )
-        convert_mdx_to_yomitan_zip(
-            staged_mdx_path,
-            archive_path,
-            options=convert_options,
-            explicit_mdds=None,
-        )
-        self._jobs[job_id] = Job(
-            archive_path=archive_path,
-            archive_file_name=archive_file_name,
-            total_bytes=archive_path.stat().st_size,
-        )
+        workspace = self._tmpdir / "jobs" / job_id
+        try:
+            staged_mdx_path = self._prepare_conversion_workspace(job_id, mdx_upload, companion_uploads)
+            archive_file_name = f"{staged_mdx_path.stem}.zip"
+            archive_path = self._tmpdir / "jobs" / job_id / archive_file_name
+            convert_options = ConvertOptions(
+                title_override=options.get("titleOverride") or None,
+                description_override=options.get("descriptionOverride") or None,
+                revision=options.get("revision") or "mdx import",
+                term_bank_size=int(options.get("termBankSize") or 10_000),
+                enable_audio=bool(options.get("enableAudio")),
+                include_assets=bool(options.get("includeAssets", True)),
+            )
+            convert_mdx_to_yomitan_zip(
+                staged_mdx_path,
+                archive_path,
+                options=convert_options,
+                explicit_mdds=[
+                    staged_mdx_path.parent / Path(_normalize_logical_file_name(upload.file_name)).name
+                    for upload in companion_uploads
+                ],
+            )
+            self._jobs[job_id] = Job(
+                archive_path=archive_path,
+                archive_file_name=archive_file_name,
+                total_bytes=archive_path.stat().st_size,
+            )
+        except Exception:
+            # A failed job is never published; release only its staged copies.
+            shutil.rmtree(workspace, ignore_errors=True)
+            raise
         return job_id
 
     def download_begin(self, job_id: str, _chunk_bytes: int) -> Dict[str, Any]:
@@ -259,9 +295,15 @@ class HostState:
 
     def download_chunk(self, job_id: str, offset: int, chunk_bytes: int) -> Dict[str, Any]:
         job = self._jobs[job_id]
+        offset = int(offset)
+        chunk_bytes = int(chunk_bytes)
+        if offset < 0 or offset > job.total_bytes:
+            raise ValueError("download offset outside archive")
+        if chunk_bytes <= 0:
+            raise ValueError("download chunk size must be positive")
         with job.archive_path.open("rb") as handle:
-            handle.seek(int(offset))
-            chunk = handle.read(int(chunk_bytes))
+            handle.seek(offset)
+            chunk = handle.read(min(chunk_bytes, job.total_bytes - offset))
         return {"data": base64.b64encode(chunk).decode("ascii")}
 
     def download_end(self, job_id: str) -> bool:
@@ -355,3 +397,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
