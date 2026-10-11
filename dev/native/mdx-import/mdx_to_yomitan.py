@@ -1273,6 +1273,7 @@ def convert_mdx_to_yomitan_zip(
     inline_stylesheets: List[tuple[str, str]] = []
 
     sequence = 0
+    has_source_entries = False
     bank_index = 1
     bank: List[list] = []
 
@@ -1287,6 +1288,7 @@ def convert_mdx_to_yomitan_zip(
         archive.writestr("index.json", json.dumps(index, ensure_ascii=False))
 
         for raw_term, raw_definition in mdx.items():
+            has_source_entries = True
             term = raw_term.decode("utf-8", errors="ignore").strip()
             definition = raw_definition.decode("utf-8", errors="ignore").strip()
             if not term or definition.startswith("@@@LINK="):
@@ -1322,6 +1324,9 @@ def convert_mdx_to_yomitan_zip(
                 )
                 bank.clear()
                 bank_index += 1
+
+        if has_source_entries and sequence == 0:
+            raise ValueError("MDX import failed: no usable non-redirect entries were found")
 
         root_stylesheet = _build_root_stylesheet(assets, options.asset_prefix, inline_stylesheets)
         if bank:
