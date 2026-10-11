@@ -210,9 +210,15 @@ class HostState:
         return companion_uploads
 
     def _prepare_conversion_workspace(self, job_id: str, mdx_upload: Upload, companion_uploads: List[Upload]) -> Path:
+        mdx_name = Path(_normalize_logical_file_name(mdx_upload.file_name)).name
+        staged_names = {mdx_name.casefold()}
+        for upload in companion_uploads:
+            name = Path(_normalize_logical_file_name(upload.file_name)).name.casefold()
+            if name in staged_names:
+                raise ValueError(f"colliding staged file name: {upload.file_name}")
+            staged_names.add(name)
         workspace = self._tmpdir / "jobs" / job_id
         workspace.mkdir(parents=True, exist_ok=True)
-        mdx_name = Path(_normalize_logical_file_name(mdx_upload.file_name)).name
         staged_mdx_path = workspace / mdx_name
         shutil.copyfile(mdx_upload.path, staged_mdx_path)
         for upload in companion_uploads:

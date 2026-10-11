@@ -13,6 +13,7 @@ import types
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 from typing import Dict, Iterable, Iterator, List, Tuple
 from urllib.parse import unquote
 
@@ -373,6 +374,39 @@ class MdxToYomitanTests(unittest.TestCase):
 
 
 class NativeHostTests(unittest.TestCase):
+    def test_staging_rejects_colliding_selected_basenames_before_copy(self) -> None:
+        for names in [
+            ["first/fixture.mdd", "second/fixture.mdd"],
+            ["first/Fixture.mdd", "second/fixture.mdd"],
+            ["other/fixture.mdx"],
+        ]:
+            with self.subTest(names=names):
+                state = native_host.HostState()
+                try:
+                    mdx_id = state.begin_upload("fixture.mdx", 3)["uploadId"]
+                    state.upload_chunk(mdx_id, 0, base64.b64encode(b"MDX").decode("ascii"))
+                    selected = []
+                    for name in names:
+                        upload_id = state.begin_upload(name, 3)["uploadId"]
+                        state.upload_chunk(upload_id, 0, base64.b64encode(b"MDD").decode("ascii"))
+                        selected.append(upload_id)
+                    def fake_convert(_mdx: Path, archive: Path, **_kwargs: object) -> None:
+                        archive.write_bytes(b"archive")
+
+                    with patch.object(native_host.shutil, "copyfile", wraps=native_host.shutil.copyfile) as copy, patch.object(
+                        native_host, "convert_mdx_to_yomitan_zip", side_effect=fake_convert
+                    ) as convert:
+                        with self.assertRaisesRegex(ValueError, "colliding.*file name"):
+                            state.convert(mdx_id, selected, {})
+                        copy.assert_not_called()
+                        convert.assert_not_called()
+                    self.assertFalse((state._tmpdir / "jobs" / "j1").exists())
+                    self.assertEqual(state._uploads[mdx_id].path.read_bytes(), b"MDX")
+                    for upload_id in selected:
+                        self.assertEqual(state._uploads[upload_id].path.read_bytes(), b"MDD")
+                finally:
+                    state.cleanup()
+
     def test_classify_conversion_errors_returns_structured_codes(self) -> None:
         encrypted = native_host._classify_conversion_error(RuntimeError("encrypted mdx payload"))
         unsupported = native_host._classify_conversion_error(RuntimeError("unsupported compression: lzo"))
