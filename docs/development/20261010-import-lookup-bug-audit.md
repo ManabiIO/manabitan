@@ -222,3 +222,32 @@ and large-import retained heap remain unqualified. No broad suites, builds,
 browser captures, benchmarks, merges or deployment ran. A future retention change
 needs a measured readable-snapshot design that preserves exact dedup and existing
 write/publication order.
+
+## Recovery close/abort continuation (2026-10-11, America/Toronto)
+
+Starting from published PR head `76f4488de7e50b787b86ddf513a5fedae1e06040`,
+the existing public preparation regression now injects failure at descriptor
+write, descriptor close before publication, and close followed by a rejected
+abort. These are two additional boundaries of the already demonstrated swallowed
+recovery-error bug, not another production defect. The fake writable keeps bytes
+private until a successful close; its optional pre-close hook fails before that
+publication. The initial writer uses the unchanged helper defaults.
+
+All three variants fail against unchanged develop
+`e05294d263582b58bbe92c5e9f97349f6f60df31`: startup incorrectly inserts the
+terminal `Dictionary record data is missing` health record. With PR source
+restored, all three pass. The cases verify original error identity even when
+abort rejects, one abort attempt, no terminal health insertion, connection close
+and cleared opening state, an empty descriptor left unpublished, and successful
+public preparation and lookup on the same database/store after retry.
+
+The full existing focused recovery selection now passes eleven cases with 159
+skipped (170 total). The five previously passed content-store cases were not
+repeated. Scoped test-file ESLint, Markdown formatting and diff checks passed;
+ESLint emitted the existing excluded MDX vendor warning. No production source
+or allocation strategy changed. These injected
+close/abort boundaries remain adapter coverage: the fake has no browser writer
+locks, and a rejected abort does not prove a real browser releases its handle.
+Close failures after an ambiguous successful commit, actual OPFS locking, SQLite
+persistence, restart and backend message gating remain unqualified. No automatic
+retry, additional I/O, snapshot redesign, broad suite or benchmark was added.

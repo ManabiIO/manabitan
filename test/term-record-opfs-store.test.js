@@ -52,7 +52,7 @@ function asFileHandle(handle) {
 
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
- * @param {{removeEntryFailures?: Map<string, number>, truncateFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, onGetFile?: (name: string) => void, onAbort?: () => Promise<void>|void, fileFactory?: ((name: string, bytes: Uint8Array) => File|null)}} [options]
+ * @param {{removeEntryFailures?: Map<string, number>, truncateFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, beforeClose?: (name: string) => Promise<void>|void, onGetFile?: (name: string) => void, onAbort?: () => Promise<void>|void, fileFactory?: ((name: string, bytes: Uint8Array) => File|null)}} [options]
  * @returns {FileSystemDirectoryHandle}
  */
 function createFakeDirectoryHandle(
@@ -62,6 +62,7 @@ function createFakeDirectoryHandle(
         truncateFailures = new Map(),
         getFileFailures = new Map(),
         beforeWrite = () => {},
+        beforeClose = () => {},
         onGetFile = () => {},
         onAbort = () => {},
         fileFactory = () => null,
@@ -144,6 +145,7 @@ function createFakeDirectoryHandle(
                         throw new Error(`Unsupported write value: ${String(value)}`);
                     },
                     async close() {
+                        await beforeClose(name);
                         fileBytesByName.set(name, nextBytes);
                     },
                     async abort() {
@@ -4008,7 +4010,7 @@ describe('TermRecordOpfsStore', () => {
         expect(readerStore.getDictionaryHealth(dictionaryName)).toEqual({status: 'available', reason: null});
     });
 
-    test('retries descriptor recovery after a failed reconstruction leaves an empty file', async () => {
+    test.each(['write', 'close', 'close-and-abort'])('retries descriptor recovery after a %s failure leaves an empty file', async (failureStage) => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Retry descriptor recovery';
         const fileBytesByName = new Map();
@@ -4031,14 +4033,25 @@ describe('TermRecordOpfsStore', () => {
         if (typeof descriptorFileName !== 'string') { throw new Error('Expected descriptor'); }
         fileBytesByName.delete(descriptorFileName);
 
-        let failRecoveryWrite = true;
+        let failRecovery = true;
+        const recoveryError = new Error(`Injected descriptor recovery ${failureStage === 'write' ? 'write' : 'close'} failure`);
+        const abort = vi.fn(async () => {
+            if (failureStage === 'close-and-abort') { throw new Error('Injected descriptor abort failure'); }
+        });
         const failedRecoveryDirectory = createFakeDirectoryHandle(fileBytesByName, {
             beforeWrite: (name) => {
-                if (name === descriptorFileName && failRecoveryWrite) {
-                    failRecoveryWrite = false;
-                    throw new Error('Injected descriptor recovery write failure');
+                if (name === descriptorFileName && failRecovery && failureStage === 'write') {
+                    failRecovery = false;
+                    throw recoveryError;
                 }
             },
+            beforeClose(name) {
+                if (name === descriptorFileName && failRecovery && failureStage !== 'write') {
+                    failRecovery = false;
+                    throw recoveryError;
+                }
+            },
+            onAbort: abort,
         });
         const readerStore = new TermRecordOpfsStore();
         Reflect.set(readerStore, '_recordsDirectoryHandle', failedRecoveryDirectory);
@@ -4070,7 +4083,8 @@ describe('TermRecordOpfsStore', () => {
         try {
             const startupError = await database.prepare().then(() => null, (error) => error);
             expect(terminalHealthWrites).toEqual([]);
-            expect(startupError).toEqual(expect.objectContaining({message: 'Injected descriptor recovery write failure'}));
+            expect(startupError).toBe(recoveryError);
+            expect(abort).toHaveBeenCalledOnce();
             expect(database.isPrepared()).toBe(false);
             expect(Reflect.get(database, '_openingPromise')).toBeNull();
             expect(Reflect.get(database, '_isOpening')).toBe(false);
