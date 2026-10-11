@@ -1079,6 +1079,54 @@ def _migrate_css_selector(selector: str, glossary_root_selector: str) -> str:
     return re.sub(r"\s+", " ", migrated_selector).strip()
 
 
+def _scope_css_selector_subject(selector: str, glossary_root_selector: str) -> str:
+    """Guard the matched element within its definition without adding specificity."""
+    parts = _split_selector_by_combinators(selector)
+    subject_index = len(parts) - 1
+    while subject_index >= 0:
+        part = parts[subject_index]
+        if part.strip() and part not in {">", "+", "~"}:
+            break
+        subject_index -= 1
+    if subject_index < 0:
+        return selector
+    subject = parts[subject_index]
+    insertion_index = len(subject)
+    quote_char = ""
+    bracket_depth = 0
+    paren_depth = 0
+    index = 0
+    while index < len(subject):
+        char = subject[index]
+        if char == "\\":
+            index += 2
+            continue
+        if quote_char:
+            if char == quote_char:
+                quote_char = ""
+        elif char in ("'", '"'):
+            quote_char = char
+        elif char == "[":
+            bracket_depth += 1
+        elif char == "]":
+            bracket_depth = max(0, bracket_depth - 1)
+        elif char == "(":
+            paren_depth += 1
+        elif char == ")":
+            paren_depth = max(0, paren_depth - 1)
+        elif char == ":" and bracket_depth == 0 and paren_depth == 0:
+            pseudo, _ = _read_css_identifier(subject, index + 1)
+            if subject[index:index + 2] == "::" or (pseudo and pseudo.lower() in {
+                "before", "after", "first-line", "first-letter",
+            }):
+                insertion_index = index
+                break
+        index += 1
+    guard = f":where({glossary_root_selector}, {glossary_root_selector} *)"
+    parts[subject_index] = subject[:insertion_index] + guard + subject[insertion_index:]
+    return "".join(parts)
+
+
 def _find_matching_css_brace(stylesheet: str, block_start_index: int) -> int:
     depth = 0
     quote_char = ""
@@ -1113,7 +1161,9 @@ def _find_matching_css_brace(stylesheet: str, block_start_index: int) -> int:
     return len(stylesheet) - 1
 
 
-def _rewrite_css_rule_selectors(stylesheet: str, glossary_root_selector: str) -> str:
+def _rewrite_css_rule_selectors(
+    stylesheet: str, glossary_root_selector: str, *, scope_selectors: bool = False,
+) -> str:
     parts: List[str] = []
     index = 0
     while index < len(stylesheet):
@@ -1180,13 +1230,15 @@ def _rewrite_css_rule_selectors(stylesheet: str, glossary_root_selector: str) ->
                 if stripped_prelude.startswith("@"):
                     at_rule_name = stripped_prelude[1:].split(None, 1)[0].lower()
                     if at_rule_name in {"media", "supports", "layer", "container", "document"}:
-                        body = _rewrite_css_rule_selectors(body, glossary_root_selector)
+                        body = _rewrite_css_rule_selectors(body, glossary_root_selector, scope_selectors=scope_selectors)
                     parts.append(f"{prelude}{{{body}}}")
                 else:
                     migrated_selectors: List[str] = []
                     seen_selectors = set()
                     for selector in _split_css_selector_list(prelude):
                         migrated_selector = _migrate_css_selector(selector, glossary_root_selector)
+                        if scope_selectors and migrated_selector:
+                            migrated_selector = _scope_css_selector_subject(migrated_selector, glossary_root_selector)
                         if not migrated_selector or migrated_selector in seen_selectors:
                             continue
                         seen_selectors.add(migrated_selector)
@@ -1224,15 +1276,18 @@ def _migrate_stylesheet_for_yomitan(
     stylesheet: str,
     asset_prefix: str,
     source_asset_path: Optional[str],
+    *,
+    glossary_root_selector: str = _STRUCTURED_ROOT_SELECTOR,
+    scope_selectors: bool = False,
 ) -> str:
     migrated = _rewrite_css_asset_urls(stylesheet, asset_prefix, source_asset_path)
-    return _rewrite_css_rule_selectors(migrated, _STRUCTURED_ROOT_SELECTOR)
+    return _rewrite_css_rule_selectors(migrated, glossary_root_selector, scope_selectors=scope_selectors)
 
 
 def _build_root_stylesheet(
     assets: Dict[str, bytes],
     asset_prefix: str,
-    inline_stylesheets: Optional[List[tuple[str, str]]] = None,
+    inline_stylesheets: Optional[List[tuple[str, str, str]]] = None,
 ) -> Optional[str]:
     css_sections: List[str] = []
     prefix_length = len(asset_prefix)
@@ -1246,8 +1301,12 @@ def _build_root_stylesheet(
         stylesheet = _migrate_stylesheet_for_yomitan(stylesheet, asset_prefix, source_name)
         css_sections.append(f"/* Source: {source_name} */\n{stylesheet}")
 
-    for source_name, stylesheet in inline_stylesheets or []:
-        migrated_stylesheet = _migrate_stylesheet_for_yomitan(stylesheet, asset_prefix, None)
+    for source_name, stylesheet, scope_class in inline_stylesheets or []:
+        scope_selector = f'[data-sc-class~="{scope_class}"]'
+        migrated_stylesheet = _migrate_stylesheet_for_yomitan(
+            stylesheet, asset_prefix, None,
+            glossary_root_selector=scope_selector, scope_selectors=True,
+        )
         css_sections.append(f"/* Source: {source_name} */\n{migrated_stylesheet}")
 
     if not css_sections:
@@ -1270,7 +1329,7 @@ def convert_mdx_to_yomitan_zip(
     description = _extract_description(mdx, options.description_override)
     mdd_paths = explicit_mdds if explicit_mdds is not None else _discover_mdds(mdx_path)
     assets = _iter_assets(mdd_paths, options.asset_prefix) if options.include_assets else {}
-    inline_stylesheets: List[tuple[str, str]] = []
+    inline_stylesheets: List[tuple[str, str, str]] = []
 
     sequence = 0
     bank_index = 1
@@ -1299,8 +1358,11 @@ def convert_mdx_to_yomitan_zip(
             )
             for archive_path, data in definition_assets.items():
                 assets.setdefault(archive_path, data)
+            scope_class = f"mdict-yomitan-entry-{sequence}"
+            if definition_inline_stylesheets:
+                fixed_definition["content"]["data"]["class"] += f" {scope_class}"
             for stylesheet_index, stylesheet in enumerate(definition_inline_stylesheets, 1):
-                inline_stylesheets.append((f"inline/{term}-{stylesheet_index}.css", stylesheet))
+                inline_stylesheets.append((f"inline/{term}-{stylesheet_index}.css", stylesheet, scope_class))
             expressions = [term, *redirects.get(term, [])]
             for expression in expressions:
                 bank.append([
