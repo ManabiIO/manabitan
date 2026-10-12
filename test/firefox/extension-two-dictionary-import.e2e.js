@@ -1363,16 +1363,9 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
         setActiveOperation(`wait for import phase gate: ${String(phasePattern)}`);
     }
     await driver.switchTo().window(settingsWindowHandle);
-    let phaseState = await waitForImportProgressPhase(driver, phasePattern, 20_000);
+    const phaseState = await waitForImportProgressPhase(driver, phasePattern, 20_000);
     if (phaseState.ok !== true && typeof phaseState.error === 'string' && phaseState.error.length > 0 && !phaseState.error.startsWith('Timed out waiting for import progress phase')) {
         throw new Error(`Import phase gate did not reach ${String(phasePattern)}: ${JSON.stringify(phaseState)}`);
-    }
-    if (phaseState.ok !== true) {
-        phaseState = {
-            ok: false,
-            label: phaseState.label,
-            error: null,
-        };
     }
     /** @type {Array<Record<string, unknown>>} */
     const iterations = [];
@@ -3741,8 +3734,10 @@ async function main() {
         await addReportPhase(
             report,
             driver,
-            'Verify search during active Jitendex update import step',
-            `While the update UI was in Step 4 import processing, dedicated search tab kept returning Jitendex + JMdict results: ${JSON.stringify(searchDuringActiveUpdateImportResult)}`,
+            searchDuringActiveUpdateImportResult.phaseState.ok ?
+                'Verify search during active Jitendex update import step' :
+                'Record search while Jitendex update data-import phase was unobserved',
+            `Observed update phase and dedicated search results: ${JSON.stringify(searchDuringActiveUpdateImportResult)}`,
             searchDuringActiveUpdateImportStart,
             searchDuringActiveUpdateImportEnd,
         );
@@ -3784,6 +3779,9 @@ async function main() {
         );
         if (verifyUpdatedJitendexContentProfile.ok !== true) {
             fail(`Jitendex backend content integrity failed after update. diagnostics=${JSON.stringify(verifyUpdatedJitendexContentProfile)}`);
+        }
+        if (searchDuringActiveUpdateImportResult.phaseState.ok !== true) {
+            fail(`Jitendex update completed without qualifying concurrent lookup during data import: ${JSON.stringify(searchDuringActiveUpdateImportResult.phaseState)}`);
         }
 
         const searchOpenStart = safePerformance.now();
