@@ -293,9 +293,15 @@ describe('API PM transport reliability', () => {
         /** @type {MessagePort[]} */
         const receivedPorts = [];
         vi.spyOn(api, '_pmInvoke').mockImplementation(async (_action, params, transfers) => {
-            const received = structuredClone({params, responsePort: transfers[0]}, {transfer: transfers});
+            expect(_action).toBe('importDictionaryOffscreen');
+            const archiveParams = /** @type {import('api').PmApiParams<'importDictionaryOffscreen'>} */ (params);
+            const responsePort = /** @type {MessagePort} */ (transfers[0]);
+            const received = structuredClone({params: archiveParams, responsePort}, {transfer: transfers});
             receivedPorts.push(received.responsePort);
             expect(archive.byteLength).toBe(0);
+            if (!(received.params.archiveContent instanceof ArrayBuffer)) {
+                throw new Error('Expected transferred archive bytes');
+            }
             expect([...new Uint8Array(received.params.archiveContent)]).toEqual([80, 75, 5, 6]);
             received.responsePort.postMessage({type: 'complete', result: {result: null, errors: []}});
         });
