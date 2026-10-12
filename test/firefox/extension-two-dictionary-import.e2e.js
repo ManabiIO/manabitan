@@ -1200,6 +1200,8 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
     const emptyStabilityMs = 2_000;
     let lastCountsText = '';
     const expectedInstalled = expectedCounts.split(',')[0];
+    const expectedNames = dictionaryName.toLowerCase().replace(' batch import', '').split('+').map((name) => name.trim());
+    let completionObserved = false;
 
     while (safePerformance.now() < deadline) {
         const now = safePerformance.now();
@@ -1209,6 +1211,23 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
         }
         const currentLabel = await getImportProgressLabel(driver);
         lastCountsText = await getDictionaryCountsText(driver);
+        if (currentLabel.length === 0) {
+            // Progress widgets and installed counts can settle while the
+            // replacement import still owns publication. The existing timing
+            // history is cleared at import admission and written at completion.
+            completionObserved = (await driver.executeScript(`
+                const names = arguments[0];
+                const debug = globalThis.__manabitanLastImportDebug;
+                const timings = globalThis.__manabitanImportStepTimingHistory;
+                const titles = [debug?.dictionaryTitle, debug?.resultTitle, debug?.sourceTitle]
+                    .filter(value => typeof value === 'string').map(value => value.toLowerCase());
+                return debug?.hasResult === true && Number(debug.errorCount || 0) === 0
+                    && Array.isArray(timings) && timings.length > 0
+                    && names.some(name => titles.some(title => title.includes(name)));
+            `, expectedNames)) === true;
+        } else {
+            completionObserved = false;
+        }
         if (currentLabel.includes('Step ')) {
             sawStepText = true;
             emptySince = null;
@@ -1228,7 +1247,7 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
             previousLabelStart = now;
         }
 
-        if (sawStepText && currentLabel.length === 0 && lastCountsText.split(',')[0] === expectedInstalled) {
+        if (sawStepText && currentLabel.length === 0 && completionObserved && lastCountsText.split(',')[0] === expectedInstalled) {
             emptySince ??= now;
             if ((now - emptySince) >= emptyStabilityMs) {
                 clearedAfterStep = true;
@@ -1260,7 +1279,7 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
             emptySince = null;
         }
 
-        if (currentLabel.length === 0 && lastCountsText === expectedCounts) {
+        if (currentLabel.length === 0 && completionObserved && lastCountsText === expectedCounts) {
             emptySince ??= now;
             if ((now - emptySince) >= emptyStabilityMs) {
                 if (previousLabel.length > 0) {
@@ -1290,7 +1309,7 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
 
     const countsText = lastCountsText || await getDictionaryCountsText(driver);
     const errorText = await getDictionaryErrorText(driver);
-    if (errorText.length === 0 && countsText === expectedCounts) {
+    if (errorText.length === 0 && completionObserved && countsText === expectedCounts) {
         const now = safePerformance.now();
         await addReportPhase(
             report,
