@@ -1122,9 +1122,14 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
     // Like Chromium, explicitly select the imported dictionaries for this
     // lookup scenario. Import completion does not prove profile enablement.
     const selection = await enableInstalledDictionariesForLookup(driver);
-    await addReportPhase(report, driver, `${dictionaryName}: enable installed dictionaries`,
+    await addReportPhase(
+        report,
+        driver,
+        `${dictionaryName}: enable installed dictionaries`,
         `Selected installed dictionary settings in profile 0 for subsequent lookup assertions: ${JSON.stringify(selection)}`,
-        started, safePerformance.now());
+        started,
+        safePerformance.now(),
+    );
 }
 
 /**
@@ -1132,7 +1137,8 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
  * @returns {Promise<unknown>}
  */
 async function enableInstalledDictionariesForLookup(driver) {
-    const result = /** @type {unknown} */ (await driver.executeAsyncScript(`
+    return await driver.wait(async () => {
+        const result = /** @type {unknown} */ (await driver.executeAsyncScript(`
         const done = arguments[arguments.length - 1];
         const send = (action, params) => new Promise((resolve, reject) => {
             chrome.runtime.sendMessage({action, params}, response => {
@@ -1149,7 +1155,7 @@ async function enableInstalledDictionariesForLookup(driver) {
             const targets = [];
             for (const title of titles) {
                 const index = options.dictionaries.findIndex(row => row.name === title);
-                if (index < 0) { throw new Error('Imported dictionary has no profile setting: ' + title); }
+                if (index < 0) { done({pending: true, dictionary: title}); return; }
                 if (options.dictionaries[index].enabled !== true) {
                     targets.push({scope: 'profile', optionsContext: {index: 0}, action: 'set',
                         path: 'dictionaries[' + index + '].enabled', value: true});
@@ -1166,11 +1172,13 @@ async function enableInstalledDictionariesForLookup(driver) {
             }
             done({ok: true, installed: titles, enabled});
         })().catch(error => done({ok: false, error: String(error)}));
-    `));
-    if (typeof result !== 'object' || result === null || Array.isArray(result) || Reflect.get(result, 'ok') !== true) {
-        fail(`Could not select installed dictionaries for Firefox lookup: ${JSON.stringify(result)}`);
-    }
-    return result;
+        `));
+        if (typeof result === 'object' && result !== null && Reflect.get(result, 'pending') === true) { return false; }
+        if (typeof result !== 'object' || result === null || Array.isArray(result) || Reflect.get(result, 'ok') !== true) {
+            fail(`Could not select installed dictionaries for Firefox lookup: ${JSON.stringify(result)}`);
+        }
+        return result;
+    }, 30_000, 'Imported dictionary profile settings were not published before lookup selection');
 }
 
 /**
@@ -1191,6 +1199,7 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
     let emptySince = null;
     const emptyStabilityMs = 2_000;
     let lastCountsText = '';
+    const expectedInstalled = expectedCounts.split(',')[0];
 
     while (safePerformance.now() < deadline) {
         const now = safePerformance.now();
@@ -1219,7 +1228,7 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
             previousLabelStart = now;
         }
 
-        if (sawStepText && currentLabel.length === 0) {
+        if (sawStepText && currentLabel.length === 0 && lastCountsText.split(',')[0] === expectedInstalled) {
             emptySince ??= now;
             if ((now - emptySince) >= emptyStabilityMs) {
                 clearedAfterStep = true;
