@@ -169,10 +169,10 @@ export class PermissionsToggleController {
 
     /**
      * @param {HTMLInputElement} toggle
-     * @returns {chrome.runtime.ManifestPermission[]}
+     * @returns {NonNullable<chrome.permissions.Permissions['permissions']>}
      */
     _getRequiredPermissions(toggle) {
         const requiredPermissions = toggle.dataset.requiredPermissions;
-        return (typeof requiredPermissions === 'string' && requiredPermissions.length > 0 ? /** @type {chrome.runtime.ManifestPermission[]} */ (requiredPermissions.split(' ')) : []);
+        return (typeof requiredPermissions === 'string' && requiredPermissions.length > 0 ? /** @type {NonNullable<chrome.permissions.Permissions['permissions']>} */ (requiredPermissions.split(' ')) : []);
     }
 }

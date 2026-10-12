@@ -142,6 +142,9 @@ jobs:
           path: |
             builds/firefox-e2e-import-report.html
             builds/firefox-e2e-import-report.json
+            builds/firefox-e2e-import-report-geckodriver.log
+            builds/firefox-e2e-import-report-live.json
+            builds/firefox-e2e-import-report-crash/
             builds/extension-e2e-report.html
           if-no-files-found: ignore
 
@@ -185,7 +188,8 @@ jobs:
           const runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;
           const opfsReady = runtime !== null && (
             runtime.hasStorageGetDirectory === true &&
-            runtime.hasCreateSyncAccessHandle === true &&
+            (runtime.hasCreateSyncAccessHandle === true ||
+             runtime.openStorageDiagnostics?.runtimeContext?.hasCreateSyncAccessHandle === true) &&
             runtime.hasOpfsSahpoolVfs === true &&
             runtime.openStorageMode === 'opfs-sahpool'
           );
@@ -235,7 +239,8 @@ jobs:
           };
           const opfsReady = runtime ? (
             runtime.hasStorageGetDirectory === true &&
-            runtime.hasCreateSyncAccessHandle === true &&
+            (runtime.hasCreateSyncAccessHandle === true ||
+             runtime.openStorageDiagnostics?.runtimeContext?.hasCreateSyncAccessHandle === true) &&
             runtime.hasOpfsSahpoolVfs === true &&
             runtime.openStorageMode === 'opfs-sahpool'
           ) : null;
@@ -313,7 +318,8 @@ jobs:
           const runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;
           const opfsReady = runtime !== null && (
             runtime.hasStorageGetDirectory === true &&
-            runtime.hasCreateSyncAccessHandle === true &&
+            (runtime.hasCreateSyncAccessHandle === true ||
+             runtime.openStorageDiagnostics?.runtimeContext?.hasCreateSyncAccessHandle === true) &&
             runtime.hasOpfsSahpoolVfs === true &&
             runtime.openStorageMode === 'opfs-sahpool'
           );
@@ -363,7 +369,8 @@ jobs:
           };
           const opfsReady = runtime ? (
             runtime.hasStorageGetDirectory === true &&
-            runtime.hasCreateSyncAccessHandle === true &&
+            (runtime.hasCreateSyncAccessHandle === true ||
+             runtime.openStorageDiagnostics?.runtimeContext?.hasCreateSyncAccessHandle === true) &&
             runtime.hasOpfsSahpoolVfs === true &&
             runtime.openStorageMode === 'opfs-sahpool'
           ) : null;

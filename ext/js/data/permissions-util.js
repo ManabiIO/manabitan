@@ -101,7 +101,7 @@ export function getAllPermissions() {
 
 /**
  * @param {string} fieldValue
- * @returns {chrome.runtime.ManifestPermission[]}
+ * @returns {NonNullable<chrome.permissions.Permissions['permissions']>}
  */
 export function getRequiredPermissionsForAnkiFieldValue(fieldValue) {
     const markers = getFieldMarkers(fieldValue);

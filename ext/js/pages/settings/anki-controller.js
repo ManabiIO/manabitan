@@ -194,7 +194,7 @@ export class AnkiController {
 
     /**
      * @param {string} fieldValue
-     * @returns {chrome.runtime.ManifestPermission[]}
+     * @returns {NonNullable<chrome.permissions.Permissions['permissions']>}
      */
     getRequiredPermissions(fieldValue) {
         return getRequiredPermissionsForAnkiFieldValue(fieldValue);
@@ -1239,7 +1239,7 @@ class AnkiCardController {
     }
 
     /**
-     * @param {chrome.runtime.ManifestPermission[]} permissions
+     * @param {NonNullable<chrome.permissions.Permissions['permissions']>} permissions
      */
     async _requestPermissions(permissions) {
         try {

@@ -672,7 +672,7 @@ async function reloadExtensionRuntime(driver, extensionBaseUrl) {
         // Expected when the current extension context is discarded during reload.
     }
     await driver.sleep(2_000);
-    await waitForExtensionBaseUrl(driver, firefoxDevExtensionUuid);
+    await waitForExtensionBaseUrl(driver);
     await navigateToExtensionPage(
         driver,
         `${extensionBaseUrl}/settings.html`,
@@ -1322,37 +1322,23 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
  * @returns {Promise<string>}
  * @throws {Error}
  */
-async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
-    // Add-on installation can leave Marionette in privileged chrome scope.
-    // Window enumeration and extension pages require ordinary content scope.
+async function waitForExtensionBaseUrl(driver, installedAddonId = firefoxDevGeckoId) {
+    // installAddon returns the manifest's Gecko ID, not the moz-extension UUID.
+    // The profile preference above maps this development build to a fixed UUID.
+    if (installedAddonId !== firefoxDevGeckoId) {
+        fail(`Unexpected installed add-on ID: ${installedAddonId}; expected ${firefoxDevGeckoId}`);
+    }
+    const expectedBaseUrl = `moz-extension://${firefoxDevExtensionUuid}`;
     await driver.setContext(firefox.Context.CONTENT);
-    const normalizedAddonId = String(installedAddonId || '').trim();
-    const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
-    const deadline = Date.now() + 30_000;
-    let fallbackBaseUrl = '';
-    while (Date.now() < deadline) {
-        const handlesUnknown = /** @type {unknown} */ (await driver.getAllWindowHandles());
-        const handles = Array.isArray(handlesUnknown) ? handlesUnknown.map(String) : [];
-        for (const handle of handles) {
-            await driver.switchTo().window(handle);
-            const url = String(await driver.getCurrentUrl());
-            const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/.exec(url);
-            if (match !== null) {
-                fallbackBaseUrl = match[1];
-                if (expectedBaseUrl.length === 0 || expectedBaseUrl === match[1]) {
-                    return match[1];
-                }
-            }
-        }
-        await driver.sleep(500);
-    }
-    if (fallbackBaseUrl.length > 0) {
-        return fallbackBaseUrl;
-    }
-    if (expectedBaseUrl.length > 0) {
-        return expectedBaseUrl;
-    }
-    fail('Failed to discover moz-extension base URL from open tabs.');
+    // Content scope can still select a privileged about: page. Navigate to and
+    // verify the actual extension page before a phase attempts a screenshot.
+    await navigateToExtensionPage(
+        driver,
+        `${expectedBaseUrl}/settings.html`,
+        By.css('#dictionary-import-file-input'),
+        {attempts: 3, pageLoadTimeoutMs: 15_000, readyTimeoutMs: 30_000},
+    );
+    return expectedBaseUrl;
 }
 
 /**
