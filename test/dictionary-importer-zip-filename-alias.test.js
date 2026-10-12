@@ -58,7 +58,8 @@ describe('DictionaryImporter ZIP filename aliases', () => {
             expect(result.result).toBeNull();
             expect(result.errors[0].message).toBe('Unsupported dictionary format version: 999');
             if (debugImportLogging) {
-                expect(onDebug.mock.calls.slice(0, 3).map(([message]) => message)).toEqual([
+                const phaseMessages = onDebug.mock.calls.map(([message]) => message).filter((message) => !message.startsWith('archive catalog reader ') && !message.startsWith('archive catalog read '));
+                expect(phaseMessages.slice(0, 3)).toEqual([
                     'archive catalog begin', 'archive catalog complete files=1', 'index read begin',
                 ]);
                 expect(onDebug).not.toHaveBeenCalledWith('index read complete');
@@ -66,6 +67,57 @@ describe('DictionaryImporter ZIP filename aliases', () => {
                 expect(onDebug).not.toHaveBeenCalled();
             }
         } finally {
+            preparedSpy.mockRestore();
+            consoleSpy.mockRestore();
+        }
+    });
+
+    test('identifies an unresolved Blob catalog read and stops range diagnostics after catalog completion', async () => {
+        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Test', revision: '1', format: 999})));
+        const bytes = await writer.close();
+        /** @type {() => void} */
+        let releaseRead = () => {};
+        const readGate = new Promise((resolve) => { releaseRead = () => resolve(undefined); });
+        class GatedBlob extends Blob {
+            /**
+             * @param {number} [start]
+             * @param {number} [end]
+             * @param {string} [contentType]
+             * @returns {Blob}
+             */
+            slice(start, end, contentType) {
+                const result = super.slice(start, end, contentType);
+                const arrayBuffer = result.arrayBuffer.bind(result);
+                result.arrayBuffer = async () => {
+                    await readGate;
+                    return await arrayBuffer();
+                };
+                return result;
+            }
+        }
+        const database = new DictionaryDatabase();
+        const preparedSpy = vi.spyOn(database, 'isPrepared').mockReturnValue(true);
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+        const onDebug = vi.fn();
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), undefined, onDebug);
+        const importPromise = importer.importDictionary(database, new GatedBlob([bytes]), {debugImportLogging: true});
+        const tailOffset = bytes.byteLength - 22;
+        try {
+            await vi.waitFor(() => expect(onDebug).toHaveBeenCalledWith(`archive catalog read begin offset=${tailOffset} length=22`));
+            expect(onDebug).not.toHaveBeenCalledWith(expect.stringContaining('archive catalog read complete'));
+            expect(onDebug).not.toHaveBeenCalledWith('index read begin');
+            releaseRead();
+            const result = await importPromise;
+            expect(result.errors[0].message).toBe('Unsupported dictionary format version: 999');
+            const messages = onDebug.mock.calls.map(([message]) => message);
+            expect(messages).toContain(`archive catalog read complete offset=${tailOffset} length=22 bytes=22`);
+            const indexReadPosition = messages.indexOf('index read begin');
+            expect(indexReadPosition).toBeGreaterThan(0);
+            expect(messages.slice(indexReadPosition).some((message) => message.startsWith('archive catalog read '))).toBe(false);
+        } finally {
+            releaseRead();
+            await importPromise;
             preparedSpy.mockRestore();
             consoleSpy.mockRestore();
         }

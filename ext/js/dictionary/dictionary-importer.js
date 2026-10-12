@@ -2164,7 +2164,26 @@ export class DictionaryImporter {
                 new Uint8ArrayReader(new Uint8Array(archiveContent))
         );
         const zipReader = /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} */ (new ZipReader(zipFileReader));
-        const zipEntries = await zipReader.getEntries();
+        const readUint8Array = zipFileReader.readUint8Array;
+        if (this._debugImportLogging) {
+            const kind = archiveContent instanceof Blob ? 'blob' : 'buffer';
+            this._logImport(`archive catalog reader kind=${kind} size=${zipFileReader.size}`);
+            zipFileReader.readUint8Array = async (offset, length) => {
+                this._logImport(`archive catalog read begin offset=${offset} length=${length}`);
+                const bytes = await readUint8Array.call(zipFileReader, offset, length);
+                this._logImport(`archive catalog read complete offset=${offset} length=${length} bytes=${bytes.byteLength}`);
+                return bytes;
+            };
+        }
+        let zipEntries;
+        try {
+            zipEntries = await zipReader.getEntries();
+        } finally {
+            // Retain the original reader for subsequent index and bank reads.
+            if (this._debugImportLogging) {
+                zipFileReader.readUint8Array = readUint8Array;
+            }
+        }
         /** @type {import('dictionary-importer').ArchiveFileMap} */
         const fileMap = new Map();
         for (const entry of zipEntries) {
