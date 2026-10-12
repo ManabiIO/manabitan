@@ -435,7 +435,7 @@ export class Offscreen {
             await this._invokeDictionaryWorker(
                 'importDictionaryOffscreen',
                 {archiveContent, details},
-                [workerChannel.port2],
+                archiveContent instanceof ArrayBuffer ? [workerChannel.port2, archiveContent] : [workerChannel.port2],
             );
         } catch (error) {
             postResponse({type: 'error', error: ExtensionError.serialize(error)}, true);

@@ -403,14 +403,14 @@ export class DictionaryImportController {
     // Private
 
     /**
-     * @param {File} archiveContent
+     * @param {File|ArrayBuffer} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
      * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}>}
      */
     async _tryImportDictionaryOffscreen(archiveContent, details, onProgress) {
-        if (!(archiveContent instanceof Blob)) {
-            throw new Error('Dictionary import requires Blob-backed archive content');
+        if (!(archiveContent instanceof Blob) && !(archiveContent instanceof ArrayBuffer)) {
+            throw new Error('Dictionary import requires Blob or ArrayBuffer archive content');
         }
         return /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
             await this._settingsController.application.api.importDictionaryOffscreen(archiveContent, details, onProgress)
@@ -1987,12 +1987,16 @@ export class DictionaryImportController {
         });
 
         const readStartTime = safePerformance.now();
-        const archiveContent = file;
+        // Firefox can leave a page-owned File's sliced Blob read pending after
+        // the backend port and dictionary worker clone it. Read it in its
+        // owning page and transfer the bytes through both boundaries instead.
+        const useArchiveBuffer = !('serviceWorker' in navigator);
+        const archiveContent = useArchiveBuffer ? await file.arrayBuffer() : file;
         const readEndTime = safePerformance.now();
         log.log(`[ImportTiming] [${dictionaryTitle}] prepared archive handle ${formatDurationMs(readEndTime - readStartTime)}`);
         recordLocalPhase('read-archive', readStartTime, readEndTime, {
             sizeBytes: file.size,
-            source: 'file-handle',
+            source: useArchiveBuffer ? 'transferred-buffer' : 'file-handle',
         });
 
         const workerImportStartTime = safePerformance.now();

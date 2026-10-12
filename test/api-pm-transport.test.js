@@ -284,6 +284,31 @@ describe('API PM transport reliability', () => {
         }
     });
 
+    test('file archive buffer transfers ownership to the backend with the response port', async () => {
+        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {serviceWorker: {}}});
+        const channel = new NativeMessageChannel();
+        vi.spyOn(globalThis, 'MessageChannel').mockImplementation(() => /** @type {MessageChannel} */ (/** @type {unknown} */ (channel)));
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        const archive = new Uint8Array([80, 75, 5, 6]).buffer;
+        /** @type {MessagePort[]} */
+        const receivedPorts = [];
+        vi.spyOn(api, '_pmInvoke').mockImplementation(async (_action, params, transfers) => {
+            const received = structuredClone({params, responsePort: transfers[0]}, {transfer: transfers});
+            receivedPorts.push(received.responsePort);
+            expect(archive.byteLength).toBe(0);
+            expect([...new Uint8Array(received.params.archiveContent)]).toEqual([80, 75, 5, 6]);
+            received.responsePort.postMessage({type: 'complete', result: {result: null, errors: []}});
+        });
+        try {
+            await expect(api.importDictionaryOffscreen(archive, {}, null)).resolves.toEqual({result: null, errors: []});
+            expect(api._shutdownRejectors.size).toBe(0);
+        } finally {
+            for (const receivedPort of receivedPorts) { receivedPort.close(); }
+            channel.port1.close();
+            channel.port2.close();
+        }
+    });
+
     test('import timeout retains the last diagnostic without extending the deadline', async () => {
         vi.useFakeTimers();
         Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {serviceWorker: {}}});

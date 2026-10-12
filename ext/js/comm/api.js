@@ -566,13 +566,13 @@ export class API {
     }
 
     /**
-     * @param {Blob} archiveContent
+     * @param {ArrayBuffer|Blob} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
      * @returns {Promise<unknown>}
      */
     importDictionaryOffscreen(archiveContent, details, onProgress) {
-        return this._importDictionaryRuntime('importDictionaryOffscreen', {archiveContent, details}, onProgress, 'Dictionary runtime import');
+        return this._importDictionaryRuntime('importDictionaryOffscreen', {archiveContent, details}, onProgress, 'Dictionary runtime import', archiveContent instanceof ArrayBuffer ? [archiveContent] : []);
     }
 
     /**
@@ -591,9 +591,10 @@ export class API {
      * @param {import('api').PmApiParams<TAction>} params
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
      * @param {string} label
+     * @param {Transferable[]} [archiveTransfers]
      * @returns {Promise<unknown>}
      */
-    _importDictionaryRuntime(action, params, onProgress, label) {
+    _importDictionaryRuntime(action, params, onProgress, label, archiveTransfers = []) {
         const pmTransportError = this._getPmTransportError();
         if (pmTransportError !== null) {
             return Promise.reject(pmTransportError);
@@ -681,7 +682,7 @@ export class API {
                 shutdownReject(new Error(`${label} response channel failed`));
             };
             try {
-                void this._pmInvoke(action, params, [channel.port2]).catch((error) => {
+                void this._pmInvoke(action, params, [channel.port2, ...archiveTransfers]).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {

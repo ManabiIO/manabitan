@@ -44,6 +44,65 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         vi.restoreAllMocks();
     });
 
+    test.each([true, false])('file import reads the owning page before Firefox transfer=%s', async (firefoxTransport) => {
+        const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: firefoxTransport ? {} : {serviceWorker: {}}});
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+        const controller = createControllerForInternalTests();
+        const file = new File([new Uint8Array([80, 75, 5, 6])], 'replacement.zip', {type: 'application/zip'});
+        const readArchive = vi.spyOn(file, 'arrayBuffer');
+        const importDictionaryOffscreen = vi.fn().mockResolvedValue({result: null, errors: []});
+        Reflect.set(controller, '_settingsController', {application: {api: {importDictionaryOffscreen}}});
+        Reflect.set(controller, '_finalizeImportedDictionaryResult', vi.fn().mockResolvedValue({errors: [], importedTitle: null}));
+        const details = {dictionaryTitleOverride: 'Test [update-staging abc]', updateSessionToken: 'abc'};
+        const onProgress = vi.fn();
+        try {
+            await importDictionaryFromZip.call(controller, file, null, details, false, false, 1, onProgress);
+            expect(importDictionaryOffscreen).toHaveBeenCalledOnce();
+            const [archive, receivedDetails, receivedProgress] = importDictionaryOffscreen.mock.calls[0];
+            expect(receivedDetails).toEqual(details);
+            expect(receivedProgress).toBe(onProgress);
+            if (firefoxTransport) {
+                expect(readArchive).toHaveBeenCalledOnce();
+                expect(archive).toBeInstanceOf(ArrayBuffer);
+                expect([...new Uint8Array(archive)]).toEqual([80, 75, 5, 6]);
+            } else {
+                expect(readArchive).not.toHaveBeenCalled();
+                expect(archive).toBe(file);
+            }
+        } finally {
+            if (typeof navigatorDescriptor === 'undefined') {
+                Reflect.deleteProperty(globalThis, 'navigator');
+            } else {
+                Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
+            }
+        }
+    });
+
+    test('owner-page file read failure rejects before admitting a runtime import', async () => {
+        const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {}});
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+        const controller = createControllerForInternalTests();
+        const file = new File(['unreadable archive'], 'replacement.zip');
+        vi.spyOn(file, 'arrayBuffer').mockRejectedValue(new Error('Archive owner read failed'));
+        const importDictionaryOffscreen = vi.fn();
+        const finalize = vi.fn();
+        Reflect.set(controller, '_settingsController', {application: {api: {importDictionaryOffscreen}}});
+        Reflect.set(controller, '_finalizeImportedDictionaryResult', finalize);
+        try {
+            await expect(importDictionaryFromZip.call(controller, file, null, {}, false, false, 1, vi.fn())).rejects.toThrow('Archive owner read failed');
+            expect(importDictionaryOffscreen).not.toHaveBeenCalled();
+            expect(finalize).not.toHaveBeenCalled();
+        } finally {
+            if (typeof navigatorDescriptor === 'undefined') {
+                Reflect.deleteProperty(globalThis, 'navigator');
+            } else {
+                Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
+            }
+        }
+    });
+
     test('skips profile dictionary rewrites for profiles without carried-over update settings', async () => {
         const controller = createControllerForInternalTests();
         Reflect.set(controller, '_activeImportRunGeneration', 1);

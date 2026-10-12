@@ -561,7 +561,7 @@ type PmApiSurface = {
     };
     importDictionaryOffscreen: {
         params: {
-            archiveContent: Blob;
+            archiveContent: ArrayBuffer | Blob;
             details: DictionaryImporter.ImportDetails;
         };
         return: void;

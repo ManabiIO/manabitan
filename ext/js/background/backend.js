@@ -521,19 +521,20 @@ export class Backend {
     }
 
     /**
-     * @param {Blob} archiveContent
+     * @param {ArrayBuffer|Blob} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {MessagePort} responsePort
      * @returns {Promise<void>}
      */
     async _forwardDictionaryImportToRuntime(archiveContent, details, responsePort) {
+        const transfers = archiveContent instanceof ArrayBuffer ? [responsePort, archiveContent] : [responsePort];
         if (this._offscreen !== null) {
             await this._offscreen.prepare();
-            await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
+            await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, transfers);
             return;
         }
         if (this._localDictionaryRuntime !== null) {
-            await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, [responsePort]);
+            await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, transfers);
             return;
         }
         throw new Error('Dictionary runtime import is unavailable');

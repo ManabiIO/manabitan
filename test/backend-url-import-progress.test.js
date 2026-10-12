@@ -20,6 +20,31 @@ import {describe, expect, test, vi} from 'vitest';
 const {Backend} = await import('../ext/js/background/backend.js');
 
 describe('Backend URL import progress', () => {
+    test.each(['_localDictionaryRuntime', '_offscreen'])('forwards owned archive bytes into %s without a Blob clone', async (runtimeKey) => {
+        const channel = new MessageChannel();
+        const archive = new Uint8Array([80, 75, 5, 6]).buffer;
+        /** @type {MessagePort[]} */
+        const receivedPorts = [];
+        const runtime = {
+            prepare: vi.fn(async () => {}),
+            sendMessageViaPort: vi.fn(async (message, transfers) => {
+                const received = structuredClone({message, responsePort: transfers[0]}, {transfer: transfers});
+                receivedPorts.push(received.responsePort);
+                expect(archive.byteLength).toBe(0);
+                expect([...new Uint8Array(received.message.params.archiveContent)]).toEqual([80, 75, 5, 6]);
+            }),
+        };
+        const context = {_offscreen: null, _localDictionaryRuntime: null, [runtimeKey]: runtime};
+        try {
+            await Reflect.get(Backend.prototype, '_forwardDictionaryImportToRuntime').call(context, archive, {}, channel.port2);
+            expect(runtime.sendMessageViaPort).toHaveBeenCalledOnce();
+        } finally {
+            for (const receivedPort of receivedPorts) { receivedPort.close(); }
+            channel.port1.close();
+            channel.port2.close();
+        }
+    });
+
     test('_onPmImportDictionaryUrlOffscreen reports download progress before forwarding to runtime', async () => {
         const responsePort = {
             postMessage: vi.fn(),
