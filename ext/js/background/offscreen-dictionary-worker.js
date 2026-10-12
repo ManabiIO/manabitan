@@ -170,8 +170,19 @@ class OffscreenDictionaryWorkerHandler {
      */
     async _importDictionaryOffscreen(details, archiveContent, port) {
         this._assertDatabaseAvailable('importDictionaryOffscreen');
+        /** @param {string} message */
+        const onDebug = (message) => {
+            if (details.debugImportLogging !== true) { return; }
+            try {
+                port.postMessage({type: 'debug', message});
+            } catch (_) {
+                // Diagnostic delivery must not change import ownership or completion.
+            }
+        };
+        onDebug('worker database prepare begin');
         await this._ensureDatabasePrepared();
-        const dictionaryImporter = new DictionaryImporter(this._mediaLoader, this._postImportProgress.bind(this, port));
+        onDebug('worker database prepare complete');
+        const dictionaryImporter = new DictionaryImporter(this._mediaLoader, this._postImportProgress.bind(this, port), onDebug);
         try {
             const importPayload = await dictionaryImporter.importDictionary(this._dictionaryDatabase, archiveContent, details);
             const {result, errors, debug} = importPayload;

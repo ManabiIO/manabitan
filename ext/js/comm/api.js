@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {log} from '../core/log.js';
 
 const pmTransportTimeoutMs = 10_000;
 const apiInvokeTimeoutMs = 30_000;
@@ -600,6 +601,8 @@ export class API {
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
             let settled = false;
+            /** @type {string|null} */
+            let lastDebugMessage = null;
             /** @param {unknown} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
@@ -616,7 +619,8 @@ export class API {
             this._shutdownRejectors.add(shutdownReject);
             const timeoutMs = 150_000;
             const timeoutId = globalThis.setTimeout(() => {
-                shutdownReject(new Error(`${label} response timed out after ${String(timeoutMs)}ms`));
+                const diagnostic = lastDebugMessage === null ? '' : `; last importer diagnostic: ${lastDebugMessage}`;
+                shutdownReject(new Error(`${label} response timed out after ${String(timeoutMs)}ms${diagnostic}`));
             }, timeoutMs);
             channel.port1.onmessage = (event) => {
                 if (settled) { return; }
@@ -626,9 +630,15 @@ export class API {
                     eventData !== null &&
                     !Array.isArray(eventData)
                 ) ?
-                    /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
+                    /** @type {{type?: string, message?: unknown, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
                     null;
                 switch (data?.type) {
+                    case 'debug':
+                        if (typeof data.message === 'string') {
+                            lastDebugMessage = data.message;
+                            log.log(`[manabitan-import] ${data.message}`);
+                        }
+                        return;
                     case 'progress':
                         onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
                         return;

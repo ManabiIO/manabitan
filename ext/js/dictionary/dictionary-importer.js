@@ -467,12 +467,15 @@ export class DictionaryImporter {
     /**
      * @param {import('dictionary-importer-media-loader').GenericMediaLoader} mediaLoader
      * @param {import('dictionary-importer').OnProgressCallback} [onProgress]
+     * @param {(message: string) => void} [onDebug]
      */
-    constructor(mediaLoader, onProgress) {
+    constructor(mediaLoader, onProgress, onDebug) {
         /** @type {import('dictionary-importer-media-loader').GenericMediaLoader} */
         this._mediaLoader = mediaLoader;
         /** @type {import('dictionary-importer').OnProgressCallback} */
         this._onProgress = typeof onProgress === 'function' ? onProgress : () => {};
+        /** @type {((message: string) => void)|undefined} */
+        this._onDebug = onDebug;
         /** @type {import('dictionary-importer').ProgressData} */
         this._progressData = this._createProgressData();
         /** @type {number} */
@@ -701,8 +704,12 @@ export class DictionaryImporter {
             if (archiveContent === null) {
                 throw new Error('Archive content is no longer available');
             }
+            this._logImport('archive catalog begin');
             ({fileMap, zipReader: archiveReader} = await this._getFilesFromArchive(archiveContent));
+            this._logImport(`archive catalog complete files=${fileMap.size}`);
+            this._logImport('index read begin');
             index = await this._readAndValidateIndex(fileMap);
+            this._logImport('index read complete');
         } catch (e) {
             recordPhaseTiming('archive-and-index', tArchiveStart, {ok: false});
             return {
@@ -2289,6 +2296,7 @@ export class DictionaryImporter {
         }
         // eslint-disable-next-line no-console
         console.log(`[manabitan-import] ${message}`);
+        this._onDebug?.(message);
     }
 
     /**

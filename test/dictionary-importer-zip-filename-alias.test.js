@@ -16,7 +16,8 @@
  */
 
 import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js';
-import {describe, expect, test} from 'vitest';
+import {describe, expect, test, vi} from 'vitest';
+import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
@@ -43,6 +44,33 @@ async function createLegacyFilenameArchive() {
 }
 
 describe('DictionaryImporter ZIP filename aliases', () => {
+    test.each([true, false])('relays archive/index diagnostics only when enabled=%s', async (debugImportLogging) => {
+        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Test', revision: '1', format: 999})));
+        const bytes = await writer.close();
+        const database = new DictionaryDatabase();
+        const preparedSpy = vi.spyOn(database, 'isPrepared').mockReturnValue(true);
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+        const onDebug = vi.fn();
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), undefined, onDebug);
+        try {
+            const result = await importer.importDictionary(database, new Uint8Array(bytes).buffer, {debugImportLogging});
+            expect(result.result).toBeNull();
+            expect(result.errors[0].message).toBe('Unsupported dictionary format version: 999');
+            if (debugImportLogging) {
+                expect(onDebug.mock.calls.slice(0, 3).map(([message]) => message)).toEqual([
+                    'archive catalog begin', 'archive catalog complete files=1', 'index read begin',
+                ]);
+                expect(onDebug).not.toHaveBeenCalledWith('index read complete');
+            } else {
+                expect(onDebug).not.toHaveBeenCalled();
+            }
+        } finally {
+            preparedSpy.mockRestore();
+            consoleSpy.mockRestore();
+        }
+    });
+
     test('indexes UTF-8 raw filenames alongside mojibake decoded ZIP names', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const archiveContent = await createLegacyFilenameArchive();

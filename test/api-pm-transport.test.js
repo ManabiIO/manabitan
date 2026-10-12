@@ -15,7 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {MessageChannel as NativeMessageChannel} from 'node:worker_threads';
 import {afterEach, describe, expect, test, vi} from 'vitest';
+import {log} from '../ext/js/core/log.js';
 
 const {API} = await import('../ext/js/comm/api.js');
 
@@ -257,6 +259,54 @@ describe('API PM transport reliability', () => {
 
         await expectation;
         expect(api._shutdownRejectors.size).toBe(0);
+    });
+
+    test('import diagnostics remain separate from progress and preserve completion', async () => {
+        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {serviceWorker: {}}});
+        const channel = new NativeMessageChannel();
+        vi.spyOn(globalThis, 'MessageChannel').mockImplementation(() => /** @type {MessageChannel} */ (/** @type {unknown} */ (channel)));
+        const logSpy = vi.spyOn(log, 'log').mockImplementation(() => {});
+        const onProgress = vi.fn();
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockImplementation(async () => {
+            channel.port2.postMessage({type: 'debug', message: 'index read begin'});
+            channel.port2.postMessage({type: 'progress', progress: {index: 1, count: 2}});
+            channel.port2.postMessage({type: 'complete', result: {result: {title: 'Test'}, errors: []}});
+        });
+        try {
+            await expect(api.importDictionaryOffscreen(new Blob([]), /** @type {import('dictionary-importer').ImportDetails} */ ({}), onProgress)).resolves.toEqual({result: {title: 'Test'}, errors: []});
+            expect(logSpy).toHaveBeenCalledWith('[manabitan-import] index read begin');
+            expect(onProgress).toHaveBeenCalledExactlyOnceWith({index: 1, count: 2});
+            expect(api._shutdownRejectors.size).toBe(0);
+        } finally {
+            channel.port1.close();
+            channel.port2.close();
+        }
+    });
+
+    test('import timeout retains the last diagnostic without extending the deadline', async () => {
+        vi.useFakeTimers();
+        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {serviceWorker: {}}});
+        const channel = new NativeMessageChannel();
+        vi.spyOn(globalThis, 'MessageChannel').mockImplementation(() => /** @type {MessageChannel} */ (/** @type {unknown} */ (channel)));
+        const logSpy = vi.spyOn(log, 'log').mockImplementation(() => {});
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockImplementation(async () => {
+            channel.port2.postMessage({type: 'debug', message: 'index read begin'});
+            channel.port2.postMessage({type: 'debug', message: 123});
+        });
+        try {
+            const promise = api.importDictionaryOffscreen(new Blob([]), /** @type {import('dictionary-importer').ImportDetails} */ ({}), null);
+            const expectation = expect(promise).rejects.toThrow('Dictionary runtime import response timed out after 150000ms; last importer diagnostic: index read begin');
+            await vi.waitFor(() => expect(logSpy).toHaveBeenCalledWith('[manabitan-import] index read begin'));
+            await vi.advanceTimersByTimeAsync(150_000);
+            await expectation;
+            expect(logSpy).toHaveBeenCalledTimes(1);
+            expect(api._shutdownRejectors.size).toBe(0);
+        } finally {
+            channel.port1.close();
+            channel.port2.close();
+        }
     });
 
     test('importDictionaryUrlOffscreen rejects immediately when runtime shuts down mid-flight', async () => {
