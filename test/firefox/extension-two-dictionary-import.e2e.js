@@ -714,9 +714,7 @@ function getUnsupportedRuntimeSkipReason(message) {
     if (
         text.includes('OPFS is required but unavailable') ||
         text.includes('no such vfs: opfs') ||
-        text.includes('opfs-sahpool') ||
-        text.includes('createSyncAccessHandle') ||
-        text.includes('DedicatedWorkerGlobalScope')
+        text.includes('createSyncAccessHandle is not a function')
     ) {
         return 'Firefox automation runtime does not expose the required OPFS SyncAccessHandle worker surface in this local Selenium stack; skipping this lane locally without enabling any SQLite fallback.';
     }
@@ -1119,6 +1117,71 @@ async function getMockSeenUrls(driver) {
  * @returns {Promise<void>}
  */
 async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName, expectedCounts, timeoutMs) {
+    await waitForImportProgressWithPhaseScreenshots(driver, report, dictionaryName, expectedCounts, timeoutMs);
+    const started = safePerformance.now();
+    // Like Chromium, explicitly select the imported dictionaries for this
+    // lookup scenario. Import completion does not prove profile enablement.
+    const selection = await enableInstalledDictionariesForLookup(driver);
+    await addReportPhase(report, driver, `${dictionaryName}: enable installed dictionaries`,
+        `Selected installed dictionary settings in profile 0 for subsequent lookup assertions: ${JSON.stringify(selection)}`,
+        started, safePerformance.now());
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @returns {Promise<unknown>}
+ */
+async function enableInstalledDictionariesForLookup(driver) {
+    const result = /** @type {unknown} */ (await driver.executeAsyncScript(`
+        const done = arguments[arguments.length - 1];
+        const send = (action, params) => new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({action, params}, response => {
+                const error = chrome.runtime.lastError;
+                if (error) { reject(new Error(error.message)); return; }
+                if (response?.error) { reject(new Error(JSON.stringify(response.error))); return; }
+                resolve(response?.result);
+            });
+        });
+        (async () => {
+            const installed = await send('getDictionaryInfo', undefined);
+            const titles = installed.map(row => row.title);
+            const options = await send('optionsGet', {optionsContext: {index: 0}});
+            const targets = [];
+            for (const title of titles) {
+                const index = options.dictionaries.findIndex(row => row.name === title);
+                if (index < 0) { throw new Error('Imported dictionary has no profile setting: ' + title); }
+                if (options.dictionaries[index].enabled !== true) {
+                    targets.push({scope: 'profile', optionsContext: {index: 0}, action: 'set',
+                        path: 'dictionaries[' + index + '].enabled', value: true});
+                }
+            }
+            if (targets.length > 0) {
+                const results = await send('modifySettings', {targets, source: 'firefox-e2e-lookup-selection'});
+                if (results.some(result => result.error)) { throw new Error(JSON.stringify(results)); }
+            }
+            const selected = await send('optionsGet', {optionsContext: {index: 0}});
+            const enabled = selected.dictionaries.filter(row => row.enabled === true).map(row => row.name);
+            if (titles.length === 0 || !titles.every(title => enabled.includes(title))) {
+                throw new Error('Installed dictionaries are not enabled after explicit selection');
+            }
+            done({ok: true, installed: titles, enabled});
+        })().catch(error => done({ok: false, error: String(error)}));
+    `));
+    if (typeof result !== 'object' || result === null || Array.isArray(result) || Reflect.get(result, 'ok') !== true) {
+        fail(`Could not select installed dictionaries for Firefox lookup: ${JSON.stringify(result)}`);
+    }
+    return result;
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @param {E2EReport} report
+ * @param {string} dictionaryName
+ * @param {string} expectedCounts
+ * @param {number} timeoutMs
+ * @returns {Promise<void>}
+ */
+async function waitForImportProgressWithPhaseScreenshots(driver, report, dictionaryName, expectedCounts, timeoutMs) {
     const importStartTime = safePerformance.now();
     let previousLabel = '';
     let previousLabelStart = importStartTime;
@@ -1953,10 +2016,11 @@ async function getBackendLookupDiagnostics(driver, term) {
                 const installedTitles = (Array.isArray(dictionaryInfo) ? dictionaryInfo : [])
                     .map((row) => String(row?.title || '').trim())
                     .filter((value) => value.length > 0);
+                const options0 = await send('optionsGet', {optionsContext: {index: 0}});
                 const termsFind = await send('termsFind', {
                     text: term,
                     details: {primaryReading: ''},
-                    optionsContext: {},
+                    optionsContext: {index: 0},
                 });
                 const termDictionaryNamesSet = new Set();
                 if (Array.isArray(termsFind?.dictionaryEntries)) {
@@ -1984,19 +2048,26 @@ async function getBackendLookupDiagnostics(driver, term) {
                         dictionaries: Array.isArray(profile?.options?.dictionaries) ?
                             profile.options.dictionaries.map((dictionary) => String(dictionary?.name || '')) :
                             [],
+                        dictionarySettings: Array.isArray(profile?.options?.dictionaries) ?
+                            profile.options.dictionaries.map((dictionary) => ({
+                                name: String(dictionary?.name || ''), enabled: dictionary?.enabled === true,
+                            })) : [],
                     })) :
                     null;
-                const enabledInstalledExactMatches = Array.isArray(optionsFull?.profiles?.[0]?.options?.dictionaries) ?
-                    optionsFull.profiles[0].options.dictionaries
+                const enabledInstalledExactMatches = Array.isArray(options0?.dictionaries) ?
+                    options0.dictionaries
                         .filter((dictionary) => dictionary?.enabled === true)
                         .map((dictionary) => String(dictionary?.name || '').trim())
                         .filter((name) => name.length > 0 && installedTitles.includes(name)) :
                     [];
                 let debugLookupState = null;
                 try {
+                    // Content integrity checks the installed store regardless
+                    // of profile enablement. termsFind above separately proves
+                    // that the selected profile can perform normal lookup.
                     debugLookupState = await send('debugDictionaryLookupState', {
                         text: term,
-                        dictionaryNames: [...new Set(enabledInstalledExactMatches)],
+                        dictionaryNames: [...new Set(installedTitles)],
                     });
                 } catch (e) {
                     debugLookupState = {
@@ -2012,7 +2083,9 @@ async function getBackendLookupDiagnostics(driver, term) {
                     debugLookupState,
                     termResultCount: Array.isArray(termsFind?.dictionaryEntries) ? termsFind.dictionaryEntries.length : null,
                     termDictionaryNames: [...termDictionaryNamesSet],
+                    enabledInstalledExactMatches,
                     profileDictionaries,
+                    profileCurrent: optionsFull?.profileCurrent ?? null,
                 });
             })().catch((e) => {
                 done({error: String(e && e.message ? e.message : e)});
