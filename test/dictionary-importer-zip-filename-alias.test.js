@@ -78,7 +78,8 @@ describe('DictionaryImporter ZIP filename aliases', () => {
         const bytes = await writer.close();
         /** @type {() => void} */
         let releaseRead = () => {};
-        const readGate = new Promise((resolve) => { releaseRead = () => resolve(undefined); });
+        /** @type {Promise<void>} */
+        const readGate = new Promise((resolve) => { releaseRead = () => resolve(); });
         class GatedBlob extends Blob {
             /**
              * @param {number} [start]

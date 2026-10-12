@@ -2164,6 +2164,9 @@ export class DictionaryImporter {
                 new Uint8ArrayReader(new Uint8Array(archiveContent))
         );
         const zipReader = /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} */ (new ZipReader(zipFileReader));
+        // Preserve and restore the method itself; the wrapper invokes it with
+        // the owning reader as its receiver.
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         const readUint8Array = zipFileReader.readUint8Array;
         if (this._debugImportLogging) {
             const kind = archiveContent instanceof Blob ? 'blob' : 'buffer';
