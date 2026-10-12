@@ -2807,8 +2807,11 @@ async function main() {
         );
         await ensurePageProfiler(driver);
         await driver.executeScript(`
-            globalThis.manabitanImportPerformanceFlags = {
-                ...(globalThis.manabitanImportPerformanceFlags || {}), debugImportLogging: true,
+            // Marionette's injected script global can differ from the page's
+            // window. Set the flags on the owning settings-page global.
+            const pageWindow = window.wrappedJSObject || window;
+            pageWindow.manabitanImportPerformanceFlags = {
+                ...(pageWindow.manabitanImportPerformanceFlags || {}), debugImportLogging: true,
             };
         `);
         const settingsOpenEnd = safePerformance.now();
