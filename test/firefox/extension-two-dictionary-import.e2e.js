@@ -1200,7 +1200,8 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
     const emptyStabilityMs = 2_000;
     let lastCountsText = '';
     const expectedInstalled = expectedCounts.split(',')[0];
-    const expectedNames = dictionaryName.toLowerCase().replace(' batch import', '').split('+').map((name) => name.trim());
+    const expectedNames = dictionaryName.toLowerCase().replace(' batch import', '').split('+')
+        .map((name) => name.trim());
     let completionObserved = false;
 
     while (safePerformance.now() < deadline) {
@@ -1211,11 +1212,10 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
         }
         const currentLabel = await getImportProgressLabel(driver);
         lastCountsText = await getDictionaryCountsText(driver);
-        if (currentLabel.length === 0) {
-            // Progress widgets and installed counts can settle while the
-            // replacement import still owns publication. The existing timing
-            // history is cleared at import admission and written at completion.
-            completionObserved = (await driver.executeScript(`
+        // Progress widgets and installed counts can settle while the
+        // replacement import still owns publication. The existing timing
+        // history is cleared at import admission and written at completion.
+        completionObserved = currentLabel.length === 0 ? (await driver.executeScript(`
                 const names = arguments[0];
                 const debug = globalThis.__manabitanLastImportDebug;
                 const timings = globalThis.__manabitanImportStepTimingHistory;
@@ -1224,10 +1224,7 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
                 return debug?.hasResult === true && Number(debug.errorCount || 0) === 0
                     && Array.isArray(timings) && timings.length > 0
                     && names.some(name => titles.some(title => title.includes(name)));
-            `, expectedNames)) === true;
-        } else {
-            completionObserved = false;
-        }
+        `, expectedNames)) === true : false;
         if (currentLabel.includes('Step ')) {
             sawStepText = true;
             emptySince = null;
@@ -2690,6 +2687,7 @@ async function main() {
     firefoxOptions.setPreference('xpinstall.signatures.required', false);
     firefoxOptions.setPreference('extensions.manifestV3.enabled', true);
     firefoxOptions.setPreference('extensions.backgroundServiceWorker.enabled', true);
+    firefoxOptions.setPreference('devtools.console.stdout.content', true);
     firefoxOptions.setPreference(
         'extensions.webextensions.uuids',
         JSON.stringify({[firefoxDevGeckoId]: firefoxDevExtensionUuid}),
@@ -2806,6 +2804,11 @@ async function main() {
             {attempts: 3, pageLoadTimeoutMs: 15_000, readyTimeoutMs: 30_000},
         );
         await ensurePageProfiler(driver);
+        await driver.executeScript(`
+            globalThis.manabitanImportPerformanceFlags = {
+                ...(globalThis.manabitanImportPerformanceFlags || {}), debugImportLogging: true,
+            };
+        `);
         const settingsOpenEnd = safePerformance.now();
         await addReportPhase(report, driver, 'Open settings page', 'Settings loaded and dictionary import controls visible', settingsOpenStart, settingsOpenEnd);
         if (!existingProfileOnly) {
