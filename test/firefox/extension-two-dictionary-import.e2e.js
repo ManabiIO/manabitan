@@ -2627,6 +2627,9 @@ async function main() {
     firefoxService.enableVerboseLogging(true);
     firefoxService.setEnvironment({
         ...process.env,
+        // Current Firefox requires explicit remote system access to navigate
+        // moz-extension pages, even when Marionette uses content scope.
+        MOZ_REMOTE_ALLOW_SYSTEM_ACCESS: '1',
         MINIDUMP_SAVE_PATH: diagnosticsArtifactPaths.crashDumpDir,
         MOZ_CRASHREPORTER: '1',
         MOZ_CRASHREPORTER_SHUTDOWN: '1',
