@@ -96,7 +96,7 @@ Keep backups and follow [Moving from Yomitan](https://manabi.io/manabitan/yomita
 
 ## Development and contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development environment and test commands. Discuss substantial proposals in the [Manabi Discord](https://discord.gg/gvxzS93C3w). While Issues are disabled, use that community for Manabitan-specific questions and reproducible reports rather than sending them to Yomitan's tracker.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development environment and test commands. New or updated contributions grant contributor-owned portions separately under GPL-3.0-or-later and [BSD-3-Clause](LICENSE-BSD-3-CLAUSE), at the recipient's option; this does not relicense upstream or third-party GPL material. Discuss substantial proposals in the [Manabi Discord](https://discord.gg/gvxzS93C3w). While Issues are disabled, use that community for Manabitan-specific questions and reproducible reports rather than sending them to Yomitan's tracker.
 
 The [wiki repository](https://github.com/ManabiIO/manabitan-wiki) owns user documentation. Developer references include [dictionary formats](docs/making-yomitan-dictionaries.md), [Anki templates](docs/templates.md), [note-type compatibility](docs/development/anki-note-type-compatibility.md), [language features](docs/development/language-features.md), and [browser bugs](docs/browser-bugs.md). Real project names, compatibility identifiers, and upstream authorship are not renamed indiscriminately.
 
