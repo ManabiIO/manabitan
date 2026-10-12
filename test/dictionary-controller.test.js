@@ -163,7 +163,7 @@ describe('DictionaryController task queue', () => {
         Reflect.set(controller, '_enqueueTask', enqueueTask);
         Reflect.set(controller, '_hideUpdatesAvailableButton', hideUpdatesAvailableButton);
 
-        onDictionaryConfirmUpdate.call(controller, /** @type {unknown} */ ({preventDefault: vi.fn()}));
+        onDictionaryConfirmUpdate.call(controller, /** @type {MouseEvent} */ (/** @type {unknown} */ ({preventDefault: vi.fn()})));
 
         expect(enqueueTask).toHaveBeenCalledWith({
             type: 'update',
@@ -187,7 +187,7 @@ describe('DictionaryController task queue', () => {
         Reflect.set(controller, '_enqueueTask', enqueueTask);
         Reflect.set(controller, '_hideUpdatesAvailableButton', hideUpdatesAvailableButton);
 
-        onDictionaryConfirmUpdate.call(controller, /** @type {unknown} */ ({preventDefault: vi.fn()}));
+        onDictionaryConfirmUpdate.call(controller, /** @type {MouseEvent} */ (/** @type {unknown} */ ({preventDefault: vi.fn()})));
 
         expect(enqueueTask).not.toHaveBeenCalled();
         expect(hideUpdatesAvailableButton).not.toHaveBeenCalled();
@@ -209,7 +209,7 @@ describe('DictionaryController task queue', () => {
         Reflect.set(controller, '_enqueueTask', enqueueTask);
         Reflect.set(controller, '_hideUpdatesAvailableButton', hideUpdatesAvailableButton);
 
-        onDictionaryConfirmUpdate.call(controller, /** @type {unknown} */ ({preventDefault: vi.fn()}));
+        onDictionaryConfirmUpdate.call(controller, /** @type {MouseEvent} */ (/** @type {unknown} */ ({preventDefault: vi.fn()})));
 
         expect(enqueueTask).toHaveBeenCalledWith({
             type: 'update',
@@ -235,7 +235,7 @@ describe('DictionaryController task queue', () => {
         Reflect.set(controller, '_hideUpdatesAvailableButton', hideUpdatesAvailableButton);
 
         const onDictionaryConfirmDelete = /** @type {(this: DictionaryController, e: MouseEvent) => void} */ (getDictionaryControllerMethod('_onDictionaryConfirmDelete'));
-        onDictionaryConfirmDelete.call(controller, /** @type {unknown} */ ({preventDefault: vi.fn()}));
+        onDictionaryConfirmDelete.call(controller, /** @type {MouseEvent} */ (/** @type {unknown} */ ({preventDefault: vi.fn()})));
 
         expect(enqueueTask).not.toHaveBeenCalled();
         expect(hideUpdatesAvailableButton).not.toHaveBeenCalled();
@@ -255,7 +255,7 @@ describe('DictionaryController task queue', () => {
         });
         Reflect.set(controller, '_updateDictionaryModal', {setVisible, node});
 
-        showUpdateDictionaryModal.call(controller, 'Jitendex', undefined);
+        showUpdateDictionaryModal.call(controller, 'Jitendex');
 
         expect(node.dataset.dictionaryTitle).toBe('Jitendex');
         expect(node.dataset.downloadUrl).toBeUndefined();
@@ -416,12 +416,14 @@ describe('DictionaryController task queue', () => {
 
     test('update availability helpers apply to every matching dictionary entry', () => {
         const controller = createControllerForInternalTests();
+        /** @type {string[]} */
         const hidden = [];
+        /** @type {string[]} */
         const shown = [];
         Reflect.set(controller, '_dictionaryEntries', [
-            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('a')), _showUpdatesAvailableButton: vi.fn(() => shown.push('a'))},
-            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('b')), _showUpdatesAvailableButton: vi.fn(() => shown.push('b'))},
-            {dictionaryTitle: 'JMdict', hideUpdatesAvailableButton: vi.fn(() => hidden.push('c')), _showUpdatesAvailableButton: vi.fn(() => shown.push('c'))},
+            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('a')), showUpdatesAvailableButton: vi.fn(() => shown.push('a'))},
+            {dictionaryTitle: 'Jitendex', hideUpdatesAvailableButton: vi.fn(() => hidden.push('b')), showUpdatesAvailableButton: vi.fn(() => shown.push('b'))},
+            {dictionaryTitle: 'JMdict', hideUpdatesAvailableButton: vi.fn(() => hidden.push('c')), showUpdatesAvailableButton: vi.fn(() => shown.push('c'))},
         ]);
 
         hideUpdatesAvailableButton.call(controller, 'Jitendex');
@@ -500,7 +502,7 @@ describe('DictionaryController task queue', () => {
         const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
         await onDatabaseUpdatedEvent.call(controller, {type: 'dictionary', cause: 'import'});
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(logErrorSpy).toHaveBeenCalled();
         expect(Reflect.get(controller, '_dictionaries')).toBeNull();
@@ -609,7 +611,7 @@ describe('DictionaryController task queue', () => {
             },
         ];
 
-        expect(getProfilesDictionarySettingsForTitle.call(controller, profiles, 'Jitendex')).toStrictEqual({
+        expect(getProfilesDictionarySettingsForTitle.call(controller, /** @type {import('settings').Profile[]} */ (/** @type {unknown} */ (profiles)), 'Jitendex')).toStrictEqual({
             'profile-1': [
                 {name: 'Jitendex', enabled: true, alias: 'Primary', index: 0},
                 {name: 'Jitendex', enabled: false, alias: 'Secondary', index: 2},

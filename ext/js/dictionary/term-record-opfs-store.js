@@ -416,10 +416,7 @@ export class TermRecordOpfsStore {
             return false;
         }
         const chromeRuntime = /** @type {{runtime?: unknown}|undefined} */ (Reflect.get(globalThis, 'chrome'));
-        if (typeof chromeRuntime?.runtime === 'object' && chromeRuntime.runtime !== null) {
-            return true;
-        }
-        return false;
+        return typeof chromeRuntime?.runtime === 'object' && chromeRuntime.runtime !== null;
     }
 
     /**
@@ -731,7 +728,7 @@ export class TermRecordOpfsStore {
         if (recordsByShard === null) {
             const state = await this._getOrCreateShardState(singleDictionaryName, singleContentDictName);
             if (state !== null) {
-                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
+                await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords);
             }
             return;
         }
@@ -739,7 +736,7 @@ export class TermRecordOpfsStore {
             const firstRecord = dictionaryRecords[0];
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
-            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords, preinternedPlan);
+            await this._encodeAndAppendChunkRunsForState(state, dictionaryRecords);
         }
     }
 
@@ -1250,8 +1247,8 @@ export class TermRecordOpfsStore {
      * @param {TermRecordShardState} state
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array}} chunk
      * @param {number} firstId
-     * @param {number[]} contentOffsets
-     * @param {number[]} contentLengths
+     * @param {number[]|Uint32Array} contentOffsets
+     * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {string} [contentDictName='raw']
      * @returns {Promise<{encodeMs: number, appendWriteMs: number}>}
@@ -1436,9 +1433,9 @@ export class TermRecordOpfsStore {
                 await writable.close();
             }
         };
-        /** @type {typeof renamePlans} */
+        /** @type {Array<{state: TermRecordShardState, shardInfo: NonNullable<ReturnType<TermRecordOpfsStore['_decodeShardInfoFromShardFileName']>>, nextFileName: string, nextFileHandle: FileSystemFileHandle, bytes: ArrayBuffer, fileSize: number}>} */
         const createdPlans = [];
-        /** @type {typeof renamePlans} */
+        /** @type {Array<{state: TermRecordShardState, shardInfo: NonNullable<ReturnType<TermRecordOpfsStore['_decodeShardInfoFromShardFileName']>>, nextFileName: string, nextFileHandle: FileSystemFileHandle, bytes: ArrayBuffer, fileSize: number}>} */
         const removedPlans = [];
         try {
             for (const plan of renamePlans) {
@@ -1450,7 +1447,7 @@ export class TermRecordOpfsStore {
                 removedPlans.push(plan);
             }
         } catch (e) {
-            for (const plan of removedPlans.slice().reverse()) {
+            for (const plan of [...removedPlans].reverse()) {
                 try {
                     const restoredHandle = await this._recordsDirectoryHandle.getFileHandle(plan.state.fileName, {create: true});
                     await writeShardBytes(restoredHandle, plan.bytes);
@@ -1458,7 +1455,7 @@ export class TermRecordOpfsStore {
                     // NOP - preserve original failure.
                 }
             }
-            for (const plan of createdPlans.slice().reverse()) {
+            for (const plan of [...createdPlans].reverse()) {
                 try {
                     await this._recordsDirectoryHandle.removeEntry(plan.nextFileName);
                 } catch (_) {
@@ -1533,7 +1530,7 @@ export class TermRecordOpfsStore {
             for (const dictionaryName of removedDictionaryNames) {
                 this._loadedDictionaryNames.delete(dictionaryName);
             }
-            for (const id of [...this._recordsById.keys()]) {
+            for (const id of this._recordsById.keys()) {
                 const record = this._recordsById.get(id);
                 if (typeof record === 'undefined' || !removedDictionaryNames.has(record.dictionary)) {
                     continue;
@@ -2443,7 +2440,7 @@ export class TermRecordOpfsStore {
                 cursor,
                 (chunk.readingEqualsExpressionList[i] === true || chunk.readingEqualsExpressionList[i] === 1) ?
                     READING_EQUALS_EXPRESSION_U32 :
-                    (readingIndexes[i] >>> 0)
+                    (readingIndexes[i] >>> 0),
             );
             const entryContentOffset = fixedContentSpan ? fixedContentOffsetBase + (i * fixedContentLength) : contentOffsets[i];
             cursor = writeU32Le(output, cursor, entryContentOffset >= 0 ? entryContentOffset : U32_NULL);
@@ -2704,6 +2701,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * @param {boolean} [materializeRecords]
      * @returns {Promise<number>}
      */
     async _loadShardFiles(materializeRecords = true) {

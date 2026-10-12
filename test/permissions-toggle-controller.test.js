@@ -57,7 +57,7 @@ describe('PermissionsToggleController', () => {
         toggle.checked = true;
 
         await expect(
-            controller._onPermissionsToggleChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: toggle})))
+            controller._onPermissionsToggleChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: toggle}))),
         ).rejects.toThrow('save failed');
 
         expect(toggle.checked).toBe(false);

@@ -1402,7 +1402,11 @@ export class Display extends EventDispatcher {
      */
     _reportTermsFindSnapshot(source, normalizedSource, isKanji, findDetails, optionsContext, dictionaryEntries) {
         try {
-            const resultDictionaries = [...new Set(dictionaryEntries.flatMap((dictionaryEntry) => dictionaryEntry.definitions.map(({dictionary}) => dictionary)))];
+            const resultDictionaries = [...new Set(dictionaryEntries.flatMap((dictionaryEntry) => (
+                dictionaryEntry.type === 'term' ?
+                    dictionaryEntry.definitions.map(({dictionary}) => dictionary) :
+                    [dictionaryEntry.dictionary]
+            )))];
             reportDiagnostics('display-terms-find-snapshot', {
                 pageType: this._pageType,
                 isKanji,

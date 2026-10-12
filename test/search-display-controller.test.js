@@ -230,15 +230,15 @@ describe('Keyboard Event Handling', () => {
         const updateProfileSelectSpy = vi.spyOn(searchDisplayController, '_updateProfileSelect').mockResolvedValue(void 0);
         const setDefaultProfileIndexSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockRejectedValue(new Error('profile save failed'));
         const logErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue({
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
             profileCurrent: 0,
             profiles: [{name: 'Default'}, {name: 'Mining'}],
-        });
+        })));
 
         searchDisplayController._onProfileSelectChangeEvent(/** @type {Event} */ (/** @type {unknown} */ ({
             currentTarget: {value: '1'},
         })));
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(setDefaultProfileIndexSpy).toHaveBeenCalledWith(1);
         expect(updateProfileSelectSpy).toHaveBeenCalledOnce();
@@ -247,10 +247,10 @@ describe('Keyboard Event Handling', () => {
 
     test('search-page profile selection ignores out-of-range indices', async () => {
         const setDefaultProfileIndexSpy = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockResolvedValue(void 0);
-        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue({
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
             profileCurrent: 0,
             profiles: [{name: 'Default'}, {name: 'Mining'}],
-        });
+        })));
 
         await searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({
             currentTarget: {value: '2'},
@@ -260,15 +260,17 @@ describe('Keyboard Event Handling', () => {
     });
 
     test('stale search-page profile-select refresh does not overwrite newer options', async () => {
-        let resolveFirst;
-        let resolveSecond;
+        /** @type {(value?: unknown) => void} */
+        let resolveFirst = (_value) => { expect.fail('resolveFirst was not initialized'); };
+        /** @type {(value?: unknown) => void} */
+        let resolveSecond = (_value) => { expect.fail('resolveSecond was not initialized'); };
         Reflect.set(searchDisplayController, '_profileSelectRefreshGeneration', 0);
         vi.spyOn(display.application.api, 'optionsGetFull')
             .mockImplementationOnce(() => new Promise((resolve) => {
-                resolveFirst = resolve;
+                resolveFirst = (value) => resolve(/** @type {import('settings').Options} */ (value));
             }))
             .mockImplementationOnce(() => new Promise((resolve) => {
-                resolveSecond = resolve;
+                resolveSecond = (value) => resolve(/** @type {import('settings').Options} */ (value));
             }));
 
         const firstRefresh = searchDisplayController._updateProfileSelect();

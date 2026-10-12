@@ -551,7 +551,7 @@ export class AudioDownloader {
     }
 
     /**
-     * @param {ArrayBuffer} arrayBuffer
+     * @param {ArrayBuffer|Uint8Array} arrayBuffer
      * @param {import('settings').AudioSourceType} sourceType
      * @returns {Promise<boolean>}
      */
@@ -573,11 +573,12 @@ export class AudioDownloader {
     }
 
     /**
-     * @param {ArrayBuffer} arrayBuffer
+     * @param {ArrayBuffer|Uint8Array} arrayBuffer
      * @returns {Promise<string>}
      */
     async _arrayBufferDigest(arrayBuffer) {
-        const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', new Uint8Array(arrayBuffer)));
+        const bytes = arrayBuffer instanceof Uint8Array ? Uint8Array.from(arrayBuffer) : new Uint8Array(arrayBuffer);
+        const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
         let digest = '';
         for (const byte of hash) {
             digest += byte.toString(16).padStart(2, '0');

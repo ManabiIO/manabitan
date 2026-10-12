@@ -62,7 +62,6 @@ function createFocusedRecommendedTermsDictionary(name, localServer) {
                 homepage: '',
                 downloadUrl: `${localServer.baseUrl}/dictionaries/jmnedict.zip`,
             };
-        case 'JMdict':
         default:
             return {
                 name: 'JMdict',
@@ -182,7 +181,7 @@ function startFirefoxResourceSampler(firefoxPid) {
  * @param {{attempts?: number, pageLoadTimeoutMs?: number, readyTimeoutMs?: number}|undefined} [options]
  * @returns {Promise<void>}
  */
-async function navigateToExtensionPage(driver, pageUrl, readyLocator, options = undefined) {
+async function navigateToExtensionPage(driver, pageUrl, readyLocator, options) {
     const attempts = Math.max(1, Number(options?.attempts ?? 3));
     const pageLoadTimeoutMs = Math.max(1_000, Number(options?.pageLoadTimeoutMs ?? 15_000));
     const readyTimeoutMs = Math.max(1_000, Number(options?.readyTimeoutMs ?? 30_000));
@@ -228,9 +227,7 @@ async function navigateToExtensionPage(driver, pageUrl, readyLocator, options = 
  */
 async function getFirefoxProcessId(driver) {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const capabilities = await driver.getCapabilities();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const rawPid = capabilities.get('moz:processID');
         const processId = Number(rawPid);
         if (Number.isFinite(processId) && processId > 0) {
@@ -306,7 +303,6 @@ async function beginPageProfilePhase(driver) {
  */
 async function endPageProfilePhase(driver) {
     // Selenium executeScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const summary = await driver.executeScript(`
         const state = globalThis.__manabitanE2EPageProfiler;
         if (!state || typeof state !== 'object') {
@@ -341,7 +337,6 @@ async function endPageProfilePhase(driver) {
         return {longTaskCount, longTaskTotalMs, longTaskPeakMs, topMeasures, topLongTasks};
     `);
     if (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const normalized = /** @type {Record<string, unknown>} */ (summary);
         const normalizeTopMeasureEntries = (entries) => {
             if (!Array.isArray(entries)) { return []; }
@@ -677,7 +672,7 @@ async function reloadExtensionRuntime(driver, extensionBaseUrl) {
         // Expected when the current extension context is discarded during reload.
     }
     await driver.sleep(2_000);
-    await waitForExtensionBaseUrl(driver, firefoxDevExtensionUuid);
+    await waitForExtensionBaseUrl(driver);
     await navigateToExtensionPage(
         driver,
         `${extensionBaseUrl}/settings.html`,
@@ -719,9 +714,7 @@ function getUnsupportedRuntimeSkipReason(message) {
     if (
         text.includes('OPFS is required but unavailable') ||
         text.includes('no such vfs: opfs') ||
-        text.includes('opfs-sahpool') ||
-        text.includes('createSyncAccessHandle') ||
-        text.includes('DedicatedWorkerGlobalScope')
+        text.includes('createSyncAccessHandle is not a function')
     ) {
         return 'Firefox automation runtime does not expose the required OPFS SyncAccessHandle worker surface in this local Selenium stack; skipping this lane locally without enabling any SQLite fallback.';
     }
@@ -753,7 +746,9 @@ function isOpfsRuntimeAvailable(runtimeDiagnostics) {
         runtimeDiagnostics.openStorageDiagnostics.runtimeContext &&
         typeof runtimeDiagnostics.openStorageDiagnostics.runtimeContext === 'object' &&
         !Array.isArray(runtimeDiagnostics.openStorageDiagnostics.runtimeContext)
-    ) ? runtimeDiagnostics.openStorageDiagnostics.runtimeContext : null;
+    ) ?
+runtimeDiagnostics.openStorageDiagnostics.runtimeContext :
+null;
     const hasSyncAccessHandle = (
         runtimeDiagnostics.hasCreateSyncAccessHandle === true ||
         workerRuntimeContext?.hasCreateSyncAccessHandle === true
@@ -1048,7 +1043,6 @@ function renderReportHtml(report) {
  */
 async function getImportProgressLabel(driver) {
     // Selenium executeScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const value = await driver.executeScript(`
         const selectors = [
             '#recommended-dictionaries-modal .dictionary-import-progress',
@@ -1083,7 +1077,6 @@ async function getDictionaryCountsText(driver) {
  */
 async function getDictionaryErrorText(driver) {
     // Selenium executeScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const value = await driver.executeScript(`
         const node = document.querySelector('#dictionary-error');
         if (!(node instanceof HTMLElement) || node.hidden) { return ''; }
@@ -1098,7 +1091,6 @@ async function getDictionaryErrorText(driver) {
  */
 async function getLastImportDebug(driver) {
     // Selenium executeScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const value = await driver.executeScript('return globalThis.__manabitanLastImportDebug ?? null;');
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         return /** @type {Record<string, unknown>} */ (value);
@@ -1112,7 +1104,6 @@ async function getLastImportDebug(driver) {
  */
 async function getMockSeenUrls(driver) {
     // Selenium executeScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const value = await driver.executeScript('return Array.isArray(globalThis.__manabitanMockSeenUrls) ? globalThis.__manabitanMockSeenUrls.slice(-8) : [];');
     return Array.isArray(value) ? value.map(String) : [];
 }
@@ -1126,6 +1117,79 @@ async function getMockSeenUrls(driver) {
  * @returns {Promise<void>}
  */
 async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName, expectedCounts, timeoutMs) {
+    await waitForImportProgressWithPhaseScreenshots(driver, report, dictionaryName, expectedCounts, timeoutMs);
+    const started = safePerformance.now();
+    // Like Chromium, explicitly select the imported dictionaries for this
+    // lookup scenario. Import completion does not prove profile enablement.
+    const selection = await enableInstalledDictionariesForLookup(driver);
+    await addReportPhase(
+        report,
+        driver,
+        `${dictionaryName}: enable installed dictionaries`,
+        `Selected installed dictionary settings in profile 0 for subsequent lookup assertions: ${JSON.stringify(selection)}`,
+        started,
+        safePerformance.now(),
+    );
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @returns {Promise<unknown>}
+ */
+async function enableInstalledDictionariesForLookup(driver) {
+    return await driver.wait(async () => {
+        const result = /** @type {unknown} */ (await driver.executeAsyncScript(`
+        const done = arguments[arguments.length - 1];
+        const send = (action, params) => new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({action, params}, response => {
+                const error = chrome.runtime.lastError;
+                if (error) { reject(new Error(error.message)); return; }
+                if (response?.error) { reject(new Error(JSON.stringify(response.error))); return; }
+                resolve(response?.result);
+            });
+        });
+        (async () => {
+            const installed = await send('getDictionaryInfo', undefined);
+            const titles = installed.map(row => row.title);
+            const options = await send('optionsGet', {optionsContext: {index: 0}});
+            const targets = [];
+            for (const title of titles) {
+                const index = options.dictionaries.findIndex(row => row.name === title);
+                if (index < 0) { done({pending: true, dictionary: title}); return; }
+                if (options.dictionaries[index].enabled !== true) {
+                    targets.push({scope: 'profile', optionsContext: {index: 0}, action: 'set',
+                        path: 'dictionaries[' + index + '].enabled', value: true});
+                }
+            }
+            if (targets.length > 0) {
+                const results = await send('modifySettings', {targets, source: 'firefox-e2e-lookup-selection'});
+                if (results.some(result => result.error)) { throw new Error(JSON.stringify(results)); }
+            }
+            const selected = await send('optionsGet', {optionsContext: {index: 0}});
+            const enabled = selected.dictionaries.filter(row => row.enabled === true).map(row => row.name);
+            if (titles.length === 0 || !titles.every(title => enabled.includes(title))) {
+                throw new Error('Installed dictionaries are not enabled after explicit selection');
+            }
+            done({ok: true, installed: titles, enabled});
+        })().catch(error => done({ok: false, error: String(error)}));
+        `));
+        if (typeof result === 'object' && result !== null && Reflect.get(result, 'pending') === true) { return false; }
+        if (typeof result !== 'object' || result === null || Array.isArray(result) || Reflect.get(result, 'ok') !== true) {
+            fail(`Could not select installed dictionaries for Firefox lookup: ${JSON.stringify(result)}`);
+        }
+        return result;
+    }, 30_000, 'Imported dictionary profile settings were not published before lookup selection');
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @param {E2EReport} report
+ * @param {string} dictionaryName
+ * @param {string} expectedCounts
+ * @param {number} timeoutMs
+ * @returns {Promise<void>}
+ */
+async function waitForImportProgressWithPhaseScreenshots(driver, report, dictionaryName, expectedCounts, timeoutMs) {
     const importStartTime = safePerformance.now();
     let previousLabel = '';
     let previousLabelStart = importStartTime;
@@ -1135,6 +1199,10 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
     let emptySince = null;
     const emptyStabilityMs = 2_000;
     let lastCountsText = '';
+    const expectedInstalled = expectedCounts.split(',')[0];
+    const expectedNames = dictionaryName.toLowerCase().replace(' batch import', '').split('+')
+        .map((name) => name.trim());
+    let completionObserved = false;
 
     while (safePerformance.now() < deadline) {
         const now = safePerformance.now();
@@ -1144,6 +1212,21 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
         }
         const currentLabel = await getImportProgressLabel(driver);
         lastCountsText = await getDictionaryCountsText(driver);
+        // Progress widgets and installed counts can settle while the
+        // replacement import still owns publication. The existing timing
+        // history is cleared at import admission and written at completion.
+        completionObserved = currentLabel.length === 0 ?
+            (await driver.executeScript(`
+                const names = arguments[0];
+                const debug = globalThis.__manabitanLastImportDebug;
+                const timings = globalThis.__manabitanImportStepTimingHistory;
+                const titles = [debug?.dictionaryTitle, debug?.resultTitle, debug?.sourceTitle]
+                    .filter(value => typeof value === 'string').map(value => value.toLowerCase());
+                return debug?.hasResult === true && Number(debug.errorCount || 0) === 0
+                    && Array.isArray(timings) && timings.length > 0
+                    && names.some(name => titles.some(title => title.includes(name)));
+            `, expectedNames)) === true :
+            false;
         if (currentLabel.includes('Step ')) {
             sawStepText = true;
             emptySince = null;
@@ -1163,7 +1246,7 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
             previousLabelStart = now;
         }
 
-        if (sawStepText && currentLabel.length === 0) {
+        if (sawStepText && currentLabel.length === 0 && completionObserved && lastCountsText.split(',')[0] === expectedInstalled) {
             emptySince ??= now;
             if ((now - emptySince) >= emptyStabilityMs) {
                 clearedAfterStep = true;
@@ -1195,7 +1278,7 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
             emptySince = null;
         }
 
-        if (currentLabel.length === 0 && lastCountsText === expectedCounts) {
+        if (currentLabel.length === 0 && completionObserved && lastCountsText === expectedCounts) {
             emptySince ??= now;
             if ((now - emptySince) >= emptyStabilityMs) {
                 if (previousLabel.length > 0) {
@@ -1225,7 +1308,7 @@ async function waitForImportWithPhaseScreenshots(driver, report, dictionaryName,
 
     const countsText = lastCountsText || await getDictionaryCountsText(driver);
     const errorText = await getDictionaryErrorText(driver);
-    if (errorText.length === 0 && countsText === expectedCounts) {
+    if (errorText.length === 0 && completionObserved && countsText === expectedCounts) {
         const now = safePerformance.now();
         await addReportPhase(
             report,
@@ -1272,6 +1355,7 @@ async function waitForImportProgressPhase(driver, pattern, timeoutMs = 30_000) {
  * @param {string} term
  * @param {string[]} expectedDictionaryNames
  * @param {number} [iterationCount]
+ * @param {((description: string) => void)|null} [setActiveOperation]
  * @returns {Promise<{phaseState: {ok: boolean, label: string, error: string|null}, iterations: Array<Record<string, unknown>>}>}
  */
 async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWindowHandle, lookupWindowHandle, phasePattern, term, expectedDictionaryNames, iterationCount = 3, setActiveOperation = null) {
@@ -1279,16 +1363,9 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
         setActiveOperation(`wait for import phase gate: ${String(phasePattern)}`);
     }
     await driver.switchTo().window(settingsWindowHandle);
-    let phaseState = await waitForImportProgressPhase(driver, phasePattern, 20_000);
+    const phaseState = await waitForImportProgressPhase(driver, phasePattern, 20_000);
     if (phaseState.ok !== true && typeof phaseState.error === 'string' && phaseState.error.length > 0 && !phaseState.error.startsWith('Timed out waiting for import progress phase')) {
         throw new Error(`Import phase gate did not reach ${String(phasePattern)}: ${JSON.stringify(phaseState)}`);
-    }
-    if (phaseState.ok !== true) {
-        phaseState = {
-            ok: false,
-            label: phaseState.label,
-            error: null,
-        };
     }
     /** @type {Array<Record<string, unknown>>} */
     const iterations = [];
@@ -1324,37 +1401,27 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
 
 /**
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @param {string} [installedAddonId]
  * @returns {Promise<string>}
  * @throws {Error}
  */
-async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
-    const normalizedAddonId = String(installedAddonId || '').trim();
-    const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
-    const deadline = Date.now() + 30_000;
-    let fallbackBaseUrl = '';
-    while (Date.now() < deadline) {
-        const handlesUnknown = /** @type {unknown} */ (await driver.getAllWindowHandles());
-        const handles = Array.isArray(handlesUnknown) ? handlesUnknown.map(String) : [];
-        for (const handle of handles) {
-            await driver.switchTo().window(handle);
-            const url = String(await driver.getCurrentUrl());
-            const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/.exec(url);
-            if (match !== null) {
-                fallbackBaseUrl = match[1];
-                if (expectedBaseUrl.length === 0 || expectedBaseUrl === match[1]) {
-                    return match[1];
-                }
-            }
-        }
-        await driver.sleep(500);
+async function waitForExtensionBaseUrl(driver, installedAddonId = firefoxDevGeckoId) {
+    // installAddon returns the manifest's Gecko ID, not the moz-extension UUID.
+    // The profile preference above maps this development build to a fixed UUID.
+    if (installedAddonId !== firefoxDevGeckoId) {
+        fail(`Unexpected installed add-on ID: ${installedAddonId}; expected ${firefoxDevGeckoId}`);
     }
-    if (fallbackBaseUrl.length > 0) {
-        return fallbackBaseUrl;
-    }
-    if (expectedBaseUrl.length > 0) {
-        return expectedBaseUrl;
-    }
-    fail('Failed to discover moz-extension base URL from open tabs.');
+    const expectedBaseUrl = `moz-extension://${firefoxDevExtensionUuid}`;
+    await driver.setContext(firefox.Context.CONTENT);
+    // Content scope can still select a privileged about: page. Navigate to and
+    // verify the actual extension page before a phase attempts a screenshot.
+    await navigateToExtensionPage(
+        driver,
+        `${expectedBaseUrl}/settings.html`,
+        By.css('#dictionary-import-file-input'),
+        {attempts: 3, pageLoadTimeoutMs: 15_000, readyTimeoutMs: 30_000},
+    );
+    return expectedBaseUrl;
 }
 
 /**
@@ -1364,7 +1431,6 @@ async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
  */
 async function clickWithScroll(driver, selector) {
     // Selenium's JS-only API surfaces `any` for located elements.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const element = await driver.findElement(By.css(selector));
     await driver.executeScript(`
         const element = arguments[0];
@@ -1386,7 +1452,6 @@ async function installRecommendedDictionary(driver, dictionaryName) {
     await driver.wait(until.elementLocated(By.css('#recommended-dictionaries-modal')), 30_000);
     await driver.wait(async () => {
         // Selenium's executeScript return value is untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const names = await driver.executeScript(`
             return Array.from(document.querySelectorAll('#recommended-dictionaries-modal .settings-item-label'))
                 .map((node) => (node.textContent || '').trim());
@@ -1394,7 +1459,6 @@ async function installRecommendedDictionary(driver, dictionaryName) {
         return Array.isArray(names) && names.includes(dictionaryName);
     }, 30_000, `Expected recommended dictionary to render: ${dictionaryName}`);
     // Selenium executeScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const importUrl = await driver.executeScript(`
         const dictionaryName = arguments[0];
         const items = Array.from(document.querySelectorAll('#recommended-dictionaries-modal .settings-item'));
@@ -1435,7 +1499,6 @@ async function closeModalIfOpen(driver, modalSelector) {
     `, modalSelector);
     await driver.wait(async () => {
         // Selenium executeScript return value is untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const hidden = await driver.executeScript(`
             const modal = document.querySelector(arguments[0]);
             return (modal instanceof HTMLElement) ? modal.hidden : true;
@@ -1450,7 +1513,6 @@ async function closeModalIfOpen(driver, modalSelector) {
  */
 async function openInstalledDictionariesModal(driver) {
     // Selenium executeScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const triggerDescription = await driver.executeScript(`
         const isHidden = (element) => {
             if (!(element instanceof HTMLElement)) { return true; }
@@ -1480,7 +1542,6 @@ async function openInstalledDictionariesModal(driver) {
     `);
     await driver.wait(async () => {
         // Selenium executeScript return value is untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const open = await driver.executeScript(`
             const dictionariesModal = document.querySelector('#dictionaries-modal');
             const recommendedModal = document.querySelector('#recommended-dictionaries-modal');
@@ -1510,7 +1571,6 @@ async function openSearchPageViaActionPopup(driver, extensionBaseUrl) {
     await driver.get(`${extensionBaseUrl}/action-popup.html`);
     await driver.wait(async () => {
         // Selenium executeScript return value is untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const loaded = await driver.executeScript('return document.body?.dataset?.loaded === "true";');
         return loaded === true;
     }, 30_000, 'Expected action popup to finish loading');
@@ -1582,7 +1642,6 @@ async function importDictionariesViaFileInput(driver, filePaths) {
 async function searchTermAndGetDictionaryHitCounts(driver, term, expectedDictionaryNames, timeoutMs = 60_000, submitMode = 'enter') {
     await driver.wait(async () => {
         // Selenium executeScript return value is untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const submitted = await driver.executeScript(`
             const textbox = document.querySelector('#search-textbox');
             const searchButton = document.querySelector('#search-button');
@@ -1620,7 +1679,6 @@ async function searchTermAndGetDictionaryHitCounts(driver, term, expectedDiction
     let lastCounts = Object.fromEntries(expectedDictionaryNames.map((name) => [name, 0]));
     while (safePerformance.now() < deadline) {
         // Selenium executeScript return value is untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const counts = await driver.executeScript(`
             const dictionaryEntries = document.querySelector('#dictionary-entries');
             if (!(dictionaryEntries instanceof HTMLElement)) {
@@ -1646,7 +1704,6 @@ async function searchTermAndGetDictionaryHitCounts(driver, term, expectedDiction
         `, expectedDictionaryNames);
         if (typeof counts === 'object' && counts !== null) {
             // Selenium executeScript return value is untyped (`any`).
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const countRecord = /** @type {Record<string, unknown>} */ (counts);
             const normalizedCounts = /** @type {Record<string, number>} */ ({});
             for (const [key, value] of Object.entries(countRecord)) {
@@ -1664,7 +1721,6 @@ async function searchTermAndGetDictionaryHitCounts(driver, term, expectedDiction
     // the page-backed runtime can already resolve the lookup through the backend.
     try {
         // Selenium executeAsyncScript return value is untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const backendCounts = await driver.executeAsyncScript(`
             const done = arguments[arguments.length - 1];
             const term = arguments[0];
@@ -1793,7 +1849,6 @@ async function findLookupProbeTerm(driver, expectedDictionaryNames, candidates, 
  */
 async function getSearchPageDiagnostics(driver) {
     // Selenium executeScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const diagnostics = await driver.executeScript(`
         const noResults = document.querySelector('#no-results');
         const noDictionaries = document.querySelector('#no-dictionaries');
@@ -1826,7 +1881,6 @@ async function getSearchPageDiagnostics(driver) {
  */
 async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictionaryNames, motionProfile = null) {
     await driver.get(pageUrl);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const targetElement = /** @type {import('selenium-webdriver').WebElement} */ (await driver.wait(until.elementLocated(By.css(targetSelector)), 30_000));
     await driver.executeScript(`
         const target = arguments[0];
@@ -1857,9 +1911,7 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
             if (pauseAfterMoveMs > 0) {
                 await driver.sleep(pauseAfterMoveMs);
             }
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const visibleWithModifier = await driver.wait(async () => {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const frames = /** @type {import('selenium-webdriver').WebElement[]} */ (await driver.findElements(By.css('iframe.yomitan-popup')));
                 for (const frame of frames) {
                     if (await frame.isDisplayed()) { return true; }
@@ -1881,7 +1933,6 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
         fail('Expected yomitan popup iframe to appear after hover scan');
     }
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const frames = /** @type {import('selenium-webdriver').WebElement[]} */ (await driver.findElements(By.css('iframe.yomitan-popup')));
         let popupFrame = null;
         for (const frame of frames) {
@@ -1897,7 +1948,6 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
         await driver.wait(until.elementLocated(By.css('#dictionary-entries, #no-results, #no-dictionaries')), 30_000);
         const popupText = String(await (await driver.findElement(By.css('body'))).getText());
         // Selenium executeScript return value is untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const popupState = await driver.executeScript(`
             const dictionaryEntries = document.querySelector('#dictionary-entries');
             const noResults = document.querySelector('#no-results');
@@ -1959,7 +2009,6 @@ async function getBackendLookupDiagnostics(driver, term) {
         return {error: String(e && e.message ? e.message : e)};
     }
     // Selenium executeAsyncScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     try {
         const diagnostics = await driver.executeAsyncScript(`
             const done = arguments[arguments.length - 1];
@@ -1987,10 +2036,11 @@ async function getBackendLookupDiagnostics(driver, term) {
                 const installedTitles = (Array.isArray(dictionaryInfo) ? dictionaryInfo : [])
                     .map((row) => String(row?.title || '').trim())
                     .filter((value) => value.length > 0);
+                const options0 = await send('optionsGet', {optionsContext: {index: 0}});
                 const termsFind = await send('termsFind', {
                     text: term,
                     details: {primaryReading: ''},
-                    optionsContext: {},
+                    optionsContext: {index: 0},
                 });
                 const termDictionaryNamesSet = new Set();
                 if (Array.isArray(termsFind?.dictionaryEntries)) {
@@ -2018,19 +2068,26 @@ async function getBackendLookupDiagnostics(driver, term) {
                         dictionaries: Array.isArray(profile?.options?.dictionaries) ?
                             profile.options.dictionaries.map((dictionary) => String(dictionary?.name || '')) :
                             [],
+                        dictionarySettings: Array.isArray(profile?.options?.dictionaries) ?
+                            profile.options.dictionaries.map((dictionary) => ({
+                                name: String(dictionary?.name || ''), enabled: dictionary?.enabled === true,
+                            })) : [],
                     })) :
                     null;
-                const enabledInstalledExactMatches = Array.isArray(optionsFull?.profiles?.[0]?.options?.dictionaries) ?
-                    optionsFull.profiles[0].options.dictionaries
+                const enabledInstalledExactMatches = Array.isArray(options0?.dictionaries) ?
+                    options0.dictionaries
                         .filter((dictionary) => dictionary?.enabled === true)
                         .map((dictionary) => String(dictionary?.name || '').trim())
                         .filter((name) => name.length > 0 && installedTitles.includes(name)) :
                     [];
                 let debugLookupState = null;
                 try {
+                    // Content integrity checks the installed store regardless
+                    // of profile enablement. termsFind above separately proves
+                    // that the selected profile can perform normal lookup.
                     debugLookupState = await send('debugDictionaryLookupState', {
                         text: term,
-                        dictionaryNames: [...new Set(enabledInstalledExactMatches)],
+                        dictionaryNames: [...new Set(installedTitles)],
                     });
                 } catch (e) {
                     debugLookupState = {
@@ -2046,7 +2103,9 @@ async function getBackendLookupDiagnostics(driver, term) {
                     debugLookupState,
                     termResultCount: Array.isArray(termsFind?.dictionaryEntries) ? termsFind.dictionaryEntries.length : null,
                     termDictionaryNames: [...termDictionaryNamesSet],
+                    enabledInstalledExactMatches,
                     profileDictionaries,
+                    profileCurrent: optionsFull?.profileCurrent ?? null,
                 });
             })().catch((e) => {
                 done({error: String(e && e.message ? e.message : e)});
@@ -2277,7 +2336,6 @@ async function installRecommendedDictionariesMock(driver, recommendedDictionarie
  */
 async function checkBackendApiAvailability(driver) {
     // Selenium executeAsyncScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await driver.executeAsyncScript(`
         const done = arguments[arguments.length - 1];
         const send = (action, params) => new Promise((resolve, reject) => {
@@ -2313,7 +2371,6 @@ async function checkBackendApiAvailability(driver) {
         return {ok: false, dictionaryCount: null, error: `Unexpected backend preflight payload: ${String(result)}`};
     }
     // Selenium executeAsyncScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const resultRecord = /** @type {Record<string, unknown>} */ (result);
     const dictionaryCountValue = resultRecord.dictionaryCount;
     const errorValue = resultRecord.error;
@@ -2330,7 +2387,6 @@ async function checkBackendApiAvailability(driver) {
  */
 async function purgeBackendDatabase(driver) {
     // Selenium executeAsyncScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await driver.executeAsyncScript(`
         const done = arguments[arguments.length - 1];
         const send = (action, params) => new Promise((resolve, reject) => {
@@ -2380,7 +2436,6 @@ async function purgeBackendDatabase(driver) {
  */
 async function getBackendStorageDiagnostics(driver) {
     // Selenium executeAsyncScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await driver.executeAsyncScript(`
         const done = arguments[arguments.length - 1];
         chrome.runtime.sendMessage({action: 'debugDictionaryStorageState', params: undefined}, (response) => {
@@ -2418,10 +2473,10 @@ function summarizeBackendStorageDiagnostics(diagnostics) {
     const dictionaryRows = Array.isArray(diagnostics.dictionaryRows) ? diagnostics.dictionaryRows : [];
     const offscreenDictionaryRows = Array.isArray(diagnostics.offscreenDictionaryRows) ? diagnostics.offscreenDictionaryRows : [];
     const dictionaryRowTitles = dictionaryRows
-        .map((row) => typeof row?.title === 'string' ? row.title : null)
+        .map((row) => (typeof row?.title === 'string' ? row.title : null))
         .filter((value) => typeof value === 'string' && value.length > 0);
     const offscreenDictionaryRowTitles = offscreenDictionaryRows
-        .map((row) => typeof row?.title === 'string' ? row.title : null)
+        .map((row) => (typeof row?.title === 'string' ? row.title : null))
         .filter((value) => typeof value === 'string' && value.length > 0);
     const lastDictionaryUrlImportDebug = diagnostics.lastDictionaryUrlImportDebug;
     const lastDictionaryUrlImportStage = (typeof lastDictionaryUrlImportDebug === 'object' && lastDictionaryUrlImportDebug !== null && !Array.isArray(lastDictionaryUrlImportDebug) && typeof lastDictionaryUrlImportDebug.stage === 'string') ?
@@ -2447,7 +2502,6 @@ function summarizeBackendStorageDiagnostics(diagnostics) {
  */
 async function deleteBackendDictionaryByTitle(driver, dictionaryTitle) {
     // Selenium executeAsyncScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await driver.executeAsyncScript(`
         const done = arguments[arguments.length - 1];
         const title = String(arguments[0] || '');
@@ -2494,7 +2548,7 @@ async function deleteBackendDictionaryByExpectedName(driver, expectedDictionaryN
     const diagnostics = await getBackendLookupDiagnostics(driver, '日本');
     const dictionaryInfoEntries = getDictionaryInfoEntries(diagnostics);
     const installedTitle = dictionaryInfoEntries
-        .map((entry) => typeof entry.title === 'string' ? entry.title.trim() : '')
+        .map((entry) => (typeof entry.title === 'string' ? entry.title.trim() : ''))
         .find((title) => matchesDictionaryName(title, expectedDictionaryName)) || null;
     if (installedTitle === null) {
         return {ok: false, error: `Unable to resolve installed dictionary title for ${expectedDictionaryName}`, deletedTitle: null};
@@ -2513,7 +2567,6 @@ async function deleteBackendDictionaryByExpectedName(driver, expectedDictionaryN
  */
 async function configureHoverTestOptions(driver) {
     // Selenium executeAsyncScript return value is untyped (`any`).
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await driver.executeAsyncScript(`
         const done = arguments[arguments.length - 1];
         const send = (action, params) => new Promise((resolve, reject) => {
@@ -2629,6 +2682,7 @@ async function main() {
     firefoxOptions.setPreference('xpinstall.signatures.required', false);
     firefoxOptions.setPreference('extensions.manifestV3.enabled', true);
     firefoxOptions.setPreference('extensions.backgroundServiceWorker.enabled', true);
+    firefoxOptions.setPreference('devtools.console.stdout.content', true);
     firefoxOptions.setPreference(
         'extensions.webextensions.uuids',
         JSON.stringify({[firefoxDevGeckoId]: firefoxDevExtensionUuid}),
@@ -2667,6 +2721,9 @@ async function main() {
     firefoxService.enableVerboseLogging(true);
     firefoxService.setEnvironment({
         ...process.env,
+        // Current Firefox requires explicit remote system access to navigate
+        // moz-extension pages, even when Marionette uses content scope.
+        MOZ_REMOTE_ALLOW_SYSTEM_ACCESS: '1',
         MINIDUMP_SAVE_PATH: diagnosticsArtifactPaths.crashDumpDir,
         MOZ_CRASHREPORTER: '1',
         MOZ_CRASHREPORTER_SHUTDOWN: '1',
@@ -2742,6 +2799,14 @@ async function main() {
             {attempts: 3, pageLoadTimeoutMs: 15_000, readyTimeoutMs: 30_000},
         );
         await ensurePageProfiler(driver);
+        await driver.executeScript(`
+            // Marionette's injected script global can differ from the page's
+            // window. Set the flags on the owning settings-page global.
+            const pageWindow = window.wrappedJSObject || window;
+            pageWindow.manabitanImportPerformanceFlags = {
+                ...(pageWindow.manabitanImportPerformanceFlags || {}), debugImportLogging: true,
+            };
+        `);
         const settingsOpenEnd = safePerformance.now();
         await addReportPhase(report, driver, 'Open settings page', 'Settings loaded and dictionary import controls visible', settingsOpenStart, settingsOpenEnd);
         if (!existingProfileOnly) {
@@ -2773,7 +2838,6 @@ async function main() {
             );
         }
         // Selenium executeScript return value is untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const runtimeDiagnostics = await driver.executeAsyncScript(`
             const done = arguments[0];
             (async () => {
@@ -3101,7 +3165,7 @@ async function main() {
             verifyJitendexContentStart,
             verifyJitendexContentEnd,
         );
-        if (!(verifyJitendexContentProfile.ok === true)) {
+        if (verifyJitendexContentProfile.ok !== true) {
             fail(`Jitendex backend content integrity failed after import. diagnostics=${JSON.stringify(verifyJitendexContentProfile)}`);
         }
         const jitendexSettleStart = safePerformance.now();
@@ -3146,13 +3210,12 @@ async function main() {
                 verifyJmnedictContentStart,
                 verifyJmnedictContentEnd,
             );
-            if (!(verifyJmnedictContentProfile.ok === true)) {
+            if (verifyJmnedictContentProfile.ok !== true) {
                 fail(`JMnedict backend content integrity failed after import. diagnostics=${JSON.stringify(verifyJmnedictContentProfile)}`);
             }
         }
 
         // Selenium return values are untyped (`any`).
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const settingsWindowHandle = /** @type {string} */ (await driver.getWindowHandle());
         const searchTabOpenStart = safePerformance.now();
         const searchWindowHandle = /** @type {string} */ (await openSearchPageInNewTab(driver, extensionBaseUrl));
@@ -3540,7 +3603,7 @@ async function main() {
             verifyJmdictContentStart,
             verifyJmdictContentEnd,
         );
-        if (!(verifyJmdictContentProfile.ok === true)) {
+        if (verifyJmdictContentProfile.ok !== true) {
             fail(`JMdict backend content integrity failed after import. diagnostics=${JSON.stringify(verifyJmdictContentProfile)}`);
         }
         const dictionaryInfoEntries = getDictionaryInfoEntries(postImportDiagnostics);
@@ -3587,7 +3650,6 @@ async function main() {
         let lastModalText = '';
         while (safePerformance.now() < verifyDeadline) {
             // Selenium's executeScript return value is untyped (`any`).
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const modalText = await driver.executeScript(`
                 const dictionariesModal = document.querySelector('#dictionaries-modal');
                 const recommendedModal = document.querySelector('#recommended-dictionaries-modal');
@@ -3672,8 +3734,10 @@ async function main() {
         await addReportPhase(
             report,
             driver,
-            'Verify search during active Jitendex update import step',
-            `While the update UI was in Step 4 import processing, dedicated search tab kept returning Jitendex + JMdict results: ${JSON.stringify(searchDuringActiveUpdateImportResult)}`,
+            searchDuringActiveUpdateImportResult.phaseState.ok ?
+                'Verify search during active Jitendex update import step' :
+                'Record search while Jitendex update data-import phase was unobserved',
+            `Observed update phase and dedicated search results: ${JSON.stringify(searchDuringActiveUpdateImportResult)}`,
             searchDuringActiveUpdateImportStart,
             searchDuringActiveUpdateImportEnd,
         );
@@ -3713,8 +3777,11 @@ async function main() {
             verifyUpdatedJitendexContentStart,
             verifyUpdatedJitendexContentEnd,
         );
-        if (!(verifyUpdatedJitendexContentProfile.ok === true)) {
+        if (verifyUpdatedJitendexContentProfile.ok !== true) {
             fail(`Jitendex backend content integrity failed after update. diagnostics=${JSON.stringify(verifyUpdatedJitendexContentProfile)}`);
+        }
+        if (searchDuringActiveUpdateImportResult.phaseState.ok !== true) {
+            fail(`Jitendex update completed without qualifying concurrent lookup during data import: ${JSON.stringify(searchDuringActiveUpdateImportResult.phaseState)}`);
         }
 
         const searchOpenStart = safePerformance.now();
@@ -3896,10 +3963,10 @@ async function main() {
             verifyBatchContentStart,
             verifyBatchContentEnd,
         );
-        if (!(verifyBatchJmdictContent.ok === true)) {
+        if (verifyBatchJmdictContent.ok !== true) {
             fail(`JMdict backend content integrity failed after multi-file import. diagnostics=${JSON.stringify(verifyBatchJmdictContent)}`);
         }
-        if (!(verifyBatchJmnedictContent.ok === true)) {
+        if (verifyBatchJmnedictContent.ok !== true) {
             fail(`JMnedict backend content integrity failed after multi-file import. diagnostics=${JSON.stringify(verifyBatchJmnedictContent)}`);
         }
 
@@ -3910,7 +3977,6 @@ async function main() {
         let tripleModalText = '';
         while (safePerformance.now() < tripleVerifyDeadline) {
             // Selenium executeScript return value is untyped (`any`).
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const modalText = await driver.executeScript(`
                 const dictionariesModal = document.querySelector('#dictionaries-modal');
                 const recommendedModal = document.querySelector('#recommended-dictionaries-modal');
@@ -4179,7 +4245,10 @@ async function main() {
                 await driver.quit();
             } catch (driverQuitError) {
                 if (!isIgnorableDriverQuitError(driverQuitError)) {
-                    throw driverQuitError;
+                    console.error(`[firefox-e2e] Failed to quit browser driver: ${errorMessage(driverQuitError)}`);
+                    if (!runError) {
+                        runError = driverQuitError instanceof Error ? driverQuitError : new Error(errorMessage(driverQuitError));
+                    }
                 }
             }
         }

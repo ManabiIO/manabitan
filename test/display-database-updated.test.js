@@ -154,8 +154,10 @@ describe('Display dictionary update handling', () => {
     });
 
     test('stale dictionary-info refresh does not overwrite newer display state', async () => {
-        let resolveFirst;
-        let resolveSecond;
+        /** @type {(value?: unknown) => void} */
+        let resolveFirst = (_value) => { expect.fail('resolveFirst was not initialized'); };
+        /** @type {(value?: unknown) => void} */
+        let resolveSecond = (_value) => { expect.fail('resolveSecond was not initialized'); };
         const getDictionaryInfo = vi.fn()
             .mockImplementationOnce(() => new Promise((resolve) => {
                 resolveFirst = resolve;

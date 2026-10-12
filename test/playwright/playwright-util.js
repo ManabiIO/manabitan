@@ -48,7 +48,8 @@ function getConfiguredExtensionId() {
     return [...hash].map((character) => String.fromCharCode('a'.charCodeAt(0) + Number.parseInt(character, 16))).join('');
 }
 
-export const test = base.extend({
+/** @type {import('@playwright/test').Fixtures<{extensionId: string}, {}, import('@playwright/test').PlaywrightTestArgs & import('@playwright/test').PlaywrightTestOptions, import('@playwright/test').PlaywrightWorkerArgs & import('@playwright/test').PlaywrightWorkerOptions>} */
+const extensionFixtures = {
     // eslint-disable-next-line no-empty-pattern
     context: async ({}, /** @type {(r: import('playwright').BrowserContext) => Promise<void>} */ use) => {
         let createdManifest = false;
@@ -128,7 +129,9 @@ export const test = base.extend({
         }
         throw new Error('Unable to discover extension id');
     },
-});
+};
+
+export const test = base.extend(extensionFixtures);
 
 export const expect = test.expect;
 

@@ -46,7 +46,7 @@ export function getDataTransmissionConsentStateFromOptionsFull(optionsFull) {
     if (!(typeof optionsFull === 'object' && optionsFull !== null && !Array.isArray(optionsFull))) {
         return 'unknown';
     }
-    const globalValue = Reflect.get(optionsFull, 'global');
+    const globalValue = /** @type {unknown} */ (Reflect.get(optionsFull, 'global'));
     if (!(typeof globalValue === 'object' && globalValue !== null && !Array.isArray(globalValue))) {
         return 'unknown';
     }

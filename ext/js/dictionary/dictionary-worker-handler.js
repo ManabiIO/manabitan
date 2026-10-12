@@ -180,12 +180,15 @@ export class DictionaryWorkerHandler {
                 null;
             /** @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase */
             const cleanupTransientReplacementTitles = async (activeDictionaryDatabase) => {
+                /** @type {Set<string>} */
                 const transientTitleCandidates = new Set();
                 const transientTitlePattern = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
                 const transientTokenMatch = (
                     dictionaryTitleOverride !== null &&
                     transientTitlePattern.test(dictionaryTitleOverride)
-                ) ? dictionaryTitleOverride.match(/\[(?:update-staging|cutover|replaced) ([^\]]+)\]$/) : null;
+                ) ?
+dictionaryTitleOverride.match(/\[(?:update-staging|cutover|replaced) ([^\]]+)\]$/) :
+null;
                 const transientSessionToken = Array.isArray(transientTokenMatch) && typeof transientTokenMatch[1] === 'string' && transientTokenMatch[1].length > 0 ?
                     transientTokenMatch[1] :
                     null;
@@ -194,17 +197,9 @@ export class DictionaryWorkerHandler {
                 }
                 const dictionaryInfos = await activeDictionaryDatabase.getDictionaryInfo();
                 for (const dictionaryInfo of dictionaryInfos) {
-                    const title = (
-                        dictionaryInfo &&
-                        typeof dictionaryInfo === 'object' &&
-                        typeof Reflect.get(dictionaryInfo, 'title') === 'string'
-                    ) ? Reflect.get(dictionaryInfo, 'title').trim() : '';
+                    const title = typeof dictionaryInfo?.title === 'string' ? dictionaryInfo.title.trim() : '';
                     if (title.length === 0) { continue; }
-                    const infoToken = (
-                        dictionaryInfo &&
-                        typeof dictionaryInfo === 'object' &&
-                        typeof Reflect.get(dictionaryInfo, 'updateSessionToken') === 'string'
-                    ) ? /** @type {string} */ (Reflect.get(dictionaryInfo, 'updateSessionToken')).trim() : '';
+                    const infoToken = typeof dictionaryInfo?.updateSessionToken === 'string' ? dictionaryInfo.updateSessionToken.trim() : '';
                     if (
                         transientTitlePattern.test(title) &&
                         (
@@ -237,10 +232,13 @@ export class DictionaryWorkerHandler {
                     );
                 });
             };
-            /** @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase */
+            /**
+             * @param {import('./dictionary-database.js').DictionaryDatabase} activeDictionaryDatabase
+             * @returns {Promise<import('dictionary-importer').ImportResult & {importerDebug: import('dictionary-importer').ImportDebug|null}>}
+             */
             const importOnce = async (activeDictionaryDatabase) => {
                 const importPayload = await dictionaryImporter.importDictionary(activeDictionaryDatabase, archiveContent, details);
-                let {result, errors} = importPayload;
+                const {result, errors} = importPayload;
                 const importerDebug = (typeof importPayload === 'object' && importPayload !== null && !Array.isArray(importPayload)) ?
                     (/** @type {import('dictionary-importer').ImportDebug|null} */ (Reflect.get(importPayload, 'debug') ?? null)) :
                     null;

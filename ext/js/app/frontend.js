@@ -407,7 +407,7 @@ export class Frontend {
 
     /**
      * @param {import('application').EventArgument<'databaseUpdated'>} details
-     * @returns {void}
+     * @returns {Promise<void>}
      */
     async _onDatabaseUpdated({type}) {
         if (type !== 'dictionary') { return; }
@@ -782,6 +782,7 @@ export class Frontend {
         let firstMatchedResultResolved = false;
         /** @type {(value: ?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}) => void} */
         let resolveFirstMatchedResult = () => {};
+        /** @type {Promise<?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>} */
         const firstMatchedResultPromise = new Promise((resolve) => {
             resolveFirstMatchedResult = resolve;
         });
@@ -1185,6 +1186,7 @@ export class Frontend {
      * @param {?string} documentTitle
      * @param {import('settings').OptionsContext} optionsContext
      * @param {'dark' | 'light'} pageTheme
+     * @param {number} [searchSuccessAt]
      */
     _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now()) {
         const query = textSource.text();
@@ -1232,6 +1234,7 @@ export class Frontend {
      * @param {import('text-source').TextSource} textSource
      * @param {?import('settings').OptionsContext} optionsContext
      * @param {?import('display').ContentDetails} details
+     * @param {number} [searchSuccessAt]
      * @returns {Promise<void>}
      */
     _showPopupContent(textSource, optionsContext, details, searchSuccessAt = safePerformance.now()) {

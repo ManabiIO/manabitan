@@ -199,7 +199,7 @@ describe('Backend database update deferral', () => {
         Reflect.set(backend, '_pendingDatabaseUpdatedNotifications', []);
         Reflect.set(backend, '_sendMessageAllTabsIgnoreResponse', sendMessageAllTabsIgnoreResponse);
 
-        await Backend.prototype._triggerDatabaseUpdated.call(backend, 'popup', 'purge');
+        await Reflect.apply(Backend.prototype._triggerDatabaseUpdated, backend, ['popup', 'purge']);
 
         expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledOnce();
         expect(sendMessageAllTabsIgnoreResponse).toHaveBeenCalledWith({

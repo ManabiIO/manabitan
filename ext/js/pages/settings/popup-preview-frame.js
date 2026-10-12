@@ -276,7 +276,10 @@ export class PopupPreviewFrame {
         await this._updateSearch();
     }
 
-    /** @type {import('popup-preview-frame').ApiHandler<'setLanguageExampleText'>} */
+    /**
+     * @param {import('popup-preview-frame').ApiParams<'setLanguageExampleText'>} details
+     * @returns {Promise<void>}
+     */
     async _setLanguageExampleText({language}) {
         const activeLanguage = /** @type {import('language').LanguageSummary} */ (this._languageSummaries.find(({iso}) => iso === language));
 

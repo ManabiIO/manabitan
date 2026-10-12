@@ -1157,7 +1157,7 @@ export class DisplayAnki {
 
     /**
      * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
-     * @param {boolean} [fetchDuplicateNoteIds]
+     * @param {boolean} [_fetchDuplicateNoteIds]
      * @param {((
      *  dictionaryEntryIndex: number,
      *  cardFormatIndex: number,
@@ -1166,7 +1166,7 @@ export class DisplayAnki {
      * ) => boolean)|null} [filter]
      * @returns {Promise<import('display-anki').DictionaryEntryDetails[]>}
      */
-    async _getDictionaryEntryDetails(dictionaryEntries, fetchDuplicateNoteIds = true, filter = null) {
+    async _getDictionaryEntryDetails(dictionaryEntries, _fetchDuplicateNoteIds = true, filter = null) {
         const notePromises = [];
         const noteTargets = [];
         /** @type {Map<number, ReturnType<DisplayAnki['_getCommonNoteBuildData']>>} */

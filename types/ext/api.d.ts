@@ -348,6 +348,16 @@ type ApiSurface = {
         params: void;
         return: unknown;
     };
+    downloadDictionaryArchive: {
+        params: {
+            url: string;
+        };
+        return: {
+            contentBase64: string;
+            fileName: string;
+            contentType: string | null;
+        };
+    };
     setDictionaryImportMode: {
         params: {
             active: boolean;
@@ -551,7 +561,14 @@ type PmApiSurface = {
     };
     importDictionaryOffscreen: {
         params: {
-            archiveContent: Blob;
+            archiveContent: ArrayBuffer | Blob;
+            details: DictionaryImporter.ImportDetails;
+        };
+        return: void;
+    };
+    importDictionaryUrlOffscreen: {
+        params: {
+            url: string;
             details: DictionaryImporter.ImportDetails;
         };
         return: void;

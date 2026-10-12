@@ -18,7 +18,7 @@
 import {querySelectorNotNull} from '../dom/query-selector.js';
 
 /**
- * @param {import('dictionary-importer').Summary[]} dictionaryInfos
+ * @param {Array<Pick<import('dictionary-importer').Summary, 'title'>>} dictionaryInfos
  */
 export function renderDictionaryInfo(dictionaryInfos) {
     const fragment = document.createDocumentFragment();

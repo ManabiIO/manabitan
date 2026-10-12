@@ -98,13 +98,14 @@ export class RecommendedPermissionsController {
         const node = /** @type {HTMLInputElement} */ (e.currentTarget);
         const value = node.checked;
         node.checked = !value;
+        /** @type {NonNullable<chrome.permissions.Permissions['permissions']>} */
         const permissions = ['clipboardRead', 'nativeMessaging'];
         try {
             await setPermissionsGranted({permissions}, value);
-        } catch (e2) {
+        } catch (error) {
             if (this._errorContainer !== null) {
                 this._errorContainer.hidden = false;
-                this._errorContainer.textContent = toError(e2).message;
+                this._errorContainer.textContent = toError(error).message;
             }
             return;
         }

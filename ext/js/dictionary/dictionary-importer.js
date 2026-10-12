@@ -26,6 +26,7 @@ import {
     configure,
 } from '../../lib/zip.js';
 import {parseJson} from '../core/json.js';
+import {uint8ArrayToArrayBuffer} from '../data/array-buffer-util.js';
 import {toError} from '../core/to-error.js';
 import {stringReverse} from '../core/utilities.js';
 import {getFileExtensionFromImageMediaType, getImageMediaTypeFromFileName} from '../media/media-util.js';
@@ -201,6 +202,7 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
         }
         const nextStringLengths = new Uint16Array(nextCapacity);
         nextStringLengths.set(stringLengths.subarray(0, stringCount));
+        /** @type {Uint8Array[]} */
         const nextStringBytesList = createSparseArray(nextCapacity);
         for (let i = 0; i < stringCount; ++i) {
             nextStringBytesList[i] = stringBytesList[i];
@@ -212,6 +214,7 @@ function createArtifactTermRecordPreinternedPlanBuilder() {
 
     /**
      * @param {number} h1
+     * @param {number} h2
      * @param {number} byteLength
      * @returns {number|number[]|undefined}
      */
@@ -464,12 +467,15 @@ export class DictionaryImporter {
     /**
      * @param {import('dictionary-importer-media-loader').GenericMediaLoader} mediaLoader
      * @param {import('dictionary-importer').OnProgressCallback} [onProgress]
+     * @param {(message: string) => void} [onDebug]
      */
-    constructor(mediaLoader, onProgress) {
+    constructor(mediaLoader, onProgress, onDebug) {
         /** @type {import('dictionary-importer-media-loader').GenericMediaLoader} */
         this._mediaLoader = mediaLoader;
         /** @type {import('dictionary-importer').OnProgressCallback} */
         this._onProgress = typeof onProgress === 'function' ? onProgress : () => {};
+        /** @type {((message: string) => void)|undefined} */
+        this._onDebug = onDebug;
         /** @type {import('dictionary-importer').ProgressData} */
         this._progressData = this._createProgressData();
         /** @type {number} */
@@ -698,8 +704,12 @@ export class DictionaryImporter {
             if (archiveContent === null) {
                 throw new Error('Archive content is no longer available');
             }
+            this._logImport('archive catalog begin');
             ({fileMap, zipReader: archiveReader} = await this._getFilesFromArchive(archiveContent));
+            this._logImport(`archive catalog complete files=${fileMap.size}`);
+            this._logImport('index read begin');
             index = await this._readAndValidateIndex(fileMap);
+            this._logImport('index read complete');
         } catch (e) {
             recordPhaseTiming('archive-and-index', tArchiveStart, {ok: false});
             return {
@@ -1024,7 +1034,7 @@ export class DictionaryImporter {
         }
         if (isStagedDictionaryUpdate) {
             summary.transientUpdateStage = 'update-staging';
-            summary.updateSessionToken = details.updateSessionToken.trim();
+            summary.updateSessionToken = typeof details.updateSessionToken === 'string' ? details.updateSessionToken.trim() : '';
         }
         const dictionarySummaryPrimaryKey = await dictionaryDatabase.addWithResult('dictionaries', summary);
         let styles = '';
@@ -1205,18 +1215,13 @@ export class DictionaryImporter {
                         );
                         continue;
                     } else if (useArtifactMediaManifestFastPath) {
-                        media = new Array(chunkEntries.length);
+                        media = createSparseArray(chunkEntries.length);
                         for (let j = 0, jj = chunkEntries.length; j < jj; ++j) {
                             const {path, mediaType, packedOffset, packedLength, compressionMethod, uncompressedLength} = chunkEntries[j];
                             const start = /** @type {number} */ (packedOffset);
                             const end = start + /** @type {number} */ (packedLength);
                             const bytes = /** @type {Uint8Array} */ (packedMediaBytesForDirectImport).subarray(start, end);
-                            const content = (
-                                bytes.byteOffset === 0 &&
-                                bytes.byteLength === bytes.buffer.byteLength
-                            ) ?
-                                bytes.buffer :
-                                bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+                            const content = uint8ArrayToArrayBuffer(bytes);
                             media[j] = {
                                 dictionary: dictionaryTitle,
                                 path,
@@ -1277,12 +1282,7 @@ export class DictionaryImporter {
                                 const start = /** @type {number} */ (packedOffset);
                                 const end = start + /** @type {number} */ (packedLength);
                                 const bytes = packedMediaBytesForDirectImport.subarray(start, end);
-                                content = (
-                                    bytes.byteOffset === 0 &&
-                                    bytes.byteLength === bytes.buffer.byteLength
-                                ) ?
-                                    bytes.buffer :
-                                    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+                                content = uint8ArrayToArrayBuffer(bytes);
                                 if (preserveCompressedMedia) {
                                     contentCompressionMethod = Number.isInteger(compressionMethod) ? /** @type {number} */ (compressionMethod) : ZIP_COMPRESSION_METHOD_STORE;
                                     contentUncompressedLength = Number.isInteger(uncompressedLength) ? /** @type {number} */ (uncompressedLength) : bytes.byteLength;
@@ -1293,12 +1293,7 @@ export class DictionaryImporter {
                                     throw new Error(`Could not find image at path ${JSON.stringify(path)} in ${dictionaryTitle}`);
                                 }
                                 const bytes = await this._getData(file, new Uint8ArrayWriter());
-                                content = (
-                                    bytes.byteOffset === 0 &&
-                                    bytes.byteLength === bytes.buffer.byteLength
-                                ) ?
-                                    bytes.buffer :
-                                    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+                                content = uint8ArrayToArrayBuffer(bytes);
                             }
                             if (!skipArtifactImageMetadata) {
                                 try {
@@ -1309,12 +1304,7 @@ export class DictionaryImporter {
                                             throw new Error(`Could not find image metadata source at path ${JSON.stringify(path)} in ${dictionaryTitle}`);
                                         }
                                         const metadataBytes = await this._getData(metadataFile, new Uint8ArrayWriter());
-                                        metadataContent = (
-                                            metadataBytes.byteOffset === 0 &&
-                                            metadataBytes.byteLength === metadataBytes.buffer.byteLength
-                                        ) ?
-                                            metadataBytes.buffer :
-                                            metadataBytes.buffer.slice(metadataBytes.byteOffset, metadataBytes.byteOffset + metadataBytes.byteLength);
+                                        metadataContent = uint8ArrayToArrayBuffer(metadataBytes);
                                     }
                                     ({width, height} = await this._mediaLoader.getImageDetails(metadataContent, mediaType));
                                 } catch (_) {
@@ -1585,11 +1575,11 @@ export class DictionaryImporter {
              * @returns {number}
              */
             const getTermFileEstimatedBytes = (termFile) => {
-                const uncompressedSize = Reflect.get(termFile, 'uncompressedSize');
+                const uncompressedSize = /** @type {unknown} */ (Reflect.get(termFile, 'uncompressedSize'));
                 if (typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) && uncompressedSize > 0) {
                     return Math.trunc(uncompressedSize);
                 }
-                const size = Reflect.get(termFile, 'size');
+                const size = /** @type {unknown} */ (Reflect.get(termFile, 'size'));
                 return (typeof size === 'number' && Number.isFinite(size) && size > 0) ? Math.trunc(size) : 0;
             };
             /**
@@ -2174,7 +2164,29 @@ export class DictionaryImporter {
                 new Uint8ArrayReader(new Uint8Array(archiveContent))
         );
         const zipReader = /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} */ (new ZipReader(zipFileReader));
-        const zipEntries = await zipReader.getEntries();
+        // Preserve and restore the method itself; the wrapper invokes it with
+        // the owning reader as its receiver.
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        const readUint8Array = zipFileReader.readUint8Array;
+        if (this._debugImportLogging) {
+            const kind = archiveContent instanceof Blob ? 'blob' : 'buffer';
+            this._logImport(`archive catalog reader kind=${kind} size=${zipFileReader.size}`);
+            zipFileReader.readUint8Array = async (offset, length) => {
+                this._logImport(`archive catalog read begin offset=${offset} length=${length}`);
+                const bytes = await readUint8Array.call(zipFileReader, offset, length);
+                this._logImport(`archive catalog read complete offset=${offset} length=${length} bytes=${bytes.byteLength}`);
+                return bytes;
+            };
+        }
+        let zipEntries;
+        try {
+            zipEntries = await zipReader.getEntries();
+        } finally {
+            // Retain the original reader for subsequent index and bank reads.
+            if (this._debugImportLogging) {
+                zipFileReader.readUint8Array = readUint8Array;
+            }
+        }
         /** @type {import('dictionary-importer').ArchiveFileMap} */
         const fileMap = new Map();
         for (const entry of zipEntries) {
@@ -2306,6 +2318,7 @@ export class DictionaryImporter {
         }
         // eslint-disable-next-line no-console
         console.log(`[manabitan-import] ${message}`);
+        this._onDebug?.(message);
     }
 
     /**
@@ -2864,12 +2877,7 @@ export class DictionaryImporter {
 
             // Load file content without staging through Blob.
             const bytes = await this._getData(file, new Uint8ArrayWriter());
-            let content = (
-                bytes.byteOffset === 0 &&
-                bytes.byteLength === bytes.buffer.byteLength
-            ) ?
-                bytes.buffer :
-                bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+            let content = uint8ArrayToArrayBuffer(bytes);
 
             const mediaType = getImageMediaTypeFromFileName(path);
             if (mediaType === null) {
@@ -3357,9 +3365,9 @@ export class DictionaryImporter {
             }
         } else {
             for (const termArtifactFile of termArtifactFiles) {
-                const uncompressedSize = typeof Reflect.get(termArtifactFile, 'uncompressedSize') === 'number' ?
-                    Reflect.get(termArtifactFile, 'uncompressedSize') :
-                    (typeof Reflect.get(termArtifactFile, 'bytes') !== 'undefined' ? Reflect.get(/** @type {{bytes: Uint8Array}} */ (termArtifactFile), 'bytes').byteLength : 0);
+                const archiveSize = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'uncompressedSize'));
+                const memoryBytes = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'bytes'));
+                const uncompressedSize = typeof archiveSize === 'number' ? archiveSize : (memoryBytes instanceof Uint8Array ? memoryBytes.byteLength : 0);
                 const size = typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) ?
                     Math.max(0, Math.trunc(uncompressedSize)) :
                     0;
@@ -3631,10 +3639,10 @@ export class DictionaryImporter {
                         };
                         /**
                          * @param {string} value
-                         * @param {Uint8Array} bytes
+                         * @param {Uint8Array} stringBytes
                          * @returns {string}
                          */
-                        const getStringValue = (value, bytes) => value.length > 0 ? value : this._textDecoder.decode(bytes);
+                        const getStringValue = (value, stringBytes) => (value.length > 0 ? value : this._textDecoder.decode(stringBytes));
                         for (let i = 0; i < rowCount; ++i) {
                             const row = /** @type {ParsedTermBankChunkRow} */ (parsedRows[i]);
                             const expressionBytes = row.expressionBytes instanceof Uint8Array ?
@@ -3954,23 +3962,15 @@ export class DictionaryImporter {
             throw new Error(`Invalid term artifact payload in '${filename}': too small`);
         }
         const magic = textDecoder.decode(bytes.subarray(0, TERM_BANK_ARTIFACT_MAGIC_BYTES));
-        const artifactVersion = (
-            magic === TERM_BANK_ARTIFACT_MAGIC_V5 ?
-                5 :
-                (
-                    magic === TERM_BANK_ARTIFACT_MAGIC_V4 ?
-                        4 :
-                        (
-                            magic === TERM_BANK_ARTIFACT_MAGIC_V3 ?
-                                3 :
-                                (
-                                    magic === TERM_BANK_ARTIFACT_MAGIC_V2 ?
-                                        2 :
-                                        (magic === TERM_BANK_ARTIFACT_MAGIC_V1 ? 1 : 0)
-                                )
-                        )
-                )
-        );
+        let artifactVersion = 0;
+        switch (magic) {
+            case TERM_BANK_ARTIFACT_MAGIC_V5: artifactVersion = 5; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V4: artifactVersion = 4; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V3: artifactVersion = 3; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V2: artifactVersion = 2; break;
+            case TERM_BANK_ARTIFACT_MAGIC_V1: artifactVersion = 1; break;
+            default: break;
+        }
         if (artifactVersion === 0) {
             throw new Error(`Invalid term artifact payload in '${filename}': bad magic`);
         }
@@ -4101,7 +4101,7 @@ export class DictionaryImporter {
         /**
          * @param {number} streamedRowCount
          * @param {import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null} termRecordPreinternedPlan
-         * @returns {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}}
+         * @returns {{dictionary: string, rowCount: number, dictionaryTotalRows?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array, sequenceList: (number|undefined)[]|Int32Array, contentBytesList: Uint8Array[], contentHash1List: number[]|Uint32Array, contentHash2List: number[]|Uint32Array, contentDictNameList: ((string|null)[]|null), uniformContentDictName?: string|null, termRecordPreinternedPlan: import('./term-record-wasm-encoder.js').PreinternedTermRecordPlan|null}}
          */
         const createDirectArtifactChunkPayload = (streamedRowCount, termRecordPreinternedPlan) => {
             const useFullChunkArrays = streamedRowCount === chunkSize;
@@ -4111,14 +4111,18 @@ export class DictionaryImporter {
                 dictionaryTotalRows,
                 expressionBytesList: useFullChunkArrays ? chunkExpressionBytes : chunkExpressionBytes.slice(0, streamedRowCount),
                 readingBytesList: useFullChunkArrays ? chunkReadingBytes : chunkReadingBytes.slice(0, streamedRowCount),
-                readingEqualsExpressionList: useFullChunkArrays ? chunkReadingEqualsExpression : chunkReadingEqualsExpression.subarray(0, streamedRowCount),
-                scoreList: useFullChunkArrays ? chunkScores : chunkScores.subarray(0, streamedRowCount),
-                sequenceList: useFullChunkArrays ? chunkSequences : chunkSequences.subarray(0, streamedRowCount),
+                readingEqualsExpressionList: useFullChunkArrays ? chunkReadingEqualsExpression : (Array.isArray(chunkReadingEqualsExpression) ? chunkReadingEqualsExpression.slice(0, streamedRowCount) : chunkReadingEqualsExpression.subarray(0, streamedRowCount)),
+                scoreList: useFullChunkArrays ? chunkScores : (Array.isArray(chunkScores) ? chunkScores.slice(0, streamedRowCount) : chunkScores.subarray(0, streamedRowCount)),
+                sequenceList: useFullChunkArrays ? chunkSequences : (Array.isArray(chunkSequences) ? chunkSequences.slice(0, streamedRowCount) : chunkSequences.subarray(0, streamedRowCount)),
                 contentBytesList: useFullChunkArrays ? chunkContentBytes : chunkContentBytes.slice(0, streamedRowCount),
-                contentHash1List: useFullChunkArrays ? chunkContentHash1 : chunkContentHash1.subarray(0, streamedRowCount),
-                contentHash2List: useFullChunkArrays ? chunkContentHash2 : chunkContentHash2.subarray(0, streamedRowCount),
-                contentDictNameList: chunkContentDictNames === null ? null : (
-                    useFullChunkArrays ? chunkContentDictNames : chunkContentDictNames.slice(0, streamedRowCount)
+                contentHash1List: useFullChunkArrays ? chunkContentHash1 : (Array.isArray(chunkContentHash1) ? chunkContentHash1.slice(0, streamedRowCount) : chunkContentHash1.subarray(0, streamedRowCount)),
+                contentHash2List: useFullChunkArrays ? chunkContentHash2 : (Array.isArray(chunkContentHash2) ? chunkContentHash2.slice(0, streamedRowCount) : chunkContentHash2.subarray(0, streamedRowCount)),
+                contentDictNameList: chunkContentDictNames === null ?
+                    null :
+                    (
+                    useFullChunkArrays ?
+                        chunkContentDictNames :
+                        chunkContentDictNames.slice(0, streamedRowCount)
                 ),
                 uniformContentDictName: chunkUniformContentDictName,
                 termRecordPreinternedPlan,
@@ -4146,7 +4150,9 @@ export class DictionaryImporter {
                 artifactTermContentMode === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME ||
                 artifactTermContentMode === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME
             )
-        ) ? artifactTermContentMode : null;
+        ) ?
+            artifactTermContentMode :
+            null;
         for (let i = 0; i < rowCount; ++i) {
             /** @type {Uint8Array} */
             let expressionBytes;
@@ -4286,13 +4292,11 @@ export class DictionaryImporter {
                 const contentInfo = this._normalizeArtifactTermContent(contentBytes, sharedGlossaryBaseOffset);
                 contentBytes = contentInfo.contentBytes;
                 contentDictName = contentInfo.contentDictName;
-                if (
+                if ((
                     contentDictName === RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME ||
                     contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME
-                ) {
-                    if (collectArtifactRowProfile) {
-                        ++sharedGlossaryRowCount;
-                    }
+                ) && collectArtifactRowProfile) {
+                    ++sharedGlossaryRowCount;
                 }
             } else {
                 contentBytes = this._normalizeArtifactTermContentBytes(contentBytes, termContentStorageMode);
@@ -4479,17 +4483,19 @@ export class DictionaryImporter {
             chunkCount: streamToChunkHandler ? chunkIndex : 0,
             totalRows: rowCount,
             rowChunkSize: chunkSize,
-            ...(collectArtifactRowProfile ? {
-                readingEqualsExpressionCount,
-                sequencePresentCount,
-                zeroScoreCount,
-                nonZeroScoreCount,
-                sharedGlossaryRowCount,
-                contentLengthExtendedCount,
-                avgContentLength: rowCount > 0 ? (contentLengthTotal / rowCount) : 0,
-                avgExpressionLength: rowCount > 0 ? (expressionLengthTotal / rowCount) : 0,
-                avgReadingLength: rowCount > 0 ? (readingLengthTotal / rowCount) : 0,
-            } : {}),
+            ...(collectArtifactRowProfile ?
+                {
+                    readingEqualsExpressionCount,
+                    sequencePresentCount,
+                    zeroScoreCount,
+                    nonZeroScoreCount,
+                    sharedGlossaryRowCount,
+                    contentLengthExtendedCount,
+                    avgContentLength: rowCount > 0 ? (contentLengthTotal / rowCount) : 0,
+                    avgExpressionLength: rowCount > 0 ? (expressionLengthTotal / rowCount) : 0,
+                    avgReadingLength: rowCount > 0 ? (readingLengthTotal / rowCount) : 0,
+                } :
+                {}),
         };
         return {termList: streamToChunkHandler ? [] : termList, requirements: null};
     }
@@ -4763,7 +4769,7 @@ export class DictionaryImporter {
      * @returns {Promise<T>}
      */
     async _getData(entry, writer) {
-        const bytes = /** @type {Uint8Array|undefined} */ (Reflect.get(entry, 'bytes'));
+        const bytes = /** @type {unknown} */ (Reflect.get(entry, 'bytes'));
         if (bytes instanceof Uint8Array) {
             if (writer instanceof Uint8ArrayWriter) {
                 return /** @type {T} */ (bytes);
@@ -4776,11 +4782,10 @@ export class DictionaryImporter {
             }
             throw new Error(`Unsupported writer for ${entry.filename}`);
         }
-        const getData = Reflect.get(entry, 'getData');
+        const getData = /** @type {unknown} */ (Reflect.get(entry, 'getData'));
         if (typeof getData !== 'function') {
             throw new Error(`Cannot read ${entry.filename}`);
         }
-        return await getData.call(entry, writer);
+        return await /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter) => Promise<T>} */ (getData).call(entry, writer);
     }
-
 }

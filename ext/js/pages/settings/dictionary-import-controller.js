@@ -197,20 +197,22 @@ function getOpfsUnavailableUserMessage(message) {
             }
             return `${base} Update to a browser/runtime which exposes worker OPFS SyncAccessHandle support and reload the extension. ${formatFallbackDiagnostics()}`;
         }
-        const runtimeContext = Reflect.get(diagnostics, 'runtimeContext');
-        const mode = typeof Reflect.get(diagnostics, 'mode') === 'string' ? Reflect.get(diagnostics, 'mode') : 'unknown';
-        const hasStorageGetDirectory = typeof Reflect.get(runtimeContext ?? {}, 'hasStorageGetDirectory') === 'boolean' ? Reflect.get(runtimeContext ?? {}, 'hasStorageGetDirectory') : null;
-        const hasCreateSyncAccessHandle = typeof Reflect.get(runtimeContext ?? {}, 'hasCreateSyncAccessHandle') === 'boolean' ? Reflect.get(runtimeContext ?? {}, 'hasCreateSyncAccessHandle') : null;
-        const opfsSahpoolInstallResult = typeof Reflect.get(diagnostics, 'opfsSahpoolInstallResult') === 'string' ? Reflect.get(diagnostics, 'opfsSahpoolInstallResult') : null;
-        const opfsSahpoolInstallError = typeof Reflect.get(diagnostics, 'opfsSahpoolInstallError') === 'string' ? Reflect.get(diagnostics, 'opfsSahpoolInstallError') : null;
-        const opfsSahpoolVfs = typeof Reflect.get(diagnostics, 'hasOpfsSahpoolVfs') === 'boolean' ? Reflect.get(diagnostics, 'hasOpfsSahpoolVfs') : null;
-        const attempts = Array.isArray(Reflect.get(diagnostics, 'attempts')) ? Reflect.get(diagnostics, 'attempts') : [];
-        const lastSahpoolOpenError = attempts
-            .filter((/** @type {unknown} */ attempt) => typeof Reflect.get(attempt ?? {}, 'strategy') === 'string' && Reflect.get(attempt ?? {}, 'strategy') === 'uri-opfs-sahpool')
-            .map((/** @type {unknown} */ attempt) => typeof Reflect.get(attempt ?? {}, 'error') === 'string' ? Reflect.get(attempt ?? {}, 'error') : '')
-            .filter((/** @type {string} */ value) => value.length > 0)
-            .at(-1) ?? null;
-        const runtimeUserAgent = typeof Reflect.get(runtimeContext ?? {}, 'userAgent') === 'string' ? Reflect.get(runtimeContext ?? {}, 'userAgent') : '';
+        const details = /** @type {Record<string, unknown>} */ (diagnostics);
+        const runtimeContext = details.runtimeContext;
+        const runtimeDetails = typeof runtimeContext === 'object' && runtimeContext !== null ? /** @type {Record<string, unknown>} */ (runtimeContext) : {};
+        const mode = typeof details.mode === 'string' ? details.mode : 'unknown';
+        const hasStorageGetDirectory = typeof runtimeDetails.hasStorageGetDirectory === 'boolean' ? runtimeDetails.hasStorageGetDirectory : null;
+        const hasCreateSyncAccessHandle = typeof runtimeDetails.hasCreateSyncAccessHandle === 'boolean' ? runtimeDetails.hasCreateSyncAccessHandle : null;
+        const opfsSahpoolInstallResult = typeof details.opfsSahpoolInstallResult === 'string' ? details.opfsSahpoolInstallResult : null;
+        const opfsSahpoolInstallError = typeof details.opfsSahpoolInstallError === 'string' ? details.opfsSahpoolInstallError : null;
+        const opfsSahpoolVfs = typeof details.hasOpfsSahpoolVfs === 'boolean' ? details.hasOpfsSahpoolVfs : null;
+        const attempts = Array.isArray(details.attempts) ? /** @type {unknown[]} */ (details.attempts) : [];
+        const attemptErrors = attempts.map((attempt) => {
+            const record = typeof attempt === 'object' && attempt !== null ? /** @type {Record<string, unknown>} */ (attempt) : {};
+            return record.strategy === 'uri-opfs-sahpool' && typeof record.error === 'string' ? record.error : '';
+        });
+        const lastSahpoolOpenError = attemptErrors.reverse().find((value) => value.length > 0) ?? null;
+        const runtimeUserAgent = typeof runtimeDetails.userAgent === 'string' ? runtimeDetails.userAgent : '';
         const isFirefoxRuntimeFromDiagnostics = /Firefox\//i.test(runtimeUserAgent) || isFirefoxRuntime;
         let reason = 'Update to a browser/runtime which exposes worker OPFS SyncAccessHandle support and reload the extension.';
         if (isFirefoxRuntimeFromDiagnostics) {
@@ -254,6 +256,21 @@ function getExtensionBuildStamp() {
     } catch (_) {
         return null;
     }
+}
+
+/**
+ * @param {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} localPhaseTimings
+ * @param {string} dictionaryTitle
+ * @param {string} phase
+ * @param {number} startTime
+ * @param {number} endTime
+ * @param {Record<string, string|number|boolean|null>} [details]
+ * @returns {void}
+ */
+function recordImportLocalPhase(localPhaseTimings, dictionaryTitle, phase, startTime, endTime, details = {}) {
+    const elapsedMs = Math.max(0, endTime - startTime);
+    localPhaseTimings.push({phase, elapsedMs, details});
+    log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
 }
 
 export class DictionaryImportController {
@@ -386,14 +403,14 @@ export class DictionaryImportController {
     // Private
 
     /**
-     * @param {File} archiveContent
+     * @param {File|ArrayBuffer} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
      * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}>}
      */
     async _tryImportDictionaryOffscreen(archiveContent, details, onProgress) {
-        if (!(archiveContent instanceof Blob)) {
-            throw new Error('Dictionary import requires Blob-backed archive content');
+        if (!(archiveContent instanceof Blob) && !(archiveContent instanceof ArrayBuffer)) {
+            throw new Error('Dictionary import requires Blob or ArrayBuffer archive content');
         }
         return /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
             await this._settingsController.application.api.importDictionaryOffscreen(archiveContent, details, onProgress)
@@ -404,7 +421,7 @@ export class DictionaryImportController {
      * @param {string} url
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}}>}
+     * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}>}
      */
     async _tryImportDictionaryUrlOffscreen(url, details, onProgress) {
         return /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
@@ -729,7 +746,7 @@ export class DictionaryImportController {
                 return Array.isArray(values) && values.length > 0;
             });
             if (!hasAnyRecommendedEntries) {
-                resolvedLanguage = undefined;
+                resolvedLanguage = void 0;
             }
         }
 
@@ -1146,6 +1163,7 @@ export class DictionaryImportController {
      * @param {string} text
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} [importDetailsOverrides]
      */
     async importFilesFromURLs(
         text,
@@ -1191,6 +1209,7 @@ export class DictionaryImportController {
      * @param {File[]} files
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} [importDetailsOverrides]
      */
     async importFiles(
         files,
@@ -1411,6 +1430,7 @@ export class DictionaryImportController {
                 request.onprogress = null;
                 abortSignal.removeEventListener('abort', onAbortSignal);
             };
+            /** @param {unknown} error */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
@@ -1430,7 +1450,7 @@ export class DictionaryImportController {
                     fail(new Error(`Failed to fetch dictionary archive: ${url} (status=${String(request.status)})`));
                     return;
                 }
-                const response = request.response;
+                const response = /** @type {unknown} */ (request.response);
                 const contentBytes = response instanceof ArrayBuffer ? new Uint8Array(response) : new Uint8Array(0);
                 if (contentBytes.byteLength === 0) {
                     fail(new Error(`Fetched dictionary archive had no content: ${url}`));
@@ -1554,10 +1574,11 @@ export class DictionaryImportController {
     }
 
     /**
-     * @param {AsyncGenerator<File, void, void>} dictionaries
+     * @param {AsyncGenerator<File|{downloadUrl: string}, void, void>} dictionaries
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
      * @param {ImportProgressTracker} importProgressTracker
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} [importDetailsOverrides]
      */
     async _importDictionaries(
         dictionaries,
@@ -1582,7 +1603,7 @@ export class DictionaryImportController {
         /** @type {Error[]} */
         let errors = [];
         /** @type {string[]} */
-        let importedTitles = [];
+        const importedTitles = [];
         const useImportSession = this._getUseImportSession();
         log.log(`[ImportTiming] import session reuse enabled=${String(useImportSession)} (globalOverride=${String(this._getUseImportSession())})`);
         reportDiagnostics('dictionary-import-session-begin', {
@@ -1655,7 +1676,7 @@ export class DictionaryImportController {
                     downloadUrl = /** @type {string} */ (Reflect.get(fileValue, 'downloadUrl')).trim();
                     file = new File([], 'fileFromURL.zip', {type: 'application/zip'});
                 } else if (fileValue && typeof fileValue === 'object') {
-                    const blobPart = /** @type {BlobPart} */ (fileValue);
+                    const blobPart = /** @type {BlobPart} */ (/** @type {unknown} */ (fileValue));
                     file = new File([blobPart], 'fileFromURL.zip', {type: 'application/zip'});
                 } else {
                     errors.push(new Error(`Failed to read file ${i + 1} of ${importProgressTracker.dictionaryCount} (value-type=${typeof fileValue}, value=${String(fileValue)}).`));
@@ -1956,17 +1977,7 @@ export class DictionaryImportController {
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const localPhaseTimings = [];
-        /**
-         * @param {string} phase
-         * @param {number} startTime
-         * @param {number} endTime
-         * @param {Record<string, string|number|boolean|null>} [details]
-         */
-        const recordLocalPhase = (phase, startTime, endTime, details = {}) => {
-            const elapsedMs = Math.max(0, endTime - startTime);
-            localPhaseTimings.push({phase, elapsedMs, details});
-            log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
-        };
+        const recordLocalPhase = recordImportLocalPhase.bind(null, localPhaseTimings, dictionaryTitle);
         log.log(`[ImportTiming] [${dictionaryTitle}] starting import`);
         reportDiagnostics('dictionary-import-zip-begin', {
             dictionaryTitle,
@@ -1976,22 +1987,24 @@ export class DictionaryImportController {
         });
 
         const readStartTime = safePerformance.now();
-        const archiveContent = file;
+        // Firefox can leave a page-owned File's sliced Blob read pending after
+        // the backend port and dictionary worker clone it. Read it in its
+        // owning page and transfer the bytes through both boundaries instead.
+        const useArchiveBuffer = !('serviceWorker' in navigator);
+        const archiveContent = useArchiveBuffer ? await file.arrayBuffer() : file;
         const readEndTime = safePerformance.now();
         log.log(`[ImportTiming] [${dictionaryTitle}] prepared archive handle ${formatDurationMs(readEndTime - readStartTime)}`);
         recordLocalPhase('read-archive', readStartTime, readEndTime, {
             sizeBytes: file.size,
-            source: 'file-handle',
+            source: useArchiveBuffer ? 'transferred-buffer' : 'file-handle',
         });
 
         const workerImportStartTime = safePerformance.now();
-        /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */
-        let importResult;
         const detailsAttempt = {
             ...importDetails,
             ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
         };
-        importResult = /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
+        const importResult = /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
             await this._tryImportDictionaryOffscreen(archiveContent, detailsAttempt, onProgress)
         );
         const workerImportEndTime = safePerformance.now();
@@ -2031,11 +2044,7 @@ export class DictionaryImportController {
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const localPhaseTimings = [];
-        const recordLocalPhase = (phase, startTime, endTime, details = {}) => {
-            const elapsedMs = Math.max(0, endTime - startTime);
-            localPhaseTimings.push({phase, elapsedMs, details});
-            log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
-        };
+        const recordLocalPhase = recordImportLocalPhase.bind(null, localPhaseTimings, dictionaryTitle);
         log.log(`[ImportTiming] [${dictionaryTitle}] starting import from URL`);
         reportDiagnostics('dictionary-import-url-begin', {
             downloadUrl: summarizeUrlForDiagnostics(downloadUrl),
@@ -2098,18 +2107,7 @@ export class DictionaryImportController {
         profilesDictionarySettings,
         localPhaseTimings,
     }) {
-        /**
-         * @param {string} phase
-         * @param {number} startTime
-         * @param {number} endTime
-         * @param {Record<string, string|number|boolean|null>} [details]
-         * @returns {void}
-         */
-        const recordLocalPhase = (phase, startTime, endTime, details = {}) => {
-            const elapsedMs = Math.max(0, endTime - startTime);
-            localPhaseTimings.push({phase, elapsedMs, details});
-            log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
-        };
+        const recordLocalPhase = recordImportLocalPhase.bind(null, localPhaseTimings, dictionaryTitle);
         /**
          * @param {string} phase
          * @returns {{errors: Error[], importedTitle: string|null}|null}
@@ -2220,7 +2218,9 @@ export class DictionaryImportController {
                 updateSessionToken: (
                     typeof importDetails.updateSessionToken === 'string' &&
                     importDetails.updateSessionToken.trim().length > 0
-                ) ? importDetails.updateSessionToken.trim() : null,
+                ) ?
+                    importDetails.updateSessionToken.trim() :
+                    null,
             };
             await this._settingsController.application.api.replaceDictionaryTitle({
                 fromDictionaryTitle: result.title,
@@ -2386,11 +2386,15 @@ export class DictionaryImportController {
         const sourceTitle = (
             typeof summary.sourceTitle === 'string' &&
             summary.sourceTitle.trim().length > 0
-        ) ? summary.sourceTitle.trim() : null;
+        ) ?
+            summary.sourceTitle.trim() :
+            null;
         const replacedTitle = (
             typeof summary.replacedDictionaryTitle === 'string' &&
             summary.replacedDictionaryTitle.trim().length > 0
-        ) ? summary.replacedDictionaryTitle.trim() : null;
+        ) ?
+            summary.replacedDictionaryTitle.trim() :
+            null;
         const selectorSourceTitle = sourceTitle ?? replacedTitle;
         let optionsFull;
         // Workaround Firefox bug sometimes causing getOptionsFull to fail
@@ -2455,14 +2459,9 @@ export class DictionaryImportController {
                 const {name} = profileDictionarySettings[0];
                 if (
                     options.general.mainDictionary === name ||
-                    (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle)
+                    (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle) ||
+                    (sequenced && options.general.mainDictionary === '')
                 ) {
-                    targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.mainDictionary`,
-                        value: title,
-                    });
-                } else if (sequenced && options.general.mainDictionary === '') {
                     targets.push({
                         action: 'set',
                         path: `profiles[${i}].options.general.mainDictionary`,
@@ -2479,7 +2478,6 @@ export class DictionaryImportController {
                         value: title,
                     });
                 }
-                continue;
             }
         }
         return await this._modifyGlobalSettings(targets);

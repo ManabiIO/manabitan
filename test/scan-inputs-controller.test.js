@@ -21,6 +21,11 @@ import {createDomTest} from './fixtures/dom-test.js';
 
 const test = createDomTest();
 
+/**
+ * @param {import('vitest').Mock} modifyProfileSettings
+ * @param {{scanning: {inputs: import('settings').ScanningInput[]}}} options
+ * @returns {{application: {api: {getEnvironmentInfo: import('vitest').Mock}}, getOptions: import('vitest').Mock, getOptionsContext: import('vitest').Mock, instantiateTemplate: import('vitest').Mock, modifyProfileSettings: import('vitest').Mock, setProfileSetting: import('vitest').Mock, on: import('vitest').Mock, trigger: import('vitest').Mock}}
+ */
 function createSettingsController(modifyProfileSettings, options) {
     return {
         application: {
@@ -53,14 +58,14 @@ describe('ScanInputsController', () => {
         const controller = new ScanInputsController(/** @type {any} */ (settingsController));
         controller._scanningInputCountNodes = window.document.querySelectorAll('.scanning-input-count');
         vi.spyOn(controller, '_addOption').mockImplementation((index) => {
-            controller._entries.push({cleanup: vi.fn(), index});
+            controller._entries.push(/** @type {typeof controller._entries[number]} */ (/** @type {unknown} */ ({cleanup: vi.fn(), index})));
         });
         const cleanup = vi.fn();
-        controller._entries = [{cleanup, index: 0}];
+        controller._entries = [(/** @type {typeof controller._entries[number]} */ (/** @type {unknown} */ ({cleanup, index: 0})))];
         controller._updateCounts();
 
         controller.removeInput(0);
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(cleanup).toHaveBeenCalled();
         expect(controller._entries).toHaveLength(1);
@@ -84,14 +89,14 @@ describe('ScanInputsController', () => {
         const controller = new ScanInputsController(/** @type {any} */ (settingsController));
         controller._scanningInputCountNodes = window.document.querySelectorAll('.scanning-input-count');
         vi.spyOn(controller, '_addOption').mockImplementation((index) => {
-            controller._entries.push({cleanup: vi.fn(), index});
+            controller._entries.push(/** @type {typeof controller._entries[number]} */ (/** @type {unknown} */ ({cleanup: vi.fn(), index})));
         });
         controller._updateCounts();
         controller._onAddButtonClick(/** @type {MouseEvent} */ (/** @type {unknown} */ ({
             preventDefault() {},
             currentTarget: window.document.querySelector('#scan-input-add'),
         })));
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(controller._entries).toHaveLength(0);
         expect(window.document.querySelector('.scanning-input-count')?.textContent).toBe('0');

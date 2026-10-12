@@ -60,7 +60,7 @@ describe('RecommendedPermissionsController', () => {
         await controller._onOptionalPermissionsToggleChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: toggle})));
 
         expect(toggle.checked).toBe(false);
-        expect(window.document.querySelector('#recommended-permissions-error')?.hidden).toBe(false);
+        expect((/** @type {HTMLElement|null} */ (window.document.querySelector('#recommended-permissions-error')))?.hidden).toBe(false);
         expect(window.document.querySelector('#recommended-permissions-error')?.textContent).toContain('permission failed');
     });
 

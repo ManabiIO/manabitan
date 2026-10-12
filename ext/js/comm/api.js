@@ -17,11 +17,16 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {log} from '../core/log.js';
 
 const pmTransportTimeoutMs = 10_000;
 const apiInvokeTimeoutMs = 30_000;
 const apiInvokeExtendedTimeoutMs = 180_000;
 
+/**
+ * @param {number} delayMs
+ * @returns {Promise<void>}
+ */
 function sleep(delayMs) {
     return new Promise((resolve) => {
         globalThis.setTimeout(resolve, delayMs);
@@ -367,13 +372,6 @@ export class API {
     }
 
     /**
-     * @returns {Promise<import('api').ApiReturn<'debugDictionaryStorageState'>>}
-     */
-    debugDictionaryStorageState() {
-        return this._invoke('debugDictionaryStorageState', void 0);
-    }
-
-    /**
      * @param {string} url
      * @returns {Promise<{contentBase64: string, fileName: string, contentType: string|null}>}
      */
@@ -568,12 +566,35 @@ export class API {
     }
 
     /**
-     * @param {Blob} archiveContent
+     * @param {ArrayBuffer|Blob} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
      * @returns {Promise<unknown>}
      */
     importDictionaryOffscreen(archiveContent, details, onProgress) {
+        return this._importDictionaryRuntime('importDictionaryOffscreen', {archiveContent, details}, onProgress, 'Dictionary runtime import', archiveContent instanceof ArrayBuffer ? [archiveContent] : []);
+    }
+
+    /**
+     * @param {string} url
+     * @param {import('dictionary-importer').ImportDetails} details
+     * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @returns {Promise<unknown>}
+     */
+    importDictionaryUrlOffscreen(url, details, onProgress) {
+        return this._importDictionaryRuntime('importDictionaryUrlOffscreen', {url, details}, onProgress, 'Dictionary runtime URL import');
+    }
+
+    /**
+     * @template {'importDictionaryOffscreen'|'importDictionaryUrlOffscreen'} TAction
+     * @param {TAction} action
+     * @param {import('api').PmApiParams<TAction>} params
+     * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {string} label
+     * @param {Transferable[]} [archiveTransfers]
+     * @returns {Promise<unknown>}
+     */
+    _importDictionaryRuntime(action, params, onProgress, label, archiveTransfers = []) {
         const pmTransportError = this._getPmTransportError();
         if (pmTransportError !== null) {
             return Promise.reject(pmTransportError);
@@ -581,6 +602,9 @@ export class API {
         const channel = new MessageChannel();
         return new Promise((resolve, reject) => {
             let settled = false;
+            /** @type {string|null} */
+            let lastDebugMessage = null;
+            /** @param {unknown} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
@@ -596,7 +620,8 @@ export class API {
             this._shutdownRejectors.add(shutdownReject);
             const timeoutMs = 150_000;
             const timeoutId = globalThis.setTimeout(() => {
-                shutdownReject(new Error(`Dictionary runtime import response timed out after ${String(timeoutMs)}ms`));
+                const diagnostic = lastDebugMessage === null ? '' : `; last importer diagnostic: ${lastDebugMessage}`;
+                shutdownReject(new Error(`${label} response timed out after ${String(timeoutMs)}ms${diagnostic}`));
             }, timeoutMs);
             channel.port1.onmessage = (event) => {
                 if (settled) { return; }
@@ -605,8 +630,16 @@ export class API {
                     typeof eventData === 'object' &&
                     eventData !== null &&
                     !Array.isArray(eventData)
-                ) ? /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) : null;
+                ) ?
+                    /** @type {{type?: string, message?: unknown, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) :
+                    null;
                 switch (data?.type) {
+                    case 'debug':
+                        if (typeof data.message === 'string') {
+                            lastDebugMessage = data.message;
+                            log.log(`[manabitan-import] ${data.message}`);
+                        }
+                        return;
                     case 'progress':
                         onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
                         return;
@@ -638,7 +671,7 @@ export class API {
                         globalThis.clearTimeout(timeoutId);
                         channel.port1.close();
                         reject(ExtensionError.deserialize(
-                            data.error ?? {name: 'Error', message: 'Dictionary runtime import failed', stack: ''},
+                            data.error ?? {name: 'Error', message: `${label} failed`, stack: ''},
                         ));
                         return;
                     default:
@@ -646,101 +679,10 @@ export class API {
                 }
             };
             channel.port1.onmessageerror = () => {
-                shutdownReject(new Error('Dictionary runtime import response channel failed'));
+                shutdownReject(new Error(`${label} response channel failed`));
             };
             try {
-                void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details}, [channel.port2]).catch((error) => {
-                    shutdownReject(error instanceof Error ? error : new Error(String(error)));
-                });
-            } catch (error) {
-                shutdownReject(error instanceof Error ? error : new Error(String(error)));
-            }
-        });
-    }
-
-    /**
-     * @param {string} url
-     * @param {import('dictionary-importer').ImportDetails} details
-     * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {Promise<unknown>}
-     */
-    importDictionaryUrlOffscreen(url, details, onProgress) {
-        const pmTransportError = this._getPmTransportError();
-        if (pmTransportError !== null) {
-            return Promise.reject(pmTransportError);
-        }
-        const channel = new MessageChannel();
-        return new Promise((resolve, reject) => {
-            let settled = false;
-            const shutdownReject = (error) => {
-                if (settled) { return; }
-                settled = true;
-                this._shutdownRejectors.delete(shutdownReject);
-                globalThis.clearTimeout(timeoutId);
-                try {
-                    channel.port1.close();
-                } catch (_) {
-                    // Ignore close failures for torn-down URL import response channels.
-                }
-                reject(error);
-            };
-            this._shutdownRejectors.add(shutdownReject);
-            const timeoutMs = 150_000;
-            const timeoutId = globalThis.setTimeout(() => {
-                shutdownReject(new Error(`Dictionary runtime URL import response timed out after ${String(timeoutMs)}ms`));
-            }, timeoutMs);
-            channel.port1.onmessage = (event) => {
-                if (settled) { return; }
-                const eventData = /** @type {unknown} */ (event.data);
-                const data = (
-                    typeof eventData === 'object' &&
-                    eventData !== null &&
-                    !Array.isArray(eventData)
-                ) ? /** @type {{type?: string, progress?: unknown, result?: unknown, error?: import('core').SerializedError}} */ (eventData) : null;
-                switch (data?.type) {
-                    case 'progress':
-                        onProgress?.(/** @type {import('dictionary-importer').ProgressData} */ (data.progress));
-                        return;
-                    case 'complete':
-                        settled = true;
-                        this._shutdownRejectors.delete(shutdownReject);
-                        globalThis.clearTimeout(timeoutId);
-                        channel.port1.close();
-                        if (
-                            data.result &&
-                            typeof data.result === 'object' &&
-                            !Array.isArray(data.result)
-                        ) {
-                            const result = /** @type {{errors?: unknown[]}} */ (data.result);
-                            if (Array.isArray(result.errors)) {
-                                result.errors = result.errors.map((error) => {
-                                    if (error && typeof error === 'object' && !Array.isArray(error)) {
-                                        return ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (error));
-                                    }
-                                    return error;
-                                });
-                            }
-                        }
-                        resolve(data.result ?? null);
-                        return;
-                    case 'error':
-                        settled = true;
-                        this._shutdownRejectors.delete(shutdownReject);
-                        globalThis.clearTimeout(timeoutId);
-                        channel.port1.close();
-                        reject(ExtensionError.deserialize(
-                            data.error ?? {name: 'Error', message: 'Dictionary runtime URL import failed', stack: ''},
-                        ));
-                        return;
-                    default:
-                        return;
-                }
-            };
-            channel.port1.onmessageerror = () => {
-                shutdownReject(new Error('Dictionary runtime URL import response channel failed'));
-            };
-            try {
-                void this._pmInvoke('importDictionaryUrlOffscreen', {url, details}, [channel.port2]).catch((error) => {
+                void this._pmInvoke(action, params, [channel.port2, ...archiveTransfers]).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {
@@ -821,6 +763,7 @@ export class API {
         return new Promise((resolve, reject) => {
             let settled = false;
             let retriedTransientFailure = false;
+            /** @param {unknown} error */
             const shutdownReject = (error) => {
                 if (settled) { return; }
                 settled = true;
@@ -969,8 +912,12 @@ export class API {
             if (transportError !== null) {
                 throw transportError;
             }
+            const backendPort = this._backendPort;
+            if (backendPort === null) {
+                throw new Error('Backend message port is not available. You may need to refresh the page.');
+            }
             try {
-                this._backendPort.postMessage({action, params}, transferables);
+                backendPort.postMessage({action, params}, transferables);
             } catch (error) {
                 this._setBackendPort(null);
                 await this._reconnectBackendPort();
@@ -994,19 +941,23 @@ export class API {
                 /** @type {(error: Error) => void} */
                 let shutdownReject = () => {};
                 try {
+                    /** @type {Promise<never>} */
+                    const timeoutPromise = new Promise((_, reject) => {
+                        timeoutId = globalThis.setTimeout(() => {
+                            reject(new Error(`Timed out waiting for active service worker after ${String(pmTransportTimeoutMs)}ms`));
+                        }, pmTransportTimeoutMs);
+                    });
+                    /** @type {Promise<never>} */
+                    const shutdownPromise = new Promise((_, reject) => {
+                        shutdownReject = (error) => {
+                            reject(error);
+                        };
+                        this._shutdownRejectors.add(shutdownReject);
+                    });
                     const serviceWorkerRegistration = await Promise.race([
                         navigator.serviceWorker.ready,
-                        new Promise((_, reject) => {
-                            timeoutId = globalThis.setTimeout(() => {
-                                reject(new Error(`Timed out waiting for active service worker after ${String(pmTransportTimeoutMs)}ms`));
-                            }, pmTransportTimeoutMs);
-                        }),
-                        new Promise((_, reject) => {
-                            shutdownReject = (error) => {
-                                reject(error);
-                            };
-                            this._shutdownRejectors.add(shutdownReject);
-                        }),
+                        timeoutPromise,
+                        shutdownPromise,
                     ]);
                     if (serviceWorkerRegistration.active === null) {
                         throw new Error(`[${self.constructor.name}] no active service worker`);
@@ -1121,6 +1072,7 @@ export class API {
 
     /**
      * @returns {MessagePort}
+     * @throws {Error} When the Firefox backend bridge cannot be connected.
      */
     _createFirefoxBackendPort() {
         const sharedWorkerBridge = new SharedWorker(new URL('shared-worker-bridge.js', import.meta.url), {type: 'module'});

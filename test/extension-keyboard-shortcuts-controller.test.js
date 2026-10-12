@@ -37,7 +37,7 @@ describe('ExtensionKeyboardShortcutController', () => {
         });
         vi.stubGlobal('chrome', {
             commands: {
-                getAll: (callback) => callback([{name: 'openSearchPage', shortcut: 'Ctrl+Shift+F'}]),
+                getAll: (/** @type {(commands: chrome.commands.Command[]) => void} */ callback) => callback([{name: 'openSearchPage', shortcut: 'Ctrl+Shift+F'}]),
             },
             runtime: {
                 lastError: null,

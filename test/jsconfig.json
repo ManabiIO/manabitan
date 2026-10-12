@@ -29,7 +29,7 @@
             "parse5"
         ],
         "lib": [
-            "ES2022",
+            "ES2024",
             "DOM",
             "DOM.Iterable",
             "WebWorker"

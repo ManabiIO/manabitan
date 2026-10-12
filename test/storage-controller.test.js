@@ -21,7 +21,7 @@ import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {StorageController} from '../ext/js/pages/settings/storage-controller.js';
 
 describe('StorageController runtime check', () => {
-    /** @type {import('../ext/js/pages/settings/storage-controller.js').StorageController} */
+    /** @type {import('../ext/js/pages/settings/storage-controller.js').StorageController|undefined} */
     let controller;
     /** @type {{persisted: ReturnType<typeof vi.fn>, estimate: ReturnType<typeof vi.fn>}} */
     let storageMock;

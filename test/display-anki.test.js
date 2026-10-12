@@ -267,8 +267,10 @@ describe('DisplayAnki preload and save flow', () => {
     test('stale anki field-template refresh does not overwrite newer dictionary-backed templates', async ({window}) => {
         setupDocument(window.document);
         const dictionaryEntries = [createTermEntry()];
-        let resolveFirst;
-        let resolveSecond;
+        /** @type {(value: string) => void} */
+        let resolveFirst = (_value) => { expect.fail('resolveFirst was not initialized'); };
+        /** @type {(value: string) => void} */
+        let resolveSecond = (_value) => { expect.fail('resolveSecond was not initialized'); };
         const {display} = createDisplay(window.document, dictionaryEntries);
         const displayAnki = new DisplayAnki(display, createDisplayAudio());
         vi.spyOn(displayAnki, '_getAnkiFieldTemplates')

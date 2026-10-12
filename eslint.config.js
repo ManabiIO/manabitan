@@ -45,6 +45,8 @@ const compat = new FlatCompat({
 header.rules.header.meta.schema = false;
 
 const manabitanHeaderFiles = [
+    'ext/js/data/data-transmission-consent-util.js',
+    'ext/js/dictionary/term-entry-content-hash.js',
     'ext/js/dictionary/sqlite-wasm.js',
     'ext/js/dictionary/raw-term-content.js',
     'dev/bin/run-playwright.js',

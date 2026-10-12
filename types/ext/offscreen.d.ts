@@ -164,6 +164,12 @@ type ApiSurface = {
         };
         return: Translator.TermFrequencySimple[];
     };
+    warmTermLookupCachesOffscreen: {
+        params: {
+            dictionaryNames: string[];
+        };
+        return: void;
+    };
     clearDatabaseCachesOffscreen: {
         params: void;
         return: void;
@@ -245,7 +251,7 @@ type McApiSurface = {
     };
     importDictionaryOffscreen: {
         params: {
-            archiveContent: Blob;
+            archiveContent: ArrayBuffer | Blob;
             details: DictionaryImporter.ImportDetails;
         };
         return: void;

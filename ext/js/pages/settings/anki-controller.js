@@ -194,7 +194,7 @@ export class AnkiController {
 
     /**
      * @param {string} fieldValue
-     * @returns {string[]}
+     * @returns {NonNullable<chrome.permissions.Permissions['permissions']>}
      */
     getRequiredPermissions(fieldValue) {
         return getRequiredPermissionsForAnkiFieldValue(fieldValue);
@@ -1239,7 +1239,7 @@ class AnkiCardController {
     }
 
     /**
-     * @param {string[]} permissions
+     * @param {NonNullable<chrome.permissions.Permissions['permissions']>} permissions
      */
     async _requestPermissions(permissions) {
         try {
@@ -1277,7 +1277,7 @@ class AnkiCardController {
      * @param {import('settings-controller').EventArgument<'permissionsChanged'>} details
      */
     _onPermissionsChanged({permissions: {permissions}}) {
-        const permissionsSet = new Set(permissions);
+        const permissionsSet = new Set(/** @type {string[]|undefined} */ (permissions));
         for (let i = 0, ii = this._fieldEntries.length; i < ii; ++i) {
             const {inputField} = this._fieldEntries[i];
             const {requiredPermission} = inputField.dataset;
