@@ -31,7 +31,7 @@ export function arrayBufferUtf8Decode(arrayBuffer) {
 
 /**
  * Converts the contents of an ArrayBuffer to a base64 string.
- * @param {ArrayBuffer} arrayBuffer The input ArrayBuffer.
+ * @param {ArrayBufferLike|Uint8Array} arrayBuffer The input buffer or byte view.
  * @returns {string} A base64 string representing the binary content.
  */
 export function arrayBufferToBase64(arrayBuffer) {
@@ -40,11 +40,11 @@ export function arrayBufferToBase64(arrayBuffer) {
 
 /**
  * Converts the contents of an ArrayBuffer to a binary string.
- * @param {ArrayBuffer} arrayBuffer The input ArrayBuffer.
+ * @param {ArrayBufferLike|Uint8Array} arrayBuffer The input buffer or byte view.
  * @returns {string} A string representing the binary content.
  */
 export function arrayBufferToBinaryString(arrayBuffer) {
-    const bytes = new Uint8Array(arrayBuffer);
+    const bytes = arrayBuffer instanceof Uint8Array ? Uint8Array.from(arrayBuffer) : new Uint8Array(arrayBuffer);
     try {
         return String.fromCharCode(...bytes);
     } catch (e) {
@@ -54,6 +54,22 @@ export function arrayBufferToBinaryString(arrayBuffer) {
         }
         return binary;
     }
+}
+
+/**
+ * Returns an ArrayBuffer containing exactly the byte view's span.
+ * Reuses a complete ordinary backing buffer and copies shared or partial views.
+ * @param {Uint8Array} bytes The input byte view.
+ * @returns {ArrayBuffer} The exact bytes in an ordinary ArrayBuffer.
+ */
+export function uint8ArrayToArrayBuffer(bytes) {
+    const {buffer, byteOffset, byteLength} = bytes;
+    if (buffer instanceof ArrayBuffer) {
+        return byteOffset === 0 && byteLength === buffer.byteLength ?
+            buffer :
+            buffer.slice(byteOffset, byteOffset + byteLength);
+    }
+    return Uint8Array.from(bytes).buffer;
 }
 
 /**

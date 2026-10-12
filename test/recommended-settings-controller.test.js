@@ -44,7 +44,7 @@ describe('RecommendedSettingsController', () => {
         const settingsController = {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'recommended-settings-list-item') { throw new Error(`Unexpected template: ${name}`); }
-                return /** @type {HTMLElement} */ (template.content.firstElementChild.cloneNode(true));
+                return /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
             }),
             modifyProfileSettings: vi.fn().mockResolvedValue([]),
             refresh: vi.fn(),
@@ -57,13 +57,13 @@ describe('RecommendedSettingsController', () => {
         const languageSelect = /** @type {HTMLSelectElement} */ (window.document.querySelector('#language-select'));
         languageSelect.value = 'ja';
         await controller._onLanguageSelectChanged(new Event('change'));
-        expect(window.document.querySelector('#recommended-settings-modal')?.hidden).toBe(false);
+        expect((/** @type {HTMLElement|null} */ (window.document.querySelector('#recommended-settings-modal')))?.hidden).toBe(false);
         expect(window.document.querySelectorAll('#recommended-settings-list .settings-item')).toHaveLength(1);
 
         languageSelect.value = 'fr';
         await controller._onLanguageSelectChanged(new Event('change'));
 
-        expect(window.document.querySelector('#recommended-settings-modal')?.hidden).toBe(true);
+        expect((/** @type {HTMLElement|null} */ (window.document.querySelector('#recommended-settings-modal')))?.hidden).toBe(true);
         expect(window.document.querySelectorAll('#recommended-settings-list .settings-item')).toHaveLength(0);
     });
 
@@ -88,7 +88,7 @@ describe('RecommendedSettingsController', () => {
         const settingsController = {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'recommended-settings-list-item') { throw new Error(`Unexpected template: ${name}`); }
-                return /** @type {HTMLElement} */ (template.content.firstElementChild.cloneNode(true));
+                return /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
             }),
             modifyProfileSettings: vi.fn().mockResolvedValue([]),
             refresh: vi.fn(),
@@ -126,7 +126,7 @@ describe('RecommendedSettingsController', () => {
         const settingsController = {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'recommended-settings-list-item') { throw new Error(`Unexpected template: ${name}`); }
-                return /** @type {HTMLElement} */ (template.content.firstElementChild.cloneNode(true));
+                return /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
             }),
             modifyProfileSettings: vi.fn().mockRejectedValue(new Error('save failed')),
             refresh: vi.fn(),
@@ -145,7 +145,7 @@ describe('RecommendedSettingsController', () => {
 
         await controller._onApplyButtonClicked(/** @type {MouseEvent} */ (new window.MouseEvent('click')));
 
-        expect(window.document.querySelector('#recommended-settings-modal')?.hidden).toBe(false);
+        expect((/** @type {HTMLElement|null} */ (window.document.querySelector('#recommended-settings-modal')))?.hidden).toBe(false);
         expect(settingsController.refresh).not.toHaveBeenCalled();
     });
 });

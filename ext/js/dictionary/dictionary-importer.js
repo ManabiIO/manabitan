@@ -26,6 +26,7 @@ import {
     configure,
 } from '../../lib/zip.js';
 import {parseJson} from '../core/json.js';
+import {uint8ArrayToArrayBuffer} from '../data/array-buffer-util.js';
 import {toError} from '../core/to-error.js';
 import {stringReverse} from '../core/utilities.js';
 import {getFileExtensionFromImageMediaType, getImageMediaTypeFromFileName} from '../media/media-util.js';
@@ -1207,18 +1208,13 @@ export class DictionaryImporter {
                         );
                         continue;
                     } else if (useArtifactMediaManifestFastPath) {
-                        media = /** @type {import('dictionary-database').MediaDataArrayBufferContent[]} */ (new Array(chunkEntries.length));
+                        media = createSparseArray(chunkEntries.length);
                         for (let j = 0, jj = chunkEntries.length; j < jj; ++j) {
                             const {path, mediaType, packedOffset, packedLength, compressionMethod, uncompressedLength} = chunkEntries[j];
                             const start = /** @type {number} */ (packedOffset);
                             const end = start + /** @type {number} */ (packedLength);
                             const bytes = /** @type {Uint8Array} */ (packedMediaBytesForDirectImport).subarray(start, end);
-                            const content = (
-                                bytes.byteOffset === 0 &&
-                                bytes.byteLength === bytes.buffer.byteLength
-                            ) ?
-                                bytes.buffer :
-                                bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+                            const content = uint8ArrayToArrayBuffer(bytes);
                             media[j] = {
                                 dictionary: dictionaryTitle,
                                 path,
@@ -1279,12 +1275,7 @@ export class DictionaryImporter {
                                 const start = /** @type {number} */ (packedOffset);
                                 const end = start + /** @type {number} */ (packedLength);
                                 const bytes = packedMediaBytesForDirectImport.subarray(start, end);
-                                content = (
-                                    bytes.byteOffset === 0 &&
-                                    bytes.byteLength === bytes.buffer.byteLength
-                                ) ?
-                                    bytes.buffer :
-                                    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+                                content = uint8ArrayToArrayBuffer(bytes);
                                 if (preserveCompressedMedia) {
                                     contentCompressionMethod = Number.isInteger(compressionMethod) ? /** @type {number} */ (compressionMethod) : ZIP_COMPRESSION_METHOD_STORE;
                                     contentUncompressedLength = Number.isInteger(uncompressedLength) ? /** @type {number} */ (uncompressedLength) : bytes.byteLength;
@@ -1295,12 +1286,7 @@ export class DictionaryImporter {
                                     throw new Error(`Could not find image at path ${JSON.stringify(path)} in ${dictionaryTitle}`);
                                 }
                                 const bytes = await this._getData(file, new Uint8ArrayWriter());
-                                content = (
-                                    bytes.byteOffset === 0 &&
-                                    bytes.byteLength === bytes.buffer.byteLength
-                                ) ?
-                                    bytes.buffer :
-                                    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+                                content = uint8ArrayToArrayBuffer(bytes);
                             }
                             if (!skipArtifactImageMetadata) {
                                 try {
@@ -1311,12 +1297,7 @@ export class DictionaryImporter {
                                             throw new Error(`Could not find image metadata source at path ${JSON.stringify(path)} in ${dictionaryTitle}`);
                                         }
                                         const metadataBytes = await this._getData(metadataFile, new Uint8ArrayWriter());
-                                        metadataContent = (
-                                            metadataBytes.byteOffset === 0 &&
-                                            metadataBytes.byteLength === metadataBytes.buffer.byteLength
-                                        ) ?
-                                            metadataBytes.buffer :
-                                            metadataBytes.buffer.slice(metadataBytes.byteOffset, metadataBytes.byteOffset + metadataBytes.byteLength);
+                                        metadataContent = uint8ArrayToArrayBuffer(metadataBytes);
                                     }
                                     ({width, height} = await this._mediaLoader.getImageDetails(metadataContent, mediaType));
                                 } catch (_) {
@@ -2866,12 +2847,7 @@ export class DictionaryImporter {
 
             // Load file content without staging through Blob.
             const bytes = await this._getData(file, new Uint8ArrayWriter());
-            let content = (
-                bytes.byteOffset === 0 &&
-                bytes.byteLength === bytes.buffer.byteLength
-            ) ?
-                bytes.buffer :
-                bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+            let content = uint8ArrayToArrayBuffer(bytes);
 
             const mediaType = getImageMediaTypeFromFileName(path);
             if (mediaType === null) {
@@ -3360,8 +3336,8 @@ export class DictionaryImporter {
         } else {
             for (const termArtifactFile of termArtifactFiles) {
                 const archiveSize = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'uncompressedSize'));
-                const memoryBytes = /** @type {Uint8Array|undefined} */ (Reflect.get(termArtifactFile, 'bytes'));
-                const uncompressedSize = typeof archiveSize === 'number' ? archiveSize : (typeof memoryBytes !== 'undefined' ? memoryBytes.byteLength : 0);
+                const memoryBytes = /** @type {unknown} */ (Reflect.get(termArtifactFile, 'bytes'));
+                const uncompressedSize = typeof archiveSize === 'number' ? archiveSize : (memoryBytes instanceof Uint8Array ? memoryBytes.byteLength : 0);
                 const size = typeof uncompressedSize === 'number' && Number.isFinite(uncompressedSize) ?
                     Math.max(0, Math.trunc(uncompressedSize)) :
                     0;
@@ -4111,7 +4087,9 @@ export class DictionaryImporter {
                 contentBytesList: useFullChunkArrays ? chunkContentBytes : chunkContentBytes.slice(0, streamedRowCount),
                 contentHash1List: useFullChunkArrays ? chunkContentHash1 : (Array.isArray(chunkContentHash1) ? chunkContentHash1.slice(0, streamedRowCount) : chunkContentHash1.subarray(0, streamedRowCount)),
                 contentHash2List: useFullChunkArrays ? chunkContentHash2 : (Array.isArray(chunkContentHash2) ? chunkContentHash2.slice(0, streamedRowCount) : chunkContentHash2.subarray(0, streamedRowCount)),
-                contentDictNameList: chunkContentDictNames === null ? null : (
+                contentDictNameList: chunkContentDictNames === null ?
+                    null :
+                    (
                     useFullChunkArrays ?
                         chunkContentDictNames :
                         chunkContentDictNames.slice(0, streamedRowCount)
@@ -4761,7 +4739,7 @@ export class DictionaryImporter {
      * @returns {Promise<T>}
      */
     async _getData(entry, writer) {
-        const bytes = /** @type {Uint8Array|undefined} */ (Reflect.get(entry, 'bytes'));
+        const bytes = /** @type {unknown} */ (Reflect.get(entry, 'bytes'));
         if (bytes instanceof Uint8Array) {
             if (writer instanceof Uint8ArrayWriter) {
                 return /** @type {T} */ (bytes);

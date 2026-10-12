@@ -1138,17 +1138,59 @@ export class DictionaryDatabase {
     }
 
     /**
+     * @returns {string[]}
+     */
+    getTermRecordShardFileNames() {
+        return this._termRecordStore.getShardFileNames();
+    }
+
+    /**
      * @param {string} text
      * @param {string[]} dictionaryNames
+     * @param {boolean} [includeSqlRows]
      * @returns {Promise<unknown>}
      */
-    async debugDictionaryLookupState(text, dictionaryNames) {
+    async debugDictionaryLookupState(text, dictionaryNames, includeSqlRows = false) {
         await this._ensureDirectTermIndexesLoaded(dictionaryNames);
         /** @type {Map<number, {dictionary: string, matchSource: string}>} */
         const ids = new Map();
         /** @type {Array<Record<string, unknown>>} */
         const directHits = [];
         const textDecoder = new TextDecoder();
+        /** @type {Map<string, Record<string, unknown>>} */
+        const sqlRowsByKey = new Map();
+        if (includeSqlRows) {
+            try {
+                const db = this._requireDb();
+                for (const dictionaryNameRaw of dictionaryNames) {
+                    const dictionaryName = String(dictionaryNameRaw || '').trim();
+                    if (dictionaryName.length === 0) { continue; }
+                    const sqlRows = db.selectObjects(`
+                        SELECT dictionary, expression, reading, entryContentId,
+                            entryContentOffset, entryContentLength
+                        FROM terms
+                        WHERE dictionary = $dictionary AND (expression = $text OR reading = $text)
+                        LIMIT 10
+                    `, {$dictionary: dictionaryName, $text: text});
+                    for (const row of sqlRows) {
+                        const key = `${this._asString(row.dictionary)}\u0000${this._asString(row.expression)}\u0000${this._asString(row.reading)}`;
+                        if (!sqlRowsByKey.has(key)) {
+                            sqlRowsByKey.set(key, {
+                                dictionary: row.dictionary ?? null,
+                                expression: row.expression ?? null,
+                                reading: row.reading ?? null,
+                                entryContentId: row.entryContentId ?? null,
+                                entryContentOffset: row.entryContentOffset ?? null,
+                                entryContentLength: row.entryContentLength ?? null,
+                            });
+                        }
+                    }
+                }
+            } catch (_) {
+                // The SQL diagnostic sample is optional when the terms table is unavailable.
+            }
+        }
+
         for (const dictionaryNameRaw of dictionaryNames) {
             const dictionaryName = String(dictionaryNameRaw || '').trim();
             if (dictionaryName.length === 0) { continue; }
@@ -1213,6 +1255,11 @@ export class DictionaryDatabase {
                 rawEntryContentOffset: rawRecord?.entryContentOffset ?? null,
                 rawEntryContentLength: rawRecord?.entryContentLength ?? null,
                 rawEntryContentDictName: rawRecord?.entryContentDictName ?? null,
+                ...(includeSqlRows ?
+                    {
+                        sqlTermRow: sqlRowsByKey.get(`${row?.dictionary ?? match.dictionary}\u0000${row?.expression ?? ''}\u0000${row?.reading ?? ''}`) ?? null,
+                    } :
+                    {}),
                 rawContentPreview,
                 readErrorDetails,
             });
@@ -4616,6 +4663,10 @@ export class DictionaryDatabase {
             const pendingContentDictNames = [];
             const pendingRowToUniqueIndex = new Int32Array(count);
             pendingRowToUniqueIndex.fill(-1);
+            /**
+             * @param {number} fillUntil
+             * @returns {(string|null)[]}
+             */
             const ensureResolvedContentDictNamesArray = (fillUntil) => {
                 if (Array.isArray(resolvedContentDictNames)) {
                     return resolvedContentDictNames;

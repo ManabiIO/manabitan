@@ -41,7 +41,7 @@ describe('Backend URL import progress', () => {
         await Reflect.get(Backend.prototype, '_onPmImportDictionaryUrlOffscreen').call(
             context,
             {url: 'https://example.com/jitendex.zip', details: {}},
-            [responsePort],
+            [(/** @type {MessagePort} */ (/** @type {unknown} */ (responsePort)))],
         );
 
         expect(responsePort.postMessage).toHaveBeenNthCalledWith(1, {

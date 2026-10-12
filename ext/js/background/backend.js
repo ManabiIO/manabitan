@@ -1612,43 +1612,19 @@ export class Backend {
      * @returns {Promise<unknown>}
      */
     async _debugDictionaryLookupState(text, dictionaryNames) {
+        // The runtime owns the database. The background proxy has no local
+        // indexes or content store to inspect alongside the authoritative result.
         if (this._offscreen !== null) {
-            const [localState, offscreenState] = await Promise.all([
-                this._debugDictionaryLookupStateLocal(
-                    text,
-                    dictionaryNames,
-                ),
-                this._offscreen.sendMessagePromise({
-                    action: 'debugDictionaryLookupStateOffscreen',
-                    params: {text, dictionaryNames},
-                }),
-            ]);
-            return {
-                ok: Boolean((/** @type {{ok?: unknown}|null|undefined} */ (localState))?.ok) && Boolean((/** @type {{ok?: unknown}|null|undefined} */ (offscreenState))?.ok),
-                text,
-                dictionaryNames,
-                localState,
-                offscreenState,
-            };
+            return await this._offscreen.sendMessagePromise({
+                action: 'debugDictionaryLookupStateOffscreen',
+                params: {text, dictionaryNames},
+            });
         }
         if (this._localDictionaryRuntime !== null) {
-            const [localState, workerState] = await Promise.all([
-                this._debugDictionaryLookupStateLocal(
-                    text,
-                    dictionaryNames,
-                ),
-                this._localDictionaryRuntime.sendMessagePromise({
-                    action: 'debugDictionaryLookupStateOffscreen',
-                    params: {text, dictionaryNames},
-                }),
-            ]);
-            return {
-                ok: Boolean((/** @type {{ok?: unknown}|null|undefined} */ (localState))?.ok) && Boolean((/** @type {{ok?: unknown}|null|undefined} */ (workerState))?.ok),
-                text,
-                dictionaryNames,
-                localState,
-                workerState,
-            };
+            return await this._localDictionaryRuntime.sendMessagePromise({
+                action: 'debugDictionaryLookupStateOffscreen',
+                params: {text, dictionaryNames},
+            });
         }
         return await this._debugDictionaryLookupStateLocal(text, dictionaryNames);
     }

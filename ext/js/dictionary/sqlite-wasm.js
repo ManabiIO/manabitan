@@ -257,7 +257,10 @@ export async function getSqlite3() {
         return await sqlite3Promise;
     }
     const initWithOptions = /** @type {(options: {locateFile: (file: string) => string}) => Promise<import('@sqlite.org/sqlite-wasm').Sqlite3Static>} */ (sqlite3InitModule);
-    /** @param {string} file */
+    /**
+     * @param {string} file
+     * @returns {string}
+     */
     const locateFile = (file) => new URL(`../../lib/sqlite/${file}`, import.meta.url).href;
     sqlite3Promise = initWithOptions({locateFile});
     const sqlite3 = await sqlite3Promise;

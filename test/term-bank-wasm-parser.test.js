@@ -46,14 +46,16 @@ const nativeFetch = globalThis.fetch;
  * }>>}
  */
 async function parseRows(rows, options = {}) {
-    /** @type {Array<{
+    /**
+     * @type {Array<{
      *   expression: string,
      *   reading: string,
      *   glossaryMayContainMedia?: boolean,
      *   termEntryContentHash1?: number,
      *   termEntryContentHash2?: number,
      *   termEntryContentBytes: Uint8Array
-     * }>} */
+     * }>}
+     */
     const parsedRows = [];
     await parseTermBankWithWasmChunks(
         textEncoder.encode(JSON.stringify(rows)),
@@ -75,7 +77,7 @@ function getContentString(row) {
 
 describe('term-bank WASM parser', () => {
     beforeAll(() => {
-        vi.stubGlobal('fetch', async (resource) => {
+        vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
             const url = resource instanceof URL ? resource : new URL(String(resource));
             if (url.protocol === 'file:') {
                 return new Response(await readFile(fileURLToPath(url)));

@@ -21,7 +21,7 @@ import {DictionaryWorker} from '../ext/js/dictionary/dictionary-worker.js';
 /**
  * @param {number} length
  * @param {number} [seed]
- * @returns {Uint8Array}
+ * @returns {Uint8Array<ArrayBuffer>}
  */
 function createBytes(length, seed = 0) {
     const bytes = new Uint8Array(length);

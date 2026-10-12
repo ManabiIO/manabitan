@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect, test as vitestTest, vi} from 'vitest';
+import {describe, expect, vi} from 'vitest';
 import {EventDispatcher} from '../ext/js/core/event-dispatcher.js';
 import {PopupFrequencyBlurController} from '../ext/js/pages/settings/popup-frequency-blur-controller.js';
 import {createDomTest} from './fixtures/dom-test.js';

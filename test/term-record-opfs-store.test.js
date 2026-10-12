@@ -26,7 +26,7 @@ import {RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME} from '../ext/js/d
  */
 function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new Map()} = {}) {
     return /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
-        async getFileHandle(/** @type {string} */ name, {create} = {create: false}) {
+        async getFileHandle(/** @type {string} */ name, {create = false} = {}) {
             if (!fileBytesByName.has(name)) {
                 if (!create) {
                     throw new Error(`File not found: ${name}`);
@@ -47,7 +47,7 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
                     return {
                         size: bytes.byteLength,
                         async arrayBuffer() {
-                            return bytes.slice().buffer;
+                            return Uint8Array.from(bytes).buffer;
                         },
                     };
                 },
@@ -66,7 +66,7 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
                             /** @type {Uint8Array|null} */
                             let bytes = null;
                             if (value instanceof ArrayBuffer) {
-                                bytes = new Uint8Array(value.slice(0));
+                                bytes = Uint8Array.from(new Uint8Array(value));
                             } else if (ArrayBuffer.isView(value)) {
                                 bytes = new Uint8Array(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength));
                             }
@@ -98,6 +98,10 @@ function createFakeDirectoryHandle(fileBytesByName, {removeEntryFailures = new M
             }
             fileBytesByName.delete(name);
         },
+        /**
+         * @this {{getFileHandle: (name: string, options: {create: boolean}) => Promise<FileSystemFileHandle>}}
+         * @yields {[string, FileSystemFileHandle]}
+         */
         async *entries() {
             for (const name of fileBytesByName.keys()) {
                 yield [name, await this.getFileHandle(name, {create: false})];
@@ -153,7 +157,7 @@ describe('TermRecordOpfsStore', () => {
         expect(recordsById.get(1)?.dictionary).toBe('JMdict [2026-02-26]');
         expect(fileBytesByName.has(oldFileName)).toBe(false);
         expect(fileBytesByName.has(newFileName)).toBe(true);
-        expect(Array.from(fileBytesByName.get(newFileName) ?? [])).toStrictEqual([1, 2, 3, 4]);
+        expect([...fileBytesByName.get(newFileName) ?? []]).toStrictEqual([1, 2, 3, 4]);
         expect(shardStateByFileName.has(oldFileName)).toBe(false);
         expect(shardStateByFileName.has(newFileName)).toBe(true);
     });
@@ -195,7 +199,7 @@ describe('TermRecordOpfsStore', () => {
         expect(recordsById.get(1)?.dictionary).toBe('JMdict staging');
         expect(fileBytesByName.has(oldFileName)).toBe(true);
         expect(fileBytesByName.has(newFileName)).toBe(false);
-        expect(Array.from(fileBytesByName.get(oldFileName) ?? [])).toStrictEqual([9, 8, 7, 6]);
+        expect([...fileBytesByName.get(oldFileName) ?? []]).toStrictEqual([9, 8, 7, 6]);
         expect(shardStateByFileName.has(oldFileName)).toBe(true);
         expect(shardStateByFileName.has(newFileName)).toBe(false);
     });
@@ -243,8 +247,8 @@ describe('TermRecordOpfsStore', () => {
         await expect(store.replaceDictionaryName('JMdict staging', 'JMdict [2026-02-26]')).rejects.toThrow(/Target shard file already exists/);
 
         expect(recordsById.get(1)?.dictionary).toBe('JMdict staging');
-        expect(Array.from(fileBytesByName.get(oldFileName) ?? [])).toStrictEqual([1, 2, 3, 4]);
-        expect(Array.from(fileBytesByName.get(newFileName) ?? [])).toStrictEqual([5, 6, 7, 8]);
+        expect([...fileBytesByName.get(oldFileName) ?? []]).toStrictEqual([1, 2, 3, 4]);
+        expect([...fileBytesByName.get(newFileName) ?? []]).toStrictEqual([5, 6, 7, 8]);
         expect(shardStateByFileName.has(oldFileName)).toBe(true);
         expect(shardStateByFileName.has(newFileName)).toBe(true);
     });
@@ -291,7 +295,7 @@ describe('TermRecordOpfsStore', () => {
 
         expect(renamedCount).toBe(1);
         expect(recordsById.get(1)?.dictionary).toBe('JMdict [2026-02-26]');
-        expect(Array.from(fileBytesByName.get(newFileName) ?? [])).toStrictEqual([1, 2, 3, 4]);
+        expect([...fileBytesByName.get(newFileName) ?? []]).toStrictEqual([1, 2, 3, 4]);
         expect(fileBytesByName.has(oldFileName)).toBe(false);
     });
 

@@ -294,7 +294,7 @@ export class DisplayController {
                 toggle.checked = extensionEnabled;
             }
             if (!this._toggleListenersSetup) {
-                toggle.addEventListener('change', this._onToggleChanged, false);
+                toggle.addEventListener('change', this._onToggleChanged.bind(this), false);
             }
         }
         this._toggleListenersSetup = true;
@@ -413,6 +413,7 @@ export class DisplayController {
 
     /**
      * @param {import('settings').ProfileOptions} options
+     * @param {number} [generation]
      */
     async _updateDictionariesEnabledWarnings(options, generation = this._optionsSetupGeneration) {
         const tooltip = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tooltip'));
@@ -440,6 +441,7 @@ export class DisplayController {
 
     /**
      * @param {import('settings').ProfileOptions} options
+     * @param {number} [generation]
      */
     async _updatePermissionsWarnings(options, generation = this._optionsSetupGeneration) {
         const permissions = await getAllPermissions();

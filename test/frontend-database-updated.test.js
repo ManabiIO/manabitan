@@ -21,7 +21,9 @@ import {Frontend} from '../ext/js/app/frontend.js';
 describe('Frontend dictionary update handling', () => {
     test('hover lookup prewarm stops scheduling probes after the first dictionary hit', async () => {
         const frontend = /** @type {Frontend} */ (/** @type {unknown} */ (Object.create(Frontend.prototype)));
+        /** @type {string[]} */
         const calls = [];
+        /** @type {import('api').FindTermsDetails[]} */
         const detailsCalls = [];
         /** @type {Array<() => void>} */
         const resolvers = [];
@@ -40,7 +42,7 @@ describe('Frontend dictionary update handling', () => {
         });
 
         const runLookupPrewarmTerms = Reflect.get(Frontend.prototype, '_runLookupPrewarmTerms');
-        const {firstMatchedResultPromise, resultsPromise} = runLookupPrewarmTerms.call(frontend, ['日本', 'する', 'ある', '見る', '食べる'], {});
+        const {firstMatchedResultPromise, resultsPromise} = runLookupPrewarmTerms.call(frontend, ['日本', 'する', 'ある', '見る', '食べる'], {depth: 0, url: 'https://example.test/'});
 
         expect(calls).toEqual(['日本', 'する', 'ある', '見る']);
         resolvers[0]();
@@ -165,7 +167,7 @@ describe('Frontend dictionary update handling', () => {
         Reflect.set(frontend, '_updatePageDebugState', vi.fn());
 
         const onDatabaseUpdated = Reflect.get(Frontend.prototype, '_onDatabaseUpdated');
-        await onDatabaseUpdated.call(frontend, {type: 'anki-note', cause: 'import'});
+        await Reflect.apply(onDatabaseUpdated, frontend, [{type: 'anki-note', cause: 'import'}]);
 
         expect(Reflect.get(frontend, '_updatePageDebugState')).not.toHaveBeenCalled();
         expect(Reflect.get(frontend, '_textScanner').searchLast).not.toHaveBeenCalled();

@@ -148,6 +148,11 @@ describe('Dictionary import stale-run fencing', () => {
 
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _activeImportRunGeneration: 2,
+            /**
+             * @this {{_activeImportRunGeneration: number}}
+             * @param {number} importRunGeneration
+             * @returns {boolean}
+             */
             _isImportRunCurrent(importRunGeneration) {
                 return importRunGeneration === this._activeImportRunGeneration;
             },
@@ -166,7 +171,7 @@ describe('Dictionary import stale-run fencing', () => {
         const result = await finalizeImportedDictionaryResult.call(controller, {
             dictionaryTitle: 'JMdict',
             importStartTime: 0,
-            importDetails: /** @type {import('dictionary-importer').ImportDetails} */ ({replacementDictionaryTitle: null}),
+            importDetails: /** @type {import('dictionary-importer').ImportDetails} */ (/** @type {unknown} */ ({replacementDictionaryTitle: null})),
             importResult: {
                 result: /** @type {import('dictionary-importer').Summary} */ ({title: 'JMdict'}),
                 errors: [],
@@ -186,7 +191,7 @@ describe('Dictionary import stale-run fencing', () => {
         expect(triggerDatabaseUpdated).not.toHaveBeenCalled();
         expect(verifyImportedDictionaryVisible).not.toHaveBeenCalled();
         expect(recordImportDebugSnapshot).not.toHaveBeenCalled();
-        expect(result.errors.map((error) => error.message)).toContain('Ignored stale import completion for JMdict');
+        expect(result.errors.map((/** @type {Error} */ error) => error.message)).toContain('Ignored stale import completion for JMdict');
     });
 
     test('profile reference rewrite skips profiles without carried-over dictionary settings', async () => {
@@ -225,6 +230,11 @@ describe('Dictionary import stale-run fencing', () => {
 
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _activeImportRunGeneration: 1,
+            /**
+             * @this {{_activeImportRunGeneration: number}}
+             * @param {number} importRunGeneration
+             * @returns {boolean}
+             */
             _isImportRunCurrent(importRunGeneration) {
                 return importRunGeneration === this._activeImportRunGeneration;
             },
@@ -321,7 +331,7 @@ describe('Dictionary import stale-run fencing', () => {
 
         await importDictionaries.call(
             controller,
-            (async function* () {
+            (async function *importFilesFixture() {
                 yield new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
             })(),
             null,
@@ -346,7 +356,7 @@ describe('Dictionary import stale-run fencing', () => {
         );
         const setDictionaryImportMode = vi.fn()
             .mockResolvedValueOnce(void 0);
-        const setModifying = vi.fn(function(value) {
+        const setModifying = vi.fn(function setModifying(/** @type {boolean} */ value) {
             this._modifying = value;
         });
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
@@ -382,7 +392,7 @@ describe('Dictionary import stale-run fencing', () => {
 
         await importDictionaries.call(
             controller,
-            (async function* () {
+            (async function *importFilesFixture() {
                 yield new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
             })(),
             null,
@@ -407,6 +417,11 @@ describe('Dictionary import stale-run fencing', () => {
             _activeImportRunGeneration: 0,
             _modifying: false,
             _statusFooter: null,
+            /**
+             * @this {{_activeImportRunGeneration: number}}
+             * @param {number} importRunGeneration
+             * @returns {boolean}
+             */
             _isImportRunCurrent(importRunGeneration) {
                 return importRunGeneration === this._activeImportRunGeneration;
             },
@@ -436,7 +451,7 @@ describe('Dictionary import stale-run fencing', () => {
 
         await expect(importDictionaries.call(
             controller,
-            (async function* () {
+            (async function *importFilesFixture() {
                 yield new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
             })(),
             null,
@@ -467,6 +482,11 @@ describe('Dictionary import stale-run fencing', () => {
             _activeImportRunGeneration: 0,
             _modifying: false,
             _statusFooter: null,
+            /**
+             * @this {{_activeImportRunGeneration: number}}
+             * @param {number} importRunGeneration
+             * @returns {boolean}
+             */
             _isImportRunCurrent(importRunGeneration) {
                 return importRunGeneration === this._activeImportRunGeneration;
             },
@@ -496,7 +516,7 @@ describe('Dictionary import stale-run fencing', () => {
 
         await importDictionaries.call(
             controller,
-            (async function* () {
+            (async function *importFilesFixture() {
                 yield new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
             })(),
             null,
@@ -507,10 +527,10 @@ describe('Dictionary import stale-run fencing', () => {
 
         expect(showErrors).toHaveBeenCalledOnce();
         const shownErrors = showErrors.mock.calls[0][0];
-        expect(shownErrors.map((error) => error.message)).toContain('import mode exit failed');
+        expect(shownErrors.map((/** @type {Error} */ error) => error.message)).toContain('import mode exit failed');
         expect(onImportDone).toHaveBeenCalledOnce();
         expect(onImportDone.mock.calls[0][0].ok).toBe(false);
-        expect(onImportDone.mock.calls[0][0].errors.map((error) => error.message)).toContain('import mode exit failed');
+        expect(onImportDone.mock.calls[0][0].errors.map((/** @type {Error} */ error) => error.message)).toContain('import mode exit failed');
     });
 
     test('download callback errors do not escape the controller', async () => {
@@ -529,7 +549,7 @@ describe('Dictionary import stale-run fencing', () => {
             },
         });
 
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
         expect(controller.downloadDictionaryFileFromURL).toHaveBeenCalledOnce();
     });
 });
@@ -631,7 +651,7 @@ describe('Dictionary import error rendering', () => {
 
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _errorContainer: errorContainer,
-            _errorToString(error) {
+            _errorToString(/** @type {Error} */ error) {
                 return error.message;
             },
         }));
@@ -673,7 +693,7 @@ describe('Dictionary import entrypoints', () => {
         });
         input.value = 'fake-value';
 
-        await onImportFileChange.call(controller, /** @type {unknown} */ ({currentTarget: input}));
+        await onImportFileChange.call(controller, /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: input})));
 
         expect(importFiles).toHaveBeenCalledOnce();
         expect(importFiles).toHaveBeenCalledWith([file], null, null);
@@ -696,7 +716,7 @@ describe('Dictionary import entrypoints', () => {
         });
         input.value = 'fake-value';
 
-        await onImportFileChange.call(controller, /** @type {unknown} */ ({currentTarget: input}));
+        await onImportFileChange.call(controller, /** @type {Event} */ (/** @type {unknown} */ ({currentTarget: input})));
 
         expect(importFiles).not.toHaveBeenCalled();
         expect(input.value).toBe('');
@@ -735,7 +755,7 @@ describe('Dictionary import entrypoints', () => {
             importFilesFromURLs,
         }));
 
-        await onImportFromURL.call(controller, /** @type {unknown} */ ({preventDefault}));
+        await onImportFromURL.call(controller, /** @type {Event} */ (/** @type {unknown} */ ({preventDefault})));
 
         expect(preventDefault).toHaveBeenCalledOnce();
         expect(importFilesFromURLs).toHaveBeenCalledWith('https://example.com/a.zip', null, null);
@@ -797,7 +817,7 @@ describe('Dictionary import entrypoints', () => {
             getDictionaryImportControllerMethod('_onRecommendedImportClick')
         );
         const button = window.document.createElement('button');
-        button.setAttribute('data-import-url', 'https://example.com/jitendex.zip');
+        button.dataset.importUrl = 'https://example.com/jitendex.zip';
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _recommendedDictionaryQueue: ['https://example.com/jitendex.zip'],
             _recommendedDictionaryActiveImport: false,
@@ -806,7 +826,7 @@ describe('Dictionary import entrypoints', () => {
             _isRecommendedImportQueuedOrActive: isRecommendedImportQueuedOrActive,
         }));
 
-        await onRecommendedImportClick.call(controller, /** @type {unknown} */ ({target: button}));
+        await onRecommendedImportClick.call(controller, /** @type {MouseEvent} */ (/** @type {unknown} */ ({target: button})));
 
         expect(Reflect.get(controller, '_recommendedDictionaryQueue')).toStrictEqual(['https://example.com/jitendex.zip']);
         expect(button.disabled).toBe(true);
@@ -817,7 +837,7 @@ describe('Dictionary import entrypoints', () => {
             getDictionaryImportControllerMethod('_onRecommendedImportClick')
         );
         const button = window.document.createElement('button');
-        button.setAttribute('data-import-url', 'https://example.com/jitendex.zip');
+        button.dataset.importUrl = 'https://example.com/jitendex.zip';
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _recommendedDictionaryQueue: [],
             _recommendedDictionaryActiveImport: true,
@@ -826,7 +846,7 @@ describe('Dictionary import entrypoints', () => {
             _isRecommendedImportQueuedOrActive: isRecommendedImportQueuedOrActive,
         }));
 
-        await onRecommendedImportClick.call(controller, /** @type {unknown} */ ({target: button}));
+        await onRecommendedImportClick.call(controller, /** @type {MouseEvent} */ (/** @type {unknown} */ ({target: button})));
 
         expect(Reflect.get(controller, '_recommendedDictionaryQueue')).toStrictEqual([]);
         expect(button.disabled).toBe(true);
@@ -837,7 +857,7 @@ describe('Dictionary import entrypoints', () => {
             getDictionaryImportControllerMethod('_onRecommendedImportClick')
         );
         const button = window.document.createElement('button');
-        button.setAttribute('data-import-url', '');
+        button.dataset.importUrl = '';
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _recommendedDictionaryQueue: [],
             _recommendedDictionaryActiveImport: false,
@@ -846,7 +866,7 @@ describe('Dictionary import entrypoints', () => {
             _isRecommendedImportQueuedOrActive: isRecommendedImportQueuedOrActive,
         }));
 
-        await onRecommendedImportClick.call(controller, /** @type {unknown} */ ({target: button}));
+        await onRecommendedImportClick.call(controller, /** @type {MouseEvent} */ (/** @type {unknown} */ ({target: button})));
 
         expect(Reflect.get(controller, '_recommendedDictionaryQueue')).toStrictEqual([]);
         expect(button.disabled).toBe(false);
@@ -857,7 +877,7 @@ describe('Dictionary import entrypoints', () => {
             getDictionaryImportControllerMethod('_onRecommendedImportClick')
         );
         const button = window.document.createElement('button');
-        button.setAttribute('data-import-url', 'https://example.com/jitendex.zip');
+        button.dataset.importUrl = 'https://example.com/jitendex.zip';
         const child = window.document.createElement('span');
         button.append(child);
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
@@ -868,10 +888,10 @@ describe('Dictionary import entrypoints', () => {
             _isRecommendedImportQueuedOrActive: isRecommendedImportQueuedOrActive,
         }));
 
-        await onRecommendedImportClick.call(controller, /** @type {unknown} */ ({
+        await onRecommendedImportClick.call(controller, /** @type {MouseEvent} */ (/** @type {unknown} */ ({
             currentTarget: button,
             target: child,
-        }));
+        })));
 
         expect(Reflect.get(controller, '_recommendedDictionaryQueue')).toStrictEqual([]);
         expect(button.disabled).toBe(true);
@@ -884,7 +904,7 @@ describe('Dictionary import entrypoints', () => {
         const importFiles = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
         const file = new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
         const fileEntry = {
-            file(resolve) { resolve(file); },
+            file(/** @type {(file: File) => void} */ resolve) { resolve(file); },
         };
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             importFiles,
@@ -894,10 +914,10 @@ describe('Dictionary import entrypoints', () => {
         }));
         const preventDefault = vi.fn();
 
-        await onFileDrop.call(controller, /** @type {unknown} */ ({
+        await onFileDrop.call(controller, /** @type {DragEvent} */ (/** @type {unknown} */ ({
             preventDefault,
             dataTransfer: {items: {}},
-        }));
+        })));
 
         expect(preventDefault).toHaveBeenCalledOnce();
         expect(importFiles).toHaveBeenCalledOnce();
@@ -911,7 +931,7 @@ describe('Dictionary import entrypoints', () => {
         const importFiles = /** @type {ReturnType<typeof vi.fn>} */ (vi.fn().mockResolvedValue(void 0));
         const file = new File([new Uint8Array([1])], 'JMdict.zip', {type: 'application/zip'});
         const fileEntry = {
-            file(resolve) { resolve(file); },
+            file(/** @type {(file: File) => void} */ resolve) { resolve(file); },
         };
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             importFiles,
@@ -920,10 +940,10 @@ describe('Dictionary import entrypoints', () => {
             _getAllFileEntries: vi.fn().mockResolvedValue([null, fileEntry]),
         }));
 
-        await onFileDrop.call(controller, /** @type {unknown} */ ({
+        await onFileDrop.call(controller, /** @type {DragEvent} */ (/** @type {unknown} */ ({
             preventDefault() {},
             dataTransfer: {items: {}},
-        }));
+        })));
 
         expect(importFiles).toHaveBeenCalledOnce();
         expect(importFiles).toHaveBeenCalledWith([file], null, null);
@@ -941,10 +961,10 @@ describe('Dictionary import entrypoints', () => {
             _getAllFileEntries: vi.fn().mockResolvedValue([null]),
         }));
 
-        await onFileDrop.call(controller, /** @type {unknown} */ ({
+        await onFileDrop.call(controller, /** @type {DragEvent} */ (/** @type {unknown} */ ({
             preventDefault() {},
             dataTransfer: {items: {}},
-        }));
+        })));
 
         expect(importFiles).not.toHaveBeenCalled();
     });
@@ -964,7 +984,7 @@ describe('Dictionary import watchdog recovery', () => {
             _recommendedDictionaryCurrentUrl: 'https://example.com/jitendex.zip',
             _updateRecommendedImportDebugState: updateRecommendedImportDebugState,
             _setRecommendedError: vi.fn(),
-            _errorToString: (error) => error.message,
+            _errorToString: (/** @type {Error} */ error) => error.message,
             _showErrors: vi.fn(),
             _setModifying: vi.fn(),
             _statusFooter: null,
@@ -1044,7 +1064,7 @@ describe('Recommended dictionary rendering', () => {
         homepage.className = 'homepage';
         const button = window.document.createElement('button');
         button.className = 'action-button';
-        button.setAttribute('data-action', 'import-recommended-dictionary');
+        button.dataset.action = 'import-recommended-dictionary';
         item.append(label, description, homepage, button);
         fragment.append(item);
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({

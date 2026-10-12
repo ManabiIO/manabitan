@@ -25,20 +25,19 @@ describe('WebExtension', () => {
 
     beforeEach(() => {
         originalChrome = globalThis.chrome;
-        globalThis.chrome = /** @type {typeof globalThis.chrome} */ ({
+        globalThis.chrome = /** @type {typeof globalThis.chrome} */ (/** @type {unknown} */ ({
             runtime: {
                 getURL: vi.fn((path) => `chrome-extension://test${path}`),
                 getManifest: vi.fn(() => ({name: 'Manabitan', version: '0.0.0.0'})),
                 sendMessage: vi.fn(),
                 lastError: undefined,
             },
-        });
+        }));
     });
 
     afterEach(() => {
         if (typeof originalChrome === 'undefined') {
-            // @ts-expect-error - restoring deleted global
-            delete globalThis.chrome;
+            Reflect.deleteProperty(globalThis, 'chrome');
         } else {
             globalThis.chrome = originalChrome;
         }
@@ -60,10 +59,10 @@ describe('WebExtension', () => {
 
     test('sendMessagePromise marks extension unloaded on retryable runtime disconnect', async () => {
         const webExtension = new WebExtension();
-        globalThis.chrome.runtime.sendMessage = vi.fn((_message, callback) => {
-            globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
-            callback(undefined);
-        });
+        vi.spyOn(globalThis.chrome.runtime, 'sendMessage').mockImplementation(/** @type {typeof chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn((/** @type {unknown} */ _message, /** @type {(response?: unknown) => void} */ callback) => {
+            Reflect.set(globalThis.chrome.runtime, 'lastError', {message: 'Could not establish connection. Receiving end does not exist.'});
+            callback();
+        }))));
 
         await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow(/Could not establish connection/);
         expect(webExtension.unloaded).toBe(true);
@@ -71,7 +70,7 @@ describe('WebExtension', () => {
 
     test('sendMessagePromise rejects immediately when runtime unloads before callback returns', async () => {
         const webExtension = new WebExtension();
-        globalThis.chrome.runtime.sendMessage = vi.fn((_message, _callback) => {});
+        vi.spyOn(globalThis.chrome.runtime, 'sendMessage').mockImplementation(/** @type {typeof chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(() => {}))));
 
         const promise = webExtension.sendMessagePromise({action: 'noop'});
         const expectation = expect(promise).rejects.toThrow(/Lost connection to the extension runtime/);

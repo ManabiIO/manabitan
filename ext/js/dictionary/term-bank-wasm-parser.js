@@ -419,6 +419,7 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
     const termTags = skipTagRuleDecode ? '' : (version >= 3 ? (decodeNullableJsonStringToken(source, metas[o + 14], metas[o + 15]) ?? '') : '');
     let termEntryContentHash1;
     let termEntryContentHash2;
+    /** @type {Uint8Array} */
     let termEntryContentBytes = EMPTY_UINT8_ARRAY;
     if (includeContentMetadata) {
         const contentOffset = contentMetas[c + 0];
@@ -491,6 +492,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const sequence = version >= 3 ? (isNullToken(source, metas[o + 12], metas[o + 13]) ? null : decodeNumberToken(source, metas[o + 12], metas[o + 13], 0)) : null;
     let termEntryContentHash1;
     let termEntryContentHash2;
+    /** @type {Uint8Array} */
     let termEntryContentBytes = EMPTY_UINT8_ARRAY;
     if (includeContentMetadata) {
         const contentOffset = contentMetas[c + 0];

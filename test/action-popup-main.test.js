@@ -45,18 +45,24 @@ describe('action popup live refresh handling', () => {
         const {document} = window;
         const toggle = /** @type {HTMLInputElement} */ (document.querySelector('.enable-search'));
 
-        controller._setupOptions({
+        controller._setupOptions(/** @type {import('settings').Profile} */ (/** @type {unknown} */ ({
+            id: 'profile-1',
+            name: 'Default',
+            conditionGroups: [],
             options: {
-                general: {enable: true, popupTheme: 'default', popupThemePreset: 'default'},
+                general: {enable: true, popupTheme: 'light', popupThemePreset: 'default'},
                 dictionaries: [],
             },
-        });
-        controller._setupOptions({
+        })));
+        controller._setupOptions(/** @type {import('settings').Profile} */ (/** @type {unknown} */ ({
+            id: 'profile-1',
+            name: 'Default',
+            conditionGroups: [],
             options: {
-                general: {enable: true, popupTheme: 'default', popupThemePreset: 'default'},
+                general: {enable: true, popupTheme: 'light', popupThemePreset: 'default'},
                 dictionaries: [],
             },
-        });
+        })));
 
         toggle.dispatchEvent(new window.Event('change'));
 
@@ -77,7 +83,7 @@ describe('action popup live refresh handling', () => {
         });
 
         controller._onDatabaseUpdated({type: 'dictionary'});
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(updateDictionariesEnabledWarnings).toHaveBeenCalledWith({
             general: {},
@@ -97,21 +103,27 @@ describe('action popup live refresh handling', () => {
         const {document} = window;
         document.body.innerHTML = '<p class="tooltip">Hover over text to scan</p>';
 
-        controller._setupOptions({
+        controller._setupOptions(/** @type {import('settings').Profile} */ (/** @type {unknown} */ ({
+            id: 'profile-1',
+            name: 'Default',
+            conditionGroups: [],
             options: {
-                general: {enable: true, popupTheme: 'default', popupThemePreset: 'default'},
+                general: {enable: true, popupTheme: 'light', popupThemePreset: 'default'},
                 dictionaries: [{name: 'JMdict', enabled: false}],
             },
-        });
-        controller._setupOptions({
+        })));
+        controller._setupOptions(/** @type {import('settings').Profile} */ (/** @type {unknown} */ ({
+            id: 'profile-1',
+            name: 'Default',
+            conditionGroups: [],
             options: {
-                general: {enable: true, popupTheme: 'default', popupThemePreset: 'default'},
+                general: {enable: true, popupTheme: 'light', popupThemePreset: 'default'},
                 dictionaries: [{name: 'JMdict', enabled: true}],
             },
-        });
+        })));
         dictionariesDeferred.resolve([{title: 'JMdict'}]);
         await dictionariesDeferred.promise;
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(document.querySelector('.tooltip')?.textContent).toBe('Hover over text to scan');
         expect(document.querySelector('.tooltip')?.classList.contains('enable-dictionary-tooltip')).toBe(false);
@@ -127,7 +139,7 @@ describe('action popup live refresh handling', () => {
         const logSpy = vi.spyOn(log, 'error').mockImplementation(() => {});
 
         controller._onOptionsUpdated({});
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(logSpy).toHaveBeenCalledWith(error);
     });
@@ -147,7 +159,7 @@ describe('action popup live refresh handling', () => {
         });
 
         controller._onDatabaseUpdated({type: 'dictionary'});
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(logSpy).toHaveBeenCalledWith(error);
     });
@@ -169,8 +181,8 @@ describe('action popup live refresh handling', () => {
             ],
         });
 
-        controller._onProfileSelectChange({currentTarget: {value: '1'}});
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        controller._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {value: '1'}})));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(setupOptions).toHaveBeenCalledWith({options: {general: {}, dictionaries: [{name: 'JMdict', enabled: true}]}});
         expect(refreshOptionsState).toHaveBeenCalledOnce();
@@ -178,8 +190,10 @@ describe('action popup live refresh handling', () => {
     });
 
     test('stale options refresh does not overwrite newer action popup state', async () => {
-        let resolveFirst;
-        let resolveSecond;
+        /** @type {(value?: unknown) => void} */
+        let resolveFirst = (_value) => { expect.fail('resolveFirst was not initialized'); };
+        /** @type {(value?: unknown) => void} */
+        let resolveSecond = (_value) => { expect.fail('resolveSecond was not initialized'); };
         const optionsGetFull = vi
             .fn()
             .mockImplementationOnce(() => new Promise((resolve) => {

@@ -21,6 +21,7 @@ import {Backend} from '../ext/js/background/backend.js';
 function createRefreshGate() {
     /** @type {() => void} */
     let resolve = () => {};
+    /** @type {Promise<void>} */
     const promise = new Promise((r) => {
         resolve = r;
     });
@@ -31,7 +32,7 @@ function createRefreshGate() {
  * @returns {Promise<void>}
  */
 function waitForTaskQueue() {
-    return new Promise((resolve) => setTimeout(resolve, 0));
+    return new Promise((resolve) => { setTimeout(resolve, 0); });
 }
 
 describe('Backend lookup refresh gating', () => {
@@ -50,7 +51,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_getTranslatorFindTermsOptions', vi.fn().mockReturnValue({enabledDictionaryMap: new Map()}));
         Reflect.set(backend, '_hasInstalledDictionaries', vi.fn().mockResolvedValue(false));
 
-        const promise = Backend.prototype._onApiTermsFind.call(backend, {
+        const promise = /** @type {import('api').ApiHandlerNoExtraArgs<'termsFind'>} */ (Backend.prototype._onApiTermsFind).call(backend, {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
@@ -80,7 +81,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_getTranslatorFindTermsOptions', vi.fn().mockReturnValue({enabledDictionaryMap: new Map()}));
         Reflect.set(backend, '_hasInstalledDictionaries', vi.fn().mockResolvedValue(false));
 
-        const promise = Backend.prototype._onApiTermsFind.call(backend, {
+        const promise = /** @type {import('api').ApiHandlerNoExtraArgs<'termsFind'>} */ (Backend.prototype._onApiTermsFind).call(backend, {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
@@ -115,7 +116,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_getTranslatorFindTermsOptions', vi.fn().mockReturnValue({enabledDictionaryMap: new Map()}));
         Reflect.set(backend, '_hasInstalledDictionaries', vi.fn().mockResolvedValue(false));
 
-        const promise = Backend.prototype._onApiTermsFind.call(backend, {
+        const promise = /** @type {import('api').ApiHandlerNoExtraArgs<'termsFind'>} */ (Backend.prototype._onApiTermsFind).call(backend, {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
@@ -155,7 +156,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_getTranslatorFindTermsOptions', vi.fn().mockReturnValue({enabledDictionaryMap: new Map()}));
         Reflect.set(backend, '_hasInstalledDictionaries', vi.fn().mockResolvedValue(false));
 
-        await Backend.prototype._onApiTermsFind.call(backend, {
+        await /** @type {import('api').ApiHandlerNoExtraArgs<'termsFind'>} */ (Backend.prototype._onApiTermsFind).call(backend, {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
@@ -196,7 +197,7 @@ describe('Backend lookup refresh gating', () => {
             Reflect.set(backend, '_getTranslatorFindTermsOptions', vi.fn().mockReturnValue({enabledDictionaryMap: new Map()}));
             Reflect.set(backend, '_hasInstalledDictionaries', vi.fn().mockResolvedValue(false));
 
-            await Backend.prototype._onApiTermsFind.call(backend, {
+            await /** @type {import('api').ApiHandlerNoExtraArgs<'termsFind'>} */ (Backend.prototype._onApiTermsFind).call(backend, {
                 text: '暗記',
                 details: {},
                 optionsContext: {depth: 0, url: 'https://example.test/'},
@@ -228,7 +229,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_getTranslatorFindTermsOptions', vi.fn().mockReturnValue({enabledDictionaryMap: new Map()}));
         Reflect.set(backend, '_hasInstalledDictionaries', vi.fn().mockResolvedValue(false));
 
-        await Backend.prototype._onApiTermsFind.call(backend, {
+        await /** @type {import('api').ApiHandlerNoExtraArgs<'termsFind'>} */ (Backend.prototype._onApiTermsFind).call(backend, {
             text: '暗記',
             details: {},
             optionsContext: {depth: 0, url: 'https://example.test/'},
@@ -255,7 +256,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_getTranslatorFindTermsOptions', vi.fn().mockReturnValue({enabledDictionaryMap: new Map()}));
         Reflect.set(backend, '_hasInstalledDictionaries', vi.fn().mockResolvedValue(false));
 
-        const promise = Backend.prototype._onApiTermsFind.call(backend, {
+        const promise = /** @type {import('api').ApiHandlerNoExtraArgs<'termsFind'>} */ (Backend.prototype._onApiTermsFind).call(backend, {
             text: '暗記',
             details: {waitForLookupWarm: true},
             optionsContext: {depth: 0, url: 'https://example.test/'},
@@ -341,7 +342,7 @@ describe('Backend lookup refresh gating', () => {
         }));
         Reflect.set(backend, '_getTranslatorFindKanjiOptions', vi.fn().mockReturnValue({}));
 
-        const promise = Backend.prototype._onApiKanjiFind.call(backend, {
+        const promise = /** @type {import('api').ApiHandlerNoExtraArgs<'kanjiFind'>} */ (Backend.prototype._onApiKanjiFind).call(backend, {
             text: '暗',
             optionsContext: {depth: 0, url: 'https://example.test/'},
         });
@@ -364,7 +365,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_translator', {getTermFrequencies});
         Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
 
-        const promise = Backend.prototype._onApiGetTermFrequencies.call(backend, {
+        const promise = /** @type {import('api').ApiHandlerNoExtraArgs<'getTermFrequencies'>} */ (Backend.prototype._onApiGetTermFrequencies).call(backend, {
             termReadingList: [{term: '暗記', reading: 'あんき'}],
             dictionaries: ['JMdict'],
         });
@@ -388,7 +389,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_translator', {getTermFrequencies});
         Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
 
-        const promise = Backend.prototype._onApiGetTermFrequencies.call(backend, {
+        const promise = /** @type {import('api').ApiHandlerNoExtraArgs<'getTermFrequencies'>} */ (Backend.prototype._onApiGetTermFrequencies).call(backend, {
             termReadingList: [{term: '暗記', reading: 'あんき'}],
             dictionaries: ['JMdict'],
         });
@@ -412,7 +413,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
         Reflect.set(backend, '_dictionaryDatabase', {getMedia});
 
-        const promise = Backend.prototype._onApiGetMedia.call(backend, {
+        const promise = /** @type {import('api').ApiHandlerNoExtraArgs<'getMedia'>} */ (Backend.prototype._onApiGetMedia).call(backend, {
             targets: [{dictionary: 'JMdict', path: 'image.png'}],
         });
         await Promise.resolve();
@@ -435,7 +436,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
         Reflect.set(backend, '_dictionaryDatabase', {exportDatabase});
 
-        const promise = Backend.prototype._onApiExportDictionaryDatabase.call(backend);
+        const promise = /** @type {import('api').ApiHandlerNoExtraArgs<'exportDictionaryDatabase'>} */ (Backend.prototype._onApiExportDictionaryDatabase).call(backend, void 0);
         await Promise.resolve();
 
         expect(exportDatabase).not.toHaveBeenCalled();
@@ -457,7 +458,7 @@ describe('Backend lookup refresh gating', () => {
         Reflect.set(backend, '_dictionaryDatabase', {deleteDictionary});
         Reflect.set(backend, '_refreshDictionaryDatabaseAfterUpdate', refreshDictionaryDatabaseAfterUpdate);
 
-        await Backend.prototype._onApiDeleteDictionaryByTitle.call(backend, {dictionaryTitle: 'JMdict'});
+        await /** @type {import('api').ApiHandlerNoExtraArgs<'deleteDictionaryByTitle'>} */ (Backend.prototype._onApiDeleteDictionaryByTitle).call(backend, {dictionaryTitle: 'JMdict'});
 
         expect(deleteDictionary).toHaveBeenCalledOnce();
         expect(refreshDictionaryDatabaseAfterUpdate).toHaveBeenCalledOnce();

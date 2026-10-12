@@ -202,7 +202,7 @@ export class TermContentOpfsStore {
             await this._closeWritable();
             const closeWritableMs = safePerformance.now() - tCloseWritableStart;
             let persistedLengthAfterClose = -1;
-            let logicalLengthAfterClose = this._length;
+            const logicalLengthAfterClose = this._length;
             if (this._fileHandle !== null) {
                 try {
                     const persistedFile = await this._fileHandle.getFile();
@@ -476,9 +476,8 @@ export class TermContentOpfsStore {
                     this._pendingWriteChunks.push(chunk);
                 }
                 if (this._importSessionActive) {
-                    if (!this._queueImportWritesEnabled) {
-                        await this._flushPendingWrites();
-                    } else if (
+                    if (
+                        !this._queueImportWritesEnabled ||
                         this._pendingWriteBytes >= this._flushThresholdBytes ||
                         this._pendingWriteChunks.length >= this._writeCoalesceMaxChunks
                     ) {

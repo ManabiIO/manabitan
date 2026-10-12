@@ -250,7 +250,7 @@ describe('API PM transport reliability', () => {
         const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
         vi.spyOn(api, '_pmInvoke').mockImplementation(() => new Promise(() => {}));
 
-        const promise = api.importDictionaryOffscreen(new Blob([]), /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null);
+        const promise = api.importDictionaryOffscreen(new Blob([]), /** @type {import('dictionary-importer').ImportDetails} */ ({}), null);
         const expectation = expect(promise).rejects.toThrow(/Runtime connections have been shut down/);
 
         api.shutdownRuntimeConnections();
@@ -269,7 +269,7 @@ describe('API PM transport reliability', () => {
         const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
         vi.spyOn(api, '_pmInvoke').mockImplementation(() => new Promise(() => {}));
 
-        const promise = api.importDictionaryUrlOffscreen('https://example.com/test.zip', /** @type {import('../ext/js/dictionary/dictionary-importer.js').ImportDetails} */ ({}), null);
+        const promise = api.importDictionaryUrlOffscreen('https://example.com/test.zip', /** @type {import('dictionary-importer').ImportDetails} */ ({}), null);
         const expectation = expect(promise).rejects.toThrow(/Runtime connections have been shut down/);
 
         api.shutdownRuntimeConnections();
@@ -339,11 +339,11 @@ describe('API PM transport reliability', () => {
             sendMessage: vi.fn((_message, callback) => {
                 callbackCount += 1;
                 if (callbackCount === 1) {
-                    globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
-                    callback(undefined);
+                    Reflect.set(globalThis.chrome.runtime, 'lastError', {message: 'Could not establish connection. Receiving end does not exist.'});
+                    callback();
                     return;
                 }
-                globalThis.chrome.runtime.lastError = undefined;
+                Reflect.set(globalThis.chrome.runtime, 'lastError', undefined);
                 callback({result: []});
             }),
             getLastError: vi.fn(() => {
@@ -376,8 +376,8 @@ describe('API PM transport reliability', () => {
         });
         const webExtension = {
             sendMessage: vi.fn((_message, callback) => {
-                globalThis.chrome.runtime.lastError = {message: 'Could not establish connection. Receiving end does not exist.'};
-                callback(undefined);
+                Reflect.set(globalThis.chrome.runtime, 'lastError', {message: 'Could not establish connection. Receiving end does not exist.'});
+                callback();
             }),
             getLastError: vi.fn(() => {
                 const lastError = globalThis.chrome.runtime.lastError;
@@ -410,7 +410,7 @@ describe('API PM transport reliability', () => {
         });
         const webExtension = {
             sendMessage: vi.fn((_message, callback) => {
-                callback(undefined);
+                callback();
             }),
             getLastError: vi.fn(() => new Error('Could not establish connection. Receiving end does not exist.')),
         };
@@ -447,7 +447,7 @@ describe('API PM transport reliability', () => {
         );
         api._mediaDrawingWorkerConnected = false;
 
-        api.drawMedia([{canvas: null}], []);
+        api.drawMedia(/** @type {Parameters<InstanceType<typeof API>['drawMedia']>[0]} */ (/** @type {unknown} */ ([{canvas: null}])), []);
         await vi.waitFor(() => {
             expect(mediaDrawingWorker.postMessage).toHaveBeenCalledTimes(2);
         });
@@ -521,7 +521,8 @@ describe('API PM transport reliability', () => {
                 serviceWorker: {},
             },
         });
-        let resolvePmInvoke;
+        /** @type {() => void} */
+        let resolvePmInvoke = () => { expect.fail('resolvePmInvoke was not initialized'); };
         const staleWorker = {
             addEventListener: vi.fn(),
             postMessage: vi.fn(),
@@ -539,7 +540,7 @@ describe('API PM transport reliability', () => {
             /** @type {Worker} */ (/** @type {unknown} */ (staleWorker)),
         );
         vi.spyOn(api, '_pmInvoke').mockImplementation(() => new Promise((resolve) => {
-            resolvePmInvoke = resolve;
+            resolvePmInvoke = () => resolve();
         }));
 
         const pending = api.ensureMediaDrawingWorkerConnected();

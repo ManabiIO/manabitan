@@ -63,9 +63,11 @@ describe('TermContentOpfsStore', () => {
                     ++writeCount;
                     if (writeCount === 1) {
                         resolve(void 0);
-                        await new Promise((writeResolve) => {
+                        /** @type {Promise<void>} */
+                        const writeGate = new Promise((writeResolve) => {
                             releaseWrite = writeResolve;
                         });
+                        await writeGate;
                     }
                 }),
             };
@@ -105,7 +107,9 @@ describe('TermContentOpfsStore', () => {
         expect(secondOffsets).toStrictEqual([3]);
         expect(secondLengths).toStrictEqual([2]);
 
-        releaseWrite?.();
+        const release = /** @type {(() => void)|null} */ (releaseWrite);
+        expect(release).not.toBeNull();
+        release?.();
         await store.endImportSession();
     });
 

@@ -129,6 +129,7 @@ export class RequestBuilder {
 
         const contentLengthString = response.headers.get('Content-Length');
         const contentLength = contentLengthString !== null ? Number.parseInt(contentLengthString, 10) : null;
+        /** @type {Uint8Array|null} */
         let target = contentLength !== null && Number.isFinite(contentLength) ? new Uint8Array(contentLength) : null;
         let targetPosition = 0;
         let totalLength = 0;

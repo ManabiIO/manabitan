@@ -42,8 +42,10 @@ describe('info page dictionary rendering', () => {
     test('DictionaryInfoController ignores stale refresh results', async () => {
         const {DictionaryInfoController} = await import('../ext/js/pages/info-dictionary-info.js');
         const {document} = window;
-        let resolveFirst;
-        let resolveSecond;
+        /** @type {(value?: unknown) => void} */
+        let resolveFirst = (_value) => { expect.fail('resolveFirst was not initialized'); };
+        /** @type {(value?: unknown) => void} */
+        let resolveSecond = (_value) => { expect.fail('resolveSecond was not initialized'); };
         const controller = new DictionaryInfoController(/** @type {import('../ext/js/comm/api.js').API} */ (/** @type {unknown} */ ({
             getDictionaryInfo: (() => {
                 let call = 0;

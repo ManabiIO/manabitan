@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {log} from '../core/log.js';
 import {base64ToArrayBuffer} from '../data/array-buffer-util.js';
 
 /**
@@ -119,12 +120,12 @@ export class DisplayContentManager {
         for (const [key, value] of url.searchParams.entries()) {
             params[key] = value;
         }
-        this._display.setContent({
+        void this._display.setContent({
             historyMode: 'new',
             focus: false,
             params,
             state: null,
             content: null,
-        });
+        }).catch((error) => { log.error(error); });
     }
 }

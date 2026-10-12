@@ -31,7 +31,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
 
         const onOptionsUpdatedEvent = /** @type {(details: {source: string}) => void} */ (Reflect.get(DisplayProfileSelection.prototype, '_onOptionsUpdatedEvent'));
         onOptionsUpdatedEvent.call(selection, {source: 'external'});
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(Reflect.get(selection, '_profileListNeedsUpdate')).toBe(true);
         expect(Reflect.get(selection, '_updateProfileList')).toHaveBeenCalledTimes(1);
@@ -40,8 +40,10 @@ describe('DisplayProfileSelection options refresh handling', () => {
     });
 
     test('stale profile-name refresh does not overwrite newer state', async () => {
-        let resolveFirst;
-        let resolveSecond;
+        /** @type {(value?: unknown) => void} */
+        let resolveFirst = (_value) => { expect.fail('resolveFirst was not initialized'); };
+        /** @type {(value?: unknown) => void} */
+        let resolveSecond = (_value) => { expect.fail('resolveSecond was not initialized'); };
         const selection = /** @type {DisplayProfileSelection} */ (/** @type {unknown} */ (Object.create(DisplayProfileSelection.prototype)));
         Reflect.set(selection, '_optionsRefreshGeneration', 0);
         Reflect.set(selection, '_profileButton', {style: {}});
@@ -90,7 +92,7 @@ describe('DisplayProfileSelection options refresh handling', () => {
         DisplayProfileSelection.prototype._onProfileRadioChange.call(selection, 1, /** @type {Event} */ (/** @type {unknown} */ ({
             currentTarget: {checked: true},
         })));
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(setProfileCurrent).toHaveBeenCalledWith(1);
         expect(updateProfileList).toHaveBeenCalledOnce();
