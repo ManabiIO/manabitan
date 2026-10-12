@@ -1215,7 +1215,8 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
         // Progress widgets and installed counts can settle while the
         // replacement import still owns publication. The existing timing
         // history is cleared at import admission and written at completion.
-        completionObserved = currentLabel.length === 0 ? (await driver.executeScript(`
+        completionObserved = currentLabel.length === 0 ?
+            (await driver.executeScript(`
                 const names = arguments[0];
                 const debug = globalThis.__manabitanLastImportDebug;
                 const timings = globalThis.__manabitanImportStepTimingHistory;
@@ -1224,7 +1225,8 @@ async function waitForImportProgressWithPhaseScreenshots(driver, report, diction
                 return debug?.hasResult === true && Number(debug.errorCount || 0) === 0
                     && Array.isArray(timings) && timings.length > 0
                     && names.some(name => titles.some(title => title.includes(name)));
-        `, expectedNames)) === true : false;
+            `, expectedNames)) === true :
+            false;
         if (currentLabel.includes('Step ')) {
             sawStepText = true;
             emptySince = null;
