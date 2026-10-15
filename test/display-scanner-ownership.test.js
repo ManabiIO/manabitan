@@ -92,6 +92,30 @@ async function invalidate(display, boundary) {
 }
 
 for (const source of /** @type {const} */ (['definitions', 'parser'])) {
+    test.for([0, 1, 2])(`${source} primary pointer press discards pending clicks without disabling later scans (button=%s)`, async (button, {window}) => {
+        const {scanner, api, publication, report, scan, close} = await setup(window, source);
+        const pending = /** @type {PromiseWithResolvers<import('api').ApiReturn<'termsFind'>>} */ (Promise.withResolvers());
+        api.termsFind.mockReturnValueOnce(pending.promise);
+        const older = scan();
+        try {
+            window.document.documentElement.dispatchEvent(new window.MouseEvent('pointerdown', {button, bubbles: true}));
+            if (button === 0) {
+                expect(Reflect.get(scanner, '_pendingLookup')).toBe(false);
+                await scan();
+                expect(api.termsFind).toHaveBeenCalledTimes(2);
+                expect(publication).toHaveBeenCalledOnce();
+            }
+            pending.resolve(hit);
+            await older;
+            expect(publication).toHaveBeenCalledOnce();
+            expect(report).not.toHaveBeenCalled();
+        } finally {
+            close();
+            pending.resolve(hit);
+            await older;
+        }
+    });
+
     for (const boundary of source === 'definitions' ? ['draft', 'navigation', 'frame-hidden'] : ['draft', 'navigation', 'hidden', 'frame-hidden']) {
         test.for([false, true])(`${source} lookup cannot publish after ${boundary} (rejection=%s)`, async (reject, {window}) => {
             const {display, api, publication, report, scan, close} = await setup(window, source);

@@ -769,6 +769,7 @@ export class TextScanner extends EventDispatcher {
      */
     _onSearchClickPointerDown(e) {
         if (e.button !== 0) { return; }
+        this.cancelPendingSearches();
         this._resetPreventNextClickScan();
     }
 
@@ -1988,6 +1989,7 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').ClearReason} reason
      */
     _triggerClear(reason) {
+        this.cancelPendingSearches();
         this.trigger('clear', {reason});
     }
 

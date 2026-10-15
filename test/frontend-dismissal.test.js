@@ -90,6 +90,7 @@ function setup() {
     })) { Reflect.set(frontend, key, value); }
     const error = vi.fn();
     const empty = vi.fn();
+    scanner.on('clear', frontend._onTextScannerClear.bind(frontend));
     scanner.on('searchSuccess', frontend._onSearchSuccess.bind(frontend));
     scanner.on('searchError', error);
     scanner.on('searchEmpty', empty);
@@ -112,11 +113,13 @@ function move(scanner, passive = false) {
     return Reflect.get(scanner, '_searchAtFromMouseMove').call(scanner, 1, 1, {...input(), passive});
 }
 
-describe.each(['escape', 'close-all'])('explicit %s dismissal', (mode) => {
+describe.each(['escape', 'close-all', 'mousedown'])('explicit %s dismissal', (mode) => {
     /** @param {Frontend} frontend */
     function dismiss(frontend) {
         if (mode === 'escape') {
             frontend._onApiClosePopup();
+        } else if (mode === 'mousedown') {
+            window.dispatchEvent(new MouseEvent('mousedown', {button: 0}));
         } else {
             frontend._onClosePopups();
         }
@@ -137,7 +140,7 @@ describe.each(['escape', 'close-all'])('explicit %s dismissal', (mode) => {
         expect(staleSelection).toBe(false);
         expect(scanner.isEnabled()).toBe(true);
         expect(show).toHaveBeenCalledTimes(1);
-        expect(hide).toHaveBeenCalledExactlyOnceWith(mode === 'escape');
+        expect(hide).toHaveBeenCalledExactlyOnceWith(mode !== 'close-all');
     });
 
     test('queued busy input is discarded rather than replayed after dismissal', async () => {
@@ -311,6 +314,36 @@ test('ordinary automatic hiding does not cancel the active replacement hover', a
     await active;
     expect(show).toHaveBeenCalledTimes(1);
     expect(scanner.hasSelection()).toBe(true);
+});
+
+test('a matching modifier press still scans the new point after dismissing an old hover', async () => {
+    const {scanner, lookup, show} = setup();
+    const pending = /** @type {PromiseWithResolvers<import('api').ApiReturn<'termsFind'>>} */ (Promise.withResolvers());
+    lookup.mockReturnValueOnce(pending.promise);
+    const older = scan(scanner);
+    Reflect.set(scanner, '_getMatchingInputGroupFromEvent', () => input());
+    window.dispatchEvent(new MouseEvent('mousedown', {button: 0, shiftKey: true, clientX: 4, clientY: 5}));
+    await vi.advanceTimersByTimeAsync(20);
+    expect(lookup).toHaveBeenCalledTimes(2);
+    expect(show).toHaveBeenCalledOnce();
+    pending.resolve(hit());
+    await older;
+    expect(show).toHaveBeenCalledOnce();
+});
+
+test('a suppressed touch-compatibility mousedown does not dismiss a current lookup', async () => {
+    const {scanner, lookup, show, hide} = setup();
+    const pending = /** @type {PromiseWithResolvers<import('api').ApiReturn<'termsFind'>>} */ (Promise.withResolvers());
+    lookup.mockReturnValueOnce(pending.promise);
+    const active = scan(scanner);
+    Reflect.set(scanner, '_preventNextMouseDown', true);
+    const event = new MouseEvent('mousedown', {button: 0, cancelable: true});
+    window.dispatchEvent(event);
+    pending.resolve(hit());
+    await active;
+    expect(event.defaultPrevented).toBe(true);
+    expect(show).toHaveBeenCalledOnce();
+    expect(hide).not.toHaveBeenCalled();
 });
 
 test('disabling pointer scanning alone does not invalidate an explicit script lookup', async () => {

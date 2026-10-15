@@ -832,7 +832,11 @@ export class Display extends EventDispatcher {
 
     /** @type {import('display').DirectApiHandler<'displaySetOptionsContext'>} */
     async _onMessageSetOptionsContext({optionsContext}) {
-        await this.setOptionsContext(optionsContext);
+        const token = this._setContentToken;
+        const promise = this.setOptionsContext(optionsContext);
+        const request = this._optionsContextRequest;
+        await promise;
+        if (this._setContentToken !== token || this._optionsContextRequest !== request) { return; }
         this.searchLast(true);
     }
 
