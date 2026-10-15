@@ -195,6 +195,11 @@ export class QueryParser extends EventDispatcher {
         }
     }
 
+    /** Cancel obsolete navigation without losing same-word hover suppression. */
+    cancelPendingSearches() {
+        this._textScanner.cancelPendingSearches();
+    }
+
     // Private
 
     /** */

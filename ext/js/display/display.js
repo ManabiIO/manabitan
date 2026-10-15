@@ -903,6 +903,7 @@ export class Display extends EventDispatcher {
     /** @type {import('display').DirectApiHandler<'displayVisibilityChanged'>} */
     _onMessageVisibilityChanged({value}) {
         this._frameVisible = value;
+        if (!value) { this._cancelPendingScannerSearches(); }
         this.trigger('frameVisibilityChange', {value});
     }
 
@@ -1870,6 +1871,7 @@ export class Display extends EventDispatcher {
         const text = this._fullQuery;
         const visible = this._isQueryParserVisible();
         this._queryParserContainer.hidden = !visible || text.length === 0;
+        if (this._queryParserContainer.hidden) { this._queryParser.cancelPendingSearches(); }
         if (visible && (this._queryParser.text !== text || this._queryParser.needsTextUpdate)) {
             void this._setQueryParserText(text);
         }
@@ -2722,7 +2724,15 @@ export class Display extends EventDispatcher {
     }
 
     /** */
+    _cancelPendingScannerSearches() {
+        this._contentTextScanner?.cancelPendingSearches();
+        this._queryParser.cancelPendingSearches();
+    }
+
+    /** */
     _triggerContentClear() {
+        this._cancelPendingScannerSearches();
+        this._contentTextScanner?.clearSelection();
         this.trigger('contentClear', {});
     }
 
