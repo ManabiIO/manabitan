@@ -1548,7 +1548,16 @@ export class TextScanner extends EventDispatcher {
             const searchKanji = this._searchKanji && (sourceInput === null || sourceInput.searchKanji);
             this._scanTimerClear();
 
-            if (typeof this._ignorePoint === 'function' && await this._ignorePoint(x, y)) { return; }
+            // Frame hit testing can wait on extension messaging too. One deadline
+            // covers admission and lookup; expiration rejects the point.
+            /** @type {Promise<boolean>|null} */
+            const deadline = Number.isFinite(this._lookupTimeoutMs) && this._lookupTimeoutMs > 0 ?
+                new Promise((resolve) => { timeout = setTimeout(() => resolve(true), this._lookupTimeoutMs); }) :
+                null;
+            if (typeof this._ignorePoint === 'function') {
+                const ignored = this._ignorePoint(x, y);
+                if (await (deadline === null ? ignored : Promise.race([ignored, deadline]))) { return; }
+            }
             if (this._isLookupStale(lookupSequence)) { return; }
             const textSource = this._textSourceGenerator.getRangeFromPoint(x, y, {
                 deepContentScan: this._deepContentScan,
@@ -1562,12 +1571,7 @@ export class TextScanner extends EventDispatcher {
                 // reader. Release its text source only when that reader settles.
                 const search = this._search(textSource, searchTerms, searchKanji, inputInfo, false, false, lookupSequence)
                     .finally(() => textSource.cleanup());
-                await (Number.isFinite(this._lookupTimeoutMs) && this._lookupTimeoutMs > 0 ?
-Promise.race([
-    search,
-    new Promise((resolve) => { timeout = setTimeout(resolve, this._lookupTimeoutMs); }),
-]) :
-search);
+                await (deadline === null ? search : Promise.race([search, deadline]));
             } else {
                 this._isMouseOverText = false;
                 this._triggerSearchEmpty(inputInfo);
