@@ -226,6 +226,61 @@ describe('Reader integration scanner lifecycle regressions', () => {
         }
     });
 
+    test.each([
+        {kind: 'touch-start', external: true},
+        {kind: 'touch-end', external: true},
+        {kind: 'pen', external: true},
+        {kind: 'touch-start', external: false},
+        {kind: 'touch-end', external: false},
+        {kind: 'pen', external: false},
+    ])('$kind completion suppresses page input only while it owns the selection (external lookup: $external)', async ({kind, external}) => {
+        const pending = deferredLookup();
+        const lookup = vi.fn(() => pending.promise);
+        const scanner = createScanner(lookup, [createFakeTextSource('old')]);
+        const inputInfo = createInputInfo();
+        inputInfo.pointerType = kind === 'pen' ? 'pen' : 'touch';
+        inputInfo.input = /** @type {import('text-scanner').InputConfig} */ (/** @type {unknown} */ ({
+            searchTerms: true, searchKanji: false, preventTouchScrolling: true, preventPenScrolling: true, scanOnPenPress: true,
+        }));
+        Reflect.set(scanner, '_getMatchingInputGroupFromEvent', () => inputInfo);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        try {
+            const active = kind === 'pen' ?
+                Reflect.get(scanner, '_searchAtFromPen').call(scanner, {clientX: 1, clientY: 1}, 'pointerDown', true) :
+                Reflect.get(scanner, kind === 'touch-start' ? '_searchAtFromTouchStart' : '_searchAtFromTouchEnd').call(scanner, 1, 1, inputInfo);
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
+            const readerSource = createFakeTextSource('reader');
+            if (external) {
+                scanner.beginExternalLookup();
+                scanner.setCurrentTextSource(readerSource);
+            }
+            pending.resolve(hit());
+            await active;
+            if (external) {
+                expect(scanner.getCurrentTextSource()).toBe(readerSource);
+                expect(success).not.toHaveBeenCalled();
+            } else {
+                expect(scanner.getCurrentTextSource()?.text()).toBe('old');
+                expect(success).toHaveBeenCalledOnce();
+            }
+
+            const mouseDown = new MouseEvent('mousedown', {button: 0, cancelable: true});
+            Reflect.get(scanner, '_onMouseDown').call(scanner, mouseDown);
+            expect(mouseDown.defaultPrevented).toBe(!external);
+            const contextMenu = new MouseEvent('contextmenu', {cancelable: true});
+            Reflect.get(scanner, '_onContextMenu').call(scanner, contextMenu);
+            expect(contextMenu.defaultPrevented).toBe(!external && kind !== 'touch-end');
+            const click = new MouseEvent('click', {button: 0, cancelable: true});
+            Reflect.get(scanner, '_onClick').call(scanner, click);
+            expect(click.defaultPrevented).toBe(!external);
+            expect(Reflect.get(scanner, '_preventScroll')).toBe(!external && kind !== 'touch-end');
+        } finally {
+            scanner.setEnabled(false);
+            pending.resolve(hit());
+        }
+    });
+
     test('several queued pointer moves coalesce to the newest eligible position', async () => {
         const first = deferredLookup();
         const lookup = vi.fn().mockImplementationOnce(() => first.promise).mockResolvedValue(hit());

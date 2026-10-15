@@ -495,15 +495,7 @@ export class TextScanner extends EventDispatcher {
      */
     beginExternalLookup() {
         ++this._externalLookupGeneration;
-        this._activeLookupSequence = null;
-        this._pendingLookup = false;
-        this._queuedLookup = null;
-        this._queuedMouseMoveLookup = null;
-        this._scanTimerClear();
-        if (this._mouseMoveLookupTimer !== null) {
-            clearTimeout(this._mouseMoveLookupTimer);
-            this._mouseMoveLookupTimer = null;
-        }
+        this._cancelPointerLookups();
         this._inputInfoCurrent = null;
         this.clearSelection();
     }
