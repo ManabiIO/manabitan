@@ -1444,7 +1444,10 @@ export class TextScanner extends EventDispatcher {
         }
         if (dictionaryEntries.length === 0 && !dictionaryAvailability?.length) { return null; }
 
-        textSource.setEndOffset(dictionaryEntries.length === 0 ? 1 : originalTextLength, false, layoutAwareScan);
+        // Translator spans use UTF-16 offsets; text sources move by code points.
+        const matchedText = searchText.slice(0, originalTextLength);
+        const matchedLength = dictionaryEntries.length === 0 ? 1 : [...matchedText].length;
+        textSource.setEndOffset(matchedLength, false, layoutAwareScan);
         const sentence = this._textSourceGenerator.extractSentence(
             textSource,
             layoutAwareScan,
