@@ -33,7 +33,9 @@ import {
  * @returns {{expression: Array<{row: number, exact: boolean}>, reading: Array<{row: number, exact: boolean}>}}
  */
 function findPrefixRowMatches(index, query, reverse = false) {
+    /** @type {Array<{id: number, exact: boolean}>} */
     const expression = [];
+    /** @type {Array<{id: number, exact: boolean}>} */
     const reading = [];
     appendPrefixIdMatches(index, query, expression, reading, 0, reverse);
     return {

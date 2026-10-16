@@ -17,7 +17,9 @@ import {
  * @returns {{expression: Array<{row: number, exact: boolean}>, reading: Array<{row: number, exact: boolean}>}}
  */
 function findPrefixRowMatches(index, query, reverse = false) {
+    /** @type {Array<{id: number, exact: boolean}>} */
     const expression = [];
+    /** @type {Array<{id: number, exact: boolean}>} */
     const reading = [];
     appendPrefixIdMatches(index, query, expression, reading, 0, reverse);
     return {
@@ -147,7 +149,7 @@ test('prefix orders preserve the highest key IDs in a maximum-key chunk', () => 
     for (const order of [index.keyOrder, index.keyReverseOrder]) {
         expect(order).not.toBeNull();
         expect([...(order ?? [])].sort((a, b) => a - b)).toEqual(expectedIds);
-        expect(order?.byteLength).toBe(expectedIds.length * 4);
+        expect(order?.byteLength).toBe(expectedIds.length * 2);
     }
     expect(encoded).toEqual(before);
 });

@@ -51,8 +51,8 @@ const HASH_SLOT_TARGET_LOAD = 4;
  * @property {Uint16Array} sequencePostingOffsets
  * @property {Uint16Array} sequencePostingRows
  * @property {Uint16Array} sequenceRowKeys
- * @property {Uint32Array|null} keyOrder
- * @property {Uint32Array|null} keyReverseOrder
+ * @property {Uint16Array|null} keyOrder
+ * @property {Uint16Array|null} keyReverseOrder
  * @property {Uint32Array|null} keyRadix
  * @property {Uint32Array|null} keyReverseRadix
  * @property {boolean} forwardReady
@@ -924,8 +924,8 @@ export function findPrefixRows(index, query, field, reverse = false) {
         ensureForwardIndex(index);
     }
     const order = reverse ?
-        /** @type {Uint32Array} */ (index.keyReverseOrder) :
-        /** @type {Uint32Array} */ (index.keyOrder);
+        /** @type {Uint16Array} */ (index.keyReverseOrder) :
+        /** @type {Uint16Array} */ (index.keyOrder);
     const radix = reverse ?
         /** @type {Uint32Array} */ (index.keyReverseRadix) :
         /** @type {Uint32Array} */ (index.keyRadix);
@@ -980,8 +980,8 @@ export function appendPrefixIdMatches(index, query, expression, reading, rowOffs
         ensureForwardIndex(index);
     }
     const order = reverse ?
-        /** @type {Uint32Array} */ (index.keyReverseOrder) :
-        /** @type {Uint32Array} */ (index.keyOrder);
+        /** @type {Uint16Array} */ (index.keyReverseOrder) :
+        /** @type {Uint16Array} */ (index.keyOrder);
     const radix = reverse ?
         /** @type {Uint32Array} */ (index.keyReverseRadix) :
         /** @type {Uint32Array} */ (index.keyRadix);
@@ -1325,7 +1325,7 @@ function validateForwardIndex(index) {
     const {keyOrder, keyRadix, keyBytes, keyOffsets} = index;
     const keyCount = keyOffsets.length - 1;
     if (
-        !(keyOrder instanceof Uint32Array) ||
+        !(keyOrder instanceof Uint16Array) ||
         !(keyRadix instanceof Uint32Array) ||
         keyOrder.length !== keyCount ||
         keyRadix.length !== RADIX_SIZE
@@ -1361,9 +1361,10 @@ function validateForwardIndex(index) {
  */
 function ensureForwardIndex(index) {
     if (index.forwardReady) { return; }
-    const keyOrder = new Uint32Array(index.keyOffsets.length - 1);
+    // Parsed chunks have fewer than U16_NULL keys, so key IDs fit in uint16.
+    const keyOrder = new Uint16Array(index.keyOffsets.length - 1);
     const keyRadix = new Uint32Array(RADIX_SIZE);
-    const scratch = new Uint32Array(keyOrder.length);
+    const scratch = new Uint16Array(keyOrder.length);
     radixSortKeysInto(keyOrder, scratch, index.keyBytes, index.keyOffsets, false);
     fillRadix(keyRadix, keyOrder, index.keyBytes, index.keyOffsets, false);
     index.keyOrder = keyOrder;
@@ -1377,9 +1378,9 @@ function ensureForwardIndex(index) {
  */
 function ensureReverseIndex(index) {
     if (index.reverseReady) { return; }
-    const keyReverseOrder = new Uint32Array(index.keyOffsets.length - 1);
+    const keyReverseOrder = new Uint16Array(index.keyOffsets.length - 1);
     const keyReverseRadix = new Uint32Array(RADIX_SIZE);
-    const scratch = new Uint32Array(keyReverseOrder.length);
+    const scratch = new Uint16Array(keyReverseOrder.length);
     radixSortKeysInto(keyReverseOrder, scratch, index.keyBytes, index.keyOffsets, true);
     fillRadix(keyReverseRadix, keyReverseOrder, index.keyBytes, index.keyOffsets, true);
     index.keyReverseOrder = keyReverseOrder;
@@ -1388,7 +1389,7 @@ function ensureReverseIndex(index) {
 }
 
 /**
- * @param {Uint32Array} values
+ * @param {Uint16Array|Uint32Array} values
  * @param {number} limit
  * @throws {Error} If a reference is outside its valid range.
  */
@@ -1667,7 +1668,7 @@ function compareBytes(a, b, reverse) {
 
 /**
  * @param {Uint32Array} radix
- * @param {Uint32Array} order
+ * @param {Uint16Array} order
  * @param {Uint8Array} bytes
  * @param {Uint32Array} offsets
  * @param {boolean} reverse
@@ -1780,8 +1781,8 @@ function keyBytesHavePrefix(bytes, offsets, key, query, reverse) {
 }
 
 /**
- * @param {Uint32Array} sorted
- * @param {Uint32Array} scratch
+ * @param {Uint16Array} sorted
+ * @param {Uint16Array} scratch
  * @param {Uint8Array} bytes
  * @param {Uint32Array} offsets
  * @param {boolean} reverse

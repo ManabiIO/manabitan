@@ -189,7 +189,7 @@ describe('parallel term hydration failure ownership', () => {
             let entered = 0;
             const read = vi.spyOn(database, '_deserializeTermRow').mockImplementation(async (value) => {
                 ++active;
-                if (++entered === 8) { started.resolve(); }
+                if (++entered === 8) { started.resolve(void 0); }
                 try {
                     if (value.id === 1) {
                         await failure.promise;
@@ -207,12 +207,12 @@ describe('parallel term hydration failure ownership', () => {
                 (error) => { settled = true; return {value: null, error}; },
             );
             await started.promise;
-            failure.resolve();
+            failure.resolve(void 0);
             // Flush the failure's microtasks while the other seven reads stay paused.
             await new Promise((resolve) => { setTimeout(resolve, 0); });
             const settledBeforePeers = settled;
             if (invalidate) { database._clearBulkImportRuntimeCaches(); }
-            peers.resolve();
+            peers.resolve(void 0);
             const result = await request;
             // Join test-owned work even against the failing predecessor.
             await new Promise((resolve) => { setTimeout(resolve, 0); });
@@ -223,7 +223,7 @@ describe('parallel term hydration failure ownership', () => {
             expect(read).toHaveBeenCalledTimes(8);
             expect(Reflect.get(database, '_termRowCache').size).toBe(0);
             read.mockRestore();
-            vi.spyOn(recordStore, 'getByIdsAsync').mockResolvedValue(new Map([[2, records.get(2)]]));
+            vi.spyOn(recordStore, 'getByIdsAsync').mockResolvedValue(new Map([...records].filter(([id]) => id === 2)));
             expect((await database._fetchTermRowsByIds([2])).get(2)?.expression).toBe('term-2');
         },
     );
