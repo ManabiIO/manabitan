@@ -2011,12 +2011,20 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
         range.setEnd(node, start + length);
         const glyph = range.getBoundingClientRect();
         const element = target.getBoundingClientRect();
-        return {text, x: glyph.left + glyph.width / 2, y: glyph.top + glyph.height / 2,
+        const x = glyph.left + glyph.width / 2;
+        const y = glyph.top + glyph.height / 2;
+        const hit = document.elementFromPoint(x, y);
+        return {text, x, y, viewportWidth: window.innerWidth, viewportHeight: window.innerHeight,
+            hitTarget: hit === target || target.contains(hit),
+            hitTag: hit instanceof Element ? hit.tagName : '',
+            hitText: String(hit?.textContent || '').trim().slice(0, 80),
             offsetX: glyph.left + glyph.width / 2 - (element.left + element.width / 2),
             offsetY: glyph.top + glyph.height / 2 - (element.top + element.height / 2),
             width: glyph.width, height: glyph.height};
     `, targetElement);
-    const moveOrigin = /** @type {import('selenium-webdriver').WebElement} */ (targetElement);
+    if (geometry.hitTarget !== true) {
+        fail(`Firefox hover target is not topmost at its first glyph before pointer motion: ${JSON.stringify({targetSelector, geometry})}`);
+    }
     const moveAwayOffsetX = Number.isFinite(Number(motionProfile?.moveAwayOffsetX)) ? Number(motionProfile?.moveAwayOffsetX) : -12;
     const moveToOffsetX = Number.isFinite(Number(motionProfile?.moveToOffsetX)) ? Number(motionProfile?.moveToOffsetX) : 10;
     const moveToOffsetY = Number.isFinite(Number(motionProfile?.moveToOffsetY)) ? Number(motionProfile?.moveToOffsetY) : 2;
@@ -2053,9 +2061,15 @@ driver.executeScript(`
                     emit('pointermove', toX, toY);
                 `, targetElement, moveAwayOffsetX, moveToOffsetX, moveToOffsetY, modifier === Key.SHIFT, modifier === Key.ALT, modifier === Key.CONTROL, geometry) :
 driver.actions({async: true})
-    .move({origin: moveOrigin, x: moveAwayOffsetX, y: -8})
-    .move({origin: moveOrigin, x: 2, y: 2})
-    .move({origin: moveOrigin, x: Math.round(geometry.offsetX + Math.max(-geometry.width / 4, Math.min(geometry.width / 4, moveToOffsetX))), y: Math.round(geometry.offsetY + Math.max(-geometry.height / 4, Math.min(geometry.height / 4, moveToOffsetY))), duration: 220})
+    // Use viewport coordinates so Firefox leaves an old popup/target cleanly
+    // before entering the measured glyph. Element-origin offsets can be
+    // interpreted against a different hit box after the popup closes.
+    .move({x: Math.max(1, Math.min(geometry.viewportWidth - 2, Math.round(geometry.x + moveAwayOffsetX - geometry.width))),
+        y: Math.max(1, Math.min(geometry.viewportHeight - 2, Math.round(geometry.y - geometry.height)))})
+    .pause(50)
+    .move({x: Math.round(geometry.x + Math.max(-geometry.width / 4, Math.min(geometry.width / 4, moveToOffsetX))),
+        y: Math.round(geometry.y + Math.max(-geometry.height / 4, Math.min(geometry.height / 4, moveToOffsetY))),
+        duration: 220})
     .perform());
             if (pauseAfterMoveMs > 0) {
                 await driver.sleep(pauseAfterMoveMs);
@@ -2102,14 +2116,15 @@ driver.actions({async: true})
         let hoverSnapshot = null;
         await driver.wait(async () => {
             hoverSnapshot = await driver.executeScript(`
-            const [expectedText, names] = arguments;
+            const [expectedText, names, selector] = arguments;
             const query = new URL(location.href).searchParams.get('query') || '';
             const entries = document.querySelector('#dictionary-entries');
             const text = entries instanceof HTMLElement ? entries.innerText : '';
             return {ready: query.startsWith(expectedText) && names.every((name) => text.includes(name)),
+                targetSelector: selector,
                 query, expectedText, entries: text.slice(0, 300), location: location.href,
                 body: document.body.innerText.slice(0, 300), sentence: history.state?.state?.sentence};
-        `, geometry.text, expectedDictionaryNames);
+        `, geometry.text, expectedDictionaryNames, targetSelector);
             return hoverSnapshot?.ready === true;
         }, popupTimeoutMs, () => `Expected the current hover target and rendered dictionary results: ${JSON.stringify(hoverSnapshot)}`);
         const popupText = String(await (await driver.findElement(By.css('body'))).getText());
