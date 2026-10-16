@@ -2073,8 +2073,7 @@ driver.actions({async: true})
     // Use viewport coordinates so Firefox leaves an old popup/target cleanly
     // before entering the measured glyph. Element-origin offsets can be
     // interpreted against a different hit box after the popup closes.
-    .move({x: Math.max(1, Math.min(geometry.viewportWidth - 2, Math.round(geometry.x + moveAwayOffsetX - geometry.width))),
-        y: Math.max(1, Math.min(geometry.viewportHeight - 2, Math.round(geometry.y - geometry.height)))})
+    .move({x: 1, y: 1})
     .pause(50)
     .move({x: Math.round(geometry.x + Math.max(-geometry.width / 4, Math.min(geometry.width / 4, moveToOffsetX))),
         y: Math.round(geometry.y + Math.max(-geometry.height / 4, Math.min(geometry.height / 4, moveToOffsetY))),
