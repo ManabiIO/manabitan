@@ -10342,36 +10342,52 @@ null :
         const entryGroups = this._groupTermRecordEntriesByContentCacheKey(recordsById);
         const concurrency = Math.min(8, Math.max(1, entryGroups.length));
         let nextIndex = 0;
+        let failed = false;
+        /** @type {unknown} */
+        let firstError;
         const deserializeNext = async () => {
-            while (true) {
-                const entryIndex = nextIndex++;
-                if (entryIndex >= entryGroups.length) { return; }
-                for (const [id, record] of entryGroups[entryIndex]) {
-                    const row = await this._deserializeTermRow({
-                        id,
-                        dictionary: this._getDictionaryNameForTermRecordStorage(record.dictionary),
-                        expression: record.expression,
-                        reading: record.reading,
-                        expressionReverse: record.expressionReverse,
-                        readingReverse: record.readingReverse,
-                        entryContentId: null,
-                        entryContentOffset: record.entryContentOffset,
-                        entryContentLength: record.entryContentLength,
-                        entryContentDictName: record.entryContentDictName,
-                        definitionTags: '',
-                        termTags: '',
-                        rules: '',
-                        score: record.score,
-                        glossaryJson: '[]',
-                        sequence: record.sequence,
-                    });
-                    this._assertTermLookupGeneration(generation);
-                    rowsById.set(id, row);
-                    this._setCachedTermRow(id, row);
+            try {
+                while (!failed) {
+                    const entryIndex = nextIndex++;
+                    if (entryIndex >= entryGroups.length) { return; }
+                    for (const [id, record] of entryGroups[entryIndex]) {
+                        if (failed) { return; }
+                        const row = await this._deserializeTermRow({
+                            id,
+                            dictionary: this._getDictionaryNameForTermRecordStorage(record.dictionary),
+                            expression: record.expression,
+                            reading: record.reading,
+                            expressionReverse: record.expressionReverse,
+                            readingReverse: record.readingReverse,
+                            entryContentId: null,
+                            entryContentOffset: record.entryContentOffset,
+                            entryContentLength: record.entryContentLength,
+                            entryContentDictName: record.entryContentDictName,
+                            definitionTags: '',
+                            termTags: '',
+                            rules: '',
+                            score: record.score,
+                            glossaryJson: '[]',
+                            sequence: record.sequence,
+                        });
+                        if (failed) { return; }
+                        this._assertTermLookupGeneration(generation);
+                        rowsById.set(id, row);
+                        this._setCachedTermRow(id, row);
+                    }
+                }
+            } catch (error) {
+                if (!failed) {
+                    failed = true;
+                    firstError = error;
                 }
             }
         };
+        // Workers catch their own failures so the scheduler retains this read
+        // until every active hydration settles. Do not admit more groups after
+        // a peer fails, and preserve the first failure (including undefined).
         await Promise.all(Array.from({length: concurrency}, () => deserializeNext()));
+        if (failed) { throw firstError; }
         this._assertTermLookupGeneration(generation);
         return rowsById;
     }
