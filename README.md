@@ -59,9 +59,9 @@ I am also [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20auth
 
 Using this fork and telling me what works and doesn't will allow me to contribute back to Yomitan easier.
 
-# Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
+# Visit [the Manabitan Wiki](https://manabi.io/manabitan) to learn more!
 
-> Documentation currently lives on the legacy Yomitan wiki. Manabitan is feature-compatible, so the Yomitan wiki guides still apply.
+> Manabitan documentation covers its own storage, migration, and integration behavior. Yomitan remains the upstream project.
 
 :wave: **Manabitan is a fast Yomitan.** It forks Yomitan to provide the same functionality with much faster imports and lookups. It also deduplicates and compresses Yomitan entries to reduce storage use.
 
@@ -75,14 +75,14 @@ Manabitan changes core Yomitan database technology to deliver major performance 
 
 ## Features
 
-Manabitan turns your web browser into a tool for building language literacy by helping you **read** texts that would otherwise be too difficult to tackle in [a variety of supported languages](https://yomitan.wiki/supported-languages/).
+Manabitan turns your web browser into a tool for building language literacy by helping you **read** texts that would otherwise be too difficult to tackle in [a variety of supported languages](https://manabi.io/manabitan/supported-languages/).
 
 Manabitan provides powerful features not available in other browser-based dictionaries:
 
 - 💬 Interactive popup definition window for displaying search results.
-- 🔊 Built-in native pronunciation audio with the ability to add your own [custom audio sources](https://yomitan.wiki/advanced/#default-audio-sources).
+- 🔊 Built-in native pronunciation audio with the ability to add your own [custom audio sources](https://manabi.io/manabitan/advanced/#default-audio-sources).
 - ✍️ Kanji stroke order diagrams are just a click away.
-- 📝 [Automatic flashcard creation](https://yomitan.wiki/anki/) for the [Anki](https://apps.ankiweb.net/) flashcard program via the [AnkiConnect](https://git.sr.ht/~foosoft/anki-connect) plugin.
+- 📝 [Automatic flashcard creation](https://manabi.io/manabitan/anki/) for the [Anki](https://apps.ankiweb.net/) flashcard program via the [AnkiConnect](https://git.sr.ht/~foosoft/anki-connect) plugin.
 - 🔍 Custom search page for easily executing custom search queries.
 - 📖 Support for multiple dictionary formats including [EPWING](https://ja.wikipedia.org/wiki/EPWING) via the [Yomitan Import](https://github.com/yomidevs/yomitan-import) tool.
 - ✨ Clean, modern code makes it easy for developers to [contribute](#contributing) new features and languages.
@@ -94,7 +94,7 @@ Manabitan provides powerful features not available in other browser-based dictio
 
 ## Documentation/How To
 
-**Please visit the [Yomitan Wiki](https://yomitan.wiki) for the most up-to-date usage documentation (legacy docs, feature-compatible with Manabitan).**
+**Please visit the [Manabitan Wiki](https://manabi.io/manabitan) for the most up-to-date usage documentation.**
 
 ### Developer Documentation
 
