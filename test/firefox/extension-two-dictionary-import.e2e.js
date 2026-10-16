@@ -1966,6 +1966,27 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
         await driver.get(pageUrl);
     }
     await waitForPageFrontendHoverReady(driver);
+    // Match Chromium's repeated-hover contract: dismiss the prior popup so it
+    // cannot occlude the next fixture target or satisfy the next visibility wait.
+    const previousFrames = await driver.findElements(By.css('iframe.yomitan-popup'));
+    for (const frame of previousFrames.reverse()) {
+        if (!await frame.isDisplayed()) { continue; }
+        try {
+            await driver.switchTo().frame(frame);
+            const closeButtons = await driver.findElements(By.css('#close-button'));
+            await (closeButtons.length > 0 && await closeButtons[0].isDisplayed() ?
+                closeButtons[0].click() :
+                (await driver.findElement(By.css('#content-scroll-focus'))).sendKeys(Key.ESCAPE));
+        } finally {
+            await driver.switchTo().defaultContent();
+        }
+    }
+    await driver.wait(async () => {
+        for (const frame of await driver.findElements(By.css('iframe.yomitan-popup'))) {
+            if (await frame.isDisplayed()) { return false; }
+        }
+        return true;
+    }, 2500, 'Expected previous hover popup to dismiss before the next target');
 
     const targetElement = /** @type {import('selenium-webdriver').WebElement} */ (await driver.wait(until.elementLocated(By.css(targetSelector)), 30_000));
     await driver.executeScript(`
@@ -1973,6 +1994,27 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
         if (target instanceof HTMLElement) {
             target.scrollIntoView({block: 'center', inline: 'center'});
         }
+    `, targetElement);
+    // Anchor the motion to the first glyph, not the element's center plus an
+    // offset that can land beyond a one-character span or inside the next word.
+    const geometry = await driver.executeScript(`
+        const target = arguments[0];
+        const text = target.textContent.trim();
+        const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
+        let node;
+        while ((node = walker.nextNode()) !== null && !node.textContent.trim()) {}
+        if (node === null) { throw new Error('Hover fixture has no text'); }
+        const start = node.textContent.search(/\\S/);
+        const length = String.fromCodePoint(node.textContent.codePointAt(start)).length;
+        const range = document.createRange();
+        range.setStart(node, start);
+        range.setEnd(node, start + length);
+        const glyph = range.getBoundingClientRect();
+        const element = target.getBoundingClientRect();
+        return {text, x: glyph.left + glyph.width / 2, y: glyph.top + glyph.height / 2,
+            offsetX: glyph.left + glyph.width / 2 - (element.left + element.width / 2),
+            offsetY: glyph.top + glyph.height / 2 - (element.top + element.height / 2),
+            width: glyph.width, height: glyph.height};
     `, targetElement);
     const moveOrigin = /** @type {import('selenium-webdriver').WebElement} */ (targetElement);
     const moveAwayOffsetX = Number.isFinite(Number(motionProfile?.moveAwayOffsetX)) ? Number(motionProfile?.moveAwayOffsetX) : -12;
@@ -1992,7 +2034,7 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
             await (useScriptedHoverMotion ?
 driver.executeScript(`
                     const [target, awayX, toX, toY, shiftKey, altKey, ctrlKey] = arguments;
-                    const rect = target.getBoundingClientRect();
+                    const glyph = arguments[7];
                     const emit = (type, x, y) => target.dispatchEvent(new PointerEvent(type, {
                         bubbles: true,
                         cancelable: true,
@@ -2000,21 +2042,20 @@ driver.executeScript(`
                         pointerId: 1,
                         pointerType: 'mouse',
                         isPrimary: true,
-                        clientX: rect.left + (rect.width / 2) + x,
-                        clientY: rect.top + (rect.height / 2) + y,
+                        clientX: glyph.x + Math.max(-glyph.width / 4, Math.min(glyph.width / 4, x)),
+                        clientY: glyph.y + Math.max(-glyph.height / 4, Math.min(glyph.height / 4, y)),
                         shiftKey,
                         altKey,
                         ctrlKey,
                     }));
-                    emit('pointerover', awayX, -8);
-                    emit('pointermove', awayX, -8);
+                    target.dispatchEvent(new PointerEvent('pointermove', {bubbles: true, pointerId: 1, pointerType: 'mouse', isPrimary: true, clientX: glyph.x + awayX - glyph.width, clientY: glyph.y - glyph.height, shiftKey, altKey, ctrlKey}));
                     emit('pointermove', 2, 2);
                     emit('pointermove', toX, toY);
-                `, targetElement, moveAwayOffsetX, moveToOffsetX, moveToOffsetY, modifier === Key.SHIFT, modifier === Key.ALT, modifier === Key.CONTROL) :
+                `, targetElement, moveAwayOffsetX, moveToOffsetX, moveToOffsetY, modifier === Key.SHIFT, modifier === Key.ALT, modifier === Key.CONTROL, geometry) :
 driver.actions({async: true})
     .move({origin: moveOrigin, x: moveAwayOffsetX, y: -8})
     .move({origin: moveOrigin, x: 2, y: 2})
-    .move({origin: moveOrigin, x: moveToOffsetX, y: moveToOffsetY, duration: 220})
+    .move({origin: moveOrigin, x: Math.round(geometry.offsetX + Math.max(-geometry.width / 4, Math.min(geometry.width / 4, moveToOffsetX))), y: Math.round(geometry.offsetY + Math.max(-geometry.height / 4, Math.min(geometry.height / 4, moveToOffsetY))), duration: 220})
     .perform());
             if (pauseAfterMoveMs > 0) {
                 await driver.sleep(pauseAfterMoveMs);
@@ -2054,7 +2095,23 @@ driver.actions({async: true})
             fail('No visible yomitan popup iframe found');
         }
         await driver.switchTo().frame(popupFrame);
-        await driver.wait(until.elementLocated(By.css('#dictionary-entries, #no-results, #no-dictionaries')), 30_000);
+        // A visible iframe and its permanent scaffold can belong to the last
+        // request. Require this target's query and rendered dictionaries before
+        // taking a snapshot; retain the existing per-popup deadline.
+        /** @type {Record<string, unknown>|null} */
+        let hoverSnapshot = null;
+        await driver.wait(async () => {
+            hoverSnapshot = await driver.executeScript(`
+            const [expectedText, names] = arguments;
+            const query = new URL(location.href).searchParams.get('query') || '';
+            const entries = document.querySelector('#dictionary-entries');
+            const text = entries instanceof HTMLElement ? entries.innerText : '';
+            return {ready: query.startsWith(expectedText) && names.every((name) => text.includes(name)),
+                query, expectedText, entries: text.slice(0, 300), location: location.href,
+                body: document.body.innerText.slice(0, 300), sentence: history.state?.state?.sentence};
+        `, geometry.text, expectedDictionaryNames);
+            return hoverSnapshot?.ready === true;
+        }, popupTimeoutMs, () => `Expected the current hover target and rendered dictionary results: ${JSON.stringify(hoverSnapshot)}`);
         const popupText = String(await (await driver.findElement(By.css('body'))).getText());
         // Selenium executeScript return value is untyped (`any`).
 
