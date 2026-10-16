@@ -39,6 +39,22 @@ jobs:
             echo "Firefox signing secrets are not configured; skipping signing and metadata update."
           fi
 
+      - name: Verify Firefox package identity before signing
+        if: steps.signingConfig.outputs.enabled == 'true'
+        env:
+          EXPECTED_ID: ${{ secrets.FF_OFFLINE_EXT_ID }}
+          RELEASE_VERSION: ${{ inputs.tag }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os, zipfile
+          with zipfile.ZipFile('manabitan-firefox-dev.zip') as package:
+              assert package.namelist().count('manifest.json') == 1
+              manifest = json.loads(package.read('manifest.json'))
+          assert os.environ['EXPECTED_ID'] == '{accbebce-862b-48a9-bb9a-1da9ad1f8702}', 'Configure the Manabitan development signing ID'
+          assert manifest['browser_specific_settings']['gecko']['id'] == os.environ['EXPECTED_ID'], 'Package/signing ID mismatch'
+          assert manifest['version'] == os.environ['RELEASE_VERSION'], 'Package/release version mismatch'
+          PYTHON
+
       - name: Sign Firefox xpi for offline distribution
         id: ffSignXpi
         if: steps.signingConfig.outputs.enabled == 'true'
@@ -60,6 +76,26 @@ jobs:
           steps.ffSignXpi.outcome == 'failure' &&
           steps.ffSignXpi.outputs.sameVersionAlreadyUploadedError != 'true'
         run: exit 1
+
+      - name: Verify the signed package before upload and update-feed publication
+        id: signedPackage
+        if: steps.ffSignXpi.outcome == 'success'
+        env:
+          EXPECTED_ID: ${{ secrets.FF_OFFLINE_EXT_ID }}
+          RELEASE_VERSION: ${{ inputs.tag }}
+        run: |
+          python3 - <<'PYTHON'
+          import hashlib, json, os, zipfile
+          from pathlib import Path
+          path = Path('manabitan-firefox-dev.xpi')
+          with zipfile.ZipFile(path) as package:
+              assert package.namelist().count('manifest.json') == 1
+              manifest = json.loads(package.read('manifest.json'))
+          assert manifest['browser_specific_settings']['gecko']['id'] == os.environ['EXPECTED_ID'], 'Signed package ID mismatch'
+          assert manifest['version'] == os.environ['RELEASE_VERSION'], 'Signed package version mismatch'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+              stream.write('hash=sha256:' + hashlib.sha256(path.read_bytes()).hexdigest() + '\n')
+          PYTHON
 
       - name: Generate hashes
         id: hash
@@ -106,7 +142,8 @@ jobs:
                       "updates": [
                           {
                               "version": "${{ inputs.tag }}",
-                              "update_link": "${{ steps.uploadReleaseAsset.outputs.browser_download_url }}"
+                              "update_link": "${{ steps.uploadReleaseAsset.outputs.browser_download_url }}",
+                              "update_hash": "${{ steps.signedPackage.outputs.hash }}"
                           }
                       ]
                   }

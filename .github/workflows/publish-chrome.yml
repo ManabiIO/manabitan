@@ -55,7 +55,7 @@ jobs:
         continue-on-error: true
         uses: cardinalby/webext-buildtools-chrome-webstore-upload-action@3d829e042b559c35f7fb71676cbaf6031892a313 # v1.0.11
         with:
-          zipFilePath: yomitan-chrome.zip
+          zipFilePath: manabitan-chrome.zip
           extensionId: ${{ secrets.G_STABLE_EXTENSION_ID }}
           apiAccessToken: ${{ steps.fetchAccessToken.outputs.accessToken }}
           waitForUploadCheckCount: 10

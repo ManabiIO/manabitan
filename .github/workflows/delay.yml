@@ -22,6 +22,12 @@ on:
         description: "Max attempts"
         required: false
         default: "10"
+      tag:
+        description: "Release tag for development publishing retries"
+        required: false
+      upload_url:
+        description: "Release asset upload URL for development publishing retries"
+        required: false
 permissions: {}
 jobs:
   delay:
@@ -30,14 +36,26 @@ jobs:
     permissions:
       actions: write
     steps:
+      - name: Prepare retry inputs
+        id: retryInputs
+        env:
+          ATTEMPT_NUMBER: ${{ inputs.attemptNumber }}
+          MAX_ATTEMPTS: ${{ inputs.maxAttempts }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_UPLOAD_URL: ${{ inputs.upload_url }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {appendFileSync} from 'node:fs';
+          const inputs = {attemptNumber: process.env.ATTEMPT_NUMBER, maxAttempts: process.env.MAX_ATTEMPTS};
+          if (process.env.RELEASE_TAG) inputs.tag = process.env.RELEASE_TAG;
+          if (process.env.RELEASE_UPLOAD_URL) inputs.upload_url = process.env.RELEASE_UPLOAD_URL;
+          appendFileSync(process.env.GITHUB_OUTPUT, `inputs=${JSON.stringify(inputs)}\n`);
+          NODE
+
       - name: Start the next attempt
         uses: aurelien-baudet/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # pin@v2
         with:
           workflow: ${{ github.event.inputs.workflow }}
           token: ${{ secrets.GITHUB_TOKEN }}
           wait-for-completion: false
-          inputs: |
-            {
-              "attemptNumber": "${{ github.event.inputs.attemptNumber }}",
-              "maxAttempts": "${{ github.event.inputs.maxAttempts }}"
-            }
+          inputs: ${{ steps.retryInputs.outputs.inputs }}
