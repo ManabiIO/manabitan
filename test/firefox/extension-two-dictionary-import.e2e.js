@@ -1981,6 +1981,13 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
             await driver.switchTo().defaultContent();
         }
     }
+    // Closing the popup leaves the native pointer on its former close button.
+    // That coordinate can expose an underlying word and immediately reopen the
+    // popup over the next fixture target. Park in the page corner first.
+    await driver.actions({async: true})
+        .move({x: 1, y: 1})
+        .pause(50)
+        .perform();
     await driver.wait(async () => {
         for (const frame of await driver.findElements(By.css('iframe.yomitan-popup'))) {
             if (await frame.isDisplayed()) { return false; }
