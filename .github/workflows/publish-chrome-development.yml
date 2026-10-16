@@ -96,7 +96,9 @@ jobs:
             {
               "attemptNumber": "${{ steps.getNextAttemptNumber.outputs.result }}",
               "maxAttempts": "${{ github.event.inputs.maxAttempts }}",
-              "workflow": "${{ github.workflow }}"
+              "workflow": "${{ github.workflow }}",
+              "tag": "${{ inputs.tag }}",
+              "upload_url": "${{ inputs.upload_url }}"
             }
 
       - name: Abort on unrecoverable upload error
