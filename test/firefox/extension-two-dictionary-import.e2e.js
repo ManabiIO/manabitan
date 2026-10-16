@@ -2034,6 +2034,8 @@ async function hoverLookupOnPage(driver, pageUrl, targetSelector, expectedDictio
     const modifierCandidates = [Key.SHIFT, Key.ALT, Key.CONTROL, null];
     let popupVisible = false;
     let usedModifier = null;
+    /** @type {Record<string, unknown>|null} */
+    let pageHoverState = null;
     for (const modifier of modifierCandidates) {
         if (modifier !== null && !useScriptedHoverMotion) {
             await driver.actions({async: true}).keyDown(modifier).perform();
@@ -2071,7 +2073,7 @@ driver.actions({async: true})
         y: Math.round(geometry.y + Math.max(-geometry.height / 4, Math.min(geometry.height / 4, moveToOffsetY))),
         duration: 220})
     .perform());
-            const pageHoverState = await driver.executeScript(`
+            pageHoverState = await driver.executeScript(`
                 const target = document.querySelector(arguments[0]);
                 if (!(target instanceof HTMLElement)) { return {found: false}; }
                 const point = document.elementFromPoint(arguments[1], arguments[2]);
