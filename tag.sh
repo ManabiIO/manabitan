@@ -19,16 +19,32 @@ fi
 
 echo -e "${YELLOW}Checking if branch is up to date...${NC}"
 
-changed=0
-git remote update origin && git status -uno | grep -q 'Your branch is behind' && changed=1
-if [ "${changed}" = 1 ]; then
-    echo -e "${RED}Please git pull before tagging.${NC}"
+if [[ -n $(git status --porcelain --untracked-files=normal) ]]; then
+    echo -e "${RED}Commit or preserve working changes before tagging.${NC}"
+    exit 1
+fi
+for operation in MERGE_HEAD CHERRY_PICK_HEAD REBASE_HEAD; do
+    if [[ -f $(git rev-parse --git-path "$operation") ]]; then
+        echo -e "${RED}Finish the in-progress Git operation before tagging.${NC}"
+        exit 1
+    fi
+done
+if [[ -d $(git rev-parse --git-path rebase-merge) || -d $(git rev-parse --git-path rebase-apply) ]]; then
+    echo -e "${RED}Finish the in-progress rebase before tagging.${NC}"
+    exit 1
+fi
+git fetch --prune origin
+remote_revision=$(git rev-parse --verify "refs/remotes/origin/${TARGET_BRANCH}")
+if [[ $(git rev-parse HEAD) != "$remote_revision" ]]; then
+    echo -e "${RED}Push or reconcile ${TARGET_BRANCH} with origin before tagging; their commits must match.${NC}"
     exit 1
 fi
 
+release_revision=$(git rev-parse HEAD)
+
 # Ask user to confirm the commit and the tag name
 echo -e "${YELLOW}Current HEAD of ${TARGET_BRANCH} branch:${NC}"
-git log -1 --decorate
+git log -1 --decorate "$release_revision"
 echo
 
 # get the current date in the format YY.MM.DD
@@ -52,7 +68,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-git tag -s "${TAG}"
+git tag -s "${TAG}" "$release_revision"
 
 echo -e -n "${YELLOW}Do you want to push the tag ${TAG} to the remote repository? (y/n): ${NC}"
 read -p "" -n 1 -r
