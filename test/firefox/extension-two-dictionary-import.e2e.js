@@ -2070,10 +2070,11 @@ driver.executeScript(`
                     emit('pointermove', toX, toY);
                 `, targetElement, moveAwayOffsetX, moveToOffsetX, moveToOffsetY, modifier === Key.SHIFT, modifier === Key.ALT, modifier === Key.CONTROL, geometry) :
 driver.actions({async: true})
-    // Use viewport coordinates so Firefox leaves an old popup/target cleanly
-    // before entering the measured glyph. Element-origin offsets can be
-    // interpreted against a different hit box after the popup closes.
-    .move({x: 1, y: 1})
+    // Teleport to a neutral point, then approach from just above this glyph.
+    // A long animated path across the fixture can hover an intervening word,
+    // opening a new popup over the intended target before the pointer arrives.
+    .move({x: 1, y: 1, duration: 0})
+    .move({x: Math.round(geometry.x), y: Math.max(1, Math.round(geometry.y - geometry.height)), duration: 0})
     .pause(50)
     .move({x: Math.round(geometry.x + Math.max(-geometry.width / 4, Math.min(geometry.width / 4, moveToOffsetX))),
         y: Math.round(geometry.y + Math.max(-geometry.height / 4, Math.min(geometry.height / 4, moveToOffsetY))),
