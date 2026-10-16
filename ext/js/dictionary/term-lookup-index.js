@@ -962,18 +962,18 @@ export function findPrefixRows(index, query, field, reverse = false) {
 }
 
 /**
- * Finds expression and reading prefix postings with one key-range search.
+ * Appends expression and reading IDs directly after one key-range search.
+ * The owning record store supplies the chunk base, avoiding per-chunk result
+ * arrays and a second object allocation for every posting.
  * @param {PersistedTermLookupIndex} index
  * @param {Uint8Array} query
- * @param {boolean} reverse
- * @returns {{expression: Array<{row: number, exact: boolean}>, reading: Array<{row: number, exact: boolean}>}}
+ * @param {Array<{id: number, exact: boolean}>} expression
+ * @param {Array<{id: number, exact: boolean}>} reading
+ * @param {number} rowOffset
+ * @param {boolean} [reverse=false]
  */
-export function findPrefixRowMatches(index, query, reverse = false) {
-    /** @type {Array<{row: number, exact: boolean}>} */
-    const expression = [];
-    /** @type {Array<{row: number, exact: boolean}>} */
-    const reading = [];
-    if (query.byteLength === 0) { return {expression, reading}; }
+export function appendPrefixIdMatches(index, query, expression, reading, rowOffset, reverse = false) {
+    if (query.byteLength === 0) { return; }
     if (reverse) {
         ensureReverseIndex(index);
     } else {
@@ -1002,13 +1002,12 @@ export function findPrefixRowMatches(index, query, reverse = false) {
         if (!keyBytesHavePrefix(index.keyBytes, index.keyOffsets, key, query, reverse)) { break; }
         const exact = (index.keyOffsets[key + 1] - index.keyOffsets[key]) === query.byteLength;
         for (let posting = index.expressionPostingOffsets[key]; posting < index.expressionPostingOffsets[key + 1]; ++posting) {
-            expression.push({row: index.expressionPostingRows[posting], exact});
+            expression.push({id: rowOffset + index.expressionPostingRows[posting], exact});
         }
         for (let posting = index.readingPostingOffsets[key]; posting < index.readingPostingOffsets[key + 1]; ++posting) {
-            reading.push({row: index.readingPostingRows[posting], exact});
+            reading.push({id: rowOffset + index.readingPostingRows[posting], exact});
         }
     }
-    return {expression, reading};
 }
 
 /**

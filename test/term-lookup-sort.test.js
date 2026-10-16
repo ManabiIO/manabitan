@@ -4,11 +4,27 @@ import {
     encodePersistedTermLookupIndex,
     findExactRows,
     findPrefixRows,
-    findPrefixRowMatches,
+    appendPrefixIdMatches,
     findSequenceRows,
     parsePersistedTermLookupIndex,
     warmPersistedTermPrefixIndex,
 } from '../ext/js/dictionary/term-lookup-index.js';
+
+/**
+ * @param {import('../ext/js/dictionary/term-lookup-index.js').PersistedTermLookupIndex} index
+ * @param {Uint8Array} query
+ * @param {boolean} [reverse=false]
+ * @returns {{expression: Array<{row: number, exact: boolean}>, reading: Array<{row: number, exact: boolean}>}}
+ */
+function findPrefixRowMatches(index, query, reverse = false) {
+    const expression = [];
+    const reading = [];
+    appendPrefixIdMatches(index, query, expression, reading, 0, reverse);
+    return {
+        expression: expression.map(({id, exact}) => ({row: id, exact})),
+        reading: reading.map(({id, exact}) => ({row: id, exact})),
+    };
+}
 
 /**
  * @param {Uint8Array} a
@@ -110,4 +126,28 @@ for (const reverse of [false, true]) {
 test('Unicode and variable-length prefix relationships retain byte order', () => {
     const encoder = new TextEncoder();
     checkKeys(['a', 'ab', 'abc', '猫', 'ねこ', '食べる', '食べ物', '𠮷野家', '🐈', '\uFEFF猫', '\u0000猫', 'café', 'e\u0301', 'é'].map((value) => encoder.encode(value)));
+});
+
+
+test('prefix orders preserve the highest key IDs in a maximum-key chunk', () => {
+    const encoder = new TextEncoder();
+    const count = 32767;
+    const encoded = encodePersistedTermLookupIndex(Array.from({length: count}, (_, row) => ({
+        expressionBytes: encoder.encode(`expression-${String(row)}`),
+        readingBytes: encoder.encode(`reading-${String(row)}`),
+        sequence: null,
+    })));
+    const before = new Uint8Array(encoded);
+    const index = parsePersistedTermLookupIndex(encoded);
+    const query = encoder.encode(`expression-${String(count - 1)}`);
+    expect(findPrefixRows(index, query, 'expression')).toEqual([{row: count - 1, exact: true}]);
+    expect(findPrefixRows(index, encoder.encode('reading-32766'), 'reading')).toEqual([{row: count - 1, exact: true}]);
+    expect(findPrefixRows(index, encoder.encode('32766'), 'expression', true)).toEqual([{row: count - 1, exact: false}]);
+    const expectedIds = Array.from({length: count * 2}, (_, key) => key);
+    for (const order of [index.keyOrder, index.keyReverseOrder]) {
+        expect(order).not.toBeNull();
+        expect([...(order ?? [])].sort((a, b) => a - b)).toEqual(expectedIds);
+        expect(order?.byteLength).toBe(expectedIds.length * 4);
+    }
+    expect(encoded).toEqual(before);
 });

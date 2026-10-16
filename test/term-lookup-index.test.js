@@ -15,7 +15,7 @@ import {
     encodePersistedTermLookupIndexFromValidatedPreinternedPlan,
     encodePersistedTermLookupIndex,
     findExactRows,
-    findPrefixRowMatches,
+    appendPrefixIdMatches,
     findPrefixRows,
     findSequenceRows,
     getPersistedTermKeyBytes,
@@ -25,6 +25,22 @@ import {
     rebuildPersistedTermLookupIndexFromBase,
     splitPersistedTermLookupIndex,
 } from '../ext/js/dictionary/term-lookup-index.js';
+
+/**
+ * @param {import('../ext/js/dictionary/term-lookup-index.js').PersistedTermLookupIndex} index
+ * @param {Uint8Array} query
+ * @param {boolean} [reverse=false]
+ * @returns {{expression: Array<{row: number, exact: boolean}>, reading: Array<{row: number, exact: boolean}>}}
+ */
+function findPrefixRowMatches(index, query, reverse = false) {
+    const expression = [];
+    const reading = [];
+    appendPrefixIdMatches(index, query, expression, reading, 0, reverse);
+    return {
+        expression: expression.map(({id, exact}) => ({row: id, exact})),
+        reading: reading.map(({id, exact}) => ({row: id, exact})),
+    };
+}
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -717,4 +733,32 @@ describe('wide persisted term sequences', () => {
             }])).toThrow(RangeError);
         },
     );
+});
+
+
+test('prefix ID appending preserves prior results, offsets, duplicates and query isolation', () => {
+    const index = createIndex([
+        {expression: '食べる', reading: 'たべる'},
+        {expression: '食べ物', reading: 'たべもの'},
+        {expression: '食べる', reading: 'たべる'},
+    ]);
+    const expression = [{id: 99, exact: true}];
+    const reading = [{id: 98, exact: false}];
+    appendPrefixIdMatches(index, bytes('食べ'), expression, reading, 65536);
+    expect(expression).toEqual([
+        {id: 99, exact: true},
+        {id: 65536, exact: false},
+        {id: 65538, exact: false},
+        {id: 65537, exact: false},
+    ]);
+    expect(reading).toEqual([{id: 98, exact: false}]);
+    appendPrefixIdMatches(index, bytes(''), expression, reading, 65536);
+    appendPrefixIdMatches(index, bytes('missing'), expression, reading, 65536);
+    expect(expression).toHaveLength(4);
+    appendPrefixIdMatches(index, bytes('たべる'), expression, reading, 70000);
+    expect(reading).toEqual([
+        {id: 98, exact: false},
+        {id: 70000, exact: true},
+        {id: 70002, exact: true},
+    ]);
 });
