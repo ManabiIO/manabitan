@@ -2071,6 +2071,15 @@ driver.actions({async: true})
         y: Math.round(geometry.y + Math.max(-geometry.height / 4, Math.min(geometry.height / 4, moveToOffsetY))),
         duration: 220})
     .perform());
+            const pageHoverState = await driver.executeScript(`
+                const target = document.querySelector(arguments[0]);
+                if (!(target instanceof HTMLElement)) { return {found: false}; }
+                const point = document.elementFromPoint(arguments[1], arguments[2]);
+                return {found: true, targetHovered: target.matches(':hover'), hitTarget: point === target || target.contains(point),
+                    hitTag: point instanceof Element ? point.tagName : '',
+                    hitText: String(point?.textContent || '').trim().slice(0, 80),
+                    targetRect: (() => { const r = target.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; })()};
+            `, targetSelector, Math.round(geometry.x), Math.round(geometry.y));
             if (pauseAfterMoveMs > 0) {
                 await driver.sleep(pauseAfterMoveMs);
             }
@@ -2116,15 +2125,16 @@ driver.actions({async: true})
         let hoverSnapshot = null;
         await driver.wait(async () => {
             hoverSnapshot = await driver.executeScript(`
-            const [expectedText, names, selector] = arguments;
+            const [expectedText, names, selector, pageState] = arguments;
             const query = new URL(location.href).searchParams.get('query') || '';
             const entries = document.querySelector('#dictionary-entries');
             const text = entries instanceof HTMLElement ? entries.innerText : '';
             return {ready: query.startsWith(expectedText) && names.every((name) => text.includes(name)),
                 targetSelector: selector,
+                pageHoverState: pageState,
                 query, expectedText, entries: text.slice(0, 300), location: location.href,
                 body: document.body.innerText.slice(0, 300), sentence: history.state?.state?.sentence};
-        `, geometry.text, expectedDictionaryNames, targetSelector);
+        `, geometry.text, expectedDictionaryNames, targetSelector, pageHoverState);
             return hoverSnapshot?.ready === true;
         }, popupTimeoutMs, () => `Expected the current hover target and rendered dictionary results: ${JSON.stringify(hoverSnapshot)}`);
         const popupText = String(await (await driver.findElement(By.css('body'))).getText());
