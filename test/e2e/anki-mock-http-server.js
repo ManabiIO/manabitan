@@ -123,6 +123,10 @@ export async function startAnkiMockHttpServer(mockState) {
                     }
                     resolve(void 0);
                 });
+                // A failed browser may leave an unfinished request body open.
+                // Stop active connections after closing admission so shutdown
+                // cannot wait forever for that client.
+                server.closeAllConnections();
             });
         },
     };
