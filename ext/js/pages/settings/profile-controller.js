@@ -332,7 +332,6 @@ export class ProfileController {
         // Get indices
         let profileCurrentNew = this._profileCurrent;
         const settingsProfileIndex = this._settingsController.profileIndex;
-        const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
         const remainingProfileCount = this._profiles.length - 1;
 
         // Construct settings modifications

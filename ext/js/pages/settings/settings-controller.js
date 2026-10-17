@@ -68,13 +68,14 @@ export class SettingsController extends EventDispatcher {
         return this._profileIndex;
     }
 
-    get profileIndexChangeGeneration() {
-        return this._profileIndexChangeGeneration;
-    }
-
     set profileIndex(value) {
         if (this._profileIndex === value) { return; }
         this._setProfileIndex(value, true);
+    }
+
+    /** @type {number} */
+    get profileIndexChangeGeneration() {
+        return this._profileIndexChangeGeneration;
     }
 
     /** */

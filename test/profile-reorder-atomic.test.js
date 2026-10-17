@@ -46,7 +46,12 @@ function createHarness() {
         _profileIndex: 0,
         profileIndexChangeGeneration: 0,
         get profileIndex() { return this._profileIndex; },
-        set profileIndex(value) { if (this._profileIndex !== value) { this._profileIndex = value; this.profileIndexChangeGeneration++; } },
+        set profileIndex(value) {
+            if (this._profileIndex !== value) {
+                this._profileIndex = value;
+                this.profileIndexChangeGeneration++;
+            }
+        },
         setGlobalSetting(/** @type {string} */ path, /** @type {unknown} */ value) {
             return backend._modifySettings([{action: 'set', path, value, scope: 'global', optionsContext: null}], 'settings');
         },
