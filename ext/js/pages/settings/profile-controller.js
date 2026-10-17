@@ -222,8 +222,8 @@ export class ProfileController {
         if (profile === null) { return; }
 
         const generation = ++this._defaultProfileWriteGeneration;
-        const viewedProfileIndex = this._settingsController.profileIndex;
-        const viewedProfileId = this._profiles[viewedProfileIndex]?.id;
+        const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
+        const viewedProfileId = this._settingsController.getOptionsContext().profileId;
         const profileId = profile.id;
         // Older options notifications may still be fetching a snapshot. Ignore
         // them so they cannot overwrite the result of this newer user intent.
@@ -255,8 +255,11 @@ export class ProfileController {
         // Keep a profile the user selected while the write was pending.
         const currentProfileIndex = this._profiles.findIndex((item) => item.id === profileId);
         if (currentProfileIndex < 0) { return; }
-        if (this._profiles[this._settingsController.profileIndex]?.id === viewedProfileId) {
-            this._settingsController.profileIndex = currentProfileIndex;
+        if (
+            this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration &&
+            this._settingsController.getOptionsContext().profileId === viewedProfileId
+        ) {
+            this._settingsController.setProfileSelection(currentProfileIndex, this._profiles[currentProfileIndex]?.id ?? null);
         }
         await this._onOptionsChanged();
     }
@@ -381,9 +384,8 @@ export class ProfileController {
 
         // Get indices
         let profileCurrentNew = this._profileCurrent;
-        const settingsProfileIndex = this._settingsController.profileIndex;
         const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
-        const viewedProfileId = this._profiles[settingsProfileIndex]?.id;
+        const viewedProfileId = this._settingsController.getOptionsContext().profileId;
         const profileId = profile.id;
 
         // Construct settings modifications
@@ -444,12 +446,8 @@ export class ProfileController {
         // when its numeric value is unchanged because the profile identity moved.
         if (this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration) {
             const viewedProfileIndexNew = this._profiles.findIndex(({id}) => id === viewedProfileId);
-            const nextSettingsProfileIndex = viewedProfileIndexNew >= 0 ? viewedProfileIndexNew : profileCurrentNew;
-            if (nextSettingsProfileIndex !== settingsProfileIndex) {
-                this._settingsController.profileIndex = nextSettingsProfileIndex;
-            } else {
-                this._settingsController.refreshProfileIndex();
-            }
+            const nextSettingsProfileIndex = typeof viewedProfileId === 'string' && viewedProfileIndexNew >= 0 ? viewedProfileIndexNew : profileCurrentNew;
+            this._settingsController.setProfileSelection(nextSettingsProfileIndex, this._profiles[nextSettingsProfileIndex]?.id ?? null);
         }
     }
 
@@ -463,9 +461,8 @@ export class ProfileController {
         if (profile1 === null || profile2 === null || index1 === index2) { return; }
 
         // Get swapped indices
-        const settingsProfileIndex = this._settingsController.profileIndex;
         const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
-        const viewedProfileId = this._profiles[settingsProfileIndex]?.id;
+        const viewedProfileId = this._settingsController.getOptionsContext().profileId;
 
         // Construct settings modifications
         /** @type {import('settings-modifications').Modification[]} */
@@ -511,8 +508,8 @@ export class ProfileController {
 
         // Update profile index
         const viewedProfileIndexNew = this._profiles.findIndex(({id}) => id === viewedProfileId);
-        if (viewedProfileIndexNew >= 0 && settingsProfileIndex !== viewedProfileIndexNew && this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration) {
-            this._settingsController.profileIndex = viewedProfileIndexNew;
+        if (viewedProfileIndexNew >= 0 && this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration) {
+            this._settingsController.setProfileSelection(viewedProfileIndexNew, viewedProfileId ?? null);
         }
     }
 
@@ -621,7 +618,7 @@ export class ProfileController {
         // Viewing a non-default profile in Settings is intentional. Only
         // recover an index that is no longer valid after profiles are deleted.
         if (settingsProfileIndex < 0 || settingsProfileIndex >= profiles.length) {
-            this._settingsController.profileIndex = profileCurrent;
+            this._settingsController.setProfileSelection(profileCurrent, profiles[profileCurrent]?.id ?? null);
             settingsProfileIndex = profileCurrent;
         }
 
@@ -675,7 +672,11 @@ export class ProfileController {
 
     /** */
     _onAdd() {
-        void this.duplicateProfile(this._settingsController.profileIndex);
+        const viewedProfileId = this._settingsController.getOptionsContext().profileId;
+        if (typeof viewedProfileId !== 'string' || viewedProfileId.length === 0) { return; }
+        const matches = this._profiles.flatMap((profile, index) => (profile.id === viewedProfileId ? [index] : []));
+        if (matches.length !== 1) { return; }
+        void this.duplicateProfile(matches[0]);
     }
 
     /** */
