@@ -20,6 +20,8 @@ import type * as Settings from './settings';
 export type OptionsScope = {
     scope: OptionsScopeType;
     optionsContext: Settings.OptionsContext | null;
+    /** Stable Settings-page owner for profile-scoped reads and writes. */
+    profileId?: string | null;
 };
 
 export type OptionsScopeType = 'profile' | 'global';

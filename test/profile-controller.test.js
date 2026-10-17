@@ -841,6 +841,8 @@ describe('ProfileController displayed profile ownership', () => {
         const controller = createControllerForInternalTests();
         const settingsController = {
             profileIndex: viewed,
+            getOptionsContext: () => ({index: viewed, profileId: `profile-${viewed}`}),
+            setProfileSelection(/** @type {number} */ index, /** @type {string|null} */ profileId) { this.profileIndex = index; Reflect.set(this, '_viewedProfileId', profileId); },
             getOptionsFull: vi.fn().mockResolvedValue({
                 profiles: [
                     {id: 'profile-a', name: 'Default'},
@@ -900,6 +902,12 @@ describe('ProfileController default profile write failures', () => {
     function configure(controller, settingsController, activeSelect) {
         Reflect.set(controller, '_settingsController', settingsController);
         Reflect.set(controller, '_profiles', [{id: 'a', name: 'First'}, {id: 'b', name: 'Second'}, {id: 'c', name: 'Third'}]);
+        settingsController._viewedProfileId ??= Reflect.get(controller, '_profiles')[settingsController.profileIndex]?.id ?? null;
+        settingsController.getOptionsContext ??= () => ({index: settingsController.profileIndex, profileId: settingsController._viewedProfileId});
+        settingsController.setProfileSelection ??= (/** @type {number} */ index, /** @type {string|null} */ profileId) => {
+            settingsController.profileIndex = index;
+            Reflect.set(settingsController, '_viewedProfileId', profileId);
+        };
         Reflect.set(controller, '_profileCurrent', 0);
         Reflect.set(controller, '_profileActiveSelect', activeSelect);
         Reflect.set(controller, '_profileEntryList', []);
@@ -1017,13 +1025,14 @@ describe('ProfileController default profile write failures', () => {
         const write = deferred();
         const settingsController = {
             profileIndex: 0,
+            setProfileSelection(/** @type {number} */ index, /** @type {string|null} */ profileId) { this.profileIndex = index; Reflect.set(this, '_viewedProfileId', profileId); },
             modifyGlobalSettings: vi.fn(() => write.promise),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: 0}),
         };
         configure(controller, settingsController, {value: '0'});
 
         const save = controller.setDefaultProfile(1);
-        settingsController.profileIndex = 2;
+        settingsController.setProfileSelection(2, 'c');
         write.resolve([{error: {name: 'Error', message: 'write rejected', stack: ''}}]);
         await expect(save).rejects.toThrow('write rejected');
         expect(settingsController.profileIndex).toBe(2);
@@ -1034,13 +1043,14 @@ describe('ProfileController default profile write failures', () => {
         const write = deferred();
         const settingsController = {
             profileIndex: 0,
+            setProfileSelection(/** @type {number} */ index, /** @type {string|null} */ profileId) { this.profileIndex = index; Reflect.set(this, '_viewedProfileId', profileId); },
             modifyGlobalSettings: vi.fn(() => write.promise),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: 1}),
         };
         configure(controller, settingsController, {value: '0'});
 
         const save = controller.setDefaultProfile(1);
-        settingsController.profileIndex = 2;
+        settingsController.setProfileSelection(2, 'c');
         write.resolve([{result: true}]);
         await save;
         expect(settingsController.profileIndex).toBe(2);
@@ -1065,7 +1075,17 @@ describe('ProfileController profile deletion indices', () => {
             calls.push('persist');
             return targets.map(() => ({result: true}));
         });
-        const settingsController = {profileIndex: viewed, refreshProfileIndex, modifyGlobalSettings};
+        const settingsController = {
+            profileIndex: viewed,
+            getOptionsContext: () => ({index: viewed, profileId: `p${viewed}`}),
+            setProfileSelection(/** @type {number} */ index, /** @type {string|null} */ profileId) {
+                this.profileIndex = index;
+                Reflect.set(this, '_viewedProfileId', profileId);
+                refreshProfileIndex();
+            },
+            refreshProfileIndex,
+            modifyGlobalSettings,
+        };
         Reflect.set(controller, '_profiles', profiles);
         Reflect.set(controller, '_profileCurrent', active);
         Reflect.set(controller, '_profileEntryList', []);
@@ -1080,11 +1100,45 @@ describe('ProfileController profile deletion indices', () => {
         expect(Reflect.get(controller, '_profiles')).toHaveLength(count - 1);
         expect(modifyGlobalSettings).toHaveBeenCalledOnce();
         expect(calls[0]).toBe('persist');
-        expect(refreshProfileIndex).toHaveBeenCalledTimes(nextViewed === viewed ? 1 : 0);
+        expect(refreshProfileIndex).toHaveBeenCalledOnce();
         expect(modifyGlobalSettings.mock.calls[0][0]).toStrictEqual([{action: 'deleteProfile', profileId: `p${deleted}`}]);
     });
 });
 
+
+test('ProfileController Add duplicates the selected ID while its profile-list refresh is pending', async () => {
+    const controller = createControllerForInternalTests();
+    const refresh = deferred();
+    const settingsController = {
+        profileIndex: 1,
+        getOptionsContext: () => ({index: 1, profileId: 'a'}),
+        getOptionsFull: () => refresh.promise,
+    };
+    const profiles = [{id: 'a', name: 'A'}, {id: 'b', name: 'B'}];
+    const duplicateProfile = vi.fn();
+    Reflect.set(controller, '_settingsController', settingsController);
+    Reflect.set(controller, '_profiles', profiles);
+    Reflect.set(controller, '_profileCurrent', 0);
+    Reflect.set(controller, '_profileActiveSelect', {value: ''});
+    Reflect.set(controller, '_profileConditionsUI', {cleanup: vi.fn(), prepare: vi.fn().mockResolvedValue(void 0)});
+    Reflect.set(controller, '_profileConditionsProfileId', null);
+    Reflect.set(controller, '_profileConditionsIndex', null);
+    Reflect.set(controller, '_profileEntryList', []);
+    Reflect.set(controller, '_profileEntriesSupported', false);
+    Reflect.set(controller, '_updateProfileSelectOptions', vi.fn());
+    Reflect.set(controller, 'duplicateProfile', duplicateProfile);
+
+    const optionsRefresh = controller._onOptionsChanged();
+    controller._onAdd();
+    expect(duplicateProfile).toHaveBeenCalledWith(0);
+    expect(Reflect.get(controller, '_profiles')).toBe(profiles);
+
+    refresh.resolve({
+        profileCurrent: 0,
+        profiles: [{id: 'b', name: 'B'}, {id: 'a', name: 'A'}],
+    });
+    await optionsRefresh;
+});
 
 describe('ProfileController deletion write failures', () => {
     test('a per-target rejection refreshes persisted state without advancing the settings index', async () => {
@@ -1093,6 +1147,7 @@ describe('ProfileController deletion write failures', () => {
         const refreshProfileIndex = vi.fn();
         const settingsController = {
             profileIndex: 1,
+            getOptionsContext: () => ({index: 1, profileId: 'b'}),
             refresh,
             refreshProfileIndex,
             modifyGlobalSettings: vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'delete rejected', stack: ''}}]),

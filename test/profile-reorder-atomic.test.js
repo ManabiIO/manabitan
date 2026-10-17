@@ -53,13 +53,21 @@ function createHarness() {
 
     const settingsController = {
         _profileIndex: 0,
+        _profileId: 'a',
         profileIndexChangeGeneration: 0,
         get profileIndex() { return this._profileIndex; },
         set profileIndex(value) {
             if (this._profileIndex !== value) {
                 this._profileIndex = value;
+                this._profileId = Reflect.get(controller, '_profiles')[value]?.id ?? null;
                 this.profileIndexChangeGeneration++;
             }
+        },
+        getOptionsContext() { return {index: this._profileIndex, profileId: this._profileId}; },
+        setProfileSelection(/** @type {number} */ index, /** @type {string} */ profileId) {
+            if (this._profileIndex !== index || this._profileId !== profileId) { this.profileIndexChangeGeneration++; }
+            this._profileIndex = index;
+            this._profileId = profileId;
         },
         setGlobalSetting(/** @type {string} */ path, /** @type {unknown} */ value) {
             return backend._modifySettings([{action: 'set', path, value, scope: 'global', optionsContext: null}], 'settings');
@@ -164,6 +172,23 @@ test('default profile identity survives a queued reorder while its save is pendi
 
     const {profileCurrent, profiles} = /** @type {{profileCurrent: number, profiles: {id: string}[]}} */ (Reflect.get(backend, '_options'));
     expect(profiles[profileCurrent]?.id).toBe('b');
+});
+
+test('default profile save preserves an explicit A to C to A selection round trip', async () => {
+    const {backend, controller, saves, settingsController} = createHarness();
+    const save = deferred();
+    saves.push(save);
+
+    const setDefault = controller.setDefaultProfile(1);
+    await flush();
+    settingsController.profileIndex = 2;
+    settingsController.profileIndex = 0;
+    save.resolve();
+    await setDefault;
+
+    const {profileCurrent, profiles} = /** @type {{profileCurrent: number, profiles: {id: string}[]}} */ (Reflect.get(backend, '_options'));
+    expect(profiles[profileCurrent]?.id).toBe('b');
+    expect(settingsController.getOptionsContext()).toMatchObject({index: 0, profileId: 'a'});
 });
 
 test('profile reorder preserves a newer explicit viewed profile choice', async () => {

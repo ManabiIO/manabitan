@@ -50,6 +50,24 @@ function profileOptions(marker) {
 }
 
 /**
+ * @param {number} profileIndex
+ * @returns {SettingsController}
+ */
+function createSettingsController(profileIndex) {
+    const optionsFull = {
+        profileCurrent: 0,
+        profiles: Array.from({length: 3}, (_, index) => ({id: `profile-${index}`, name: `Profile ${index}`, options: {}, conditionGroups: []})),
+    };
+    return Object.assign(Object.create(SettingsController.prototype), {
+        _profileIndex: profileIndex,
+        _profileId: `profile-${profileIndex}`,
+        _profileIndexChangeGeneration: 0,
+        _preparedOptionsFull: optionsFull,
+        _application: {api: {optionsGetFull: async () => optionsFull}},
+    });
+}
+
+/**
  * @param {object} prototype
  * @param {string} method
  * @param {unknown[]} [args]
@@ -79,8 +97,7 @@ async function expectDirectRefreshDropsStaleProfile(prototype, method, args = []
 }
 
 test('SettingsController never emits an old-profile options snapshot after the profile changes', async () => {
-    const controller = /** @type {SettingsController} */ (Object.create(SettingsController.prototype));
-    Reflect.set(controller, '_profileIndex', 0);
+    const controller = /** @type {SettingsController} */ (createSettingsController(0));
     /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
     const pending = deferred();
     Reflect.set(controller, 'getOptions', () => pending.promise);
@@ -90,6 +107,7 @@ test('SettingsController never emits an old-profile options snapshot after the p
     const refresh = controller._onOptionsUpdatedInternal(false);
     await flush();
     Reflect.set(controller, '_profileIndex', 1);
+    Reflect.set(controller, '_profileIndexChangeGeneration', 1);
     pending.resolve(profileOptions('profile-0'));
     await refresh;
 
@@ -98,15 +116,15 @@ test('SettingsController never emits an old-profile options snapshot after the p
 
 
 test('SettingsController applies only the latest overlapping refresh for one profile', async () => {
-    const controller = /** @type {SettingsController} */ (Object.create(SettingsController.prototype));
-    Reflect.set(controller, '_profileIndex', 0);
-    /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
+    const controller = /** @type {SettingsController} */ (createSettingsController(0));
+    /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
     const older = deferred();
-    /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
+    /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
     const newer = deferred();
-    const getOptions = vi.fn()
+    Reflect.set(controller.application.api, 'optionsGetFull', vi.fn()
         .mockImplementationOnce(() => older.promise)
-        .mockImplementationOnce(() => newer.promise);
+        .mockImplementationOnce(() => newer.promise));
+    const getOptions = vi.fn(async () => profileOptions('newer'));
     Reflect.set(controller, 'getOptions', getOptions);
     const trigger = vi.fn();
     Reflect.set(controller, 'trigger', trigger);
@@ -115,30 +133,29 @@ test('SettingsController applies only the latest overlapping refresh for one pro
     const second = controller._onOptionsUpdatedInternal(false);
     await flush();
 
-    const newerOptions = profileOptions('newer');
-    newer.resolve(newerOptions);
+    const newerOptions = await getOptions();
+    newer.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({profileCurrent: 0, profiles: [{id: 'profile-0', options: {}, conditionGroups: []}]})));
     await second;
-    older.resolve(profileOptions('older'));
+    older.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({profileCurrent: 0, profiles: [{id: 'profile-0', options: {}, conditionGroups: []}]})));
     await first;
 
     expect(trigger).toHaveBeenCalledOnce();
     expect(trigger).toHaveBeenCalledWith('optionsChanged', {
         options: newerOptions,
-        optionsContext: {index: 0},
+        optionsContext: {index: 0, profileId: 'profile-0'},
     });
 });
 
 test('an older same-profile refresh failure cannot reset profile zero after a newer refresh succeeds', async () => {
-    const controller = /** @type {SettingsController} */ (Object.create(SettingsController.prototype));
-    Reflect.set(controller, '_profileIndex', 2);
-    /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
+    const controller = /** @type {SettingsController} */ (createSettingsController(2));
+    /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
     const older = deferred();
-    /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
+    /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
     const newer = deferred();
-    const getOptions = vi.fn()
+    Reflect.set(controller.application.api, 'optionsGetFull', vi.fn()
         .mockImplementationOnce(() => older.promise)
-        .mockImplementationOnce(() => newer.promise);
-    Reflect.set(controller, 'getOptions', getOptions);
+        .mockImplementationOnce(() => newer.promise));
+    Reflect.set(controller, 'getOptions', async () => profileOptions('newer'));
     Reflect.set(controller, 'trigger', vi.fn());
     const setProfileIndex = vi.fn();
     Reflect.set(controller, '_setProfileIndex', setProfileIndex);
@@ -147,7 +164,10 @@ test('an older same-profile refresh failure cannot reset profile zero after a ne
     const second = controller._onOptionsUpdatedInternal(true);
     await flush();
 
-    newer.resolve(profileOptions('newer'));
+    newer.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+        profileCurrent: 0,
+        profiles: Array.from({length: 3}, (_, index) => ({id: `profile-${index}`, options: {}, conditionGroups: []})),
+    })));
     await second;
     older.reject(new Error('stale failure'));
     await first;
@@ -157,8 +177,7 @@ test('an older same-profile refresh failure cannot reset profile zero after a ne
 });
 
 test('SettingsController ignores a stale old-profile refresh failure after the profile changes', async () => {
-    const controller = /** @type {SettingsController} */ (Object.create(SettingsController.prototype));
-    Reflect.set(controller, '_profileIndex', 1);
+    const controller = /** @type {SettingsController} */ (createSettingsController(1));
     /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
     const pending = deferred();
     Reflect.set(controller, 'getOptions', () => pending.promise);
@@ -168,6 +187,7 @@ test('SettingsController ignores a stale old-profile refresh failure after the p
     const refresh = controller._onOptionsUpdatedInternal(true);
     await flush();
     Reflect.set(controller, '_profileIndex', 2);
+    Reflect.set(controller, '_profileIndexChangeGeneration', 1);
     pending.reject(new Error('old profile unavailable'));
     await refresh;
 
@@ -176,21 +196,17 @@ test('SettingsController ignores a stale old-profile refresh failure after the p
 });
 
 test('SettingsController still falls back to profile zero when the current profile refresh fails', async () => {
-    const controller = /** @type {SettingsController} */ (Object.create(SettingsController.prototype));
-    Reflect.set(controller, '_profileIndex', 2);
+    const controller = /** @type {SettingsController} */ (createSettingsController(2));
     Reflect.set(controller, 'getOptions', async () => { throw new Error('current profile unavailable'); });
-    const setProfileIndex = vi.fn();
-    Reflect.set(controller, '_setProfileIndex', setProfileIndex);
-
+    Reflect.set(controller, 'trigger', vi.fn());
     await controller._onOptionsUpdatedInternal(true);
 
-    expect(setProfileIndex).toHaveBeenCalledOnce();
-    expect(setProfileIndex).toHaveBeenCalledWith(0, false);
+    expect(Reflect.get(controller, '_profileIndex')).toBe(0);
+    expect(Reflect.get(controller, '_profileId')).toBe('profile-0');
 });
 
 test('SettingsController still emits a stable current-profile options snapshot', async () => {
-    const controller = /** @type {SettingsController} */ (Object.create(SettingsController.prototype));
-    Reflect.set(controller, '_profileIndex', 2);
+    const controller = /** @type {SettingsController} */ (createSettingsController(2));
     const options = profileOptions('profile-2');
     Reflect.set(controller, 'getOptions', async () => options);
     const trigger = vi.fn();
@@ -199,7 +215,7 @@ test('SettingsController still emits a stable current-profile options snapshot',
     await controller._onOptionsUpdatedInternal(false);
 
     expect(trigger).toHaveBeenCalledOnce();
-    expect(trigger).toHaveBeenCalledWith('optionsChanged', {options, optionsContext: {index: 2}});
+    expect(trigger).toHaveBeenCalledWith('optionsChanged', {options, optionsContext: {index: 2, profileId: 'profile-2'}});
 });
 
 /** @type {[string, object, string, unknown[]][]} */
