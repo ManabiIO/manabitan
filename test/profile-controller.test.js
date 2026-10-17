@@ -63,7 +63,7 @@ describe('ProfileController profile conditions modal', () => {
         await controller.openProfileConditionsModal(0);
 
         expect(cleanup).toHaveBeenCalledOnce();
-        expect(prepare).toHaveBeenCalledWith(0);
+        expect(prepare).toHaveBeenCalledWith(0, 'profile-0');
         expect(profileConditionsProfileName.textContent).toBe('Default profile');
         expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(0);
         expect(setVisible).toHaveBeenCalledWith(true);
@@ -76,7 +76,7 @@ describe('ProfileController profile conditions modal', () => {
         const prepare = vi.fn().mockRejectedValue(new Error('prepare failed'));
         const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
         const profileConditionsProfileName = {textContent: 'Old profile'};
-        Reflect.set(controller, '_profiles', [{name: 'Default profile'}]);
+        Reflect.set(controller, '_profiles', [{id: 'profile-0', name: 'Default profile'}]);
         Reflect.set(controller, '_profileConditionsModal', {setVisible});
         Reflect.set(controller, '_profileConditionsUI', {cleanup, prepare});
         Reflect.set(controller, '_profileConditionsProfileName', profileConditionsProfileName);
@@ -85,7 +85,7 @@ describe('ProfileController profile conditions modal', () => {
         await expect(controller.openProfileConditionsModal(0)).resolves.toBeUndefined();
 
         expect(cleanup).toHaveBeenCalledOnce();
-        expect(prepare).toHaveBeenCalledWith(0);
+        expect(prepare).toHaveBeenCalledWith(0, 'profile-0');
         expect(profileConditionsProfileName.textContent).toBe('Old profile');
         expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(7);
         expect(setVisible).not.toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('ProfileController profile conditions modal', () => {
         Reflect.set(controller, '_profileActiveSelect', {value: ''});
         Reflect.set(controller, '_updateProfileSelectOptions', vi.fn());
         Reflect.set(controller, 'setDefaultProfile', vi.fn());
-        Reflect.set(controller, '_getProfile', vi.fn((index) => ({name: index === 0 ? 'First' : 'Second'})));
+        Reflect.set(controller, '_getProfile', vi.fn((index) => ({id: `profile-${index}`, name: index === 0 ? 'First' : 'Second'})));
 
         const onOptionsChanged = /** @type {(this: ProfileController) => Promise<void>} */ (
             Reflect.get(ProfileController.prototype, '_onOptionsChanged')
@@ -124,7 +124,7 @@ describe('ProfileController profile conditions modal', () => {
         await onOptionsChanged.call(controller);
 
         expect(cleanup).toHaveBeenCalledOnce();
-        expect(prepare).toHaveBeenCalledWith(0);
+        expect(prepare).toHaveBeenCalledWith(0, 'profile-0');
         expect(Reflect.get(controller, '_updateProfileSelectOptions')).toHaveBeenCalledOnce();
         expect(Reflect.get(controller, 'setDefaultProfile')).not.toHaveBeenCalled();
         expect(Reflect.get(controller, '_profileActiveSelect').value).toBe('1');
@@ -732,21 +732,21 @@ describe('ProfileConditionsUI prepare ownership', () => {
         Reflect.set(ui, '_eventListeners', {addEventListener});
         Reflect.set(ui, '_addConditionGroupButton', {});
 
-        const older = ui.prepare(0);
-        const newer = ui.prepare(1);
+        const older = ui.prepare(0, 'profile-a');
+        const newer = ui.prepare(1, 'profile-b');
         await flush();
 
         second.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
             profiles: [
-                {conditionGroups: [{name: 'old'}]},
-                {conditionGroups: [{name: 'new'}]},
+                {id: 'profile-a', conditionGroups: [{name: 'old'}]},
+                {id: 'profile-b', conditionGroups: [{name: 'new'}]},
             ],
         })));
         await newer;
         first.resolve(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({
             profiles: [
-                {conditionGroups: [{name: 'stale'}]},
-                {conditionGroups: []},
+                {id: 'profile-a', conditionGroups: [{name: 'stale'}]},
+                {id: 'profile-b', conditionGroups: []},
             ],
         })));
         await older;
@@ -794,7 +794,7 @@ describe('ProfileController condition profile identity', () => {
         expect(Reflect.get(controller, '_profileConditionsIndex')).toBe(1);
         expect(Reflect.get(controller, '_profileConditionsProfileId')).toBe('profile-a');
         expect(profileName.textContent).toBe('First');
-        expect(prepare).toHaveBeenCalledWith(1);
+        expect(prepare).toHaveBeenCalledWith(1, 'profile-a');
         expect(setVisible).not.toHaveBeenCalled();
     });
 
@@ -873,8 +873,24 @@ describe('ProfileController displayed profile ownership', () => {
         expect(setDefaultProfile).not.toHaveBeenCalled();
         expect(cleanup).toHaveBeenCalledOnce();
         expect(prepare).toHaveBeenCalledOnce();
-        expect(prepare).toHaveBeenCalledWith(expected);
+        expect(prepare).toHaveBeenCalledWith(expected, `profile-${expected === 0 ? 'a' : 'b'}`);
     });
+});
+
+test('condition group count events resolve the displayed entry by profile ID', () => {
+    const controller = /** @type {ProfileController} */ (Object.create(ProfileController.prototype));
+    const first = {setConditionGroupsCount: vi.fn()};
+    const second = {setConditionGroupsCount: vi.fn()};
+    Reflect.set(controller, '_profiles', [{id: 'profile-b'}, {id: 'profile-a'}]);
+    Reflect.set(controller, '_profileEntryList', [first, second]);
+
+    const handler = /** @type {(this: ProfileController, event: {count: number, profileIndex: number, profileId: string}) => void} */ (
+        Reflect.get(ProfileController.prototype, '_onConditionGroupCountChanged')
+    );
+    handler.call(controller, {count: 4, profileIndex: 0, profileId: 'profile-a'});
+
+    expect(first.setConditionGroupsCount).not.toHaveBeenCalled();
+    expect(second.setConditionGroupsCount).toHaveBeenCalledWith(4);
 });
 
 describe('ProfileController default profile write failures', () => {

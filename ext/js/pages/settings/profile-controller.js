@@ -579,7 +579,7 @@ export class ProfileController {
         this._profileConditionsOpenToken = token;
         try {
             this._profileConditionsUI.cleanup();
-            await this._profileConditionsUI.prepare(profileIndex);
+            await this._profileConditionsUI.prepare(profileIndex, profile.id);
             if (
                 this._profileConditionsOpenToken !== token ||
                 this._profiles.indexOf(profile) !== profileIndex
@@ -645,7 +645,7 @@ export class ProfileController {
             if (this._profileConditionsProfileName !== null) {
                 this._profileConditionsProfileName.textContent = conditionsProfile.name;
             }
-            void this._profileConditionsUI.prepare(conditionsProfileIndex);
+            void this._profileConditionsUI.prepare(conditionsProfileIndex, conditionsProfile.id);
         }
 
         // Update profile entries
@@ -721,10 +721,12 @@ export class ProfileController {
     /**
      * @param {import('profile-conditions-ui').EventArgument<'conditionGroupCountChanged'>} details
      */
-    _onConditionGroupCountChanged({count, profileIndex}) {
-        if (profileIndex >= 0 && profileIndex < this._profileEntryList.length) {
-            const profileEntry = this._profileEntryList[profileIndex];
-            profileEntry.setConditionGroupsCount(count);
+    _onConditionGroupCountChanged({count, profileId}) {
+        const matchingProfiles = this._profiles.filter((profile) => profile.id === profileId);
+        if (matchingProfiles.length !== 1) { return; }
+        const resolvedIndex = this._profiles.indexOf(matchingProfiles[0]);
+        if (resolvedIndex >= 0 && resolvedIndex < this._profileEntryList.length) {
+            this._profileEntryList[resolvedIndex].setConditionGroupsCount(count);
         }
     }
 
