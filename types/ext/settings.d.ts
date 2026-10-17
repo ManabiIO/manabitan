@@ -32,6 +32,8 @@ export type OptionsContext1 = {
 
 export type OptionsContext2 = {
     index: number;
+    /** Stable profile identity used by Settings pages across profile reorders. */
+    profileId?: string | null;
     url?: undefined;
     depth?: undefined;
     current?: undefined;

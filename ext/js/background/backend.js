@@ -2892,10 +2892,21 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
     _getProfile(optionsContext, useSchema) {
         const options = this._getOptionsFull(useSchema);
         const profiles = options.profiles;
+        if (
+            !optionsContext.current &&
+            typeof optionsContext.index === 'number' &&
+            Object.hasOwn(optionsContext, 'profileId')
+        ) {
+            const {profileId} = optionsContext;
+            if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+            const matches = profiles.filter((profile) => isObjectNotArray(profile) && profile.id === profileId);
+            if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+            return matches[0];
+        }
         if (!optionsContext.current) {
-            // Specific index
-            const {index} = optionsContext;
-            if (typeof index === 'number') {
+            if (typeof optionsContext.index === 'number') {
+                // Specific index
+                const {index} = optionsContext;
                 if (index < 0 || index >= profiles.length) {
                     throw this._createDataError(`Invalid profile index: ${index}`, optionsContext);
                 }
@@ -3123,6 +3134,14 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         switch (scope) {
             case 'profile':
             {
+                if (Object.hasOwn(target, 'profileId')) {
+                    const {profileId} = target;
+                    if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                    const {profiles} = this._getOptionsFull(true);
+                    const matches = profiles.filter((profile) => isObjectNotArray(profile) && profile.id === profileId);
+                    if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                    return matches[0].options;
+                }
                 const {optionsContext} = target;
                 if (typeof optionsContext !== 'object' || optionsContext === null) { throw new Error('Invalid optionsContext'); }
                 return /** @type {import('settings').ProfileOptions} */ (this._getProfileOptions(optionsContext, true));
