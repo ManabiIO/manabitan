@@ -2518,6 +2518,50 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
      */
     async _modifySettings(targets, source) {
+        if (targets.some(({action}) => action === 'removeDictionary')) {
+            // Orphan reconciliation must be checked against database state at
+            // the point it owns the dictionary mutation queue. A settings page
+            // can submit a stale snapshot while an import is publishing.
+            /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
+            let modificationResults = [];
+            await this._runDictionaryMutation(async () => {
+                await this._ensureDictionaryDatabaseReady();
+                const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
+                const installedDictionaryNames = new Set(dictionaryInfo.map(({title}) => title));
+                /** @type {import('settings-modifications').ScopedModification[]} */
+                const filteredTargets = [];
+                /** @type {number[]} */
+                const filteredTargetIndices = [];
+                /** @type {Array<import('core').Response<import('settings-modifications').ModificationResult>|null>} */
+                const results = targets.map(() => null);
+                for (let index = 0; index < targets.length; ++index) {
+                    const target = targets[index];
+                    if (target.action === 'removeDictionary' && installedDictionaryNames.has(target.name)) {
+                        results[index] = {result: []};
+                        continue;
+                    }
+                    filteredTargets.push(target);
+                    filteredTargetIndices.push(index);
+                }
+                if (filteredTargets.length > 0) {
+                    const filteredResults = await this._modifySettingsQueued(filteredTargets, source);
+                    for (let i = 0; i < filteredResults.length; ++i) {
+                        results[filteredTargetIndices[i]] = filteredResults[i];
+                    }
+                }
+                modificationResults = /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */ (results);
+            });
+            return modificationResults;
+        }
+        return await this._modifySettingsQueued(targets, source);
+    }
+
+    /**
+     * @param {import('settings-modifications').ScopedModification[]} targets
+     * @param {string} source
+     * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
+     */
+    async _modifySettingsQueued(targets, source) {
         return await this._runOptionsMutation(async () => {
             // Stage synchronous mutations on an isolated copy. Read APIs
             // continue to observe the last committed options while storage is
