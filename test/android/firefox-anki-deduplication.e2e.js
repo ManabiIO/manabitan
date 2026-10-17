@@ -393,7 +393,7 @@ async function main() {
             const remoteDebuggingStart = safePerformance.now();
             await runCommand('bash', [path.join(dirname, 'enable-firefox-remote-debugging.sh'), device, firefoxPackage]);
             const remoteDebuggingEnd = safePerformance.now();
-            addPhase(report, 'Enable Firefox Android remote debugging', `Enabled and read back Fenix remote debugging preference for ${device}.`, remoteDebuggingStart, remoteDebuggingEnd);
+            addPhase(report, 'Prepare Firefox Android remote debugging', `Updated the Fenix preference while Firefox was disabled and process-free on ${device}.`, remoteDebuggingStart, remoteDebuggingEnd);
         }
 
         const resolveSourceDirStart = safePerformance.now();
@@ -421,6 +421,13 @@ async function main() {
             smokeStart,
             smokeEnd,
         );
+
+        if (String(process.env.MANABITAN_ANDROID_ENABLE_FIREFOX_REMOTE_DEBUGGING || '').trim() === '1') {
+            const preferenceVerifyStart = safePerformance.now();
+            await runCommand('bash', [path.join(dirname, 'enable-firefox-remote-debugging.sh'), device, firefoxPackage, '--verify-after-launch']);
+            const preferenceVerifyEnd = safePerformance.now();
+            addPhase(report, 'Verify Firefox Android remote debugging after ACK', `Fenix retained pref_key_remote_debugging=true after launching and acknowledging the temporary add-on on ${device}.`, preferenceVerifyStart, preferenceVerifyEnd);
+        }
 
         const contractStart = safePerformance.now();
         const contractState = createAnkiMockState();
