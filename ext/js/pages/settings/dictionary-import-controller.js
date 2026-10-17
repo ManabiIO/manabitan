@@ -3142,7 +3142,8 @@ export class DictionaryImportController {
         });
         if (replacementDictionaryTitle !== null && shouldAddDictionarySettings) {
             const removeOldSettingsStartTime = safePerformance.now();
-            await this._removeDictionarySettingsByName(replacementDictionaryTitle);
+            const cleanupErrors = await this._removeDictionarySettingsByName(replacementDictionaryTitle);
+            if (Array.isArray(cleanupErrors)) { errors2.push(...cleanupErrors); }
             const removeOldSettingsEndTime = safePerformance.now();
             recordLocalPhase('remove-replaced-dictionary-settings', removeOldSettingsStartTime, removeOldSettingsEndTime, {
                 removedDictionaryTitle: replacementDictionaryTitle,
@@ -3388,87 +3389,72 @@ export class DictionaryImportController {
         }
         if (!optionsFull) { return [new Error('Failed to automatically set dictionary settings. A page refresh and manual enabling of the dictionary may be required.')]; }
 
-        const profileIndex = this._settingsController.profileIndex;
+        const selectedProfileId = this._settingsController.getOptionsContext?.().profileId;
+        if (typeof selectedProfileId !== 'string' || selectedProfileId.length === 0 || optionsFull.profiles.filter(({id}) => id === selectedProfileId).length !== 1) {
+            return [new Error('Unable to identify the active profile; dictionary settings were not changed.')];
+        }
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         const profileCount = optionsFull.profiles.length;
         for (let i = 0; i < profileCount; ++i) {
             const {options, id: profileId} = optionsFull.profiles[i];
-            const enabled = profileIndex === i;
+            const enabled = profileId === selectedProfileId;
             const defaultSettings = DictionaryController.createDefaultDictionarySettings(title, enabled, styles);
-            const path1 = `profiles[${i}].options.dictionaries`;
 
             const profileDictionarySettings = profilesDictionarySettings?.[profileId];
             if (!Array.isArray(profileDictionarySettings) || profileDictionarySettings.length === 0) {
                 const existingIndex = options.dictionaries.findIndex((dictionary) => dictionary.name === title);
                 if (existingIndex < 0) {
-                    targets.push({action: 'push', path: path1, items: [defaultSettings]});
+                    targets.push({action: 'ensureDictionary', profileId, item: defaultSettings});
+                    if (enabled) {
+                        // A databaseUpdated refresh may have queued a disabled
+                        // default row after this snapshot. Apply the selected
+                        // import's enable intent after ensureDictionary so the
+                        // existing row is enabled without replacing its prefs.
+                        targets.push({action: 'setDictionaryEnabled', profileId, name: title, alias: title, value: true});
+                    }
                 } else if (profilesDictionarySettings === null && enabled && !options.dictionaries.some((dictionary) => dictionary.name === title && dictionary.enabled)) {
                     // A databaseUpdated refresh can auto-create this entry with
                     // enabled=false before the import finishes. Enable it in
                     // place rather than inserting another entry with the same name.
                     targets.push({
-                        action: 'set',
-                        path: `${path1}[${existingIndex}].enabled`,
+                        action: 'setDictionaryEnabled',
+                        profileId,
+                        name: title,
+                        alias: options.dictionaries[existingIndex].alias,
                         value: true,
                     });
                 }
                 if (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle) {
-                    targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.mainDictionary`,
-                        value: title,
-                    });
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: selectorSourceTitle, value: title});
                 } else if (sequenced && options.general.mainDictionary === '') {
-                    const path2 = `profiles[${i}].options.general.mainDictionary`;
-                    targets.push({action: 'set', path: path2, value: title});
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: '', value: title});
                 }
                 if (selectorSourceTitle !== null && options.general.sortFrequencyDictionary === selectorSourceTitle) {
-                    targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.sortFrequencyDictionary`,
-                        value: title,
-                    });
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: selectorSourceTitle, value: title});
                 }
             } else {
-                const orderedProfileDictionarySettings = [...profileDictionarySettings]
-                    .sort((a, b) => b.index - a.index);
-                for (const {index, alias, name, ...currentSettings} of orderedProfileDictionarySettings) {
-                    const newAlias = alias === name ? title : alias;
-                    targets.push({
-                        action: 'splice',
-                        path: path1,
-                        start: index,
-                        items: [{
-                            ...currentSettings,
-                            styles,
-                            name: title,
-                            alias: newAlias,
-                        }],
-                        deleteCount: 0,
-                    });
-                }
                 const {name} = profileDictionarySettings[0];
+                targets.push({
+                    action: 'replaceDictionaryName',
+                    profileId,
+                    sourceName: name,
+                    name: title,
+                    styles,
+                    fallbackSettings: profileDictionarySettings.map(({index, ...item}) => ({index, item})),
+                });
                 if (
                     options.general.mainDictionary === name ||
                     (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle) ||
                     (sequenced && options.general.mainDictionary === '')
                 ) {
-                    targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.mainDictionary`,
-                        value: title,
-                    });
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: options.general.mainDictionary, value: title});
                 }
                 if (
                     options.general.sortFrequencyDictionary === name ||
                     (selectorSourceTitle !== null && options.general.sortFrequencyDictionary === selectorSourceTitle)
                 ) {
-                    targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.sortFrequencyDictionary`,
-                        value: title,
-                    });
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: options.general.sortFrequencyDictionary, value: title});
                 }
             }
         }
@@ -3477,7 +3463,7 @@ export class DictionaryImportController {
 
     /**
      * @param {string} dictionaryTitle
-     * @returns {Promise<void>}
+     * @returns {Promise<Error[]>}
      */
     async _removeDictionarySettingsByName(dictionaryTitle) {
         const optionsFull = await this._settingsController.getOptionsFull();
@@ -3485,36 +3471,17 @@ export class DictionaryImportController {
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
-            const {options} = profiles[i];
+            const {options, id: profileId} = profiles[i];
             const {dictionaries, general} = options;
-            for (let j = dictionaries.length - 1; j >= 0; --j) {
-                if (dictionaries[j].name !== dictionaryTitle) { continue; }
-                targets.push({
-                    action: 'splice',
-                    path: `profiles[${i}].options.dictionaries`,
-                    start: j,
-                    deleteCount: 1,
-                    items: [],
-                });
-            }
+            if (dictionaries.some(({name}) => name === dictionaryTitle)) { targets.push({action: 'removeDictionaryByName', profileId, name: dictionaryTitle}); }
             if (general.mainDictionary === dictionaryTitle) {
-                targets.push({
-                    action: 'set',
-                    path: `profiles[${i}].options.general.mainDictionary`,
-                    value: '',
-                });
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: dictionaryTitle, value: '', requireDictionaryUninstalled: dictionaryTitle});
             }
             if (general.sortFrequencyDictionary === dictionaryTitle) {
-                targets.push({
-                    action: 'set',
-                    path: `profiles[${i}].options.general.sortFrequencyDictionary`,
-                    value: null,
-                });
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: dictionaryTitle, value: null, requireDictionaryUninstalled: dictionaryTitle});
             }
         }
-        if (targets.length > 0) {
-            await this._modifyGlobalSettings(targets);
-        }
+        return targets.length > 0 ? await this._modifyGlobalSettings(targets) : [];
     }
 
     /**

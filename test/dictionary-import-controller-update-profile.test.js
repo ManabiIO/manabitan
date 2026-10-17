@@ -273,15 +273,18 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         }));
         const modifyGlobalSettings = vi.fn(async (targets) => {
             for (const target of targets) {
-                const match = /^profiles\[(\d+)]\.options\.dictionaries$/.exec(target.path);
-                if (target.action !== 'push' || match === null) { continue; }
-                optionsFull.profiles[Number(match[1])].options.dictionaries.push(...target.items);
+                if (target.action !== 'ensureDictionary') { continue; }
+                const profile = optionsFull.profiles.find(({id}) => id === target.profileId);
+                if (profile && !profile.options.dictionaries.some(({name}) => name === target.item.name)) {
+                    profile.options.dictionaries.push(target.item);
+                }
             }
             return targets.map(() => ({}));
         });
         Reflect.set(controller, '_activeImportRunGeneration', 11);
         Reflect.set(controller, '_settingsController', {
             profileIndex: 1,
+            getOptionsContext: () => ({profileId: 'profile-2', index: 1}),
             application: {api: {triggerDatabaseUpdated}},
             getOptionsFull: vi.fn(async () => optionsFull),
             modifyGlobalSettings,

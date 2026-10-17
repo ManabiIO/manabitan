@@ -17,15 +17,14 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
     test('preserves intentional duplicate aliases and removes only truly missing dictionaries', async () => {
         const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
         const optionsFull = {
-            profiles: [{
+            profiles: [{id: 'profile-a',
                 options: {
                     dictionaries: [
                         {name: 'JMdict', alias: 'Primary', enabled: true},
                         {name: 'Unknown', alias: 'Orphan', enabled: true},
                         {name: 'JMdict', alias: 'Secondary', enabled: false},
                     ],
-                },
-            }],
+                }}],
         };
         const dictionaries = [
             {title: 'JMdict', styles: 'old'},
@@ -47,14 +46,14 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
         expect(modifyGlobalSettings).toHaveBeenCalledOnce();
         expect(modifyGlobalSettings).toHaveBeenCalledWith([
             {
-                action: 'removeDictionary',
-                path: 'profiles[0].options.dictionaries',
+                action: 'removeDictionaryByName',
+                profileId: 'profile-a',
                 name: 'Unknown',
             },
             {
-                action: 'push',
-                path: 'profiles[0].options.dictionaries',
-                items: [DictionaryController.createDefaultDictionarySettings('Jitendex', false, 'new')],
+                action: 'ensureDictionary',
+                profileId: 'profile-a',
+                item: DictionaryController.createDefaultDictionarySettings('Jitendex', false, 'new'),
             },
         ]);
     });
@@ -67,27 +66,42 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
         ];
         const modifyGlobalSettings = vi.fn(async (/** @type {import('settings-modifications').Modification[]} */ modifications) => {
             for (const modification of modifications) {
-                if (modification.action === 'removeDictionary') {
-                    for (let i = backendDictionaries.length - 1; i >= 0; --i) {
-                        if (Reflect.get(/** @type {object} */ (backendDictionaries[i]), 'name') === modification.name) { backendDictionaries.splice(i, 1); }
+                switch (modification.action) {
+                    case 'removeDictionary':
+                    case 'removeDictionaryByName': {
+                        for (let i = backendDictionaries.length - 1; i >= 0; --i) {
+                            if (Reflect.get(/** @type {object} */ (backendDictionaries[i]), 'name') === modification.name) { backendDictionaries.splice(i, 1); }
+                        }
+
+                        break;
                     }
-                } else if (modification.action === 'push') {
-                    backendDictionaries.push(...modification.items);
-                } else {
-                    throw new Error('Unexpected whole-array replacement');
+                    case 'push': {
+                        backendDictionaries.push(...modification.items);
+
+                        break;
+                    }
+                    case 'ensureDictionary': {
+                        if (!backendDictionaries.some((entry) => Reflect.get(/** @type {object} */ (entry), 'name') === modification.item.name)) {
+                            backendDictionaries.push(modification.item);
+                        }
+
+                        break;
+                    }
+                    default: {
+                        throw new Error('Unexpected whole-array replacement');
+                    }
                 }
             }
             return [];
         });
         const staleOptions = {
-            profiles: [{
+            profiles: [{id: 'profile-a',
                 options: {
                     dictionaries: [
                         {name: 'JMdict', alias: 'My alias', enabled: false},
                         {name: 'Unknown', alias: 'Stale', enabled: true},
                     ],
-                },
-            }],
+                }}],
         };
 
         await DictionaryController.ensureDictionarySettings(
@@ -100,8 +114,8 @@ describe('DictionaryController installed-dictionary setting reconciliation', () 
 
         expect(backendDictionaries).toStrictEqual([{name: 'JMdict', alias: 'My alias', enabled: true}]);
         expect(modifyGlobalSettings).toHaveBeenCalledWith([{
-            action: 'removeDictionary',
-            path: 'profiles[0].options.dictionaries',
+            action: 'removeDictionaryByName',
+            profileId: 'profile-a',
             name: 'Unknown',
         }]);
     });
@@ -278,10 +292,11 @@ describe('DictionaryController database refresh ordering', () => {
 
 
 test('concurrent dictionary refreshes cannot remove the next installed entry using the same stale index', async () => {
-    const options = {profiles: [{options: {dictionaries: [
-        {name: 'Deleted', alias: 'Deleted', enabled: true},
-        {name: 'JMdict', alias: 'Mine', enabled: true},
-    ]}}]};
+    const options = {profiles: [{id: 'profile-a',
+        options: {dictionaries: [
+            {name: 'Deleted', alias: 'Deleted', enabled: true},
+            {name: 'JMdict', alias: 'Mine', enabled: true},
+        ]}}]};
     /** @type {import('core').DeferredPromiseDetails<void>} */
     const entered = deferPromise();
     /** @type {import('core').DeferredPromiseDetails<void>} */
@@ -291,7 +306,7 @@ test('concurrent dictionary refreshes cannot remove the next installed entry usi
         entered.resolve();
         await resume.promise;
         for (const modification of modifications) {
-            if (modification.action !== 'removeDictionary') { throw new Error('Unexpected modification'); }
+            if (modification.action !== 'removeDictionaryByName') { throw new Error('Unexpected modification'); }
             const dictionaries = options.profiles[0].options.dictionaries;
             for (let i = dictionaries.length - 1; i >= 0; --i) {
                 if (dictionaries[i].name === modification.name) { dictionaries.splice(i, 1); }

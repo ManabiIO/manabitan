@@ -2518,9 +2518,16 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
      */
     async _modifySettings(targets, source) {
-        if (targets.some(({action}) => action === 'removeDictionary')) {
+        if (targets.some(({action}) => (
+            action === 'removeDictionary' ||
+            action === 'removeDictionaryByName' ||
+            action === 'ensureDictionary' ||
+            action === 'setDictionarySelector'
+        ))) {
             // Read installed state after earlier options writes commit. The
             // database proxy serializes this read with import publication.
+            // This also prevents stale reconciliation snapshots from restoring
+            // settings for a title deleted before this queued operation.
             return await this._modifySettingsQueued(targets, source, async () => {
                 await this._ensureDictionaryDatabaseReady();
                 const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
@@ -2561,11 +2568,16 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                             results.push({result: []});
                             continue;
                         }
-                        const result = this._modifySetting(target);
+                        const result = this._modifySetting(target, installedDictionaryNames);
                         results.push({result: clone(result)});
-                        if (target.action !== 'removeDictionary' || (Array.isArray(result) && result.length > 0)) {
-                            hasChanges = true;
-                        }
+                        const noOpAction = (
+                            target.action === 'ensureDictionary' ||
+                            target.action === 'setDictionaryEnabled' ||
+                            target.action === 'setDictionarySelector' ||
+                            target.action === 'replaceDictionaryName'
+                        );
+                        const removalAction = target.action === 'removeDictionary' || target.action === 'removeDictionaryByName';
+                        if (noOpAction ? result === true : (!removalAction || (Array.isArray(result) && result.length > 0))) { hasChanges = true; }
                     } catch (e) {
                         results.push({error: ExtensionError.serialize(e)});
                     }
@@ -3168,14 +3180,163 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
 
     /**
      * @param {import('settings-modifications').ScopedModification} target
+     * @param {Set<string>|null} [installedDictionaryNames]
      * @returns {import('settings-modifications').ModificationResult}
      * @throws {Error}
      */
-    _modifySetting(target) {
+    _modifySetting(target, installedDictionaryNames = null) {
         const options = this._getModifySettingObject(target);
         const accessor = new ObjectPropertyAccessor(options);
         const action = target.action;
         switch (action) {
+            case 'ensureDictionary':
+            {
+                const {profileId, item} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                if (!isObjectNotArray(item) || typeof item.name !== 'string') { throw new Error('Invalid dictionary settings'); }
+                if (installedDictionaryNames !== null && !installedDictionaryNames.has(item.name)) { return false; }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown, options?: {dictionaries?: unknown} }[]} */ (profilesValue);
+                const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                const dictionaries = profiles[matches[0]].options?.dictionaries;
+                if (!Array.isArray(dictionaries)) { throw new Error('Invalid dictionary settings target'); }
+                if (dictionaries.some((entry) => isObjectNotArray(entry) && entry.name === item.name)) { return false; }
+                dictionaries.push(clone(item));
+                return true;
+            }
+            case 'setDictionaryEnabled':
+            case 'setDictionarySelector':
+            case 'removeDictionaryByName':
+            case 'replaceDictionaryName':
+            {
+                const {profileId} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown, options?: {dictionaries?: unknown, general?: Record<string, unknown>} }[]} */ (profilesValue);
+                const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                const profile = profiles[matches[0]];
+                if (!isObjectNotArray(profile.options)) { throw new Error('Invalid profile settings target'); }
+                if (action === 'setDictionaryEnabled') {
+                    const {name, alias, value} = target;
+                    if (typeof name !== 'string' || typeof alias !== 'string' || typeof value !== 'boolean') { throw new Error('Invalid dictionary settings'); }
+                    const dictionaries = profile.options.dictionaries;
+                    if (!Array.isArray(dictionaries)) { throw new Error('Invalid dictionary settings target'); }
+                    let entry = null;
+                    for (const item of dictionaries) {
+                        if (isObjectNotArray(item) && item.name === name && item.alias === alias) {
+                            entry = item;
+                            break;
+                        }
+                    }
+                    if (entry === null) { return false; }
+                    if (entry.enabled === value) { return false; }
+                    entry.enabled = value;
+                    return true;
+                }
+                if (action === 'setDictionarySelector') {
+                    const {selector, expectedValue, value} = target;
+                    if (selector !== 'mainDictionary' && selector !== 'sortFrequencyDictionary') { throw new Error('Invalid dictionary selector'); }
+                    if (typeof target.requireDictionaryUninstalled === 'string' && installedDictionaryNames?.has(target.requireDictionaryUninstalled)) { return false; }
+                    if (!isObjectNotArray(profile.options.general)) { throw new Error('Invalid profile general settings'); }
+                    if (profile.options.general[selector] !== expectedValue) { return false; }
+                    if (profile.options.general[selector] === value) { return false; }
+                    profile.options.general[selector] = value;
+                    return true;
+                }
+                if (action === 'replaceDictionaryName') {
+                    const {sourceName, name, styles} = target;
+                    if (typeof sourceName !== 'string' || typeof name !== 'string' || typeof styles !== 'string') { throw new Error('Invalid dictionary replacement'); }
+                    if (sourceName === name) { return false; }
+                    const dictionariesValue = profile.options.dictionaries;
+                    if (!Array.isArray(dictionariesValue)) { throw new Error('Invalid dictionary settings target'); }
+                    const dictionaries = /** @type {unknown[]} */ (dictionariesValue);
+                    const liveSourceIndices = dictionaries.flatMap((entry, index) => (
+                        isObjectNotArray(entry) && entry.name === sourceName ? [index] : []
+                    ));
+                    if (liveSourceIndices.length > 0) {
+                        // Only target rows present before this operation may
+                        // absorb source occurrences. Converted rows must not
+                        // collapse later source rows with the same alias.
+                        /** @type {Map<unknown, number>} */
+                        const initialTargetOccurrences = new Map();
+                        for (const candidate of dictionaries) {
+                            if (!isObjectNotArray(candidate) || candidate.name !== name) { continue; }
+                            const alias = candidate.alias;
+                            initialTargetOccurrences.set(alias, (initialTargetOccurrences.get(alias) ?? 0) + 1);
+                        }
+                        for (let i = liveSourceIndices.length - 1; i >= 0; --i) {
+                            const index = liveSourceIndices[i];
+                            const entryValue = dictionaries[index];
+                            if (!isObjectNotArray(entryValue)) { continue; }
+                            const entry = /** @type {Record<string, unknown>} */ (entryValue);
+                            const originalAlias = /** @type {unknown} */ (entry.alias);
+                            const alias = /** @type {unknown} */ (originalAlias === sourceName ? name : originalAlias);
+                            const targetCount = initialTargetOccurrences.get(alias) ?? 0;
+                            if (targetCount > 0) {
+                                // Keep a newer target alias row and its settings
+                                // rather than producing a duplicate from source.
+                                initialTargetOccurrences.set(alias, targetCount - 1);
+                                dictionaries.splice(index, 1);
+                                continue;
+                            }
+                            entry.name = name;
+                            entry.alias = alias;
+                            entry.styles = styles;
+                        }
+                        return true;
+                    }
+
+                    const fallbackSettings = target.fallbackSettings;
+                    if (!Array.isArray(fallbackSettings)) { return false; }
+                    let changed = false;
+                    const orderedFallbacks = [...fallbackSettings].sort((a, b) => a.index - b.index);
+                    /** @type {Map<unknown, number>} */
+                    const initialTargetOccurrences = new Map();
+                    for (const candidate of dictionaries) {
+                        if (!isObjectNotArray(candidate) || candidate.name !== name) { continue; }
+                        const alias = candidate.alias;
+                        initialTargetOccurrences.set(alias, (initialTargetOccurrences.get(alias) ?? 0) + 1);
+                    }
+                    for (const {index: _index, item} of orderedFallbacks) {
+                        if (!isObjectNotArray(item) || item.name !== sourceName) { continue; }
+                        const alias = /** @type {unknown} */ (item.alias === sourceName ? name : item.alias);
+                        // Finalization can be retried after a prior replacement,
+                        // or another producer can already have created the target
+                        // alias. Preserve that live row and its newer settings.
+                        const targetCount = initialTargetOccurrences.get(alias) ?? 0;
+                        if (targetCount > 0) {
+                            initialTargetOccurrences.set(alias, targetCount - 1);
+                            continue;
+                        }
+                        const replacement = clone(item);
+                        replacement.name = name;
+                        replacement.alias = alias;
+                        replacement.styles = styles;
+                        dictionaries.splice(Math.min(_index, dictionaries.length), 0, replacement);
+                        changed = true;
+                    }
+                    return changed;
+                }
+                const {name} = target;
+                if (typeof name !== 'string') { throw new Error('Invalid dictionary name'); }
+                const dictionaries = /** @type {unknown[]} */ (profile.options.dictionaries);
+                if (!Array.isArray(dictionaries)) { throw new Error('Invalid dictionary settings target'); }
+                if (installedDictionaryNames !== null && installedDictionaryNames.has(name)) { return []; }
+                /** @type {unknown[]} */
+                const removed = [];
+                for (let i = dictionaries.length - 1; i >= 0; --i) {
+                    const entry = dictionaries[i];
+                    if (!isObjectNotArray(entry) || entry.name !== name) { continue; }
+                    removed.unshift(...dictionaries.splice(i, 1));
+                }
+                return removed;
+            }
             case 'set':
             {
                 const {path, value} = target;
