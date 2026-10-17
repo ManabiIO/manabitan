@@ -1466,7 +1466,12 @@ export class DictionaryController {
      * @param {import('dictionary-controller.js').DictionaryTask} task
      */
     _enqueueTask(task) {
-        const existingTaskIndex = this._dictionaryTaskQueue.findIndex((queueTask) => queueTask.dictionaryTitle === task.dictionaryTitle);
+        // The running task still occupies slot zero until its finally block
+        // retires it. Replacing that slot would silently discard the new task
+        // when the running operation finishes and shifts the queue.
+        const existingTaskIndex = this._dictionaryTaskQueue.findIndex((queueTask, index) => (
+            (!this._isTaskQueueRunning || index > 0) && queueTask.dictionaryTitle === task.dictionaryTitle
+        ));
         if (existingTaskIndex >= 0) {
             const existingTask = this._dictionaryTaskQueue[existingTaskIndex];
             let taskReplaced = false;
