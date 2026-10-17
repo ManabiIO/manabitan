@@ -26,10 +26,10 @@ import {
 } from './raw-term-content.js';
 import {
     appendExactRowMatches,
+    appendPrefixIdMatches,
     encodePersistedTermLookupIndex,
     encodePersistedTermLookupIndexFromPreinternedPlan,
     findExactRows,
-    findPrefixRowMatches,
     findPrefixRows,
     findSequenceRows,
     getPersistedTermLookupBaseBytes,
@@ -4482,16 +4482,19 @@ export class TermRecordOpfsStore {
             const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
             if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
                 queryBytes ??= this._textEncoder.encode(query);
+                /** @type {Array<{id: number, exact: boolean}>} */
                 const expression = [];
+                /** @type {Array<{id: number, exact: boolean}>} */
                 const reading = [];
                 for (const chunk of chunks) {
-                    const matches = findPrefixRowMatches(chunk.lookupIndex, queryBytes, reverse);
-                    for (const {row, exact} of matches.expression) {
-                        expression.push({id: chunk.firstId + row, exact});
-                    }
-                    for (const {row, exact} of matches.reading) {
-                        reading.push({id: chunk.firstId + row, exact});
-                    }
+                    appendPrefixIdMatches(
+                        chunk.lookupIndex,
+                        queryBytes,
+                        expression,
+                        reading,
+                        chunk.firstId,
+                        reverse,
+                    );
                 }
                 return {expression, reading};
             }
