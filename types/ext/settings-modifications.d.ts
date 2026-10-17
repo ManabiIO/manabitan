@@ -65,6 +65,28 @@ export type ModificationSwapProfiles = {
     profileId2: string;
 };
 
+export type ModificationProfileAction = {
+    action: 'setProfileName';
+    profileId: string;
+    value: string;
+} | {
+    action: 'copyProfileOptions';
+    sourceProfileId: string;
+    destinationProfileId: string;
+    value: unknown;
+} | {
+    action: 'resetProfile';
+    profileId: string;
+    value: unknown;
+} | {
+    action: 'deleteProfile';
+    profileId: string;
+} | {
+    action: 'duplicateProfile';
+    sourceProfileId: string;
+    profile: unknown;
+};
+
 export type ModificationSplice = {
     action: 'splice';
     path: string;
@@ -92,6 +114,7 @@ export type Modification = (
     ModificationMoveDictionary |
     ModificationSetDefaultProfile |
     ModificationSwapProfiles |
+    ModificationProfileAction |
     ModificationSplice |
     ModificationPush |
     ModificationRemoveDictionary
@@ -111,6 +134,8 @@ export type ScopedModificationSetDefaultProfile = ModificationSetDefaultProfile 
 
 export type ScopedModificationSwapProfiles = ModificationSwapProfiles & OptionsScope;
 
+export type ScopedModificationProfileAction = ModificationProfileAction & OptionsScope;
+
 export type ScopedModificationSplice = ModificationSplice & OptionsScope;
 
 export type ScopedModificationPush = ModificationPush & OptionsScope;
@@ -124,6 +149,7 @@ export type ScopedModification = (
     ScopedModificationMoveDictionary |
     ScopedModificationSetDefaultProfile |
     ScopedModificationSwapProfiles |
+    ScopedModificationProfileAction |
     ScopedModificationSplice |
     ScopedModificationPush |
     ScopedModificationRemoveDictionary

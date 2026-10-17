@@ -23,6 +23,18 @@ import {clone, generateId} from '../../core/utilities.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {ProfileConditionsUI} from './profile-conditions-ui.js';
 
+/**
+ * @param {import('settings-controller').ModifyResult[]} results
+ * @param {string} action
+ * @throws {Error}
+ */
+function assertSingleProfileModificationResult(results, action) {
+    if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+        throw new Error(`${action} returned an invalid result`);
+    }
+    if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+}
+
 export class ProfileController {
     /**
      * @param {import('./settings-controller.js').SettingsController} settingsController
@@ -172,7 +184,9 @@ export class ProfileController {
             const entry = this._getProfileEntry(index);
             if (entry !== null) { entry.setName(value); }
             try {
-                const results = await this._settingsController.setGlobalSetting(`profiles[${index}].name`, value);
+                const results = await this._settingsController.modifyGlobalSettings([{
+                    action: 'setProfileName', profileId: id ?? profile.id, value,
+                }]);
                 if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
                     throw new Error('Profile name update returned an invalid result');
                 }
@@ -180,9 +194,9 @@ export class ProfileController {
             } catch (error) {
                 if (currentIndex() >= 0 && this._profileNameSaveEdits.get(key) === edit) {
                     try {
-                        // Recovery reads all profiles, so every name write shares this queue.
-                        // A newer save waits until this read has settled.
-                        await this._settingsController.refresh();
+                        // Refreshing options does not await this controller's async subscriber.
+                        // Reconcile here before allowing the next queued name edit to run.
+                        await this._onOptionsChanged();
                     } catch (refreshError) {
                         log.error(refreshError);
                     }
@@ -265,13 +279,23 @@ export class ProfileController {
             destinationProfileEntry.updateState();
         }
 
-        await this._settingsController.modifyGlobalSettings([{
-            action: 'set',
-            path: `profiles[${destinationProfileIndex}].options`,
-            value: options,
-        }]);
-
-        await this._settingsController.refresh();
+        try {
+            const results = await this._settingsController.modifyGlobalSettings([{
+                action: 'copyProfileOptions',
+                sourceProfileId: sourceProfile.id,
+                destinationProfileId: this._profiles[destinationProfileIndex].id,
+                value: options,
+            }]);
+            assertSingleProfileModificationResult(results, 'Profile copy');
+            await this._settingsController.refresh();
+        } catch (error) {
+            try {
+                await this._onOptionsChanged();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
+        }
     }
 
     /**
@@ -295,13 +319,21 @@ export class ProfileController {
         this._updateProfileSelectOptions();
 
         // Modify settings
-        await this._settingsController.modifyGlobalSettings([{
-            action: 'splice',
-            path: 'profiles',
-            start: index,
-            deleteCount: 0,
-            items: [newProfile],
-        }]);
+        try {
+            const results = await this._settingsController.modifyGlobalSettings([{
+                action: 'duplicateProfile',
+                sourceProfileId: profile.id,
+                profile: newProfile,
+            }]);
+            assertSingleProfileModificationResult(results, 'Profile duplication');
+        } catch (error) {
+            try {
+                await this._onOptionsChanged();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
+        }
     }
 
     /**
@@ -311,21 +343,33 @@ export class ProfileController {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
 
+        const profileId = profile.id;
+        if (typeof profileId !== 'string' || profileId.length === 0) { return; }
         const defaultOptions = await this._settingsController.getDefaultOptions();
-        const currentIndex = this._profiles.indexOf(profile);
-        if (currentIndex < 0) { return; }
+        const matches = this._profiles.filter((item) => item.id === profileId);
+        if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+        const currentProfile = matches[0];
         const defaultProfileOptions = defaultOptions.profiles[0];
         // Reset settings without replacing the profile identity.
-        defaultProfileOptions.id = profile.id;
-        defaultProfileOptions.name = profile.name;
+        defaultProfileOptions.id = profileId;
+        defaultProfileOptions.name = currentProfile.name;
 
-        await this._settingsController.modifyGlobalSettings([{
-            action: 'set',
-            path: `profiles[${currentIndex}]`,
-            value: defaultProfileOptions,
-        }]);
-
-        await this._settingsController.refresh();
+        try {
+            const results = await this._settingsController.modifyGlobalSettings([{
+                action: 'resetProfile',
+                profileId,
+                value: defaultProfileOptions,
+            }]);
+            assertSingleProfileModificationResult(results, 'Profile reset');
+            await this._settingsController.refresh();
+        } catch (error) {
+            try {
+                await this._onOptionsChanged();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
+        }
     }
 
     /**
@@ -338,27 +382,18 @@ export class ProfileController {
         // Get indices
         let profileCurrentNew = this._profileCurrent;
         const settingsProfileIndex = this._settingsController.profileIndex;
-        const remainingProfileCount = this._profiles.length - 1;
+        const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
+        const viewedProfileId = this._profiles[settingsProfileIndex]?.id;
+        const profileId = profile.id;
 
         // Construct settings modifications
         /** @type {import('settings-modifications').Modification[]} */
         const modifications = [{
-            action: 'splice',
-            path: 'profiles',
-            start: profileIndex,
-            deleteCount: 1,
-            items: [],
+            action: 'deleteProfile',
+            profileId,
         }];
-        if (profileCurrentNew >= profileIndex) {
-            // Deleting the active first profile must select the new index 0,
-            // never the invalid index -1.
-            profileCurrentNew = Math.max(0, Math.min(profileCurrentNew - 1, remainingProfileCount - 1));
-            modifications.push({
-                action: 'set',
-                path: 'profileCurrent',
-                value: profileCurrentNew,
-            });
-        }
+        const remainingProfileCount = this._profiles.length - 1;
+        profileCurrentNew = Math.max(0, Math.min(profileCurrentNew - (profileCurrentNew >= profileIndex ? 1 : 0), remainingProfileCount - 1));
 
         // Update state
         this._profileCurrent = profileCurrentNew;
@@ -398,7 +433,7 @@ export class ProfileController {
         } catch (error) {
             // Reconcile the optimistic list with durable settings after rejection.
             try {
-                await this._settingsController.refresh();
+                await this._onOptionsChanged();
             } catch (refreshError) {
                 log.error(refreshError);
             }
@@ -407,13 +442,14 @@ export class ProfileController {
 
         // Update profile index after deletion, including index 0. Refresh even
         // when its numeric value is unchanged because the profile identity moved.
-        const settingsProfileIndexNew = settingsProfileIndex >= profileIndex ?
-            Math.max(0, Math.min(settingsProfileIndex - 1, remainingProfileCount - 1)) :
-            settingsProfileIndex;
-        if (settingsProfileIndexNew === settingsProfileIndex) {
-            this._settingsController.refreshProfileIndex();
-        } else {
-            this._settingsController.profileIndex = settingsProfileIndexNew;
+        if (this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration) {
+            const viewedProfileIndexNew = this._profiles.findIndex(({id}) => id === viewedProfileId);
+            const nextSettingsProfileIndex = viewedProfileIndexNew >= 0 ? viewedProfileIndexNew : profileCurrentNew;
+            if (nextSettingsProfileIndex !== settingsProfileIndex) {
+                this._settingsController.profileIndex = nextSettingsProfileIndex;
+            } else {
+                this._settingsController.refreshProfileIndex();
+            }
         }
     }
 
