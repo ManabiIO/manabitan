@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {readFileSync} from 'node:fs';
 import {describe, expect, vi} from 'vitest';
 import {ScanInputsController} from '../ext/js/pages/settings/scan-inputs-controller.js';
 import {createDomTest} from './fixtures/dom-test.js';
@@ -22,86 +23,53 @@ import {createDomTest} from './fixtures/dom-test.js';
 const test = createDomTest();
 
 /**
- * @param {import('../ext/js/pages/settings/settings-controller.js').SettingsController['modifyProfileSettings']} modifyProfileSettings
- * @param {{scanning: {inputs: import('settings').ScanningInput[]}}} options
- * @returns {Record<string, unknown>}
+ * @param {import('jsdom').DOMWindow} window
+ * @param {import('settings').ScanningInput[]} inputs
+ * @returns {Promise<{controller: ScanInputsController, modifySettings: ReturnType<typeof vi.fn>}>}
  */
-function createSettingsController(modifyProfileSettings, options) {
-    return {
-        application: {
-            api: {
-                getEnvironmentInfo: vi.fn().mockResolvedValue({platform: {os: 'linux'}}),
-            },
-        },
-        getOptions: vi.fn().mockImplementation(async () => structuredClone(options)),
-        getOptionsContext: vi.fn(() => ({})),
-        instantiateTemplate: vi.fn(),
-        modifyProfileSettings,
-        setProfileSetting: vi.fn(),
+async function createController(window, inputs) {
+    window.document.body.innerHTML = '<div class="modal"><div class="modal-body"><div id="scan-input-list"></div><button id="scan-input-add"></button><span class="scanning-input-count"></span></div></div>';
+    const templates = new window.DOMParser().parseFromString(readFileSync(new URL('../ext/templates-settings.html', import.meta.url), 'utf8'), 'text/html');
+    const modifySettings = vi.fn().mockRejectedValue(new Error('injected save failure'));
+    const settings = {
+        application: {api: {getEnvironmentInfo: vi.fn().mockResolvedValue({platform: {os: 'linux'}})}},
+        getOptions: vi.fn(async () => structuredClone({scanning: {inputs}})),
+        getOptionsContext: vi.fn(() => ({index: 0, profileId: 'profile-a'})),
+        instantiateTemplate: vi.fn((name) => {
+            const template = /** @type {HTMLTemplateElement|null} */ (templates.getElementById(name + '-template'));
+            const node = template?.content.firstElementChild;
+            if (!node) { throw new Error('Missing shipped row template'); }
+            return window.document.importNode(node, true);
+        }),
+        modifySettings,
         on: vi.fn(),
         trigger: vi.fn(),
     };
+    const controller = new ScanInputsController(/** @type {any} */ (settings));
+    await controller.prepare();
+    return {controller, modifySettings};
 }
 
-/** @typedef {{cleanup: () => void, index: number}} TestScanInputEntry */
-
-describe('ScanInputsController', () => {
-    test('removeInput refreshes the list after a failed delete write', async ({window}) => {
-        window.document.body.innerHTML = `
-            <div id="scan-input-list"></div>
-            <button id="scan-input-add"></button>
-            <span class="scanning-input-count"></span>
-        `;
-
-        const input = ScanInputsController.createDefaultMouseInput('shift', 'mouse0');
-        const options = {scanning: {inputs: [input]}};
-        const modifyProfileSettings = vi.fn().mockRejectedValue(new Error('save failed'));
-        const settingsController = createSettingsController(modifyProfileSettings, options);
-        const controller = new ScanInputsController(/** @type {any} */ (settingsController));
-        controller._scanningInputCountNodes = window.document.querySelectorAll('.scanning-input-count');
-        const entries = /** @type {TestScanInputEntry[]} */ (controller._entries);
-        vi.spyOn(controller, '_addOption').mockImplementation((index) => {
-            entries.push({cleanup: vi.fn(), index});
-        });
-        const cleanup = vi.fn();
-        entries.push({cleanup, index: 0});
-        controller._updateCounts();
-
-        controller.removeInput(0);
-        await new Promise((resolve) => { setTimeout(resolve, 0); });
-
-        expect(cleanup).toHaveBeenCalled();
+describe('ScanInputsController failed writes', () => {
+    test('a failed delete leaves the acknowledged row visible and usable', async ({window}) => {
+        const {controller, modifySettings} = await createController(window, [ScanInputsController.createDefaultMouseInput('shift', 'mouse0')]);
+        const row = window.document.querySelector('.scan-input');
+        await controller.removeInput(0).catch(() => {});
+        expect(modifySettings).toHaveBeenCalledTimes(1);
+        expect(window.document.querySelector('.scan-input')).toBe(row);
         expect(controller._entries).toHaveLength(1);
         expect(window.document.querySelector('.scanning-input-count')?.textContent).toBe('1');
+        expect(/** @type {HTMLInputElement} */ (row?.querySelector('.scan-input-field'))?.value).toBe('Shift');
     });
 
-    test('add click refreshes the list after a failed insert write', async ({window}) => {
-        window.document.body.innerHTML = `
-            <div class="modal">
-                <div class="modal-body">
-                    <div id="scan-input-list"></div>
-                    <button id="scan-input-add"></button>
-                    <span class="scanning-input-count"></span>
-                </div>
-            </div>
-        `;
-
-        const options = {scanning: {inputs: []}};
-        const modifyProfileSettings = vi.fn().mockRejectedValue(new Error('save failed'));
-        const settingsController = createSettingsController(modifyProfileSettings, options);
-        const controller = new ScanInputsController(/** @type {any} */ (settingsController));
-        controller._scanningInputCountNodes = window.document.querySelectorAll('.scanning-input-count');
-        const entries = /** @type {TestScanInputEntry[]} */ (controller._entries);
-        vi.spyOn(controller, '_addOption').mockImplementation((index) => {
-            entries.push({cleanup: vi.fn(), index});
-        });
-        controller._updateCounts();
-        controller._onAddButtonClick(/** @type {MouseEvent} */ (/** @type {unknown} */ ({
-            preventDefault() {},
-            currentTarget: window.document.querySelector('#scan-input-add'),
-        })));
+    test('a failed add click leaves no phantom row or count', async ({window}) => {
+        const {controller, modifySettings} = await createController(window, []);
+        const add = /** @type {HTMLButtonElement} */ (window.document.getElementById('scan-input-add'));
+        add.dispatchEvent(new window.MouseEvent('click', {bubbles: true}));
+        await Reflect.get(controller, '_mutationTail');
         await new Promise((resolve) => { setTimeout(resolve, 0); });
-
+        expect(modifySettings).toHaveBeenCalledTimes(1);
+        expect(window.document.querySelectorAll('.scan-input')).toHaveLength(0);
         expect(controller._entries).toHaveLength(0);
         expect(window.document.querySelector('.scanning-input-count')?.textContent).toBe('0');
     });

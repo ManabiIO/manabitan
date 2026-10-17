@@ -43,6 +43,7 @@ describe('ScanInputsSimpleController', () => {
             getOptions: vi.fn().mockResolvedValue(options),
             getOptionsContext: vi.fn(() => ({})),
             modifyProfileSettings,
+            modifySettings: modifyProfileSettings,
             on: vi.fn(),
             trigger: vi.fn(),
         };
@@ -78,6 +79,7 @@ describe('ScanInputsSimpleController', () => {
             getOptions: vi.fn().mockResolvedValue(options),
             getOptionsContext: vi.fn(() => ({})),
             modifyProfileSettings: vi.fn().mockRejectedValue(new Error('save failed')),
+            modifySettings: vi.fn().mockRejectedValue(new Error('save failed')),
             on: vi.fn(),
             trigger: vi.fn(),
         };

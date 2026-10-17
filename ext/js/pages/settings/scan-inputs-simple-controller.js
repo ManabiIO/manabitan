@@ -16,118 +16,347 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {HotkeyUtil} from '../../input/hotkey-util.js';
 import {ScanInputsController} from './scan-inputs-controller.js';
 
+/** @typedef {import('settings').ScanningInput} ScanningInput */
+/** @typedef {{generation: number, context: import('settings').OptionsContext}} Owner */
+/** @typedef {{generation: number, revision: number, pending: number, requested: string|boolean}} EditState */
+
 export class ScanInputsSimpleController {
-    /**
-     * @param {import('./settings-controller.js').SettingsController} settingsController
-     */
+    /** @param {import('./settings-controller.js').SettingsController} settingsController */
     constructor(settingsController) {
-        /** @type {import('./settings-controller.js').SettingsController} */
+        /**
+         *
+         */
         this._settingsController = settingsController;
         /** @type {HTMLInputElement} */
         this._middleMouseButtonScan = querySelectorNotNull(document, '#middle-mouse-button-scan');
         /** @type {HTMLSelectElement} */
         this._mainScanModifierKeyInput = querySelectorNotNull(document, '#main-scan-modifier-key');
-        /** @type {boolean} */
+        /**
+         *
+         */
         this._mainScanModifierKeyInputHasOther = false;
-        /** @type {HotkeyUtil} */
+        /**
+         *
+         */
         this._hotkeyUtil = new HotkeyUtil();
+        /** @type {?import('settings').OptionsContext} */
+        this._viewContext = null;
+        /**
+         *
+         */
+        this._viewGeneration = 0;
+        /**
+         *
+         */
+        this._readGeneration = 0;
+        /** @type {ScanningInput[]} */
+        this._savedInputs = [];
+        /** @type {Promise<void>} */
+        this._mutationTail = Promise.resolve();
+        /** @type {Map<string, EditState>} */
+        this._edits = new Map();
     }
 
-    /** */
+    /** @returns {Promise<void>} */
     async prepare() {
         const {platform: {os}} = await this._settingsController.application.api.getEnvironmentInfo();
         this._hotkeyUtil.os = os;
-
-        this._mainScanModifierKeyInputHasOther = false;
-        this._populateSelect(this._mainScanModifierKeyInput, this._mainScanModifierKeyInputHasOther);
-
-        this._middleMouseButtonScan.addEventListener('change', this.onMiddleMouseButtonScanChange.bind(this), false);
-        this._mainScanModifierKeyInput.addEventListener('change', this._onMainScanModifierKeyInputChange.bind(this), false);
-
+        this._populateSelect(this._mainScanModifierKeyInput, false);
+        this._middleMouseButtonScan.addEventListener('change', this.onMiddleMouseButtonScanChange.bind(this));
+        this._mainScanModifierKeyInput.addEventListener('change', this._onMainScanModifierKeyInputChange.bind(this));
         this._settingsController.on('scanInputsChanged', this._onScanInputsChanged.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
-
-        const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
-            this._onOptionsChanged({options, optionsContext});
-        }
+        this._settingsController.on('optionsContextChanged', this._onOptionsContextChanged.bind(this));
+        await this.refresh();
     }
 
-    /** */
+    /** @returns {Promise<void>} */
     async refresh() {
-        const optionsContext = this._settingsController.getOptionsContext();
+        const read = ++this._readGeneration;
+        const context = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        this._onOptionsChanged({options, optionsContext});
+        if (read !== this._readGeneration || !this._sameContext(context, this._settingsController.getOptionsContext())) { return; }
+        this._onOptionsChanged({options, optionsContext: context});
     }
 
-    // Private
+    /** @param {import('settings-controller').EventArgument<'optionsChanged'>} details */
+    _onOptionsChanged({options, optionsContext}) {
+        if (!this._sameContext(optionsContext, this._settingsController.getOptionsContext())) { return; }
+        const force = this._viewContext === null || !this._sameContext(this._viewContext, optionsContext);
+        ++this._readGeneration;
+        this._viewContext = {...optionsContext};
+        this._adoptInputs(options.scanning.inputs, force);
+    }
 
-    /**
-     * @param {import('settings-controller').EventArgument<'scanInputsChanged'>} details
-     */
+    /** @returns {void} */
+    _onOptionsContextChanged() {
+        ++this._readGeneration;
+        ++this._viewGeneration;
+        this._viewContext = null;
+    }
+
+    /** @param {import('settings-controller').EventArgument<'scanInputsChanged'>} details */
     _onScanInputsChanged({source}) {
-        if (source === this) { return; }
-        void this.refresh();
+        if (source !== this) { void this.refresh().catch((error) => log.error(error)); }
+    }
+
+    /** @param {Event} event */
+    onMiddleMouseButtonScanChange(event) {
+        const input = /** @type {HTMLInputElement} */ (event.currentTarget);
+        void this._handleMiddleMouseButtonScanChange(input, input.checked).catch((error) => log.error(error));
+    }
+
+    /** @param {Event} event */
+    _onMainScanModifierKeyInputChange(event) {
+        const input = /** @type {HTMLSelectElement} */ (event.currentTarget);
+        const value = input.value;
+        if (value !== 'other') { void this._handleMainScanModifierKeyInputChange(input, value === 'none' ? [] : [value]).catch((error) => log.error(error)); }
     }
 
     /**
-     * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
+     * @param {HTMLInputElement} element
+     * @param {boolean} value
+     * @returns {Promise<void>}
      */
-    _onOptionsChanged({options}) {
-        const {scanning: {inputs}} = options;
-        const middleMouseSupportedIndex = this._getIndexOfMiddleMouseButtonScanInput(inputs);
-        const mainScanInputIndex = this._getIndexOfMainScanInput(inputs);
-        const hasMainScanInput = (mainScanInputIndex >= 0);
+    async _handleMiddleMouseButtonScanChange(element, value) {
+        if (element !== this._middleMouseButtonScan) { return; }
+        try {
+            await this._runEdit('middle', value, (rows, previousIndices) => {
+                const index = this._getIndexOfMiddleMouseButtonScanInput(rows);
+                if (value) {
+                    if (index >= 0) { return; }
+                    const main = this._getIndexOfMainScanInput(rows);
+                    const insertion = main >= 0 ? main + 1 : rows.length;
+                    rows.splice(insertion, 0, ScanInputsController.createDefaultMouseInput('mouse2', ''));
+                    previousIndices.splice(insertion, 0, null);
+                } else {
+                    let removal = index;
+                    while (removal >= 0) {
+                        rows.splice(removal, 1);
+                        previousIndices.splice(removal, 1);
+                        removal = this._getIndexOfMiddleMouseButtonScanInput(rows);
+                    }
+                }
+            });
+        } catch (error) {
+            log.error(error);
+        }
+    }
 
-        let middleMouseSupported = false;
-        if (middleMouseSupportedIndex >= 0) {
-            const includeValues = this._splitValue(inputs[middleMouseSupportedIndex].include);
-            if (includeValues.includes('mouse2')) {
-                middleMouseSupported = true;
+    /**
+     * @param {HTMLSelectElement} element
+     * @param {string[]} values
+     * @returns {Promise<void>}
+     */
+    async _handleMainScanModifierKeyInputChange(element, values) {
+        if (element !== this._mainScanModifierKeyInput) { return; }
+        const value = values.join(', ');
+        try {
+            await this._runEdit('main', element.value, (rows, previousIndices) => {
+                const index = this._getIndexOfMainScanInput(rows);
+                if (index < 0) {
+                    rows.push(ScanInputsController.createDefaultMouseInput(value, 'mouse0'));
+                    previousIndices.push(null);
+                } else {
+                    rows[index].include = value;
+                }
+            });
+        } catch (error) {
+            log.error(error);
+        }
+    }
+
+    /**
+     * @param {string} field
+     * @param {string|boolean} requested
+     * @param {(rows: ScanningInput[], previousIndices: (number|null)[]) => void} transform
+     * @returns {Promise<void>}
+     */
+    async _runEdit(field, requested, transform) {
+        const owner = this._captureOwner();
+        if (owner === null) { return; }
+        let state = this._edits.get(field);
+        if (typeof state === 'undefined' || state.generation !== owner.generation) {
+            state = {generation: owner.generation, revision: 0, pending: 0, requested};
+            this._edits.set(field, state);
+        }
+        const revision = ++state.revision;
+        ++state.pending;
+        state.requested = requested;
+        try {
+            const operation = this._mutationTail.then(async () => { await this._commit(owner, transform); });
+            this._mutationTail = operation.then(() => {}, () => {});
+            await operation;
+        } finally {
+            --state.pending;
+            if (this._owns(owner) && this._edits.get(field) === state && state.revision === revision && state.pending === 0 && this._controlValue(field) === requested) {
+                this._applyField(field);
             }
         }
+    }
 
-        let mainScanInput = 'none';
-        if (hasMainScanInput) {
-            const includeValues = this._splitValue(inputs[mainScanInputIndex].include);
-            if (includeValues.length > 0) {
-                mainScanInput = includeValues[0];
+    /**
+     * @param {Owner} owner
+     * @param {(rows: ScanningInput[], previousIndices: (number|null)[]) => void} transform
+     * @returns {Promise<void>}
+     */
+    async _commit(owner, transform) {
+        for (let attempt = 0; attempt < 2; ++attempt) {
+            if (!this._owns(owner)) { return; }
+            const expected = structuredClone(this._savedInputs);
+            const next = structuredClone(expected);
+            /** @type {(number|null)[]} */
+            const previousIndices = expected.map((_, index) => index);
+            transform(next, previousIndices);
+            if (JSON.stringify(next) === JSON.stringify(expected)) { return; }
+            /** @type {import('settings-controller').ScanInputsMutation} */
+            const mutation = {optionsContext: {...owner.context}, expectedInputs: expected, inputs: next, previousIndices};
+            let results;
+            try {
+                results = await this._settingsController.modifySettings([{
+                    action: 'set',
+                    path: 'scanning.inputs',
+                    value: next,
+                    expectedValue: expected,
+                    scope: 'profile',
+                    profileId: 'profileId' in owner.context ? owner.context.profileId : null,
+                    optionsContext: owner.context,
+                }]);
+            } catch (error) {
+                await this._recover(owner, expected, mutation);
+                throw error;
             }
+            const response = results?.[0];
+            if (response?.error) {
+                const data = 'data' in response.error ? response.error.data : null;
+                if (data !== null && typeof data === 'object' && 'code' in data && data.code === 'stale' && await this._recover(owner, expected, mutation)) { continue; }
+                return;
+            }
+            if (!Array.isArray(results) || results.length !== 1 || !Array.isArray(response?.result) || JSON.stringify(response.result) !== JSON.stringify(next)) {
+                await this._recover(owner, expected, mutation);
+                throw new Error('Invalid scan input settings response');
+            }
+            if (this._owns(owner) || this._canReconcile(owner, expected)) {
+                const saved = JSON.stringify(this._savedInputs);
+                if (saved !== JSON.stringify(expected) && saved !== JSON.stringify(next)) {
+                    await this._recover(owner, expected, mutation);
+                    return;
+                }
+                ++this._readGeneration;
+                this._adoptInputs(next);
+                this._triggerScanInputsChanged(mutation);
+            }
+            return;
+        }
+    }
+
+    /**
+     * @param {Owner} owner
+     * @param {ScanningInput[]} expected
+     * @param {import('settings-controller').ScanInputsMutation} mutation
+     * @returns {Promise<boolean>}
+     */
+    async _recover(owner, expected, mutation) {
+        const currentOwner = this._owns(owner) ? owner : (this._canReconcile(owner, expected) ? this._captureOwner() : null);
+        if (currentOwner === null) { return false; }
+        this._viewContext = null;
+        const read = ++this._readGeneration;
+        try {
+            const options = await this._settingsController.getOptions();
+            if (read !== this._readGeneration || currentOwner.generation !== this._viewGeneration || !this._sameContext(currentOwner.context, this._settingsController.getOptionsContext())) { return false; }
+            this._viewContext = {...currentOwner.context};
+            this._adoptInputs(options.scanning.inputs);
+            if (JSON.stringify(options.scanning.inputs) === JSON.stringify(mutation.inputs)) { this._triggerScanInputsChanged(mutation); }
+            return this._owns(owner);
+        } catch (error) {
+            log.error(error);
+            return false;
+        }
+    }
+
+    /** @returns {?Owner} */
+    _captureOwner() {
+        const context = this._settingsController.getOptionsContext();
+        return this._viewContext !== null && this._sameContext(context, this._viewContext) ? {generation: this._viewGeneration, context: {...context}} : null;
+    }
+
+    /**
+     * @param {Owner} owner
+     * @returns {boolean}
+     */
+    _owns(owner) {
+        return owner.generation === this._viewGeneration && this._viewContext !== null && this._sameContext(owner.context, this._viewContext) && this._sameContext(owner.context, this._settingsController.getOptionsContext());
+    }
+
+    /**
+     * @param {Owner} owner
+     * @param {ScanningInput[]} expected
+     * @returns {boolean}
+     */
+    _canReconcile(owner, expected) {
+        return this._viewContext !== null && this._sameContext(this._viewContext, owner.context) && this._sameContext(owner.context, this._settingsController.getOptionsContext()) && JSON.stringify(this._savedInputs) === JSON.stringify(expected);
+    }
+
+    /**
+     * @param {import('settings').OptionsContext} a
+     * @param {import('settings').OptionsContext} b
+     * @returns {boolean}
+     */
+    _sameContext(a, b) { return a.index === b.index && ('profileId' in a ? a.profileId : null) === ('profileId' in b ? b.profileId : null); }
+
+    /**
+     * @param {ScanningInput[]} rows
+     * @param {boolean} [force]
+     */
+    _adoptInputs(rows, force = false) {
+        const previous = this._savedInputs;
+        const updates = ['main', 'middle'].filter((field) => {
+            const state = this._edits.get(field);
+            return (force || this._controlValue(field) === this._summaryValue(field, previous)) && !(state?.generation === this._viewGeneration && state.pending > 0);
+        });
+        this._savedInputs = structuredClone(rows);
+        for (const field of updates) { this._applyField(field); }
+    }
+
+    /**
+     * @param {string} field
+     * @returns {string|boolean}
+     */
+    _controlValue(field) { return field === 'middle' ? this._middleMouseButtonScan.checked : this._mainScanModifierKeyInput.value; }
+
+    /**
+     * @param {string} field
+     * @param {ScanningInput[]} rows
+     * @returns {string|boolean}
+     */
+    _summaryValue(field, rows) {
+        if (field === 'middle') { return this._getIndexOfMiddleMouseButtonScanInput(rows) >= 0; }
+        const index = this._getIndexOfMainScanInput(rows);
+        return index >= 0 ? this._splitValue(rows[index].include)[0] ?? 'none' : 'other';
+    }
+
+    /** @param {string} field */
+    _applyField(field) {
+        const value = this._summaryValue(field, this._savedInputs);
+        if (field === 'middle') {
+            this._middleMouseButtonScan.checked = value === true;
         } else {
-            mainScanInput = 'other';
+            const hasOther = value === 'other';
+            if (hasOther !== this._mainScanModifierKeyInputHasOther) {
+                this._mainScanModifierKeyInputHasOther = hasOther;
+                this._populateSelect(this._mainScanModifierKeyInput, hasOther);
+            }
+            this._mainScanModifierKeyInput.value = String(value);
         }
-
-        this._setHasMainScanInput(hasMainScanInput);
-
-        /** @type {HTMLInputElement} */ (this._middleMouseButtonScan).checked = middleMouseSupported;
-        /** @type {HTMLSelectElement} */ (this._mainScanModifierKeyInput).value = mainScanInput;
     }
 
-    /**
-     * @param {Event} e
-     */
-    onMiddleMouseButtonScanChange(e) {
-        const element = /** @type {HTMLInputElement} */ (e.currentTarget);
-        const middleMouseSupported = element.checked;
-        void this._handleMiddleMouseButtonScanChange(element, middleMouseSupported);
-    }
-
-    /**
-     * @param {Event} e
-     */
-    _onMainScanModifierKeyInputChange(e) {
-        const element = /** @type {HTMLSelectElement} */ (e.currentTarget);
-        const mainScanKey = element.value;
-        if (mainScanKey === 'other') { return; }
-        const mainScanInputs = (mainScanKey === 'none' ? [] : [mainScanKey]);
-        void this._handleMainScanModifierKeyInputChange(element, mainScanInputs);
-    }
+    /** @param {import('settings-controller').ScanInputsMutation} mutation */
+    _triggerScanInputsChanged(mutation) { this._settingsController.trigger('scanInputsChanged', {source: this, mutation}); }
 
     /**
      * @param {HTMLSelectElement} select
@@ -163,132 +392,6 @@ export class ScanInputsSimpleController {
      */
     _splitValue(value) {
         return value.split(/[,;\s]+/).map((v) => v.trim().toLowerCase()).filter((v) => v.length > 0);
-    }
-
-    /**
-     * @param {boolean} value
-     */
-    async _setMiddleMouseSuppported(value) {
-        // Find target index
-        const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        const {scanning: {inputs}} = options;
-        const index = this._getIndexOfMiddleMouseButtonScanInput(inputs);
-
-        if (value) {
-            // Add new
-            if (index >= 0) { return; }
-            let insertionPosition = this._getIndexOfMainScanInput(inputs);
-            insertionPosition = (insertionPosition >= 0 ? insertionPosition + 1 : inputs.length);
-            const input = ScanInputsController.createDefaultMouseInput('mouse2', '');
-            await this._modifyProfileSettings([{
-                action: 'splice',
-                path: 'scanning.inputs',
-                start: insertionPosition,
-                deleteCount: 0,
-                items: [input],
-            }]);
-        } else {
-            // Modify existing
-            if (index < 0) { return; }
-            await this._modifyProfileSettings([{
-                action: 'splice',
-                path: 'scanning.inputs',
-                start: index,
-                deleteCount: 1,
-                items: [],
-            }]);
-        }
-    }
-
-    /**
-     * @param {string[]} value
-     */
-    async _setMainScanInputs(value) {
-        const value2 = value.join(', ');
-
-        // Find target index
-        const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        const {scanning: {inputs}} = options;
-        const index = this._getIndexOfMainScanInput(inputs);
-
-        if (index < 0) {
-            // Add new
-            const input = ScanInputsController.createDefaultMouseInput(value2, 'mouse0');
-            await this._modifyProfileSettings([{
-                action: 'splice',
-                path: 'scanning.inputs',
-                start: inputs.length,
-                deleteCount: 0,
-                items: [input],
-            }]);
-        } else {
-            // Modify existing
-            await this._modifyProfileSettings([{
-                action: 'set',
-                path: `scanning.inputs[${index}].include`,
-                value: value2,
-            }]);
-        }
-    }
-
-    /**
-     * @param {import('settings-modifications').Modification[]} targets
-     */
-    async _modifyProfileSettings(targets) {
-        await this._settingsController.modifyProfileSettings(targets);
-        /** @type {import('settings-controller').EventArgument<'scanInputsChanged'>} */
-        const event = {source: this};
-        this._settingsController.trigger('scanInputsChanged', event);
-    }
-
-    /**
-     * @param {HTMLInputElement} element
-     * @param {boolean} middleMouseSupported
-     */
-    async _handleMiddleMouseButtonScanChange(element, middleMouseSupported) {
-        const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        const {scanning: {inputs}} = options;
-        const previousValue = (this._getIndexOfMiddleMouseButtonScanInput(inputs) >= 0);
-        try {
-            await this._setMiddleMouseSuppported(middleMouseSupported);
-        } catch {
-            element.checked = previousValue;
-        }
-    }
-
-    /**
-     * @param {HTMLSelectElement} element
-     * @param {string[]} mainScanInputs
-     */
-    async _handleMainScanModifierKeyInputChange(element, mainScanInputs) {
-        const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        const {scanning: {inputs}} = options;
-        const previousIndex = this._getIndexOfMainScanInput(inputs);
-        const previousHasOther = (previousIndex < 0);
-        let previousValue = 'none';
-        if (previousIndex >= 0) {
-            const includeValues = this._splitValue(inputs[previousIndex].include);
-            previousValue = (includeValues.length > 0 ? includeValues[0] : 'none');
-        } else {
-            previousValue = 'other';
-        }
-        try {
-            await this._setMainScanInputs(mainScanInputs);
-        } catch {
-            if (this._mainScanModifierKeyInputHasOther !== previousHasOther) {
-                this._mainScanModifierKeyInputHasOther = previousHasOther;
-                this._populateSelect(element, previousHasOther);
-            }
-            element.value = previousValue;
-        }
     }
 
     /**
@@ -341,16 +444,5 @@ export class ScanInputsSimpleController {
      */
     _isMouseInput(input) {
         return /^mouse\d+$/.test(input);
-    }
-
-    /**
-     * @param {boolean} hasMainScanInput
-     */
-    _setHasMainScanInput(hasMainScanInput) {
-        if (this._mainScanModifierKeyInputHasOther !== hasMainScanInput) { return; }
-        this._mainScanModifierKeyInputHasOther = !hasMainScanInput;
-        if (this._mainScanModifierKeyInput !== null) {
-            this._populateSelect(this._mainScanModifierKeyInput, this._mainScanModifierKeyInputHasOther);
-        }
     }
 }

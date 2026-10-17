@@ -399,7 +399,8 @@ async function expectProfileWriteDropsAfterSwitch(prototype, method, args, optio
     const isSentenceEditor = prototype === SentenceTerminationCharactersController.prototype;
     const isReplacementEditor = prototype === TranslationTextReplacementsController.prototype;
     const isShortcutEditor = prototype === KeyboardShortcutController.prototype;
-    const queued = isSentenceEditor || isReplacementEditor || isShortcutEditor ? deferred() : null;
+    const isSimpleScanEditor = prototype === ScanInputsSimpleController.prototype;
+    const queued = isSentenceEditor || isReplacementEditor || isShortcutEditor || isSimpleScanEditor ? deferred() : null;
     if (queued !== null) {
         Object.assign(controller, {
             _viewContext: {index: 0},
@@ -409,11 +410,17 @@ async function expectProfileWriteDropsAfterSwitch(prototype, method, args, optio
             _savedRows: isSentenceEditor ? options.sentenceParsing.terminationCharacters : (isReplacementEditor ? (options.translation.textReplacements.groups[0] ?? []) : []),
             _savedGroups: isReplacementEditor ? options.translation.textReplacements.groups : [],
             _savedHotkeys: isShortcutEditor ? options.inputs.hotkeys : [],
+            _savedInputs: isSimpleScanEditor ? options.scanning.inputs : [],
+            _edits: new Map(),
+            _mainScanModifierKeyInput: {value: 'shift'},
+            _middleMouseButtonScan: {checked: true},
             _entries: [{index: 0, generation: 0, retired: false, isDisposed: false}],
         });
     }
-    const operation = Reflect.apply(Reflect.get(prototype, method), controller, args);
+    const operationArgs = isSimpleScanEditor ? [Reflect.get(controller, method === '_handleMiddleMouseButtonScanChange' ? '_middleMouseButtonScan' : '_mainScanModifierKeyInput'), ...args] : args;
+    const operation = Reflect.apply(Reflect.get(prototype, method), controller, operationArgs);
     await flush();
+    if (isSimpleScanEditor) { expect(Reflect.get(controller, '_edits').size).toBe(1); }
     profileIndex = 1;
     pending.resolve(options);
     queued?.resolve(void 0);
@@ -477,14 +484,14 @@ const staleProfileWriteCases = [
     [
         'simple scan middle-mouse change',
         ScanInputsSimpleController.prototype,
-        '_setMiddleMouseSuppported',
+        '_handleMiddleMouseButtonScanChange',
         [true],
         partialProfileOptions({scanning: {inputs: []}}),
     ],
     [
         'simple scan main-input change',
         ScanInputsSimpleController.prototype,
-        '_setMainScanInputs',
+        '_handleMainScanModifierKeyInputChange',
         [['shift']],
         partialProfileOptions({scanning: {inputs: []}}),
     ],
@@ -645,34 +652,11 @@ test('permission prompt completion cannot write its result into a newly selected
     expect(setProfileSetting).not.toHaveBeenCalled();
 });
 
-for (const [name, method, element] of [
-    ['middle mouse handler', '_handleMiddleMouseButtonScanChange', {checked: true}],
-    ['main scan modifier handler', '_handleMainScanModifierKeyInputChange', {value: 'shift'}],
-]) {
-    test(name + ' cannot hand a stale-profile event to a setter for the new profile', async () => {
-        let profileIndex = 0;
-        /** @type {ReturnType<typeof deferred<import('settings').ProfileOptions>>} */
-        const pending = deferred();
-        const middleSetter = vi.fn(async () => {});
-        const mainSetter = vi.fn(async () => {});
-        const controller = Object.assign(Object.create(ScanInputsSimpleController.prototype), {
-            _settingsController: {
-                getOptionsContext: () => ({index: profileIndex}),
-                getOptions: () => pending.promise,
-            },
-            _setMiddleMouseSuppported: middleSetter,
-            _setMainScanInputs: mainSetter,
-        });
-
-        const operation = method === '_handleMiddleMouseButtonScanChange' ?
-            controller._handleMiddleMouseButtonScanChange(element, true) :
-            controller._handleMainScanModifierKeyInputChange(element, ['shift']);
-        await flush();
-        profileIndex = 1;
-        pending.resolve(partialProfileOptions({scanning: {inputs: []}}));
-        await operation;
-
-        expect(middleSetter).not.toHaveBeenCalled();
-        expect(mainSetter).not.toHaveBeenCalled();
+for (const [name, method, args] of /** @type {[string, string, unknown[]][]} */ ([
+    ['middle mouse handler', '_handleMiddleMouseButtonScanChange', [true]],
+    ['main scan modifier handler', '_handleMainScanModifierKeyInputChange', [['shift']]],
+])) {
+    test(name + ' cannot dispatch a stale-profile write after queued admission', async () => {
+        await expectProfileWriteDropsAfterSwitch(ScanInputsSimpleController.prototype, method, args, partialProfileOptions({scanning: {inputs: []}}));
     });
 }
