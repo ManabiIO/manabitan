@@ -65,7 +65,7 @@ describe('Settings list rebuild robustness', () => {
 
         await Reflect.get(DictionaryController.prototype, '_refreshEntriesAfterOptionsChanged').call(controller);
 
-        expect(updateEntries).toHaveBeenCalledWith(null, false);
+        expect(updateEntries).toHaveBeenCalledWith(expect.any(Object), false);
     });
 
     test('translation text replacements skips broken entries during rebuild', async ({window}) => {
@@ -348,6 +348,77 @@ describe('Settings list rebuild robustness', () => {
         const integrityError = /** @type {HTMLButtonElement} */ (window.document.querySelector('.dictionary-integrity-button-error'));
         expect(integrityError.hidden).toBe(false);
         expect(integrityError.title).toBe('Re-import required');
+    });
+
+    test('dictionary reorders rebuild real entries without stale registry nodes', async ({window}) => {
+        window.document.body.innerHTML = `
+            <div id="dictionary-list"><div class="dictionary-item-bottom"></div></div>
+            <template id="dictionary-template">
+                <div class="dictionary-item">
+                    <input class="dictionary-enabled" type="checkbox">
+                    <button id="dictionary-move-up"></button>
+                    <button id="dictionary-move-down"></button>
+                    <button class="dictionary-menu-button"></button>
+                    <button class="dictionary-outdated-button" hidden></button>
+                    <button class="dictionary-integrity-button-check" hidden></button>
+                    <button class="dictionary-integrity-button-warning" hidden></button>
+                    <button class="dictionary-integrity-button-error" hidden></button>
+                    <button class="dictionary-update-available" hidden></button>
+                    <div class="dictionary-alias"></div>
+                    <div class="dictionary-revision"></div>
+                    <div class="dictionary-item-title-container"></div>
+                </div>
+            </template>
+        `;
+
+        const controller = /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
+        const container = /** @type {HTMLElement} */ (window.document.querySelector('#dictionary-list'));
+        const template = /** @type {HTMLTemplateElement} */ (window.document.querySelector('#dictionary-template'));
+        const dictionaryInfo = /** @type {import('dictionary-importer').Summary[]} */ ([
+            {title: 'A', revision: '1', version: 3, importSuccess: true},
+            {title: 'B', revision: '2', version: 3, importSuccess: true},
+        ]);
+        const options = {dictionaries: [
+            {name: 'A', alias: 'alpha', enabled: true},
+            {name: 'B', alias: 'beta', enabled: true},
+        ]};
+        const settingsController = {
+            getOptionsContext: () => ({index: 0}),
+            getOptions: vi.fn(async () => structuredClone(options)),
+            async modifyProfileSettings() {
+                const item = options.dictionaries.splice(0, 1)[0];
+                options.dictionaries.splice(1, 0, item);
+                return [{}];
+            },
+            trigger: vi.fn(),
+        };
+
+        Reflect.set(controller, '_settingsController', settingsController);
+        Reflect.set(controller, '_dictionaries', dictionaryInfo);
+        Reflect.set(controller, '_dictionaryEntries', []);
+        Reflect.set(controller, '_dictionaryEntryContainer', container);
+        Reflect.set(controller, '_dictionaryModalBody', {scrollTop: 0, scroll: vi.fn()});
+        Reflect.set(controller, '_updateDictionariesEnabledWarnings', vi.fn());
+        Reflect.set(controller, 'isDictionaryInTaskQueue', vi.fn(() => false));
+        Reflect.set(controller, 'instantiateTemplateFragment', () => /** @type {DocumentFragment} */ (template.content.cloneNode(true)));
+
+        controller._createDictionaryEntry(0, dictionaryInfo[0], 'https://example.test/a.zip', null);
+        controller._createDictionaryEntry(1, dictionaryInfo[1], 'https://example.test/b.zip', null);
+        const oldEntries = [...Reflect.get(controller, '_dictionaryEntries')];
+        const cleanup = oldEntries.map((entry) => vi.spyOn(entry, 'cleanup'));
+
+        await controller.moveDictionaryOptions(0, 1);
+        await controller.moveDictionaryOptions(0, 1);
+
+        const entries = Reflect.get(controller, '_dictionaryEntries');
+        expect(entries.map((entry) => entry.dictionaryTitle)).toEqual(['A', 'B']);
+        expect(entries.map((entry) => entry.updateDownloadUrl)).toEqual([
+            'https://example.test/a.zip', 'https://example.test/b.zip',
+        ]);
+        expect(container.querySelectorAll('.dictionary-item')).toHaveLength(2);
+        expect(container.dataset.count).toBe('2');
+        expect(cleanup.every((spy) => spy.mock.calls.length === 1)).toBe(true);
+        expect(oldEntries.every((entry) => entry._nodes.length === 0)).toBe(true);
     });
 
     test('scan inputs controller skips broken entries during rebuild', async ({window}) => {

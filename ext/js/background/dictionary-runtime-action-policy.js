@@ -23,6 +23,7 @@
  *   timeoutClass: DictionaryRuntimeTimeoutClass,
  *   retryable: boolean,
  *   requiresDatabase: boolean,
+ *   rejectDuringImport?: boolean,
  * }} DictionaryRuntimeActionPolicy
  */
 
@@ -38,6 +39,7 @@ const standardReadPolicy = Object.freeze({
     timeoutClass: /** @type {const} */ ('standard'),
     retryable: false,
     requiresDatabase: true,
+    rejectDuringImport: true,
 });
 
 const maintenancePolicy = Object.freeze({
@@ -45,6 +47,7 @@ const maintenancePolicy = Object.freeze({
     timeoutClass: /** @type {const} */ ('maintenance'),
     retryable: false,
     requiresDatabase: true,
+    rejectDuringImport: true,
 });
 
 const cooperativeMaintenanceReadPolicy = Object.freeze({
@@ -57,13 +60,13 @@ const cooperativeMaintenanceReadPolicy = Object.freeze({
 /** @type {Readonly<Record<string, Readonly<DictionaryRuntimeActionPolicy>>>} */
 export const dictionaryRuntimeActionPolicies = Object.freeze({
     databasePrepareOffscreen: Object.freeze({
-        concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false,
+        concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false, rejectDuringImport: true,
     }),
     getDatabaseRuntimeStateOffscreen: Object.freeze({
-        concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false,
+        concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false, rejectDuringImport: true,
     }),
     databaseSetSuspendedOffscreen: Object.freeze({
-        concurrency: 'exclusive', timeoutClass: 'maintenance', retryable: false, requiresDatabase: false,
+        concurrency: 'exclusive', timeoutClass: 'maintenance', retryable: false, requiresDatabase: false, rejectDuringImport: true,
     }),
     getDictionaryInfoOffscreen: standardReadPolicy,
     deleteDictionaryOffscreen: maintenancePolicy,
@@ -71,7 +74,7 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     getDictionaryCountsOffscreen: standardReadPolicy,
     getDictionaryTermProbeOffscreen: standardReadPolicy,
     findTermsBulkOffscreen: Object.freeze({
-        concurrency: 'exclusive', timeoutClass: 'maintenance', retryable: false, requiresDatabase: true,
+        concurrency: 'exclusive', timeoutClass: 'maintenance', retryable: false, requiresDatabase: true, rejectDuringImport: true,
     }),
     // Cache warming only reads persistent state and uses the same coalesced
     // cache loaders as visible lookups. Let interactive reads run alongside it
@@ -88,7 +91,7 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     findTermsStructuredOffscreen: interactiveLookupPolicy,
     getTermFrequenciesOffscreen: interactiveLookupPolicy,
     clearDatabaseCachesOffscreen: Object.freeze({
-        concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false,
+        concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false, rejectDuringImport: true,
     }),
     cancelDictionaryImportOffscreen: Object.freeze({
         concurrency: 'cancellation', timeoutClass: 'standard', retryable: false, requiresDatabase: false,
@@ -106,6 +109,7 @@ const unknownActionPolicy = Object.freeze({
     timeoutClass: /** @type {const} */ ('standard'),
     retryable: false,
     requiresDatabase: false,
+    rejectDuringImport: true,
 });
 
 /**

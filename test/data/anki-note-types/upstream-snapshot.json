@@ -1,0 +1,142 @@
+{
+    "checkedAt": "2026-09-14T18:12:17Z",
+    "captureRun": "https://github.com/ManabiIO/manabitan/actions/runs/34879349946",
+    "results": [
+        {
+            "id": "kiku",
+            "status": "downloaded",
+            "revision": "v2.1.0",
+            "sha256": "e6a3f1d37ee530e07c02ea7f6d64d98f5702e9691c2ccc512ea288b372cef045",
+            "models": [
+                {
+                    "name": "Basic",
+                    "fields": [
+                        "Front",
+                        "Back"
+                    ]
+                },
+                {
+                    "name": "Kiku",
+                    "fields": [
+                        "Expression",
+                        "ExpressionFurigana",
+                        "ExpressionReading",
+                        "ExpressionAudio",
+                        "RelatedExpression",
+                        "SelectionText",
+                        "MainDefinition",
+                        "DefinitionPicture",
+                        "Sentence",
+                        "SentenceFurigana",
+                        "SentenceTranslation",
+                        "SentenceAudio",
+                        "Picture",
+                        "Glossary",
+                        "Hint",
+                        "IsWordAndSentenceCard",
+                        "IsClickCard",
+                        "IsSentenceCard",
+                        "IsAudioCard",
+                        "PitchPosition",
+                        "PitchCategories",
+                        "Frequency",
+                        "FreqSort",
+                        "MiscInfo"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "lapis",
+            "status": "downloaded",
+            "revision": "1.7.0",
+            "sha256": "85984f8c6f1263e2882c364bbbfdee4bce9e1e03f053a0a5b0ccc6cd90de0088",
+            "models": [
+                {
+                    "name": "Lapis",
+                    "fields": [
+                        "Expression",
+                        "ExpressionFurigana",
+                        "ExpressionReading",
+                        "ExpressionAudio",
+                        "SelectionText",
+                        "MainDefinition",
+                        "DefinitionPicture",
+                        "Sentence",
+                        "SentenceFurigana",
+                        "SentenceAudio",
+                        "Picture",
+                        "Glossary",
+                        "Hint",
+                        "IsWordAndSentenceCard",
+                        "IsClickCard",
+                        "IsSentenceCard",
+                        "IsAudioCard",
+                        "PitchPosition",
+                        "PitchCategories",
+                        "Frequency",
+                        "FreqSort",
+                        "MiscInfo"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "senren",
+            "status": "downloaded",
+            "revision": "v5.1.0",
+            "sha256": "319367e09af9dfd698c3e1a953d404151222d6680ecf6b6acc5d68499578e659",
+            "models": [
+                {
+                    "name": "Senren",
+                    "fields": [
+                        "word",
+                        "reading",
+                        "sentence",
+                        "sentenceFurigana",
+                        "sentenceTranslation",
+                        "sentenceCard",
+                        "audioCard",
+                        "notes",
+                        "hint",
+                        "picture",
+                        "wordAudio",
+                        "sentenceAudio",
+                        "selectionText",
+                        "definition",
+                        "glossary",
+                        "pitchAccents",
+                        "pitchPositions",
+                        "pitchCategories",
+                        "frequencies",
+                        "freqSort",
+                        "miscInfo",
+                        "dictionaryPreference"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "crop-theft-vocab",
+            "status": "downloaded",
+            "revision": "88865e6209251b1baaaca7219be0dd6073e74cb8",
+            "sha256": "64bfd51195d38a92139b0eabae12881b016713cc08ac473dae0ba4ea5b74f939",
+            "models": [
+                {
+                    "name": "Crop Theft Vocab",
+                    "fields": [
+                        "Word",
+                        "Reading",
+                        "PitchPattern",
+                        "Audio",
+                        "Definition",
+                        "Example Sentence",
+                        "Example Target",
+                        "Frequency",
+                        "Notes"
+                    ]
+                }
+            ]
+        }
+    ]
+}

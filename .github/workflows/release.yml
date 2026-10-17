@@ -1,10 +1,11 @@
 name: release
 on:
   release:
-    types: [published, released]
+    types: [released]
 permissions: {}
 jobs:
   build:
+    if: github.event.release.prerelease == false && github.event.release.draft == false
     runs-on: ubuntu-latest
     permissions:
       actions: write
