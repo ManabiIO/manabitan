@@ -45,6 +45,14 @@ export type ModificationSwap = {
     path2: string;
 };
 
+export type ModificationMoveDictionary = {
+    action: 'moveDictionary';
+    path: string;
+    currentIndex: number;
+    targetIndex: number;
+    expectedNames: string[];
+};
+
 export type ModificationSplice = {
     action: 'splice';
     path: string;
@@ -69,6 +77,7 @@ export type Modification = (
     ModificationSet |
     ModificationDelete |
     ModificationSwap |
+    ModificationMoveDictionary |
     ModificationSplice |
     ModificationPush |
     ModificationRemoveDictionary
@@ -82,6 +91,8 @@ export type ScopedModificationDelete = ModificationDelete & OptionsScope;
 
 export type ScopedModificationSwap = ModificationSwap & OptionsScope;
 
+export type ScopedModificationMoveDictionary = ModificationMoveDictionary & OptionsScope;
+
 export type ScopedModificationSplice = ModificationSplice & OptionsScope;
 
 export type ScopedModificationPush = ModificationPush & OptionsScope;
@@ -92,6 +103,7 @@ export type ScopedModification = (
     ScopedModificationSet |
     ScopedModificationDelete |
     ScopedModificationSwap |
+    ScopedModificationMoveDictionary |
     ScopedModificationSplice |
     ScopedModificationPush |
     ScopedModificationRemoveDictionary

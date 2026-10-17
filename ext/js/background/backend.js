@@ -3146,6 +3146,33 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                 accessor.swap(ObjectPropertyAccessor.getPathArray(path1), ObjectPropertyAccessor.getPathArray(path2));
                 return true;
             }
+            case 'moveDictionary':
+            {
+                const {path, currentIndex, targetIndex, expectedNames} = target;
+                if (typeof path !== 'string') { throw new Error('Invalid path'); }
+                if (!/^dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
+                if (!Number.isInteger(currentIndex) || !Number.isInteger(targetIndex)) { throw new Error('Invalid dictionary settings index'); }
+                if (!Array.isArray(expectedNames) || !expectedNames.every((name) => typeof name === 'string')) { throw new Error('Invalid expected dictionary names'); }
+                const dictionariesValue = accessor.get(ObjectPropertyAccessor.getPathArray(path));
+                if (!Array.isArray(dictionariesValue)) { throw new Error('Invalid target type'); }
+                const dictionaries = /** @type {unknown[]} */ (dictionariesValue);
+                const currentNames = dictionaries.map((entry) => (
+                    isObjectNotArray(entry) ? entry.name : void 0
+                ));
+                if (
+                    currentNames.length !== expectedNames.length ||
+                    currentNames.some((name, index) => name !== expectedNames[index])
+                ) {
+                    throw new Error('Dictionary order changed; reload settings and try again');
+                }
+                if (currentIndex < 0 || currentIndex >= dictionaries.length || targetIndex < 0 || targetIndex >= dictionaries.length) { throw new Error('Invalid dictionary settings index'); }
+                if (currentIndex !== targetIndex) {
+                    const dictionary = dictionaries[currentIndex];
+                    dictionaries.splice(currentIndex, 1);
+                    dictionaries.splice(targetIndex, 0, dictionary);
+                }
+                return true;
+            }
             case 'splice':
             {
                 const {path, start, deleteCount, items} = target;

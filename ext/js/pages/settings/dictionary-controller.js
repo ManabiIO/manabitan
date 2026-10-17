@@ -870,14 +870,15 @@ export class DictionaryController {
             return;
         }
 
-        const item = dictionaries.splice(currentIndex, 1)[0];
-        dictionaries.splice(targetIndex, 0, item);
-
-        await this._settingsController.modifyProfileSettings([{
-            action: 'set',
+        const dictionaryNames = dictionaries.map(({name}) => name);
+        const results = await this._settingsController.modifyProfileSettings([{
+            action: 'moveDictionary',
             path: 'dictionaries',
-            value: dictionaries,
+            currentIndex,
+            targetIndex,
+            expectedNames: dictionaryNames,
         }]);
+        if (results[0]?.error) { return; }
 
         /** @type {import('settings-controller').EventArgument<'dictionarySettingsReordered'>} */
         const event = {source: this};
