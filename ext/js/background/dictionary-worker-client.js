@@ -118,9 +118,15 @@ export class DictionaryWorkerClient {
     async invoke(action, params = {}, transferables = []) {
         const policy = getDictionaryRuntimeActionPolicy(action);
         const attemptCount = policy.retryable && transferables.length === 0 ? 2 : 1;
+        const timeoutMs = timeoutByClass[policy.timeoutClass];
+        const deadline = timeoutMs === null ? null : globalThis.performance.now() + timeoutMs;
         for (let attempt = 0; attempt < attemptCount; ++attempt) {
+            const attemptTimeoutMs = deadline === null ? null : Math.max(0, deadline - globalThis.performance.now());
+            if (attemptTimeoutMs === 0) {
+                throw new DictionaryWorkerTransportError(`Timed out waiting for ${this._context} response to ${action} after ${String(timeoutMs)}ms`);
+            }
             try {
-                return await this._invokeOnce(action, params, transferables);
+                return await this._invokeOnce(action, params, transferables, attemptTimeoutMs);
             } catch (error) {
                 if (!(error instanceof DictionaryWorkerTransportError) || !error.retryable || attempt + 1 >= attemptCount) {
                     throw error;
@@ -141,12 +147,12 @@ export class DictionaryWorkerClient {
      * @param {string} action
      * @param {import('core').SerializableObject} params
      * @param {Transferable[]} transferables
+     * @param {number|null} timeoutMs
      * @returns {Promise<TReturn>}
      */
-    async _invokeOnce(action, params, transferables) {
+    async _invokeOnce(action, params, transferables, timeoutMs) {
         const worker = this._getWorkerForRequest();
         const id = ++this._requestId;
-        const timeoutMs = timeoutByClass[getDictionaryRuntimeActionPolicy(action).timeoutClass];
         return await new Promise((resolve, reject) => {
             /** @type {ReturnType<typeof globalThis.setTimeout>|null} */
             let timeoutId = null;

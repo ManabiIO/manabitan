@@ -12,6 +12,7 @@ on:
     branches: [main]
   pull_request:
   merge_group:
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -427,6 +428,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
 
       - name: Build Firefox Android package
         run: npm run build -- --target firefox-android
@@ -436,6 +439,7 @@ jobs:
         env:
           MANABITAN_ANDROID_AUTO_INSTALL_FIREFOX: '1'
           MANABITAN_ANDROID_FIREFOX_PACKAGE: org.mozilla.firefox
+          MANABITAN_ANDROID_ENABLE_FIREFOX_REMOTE_DEBUGGING: '1'
           MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS: '45000'
           MANABITAN_E2E_STRICT_RUNTIME: '1'
         with:

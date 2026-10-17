@@ -247,7 +247,7 @@ export class RecommendedSettingsController {
                 break;
             }
             default: {
-                log.error(new Error(`Unknown modification: ${modification}`));
+                log.error(new Error(`Unknown modification: ${modification.action}`));
             }
         }
     }

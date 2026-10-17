@@ -25,6 +25,9 @@ const logWarn = vi.fn();
 const logError = vi.fn();
 const importControl = vi.hoisted(() => ({
     waitForCancellation: false,
+    holdImport: false,
+    importGate: /** @type {Promise<void>|null} */ (null),
+    releaseImport: /** @type {(() => void)|null} */ (null),
     started: false,
     waitForLookupRelease: false,
     lookupStarted: false,
@@ -127,6 +130,15 @@ vi.mock('../ext/js/dictionary/dictionary-importer.js', () => ({
          */
         async importDictionary() {
             importControl.cancelledAtStart = this._isCancelled();
+            if (importControl.holdImport) {
+                importControl.started = true;
+                this._onProgress({nextStep: false, index: 1, count: 2});
+                if (importControl.importGate === null) {
+                    importControl.importGate = new Promise((resolve) => { importControl.releaseImport = resolve; });
+                }
+                await importControl.importGate;
+                return {result: {title: 'Fixture'}, errors: [], debug: null};
+            }
             if (importControl.waitForCancellation) {
                 importControl.started = true;
                 while (!this._isCancelled()) {
@@ -147,12 +159,16 @@ vi.mock('../ext/js/dictionary/dictionary-importer.js', () => ({
 
 describe('Offscreen dictionary worker import response port handling', () => {
     afterEach(() => {
+        vi.useRealTimers();
         vi.resetModules();
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
         logWarn.mockReset();
         logError.mockReset();
         importControl.waitForCancellation = false;
+        importControl.holdImport = false;
+        importControl.importGate = null;
+        importControl.releaseImport = null;
         importControl.started = false;
         importControl.waitForLookupRelease = false;
         importControl.lookupStarted = false;
@@ -167,6 +183,73 @@ describe('Offscreen dictionary worker import response port handling', () => {
         importControl.cancelledAtStart = false;
         importControl.translatorClearCount = 0;
         importControl.lastFindTermsOptions = null;
+    });
+
+    test('rejects standard reads while an import owns the worker instead of timing out queued work', async () => {
+        importControl.holdImport = true;
+        /** @type {Map<string, (event: MessageEvent) => void>} */
+        const listeners = new Map();
+        const workerPostMessage = vi.fn();
+        /** @type {((event: MessageEvent) => void)|null} */
+        let clientMessageListener = null;
+        const worker = {
+            postMessage: vi.fn((message, ports) => {
+                listeners.get('message')?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({data: message, ports})));
+            }),
+            terminate: vi.fn(),
+            addEventListener: vi.fn((type, listener) => {
+                if (type === 'message') { clientMessageListener = listener; }
+            }),
+        };
+        vi.stubGlobal('Worker', class { constructor() { Object.assign(this, worker); } });
+        vi.stubGlobal('self', {
+            addEventListener: vi.fn((type, listener) => { listeners.set(type, listener); }),
+            /** @param {unknown} message */
+            postMessage: (message) => {
+                workerPostMessage(message);
+                clientMessageListener?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({data: message})));
+            },
+        });
+        await import('../ext/js/background/offscreen-dictionary-worker.js');
+        const {DictionaryWorkerClient} = await import('../ext/js/background/dictionary-worker-client.js');
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const importPort = {postMessage: vi.fn(), close: vi.fn()};
+        client.post('importDictionaryOffscreen', {operationId: importOperationId1, archiveContent: new Blob(['dictionary']), details: {}}, [importPort]);
+        await vi.waitFor(() => expect(importControl.started).toBe(true));
+        expect(importPort.postMessage).toHaveBeenCalledWith({type: 'progress', progress: {nextStep: false, index: 1, count: 2}});
+
+        /** @type {[string, Record<string, unknown>][]} */
+        const importTimeActions = [
+            ['databasePrepareOffscreen', {}],
+            ['clearDatabaseCachesOffscreen', {}],
+            ['databasePurgeOffscreen', {}],
+            ['deleteDictionaryOffscreen', {dictionaryTitle: 'Fixture'}],
+            ['databaseRefreshOffscreen', {}],
+            ['databaseSetSuspendedOffscreen', {suspended: false}],
+            ['findTermsBulkOffscreen', {termList: [], dictionaryNames: [], matchType: 'exact'}],
+            ['unknownWorkerAction', {}],
+        ];
+        for (const [action, params] of importTimeActions) {
+            const rejected = client.invoke(action, params);
+            await expect(rejected).rejects.toThrow(`Cannot execute ${action}: dictionary import is in progress`);
+            expect(worker.terminate).not.toHaveBeenCalled();
+        }
+
+        vi.useFakeTimers();
+        const runtimeState = client.invoke('getDatabaseRuntimeStateOffscreen', {});
+        await expect(runtimeState).rejects.toThrow('Cannot execute getDatabaseRuntimeStateOffscreen: dictionary import is in progress');
+        expect(importPort.close).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(worker.terminate).not.toHaveBeenCalled();
+        expect(importControl.started).toBe(true);
+        expect(workerPostMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: expect.any(Number), result: expect.anything()}));
+        vi.useRealTimers();
+
+        importControl.releaseImport?.();
+        await vi.waitFor(() => expect(importPort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'})));
+        expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({result: undefined}));
+        const afterImport = client.invoke('getDatabaseRuntimeStateOffscreen', {});
+        await expect(afterImport).resolves.toEqual({isPrepared: false, usesFallbackStorage: false, openStorageDiagnostics: null});
     });
 
     test('accepts native structured-clone lookup settings', async () => {
