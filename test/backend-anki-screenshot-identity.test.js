@@ -77,13 +77,15 @@ test('timestamp fallback keeps distinct Anki media payloads under their returned
     try {
         const timestamp = 1_797_000_000_000;
         const storedMedia = new Map();
+        const storeMediaFile = vi.fn(async (fileName, content) => {
+            storedMedia.set(fileName, content);
+            return fileName;
+        });
         const returnedFileNames = await Promise.all([
-            mediaFileNameHashOrTimestamp('yomitan_audio', 'Zmlyc3Q=', '.mp3', null, timestamp),
-            mediaFileNameHashOrTimestamp('yomitan_audio', 'c2Vjb25k', '.mp3', null, timestamp),
+            mediaFileNameHashOrTimestamp('yomitan_audio', 'Zmlyc3Q=', '.mp3', null, timestamp).then((fileName) => storeMediaFile(fileName, 'Zmlyc3Q=')),
+            mediaFileNameHashOrTimestamp('yomitan_audio', 'c2Vjb25k', '.mp3', null, timestamp).then((fileName) => storeMediaFile(fileName, 'c2Vjb25k')),
         ]);
-        for (const [index, fileName] of returnedFileNames.entries()) {
-            storedMedia.set(fileName, ['Zmlyc3Q=', 'c2Vjb25k'][index]);
-        }
+        expect(storeMediaFile).toHaveBeenCalledTimes(2);
         expect(returnedFileNames[0]).not.toBe(returnedFileNames[1]);
         expect(new Set(storedMedia.values())).toEqual(new Set(['Zmlyc3Q=', 'c2Vjb25k']));
     } finally {
