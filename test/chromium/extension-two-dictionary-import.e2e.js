@@ -37,6 +37,7 @@ import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
 import {armBrowserImportTiming} from '../e2e/import-timing.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
+import {runWithReaderFinalization} from '../e2e/reader-finalization.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -2817,7 +2818,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
     ));
     const result = {clicks: [], hover: null, ankiActions: [], minedNote: null};
     let stage = 'configure';
-    try {
+    await runWithReaderFinalization(async () => {
         const options = structuredClone(savedOptions);
         for (const {options: profileOptions} of options.profiles) {
             profileOptions.anki.enable = true;
@@ -3015,30 +3016,37 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
             'Ordinary cat hover must render the real reading',
         );
         assert.match(result.hover.entriesTextPreview, /猫/, 'Ordinary hover must show the cat headword');
-    } catch (error) {
+    }, [async () => {
         const states = [];
-        for (const frame of page.frames()) {
-            if (frame.url().startsWith('chrome-extension:')) {
-                states.push(await frame.evaluate(() => ({
-                    url: location.href,
-                    sentence: history.state?.state?.sentence,
-                    text: document.querySelector('#dictionary-entries')?.textContent?.trim().slice(0, 800),
-                    progress: document.querySelector('#progress-indicator')?.getAttribute('data-active'),
-                    headwords: Array.from(document.querySelectorAll('.headword')).map((node) => ({term: node.querySelector('.headword-term')?.textContent, reading: node.querySelector('.headword-reading')?.textContent})),
-                })).catch(() => null));
-            }
+        await Promise.all(page.frames().filter((frame) => frame.url().startsWith('chrome-extension:')).map(async (frame) => {
+            states.push(await frame.evaluate(() => ({
+                url: location.href,
+                sentence: history.state?.state?.sentence,
+                text: document.querySelector('#dictionary-entries')?.textContent?.trim().slice(0, 800),
+                progress: document.querySelector('#progress-indicator')?.getAttribute('data-active'),
+                headwords: Array.from(document.querySelectorAll('.headword')).map((node) => ({term: node.querySelector('.headword-term')?.textContent, reading: node.querySelector('.headword-reading')?.textContent})),
+            })).catch(() => null));
+        }));
+        console.error(`${e2eLogTag} Reader bridge failure at ${stage}; display=${JSON.stringify(states)}`);
+    }], [async (signal) => {
+        // Navigation must finish before extension-origin RPC, and the mock
+        // server stays available until restoration completes or fails.
+        await page.goto(extensionPageUrl, {timeout: 10_000});
+        signal.throwIfAborted();
+        await send('setAllSettings', {value: savedOptions, source: 'chromium-e2e-reader-bridge-restore'});
+    }, async () => {
+        await ankiServer.close();
+    }], (error, diagnosticResults) => {
+        if (diagnosticResults === null) {
+            console.error(`${e2eLogTag} Reader bridge failure at ${stage}: ${errorMessage(error)}`);
+            return;
         }
-        console.error(`${e2eLogTag} Reader bridge failure at ${stage}: ${errorMessage(error)}; display=${JSON.stringify(states)}`);
-        throw new Error(`Reader bridge ${stage}: ${errorMessage(error)}; display=${JSON.stringify(states)}`, {cause: error});
-    } finally {
-        // Restore settings from an extension-origin page, even if an assertion failed on the lookup site.
-        try {
-            await page.goto(extensionPageUrl);
-            await send('setAllSettings', {value: savedOptions, source: 'chromium-e2e-reader-bridge-restore'});
-        } finally {
-            await ankiServer.close();
-        }
-    }
+        const diagnostics = diagnosticResults.map((outcome) => (
+            outcome.status === 'rejected' ? {status: outcome.status, reason: errorMessage(outcome.reason)} : {status: outcome.status}
+        ));
+        error.message = `Reader bridge ${stage}: ${errorMessage(error)}; diagnostics=${JSON.stringify(diagnostics)}`;
+        console.error(`${e2eLogTag} ${error.message}`);
+    });
     result.ankiActions = mockState.getActionNames();
     assert.deepEqual(
         getWrites(),
@@ -5602,6 +5610,8 @@ async function main() {
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
                 await waitForSettingsPageReady(page);
                 readerBridgeResult = await verifyInstalledReaderLookupBridge(page, localServer, expectedLookupDictionaries);
+                assert.equal(readerBridgeResult?.clicks?.length, 3, 'Reader bridge must return all three verified click results');
+                assert.ok(readerBridgeResult.minedNote, 'Reader bridge must return the explicitly mined note');
             } catch (e) {
                 readerBridgeError = errorMessage(e);
                 verificationErrors.push(`Installed Reader bridge verification failed: ${readerBridgeError}`);
