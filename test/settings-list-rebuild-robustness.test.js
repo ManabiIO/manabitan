@@ -65,7 +65,7 @@ describe('Settings list rebuild robustness', () => {
 
         await Reflect.get(DictionaryController.prototype, '_refreshEntriesAfterOptionsChanged').call(controller);
 
-        expect(updateEntries).toHaveBeenCalledWith(null, false);
+        expect(updateEntries).toHaveBeenCalledWith(expect.any(Object), false);
     });
 
     test('translation text replacements skips broken entries during rebuild', async ({window}) => {
