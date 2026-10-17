@@ -3218,6 +3218,44 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                 }
                 return true;
             }
+            case 'setDefaultProfile':
+            {
+                const {profileId} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown}[]} */ (profilesValue);
+                const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                accessor.set(['profileCurrent'], matches[0]);
+                return matches[0];
+            }
+            case 'swapProfiles':
+            {
+                const {profileId1, profileId2} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId1 !== 'string' || profileId1.length === 0 || typeof profileId2 !== 'string' || profileId2.length === 0 || profileId1 === profileId2) {
+                    throw new Error('Invalid profile IDs');
+                }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown}[]} */ (profilesValue);
+                const findUniqueProfileIndex = (/** @type {string} */ profileId) => {
+                    const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                    if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                    return matches[0];
+                };
+                const index1 = findUniqueProfileIndex(profileId1);
+                const index2 = findUniqueProfileIndex(profileId2);
+                const profileCurrent = accessor.get(['profileCurrent']);
+                if (typeof profileCurrent !== 'number' || !Number.isInteger(profileCurrent) || profileCurrent < 0 || profileCurrent >= profiles.length) { throw new Error('Invalid current profile index'); }
+                accessor.swap(['profiles', index1], ['profiles', index2]);
+                if (profileCurrent === index1 || profileCurrent === index2) {
+                    accessor.set(['profileCurrent'], profileCurrent === index1 ? index2 : index1);
+                }
+                return true;
+            }
             case 'splice':
             {
                 const {path, start, deleteCount, items} = target;
@@ -3857,7 +3895,10 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             throw new Error('Unknown media type for screenshot image');
         }
 
-        const fileName = generateAnkiNoteMediaFileName('yomitan_browser_screenshot', extension, timestamp);
+        // Concurrent saves can share a timestamp while capturing different tabs.
+        // Keep each screenshot distinct so AnkiConnect cannot replace another
+        // note's image under the same media filename.
+        const fileName = generateAnkiNoteMediaFileName('yomitan_browser_screenshot', extension, `${timestamp}_${crypto.randomUUID()}`);
         return await ankiConnect.storeMediaFile(fileName, data);
     }
 

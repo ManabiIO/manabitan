@@ -83,6 +83,8 @@ export class ProfileController {
         this._profileCurrent = 0;
         /** @type {?import('core').TokenObject} */
         this._optionsUpdateToken = null;
+        /** @type {number} */
+        this._defaultProfileWriteGeneration = 0;
         /** @type {?Promise<void>} */
         this._profileNameSaveTail = null;
         /** @type {Map<string|import('settings').Profile, {value: string}>} */
@@ -205,14 +207,44 @@ export class ProfileController {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
 
-        /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileIndex}`;
-        this._profileCurrent = profileIndex;
+        const generation = ++this._defaultProfileWriteGeneration;
+        const viewedProfileIndex = this._settingsController.profileIndex;
+        const viewedProfileId = this._profiles[viewedProfileIndex]?.id;
+        const profileId = profile.id;
+        // Older options notifications may still be fetching a snapshot. Ignore
+        // them so they cannot overwrite the result of this newer user intent.
+        this._optionsUpdateToken = null;
+        try {
+            const results = await this._settingsController.modifyGlobalSettings([{
+                action: 'setDefaultProfile',
+                profileId,
+            }]);
+            if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                throw new Error('Default profile update returned an invalid result');
+            }
+            if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+        } catch (error) {
+            if (generation === this._defaultProfileWriteGeneration) {
+                try {
+                    // SettingsController.refresh() does not await its async
+                    // optionsChanged subscribers. Reconcile directly instead.
+                    await this._onOptionsChanged();
+                } catch (refreshError) {
+                    log.error(refreshError);
+                }
+            }
+            throw error;
+        }
+        if (generation !== this._defaultProfileWriteGeneration) { return; }
 
-        const profileEntry = this._getProfileEntry(profileIndex);
-        if (profileEntry !== null) { profileEntry.setIsDefault(true); }
-
-        this._settingsController.profileIndex = profileIndex;
-        await this._settingsController.setGlobalSetting('profileCurrent', profileIndex);
+        // Changing the default normally switches Settings to that profile.
+        // Keep a profile the user selected while the write was pending.
+        const currentProfileIndex = this._profiles.findIndex((item) => item.id === profileId);
+        if (currentProfileIndex < 0) { return; }
+        if (this._profiles[this._settingsController.profileIndex]?.id === viewedProfileId) {
+            this._settingsController.profileIndex = currentProfileIndex;
+        }
+        await this._onOptionsChanged();
     }
 
     /**
@@ -395,29 +427,20 @@ export class ProfileController {
         if (profile1 === null || profile2 === null || index1 === index2) { return; }
 
         // Get swapped indices
-        const profileCurrent = this._profileCurrent;
-        const profileCurrentNew = this._getSwappedValue(profileCurrent, index1, index2);
-
         const settingsProfileIndex = this._settingsController.profileIndex;
-        const settingsProfileIndexNew = this._getSwappedValue(settingsProfileIndex, index1, index2);
+        const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
+        const viewedProfileId = this._profiles[settingsProfileIndex]?.id;
 
         // Construct settings modifications
         /** @type {import('settings-modifications').Modification[]} */
         const modifications = [{
-            action: 'swap',
-            path1: `profiles[${index1}]`,
-            path2: `profiles[${index2}]`,
+            action: 'swapProfiles',
+            profileId1: profile1.id,
+            profileId2: profile2.id,
         }];
-        if (profileCurrentNew !== profileCurrent) {
-            modifications.push({
-                action: 'set',
-                path: 'profileCurrent',
-                value: profileCurrentNew,
-            });
-        }
 
         // Update state
-        this._profileCurrent = profileCurrentNew;
+        this._profileCurrent = this._getSwappedValue(this._profileCurrent, index1, index2);
 
         this._profiles[index1] = profile2;
         this._profiles[index2] = profile1;
@@ -435,11 +458,25 @@ export class ProfileController {
         this._updateProfileSelectOptions();
 
         // Modify settings
-        await this._settingsController.modifyGlobalSettings(modifications);
+        try {
+            const results = await this._settingsController.modifyGlobalSettings(modifications);
+            if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                throw new Error('Profile reorder returned an invalid result');
+            }
+            if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+        } catch (error) {
+            try {
+                await this._onOptionsChanged();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
+        }
 
         // Update profile index
-        if (settingsProfileIndex !== settingsProfileIndexNew) {
-            this._settingsController.profileIndex = settingsProfileIndexNew;
+        const viewedProfileIndexNew = this._profiles.findIndex(({id}) => id === viewedProfileId);
+        if (viewedProfileIndexNew >= 0 && settingsProfileIndex !== viewedProfileIndexNew && this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration) {
+            this._settingsController.profileIndex = viewedProfileIndexNew;
         }
     }
 
@@ -597,7 +634,7 @@ export class ProfileController {
         const element = /** @type {HTMLSelectElement} */ (e.currentTarget);
         const value = this._tryGetValidProfileIndex(element.value);
         if (value === null) { return; }
-        void this.setDefaultProfile(value);
+        void this.setDefaultProfile(value).catch((error) => { log.error(error); });
     }
 
     /** */
@@ -958,7 +995,7 @@ class ProfileEntry {
     _onIsDefaultRadioChange(e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         if (!element.checked) { return; }
-        void this._profileController.setDefaultProfile(this._index);
+        void this._profileController.setDefaultProfile(this._index).catch((error) => { log.error(error); });
     }
 
     /**
@@ -993,10 +1030,10 @@ class ProfileEntry {
     _onMenuClose(e) {
         switch (e.detail.action) {
             case 'moveUp':
-                void this._profileController.moveProfile(this._index, -1);
+                void this._profileController.moveProfile(this._index, -1).catch((error) => { log.error(error); });
                 break;
             case 'moveDown':
-                void this._profileController.moveProfile(this._index, 1);
+                void this._profileController.moveProfile(this._index, 1).catch((error) => { log.error(error); });
                 break;
             case 'copyFrom':
                 this._profileController.openCopyProfileModal(this._index);
