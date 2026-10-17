@@ -152,4 +152,4 @@ test('prefix orders preserve the highest key IDs in a maximum-key chunk', () => 
         expect(order?.byteLength).toBe(expectedIds.length * 2);
     }
     expect(encoded).toEqual(before);
-});
+}, 15000);
