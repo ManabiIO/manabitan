@@ -195,6 +195,11 @@ export class QueryParser extends EventDispatcher {
         }
     }
 
+    /** Cancel obsolete navigation without losing same-word hover suppression. */
+    cancelPendingSearches() {
+        this._textScanner.cancelPendingSearches();
+    }
+
     // Private
 
     /** */
@@ -302,6 +307,8 @@ export class QueryParser extends EventDispatcher {
         this._parseResults = [];
         this._renderParserSelect();
         const terms = [[{text, reading: ''}]];
+        this._textScanner.cancelPendingSearches();
+        this._textScanner.clearSelection();
         this._queryParser.textContent = '';
         this._queryParser.dataset.parsed = 'false';
         this._queryParser.appendChild(this._createParseResult(terms));
@@ -324,6 +331,8 @@ export class QueryParser extends EventDispatcher {
             return;
         }
         const fragment = this._createParseResult(parseResult.content);
+        this._textScanner.cancelPendingSearches();
+        this._textScanner.clearSelection();
         this._queryParser.replaceChildren(fragment);
         this._queryParser.dataset.parsed = 'true';
     }

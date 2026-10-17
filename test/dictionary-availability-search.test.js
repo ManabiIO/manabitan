@@ -324,7 +324,7 @@ describe('scanner incomplete results', () => {
     });
 
     domTest('partial results retain healthy entries and their matched source span', async ({window}) => {
-        const termsFind = vi.fn().mockResolvedValue({dictionaryEntries: [healthyEntry], originalTextLength: 2, dictionaryAvailability: degraded});
+        const termsFind = vi.fn().mockResolvedValue({dictionaryEntries: [healthyEntry], originalTextLength: 3, dictionaryAvailability: degraded});
         const scanner = createScanner(termsFind, /** @type {Window} */ (/** @type {unknown} */ (window)));
         const source = createSource(window.document);
         const result = await scanner._findDictionaryEntries(source, true, true, optionsContext);

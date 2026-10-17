@@ -16,6 +16,7 @@
  */
 
 import {afterAll, afterEach, expect, test, vi} from 'vitest';
+import {Frontend} from '../ext/js/app/frontend.js';
 import {installReaderLookupIntegration} from '../ext/js/app/reader-lookup-integration.js';
 import {createAnkiNoteData} from '../ext/js/data/anki-note-data-creator.js';
 import {setupDomTest} from './fixtures/dom-test.js';
@@ -88,4 +89,47 @@ test('reader UTF-16 offsets become code-point mining offsets and preserve the in
 test('cloze body length counts supplementary characters once', () => {
     const entry = createEntry('𠮷野', 'よしの');
     expect(createCloze(entry, {text: '😀𠮷野です。', offset: 1})).toMatchObject({prefix: '😀', body: '𠮷野', suffix: 'です。'});
+});
+
+test.each([false, true])('reader popup preserves dictionary repair warnings (has exact results: %s)', async (hasResults) => {
+    vi.stubGlobal('matchMedia', () => ({matches: false}));
+    /** @type {import('../ext/js/app/reader-lookup-bridge.js').ReaderLookup} */
+    const request = {protocol: 1, term: 'cat', reading: 'cat', surface: 'cat', sentence: 'cat', offset: 0};
+    /** @type {import('translator').DictionaryAvailability[]} */
+    const dictionaryAvailability = [{dictionary: 'Repairing', generationId: 'generation-1', status: 'repairing', reason: 'index missing'}];
+    /** @type {import('translator').DictionaryAvailability[]|undefined} */
+    let availability = dictionaryAvailability;
+    const showPopup = vi.fn().mockResolvedValue(void 0);
+    const frontend = /** @type {Frontend} */ (Object.create(Frontend.prototype));
+    Object.assign(frontend, {
+        _options: {general: {enable: true}},
+        _disabledOverride: false,
+        _getOptionsContext: async () => ({url: 'https://example.test/'}),
+        _application: {api: {termsFind: async () => ({
+            dictionaryEntries: hasResults ? [createEntry(request.term, request.reading)] : [],
+            dictionaryAvailability: availability,
+        })}},
+        _textScanner: {setCurrentTextSource: vi.fn()},
+        _showPopupContent: showPopup,
+        showContentCompleted: async () => {},
+    });
+    const bridge = installReaderLookupIntegration(frontend);
+    try {
+        const anchor = document.createElement('span');
+        anchor.textContent = request.surface;
+        await Reflect.get(bridge, '_show')(request, anchor, () => true, () => () => {});
+        expect(showPopup).toHaveBeenCalledOnce();
+        const details = showPopup.mock.calls[0][2];
+        expect(details.content.dictionaryAvailability).toEqual(dictionaryAvailability);
+        expect(details.content.dictionaryEntries).toHaveLength(hasResults ? 1 : 0);
+        expect(document.documentElement.dataset.readerLookupStatus).toBe('incomplete');
+
+        availability = void 0;
+        await Reflect.get(bridge, '_show')(request, anchor, () => true, () => () => {});
+        expect(showPopup.mock.calls[1][2].content.dictionaryAvailability).toBeUndefined();
+        expect(document.documentElement.dataset.readerLookupStatus).toBe(hasResults ? 'shown' : 'no-exact-match');
+    } finally {
+        bridge.dispose();
+        delete document.documentElement.dataset.readerLookupStatus;
+    }
 });
