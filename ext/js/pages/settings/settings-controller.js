@@ -37,6 +37,8 @@ export class SettingsController extends EventDispatcher {
         this._application = application;
         /** @type {number} */
         this._profileIndex = 0;
+        /** @type {number} */
+        this._profileIndexChangeGeneration = 0;
         /** @type {string} */
         this._source = generateId(16);
         /** @type {Set<import('settings-controller').PageExitPrevention>} */
@@ -64,6 +66,10 @@ export class SettingsController extends EventDispatcher {
     /** @type {number} */
     get profileIndex() {
         return this._profileIndex;
+    }
+
+    get profileIndexChangeGeneration() {
+        return this._profileIndexChangeGeneration;
     }
 
     set profileIndex(value) {
@@ -311,6 +317,7 @@ export class SettingsController extends EventDispatcher {
      * @param {boolean} canUpdateProfileIndex
      */
     _setProfileIndex(value, canUpdateProfileIndex) {
+        if (this._profileIndex !== value) { this._profileIndexChangeGeneration++; }
         this._profileIndex = value;
         this.trigger('optionsContextChanged', {});
         void this._onOptionsUpdatedInternal(canUpdateProfileIndex);

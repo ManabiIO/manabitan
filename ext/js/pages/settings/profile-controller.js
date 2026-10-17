@@ -332,6 +332,7 @@ export class ProfileController {
         // Get indices
         let profileCurrentNew = this._profileCurrent;
         const settingsProfileIndex = this._settingsController.profileIndex;
+        const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
         const remainingProfileCount = this._profiles.length - 1;
 
         // Construct settings modifications
@@ -422,6 +423,7 @@ export class ProfileController {
 
         // Get swapped indices
         const settingsProfileIndex = this._settingsController.profileIndex;
+        const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
         const viewedProfileId = this._profiles[settingsProfileIndex]?.id;
 
         // Construct settings modifications
@@ -468,7 +470,7 @@ export class ProfileController {
 
         // Update profile index
         const viewedProfileIndexNew = this._profiles.findIndex(({id}) => id === viewedProfileId);
-        if (viewedProfileIndexNew >= 0 && settingsProfileIndex !== viewedProfileIndexNew) {
+        if (viewedProfileIndexNew >= 0 && settingsProfileIndex !== viewedProfileIndexNew && this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration) {
             this._settingsController.profileIndex = viewedProfileIndexNew;
         }
     }

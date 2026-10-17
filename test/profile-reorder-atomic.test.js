@@ -26,6 +26,7 @@ function createHarness() {
         profiles: [
             {id: 'a', name: 'A', options: {}, conditionGroups: []},
             {id: 'b', name: 'B', options: {}, conditionGroups: []},
+            {id: 'c', name: 'C', options: {}, conditionGroups: []},
         ],
     };
     Reflect.set(backend, '_options', options);
@@ -42,7 +43,10 @@ function createHarness() {
     Reflect.set(backend, '_getModifySettingObject', () => Reflect.get(backend, '_options'));
 
     const settingsController = {
-        profileIndex: 0,
+        _profileIndex: 0,
+        profileIndexChangeGeneration: 0,
+        get profileIndex() { return this._profileIndex; },
+        set profileIndex(value) { if (this._profileIndex !== value) { this._profileIndex = value; this.profileIndexChangeGeneration++; } },
         setGlobalSetting(/** @type {string} */ path, /** @type {unknown} */ value) {
             return backend._modifySettings([{action: 'set', path, value, scope: 'global', optionsContext: null}], 'settings');
         },
@@ -80,6 +84,21 @@ test('default profile identity survives a queued reorder while its save is pendi
 
     const {profileCurrent, profiles} = /** @type {{profileCurrent: number, profiles: {id: string}[]}} */ (Reflect.get(backend, '_options'));
     expect(profiles[profileCurrent]?.id).toBe('b');
+});
+
+test('profile reorder preserves a newer explicit viewed profile choice', async () => {
+    const {controller, saves, settingsController} = createHarness();
+    settingsController.profileIndex = 1;
+    const reorderSave = deferred();
+    saves.push(reorderSave);
+
+    const reorder = controller.swapProfiles(1, 2);
+    await flush();
+    settingsController.profileIndex = 0;
+    reorderSave.resolve();
+    await reorder;
+
+    expect(settingsController.profileIndex).toBe(0);
 });
 
 test('an unknown profile identity fails closed without changing settings', async () => {
