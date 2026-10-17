@@ -34,6 +34,8 @@ export type ModificationSet = {
     action: 'set';
     path: string;
     value: unknown;
+    /** Optional JSON snapshot precondition, checked inside the options mutation queue. */
+    expectedValue?: unknown;
 };
 
 export type ModificationDelete = {
