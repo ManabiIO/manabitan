@@ -683,7 +683,7 @@ describe('ProfileController default profile write failures', () => {
         let persistedDefault = 0;
         const settingsController = {
             profileIndex: 0,
-            setGlobalSetting: vi.fn()
+            modifyGlobalSettings: vi.fn()
                 .mockReturnValueOnce(firstWrite.promise)
                 .mockReturnValueOnce(secondWrite.promise),
             getOptionsFull: vi.fn(async () => ({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: persistedDefault})),
@@ -714,7 +714,7 @@ describe('ProfileController default profile write failures', () => {
         const secondWrite = deferred();
         const settingsController = {
             profileIndex: 0,
-            setGlobalSetting: vi.fn().mockReturnValueOnce(firstWrite.promise).mockReturnValueOnce(secondWrite.promise),
+            modifyGlobalSettings: vi.fn().mockReturnValueOnce(firstWrite.promise).mockReturnValueOnce(secondWrite.promise),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: 0}),
         };
         const activeSelect = {value: '0'};
@@ -734,7 +734,7 @@ describe('ProfileController default profile write failures', () => {
         const activeSelect = {value: '0'};
         const settingsController = {
             profileIndex: 0,
-            setGlobalSetting: vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'profile write rejected', stack: ''}}]),
+            modifyGlobalSettings: vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'profile write rejected', stack: ''}}]),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a', name: 'First'}, {id: 'b', name: 'Second'}], profileCurrent: 0}),
         };
         configure(controller, settingsController, activeSelect);
@@ -754,7 +754,7 @@ describe('ProfileController default profile write failures', () => {
         const activeSelect = {value: '0'};
         const settingsController = {
             profileIndex: 0,
-            setGlobalSetting: vi.fn(write),
+            modifyGlobalSettings: vi.fn(write),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}], profileCurrent: 0}),
         };
         configure(controller, settingsController, activeSelect);
@@ -767,7 +767,7 @@ describe('ProfileController default profile write failures', () => {
         const refreshError = new Error('refresh failed');
         const settingsController = {
             profileIndex: 0,
-            setGlobalSetting: vi.fn().mockRejectedValue(new Error('write failed')),
+            modifyGlobalSettings: vi.fn().mockRejectedValue(new Error('write failed')),
             getOptionsFull: vi.fn().mockRejectedValue(refreshError),
         };
         configure(controller, settingsController, {value: '0'});
@@ -780,7 +780,7 @@ describe('ProfileController default profile write failures', () => {
         const write = deferred();
         const settingsController = {
             profileIndex: 0,
-            setGlobalSetting: vi.fn(() => write.promise),
+            modifyGlobalSettings: vi.fn(() => write.promise),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: 0}),
         };
         configure(controller, settingsController, {value: '0'});
@@ -797,7 +797,7 @@ describe('ProfileController default profile write failures', () => {
         const write = deferred();
         const settingsController = {
             profileIndex: 0,
-            setGlobalSetting: vi.fn(() => write.promise),
+            modifyGlobalSettings: vi.fn(() => write.promise),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: 1}),
         };
         configure(controller, settingsController, {value: '0'});
