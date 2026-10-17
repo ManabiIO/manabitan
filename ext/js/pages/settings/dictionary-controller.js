@@ -684,6 +684,10 @@ export class DictionaryController {
         this._dictionaryEntries = [];
         /** @type {?import('core').TokenObject} */
         this._databaseStateToken = null;
+        /** @type {?import('core').TokenObject} */
+        this._entriesUpdateToken = null;
+        /** @type {?import('core').TokenObject} */
+        this._dictionaryReorderToken = null;
         /** @type {boolean} */
         this._checkingUpdates = false;
         /** @type {boolean} */
@@ -858,9 +862,12 @@ export class DictionaryController {
      * @param {number} targetIndex
      */
     async moveDictionaryOptions(currentIndex, targetIndex) {
+        /** @type {import('core').TokenObject} */
+        const reorderToken = {};
+        this._dictionaryReorderToken = reorderToken;
         const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        if (this._dictionaryReorderToken !== reorderToken || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const {dictionaries} = options;
         if (
             currentIndex < 0 || currentIndex >= dictionaries.length ||
@@ -880,20 +887,29 @@ export class DictionaryController {
             expectedNames: dictionaryNames,
             expectedEntries,
         }]);
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        if (this._dictionaryReorderToken !== reorderToken || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         if (results[0]?.error) {
             await this._settingsController.refresh();
-            if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+            if (this._dictionaryReorderToken !== reorderToken || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
             return;
         }
 
+        // Options events during the write may have rendered an earlier snapshot.
+        // Start a fresh committed read now so it includes those field changes.
+        /** @type {import('core').TokenObject} */
+        const renderToken = {};
+        this._entriesUpdateToken = renderToken;
         const committedOptions = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        if (
+            this._dictionaryReorderToken !== reorderToken ||
+            this._entriesUpdateToken !== renderToken ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) { return; }
 
         /** @type {import('settings-controller').EventArgument<'dictionarySettingsReordered'>} */
         const event = {source: this};
         this._settingsController.trigger('dictionarySettingsReordered', event);
-
+        if (this._entriesUpdateToken !== renderToken) { return; }
         this._updateCurrentEntries(committedOptions);
     }
 
@@ -1026,11 +1042,14 @@ export class DictionaryController {
      * @returns {Promise<void>}
      */
     async _refreshEntriesAfterOptionsChanged() {
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._entriesUpdateToken = token;
         try {
             // The cached dictionary list can be older than an in-flight import.
             // Reconcile settings only after a databaseUpdated event supplies a
             // fresh list; an options-only refresh must remain render-only.
-            await this._updateEntries(null, false);
+            await this._updateEntries(token, false);
         } catch (error) {
             log.error(error);
         }
@@ -1051,14 +1070,15 @@ export class DictionaryController {
         /** @type {?import('core').TokenObject} */
         const token = {};
         this._databaseStateToken = token;
+        this._entriesUpdateToken = token;
         this._dictionaries = null;
         try {
             const dictionaries = await this._settingsController.getDictionaryInfo();
             if (this._databaseStateToken !== token) { return; }
             this._dictionaries = dictionaries;
 
-            await this._updateEntries(null);
-            if (this._databaseStateToken !== token) { return; }
+            await this._updateEntries(token);
+            if (this._databaseStateToken !== token || !this._isEntriesUpdateCurrent(token)) { return; }
 
             if (this._onDictionariesUpdate) {
                 this._onDictionariesUpdate();
@@ -1108,11 +1128,11 @@ export class DictionaryController {
 
         if (reconcileSettings) {
             await DictionaryController.ensureDictionarySettings(this._settingsController, dictionaries, void 0, true, false);
-            if (token !== null && this._databaseStateToken !== token) { return; }
+            if (token !== null && !this._isEntriesUpdateCurrent(token)) { return; }
         }
 
         const options = await this._settingsController.getOptions();
-        if (token !== null && this._databaseStateToken !== token) { return; }
+        if (token !== null && !this._isEntriesUpdateCurrent(token)) { return; }
         this._updateDictionariesEnabledWarnings(options);
 
         /** @type {Map<string, import('dictionary-importer').Summary>} */
@@ -1132,12 +1152,21 @@ export class DictionaryController {
     }
 
     /**
+     * @param {import('core').TokenObject} token
+     * @returns {boolean}
+     */
+    _isEntriesUpdateCurrent(token) {
+        return this._entriesUpdateToken === token;
+    }
+
+    /**
      * @param {import('settings').ProfileOptions} options
      */
     _updateCurrentEntries(options) {
         const dictionariesModalBodyScrollY = this._dictionaryModalBody.scrollTop;
         const dictionaries = this._dictionaries;
         if (dictionaries === null) { return; }
+        this._entriesUpdateToken = {};
 
         for (const dictionaryEntry of this._dictionaryEntries) {
             dictionaryEntry.cleanup();

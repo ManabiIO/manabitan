@@ -98,6 +98,41 @@ function getDictionaries(/** @type {Backend} */ backend, /** @type {number} */ p
     );
 }
 
+function enableProductionRender(/** @type {ReturnType<typeof createHarness>} */ harness) {
+    const {controller, settingsController} = harness;
+    /** @type {string[]} */
+    const renders = [];
+    Reflect.set(controller, '_dictionaries', [
+        {title: 'A'}, {title: 'B'}, {title: 'X'}, {title: 'Y'},
+    ]);
+    Reflect.set(controller, '_dictionaryModalBody', {scrollTop: 0, scroll: vi.fn()});
+    Reflect.set(controller, '_dictionaryEntries', []);
+    Reflect.set(controller, '_createDictionaryEntry', (index, info) => renders.push(`${index}:${info.title}`));
+    Reflect.set(controller, '_updateDictionariesEnabledWarnings', vi.fn());
+    Reflect.set(controller, '_updateCurrentEntries', DictionaryController.prototype._updateCurrentEntries.bind(controller));
+    // Keep the real options refresh method and render method; stub only entry-list loading.
+    /** @type {Promise<void>[]} */
+    const updates = [];
+    Reflect.set(controller, '_testEntryUpdatePromises', updates);
+    Reflect.set(controller, '_updateEntries', (token) => {
+        const update = (async () => {
+            const options = await settingsController.getOptions();
+            if (token !== null && typeof token !== 'undefined' && !controller._isEntriesUpdateCurrent(token)) { return; }
+            controller._updateCurrentEntries(options);
+        })();
+        updates.push(update);
+        return update;
+    });
+    return renders;
+}
+
+function setDictionaryOrder(/** @type {Backend} */ backend, /** @type {string[]} */ names) {
+    const options = /** @type {{profiles: {options: import('settings').ProfileOptions}[]}} */ (Reflect.get(backend, '_options'));
+    const dictionaries = options.profiles[0].options.dictionaries;
+    const byName = new Map(dictionaries.map((dictionary) => [dictionary.name, dictionary]));
+    options.profiles[0].options.dictionaries = /** @type {import('settings').DictionariesOptions} */ (names.map((name) => byName.get(name)));
+}
+
 test('reorder preserves concurrent dictionary field edits and duplicate aliases', async () => {
     const {backend, controller, deferNextRead} = createHarness();
     const readGate = deferNextRead();
@@ -192,4 +227,103 @@ test('malformed moveDictionary action returns an error without persisting', asyn
     expect(results[0]?.error).toBeDefined();
     expect(saveOptions.save).not.toHaveBeenCalled();
     expect(getDictionaries(backend).map(({name}) => name)).toEqual(['A', 'B', 'A']);
+});
+
+test('newer options render owns publication when an older committed reorder read completes', async () => {
+    const harness = createHarness();
+    const {backend, controller, settingsController} = harness;
+    const renders = enableProductionRender(harness);
+    const originalGetOptions = settingsController.getOptions.bind(settingsController);
+    const oldRead = createDeferred();
+    let readCount = 0;
+    settingsController.getOptions = async () => {
+        const snapshot = await originalGetOptions();
+        ++readCount;
+        if (readCount === 2) { await oldRead.promise; }
+        return snapshot;
+    };
+    const reorder = controller.moveDictionaryOptions(0, 1);
+    await vi.waitFor(() => { expect(readCount).toBe(2); });
+
+    setDictionaryOrder(backend, ['A', 'A', 'B']);
+    controller._onOptionsChanged({options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: []})), optionsContext: {index: 0}});
+    await vi.waitFor(() => { expect(renders).toEqual(['0:A', '1:A', '2:B']); });
+    renders.length = 0;
+    oldRead.resolve();
+    await reorder;
+
+    expect(renders).toEqual([]);
+    expect(settingsController.trigger).not.toHaveBeenCalledWith('dictionarySettingsReordered', expect.anything());
+});
+
+test('newer reorder prevents an older committed read from rendering or announcing', async () => {
+    const harness = createHarness();
+    const {controller, settingsController} = harness;
+    const renders = enableProductionRender(harness);
+    const originalGetOptions = settingsController.getOptions.bind(settingsController);
+    const oldRead = createDeferred();
+    let readCount = 0;
+    settingsController.getOptions = async () => {
+        const snapshot = await originalGetOptions();
+        ++readCount;
+        if (readCount === 2) { await oldRead.promise; }
+        return snapshot;
+    };
+    const first = controller.moveDictionaryOptions(0, 1);
+    await vi.waitFor(() => { expect(readCount).toBe(2); });
+    await controller.moveDictionaryOptions(1, 0);
+    expect(renders).toEqual(['0:A', '1:B', '2:A']);
+    expect(settingsController.trigger).toHaveBeenCalledTimes(1);
+
+    renders.length = 0;
+    oldRead.resolve();
+    await first;
+    expect(renders).toEqual([]);
+    expect(settingsController.trigger).toHaveBeenCalledTimes(1);
+});
+
+test('an options refresh pending during a write cannot replace the committed reorder render', async () => {
+    const harness = createHarness();
+    const {backend, controller, settingsController} = harness;
+    const renders = enableProductionRender(harness);
+    const oldRefreshRead = createDeferred();
+    const originalGetOptions = settingsController.getOptions.bind(settingsController);
+    let holdNextRead = false;
+    settingsController.getOptions = async () => {
+        const snapshot = await originalGetOptions();
+        if (holdNextRead) {
+            holdNextRead = false;
+            await oldRefreshRead.promise;
+        }
+        return snapshot;
+    };
+
+    holdNextRead = true;
+    controller._onOptionsChanged({options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: []})), optionsContext: {index: 0}});
+    await Promise.resolve();
+    const writeGate = harness.deferModification();
+    const reorder = controller.moveDictionaryOptions(0, 1);
+    await Promise.resolve();
+    await Promise.resolve();
+    writeGate.resolve();
+    await reorder;
+    expect(renders).toEqual(['0:B', '1:A', '2:A']);
+
+    renders.length = 0;
+    oldRefreshRead.resolve();
+    await Promise.all(/** @type {Promise<void>[]} */ (Reflect.get(controller, '_testEntryUpdatePromises')));
+    expect(renders).toEqual([]);
+});
+
+test('a reorder render with a null dictionary cache does not invalidate the pending database refresh', () => {
+    const {controller} = createHarness();
+    const pendingDatabaseRefresh = {};
+    Reflect.set(controller, '_dictionaries', null);
+    Reflect.set(controller, '_dictionaryModalBody', {scrollTop: 0, scroll: vi.fn()});
+    Reflect.set(controller, '_entriesUpdateToken', pendingDatabaseRefresh);
+    Reflect.set(controller, '_updateCurrentEntries', DictionaryController.prototype._updateCurrentEntries.bind(controller));
+
+    controller._updateCurrentEntries(/** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: []})));
+
+    expect(Reflect.get(controller, '_entriesUpdateToken')).toBe(pendingDatabaseRefresh);
 });
