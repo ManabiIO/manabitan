@@ -85,7 +85,8 @@ export class SortFrequencyDictionaryController {
             if (
                 request !== this._optionsRenderRequest ||
                 this._getDictionaryInfoToken !== token ||
-                this._settingsController.getOptionsContext().index !== optionsContext.index
+                this._settingsController.getOptionsContext().index !== optionsContext.index ||
+                this._settingsController.getOptionsContext().profileId !== optionsContext.profileId
             ) {
                 return;
             }
@@ -163,17 +164,17 @@ export class SortFrequencyDictionaryController {
     async _setSortFrequencyDictionaryValue(value) {
         const request = ++this._dictionaryWriteRequest;
         const revision = this._optionsRevision;
-        const {index} = this._settingsController.getOptionsContext();
+        const {index, profileId} = this._settingsController.getOptionsContext();
         this._sortFrequencyDictionaryOrderContainerNode.hidden = (value === null);
         try {
-            const saved = await this._saveProfileSetting('general.sortFrequencyDictionary', value, index, () => request === this._dictionaryWriteRequest);
-            if (!saved || this._settingsController.getOptionsContext().index !== index || revision !== this._optionsRevision) { return; }
+            const saved = await this._saveProfileSetting('general.sortFrequencyDictionary', value, index, profileId ?? void 0, () => request === this._dictionaryWriteRequest && revision === this._optionsRevision);
+            if (!saved || this._settingsController.getOptionsContext().index !== index || this._settingsController.getOptionsContext().profileId !== profileId || revision !== this._optionsRevision) { return; }
             this._confirmedDictionary = value !== null ? value : '';
             if (request === this._dictionaryWriteRequest && value !== null) {
                 await this._autoUpdateOrder(value);
             }
         } catch (error) {
-            if (request === this._dictionaryWriteRequest && revision === this._optionsRevision && this._settingsController.getOptionsContext().index === index) {
+            if (request === this._dictionaryWriteRequest && revision === this._optionsRevision && this._settingsController.getOptionsContext().index === index && this._settingsController.getOptionsContext().profileId === profileId) {
                 this._sortFrequencyDictionarySelect.value = this._confirmedDictionary;
                 this._sortFrequencyDictionaryOrderContainerNode.hidden = this._confirmedDictionary === '';
             }
@@ -187,14 +188,14 @@ export class SortFrequencyDictionaryController {
     async _setSortFrequencyDictionaryOrderValue(value) {
         const request = ++this._orderWriteRequest;
         const revision = this._optionsRevision;
-        const {index} = this._settingsController.getOptionsContext();
+        const {index, profileId} = this._settingsController.getOptionsContext();
         try {
-            const saved = await this._saveProfileSetting('general.sortFrequencyDictionaryOrder', value, index, () => request === this._orderWriteRequest);
-            if (saved && revision === this._optionsRevision && this._settingsController.getOptionsContext().index === index) {
+            const saved = await this._saveProfileSetting('general.sortFrequencyDictionaryOrder', value, index, profileId ?? void 0, () => request === this._orderWriteRequest && revision === this._optionsRevision);
+            if (saved && revision === this._optionsRevision && this._settingsController.getOptionsContext().index === index && this._settingsController.getOptionsContext().profileId === profileId) {
                 this._confirmedOrder = value;
             }
         } catch (error) {
-            if (request === this._orderWriteRequest && revision === this._optionsRevision && this._settingsController.getOptionsContext().index === index) {
+            if (request === this._orderWriteRequest && revision === this._optionsRevision && this._settingsController.getOptionsContext().index === index && this._settingsController.getOptionsContext().profileId === profileId) {
                 this._sortFrequencyDictionaryOrderSelect.value = this._confirmedOrder;
             }
             throw error;
@@ -205,12 +206,13 @@ export class SortFrequencyDictionaryController {
      * @param {string} path
      * @param {unknown} value
      * @param {number|undefined} index
+     * @param {string|undefined} profileId
      * @param {() => boolean} isCurrent
      * @returns {Promise<boolean>}
      */
-    async _saveProfileSetting(path, value, index, isCurrent) {
+    async _saveProfileSetting(path, value, index, profileId, isCurrent) {
         const operation = this._settingWriteTail.then(async () => {
-            if (!isCurrent() || this._settingsController.getOptionsContext().index !== index) { return false; }
+            if (!isCurrent() || this._settingsController.getOptionsContext().index !== index || this._settingsController.getOptionsContext().profileId !== profileId) { return false; }
             const results = await this._settingsController.setProfileSetting(path, value);
             if (!Array.isArray(results) || results.length !== 1 || typeof results[0] !== 'object' || results[0] === null) {
                 throw new Error('Frequency setting update returned an invalid result');
@@ -233,6 +235,7 @@ export class SortFrequencyDictionaryController {
             order === null ||
             requestId !== this._autoOrderRequestId ||
             this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._settingsController.getOptionsContext().profileId !== optionsContext.profileId ||
             this._confirmedDictionary !== dictionary ||
             this._sortFrequencyDictionarySelect.value !== dictionary
         ) {
