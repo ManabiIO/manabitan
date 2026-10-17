@@ -166,6 +166,70 @@ describe('database lookup generation ownership', () => {
 });
 
 
+describe('parallel term hydration failure ownership', () => {
+    test.each([false, true].flatMap((invalidate) => ['error', 'undefined'].map((rejection) => ({invalidate, rejection}))))(
+        'joins active workers and stops new groups after failure (invalidate=$invalidate, rejection=$rejection)',
+        async ({invalidate, rejection}) => {
+            const database = new DictionaryDatabase();
+            const started = deferPromise();
+            const failure = deferPromise();
+            const peers = deferPromise();
+            const expectedError = rejection === 'undefined' ? void 0 : new Error('controlled content read failure');
+            const contentStore = Reflect.get(database, '_termContentStore');
+            const recordStore = Reflect.get(database, '_termRecordStore');
+            const records = new Map(Array.from({length: 10}, (_, index) => {
+                const id = index + 1;
+                return [id, {...row, id, expression: `term-${id}`, entryContentOffset: -1, entryContentLength: 0}];
+            }));
+            vi.spyOn(contentStore, 'ensureLoadedForRead').mockResolvedValue();
+            vi.spyOn(contentStore, 'warmSlices').mockResolvedValue();
+            vi.spyOn(recordStore, 'getByIdsAsync').mockResolvedValue(records);
+            const deserialize = database._deserializeTermRow.bind(database);
+            let active = 0;
+            let entered = 0;
+            const read = vi.spyOn(database, '_deserializeTermRow').mockImplementation(async (value) => {
+                ++active;
+                if (++entered === 8) { started.resolve(void 0); }
+                try {
+                    if (value.id === 1) {
+                        await failure.promise;
+                        throw expectedError;
+                    }
+                    await peers.promise;
+                    return await deserialize(value);
+                } finally {
+                    --active;
+                }
+            });
+            let settled = false;
+            const request = database._fetchTermRowsByIds(records.keys()).then(
+                (value) => { settled = true; return {value, error: null}; },
+                (error) => { settled = true; return {value: null, error}; },
+            );
+            await started.promise;
+            failure.resolve(void 0);
+            // Flush the failure's microtasks while the other seven reads stay paused.
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+            const settledBeforePeers = settled;
+            if (invalidate) { database._clearBulkImportRuntimeCaches(); }
+            peers.resolve(void 0);
+            const result = await request;
+            // Join test-owned work even against the failing predecessor.
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+            expect(settledBeforePeers).toBe(false);
+            expect(result.value).toBeNull();
+            expect(result.error).toBe(expectedError);
+            expect(active).toBe(0);
+            expect(read).toHaveBeenCalledTimes(8);
+            expect(Reflect.get(database, '_termRowCache').size).toBe(0);
+            read.mockRestore();
+            vi.spyOn(recordStore, 'getByIdsAsync').mockResolvedValue(new Map([...records].filter(([id]) => id === 2)));
+            expect((await database._fetchTermRowsByIds([2])).get(2)?.expression).toBe('term-2');
+        },
+    );
+});
+
+
 describe('zero-term dictionary lookup state', () => {
     test('does not treat a metadata-only dictionary as a missing term-record shard', async () => {
         const database = new DictionaryDatabase();
