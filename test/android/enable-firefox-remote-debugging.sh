@@ -102,13 +102,28 @@ fi
 package_disabled=0
 restore_package_state() {
     if [[ "${package_disabled}" == "1" ]]; then
-        adb -s "${device}" shell "pm enable --user 0 ${package}" >/dev/null || true
         if [[ "${package_state}" == "0" ]]; then
-            adb -s "${device}" shell "pm default-state --user 0 ${package}" >/dev/null || true
+            adb -s "${device}" shell "pm default-state --user 0 ${package}" >/dev/null || {
+                echo "Failed to restore ${package} to its default enabled state." >&2
+                return 1
+            }
+        else
+            adb -s "${device}" shell "pm enable --user 0 ${package}" >/dev/null || {
+                echo "Failed to restore ${package} to its enabled state." >&2
+                return 1
+            }
         fi
     fi
 }
-trap restore_package_state EXIT
+finish_package_state() {
+    local status="$?"
+    trap - EXIT
+    if ! restore_package_state; then
+        [[ "${status}" != "0" ]] || status=1
+    fi
+    exit "${status}"
+}
+trap finish_package_state EXIT
 
 adb -s "${device}" shell "am force-stop --user 0 ${package}"
 package_disabled=1
@@ -156,16 +171,12 @@ for entry in list(root):
 ET.SubElement(root, "boolean", {"name": key, "value": "true"})
 tree.write(file_path, encoding="utf-8", xml_declaration=True)
 PY
-    local remote_temp="/data/local/tmp/manabitan-fenix-preferences-${$}-$(basename "${remote_path}")"
+    local remote_temp="${remote_path}.manabitan-${$}.tmp"
     adb -s "${device}" push "${local_path}" "${remote_temp}" >/dev/null
-    adb -s "${device}" shell "cat ${remote_temp} > ${remote_path}"
-    adb -s "${device}" shell "chown ${file_uid}:${file_gid} ${remote_path}"
-    adb -s "${device}" shell "chmod ${file_mode} ${remote_path}"
-    if adb -s "${device}" shell command -v restorecon >/dev/null 2>&1; then
-        adb -s "${device}" shell "restorecon ${remote_path}"
-    else
-        adb -s "${device}" shell "chcon ${file_context} ${remote_path}"
-    fi
+    adb -s "${device}" shell "chown ${file_uid}:${file_gid} ${remote_temp}"
+    adb -s "${device}" shell "chmod ${file_mode} ${remote_temp}"
+    adb -s "${device}" shell "chcon ${file_context} ${remote_temp}"
+    adb -s "${device}" shell "mv -f ${remote_temp} ${remote_path}"
 }
 
 write_preference_file "${preferences}" "${local_dir}/fenix_preferences.xml"
