@@ -2818,7 +2818,7 @@ async function verifyInstalledReaderLookupBridge(page, localServer, expectedDict
     ));
     const result = {clicks: [], hover: null, ankiActions: [], minedNote: null};
     let stage = 'configure';
-    return await runWithReaderFinalization(async () => {
+    await runWithReaderFinalization(async () => {
         const options = structuredClone(savedOptions);
         for (const {options: profileOptions} of options.profiles) {
             profileOptions.anki.enable = true;
@@ -5610,6 +5610,8 @@ async function main() {
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
                 await waitForSettingsPageReady(page);
                 readerBridgeResult = await verifyInstalledReaderLookupBridge(page, localServer, expectedLookupDictionaries);
+                assert.equal(readerBridgeResult?.clicks?.length, 3, 'Reader bridge must return all three verified click results');
+                assert.ok(readerBridgeResult.minedNote, 'Reader bridge must return the explicitly mined note');
             } catch (e) {
                 readerBridgeError = errorMessage(e);
                 verificationErrors.push(`Installed Reader bridge verification failed: ${readerBridgeError}`);
