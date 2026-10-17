@@ -3601,7 +3601,10 @@ null;
                 if (!Array.isArray(items)) { throw new Error('Invalid items'); }
                 const array = accessor.get(ObjectPropertyAccessor.getPathArray(path));
                 if (!Array.isArray(array)) { throw new Error('Invalid target type'); }
-                return array.splice(start, deleteCount, ...items);
+                const nextArray = clone(array);
+                const removed = nextArray.splice(start, deleteCount, ...items);
+                accessor.set(ObjectPropertyAccessor.getPathArray(path), nextArray);
+                return removed;
             }
             case 'removeDictionary':
             {

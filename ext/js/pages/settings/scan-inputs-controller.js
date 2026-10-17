@@ -18,16 +18,21 @@
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {log} from '../../core/log.js';
-import {normalizeModifier} from '../../dom/document-util.js';
+import {convertElementValueToNumber, normalizeModifier} from '../../dom/document-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
+import {ObjectPropertyAccessor} from '../../general/object-property-accessor.js';
+import {HotkeyUtil} from '../../input/hotkey-util.js';
 import {KeyboardMouseInputField} from './keyboard-mouse-input-field.js';
 
+/** @typedef {import('settings').ScanningInput} ScanningInput */
+/** @typedef {{generation: number, context: import('settings').OptionsContext}} Owner */
+
 export class ScanInputsController {
-    /**
-     * @param {import('./settings-controller.js').SettingsController} settingsController
-     */
+    /** @param {import('./settings-controller.js').SettingsController} settingsController */
     constructor(settingsController) {
-        /** @type {import('./settings-controller.js').SettingsController} */
+        /**
+         *
+         */
         this._settingsController = settingsController;
         /** @type {?import('environment').OperatingSystem} */
         this._os = null;
@@ -35,49 +40,183 @@ export class ScanInputsController {
         this._container = querySelectorNotNull(document, '#scan-input-list');
         /** @type {HTMLButtonElement} */
         this._addButton = querySelectorNotNull(document, '#scan-input-add');
-        /** @type {?NodeListOf<HTMLElement>} */
-        this._scanningInputCountNodes = null;
-        /** @type {ScanInputField[]} */
+        /** @type {NodeListOf<HTMLElement>} */
+        this._scanningInputCountNodes = document.querySelectorAll('.scanning-input-count');
+        /** @type {(ScanInputField|null)[]} */
         this._entries = [];
+        /** @type {?import('settings').OptionsContext} */
+        this._viewContext = null;
+        /** @type {?import('settings').OptionsContext} */
+        this._snapshotContext = null;
+        /** @type {?{owner: Owner, expected: ScanningInput[], next: ScanningInput[], updateStructure: (() => void)|null, applied: boolean}} */
+        this._inflightSave = null;
+        /**
+         *
+         */
+        this._viewGeneration = 0;
+        /**
+         *
+         */
+        this._readGeneration = 0;
+        /** @type {ScanningInput[]} */
+        this._savedInputs = [];
+        /** @type {Promise<void>} */
+        this._mutationTail = Promise.resolve();
     }
 
-    /** */
+    /** @returns {Promise<void>} */
     async prepare() {
         const {platform: {os}} = await this._settingsController.application.api.getEnvironmentInfo();
         this._os = os;
-
-        this._scanningInputCountNodes = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.scanning-input-count'));
-
-        this._addButton.addEventListener('click', this._onAddButtonClick.bind(this), false);
+        this._addButton.addEventListener('click', this._onAddButtonClick.bind(this));
         this._settingsController.on('scanInputsChanged', this._onScanInputsChanged.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
-
+        this._settingsController.on('optionsContextChanged', this._onOptionsContextChanged.bind(this));
         await this.refresh();
+    }
+
+    /** @returns {Promise<void>} */
+    async refresh() {
+        const generation = ++this._readGeneration;
+        const context = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (generation !== this._readGeneration || !this._sameContext(context, this._settingsController.getOptionsContext())) { return; }
+        this._onOptionsChanged({options, optionsContext: context});
+    }
+
+    /** @param {import('settings-controller').EventArgument<'optionsChanged'>} details */
+    _onOptionsChanged({options, optionsContext}) {
+        if (!this._sameContext(optionsContext, this._settingsController.getOptionsContext())) { return; }
+        ++this._readGeneration;
+        ++this._viewGeneration;
+        this._viewContext = {...optionsContext};
+        this._snapshotContext = {...optionsContext};
+        this._savedInputs = structuredClone(options.scanning.inputs);
+        for (const entry of this._entries) { entry?.cleanup(); }
+        this._entries = [];
+        for (const [index, row] of this._savedInputs.entries()) { this._createEntry(row, index); }
+        this._updateCounts();
+    }
+
+    /** @returns {void} */
+    _onOptionsContextChanged() {
+        ++this._readGeneration;
+        ++this._viewGeneration;
+        this._viewContext = null;
+        this._snapshotContext = null;
+    }
+
+    /** @param {import('settings-controller').EventArgument<'scanInputsChanged'>} details */
+    _onScanInputsChanged({source, mutation}) {
+        if (source === this) { return; }
+        if (typeof mutation !== 'undefined' && this._applyKnownMutation(mutation)) { return; }
+        void this.refresh().catch((error) => log.error(error));
+    }
+
+    /**
+     * @param {import('settings-controller').ScanInputsMutation} mutation
+     * @returns {boolean}
+     */
+    _applyKnownMutation(mutation) {
+        const {optionsContext, expectedInputs, inputs, previousIndices} = mutation;
+        if (this._snapshotContext === null || !this._sameContext(this._snapshotContext, optionsContext) || !this._sameContext(optionsContext, this._settingsController.getOptionsContext()) || previousIndices.length !== inputs.length) { return false; }
+        let previous = -1;
+        for (const index of previousIndices) {
+            if (index === null) { continue; }
+            if (!Number.isInteger(index) || index <= previous || index >= expectedInputs.length) { return false; }
+            previous = index;
+        }
+        const expected = JSON.stringify(expectedInputs);
+        if (JSON.stringify(this._savedInputs) !== expected) {
+            const flight = this._inflightSave;
+            if (flight === null || !this._owns(flight.owner) || JSON.stringify(this._savedInputs) !== JSON.stringify(flight.expected) || expected !== JSON.stringify(flight.next)) { return false; }
+            this._savedInputs = structuredClone(flight.next);
+            if (flight.updateStructure === null) {
+                this._adoptInputs(flight.next);
+            } else if (!flight.applied) {
+                flight.applied = true;
+                flight.updateStructure();
+            }
+        }
+        ++this._readGeneration;
+        this._viewContext = {...optionsContext};
+        const oldEntries = this._entries;
+        const used = new Set(previousIndices);
+        for (const [index, entry] of oldEntries.entries()) {
+            if (!used.has(index)) {
+                entry?.cleanup();
+            }
+        }
+        this._savedInputs = structuredClone(inputs);
+        this._entries = previousIndices.map((index) => (index === null ? null : oldEntries[index]));
+        for (const [index, row] of inputs.entries()) {
+            if (previousIndices[index] === null) {
+                this._createEntry(row, index);
+            } else {
+                const entry = this._entries[index];
+                entry?.setIndex(index);
+                entry?.adoptData(row, true);
+            }
+        }
+        /** @type {Element|null} */
+        let anchor = null;
+        for (let index = this._entries.length - 1; index >= 0; --index) {
+            const node = this._entries[index]?.node;
+            if (!node) { continue; }
+            if (node.nextElementSibling !== anchor) { this._container.insertBefore(node, anchor); }
+            anchor = node;
+        }
+        this._updateCounts();
+        return true;
+    }
+
+    /** @param {MouseEvent} event */
+    _onAddButtonClick(event) {
+        event.preventDefault();
+        void this.addInput().catch((error) => log.error(error));
+    }
+
+    /** @returns {Promise<void>} */
+    async addInput() {
+        const owner = this.captureOwner();
+        if (owner === null) { return; }
+        await this._enqueue(async () => {
+            if (!this._owns(owner)) { return; }
+            const row = ScanInputsController.createDefaultMouseInput('', '');
+            const next = [...structuredClone(this._savedInputs), row];
+            if (await this._saveInputs(next, owner, () => {
+                this._createEntry(row, next.length - 1);
+                this._updateCounts();
+            })) {
+                const modal = this._addButton.closest('.modal');
+                if (modal !== null) {
+                    const scroll = querySelectorNotNull(modal, '.modal-body');
+                    scroll.scrollTop = scroll.scrollHeight;
+                }
+            }
+        });
     }
 
     /**
      * @param {number} index
-     * @returns {boolean}
+     * @param {ScanInputField|null|undefined} [entry]
+     * @returns {Promise<boolean>}
      */
-    removeInput(index) {
-        if (index < 0 || index >= this._entries.length) { return false; }
-        const input = this._entries[index];
-        input.cleanup();
-        this._entries.splice(index, 1);
-        for (let i = index, ii = this._entries.length; i < ii; ++i) {
-            this._entries[i].index = i;
-        }
-        this._updateCounts();
-        void this._modifyProfileSettings([{
-            action: 'splice',
-            path: 'scanning.inputs',
-            start: index,
-            deleteCount: 1,
-            items: [],
-        }]).catch(() => {
-            void this.refresh();
+    async removeInput(index, entry = this._entries[index]) {
+        const owner = this.captureOwner();
+        if (owner === null || entry === null || typeof entry === 'undefined') { return false; }
+        return await this._enqueue(async () => {
+            if (!this.ownsEntry(entry, owner)) { return false; }
+            const currentIndex = entry.index;
+            const next = structuredClone(this._savedInputs);
+            next.splice(currentIndex, 1);
+            return await this._saveInputs(next, owner, () => {
+                const [removed] = this._entries.splice(currentIndex, 1);
+                removed?.cleanup();
+                for (let i = currentIndex; i < this._entries.length; ++i) { this._entries[i]?.setIndex(i); }
+                this._updateCounts();
+            });
         });
-        return true;
     }
 
     /**
@@ -85,126 +224,237 @@ export class ScanInputsController {
      * @param {string} property
      * @param {unknown} value
      * @param {boolean} event
+     * @param {ScanInputField|null|undefined} [entry]
+     * @returns {Promise<boolean>}
      */
-    async setProperty(index, property, value, event) {
-        const path = `scanning.inputs[${index}].${property}`;
-        await this._settingsController.setProfileSetting(path, value);
-        if (event) {
-            this._triggerScanInputsChanged();
-        }
+    async setProperty(index, property, value, event, entry = this._entries[index]) {
+        const owner = this.captureOwner();
+        if (owner === null || entry === null || typeof entry === 'undefined' || !this.ownsEntry(entry, owner)) { return false; }
+        const externalRevision = entry.getExternalRevision(property);
+        return await this._enqueue(async () => {
+            for (let attempt = 0; attempt < 2; ++attempt) {
+                if (!this.ownsEntry(entry, owner) || entry.getExternalRevision(property) !== externalRevision) { return false; }
+                const expected = JSON.stringify(this._savedInputs);
+                const next = structuredClone(this._savedInputs);
+                new ObjectPropertyAccessor(next[entry.index]).set(ObjectPropertyAccessor.getPathArray(property), value);
+                if (await this._saveInputs(next, owner, null, event || property.startsWith('types.'))) {
+                    entry.adoptData(next[entry.index]);
+                    return true;
+                }
+                if (JSON.stringify(this._savedInputs) === expected) { return false; }
+            }
+            return false;
+        });
     }
 
     /**
      * @param {string} name
      * @returns {Element}
      */
-    instantiateTemplate(name) {
-        return this._settingsController.instantiateTemplate(name);
-    }
-
-    /** */
-    async refresh() {
-        const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        this._onOptionsChanged({options, optionsContext});
-    }
-
-    // Private
+    instantiateTemplate(name) { return this._settingsController.instantiateTemplate(name); }
 
     /**
-     * @param {import('settings-controller').EventArgument<'scanInputsChanged'>} details
+     * @param {ScanInputField} entry
+     * @returns {boolean}
      */
-    _onScanInputsChanged({source}) {
-        if (source === this) { return; }
-        void this.refresh();
+    isEntryCurrent(entry) {
+        const owner = this.captureOwner();
+        return owner !== null && this.ownsEntry(entry, owner);
     }
 
     /**
-     * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
+     * @param {ScanningInput[]} next
+     * @param {Owner} owner
+     * @param {?(() => void)} [updateStructure]
+     * @param {boolean} [publish]
+     * @returns {Promise<boolean>}
      */
-    _onOptionsChanged({options}) {
-        const {inputs} = options.scanning;
-
-        for (let i = this._entries.length - 1; i >= 0; --i) {
-            this._entries[i].cleanup();
-        }
-        this._entries.length = 0;
-
-        for (let i = 0, ii = inputs.length; i < ii; ++i) {
-            this._addOption(i, inputs[i]);
-        }
-
-        this._updateCounts();
+    async _saveInputs(next, owner, updateStructure = null, publish = true) {
+        if (!this._owns(owner)) { return false; }
+        const expected = structuredClone(this._savedInputs);
+        const flight = {owner, expected, next, updateStructure, applied: false};
+        this._inflightSave = flight;
+        const applyStructure = updateStructure === null ?
+null :
+() => {
+    if (!flight.applied) {
+        flight.applied = true;
+        updateStructure();
     }
-
-    /**
-     * @param {MouseEvent} e
-     */
-    _onAddButtonClick(e) {
-        e.preventDefault();
-
-        const index = this._entries.length;
-        const scanningInput = ScanInputsController.createDefaultMouseInput('', '');
-        this._addOption(index, scanningInput);
-        this._updateCounts();
-        void this._modifyProfileSettings([{
-            action: 'splice',
-            path: 'scanning.inputs',
-            start: index,
-            deleteCount: 0,
-            items: [scanningInput],
-        }]).catch(() => {
-            void this.refresh();
-        });
-
-        // Scroll to bottom
-        const button = /** @type {HTMLElement} */ (e.currentTarget);
-        const modalContainer = /** @type {HTMLElement} */ (button.closest('.modal'));
-        /** @type {HTMLElement} */
-        const scrollContainer = querySelectorNotNull(modalContainer, '.modal-body');
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-    }
-
-    /**
-     * @param {number} index
-     * @param {import('settings').ScanningInput} scanningInput
-     */
-    _addOption(index, scanningInput) {
-        if (this._os === null || this._container === null) { return; }
-        const field = new ScanInputField(this, index, this._os);
+};
         try {
-            field.prepare(this._container, scanningInput);
-        } catch (e) {
-            log.error(e);
-            field.cleanup();
-            return;
-        }
-        this._entries.push(field);
-    }
-
-    /** */
-    _updateCounts() {
-        const stringValue = `${this._entries.length}`;
-        for (const node of /** @type {NodeListOf<HTMLElement>} */ (this._scanningInputCountNodes)) {
-            node.textContent = stringValue;
+            let results;
+            try {
+                results = await this._settingsController.modifySettings([{
+                    action: 'set',
+                    path: 'scanning.inputs',
+                    value: next,
+                    expectedValue: expected,
+                    scope: 'profile',
+                    profileId: 'profileId' in owner.context ? owner.context.profileId : null,
+                    optionsContext: owner.context,
+                }]);
+            } catch (error) {
+                await this._recoverInputs(owner, expected, next, applyStructure);
+                throw error;
+            }
+            const response = results?.[0];
+            if (response?.error) {
+                const data = 'data' in response.error ? response.error.data : null;
+                if (data !== null && typeof data === 'object' && 'code' in data && data.code === 'stale') { await this._recoverInputs(owner, expected, next, applyStructure); }
+                return false;
+            }
+            if (!Array.isArray(results) || results.length !== 1 || !Array.isArray(response?.result) || JSON.stringify(response.result) !== JSON.stringify(next)) {
+                await this._recoverInputs(owner, expected, next, applyStructure);
+                throw new Error('Invalid scan input settings response');
+            }
+            if (!this._owns(owner)) {
+                if (this._canReconcileSave(owner, expected)) {
+                    ++this._readGeneration;
+                    if (applyStructure === null) {
+                        this._adoptInputs(next);
+                    } else {
+                        this._savedInputs = structuredClone(next);
+                        applyStructure();
+                    }
+                    if (publish) { this._triggerScanInputsChanged(); }
+                }
+                return false;
+            }
+            const saved = JSON.stringify(this._savedInputs);
+            if (saved !== JSON.stringify(expected) && saved !== JSON.stringify(next)) {
+                await this._recoverInputs(owner, expected, next, applyStructure);
+                return false;
+            }
+            ++this._readGeneration;
+            this._savedInputs = structuredClone(next);
+            applyStructure?.();
+            if (publish) { this._triggerScanInputsChanged(); }
+            return true;
+        } finally {
+            if (this._inflightSave === flight) { this._inflightSave = null; }
         }
     }
 
     /**
-     * @param {import('settings-modifications').Modification[]} targets
+     * @param {Owner} owner
+     * @param {ScanningInput[]} expected
+     * @param {ScanningInput[]} next
+     * @param {?(() => void)} updateStructure
+     * @returns {Promise<void>}
      */
-    async _modifyProfileSettings(targets) {
-        await this._settingsController.modifyProfileSettings(targets);
-        this._triggerScanInputsChanged();
+    async _recoverInputs(owner, expected, next, updateStructure) {
+        const recoveryOwner = this._owns(owner) ? owner : (this._canReconcileSave(owner, expected) ? this.captureOwner() : null);
+        if (recoveryOwner === null) { return; }
+        this._viewContext = null;
+        const generation = ++this._readGeneration;
+        try {
+            const options = await this._settingsController.getOptions();
+            if (recoveryOwner.generation !== this._viewGeneration || generation !== this._readGeneration || !this._sameContext(recoveryOwner.context, this._settingsController.getOptionsContext())) { return; }
+            const actual = options.scanning.inputs;
+            const serialized = JSON.stringify(actual);
+            if (serialized === JSON.stringify(expected) || serialized === JSON.stringify(next) || serialized === JSON.stringify(this._savedInputs)) {
+                this._viewContext = {...recoveryOwner.context};
+                if (updateStructure !== null && serialized === JSON.stringify(next) && serialized !== JSON.stringify(expected)) {
+                    this._savedInputs = structuredClone(actual);
+                    updateStructure();
+                } else {
+                    this._adoptInputs(actual);
+                }
+            } else {
+                this._onOptionsChanged({options, optionsContext: recoveryOwner.context});
+            }
+            this._triggerScanInputsChanged();
+        } catch (error) {
+            // Keep writes blocked until a verified refresh, retaining the save error.
+            log.error(error);
+        }
     }
 
-    /** */
-    _triggerScanInputsChanged() {
-        /** @type {import('settings-controller').EventArgument<'scanInputsChanged'>} */
-        const event = {source: this};
-        this._settingsController.trigger('scanInputsChanged', event);
+    /**
+     * @param {Owner} owner
+     * @param {ScanningInput[]} expected
+     * @returns {boolean}
+     */
+    _canReconcileSave(owner, expected) {
+        return this._viewContext !== null && this._sameContext(this._viewContext, owner.context) && this._sameContext(owner.context, this._settingsController.getOptionsContext()) && JSON.stringify(this._savedInputs) === JSON.stringify(expected);
     }
+
+    /** @param {ScanningInput[]} rows */
+    _adoptInputs(rows) {
+        this._savedInputs = structuredClone(rows);
+        for (const entry of this._entries) {
+            if (entry !== null) { entry.adoptData(rows[entry.index]); }
+        }
+    }
+
+    /**
+     * @template T
+     * @param {() => Promise<T>} callback
+     * @returns {Promise<T>}
+     */
+    _enqueue(callback) {
+        const result = this._mutationTail.then(callback);
+        this._mutationTail = result.then(() => {}, () => {});
+        return result;
+    }
+
+    /** @returns {?Owner} */
+    captureOwner() {
+        const context = this._settingsController.getOptionsContext();
+        return this._viewContext !== null && this._sameContext(context, this._viewContext) ? {generation: this._viewGeneration, context: {...context}} : null;
+    }
+
+    /**
+     * @param {Owner} owner
+     * @returns {boolean}
+     */
+    _owns(owner) {
+        return owner.generation === this._viewGeneration && this._viewContext !== null && this._sameContext(this._viewContext, owner.context) && this._sameContext(owner.context, this._settingsController.getOptionsContext());
+    }
+
+    /**
+     * @param {ScanInputField} entry
+     * @param {Owner} owner
+     * @returns {boolean}
+     */
+    ownsEntry(entry, owner) {
+        return this._owns(owner) && !entry.isDisposed && entry.generation === owner.generation && this._entries[entry.index] === entry;
+    }
+
+    /**
+     * @param {import('settings').OptionsContext} a
+     * @param {import('settings').OptionsContext} b
+     * @returns {boolean}
+     */
+    _sameContext(a, b) {
+        return a.index === b.index && ('profileId' in a ? a.profileId : null) === ('profileId' in b ? b.profileId : null);
+    }
+
+    /**
+     * @param {ScanningInput} row
+     * @param {number} index
+     */
+    _createEntry(row, index) {
+        const entry = new ScanInputField(this, row, index, /** @type {import('environment').OperatingSystem} */ (this._os), this._viewGeneration);
+        this._entries[index] = entry;
+        try {
+            entry.prepare(this._container);
+        } catch (error) {
+            log.error(error);
+            entry.cleanup();
+            this._entries[index] = null;
+        }
+    }
+
+    /** @returns {void} */
+    _updateCounts() {
+        const count = this._entries.filter((entry) => entry !== null).length;
+        for (const node of this._scanningInputCountNodes) { node.textContent = String(count); }
+    }
+
+    /** @returns {void} */
+    _triggerScanInputsChanged() { this._settingsController.trigger('scanInputsChanged', {source: this}); }
 
     /**
      * @param {string} include
@@ -240,153 +490,250 @@ export class ScanInputsController {
 class ScanInputField {
     /**
      * @param {ScanInputsController} parent
+     * @param {ScanningInput} data
      * @param {number} index
      * @param {import('environment').OperatingSystem} os
+     * @param {number} generation
      */
-    constructor(parent, index, os) {
-        /** @type {ScanInputsController} */
+    constructor(parent, data, index, os, generation) {
+        /**
+         *
+         */
         this._parent = parent;
-        /** @type {number} */
+        /**
+         *
+         */
+        this._data = structuredClone(data);
+        /**
+         *
+         */
         this._index = index;
-        /** @type {import('environment').OperatingSystem} */
+        /**
+         *
+         */
         this._os = os;
+        /**
+         *
+         */
+        this._generation = generation;
+        /**
+         *
+         */
+        this._isDisposed = false;
+        /**
+         *
+         */
+        this._hotkeyUtil = new HotkeyUtil(os);
         /** @type {?HTMLElement} */
         this._node = null;
         /** @type {?KeyboardMouseInputField} */
         this._includeInputField = null;
         /** @type {?KeyboardMouseInputField} */
         this._excludeInputField = null;
-        /** @type {EventListenerCollection} */
+        /**
+         *
+         */
         this._eventListeners = new EventListenerCollection();
+        /** @type {Map<string, HTMLInputElement>} */
+        this._controls = new Map();
+        /** @type {Map<string, number>} */
+        this._revisions = new Map();
+        /** @type {Map<string, number>} */
+        this._externalRevisions = new Map();
+        /** @type {Map<string, number>} */
+        this._pending = new Map();
     }
 
-    /** @type {number} */
-    get index() {
-        return this._index;
-    }
-
-    set index(value) {
-        this._index = value;
-        this._updateDataSettingTargets();
-    }
-
+    /** @returns {number} */
+    get index() { return this._index; }
+    /** @returns {?HTMLElement} */
+    get node() { return this._node; }
     /**
-     * @param {HTMLElement} container
-     * @param {import('settings').ScanningInput} scanningInput
+     * @param {string} property
+     * @returns {number}
      */
-    prepare(container, scanningInput) {
-        const {include, exclude, options: {showAdvanced}} = scanningInput;
+    getExternalRevision(property) { return this._externalRevisions.get(property) ?? 0; }
+    /** @returns {number} */
+    get generation() { return this._generation; }
+    /** @returns {boolean} */
+    get isDisposed() { return this._isDisposed; }
+    /** @param {number} value */
+    setIndex(value) { this._index = value; }
 
+    /** @param {HTMLElement} container */
+    prepare(container) {
         const node = /** @type {HTMLElement} */ (this._parent.instantiateTemplate('scan-input'));
-        /** @type {HTMLInputElement} */
-        const includeInputNode = querySelectorNotNull(node, '.scan-input-field[data-property=include]');
-        /** @type {HTMLButtonElement} */
-        const includeMouseButton = querySelectorNotNull(node, '.mouse-button[data-property=include]');
-        /** @type {HTMLInputElement} */
-        const excludeInputNode = querySelectorNotNull(node, '.scan-input-field[data-property=exclude]');
-        /** @type {HTMLButtonElement} */
-        const excludeMouseButton = querySelectorNotNull(node, '.mouse-button[data-property=exclude]');
-        /** @type {HTMLButtonElement} */
-        const menuButton = querySelectorNotNull(node, '.scanning-input-menu-button');
-
-        node.dataset.showAdvanced = `${showAdvanced}`;
-
         this._node = node;
+        const include = /** @type {HTMLInputElement} */ (querySelectorNotNull(node, '.scan-input-field[data-property=include]'));
+        const exclude = /** @type {HTMLInputElement} */ (querySelectorNotNull(node, '.scan-input-field[data-property=exclude]'));
+        const includeMouse = /** @type {HTMLButtonElement} */ (querySelectorNotNull(node, '.mouse-button[data-property=include]'));
+        const excludeMouse = /** @type {HTMLButtonElement} */ (querySelectorNotNull(node, '.mouse-button[data-property=exclude]'));
+        const menu = querySelectorNotNull(node, '.scanning-input-menu-button');
+        this._controls.set('include', include);
+        this._controls.set('exclude', exclude);
+        this._includeInputField = new KeyboardMouseInputField(include, includeMouse, this._os, this._isPointerTypeSupported.bind(this));
+        this._excludeInputField = new KeyboardMouseInputField(exclude, excludeMouse, this._os, this._isPointerTypeSupported.bind(this));
+        this._includeInputField.prepare(null, this._splitModifiers(this._data.include), true, false);
+        this._excludeInputField.prepare(null, this._splitModifiers(this._data.exclude), true, false);
+        this._eventListeners.on(this._includeInputField, 'change', ({modifiers}) => {
+            void this._setProperty('include', modifiers.join(', ')).catch((error) => log.error(error));
+        });
+        this._eventListeners.on(this._excludeInputField, 'change', ({modifiers}) => {
+            void this._setProperty('exclude', modifiers.join(', ')).catch((error) => log.error(error));
+        });
+        for (const input of /** @type {NodeListOf<HTMLInputElement>} */ (node.querySelectorAll('.scan-input-settings-checkbox, .scan-input-settings-input'))) {
+            const {property} = input.dataset;
+            if (typeof property !== 'string') { continue; }
+            delete input.dataset.setting;
+            this._controls.set(property, input);
+            this._applyValue(property);
+            this._eventListeners.addEventListener(input, 'change', () => {
+                const value = input.type === 'checkbox' ? input.checked : convertElementValueToNumber(input.value, input);
+                if (input.type !== 'checkbox') { input.value = String(value); }
+                void this._setProperty(property, value).catch((error) => log.error(error));
+            });
+        }
+        this._applyValue('options.showAdvanced');
+        this._eventListeners.addEventListener(menu, 'menuOpen', this._onMenuOpen.bind(this));
+        this._eventListeners.addEventListener(menu, 'menuClose', this._onMenuClose.bind(this));
         container.appendChild(node);
-
-        const isPointerTypeSupported = this._isPointerTypeSupported.bind(this);
-        this._includeInputField = new KeyboardMouseInputField(includeInputNode, includeMouseButton, this._os, isPointerTypeSupported);
-        this._excludeInputField = new KeyboardMouseInputField(excludeInputNode, excludeMouseButton, this._os, isPointerTypeSupported);
-        this._includeInputField.prepare(null, this._splitModifiers(include), true, false);
-        this._excludeInputField.prepare(null, this._splitModifiers(exclude), true, false);
-
-        this._eventListeners.on(this._includeInputField, 'change', this._onIncludeValueChange.bind(this));
-        this._eventListeners.on(this._excludeInputField, 'change', this._onExcludeValueChange.bind(this));
-        this._eventListeners.addEventListener(menuButton, 'menuOpen', this._onMenuOpen.bind(this));
-        this._eventListeners.addEventListener(menuButton, 'menuClose', this._onMenuClose.bind(this));
-
-        this._updateDataSettingTargets();
     }
 
-    /** */
+    /**
+     * @param {ScanningInput} data
+     * @param {boolean} [external]
+     */
+    adoptData(data, external = false) {
+        const previous = this._data;
+        const properties = [...this._controls.keys(), 'options.showAdvanced'];
+        if (external) {
+            for (const property of properties) {
+                const parts = ObjectPropertyAccessor.getPathArray(property);
+                if (JSON.stringify(new ObjectPropertyAccessor(previous).get(parts)) !== JSON.stringify(new ObjectPropertyAccessor(data).get(parts))) {
+                    this._externalRevisions.set(property, this.getExternalRevision(property) + 1);
+                }
+            }
+        }
+        const updates = properties.filter((property) => (this._pending.get(property) ?? 0) === 0 && this._controlValue(property) === this._displayValue(property, previous));
+        this._data = structuredClone(data);
+        for (const property of updates) { this._applyValue(property); }
+    }
+
+    /** @returns {void} */
     cleanup() {
+        this._isDisposed = true;
         this._eventListeners.removeAllEventListeners();
-        if (this._includeInputField !== null) {
-            this._includeInputField.cleanup();
-            this._includeInputField = null;
-        }
-        if (this._excludeInputField !== null) {
-            this._excludeInputField.cleanup();
-            this._excludeInputField = null;
-        }
-        if (this._node !== null) {
-            const parent = this._node.parentNode;
-            if (parent !== null) { parent.removeChild(this._node); }
-            this._node = null;
-        }
-    }
-
-    // Private
-
-    /**
-     * @param {import('keyboard-mouse-input-field').EventArgument<'change'>} details
-     */
-    _onIncludeValueChange({modifiers}) {
-        const modifiers2 = this._joinModifiers(modifiers);
-        void this._parent.setProperty(this._index, 'include', modifiers2, true);
+        this._includeInputField?.cleanup();
+        this._excludeInputField?.cleanup();
+        this._includeInputField = null;
+        this._excludeInputField = null;
+        this._controls.clear();
+        this._node?.remove();
+        this._node = null;
     }
 
     /**
-     * @param {import('keyboard-mouse-input-field').EventArgument<'change'>} details
+     * @param {string} property
+     * @param {unknown} value
+     * @returns {Promise<void>}
      */
-    _onExcludeValueChange({modifiers}) {
-        const modifiers2 = this._joinModifiers(modifiers);
-        void this._parent.setProperty(this._index, 'exclude', modifiers2, true);
-    }
-
-    /**
-     * @param {MouseEvent} e
-     */
-    _onRemoveClick(e) {
-        e.preventDefault();
-        this._removeSelf();
-    }
-
-    /**
-     * @param {import('popup-menu').MenuOpenEvent} e
-     */
-    _onMenuOpen(e) {
-        const bodyNode = e.detail.menu.bodyNode;
-        /** @type {?HTMLElement} */
-        const showAdvanced = bodyNode.querySelector('.popup-menu-item[data-menu-action="showAdvanced"]');
-        /** @type {?HTMLElement} */
-        const hideAdvanced = bodyNode.querySelector('.popup-menu-item[data-menu-action="hideAdvanced"]');
-        const advancedVisible = (this._node !== null && this._node.dataset.showAdvanced === 'true');
-        if (showAdvanced !== null) {
-            showAdvanced.hidden = advancedVisible;
-        }
-        if (hideAdvanced !== null) {
-            hideAdvanced.hidden = !advancedVisible;
+    async _setProperty(property, value) {
+        const revision = (this._revisions.get(property) ?? 0) + 1;
+        this._revisions.set(property, revision);
+        const requested = this._controlValue(property);
+        this._pending.set(property, (this._pending.get(property) ?? 0) + 1);
+        try {
+            await this._parent.setProperty(this._index, property, value, property === 'include' || property === 'exclude', this);
+        } finally {
+            const remaining = (this._pending.get(property) ?? 1) - 1;
+            if (remaining === 0) {
+                this._pending.delete(property);
+            } else {
+                this._pending.set(property, remaining);
+            }
+            if (this._parent.isEntryCurrent(this) && this._revisions.get(property) === revision && remaining === 0 && this._controlValue(property) === requested) {
+                this._applyValue(property);
+            }
         }
     }
 
     /**
-     * @param {import('popup-menu').MenuCloseEvent} e
+     * @param {string} property
+     * @returns {string|boolean|undefined}
      */
-    _onMenuClose(e) {
-        switch (e.detail.action) {
+    _controlValue(property) {
+        if (property === 'options.showAdvanced') { return this._node?.dataset.showAdvanced === 'true'; }
+        const input = this._controls.get(property);
+        return input?.type === 'checkbox' ? input.checked : input?.value;
+    }
+
+    /**
+     * @param {string} property
+     * @param {ScanningInput} data
+     * @returns {string|boolean}
+     */
+    _displayValue(property, data) {
+        const value = new ObjectPropertyAccessor(data).get(ObjectPropertyAccessor.getPathArray(property));
+        if (property === 'include' || property === 'exclude') {
+            return this._hotkeyUtil.getInputDisplayValue(null, this._hotkeyUtil.sortModifiers(this._splitModifiers(String(value))));
+        }
+        return typeof value === 'boolean' ? value : String(value);
+    }
+
+    /** @param {string} property */
+    _applyValue(property) {
+        const value = this._displayValue(property, this._data);
+        switch (property) {
+            case 'options.showAdvanced': {
+                if (this._node !== null) { this._node.dataset.showAdvanced = String(value); }
+
+                break;
+            }
+            case 'include': {
+                this._includeInputField?.setInput(null, this._splitModifiers(this._data.include));
+
+                break;
+            }
+            case 'exclude': {
+                this._excludeInputField?.setInput(null, this._splitModifiers(this._data.exclude));
+
+                break;
+            }
+            default: {
+                const input = this._controls.get(property);
+                if (typeof input === 'undefined') { return; }
+                if (input.type === 'checkbox') {
+                    input.checked = value === true;
+                } else {
+                    input.value = String(value);
+                }
+            }
+        }
+    }
+
+    /** @param {import('popup-menu').MenuOpenEvent} event */
+    _onMenuOpen(event) {
+        const advanced = this._node?.dataset.showAdvanced === 'true';
+        const show = /** @type {?HTMLElement} */ (event.detail.menu.bodyNode.querySelector('[data-menu-action="showAdvanced"]'));
+        const hide = /** @type {?HTMLElement} */ (event.detail.menu.bodyNode.querySelector('[data-menu-action="hideAdvanced"]'));
+        if (show !== null) { show.hidden = advanced; }
+        if (hide !== null) { hide.hidden = !advanced; }
+    }
+
+    /** @param {import('popup-menu').MenuCloseEvent} event */
+    _onMenuClose(event) {
+        switch (event.detail.action) {
             case 'remove':
-                this._removeSelf();
+                void this._parent.removeInput(this._index, this).catch((error) => log.error(error));
                 break;
             case 'showAdvanced':
-                this._setAdvancedOptionsVisible(true);
-                break;
             case 'hideAdvanced':
-                this._setAdvancedOptionsVisible(false);
+                if (this._node !== null) { this._node.dataset.showAdvanced = String(event.detail.action === 'showAdvanced'); }
+                void this._setProperty('options.showAdvanced', event.detail.action === 'showAdvanced').catch((error) => log.error(error));
                 break;
             case 'clearInputs':
-                /** @type {KeyboardMouseInputField} */ (this._includeInputField).clearInputs();
-                /** @type {KeyboardMouseInputField} */ (this._excludeInputField).clearInputs();
+                this._includeInputField?.clearInputs();
+                this._excludeInputField?.clearInputs();
                 break;
         }
     }
@@ -395,62 +742,19 @@ class ScanInputField {
      * @param {string} pointerType
      * @returns {boolean}
      */
-    _isPointerTypeSupported(pointerType) {
-        if (this._node === null) { return false; }
-        const node = /** @type {?HTMLInputElement} */ (this._node.querySelector(`input.scan-input-settings-checkbox[data-property="types.${pointerType}"]`));
-        return node !== null && node.checked;
-    }
-
-    /** */
-    _updateDataSettingTargets() {
-        if (this._node === null) { return; }
-        const index = this._index;
-        for (const typeCheckbox of /** @type {NodeListOf<HTMLElement>} */ (this._node.querySelectorAll('.scan-input-settings-checkbox'))) {
-            const {property} = typeCheckbox.dataset;
-            typeCheckbox.dataset.setting = `scanning.inputs[${index}].${property}`;
-        }
-        for (const typeInput of /** @type {NodeListOf<HTMLElement>} */ (this._node.querySelectorAll('.scan-input-settings-input'))) {
-            const {property} = typeInput.dataset;
-            typeInput.dataset.setting = `scanning.inputs[${index}].${property}`;
-        }
-    }
-
-    /** */
-    _removeSelf() {
-        this._parent.removeInput(this._index);
-    }
+    _isPointerTypeSupported(pointerType) { return this._controls.get('types.'.concat(pointerType))?.checked === true; }
 
     /**
-     * @param {boolean} showAdvanced
-     */
-    _setAdvancedOptionsVisible(showAdvanced) {
-        showAdvanced = !!showAdvanced;
-        if (this._node !== null) {
-            this._node.dataset.showAdvanced = `${showAdvanced}`;
-        }
-        void this._parent.setProperty(this._index, 'options.showAdvanced', showAdvanced, false);
-    }
-
-    /**
-     * @param {string} modifiersString
+     * @param {string} value
      * @returns {import('input').Modifier[]}
      */
-    _splitModifiers(modifiersString) {
+    _splitModifiers(value) {
         /** @type {import('input').Modifier[]} */
-        const results = [];
-        for (const modifier of modifiersString.split(/[,;\s]+/)) {
-            const modifier2 = normalizeModifier(modifier.trim().toLowerCase());
-            if (modifier2 === null) { continue; }
-            results.push(modifier2);
+        const result = [];
+        for (const item of value.split(/[,;\s]+/)) {
+            const modifier = normalizeModifier(item.trim().toLowerCase());
+            if (modifier !== null) { result.push(modifier); }
         }
-        return results;
-    }
-
-    /**
-     * @param {import('input').Modifier[]} modifiersArray
-     * @returns {string}
-     */
-    _joinModifiers(modifiersArray) {
-        return modifiersArray.join(', ');
+        return result;
     }
 }
