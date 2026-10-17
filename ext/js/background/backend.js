@@ -3256,6 +3256,71 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                 }
                 return true;
             }
+            case 'setProfileName':
+            case 'copyProfileOptions':
+            case 'resetProfile':
+            case 'deleteProfile':
+            case 'duplicateProfile':
+            {
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {Record<string, unknown>[]} */ (profilesValue);
+                const findUniqueProfileIndex = (/** @type {unknown} */ profileId) => {
+                    if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                    const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                    if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                    return matches[0];
+                };
+                switch (target.action) {
+                    case 'setProfileName':
+                    {
+                        if (typeof target.value !== 'string') { throw new Error('Invalid profile name'); }
+                        const index = findUniqueProfileIndex(target.profileId);
+                        accessor.set(['profiles', index, 'name'], target.value);
+                        return target.value;
+                    }
+                    case 'copyProfileOptions':
+                    {
+                        findUniqueProfileIndex(target.sourceProfileId);
+                        const destinationIndex = findUniqueProfileIndex(target.destinationProfileId);
+                        accessor.set(['profiles', destinationIndex, 'options'], target.value);
+                        return true;
+                    }
+                    case 'resetProfile':
+                    {
+                        const index = findUniqueProfileIndex(target.profileId);
+                        if (!isObjectNotArray(target.value)) { throw new Error('Invalid profile reset value'); }
+                        const profile = clone(target.value);
+                        profile.id = profiles[index].id;
+                        profile.name = profiles[index].name;
+                        accessor.set(['profiles', index], profile);
+                        return profile;
+                    }
+                    case 'deleteProfile':
+                    {
+                        if (profiles.length <= 1) { throw new Error('Cannot delete the last profile'); }
+                        const index = findUniqueProfileIndex(target.profileId);
+                        const profileCurrent = accessor.get(['profileCurrent']);
+                        if (typeof profileCurrent !== 'number' || !Number.isInteger(profileCurrent) || profileCurrent < 0 || profileCurrent >= profiles.length) { throw new Error('Invalid current profile index'); }
+                        profiles.splice(index, 1);
+                        if (profileCurrent >= index) {
+                            accessor.set(['profileCurrent'], Math.max(0, Math.min(profileCurrent - 1, profiles.length - 1)));
+                        }
+                        return true;
+                    }
+                    case 'duplicateProfile':
+                    {
+                        const sourceIndex = findUniqueProfileIndex(target.sourceProfileId);
+                        const duplicateProfile = target.profile;
+                        if (!isObjectNotArray(duplicateProfile) || typeof duplicateProfile.id !== 'string' || duplicateProfile.id.length === 0) { throw new Error('Invalid duplicate profile'); }
+                        if (profiles.some((profile) => isObjectNotArray(profile) && profile.id === duplicateProfile.id)) { throw new Error('Duplicate profile ID'); }
+                        profiles.splice(profiles.length, 0, {...profiles[sourceIndex], ...duplicateProfile});
+                        return profiles.length - 1;
+                    }
+                    default: throw new Error('Invalid profile action');
+                }
+            }
             case 'splice':
             {
                 const {path, start, deleteCount, items} = target;

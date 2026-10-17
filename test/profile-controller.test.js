@@ -140,12 +140,14 @@ describe('ProfileController name save ownership', () => {
         const controller = createControllerForInternalTests();
         const profiles = [{id: 'first', name: 'Original'}, {id: 'second', name: 'Other'}];
         const setGlobalSetting = vi.fn().mockResolvedValue([{result: null}]);
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([{result: null}]);
         const refresh = vi.fn().mockResolvedValue(void 0);
         Reflect.set(controller, '_profiles', profiles);
         Reflect.set(controller, '_profileEntryList', []);
         Reflect.set(controller, '_updateSelectName', vi.fn());
-        Reflect.set(controller, '_settingsController', {setGlobalSetting, refresh});
-        return {controller, profiles, setGlobalSetting, refresh};
+        Reflect.set(controller, '_settingsController', {setGlobalSetting, modifyGlobalSettings, refresh});
+        Reflect.set(controller, '_onOptionsChanged', async () => await refresh());
+        return {controller, profiles, setGlobalSetting: modifyGlobalSettings, refresh};
     }
 
     test('coalesces rapid typing into the latest not-yet-started save', async () => {
@@ -156,7 +158,7 @@ describe('ProfileController name save ownership', () => {
         await Promise.all([first, second]);
 
         expect(setGlobalSetting).toHaveBeenCalledOnce();
-        expect(setGlobalSetting).toHaveBeenCalledWith('profiles[0].name', 'Reading');
+        expect(setGlobalSetting).toHaveBeenCalledWith([{action: 'setProfileName', profileId: 'first', value: 'Reading'}]);
         expect(profiles[0].name).toBe('Reading');
     });
 
@@ -181,8 +183,8 @@ describe('ProfileController name save ownership', () => {
         await Promise.all([first, second]);
 
         expect(setGlobalSetting.mock.calls).toStrictEqual([
-            ['profiles[0].name', 'Read'],
-            ['profiles[1].name', 'Reading'],
+            [[{action: 'setProfileName', profileId: 'first', value: 'Read'}]],
+            [[{action: 'setProfileName', profileId: 'first', value: 'Reading'}]],
         ]);
         expect(profiles[0].name).toBe('Reading');
     });
@@ -223,7 +225,7 @@ describe('ProfileController name save ownership', () => {
         finishRefresh.resolve(void 0);
         await rejected;
         await latest;
-        expect(setGlobalSetting.mock.calls[1]).toStrictEqual(['profiles[1].name', 'Latest']);
+        expect(setGlobalSetting.mock.calls[1]).toStrictEqual([[{action: 'setProfileName', profileId: 'first', value: 'Latest'}]]);
         expect(Reflect.get(controller, '_profiles')[1].name).toBe('Latest');
         expect(Reflect.get(controller, '_updateSelectName')).toHaveBeenLastCalledWith(1, 'Latest');
     });
@@ -249,7 +251,7 @@ describe('ProfileController name save ownership', () => {
         finishRefresh.resolve(void 0);
         await rejected;
         await latest;
-        expect(setGlobalSetting.mock.calls[1]).toStrictEqual(['profiles[0].name', 'Latest']);
+        expect(setGlobalSetting.mock.calls[1]).toStrictEqual([[{action: 'setProfileName', profileId: 'second', value: 'Latest'}]]);
         expect(Reflect.get(controller, '_profiles')[0].name).toBe('Latest');
         expect(Reflect.get(controller, '_updateSelectName')).toHaveBeenLastCalledWith(0, 'Latest');
     });
@@ -277,7 +279,7 @@ describe('ProfileController name save ownership', () => {
 
         expect(refresh).not.toHaveBeenCalled();
         expect(profiles[0].name).toBe('Latest');
-        expect(setGlobalSetting.mock.calls[1]).toStrictEqual(['profiles[0].name', 'Latest']);
+        expect(setGlobalSetting.mock.calls[1]).toStrictEqual([[{action: 'setProfileName', profileId: 'first', value: 'Latest'}]]);
     });
 });
 
@@ -313,8 +315,8 @@ describe('ProfileController reset preserves identity', () => {
 
         expect(modifyGlobalSettings).toHaveBeenCalledOnce();
         expect(modifyGlobalSettings.mock.calls[0][0][0]).toStrictEqual({
-            action: 'set',
-            path: 'profiles[1]',
+            action: 'resetProfile',
+            profileId: 'my-stable-profile',
             value: {
                 id: 'my-stable-profile',
                 name: 'Reading',
@@ -329,12 +331,12 @@ describe('ProfileController reset preserves identity', () => {
 describe('ProfileController async ownership', () => {
     test('reset follows the same profile object if profiles are reordered while defaults load', async () => {
         const controller = createControllerForInternalTests();
-        const first = {name: 'First'};
-        const second = {name: 'Second'};
+        const first = {id: 'first', name: 'First'};
+        const second = {id: 'second', name: 'Second'};
         Reflect.set(controller, '_profiles', [first, second]);
         /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
         const defaults = deferred();
-        const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([{result: true}]);
         const refresh = vi.fn(async () => {});
         Reflect.set(controller, '_settingsController', {
             getDefaultOptions: () => defaults.promise,
@@ -351,7 +353,7 @@ describe('ProfileController async ownership', () => {
         await operation;
 
         expect(modifyGlobalSettings).toHaveBeenCalledOnce();
-        expect(modifyGlobalSettings.mock.calls[0][0][0].path).toBe('profiles[1]');
+        expect(modifyGlobalSettings.mock.calls[0][0][0].profileId).toBe('first');
         expect(modifyGlobalSettings.mock.calls[0][0][0].value.name).toBe('First');
         expect(refresh).toHaveBeenCalledOnce();
     });
@@ -363,7 +365,7 @@ describe('ProfileController async ownership', () => {
         Reflect.set(controller, '_profiles', [first, second]);
         /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
         const defaults = deferred();
-        const modifyGlobalSettings = vi.fn().mockResolvedValue([]);
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([{result: true}]);
         const refresh = vi.fn(async () => {});
         Reflect.set(controller, '_settingsController', {
             getDefaultOptions: () => defaults.promise,
@@ -698,8 +700,8 @@ describe('ProfileController profile modal identity', () => {
         await flush();
 
         expect(modifyGlobalSettings).toHaveBeenCalledWith([{
-            action: 'set',
-            path: 'profiles[0]',
+            action: 'resetProfile',
+            profileId: 'only-profile',
             value: {
                 id: 'only-profile',
                 name: 'Only profile',
@@ -1063,11 +1065,7 @@ describe('ProfileController profile deletion indices', () => {
         expect(modifyGlobalSettings).toHaveBeenCalledOnce();
         expect(calls[0]).toBe('persist');
         expect(refreshProfileIndex).toHaveBeenCalledTimes(nextViewed === viewed ? 1 : 0);
-        if (active >= deleted) {
-            expect(modifyGlobalSettings.mock.calls[0][0]).toContainEqual({
-                action: 'set', path: 'profileCurrent', value: nextActive,
-            });
-        }
+        expect(modifyGlobalSettings.mock.calls[0][0]).toStrictEqual([{action: 'deleteProfile', profileId: `p${deleted}`}]);
     });
 });
 
@@ -1081,17 +1079,19 @@ describe('ProfileController deletion write failures', () => {
             profileIndex: 1,
             refresh,
             refreshProfileIndex,
-            modifyGlobalSettings: vi.fn().mockResolvedValue([{result: null}, {error: {name: 'Error', message: 'delete rejected', stack: ''}}]),
+            modifyGlobalSettings: vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'delete rejected', stack: ''}}]),
         };
         Reflect.set(controller, '_profiles', [{id: 'a', name: 'First'}, {id: 'b', name: 'Second'}]);
         Reflect.set(controller, '_profileCurrent', 1);
         Reflect.set(controller, '_profileEntryList', []);
         Reflect.set(controller, '_settingsController', settingsController);
+        const reconcile = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_onOptionsChanged', reconcile);
         Reflect.set(controller, '_updateProfileSelectOptions', vi.fn());
 
         await expect(controller.deleteProfile(0)).rejects.toThrow('delete rejected');
 
-        expect(refresh).toHaveBeenCalledOnce();
+        expect(reconcile).toHaveBeenCalledOnce();
         expect(refreshProfileIndex).not.toHaveBeenCalled();
         expect(settingsController.profileIndex).toBe(1);
     });
