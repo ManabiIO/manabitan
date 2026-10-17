@@ -2,9 +2,9 @@ name: Setup
 description: Setup the workspace for the CI
 inputs:
   node-version:
-    description: "Optional Node.js version override"
+    description: "Node.js version override (defaults to 22.22.0; empty uses package.json)"
     required: false
-    default: ""
+    default: "22.22.0"
 runs:
   using: "composite"
   steps:
