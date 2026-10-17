@@ -77,6 +77,8 @@ export class ProfileController {
         this._profileCurrent = 0;
         /** @type {?import('core').TokenObject} */
         this._optionsUpdateToken = null;
+        /** @type {number} */
+        this._defaultProfileWriteGeneration = 0;
         /** @type {?Promise<void>} */
         this._profileNameSaveTail = null;
         /** @type {Map<string|import('settings').Profile, {value: string}>} */
@@ -199,16 +201,11 @@ export class ProfileController {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
 
-        const previousProfileCurrent = this._profileCurrent;
-        const previousSettingsProfileIndex = this._settingsController.profileIndex;
-
-        /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileIndex}`;
-        this._profileCurrent = profileIndex;
-
-        const profileEntry = this._getProfileEntry(profileIndex);
-        if (profileEntry !== null) { profileEntry.setIsDefault(true); }
-
-        this._settingsController.profileIndex = profileIndex;
+        const generation = ++this._defaultProfileWriteGeneration;
+        const viewedProfileIndex = this._settingsController.profileIndex;
+        // Older options notifications may still be fetching a snapshot. Ignore
+        // them so they cannot overwrite the result of this newer user intent.
+        this._optionsUpdateToken = null;
         try {
             const results = await this._settingsController.setGlobalSetting('profileCurrent', profileIndex);
             if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
@@ -216,21 +213,25 @@ export class ProfileController {
             }
             if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
         } catch (error) {
-            // The selector and settings context are updated optimistically.
-            // Restore their last known values before reconciling durable state.
-            this._profileCurrent = previousProfileCurrent;
-            /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${previousProfileCurrent}`;
-            for (let i = 0; i < this._profileEntryList.length; ++i) {
-                this._profileEntryList[i].setIsDefault(i === previousProfileCurrent);
-            }
-            this._settingsController.profileIndex = previousSettingsProfileIndex;
-            try {
-                await this._settingsController.refresh();
-            } catch (refreshError) {
-                log.error(refreshError);
+            if (generation === this._defaultProfileWriteGeneration) {
+                try {
+                    // SettingsController.refresh() does not await its async
+                    // optionsChanged subscribers. Reconcile directly instead.
+                    await this._onOptionsChanged();
+                } catch (refreshError) {
+                    log.error(refreshError);
+                }
             }
             throw error;
         }
+        if (generation !== this._defaultProfileWriteGeneration) { return; }
+
+        // Changing the default normally switches Settings to that profile.
+        // Keep a profile the user selected while the write was pending.
+        if (this._settingsController.profileIndex === viewedProfileIndex) {
+            this._settingsController.profileIndex = profileIndex;
+        }
+        await this._onOptionsChanged();
     }
 
     /**
