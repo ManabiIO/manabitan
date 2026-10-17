@@ -128,13 +128,12 @@ describe('DictionaryWorkerClient', () => {
         vi.restoreAllMocks();
     });
 
-    test('restarts and retries an interactive lookup once after timeout', async () => {
-        vi.useFakeTimers();
+    test('restarts and retries an interactive lookup after an early worker failure', async () => {
         const client = new DictionaryWorkerClient('/dictionary-worker.js', {context: 'Test worker'});
         const promise = client.invoke('findTermsOffscreen', {text: '日本'});
         const firstWorker = FakeWorker.instances[0];
-
-        await vi.advanceTimersByTimeAsync(30_000);
+        firstWorker.emit('error', {message: 'crashed'});
+        await vi.waitFor(() => expect(FakeWorker.instances).toHaveLength(2));
         const secondWorker = FakeWorker.instances[1];
         expect(firstWorker.terminate).toHaveBeenCalledOnce();
         expect(secondWorker).toBeDefined();
@@ -151,13 +150,18 @@ describe('DictionaryWorkerClient', () => {
         }));
     });
 
-    test('stops after one failed lookup retry', async () => {
+    test('keeps an interactive retry within the original timeout deadline', async () => {
         vi.useFakeTimers();
         const client = new DictionaryWorkerClient('/dictionary-worker.js');
         const promise = client.invoke('findKanjiOffscreen', {text: '日'});
-        const expectation = expect(promise).rejects.toThrow(/findKanjiOffscreen.*30000ms/);
+        const expectation = expect(promise).rejects.toThrow(/findKanjiOffscreen.*20000ms/);
 
-        await vi.advanceTimersByTimeAsync(60_000);
+        await vi.advanceTimersByTimeAsync(10_000);
+        FakeWorker.instances[0].emit('error', {message: 'crashed'});
+        await vi.advanceTimersByTimeAsync(19_999);
+        expect(FakeWorker.instances).toHaveLength(2);
+        expect(FakeWorker.instances[1].terminate).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(1);
         await expectation;
         expect(FakeWorker.instances).toHaveLength(2);
         expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();

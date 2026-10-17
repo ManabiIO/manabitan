@@ -23,6 +23,7 @@
  *   timeoutClass: DictionaryRuntimeTimeoutClass,
  *   retryable: boolean,
  *   requiresDatabase: boolean,
+ *   rejectDuringImport?: boolean,
  * }} DictionaryRuntimeActionPolicy
  */
 
@@ -38,6 +39,7 @@ const standardReadPolicy = Object.freeze({
     timeoutClass: /** @type {const} */ ('standard'),
     retryable: false,
     requiresDatabase: true,
+    rejectDuringImport: true,
 });
 
 const maintenancePolicy = Object.freeze({

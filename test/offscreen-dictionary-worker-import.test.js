@@ -25,6 +25,9 @@ const logWarn = vi.fn();
 const logError = vi.fn();
 const importControl = vi.hoisted(() => ({
     waitForCancellation: false,
+    holdImport: false,
+    importGate: /** @type {Promise<void>|null} */ (null),
+    releaseImport: /** @type {(() => void)|null} */ (null),
     started: false,
     waitForLookupRelease: false,
     lookupStarted: false,
@@ -127,6 +130,15 @@ vi.mock('../ext/js/dictionary/dictionary-importer.js', () => ({
          */
         async importDictionary() {
             importControl.cancelledAtStart = this._isCancelled();
+            if (importControl.holdImport) {
+                importControl.started = true;
+                this._onProgress({nextStep: false, index: 1, count: 2});
+                if (importControl.importGate === null) {
+                    importControl.importGate = new Promise((resolve) => { importControl.releaseImport = resolve; });
+                }
+                await importControl.importGate;
+                return {result: {title: 'Fixture'}, errors: [], debug: null};
+            }
             if (importControl.waitForCancellation) {
                 importControl.started = true;
                 while (!this._isCancelled()) {
@@ -153,6 +165,9 @@ describe('Offscreen dictionary worker import response port handling', () => {
         logWarn.mockReset();
         logError.mockReset();
         importControl.waitForCancellation = false;
+        importControl.holdImport = false;
+        importControl.importGate = null;
+        importControl.releaseImport = null;
         importControl.started = false;
         importControl.waitForLookupRelease = false;
         importControl.lookupStarted = false;
@@ -167,6 +182,40 @@ describe('Offscreen dictionary worker import response port handling', () => {
         importControl.cancelledAtStart = false;
         importControl.translatorClearCount = 0;
         importControl.lastFindTermsOptions = null;
+    });
+
+    test('rejects standard reads while an import owns the worker instead of timing out queued work', async () => {
+        importControl.holdImport = true;
+        /** @type {Map<string, (event: MessageEvent) => void>} */
+        const listeners = new Map();
+        const workerPostMessage = vi.fn();
+        vi.stubGlobal('self', {
+            addEventListener: vi.fn((type, listener) => { listeners.set(type, listener); }),
+            postMessage: workerPostMessage,
+        });
+        await import('../ext/js/background/offscreen-dictionary-worker.js');
+        const onMessage = listeners.get('message');
+        const importPort = {postMessage: vi.fn(), close: vi.fn()};
+        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {id: 1, action: 'importDictionaryOffscreen', params: {operationId: importOperationId1, archiveContent: new Blob(['dictionary']), details: {}}},
+            ports: [importPort],
+        })));
+        await vi.waitFor(() => expect(importControl.started).toBe(true));
+        expect(importPort.postMessage).toHaveBeenCalledWith({type: 'progress', progress: {nextStep: false, index: 1, count: 2}});
+
+        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {id: 2, action: 'getDictionaryInfoOffscreen', params: {}},
+            ports: [],
+        })));
+        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({
+            id: 2,
+            error: expect.objectContaining({message: 'Cannot execute getDictionaryInfoOffscreen: dictionary import is in progress'}),
+        })));
+        expect(importPort.close).not.toHaveBeenCalled();
+
+        importControl.releaseImport?.();
+        await vi.waitFor(() => expect(importPort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'})));
+        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith({id: 1, result: undefined}));
     });
 
     test('accepts native structured-clone lookup settings', async () => {
