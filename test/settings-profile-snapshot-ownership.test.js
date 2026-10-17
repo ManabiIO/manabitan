@@ -398,16 +398,18 @@ async function expectProfileWriteDropsAfterSwitch(prototype, method, args, optio
     // boundary so the profile switch still exercises an unsent write.
     const isSentenceEditor = prototype === SentenceTerminationCharactersController.prototype;
     const isReplacementEditor = prototype === TranslationTextReplacementsController.prototype;
-    const queued = isSentenceEditor || isReplacementEditor ? deferred() : null;
+    const isShortcutEditor = prototype === KeyboardShortcutController.prototype;
+    const queued = isSentenceEditor || isReplacementEditor || isShortcutEditor ? deferred() : null;
     if (queued !== null) {
         Object.assign(controller, {
             _viewContext: {index: 0},
             _viewGeneration: 0,
             _mutationTail: queued.promise,
             _mutationRequestGeneration: 0,
-            _savedRows: isSentenceEditor ? options.sentenceParsing.terminationCharacters : (options.translation.textReplacements.groups[0] ?? []),
+            _savedRows: isSentenceEditor ? options.sentenceParsing.terminationCharacters : (isReplacementEditor ? (options.translation.textReplacements.groups[0] ?? []) : []),
             _savedGroups: isReplacementEditor ? options.translation.textReplacements.groups : [],
-            _entries: [{index: 0, generation: 0, retired: false}],
+            _savedHotkeys: isShortcutEditor ? options.inputs.hotkeys : [],
+            _entries: [{index: 0, generation: 0, retired: false, isDisposed: false}],
         });
     }
     const operation = Reflect.apply(Reflect.get(prototype, method), controller, args);
@@ -527,14 +529,18 @@ test('keyboard shortcut reset cannot write defaults into a profile selected whil
     let profileIndex = 0;
     /** @type {ReturnType<typeof deferred<import('settings').InputsHotkeyOptions[]>>} */
     const pending = deferred();
-    const setProfileSetting = vi.fn().mockResolvedValue([]);
+    const modifySettings = vi.fn().mockResolvedValue([]);
     const controller = Object.assign(Object.create(KeyboardShortcutController.prototype), {
         _settingsController: {
             getOptionsContext: () => ({index: profileIndex}),
-            setProfileSetting,
+            modifySettings,
         },
         getDefaultHotkeys: () => pending.promise,
         _updateOptions: vi.fn(),
+        _viewContext: {index: 0},
+        _viewGeneration: 0,
+        _mutationRequestGeneration: 0,
+        _mutationTail: Promise.resolve(),
     });
 
     const operation = controller._reset();
@@ -543,7 +549,7 @@ test('keyboard shortcut reset cannot write defaults into a profile selected whil
     pending.resolve([]);
     await operation;
 
-    expect(setProfileSetting).not.toHaveBeenCalled();
+    expect(modifySettings).not.toHaveBeenCalled();
 });
 
 test('sentence termination reset cannot write defaults into a profile selected while defaults load', async () => {
