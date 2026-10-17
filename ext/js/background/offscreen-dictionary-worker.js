@@ -136,6 +136,16 @@ export class OffscreenDictionaryWorkerHandler {
             return;
         }
         if (
+            policy.rejectDuringImport === true &&
+            (this._queuedImportRequestCount > 0 || this._activeImportAbortController !== null)
+        ) {
+            self.postMessage({
+                id: event.data.id,
+                error: ExtensionError.serialize(new Error(`Cannot execute ${action}: dictionary import is in progress`)),
+            });
+            return;
+        }
+        if (
             policy.concurrency === 'lookup' &&
             this._queuedExclusiveRequestCount === 0 &&
             this._activeImportAbortController === null
