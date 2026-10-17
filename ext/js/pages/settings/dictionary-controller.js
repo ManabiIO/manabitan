@@ -1174,11 +1174,6 @@ export class DictionaryController {
         const dictionaries = this._dictionaries;
         if (dictionaries === null) { return; }
         this._entriesUpdateToken = {};
-
-        for (const dictionaryEntry of this._dictionaryEntries) {
-            dictionaryEntry.cleanup();
-        }
-
         /** @type {Map<string, string | null>} */
         const dictionaryUpdateDownloadUrlMap = new Map();
         /** @type {Map<string, import('dictionary-database').DictionaryCountGroup | null>} */
@@ -1188,7 +1183,7 @@ export class DictionaryController {
             dictionaryDatabaseCountsMap.set(entry.dictionaryTitle, entry.databaseCounts);
             entry.cleanup();
         }
-
+        this._dictionaryEntries = [];
         const dictionaryOptionsArray = options.dictionaries;
         for (let i = 0; i < dictionaryOptionsArray.length; i++) {
             const {name} = dictionaryOptionsArray[i];
