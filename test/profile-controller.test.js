@@ -16,6 +16,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
+import {JSDOM} from 'jsdom';
 import {ProfileConditionsUI} from '../ext/js/pages/settings/profile-conditions-ui.js';
 import {ProfileController} from '../ext/js/pages/settings/profile-controller.js';
 
@@ -537,6 +538,175 @@ describe('ProfileController profile modal identity', () => {
         controller._onCopyConfirm();
 
         expect(copyProfile).toHaveBeenCalledWith(1, 0);
+    });
+
+    test('reset confirmation is a no-op if its profile was removed', () => {
+        const controller = createControllerForInternalTests();
+        const profile = {id: 'removed', name: 'Removed'};
+        const resetProfile = vi.fn();
+        Reflect.set(controller, '_profiles', [profile, {id: 'survivor', name: 'Survivor'}]);
+        Reflect.set(controller, '_profileResetModal', {setVisible: vi.fn()});
+        Reflect.set(controller, '_resetProfileNameElement', {textContent: ''});
+        Reflect.set(controller, 'resetProfile', resetProfile);
+
+        controller.openResetProfileModal(0);
+        Reflect.set(controller, '_profiles', [{id: 'survivor', name: 'Survivor'}]);
+        controller._onResetConfirm();
+
+        expect(resetProfile).not.toHaveBeenCalled();
+    });
+
+    test('delete confirmation is a no-op if its profile was removed', () => {
+        const controller = createControllerForInternalTests();
+        const profile = {id: 'removed', name: 'Removed'};
+        const deleteProfile = vi.fn();
+        Reflect.set(controller, '_profiles', [profile, {id: 'survivor', name: 'Survivor'}]);
+        Reflect.set(controller, '_profileRemoveModal', {setVisible: vi.fn()});
+        Reflect.set(controller, '_removeProfileNameElement', {textContent: ''});
+        Reflect.set(controller, 'deleteProfile', deleteProfile);
+
+        controller.openDeleteProfileModal(0);
+        Reflect.set(controller, '_profiles', [{id: 'survivor', name: 'Survivor'}]);
+        controller._onDeleteConfirm();
+
+        expect(deleteProfile).not.toHaveBeenCalled();
+    });
+
+    test('copy confirmation is a no-op if its destination profile was removed', () => {
+        const controller = createControllerForInternalTests();
+        const profiles = [{id: 'destination', name: 'Destination'}, {id: 'source', name: 'Source'}];
+        const copyProfile = vi.fn();
+        Reflect.set(controller, '_profiles', profiles);
+        Reflect.set(controller, '_profileCurrent', 1);
+        Reflect.set(controller, '_profileCopySourceSelect', {
+            querySelectorAll: () => profiles.map(({id}) => ({value: `id:${id}`, disabled: false})),
+            value: '',
+        });
+        Reflect.set(controller, '_profileCopyModal', {setVisible: vi.fn()});
+        Reflect.set(controller, 'copyProfile', copyProfile);
+
+        controller.openCopyProfileModal(0);
+        Reflect.set(controller, '_profiles', [profiles[1]]);
+        controller._onCopyConfirm();
+
+        expect(copyProfile).not.toHaveBeenCalled();
+    });
+
+    test('copy confirmation resolves refreshed destination and source objects by ID', () => {
+        const controller = createControllerForInternalTests();
+        const profiles = [{id: 'destination', name: 'Destination'}, {id: 'source', name: 'Source'}];
+        const copyProfile = vi.fn();
+        const dom = new JSDOM('<select></select>');
+        vi.stubGlobal('document', dom.window.document);
+        const select = /** @type {HTMLSelectElement} */ (dom.window.document.querySelector('select'));
+        Reflect.set(controller, '_profiles', profiles);
+        Reflect.set(controller, '_profileCurrent', 1);
+        Reflect.set(controller, '_profileCopySourceSelect', select);
+        Reflect.set(controller, '_getAllProfileSelects', () => [select]);
+        Reflect.set(controller, '_profileCopyModal', {setVisible: vi.fn()});
+        Reflect.set(controller, 'copyProfile', copyProfile);
+
+        controller._updateProfileSelectOptions();
+        controller.openCopyProfileModal(0);
+        Reflect.set(controller, '_profiles', profiles.map((profile) => ({...profile})));
+        controller._onCopyConfirm();
+
+        expect(copyProfile).toHaveBeenCalledWith(1, 0);
+        vi.unstubAllGlobals();
+    });
+
+    test('copy source removal is a no-op after the source options are rebuilt', () => {
+        const controller = createControllerForInternalTests();
+        const destination = {id: 'destination', name: 'Destination'};
+        const source = {id: 'source', name: 'Source'};
+        const copyProfile = vi.fn();
+        const dom = new JSDOM('<select></select>');
+        vi.stubGlobal('document', dom.window.document);
+        const select = /** @type {HTMLSelectElement} */ (dom.window.document.querySelector('select'));
+        Reflect.set(controller, '_profiles', [destination, source]);
+        Reflect.set(controller, '_profileCurrent', 1);
+        Reflect.set(controller, '_profileCopySourceSelect', select);
+        Reflect.set(controller, '_getAllProfileSelects', () => [select]);
+        Reflect.set(controller, '_profileCopyModal', {setVisible: vi.fn()});
+        Reflect.set(controller, 'copyProfile', copyProfile);
+
+        controller._updateProfileSelectOptions();
+        controller.openCopyProfileModal(0);
+        Reflect.set(controller, '_profiles', [{...destination}]);
+        controller._updateProfileSelectOptions();
+        controller._onCopyConfirm();
+
+        expect(copyProfile).not.toHaveBeenCalled();
+        vi.unstubAllGlobals();
+    });
+
+    test('copy source selection and renamed label survive a source-options rebuild', () => {
+        const controller = createControllerForInternalTests();
+        const destination = {id: 'destination', name: 'Destination'};
+        const source = {id: 'source', name: 'Source'};
+        const dom = new JSDOM('<select></select>');
+        vi.stubGlobal('document', dom.window.document);
+        const select = /** @type {HTMLSelectElement} */ (dom.window.document.querySelector('select'));
+        Reflect.set(controller, '_profiles', [destination, source]);
+        Reflect.set(controller, '_profileCurrent', 1);
+        Reflect.set(controller, '_profileCopySourceSelect', select);
+        Reflect.set(controller, '_profileCopyModal', {setVisible: vi.fn()});
+        Reflect.set(controller, '_getAllProfileSelects', () => [select]);
+
+        controller._updateProfileSelectOptions();
+        controller.openCopyProfileModal(0);
+        expect(select.value).toBe('id:source');
+
+        const renamedProfiles = [{...destination}, {...source, name: 'Renamed source'}];
+        Reflect.set(controller, '_profiles', renamedProfiles);
+        controller._updateProfileSelectOptions();
+
+        expect(select.value).toBe('id:source');
+        expect(select.options[1].textContent).toBe('Renamed source');
+        vi.unstubAllGlobals();
+    });
+
+    test('a single profile can be reset from its confirmation modal', async () => {
+        const controller = createControllerForInternalTests();
+        const profile = {
+            id: 'only-profile',
+            name: 'Only profile',
+            options: {general: {enable: false}},
+            conditionGroups: [{conditions: []}],
+        };
+        const defaults = /** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+            profiles: [{name: 'Default', options: {general: {enable: true}}, conditionGroups: []}],
+        }));
+        const modifyGlobalSettings = vi.fn().mockResolvedValue([{result: true}]);
+        const refresh = vi.fn().mockResolvedValue(void 0);
+        const modal = {setVisible: vi.fn()};
+        Reflect.set(controller, '_profiles', [profile]);
+        Reflect.set(controller, '_profileResetModal', modal);
+        Reflect.set(controller, '_resetProfileNameElement', {textContent: ''});
+        Reflect.set(controller, '_settingsController', {
+            getDefaultOptions: vi.fn().mockResolvedValue(defaults),
+            modifyGlobalSettings,
+            refresh,
+        });
+
+        controller.openResetProfileModal(0);
+        expect(modal.setVisible).toHaveBeenCalledWith(true);
+        expect(Reflect.get(controller, '_resetProfileNameElement').textContent).toBe('Only profile');
+
+        controller._onResetConfirm();
+        await flush();
+
+        expect(modifyGlobalSettings).toHaveBeenCalledWith([{
+            action: 'set',
+            path: 'profiles[0]',
+            value: {
+                id: 'only-profile',
+                name: 'Only profile',
+                options: {general: {enable: true}},
+                conditionGroups: [],
+            },
+        }]);
+        expect(refresh).toHaveBeenCalledOnce();
     });
 });
 

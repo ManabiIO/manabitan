@@ -448,7 +448,7 @@ export class ProfileController {
      */
     openResetProfileModal(profileIndex) {
         const profile = this._getProfile(profileIndex);
-        if (profile === null || this.profileCount <= 1) { return; }
+        if (profile === null) { return; }
 
         /** @type {HTMLElement} */ (this._resetProfileNameElement).textContent = profile.name;
         this._profileResetTarget = profile;
@@ -689,6 +689,8 @@ export class ProfileController {
             select.appendChild(fragment);
             if (previousValue !== null && [...select.options].some(({value}) => value === previousValue)) {
                 select.value = previousValue;
+            } else if (previousValue !== null) {
+                select.value = '';
             }
         }
     }
