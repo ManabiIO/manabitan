@@ -74,7 +74,7 @@ jobs:
         continue-on-error: true
         uses: cardinalby/webext-buildtools-chrome-webstore-upload-action@3d829e042b559c35f7fb71676cbaf6031892a313 # v1.0.11
         with:
-          zipFilePath: yomitan-chrome-dev.zip
+          zipFilePath: manabitan-chrome-dev.zip
           extensionId: ${{ secrets.G_DEVELOPMENT_EXTENSION_ID }}
           apiAccessToken: ${{ steps.fetchAccessToken.outputs.accessToken }}
           waitForUploadCheckCount: 10
@@ -96,7 +96,9 @@ jobs:
             {
               "attemptNumber": "${{ steps.getNextAttemptNumber.outputs.result }}",
               "maxAttempts": "${{ github.event.inputs.maxAttempts }}",
-              "workflow": "${{ github.workflow }}"
+              "workflow": "${{ github.workflow }}",
+              "tag": "${{ inputs.tag }}",
+              "upload_url": "${{ inputs.upload_url }}"
             }
 
       - name: Abort on unrecoverable upload error
@@ -146,7 +148,7 @@ jobs:
         if: steps.crxConfig.outputs.enabled == 'true'
         uses: cardinalby/webext-buildtools-chrome-crx-action@v2
         with:
-          zipFilePath: 'yomitan-chrome-dev.zip'
+          zipFilePath: 'manabitan-chrome-dev.zip'
           crxFilePath: 'yomitan-chrome-dev.crx'
           privateKey: ${{ secrets.CHROME_CRX_PRIVATE_KEY }}
 

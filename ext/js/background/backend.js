@@ -32,7 +32,7 @@ import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-repo
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
-import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid, mediaFileNameHashOrTimestamp} from '../data/anki-util.js';
+import {generateAnkiNoteMediaFileName, generateAnkiNoteMediaFileNameWithUniqueTimestamp, INVALID_NOTE_ID, isNoteDataValid, mediaFileNameHashOrTimestamp} from '../data/anki-util.js';
 import {arrayBufferToBase64} from '../data/array-buffer-util.js';
 import {OptionsUtil} from '../data/options-util.js';
 import {getAllPermissions, hasPermissions, hasRequiredPermissionsForOptions} from '../data/permissions-util.js';
@@ -2518,7 +2518,32 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
      */
     async _modifySettings(targets, source) {
+        if (targets.some(({action}) => action === 'removeDictionary')) {
+            // Read installed state after earlier options writes commit. The
+            // database proxy serializes this read with import publication.
+            return await this._modifySettingsQueued(targets, source, async () => {
+                await this._ensureDictionaryDatabaseReady();
+                const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
+                return new Set(dictionaryInfo.map(({title}) => title));
+            });
+        }
+        return await this._modifySettingsQueued(targets, source);
+    }
+
+    /**
+     * @param {import('settings-modifications').ScopedModification[]} targets
+     * @param {string} source
+     * @param {null|(() => Promise<Set<string>>)} [getInstalledDictionaryNames]
+     * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
+     */
+    async _modifySettingsQueued(targets, source, getInstalledDictionaryNames = null) {
         return await this._runOptionsMutation(async () => {
+            // This runs inside the options queue and before staging or writing.
+            // Do not acquire the dictionary mutation queue here: imports can
+            // themselves need to commit settings after publishing.
+            const installedDictionaryNames = getInstalledDictionaryNames !== null ?
+                await getInstalledDictionaryNames() :
+                null;
             // Stage synchronous mutations on an isolated copy. Read APIs
             // continue to observe the last committed options while storage is
             // pending, including when a write eventually fails.
@@ -2526,12 +2551,21 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             const stagedOptions = clone(previousOptions);
             /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
             const results = [];
+            let hasChanges = false;
             this._options = stagedOptions;
             try {
                 for (const target of targets) {
                     try {
+                        if (target.action === 'removeDictionary' && installedDictionaryNames?.has(target.name)) {
+                            this._getDictionarySettingsRemovalArray(target);
+                            results.push({result: []});
+                            continue;
+                        }
                         const result = this._modifySetting(target);
                         results.push({result: clone(result)});
+                        if (target.action !== 'removeDictionary' || (Array.isArray(result) && result.length > 0)) {
+                            hasChanges = true;
+                        }
                     } catch (e) {
                         results.push({error: ExtensionError.serialize(e)});
                     }
@@ -2539,7 +2573,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             } finally {
                 this._options = previousOptions;
             }
-            if (!results.some((result) => Object.hasOwn(result, 'result'))) {
+            if (!hasChanges) {
                 // No successful mutation: keep the previous state and skip
                 // persistence, notifications, and runtime cache resets.
                 return results;
@@ -3146,6 +3180,147 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                 accessor.swap(ObjectPropertyAccessor.getPathArray(path1), ObjectPropertyAccessor.getPathArray(path2));
                 return true;
             }
+            case 'moveDictionary':
+            {
+                const {path, currentIndex, targetIndex, expectedNames, expectedEntries} = target;
+                if (typeof path !== 'string') { throw new Error('Invalid path'); }
+                if (!/^dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
+                if (!Number.isInteger(currentIndex) || !Number.isInteger(targetIndex)) { throw new Error('Invalid dictionary settings index'); }
+                if (!Array.isArray(expectedNames) || !expectedNames.every((name) => typeof name === 'string')) { throw new Error('Invalid expected dictionary names'); }
+                if (!Array.isArray(expectedEntries) || !expectedEntries.every(isObjectNotArray)) { throw new Error('Invalid expected dictionary entries'); }
+                const dictionariesValue = accessor.get(ObjectPropertyAccessor.getPathArray(path));
+                if (!Array.isArray(dictionariesValue)) { throw new Error('Invalid target type'); }
+                const dictionaries = /** @type {unknown[]} */ (dictionariesValue);
+                const currentNames = dictionaries.map((entry) => (
+                    isObjectNotArray(entry) ? entry.name : void 0
+                ));
+                if (
+                    currentNames.length !== expectedNames.length ||
+                    currentNames.some((name, index) => name !== expectedNames[index])
+                ) {
+                    throw new Error('Dictionary order changed; reload settings and try again');
+                }
+                if (expectedEntries.length !== currentNames.length) { throw new Error('Invalid expected dictionary entries'); }
+                const duplicateNames = new Set(expectedNames.filter((name, index) => expectedNames.indexOf(name) !== index));
+                for (let i = 0; i < expectedNames.length; ++i) {
+                    if (duplicateNames.has(expectedNames[i])) {
+                        const currentEntry = dictionaries[i];
+                        if (!isObjectNotArray(currentEntry) || JSON.stringify(currentEntry) !== JSON.stringify(expectedEntries[i])) {
+                            throw new Error('Duplicate dictionary identity changed; reload settings and try again');
+                        }
+                    }
+                }
+                if (currentIndex < 0 || currentIndex >= dictionaries.length || targetIndex < 0 || targetIndex >= dictionaries.length) { throw new Error('Invalid dictionary settings index'); }
+                if (currentIndex !== targetIndex) {
+                    const dictionary = dictionaries[currentIndex];
+                    dictionaries.splice(currentIndex, 1);
+                    dictionaries.splice(targetIndex, 0, dictionary);
+                }
+                return true;
+            }
+            case 'setDefaultProfile':
+            {
+                const {profileId} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown}[]} */ (profilesValue);
+                const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                accessor.set(['profileCurrent'], matches[0]);
+                return matches[0];
+            }
+            case 'swapProfiles':
+            {
+                const {profileId1, profileId2} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId1 !== 'string' || profileId1.length === 0 || typeof profileId2 !== 'string' || profileId2.length === 0 || profileId1 === profileId2) {
+                    throw new Error('Invalid profile IDs');
+                }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown}[]} */ (profilesValue);
+                const findUniqueProfileIndex = (/** @type {string} */ profileId) => {
+                    const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                    if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                    return matches[0];
+                };
+                const index1 = findUniqueProfileIndex(profileId1);
+                const index2 = findUniqueProfileIndex(profileId2);
+                const profileCurrent = accessor.get(['profileCurrent']);
+                if (typeof profileCurrent !== 'number' || !Number.isInteger(profileCurrent) || profileCurrent < 0 || profileCurrent >= profiles.length) { throw new Error('Invalid current profile index'); }
+                accessor.swap(['profiles', index1], ['profiles', index2]);
+                if (profileCurrent === index1 || profileCurrent === index2) {
+                    accessor.set(['profileCurrent'], profileCurrent === index1 ? index2 : index1);
+                }
+                return true;
+            }
+            case 'setProfileName':
+            case 'copyProfileOptions':
+            case 'resetProfile':
+            case 'deleteProfile':
+            case 'duplicateProfile':
+            {
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {Record<string, unknown>[]} */ (profilesValue);
+                const findUniqueProfileIndex = (/** @type {unknown} */ profileId) => {
+                    if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                    const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                    if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                    return matches[0];
+                };
+                switch (target.action) {
+                    case 'setProfileName':
+                    {
+                        if (typeof target.value !== 'string') { throw new Error('Invalid profile name'); }
+                        const index = findUniqueProfileIndex(target.profileId);
+                        accessor.set(['profiles', index, 'name'], target.value);
+                        return target.value;
+                    }
+                    case 'copyProfileOptions':
+                    {
+                        findUniqueProfileIndex(target.sourceProfileId);
+                        const destinationIndex = findUniqueProfileIndex(target.destinationProfileId);
+                        accessor.set(['profiles', destinationIndex, 'options'], target.value);
+                        return true;
+                    }
+                    case 'resetProfile':
+                    {
+                        const index = findUniqueProfileIndex(target.profileId);
+                        if (!isObjectNotArray(target.value)) { throw new Error('Invalid profile reset value'); }
+                        const profile = clone(target.value);
+                        profile.id = profiles[index].id;
+                        profile.name = profiles[index].name;
+                        accessor.set(['profiles', index], profile);
+                        return profile;
+                    }
+                    case 'deleteProfile':
+                    {
+                        if (profiles.length <= 1) { throw new Error('Cannot delete the last profile'); }
+                        const index = findUniqueProfileIndex(target.profileId);
+                        const profileCurrent = accessor.get(['profileCurrent']);
+                        if (typeof profileCurrent !== 'number' || !Number.isInteger(profileCurrent) || profileCurrent < 0 || profileCurrent >= profiles.length) { throw new Error('Invalid current profile index'); }
+                        profiles.splice(index, 1);
+                        if (profileCurrent >= index) {
+                            accessor.set(['profileCurrent'], Math.max(0, Math.min(profileCurrent - 1, profiles.length - 1)));
+                        }
+                        return true;
+                    }
+                    case 'duplicateProfile':
+                    {
+                        const sourceIndex = findUniqueProfileIndex(target.sourceProfileId);
+                        const duplicateProfile = target.profile;
+                        if (!isObjectNotArray(duplicateProfile) || typeof duplicateProfile.id !== 'string' || duplicateProfile.id.length === 0) { throw new Error('Invalid duplicate profile'); }
+                        if (profiles.some((profile) => isObjectNotArray(profile) && profile.id === duplicateProfile.id)) { throw new Error('Duplicate profile ID'); }
+                        profiles.splice(profiles.length, 0, {...profiles[sourceIndex], ...duplicateProfile});
+                        return profiles.length - 1;
+                    }
+                    default: throw new Error('Invalid profile action');
+                }
+            }
             case 'splice':
             {
                 const {path, start, deleteCount, items} = target;
@@ -3159,11 +3334,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             }
             case 'removeDictionary':
             {
-                const {path, name} = target;
-                if (typeof path !== 'string' || !/^profiles\[\d+\]\.options\.dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
-                if (typeof name !== 'string') { throw new Error('Invalid dictionary name'); }
-                const array = accessor.get(ObjectPropertyAccessor.getPathArray(path));
-                if (!Array.isArray(array)) { throw new Error('Invalid target type'); }
+                const {array, name} = this._getDictionarySettingsRemovalArray(target);
                 /** @type {unknown[]} */
                 const removed = [];
                 for (let i = array.length - 1; i >= 0; --i) {
@@ -3189,6 +3360,24 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             default:
                 throw new Error(`Unknown action: ${action}`);
         }
+    }
+
+    /**
+     * Validates a dictionary removal and returns its target array without
+     * changing it. Also used when an installed title makes the removal a no-op.
+     * @param {import('settings-modifications').ScopedModificationRemoveDictionary} target
+     * @returns {{array: unknown[], name: string}}
+     * @throws {Error}
+     */
+    _getDictionarySettingsRemovalArray(target) {
+        const options = this._getModifySettingObject(target);
+        const accessor = new ObjectPropertyAccessor(options);
+        const {path, name} = target;
+        if (typeof path !== 'string' || !/^profiles\[\d+\]\.options\.dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
+        if (typeof name !== 'string') { throw new Error('Invalid dictionary name'); }
+        const array = accessor.get(ObjectPropertyAccessor.getPathArray(path));
+        if (!Array.isArray(array)) { throw new Error('Invalid target type'); }
+        return {array, name};
     }
 
     /**
@@ -3771,7 +3960,10 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             throw new Error('Unknown media type for screenshot image');
         }
 
-        const fileName = generateAnkiNoteMediaFileName('yomitan_browser_screenshot', extension, timestamp);
+        // Concurrent saves can share a timestamp while capturing different tabs.
+        // Keep each screenshot distinct so AnkiConnect cannot replace another
+        // note's image under the same media filename.
+        const fileName = generateAnkiNoteMediaFileName('yomitan_browser_screenshot', extension, `${timestamp}_${crypto.randomUUID()}`);
         return await ankiConnect.storeMediaFile(fileName, data);
     }
 
@@ -3794,7 +3986,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
 
         const fileName = dataUrl === this._ankiClipboardImageDataUrlCache && this._ankiClipboardImageFilenameCache ?
             this._ankiClipboardImageFilenameCache :
-            generateAnkiNoteMediaFileName('yomitan_clipboard_image', extension, timestamp);
+            generateAnkiNoteMediaFileNameWithUniqueTimestamp('yomitan_clipboard_image', extension, timestamp);
 
         const storedFileName = await ankiConnect.storeMediaFile(fileName, data);
 

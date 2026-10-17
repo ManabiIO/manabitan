@@ -12,6 +12,7 @@ on:
     branches: [main]
   pull_request:
   merge_group:
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -427,15 +428,30 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
 
       - name: Build Firefox Android package
         run: npm run build -- --target firefox-android
+
+      - name: Enable Android emulator KVM
+        run: |
+          if [ ! -e /dev/kvm ]; then
+            echo 'KVM device /dev/kvm is unavailable on this runner.' >&2
+            exit 1
+          fi
+          sudo chmod 0666 /dev/kvm
+          if [ ! -r /dev/kvm ] || [ ! -w /dev/kvm ]; then
+            echo 'The runner cannot read and write /dev/kvm.' >&2
+            exit 1
+          fi
 
       - name: Run Firefox Android extension E2E
         uses: reactivecircus/android-emulator-runner@v2
         env:
           MANABITAN_ANDROID_AUTO_INSTALL_FIREFOX: '1'
           MANABITAN_ANDROID_FIREFOX_PACKAGE: org.mozilla.firefox
+          MANABITAN_ANDROID_ENABLE_FIREFOX_REMOTE_DEBUGGING: '1'
           MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS: '45000'
           MANABITAN_E2E_STRICT_RUNTIME: '1'
         with:
@@ -444,6 +460,7 @@ jobs:
           target: default
           profile: pixel_6
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-linux-hw-accel: false
           disable-animations: true
           script: |
             adb wait-for-device

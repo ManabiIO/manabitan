@@ -18,7 +18,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-import {execFile, spawn} from 'node:child_process';
+import {execFile} from 'node:child_process';
 import {createWriteStream} from 'node:fs';
 import {access, mkdir, readdir, stat, writeFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -27,6 +27,7 @@ import {pipeline} from 'node:stream/promises';
 import {fileURLToPath} from 'node:url';
 import {promisify} from 'node:util';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
+import {runWebExtInstallHandshake} from './web-ext-install-handshake.js';
 import {extractFirefoxAndroidApkUrls, extractFirefoxAndroidStableReleaseVersions, selectPreferredFirefoxAndroidApkUrl} from './firefox-android-release-utils.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -88,6 +89,7 @@ function createReport() {
         firefoxPackage: '',
         sourceDir: '',
         firefoxApkUrl: '',
+        androidDiagnostics: null,
         phases: [],
     };
 }
@@ -149,6 +151,7 @@ function renderReportHtml(report) {
     <div><strong>Firefox APK URL:</strong> ${escapeHtml(report.firefoxApkUrl || 'not-used')}</div>
   </div>
   ${phasesHtml}
+  ${report.androidDiagnostics ? `<section class="phase"><h2>Android failure diagnostics</h2><pre>${escapeHtml(JSON.stringify(report.androidDiagnostics, null, 2))}</pre></section>` : ''}
 </body>
 </html>`;
 }
@@ -298,95 +301,56 @@ async function resolveFirefoxAndroidSourceDir() {
  * @returns {Promise<string[]>}
  */
 async function runWebExtSmoke({device, packageName, sourceDir, timeoutMs}) {
-    const args = [
-        '--yes',
-        'web-ext',
-        'run',
-        '--target',
-        'firefox-android',
-        '--adb-device',
+    return await runWebExtInstallHandshake({
         device,
-        '--firefox-apk',
         packageName,
-        '-s',
         sourceDir,
-    ];
-    const child = spawn('npx', args, {
+        timeoutMs,
         cwd: root,
-        env: process.env,
-        stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    /** @type {string[]} */
-    const outputLines = [];
-    let stdoutBuffer = '';
-    let stderrBuffer = '';
-    let sawOutput = false;
-    let timedOut = false;
-
-    /**
-     * @param {string} chunk
-     */
-    const appendLine = (chunk) => {
-        const lines = chunk.split('\n');
-        for (let index = 0; index < lines.length - 1; index += 1) {
-            const line = lines[index].trimEnd();
-            if (line.length === 0) { continue; }
-            sawOutput = true;
-            outputLines.push(line);
-            if (outputLines.length > 200) {
-                outputLines.splice(0, outputLines.length - 200);
-            }
+        onOutput: (line) => {
             console.log(`[firefox-android-e2e] web-ext: ${line}`);
+        },
+    });
+}
+
+/**
+ * Captures bounded, read-only emulator state at the failed install deadline.
+ * @param {string} device
+ * @param {string} packageName
+ * @returns {Promise<Record<string, {capturedAtIso: string, output: string, error?: string}>>}
+ */
+async function captureFirefoxDiagnostics(device, packageName) {
+    const packagePattern = /^[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)+$/;
+    if (!device.startsWith('emulator-')) { throw new Error(`Refusing Android diagnostics on non-emulator device ${device}.`); }
+    if (!packagePattern.test(packageName)) { throw new Error(`Refusing Android diagnostics for invalid package name ${packageName}.`); }
+    /** @type {Record<string, {capturedAtIso: string, output: string, error?: string}>} */
+    const result = {};
+    const capture = async (name, args, filter = (value) => value) => {
+        const capturedAtIso = new Date().toISOString();
+        try {
+            const {stdout} = await execFileAsync('adb', ['-s', device, ...args], {cwd: root, env: process.env, timeout: 8_000, maxBuffer: 4 * 1024 * 1024});
+            result[name] = {capturedAtIso, output: filter(String(stdout || '')).slice(0, 40_000)};
+        } catch (error) {
+            result[name] = {capturedAtIso, output: '', error: errorMessage(error)};
         }
     };
-
-    return await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-            timedOut = true;
-            if (!sawOutput) {
-                if (!child.killed) { child.kill('SIGKILL'); }
-                reject(new Error('web-ext produced no output before smoke timeout.'));
-                return;
-            }
-            if (!child.killed) {
-                child.kill('SIGTERM');
-                setTimeout(() => {
-                    if (!child.killed) {
-                        child.kill('SIGKILL');
-                    }
-                }, 5_000);
-            }
-        }, timeoutMs);
-
-        child.stdout.on('data', (chunk) => {
-            stdoutBuffer += String(chunk);
-            const newlineIndex = stdoutBuffer.lastIndexOf('\n');
-            if (newlineIndex === -1) { return; }
-            appendLine(stdoutBuffer.slice(0, newlineIndex + 1));
-            stdoutBuffer = stdoutBuffer.slice(newlineIndex + 1);
-        });
-        child.stderr.on('data', (chunk) => {
-            stderrBuffer += String(chunk);
-            const newlineIndex = stderrBuffer.lastIndexOf('\n');
-            if (newlineIndex === -1) { return; }
-            appendLine(stderrBuffer.slice(0, newlineIndex + 1));
-            stderrBuffer = stderrBuffer.slice(newlineIndex + 1);
-        });
-        child.on('error', (error) => {
-            clearTimeout(timeout);
-            reject(error);
-        });
-        child.on('exit', (code, signal) => {
-            clearTimeout(timeout);
-            if (stdoutBuffer.trim().length > 0) { appendLine(`${stdoutBuffer.trim()}\n`); }
-            if (stderrBuffer.trim().length > 0) { appendLine(`${stderrBuffer.trim()}\n`); }
-            if (timedOut) {
-                resolve(outputLines);
-                return;
-            }
-            reject(new Error(`web-ext exited before smoke timeout (code=${String(code)} signal=${String(signal)}).`));
-        });
-    });
+    const onlyLines = (pattern, limit, fromEnd = false) => (value) => {
+        const lines = value.split('\n').filter((line) => pattern.test(line));
+        return (fromEnd ? lines.slice(-limit) : lines.slice(0, limit)).join('\n');
+    };
+    await capture('package', ['shell', 'dumpsys', 'package', packageName], onlyLines(/versionName=|versionCode=|firstInstallTime=|lastUpdateTime=/i, 40));
+    await capture('activity', ['shell', 'dumpsys', 'activity', 'activities'], onlyLines(/mResumedActivity|topResumedActivity|org\.mozilla\.(?:firefox|fenix)/i, 80, true));
+    await capture('process', ['shell', 'ps', '-A'], onlyLines(new RegExp(packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), 60));
+    await capture('debugger-sockets', ['shell', 'cat', '/proc/net/unix'], onlyLines(/mozilla|debugger/i, 100));
+    await capture('remote-debugging-pref-root', ['shell', 'id', '-u']);
+    if (result['remote-debugging-pref-root'].output.trim() === '0') {
+        await capture('remote-debugging-pref', ['shell', 'cat', `/data/data/${packageName}/shared_prefs/fenix_preferences.xml`], onlyLines(/pref_key_remote_debugging|remote_debugging/i, 80));
+    } else {
+        const diagnostic = result['remote-debugging-pref-root'];
+        result['remote-debugging-pref'] = {capturedAtIso: new Date().toISOString(), output: '', error: `ADB shell uid was not root: ${diagnostic.output.trim() || diagnostic.error || 'unknown'}`};
+    }
+    await capture('logcat', ['logcat', '-d', '-t', '2000', '-v', 'threadtime'], onlyLines(/org\.mozilla\.(?:firefox|fenix)|GeckoView|FATAL EXCEPTION|AndroidRuntime|crash|fatal/i, 300, true));
+    return result;
 }
 
 /**
@@ -396,6 +360,7 @@ async function main() {
     const report = createReport();
     const reportPath = process.env.MANABITAN_FIREFOX_ANDROID_E2E_REPORT ?? path.join(root, 'builds', 'firefox-android-e2e-report.html');
     const reportJsonPath = reportPath.replace(/\.html$/i, '.json');
+    report.androidDiagnostics = null;
     /** @type {Error|undefined} */
     let runError;
     const firefoxPackage = String(process.env.MANABITAN_ANDROID_FIREFOX_PACKAGE || 'org.mozilla.firefox').trim();
@@ -434,6 +399,13 @@ async function main() {
             packageCheckEnd,
         );
 
+        if (String(process.env.MANABITAN_ANDROID_ENABLE_FIREFOX_REMOTE_DEBUGGING || '').trim() === '1') {
+            const remoteDebuggingStart = safePerformance.now();
+            await runCommand('bash', [path.join(dirname, 'enable-firefox-remote-debugging.sh'), device, firefoxPackage]);
+            const remoteDebuggingEnd = safePerformance.now();
+            addPhase(report, 'Prepare Firefox Android remote debugging', `Updated the Fenix preference while Firefox was disabled and process-free on ${device}.`, remoteDebuggingStart, remoteDebuggingEnd);
+        }
+
         const resolveSourceDirStart = safePerformance.now();
         const sourceDir = await resolveFirefoxAndroidSourceDir();
         report.sourceDir = sourceDir;
@@ -445,15 +417,30 @@ async function main() {
             fail(`Invalid MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS: ${String(process.env.MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS || '')}`);
         }
         const webExtSmokeStart = safePerformance.now();
-        const webExtOutputTail = await runWebExtSmoke({device, packageName: firefoxPackage, sourceDir, timeoutMs});
+        const webExtOutputTail = await runWebExtInstallHandshake({
+            device,
+            packageName: firefoxPackage,
+            sourceDir,
+            timeoutMs,
+            cwd: root,
+            onOutput: (line) => console.log(`[firefox-android-e2e] web-ext: ${line}`),
+            onBeforeFailureCleanup: async () => { report.androidDiagnostics = await captureFirefoxDiagnostics(device, firefoxPackage); },
+        });
         const webExtSmokeEnd = safePerformance.now();
         addPhase(
             report,
             'Run Firefox Android web-ext smoke',
-            `web-ext run remained alive through timeout (${String(timeoutMs)} ms). outputTail=${JSON.stringify(webExtOutputTail.slice(-20))}`,
+            `web-ext confirmed Firefox remote debugger installation of the temporary add-on. outputTail=${JSON.stringify(webExtOutputTail.slice(-20))}`,
             webExtSmokeStart,
             webExtSmokeEnd,
         );
+
+        if (String(process.env.MANABITAN_ANDROID_ENABLE_FIREFOX_REMOTE_DEBUGGING || '').trim() === '1') {
+            const preferenceVerifyStart = safePerformance.now();
+            await runCommand('bash', [path.join(dirname, 'enable-firefox-remote-debugging.sh'), device, firefoxPackage, '--verify-after-launch']);
+            const preferenceVerifyEnd = safePerformance.now();
+            addPhase(report, 'Verify Firefox Android remote debugging after ACK', `Fenix retained pref_key_remote_debugging=true after launching and acknowledging the temporary add-on on ${device}.`, preferenceVerifyStart, preferenceVerifyEnd);
+        }
 
         report.status = 'success';
         console.log('[firefox-android-e2e] PASS: Firefox Android extension smoke run succeeded.');

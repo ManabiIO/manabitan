@@ -22,6 +22,27 @@ import {createDomTest} from './fixtures/dom-test.js';
 const test = createDomTest();
 
 describe('Display lookup refresh', () => {
+    test.for(['clear', 'unloaded'])('searchLast does not navigate a %s display', (type, {window}) => {
+        const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
+        const setContent = vi.fn();
+        Object.assign(display, {
+            _contentType: type,
+            _query: '',
+            _fullQuery: '',
+            _queryOffset: 0,
+            _primaryReading: '',
+            _lookup: true,
+            _wildcardsEnabled: false,
+            _queryParserVisibleOverride: null,
+            _optionsContext: {depth: 0, url: window.location.href},
+            _history: {state: null},
+            getContentOrigin: () => ({tabId: 1, frameId: 2}),
+            setContent,
+        });
+        display.searchLast(false);
+        expect(setContent).not.toHaveBeenCalled();
+    });
+
     test('term lookup uses freshly loaded enabled dictionaries when options were initially null', async ({window}) => {
         window.document.body.innerHTML = `
             <div id="no-results" hidden></div>

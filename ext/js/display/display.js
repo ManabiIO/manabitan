@@ -687,7 +687,7 @@ export class Display extends EventDispatcher {
      */
     searchLast(updateOptionsContext, preserveSearchInput = false) {
         const type = this._contentType;
-        if (type === 'clear') { return; }
+        if (type === 'clear' || type === 'unloaded') { return; }
         const query = this._query;
         const {state} = this._history;
         const hasState = typeof state === 'object' && state !== null;
@@ -832,7 +832,11 @@ export class Display extends EventDispatcher {
 
     /** @type {import('display').DirectApiHandler<'displaySetOptionsContext'>} */
     async _onMessageSetOptionsContext({optionsContext}) {
-        await this.setOptionsContext(optionsContext);
+        const token = this._setContentToken;
+        const promise = this.setOptionsContext(optionsContext);
+        const request = this._optionsContextRequest;
+        await promise;
+        if (this._setContentToken !== token || this._optionsContextRequest !== request) { return; }
         this.searchLast(true);
     }
 
@@ -903,6 +907,7 @@ export class Display extends EventDispatcher {
     /** @type {import('display').DirectApiHandler<'displayVisibilityChanged'>} */
     _onMessageVisibilityChanged({value}) {
         this._frameVisible = value;
+        if (!value) { this._cancelPendingScannerSearches(); }
         this.trigger('frameVisibilityChange', {value});
     }
 
@@ -988,7 +993,7 @@ export class Display extends EventDispatcher {
             safePerformance.measure('display:_onStateChanged:setContent', 'display:_onStateChanged:setContent:start', 'display:_onStateChanged:setContent:end');
         } catch (e) {
             try {
-                this.onError(toError(e));
+                if (this._setContentToken === token) { this.onError(toError(e)); }
             } catch (error) {
                 // Reporting must not reject the unawaited history event handler.
             }
@@ -1104,7 +1109,7 @@ export class Display extends EventDispatcher {
     /**
      * @param {MouseEvent} e
      */
-    async _onKanjiLookup(e) {
+    _onKanjiLookup(e) {
         try {
             e.preventDefault();
             const {state} = this._history;
@@ -1117,7 +1122,6 @@ export class Display extends EventDispatcher {
             const element = /** @type {Element} */ (e.currentTarget);
             let query = element.textContent;
             if (query === null) { query = ''; }
-            const dictionaryEntries = await this._application.api.kanjiFind(query, optionsContext);
             /** @type {import('display').ContentDetails} */
             const details = {
                 focus: false,
@@ -1131,7 +1135,6 @@ export class Display extends EventDispatcher {
                     documentTitle,
                 },
                 content: {
-                    dictionaryEntries,
                     contentOrigin: this.getContentOrigin(),
                 },
             };
@@ -1870,6 +1873,7 @@ export class Display extends EventDispatcher {
         const text = this._fullQuery;
         const visible = this._isQueryParserVisible();
         this._queryParserContainer.hidden = !visible || text.length === 0;
+        if (this._queryParserContainer.hidden) { this._queryParser.cancelPendingSearches(); }
         if (visible && (this._queryParser.text !== text || this._queryParser.needsTextUpdate)) {
             void this._setQueryParserText(text);
         }
@@ -2563,6 +2567,7 @@ export class Display extends EventDispatcher {
     async _refreshSearchEmptyStateAfterOptionsUpdate() {
         try {
             await this.updateOptions();
+            if (this._contentType !== 'clear') { return; }
             const hasEnabledDictionaries = this._options ? this._options.dictionaries.some(({enabled}) => enabled) : false;
             this._setNoContentVisible(false);
             this._setNoDictionariesVisible(!hasEnabledDictionaries);
@@ -2591,6 +2596,7 @@ export class Display extends EventDispatcher {
             await this._refreshDictionaryInfo();
             if (this._pageType === 'search' && this._contentType === 'clear') {
                 await this.updateOptions();
+                if (this._contentType !== 'clear') { return; }
                 const hasEnabledDictionaries = this._options ? this._options.dictionaries.some(({enabled}) => enabled) : false;
                 this._setNoContentVisible(false);
                 this._setNoDictionariesVisible(!hasEnabledDictionaries);
@@ -2722,7 +2728,15 @@ export class Display extends EventDispatcher {
     }
 
     /** */
+    _cancelPendingScannerSearches() {
+        this._contentTextScanner?.cancelPendingSearches();
+        this._queryParser.cancelPendingSearches();
+    }
+
+    /** */
     _triggerContentClear() {
+        this._cancelPendingScannerSearches();
+        this._contentTextScanner?.clearSelection();
         this.trigger('contentClear', {});
     }
 

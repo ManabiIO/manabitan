@@ -7,6 +7,7 @@ import {afterEach, expect, vi} from 'vitest';
 import {log} from '../ext/js/core/log.js';
 import {Display} from '../ext/js/display/display.js';
 import {QueryParser} from '../ext/js/display/query-parser.js';
+import {TextSourceRange} from '../ext/js/dom/text-source-range.js';
 import {createDomTest} from './fixtures/dom-test.js';
 
 const test = createDomTest();
@@ -333,3 +334,84 @@ test('a rendering failure clears unusable cached results and allows a same-text 
     expect(parser.needsTextUpdate).toBe(false);
     expect(parser._queryParser.textContent).toBe('same');
 });
+
+test.for(['new-text', 'parser-change', 'parse-completion', 'parsing-disabled', 'unchanged-options', 'render-failure'])(
+    '%s retains lookup ownership only while the parser text survives',
+    async (change, {window}) => {
+        const {parser, api, report} = setup(window);
+        const scanner = parser._textScanner;
+        const oldLookup = /** @type {PromiseWithResolvers<import('api').ApiReturn<'termsFind'>>} */ (Promise.withResolvers());
+        const parsed = /** @type {PromiseWithResolvers<import('api').ParseTextResultItem[]>} */ (Promise.withResolvers());
+        /** @type {import('api').ApiReturn<'termsFind'>} */
+        const hit = {
+            dictionaryEntries: [
+                /** @type {import('dictionary').TermDictionaryEntry} */ (/** @type {unknown} */ ({type: 'term', definitions: []})),
+            ],
+            originalTextLength: 1,
+        };
+        const lookup = vi.fn().mockReturnValueOnce(oldLookup.promise).mockResolvedValue(hit);
+        Reflect.set(api, 'termsFind', lookup);
+        Reflect.set(scanner, '_textSourceGenerator', {
+            getRangeFromPoint: () => {
+                const node = parser._queryParser.querySelector('.query-parser-term')?.firstChild;
+                if (!node) { throw new Error('Missing parser text'); }
+                const range = window.document.createRange();
+                range.selectNodeContents(node);
+                return TextSourceRange.create(range);
+            },
+            extractSentence: () => ({text: parser.text, offset: 0}),
+        });
+        api.parseText.mockReturnValueOnce(change === 'parse-completion' ? parsed.promise : Promise.resolve(results('old')));
+        const parsing = parser.setText('old');
+        if (change !== 'parse-completion') { await parsing; }
+        parser.prepare();
+        scanner.setEnabled(true);
+        scanner.setOptions({scanLength: 20});
+        const searched = vi.fn();
+        parser.on('searched', searched);
+        const click = () => Reflect.get(scanner, '_searchAt').call(scanner, 1, 1, {
+            input: null, pointerType: 'mouse', eventType: 'click', passive: false, modifiers: [], modifierKeys: [], detail: null,
+        });
+        const older = click();
+        try {
+            expect(lookup).toHaveBeenCalledOnce();
+            switch (change) {
+                case 'new-text': await parser.setText('new'); break;
+                case 'parser-change': parser.setOptions(options({selectedParser: 'mecab'})); break;
+                case 'parse-completion':
+                    parsed.resolve(results('parsed'));
+                    await parsing;
+                    break;
+                case 'parsing-disabled': parser.setOptions(options({useInternalParser: false, useMecabParser: false})); break;
+                case 'unchanged-options': parser.setOptions(options()); break;
+                case 'render-failure':
+                    vi.spyOn(parser, '_createParseResult').mockImplementationOnce(() => { throw new Error('Render failed'); });
+                    expect(() => parser._renderParseResult()).toThrow('Render failed');
+                    break;
+            }
+            if (change === 'unchanged-options' || change === 'render-failure') {
+                oldLookup.resolve(hit);
+                await older;
+                expect(searched).toHaveBeenCalledOnce();
+                expect(scanner.getCurrentTextSource()?.text()).toBe('o');
+                expect(report).not.toHaveBeenCalled();
+                return;
+            }
+            // A new click must not queue behind an old query's reader.
+            await click();
+            expect(lookup).toHaveBeenCalledTimes(2);
+            expect(searched).toHaveBeenCalledOnce();
+            const currentSource = scanner.getCurrentTextSource();
+            oldLookup.resolve(hit);
+            await older;
+            expect(searched).toHaveBeenCalledOnce();
+            expect(scanner.getCurrentTextSource()).toBe(currentSource);
+            expect(report).not.toHaveBeenCalled();
+        } finally {
+            scanner.setEnabled(false);
+            oldLookup.resolve(hit);
+            parsed.resolve(results('old'));
+            await Promise.all([older, parsing]);
+        }
+    },
+);

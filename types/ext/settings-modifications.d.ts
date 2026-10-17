@@ -45,6 +45,48 @@ export type ModificationSwap = {
     path2: string;
 };
 
+export type ModificationMoveDictionary = {
+    action: 'moveDictionary';
+    path: string;
+    currentIndex: number;
+    targetIndex: number;
+    expectedNames: string[];
+    expectedEntries: Record<string, unknown>[];
+};
+
+export type ModificationSetDefaultProfile = {
+    action: 'setDefaultProfile';
+    profileId: string;
+};
+
+export type ModificationSwapProfiles = {
+    action: 'swapProfiles';
+    profileId1: string;
+    profileId2: string;
+};
+
+export type ModificationProfileAction = {
+    action: 'setProfileName';
+    profileId: string;
+    value: string;
+} | {
+    action: 'copyProfileOptions';
+    sourceProfileId: string;
+    destinationProfileId: string;
+    value: unknown;
+} | {
+    action: 'resetProfile';
+    profileId: string;
+    value: unknown;
+} | {
+    action: 'deleteProfile';
+    profileId: string;
+} | {
+    action: 'duplicateProfile';
+    sourceProfileId: string;
+    profile: unknown;
+};
+
 export type ModificationSplice = {
     action: 'splice';
     path: string;
@@ -69,6 +111,10 @@ export type Modification = (
     ModificationSet |
     ModificationDelete |
     ModificationSwap |
+    ModificationMoveDictionary |
+    ModificationSetDefaultProfile |
+    ModificationSwapProfiles |
+    ModificationProfileAction |
     ModificationSplice |
     ModificationPush |
     ModificationRemoveDictionary
@@ -82,6 +128,14 @@ export type ScopedModificationDelete = ModificationDelete & OptionsScope;
 
 export type ScopedModificationSwap = ModificationSwap & OptionsScope;
 
+export type ScopedModificationMoveDictionary = ModificationMoveDictionary & OptionsScope;
+
+export type ScopedModificationSetDefaultProfile = ModificationSetDefaultProfile & OptionsScope;
+
+export type ScopedModificationSwapProfiles = ModificationSwapProfiles & OptionsScope;
+
+export type ScopedModificationProfileAction = ModificationProfileAction & OptionsScope;
+
 export type ScopedModificationSplice = ModificationSplice & OptionsScope;
 
 export type ScopedModificationPush = ModificationPush & OptionsScope;
@@ -92,6 +146,10 @@ export type ScopedModification = (
     ScopedModificationSet |
     ScopedModificationDelete |
     ScopedModificationSwap |
+    ScopedModificationMoveDictionary |
+    ScopedModificationSetDefaultProfile |
+    ScopedModificationSwapProfiles |
+    ScopedModificationProfileAction |
     ScopedModificationSplice |
     ScopedModificationPush |
     ScopedModificationRemoveDictionary

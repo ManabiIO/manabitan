@@ -36,7 +36,7 @@ export function installReaderLookupIntegration(frontend) {
         show: async (request, anchor, isCurrent, subscribe) => {
             const optionsContext = await frontend._getOptionsContext();
             if (!isCurrent()) { return; }
-            const {dictionaryEntries} = await frontend._application.api.termsFind(request.term, {
+            const {dictionaryEntries, dictionaryAvailability} = await frontend._application.api.termsFind(request.term, {
                 matchType: 'exact', deinflect: false, primaryReading: request.reading,
             }, optionsContext);
             if (!isCurrent()) { return; }
@@ -58,9 +58,12 @@ export function installReaderLookupIntegration(frontend) {
                 matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
                 void 0,
                 {isCurrent, subscribe},
+                dictionaryAvailability,
             );
             await frontend.showContentCompleted();
-            if (isCurrent()) { document.documentElement.dataset.readerLookupStatus = entries.length > 0 ? 'shown' : 'no-exact-match'; }
+            if (isCurrent()) {
+                document.documentElement.dataset.readerLookupStatus = dictionaryAvailability?.length ? 'incomplete' : (entries.length > 0 ? 'shown' : 'no-exact-match');
+            }
         },
     });
 }
