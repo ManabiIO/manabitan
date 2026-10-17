@@ -3405,9 +3405,14 @@ null;
             }
             case 'set':
             {
-                const {path, value} = target;
+                const {path, value, expectedValue} = target;
                 if (typeof path !== 'string') { throw new Error('Invalid path'); }
                 const pathArray = ObjectPropertyAccessor.getPathArray(path);
+                if (Object.hasOwn(target, 'expectedValue') && JSON.stringify(accessor.get(pathArray)) !== JSON.stringify(expectedValue)) {
+                    const error = new ExtensionError('Setting value changed before update');
+                    error.data = {code: 'stale'};
+                    throw error;
+                }
                 accessor.set(pathArray, value);
                 return accessor.get(pathArray);
             }

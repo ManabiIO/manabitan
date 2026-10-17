@@ -84,6 +84,7 @@ async function expectDirectRefreshDropsStaleProfile(prototype, method, args = []
             getOptions: () => pending.promise,
         },
         _onOptionsChanged: applied,
+        _readGeneration: 0,
         ...extra,
     });
 
@@ -385,16 +386,32 @@ async function expectProfileWriteDropsAfterSwitch(prototype, method, args, optio
         getOptionsContext: () => ({index: profileIndex}),
         getOptions: () => pending.promise,
         modifyProfileSettings,
+        modifySettings: modifyProfileSettings,
         trigger: vi.fn(),
     };
     const controller = Object.assign(Object.create(prototype), {
         _settingsController: settingsController,
     });
 
+    // Sentence edits now queue against the verified row snapshot, rather than
+    // making a fresh options read before dispatch. Hold that real admission
+    // boundary so the profile switch still exercises an unsent write.
+    const queued = prototype === SentenceTerminationCharactersController.prototype ? deferred() : null;
+    if (queued !== null) {
+        Object.assign(controller, {
+            _viewContext: {index: 0},
+            _viewGeneration: 0,
+            _mutationTail: queued.promise,
+            _mutationRequestGeneration: 0,
+            _savedRows: options.sentenceParsing.terminationCharacters,
+            _entries: [{index: 0, generation: 0, retired: false}],
+        });
+    }
     const operation = Reflect.apply(Reflect.get(prototype, method), controller, args);
     await flush();
     profileIndex = 1;
     pending.resolve(options);
+    queued?.resolve(void 0);
     await operation;
 
     expect(modifyProfileSettings).not.toHaveBeenCalled();
@@ -530,14 +547,18 @@ test('sentence termination reset cannot write defaults into a profile selected w
     let profileIndex = 0;
     /** @type {ReturnType<typeof deferred<import('settings').Options>>} */
     const pending = deferred();
-    const setProfileSetting = vi.fn().mockResolvedValue([]);
+    const modifySettings = vi.fn().mockResolvedValue([]);
     const controller = Object.assign(Object.create(SentenceTerminationCharactersController.prototype), {
         _settingsController: {
             getOptionsContext: () => ({index: profileIndex}),
             getDefaultOptions: () => pending.promise,
-            setProfileSetting,
+            modifySettings,
         },
         _updateOptions: vi.fn(),
+        _viewContext: {index: 0},
+        _viewGeneration: 0,
+        _mutationTail: Promise.resolve(),
+        _mutationRequestGeneration: 0,
     });
 
     const operation = controller._reset();
@@ -548,7 +569,7 @@ test('sentence termination reset cannot write defaults into a profile selected w
     })));
     await operation;
 
-    expect(setProfileSetting).not.toHaveBeenCalled();
+    expect(modifySettings).not.toHaveBeenCalled();
 });
 
 test('sort-frequency auto detection cannot write its result into a newly selected profile', async () => {
