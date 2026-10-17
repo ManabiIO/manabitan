@@ -105,6 +105,17 @@ export function generateAnkiNoteMediaFileName(prefix, extension, suffix) {
 }
 
 /**
+ * Generates a media filename with a timestamp and a collision-resistant suffix.
+ * @param {string} prefix
+ * @param {string} extension
+ * @param {number} timestamp
+ * @returns {string}
+ */
+export function generateAnkiNoteMediaFileNameWithUniqueTimestamp(prefix, extension, timestamp) {
+    return generateAnkiNoteMediaFileName(prefix, extension, `${timestamp}_${crypto.randomUUID()}`);
+}
+
+/**
  * @param {string} prefix
  * @param {string} content
  * @param {string?} extension
@@ -122,7 +133,7 @@ export async function mediaFileNameHashOrTimestamp(prefix, content, extension, m
     } catch {
         const mediaCountInfix = mediaCount ? mediaCount + 1 : '';
         // fallback on using timestamp for older browser versions
-        return generateAnkiNoteMediaFileName(`${prefix}_${mediaCountInfix}`, extension !== null ? extension : '', timestamp);
+        return generateAnkiNoteMediaFileNameWithUniqueTimestamp(`${prefix}_${mediaCountInfix}`, extension !== null ? extension : '', timestamp);
     }
 }
 

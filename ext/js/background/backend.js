@@ -32,7 +32,7 @@ import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-repo
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
-import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid, mediaFileNameHashOrTimestamp} from '../data/anki-util.js';
+import {generateAnkiNoteMediaFileName, generateAnkiNoteMediaFileNameWithUniqueTimestamp, INVALID_NOTE_ID, isNoteDataValid, mediaFileNameHashOrTimestamp} from '../data/anki-util.js';
 import {arrayBufferToBase64} from '../data/array-buffer-util.js';
 import {OptionsUtil} from '../data/options-util.js';
 import {getAllPermissions, hasPermissions, hasRequiredPermissionsForOptions} from '../data/permissions-util.js';
@@ -3921,7 +3921,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
 
         const fileName = dataUrl === this._ankiClipboardImageDataUrlCache && this._ankiClipboardImageFilenameCache ?
             this._ankiClipboardImageFilenameCache :
-            generateAnkiNoteMediaFileName('yomitan_clipboard_image', extension, timestamp);
+            generateAnkiNoteMediaFileNameWithUniqueTimestamp('yomitan_clipboard_image', extension, timestamp);
 
         const storedFileName = await ankiConnect.storeMediaFile(fileName, data);
 
