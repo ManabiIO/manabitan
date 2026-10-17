@@ -73,6 +73,9 @@ const fixtures = {
             '--disable-crash-reporter',
             '--disable-crashpad',
         ];
+        if (process.platform === 'darwin') {
+            launchArgs.push('--disable-features=MacAppCodeSignClone');
+        }
         if (!runHeadless && hideWindow) {
             launchArgs.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
         }
