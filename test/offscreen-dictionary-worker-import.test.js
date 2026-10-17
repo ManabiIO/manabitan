@@ -159,6 +159,7 @@ vi.mock('../ext/js/dictionary/dictionary-importer.js', () => ({
 
 describe('Offscreen dictionary worker import response port handling', () => {
     afterEach(() => {
+        vi.useRealTimers();
         vi.resetModules();
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
@@ -189,33 +190,64 @@ describe('Offscreen dictionary worker import response port handling', () => {
         /** @type {Map<string, (event: MessageEvent) => void>} */
         const listeners = new Map();
         const workerPostMessage = vi.fn();
+        /** @type {((event: MessageEvent) => void)|null} */
+        let clientMessageListener = null;
+        const worker = {
+            postMessage: vi.fn((message, ports) => {
+                listeners.get('message')?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({data: message, ports})));
+            }),
+            terminate: vi.fn(),
+            addEventListener: vi.fn((type, listener) => {
+                if (type === 'message') { clientMessageListener = listener; }
+            }),
+        };
+        vi.stubGlobal('Worker', class { constructor() { Object.assign(this, worker); } });
         vi.stubGlobal('self', {
             addEventListener: vi.fn((type, listener) => { listeners.set(type, listener); }),
-            postMessage: workerPostMessage,
+            postMessage: (message) => {
+                workerPostMessage(message);
+                clientMessageListener?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({data: message})));
+            },
         });
         await import('../ext/js/background/offscreen-dictionary-worker.js');
+        const {DictionaryWorkerClient} = await import('../ext/js/background/dictionary-worker-client.js');
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
         const onMessage = listeners.get('message');
         const importPort = {postMessage: vi.fn(), close: vi.fn()};
-        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 1, action: 'importDictionaryOffscreen', params: {operationId: importOperationId1, archiveContent: new Blob(['dictionary']), details: {}}},
-            ports: [importPort],
-        })));
+        client.post('importDictionaryOffscreen', {operationId: importOperationId1, archiveContent: new Blob(['dictionary']), details: {}}, [importPort]);
         await vi.waitFor(() => expect(importControl.started).toBe(true));
         expect(importPort.postMessage).toHaveBeenCalledWith({type: 'progress', progress: {nextStep: false, index: 1, count: 2}});
 
-        onMessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
-            data: {id: 2, action: 'getDictionaryInfoOffscreen', params: {}},
-            ports: [],
-        })));
-        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({
-            id: 2,
-            error: expect.objectContaining({message: 'Cannot execute getDictionaryInfoOffscreen: dictionary import is in progress'}),
-        })));
+        for (const [action, params] of [
+            ['databasePrepareOffscreen', {}],
+            ['clearDatabaseCachesOffscreen', {}],
+            ['databasePurgeOffscreen', {}],
+            ['deleteDictionaryOffscreen', {dictionaryTitle: 'Fixture'}],
+            ['databaseRefreshOffscreen', {}],
+            ['databaseSetSuspendedOffscreen', {suspended: false}],
+            ['findTermsBulkOffscreen', {termList: [], dictionaryNames: [], matchType: 'exact'}],
+            ['unknownWorkerAction', {}],
+        ]) {
+            const rejected = client.invoke(action, params);
+            await expect(rejected).rejects.toThrow(`Cannot execute ${action}: dictionary import is in progress`);
+            expect(worker.terminate).not.toHaveBeenCalled();
+        }
+
+        vi.useFakeTimers();
+        const runtimeState = client.invoke('getDatabaseRuntimeStateOffscreen', {});
+        await expect(runtimeState).rejects.toThrow('Cannot execute getDatabaseRuntimeStateOffscreen: dictionary import is in progress');
         expect(importPort.close).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(worker.terminate).not.toHaveBeenCalled();
+        expect(importControl.started).toBe(true);
+        expect(workerPostMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: expect.any(Number), result: expect.anything()}));
+        vi.useRealTimers();
 
         importControl.releaseImport?.();
         await vi.waitFor(() => expect(importPort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'})));
-        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith({id: 1, result: undefined}));
+        expect(workerPostMessage).toHaveBeenCalledWith(expect.objectContaining({result: undefined}));
+        const afterImport = client.invoke('getDatabaseRuntimeStateOffscreen', {});
+        await expect(afterImport).resolves.toEqual({isPrepared: false, usesFallbackStorage: false, openStorageDiagnostics: null});
     });
 
     test('accepts native structured-clone lookup settings', async () => {

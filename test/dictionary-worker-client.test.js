@@ -95,6 +95,10 @@ describe('dictionary runtime action policies', () => {
                 retryable: expect.any(Boolean),
                 requiresDatabase: expect.any(Boolean),
             });
+            const policy = getDictionaryRuntimeActionPolicy(action);
+            if (policy.concurrency === 'exclusive') {
+                expect(policy.rejectDuringImport).toBe(true);
+            }
         }
     });
 
