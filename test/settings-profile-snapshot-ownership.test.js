@@ -393,17 +393,20 @@ async function expectProfileWriteDropsAfterSwitch(prototype, method, args, optio
         _settingsController: settingsController,
     });
 
-    // Sentence edits now queue against the verified row snapshot, rather than
+    // Snapshot-based editors queue against the verified row snapshot, rather than
     // making a fresh options read before dispatch. Hold that real admission
     // boundary so the profile switch still exercises an unsent write.
-    const queued = prototype === SentenceTerminationCharactersController.prototype ? deferred() : null;
+    const isSentenceEditor = prototype === SentenceTerminationCharactersController.prototype;
+    const isReplacementEditor = prototype === TranslationTextReplacementsController.prototype;
+    const queued = isSentenceEditor || isReplacementEditor ? deferred() : null;
     if (queued !== null) {
         Object.assign(controller, {
             _viewContext: {index: 0},
             _viewGeneration: 0,
             _mutationTail: queued.promise,
             _mutationRequestGeneration: 0,
-            _savedRows: options.sentenceParsing.terminationCharacters,
+            _savedRows: isSentenceEditor ? options.sentenceParsing.terminationCharacters : (options.translation.textReplacements.groups[0] ?? []),
+            _savedGroups: isReplacementEditor ? options.translation.textReplacements.groups : [],
             _entries: [{index: 0, generation: 0, retired: false}],
         });
     }
