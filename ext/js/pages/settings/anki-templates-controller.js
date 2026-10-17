@@ -45,6 +45,24 @@ export class AnkiTemplatesController {
         /** @type {?string} */
         this._cachedDictionaryEntryText = null;
         /** @type {?string} */
+        this._cachedDictionaryEntryContext = null;
+        /** @type {number} */
+        this._viewGeneration = 0;
+        /** @type {?import('settings').OptionsContext} */
+        this._viewOptionsContext = null;
+        /** @type {number} */
+        this._prepareGeneration = 0;
+        /** @type {number} */
+        this._compileValidationGeneration = 0;
+        /** @type {number} */
+        this._previewValidationGeneration = 0;
+        /** @type {number} */
+        this._saveGeneration = 0;
+        /** @type {number} */
+        this._lastAcknowledgedSaveGeneration = 0;
+        /** @type {string} */
+        this._lastAcknowledgedTemplates = '';
+        /** @type {?string} */
         this._defaultFieldTemplates = null;
         /** @type {HTMLTextAreaElement} */
         this._fieldTemplatesTextarea = querySelectorNotNull(document, '#anki-card-templates-textarea');
@@ -60,6 +78,8 @@ export class AnkiTemplatesController {
         this._mainSettingsEntry = querySelectorNotNull(document, '[data-modal-action="show,anki-card-templates"]');
         /** @type {?import('./modal.js').Modal} */
         this._fieldTemplateResetModal = null;
+        /** @type {?{viewGeneration: number, optionsContext: import('settings').OptionsContext}} */
+        this._resetModalOwner = null;
         /** @type {AnkiNoteBuilder} */
         this._ankiNoteBuilder = new AnkiNoteBuilder(settingsController.application.api, new TemplateRendererProxy());
     }
@@ -91,15 +111,17 @@ export class AnkiTemplatesController {
         }
 
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
+        this._settingsController.on('optionsContextChanged', this._onOptionsContextChanged.bind(this));
 
+        const prepareGeneration = ++this._prepareGeneration;
         const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
+        if (prepareGeneration === this._prepareGeneration && this._sameOptionsContext(this._settingsController.getOptionsContext(), optionsContext)) {
             this._onOptionsChanged({options, optionsContext});
         }
 
-        void this._updateExampleText();
-        this._mainSettingsEntry.addEventListener('click', this._updateExampleText.bind(this), false);
+        void this._updateExampleTextEvent();
+        this._mainSettingsEntry.addEventListener('click', this._updateExampleTextEvent.bind(this), false);
     }
 
     // Private
@@ -107,7 +129,12 @@ export class AnkiTemplatesController {
     /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
-    _onOptionsChanged({options}) {
+    _onOptionsChanged({options, optionsContext}) {
+        if (!this._sameOptionsContext(this._settingsController.getOptionsContext(), optionsContext)) { return; }
+        ++this._prepareGeneration;
+        ++this._viewGeneration;
+        this._viewOptionsContext = optionsContext;
+        this._invalidateDictionaryEntryCache();
         let templates = options.anki.fieldTemplates;
         if (typeof templates !== 'string') {
             templates = this._defaultFieldTemplates;
@@ -115,8 +142,18 @@ export class AnkiTemplatesController {
         }
         /** @type {HTMLTextAreaElement} */ (this._fieldTemplatesTextarea).value = templates;
         /** @type {HTMLTextAreaElement} */ (this._fieldTemplatesTextarea).dataset.value = templates;
+        this._lastAcknowledgedTemplates = templates;
 
         this._onValidateCompile();
+    }
+
+    /** */
+    _onOptionsContextChanged() {
+        ++this._prepareGeneration;
+        ++this._viewGeneration;
+        this._viewOptionsContext = null;
+        this._invalidateDictionaryEntryCache();
+        this._clearValidationResults();
     }
 
     /**
@@ -125,6 +162,13 @@ export class AnkiTemplatesController {
     _onReset(e) {
         e.preventDefault();
         if (this._fieldTemplateResetModal !== null) {
+            const optionsContext = this._settingsController.getOptionsContext();
+            this._resetModalOwner = this._viewOptionsContext !== null && this._sameOptionsContext(this._viewOptionsContext, optionsContext) ?
+                {
+                    viewGeneration: this._viewGeneration,
+                    optionsContext,
+                } :
+                null;
             this._fieldTemplateResetModal.setVisible(true);
         }
     }
@@ -139,6 +183,10 @@ export class AnkiTemplatesController {
             this._fieldTemplateResetModal.setVisible(false);
         }
 
+        const owner = this._resetModalOwner;
+        this._resetModalOwner = null;
+        if (owner === null || owner.viewGeneration !== this._viewGeneration || !this._sameOptionsContext(owner.optionsContext, this._settingsController.getOptionsContext())) { return; }
+
         const value = this._defaultFieldTemplates;
 
         const textarea = /** @type {HTMLTextAreaElement} */ (this._fieldTemplatesTextarea);
@@ -150,28 +198,44 @@ export class AnkiTemplatesController {
      * @param {Event} e
      */
     async _onChanged(e) {
-        // Get value
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
-        const previousValue = element.dataset.value ?? '';
-        /** @type {?string} */
-        let templates = element.value;
-        if (templates === this._defaultFieldTemplates) {
-            // Default
-            templates = null;
-        }
-
-        // Overwrite
+        const submittedValue = element.value;
+        const viewGeneration = this._viewGeneration;
+        const optionsContext = this._settingsController.getOptionsContext();
+        if (this._viewOptionsContext === null || !this._sameOptionsContext(this._viewOptionsContext, optionsContext)) { return; }
+        const saveGeneration = ++this._saveGeneration;
+        const profileId = optionsContext.profileId;
+        const payload = submittedValue === this._defaultFieldTemplates ? null : submittedValue;
+        const isCurrentView = () => this._viewGeneration === viewGeneration && this._sameOptionsContext(this._settingsController.getOptionsContext(), optionsContext);
         try {
-            await this._settingsController.setProfileSetting('anki.fieldTemplates', templates);
+            const modification = /** @type {import('settings-modifications').ScopedModification} */ ({
+                action: 'set',
+                path: 'anki.fieldTemplates',
+                value: payload,
+                scope: 'profile',
+                profileId,
+                optionsContext,
+            });
+            const results = await this._settingsController.modifySettings([modification]);
+            const result = results?.[0];
+            if (!Array.isArray(results) || results.length !== 1 || typeof result !== 'object' || result === null || Array.isArray(result) || !Object.hasOwn(result, 'result') || result.error) {
+                throw ExtensionError.deserialize(result?.error ?? {name: 'Error', message: 'Invalid profile settings response', stack: ''});
+            }
+            if (saveGeneration >= this._lastAcknowledgedSaveGeneration) {
+                this._lastAcknowledgedSaveGeneration = saveGeneration;
+                if (isCurrentView()) {
+                    this._lastAcknowledgedTemplates = submittedValue;
+                    this._fieldTemplatesTextarea.dataset.value = submittedValue;
+                }
+            }
         } catch (error) {
-            element.value = previousValue;
+            if (isCurrentView() && saveGeneration === this._saveGeneration && element.value === submittedValue) {
+                element.value = this._lastAcknowledgedTemplates;
+                element.dataset.value = this._lastAcknowledgedTemplates;
+            }
             throw error;
         }
-
-        element.dataset.value = element.value;
-
-        // Compile
-        this._onValidateCompile();
+        if (isCurrentView()) { this._onValidateCompile(); }
     }
 
     /**
@@ -189,6 +253,21 @@ export class AnkiTemplatesController {
         void this._validate(this._compileResultInfo, '{expression}', false, true);
     }
 
+    /** */
+    _clearValidationResults() {
+        ++this._compileValidationGeneration;
+        ++this._previewValidationGeneration;
+        if (this._compileResultInfo !== null) {
+            this._compileResultInfo.textContent = '';
+            this._compileResultInfo.hidden = true;
+        }
+        if (this._renderResult !== null) {
+            this._renderResult.textContent = '';
+            this._renderResult.hidden = true;
+        }
+        delete this._fieldTemplatesTextarea.dataset.invalid;
+    }
+
     /**
      * @param {Event} e
      */
@@ -198,15 +277,30 @@ export class AnkiTemplatesController {
         const field = /** @type {HTMLInputElement} */ (this._renderFieldInput).value;
         const infoNode = /** @type {HTMLElement} */ (this._renderResult);
         infoNode.hidden = true;
-        this._cachedDictionaryEntryText = null;
+        this._invalidateDictionaryEntryCache();
         void this._validate(infoNode, field, true, false);
     }
 
     /** */
+    _updateExampleTextEvent() {
+        void this._updateExampleText().catch((error) => {
+            log.error(error);
+        });
+    }
+
+    /** */
     async _updateExampleText() {
+        const viewGeneration = this._viewGeneration;
+        const optionsContext = this._settingsController.getOptionsContext();
+        const input = /** @type {HTMLInputElement} */ (this._renderTextInput);
+        const inputValue = input.value;
+        const ownsExample = () => this._viewGeneration === viewGeneration && this._viewOptionsContext !== null && this._sameOptionsContext(this._viewOptionsContext, optionsContext) && this._sameOptionsContext(this._settingsController.getOptionsContext(), optionsContext) && input.value === inputValue;
         const languageSummaries = await this._application.api.getLanguageSummaries();
+        if (!ownsExample()) { return; }
         const options = await this._settingsController.getOptions();
-        const activeLanguage = /** @type {import('language').LanguageSummary} */ (languageSummaries.find(({iso}) => iso === options.general.language));
+        if (!ownsExample()) { return; }
+        const activeLanguage = languageSummaries.find(({iso}) => iso === options.general.language);
+        if (typeof activeLanguage === 'undefined') { return; }
         this._renderTextInput.lang = options.general.language;
         this._renderTextInput.value = activeLanguage.exampleText;
         this._renderResult.lang = options.general.language;
@@ -240,15 +334,22 @@ export class AnkiTemplatesController {
     /**
      * @param {string} text
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {number} viewGeneration
      * @returns {Promise<?{dictionaryEntry: import('dictionary').TermDictionaryEntry, text: string}>}
      */
-    async _getDictionaryEntry(text, optionsContext) {
-        if (this._cachedDictionaryEntryText !== text) {
+    async _getDictionaryEntry(text, optionsContext, viewGeneration) {
+        const contextKey = JSON.stringify(optionsContext);
+        if (this._cachedDictionaryEntryText !== text || this._cachedDictionaryEntryContext !== contextKey) {
             const {dictionaryEntries} = await this._settingsController.application.api.termsFind(text, {}, optionsContext);
             if (dictionaryEntries.length === 0) { return null; }
 
-            this._cachedDictionaryEntryValue = dictionaryEntries[0];
-            this._cachedDictionaryEntryText = text;
+            const dictionaryEntry = dictionaryEntries[0];
+            if (this._viewGeneration === viewGeneration && this._sameOptionsContext(this._settingsController.getOptionsContext(), optionsContext)) {
+                this._cachedDictionaryEntryValue = dictionaryEntry;
+                this._cachedDictionaryEntryText = text;
+                this._cachedDictionaryEntryContext = contextKey;
+            }
+            return {dictionaryEntry, text};
         }
         return {
             dictionaryEntry: /** @type {import('dictionary').TermDictionaryEntry} */ (this._cachedDictionaryEntryValue),
@@ -263,16 +364,39 @@ export class AnkiTemplatesController {
      * @param {boolean} invalidateInput
      */
     async _validate(infoNode, field, showSuccessResult, invalidateInput) {
+        const validationGeneration = invalidateInput ? ++this._compileValidationGeneration : ++this._previewValidationGeneration;
+        const validationViewGeneration = this._viewGeneration;
+        const validationOptionsContext = this._settingsController.getOptionsContext();
+        if (this._viewOptionsContext === null || !this._sameOptionsContext(this._viewOptionsContext, validationOptionsContext)) { return; }
+        const textInput = /** @type {HTMLInputElement} */ (this._renderTextInput);
+        const fieldTemplatesTextarea = /** @type {HTMLTextAreaElement} */ (this._fieldTemplatesTextarea);
+        const inputText = textInput.value;
+        const fieldInput = /** @type {HTMLInputElement} */ (this._renderFieldInput);
+        const inputField = fieldInput.value;
+        const inputTemplates = fieldTemplatesTextarea.value;
+        const inputOptionsGeneration = this._viewGeneration;
+        const ownsResult = () => {
+            const currentGeneration = invalidateInput ? this._compileValidationGeneration : this._previewValidationGeneration;
+            const ownsView = this._viewOptionsContext !== null && this._sameOptionsContext(this._viewOptionsContext, validationOptionsContext) && this._sameOptionsContext(this._settingsController.getOptionsContext(), validationOptionsContext);
+            const ownsInputs = this._viewGeneration === inputOptionsGeneration && (
+                textInput.value === inputText &&
+                fieldInput.value === inputField &&
+                fieldTemplatesTextarea.value === inputTemplates
+            );
+            return currentGeneration === validationGeneration && this._viewGeneration === validationViewGeneration && ownsView && ownsInputs;
+        };
         /** @type {Error[]} */
         const allErrors = [];
-        const text = /** @type {HTMLInputElement} */ (this._renderTextInput).value;
+        const text = inputText;
         let result = `No definition found for ${text}`;
         try {
-            const optionsContext = this._settingsController.getOptionsContext();
-            const data = await this._getDictionaryEntry(text, optionsContext);
+            const data = await this._getDictionaryEntry(text, validationOptionsContext, validationViewGeneration);
             if (data !== null) {
+                if (!ownsResult()) { return; }
                 const {dictionaryEntry, text: sentenceText} = data;
                 const options = await this._settingsController.getOptions();
+                if (!ownsResult()) { return; }
+                if (!this._sameOptionsContext(validationOptionsContext, this._settingsController.getOptionsContext())) { return; }
                 const context = {
                     url: window.location.href,
                     sentence: {
@@ -283,7 +407,8 @@ export class AnkiTemplatesController {
                     query: sentenceText,
                     fullQuery: sentenceText,
                 };
-                const template = await this._getAnkiTemplate(options);
+                const template = await this._getAnkiTemplate(options, inputTemplates);
+                if (!ownsResult()) { return; }
                 const {general: {resultOutputMode, glossaryLayoutMode, compactTags}} = options;
                 const fields = {
                     field: {
@@ -309,12 +434,15 @@ export class AnkiTemplatesController {
                     compactTags,
                     dictionaryStylesMap: this._ankiNoteBuilder.getDictionaryStylesMap(options.dictionaries),
                 }));
+                if (!ownsResult()) { return; }
                 result = note.fields.field;
                 allErrors.push(...errors);
             }
         } catch (e) {
             allErrors.push(toError(e));
         }
+
+        if (!ownsResult()) { return; }
 
         /**
          * @param {Error} e
@@ -343,11 +471,30 @@ export class AnkiTemplatesController {
     }
 
     /**
+     * @param {import('settings').OptionsContext} a
+     * @param {import('settings').OptionsContext} b
+     * @returns {boolean}
+     */
+    _sameOptionsContext(a, b) {
+        const profileIdA = 'profileId' in a ? a.profileId : null;
+        const profileIdB = 'profileId' in b ? b.profileId : null;
+        return a.index === b.index && profileIdA === profileIdB;
+    }
+
+    /** */
+    _invalidateDictionaryEntryCache() {
+        this._cachedDictionaryEntryValue = null;
+        this._cachedDictionaryEntryText = null;
+        this._cachedDictionaryEntryContext = null;
+    }
+
+    /**
      * @param {import('settings').ProfileOptions} options
+     * @param {string} [fieldTemplates]
      * @returns {Promise<string>}
      */
-    async _getAnkiTemplate(options) {
-        let staticTemplates = options.anki.fieldTemplates;
+    async _getAnkiTemplate(options, fieldTemplates) {
+        let staticTemplates = fieldTemplates ?? options.anki.fieldTemplates;
         if (typeof staticTemplates !== 'string') { staticTemplates = this._defaultFieldTemplates; }
         const dictionaryInfo = await this._application.api.getDictionaryInfo();
         const dynamicTemplates = getDynamicTemplates(options, dictionaryInfo);
