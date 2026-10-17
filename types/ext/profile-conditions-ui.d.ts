@@ -22,6 +22,7 @@ export type Events = {
     conditionGroupCountChanged: {
         count: number;
         profileIndex: number;
+        profileId: string;
     };
 };
 

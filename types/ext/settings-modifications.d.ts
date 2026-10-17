@@ -87,6 +87,13 @@ export type ModificationProfileAction = {
     profile: unknown;
 };
 
+export type ModificationSetProfileConditionGroups = {
+    action: 'setProfileConditionGroups';
+    profileId: string;
+    expectedConditionGroups: Settings.ProfileConditionGroup[];
+    value: Settings.ProfileConditionGroup[];
+};
+
 export type ModificationSplice = {
     action: 'splice';
     path: string;
@@ -115,6 +122,7 @@ export type Modification = (
     ModificationSetDefaultProfile |
     ModificationSwapProfiles |
     ModificationProfileAction |
+    ModificationSetProfileConditionGroups |
     ModificationSplice |
     ModificationPush |
     ModificationRemoveDictionary
@@ -136,6 +144,8 @@ export type ScopedModificationSwapProfiles = ModificationSwapProfiles & OptionsS
 
 export type ScopedModificationProfileAction = ModificationProfileAction & OptionsScope;
 
+export type ScopedModificationSetProfileConditionGroups = ModificationSetProfileConditionGroups & OptionsScope;
+
 export type ScopedModificationSplice = ModificationSplice & OptionsScope;
 
 export type ScopedModificationPush = ModificationPush & OptionsScope;
@@ -150,6 +160,7 @@ export type ScopedModification = (
     ScopedModificationSetDefaultProfile |
     ScopedModificationSwapProfiles |
     ScopedModificationProfileAction |
+    ScopedModificationSetProfileConditionGroups |
     ScopedModificationSplice |
     ScopedModificationPush |
     ScopedModificationRemoveDictionary

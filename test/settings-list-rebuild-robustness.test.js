@@ -578,6 +578,7 @@ describe('Settings list rebuild robustness', () => {
             getOptionsFull: vi.fn().mockResolvedValue({
                 profiles: [
                     {
+                        id: 'profile-0',
                         conditionGroups: [
                             {conditions: [{type: 'popupLevel', operator: 'equal', value: '0'}]},
                             {conditions: [{type: 'popupLevel', operator: 'equal', value: '1'}]},
@@ -591,7 +592,7 @@ describe('Settings list rebuild robustness', () => {
         const controller = new ProfileConditionsUI(/** @type {any} */ (settingsController));
         controller.os = 'mac';
 
-        await expect(controller.prepare(0)).resolves.toBeUndefined();
+        await expect(controller.prepare(0, 'profile-0')).resolves.toBeUndefined();
 
         expect(window.document.querySelectorAll('#profile-condition-groups .profile-condition-group')).toHaveLength(1);
         expect(window.document.querySelectorAll('#profile-condition-groups .profile-condition')).toHaveLength(1);

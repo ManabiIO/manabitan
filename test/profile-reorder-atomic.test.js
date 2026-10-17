@@ -4,13 +4,22 @@
  */
 
 import {expect, test, vi} from 'vitest';
+import {JSDOM} from 'jsdom';
 import {Backend} from '../ext/js/background/backend.js';
+import {ProfileConditionsUI} from '../ext/js/pages/settings/profile-conditions-ui.js';
 import {ProfileController} from '../ext/js/pages/settings/profile-controller.js';
 
 function deferred() {
     /** @type {() => void} */
     let resolve = () => {};
     const promise = new Promise((/** @type {(value: void) => void} */ resolvePromise) => { resolve = () => resolvePromise(void 0); });
+    return {promise, resolve};
+}
+
+function deferredValue() {
+    /** @type {(value: unknown) => void} */
+    let resolve = () => {};
+    const promise = new Promise((resolvePromise) => { resolve = resolvePromise; });
     return {promise, resolve};
 }
 
@@ -73,6 +82,68 @@ function createHarness() {
     Reflect.set(settingsController, 'refresh', vi.fn().mockResolvedValue(void 0));
     Reflect.set(settingsController, 'refreshProfileIndex', vi.fn());
     return {backend, controller, saves, settingsController};
+}
+
+/**
+ * @param {any} settingsController
+ * @param {() => Promise<import('settings').Options>} getOptionsFull
+ * @returns {{dom: JSDOM, ui: ProfileConditionsUI, restore: () => void}}
+ */
+function createConditionsUI(settingsController, getOptionsFull) {
+    const previousDocument = globalThis.document;
+    const dom = new JSDOM(`<div id="profile-condition-groups"></div>
+        <button id="profile-add-condition-group"></button>
+        <template id="profile-condition-group-template"><div class="profile-condition-group">
+            <div class="profile-condition-list"></div>
+            <button class="profile-condition-add-button"></button>
+        </div></template>
+        <template id="profile-condition-template"><div class="profile-condition">
+            <div class="profile-condition-prefix"></div>
+            <select class="profile-condition-type"><optgroup></optgroup></select>
+            <select class="profile-condition-operator"><optgroup></optgroup></select>
+            <input class="profile-condition-input">
+            <button class="profile-condition-menu-button"></button>
+            <div class="mouse-button-container"><button class="mouse-button"></button></div>
+        </div></template>`);
+    Reflect.set(globalThis, 'document', dom.window.document);
+    Reflect.set(settingsController, 'getOptionsFull', getOptionsFull);
+    Reflect.set(settingsController, 'instantiateTemplate', (/** @type {string} */ name) => {
+        const template = /** @type {HTMLTemplateElement|null} */ (dom.window.document.querySelector(`#${name}-template`));
+        if (template === null || template.content.firstElementChild === null) { throw new Error(`Missing template: ${name}`); }
+        return template.content.firstElementChild.cloneNode(true);
+    });
+    const ui = new ProfileConditionsUI(/** @type {any} */ (settingsController));
+    return {
+        dom,
+        ui,
+        restore() {
+            if (typeof previousDocument === 'undefined') {
+                Reflect.deleteProperty(globalThis, 'document');
+            } else {
+                Reflect.set(globalThis, 'document', previousDocument);
+            }
+            dom.window.close();
+        },
+    };
+}
+
+/**
+ * @param {JSDOM} dom
+ * @param {string} selector
+ * @returns {HTMLElement}
+ */
+function queryElement(dom, selector) {
+    const element = dom.window.document.querySelector(selector);
+    if (element === null) { throw new Error(`Missing element: ${selector}`); }
+    return /** @type {HTMLElement} */ (element);
+}
+
+/**
+ * @param {Backend} backend
+ * @returns {import('settings').Options}
+ */
+function getBackendOptions(backend) {
+    return /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
 }
 
 test('default profile identity survives a queued reorder while its save is pending', async () => {
@@ -206,6 +277,288 @@ test('a name edit queued behind a reorder follows the profile identity', async (
     const {profiles} = /** @type {{profiles: {id: string, name: string}[]}} */ (Reflect.get(backend, '_options'));
     expect(profiles.find(({id}) => id === 'a')?.name).toBe('Renamed A');
     expect(profiles.find(({id}) => id === 'b')?.name).toBe('B');
+});
+
+test('a frontend-produced condition edit queued behind a reorder follows profile identity', async () => {
+    const {backend, saves, settingsController} = createHarness();
+    const {ui, dom, restore} = createConditionsUI(settingsController, async () => getBackendOptions(backend));
+    await ui.prepare(0, 'a');
+    const reorderSave = deferred();
+    saves.push(reorderSave);
+    const reorder = backend._modifySettings([{
+        action: 'swapProfiles', profileId1: 'a', profileId2: 'b', scope: 'global', optionsContext: null,
+    }], 'other-tab');
+    await flush();
+
+    try {
+        queryElement(dom, '#profile-add-condition-group').click();
+        reorderSave.resolve();
+        await reorder;
+        await flush();
+
+        const {profiles} = /** @type {{profiles: {id: string, conditionGroups: unknown[]}[]}} */ (Reflect.get(backend, '_options'));
+        expect(profiles.find(({id}) => id === 'a')?.conditionGroups).toHaveLength(1);
+        expect(profiles.find(({id}) => id === 'b')?.conditionGroups).toHaveLength(0);
+    } finally {
+        restore();
+    }
+});
+
+test('rapid frontend condition edits serialize against each optimistic snapshot', async () => {
+    const {backend, settingsController} = createHarness();
+    const ui = /** @type {ProfileConditionsUI} */ (Object.create(ProfileConditionsUI.prototype));
+    Reflect.set(ui, '_settingsController', settingsController);
+    Reflect.set(ui, '_profileId', 'a');
+    Reflect.set(ui, '_conditionGroups', []);
+    Reflect.set(ui, '_conditionGroupsMutationGeneration', 0);
+    Reflect.set(ui, '_prepareToken', {});
+    Reflect.set(ui, '_children', []);
+    Reflect.set(ui, '_addConditionGroup', () => { Reflect.get(ui, '_children').push(/** @type {any} */ ({})); });
+    Reflect.set(ui, '_triggerConditionGroupCountChanged', vi.fn());
+    Reflect.set(ui, 'getDefaultCondition', () => ({type: 'popupLevel', operator: 'equal', value: '0'}));
+
+    ui._onAddConditionGroupButtonClick();
+    ui._onAddConditionGroupButtonClick();
+    await flush();
+
+    const {profiles} = /** @type {{profiles: {id: string, conditionGroups: unknown[]}[]}} */ (Reflect.get(backend, '_options'));
+    expect(profiles.find(({id}) => id === 'a')?.conditionGroups).toHaveLength(2);
+    expect(profiles.find(({id}) => id === 'b')?.conditionGroups).toHaveLength(0);
+});
+
+test('rapid type, operator, and value changes are preserved in order', async () => {
+    const {backend, settingsController} = createHarness();
+    const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+    options.profiles[0].conditionGroups = [{conditions: [{type: 'popupLevel', operator: 'equal', value: '0'}]}];
+    const {ui, dom, restore} = createConditionsUI(settingsController, async () => getBackendOptions(backend));
+    try {
+        await ui.prepare(0, 'a');
+        const type = /** @type {HTMLSelectElement} */ (queryElement(dom, '.profile-condition-type'));
+        type.value = 'url';
+        type.dispatchEvent(new dom.window.Event('change', {bubbles: true}));
+        const operator = /** @type {HTMLSelectElement} */ (queryElement(dom, '.profile-condition-operator'));
+        operator.value = 'matchRegExp';
+        operator.dispatchEvent(new dom.window.Event('change', {bubbles: true}));
+        const input = /** @type {HTMLInputElement} */ (queryElement(dom, '.profile-condition-input'));
+        input.value = 'example\\.org';
+        input.dispatchEvent(new dom.window.Event('change', {bubbles: true}));
+        await flush();
+
+        const {profiles} = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        expect(profiles[0].conditionGroups[0].conditions[0]).toStrictEqual({
+            type: 'url', operator: 'matchRegExp', value: 'example\\.org',
+        });
+    } finally {
+        ui.cleanup();
+        restore();
+    }
+});
+
+test('operator change does not persist an invalid flags input value', async () => {
+    const {backend, settingsController} = createHarness();
+    const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+    options.profiles[0].conditionGroups = [{conditions: [{type: 'flags', operator: 'are', value: 'clipboard'}]}];
+    const {ui, dom, restore} = createConditionsUI(settingsController, async () => getBackendOptions(backend));
+    try {
+        await ui.prepare(0, 'a');
+        const input = /** @type {HTMLInputElement} */ (queryElement(dom, '.profile-condition-input'));
+        input.value = 'not-a-valid-flag';
+        input.dispatchEvent(new dom.window.Event('change', {bubbles: true}));
+
+        const operator = /** @type {HTMLSelectElement} */ (queryElement(dom, '.profile-condition-operator'));
+        operator.value = 'areNot';
+        operator.dispatchEvent(new dom.window.Event('change', {bubbles: true}));
+        await flush();
+
+        expect(getBackendOptions(backend).profiles[0].conditionGroups[0].conditions[0]).toStrictEqual({
+            type: 'flags', operator: 'areNot', value: 'clipboard',
+        });
+        expect(input.value).toBe('not-a-valid-flag');
+        expect(input.dataset.invalid).toBe('true');
+    } finally {
+        ui.cleanup();
+        restore();
+    }
+});
+
+test('deleting the last condition cascades its group removal in the same-tab queue', async () => {
+    const {backend, settingsController} = createHarness();
+    const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+    options.profiles[0].conditionGroups = [{conditions: [{type: 'popupLevel', operator: 'equal', value: '0'}]}];
+    const {ui, dom, restore} = createConditionsUI(settingsController, async () => getBackendOptions(backend));
+    try {
+        await ui.prepare(0, 'a');
+        const menuButton = queryElement(dom, '.profile-condition-menu-button');
+        menuButton.dispatchEvent(new dom.window.CustomEvent('menuClose', {detail: {action: 'delete'}}));
+        await flush();
+
+        const {profiles} = getBackendOptions(backend);
+        expect(profiles[0].conditionGroups).toStrictEqual([]);
+    } finally {
+        ui.cleanup();
+        restore();
+    }
+});
+
+test.each([
+    {name: 'deleted', profiles: [{id: 'b', name: 'B', options: {}, conditionGroups: []}]},
+    {
+        name: 'duplicated',
+        profiles: [
+            {id: 'a', name: 'A', options: {}, conditionGroups: []},
+            {id: 'a', name: 'duplicate', options: {}, conditionGroups: []},
+        ],
+    },
+    {name: 'missing', profiles: [{name: 'legacy', options: {}, conditionGroups: []}]},
+])('frontend-produced condition mutation fails closed when its profile identity is $name', async ({profiles}) => {
+    const {backend, settingsController} = createHarness();
+    const {ui, dom, restore} = createConditionsUI(settingsController, async () => getBackendOptions(backend));
+    await ui.prepare(0, 'a');
+    const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+    Reflect.set(options, 'profiles', profiles);
+    const before = structuredClone(options);
+
+    try {
+        queryElement(dom, '#profile-add-condition-group').click();
+        await flush();
+
+        expect(Reflect.get(backend, '_options')).toStrictEqual(before);
+        expect(Reflect.get(ui, '_conditionGroups')).toHaveLength(1);
+    } finally {
+        ui.cleanup();
+        restore();
+    }
+});
+
+test('condition compare-and-swap rejects stale nested structure without overwriting it', async () => {
+    const {backend} = createHarness();
+    const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+    options.profiles[0].conditionGroups = [{conditions: [{type: 'url', operator: 'matchDomain', value: 'changed.example'}]}];
+    const before = structuredClone(options);
+
+    const results = await backend._modifySettings([{
+        action: 'setProfileConditionGroups',
+        profileId: 'a',
+        expectedConditionGroups: [],
+        value: [{conditions: [{type: 'popupLevel', operator: 'equal', value: '0'}]}],
+        scope: 'global',
+        optionsContext: null,
+    }], 'other-tab');
+
+    expect(results[0]?.error).toBeDefined();
+    expect(Reflect.get(backend, '_options')).toStrictEqual(before);
+});
+
+test('frontend edit fails closed after another tab removes the edited condition group', async () => {
+    const {backend, saves, settingsController} = createHarness();
+    const options = getBackendOptions(backend);
+    options.profiles[0].conditionGroups = [
+        {conditions: [{type: 'url', operator: 'matchDomain', value: 'first.example'}]},
+        {conditions: [{type: 'url', operator: 'matchDomain', value: 'second.example'}]},
+    ];
+    const {ui, dom, restore} = createConditionsUI(settingsController, async () => getBackendOptions(backend));
+    try {
+        await ui.prepare(0, 'a');
+        const externalSave = deferred();
+        saves.push(externalSave);
+        const removeGroup = backend._modifySettings([{
+            action: 'splice',
+            path: 'profiles[0].conditionGroups',
+            start: 0,
+            deleteCount: 1,
+            items: [],
+            scope: 'global',
+            optionsContext: null,
+        }], 'other-tab');
+        await flush();
+
+        const input = /** @type {HTMLInputElement} */ (queryElement(dom, '.profile-condition-input'));
+        input.value = 'would-be-wrong-row.example';
+        input.dispatchEvent(new dom.window.Event('change', {bubbles: true}));
+
+        externalSave.resolve();
+        await removeGroup;
+        await flush();
+
+        expect(getBackendOptions(backend).profiles[0].conditionGroups).toStrictEqual([
+            {conditions: [{type: 'url', operator: 'matchDomain', value: 'second.example'}]},
+        ]);
+        expect(Reflect.get(ui, '_conditionGroups')).toStrictEqual(getBackendOptions(backend).profiles[0].conditionGroups);
+        expect(dom.window.document.querySelectorAll('.profile-condition-group')).toHaveLength(1);
+    } finally {
+        ui.cleanup();
+        restore();
+    }
+});
+
+test('late condition failure from a closed dialog cannot reconcile a reopened dialog for the same profile', async () => {
+    const {backend, settingsController} = createHarness();
+    const oldWrite = deferredValue();
+    const newWrite = deferredValue();
+    const modifyGlobalSettings = vi.fn()
+        .mockReturnValueOnce(oldWrite.promise)
+        .mockReturnValueOnce(newWrite.promise);
+    const getOptionsFull = vi.fn().mockResolvedValue({profiles: [
+        {id: 'a', name: 'A', options: {}, conditionGroups: []},
+    ]});
+    Reflect.set(settingsController, 'modifyGlobalSettings', modifyGlobalSettings);
+    Reflect.set(settingsController, 'getOptionsFull', getOptionsFull);
+
+    const ui = /** @type {ProfileConditionsUI} */ (Object.create(ProfileConditionsUI.prototype));
+    Reflect.set(ui, '_settingsController', settingsController);
+    Reflect.set(ui, '_profileId', 'a');
+    Reflect.set(ui, '_conditionGroups', []);
+    Reflect.set(ui, '_conditionGroupsMutationGeneration', 0);
+    Reflect.set(ui, '_prepareToken', {});
+    Reflect.set(ui, '_children', []);
+    Reflect.set(ui, '_addConditionGroup', () => { Reflect.get(ui, '_children').push(/** @type {any} */ ({cleanup: vi.fn()})); });
+    Reflect.set(ui, '_addConditionGroupButton', {});
+    Reflect.set(ui, '_eventListeners', {addEventListener: vi.fn(), removeAllEventListeners: vi.fn()});
+    const countChanged = vi.fn();
+    Reflect.set(ui, '_triggerConditionGroupCountChanged', countChanged);
+
+    ui.updateConditionGroups((conditionGroups) => { conditionGroups.push({conditions: []}); });
+    ui.cleanup();
+    await ui.prepare(0, 'a');
+    ui.updateConditionGroups((conditionGroups) => { conditionGroups.push({conditions: [{type: 'url', operator: 'matchDomain', value: 'new.example'}]}); });
+
+    oldWrite.resolve([{error: {message: 'stale write rejected'}}]);
+    await flush();
+
+    expect(getOptionsFull).toHaveBeenCalledOnce();
+    expect(Reflect.get(ui, '_conditionGroups')).toHaveLength(1);
+    expect(Reflect.get(ui, '_conditionGroupsMutationGeneration')).toBeGreaterThan(1);
+    expect(countChanged).not.toHaveBeenCalled();
+
+    newWrite.resolve([{}]);
+    await flush();
+    expect(getBackendOptions(backend).profiles[0].conditionGroups).toStrictEqual([]);
+});
+
+test('condition CAS reconciliation refreshes the profile entry group count', async () => {
+    const {settingsController} = createHarness();
+    Reflect.set(settingsController, 'modifyGlobalSettings', vi.fn().mockResolvedValue([{error: {message: 'stale write rejected'}}]));
+    Reflect.set(settingsController, 'getOptionsFull', vi.fn().mockResolvedValue({profiles: [
+        {id: 'a', name: 'A', options: {}, conditionGroups: [{conditions: []}, {conditions: []}]},
+    ]}));
+    const ui = /** @type {ProfileConditionsUI} */ (Object.create(ProfileConditionsUI.prototype));
+    Reflect.set(ui, '_settingsController', settingsController);
+    Reflect.set(ui, '_profileId', 'a');
+    Reflect.set(ui, '_profileIndex', 0);
+    Reflect.set(ui, '_conditionGroups', []);
+    Reflect.set(ui, '_conditionGroupsMutationGeneration', 0);
+    Reflect.set(ui, '_prepareToken', {});
+    Reflect.set(ui, '_children', []);
+    Reflect.set(ui, '_addConditionGroup', () => { Reflect.get(ui, '_children').push(/** @type {any} */ ({cleanup: vi.fn()})); });
+    const countChanged = vi.fn();
+    Reflect.set(ui, '_triggerConditionGroupCountChanged', countChanged);
+
+    ui.updateConditionGroups((conditionGroups) => { conditionGroups.push({conditions: []}); });
+    await flush();
+
+    expect(countChanged).toHaveBeenLastCalledWith(2);
+    expect(Reflect.get(ui, '_children')).toHaveLength(2);
+    expect(Reflect.get(ui, '_conditionGroups')).toHaveLength(2);
 });
 
 test('copy queued behind a reorder resolves source and destination by identity', async () => {

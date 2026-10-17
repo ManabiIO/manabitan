@@ -3231,6 +3231,26 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                 accessor.set(['profileCurrent'], matches[0]);
                 return matches[0];
             }
+            case 'setProfileConditionGroups':
+            {
+                const {profileId, expectedConditionGroups, value} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                if (!Array.isArray(expectedConditionGroups) || !Array.isArray(value)) { throw new Error('Invalid profile condition groups'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {Record<string, unknown>[]} */ (profilesValue);
+                const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                const index = matches[0];
+                const conditionGroups = profiles[index].conditionGroups;
+                if (!Array.isArray(conditionGroups)) { throw new Error('Invalid profile condition groups target'); }
+                if (JSON.stringify(conditionGroups) !== JSON.stringify(expectedConditionGroups)) {
+                    throw new Error('Profile conditions changed; reload settings and try again');
+                }
+                accessor.set(['profiles', index, 'conditionGroups'], value);
+                return value;
+            }
             case 'swapProfiles':
             {
                 const {profileId1, profileId2} = target;
