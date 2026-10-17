@@ -491,6 +491,55 @@ describe('ProfileController condition modal ownership', () => {
     });
 });
 
+describe('ProfileController profile modal identity', () => {
+    test('reset confirmation follows the selected profile after it is reordered', () => {
+        const controller = createControllerForInternalTests();
+        const profiles = [
+            {id: 'first', name: 'First'},
+            {id: 'second', name: 'Second'},
+        ];
+        const modal = {node: {dataset: {}}, setVisible: vi.fn()};
+        const resetProfile = vi.fn();
+        Reflect.set(controller, '_profiles', profiles);
+        Reflect.set(controller, '_profileResetModal', modal);
+        Reflect.set(controller, '_resetProfileNameElement', {textContent: ''});
+        Reflect.set(controller, 'resetProfile', resetProfile);
+
+        controller.openResetProfileModal(0);
+        Reflect.set(controller, '_profiles', [profiles[1], profiles[0]]);
+        controller._onResetConfirm();
+
+        expect(resetProfile).toHaveBeenCalledWith(1);
+    });
+
+    test('copy confirmation follows the destination and source IDs after reordering', () => {
+        const controller = createControllerForInternalTests();
+        const profiles = [
+            {id: 'first', name: 'First'},
+            {id: 'second', name: 'Second'},
+        ];
+        const options = profiles.map(({id}) => ({value: `id:${id}`, disabled: false}));
+        const select = {
+            querySelectorAll: () => options,
+            value: '',
+        };
+        const modal = {node: {dataset: {}}, setVisible: vi.fn()};
+        const copyProfile = vi.fn();
+        Reflect.set(controller, '_profiles', profiles);
+        Reflect.set(controller, '_profileCurrent', 0);
+        Reflect.set(controller, '_profileCopySourceSelect', select);
+        Reflect.set(controller, '_profileCopyModal', modal);
+        Reflect.set(controller, 'copyProfile', copyProfile);
+
+        controller.openCopyProfileModal(1);
+        expect(select.value).toBe('id:first');
+        Reflect.set(controller, '_profiles', [profiles[1], profiles[0]]);
+        controller._onCopyConfirm();
+
+        expect(copyProfile).toHaveBeenCalledWith(1, 0);
+    });
+});
+
 describe('ProfileConditionsUI prepare ownership', () => {
     test('only the latest overlapping profile preparation can populate the shared UI', async () => {
         const ui = /** @type {ProfileConditionsUI} */ (Object.create(ProfileConditionsUI.prototype));
