@@ -48,6 +48,7 @@ describe('Dictionary import profile visibility', () => {
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _settingsController: {
                 profileIndex: 0,
+                getOptionsContext: () => ({profileId: 'selected', index: 0}),
                 getOptionsFull: vi.fn().mockResolvedValue(optionsFull),
             },
             _modifyGlobalSettings: modifyGlobalSettings,
@@ -60,8 +61,10 @@ describe('Dictionary import profile visibility', () => {
         expect(errors).toStrictEqual([]);
         expect(modifyGlobalSettings).toHaveBeenCalledOnce();
         expect(modifyGlobalSettings.mock.calls[0][0]).toStrictEqual([{
-            action: 'set',
-            path: 'profiles[0].options.dictionaries[0].enabled',
+            action: 'setDictionaryEnabled',
+            profileId: 'selected',
+            name: 'Jitendex',
+            alias: 'Jitendex',
             value: true,
         }]);
     });
@@ -71,6 +74,7 @@ describe('Dictionary import profile visibility', () => {
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _settingsController: {
                 profileIndex: 0,
+                getOptionsContext: () => ({profileId: 'selected', index: 0}),
                 getOptionsFull: vi.fn().mockResolvedValue({
                     profiles: [{
                         id: 'selected',
@@ -98,6 +102,7 @@ describe('Dictionary import profile visibility', () => {
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _settingsController: {
                 profileIndex: 0,
+                getOptionsContext: () => ({profileId: 'selected', index: 0}),
                 getOptionsFull: vi.fn().mockResolvedValue({
                     profiles: [{
                         id: 'selected',
@@ -122,6 +127,7 @@ describe('Dictionary import profile visibility', () => {
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _settingsController: {
                 profileIndex: 0,
+                getOptionsContext: () => ({profileId: 'selected', index: 0}),
                 getOptionsFull: vi.fn().mockResolvedValue({
                     profiles: [{
                         id: 'selected',
@@ -142,6 +148,7 @@ describe('Dictionary import profile visibility', () => {
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _settingsController: {
                 profileIndex: 0,
+                getOptionsContext: () => ({profileId: 'selected', index: 0}),
                 getOptionsFull: vi.fn().mockResolvedValue({
                     profiles: [{
                         id: 'selected',

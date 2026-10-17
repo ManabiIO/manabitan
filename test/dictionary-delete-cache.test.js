@@ -199,15 +199,19 @@ test.each([
     Reflect.set(controller, '_dictionaryEntries', [{dictionaryTitle: title}]);
     Reflect.set(controller, '_statusFooter', null);
     const end = vi.fn();
-    const optionsFull = {profiles: [{options: {
-        dictionaries: [{name: title, enabled: true}, {name: 'Fixture', enabled: true}],
-        general: {mainDictionary: title, sortFrequencyDictionary: title},
-    }}]};
+    const optionsFull = {profiles: [{
+        id: 'profile-a',
+        options: {
+            dictionaries: [{name: title, enabled: true}, {name: 'Fixture', enabled: true}],
+            general: {mainDictionary: title, sortFrequencyDictionary: title},
+        },
+    }]};
     Reflect.set(backend, '_getModifySettingObject', () => optionsFull);
     const modifyGlobalSettings = vi.fn(async (/** @type {import('settings-modifications').Modification[]} */ targets) => {
         for (const target of targets) {
             backend._modifySetting({...target, scope: 'global', optionsContext: null});
         }
+        return targets.map(() => ({result: true}));
     });
     Reflect.set(controller, '_settingsController', {
         preventPageExit: () => ({end}),

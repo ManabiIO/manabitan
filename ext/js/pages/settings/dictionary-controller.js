@@ -19,6 +19,7 @@
 import * as ajvSchemas0 from '../../../lib/validate-schemas.js';
 import {reportDiagnostics} from '../../core/diagnostics-reporter.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {ExtensionError} from '../../core/extension-error.js';
 import {readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {deferPromise, promiseTimeout} from '../../core/utilities.js';
@@ -1005,7 +1006,7 @@ export class DictionaryController {
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
             const existingDictionaryNames = new Set();
             const dictionaryOptionsArray = profiles[i].options.dictionaries;
-            const path = `profiles[${i}].options.dictionaries`;
+            const profileId = profiles[i].id;
             for (let j = dictionaryOptionsArray.length - 1; j >= 0; --j) {
                 const {name} = dictionaryOptionsArray[j];
                 if (installedDictionaryNames.has(name)) {
@@ -1016,7 +1017,7 @@ export class DictionaryController {
                     dictionaryOptionsArray.splice(j, 1);
                     // Never write a stale whole-array snapshot: a concurrent
                     // import may have just enabled an entry in the backend.
-                    targets.push({action: 'removeDictionary', path, name});
+                    targets.push({action: 'removeDictionaryByName', profileId, name});
                 }
             }
 
@@ -1024,12 +1025,16 @@ export class DictionaryController {
                 if (existingDictionaryNames.has(title)) { continue; }
                 const value = DictionaryController.createDefaultDictionarySettings(title, newDictionariesEnabled, styles);
                 dictionaryOptionsArray.push(value);
-                targets.push({action: 'push', path, items: [value]});
+                targets.push({action: 'ensureDictionary', profileId, item: value});
             }
         }
 
         if (modifyGlobalSettings && targets.length > 0) {
-            await settingsController.modifyGlobalSettings(targets);
+            const results = await settingsController.modifyGlobalSettings(targets);
+            const errors = results.flatMap(({error}) => (typeof error === 'undefined' ? [] : [ExtensionError.deserialize(error)]));
+            if (errors.length > 0) {
+                throw new Error(errors.map((error) => error.message).join('; '));
+            }
         }
     }
 
@@ -2012,30 +2017,22 @@ export class DictionaryController {
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
-            const {options: {dictionaries, general}} = profiles[i];
+            const {options: {dictionaries, general}, id: profileId} = profiles[i];
             if (dictionaries.some(({name}) => name === dictionaryTitle)) {
-                targets.push({
-                    action: 'removeDictionary',
-                    path: `profiles[${i}].options.dictionaries`,
-                    name: dictionaryTitle,
-                });
+                targets.push({action: 'removeDictionaryByName', profileId, name: dictionaryTitle});
             }
             if (general.mainDictionary === dictionaryTitle) {
-                targets.push({
-                    action: 'set',
-                    path: `profiles[${i}].options.general.mainDictionary`,
-                    value: '',
-                });
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: dictionaryTitle, value: '', requireDictionaryUninstalled: dictionaryTitle});
             }
             if (general.sortFrequencyDictionary === dictionaryTitle) {
-                targets.push({
-                    action: 'set',
-                    path: `profiles[${i}].options.general.sortFrequencyDictionary`,
-                    value: null,
-                });
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: dictionaryTitle, value: null, requireDictionaryUninstalled: dictionaryTitle});
             }
         }
-        await this._settingsController.modifyGlobalSettings(targets);
+        const results = await this._settingsController.modifyGlobalSettings(targets);
+        const failure = results.find((result) => typeof result.error !== 'undefined');
+        if (typeof failure?.error !== 'undefined') {
+            throw ExtensionError.deserialize(failure.error);
+        }
     }
 
     /** */
