@@ -199,6 +199,9 @@ export class ProfileController {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
 
+        const previousProfileCurrent = this._profileCurrent;
+        const previousSettingsProfileIndex = this._settingsController.profileIndex;
+
         /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileIndex}`;
         this._profileCurrent = profileIndex;
 
@@ -206,7 +209,28 @@ export class ProfileController {
         if (profileEntry !== null) { profileEntry.setIsDefault(true); }
 
         this._settingsController.profileIndex = profileIndex;
-        await this._settingsController.setGlobalSetting('profileCurrent', profileIndex);
+        try {
+            const results = await this._settingsController.setGlobalSetting('profileCurrent', profileIndex);
+            if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                throw new Error('Default profile update returned an invalid result');
+            }
+            if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+        } catch (error) {
+            // The selector and settings context are updated optimistically.
+            // Restore their last known values before reconciling durable state.
+            this._profileCurrent = previousProfileCurrent;
+            /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${previousProfileCurrent}`;
+            for (let i = 0; i < this._profileEntryList.length; ++i) {
+                this._profileEntryList[i].setIsDefault(i === previousProfileCurrent);
+            }
+            this._settingsController.profileIndex = previousSettingsProfileIndex;
+            try {
+                await this._settingsController.refresh();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
+        }
     }
 
     /**

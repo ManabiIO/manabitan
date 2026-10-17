@@ -653,6 +653,31 @@ describe('ProfileController displayed profile ownership', () => {
     });
 });
 
+describe('ProfileController default profile write failures', () => {
+    test('a rejected default-profile write refreshes the selector from persisted settings', async () => {
+        const controller = createControllerForInternalTests();
+        const refresh = vi.fn().mockResolvedValue(void 0);
+        const settingsController = {
+            profileIndex: 0,
+            setGlobalSetting: vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'profile write rejected', stack: ''}}]),
+            refresh,
+        };
+        const activeSelect = {value: '0'};
+        Reflect.set(controller, '_settingsController', settingsController);
+        Reflect.set(controller, '_profiles', [{id: 'a', name: 'First'}, {id: 'b', name: 'Second'}]);
+        Reflect.set(controller, '_profileCurrent', 0);
+        Reflect.set(controller, '_profileActiveSelect', activeSelect);
+        Reflect.set(controller, '_profileEntryList', []);
+
+        await expect(controller.setDefaultProfile(1)).rejects.toThrow('profile write rejected');
+
+        expect(refresh).toHaveBeenCalledOnce();
+        expect(Reflect.get(controller, '_profileCurrent')).toBe(0);
+        expect(activeSelect.value).toBe('0');
+        expect(settingsController.profileIndex).toBe(0);
+    });
+});
+
 describe('ProfileController profile deletion indices', () => {
     test.each([
         {name: 'removing the active first profile with one survivor', count: 2, active: 0, viewed: 0, deleted: 0, nextActive: 0, nextViewed: 0},
