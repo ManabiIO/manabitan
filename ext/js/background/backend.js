@@ -3148,11 +3148,12 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             }
             case 'moveDictionary':
             {
-                const {path, currentIndex, targetIndex, expectedNames} = target;
+                const {path, currentIndex, targetIndex, expectedNames, expectedEntries} = target;
                 if (typeof path !== 'string') { throw new Error('Invalid path'); }
                 if (!/^dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
                 if (!Number.isInteger(currentIndex) || !Number.isInteger(targetIndex)) { throw new Error('Invalid dictionary settings index'); }
                 if (!Array.isArray(expectedNames) || !expectedNames.every((name) => typeof name === 'string')) { throw new Error('Invalid expected dictionary names'); }
+                if (!Array.isArray(expectedEntries) || !expectedEntries.every(isObjectNotArray)) { throw new Error('Invalid expected dictionary entries'); }
                 const dictionariesValue = accessor.get(ObjectPropertyAccessor.getPathArray(path));
                 if (!Array.isArray(dictionariesValue)) { throw new Error('Invalid target type'); }
                 const dictionaries = /** @type {unknown[]} */ (dictionariesValue);
@@ -3164,6 +3165,16 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                     currentNames.some((name, index) => name !== expectedNames[index])
                 ) {
                     throw new Error('Dictionary order changed; reload settings and try again');
+                }
+                if (expectedEntries.length !== currentNames.length) { throw new Error('Invalid expected dictionary entries'); }
+                const duplicateNames = new Set(expectedNames.filter((name, index) => expectedNames.indexOf(name) !== index));
+                for (let i = 0; i < expectedNames.length; ++i) {
+                    if (duplicateNames.has(expectedNames[i])) {
+                        const currentEntry = dictionaries[i];
+                        if (!isObjectNotArray(currentEntry) || JSON.stringify(currentEntry) !== JSON.stringify(expectedEntries[i])) {
+                            throw new Error('Duplicate dictionary identity changed; reload settings and try again');
+                        }
+                    }
                 }
                 if (currentIndex < 0 || currentIndex >= dictionaries.length || targetIndex < 0 || targetIndex >= dictionaries.length) { throw new Error('Invalid dictionary settings index'); }
                 if (currentIndex !== targetIndex) {

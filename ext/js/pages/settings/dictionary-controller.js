@@ -871,20 +871,30 @@ export class DictionaryController {
         }
 
         const dictionaryNames = dictionaries.map(({name}) => name);
+        const expectedEntries = dictionaries.map((dictionary) => structuredClone(dictionary));
         const results = await this._settingsController.modifyProfileSettings([{
             action: 'moveDictionary',
             path: 'dictionaries',
             currentIndex,
             targetIndex,
             expectedNames: dictionaryNames,
+            expectedEntries,
         }]);
-        if (results[0]?.error) { return; }
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        if (results[0]?.error) {
+            await this._settingsController.refresh();
+            if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+            return;
+        }
+
+        const committedOptions = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
 
         /** @type {import('settings-controller').EventArgument<'dictionarySettingsReordered'>} */
         const event = {source: this};
         this._settingsController.trigger('dictionarySettingsReordered', event);
 
-        this._updateCurrentEntries(options);
+        this._updateCurrentEntries(committedOptions);
     }
 
     /**

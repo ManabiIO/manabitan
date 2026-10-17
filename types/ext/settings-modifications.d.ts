@@ -51,6 +51,7 @@ export type ModificationMoveDictionary = {
     currentIndex: number;
     targetIndex: number;
     expectedNames: string[];
+    expectedEntries: Record<string, unknown>[];
 };
 
 export type ModificationSplice = {
