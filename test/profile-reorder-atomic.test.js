@@ -112,17 +112,17 @@ test('profile reorder preserves a newer explicit viewed profile choice', async (
 
 test('profile deletion preserves a newer explicit viewed profile choice', async () => {
     const {controller, saves, settingsController} = createHarness();
-    settingsController.profileIndex = 1;
+    settingsController.profileIndex = 2;
     const deleteSave = deferred();
     saves.push(deleteSave);
 
     const deletion = controller.deleteProfile(0);
     await flush();
-    settingsController.profileIndex = 2;
+    settingsController.profileIndex = 0;
     deleteSave.resolve();
     await deletion;
 
-    expect(settingsController.profileIndex).toBe(2);
+    expect(settingsController.profileIndex).toBe(0);
 });
 
 test('reset resolves the profile again by ID after options refresh replaces profile objects', async () => {
@@ -213,6 +213,7 @@ test('copy queued behind a reorder resolves source and destination by identity',
     const profiles = Reflect.get(controller, '_profiles');
     Reflect.set(profiles[0], 'options', {marker: 'A snapshot'});
     Reflect.set(profiles[1], 'options', {marker: 'B'});
+    Reflect.set(profiles[2], 'options', {marker: 'C snapshot'});
     const reorderSave = deferred();
     saves.push(reorderSave);
 
@@ -220,14 +221,14 @@ test('copy queued behind a reorder resolves source and destination by identity',
         action: 'swapProfiles', profileId1: 'a', profileId2: 'b', scope: 'global', optionsContext: null,
     }], 'other-tab');
     await flush();
-    const copy = controller.copyProfile(0, 2);
+    const copy = controller.copyProfile(2, 0);
     await flush();
     reorderSave.resolve();
     await Promise.all([reorder, copy]);
 
     const {profiles: persisted} = /** @type {{profiles: {id: string, options: object}[]}} */ (Reflect.get(backend, '_options'));
-    const duplicatedProfile = persisted.find(({id}) => id === 'c');
-    expect(duplicatedProfile?.options).toStrictEqual({marker: 'A snapshot'});
+    expect(persisted.find(({id}) => id === 'a')?.options).toStrictEqual({marker: 'C snapshot'});
+    expect(persisted.find(({id}) => id === 'b')?.options).toStrictEqual({});
 });
 
 test('duplication queued behind a reorder appends a snapshot of the selected profile', async () => {
@@ -281,17 +282,15 @@ test('reset queued behind a name change preserves the latest profile name', asyn
     const renameSave = deferred();
     const resetSave = deferred();
     saves.push(renameSave, resetSave);
-    Reflect.set(controller, '_settingsController', {
-        ...Reflect.get(controller, '_settingsController'),
-        getDefaultOptions: vi.fn().mockResolvedValue(defaults),
-        refresh: vi.fn().mockResolvedValue(void 0),
-    });
+    Reflect.set(Reflect.get(controller, '_settingsController'), 'getDefaultOptions', vi.fn().mockResolvedValue(defaults));
 
-    const rename = controller.setProfileName(0, 'Latest name');
-    await flush();
-    renameSave.resolve();
+    const rename = backend._modifySettings([{
+        action: 'set', path: 'profiles[0].name', value: 'Latest name', scope: 'global', optionsContext: null,
+    }], 'other-tab');
     await flush();
     const reset = controller.resetProfile(0);
+    await flush();
+    renameSave.resolve();
     await flush();
     resetSave.resolve();
     await Promise.all([rename, reset]);
