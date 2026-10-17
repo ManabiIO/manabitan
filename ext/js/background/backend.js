@@ -2556,6 +2556,21 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             // pending, including when a write eventually fails.
             const previousOptions = this._getOptionsFull(false);
             const stagedOptions = clone(previousOptions);
+            /** @type {Map<string, Record<string, unknown>>} */
+            const expectedDictionaryRows = new Map();
+            for (const target of targets) {
+                if (target.action !== 'setDictionaryField' || typeof target.profileId !== 'string' || !Number.isInteger(target.index)) { continue; }
+                const originalProfile = previousOptions.profiles.find((profile) => isObjectNotArray(profile) && profile.id === target.profileId);
+                const originalDictionaries = originalProfile?.options?.dictionaries;
+                const stagedProfile = stagedOptions.profiles.find((profile) => isObjectNotArray(profile) && profile.id === target.profileId);
+                const stagedDictionaries = stagedProfile?.options?.dictionaries;
+                const originalEntry = Array.isArray(originalDictionaries) ? originalDictionaries[target.index] : null;
+                const stagedEntry = Array.isArray(stagedDictionaries) ? stagedDictionaries[target.index] : null;
+                const rowKey = `${target.profileId}:${target.index}`;
+                if (!expectedDictionaryRows.has(rowKey) && isObjectNotArray(originalEntry) && isObjectNotArray(stagedEntry)) {
+                    expectedDictionaryRows.set(rowKey, /** @type {Record<string, unknown>} */ (stagedEntry));
+                }
+            }
             /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
             const results = [];
             let hasChanges = false;
@@ -2568,16 +2583,22 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
                             results.push({result: []});
                             continue;
                         }
-                        const result = this._modifySetting(target, installedDictionaryNames);
+                        /** @type {Record<string, unknown>|null} */
+                        const expectedDictionaryEntry = target.action === 'setDictionaryField' ?
+                            expectedDictionaryRows.get(`${target.profileId}:${target.index}`) ?? null :
+null;
+                        const result = this._modifySetting(target, installedDictionaryNames, previousOptions, expectedDictionaryEntry);
                         results.push({result: clone(result)});
                         const noOpAction = (
                             target.action === 'ensureDictionary' ||
                             target.action === 'setDictionaryEnabled' ||
                             target.action === 'setDictionarySelector' ||
-                            target.action === 'replaceDictionaryName'
+                            target.action === 'replaceDictionaryName' ||
+                            target.action === 'setDictionaryField'
                         );
                         const removalAction = target.action === 'removeDictionary' || target.action === 'removeDictionaryByName';
-                        if (noOpAction ? result === true : (!removalAction || (Array.isArray(result) && result.length > 0))) { hasChanges = true; }
+                        const dictionaryFieldChanged = target.action === 'setDictionaryField' && result !== null && typeof result === 'object' && /** @type {{changed?: unknown}} */ (result).changed === true;
+                        if (noOpAction ? (target.action === 'setDictionaryField' ? dictionaryFieldChanged : result === true) : (!removalAction || (Array.isArray(result) && result.length > 0))) { hasChanges = true; }
                     } catch (e) {
                         results.push({error: ExtensionError.serialize(e)});
                     }
@@ -3181,14 +3202,59 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
     /**
      * @param {import('settings-modifications').ScopedModification} target
      * @param {Set<string>|null} [installedDictionaryNames]
+     * @param {import('settings').Options|null} [originalOptions]
+     * @param {Record<string, unknown>|null} [expectedDraftEntry]
      * @returns {import('settings-modifications').ModificationResult}
      * @throws {Error}
      */
-    _modifySetting(target, installedDictionaryNames = null) {
+    _modifySetting(target, installedDictionaryNames = null, originalOptions = null, expectedDraftEntry = null) {
         const options = this._getModifySettingObject(target);
         const accessor = new ObjectPropertyAccessor(options);
         const action = target.action;
         switch (action) {
+            case 'setDictionaryField':
+            {
+                const {profileId, index, expectedEntry, field, value} = target;
+                const allowedFields = new Set([
+                    'alias',
+                    'enabled',
+                    'allowSecondarySearches',
+                    'definitionsCollapsible',
+                    'partsOfSpeechFilter',
+                    'useDeinflections',
+                ]);
+                if (
+                    target.scope !== 'profile' ||
+                    typeof profileId !== 'string' || profileId.length === 0 ||
+                    !Number.isInteger(index) || index < 0 ||
+                    !isObjectNotArray(expectedEntry) ||
+                    typeof field !== 'string' || !allowedFields.has(field)
+                ) {
+                    throw new Error('Invalid dictionary field update');
+                }
+                if (originalOptions === null) { throw new Error('Missing dictionary field snapshot'); }
+                if (expectedDraftEntry === null) { return {stale: true}; }
+                const originalProfiles = originalOptions.profiles.filter((profile) => isObjectNotArray(profile) && profile.id === profileId);
+                if (originalProfiles.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                const originalDictionaries = originalProfiles[0].options?.dictionaries;
+                if (!Array.isArray(originalDictionaries)) { return {stale: true}; }
+                const originalEntry = originalDictionaries[index];
+                if (!isObjectNotArray(originalEntry) || JSON.stringify(originalEntry) !== JSON.stringify(expectedEntry)) { return {stale: true}; }
+
+                const profile = /** @type {import('settings').ProfileOptions} */ (this._getModifySettingObject(target));
+                const dictionaries = profile.dictionaries;
+                const entry = dictionaries[index];
+                if (!isObjectNotArray(entry)) { return {stale: true}; }
+                // Validation proxies may wrap the row differently on each read.
+                // Check ownership against the raw staged object before writing
+                // through the validating proxy.
+                const stagedProfiles = this._getOptionsFull(false).profiles.filter((item) => item.id === profileId);
+                if (stagedProfiles.length !== 1 || stagedProfiles[0].options.dictionaries[index] !== expectedDraftEntry) { return {stale: true}; }
+                const current = /** @type {Record<string, unknown>} */ (entry);
+                const changed = current[field] !== value;
+                if (changed) { current[field] = clone(value); }
+                return {dictionaryEntry: clone(current), value: clone(current[field]), changed};
+            }
             case 'ensureDictionary':
             {
                 const {profileId, item} = target;

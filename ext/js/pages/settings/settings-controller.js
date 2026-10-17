@@ -23,6 +23,7 @@ import {deferPromise, generateId} from '../../core/utilities.js';
 import {OptionsUtil} from '../../data/options-util.js';
 import {getAllPermissions} from '../../data/permissions-util.js';
 import {HtmlTemplateCollection} from '../../dom/html-template-collection.js';
+import {publishDictionaryRowOwnership} from './dictionary-row-ownership.js';
 
 /**
  * @augments EventDispatcher<import('settings-controller').Events>
@@ -485,7 +486,21 @@ export class SettingsController extends EventDispatcher {
             this._modifyOptionsScope(target2);
             return target2;
         });
-        return await this._application.api.modifySettings(targets2, this._source);
+        const results = await this._application.api.modifySettings(targets2, this._source);
+        /** @type {Map<string, Record<string, unknown>>} */
+        const publishedRows = new Map();
+        for (let i = 0; i < targets2.length; ++i) {
+            const target = targets2[i];
+            const response = results[i];
+            if (target.action !== 'setDictionaryField' || response?.error || !isObjectNotArray(response?.result)) { continue; }
+            const {dictionaryEntry} = response.result;
+            if (!isObjectNotArray(dictionaryEntry)) { continue; }
+            const key = JSON.stringify([target.profileId, target.index]);
+            const expectedEntry = publishedRows.get(key) ?? target.expectedEntry;
+            publishDictionaryRowOwnership(target.profileId, target.index, expectedEntry, dictionaryEntry);
+            publishedRows.set(key, dictionaryEntry);
+        }
+        return results;
     }
 
     /**

@@ -56,6 +56,15 @@ export type ModificationMoveDictionary = {
     expectedEntries: Record<string, unknown>[];
 };
 
+export type ModificationSetDictionaryField = {
+    action: 'setDictionaryField';
+    profileId: string;
+    index: number;
+    expectedEntry: Record<string, unknown>;
+    field: 'alias' | 'enabled' | 'allowSecondarySearches' | 'definitionsCollapsible' | 'partsOfSpeechFilter' | 'useDeinflections';
+    value: unknown;
+};
+
 export type ModificationSetDefaultProfile = {
     action: 'setDefaultProfile';
     profileId: string;
@@ -162,6 +171,7 @@ export type Modification = (
     ModificationDelete |
     ModificationSwap |
     ModificationMoveDictionary |
+    ModificationSetDictionaryField |
     ModificationSetDefaultProfile |
     ModificationSwapProfiles |
     ModificationProfileAction |
@@ -185,6 +195,8 @@ export type ScopedModificationDelete = ModificationDelete & OptionsScope;
 export type ScopedModificationSwap = ModificationSwap & OptionsScope;
 
 export type ScopedModificationMoveDictionary = ModificationMoveDictionary & OptionsScope;
+
+export type ScopedModificationSetDictionaryField = ModificationSetDictionaryField & OptionsScope;
 
 export type ScopedModificationSetDefaultProfile = ModificationSetDefaultProfile & OptionsScope;
 
@@ -215,6 +227,7 @@ export type ScopedModification = (
     ScopedModificationDelete |
     ScopedModificationSwap |
     ScopedModificationMoveDictionary |
+    ScopedModificationSetDictionaryField |
     ScopedModificationSetDefaultProfile |
     ScopedModificationSwapProfiles |
     ScopedModificationProfileAction |
