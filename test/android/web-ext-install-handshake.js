@@ -59,12 +59,15 @@ async function stopProcessTree(child, closePromise) {
 
 /**
  * Runs web-ext until its remote debugger confirms extension installation.
- * @param {{device: string, packageName: string, sourceDir: string, timeoutMs: number, onOutput?: (line: string) => void, command?: string, commandArgs?: string[], cwd?: string}} options
+ * @param {{device: string, packageName: string, sourceDir: string, timeoutMs: number, onOutput?: (line: string) => void, onBeforeFailureCleanup?: () => Promise<void>, diagnosticTimeoutMs?: number, command?: string, commandArgs?: string[], cwd?: string}} options
  * @returns {Promise<string[]>}
  */
-export async function runWebExtInstallHandshake({device, packageName, sourceDir, timeoutMs, onOutput = () => {}, command = 'npx', commandArgs, cwd = process.cwd()}) {
+export async function runWebExtInstallHandshake({device, packageName, sourceDir, timeoutMs, onOutput = () => {}, onBeforeFailureCleanup = async () => {}, diagnosticTimeoutMs = 60_000, command = 'npx', commandArgs, cwd = process.cwd()}) {
     if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
         throw new Error(`Invalid web-ext install handshake timeout: ${String(timeoutMs)}`);
+    }
+    if (!Number.isFinite(diagnosticTimeoutMs) || diagnosticTimeoutMs <= 0) {
+        throw new Error(`Invalid web-ext diagnostic timeout: ${String(diagnosticTimeoutMs)}`);
     }
     if (process.platform === 'win32') {
         throw new Error('Firefox Android web-ext process-tree cleanup requires POSIX process-group signaling.');
@@ -122,6 +125,9 @@ export async function runWebExtInstallHandshake({device, packageName, sourceDir,
             resolve();
         });
     }));
+    child.once('exit', (code, signal) => {
+        exitState.value ??= {code, signal};
+    });
 
     child.stdout.on('data', (chunk) => {
         stdoutBuffer += String(chunk);
@@ -145,6 +151,10 @@ export async function runWebExtInstallHandshake({device, packageName, sourceDir,
 
     const deadline = Date.now() + timeoutMs;
     let runnerExitedBeforeCleanup = false;
+    /** @type {unknown} */
+    let handshakeFailure;
+    /** @type {unknown} */
+    let cleanupFailure;
     try {
         while (!installAcknowledged && !processError && !exitState.value) {
             if (Date.now() >= deadline) {
@@ -156,14 +166,39 @@ export async function runWebExtInstallHandshake({device, packageName, sourceDir,
         if (!installAcknowledged) {
             throw new Error(`web-ext exited before Firefox Android confirmed extension installation (code=${String(exitState.value?.code)} signal=${String(exitState.value?.signal)}). Output tail=${JSON.stringify(outputLines.slice(-20))}`);
         }
+        await Promise.race([closePromise, delay(10)]);
+        if (exitState.value) {
+            throw new Error(`web-ext exited after reporting installation (code=${String(exitState.value.code)} signal=${String(exitState.value.signal)}).`);
+        }
         // Stop the runner before declaring success. Errors reported during teardown
         // also invalidate the handshake, including errors arriving after the marker.
+    } catch (error) {
+        handshakeFailure = error;
     } finally {
+        if (handshakeFailure !== undefined) {
+            let diagnosticTimer;
+            try {
+                await Promise.race([
+                    Promise.resolve().then(onBeforeFailureCleanup).catch(() => {}),
+                    new Promise((resolve) => { diagnosticTimer = setTimeout(resolve, diagnosticTimeoutMs); }),
+                ]);
+            } catch {
+                // Diagnostics must never replace the fail-closed handshake failure.
+            } finally {
+                if (diagnosticTimer !== undefined) { clearTimeout(diagnosticTimer); }
+            }
+        }
         // Fenix stays open after install. Stop web-ext and all descendants, then wait
         // for stdio to close so a PASS cannot leave a runner holding the job open.
         runnerExitedBeforeCleanup = Boolean(exitState.value);
-        await stopProcessTree(child, closePromise);
+        try {
+            await stopProcessTree(child, closePromise);
+        } catch (cleanupError) {
+            cleanupFailure = cleanupError;
+        }
     }
+    if (handshakeFailure !== undefined) { throw handshakeFailure; }
+    if (cleanupFailure !== undefined) { throw cleanupFailure; }
     if (processError) { throw processError; }
     if (runnerExitedBeforeCleanup) {
         throw new Error(`web-ext exited after reporting installation (code=${String(exitState.value?.code)} signal=${String(exitState.value?.signal)}).`);
