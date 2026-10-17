@@ -160,6 +160,7 @@ describe('DictionaryController database refresh ordering', () => {
         Reflect.set(controller, '_updateDictionariesEnabledWarnings', vi.fn());
         Reflect.set(controller, '_createDictionaryEntry', vi.fn());
         Reflect.set(controller, '_settingsController', {
+            getOptionsContext: () => ({index: 0, profileId: 'profile-a'}),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: []}),
             modifyGlobalSettings: vi.fn().mockResolvedValue([]),
         });
@@ -173,6 +174,7 @@ describe('DictionaryController database refresh ordering', () => {
             .mockReturnValueOnce(olderOptions.promise)
             .mockReturnValueOnce(newerOptions.promise);
         const settingsController = {
+            getOptionsContext: () => ({index: 0, profileId: 'profile-a'}),
             getDictionaryInfo: vi.fn()
                 .mockResolvedValueOnce([{title: 'Old dictionary'}])
                 .mockResolvedValueOnce([{title: 'New dictionary'}]),
@@ -196,7 +198,7 @@ describe('DictionaryController database refresh ordering', () => {
         await olderRefresh;
 
         expect(createEntry).toHaveBeenCalledOnce();
-        expect(createEntry).toHaveBeenCalledWith(0, {title: 'New dictionary'}, null, null);
+        expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', {name: 'New dictionary'}, {title: 'New dictionary'}, null, null);
     });
 
     test('an older options event cannot render entries after a newer options event', async () => {
@@ -216,7 +218,7 @@ describe('DictionaryController database refresh ordering', () => {
         await olderRefresh;
 
         expect(createEntry).toHaveBeenCalledOnce();
-        expect(createEntry).toHaveBeenCalledWith(0, {title: 'Dictionary'}, null, null);
+        expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', {name: 'Dictionary', alias: 'New'}, {title: 'Dictionary'}, null, null);
     });
 
     test('a pending options refresh cannot render after a database refresh supersedes it', async () => {
@@ -225,6 +227,7 @@ describe('DictionaryController database refresh ordering', () => {
         const getOptions = vi.fn().mockReturnValueOnce(olderOptions.promise).mockReturnValueOnce(newerOptions.promise);
         const controller = createRefreshController();
         Reflect.set(controller, '_settingsController', {
+            getOptionsContext: () => ({index: 0, profileId: 'profile-a'}),
             getDictionaryInfo: vi.fn().mockResolvedValue([{title: 'Fresh dictionary'}]),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: []}),
             modifyGlobalSettings: vi.fn().mockResolvedValue([]),
@@ -243,7 +246,7 @@ describe('DictionaryController database refresh ordering', () => {
         await olderRefresh;
 
         expect(createEntry).toHaveBeenCalledOnce();
-        expect(createEntry).toHaveBeenCalledWith(0, {title: 'Fresh dictionary'}, null, null);
+        expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', {name: 'Fresh dictionary'}, {title: 'Fresh dictionary'}, null, null);
     });
 
     test('a pending database refresh cannot render after a newer options refresh', async () => {
@@ -252,6 +255,7 @@ describe('DictionaryController database refresh ordering', () => {
         const getOptions = vi.fn().mockReturnValueOnce(olderOptions.promise).mockReturnValueOnce(newerOptions.promise);
         const controller = createRefreshController();
         Reflect.set(controller, '_settingsController', {
+            getOptionsContext: () => ({index: 0, profileId: 'profile-a'}),
             getDictionaryInfo: vi.fn().mockResolvedValue([{title: 'Dictionary'}]),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: []}),
             modifyGlobalSettings: vi.fn().mockResolvedValue([]),
@@ -270,7 +274,7 @@ describe('DictionaryController database refresh ordering', () => {
         await olderRefresh;
 
         expect(createEntry).toHaveBeenCalledOnce();
-        expect(createEntry).toHaveBeenCalledWith(0, {title: 'Dictionary'}, null, null);
+        expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', {name: 'Dictionary', alias: 'New'}, {title: 'Dictionary'}, null, null);
     });
 
     test('reordering replaces the entry array after cleaning each existing entry once', () => {

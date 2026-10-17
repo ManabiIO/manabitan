@@ -20,14 +20,18 @@ import * as ajvSchemas0 from '../../../lib/validate-schemas.js';
 import {reportDiagnostics} from '../../core/diagnostics-reporter.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {ExtensionError} from '../../core/extension-error.js';
-import {readResponseJson} from '../../core/json.js';
+import {parseJson, readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {deferPromise, promiseTimeout} from '../../core/utilities.js';
 import {compareRevisions} from '../../dictionary/dictionary-data-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
+import {bindDictionaryRowOwnership, createDictionaryRowOwnership, getDictionaryRowOwnership} from './dictionary-row-ownership.js';
 
 const ajvSchemas = /** @type {import('dictionary-importer').CompiledSchemaValidators} */ (/** @type {unknown} */ (ajvSchemas0));
 const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
+/** @type {WeakMap<HTMLElement, number>} */
+const dictionaryModalGenerationByNode = new WeakMap();
+let nextDictionaryModalGeneration = 0;
 const MUTATION_CALLBACK_TIMEOUT_MS = 180_000;
 
 /**
@@ -63,15 +67,19 @@ class DictionaryEntry {
      * @param {DictionaryController} dictionaryController
      * @param {DocumentFragment} fragment
      * @param {number} index
+     * @param {string} profileId
+     * @param {import('settings').DictionaryOptions} dictionarySettings
      * @param {import('dictionary-importer').Summary} dictionaryInfo
      * @param {string | null} updateDownloadUrl
      * @param {import('dictionary-database').DictionaryCountGroup|null} dictionaryDatabaseCounts
      */
-    constructor(dictionaryController, fragment, index, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts) {
+    constructor(dictionaryController, fragment, index, profileId, dictionarySettings, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts) {
         /** @type {DictionaryController} */
         this._dictionaryController = dictionaryController;
         /** @type {number} */
         this._index = index;
+        /** @type {string} */
+        this._profileId = profileId;
         /** @type {import('dictionary-importer').Summary} */
         this._dictionaryInfo = dictionaryInfo;
         /** @type {string | null} */
@@ -102,6 +110,8 @@ class DictionaryEntry {
         this._updatesAvailable = querySelectorNotNull(fragment, '.dictionary-update-available');
         /** @type {HTMLElement} */
         this._aliasNode = querySelectorNotNull(fragment, '.dictionary-alias');
+        /** @type {import('generic-setting-controller').DictionaryRowOwnership} */
+        this._rowOwnership = createDictionaryRowOwnership(this._aliasNode, profileId, index, dictionarySettings, 'main');
         /** @type {HTMLElement} */
         this._versionNode = querySelectorNotNull(fragment, '.dictionary-revision');
         /** @type {HTMLElement} */
@@ -113,22 +123,34 @@ class DictionaryEntry {
         return this._dictionaryInfo.title;
     }
 
+    /**
+     * @param {unknown} value
+     * @returns {boolean}
+     */
+    matchesSettingsSnapshot(value) {
+        return JSON.stringify(this._rowOwnership.expectedEntry) === JSON.stringify(value);
+    }
+
+    /** @returns {number} */
+    get settingsIndex() { return this._index; }
+    /** @returns {string} */
+    get settingsProfileId() { return this._profileId; }
+
     /** */
     prepare() {
         //
-        const index = this._index;
         const {revision, version, importSuccess, storageHealth} = this._dictionaryInfo;
 
-        this._aliasNode.dataset.setting = `dictionaries[${index}].alias`;
+        this._setDictionarySetting(this._aliasNode, 'alias');
         this._versionNode.textContent = `rev.${revision}`;
         this._outdatedButton.hidden = (version >= 3);
-        this._enabledCheckbox.dataset.setting = `dictionaries[${index}].enabled`;
+        this._setDictionarySetting(this._enabledCheckbox, 'enabled');
         this.showUpdatesAvailableButton();
         this._eventListeners.addEventListener(this._enabledCheckbox, 'settingChanged', this._onEnabledChanged.bind(this), false);
         this._eventListeners.addEventListener(this._menuButton, 'menuOpen', this._onMenuOpen.bind(this), false);
         this._eventListeners.addEventListener(this._menuButton, 'menuClose', this._onMenuClose.bind(this), false);
-        this._eventListeners.addEventListener(this._upButton, 'click', (() => { this._move(-1); }).bind(this), false);
-        this._eventListeners.addEventListener(this._downButton, 'click', (() => { this._move(1); }).bind(this), false);
+        this._eventListeners.addEventListener(this._upButton, 'click', (() => { void this._move(-1); }).bind(this), false);
+        this._eventListeners.addEventListener(this._downButton, 'click', (() => { void this._move(1); }).bind(this), false);
         this._eventListeners.addEventListener(this._outdatedButton, 'click', this._onOutdatedButtonClick.bind(this), false);
         this._eventListeners.addEventListener(this._integrityButtonCheck, 'click', this._onIntegrityButtonClick.bind(this), false);
         this._eventListeners.addEventListener(this._integrityButtonWarning, 'click', this._onIntegrityButtonClick.bind(this), false);
@@ -293,10 +315,10 @@ class DictionaryEntry {
                 this._showDetails();
                 break;
             case 'moveTo':
-                this._showMoveToModal();
+                void this._showMoveToModal();
                 break;
             case 'rename':
-                this._showRenameModal();
+                void this._showRenameModal();
                 break;
         }
     }
@@ -394,10 +416,9 @@ class DictionaryEntry {
         }
         wildcardSupportedElement.checked = prefixWildcardsSupported;
         partsOfSpeechFilterSetting.hidden = !counts?.terms.total;
-        partsOfSpeechFilterToggle.dataset.setting = `dictionaries[${this._index}].partsOfSpeechFilter`;
-
         useDeinflectionsSetting.hidden = !counts?.terms.total;
-        useDeinflectionsToggle.dataset.setting = `dictionaries[${this._index}].useDeinflections`;
+        this._setDictionarySetting(partsOfSpeechFilterToggle, 'partsOfSpeechFilter');
+        this._setDictionarySetting(useDeinflectionsToggle, 'useDeinflections');
 
         this._setupDetails(detailsTableElement);
 
@@ -485,8 +506,26 @@ class DictionaryEntry {
     /**
      * @param {number} offset
      */
-    _move(offset) {
-        void this._dictionaryController.moveDictionaryOptions(this._index, this._index + offset);
+    async _move(offset) {
+        // eslint-disable-next-line no-underscore-dangle
+        const settingsController = this._dictionaryController._settingsController;
+        const optionsContext = settingsController.getOptionsContext();
+        const options = await settingsController.getOptions();
+        if (
+            settingsController.getOptionsContext().profileId !== optionsContext.profileId ||
+            optionsContext.profileId !== this._profileId ||
+            !this.matchesSettingsSnapshot(options.dictionaries[this._index])
+        ) { return; }
+        void this._dictionaryController.moveDictionaryOptions(this._index, this._index + offset, this._profileId, options.dictionaries);
+    }
+
+    /**
+     * @param {HTMLElement} element
+     * @param {import('settings-modifications').ModificationSetDictionaryField['field']} field
+     */
+    _setDictionarySetting(element, field) {
+        element.dataset.setting = `dictionaries[${this._index}].${field}`;
+        bindDictionaryRowOwnership(element, this._rowOwnership);
     }
 
     /**
@@ -501,17 +540,28 @@ class DictionaryEntry {
     }
 
     /** */
-    _showMoveToModal() {
+    async _showMoveToModal() {
         const {title} = this._dictionaryInfo;
         const count = this._dictionaryController.dictionaryOptionCount;
         const modal = this._dictionaryController.modalController.getModal('dictionary-move-location');
         if (modal === null) { return; }
+        // eslint-disable-next-line no-underscore-dangle
+        const settingsController = this._dictionaryController._settingsController;
+        const optionsContext = settingsController.getOptionsContext();
+        const options = await settingsController.getOptions();
+        if (
+            settingsController.getOptionsContext().profileId !== optionsContext.profileId ||
+            optionsContext.profileId !== this._profileId ||
+            !this.matchesSettingsSnapshot(options.dictionaries[this._index])
+        ) { return; }
         /** @type {HTMLInputElement} */
         const input = querySelectorNotNull(modal.node, '#dictionary-move-location');
         /** @type {HTMLElement} */
         const titleNode = querySelectorNotNull(modal.node, '.dictionary-title');
 
+        this._setModalDictionaryRow(modal.node);
         modal.node.dataset.index = `${this._index}`;
+        modal.node.dataset.dictionaryOrderSnapshot = JSON.stringify(options.dictionaries);
         titleNode.textContent = title;
         input.value = `${this._index + 1}`;
         input.max = `${count}`;
@@ -529,11 +579,22 @@ class DictionaryEntry {
         /** @type {HTMLElement} */
         const titleNode = querySelectorNotNull(modal.node, '.dictionary-title');
 
+        this._setModalDictionaryRow(modal.node);
         modal.node.dataset.index = `${this._index}`;
         titleNode.textContent = title;
         input.value = this._aliasNode.textContent || title;
 
         modal.setVisible(true);
+    }
+
+    /**
+     * @param {HTMLElement} modalNode
+     */
+    _setModalDictionaryRow(modalNode) {
+        bindDictionaryRowOwnership(modalNode, this._rowOwnership);
+        dictionaryModalGenerationByNode.set(modalNode, ++nextDictionaryModalGeneration);
+        modalNode.dataset.dictionaryRowProfileId = this._profileId;
+        modalNode.dataset.dictionaryTitle = this.dictionaryTitle;
     }
 }
 
@@ -861,15 +922,18 @@ export class DictionaryController {
     /**
      * @param {number} currentIndex
      * @param {number} targetIndex
+     * @param {string|null} [capturedProfileId]
+     * @param {import('settings').DictionaryOptions[]|null} [capturedEntries]
      */
-    async moveDictionaryOptions(currentIndex, targetIndex) {
+    async moveDictionaryOptions(currentIndex, targetIndex, capturedProfileId = null, capturedEntries = null) {
         /** @type {import('core').TokenObject} */
         const reorderToken = {};
         this._dictionaryReorderToken = reorderToken;
         const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (this._dictionaryReorderToken !== reorderToken || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
-        const {dictionaries} = options;
+        if (capturedProfileId !== null && optionsContext.profileId !== capturedProfileId) { return; }
+        const options = capturedEntries === null ? await this._settingsController.getOptions() : null;
+        if (this._dictionaryReorderToken !== reorderToken || this._settingsController.getOptionsContext().index !== optionsContext.index || this._settingsController.getOptionsContext().profileId !== optionsContext.profileId) { return; }
+        const dictionaries = capturedEntries ?? /** @type {import('settings').ProfileOptions} */ (options).dictionaries;
         if (
             currentIndex < 0 || currentIndex >= dictionaries.length ||
             targetIndex < 0 || targetIndex >= dictionaries.length ||
@@ -888,10 +952,10 @@ export class DictionaryController {
             expectedNames: dictionaryNames,
             expectedEntries,
         }]);
-        if (this._dictionaryReorderToken !== reorderToken || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        if (this._dictionaryReorderToken !== reorderToken || this._settingsController.getOptionsContext().index !== optionsContext.index || this._settingsController.getOptionsContext().profileId !== optionsContext.profileId) { return; }
         if (results[0]?.error) {
             await this._settingsController.refresh();
-            if (this._dictionaryReorderToken !== reorderToken || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+            if (this._dictionaryReorderToken !== reorderToken || this._settingsController.getOptionsContext().index !== optionsContext.index || this._settingsController.getOptionsContext().profileId !== optionsContext.profileId) { return; }
             return;
         }
 
@@ -911,7 +975,8 @@ export class DictionaryController {
         if (
             this._dictionaryReorderToken !== reorderToken ||
             this._entriesUpdateToken !== renderToken ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._settingsController.getOptionsContext().profileId !== optionsContext.profileId
         ) { return; }
 
         /** @type {import('settings-controller').EventArgument<'dictionarySettingsReordered'>} */
@@ -939,7 +1004,9 @@ export class DictionaryController {
 
     /** */
     async updateDictionariesEnabled() {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index || this._settingsController.getOptionsContext().profileId !== optionsContext.profileId) { return; }
         this._updateDictionariesEnabledWarnings(options);
     }
 
@@ -1143,8 +1210,13 @@ export class DictionaryController {
             if (token !== null && !this._isEntriesUpdateCurrent(token)) { return; }
         }
 
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
-        if (token !== null && !this._isEntriesUpdateCurrent(token)) { return; }
+        if (
+            (token !== null && !this._isEntriesUpdateCurrent(token)) ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._settingsController.getOptionsContext().profileId !== optionsContext.profileId
+        ) { return; }
         this._updateDictionariesEnabledWarnings(options);
 
         /** @type {Map<string, import('dictionary-importer').Summary>} */
@@ -1159,7 +1231,7 @@ export class DictionaryController {
             const dictionaryInfo = dictionaryInfoMap.get(name);
             const updateDownloadUrl = dictionaryUpdateDownloadUrlMap.get(name) ?? null;
             if (typeof dictionaryInfo === 'undefined') { continue; }
-            this._createDictionaryEntry(i, dictionaryInfo, updateDownloadUrl, null);
+            this._createDictionaryEntry(i, optionsContext.profileId ?? '', dictionaryOptionsArray[i], dictionaryInfo, updateDownloadUrl, null);
         }
     }
 
@@ -1197,7 +1269,7 @@ export class DictionaryController {
             if (typeof dictionaryInfo === 'undefined') { continue; }
             const updateDownloadUrl = dictionaryUpdateDownloadUrlMap.get(name) ?? null;
             const dictionaryDatabaseCounts = dictionaryDatabaseCountsMap.get(name) ?? null;
-            this._createDictionaryEntry(i, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts);
+            this._createDictionaryEntry(i, this._settingsController.getOptionsContext().profileId ?? '', dictionaryOptionsArray[i], dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts);
         }
         this._dictionaryModalBody.scroll({top: dictionariesModalBodyScrollY});
     }
@@ -1316,6 +1388,17 @@ export class DictionaryController {
         const index = modal.node.dataset.index ?? '';
         const indexNumber = Number.parseInt(index, 10);
         if (Number.isNaN(indexNumber)) { return; }
+        const profileId = modal.node.dataset.dictionaryRowProfileId;
+        const ownership = getDictionaryRowOwnership(modal.node);
+        const entriesString = modal.node.dataset.dictionaryOrderSnapshot;
+        if (typeof profileId !== 'string' || ownership === void 0 || ownership.profileId !== profileId || typeof entriesString !== 'string' || this._settingsController.getOptionsContext().profileId !== profileId) { return; }
+        let expectedEntries;
+        try {
+            expectedEntries = parseJson(entriesString);
+        } catch {
+            return;
+        }
+        if (!Array.isArray(expectedEntries) || indexNumber < 0 || indexNumber >= expectedEntries.length) { return; }
 
         /** @type {HTMLInputElement} */
         const targetStringInput = querySelectorNotNull(document, '#dictionary-move-location');
@@ -1324,34 +1407,60 @@ export class DictionaryController {
 
         if (!Number.isFinite(target) || !Number.isFinite(indexNumber) || indexNumber === target) { return; }
 
-        void this.moveDictionaryOptions(indexNumber, target);
+        void this.moveDictionaryOptions(indexNumber, target, profileId, expectedEntries);
     }
 
     /** */
-    _onDictionaryResetAliasButtonClick() {
+    async _onDictionaryResetAliasButtonClick() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._modalController.getModal('dictionary-set-alias'));
+        const generation = dictionaryModalGenerationByNode.get(modal.node);
         const index = modal.node.dataset.index ?? '';
         const indexNumber = Number.parseInt(index, 10);
         if (Number.isNaN(indexNumber)) { return; }
+        const entry = await this._getModalDictionaryRow(modal.node, indexNumber, generation);
+        if (entry === null || dictionaryModalGenerationByNode.get(modal.node) !== generation) { return; }
 
         /** @type {HTMLInputElement} */
         const input = querySelectorNotNull(modal.node, '#dictionary-alias-input');
-        input.value = this._dictionaryEntries[indexNumber].dictionaryTitle;
+        input.value = entry.dictionaryTitle;
     }
 
     /** */
-    _onDictionarySetAliasButtonClick() {
+    async _onDictionarySetAliasButtonClick() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._modalController.getModal('dictionary-set-alias'));
-        const index = modal.node.dataset.index ?? '';
-        const indexNumber = Number.parseInt(index, 10);
-        if (Number.isNaN(indexNumber)) { return; }
-
+        const generation = dictionaryModalGenerationByNode.get(modal.node);
         /** @type {HTMLInputElement} */
         const input = querySelectorNotNull(modal.node, '#dictionary-alias-input');
         const inputValue = input.value.trim();
-        if (inputValue) {
-            this._dictionaryEntries[indexNumber].updateAliasSettings(inputValue);
+        const index = modal.node.dataset.index ?? '';
+        const indexNumber = Number.parseInt(index, 10);
+        if (Number.isNaN(indexNumber)) { return; }
+        const entry = await this._getModalDictionaryRow(modal.node, indexNumber, generation);
+        if (entry !== null && dictionaryModalGenerationByNode.get(modal.node) === generation && inputValue) {
+            entry.updateAliasSettings(inputValue);
         }
+    }
+
+    /**
+     * @param {HTMLElement} modalNode
+     * @param {number} index
+     * @param {number|undefined} generation
+     * @returns {Promise<DictionaryEntry|null>}
+     */
+    async _getModalDictionaryRow(modalNode, index, generation) {
+        const ownership = getDictionaryRowOwnership(modalNode);
+        const profileId = ownership?.profileId;
+        const expectedEntry = ownership?.expectedEntry;
+        if (ownership === void 0 || ownership.index !== index || typeof profileId !== 'string' || dictionaryModalGenerationByNode.get(modalNode) !== generation || this._settingsController.getOptionsContext().profileId !== profileId) { return null; }
+        const options = await this._settingsController.getOptions();
+        if (dictionaryModalGenerationByNode.get(modalNode) !== generation || getDictionaryRowOwnership(modalNode) !== ownership || this._settingsController.getOptionsContext().profileId !== profileId) { return null; }
+        const entry = options.dictionaries[index];
+        if (!entry || entry.name !== modalNode.dataset.dictionaryTitle || JSON.stringify(entry) !== JSON.stringify(expectedEntry)) { return null; }
+        return this._dictionaryEntries.find((candidate) => (
+            candidate.settingsIndex === index &&
+            candidate.settingsProfileId === profileId &&
+            candidate.dictionaryTitle === entry.name
+        )) ?? null;
     }
 
     /**
@@ -1479,14 +1588,16 @@ export class DictionaryController {
 
     /**
      * @param {number} index
+     * @param {string} profileId
+     * @param {import('settings').DictionaryOptions} dictionarySettings
      * @param {import('dictionary-importer').Summary} dictionaryInfo
      * @param {string|null} updateDownloadUrl
      * @param {import('dictionary-database').DictionaryCountGroup|null} dictionaryDatabaseCounts
      */
-    _createDictionaryEntry(index, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts) {
+    _createDictionaryEntry(index, profileId, dictionarySettings, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts) {
         const fragment = this.instantiateTemplateFragment('dictionary');
         try {
-            const entry = new DictionaryEntry(this, fragment, index, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts);
+            const entry = new DictionaryEntry(this, fragment, index, profileId, dictionarySettings, dictionaryInfo, updateDownloadUrl, dictionaryDatabaseCounts);
             this._dictionaryEntries.push(entry);
             entry.prepare();
 
@@ -2086,19 +2197,26 @@ export class DictionaryController {
     async _setAllDictionariesEnabled(value) {
         const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index || this._settingsController.getOptionsContext().profileId !== optionsContext.profileId) { return; }
         const {dictionaries} = options;
 
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         for (let i = 0, ii = dictionaries.length; i < ii; ++i) {
             targets.push({
-                action: 'set',
-                path: `dictionaries[${i}].enabled`,
+                action: 'setDictionaryField',
+                profileId: optionsContext.profileId ?? '',
+                index: i,
+                expectedEntry: structuredClone(dictionaries[i]),
+                field: 'enabled',
                 value,
             });
         }
-        await this._settingsController.modifyProfileSettings(targets);
+        const results = await this._settingsController.modifyProfileSettings(targets);
+        if (results.some(({error, result}) => typeof error !== 'undefined' || (result !== null && typeof result === 'object' && /** @type {{stale?: unknown}} */ (result).stale === true))) {
+            await this._settingsController.refresh();
+            return;
+        }
 
         await this.updateDictionariesEnabled();
     }

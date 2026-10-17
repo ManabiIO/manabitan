@@ -30,6 +30,7 @@ describe('dictionary settings option snapshot ownership', () => {
         const createEntry = vi.fn();
         const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({...optionsFixture(), dictionaries: [{name: 'Dictionary'}]}));
         Reflect.set(controller, '_settingsController', {
+            getOptionsContext: () => ({index: 0, profileId: 'profile-a'}),
             getDictionaryInfo: () => deferred.promise,
             getOptions: async () => options,
         });
@@ -53,7 +54,7 @@ describe('dictionary settings option snapshot ownership', () => {
 
         expect(ensureSettings).toHaveBeenCalledOnce();
         expect(createEntry).toHaveBeenCalledOnce();
-        expect(createEntry).toHaveBeenCalledWith(0, dictionary, null, null);
+        expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', {name: 'Dictionary'}, dictionary, null, null);
     });
 
     test('reorder with cached dictionaries still supersedes a pending options render', async () => {
@@ -61,7 +62,7 @@ describe('dictionary settings option snapshot ownership', () => {
         const dictionary = /** @type {import('dictionary-importer').Summary} */ ({title: 'Dictionary'});
         const controller = /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
         const createEntry = vi.fn();
-        Reflect.set(controller, '_settingsController', {getOptions: () => deferred.promise});
+        Reflect.set(controller, '_settingsController', {getOptions: () => deferred.promise, getOptionsContext: () => ({index: 0, profileId: 'profile-a'})});
         Reflect.set(controller, '_dictionaries', [dictionary]);
         Reflect.set(controller, '_dictionaryEntries', []);
         Reflect.set(controller, '_updateMainDictionarySelectOptions', vi.fn());
