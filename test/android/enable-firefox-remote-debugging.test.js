@@ -23,7 +23,7 @@ describe('Firefox Android remote debugging preference helper', () => {
 
         const commands = (await readFile(fixture.logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line).join(' '));
         const disableIndex = commands.findIndex((command) => command.includes('pm disable-user --user 0 org.mozilla.firefox'));
-        const firstPreferenceWriteIndex = commands.findIndex((command) => command.includes('cat /data/local/tmp/manabitan-fenix-preferences-') && command.includes('> /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml'));
+        const firstPreferenceWriteIndex = commands.findIndex((command) => command.includes('mv -f /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.manabitan-') && command.endsWith('/data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml'));
         expect(disableIndex).toBeGreaterThan(-1);
         expect(firstPreferenceWriteIndex).toBeGreaterThan(disableIndex);
         expect(commands.some((command) => command.includes('monkey -p org.mozilla.firefox 1'))).toBe(true);
@@ -44,7 +44,7 @@ describe('Firefox Android remote debugging preference helper', () => {
         const commands = (await readFile(fixture.logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line).join(' '));
         expect(commands.some((command) => command.includes('pm disable-user --user 0 org.mozilla.firefox'))).toBe(true);
         expect(commands.some((command) => command.includes('pm enable --user 0 org.mozilla.firefox'))).toBe(true);
-        expect(commands.some((command) => command.includes('cat /data/local/tmp/manabitan-fenix-preferences-') && command.includes('> /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml'))).toBe(false);
+        expect(commands.some((command) => command.includes('mv -f /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.manabitan-') && command.endsWith('/data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml'))).toBe(false);
     });
 
     test('refuses to edit when Firefox remains alive after package disable', async () => {
@@ -52,7 +52,7 @@ describe('Firefox Android remote debugging preference helper', () => {
         expect(() => runHelper(fixture)).toThrow(/process remained alive/);
 
         const commands = (await readFile(fixture.logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line).join(' '));
-        expect(commands.some((command) => command.includes('cat /data/local/tmp/manabitan-fenix-preferences-') && command.includes('> /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml'))).toBe(false);
+        expect(commands.some((command) => command.includes('mv -f /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.manabitan-') && command.endsWith('/data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml'))).toBe(false);
         expect(commands.some((command) => command.includes('pm enable --user 0 org.mozilla.firefox'))).toBe(true);
     });
 
@@ -93,14 +93,13 @@ else if (command.startsWith('monkey ')) emit('Events injected: 1');
 else if (command.startsWith('cmd package list packages -U')) emit('package:org.mozilla.firefox uid:10001');
 else if (command.startsWith('dumpsys package ')) emit('User 0: installed=true enabled=0');
 else if (command.startsWith('test -f ')) { const p = command.slice('test -f '.length); if (!fs.existsSync(mapRemotePath(p))) process.exit(1); }
-else if (command.startsWith('am force-stop ') || command.startsWith('pm disable-user ') || command.startsWith('pm enable ') || command.startsWith('pm default-state ') || command.startsWith('chown ') || command.startsWith('chmod ') || command.startsWith('restorecon ')) emit('');
+else if (command.startsWith('am force-stop ') || command.startsWith('pm disable-user ') || command.startsWith('pm enable ') || command.startsWith('pm default-state ') || command.startsWith('chown ') || command.startsWith('chmod ') || command.startsWith('chcon ')) emit('');
 else if (command.startsWith('pidof ')) { if (${options.processStaysAlive ? 'true' : 'false'}) emit('2567'); else process.exit(1); }
 else if (command.startsWith('toybox stat ')) emit('${options.wrongOwner ? '10002' : '10001'} 10001 600');
 else if (command.startsWith('ls -Z ')) emit('u:object_r:app_data_file:s0');
-else if (command.startsWith('command -v restorecon')) emit('/system/bin/restorecon');
 else if (args[2] === 'pull') { fs.copyFileSync(mapRemotePath(args[3]), args[4]); }
 else if (args[2] === 'push') { fs.copyFileSync(args[3], mapRemotePath(args[4])); }
-else if (command.startsWith('cat ')) { const match = command.match(/^cat (\\S+) > (\\S+)$/); if (!match) process.exit(2); fs.copyFileSync(mapRemotePath(match[1]), mapRemotePath(match[2])); }
+else if (command.startsWith('mv -f ')) { const match = command.match(/^mv -f (\\S+) (\\S+)$/); if (!match) process.exit(2); fs.renameSync(mapRemotePath(match[1]), mapRemotePath(match[2])); }
 else { process.stderr.write('Unexpected mocked adb invocation: ' + args.join(' ') + '\\n'); process.exit(2); }
 `;
     await writeFile(adbPath, adbSource);

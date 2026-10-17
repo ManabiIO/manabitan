@@ -156,16 +156,12 @@ for entry in list(root):
 ET.SubElement(root, "boolean", {"name": key, "value": "true"})
 tree.write(file_path, encoding="utf-8", xml_declaration=True)
 PY
-    local remote_temp="/data/local/tmp/manabitan-fenix-preferences-${$}-$(basename "${remote_path}")"
+    local remote_temp="${remote_path}.manabitan-${$}.tmp"
     adb -s "${device}" push "${local_path}" "${remote_temp}" >/dev/null
-    adb -s "${device}" shell "cat ${remote_temp} > ${remote_path}"
-    adb -s "${device}" shell "chown ${file_uid}:${file_gid} ${remote_path}"
-    adb -s "${device}" shell "chmod ${file_mode} ${remote_path}"
-    if adb -s "${device}" shell command -v restorecon >/dev/null 2>&1; then
-        adb -s "${device}" shell "restorecon ${remote_path}"
-    else
-        adb -s "${device}" shell "chcon ${file_context} ${remote_path}"
-    fi
+    adb -s "${device}" shell "chown ${file_uid}:${file_gid} ${remote_temp}"
+    adb -s "${device}" shell "chmod ${file_mode} ${remote_temp}"
+    adb -s "${device}" shell "chcon ${file_context} ${remote_temp}"
+    adb -s "${device}" shell "mv -f ${remote_temp} ${remote_path}"
 }
 
 write_preference_file "${preferences}" "${local_dir}/fenix_preferences.xml"
