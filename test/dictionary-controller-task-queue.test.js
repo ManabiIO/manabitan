@@ -32,13 +32,14 @@ describe('DictionaryController active and pending tasks', () => {
         const value = controller();
         /** @type {() => void} */
         let finishUpdate = () => {};
+        /** @type {Promise<void>} */
         const gate = new Promise((resolve) => {
             finishUpdate = () => {
                 resolve();
             };
         });
         const update = vi.fn(async () => { await gate; });
-        const remove = vi.fn().mockResolvedValue();
+        const remove = vi.fn(async () => {});
         Reflect.set(value, '_dictionaryTaskQueue', [{type: 'update', dictionaryTitle: 'JMdict', downloadUrl: 'first'}]);
         Reflect.set(value, '_updateDictionary', update);
         Reflect.set(value, '_deleteDictionary', remove);
@@ -61,6 +62,7 @@ describe('DictionaryController active and pending tasks', () => {
         const value = controller();
         /** @type {() => void} */
         let finishUpdate = () => {};
+        /** @type {Promise<void>} */
         const gate = new Promise((resolve) => {
             finishUpdate = () => {
                 resolve();
