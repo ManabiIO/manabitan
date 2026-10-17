@@ -23,7 +23,7 @@ function runScript(script, overrides = {}) {
     });
 }
 
-describe('Firefox Android web-ext install handshake', () => {
+describe.skipIf(process.platform === 'win32')('Firefox Android web-ext install handshake', () => {
     test('accepts an acknowledged temporary add-on installation and shuts down web-ext', async () => {
         const output = await runScript("console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);");
         expect(output).toContain('Installed /data/local/tmp/extension.xpi as a temporary add-on');
@@ -88,3 +88,8 @@ async function expectProcessToExit(pid) {
     }
     throw new Error(`Process ${String(pid)} remained alive after handshake timeout cleanup.`);
 }
+
+// The Android smoke runner uses POSIX process groups and must reject before spawning on Windows.
+test.runIf(process.platform === 'win32')('rejects unsupported Windows process cleanup before starting a runner', async () => {
+    await expect(runScript("throw new Error('runner must not spawn');")).rejects.toThrow('requires POSIX process-group signaling');
+});
