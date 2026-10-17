@@ -67,6 +67,12 @@ export class ProfileController {
         this._profileCopyModal = null;
         /** @type {?import('./modal.js').Modal} */
         this._profileConditionsModal = null;
+        /** @type {?import('settings').Profile} */
+        this._profileResetTarget = null;
+        /** @type {?import('settings').Profile} */
+        this._profileRemoveTarget = null;
+        /** @type {?import('settings').Profile} */
+        this._profileCopyDestinationTarget = null;
         /** @type {boolean} */
         this._profileEntriesSupported = false;
         /** @type {ProfileEntry[]} */
@@ -479,10 +485,10 @@ export class ProfileController {
      */
     openResetProfileModal(profileIndex) {
         const profile = this._getProfile(profileIndex);
-        if (profile === null || this.profileCount <= 1) { return; }
+        if (profile === null) { return; }
 
         /** @type {HTMLElement} */ (this._resetProfileNameElement).textContent = profile.name;
-        /** @type {import('./modal.js').Modal} */ (this._profileResetModal).node.dataset.profileIndex = `${profileIndex}`;
+        this._profileResetTarget = profile;
         /** @type {import('./modal.js').Modal} */ (this._profileResetModal).setVisible(true);
     }
 
@@ -494,7 +500,7 @@ export class ProfileController {
         if (profile === null || this.profileCount <= 1) { return; }
 
         /** @type {HTMLElement} */ (this._removeProfileNameElement).textContent = profile.name;
-        /** @type {import('./modal.js').Modal} */ (this._profileRemoveModal).node.dataset.profileIndex = `${profileIndex}`;
+        this._profileRemoveTarget = profile;
         /** @type {import('./modal.js').Modal} */ (this._profileRemoveModal).setVisible(true);
     }
 
@@ -514,15 +520,16 @@ export class ProfileController {
             }
         }
 
-        const profileIndexString = `${profileIndex}`;
         const select = /** @type {HTMLSelectElement} */ (this._profileCopySourceSelect);
         for (const option of select.querySelectorAll('option')) {
             const {value} = option;
-            option.disabled = (value === profileIndexString);
+            option.disabled = (value === this._getProfileSelectValue(profile, profileIndex));
         }
-        select.value = `${copyFromIndex}`;
+        const copyFromProfile = this._getProfile(copyFromIndex);
+        if (copyFromProfile === null) { return; }
+        select.value = this._getProfileSelectValue(copyFromProfile, copyFromIndex);
 
-        /** @type {import('./modal.js').Modal} */ (this._profileCopyModal).node.dataset.profileIndex = `${profileIndex}`;
+        this._profileCopyDestinationTarget = profile;
         /** @type {import('./modal.js').Modal} */ (this._profileCopyModal).setVisible(true);
     }
 
@@ -639,11 +646,9 @@ export class ProfileController {
     _onResetConfirm() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._profileResetModal);
         modal.setVisible(false);
-        const {node} = modal;
-        const profileIndex = node.dataset.profileIndex;
-        delete node.dataset.profileIndex;
-
-        const validProfileIndex = this._tryGetValidProfileIndex(profileIndex);
+        const profile = this._profileResetTarget;
+        this._profileResetTarget = null;
+        const validProfileIndex = this._getCurrentProfileIndex(profile);
         if (validProfileIndex === null) { return; }
 
         void this.resetProfile(validProfileIndex);
@@ -653,11 +658,9 @@ export class ProfileController {
     _onDeleteConfirm() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._profileRemoveModal);
         modal.setVisible(false);
-        const {node} = modal;
-        const profileIndex = node.dataset.profileIndex;
-        delete node.dataset.profileIndex;
-
-        const validProfileIndex = this._tryGetValidProfileIndex(profileIndex);
+        const profile = this._profileRemoveTarget;
+        this._profileRemoveTarget = null;
+        const validProfileIndex = this._getCurrentProfileIndex(profile);
         if (validProfileIndex === null) { return; }
 
         void this.deleteProfile(validProfileIndex);
@@ -667,14 +670,12 @@ export class ProfileController {
     _onCopyConfirm() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._profileCopyModal);
         modal.setVisible(false);
-        const {node} = modal;
-        const destinationProfileIndex = node.dataset.profileIndex;
-        delete node.dataset.profileIndex;
-
-        const validDestinationProfileIndex = this._tryGetValidProfileIndex(destinationProfileIndex);
+        const destinationProfile = this._profileCopyDestinationTarget;
+        this._profileCopyDestinationTarget = null;
+        const validDestinationProfileIndex = this._getCurrentProfileIndex(destinationProfile);
         if (validDestinationProfileIndex === null) { return; }
 
-        const sourceProfileIndex = this._tryGetValidProfileIndex(/** @type {HTMLSelectElement} */ (this._profileCopySourceSelect).value);
+        const sourceProfileIndex = this._getProfileIndexFromSelectValue(/** @type {HTMLSelectElement} */ (this._profileCopySourceSelect).value);
         if (sourceProfileIndex === null) { return; }
 
         void this.copyProfile(sourceProfileIndex, validDestinationProfileIndex);
@@ -712,16 +713,22 @@ export class ProfileController {
     /** */
     _updateProfileSelectOptions() {
         for (const select of this._getAllProfileSelects()) {
+            const previousValue = (select === this._profileCopySourceSelect ? select.value : null);
             const fragment = document.createDocumentFragment();
             for (let i = 0; i < this._profiles.length; ++i) {
                 const profile = this._profiles[i];
                 const option = document.createElement('option');
-                option.value = `${i}`;
+                option.value = (select === this._profileCopySourceSelect ? this._getProfileSelectValue(profile, i) : `${i}`);
                 option.textContent = profile.name;
                 fragment.appendChild(option);
             }
             select.textContent = '';
             select.appendChild(fragment);
+            if (previousValue !== null && [...select.options].some(({value}) => value === previousValue)) {
+                select.value = previousValue;
+            } else if (previousValue !== null) {
+                select.value = '';
+            }
         }
     }
 
@@ -730,8 +737,10 @@ export class ProfileController {
      * @param {string} name
      */
     _updateSelectName(index, name) {
-        const optionValue = `${index}`;
+        const profile = this._getProfile(index);
+        if (profile === null) { return; }
         for (const select of this._getAllProfileSelects()) {
+            const optionValue = (select === this._profileCopySourceSelect ? this._getProfileSelectValue(profile, index) : `${index}`);
             for (const option of select.querySelectorAll('option')) {
                 if (option.value === optionValue) {
                     option.textContent = name;
@@ -764,6 +773,42 @@ export class ProfileController {
             intValue :
             null
         );
+    }
+
+    /**
+     * @param {?import('settings').Profile} profile
+     * @returns {?number}
+     */
+    _getCurrentProfileIndex(profile) {
+        if (profile === null) { return null; }
+        const id = typeof profile.id === 'string' && profile.id.length > 0 ? profile.id : null;
+        const index = this._profiles.findIndex((item) => item === profile || (id !== null && item.id === id));
+        return (index >= 0 ? index : null);
+    }
+
+    /**
+     * @param {import('settings').Profile} profile
+     * @param {number} index
+     * @returns {string}
+     */
+    _getProfileSelectValue(profile, index) {
+        return (typeof profile.id === 'string' && profile.id.length > 0 ? `id:${profile.id}` : `index:${index}`);
+    }
+
+    /**
+     * @param {string} value
+     * @returns {?number}
+     */
+    _getProfileIndexFromSelectValue(value) {
+        if (value.startsWith('id:')) {
+            const id = value.slice(3);
+            const index = this._profiles.findIndex((profile) => profile.id === id);
+            return (index >= 0 ? index : null);
+        }
+        if (value.startsWith('index:')) {
+            return this._tryGetValidProfileIndex(value.slice(6));
+        }
+        return this._tryGetValidProfileIndex(value);
     }
 
     /**
