@@ -2518,7 +2518,32 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
      */
     async _modifySettings(targets, source) {
+        if (targets.some(({action}) => action === 'removeDictionary')) {
+            // Read installed state after earlier options writes commit. The
+            // database proxy serializes this read with import publication.
+            return await this._modifySettingsQueued(targets, source, async () => {
+                await this._ensureDictionaryDatabaseReady();
+                const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
+                return new Set(dictionaryInfo.map(({title}) => title));
+            });
+        }
+        return await this._modifySettingsQueued(targets, source);
+    }
+
+    /**
+     * @param {import('settings-modifications').ScopedModification[]} targets
+     * @param {string} source
+     * @param {null|(() => Promise<Set<string>>)} [getInstalledDictionaryNames]
+     * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
+     */
+    async _modifySettingsQueued(targets, source, getInstalledDictionaryNames = null) {
         return await this._runOptionsMutation(async () => {
+            // This runs inside the options queue and before staging or writing.
+            // Do not acquire the dictionary mutation queue here: imports can
+            // themselves need to commit settings after publishing.
+            const installedDictionaryNames = getInstalledDictionaryNames !== null ?
+                await getInstalledDictionaryNames() :
+                null;
             // Stage synchronous mutations on an isolated copy. Read APIs
             // continue to observe the last committed options while storage is
             // pending, including when a write eventually fails.
@@ -2526,12 +2551,21 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             const stagedOptions = clone(previousOptions);
             /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
             const results = [];
+            let hasChanges = false;
             this._options = stagedOptions;
             try {
                 for (const target of targets) {
                     try {
+                        if (target.action === 'removeDictionary' && installedDictionaryNames?.has(target.name)) {
+                            this._getDictionarySettingsRemovalArray(target);
+                            results.push({result: []});
+                            continue;
+                        }
                         const result = this._modifySetting(target);
                         results.push({result: clone(result)});
+                        if (target.action !== 'removeDictionary' || (Array.isArray(result) && result.length > 0)) {
+                            hasChanges = true;
+                        }
                     } catch (e) {
                         results.push({error: ExtensionError.serialize(e)});
                     }
@@ -2539,7 +2573,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             } finally {
                 this._options = previousOptions;
             }
-            if (!results.some((result) => Object.hasOwn(result, 'result'))) {
+            if (!hasChanges) {
                 // No successful mutation: keep the previous state and skip
                 // persistence, notifications, and runtime cache resets.
                 return results;
@@ -3197,11 +3231,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             }
             case 'removeDictionary':
             {
-                const {path, name} = target;
-                if (typeof path !== 'string' || !/^profiles\[\d+\]\.options\.dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
-                if (typeof name !== 'string') { throw new Error('Invalid dictionary name'); }
-                const array = accessor.get(ObjectPropertyAccessor.getPathArray(path));
-                if (!Array.isArray(array)) { throw new Error('Invalid target type'); }
+                const {array, name} = this._getDictionarySettingsRemovalArray(target);
                 /** @type {unknown[]} */
                 const removed = [];
                 for (let i = array.length - 1; i >= 0; --i) {
@@ -3227,6 +3257,24 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             default:
                 throw new Error(`Unknown action: ${action}`);
         }
+    }
+
+    /**
+     * Validates a dictionary removal and returns its target array without
+     * changing it. Also used when an installed title makes the removal a no-op.
+     * @param {import('settings-modifications').ScopedModificationRemoveDictionary} target
+     * @returns {{array: unknown[], name: string}}
+     * @throws {Error}
+     */
+    _getDictionarySettingsRemovalArray(target) {
+        const options = this._getModifySettingObject(target);
+        const accessor = new ObjectPropertyAccessor(options);
+        const {path, name} = target;
+        if (typeof path !== 'string' || !/^profiles\[\d+\]\.options\.dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
+        if (typeof name !== 'string') { throw new Error('Invalid dictionary name'); }
+        const array = accessor.get(ObjectPropertyAccessor.getPathArray(path));
+        if (!Array.isArray(array)) { throw new Error('Invalid target type'); }
+        return {array, name};
     }
 
     /**
