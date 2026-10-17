@@ -246,7 +246,9 @@ test('duplication queued behind a reorder appends a snapshot of the selected pro
     await Promise.all([reorder, duplicate]);
 
     const {profiles} = /** @type {{profiles: {id: string, name: string, options: object}[]}} */ (Reflect.get(backend, '_options'));
-    expect(profiles.map(({id}) => id)).toEqual(['b', 'a', 'c', expect.any(String)]);
+    expect(profiles.slice(0, 3).map(({id}) => id)).toEqual(['b', 'a', 'c']);
+    expect(profiles).toHaveLength(4);
+    expect(profiles[3]?.id).toEqual(expect.any(String));
     expect(profiles[3]?.name).toBe('A (Copy)');
     expect(profiles[3]?.options).toStrictEqual({marker: 'A snapshot'});
 });
