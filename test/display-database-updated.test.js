@@ -19,6 +19,38 @@ import {describe, expect, test, vi} from 'vitest';
 import {Display} from '../ext/js/display/display.js';
 
 describe('Display dictionary update handling', () => {
+    for (const method of /** @type {const} */ (['_refreshSearchEmptyStateAfterOptionsUpdate', '_refreshAfterDictionaryDatabaseUpdate'])) {
+        test.each(['terms', 'kanji', 'unloaded', 'clear'])(`${method} only updates a still-empty search page after options load (%s)`, async (type) => {
+            const pending = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+            const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
+            const updateOptions = vi.fn().mockReturnValue(pending.promise);
+            const setNoContentVisible = vi.fn();
+            const setNoDictionariesVisible = vi.fn();
+            Object.assign(display, {
+                _pageType: 'search',
+                _contentType: 'clear',
+                _options: {dictionaries: [{enabled: true}]},
+                _application: {webExtension: {unloaded: false}},
+                _refreshDictionaryInfo: vi.fn().mockResolvedValue(void 0),
+                updateOptions,
+                _setNoContentVisible: setNoContentVisible,
+                _setNoDictionariesVisible: setNoDictionariesVisible,
+            });
+            const operation = display[method]();
+            await vi.waitFor(() => { expect(updateOptions).toHaveBeenCalledOnce(); });
+            Reflect.set(display, '_contentType', type);
+            pending.resolve();
+            await operation;
+            if (type === 'clear') {
+                expect(setNoContentVisible).toHaveBeenCalledExactlyOnceWith(false);
+                expect(setNoDictionariesVisible).toHaveBeenCalledExactlyOnceWith(false);
+            } else {
+                expect(setNoContentVisible).not.toHaveBeenCalled();
+                expect(setNoDictionariesVisible).not.toHaveBeenCalled();
+            }
+        });
+    }
+
     test('dictionary database updates refresh cached dictionary info', async () => {
         const getDictionaryInfo = vi.fn().mockResolvedValue([{title: 'JMdict'}]);
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));

@@ -226,6 +226,61 @@ describe('Reader integration scanner lifecycle regressions', () => {
         }
     });
 
+    test.each([
+        {kind: 'touch-start', external: true},
+        {kind: 'touch-end', external: true},
+        {kind: 'pen', external: true},
+        {kind: 'touch-start', external: false},
+        {kind: 'touch-end', external: false},
+        {kind: 'pen', external: false},
+    ])('$kind completion suppresses page input only while it owns the selection (external lookup: $external)', async ({kind, external}) => {
+        const pending = deferredLookup();
+        const lookup = vi.fn(() => pending.promise);
+        const scanner = createScanner(lookup, [createFakeTextSource('old')]);
+        const inputInfo = createInputInfo();
+        inputInfo.pointerType = kind === 'pen' ? 'pen' : 'touch';
+        inputInfo.input = /** @type {import('text-scanner').InputConfig} */ (/** @type {unknown} */ ({
+            searchTerms: true, searchKanji: false, preventTouchScrolling: true, preventPenScrolling: true, scanOnPenPress: true,
+        }));
+        Reflect.set(scanner, '_getMatchingInputGroupFromEvent', () => inputInfo);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        try {
+            const active = kind === 'pen' ?
+                Reflect.get(scanner, '_searchAtFromPen').call(scanner, /** @type {PointerEvent} */ (/** @type {unknown} */ ({clientX: 1, clientY: 1})), 'pointerDown', true) :
+                Reflect.get(scanner, kind === 'touch-start' ? '_searchAtFromTouchStart' : '_searchAtFromTouchEnd').call(scanner, 1, 1, inputInfo);
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
+            const readerSource = createFakeTextSource('reader');
+            if (external) {
+                scanner.beginExternalLookup();
+                scanner.setCurrentTextSource(readerSource);
+            }
+            pending.resolve(hit());
+            await active;
+            if (external) {
+                expect(scanner.getCurrentTextSource()).toBe(readerSource);
+                expect(success).not.toHaveBeenCalled();
+            } else {
+                expect(scanner.getCurrentTextSource()?.text()).toBe('old');
+                expect(success).toHaveBeenCalledOnce();
+            }
+
+            const mouseDown = /** @type {PointerEvent} */ (/** @type {unknown} */ (new MouseEvent('mousedown', {button: 0, cancelable: true})));
+            Reflect.get(scanner, '_onMouseDown').call(scanner, mouseDown);
+            expect(mouseDown.defaultPrevented).toBe(!external);
+            const contextMenu = /** @type {PointerEvent} */ (/** @type {unknown} */ (new MouseEvent('contextmenu', {cancelable: true})));
+            Reflect.get(scanner, '_onContextMenu').call(scanner, contextMenu);
+            expect(contextMenu.defaultPrevented).toBe(!external && kind !== 'touch-end');
+            const click = /** @type {PointerEvent} */ (/** @type {unknown} */ (new MouseEvent('click', {button: 0, cancelable: true})));
+            Reflect.get(scanner, '_onClick').call(scanner, click);
+            expect(click.defaultPrevented).toBe(!external);
+            expect(Reflect.get(scanner, '_preventScroll')).toBe(!external && kind !== 'touch-end');
+        } finally {
+            scanner.setEnabled(false);
+            pending.resolve(hit());
+        }
+    });
+
     test('several queued pointer moves coalesce to the newest eligible position', async () => {
         const first = deferredLookup();
         const lookup = vi.fn().mockImplementationOnce(() => first.promise).mockResolvedValue(hit());
@@ -403,5 +458,109 @@ describe('Reader integration scanner lifecycle regressions', () => {
         decide(false);
         await active;
         expect(lookup).not.toHaveBeenCalled();
+    });
+
+    test.each(['eligible', 'ignored', 'rejected'])('hit-test timeout releases the newest queued hover and ignores a late %s response', async (outcome) => {
+        vi.useFakeTimers();
+        const admission = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+        const current = deferredLookup();
+        const lookup = vi.fn(() => current.promise);
+        const scanner = createScanner(lookup, [createFakeTextSource('current')]);
+        const range = vi.spyOn(Reflect.get(scanner, '_textSourceGenerator'), 'getRangeFromPoint');
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        Reflect.set(scanner, '_lookupTimeoutMs', 25);
+        Reflect.set(scanner, '_ignorePoint', vi.fn().mockReturnValueOnce(admission.promise).mockResolvedValue(false));
+        const done = vi.fn();
+        const active = searchAt(scanner, 1, 1, createInputInfo()).then(done);
+        try {
+            await searchAt(scanner, 2, 2, createInputInfo());
+            await searchAt(scanner, 3, 3, createInputInfo());
+            await vi.advanceTimersByTimeAsync(25);
+            expect(done).toHaveBeenCalledOnce();
+            expect(range.mock.calls.map((args) => args.slice(0, 2))).toEqual([[3, 3]]);
+            expect(lookup).toHaveBeenCalledOnce();
+            expect(success).not.toHaveBeenCalled();
+
+            if (outcome === 'rejected') {
+                admission.reject(new Error('Old hit-test failed'));
+            } else {
+                admission.resolve(outcome === 'ignored');
+            }
+            await vi.advanceTimersByTimeAsync(0);
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(true);
+            expect(range).toHaveBeenCalledOnce();
+            current.resolve(hit());
+            await vi.advanceTimersByTimeAsync(0);
+            expect(success).toHaveBeenCalledOnce();
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(false);
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            scanner.setEnabled(false);
+            admission.resolve(false);
+            current.resolve(hit());
+            await active;
+            range.mockRestore();
+        }
+    });
+
+    test('hit testing and dictionary work share one timeout while the reader retains its source', async () => {
+        vi.useFakeTimers();
+        const admission = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+        const reader = deferredLookup();
+        const lookup = vi.fn(() => reader.promise);
+        const source = createFakeTextSource('pending');
+        const cleanup = vi.spyOn(source, 'cleanup');
+        const scanner = createScanner(lookup, [source]);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        Reflect.set(scanner, '_lookupTimeoutMs', 25);
+        Reflect.set(scanner, '_ignorePoint', () => admission.promise);
+        const done = vi.fn();
+        const active = searchAt(scanner, 1, 1, createInputInfo()).then(done);
+        try {
+            await vi.advanceTimersByTimeAsync(15);
+            admission.resolve(false);
+            await vi.advanceTimersByTimeAsync(0);
+            expect(lookup).toHaveBeenCalledOnce();
+            await vi.advanceTimersByTimeAsync(10);
+            expect(done).toHaveBeenCalledOnce();
+            expect(cleanup).not.toHaveBeenCalled();
+            reader.resolve(hit());
+            await vi.advanceTimersByTimeAsync(0);
+            expect(cleanup).toHaveBeenCalledOnce();
+            expect(success).not.toHaveBeenCalled();
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            scanner.setEnabled(false);
+            admission.resolve(false);
+            reader.resolve(hit());
+            await active;
+            cleanup.mockRestore();
+        }
+    });
+
+    test('disabled watchdog preserves asynchronous hit testing without leaking a timer', async () => {
+        vi.useFakeTimers();
+        const admission = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+        const lookup = vi.fn().mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('current')]);
+        Reflect.set(scanner, '_lookupTimeoutMs', 0);
+        Reflect.set(scanner, '_ignorePoint', () => admission.promise);
+        const done = vi.fn();
+        const active = searchAt(scanner, 1, 1, createInputInfo()).then(done);
+        try {
+            await vi.advanceTimersByTimeAsync(60_000);
+            expect(done).not.toHaveBeenCalled();
+            expect(lookup).not.toHaveBeenCalled();
+            admission.resolve(false);
+            await active;
+            expect(lookup).toHaveBeenCalledOnce();
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            scanner.setEnabled(false);
+            admission.resolve(false);
+            await active;
+        }
     });
 });

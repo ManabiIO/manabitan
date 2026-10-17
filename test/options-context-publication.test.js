@@ -89,6 +89,57 @@ function appliedWidth(owner) {
     return owner instanceof Popup ? owner._initialWidth : owner._options?.general.popupWidth;
 }
 
+describe('display options-message navigation ownership', () => {
+    test.each([false, true])('only the newest options message can refresh content (same context=%s)', async (sameContext) => {
+        const {owner, optionsGet} = createOwner('display');
+        if (!(owner instanceof Display)) { throw new Error('Expected display'); }
+        const refresh = vi.spyOn(owner, 'searchLast').mockImplementation(() => {});
+        const pending = /** @type {PromiseWithResolvers<import('settings').ProfileOptions>} */ (Promise.withResolvers());
+        optionsGet.mockReturnValueOnce(pending.promise).mockResolvedValueOnce(options(700));
+        const older = owner._onMessageSetOptionsContext({optionsContext: a});
+        await owner._onMessageSetOptionsContext({optionsContext: sameContext ? {...a} : b});
+        pending.resolve(options(300));
+        await older;
+        expect(appliedWidth(owner)).toBe(700);
+        expect(refresh).toHaveBeenCalledExactlyOnceWith(true);
+    });
+
+    test.each([false, true])('an options message only refreshes the content it started with (changed=%s)', async (changed) => {
+        const {owner, optionsGet} = createOwner('display');
+        if (!(owner instanceof Display)) { throw new Error('Expected display'); }
+        const refresh = vi.spyOn(owner, 'searchLast').mockImplementation(() => {});
+        const pending = /** @type {PromiseWithResolvers<import('settings').ProfileOptions>} */ (Promise.withResolvers());
+        optionsGet.mockReturnValueOnce(pending.promise);
+        owner._setContentToken = {};
+        const operation = owner._onMessageSetOptionsContext({optionsContext: a});
+        if (changed) { owner._setContentToken = {}; }
+        pending.resolve(options(500));
+        await operation;
+        expect(appliedWidth(owner)).toBe(500);
+        if (changed) {
+            expect(refresh).not.toHaveBeenCalled();
+        } else {
+            expect(refresh).toHaveBeenCalledExactlyOnceWith(true);
+        }
+    });
+
+    test('a superseded message cannot refresh after the replacement options load failed', async () => {
+        const {owner, optionsGet} = createOwner('display');
+        if (!(owner instanceof Display)) { throw new Error('Expected display'); }
+        const refresh = vi.spyOn(owner, 'searchLast').mockImplementation(() => {});
+        const pending = /** @type {PromiseWithResolvers<import('settings').ProfileOptions>} */ (Promise.withResolvers());
+        optionsGet.mockReturnValueOnce(pending.promise).mockRejectedValueOnce(new Error('Options unavailable'));
+        const older = owner._onMessageSetOptionsContext({optionsContext: a});
+        await expect(owner._onMessageSetOptionsContext({optionsContext: b})).rejects.toThrow('Options unavailable');
+        pending.resolve(options(300));
+        await older;
+        expect(refresh).not.toHaveBeenCalled();
+        optionsGet.mockResolvedValueOnce(options(700));
+        await owner._onMessageSetOptionsContext({optionsContext: b});
+        expect(refresh).toHaveBeenCalledExactlyOnceWith(true);
+    });
+});
+
 describe.each(['popup', 'display'])('%s options publication', (kind) => {
     const ownerKind = /** @type {'popup'|'display'} */ (kind);
 
