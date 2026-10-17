@@ -3857,7 +3857,10 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             throw new Error('Unknown media type for screenshot image');
         }
 
-        const fileName = generateAnkiNoteMediaFileName('yomitan_browser_screenshot', extension, timestamp);
+        // Concurrent saves can share a timestamp while capturing different tabs.
+        // Keep each screenshot distinct so AnkiConnect cannot replace another
+        // note's image under the same media filename.
+        const fileName = generateAnkiNoteMediaFileName('yomitan_browser_screenshot', extension, `${timestamp}_${crypto.randomUUID()}`);
         return await ankiConnect.storeMediaFile(fileName, data);
     }
 
