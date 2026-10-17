@@ -1813,9 +1813,16 @@ export class DictionaryController {
      */
     async _validateUpdatedDictionaryState(dictionaryTitle, importToken, stagedDictionaryTitle, importedTitles) {
         const {dictionaryInfo, transientTitles} = await this._getDictionaryInfoAfterTransientCleanup();
-        const updatedDictionary = dictionaryInfo.find((dictionary) => dictionary.title === dictionaryTitle);
-        const importedDictionaryPresent = importedTitles.includes(dictionaryTitle);
-        const updateTokenApplied = typeof updatedDictionary?.updateSessionToken === 'string' && updatedDictionary.updateSessionToken === importToken;
+        const updatedDictionaries = dictionaryInfo.filter((dictionary) => (
+            importedTitles.includes(dictionary.title) &&
+            typeof dictionary.updateSessionToken === 'string' &&
+            dictionary.updateSessionToken === importToken
+        ));
+        const updatedDictionary = updatedDictionaries.length === 1 ? updatedDictionaries[0] : null;
+        const importedDictionaryPresent = updatedDictionary !== null;
+        const updateTokenApplied = importedDictionaryPresent;
+        const originalDictionaryRemoved = dictionaryTitle === updatedDictionary?.title || !dictionaryInfo.some((dictionary) => dictionary.title === dictionaryTitle);
+        const stagedDictionaryRemoved = !dictionaryInfo.some((dictionary) => dictionary.title === stagedDictionaryTitle);
         reportDiagnostics('dictionary-update-state-validated', {
             dictionaryTitle,
             importToken,
@@ -1823,12 +1830,18 @@ export class DictionaryController {
             importedTitles,
             importedDictionaryPresent,
             updateTokenApplied,
+            updatedDictionaryTitle: updatedDictionary?.title ?? null,
+            matchingUpdateCount: updatedDictionaries.length,
+            originalDictionaryRemoved,
+            stagedDictionaryRemoved,
             transientTitles,
         });
-        if (!importedDictionaryPresent || typeof updatedDictionary === 'undefined' || !updateTokenApplied || transientTitles.length > 0) {
+        if (!importedDictionaryPresent || !originalDictionaryRemoved || !stagedDictionaryRemoved || transientTitles.length > 0) {
             throw new Error(
                 `Dictionary update requires repair for "${dictionaryTitle}" ` +
                 `(imported=${String(importedDictionaryPresent)} tokenApplied=${String(updateTokenApplied)} ` +
+                `originalRemoved=${String(originalDictionaryRemoved)} matchingUpdates=${String(updatedDictionaries.length)} ` +
+                `stagedRemoved=${String(stagedDictionaryRemoved)} ` +
                 `transientTitles=${JSON.stringify(transientTitles)})`,
             );
         }
@@ -1845,17 +1858,27 @@ export class DictionaryController {
         // deleting staging rows which may still be owned by that import.
         const dictionaryInfo = await this._settingsController.application.api.getDictionaryInfo();
         const transientTitles = this._getTransientDictionaryTitles(dictionaryInfo);
-        const updatedDictionary = dictionaryInfo.find((dictionary) => dictionary.title === dictionaryTitle);
-        const updateTokenApplied = typeof updatedDictionary?.updateSessionToken === 'string' && updatedDictionary.updateSessionToken === importToken;
+        const updatedDictionaries = dictionaryInfo.filter((dictionary) => (
+            typeof dictionary.updateSessionToken === 'string' &&
+            dictionary.updateSessionToken === importToken
+        ));
+        const updatedDictionary = updatedDictionaries.length === 1 ? updatedDictionaries[0] : null;
+        const updateTokenApplied = updatedDictionary !== null;
+        const originalDictionaryRemoved = dictionaryTitle === updatedDictionary?.title || !dictionaryInfo.some((dictionary) => dictionary.title === dictionaryTitle);
+        const stagedDictionaryRemoved = !dictionaryInfo.some((dictionary) => dictionary.title === stagedDictionaryTitle);
         reportDiagnostics('dictionary-update-timeout-recovery', {
             dictionaryTitle,
             importToken,
             stagedDictionaryTitle,
             updateTokenApplied,
+            updatedDictionaryTitle: updatedDictionary?.title ?? null,
+            matchingUpdateCount: updatedDictionaries.length,
+            originalDictionaryRemoved,
+            stagedDictionaryRemoved,
             transientTitles,
             installedTitles: dictionaryInfo.map((dictionary) => dictionary.title),
         });
-        return typeof updatedDictionary !== 'undefined' && updateTokenApplied && transientTitles.length === 0;
+        return updateTokenApplied && originalDictionaryRemoved && stagedDictionaryRemoved && transientTitles.length === 0;
     }
 
     /**
