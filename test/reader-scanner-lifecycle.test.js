@@ -247,7 +247,7 @@ describe('Reader integration scanner lifecycle regressions', () => {
         scanner.on('searchSuccess', success);
         try {
             const active = kind === 'pen' ?
-                Reflect.get(scanner, '_searchAtFromPen').call(scanner, {clientX: 1, clientY: 1}, 'pointerDown', true) :
+                Reflect.get(scanner, '_searchAtFromPen').call(scanner, /** @type {PointerEvent} */ (/** @type {unknown} */ ({clientX: 1, clientY: 1})), 'pointerDown', true) :
                 Reflect.get(scanner, kind === 'touch-start' ? '_searchAtFromTouchStart' : '_searchAtFromTouchEnd').call(scanner, 1, 1, inputInfo);
             await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
             const readerSource = createFakeTextSource('reader');
@@ -265,13 +265,13 @@ describe('Reader integration scanner lifecycle regressions', () => {
                 expect(success).toHaveBeenCalledOnce();
             }
 
-            const mouseDown = new MouseEvent('mousedown', {button: 0, cancelable: true});
+            const mouseDown = /** @type {PointerEvent} */ (/** @type {unknown} */ (new MouseEvent('mousedown', {button: 0, cancelable: true})));
             Reflect.get(scanner, '_onMouseDown').call(scanner, mouseDown);
             expect(mouseDown.defaultPrevented).toBe(!external);
-            const contextMenu = new MouseEvent('contextmenu', {cancelable: true});
+            const contextMenu = /** @type {PointerEvent} */ (/** @type {unknown} */ (new MouseEvent('contextmenu', {cancelable: true})));
             Reflect.get(scanner, '_onContextMenu').call(scanner, contextMenu);
             expect(contextMenu.defaultPrevented).toBe(!external && kind !== 'touch-end');
-            const click = new MouseEvent('click', {button: 0, cancelable: true});
+            const click = /** @type {PointerEvent} */ (/** @type {unknown} */ (new MouseEvent('click', {button: 0, cancelable: true})));
             Reflect.get(scanner, '_onClick').call(scanner, click);
             expect(click.defaultPrevented).toBe(!external);
             expect(Reflect.get(scanner, '_preventScroll')).toBe(!external && kind !== 'touch-end');
