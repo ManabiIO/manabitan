@@ -21,6 +21,7 @@ import {parseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {convertElementValueToNumber} from '../../dom/document-util.js';
 import {DOMDataBinder} from '../../dom/dom-data-binder.js';
+import {getDictionaryRowOwnership} from './dictionary-row-ownership.js';
 
 export class GenericSettingController {
     /**
@@ -82,11 +83,13 @@ export class GenericSettingController {
         const path = element.dataset.setting ?? element.dataset.permissionsSetting;
         if (typeof path !== 'string') { return void 0; }
         const scope2 = this._normalizeScope(scope);
+        const dictionaryRowOwnership = getDictionaryRowOwnership(element);
         return {
             path,
             scope: scope2 !== null ? scope2 : this._defaultScope,
             transforms: this._getTransformDataArray(transformRaw),
             transformRaw,
+            dictionaryRowOwnership,
         };
     }
 
@@ -99,7 +102,9 @@ export class GenericSettingController {
         return (
             metadata1.path === metadata2.path &&
             metadata1.scope === metadata2.scope &&
-            metadata1.transformRaw === metadata2.transformRaw
+            metadata1.transformRaw === metadata2.transformRaw &&
+            metadata1.dictionaryRowOwnership?.id === metadata2.dictionaryRowOwnership?.id &&
+            metadata1.dictionaryRowOwnership?.profileId === metadata2.dictionaryRowOwnership?.profileId
         );
     }
 
@@ -111,7 +116,36 @@ export class GenericSettingController {
         const defaultScope = this._defaultScope;
         /** @type {import('settings-modifications').ScopedRead[]} */
         const settingsTargets = [];
-        for (const {metadata: {path, scope}} of targets) {
+        const responseIndexes = [];
+        /** @type {(import('dom-data-binder').TaskResult | null)[]} */
+        const localValues = [];
+        for (let i = 0; i < targets.length; ++i) {
+            const {metadata: {path, scope, dictionaryRowOwnership}} = targets[i];
+            const dictionaryMatch = /^dictionaries\[(\d+)\]\.([A-Za-z]+)$/u.exec(path);
+            if (dictionaryMatch !== null && dictionaryRowOwnership === void 0) {
+                responseIndexes.push(-1);
+                localValues.push({error: new ExtensionError('Missing dictionary row ownership snapshot')});
+                continue;
+            }
+            if (dictionaryRowOwnership !== void 0) {
+                if (
+                    dictionaryMatch === null ||
+                    Number.parseInt(dictionaryMatch[1], 10) !== dictionaryRowOwnership.index ||
+                    !Object.hasOwn(dictionaryRowOwnership.expectedEntry, dictionaryMatch[2])
+                ) {
+                    responseIndexes.push(-1);
+                    localValues.push({error: new ExtensionError('Invalid dictionary row ownership snapshot')});
+                    continue;
+                }
+                if (this._settingsController.getOptionsContext().profileId !== dictionaryRowOwnership.profileId) {
+                    responseIndexes.push(-1);
+                    localValues.push({error: new ExtensionError('Profile changed; reload the dictionary settings row')});
+                    continue;
+                }
+                responseIndexes.push(-1);
+                localValues.push({result: dictionaryRowOwnership.expectedEntry[dictionaryMatch[2]]});
+                continue;
+            }
             /** @type {import('settings-modifications').ScopedRead} */
             const target = {
                 path,
@@ -119,8 +153,17 @@ export class GenericSettingController {
                 optionsContext: null,
             };
             settingsTargets.push(target);
+            responseIndexes.push(settingsTargets.length - 1);
+            localValues.push(null);
         }
-        return this._transformResults(await this._settingsController.getSettings(settingsTargets), targets);
+        const values = await this._settingsController.getSettings(settingsTargets);
+        for (const {metadata: {dictionaryRowOwnership}} of targets) {
+            if (dictionaryRowOwnership !== void 0 && this._settingsController.getOptionsContext().profileId !== dictionaryRowOwnership.profileId) {
+                return targets.map(() => ({error: new ExtensionError('Profile changed; reload the dictionary settings row')}));
+            }
+        }
+        const results = /** @type {import('settings-controller').ModifyResult[]} */ (responseIndexes.map((index, i) => (index < 0 ? localValues[i] : values[index])));
+        return this._transformResults(results, targets);
     }
 
     /**
@@ -134,16 +177,75 @@ export class GenericSettingController {
         for (const {metadata: {path, scope, transforms}, value, element} of targets) {
             const transformedValue = this._applyTransforms(value, transforms, 'pre', element);
             /** @type {import('settings-modifications').ScopedModification} */
-            const target = {
-                path,
-                scope: typeof scope === 'string' ? scope : defaultScope,
-                action: 'set',
-                value: transformedValue,
-                optionsContext: null,
-            };
+            let target;
+            const dictionaryMatch = /^dictionaries\[(\d+)\]\.([A-Za-z]+)$/u.exec(path);
+            const targetDetails = targets[settingsTargets.length];
+            const ownership = targetDetails?.metadata.dictionaryRowOwnership;
+            if (dictionaryMatch !== null && ownership !== void 0 && Number.parseInt(dictionaryMatch[1], 10) === ownership.index) {
+                target = {
+                    action: 'setDictionaryField',
+                    scope: typeof scope === 'string' ? scope : defaultScope,
+                    optionsContext: null,
+                    profileId: ownership.profileId,
+                    index: ownership.index,
+                    expectedEntry: structuredClone(ownership.expectedEntry),
+                    field: /** @type {import('settings-modifications').ModificationSetDictionaryField['field']} */ (dictionaryMatch[2]),
+                    value: transformedValue,
+                };
+            } else if (dictionaryMatch !== null) {
+                // An indexed dictionary field without a captured row owner is
+                // unsafe to apply. Fail closed instead of falling back to `set`.
+                target = {
+                    action: 'setDictionaryField',
+                    scope: typeof scope === 'string' ? scope : defaultScope,
+                    optionsContext: null,
+                    profileId: '',
+                    index: Number.parseInt(dictionaryMatch[1], 10),
+                    expectedEntry: {},
+                    field: /** @type {import('settings-modifications').ModificationSetDictionaryField['field']} */ (dictionaryMatch[2]),
+                    value: transformedValue,
+                };
+            } else {
+                target = {
+                    path,
+                    scope: typeof scope === 'string' ? scope : defaultScope,
+                    action: 'set',
+                    value: transformedValue,
+                    optionsContext: null,
+                };
+            }
             settingsTargets.push(target);
         }
-        return this._transformResults(await this._settingsController.modifySettings(settingsTargets), targets);
+        const results = await this._settingsController.modifySettings(settingsTargets);
+        let refreshNeeded = false;
+        for (let i = 0; i < results.length; ++i) {
+            const result = results[i];
+            if (result.error) {
+                if (
+                    targets[i].metadata.dictionaryRowOwnership !== void 0 ||
+                    /^dictionaries\[\d+\]\.[A-Za-z]+$/u.test(targets[i].metadata.path)
+                ) { refreshNeeded = true; }
+                continue;
+            }
+            const ownership = targets[i].metadata.dictionaryRowOwnership;
+            if (ownership === void 0) { continue; }
+            const value = result.result;
+            if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+                const rowResult = /** @type {{dictionaryEntry?: unknown, value?: unknown, stale?: unknown}} */ (value);
+                if (rowResult.stale === true) {
+                    refreshNeeded = true;
+                } else if (rowResult.dictionaryEntry !== null && typeof rowResult.dictionaryEntry === 'object' && !Array.isArray(rowResult.dictionaryEntry)) {
+                    // SettingsController has published the final committed row snapshot.
+                    results[i] = {...result, result: rowResult.value};
+                }
+            }
+        }
+        if (refreshNeeded) {
+            void this._settingsController.refresh().catch((error) => {
+                log.error(error);
+            });
+        }
+        return this._transformResults(results, targets);
     }
 
     /**
