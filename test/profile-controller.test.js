@@ -25,6 +25,7 @@ import {ProfileController} from '../ext/js/pages/settings/profile-controller.js'
 function createControllerForInternalTests() {
     const controller = /** @type {ProfileController} */ (Object.create(ProfileController.prototype));
     Reflect.set(controller, '_profileConditionsProfileName', null);
+    Reflect.set(controller, '_defaultProfileWriteGeneration', 0);
     return controller;
 }
 
@@ -650,6 +651,163 @@ describe('ProfileController displayed profile ownership', () => {
         expect(cleanup).toHaveBeenCalledOnce();
         expect(prepare).toHaveBeenCalledOnce();
         expect(prepare).toHaveBeenCalledWith(expected);
+    });
+});
+
+describe('ProfileController default profile write failures', () => {
+    /**
+     * @param {ProfileController} controller
+     * @param {any} settingsController
+     * @param {any} activeSelect
+     */
+    function configure(controller, settingsController, activeSelect) {
+        Reflect.set(controller, '_settingsController', settingsController);
+        Reflect.set(controller, '_profiles', [{id: 'a', name: 'First'}, {id: 'b', name: 'Second'}, {id: 'c', name: 'Third'}]);
+        Reflect.set(controller, '_profileCurrent', 0);
+        Reflect.set(controller, '_profileActiveSelect', activeSelect);
+        Reflect.set(controller, '_profileEntryList', []);
+        Reflect.set(controller, '_profileEntriesSupported', false);
+        Reflect.set(controller, '_updateProfileSelectOptions', vi.fn());
+        Reflect.set(controller, '_profileConditionsUI', {cleanup: vi.fn(), prepare: vi.fn().mockResolvedValue(void 0)});
+        Reflect.set(controller, '_profileConditionsIndex', null);
+        Reflect.set(controller, '_profileConditionsProfileId', null);
+        Reflect.set(controller, '_profileConditionsOpenToken', null);
+        Reflect.set(controller, '_profileConditionsModal', null);
+        Reflect.set(controller, '_profileConditionsProfileName', null);
+    }
+
+    test('a stale failed write cannot overwrite the newer default while it is pending', async () => {
+        const controller = createControllerForInternalTests();
+        const firstWrite = deferred();
+        const secondWrite = deferred();
+        let persistedDefault = 0;
+        const settingsController = {
+            profileIndex: 0,
+            modifyGlobalSettings: vi.fn()
+                .mockReturnValueOnce(firstWrite.promise)
+                .mockReturnValueOnce(secondWrite.promise),
+            getOptionsFull: vi.fn(async () => ({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: persistedDefault})),
+        };
+        const activeSelect = {value: '0'};
+        configure(controller, settingsController, activeSelect);
+
+        const first = controller.setDefaultProfile(1);
+        const second = controller.setDefaultProfile(2);
+        firstWrite.resolve([{error: {name: 'Error', message: 'stale write rejected', stack: ''}}]);
+        await expect(first).rejects.toThrow('stale write rejected');
+
+        expect(Reflect.get(controller, '_profileCurrent')).toBe(0);
+        expect(activeSelect.value).toBe('0');
+        expect(settingsController.profileIndex).toBe(0);
+
+        persistedDefault = 2;
+        secondWrite.resolve([{result: true}]);
+        await second;
+        expect(Reflect.get(controller, '_profileCurrent')).toBe(2);
+        expect(activeSelect.value).toBe('2');
+        expect(settingsController.profileIndex).toBe(2);
+    });
+
+    test('both failed writes reconcile the latest persisted default', async () => {
+        const controller = createControllerForInternalTests();
+        const firstWrite = deferred();
+        const secondWrite = deferred();
+        const settingsController = {
+            profileIndex: 0,
+            modifyGlobalSettings: vi.fn().mockReturnValueOnce(firstWrite.promise).mockReturnValueOnce(secondWrite.promise),
+            getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: 0}),
+        };
+        const activeSelect = {value: '0'};
+        configure(controller, settingsController, activeSelect);
+
+        const first = controller.setDefaultProfile(1);
+        const second = controller.setDefaultProfile(2);
+        firstWrite.resolve([{error: {name: 'Error', message: 'first failed', stack: ''}}]);
+        secondWrite.resolve([{error: {name: 'Error', message: 'second failed', stack: ''}}]);
+        await expect(first).rejects.toThrow('first failed');
+        await expect(second).rejects.toThrow('second failed');
+        expect(Reflect.get(controller, '_profileCurrent')).toBe(0);
+        expect(activeSelect.value).toBe('0');
+    });
+    test('a rejected default-profile write refreshes the selector from persisted settings', async () => {
+        const controller = createControllerForInternalTests();
+        const activeSelect = {value: '0'};
+        const settingsController = {
+            profileIndex: 0,
+            modifyGlobalSettings: vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'profile write rejected', stack: ''}}]),
+            getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a', name: 'First'}, {id: 'b', name: 'Second'}], profileCurrent: 0}),
+        };
+        configure(controller, settingsController, activeSelect);
+
+        await expect(controller.setDefaultProfile(1)).rejects.toThrow('profile write rejected');
+
+        expect(Reflect.get(controller, '_profileCurrent')).toBe(0);
+        expect(activeSelect.value).toBe('0');
+        expect(settingsController.profileIndex).toBe(0);
+    });
+
+    test.each([
+        {name: 'transport rejection', write: () => Promise.reject(new Error('transport failed')), message: 'transport failed'},
+        {name: 'malformed response', write: () => Promise.resolve([]), message: 'invalid result'},
+    ])('reconciles a $name while preserving its original error', async ({write, message}) => {
+        const controller = createControllerForInternalTests();
+        const activeSelect = {value: '0'};
+        const settingsController = {
+            profileIndex: 0,
+            modifyGlobalSettings: vi.fn(write),
+            getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}], profileCurrent: 0}),
+        };
+        configure(controller, settingsController, activeSelect);
+
+        await expect(controller.setDefaultProfile(1)).rejects.toThrow(message);
+    });
+
+    test('preserves the original write error when refresh fails', async () => {
+        const controller = createControllerForInternalTests();
+        const refreshError = new Error('refresh failed');
+        const settingsController = {
+            profileIndex: 0,
+            modifyGlobalSettings: vi.fn().mockRejectedValue(new Error('write failed')),
+            getOptionsFull: vi.fn().mockRejectedValue(refreshError),
+        };
+        configure(controller, settingsController, {value: '0'});
+
+        await expect(controller.setDefaultProfile(1)).rejects.toThrow('write failed');
+    });
+
+    test('does not reset a viewed non-default profile changed while the write is pending', async () => {
+        const controller = createControllerForInternalTests();
+        const write = deferred();
+        const settingsController = {
+            profileIndex: 0,
+            modifyGlobalSettings: vi.fn(() => write.promise),
+            getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: 0}),
+        };
+        configure(controller, settingsController, {value: '0'});
+
+        const save = controller.setDefaultProfile(1);
+        settingsController.profileIndex = 2;
+        write.resolve([{error: {name: 'Error', message: 'write rejected', stack: ''}}]);
+        await expect(save).rejects.toThrow('write rejected');
+        expect(settingsController.profileIndex).toBe(2);
+    });
+
+    test('keeps a newly viewed profile after a successful default change', async () => {
+        const controller = createControllerForInternalTests();
+        const write = deferred();
+        const settingsController = {
+            profileIndex: 0,
+            modifyGlobalSettings: vi.fn(() => write.promise),
+            getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'a'}, {id: 'b'}, {id: 'c'}], profileCurrent: 1}),
+        };
+        configure(controller, settingsController, {value: '0'});
+
+        const save = controller.setDefaultProfile(1);
+        settingsController.profileIndex = 2;
+        write.resolve([{result: true}]);
+        await save;
+        expect(settingsController.profileIndex).toBe(2);
+        expect(Reflect.get(controller, '_profileCurrent')).toBe(1);
     });
 });
 
