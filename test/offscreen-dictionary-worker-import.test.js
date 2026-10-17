@@ -204,6 +204,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
         vi.stubGlobal('Worker', class { constructor() { Object.assign(this, worker); } });
         vi.stubGlobal('self', {
             addEventListener: vi.fn((type, listener) => { listeners.set(type, listener); }),
+            /** @param {unknown} message */
             postMessage: (message) => {
                 workerPostMessage(message);
                 clientMessageListener?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({data: message})));
@@ -212,13 +213,13 @@ describe('Offscreen dictionary worker import response port handling', () => {
         await import('../ext/js/background/offscreen-dictionary-worker.js');
         const {DictionaryWorkerClient} = await import('../ext/js/background/dictionary-worker-client.js');
         const client = new DictionaryWorkerClient('/dictionary-worker.js');
-        const onMessage = listeners.get('message');
         const importPort = {postMessage: vi.fn(), close: vi.fn()};
         client.post('importDictionaryOffscreen', {operationId: importOperationId1, archiveContent: new Blob(['dictionary']), details: {}}, [importPort]);
         await vi.waitFor(() => expect(importControl.started).toBe(true));
         expect(importPort.postMessage).toHaveBeenCalledWith({type: 'progress', progress: {nextStep: false, index: 1, count: 2}});
 
-        for (const [action, params] of [
+        /** @type {[string, Record<string, unknown>][]} */
+        const importTimeActions = [
             ['databasePrepareOffscreen', {}],
             ['clearDatabaseCachesOffscreen', {}],
             ['databasePurgeOffscreen', {}],
@@ -227,7 +228,8 @@ describe('Offscreen dictionary worker import response port handling', () => {
             ['databaseSetSuspendedOffscreen', {suspended: false}],
             ['findTermsBulkOffscreen', {termList: [], dictionaryNames: [], matchType: 'exact'}],
             ['unknownWorkerAction', {}],
-        ]) {
+        ];
+        for (const [action, params] of importTimeActions) {
             const rejected = client.invoke(action, params);
             await expect(rejected).rejects.toThrow(`Cannot execute ${action}: dictionary import is in progress`);
             expect(worker.terminate).not.toHaveBeenCalled();
