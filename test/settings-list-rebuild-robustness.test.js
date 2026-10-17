@@ -329,18 +329,22 @@ describe('Settings list rebuild robustness', () => {
         Reflect.set(controller, 'instantiateTemplateFragment', instantiateTemplateFragment);
         Reflect.set(controller, 'isDictionaryInTaskQueue', vi.fn(() => false));
 
-        const createDictionaryEntry = /** @type {(this: DictionaryController, index: number, dictionaryInfo: any, updateDownloadUrl: string|null, dictionaryDatabaseCounts: any) => void} */ (
+        const createDictionaryEntry = /** @type {(this: DictionaryController, index: number, profileId: string, settings: import('settings').DictionaryOptions, dictionaryInfo: any, updateDownloadUrl: string|null, dictionaryDatabaseCounts: any) => void} */ (
             Reflect.get(DictionaryController.prototype, '_createDictionaryEntry')
         );
 
-        createDictionaryEntry.call(controller, 0, {
+        const dictionarySettings = /** @type {import('settings').DictionaryOptions[]} */ ([
+            {name: 'Dict 1', alias: 'one', enabled: true, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: false},
+            {name: 'Dict 2', alias: 'two', enabled: true, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: false},
+        ]);
+        createDictionaryEntry.call(controller, 0, 'profile-a', dictionarySettings[0], {
             title: 'Dict 1',
             revision: '1',
             version: 3,
             importSuccess: true,
             storageHealth: 'reimportRequired',
         }, null, null);
-        createDictionaryEntry.call(controller, 1, {title: 'Dict 2', revision: '1', version: 3, importSuccess: true}, null, null);
+        createDictionaryEntry.call(controller, 1, 'profile-a', dictionarySettings[1], {title: 'Dict 2', revision: '1', version: 3, importSuccess: true}, null, null);
 
         expect(instantiateTemplateFragment).toHaveBeenCalledTimes(2);
         expect(window.document.querySelectorAll('#dictionary-list .dictionary-item')).toHaveLength(1);
@@ -378,12 +382,12 @@ describe('Settings list rebuild robustness', () => {
             {title: 'A', revision: '1', version: 3, importSuccess: true},
             {title: 'B', revision: '2', version: 3, importSuccess: true},
         ]);
-        const options = {dictionaries: [
-            {name: 'A', alias: 'alpha', enabled: true},
-            {name: 'B', alias: 'beta', enabled: true},
-        ]};
+        const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [
+            {name: 'A', alias: 'alpha', enabled: true, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: false},
+            {name: 'B', alias: 'beta', enabled: true, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: false},
+        ]}));
         const settingsController = {
-            getOptionsContext: () => ({index: 0}),
+            getOptionsContext: () => ({index: 0, profileId: 'profile-a'}),
             getOptions: vi.fn(async () => structuredClone(options)),
             async modifyProfileSettings() {
                 const item = options.dictionaries.splice(0, 1)[0];
@@ -402,8 +406,8 @@ describe('Settings list rebuild robustness', () => {
         Reflect.set(controller, 'isDictionaryInTaskQueue', vi.fn(() => false));
         Reflect.set(controller, 'instantiateTemplateFragment', () => /** @type {DocumentFragment} */ (template.content.cloneNode(true)));
 
-        controller._createDictionaryEntry(0, dictionaryInfo[0], 'https://example.test/a.zip', null);
-        controller._createDictionaryEntry(1, dictionaryInfo[1], 'https://example.test/b.zip', null);
+        controller._createDictionaryEntry(0, 'profile-a', options.dictionaries[0], dictionaryInfo[0], 'https://example.test/a.zip', null);
+        controller._createDictionaryEntry(1, 'profile-a', options.dictionaries[1], dictionaryInfo[1], 'https://example.test/b.zip', null);
         const oldEntries = [...Reflect.get(controller, '_dictionaryEntries')];
         const cleanup = oldEntries.map((entry) => vi.spyOn(entry, 'cleanup'));
 

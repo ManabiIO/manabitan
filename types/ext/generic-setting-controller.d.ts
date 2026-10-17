@@ -25,6 +25,14 @@ export type ElementMetadata = {
     scope: SettingsModifications.OptionsScopeType | undefined;
     transforms: TransformData[];
     transformRaw: string | undefined;
+    dictionaryRowOwnership?: DictionaryRowOwnership;
+};
+
+export type DictionaryRowOwnership = {
+    id: string;
+    profileId: string;
+    index: number;
+    expectedEntry: Record<string, unknown>;
 };
 
 export type TransformFunction = (

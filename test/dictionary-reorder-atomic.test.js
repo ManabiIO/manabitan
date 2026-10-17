@@ -56,7 +56,7 @@ function createHarness() {
     /** @type {ReturnType<typeof createDeferred>|null} */
     let modifyGate = null;
     const settingsController = {
-        getOptionsContext: () => ({index: profileIndex}),
+        getOptionsContext: () => ({index: profileIndex, profileId: `profile-${profileIndex}`}),
         async getOptions() {
             const optionsSnapshot = structuredClone(/** @type {{profiles: {options: import('settings').ProfileOptions}[]}} */ (Reflect.get(backend, '_options')).profiles[profileIndex].options);
             const gate = nextReadGate;
@@ -65,7 +65,7 @@ function createHarness() {
             return optionsSnapshot;
         },
         async modifyProfileSettings(/** @type {import('settings-modifications').Modification[]} */ targets) {
-            const optionsContext = {index: profileIndex};
+            const optionsContext = {index: profileIndex, profileId: `profile-${profileIndex}`};
             const gate = modifyGate;
             modifyGate = null;
             if (gate !== null) { await gate.promise; }
@@ -114,7 +114,7 @@ function enableProductionRender(/** @type {ReturnType<typeof createHarness>} */ 
     ]);
     Reflect.set(controller, '_dictionaryModalBody', {scrollTop: 0, scroll: vi.fn()});
     Reflect.set(controller, '_dictionaryEntries', []);
-    Reflect.set(controller, '_createDictionaryEntry', (index, info) => renders.push(`${index}:${info.title}`));
+    Reflect.set(controller, '_createDictionaryEntry', (index, _profileId, _settings, info) => renders.push(`${index}:${info.title}`));
     Reflect.set(controller, '_updateDictionariesEnabledWarnings', vi.fn());
     Reflect.set(controller, '_updateCurrentEntries', DictionaryController.prototype._updateCurrentEntries.bind(controller));
     // Keep the real options refresh method and render method; stub only entry-list loading.
@@ -336,7 +336,7 @@ test('reorder during a pending database refresh renders the committed order', as
     Reflect.set(controller, '_updateDictionariesEnabledWarnings', vi.fn());
     /** @type {string[]} */
     const renders = [];
-    Reflect.set(controller, '_createDictionaryEntry', (index, info) => renders.push(`${index}:${info.title}`));
+    Reflect.set(controller, '_createDictionaryEntry', (index, _profileId, _settings, info) => renders.push(`${index}:${info.title}`));
     Reflect.set(controller, '_updateCurrentEntries', DictionaryController.prototype._updateCurrentEntries.bind(controller));
     Reflect.set(controller, '_updateEntries', DictionaryController.prototype._updateEntries.bind(controller));
     vi.spyOn(DictionaryController, 'ensureDictionarySettings').mockResolvedValue(void 0);
