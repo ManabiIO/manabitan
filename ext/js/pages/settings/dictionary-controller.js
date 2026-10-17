@@ -1138,10 +1138,10 @@ export class DictionaryController {
      * @param {import('settings').ProfileOptions} options
      */
     _updateCurrentEntries(options) {
-        this._entriesUpdateToken = {};
         const dictionariesModalBodyScrollY = this._dictionaryModalBody.scrollTop;
         const dictionaries = this._dictionaries;
         if (dictionaries === null) { return; }
+        this._entriesUpdateToken = {};
 
         /** @type {Map<string, string | null>} */
         const dictionaryUpdateDownloadUrlMap = new Map();

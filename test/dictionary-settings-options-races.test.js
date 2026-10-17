@@ -5,6 +5,7 @@
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {deferPromise} from '../ext/js/core/utilities.js';
+import {DictionaryController} from '../ext/js/pages/settings/dictionary-controller.js';
 import {SecondarySearchDictionaryController} from '../ext/js/pages/settings/secondary-search-dictionary-controller.js';
 import {SortFrequencyDictionaryController} from '../ext/js/pages/settings/sort-frequency-dictionary-controller.js';
 
@@ -22,6 +23,66 @@ function optionsFixture() {
 }
 
 describe('dictionary settings option snapshot ownership', () => {
+    test('reorder during database refresh does not cancel the render while dictionaries are unavailable', async () => {
+        const deferred = /** @type {import('core').DeferredPromiseDetails<import('dictionary-importer').Summary[]>} */ (deferPromise());
+        const dictionary = /** @type {import('dictionary-importer').Summary} */ ({title: 'Dictionary'});
+        const controller = /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
+        const createEntry = vi.fn();
+        const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({...optionsFixture(), dictionaries: [{name: 'Dictionary'}]}));
+        Reflect.set(controller, '_settingsController', {
+            getDictionaryInfo: () => deferred.promise,
+            getOptions: async () => options,
+        });
+        Reflect.set(controller, '_dictionaries', null);
+        Reflect.set(controller, '_dictionaryEntries', []);
+        Reflect.set(controller, '_dictionaryModalBody', {scrollTop: 0, scroll: vi.fn()});
+        Reflect.set(controller, '_updateMainDictionarySelectOptions', vi.fn());
+        Reflect.set(controller, '_updateDictionaryEntryCount', vi.fn());
+        Reflect.set(controller, '_dictionaryInstallCountNode', null);
+        Reflect.set(controller, '_noDictionariesInstalledWarnings', []);
+        Reflect.set(controller, '_noDictionariesEnabledWarnings', []);
+        Reflect.set(controller, '_updateDictionariesEnabledWarnings', vi.fn());
+        Reflect.set(controller, '_createDictionaryEntry', createEntry);
+        const ensureSettings = vi.spyOn(DictionaryController, 'ensureDictionarySettings').mockResolvedValue();
+        const refresh = controller._onDatabaseUpdated();
+        await vi.waitFor(() => { expect(Reflect.get(controller, '_databaseStateToken')).not.toBeNull(); });
+
+        controller._updateCurrentEntries(options);
+        deferred.resolve([dictionary]);
+        await refresh;
+
+        expect(ensureSettings).toHaveBeenCalledOnce();
+        expect(createEntry).toHaveBeenCalledOnce();
+        expect(createEntry).toHaveBeenCalledWith(0, dictionary, null, null);
+    });
+
+    test('reorder with cached dictionaries still supersedes a pending options render', async () => {
+        const deferred = /** @type {import('core').DeferredPromiseDetails<import('settings').ProfileOptions>} */ (deferPromise());
+        const dictionary = /** @type {import('dictionary-importer').Summary} */ ({title: 'Dictionary'});
+        const controller = /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
+        const createEntry = vi.fn();
+        Reflect.set(controller, '_settingsController', {getOptions: () => deferred.promise});
+        Reflect.set(controller, '_dictionaries', [dictionary]);
+        Reflect.set(controller, '_dictionaryEntries', []);
+        Reflect.set(controller, '_updateMainDictionarySelectOptions', vi.fn());
+        Reflect.set(controller, '_updateDictionaryEntryCount', vi.fn());
+        Reflect.set(controller, '_dictionaryInstallCountNode', null);
+        Reflect.set(controller, '_noDictionariesInstalledWarnings', []);
+        Reflect.set(controller, '_noDictionariesEnabledWarnings', []);
+        Reflect.set(controller, '_updateDictionariesEnabledWarnings', vi.fn());
+        Reflect.set(controller, '_createDictionaryEntry', createEntry);
+        Reflect.set(controller, '_dictionaryModalBody', {scrollTop: 0, scroll: vi.fn()});
+
+        const pendingRefresh = controller._refreshEntriesAfterOptionsChanged();
+        await vi.waitFor(() => { expect(Reflect.get(controller, '_entriesUpdateToken')).not.toBeNull(); });
+        const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({...optionsFixture(), dictionaries: [{name: 'Dictionary'}]}));
+        controller._updateCurrentEntries(options);
+        deferred.resolve(optionsFixture());
+        await pendingRefresh;
+
+        expect(createEntry).toHaveBeenCalledOnce();
+    });
+
     test('secondary-search panel cannot render an older response after a new settings refresh', async () => {
         const earlier = /** @type {import('core').DeferredPromiseDetails<import('settings').ProfileOptions>} */ (deferPromise());
         const latest = /** @type {import('core').DeferredPromiseDetails<import('settings').ProfileOptions>} */ (deferPromise());
