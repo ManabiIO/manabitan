@@ -896,6 +896,13 @@ export class DictionaryController {
 
         // Options events during the write may have rendered an earlier snapshot.
         // Start a fresh committed read now so it includes those field changes.
+        if (this._dictionaries === null) {
+            /** @type {import('settings-controller').EventArgument<'dictionarySettingsReordered'>} */
+            const event = {source: this};
+            this._settingsController.trigger('dictionarySettingsReordered', event);
+            return;
+        }
+
         /** @type {import('core').TokenObject} */
         const renderToken = {};
         this._entriesUpdateToken = renderToken;

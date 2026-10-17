@@ -14,6 +14,13 @@ function createDeferred() {
     return {promise, resolve};
 }
 
+function createDeferredValue() {
+    /** @type {(value: {title: string}[]) => void} */
+    let resolve = () => {};
+    const promise = new Promise(/** @type {(resolve: (value: {title: string}[]) => void) => void} */ ((resolvePromise) => { resolve = resolvePromise; }));
+    return {promise, resolve};
+}
+
 function createHarness() {
     const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
     const options = {profiles: [
@@ -313,6 +320,37 @@ test('an options refresh pending during a write cannot replace the committed reo
     oldRefreshRead.resolve();
     await Promise.all(/** @type {Promise<void>[]} */ (Reflect.get(controller, '_testEntryUpdatePromises')));
     expect(renders).toEqual([]);
+});
+
+test('reorder during a pending database refresh renders the committed order', async () => {
+    const {backend, controller, settingsController} = createHarness();
+    const dictionaryInfoGate = createDeferredValue();
+    Reflect.set(settingsController, 'getDictionaryInfo', vi.fn(() => dictionaryInfoGate.promise));
+    Reflect.set(controller, '_dictionaries', null);
+    Reflect.set(controller, '_dictionaryModalBody', {scrollTop: 0, scroll: vi.fn()});
+    Reflect.set(controller, '_dictionaryEntries', []);
+    Reflect.set(controller, '_dictionaryInstallCountNode', null);
+    Reflect.set(controller, '_noDictionariesInstalledWarnings', []);
+    Reflect.set(controller, '_updateDictionaryEntryCount', vi.fn());
+    Reflect.set(controller, '_updateMainDictionarySelectOptions', vi.fn());
+    Reflect.set(controller, '_updateDictionariesEnabledWarnings', vi.fn());
+    /** @type {string[]} */
+    const renders = [];
+    Reflect.set(controller, '_createDictionaryEntry', (index, info) => renders.push(`${index}:${info.title}`));
+    Reflect.set(controller, '_updateCurrentEntries', DictionaryController.prototype._updateCurrentEntries.bind(controller));
+    Reflect.set(controller, '_updateEntries', DictionaryController.prototype._updateEntries.bind(controller));
+    vi.spyOn(DictionaryController, 'ensureDictionarySettings').mockResolvedValue(void 0);
+
+    const refresh = controller._onDatabaseUpdated();
+    await vi.waitFor(() => { expect(Reflect.get(settingsController, 'getDictionaryInfo')).toHaveBeenCalledOnce(); });
+    await controller.moveDictionaryOptions(0, 1);
+    expect(getDictionaries(backend).map(({name}) => name)).toEqual(['B', 'A', 'A']);
+
+    dictionaryInfoGate.resolve(/** @type {import('dictionary-importer').Summary[]} */ (/** @type {unknown} */ ([{title: 'A'}, {title: 'B'}])));
+    await refresh;
+
+    expect(renders).toEqual(['0:B', '1:A', '2:A']);
+    expect(Reflect.get(controller, '_dictionaries')).not.toBeNull();
 });
 
 test('a reorder render with a null dictionary cache does not invalidate the pending database refresh', () => {
