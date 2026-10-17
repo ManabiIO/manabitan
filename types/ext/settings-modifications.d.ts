@@ -54,6 +54,17 @@ export type ModificationMoveDictionary = {
     expectedEntries: Record<string, unknown>[];
 };
 
+export type ModificationSetDefaultProfile = {
+    action: 'setDefaultProfile';
+    profileId: string;
+};
+
+export type ModificationSwapProfiles = {
+    action: 'swapProfiles';
+    profileId1: string;
+    profileId2: string;
+};
+
 export type ModificationSplice = {
     action: 'splice';
     path: string;
@@ -79,6 +90,8 @@ export type Modification = (
     ModificationDelete |
     ModificationSwap |
     ModificationMoveDictionary |
+    ModificationSetDefaultProfile |
+    ModificationSwapProfiles |
     ModificationSplice |
     ModificationPush |
     ModificationRemoveDictionary
@@ -94,6 +107,10 @@ export type ScopedModificationSwap = ModificationSwap & OptionsScope;
 
 export type ScopedModificationMoveDictionary = ModificationMoveDictionary & OptionsScope;
 
+export type ScopedModificationSetDefaultProfile = ModificationSetDefaultProfile & OptionsScope;
+
+export type ScopedModificationSwapProfiles = ModificationSwapProfiles & OptionsScope;
+
 export type ScopedModificationSplice = ModificationSplice & OptionsScope;
 
 export type ScopedModificationPush = ModificationPush & OptionsScope;
@@ -105,6 +122,8 @@ export type ScopedModification = (
     ScopedModificationDelete |
     ScopedModificationSwap |
     ScopedModificationMoveDictionary |
+    ScopedModificationSetDefaultProfile |
+    ScopedModificationSwapProfiles |
     ScopedModificationSplice |
     ScopedModificationPush |
     ScopedModificationRemoveDictionary
