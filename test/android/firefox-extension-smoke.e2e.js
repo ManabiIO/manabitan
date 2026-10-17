@@ -89,6 +89,7 @@ function createReport() {
         firefoxPackage: '',
         sourceDir: '',
         firefoxApkUrl: '',
+        androidDiagnostics: null,
         phases: [],
     };
 }
@@ -150,6 +151,7 @@ function renderReportHtml(report) {
     <div><strong>Firefox APK URL:</strong> ${escapeHtml(report.firefoxApkUrl || 'not-used')}</div>
   </div>
   ${phasesHtml}
+  ${report.androidDiagnostics ? `<section class="phase"><h2>Android failure diagnostics</h2><pre>${escapeHtml(JSON.stringify(report.androidDiagnostics, null, 2))}</pre></section>` : ''}
 </body>
 </html>`;
 }
@@ -312,12 +314,53 @@ async function runWebExtSmoke({device, packageName, sourceDir, timeoutMs}) {
 }
 
 /**
+ * Captures bounded, read-only emulator state at the failed install deadline.
+ * @param {string} device
+ * @param {string} packageName
+ * @returns {Promise<Record<string, {capturedAtIso: string, output: string, error?: string}>>}
+ */
+async function captureFirefoxDiagnostics(device, packageName) {
+    const packagePattern = /^[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)+$/;
+    if (!device.startsWith('emulator-')) { throw new Error(`Refusing Android diagnostics on non-emulator device ${device}.`); }
+    if (!packagePattern.test(packageName)) { throw new Error(`Refusing Android diagnostics for invalid package name ${packageName}.`); }
+    /** @type {Record<string, {capturedAtIso: string, output: string, error?: string}>} */
+    const result = {};
+    const capture = async (name, args, filter = (value) => value) => {
+        const capturedAtIso = new Date().toISOString();
+        try {
+            const {stdout} = await execFileAsync('adb', ['-s', device, ...args], {cwd: root, env: process.env, timeout: 8_000, maxBuffer: 4 * 1024 * 1024});
+            result[name] = {capturedAtIso, output: filter(String(stdout || '')).slice(0, 40_000)};
+        } catch (error) {
+            result[name] = {capturedAtIso, output: '', error: errorMessage(error)};
+        }
+    };
+    const onlyLines = (pattern, limit, fromEnd = false) => (value) => {
+        const lines = value.split('\n').filter((line) => pattern.test(line));
+        return (fromEnd ? lines.slice(-limit) : lines.slice(0, limit)).join('\n');
+    };
+    await capture('package', ['shell', 'dumpsys', 'package', packageName], onlyLines(/versionName=|versionCode=|firstInstallTime=|lastUpdateTime=/i, 40));
+    await capture('activity', ['shell', 'dumpsys', 'activity', 'activities'], onlyLines(/mResumedActivity|topResumedActivity|org\.mozilla\.(?:firefox|fenix)/i, 80, true));
+    await capture('process', ['shell', 'ps', '-A'], onlyLines(new RegExp(packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), 60));
+    await capture('debugger-sockets', ['shell', 'cat', '/proc/net/unix'], onlyLines(/mozilla|debugger/i, 100));
+    await capture('remote-debugging-pref-root', ['shell', 'id', '-u']);
+    if (result['remote-debugging-pref-root'].output.trim() === '0') {
+        await capture('remote-debugging-pref', ['shell', 'cat', `/data/data/${packageName}/shared_prefs/fenix_preferences.xml`], onlyLines(/pref_key_remote_debugging|remote_debugging/i, 80));
+    } else {
+        const diagnostic = result['remote-debugging-pref-root'];
+        result['remote-debugging-pref'] = {capturedAtIso: new Date().toISOString(), output: '', error: `ADB shell uid was not root: ${diagnostic.output.trim() || diagnostic.error || 'unknown'}`};
+    }
+    await capture('logcat', ['logcat', '-d', '-t', '2000', '-v', 'threadtime'], onlyLines(/org\.mozilla\.(?:firefox|fenix)|GeckoView|FATAL EXCEPTION|AndroidRuntime|crash|fatal/i, 300, true));
+    return result;
+}
+
+/**
  * @returns {Promise<void>}
  */
 async function main() {
     const report = createReport();
     const reportPath = process.env.MANABITAN_FIREFOX_ANDROID_E2E_REPORT ?? path.join(root, 'builds', 'firefox-android-e2e-report.html');
     const reportJsonPath = reportPath.replace(/\.html$/i, '.json');
+    report.androidDiagnostics = null;
     /** @type {Error|undefined} */
     let runError;
     const firefoxPackage = String(process.env.MANABITAN_ANDROID_FIREFOX_PACKAGE || 'org.mozilla.firefox').trim();
@@ -374,7 +417,15 @@ async function main() {
             fail(`Invalid MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS: ${String(process.env.MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS || '')}`);
         }
         const webExtSmokeStart = safePerformance.now();
-        const webExtOutputTail = await runWebExtSmoke({device, packageName: firefoxPackage, sourceDir, timeoutMs});
+        const webExtOutputTail = await runWebExtInstallHandshake({
+            device,
+            packageName: firefoxPackage,
+            sourceDir,
+            timeoutMs,
+            cwd: root,
+            onOutput: (line) => console.log(`[firefox-android-e2e] web-ext: ${line}`),
+            onBeforeFailureCleanup: async () => { report.androidDiagnostics = await captureFirefoxDiagnostics(device, firefoxPackage); },
+        });
         const webExtSmokeEnd = safePerformance.now();
         addPhase(
             report,

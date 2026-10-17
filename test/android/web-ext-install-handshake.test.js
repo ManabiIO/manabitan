@@ -11,7 +11,7 @@ const baseOptions = {
 
 /**
  * @param {string} script
- * @param {{timeoutMs?: number, command?: string, commandArgs?: string[], onOutput?: (line: string) => void, cwd?: string}} [overrides]
+ * @param {{timeoutMs?: number, diagnosticTimeoutMs?: number, command?: string, commandArgs?: string[], onOutput?: (line: string) => void, onBeforeFailureCleanup?: () => Promise<void>, cwd?: string}} [overrides]
  * @returns {Promise<string[]>}
  */
 function runScript(script, overrides = {}) {
@@ -68,6 +68,69 @@ describe.skipIf(process.platform === 'win32')('Firefox Android web-ext install h
         expect(pidLine).toBeDefined();
         const childPid = Number(pidLine?.slice('child-pid='.length));
         await expectProcessToExit(childPid);
+    });
+
+    test('captures diagnostics before cleanup on timeout and preserves the timeout when diagnostics reject', async () => {
+        let diagnosticCalled = false;
+        await expect(runScript("console.log('Waiting for RemoteDebuggingServer'); setInterval(() => {}, 1000);", {
+            timeoutMs: 100,
+            onBeforeFailureCleanup: async () => {
+                diagnosticCalled = true;
+                throw new Error('diagnostic unavailable');
+            },
+        })).rejects.toThrow('Timed out after 100 ms waiting for Firefox Android remote debugger install acknowledgement');
+        expect(diagnosticCalled).toBe(true);
+    });
+
+    test('bounds a hung diagnostic and still cleans up the runner', async () => {
+        const startedAt = Date.now();
+        await expect(runScript("console.log('Waiting for RemoteDebuggingServer'); setInterval(() => {}, 1000);", {
+            timeoutMs: 100,
+            diagnosticTimeoutMs: 50,
+            onBeforeFailureCleanup: async () => await new Promise(() => {}),
+        })).rejects.toThrow('Timed out after 100 ms waiting for Firefox Android remote debugger install acknowledgement');
+        expect(Date.now() - startedAt).toBeLessThan(2_000);
+    });
+
+    test('captures error-line failures while the runner is still alive', async () => {
+        let runnerPid = 0;
+        let runnerWasAlive = false;
+        const script = "console.log('runner-pid='+process.pid); console.error('Error: socket unavailable'); setInterval(() => {}, 1000);";
+        await expect(runScript(script, {
+            onOutput: (line) => {
+                if (line.startsWith('runner-pid=')) { runnerPid = Number(line.slice('runner-pid='.length)); }
+            },
+            onBeforeFailureCleanup: async () => {
+                process.kill(runnerPid, 0);
+                runnerWasAlive = true;
+            },
+        })).rejects.toThrow('web-ext reported an error');
+        expect(runnerWasAlive).toBe(true);
+    });
+
+    test('captures early-exit failures while a Firefox child process is still alive', async () => {
+        let childPid = 0;
+        let childWasAlive = false;
+        const script = "const {spawn}=require('node:child_process'); const child=spawn(process.execPath,['-e',\"process.on('SIGTERM',()=>{}); setInterval(()=>{},1000)\"],{stdio:'ignore'}); console.log('child-pid='+child.pid); process.exit(0);";
+        await expect(runScript(script, {
+            onOutput: (line) => {
+                if (line.startsWith('child-pid=')) { childPid = Number(line.slice('child-pid='.length)); }
+            },
+            onBeforeFailureCleanup: async () => {
+                process.kill(childPid, 0);
+                childWasAlive = true;
+            },
+        })).rejects.toThrow('exited before Firefox Android confirmed extension installation');
+        expect(childWasAlive).toBe(true);
+        await expectProcessToExit(childPid);
+    });
+
+    test('does not run diagnostics after install acknowledgement', async () => {
+        let diagnosticCalled = false;
+        await runScript("console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);", {
+            onBeforeFailureCleanup: async () => { diagnosticCalled = true; },
+        });
+        expect(diagnosticCalled).toBe(false);
     });
 });
 
