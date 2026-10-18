@@ -403,11 +403,12 @@ class DictionaryEntry {
         reimportButton.hidden = storageHealth !== 'reimportRequired';
         reimportButton.onclick = null;
         if (storageHealth === 'reimportRequired') {
-            const downloadUrl = this._updateDownloadUrl ?? normalizeOptionalDownloadUrl(this._dictionaryInfo.downloadUrl);
-            reimportButton.textContent = downloadUrl === null ? 'Choose file...' : 'Download again';
+            const downloadUrl = normalizeOptionalDownloadUrl(this._updateDownloadUrl) ?? normalizeOptionalDownloadUrl(this._dictionaryInfo.downloadUrl);
+            const hasDownloadUrl = typeof downloadUrl === 'string';
+            reimportButton.textContent = hasDownloadUrl ? 'Download again' : 'Choose file...';
             reimportButton.onclick = () => {
                 modal.setVisible(false);
-                if (downloadUrl !== null) {
+                if (hasDownloadUrl) {
                     this._dictionaryController.updateDictionary(title, downloadUrl);
                 } else {
                     this._dictionaryController.reimportDictionaryFromFile(title);

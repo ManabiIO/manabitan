@@ -28,6 +28,7 @@ import {AnkiTemplatesController} from './anki-templates-controller.js';
 import {AudioController} from './audio-controller.js';
 import {BackupController} from './backup-controller.js';
 import {CollapsibleDictionaryController} from './collapsible-dictionary-controller.js';
+import {DataTransmissionConsentController} from './data-transmission-consent-controller.js';
 import {DictionaryController} from './dictionary-controller.js';
 import {DictionaryImportController} from './dictionary-import-controller.js';
 import {ExtensionKeyboardShortcutController} from './extension-keyboard-shortcuts-controller.js';
@@ -229,6 +230,13 @@ try {
             const startedAt = getNowMs();
             await audioController.prepare();
             recordPhase(startupPhases, 'audioController.prepare', startedAt);
+        })());
+
+        const dataTransmissionConsentController = new DataTransmissionConsentController(settingsController, modalController);
+        preparePromises.push((async () => {
+            const startedAt = getNowMs();
+            await dataTransmissionConsentController.prepare();
+            recordPhase(startupPhases, 'dataTransmissionConsentController.prepare', startedAt);
         })());
 
         const profileController = new ProfileController(settingsController, modalController);
