@@ -115,8 +115,22 @@ export class DataTransmissionConsentController {
                     if (result.error) { throw ExtensionError.deserialize(result.error); }
                 }
             }
+            try {
+                await this._settingsController.refresh();
+            } catch (error) {
+                // The decision is already persisted; a transient UI refresh failure
+                // must not leave the consent dialog open as if the save had failed.
+                log.error(error);
+            }
             this._consentModal?.setVisible(false);
         } catch (error) {
+            try {
+                // Settings writes can partially succeed; reconcile the UI with the
+                // persisted state while keeping the consent dialog available to retry.
+                await this._settingsController.refresh();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
             if (errorNode instanceof HTMLElement) {
                 errorNode.textContent = 'Could not save your choice. Please try again.';
                 errorNode.hidden = false;
