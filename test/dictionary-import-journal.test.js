@@ -8,7 +8,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
-import {DictionaryImportJournal} from '../ext/js/dictionary/dictionary-import-journal.js';
+import {createDictionaryImportSessionId, DictionaryImportJournal} from '../ext/js/dictionary/dictionary-import-journal.js';
 
 describe('DictionaryImportJournal', () => {
     /** @returns {import('dictionary-import-journal').DictionaryImportJournalRecord} */
@@ -25,6 +25,49 @@ describe('DictionaryImportJournal', () => {
             ],
         },
         createdAt: 1234,
+    });
+
+    test('uses randomUUID when the platform provides it', () => {
+        const randomUUID = vi.fn(() => 'secure-session-id');
+        vi.stubGlobal('crypto', {randomUUID});
+        try {
+            expect(createDictionaryImportSessionId()).toBe('secure-session-id');
+            expect(randomUUID).toHaveBeenCalledOnce();
+        } finally {
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test('uses cryptographic random bytes when randomUUID is unavailable', () => {
+        let nextByte = 0;
+        const getRandomValues = vi.fn((bytes) => {
+            for (let i = 0; i < bytes.length; ++i) {
+                bytes[i] = nextByte++ & 0xff;
+            }
+            return bytes;
+        });
+        vi.stubGlobal('crypto', {getRandomValues});
+        try {
+            const first = createDictionaryImportSessionId();
+            const second = createDictionaryImportSessionId();
+            expect(first).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+            expect(second).not.toBe(first);
+            expect(getRandomValues).toHaveBeenCalledTimes(2);
+        } finally {
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test.each([
+        ['crypto is unavailable', undefined],
+        ['cryptographic byte generation is unavailable', {}],
+    ])('fails closed when %s', (_name, cryptoValue) => {
+        vi.stubGlobal('crypto', cryptoValue);
+        try {
+            expect(createDictionaryImportSessionId).toThrow('require cryptographic randomness');
+        } finally {
+            vi.unstubAllGlobals();
+        }
     });
 
     test('accepts complete checkpoints including lookup sidecars', () => {
