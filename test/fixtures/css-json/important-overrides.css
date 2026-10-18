@@ -1,5 +1,6 @@
+/* stylelint-disable declaration-no-important -- parser fixture verifies priority preservation. */
 .parent, .child:is(.x, .y) {
-    color: orange !important;
+    color: #ffa500 !important;
     /* remove-property background-color */
 }
 

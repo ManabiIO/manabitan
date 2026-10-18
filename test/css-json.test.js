@@ -37,7 +37,7 @@ describe('css-json', () => {
         expect(generateRules(cssFilePath, overridesCssFilePath)).toStrictEqual([
             {
                 selectors: ['.parent', '.child:is(.x, .y)'],
-                styles: [['color', 'orange !important'], ['border-color', 'green !important']],
+                styles: [['border-color', '#008000 !important'], ['color', '#ffa500 !important']],
             },
         ]);
     });

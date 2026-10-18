@@ -1,9 +1,10 @@
+/* stylelint-disable declaration-no-important -- parser fixture verifies priority preservation. */
 .parent, .child:is(.x, .y) {
-    color: red !important;
-    background-color: blue;
-    border-color: green !important;
+    color: #ff0000 !important;
+    background-color: #0000ff;
+    border-color: #008000 !important;
 }
 
 .removed {
-    color: red;
+    color: #ff0000;
 }
