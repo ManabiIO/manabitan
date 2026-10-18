@@ -7,6 +7,7 @@ on:
       - 'ext/js/data/anki-template-util.js'
       - 'ext/js/pages/settings/anki-controller.js'
       - 'dev/anki-note-type-*'
+      - 'dev/requirements-anki-note-type-compatibility.txt'
       - 'dev/tests/*anki*'
       - 'test/anki-note-type-field-util.test.js'
       - 'test/data/anki-note-types/**'
