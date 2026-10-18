@@ -11,6 +11,7 @@
         {"path": ".claude/settings.local.json", "ignore": true},
         {"path": ".github/actionlint-matcher.json", "ignore": true},
         {"path": "dev/jsconfig.json", "ignore": true},
+        {"path": "web/tsconfig.json", "ignore": true},
         {"path": "ext/manifest.json", "ignore": true},
         {"path": "test/data/anki-note-types/contracts.json", "ignore": true},
         {"path": "test/data/anki-note-types/upstream-snapshot.json", "ignore": true},
@@ -33,7 +34,15 @@
         {"path": "test/data/vitest.json.config.json", "ignore": true},
         {"path": "benches/jsconfig.json", "ignore": true},
         {"path": "dev/data/chrome-manifest-schema.json", "ignore": true},
+        {"path": "dev/perf/native-lookup-qualification-20260918.json", "ignore": true},
+        {"path": "dev/perf/mdict-checksum-overhead-abba-20260920.json", "ignore": true},
+        {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
 
+        {
+            "path": "test/perf/dictionaries.lock.json",
+            "typeFile": "types/test/performance-dictionary-lock.d.ts",
+            "type": "PerformanceDictionaryLock"
+        },
         {
             "path": "dev/data/manifest-variants.json",
             "typeFile": "types/dev/manifest.d.ts",

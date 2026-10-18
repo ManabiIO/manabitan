@@ -142,6 +142,7 @@ export type ApiSurface = {
         params: {
             id: string;
             changeFocus: boolean;
+            publication?: import('./popup').PublicationToken;
         };
         return: void;
     };
@@ -179,7 +180,12 @@ export type ApiSurface = {
             id: string;
             details: PopupContentDetails;
             displayDetails: DisplayContentDetails | null;
+            publication?: import('./popup').PublicationToken;
         };
+        return: void;
+    };
+    popupFactoryCancelPublication: {
+        params: {id: string, publication: import('./popup').PublicationToken};
         return: void;
     };
     popupFactorySetCustomCss: {

@@ -46,22 +46,22 @@ describe('action popup live refresh handling', () => {
         const toggle = /** @type {HTMLInputElement} */ (document.querySelector('.enable-search'));
 
         controller._setupOptions(/** @type {import('settings').Profile} */ (/** @type {unknown} */ ({
-            id: 'profile-1',
-            name: 'Default',
+            id: 'test-profile',
+            name: 'Test profile',
             conditionGroups: [],
-            options: {
+            options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
                 general: {enable: true, popupTheme: 'light', popupThemePreset: 'default'},
                 dictionaries: [],
-            },
+            })),
         })));
         controller._setupOptions(/** @type {import('settings').Profile} */ (/** @type {unknown} */ ({
-            id: 'profile-1',
-            name: 'Default',
+            id: 'test-profile',
+            name: 'Test profile',
             conditionGroups: [],
-            options: {
+            options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
                 general: {enable: true, popupTheme: 'light', popupThemePreset: 'default'},
                 dictionaries: [],
-            },
+            })),
         })));
 
         toggle.dispatchEvent(new window.Event('change'));
@@ -91,6 +91,29 @@ describe('action popup live refresh handling', () => {
         }, 0);
     });
 
+    test('enabled dictionaries requiring reimport are not counted as lookup-ready', async () => {
+        const controller = new DisplayController(/** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ ({
+            api: {
+                getDictionaryInfo: vi.fn().mockResolvedValue([{
+                    title: 'JMdict',
+                    storageHealth: 'reimportRequired',
+                }]),
+            },
+        })));
+        Reflect.set(controller, '_optionsSetupGeneration', 1);
+        const {document} = window;
+        document.body.innerHTML = '<p class="tooltip">Hover over text to scan</p>';
+
+        await controller._updateDictionariesEnabledWarnings(
+            /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+                dictionaries: [{name: 'JMdict', enabled: true}],
+            })),
+            1,
+        );
+
+        expect(document.querySelector('.tooltip')?.textContent).toBe('Dictionary re-import required');
+    });
+
     test('stale dictionary warning refresh does not overwrite newer profile state', async () => {
         const dictionariesDeferred = Promise.withResolvers();
         const controller = new DisplayController(/** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ ({
@@ -104,22 +127,22 @@ describe('action popup live refresh handling', () => {
         document.body.innerHTML = '<p class="tooltip">Hover over text to scan</p>';
 
         controller._setupOptions(/** @type {import('settings').Profile} */ (/** @type {unknown} */ ({
-            id: 'profile-1',
-            name: 'Default',
+            id: 'test-profile',
+            name: 'Test profile',
             conditionGroups: [],
-            options: {
+            options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
                 general: {enable: true, popupTheme: 'light', popupThemePreset: 'default'},
-                dictionaries: [{name: 'JMdict', enabled: false}],
-            },
+                dictionaries: /** @type {import('settings').DictionaryOptions[]} */ (/** @type {unknown} */ ([{name: 'JMdict', enabled: false}])),
+            })),
         })));
         controller._setupOptions(/** @type {import('settings').Profile} */ (/** @type {unknown} */ ({
-            id: 'profile-1',
-            name: 'Default',
+            id: 'test-profile',
+            name: 'Test profile',
             conditionGroups: [],
-            options: {
+            options: /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
                 general: {enable: true, popupTheme: 'light', popupThemePreset: 'default'},
-                dictionaries: [{name: 'JMdict', enabled: true}],
-            },
+                dictionaries: /** @type {import('settings').DictionaryOptions[]} */ (/** @type {unknown} */ ([{name: 'JMdict', enabled: true}])),
+            })),
         })));
         dictionariesDeferred.resolve([{title: 'JMdict'}]);
         await dictionariesDeferred.promise;
@@ -138,7 +161,7 @@ describe('action popup live refresh handling', () => {
         vi.spyOn(controller, '_refreshOptionsState').mockRejectedValue(error);
         const logSpy = vi.spyOn(log, 'error').mockImplementation(() => {});
 
-        controller._onOptionsUpdated({});
+        controller._onOptionsUpdated();
         await new Promise((resolve) => { setTimeout(resolve, 0); });
 
         expect(logSpy).toHaveBeenCalledWith(error);
@@ -190,10 +213,10 @@ describe('action popup live refresh handling', () => {
     });
 
     test('stale options refresh does not overwrite newer action popup state', async () => {
-        /** @type {(value?: unknown) => void} */
-        let resolveFirst = (_value) => { expect.fail('resolveFirst was not initialized'); };
-        /** @type {(value?: unknown) => void} */
-        let resolveSecond = (_value) => { expect.fail('resolveSecond was not initialized'); };
+        /** @type {(value: unknown) => void} */
+        let resolveFirst = () => {};
+        /** @type {(value: unknown) => void} */
+        let resolveSecond = () => {};
         const optionsGetFull = vi
             .fn()
             .mockImplementationOnce(() => new Promise((resolve) => {

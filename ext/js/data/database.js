@@ -92,15 +92,16 @@ export class Database {
      * Returns a new transaction with the given mode ("readonly" or "readwrite") and scope which can be a single object store name or an array of names.
      * @param {string[]} storeNames
      * @param {IDBTransactionMode} mode
+     * @param {IDBTransactionDurability} [durability]
      * @returns {IDBTransaction}
      * @throws {Error}
      */
-    transaction(storeNames, mode) {
+    transaction(storeNames, mode, durability = 'default') {
         if (this._db === null) {
             throw new Error(this._isOpening ? 'Database not ready' : 'Database not open');
         }
         try {
-            return this._db.transaction(storeNames, mode);
+            return this._db.transaction(storeNames, mode, {durability});
         } catch (e) {
             throw new Error(toError(e).message + '\nDatabase transaction error, you may need to Delete All dictionaries to reset the database or manually delete the Indexed DB database.');
         }
@@ -541,7 +542,7 @@ export class Database {
      *   - If the value is greater than or equal to `maxActiveRequests-1`, every time a single request completes, a new single request will be started.
      * @param {?(completedCount: number, totalCount: number) => void} onProgress An optional progress callback function.
      * @param {(error: ?Error) => void} onComplete A function which is called after all operations have finished.
-     *   If an error occured, the `error` parameter will be non-`null`. Otherwise, it will be `null`.
+     *   If an error occurred, the `error` parameter will be non-`null`. Otherwise, it will be `null`.
      * @throws {Error} An error is thrown if the input parameters are invalid.
      */
     _bulkDeleteInternal(objectStore, keys, maxActiveRequests, maxActiveRequestsForContinue, onProgress, onComplete) {
@@ -609,7 +610,7 @@ export class Database {
      * @returns {IDBTransaction}
      */
     _readWriteTransaction(storeNames, resolve, reject) {
-        const transaction = this.transaction(storeNames, 'readwrite');
+        const transaction = this.transaction(storeNames, 'readwrite', 'relaxed');
         transaction.onerror = (e) => reject(/** @type {IDBTransaction} */ (e.target).error);
         transaction.onabort = () => reject(new Error('Transaction aborted'));
         transaction.oncomplete = () => resolve();

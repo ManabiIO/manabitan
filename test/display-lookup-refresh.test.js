@@ -22,6 +22,27 @@ import {createDomTest} from './fixtures/dom-test.js';
 const test = createDomTest();
 
 describe('Display lookup refresh', () => {
+    test.for(['clear', 'unloaded'])('searchLast does not navigate a %s display', (type, {window}) => {
+        const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
+        const setContent = vi.fn();
+        Object.assign(display, {
+            _contentType: type,
+            _query: '',
+            _fullQuery: '',
+            _queryOffset: 0,
+            _primaryReading: '',
+            _lookup: true,
+            _wildcardsEnabled: false,
+            _queryParserVisibleOverride: null,
+            _optionsContext: {depth: 0, url: window.location.href},
+            _history: {state: null},
+            getContentOrigin: () => ({tabId: 1, frameId: 2}),
+            setContent,
+        });
+        display.searchLast(false);
+        expect(setContent).not.toHaveBeenCalled();
+    });
+
     test('term lookup uses freshly loaded enabled dictionaries when options were initially null', async ({window}) => {
         window.document.body.innerHTML = `
             <div id="no-results" hidden></div>
@@ -30,25 +51,24 @@ describe('Display lookup refresh', () => {
 
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
         display._options = null;
-        display._history = /** @type {Display['_history']} */ (/** @type {unknown} */ ({state: {}, content: {}}));
-        /** @type {import('core').TokenObject} */
-        const token = {};
-        display._setContentToken = token;
+        display._history = /** @type {import('../ext/js/display/display-history.js').DisplayHistory} */ (/** @type {unknown} */ ({state: {}, content: {}}));
+        const contentToken = /** @type {import('core').TokenObject} */ (/** @type {unknown} */ ('token'));
+        display._setContentToken = contentToken;
         display._container = window.document.createElement('div');
         display._dictionaryEntryNodes = [];
-        display._windowScroll = /** @type {Display['_windowScroll']} */ (/** @type {unknown} */ ({stop() {}, to() {}}));
-        display._contentManager = /** @type {Display['_contentManager']} */ (/** @type {unknown} */ ({async executeMediaRequests() {}}));
-        display._elementOverflowController = /** @type {Display['_elementOverflowController']} */ (/** @type {unknown} */ ({addElements() {}}));
-        display._displayGenerator = /** @type {Display['_displayGenerator']} */ (/** @type {unknown} */ ({}));
+        display._windowScroll = /** @type {import('../ext/js/dom/scroll-element.js').ScrollElement} */ (/** @type {unknown} */ ({stop() {}, to() {}}));
+        display._contentManager = /** @type {import('../ext/js/display/display-content-manager.js').DisplayContentManager} */ (/** @type {unknown} */ ({executeMediaRequests: async () => {}}));
+        display._elementOverflowController = /** @type {import('../ext/js/display/element-overflow-controller.js').ElementOverflowController} */ (/** @type {unknown} */ ({addElements() {}}));
+        display._displayGenerator = /** @type {import('../ext/js/display/display-generator.js').DisplayGenerator} */ (/** @type {unknown} */ ({}));
         display._dictionaryInfo = [];
         display._setQuery = vi.fn();
         display._setOptionsContextIfDifferent = vi.fn().mockResolvedValue(void 0);
         display.updateOptions = vi.fn().mockImplementation(async () => {
             display._options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [{enabled: true}]}));
         });
-        display._findDictionaryEntries = vi.fn().mockResolvedValue([]);
+        display._findDictionaryEntries = vi.fn().mockResolvedValue({dictionaryEntries: []});
         display._replaceHistoryStateNoNavigate = vi.fn();
-        display.getOptionsContext = vi.fn(() => ({depth: 0, url: window.location.href}));
+        display.getOptionsContext = /** @type {typeof display.getOptionsContext} */ (/** @type {unknown} */ (vi.fn(() => ({depth: 0}))));
         display.getContentOrigin = vi.fn(() => ({tabId: null, frameId: null}));
         display._updateNavigationAuto = vi.fn();
         display._setNoContentVisible = vi.fn();
@@ -60,7 +80,7 @@ describe('Display lookup refresh', () => {
         display._focusEntry = vi.fn();
 
         const urlSearchParams = new URLSearchParams({query: '名前'});
-        await display._setContentTermsOrKanji('terms', urlSearchParams, token);
+        await display._setContentTermsOrKanji('terms', urlSearchParams, contentToken);
 
         expect(display.updateOptions).toHaveBeenCalledOnce();
         expect(display._findDictionaryEntries).toHaveBeenCalledOnce();
@@ -78,15 +98,16 @@ describe('Display lookup refresh', () => {
         display._lookup = false;
         display._wildcardsEnabled = false;
         display._optionsContext = {depth: 0, url: window.location.href};
-        display._history = /** @type {Display['_history']} */ (/** @type {unknown} */ ({state: null}));
+        display._history = /** @type {import('../ext/js/display/display-history.js').DisplayHistory} */ (/** @type {unknown} */ ({state: null}));
         display.getContentOrigin = vi.fn(() => ({tabId: 1, frameId: 1}));
-        display.setContent = vi.fn(async (/** @type {import('display').ContentDetails} */ _details) => {});
+        const setContent = vi.fn();
+        display.setContent = /** @type {typeof display.setContent} */ (/** @type {unknown} */ (setContent));
 
         display.searchLast(false);
 
         expect(display.setContent).toHaveBeenCalledOnce();
-        expect(vi.mocked(display.setContent).mock.calls[0][0].params.lookup).toBe('false');
-        expect(vi.mocked(display.setContent).mock.calls[0][0].params.wildcards).toBe('off');
+        expect(setContent.mock.calls[0][0].params.lookup).toBe('false');
+        expect(setContent.mock.calls[0][0].params.wildcards).toBe('off');
     });
 
     test('searchLast preserves primary reading across refreshes', async ({window}) => {
@@ -99,13 +120,14 @@ describe('Display lookup refresh', () => {
         display._lookup = true;
         display._wildcardsEnabled = false;
         display._optionsContext = {depth: 0, url: window.location.href};
-        display._history = /** @type {Display['_history']} */ (/** @type {unknown} */ ({state: null}));
+        display._history = /** @type {import('../ext/js/display/display-history.js').DisplayHistory} */ (/** @type {unknown} */ ({state: null}));
         display.getContentOrigin = vi.fn(() => ({tabId: 1, frameId: 1}));
-        display.setContent = vi.fn(async (/** @type {import('display').ContentDetails} */ _details) => {});
+        const setContent = vi.fn();
+        display.setContent = /** @type {typeof display.setContent} */ (/** @type {unknown} */ (setContent));
 
         display.searchLast(false);
 
         expect(display.setContent).toHaveBeenCalledOnce();
-        expect(vi.mocked(display.setContent).mock.calls[0][0].params.primary_reading).toBe('じちょう');
+        expect(setContent.mock.calls[0][0].params.primary_reading).toBe('じちょう');
     });
 });

@@ -32,6 +32,8 @@ export class HotkeyHandler extends EventDispatcher {
         super();
         /** @type {Map<string, (argument: unknown) => (boolean|void)>} */
         this._actions = new Map();
+        /** @type {WeakMap<(argument: unknown) => boolean|void, {active: boolean, previous: ((argument: unknown) => boolean|void)|undefined}>} */
+        this._scopedActions = new WeakMap();
         /** @type {Map<(string | null), import('hotkey-handler').HotkeyHandlers>} */
         this._hotkeys = new Map();
         /** @type {Map<import('settings').InputsHotkeyScope, import('settings').InputsHotkeyOptions[]>} */
@@ -64,6 +66,44 @@ export class HotkeyHandler extends EventDispatcher {
         for (const [name, handler] of actions) {
             this._actions.set(name, handler);
         }
+    }
+
+    /**
+     * @param {[name: string, handler: (argument: unknown) => boolean|void][]} actions
+     * @returns {() => void}
+     */
+    registerActionsScoped(actions) {
+        const registrations = actions.map(([name, handler]) => {
+            const previous = this._actions.get(name);
+            const state = {active: true, previous};
+            /**
+             * @param {unknown} argument
+             * @returns {boolean|void}
+             */
+            const callback = (argument) => handler(argument);
+            this._scopedActions.set(callback, state);
+            this._actions.set(name, callback);
+            return {name, callback, state};
+        });
+        return () => {
+            for (const {name, callback, state} of registrations) {
+                if (!state.active) { continue; }
+                state.active = false;
+                if (this._actions.get(name) !== callback) { continue; }
+                let previous = state.previous;
+                // A newer scope must not restore an older scope already retired underneath it.
+                while (previous) {
+                    const previousState = this._scopedActions.get(previous);
+                    if (!previousState || previousState.active) { break; }
+                    previous = previousState.previous;
+                }
+                if (previous) {
+                    this._actions.set(name, previous);
+                } else {
+                    this._actions.delete(name);
+                }
+            }
+        };
     }
 
     /**

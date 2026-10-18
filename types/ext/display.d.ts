@@ -19,6 +19,7 @@ import type * as Dictionary from './dictionary';
 import type * as Extension from './extension';
 import type * as Settings from './settings';
 import type * as TextScannerTypes from './text-scanner';
+import type {DictionaryAvailability} from './translator';
 import type {EventNames, EventArgument as BaseEventArgument} from './core';
 import type {Message as FrameClientMessage} from './frame-client';
 import type {
@@ -113,15 +114,24 @@ export type HistoryStateSentence = {
  * The non-persistent content assigned to the navigation entry.
  */
 export type HistoryContent = {
+    /** One-shot automatic-refresh flag, consumed before rendering; not a navigation preference. */
+    preserveSearchInput?: boolean;
     /** Whether or not any CSS animations should occur. */
     animate?: boolean;
     /** An array of dictionary entries to display as content. */
     dictionaryEntries?: Dictionary.DictionaryEntry[];
+    /** Degraded dictionaries for this lookup, including incomplete misses. */
+    dictionaryAvailability?: DictionaryAvailability[];
     /** The identifying information for the frame the content originated from. */
     contentOrigin?: Extension.ContentOrigin;
 };
 
 export type SearchMode = null | 'popup' | 'action-popup';
+
+export type DictionarySearchResult = {
+    dictionaryEntries: Dictionary.DictionaryEntry[];
+    dictionaryAvailability?: DictionaryAvailability[];
+};
 
 export type GetSearchContextCallback = TextScannerTypes.GetSearchContextCallbackSync;
 
@@ -131,6 +141,7 @@ export type QueryParserOptions = {
     readingMode: Settings.ParsingReadingMode;
     useInternalParser: boolean;
     useMecabParser: boolean;
+    useAllFrequencyDictionaries: boolean;
     language: string;
     scanning: TextScannerTypes.Options;
 };
@@ -150,6 +161,7 @@ export type Events = {
     contentUpdateStart: {
         type: PageType;
         query: string;
+        preserveSearchInput?: boolean;
     };
     contentUpdateEntry: {
         dictionaryEntry: Dictionary.DictionaryEntry;
@@ -179,6 +191,13 @@ export type DirectApiSurface = {
     displaySetContent: {
         params: {
             details: ContentDetails;
+            publication?: import('./popup').PublicationToken;
+        };
+        return: void;
+    };
+    displayCancelPublication: {
+        params: {
+            publication: import('./popup').PublicationToken;
         };
         return: void;
     };

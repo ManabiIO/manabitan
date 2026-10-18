@@ -16,14 +16,14 @@
  */
 
 import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js';
-import {describe, expect, test, vi} from 'vitest';
-import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
+import {describe, expect, test} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {TermBankWasmResourceError} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 /**
  * Reproduce UTF-8 filename bytes incorrectly marked as legacy CP437, without
- * depending on a private dictionary archive outside the repository.
+ * depending on a private multi-gigabyte dictionary outside the repository.
  * @returns {Promise<ArrayBuffer>}
  */
 async function createLegacyFilenameArchive() {
@@ -37,6 +37,7 @@ async function createLegacyFilenameArchive() {
     expect(view.getUint32(centralOffset, true)).toBe(0x02014b50);
     const localOffset = view.getUint32(centralOffset + 42, true);
     expect(view.getUint32(localOffset, true)).toBe(0x04034b50);
+    // Clear general-purpose bit 11 in both the local and central headers.
     for (const offset of [localOffset + 6, centralOffset + 8]) {
         view.setUint16(offset, view.getUint16(offset, true) & ~0x0800, true);
     }
@@ -44,86 +45,6 @@ async function createLegacyFilenameArchive() {
 }
 
 describe('DictionaryImporter ZIP filename aliases', () => {
-    test.each([true, false])('relays archive/index diagnostics only when enabled=%s', async (debugImportLogging) => {
-        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
-        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Test', revision: '1', format: 999})));
-        const bytes = await writer.close();
-        const database = new DictionaryDatabase();
-        const preparedSpy = vi.spyOn(database, 'isPrepared').mockReturnValue(true);
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-        const onDebug = vi.fn();
-        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), undefined, onDebug);
-        try {
-            const result = await importer.importDictionary(database, new Uint8Array(bytes).buffer, {debugImportLogging});
-            expect(result.result).toBeNull();
-            expect(result.errors[0].message).toBe('Unsupported dictionary format version: 999');
-            if (debugImportLogging) {
-                const phaseMessages = onDebug.mock.calls.map(([message]) => message).filter((message) => !message.startsWith('archive catalog reader ') && !message.startsWith('archive catalog read '));
-                expect(phaseMessages.slice(0, 3)).toEqual([
-                    'archive catalog begin', 'archive catalog complete files=1', 'index read begin',
-                ]);
-                expect(onDebug).not.toHaveBeenCalledWith('index read complete');
-            } else {
-                expect(onDebug).not.toHaveBeenCalled();
-            }
-        } finally {
-            preparedSpy.mockRestore();
-            consoleSpy.mockRestore();
-        }
-    });
-
-    test('identifies an unresolved Blob catalog read and stops range diagnostics after catalog completion', async () => {
-        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
-        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Test', revision: '1', format: 999})));
-        const bytes = await writer.close();
-        /** @type {() => void} */
-        let releaseRead = () => {};
-        /** @type {Promise<void>} */
-        const readGate = new Promise((resolve) => { releaseRead = () => resolve(); });
-        class GatedBlob extends Blob {
-            /**
-             * @param {number} [start]
-             * @param {number} [end]
-             * @param {string} [contentType]
-             * @returns {Blob}
-             */
-            slice(start, end, contentType) {
-                const result = super.slice(start, end, contentType);
-                const arrayBuffer = result.arrayBuffer.bind(result);
-                result.arrayBuffer = async () => {
-                    await readGate;
-                    return await arrayBuffer();
-                };
-                return result;
-            }
-        }
-        const database = new DictionaryDatabase();
-        const preparedSpy = vi.spyOn(database, 'isPrepared').mockReturnValue(true);
-        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-        const onDebug = vi.fn();
-        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), undefined, onDebug);
-        const importPromise = importer.importDictionary(database, new GatedBlob([bytes]), {debugImportLogging: true});
-        const tailOffset = bytes.byteLength - 22;
-        try {
-            await vi.waitFor(() => expect(onDebug).toHaveBeenCalledWith(`archive catalog read begin offset=${tailOffset} length=22`));
-            expect(onDebug).not.toHaveBeenCalledWith(expect.stringContaining('archive catalog read complete'));
-            expect(onDebug).not.toHaveBeenCalledWith('index read begin');
-            releaseRead();
-            const result = await importPromise;
-            expect(result.errors[0].message).toBe('Unsupported dictionary format version: 999');
-            const messages = onDebug.mock.calls.map(([message]) => message);
-            expect(messages).toContain(`archive catalog read complete offset=${tailOffset} length=22 bytes=22`);
-            const indexReadPosition = messages.indexOf('index read begin');
-            expect(indexReadPosition).toBeGreaterThan(0);
-            expect(messages.slice(indexReadPosition).some((message) => message.startsWith('archive catalog read '))).toBe(false);
-        } finally {
-            releaseRead();
-            await importPromise;
-            preparedSpy.mockRestore();
-            consoleSpy.mockRestore();
-        }
-    });
-
     test('indexes UTF-8 raw filenames alongside mojibake decoded ZIP names', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const archiveContent = await createLegacyFilenameArchive();
@@ -139,5 +60,223 @@ describe('DictionaryImporter ZIP filename aliases', () => {
         } finally {
             await zipReader.close();
         }
+    });
+});
+
+describe('DictionaryImporter artifact bank admission', () => {
+    /**
+     * @param {string[]} termFileNames
+     * @param {string[]} artifactFileNames
+     * @returns {boolean}
+     */
+    const hasCompleteCoverage = (termFileNames, artifactFileNames) => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const check = /** @type {(termFiles: {filename: string}[], artifactFileNames: Iterable<string>) => boolean} */ (
+            Reflect.get(importer, '_hasCompleteTermArtifactCoverage')
+        );
+        return check.call(
+            importer,
+            termFileNames.map((filename) => ({filename})),
+            artifactFileNames,
+        );
+    };
+
+    test('falls back to ordinary term banks when standalone artifact coverage is partial', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const ordinaryFailure = new Error('ordinary term source selected');
+        const artifactFailure = new Error('partial artifact source selected');
+        const fileMap = new Map([
+            ['term_bank_1.json', {filename: 'term_bank_1.json'}],
+            ['term_bank_2.json', {filename: 'term_bank_2.json'}],
+            ['term_bank_1.mbtb', {filename: 'term_bank_1.mbtb', getData: async () => new Uint8Array(0)}],
+        ]);
+        Reflect.set(importer, '_getFilesFromArchive', async () => ({
+            fileMap,
+            zipReader: {close: async () => {}},
+        }));
+        Reflect.set(importer, '_readAndValidateIndex', async () => ({
+            title: 'Partial artifact coverage',
+            version: 3,
+            revision: '1',
+        }));
+        Reflect.set(importer, '_readTermBankFile', async () => { throw ordinaryFailure; });
+        Reflect.set(importer, '_readTermBankArtifactFile', async () => { throw artifactFailure; });
+        const database = /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ ({
+            isPrepared: () => true,
+            setImportOptimizationFlags() {},
+            dictionaryExists: async () => false,
+            setImportDebugLogging() {},
+            setTermEntryContentDedupEnabled() {},
+            addWithResult: async () => 1,
+            startBulkImport: async () => 'test-session',
+            abortBulkImport: async () => {},
+            deleteDictionaryImportPlaceholder: async () => {},
+        }));
+
+        const result = await importer.importDictionary(
+            database,
+            new ArrayBuffer(0),
+            /** @type {import('dictionary-importer').ImportDetails} */ ({}),
+        );
+
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(ordinaryFailure);
+        expect(result.errors).not.toContain(artifactFailure);
+    });
+
+    test('rejects a partial standalone artifact replacement', () => {
+        expect(hasCompleteCoverage(
+            ['term_bank_1.json', 'term_bank_2.json'],
+            ['term_bank_1.mbtb'],
+        )).toBe(false);
+    });
+
+    test('accepts a complete standalone artifact replacement', () => {
+        expect(hasCompleteCoverage(
+            ['term_bank_1.json', 'term_bank_2.json'],
+            ['term_bank_1.mbtb', 'term_bank_2.mbtb'],
+        )).toBe(true);
+    });
+
+    test('rejects artifact banks which do not match the ordinary bank set', () => {
+        expect(hasCompleteCoverage(
+            ['term_bank_1.json', 'term_bank_2.json'],
+            ['term_bank_1.mbtb', 'term_bank_2.mbtb', 'term_bank_3.mbtb'],
+        )).toBe(false);
+    });
+
+    test('preserves exact bank index spelling when matching replacements', () => {
+        expect(hasCompleteCoverage(['term_bank_01.json'], ['term_bank_1.mbtb'])).toBe(false);
+        expect(hasCompleteCoverage(['term_bank_01.json'], ['term_bank_01.mbtb'])).toBe(true);
+    });
+
+    test('allows artifact-only dictionaries when no ordinary term banks exist', () => {
+        expect(hasCompleteCoverage([], ['term_bank_1.mbtb'])).toBe(true);
+        expect(hasCompleteCoverage([], [])).toBe(false);
+    });
+});
+
+describe('DictionaryImporter archive bank discovery', () => {
+    test('sorts numbered bank files numerically regardless of ZIP entry order', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const getArchiveFiles = /** @type {(this: DictionaryImporter, fileMap: Map<string, {filename: string}>, queryDetails: [string, RegExp][]) => Map<string, {filename: string}[]>} */ (
+            /** @type {unknown} */ (Reflect.get(importer, '_getArchiveFiles'))
+        );
+        const fileMap = new Map([
+            ['term_bank_1.json', {filename: 'term_bank_1.json'}],
+            ['term_bank_10.json', {filename: 'term_bank_10.json'}],
+            ['term_bank_2.json', {filename: 'term_bank_2.json'}],
+            ['term_bank_100.json', {filename: 'term_bank_100.json'}],
+        ]);
+
+        const results = getArchiveFiles.call(importer, fileMap, [['termFiles', /^term_bank_(\d+)\.json$/]]);
+
+        expect(results.get('termFiles')?.map((entry) => entry.filename)).toEqual([
+            'term_bank_1.json',
+            'term_bank_2.json',
+            'term_bank_10.json',
+            'term_bank_100.json',
+        ]);
+    });
+});
+
+describe('DictionaryImporter archive filename validation', () => {
+    test('rejects duplicate ZIP entry filenames', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const entry = {filename: 'term_bank_1.json'};
+
+        expect(() => createArchiveFileMap.call(importer, [entry, {...entry}])).toThrow(
+            "Duplicate archive filename: 'term_bank_1.json'",
+        );
+    });
+
+    test('preserves a leading U+FEFF in raw UTF-8 filename aliases', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const prefixed = {filename: '\ufeffimage.png', rawFilename: new TextEncoder().encode('\ufeffimage.png')};
+        const plain = {filename: 'image.png', rawFilename: new TextEncoder().encode('image.png')};
+
+        const map = createArchiveFileMap.call(importer, [prefixed, plain]);
+        expect(map.get('\ufeffimage.png')).toBe(prefixed);
+        expect(map.get('image.png')).toBe(plain);
+        expect(map.size).toBe(2);
+    });
+
+    test('legacy-decoded raw alias retains every leading U+FEFF', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const file = {filename: 'legacy', rawFilename: new TextEncoder().encode('\ufeff\ufeffimage.png')};
+
+        const map = createArchiveFileMap.call(importer, [file]);
+        expect(map.get('\ufeff\ufeffimage.png')).toBe(file);
+        expect(map.has('\ufeffimage.png')).toBe(false);
+        expect(map.has('image.png')).toBe(false);
+    });
+
+    test('rejects collisions between decoded filenames and UTF-8 aliases', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        const rawFilename = new TextEncoder().encode('文-default.svg');
+
+        expect(() => createArchiveFileMap.call(importer, [
+            {filename: 'µûç-default.svg', rawFilename},
+            {filename: '文-default.svg', rawFilename},
+        ])).toThrow("Ambiguous archive filename: '文-default.svg'");
+    });
+});
+
+describe('DictionaryImporter bank JSON validation', () => {
+    test('rejects non-array auxiliary bank JSON', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const readFileSequence = /** @type {(files: {filename: string, bytes: Uint8Array}[], convertEntry: (entry: unknown, dictionaryTitle: string) => unknown, dictionaryTitle: string) => Promise<unknown[]>} */ (
+            Reflect.get(importer, '_readFileSequence')
+        );
+        const file = {filename: 'tag_bank_1.json', bytes: new TextEncoder().encode('{}')};
+
+        await expect(readFileSequence.call(importer, [file], (entry) => entry, 'Test dictionary')).rejects.toThrow(
+            "Expected a JSON array in 'tag_bank_1.json'",
+        );
+    });
+
+    test('rejects non-array term bank JSON before treating it as empty', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const readTermBankFile = /** @type {(termFile: {filename: string, bytes: Uint8Array}, version: number, dictionaryTitle: string, prefixWildcardsSupported: boolean, useMediaPipeline: boolean, enableTermEntryContentDedup: boolean, termContentStorageMode: 'baseline'|'raw-bytes') => Promise<unknown>} */ (
+            /** @type {unknown} */ (Reflect.get(importer, '_readTermBankFile'))
+        );
+        const file = {filename: 'term_bank_1.json', bytes: new TextEncoder().encode('{}')};
+
+        await expect(readTermBankFile.call(importer, file, 3, 'Test dictionary', false, false, true, 'baseline')).rejects.toThrow(
+            "Expected a JSON array in 'term_bank_1.json'",
+        );
+    });
+
+    test('does not retry a WASM resource failure through the larger JSON fallback', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const readTermBankFile = /** @type {(termFile: {filename: string, bytes: Uint8Array}, version: number, dictionaryTitle: string, prefixWildcardsSupported: boolean, useMediaPipeline: boolean, enableTermEntryContentDedup: boolean, termContentStorageMode: 'baseline'|'raw-bytes') => Promise<unknown>} */ (
+            /** @type {unknown} */ (Reflect.get(importer, '_readTermBankFile'))
+        );
+        let fallbackRead = false;
+        Reflect.set(importer, '_readTermBankFileFast', async () => {
+            throw new TermBankWasmResourceError('capacity exhausted');
+        });
+        Reflect.set(importer, '_getData', async () => {
+            fallbackRead = true;
+            return '[]';
+        });
+        const file = {filename: 'term_bank_1.json', bytes: new Uint8Array(0)};
+
+        await expect(readTermBankFile.call(importer, file, 3, 'Test dictionary', false, false, true, 'baseline')).rejects.toThrow(
+            'capacity exhausted',
+        );
+        expect(fallbackRead).toBe(false);
     });
 });

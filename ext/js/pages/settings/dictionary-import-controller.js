@@ -22,12 +22,104 @@ import {parseJson, readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {safePerformance} from '../../core/safe-performance.js';
 import {toError} from '../../core/to-error.js';
-import {promiseTimeout} from '../../core/utilities.js';
 import {getKebabCase} from '../../data/anki-template-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
+import {Mdx} from '../../comm/mdx.js';
+import {createMdictImportSources, compareMddImportPaths, resolveMddImportKey} from '../../dictionary/mdict-import-sources.js';
+import {appendMdictConversionWarnings} from './mdict-import-feedback.js';
+import {snapshotTermBankExperiments} from '../../dictionary/term-bank-experiments.js';
 import {DictionaryController} from './dictionary-controller.js';
 
 const OPFS_REQUIRED_USER_MESSAGE = 'Manabitan requires OPFS storage support.';
+const MDX_CONVERSION_PROGRESS_TOTAL = 1000;
+const MDX_UPLOAD_PROGRESS_RATIO = 0.45;
+
+/**
+ * @typedef {object} ZipImportSource
+ * @property {'zip'} type
+ * @property {File} file
+ */
+
+/**
+ * @typedef {object} MdxImportSource
+ * @property {'mdx'} type
+ * @property {File} mdxFile
+ * @property {File[]} mddFiles
+ */
+
+/**
+ * @typedef {ZipImportSource|MdxImportSource} DictionaryImportSource
+ */
+
+/**
+ * @typedef {{phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}} ImporterDebugPayload
+ */
+
+/**
+ * @typedef {{usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: ImporterDebugPayload|null}} ImportResultDebugPayload
+ */
+
+/**
+ * @typedef {import('dictionary-importer').ImportResult & {debug?: ImportResultDebugPayload}} ImportResultWithDebug
+ */
+
+/**
+ * Page-side work which must not be published until every worker import in the
+ * shared import session has returned.
+ * @typedef {object} DeferredDictionaryFinalization
+ * @property {string} dictionaryTitle
+ * @property {number} importStartTime
+ * @property {import('dictionary-importer').ImportDetails} importDetails
+ * @property {ImportResultWithDebug} importResult
+ * @property {number} workerImportStartTime
+ * @property {number} workerImportEndTime
+ * @property {boolean} useImportSession
+ * @property {boolean} finalizeImportSession
+ * @property {number} importRunGeneration
+ * @property {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
+ * @property {Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>} localPhaseTimings
+ * @property {boolean} workerResultAlreadyRecorded
+ */
+
+/**
+ * @param {string} fileName
+ * @returns {string}
+ */
+function getLowercaseFileName(fileName) {
+    return fileName.replaceAll('\\', '/').toLowerCase();
+}
+
+/**
+ * @param {string} fileName
+ * @returns {boolean}
+ */
+function isZipDictionaryFileName(fileName) {
+    return getLowercaseFileName(fileName).endsWith('.zip');
+}
+
+/**
+ * @param {string} fileName
+ * @returns {boolean}
+ */
+function isMdxDictionaryFileName(fileName) {
+    return getLowercaseFileName(fileName).endsWith('.mdx');
+}
+
+/**
+ * @param {string} url
+ * @returns {string|null}
+ */
+function getDictionaryFileNameFromUrl(url) {
+    try {
+        const parsed = new URL(url);
+        const pathName = decodeURIComponent(parsed.pathname);
+        const segments = pathName.split('/');
+        const fileName = segments.length > 0 ? segments[segments.length - 1] : '';
+        return fileName.length > 0 ? fileName : null;
+    } catch (_error) {
+        return null;
+    }
+}
 
 /**
  * @param {number} valueMs
@@ -98,11 +190,11 @@ function getHeapDeltaBytes(start, end) {
 
 /**
  * @param {unknown} value
- * @returns {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>}
+ * @returns {Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>}
  */
 function normalizeImporterPhaseTimings(value) {
     if (!Array.isArray(value)) { return []; }
-    /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
+    /** @type {Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>} */
     const results = [];
     for (const item of value) {
         if (!(typeof item === 'object' && item !== null && !Array.isArray(item))) {
@@ -111,6 +203,8 @@ function normalizeImporterPhaseTimings(value) {
         const phaseRaw = /** @type {unknown} */ (Reflect.get(item, 'phase'));
         const elapsedMsRaw = /** @type {unknown} */ (Reflect.get(item, 'elapsedMs'));
         const detailsRaw = /** @type {unknown} */ (Reflect.get(item, 'details'));
+        const startEpochMsRaw = /** @type {unknown} */ (Reflect.get(item, 'startEpochMs'));
+        const endEpochMsRaw = /** @type {unknown} */ (Reflect.get(item, 'endEpochMs'));
         if (typeof phaseRaw !== 'string' || typeof elapsedMsRaw !== 'number' || !Number.isFinite(elapsedMsRaw)) {
             continue;
         }
@@ -118,6 +212,8 @@ function normalizeImporterPhaseTimings(value) {
             results.push({
                 phase: phaseRaw,
                 elapsedMs: Math.max(0, elapsedMsRaw),
+                ...(typeof startEpochMsRaw === 'number' && Number.isFinite(startEpochMsRaw) ? {startEpochMs: startEpochMsRaw} : {}),
+                ...(typeof endEpochMsRaw === 'number' && Number.isFinite(endEpochMsRaw) ? {endEpochMs: endEpochMsRaw} : {}),
                 details: /** @type {Record<string, string|number|boolean|null>} */ (detailsRaw),
             });
             continue;
@@ -125,6 +221,8 @@ function normalizeImporterPhaseTimings(value) {
         results.push({
             phase: phaseRaw,
             elapsedMs: Math.max(0, elapsedMsRaw),
+            ...(typeof startEpochMsRaw === 'number' && Number.isFinite(startEpochMsRaw) ? {startEpochMs: startEpochMsRaw} : {}),
+            ...(typeof endEpochMsRaw === 'number' && Number.isFinite(endEpochMsRaw) ? {endEpochMs: endEpochMsRaw} : {}),
         });
     }
     return results;
@@ -197,22 +295,47 @@ function getOpfsUnavailableUserMessage(message) {
             }
             return `${base} Update to a browser/runtime which exposes worker OPFS SyncAccessHandle support and reload the extension. ${formatFallbackDiagnostics()}`;
         }
-        const details = /** @type {Record<string, unknown>} */ (diagnostics);
-        const runtimeContext = details.runtimeContext;
-        const runtimeDetails = typeof runtimeContext === 'object' && runtimeContext !== null ? /** @type {Record<string, unknown>} */ (runtimeContext) : {};
-        const mode = typeof details.mode === 'string' ? details.mode : 'unknown';
-        const hasStorageGetDirectory = typeof runtimeDetails.hasStorageGetDirectory === 'boolean' ? runtimeDetails.hasStorageGetDirectory : null;
-        const hasCreateSyncAccessHandle = typeof runtimeDetails.hasCreateSyncAccessHandle === 'boolean' ? runtimeDetails.hasCreateSyncAccessHandle : null;
-        const opfsSahpoolInstallResult = typeof details.opfsSahpoolInstallResult === 'string' ? details.opfsSahpoolInstallResult : null;
-        const opfsSahpoolInstallError = typeof details.opfsSahpoolInstallError === 'string' ? details.opfsSahpoolInstallError : null;
-        const opfsSahpoolVfs = typeof details.hasOpfsSahpoolVfs === 'boolean' ? details.hasOpfsSahpoolVfs : null;
-        const attempts = Array.isArray(details.attempts) ? /** @type {unknown[]} */ (details.attempts) : [];
-        const attemptErrors = attempts.map((attempt) => {
-            const record = typeof attempt === 'object' && attempt !== null ? /** @type {Record<string, unknown>} */ (attempt) : {};
-            return record.strategy === 'uri-opfs-sahpool' && typeof record.error === 'string' ? record.error : '';
-        });
-        const lastSahpoolOpenError = attemptErrors.reverse().find((value) => value.length > 0) ?? null;
-        const runtimeUserAgent = typeof runtimeDetails.userAgent === 'string' ? runtimeDetails.userAgent : '';
+        const diagnosticsRecord = /** @type {Record<string, unknown>} */ (diagnostics);
+        const runtimeContextRaw = Reflect.get(diagnosticsRecord, 'runtimeContext');
+        const runtimeContext = (typeof runtimeContextRaw === 'object' && runtimeContextRaw !== null && !Array.isArray(runtimeContextRaw)) ?
+            /** @type {Record<string, unknown>} */ (runtimeContextRaw) :
+            {};
+        const modeRaw = Reflect.get(diagnosticsRecord, 'mode');
+        const mode = typeof modeRaw === 'string' ? modeRaw : 'unknown';
+        const hasStorageGetDirectoryRaw = Reflect.get(runtimeContext, 'hasStorageGetDirectory');
+        const hasStorageGetDirectory = typeof hasStorageGetDirectoryRaw === 'boolean' ? hasStorageGetDirectoryRaw : null;
+        const hasCreateSyncAccessHandleRaw = Reflect.get(runtimeContext, 'hasCreateSyncAccessHandle');
+        const hasCreateSyncAccessHandle = typeof hasCreateSyncAccessHandleRaw === 'boolean' ? hasCreateSyncAccessHandleRaw : null;
+        const opfsSahpoolInstallResultRaw = Reflect.get(diagnosticsRecord, 'opfsSahpoolInstallResult');
+        const opfsSahpoolInstallResult = typeof opfsSahpoolInstallResultRaw === 'string' ? opfsSahpoolInstallResultRaw : null;
+        const opfsSahpoolInstallErrorRaw = Reflect.get(diagnosticsRecord, 'opfsSahpoolInstallError');
+        const opfsSahpoolInstallError = typeof opfsSahpoolInstallErrorRaw === 'string' ? opfsSahpoolInstallErrorRaw : null;
+        const opfsSahpoolVfsRaw = Reflect.get(diagnosticsRecord, 'hasOpfsSahpoolVfs');
+        const opfsSahpoolVfs = typeof opfsSahpoolVfsRaw === 'boolean' ? opfsSahpoolVfsRaw : null;
+        const attemptsRaw = Reflect.get(diagnosticsRecord, 'attempts');
+        /** @type {unknown[]} */
+        const attempts = Array.isArray(attemptsRaw) ? attemptsRaw : [];
+        /** @type {unknown} */
+        let lastSahpoolOpenAttempt = null;
+        for (let i = attempts.length - 1; i >= 0; --i) {
+            const attempt = attempts[i];
+            if (!(typeof attempt === 'object' && attempt !== null && !Array.isArray(attempt))) { continue; }
+            if (Reflect.get(attempt, 'strategy') !== 'uri-opfs-sahpool' || typeof Reflect.get(attempt, 'error') !== 'string') { continue; }
+            lastSahpoolOpenAttempt = attempt;
+            break;
+        }
+        const lastSahpoolOpenErrorRaw = /** @type {unknown} */ ((
+            typeof lastSahpoolOpenAttempt === 'object' &&
+            lastSahpoolOpenAttempt !== null &&
+            !Array.isArray(lastSahpoolOpenAttempt)
+        ) ?
+            Reflect.get(lastSahpoolOpenAttempt, 'error') :
+            null);
+        const lastSahpoolOpenError = typeof lastSahpoolOpenErrorRaw === 'string' && lastSahpoolOpenErrorRaw.length > 0 ?
+            lastSahpoolOpenErrorRaw :
+            null;
+        const runtimeUserAgentRaw = Reflect.get(runtimeContext, 'userAgent');
+        const runtimeUserAgent = typeof runtimeUserAgentRaw === 'string' ? runtimeUserAgentRaw : '';
         const isFirefoxRuntimeFromDiagnostics = /Firefox\//i.test(runtimeUserAgent) || isFirefoxRuntime;
         let reason = 'Update to a browser/runtime which exposes worker OPFS SyncAccessHandle support and reload the extension.';
         if (isFirefoxRuntimeFromDiagnostics) {
@@ -258,21 +381,6 @@ function getExtensionBuildStamp() {
     }
 }
 
-/**
- * @param {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} localPhaseTimings
- * @param {string} dictionaryTitle
- * @param {string} phase
- * @param {number} startTime
- * @param {number} endTime
- * @param {Record<string, string|number|boolean|null>} [details]
- * @returns {void}
- */
-function recordImportLocalPhase(localPhaseTimings, dictionaryTitle, phase, startTime, endTime, details = {}) {
-    const elapsedMs = Math.max(0, endTime - startTime);
-    localPhaseTimings.push({phase, elapsedMs, details});
-    log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
-}
-
 export class DictionaryImportController {
     /**
      * @param {import('./settings-controller.js').SettingsController} settingsController
@@ -288,6 +396,8 @@ export class DictionaryImportController {
         this._statusFooter = statusFooter;
         /** @type {boolean} */
         this._modifying = false;
+        /** @type {Mdx|null} */
+        this._activeMdx = null;
         /** @type {HTMLButtonElement} */
         this._purgeButton = querySelectorNotNull(document, '#dictionary-delete-all-button');
         /** @type {HTMLButtonElement} */
@@ -301,9 +411,17 @@ export class DictionaryImportController {
         /** @type {HTMLInputElement} */
         this._importButton = querySelectorNotNull(document, '#dictionary-import-button');
         /** @type {HTMLInputElement} */
+        this._importConfirmButton = querySelectorNotNull(document, '#dictionary-import-confirm-button');
+        /** @type {HTMLInputElement} */
         this._importURLButton = querySelectorNotNull(document, '#dictionary-import-url-button');
         /** @type {HTMLInputElement} */
         this._importURLText = querySelectorNotNull(document, '#dictionary-import-url-text');
+        /** @type {HTMLElement} */
+        this._importSourceList = querySelectorNotNull(document, '#dictionary-import-source-list');
+        /** @type {HTMLElement} */
+        this._importSourceEmpty = querySelectorNotNull(document, '#dictionary-import-source-empty');
+        /** @type {?import('./modal.js').Modal} */
+        this._importModal = null;
         /** @type {?import('./modal.js').Modal} */
         this._purgeConfirmModal = null;
         /** @type {?import('./modal.js').Modal} */
@@ -345,6 +463,8 @@ export class DictionaryImportController {
         this._recommendedDictionariesRenderPending = false;
         /** @type {boolean} */
         this._recommendedDictionariesPrimed = false;
+        /** @type {boolean} */
+        this._readerInstallJitendex = false;
         /** @type {{queueLength: number, activeImport: boolean, currentUrl: string|null, lastError: string|null}} */
         this._recommendedImportDebugState = {
             queueLength: 0,
@@ -354,6 +474,10 @@ export class DictionaryImportController {
         };
         /** @type {number} */
         this._activeImportRunGeneration = 0;
+        /** @type {string|undefined} */
+        this._activeImportOwnerId = void 0;
+        /** @type {DictionaryImportSource[]} */
+        this._pendingImportSources = [];
         /** @type {(event: MouseEvent) => void} */
         this._onDocumentClickCaptureBind = this._onDocumentClickCapture.bind(this);
         /** @type {(event: Event) => void} */
@@ -377,6 +501,7 @@ export class DictionaryImportController {
         this._purgeButton.addEventListener('click', this._onPurgeButtonClick.bind(this), false);
         this._purgeConfirmButton.addEventListener('click', this._onPurgeConfirmButtonClick.bind(this), false);
         this._importButton.addEventListener('click', this._onImportButtonClick.bind(this), false);
+        this._importConfirmButton.addEventListener('click', this._onImportConfirm.bind(this), false);
         this._importURLButton.addEventListener('click', this._onImportFromURL.bind(this), false);
         this._importFileInput.addEventListener('change', this._onImportFileChange.bind(this), false);
 
@@ -400,20 +525,26 @@ export class DictionaryImportController {
         });
     }
 
+    /** Use the normal recommended-dictionaries modal and import path. */
+    openReaderJitendexSetup() {
+        this._readerInstallJitendex = true;
+        this._recommendedDictionariesModal?.setVisible(true);
+    }
+
     // Private
 
     /**
-     * @param {File|ArrayBuffer} archiveContent
+     * @param {File} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}>}
+     * @returns {Promise<ImportResultWithDebug>}
      */
     async _tryImportDictionaryOffscreen(archiveContent, details, onProgress) {
-        if (!(archiveContent instanceof Blob) && !(archiveContent instanceof ArrayBuffer)) {
-            throw new Error('Dictionary import requires Blob or ArrayBuffer archive content');
+        if (!(archiveContent instanceof Blob)) {
+            throw new Error('Dictionary import requires Blob-backed archive content');
         }
-        return /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
-            await this._settingsController.application.api.importDictionaryOffscreen(archiveContent, details, onProgress)
+        return /** @type {ImportResultWithDebug} */ (
+            await this._settingsController.application.api.importDictionaryOffscreen(archiveContent, details, onProgress, `${Date.now()}:${crypto.randomUUID()}`, this._activeImportOwnerId)
         );
     }
 
@@ -421,16 +552,23 @@ export class DictionaryImportController {
      * @param {string} url
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {?import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {Promise<import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}>}
+     * @returns {Promise<ImportResultWithDebug>}
      */
     async _tryImportDictionaryUrlOffscreen(url, details, onProgress) {
-        return /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
-            await this._settingsController.application.api.importDictionaryUrlOffscreen(url, details, onProgress)
+        return /** @type {ImportResultWithDebug} */ (
+            await this._settingsController.application.api.importDictionaryUrlOffscreen(url, details, onProgress, `${Date.now()}:${crypto.randomUUID()}`, this._activeImportOwnerId)
         );
     }
 
     /** */
     _onBeforeUnload() {
+        const ownerId = this._activeImportOwnerId;
+        if (typeof ownerId === 'string') {
+            this._activeImportOwnerId = void 0;
+            void this._settingsController.application.api.setDictionaryImportMode(false, ownerId).catch(() => {});
+        }
+        this._activeMdx?.disconnect();
+        this._activeMdx = null;
         document.removeEventListener('click', this._onDocumentClickCaptureBind, true);
         globalThis.removeEventListener('manabitan:modal-visibility-changed', this._onModalVisibilityChangedEventBind, false);
         this._recommendedDictionariesModal?.off('visibilityChanged', this._onRecommendedDictionariesModalVisibilityChangedBind);
@@ -610,6 +748,7 @@ export class DictionaryImportController {
                             importProgressTracker,
                         ),
                         `Recommended dictionary import (${summarizeUrlForDiagnostics(url)})`,
+                        importProgressTracker,
                     );
                 } catch (error) {
                     const e2 = toError(error);
@@ -751,6 +890,10 @@ export class DictionaryImportController {
         }
 
         if (typeof resolvedLanguage !== 'string') {
+            if (this._readerInstallJitendex) {
+                this._readerInstallJitendex = false;
+                this._setRecommendedError('Select Japanese as the active language, then choose Jitendex.');
+            }
             diagnostics.push(`requestedLanguage="${language}" resolvedLanguage=none`);
             this._setRecommendedDiagnostics(diagnostics.join('\n'));
             for (const {element} of recommendedDictionaryCategories) {
@@ -825,6 +968,21 @@ export class DictionaryImportController {
         const buttons = document.querySelectorAll('.action-button[data-action=import-recommended-dictionary]');
         for (const button of buttons) {
             button.addEventListener('click', this._onRecommendedImportClick.bind(this), false);
+        }
+        this._installReaderJitendexIfRequested();
+    }
+
+    /** Reuse the same button and progress UI as a normal Yomitan-style install. */
+    _installReaderJitendexIfRequested() {
+        if (!this._readerInstallJitendex) { return; }
+        this._readerInstallJitendex = false;
+        const row = [...document.querySelectorAll('#recommended-term-dictionaries .settings-item')]
+            .find((item) => item.querySelector('.settings-item-label')?.textContent === 'Jitendex');
+        const button = row?.querySelector('.action-button[data-action=import-recommended-dictionary]');
+        if (button instanceof HTMLButtonElement && !button.disabled) {
+            button.click();
+        } else if (!(button instanceof HTMLButtonElement)) {
+            this._setRecommendedError('Select Japanese as the active language, then choose Jitendex.');
         }
     }
 
@@ -950,14 +1108,14 @@ export class DictionaryImportController {
      * @param {import('settings-controller').EventArgument<'importDictionaryFromUrl'>} details
      */
     _onEventImportDictionaryFromUrl({url, profilesDictionarySettings, onImportDone, importDetailsOverrides}) {
-        void this.importFilesFromURLs(url, profilesDictionarySettings, onImportDone, importDetailsOverrides ?? null);
+        this._observeImportTask(this.importFilesFromURLs(url, profilesDictionarySettings, onImportDone, importDetailsOverrides ?? null));
     }
 
     /**
      * @param {import('settings-controller').EventArgument<'importDictionaryFromFile'>} details
      */
     _onEventImportDictionaryFromFile({files, profilesDictionarySettings, onImportDone, importDetailsOverrides}) {
-        void this.importFiles(files, profilesDictionarySettings, onImportDone, importDetailsOverrides ?? null);
+        this._observeImportTask(this.importFiles(files, profilesDictionarySettings, onImportDone, importDetailsOverrides ?? null));
     }
 
     /**
@@ -1002,7 +1160,11 @@ export class DictionaryImportController {
         if (!e.dataTransfer) { return; }
         for (const item of e.dataTransfer.items) {
             // Directories and files with no extension both show as ''
-            if (item.type === '' || item.type === 'application/zip') {
+            if (
+                item.type === '' ||
+                item.type === 'application/zip' ||
+                item.type === 'application/octet-stream'
+            ) {
                 this._importFileDrop.classList.add('drag-over');
                 break;
             }
@@ -1034,7 +1196,16 @@ export class DictionaryImportController {
         /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(false);
         /** @type {File[]} */
         const fileArray = [];
-        for (const fileEntry of await this._getAllFileEntries(e.dataTransfer.items)) {
+        let fileEntries;
+        try {
+            fileEntries = await this._getAllFileEntries(e.dataTransfer.items);
+        } catch (error) {
+            const normalizedError = toError(error);
+            log.error(normalizedError);
+            this._showErrors([normalizedError]);
+            return;
+        }
+        for (const fileEntry of fileEntries) {
             if (!fileEntry) { continue; }
             try {
                 fileArray.push(await new Promise((resolve, reject) => { fileEntry.file(resolve, reject); }));
@@ -1043,7 +1214,7 @@ export class DictionaryImportController {
             }
         }
         if (fileArray.length === 0) { return; }
-        void this.importFiles(fileArray, null, null);
+        this._observeImportTask(this.importFiles(fileArray, null, null));
     }
 
     /**
@@ -1067,7 +1238,8 @@ export class DictionaryImportController {
             const entry = entries.shift();
             if (!entry) { continue; }
             if (entry.isFile) {
-                if (entry.name.substring(entry.name.lastIndexOf('.'), entry.name.length) === '.zip') {
+                const extension = entry.name.substring(entry.name.lastIndexOf('.'), entry.name.length).toLowerCase();
+                if (extension === '.zip' || extension === '.mdx' || extension === '.mdd') {
                     // @ts-expect-error - ts does not recognize `if (entry.isFile)` as verifying `entry` is type `FileSystemFileEntry` and instanceof does not work
                     fileEntries.push(entry);
                 }
@@ -1087,15 +1259,29 @@ export class DictionaryImportController {
     async _readAllDirectoryEntries(directoryReader) {
         const entries = [];
         /** @type {(FileSystemEntry)[]} */
-        let readEntries = await new Promise((resolve) => { directoryReader.readEntries(resolve); });
+        let readEntries = await this._readDirectoryEntries(directoryReader);
         while (readEntries.length > 0) {
             this._importFileDropItemCount += readEntries.length;
             this._validateDirectoryItemCount();
 
             entries.push(...readEntries);
-            readEntries = await new Promise((resolve) => { directoryReader.readEntries(resolve); });
+            readEntries = await this._readDirectoryEntries(directoryReader);
         }
         return entries;
+    }
+
+    /**
+     * @param {FileSystemDirectoryReader} directoryReader
+     * @returns {Promise<FileSystemEntry[]>}
+     */
+    _readDirectoryEntries(directoryReader) {
+        return new Promise((resolve, reject) => {
+            try {
+                directoryReader.readEntries(resolve, reject);
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 
     /**
@@ -1115,7 +1301,17 @@ export class DictionaryImportController {
      */
     _onImportButtonClick(e) {
         e.preventDefault();
+        this._renderPendingImportSources();
         /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(true);
+    }
+
+    /**
+     * @param {MouseEvent} e
+     */
+    _onImportConfirm(e) {
+        e.preventDefault();
+        if (this._pendingImportSources.length === 0) { return; }
+        this._importSelectedSources([...this._pendingImportSources]);
     }
 
     /**
@@ -1146,7 +1342,7 @@ export class DictionaryImportController {
         const files2 = [...files];
         node.value = '';
         if (files2.length === 0) { return; }
-        void this.importFiles(files2, null, null);
+        this._observeImportTask(this.importFiles(files2, null, null));
     }
 
     /**
@@ -1156,14 +1352,31 @@ export class DictionaryImportController {
         e.preventDefault();
         const text = this._importURLText.value.trim();
         if (!text) { return; }
-        await this.importFilesFromURLs(text, null, null);
+        const urls = this._normalizeImportUrls(text);
+        /** @type {DictionaryImportSource[]} */
+        const sources = [];
+        /** @type {Error[]} */
+        const errors = [];
+        const importProgressTracker = new ImportProgressTracker(this._getUrlImportSteps(), urls.length);
+        const onProgress = importProgressTracker.onProgress.bind(importProgressTracker);
+        for await (const source of this._generateFilesFromUrls(urls, onProgress, (error) => {
+            errors.push(error);
+        })) {
+            sources.push(source);
+        }
+        if (sources.length === 0) {
+            if (errors.length > 0) { this._showErrors(errors); }
+            return;
+        }
+        this._importURLText.value = '';
+        this._appendPendingImportSources(sources, errors);
     }
 
     /**
      * @param {string} text
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
-     * @param {Partial<import('dictionary-importer').ImportDetails>|null} [importDetailsOverrides]
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} importDetailsOverrides
      */
     async importFilesFromURLs(
         text,
@@ -1185,6 +1398,7 @@ export class DictionaryImportController {
                 importDetailsOverrides,
             ),
             `URL dictionary import (${String(urls.length)})`,
+            importProgressTracker,
         );
     }
 
@@ -1209,7 +1423,7 @@ export class DictionaryImportController {
      * @param {File[]} files
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
-     * @param {Partial<import('dictionary-importer').ImportDetails>|null} [importDetailsOverrides]
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} importDetailsOverrides
      */
     async importFiles(
         files,
@@ -1218,39 +1432,163 @@ export class DictionaryImportController {
         /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
     ) {
         if (files.length === 0) { return; }
-        const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), files.length);
+        const {sources, errors} = this._createImportSourcesFromFiles(files);
+        if (sources.length === 0) {
+            if (errors.length > 0) { this._showErrors(errors); }
+            return;
+        }
+        const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), sources.length);
         await this._runImportWithWatchdog(
             this._importDictionaries(
-                this._arrayToAsyncGenerator(files),
+                this._arrayToAsyncGenerator(sources),
                 profilesDictionarySettings,
                 onImportDone,
                 importProgressTracker,
                 importDetailsOverrides,
+                errors,
             ),
-            `File dictionary import (${String(files.length)})`,
+            `File dictionary import (${String(sources.length)})`,
+            importProgressTracker,
         );
+    }
+
+    /**
+     * @param {DictionaryImportSource[]} sources
+     * @param {Error[]} errors
+     */
+    _appendPendingImportSources(sources, errors = []) {
+        this._pendingImportSources.push(...sources);
+        this._renderPendingImportSources();
+        this._hideErrors();
+        if (errors.length > 0) {
+            this._showErrors(errors);
+        }
+    }
+
+    /**
+     * @param {DictionaryImportSource[]} sources
+     * @param {Error[]} initialErrors
+     */
+    _importSelectedSources(sources, initialErrors = []) {
+        if (sources.length === 0) { return; }
+        this._clearPendingImportSources();
+        /** @type {import('./modal.js').Modal} */ (this._importModal).setVisible(false);
+        const importProgressTracker = new ImportProgressTracker(this._getFileImportSteps(), sources.length);
+        void this._runImportWithWatchdog(
+            this._importDictionaries(
+                this._arrayToAsyncGenerator(sources),
+                null,
+                null,
+                importProgressTracker,
+                null,
+                initialErrors,
+            ),
+            `Selected dictionary import (${String(sources.length)})`,
+            importProgressTracker,
+        ).catch((error) => {
+            log.error(error);
+            this._showErrors([toError(error)]);
+        });
+    }
+
+    /** */
+    _clearPendingImportSources() {
+        this._pendingImportSources = [];
+        this._renderPendingImportSources();
+    }
+
+    /** */
+    _renderPendingImportSources() {
+        this._importSourceList.textContent = '';
+        const hasSources = this._pendingImportSources.length > 0;
+        this._importSourceEmpty.hidden = hasSources;
+        this._importConfirmButton.disabled = !hasSources;
+        if (!hasSources) { return; }
+
+        const fragment = document.createDocumentFragment();
+        for (const source of this._pendingImportSources) {
+            const node = /** @type {HTMLElement} */ (this._settingsController.instantiateTemplate('dictionary-import-source'));
+            const title = querySelectorNotNull(node, '.dictionary-import-source-title');
+            const description = querySelectorNotNull(node, '.dictionary-import-source-description');
+            title.textContent = this._getPendingImportSourceLabel(source);
+            description.textContent = this._getPendingImportSourceDescription(source);
+            fragment.appendChild(node);
+        }
+        this._importSourceList.appendChild(fragment);
+    }
+
+    /**
+     * @param {DictionaryImportSource} source
+     * @returns {string}
+     */
+    _getPendingImportSourceLabel(source) {
+        return source.type === 'zip' ? source.file.name : source.mdxFile.name;
+    }
+
+    /**
+     * @param {DictionaryImportSource} source
+     * @returns {string}
+     */
+    _getPendingImportSourceDescription(source) {
+        if (source.type === 'zip') { return 'ZIP archive'; }
+        const mddCount = source.mddFiles.length;
+        return mddCount > 0 ? `MDX dictionary with ${mddCount} matching MDD file${mddCount === 1 ? '' : 's'}` : 'MDX dictionary';
+    }
+
+    /**
+     * Owns import promises launched from synchronous UI/event callbacks.
+     * Watchdog recovery deliberately rejects after restoring UI state; observing
+     * that rejection here prevents a second global unhandled-rejection signal.
+     * @param {Promise<void>} promise
+     */
+    _observeImportTask(promise) {
+        void promise.catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
      * @param {Promise<void>} importPromise
      * @param {string} label
+     * @param {{lastActivityTime: number, lastForwardProgressTime: number}|null} [progressTracker=null]
      * @returns {Promise<void>}
      */
-    async _runImportWithWatchdog(importPromise, label) {
+    async _runImportWithWatchdog(importPromise, label, progressTracker = null) {
         const timeoutMs = 180_000;
+        const absoluteTimeoutMs = 2 * 60 * 60 * 1000;
+        const startedAt = safePerformance.now();
+        const idleError = new Error(`${label} did not complete within ${String(timeoutMs)}ms without progress`);
+        const absoluteError = new Error(`${label} did not complete within ${String(absoluteTimeoutMs)}ms`);
+        /** @type {?import('core').Timeout} */
+        let timer = null;
+        const watchdogPromise = new Promise((_resolve, reject) => {
+            const check = () => {
+                const now = safePerformance.now();
+                if ((now - startedAt) >= absoluteTimeoutMs) {
+                    reject(absoluteError);
+                    return;
+                }
+                const lastActivityTime = progressTracker?.lastForwardProgressTime ?? progressTracker?.lastActivityTime ?? startedAt;
+                const idleMs = Math.max(0, now - lastActivityTime);
+                const remainingMs = timeoutMs - idleMs;
+                if (remainingMs <= 0) {
+                    reject(idleError);
+                    return;
+                }
+                timer = setTimeout(check, Math.min(1_000, remainingMs));
+            };
+            check();
+        });
         try {
-            await Promise.race([
-                importPromise,
-                promiseTimeout(timeoutMs).then(() => {
-                    throw new Error(`${label} did not complete within ${String(timeoutMs)}ms`);
-                }),
-            ]);
+            await Promise.race([importPromise, watchdogPromise]);
         } catch (error) {
             const normalizedError = toError(error);
-            if (normalizedError.message.includes('did not complete within')) {
+            if (error === idleError || error === absoluteError) {
                 this._forceRecoverHungImportSession(normalizedError, label);
             }
             throw normalizedError;
+        } finally {
+            if (timer !== null) { clearTimeout(timer); }
         }
     }
 
@@ -1260,7 +1598,11 @@ export class DictionaryImportController {
      * @returns {void}
      */
     _forceRecoverHungImportSession(error, label) {
+        const ownerId = this._activeImportOwnerId;
+        this._activeImportOwnerId = void 0;
         this._activeImportRunGeneration += 1;
+        this._activeMdx?.disconnect();
+        this._activeMdx = null;
         reportDiagnostics('dictionary-import-watchdog-recovery', {
             label,
             message: error.message,
@@ -1292,7 +1634,7 @@ export class DictionaryImportController {
         if (statusFooter !== null) {
             statusFooter.setTaskActive(progressSelector, false);
         }
-        void this._settingsController.application.api.setDictionaryImportMode(false).catch((importModeError) => {
+        void this._settingsController.application.api.setDictionaryImportMode(false, ownerId).catch((importModeError) => {
             const normalizedImportModeError = toError(importModeError);
             reportDiagnostics('dictionary-import-watchdog-import-mode-exit-failed', {
                 label,
@@ -1329,14 +1671,16 @@ export class DictionaryImportController {
     /**
      * @param {string[]} urls
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
-     * @yields {Promise<File>}
-     * @returns {AsyncGenerator<File, void, void>}
+     * @param {(error: Error) => void} [onError]
+     * @yields {Promise<DictionaryImportSource>}
+     * @returns {AsyncGenerator<DictionaryImportSource, void, void>}
      */
-    async *_generateFilesFromUrls(urls, onProgress) {
+    async *_generateFilesFromUrls(urls, onProgress, onError = void 0) {
         const downloadTimeoutMs = 120_000;
         for (const url of urls) {
             onProgress({nextStep: true, index: 0, count: 0});
             const trimmedUrl = url.trim();
+            if (trimmedUrl.length === 0) { continue; }
             const downloadStartTime = safePerformance.now();
             log.log(`[ImportTiming] download started: ${trimmedUrl}`);
             reportDiagnostics('dictionary-url-download-begin', {
@@ -1360,7 +1704,7 @@ export class DictionaryImportController {
                         elapsedMs: Math.max(0, downloadEndTime - downloadStartTime),
                         sizeBytes: file.size,
                     });
-                    yield file;
+                    yield {type: 'zip', file};
                     continue;
                 }
 
@@ -1369,16 +1713,20 @@ export class DictionaryImportController {
                     abortController.abort(new Error(`Timed out fetching URL after ${String(downloadTimeoutMs)}ms: ${trimmedUrl}`));
                 }, downloadTimeoutMs);
                 try {
-                    const file = await this._downloadDictionaryFileViaXhr(trimmedUrl, downloadTimeoutMs, onProgress, abortController.signal);
+                    const source = await this._createImportSourceFromUrl(trimmedUrl, downloadTimeoutMs, onProgress, abortController.signal);
                     const downloadEndTime = safePerformance.now();
                     log.log(`[ImportTiming] download completed in ${formatDurationMs(downloadEndTime - downloadStartTime)}: ${trimmedUrl}`);
                     reportDiagnostics('dictionary-url-download-complete', {
                         url: summarizeUrlForDiagnostics(trimmedUrl),
                         inline: false,
                         elapsedMs: Math.max(0, downloadEndTime - downloadStartTime),
-                        sizeBytes: file.size,
+                        sizeBytes: this._getImportSourceSize(source),
+                        sourceType: source.type,
                     });
-                    yield file;
+                    // The download is complete; importing the yielded file may
+                    // take longer than the network timeout. Retire that timer now.
+                    globalThis.clearTimeout(timeoutId);
+                    yield source;
                 } catch (error) {
                     const abortReason = /** @type {unknown} */ (abortController.signal.reason);
                     if (abortController.signal.aborted && abortReason instanceof Error) {
@@ -1396,6 +1744,11 @@ export class DictionaryImportController {
                     elapsedMs: Math.max(0, downloadEndTime - downloadStartTime),
                     message: toError(error).message,
                 });
+                if (typeof onError === 'function') {
+                    log.error(error);
+                    onError(toError(error));
+                    continue;
+                }
                 throw toError(error);
             }
         }
@@ -1404,7 +1757,7 @@ export class DictionaryImportController {
     /**
      * @param {string[]} urls
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
-     * @returns {AsyncGenerator<File|{downloadUrl: string}, void, void>}
+     * @returns {AsyncGenerator<DictionaryImportSource|{downloadUrl: string}, void, void>}
      */
     _getUrlImportSources(urls, onProgress) {
         return ('serviceWorker' in navigator) ?
@@ -1435,7 +1788,13 @@ export class DictionaryImportController {
                 cleanup();
                 reject(toError(error));
             };
+            const getAbortError = () => {
+                const abortReason = /** @type {unknown} */ (abortSignal.reason);
+                return abortReason instanceof Error ? abortReason : new Error(`Aborted fetching dictionary archive: ${url}`);
+            };
             const onAbortSignal = () => {
+                // Cancellation owns settlement even if XHR cannot emit an abort event.
+                fail(getAbortError());
                 try {
                     request.abort();
                 } catch (_) {
@@ -1456,16 +1815,7 @@ export class DictionaryImportController {
                     fail(new Error(`Fetched dictionary archive had no content: ${url}`));
                     return;
                 }
-                const urlPathName = (() => {
-                    try {
-                        return new URL(url).pathname;
-                    } catch (_) {
-                        return '';
-                    }
-                })();
-                const pathSegments = urlPathName.split('/');
-                const fileNameCandidate = pathSegments.length > 0 ? pathSegments[pathSegments.length - 1].trim() : '';
-                const fileName = fileNameCandidate.length > 0 ? fileNameCandidate : 'fileFromURL.zip';
+                const fileName = getDictionaryFileNameFromUrl(url) ?? 'fileFromURL.zip';
                 const contentType = request.getResponseHeader('Content-Type') || 'application/zip';
                 cleanup();
                 resolve(new File([contentBytes], fileName, {type: contentType}));
@@ -1474,8 +1824,7 @@ export class DictionaryImportController {
                 fail(new Error(`Failed to fetch dictionary archive: ${url}`));
             };
             request.onabort = () => {
-                const abortReason = /** @type {unknown} */ (abortSignal.reason);
-                fail(abortReason instanceof Error ? abortReason : new Error(`Aborted fetching dictionary archive: ${url}`));
+                fail(getAbortError());
             };
             request.ontimeout = () => {
                 fail(new Error(`Timed out fetching URL after ${String(timeoutMs)}ms: ${url}`));
@@ -1484,6 +1833,10 @@ export class DictionaryImportController {
                 if (!event.lengthComputable) { return; }
                 onProgress({nextStep: false, index: event.loaded, count: event.total});
             };
+            if (abortSignal.aborted) {
+                fail(getAbortError());
+                return;
+            }
             abortSignal.addEventListener('abort', onAbortSignal, {once: true});
             try {
                 request.send();
@@ -1494,13 +1847,202 @@ export class DictionaryImportController {
     }
 
     /**
+     * @param {string} url
+     * @param {number} timeoutMs
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {AbortSignal} abortSignal
+     * @returns {Promise<DictionaryImportSource>}
+     */
+    async _createImportSourceFromUrl(url, timeoutMs, onProgress, abortSignal) {
+        const directFileName = getDictionaryFileNameFromUrl(url);
+        if (directFileName !== null && isZipDictionaryFileName(directFileName)) {
+            return {type: 'zip', file: await this._downloadDictionaryFileViaXhr(url, timeoutMs, onProgress, abortSignal)};
+        }
+        if (directFileName !== null && isMdxDictionaryFileName(directFileName)) {
+            return await this._downloadMdxImportSourceFromUrl(url, timeoutMs, onProgress, abortSignal, directFileName);
+        }
+
+        const response = await fetch(url, {signal: abortSignal});
+        if (!response.ok) {
+            void response.body?.cancel().catch(() => {});
+            throw new Error(`Failed to fetch dictionary archive: ${url} (status=${String(response.status)})`);
+        }
+        const contentType = response.headers.get('content-type') || '';
+        if (/text\/html|application\/xhtml\+xml/i.test(contentType)) {
+            const listing = this._parseMdxListingDocument(response.url || url, await response.text(), null);
+            if (listing === null) {
+                throw new Error(`URL did not point to a supported dictionary file or MDX directory listing: ${url}`);
+            }
+            return await this._downloadMdxImportSourceFromListing(listing, timeoutMs, onProgress, abortSignal);
+        }
+
+        const content = await response.arrayBuffer();
+        if (content.byteLength === 0) {
+            throw new Error(`Fetched dictionary archive had no content: ${url}`);
+        }
+        const fileName = directFileName ?? 'fileFromURL.zip';
+        if (isMdxDictionaryFileName(fileName)) {
+            const mdxFile = new File([content], fileName, {type: contentType || 'application/octet-stream'});
+            return {type: 'mdx', mdxFile, mddFiles: []};
+        }
+        return {type: 'zip', file: new File([content], fileName, {type: contentType || 'application/zip'})};
+    }
+
+    /**
+     * @param {string} url
+     * @param {number} timeoutMs
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {AbortSignal} abortSignal
+     * @param {string} mdxFileName
+     * @returns {Promise<MdxImportSource>}
+     */
+    async _downloadMdxImportSourceFromUrl(url, timeoutMs, onProgress, abortSignal, mdxFileName) {
+        const downloadedFile = await this._downloadDictionaryFileViaXhr(url, timeoutMs, onProgress, abortSignal);
+        const mdxFile = downloadedFile.name === mdxFileName ? downloadedFile : new File([downloadedFile], mdxFileName, {type: downloadedFile.type});
+        const listing = await this._getMdxListingForUrl(url, mdxFileName, abortSignal);
+        if (listing === null) {
+            return {type: 'mdx', mdxFile, mddFiles: []};
+        }
+        const mddFiles = await this._downloadListingFiles(listing.mddLinks, timeoutMs, onProgress, abortSignal);
+        return {type: 'mdx', mdxFile, mddFiles};
+    }
+
+    /**
+     * @param {{mdxLink: {url: string, fileName: string}, mddLinks: Array<{url: string, fileName: string}>}} listing
+     * @param {number} timeoutMs
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {AbortSignal} abortSignal
+     * @returns {Promise<MdxImportSource>}
+     */
+    async _downloadMdxImportSourceFromListing(listing, timeoutMs, onProgress, abortSignal) {
+        const downloadedFile = await this._downloadDictionaryFileViaXhr(listing.mdxLink.url, timeoutMs, onProgress, abortSignal);
+        const mdxFile = downloadedFile.name === listing.mdxLink.fileName ? downloadedFile : new File([downloadedFile], listing.mdxLink.fileName, {type: downloadedFile.type});
+        const mddFiles = await this._downloadListingFiles(listing.mddLinks, timeoutMs, onProgress, abortSignal);
+        return {type: 'mdx', mdxFile, mddFiles};
+    }
+
+    /**
+     * @param {string} url
+     * @param {string} mdxFileName
+     * @param {AbortSignal} abortSignal
+     * @returns {Promise<{mdxLink: {url: string, fileName: string}, mddLinks: Array<{url: string, fileName: string}>}|null>}
+     */
+    async _getMdxListingForUrl(url, mdxFileName, abortSignal) {
+        const parentUrl = new URL('.', url).href;
+        let listingUrl = parentUrl;
+        let html;
+        try {
+            const response = await fetch(parentUrl, {signal: abortSignal});
+            const contentType = response.headers.get('content-type') || '';
+            if (!response.ok || !/text\/html|application\/xhtml\+xml/i.test(contentType)) {
+                void response.body?.cancel().catch(() => {});
+                return null;
+            }
+            listingUrl = response.url || parentUrl;
+            html = await response.text();
+        } catch (error) {
+            if (abortSignal.aborted) { throw error; }
+            return null;
+        }
+        return this._parseMdxListingDocument(listingUrl, html, mdxFileName);
+    }
+
+    /**
+     * @param {Array<{url: string, fileName: string}>} listingFiles
+     * @param {number} timeoutMs
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {AbortSignal} abortSignal
+     * @returns {Promise<File[]>}
+     */
+    async _downloadListingFiles(listingFiles, timeoutMs, onProgress, abortSignal) {
+        /** @type {File[]} */
+        const files = [];
+        for (const {url, fileName} of listingFiles) {
+            files.push(await this._downloadDictionaryFileViaXhr(url, timeoutMs, onProgress, abortSignal));
+            if (files[files.length - 1].name !== fileName) {
+                files[files.length - 1] = new File([files[files.length - 1]], fileName, {type: files[files.length - 1].type});
+            }
+        }
+        // listingFiles already has validated, exact-stem-aware volume order.
+        // Re-sorting by the last numeric suffix moves Book.2024.mdd behind its volumes.
+        return files;
+    }
+
+    /**
+     * @param {string} baseUrl
+     * @param {string} html
+     * @param {string|null} mdxFileName
+     * @returns {{mdxLink: {url: string, fileName: string}, mddLinks: Array<{url: string, fileName: string}>}|null}
+     * @throws {Error} If matching MDD links are ambiguous.
+     */
+    _parseMdxListingDocument(baseUrl, html, mdxFileName) {
+        if (typeof DOMParser === 'undefined') { return null; }
+        const document = new DOMParser().parseFromString(html, 'text/html');
+        /** @type {Array<{url: string, fileName: string}>} */
+        const fileLinks = [];
+        const directoryUrl = new URL('.', baseUrl).href;
+        const seenUrls = new Set();
+        for (const anchor of document.querySelectorAll('a[href]')) {
+            const href = anchor.getAttribute('href') || '';
+            let resolvedUrl;
+            try {
+                resolvedUrl = new URL(href, baseUrl).href;
+            } catch (_error) {
+                continue;
+            }
+            const parsedUrl = new URL(resolvedUrl);
+            if (
+                (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') ||
+                new URL('.', parsedUrl).href !== directoryUrl
+            ) { continue; }
+            parsedUrl.hash = '';
+            resolvedUrl = parsedUrl.href;
+            if (seenUrls.has(resolvedUrl)) { continue; }
+            seenUrls.add(resolvedUrl);
+            const fileName = getDictionaryFileNameFromUrl(resolvedUrl);
+            if (fileName === null) { continue; }
+            fileLinks.push({url: resolvedUrl, fileName});
+        }
+
+        let mdxLink = null;
+        if (typeof mdxFileName === 'string' && mdxFileName.length > 0) {
+            const matchingMdx = fileLinks.filter(({fileName}) => getLowercaseFileName(fileName) === getLowercaseFileName(mdxFileName) && isMdxDictionaryFileName(fileName));
+            if (matchingMdx.length !== 1) { return null; }
+            [mdxLink] = matchingMdx;
+        } else {
+            const mdxLinks = fileLinks.filter(({fileName}) => isMdxDictionaryFileName(fileName));
+            if (mdxLinks.length !== 1) { return null; }
+            [mdxLink] = mdxLinks;
+        }
+        if (mdxLink === null) { return null; }
+
+        const mdxKey = getLowercaseFileName(mdxLink.fileName).slice(0, -4);
+        const mdxKeys = new Set(fileLinks
+            .filter(({fileName}) => isMdxDictionaryFileName(fileName))
+            .map(({fileName}) => getLowercaseFileName(fileName).slice(0, -4)));
+        const mddLinks = fileLinks
+            .filter(({fileName}) => resolveMddImportKey(fileName, mdxKeys) === mdxKey)
+            .sort((a, b) => compareMddImportPaths(a.fileName, b.fileName, mdxKey));
+        const resourceNames = new Set();
+        for (const {fileName} of mddLinks) {
+            const key = getLowercaseFileName(fileName);
+            if (resourceNames.has(key)) {
+                throw new Error(`Ambiguous MDD resource in directory listing: ${fileName}. Download one complete dictionary set and select its files together.`);
+            }
+            resourceNames.add(key);
+        }
+        return {mdxLink, mddLinks};
+    }
+
+    /**
      * @param {string[]} urls
-     * @yields {Promise<File|{downloadUrl: string}>}
-     * @returns {AsyncGenerator<File|{downloadUrl: string}, void, void>}
+     * @yields {Promise<DictionaryImportSource|{downloadUrl: string}>}
+     * @returns {AsyncGenerator<DictionaryImportSource|{downloadUrl: string}, void, void>}
      */
     async *_generateImportSourcesFromUrls(urls) {
         for (const url of urls) {
             const trimmedUrl = url.trim();
+            if (trimmedUrl.length === 0) { continue; }
             if (trimmedUrl.startsWith('manabitan-e2e-dict:')) {
                 const inlineArchiveBase64 = this._getInlineArchiveBase64ForUrl(trimmedUrl);
                 if (typeof inlineArchiveBase64 !== 'string') {
@@ -1508,7 +2050,7 @@ export class DictionaryImportController {
                 }
                 const tokenName = trimmedUrl.slice('manabitan-e2e-dict:'.length).trim();
                 const safeName = tokenName.length > 0 ? tokenName.replaceAll(/[^a-zA-Z0-9._-]/g, '-') : 'fileFromURL';
-                yield new File([this._base64ToUint8Array(inlineArchiveBase64)], `${safeName}.zip`, {type: 'application/zip'});
+                yield {type: 'zip', file: new File([this._base64ToUint8Array(inlineArchiveBase64)], `${safeName}.zip`, {type: 'application/zip'})};
                 continue;
             }
             yield {downloadUrl: trimmedUrl};
@@ -1548,6 +2090,50 @@ export class DictionaryImportController {
         return bytes;
     }
 
+    /**
+     * @param {File[]} files
+     * @returns {{sources: DictionaryImportSource[], errors: Error[]}}
+     */
+    _createImportSourcesFromFiles(files) {
+        return createMdictImportSources(files);
+    }
+
+    /**
+     * @param {DictionaryImportSource} source
+     * @returns {number}
+     */
+    _getImportSourceSize(source) {
+        if (source.type === 'zip') {
+            return source.file.size;
+        }
+        return source.mdxFile.size + source.mddFiles.reduce((sum, file) => sum + file.size, 0);
+    }
+
+    /**
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {{stage: 'upload'|'convert'|'download', completed: number, total: number}} details
+     */
+    _reportMdxConversionProgress(onProgress, details) {
+        const {stage, completed, total} = details;
+        let progress = 0;
+        switch (stage) {
+            case 'upload':
+                progress = (total > 0 ? completed / total : 0) * MDX_UPLOAD_PROGRESS_RATIO;
+                break;
+            case 'convert':
+                progress = MDX_UPLOAD_PROGRESS_RATIO + ((total > 0 ? completed / total : 1) * (1 - MDX_UPLOAD_PROGRESS_RATIO));
+                break;
+            case 'download':
+                progress = 1;
+                break;
+        }
+        onProgress({
+            nextStep: false,
+            index: Math.round(Math.max(0, Math.min(1, progress)) * MDX_CONVERSION_PROGRESS_TOTAL),
+            count: MDX_CONVERSION_PROGRESS_TOTAL,
+        });
+    }
+
     /** */
     async _purgeDatabase() {
         if (this._modifying) { return; }
@@ -1574,11 +2160,12 @@ export class DictionaryImportController {
     }
 
     /**
-     * @param {AsyncGenerator<File|{downloadUrl: string}, void, void>} dictionaries
+     * @param {AsyncGenerator<File|DictionaryImportSource|{downloadUrl: string}, void, void>} dictionaries
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('settings-controller').ImportDictionaryDoneCallback} onImportDone
      * @param {ImportProgressTracker} importProgressTracker
-     * @param {Partial<import('dictionary-importer').ImportDetails>|null} [importDetailsOverrides]
+     * @param {Partial<import('dictionary-importer').ImportDetails>|null} importDetailsOverrides
+     * @param {Error[]} initialErrors
      */
     async _importDictionaries(
         dictionaries,
@@ -1586,9 +2173,18 @@ export class DictionaryImportController {
         onImportDone,
         importProgressTracker,
         /** @type {Partial<import('dictionary-importer').ImportDetails>|null} */ importDetailsOverrides = null,
+        /** @type {Error[]} */ initialErrors = [],
     ) {
         if (this._modifying) { return; }
         const importRunGeneration = ++this._activeImportRunGeneration;
+        const importOwnerId = crypto.randomUUID();
+        this._activeImportOwnerId = importOwnerId;
+        const assertCurrentRun = () => {
+            if (!this._isImportRunCurrent(importRunGeneration)) {
+                throw new Error('Ignored stale dictionary import run');
+            }
+        };
+        importProgressTracker.setImportRunCheck(() => this._isImportRunCurrent(importRunGeneration));
 
         const statusFooter = this._statusFooter;
         const progressSelector = '.dictionary-import-progress';
@@ -1599,12 +2195,18 @@ export class DictionaryImportController {
 
         const onProgress = importProgressTracker.onProgress.bind(importProgressTracker);
         Reflect.set(globalThis, '__manabitanImportStepTimingHistory', []);
+        for (const root of document.querySelectorAll('.mdict-import-warnings')) {
+            root.textContent = '';
+            /** @type {HTMLElement} */ (root).hidden = true;
+        }
 
         /** @type {Error[]} */
-        let errors = [];
+        let errors = [...initialErrors];
         /** @type {string[]} */
         const importedTitles = [];
         const useImportSession = this._getUseImportSession();
+        /** @type {DeferredDictionaryFinalization[]|null} */
+        const deferredFinalizations = useImportSession ? [] : null;
         log.log(`[ImportTiming] import session reuse enabled=${String(useImportSession)} (globalOverride=${String(this._getUseImportSession())})`);
         reportDiagnostics('dictionary-import-session-begin', {
             dictionaryCount: importProgressTracker.dictionaryCount,
@@ -1617,39 +2219,50 @@ export class DictionaryImportController {
         try {
             this._setModifying(true);
             this._hideErrors();
-            await this._settingsController.application.api.setDictionaryImportMode(true);
             importModeEnabled = true;
+            await this._settingsController.application.api.setDictionaryImportMode(true, importOwnerId);
+            assertCurrentRun();
 
             for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = false; }
 
             const optionsFull = await this._settingsController.getOptionsFull();
+            assertCurrentRun();
             const {
                 skipImageMetadata,
+                skipMediaImport,
                 mediaResolutionConcurrency,
                 debugImportLogging,
                 enableTermEntryContentDedup,
                 termContentStorageMode,
                 zipMaxWorkers,
                 zipChunkSize,
+                zipUseWebWorkers,
                 artifactFixedPackMinTotalRows,
                 wasmPreallocateChunkRows,
+                termContentBlockTargetBytes,
+                termBankExperiments,
             } = this._getImportPerformanceFlags();
             const importDetails = {
                 prefixWildcardsSupported: optionsFull.global.database.prefixWildcardsSupported,
                 yomitanVersion: chrome.runtime.getManifest().version,
                 skipImageMetadata,
+                skipMediaImport,
                 mediaResolutionConcurrency,
                 debugImportLogging,
                 enableTermEntryContentDedup,
                 termContentStorageMode,
                 zipMaxWorkers,
                 zipChunkSize,
+                zipUseWebWorkers,
                 artifactFixedPackMinTotalRows,
                 wasmPreallocateChunkRows,
+                termContentBlockTargetBytes,
+                ...termBankExperiments,
                 ...(importDetailsOverrides && typeof importDetailsOverrides === 'object' && !Array.isArray(importDetailsOverrides) ? importDetailsOverrides : {}),
             };
 
             for (let i = 0; i < importProgressTracker.dictionaryCount; ++i) {
+                assertCurrentRun();
                 importProgressTracker.onNextDictionary();
                 if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, true); }
                 const dictionaryLoopStartTime = safePerformance.now();
@@ -1660,35 +2273,50 @@ export class DictionaryImportController {
                     finalizeImportSession,
                 });
                 const nextDictionary = await dictionaries.next();
-                const fileValue = nextDictionary.done ? null : nextDictionary.value;
-                /** @type {File} */
-                let file;
+                assertCurrentRun();
+                const source = nextDictionary.done ? null : nextDictionary.value;
                 /** @type {string|null} */
                 let downloadUrl = null;
-                if (fileValue instanceof File) {
-                    file = fileValue;
+                /** @type {DictionaryImportSource|null} */
+                let importSource = null;
+                if (source instanceof File) {
+                    importSource = {type: 'zip', file: source};
                 } else if (
-                    fileValue &&
-                    typeof fileValue === 'object' &&
-                    !Array.isArray(fileValue) &&
-                    typeof Reflect.get(fileValue, 'downloadUrl') === 'string'
+                    source &&
+                    typeof source === 'object' &&
+                    !Array.isArray(source) &&
+                    Reflect.get(source, 'type') === 'zip' &&
+                    Reflect.get(source, 'file') instanceof File
                 ) {
-                    downloadUrl = /** @type {string} */ (Reflect.get(fileValue, 'downloadUrl')).trim();
-                    file = new File([], 'fileFromURL.zip', {type: 'application/zip'});
-                } else if (fileValue && typeof fileValue === 'object') {
-                    const blobPart = /** @type {BlobPart} */ (/** @type {unknown} */ (fileValue));
-                    file = new File([blobPart], 'fileFromURL.zip', {type: 'application/zip'});
+                    importSource = /** @type {ZipImportSource} */ (source);
+                } else if (
+                    source &&
+                    typeof source === 'object' &&
+                    !Array.isArray(source) &&
+                    Reflect.get(source, 'type') === 'mdx' &&
+                    Reflect.get(source, 'mdxFile') instanceof File &&
+                    Array.isArray(Reflect.get(source, 'mddFiles'))
+                ) {
+                    importSource = /** @type {MdxImportSource} */ (source);
+                } else if (
+                    source &&
+                    typeof source === 'object' &&
+                    !Array.isArray(source) &&
+                    typeof Reflect.get(source, 'downloadUrl') === 'string'
+                ) {
+                    downloadUrl = /** @type {string} */ (Reflect.get(source, 'downloadUrl')).trim();
                 } else {
-                    errors.push(new Error(`Failed to read file ${i + 1} of ${importProgressTracker.dictionaryCount} (value-type=${typeof fileValue}, value=${String(fileValue)}).`));
+                    errors.push(new Error(`Failed to read file ${i + 1} of ${importProgressTracker.dictionaryCount} (value-type=${typeof source}).`));
                     reportDiagnostics('dictionary-import-item-invalid-file', {
                         index: i + 1,
                         dictionaryCount: importProgressTracker.dictionaryCount,
-                        valueType: typeof fileValue,
+                        valueType: typeof source,
                     });
                     continue;
                 }
-                const importItemResult = (downloadUrl !== null && downloadUrl.length > 0) ?
-                    await this._importDictionaryFromUrl(
+                let importItemResult;
+                if (downloadUrl !== null && downloadUrl.length > 0) {
+                    importItemResult = await this._importDictionaryFromUrl(
                         downloadUrl,
                         profilesDictionarySettings,
                         importDetails,
@@ -1696,16 +2324,35 @@ export class DictionaryImportController {
                         finalizeImportSession,
                         importRunGeneration,
                         onProgress,
-                    ) :
-                    await this._importDictionaryFromZip(
-                        file,
+                        deferredFinalizations,
+                    );
+                } else if (importSource?.type === 'mdx') {
+                    importItemResult = await this._importDictionaryFromMdx(
+                        importSource,
                         profilesDictionarySettings,
                         importDetails,
                         useImportSession,
                         finalizeImportSession,
                         importRunGeneration,
                         onProgress,
+                        deferredFinalizations,
                     );
+                } else if (importSource?.type === 'zip') {
+                    importItemResult = await this._importDictionaryFromZip(
+                        importSource.file,
+                        profilesDictionarySettings,
+                        importDetails,
+                        useImportSession,
+                        finalizeImportSession,
+                        importRunGeneration,
+                        onProgress,
+                        deferredFinalizations,
+                    );
+                } else {
+                    errors.push(new Error(`Unsupported dictionary import source at item ${i + 1}.`));
+                    continue;
+                }
+                assertCurrentRun();
                 errors = [...errors, ...importItemResult.errors];
                 if (typeof importItemResult.importedTitle === 'string' && importItemResult.importedTitle.length > 0) {
                     importedTitles.push(importItemResult.importedTitle);
@@ -1717,7 +2364,8 @@ export class DictionaryImportController {
                     dictionaryCount: importProgressTracker.dictionaryCount,
                     elapsedMs: Math.max(0, dictionaryLoopEndTime - dictionaryLoopStartTime),
                     cumulativeErrorCount: errors.length,
-                    fileName: file.name || null,
+                    fileName: importSource?.type === 'mdx' ? importSource.mdxFile.name : (importSource?.type === 'zip' ? importSource.file.name : null),
+                    sourceType: importSource?.type ?? (downloadUrl !== null ? 'url' : null),
                     memory: getImportMemorySnapshot(),
                 });
             }
@@ -1727,8 +2375,46 @@ export class DictionaryImportController {
                 message: toError(error).message,
             });
         } finally {
-            importProgressTracker.onImportComplete(errors.length);
-            Reflect.set(globalThis, '__manabitanImportStepTimingHistory', importProgressTracker.getStepTimingHistory());
+            try {
+                await dictionaries.return();
+            } catch (error) {
+                errors.push(toError(error));
+                reportDiagnostics('dictionary-import-source-close-failed', {
+                    message: toError(error).message,
+                    importRunGeneration,
+                });
+            }
+            if (
+                deferredFinalizations !== null &&
+                deferredFinalizations.length > 0 &&
+                this._isImportRunCurrent(importRunGeneration)
+            ) {
+                try {
+                    const deferredResult = await this._finalizeDeferredImportedDictionaries(deferredFinalizations, importRunGeneration);
+                    errors = [...errors, ...deferredResult.errors];
+                    importedTitles.push(...deferredResult.importedTitles);
+                } catch (error) {
+                    const finalizationError = toError(error);
+                    errors.push(finalizationError);
+                    reportDiagnostics('dictionary-import-deferred-finalization-failed', {
+                        message: finalizationError.message,
+                        importRunGeneration,
+                    });
+                }
+            }
+            if (this._isImportRunCurrent(importRunGeneration)) {
+                try {
+                    importProgressTracker.onImportComplete(errors.length);
+                } catch (error) {
+                    const normalizedError = toError(error);
+                    errors.push(normalizedError);
+                    reportDiagnostics('dictionary-import-progress-finalization-failed', {
+                        message: normalizedError.message,
+                        importRunGeneration,
+                    });
+                }
+                Reflect.set(globalThis, '__manabitanImportStepTimingHistory', importProgressTracker.getStepTimingHistory());
+            }
             const importEndTime = safePerformance.now();
             log.log(`[ImportTiming] import session complete in ${formatDurationMs(importEndTime - importStartTime)} (errors=${errors.length})`);
             reportDiagnostics('dictionary-import-session-complete', {
@@ -1740,22 +2426,26 @@ export class DictionaryImportController {
                 importRunCurrent: this._isImportRunCurrent(importRunGeneration),
             });
             prevention.end();
+            // Keep mutation ownership until backend cleanup settles, then
+            // recheck ownership before touching a possibly newer import UI.
+            if (importModeEnabled) {
+                try {
+                    await this._settingsController.application.api.setDictionaryImportMode(false, importOwnerId);
+                } catch (error) {
+                    const importModeExitError = toError(error);
+                    errors.push(importModeExitError);
+                    reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
+                        message: importModeExitError.message,
+                        importRunGeneration,
+                        activeImportRunGeneration: this._activeImportRunGeneration,
+                    });
+                }
+            }
+            if (this._activeImportOwnerId === importOwnerId) { this._activeImportOwnerId = void 0; }
             if (this._isImportRunCurrent(importRunGeneration)) {
                 for (const progress of [...progressContainers, ...recommendedProgressContainers]) { progress.hidden = true; }
                 if (statusFooter !== null) { statusFooter.setTaskActive(progressSelector, false); }
                 this._setModifying(false);
-                if (importModeEnabled) {
-                    try {
-                        await this._settingsController.application.api.setDictionaryImportMode(false);
-                    } catch (error) {
-                        const importModeExitError = toError(error);
-                        errors.push(importModeExitError);
-                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed', {
-                            message: importModeExitError.message,
-                            importRunGeneration,
-                        });
-                    }
-                }
                 this._showErrors(errors);
                 this._triggerStorageChanged();
                 if (onImportDone) {
@@ -1775,17 +2465,6 @@ export class DictionaryImportController {
                     }
                 }
             } else {
-                if (importModeEnabled && !this._modifying) {
-                    try {
-                        await this._settingsController.application.api.setDictionaryImportMode(false);
-                    } catch (error) {
-                        reportDiagnostics('dictionary-import-session-import-mode-exit-failed-stale', {
-                            message: toError(error).message,
-                            importRunGeneration,
-                            activeImportRunGeneration: this._activeImportRunGeneration,
-                        });
-                    }
-                }
                 reportDiagnostics('dictionary-import-session-complete-stale', {
                     dictionaryCount: importProgressTracker.dictionaryCount,
                     errorCount: errors.length,
@@ -1793,6 +2472,12 @@ export class DictionaryImportController {
                     activeImportRunGeneration: this._activeImportRunGeneration,
                 });
             }
+            this._signalImportSessionCompletion({
+                importRunGeneration,
+                importRunCurrent: this._isImportRunCurrent(importRunGeneration),
+                errorCount: errors.length,
+                importedTitles: [...new Set(importedTitles)],
+            });
         }
     }
 
@@ -1819,35 +2504,42 @@ export class DictionaryImportController {
     }
 
     /**
-     * @returns {{skipImageMetadata: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean}}
+     * @returns {{skipImageMetadata: boolean, skipMediaImport: boolean, mediaResolutionConcurrency: number, debugImportLogging: boolean, enableTermEntryContentDedup: boolean|null, termContentStorageMode: 'baseline'|'raw-bytes', preserveCompressedMedia: boolean, zipMaxWorkers: number|null, zipChunkSize: number|null, zipUseWebWorkers: boolean|null, artifactFixedPackMinTotalRows: number|null, wasmPreallocateChunkRows: boolean, termContentBlockTargetBytes: number|null, termBankExperiments: ReturnType<typeof snapshotTermBankExperiments>}}
      */
     _getImportPerformanceFlags() {
         const flags = /** @type {unknown} */ (Reflect.get(globalThis, 'manabitanImportPerformanceFlags'));
         if (typeof flags !== 'object' || flags === null || Array.isArray(flags)) {
             return {
                 skipImageMetadata: true,
-                mediaResolutionConcurrency: 8,
+                skipMediaImport: false,
+                mediaResolutionConcurrency: 16,
                 debugImportLogging: false,
                 enableTermEntryContentDedup: null,
                 termContentStorageMode: 'raw-bytes',
                 preserveCompressedMedia: false,
                 zipMaxWorkers: null,
                 zipChunkSize: null,
+                zipUseWebWorkers: null,
                 artifactFixedPackMinTotalRows: null,
                 wasmPreallocateChunkRows: true,
+                termContentBlockTargetBytes: null,
+                termBankExperiments: snapshotTermBankExperiments(),
             };
         }
         const flagsRecord = /** @type {Record<string, unknown>} */ (flags);
-        const mediaResolutionConcurrency = Number.isFinite(flagsRecord.mediaResolutionConcurrency) ? Math.trunc(/** @type {number} */ (flagsRecord.mediaResolutionConcurrency)) : 8;
+        const mediaResolutionConcurrency = Number.isFinite(flagsRecord.mediaResolutionConcurrency) ? Math.trunc(/** @type {number} */ (flagsRecord.mediaResolutionConcurrency)) : 16;
         const zipMaxWorkers = Number.isFinite(flagsRecord.zipMaxWorkers) ? Math.trunc(/** @type {number} */ (flagsRecord.zipMaxWorkers)) : null;
         const zipChunkSize = Number.isFinite(flagsRecord.zipChunkSize) ? Math.trunc(/** @type {number} */ (flagsRecord.zipChunkSize)) : null;
         const artifactFixedPackMinTotalRows = Number.isFinite(flagsRecord.artifactFixedPackMinTotalRows) ? Math.trunc(/** @type {number} */ (flagsRecord.artifactFixedPackMinTotalRows)) : null;
+        const termContentBlockTargetBytes = Number.isFinite(flagsRecord.termContentBlockTargetBytes) ? Math.trunc(/** @type {number} */ (flagsRecord.termContentBlockTargetBytes)) : null;
         const termContentStorageModeRaw = flagsRecord.termContentStorageMode;
         const termContentStorageMode = (termContentStorageModeRaw === 'raw-bytes') ?
             termContentStorageModeRaw :
             'raw-bytes';
         return {
+            termBankExperiments: snapshotTermBankExperiments(/** @type {import('dictionary-importer').ImportExperiments} */ (flagsRecord)),
             skipImageMetadata: flagsRecord.skipImageMetadata !== false,
+            skipMediaImport: flagsRecord.skipMediaImport === true,
             mediaResolutionConcurrency: Math.max(1, Math.min(32, mediaResolutionConcurrency)),
             debugImportLogging: flagsRecord.debugImportLogging === true,
             enableTermEntryContentDedup: typeof flagsRecord.enableTermEntryContentDedup === 'boolean' ? flagsRecord.enableTermEntryContentDedup : null,
@@ -1855,8 +2547,10 @@ export class DictionaryImportController {
             preserveCompressedMedia: flagsRecord.preserveCompressedMedia === true,
             zipMaxWorkers: zipMaxWorkers === null ? null : Math.max(1, Math.min(32, zipMaxWorkers)),
             zipChunkSize: zipChunkSize === null ? null : Math.max(16 * 1024, Math.min(8 * 1024 * 1024, zipChunkSize)),
+            zipUseWebWorkers: typeof flagsRecord.zipUseWebWorkers === 'boolean' ? flagsRecord.zipUseWebWorkers : null,
             artifactFixedPackMinTotalRows: artifactFixedPackMinTotalRows === null ? null : Math.max(0, Math.min(4_000_000, artifactFixedPackMinTotalRows)),
             wasmPreallocateChunkRows: flagsRecord.wasmPreallocateChunkRows !== false,
+            termContentBlockTargetBytes: termContentBlockTargetBytes === null ? null : Math.max(64 * 1024, Math.min(16 * 1024 * 1024, termContentBlockTargetBytes)),
         };
     }
 
@@ -1873,7 +2567,7 @@ export class DictionaryImportController {
      * @returns {Promise<void>}
      */
     async _verifyImportedDictionaryVisible(dictionaryTitle, requireEnabledForActiveProfile) {
-        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle : '';
         if (normalizedTitle.length === 0) {
             throw new Error('Cannot verify imported dictionary visibility without a title');
         }
@@ -1891,6 +2585,7 @@ export class DictionaryImportController {
                 dictionaryTitle: normalizedTitle,
                 activeProfileIndex,
             });
+            throw new Error(`Imported dictionary ${normalizedTitle} was not enabled for the active profile`);
         }
         reportDiagnostics('dictionary-import-visibility-verified', {
             dictionaryTitle: normalizedTitle,
@@ -1951,6 +2646,22 @@ export class DictionaryImportController {
     }
 
     /**
+     * Exposes an exact post-UI completion boundary to development harnesses.
+     * @param {{importRunGeneration: number, importRunCurrent: boolean, errorCount: number, importedTitles: string[]}} details
+     */
+    _signalImportSessionCompletion(details) {
+        if (Reflect.get(globalThis, '__manabitanImportCompletionSignalEnabled') !== true) { return; }
+        const previousSequence = /** @type {unknown} */ (Reflect.get(globalThis, '__manabitanImportCompletionSequence'));
+        const sequence = typeof previousSequence === 'number' && Number.isSafeInteger(previousSequence) && previousSequence >= 0 ?
+            previousSequence + 1 :
+            1;
+        const completion = {...details, sequence, completedAtEpochMs: Date.now(), completedAtMonotonicMs: safePerformance.now()};
+        Reflect.set(globalThis, '__manabitanImportCompletionSequence', sequence);
+        Reflect.set(globalThis, '__manabitanLastImportCompletion', completion);
+        globalThis.dispatchEvent(new CustomEvent('manabitan:dictionary-import-complete', {detail: completion}));
+    }
+
+    /**
      * @template T
      * @param {T[]} arr
      * @yields {Promise<T>}
@@ -1963,6 +2674,126 @@ export class DictionaryImportController {
     }
 
     /**
+     * @param {string} dictionaryTitle
+     * @param {Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>} localPhaseTimings
+     * @param {string} phase
+     * @param {number} startTime
+     * @param {number} endTime
+     * @param {Record<string, string|number|boolean|null>} [details]
+     * @returns {void}
+     */
+    _recordImportLocalPhase(dictionaryTitle, localPhaseTimings, phase, startTime, endTime, details = {}) {
+        const elapsedMs = Math.max(0, endTime - startTime);
+        const endEpochMs = Date.now();
+        const startEpochMs = endEpochMs - elapsedMs;
+        localPhaseTimings.push({phase, elapsedMs, startEpochMs, endEpochMs, details});
+        log.log(`[ImportTiming] [${dictionaryTitle}] phase ${phase} ${formatDurationMs(elapsedMs)} details=${JSON.stringify(details)}`);
+    }
+
+    /**
+     * @param {MdxImportSource} source
+     * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
+     * @param {import('dictionary-importer').ImportDetails} importDetails
+     * @param {boolean} useImportSession
+     * @param {boolean} finalizeImportSession
+     * @param {number} importRunGeneration
+     * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {DeferredDictionaryFinalization[]|null} [deferredFinalizations]
+     * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
+     */
+    async _importDictionaryFromMdx(source, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress, deferredFinalizations = null) {
+        if (typeof importRunGeneration === 'function' && typeof onProgress === 'undefined') {
+            onProgress = importRunGeneration;
+            importRunGeneration = this._activeImportRunGeneration;
+        }
+        const dictionaryTitle = source.mdxFile.name || 'unknown-dictionary.mdx';
+        const importStartTime = safePerformance.now();
+        /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
+        const localPhaseTimings = [];
+        const recordLocalPhase = this._recordImportLocalPhase.bind(this, dictionaryTitle, localPhaseTimings);
+        log.log(`[ImportTiming] [${dictionaryTitle}] starting MDX import`);
+        reportDiagnostics('dictionary-import-mdx-begin', {
+            dictionaryTitle,
+            mddCount: source.mddFiles.length,
+            sizeBytes: source.mdxFile.size + source.mddFiles.reduce((sum, file) => sum + file.size, 0),
+            useImportSession,
+            finalizeImportSession,
+        });
+
+        const mdx = new Mdx();
+        if (this._activeMdx !== null) {
+            throw new Error('An MDX conversion is already active');
+        }
+        this._activeMdx = mdx;
+        /** @type {File|null} */
+        let archiveFile = null;
+        const prepareStartTime = safePerformance.now();
+        try {
+            const archive = await mdx.convertDictionary(
+                {
+                    mdxFile: source.mdxFile,
+                    mddFiles: source.mddFiles,
+                    enableAudio: false,
+                    includeAssets: true,
+                },
+                (details) => this._reportMdxConversionProgress(onProgress, details),
+            );
+            if (!this._isImportRunCurrent(importRunGeneration)) {
+                throw new Error(`Ignored stale MDX conversion for ${dictionaryTitle}`);
+            }
+            localPhaseTimings.push(...archive.phaseTimings);
+            for (const root of document.querySelectorAll('.mdict-import-warnings')) {
+                appendMdictConversionWarnings(/** @type {HTMLElement} */ (root), dictionaryTitle, archive.phaseTimings);
+            }
+            archiveFile = new File([archive.archiveContent], archive.archiveFileName, {type: 'application/zip'});
+        } finally {
+            mdx.disconnect();
+            if (this._activeMdx === mdx) {
+                this._activeMdx = null;
+            }
+        }
+        if (archiveFile === null) {
+            throw new Error(`MDX conversion did not return an archive for ${dictionaryTitle}`);
+        }
+        const prepareEndTime = safePerformance.now();
+        recordLocalPhase('prepare-mdx-archive', prepareStartTime, prepareEndTime, {
+            mddCount: source.mddFiles.length,
+            sourceSizeBytes: source.mdxFile.size + source.mddFiles.reduce((sum, file) => sum + file.size, 0),
+            archiveSizeBytes: archiveFile.size,
+        });
+
+        const workerImportStartTime = safePerformance.now();
+        const detailsAttempt = {
+            ...importDetails,
+            ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
+        };
+        const importResult = /** @type {ImportResultWithDebug} */ (
+            await this._tryImportDictionaryOffscreen(archiveFile, detailsAttempt, onProgress)
+        );
+        const workerImportEndTime = safePerformance.now();
+        recordLocalPhase('worker-import-dictionary', workerImportStartTime, workerImportEndTime, {
+            useImportSession,
+            finalizeImportSession,
+            source: 'mdx-converted-archive',
+        });
+
+        return await this._finalizeImportedDictionaryResult({
+            dictionaryTitle,
+            importStartTime,
+            importDetails,
+            importResult,
+            workerImportStartTime,
+            workerImportEndTime,
+            useImportSession,
+            finalizeImportSession,
+            importRunGeneration,
+            profilesDictionarySettings,
+            localPhaseTimings,
+            deferredFinalizations,
+        });
+    }
+
+    /**
      * @param {File} file
      * @param {import('settings-controller').ProfilesDictionarySettings} profilesDictionarySettings
      * @param {import('dictionary-importer').ImportDetails} importDetails
@@ -1970,14 +2801,19 @@ export class DictionaryImportController {
      * @param {boolean} finalizeImportSession
      * @param {number} importRunGeneration
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {DeferredDictionaryFinalization[]|null} [deferredFinalizations]
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
-    async _importDictionaryFromZip(file, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
+    async _importDictionaryFromZip(file, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress, deferredFinalizations = null) {
+        if (typeof importRunGeneration === 'function' && typeof onProgress === 'undefined') {
+            onProgress = importRunGeneration;
+            importRunGeneration = this._activeImportRunGeneration;
+        }
         const dictionaryTitle = file.name || 'unknown-dictionary';
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const localPhaseTimings = [];
-        const recordLocalPhase = recordImportLocalPhase.bind(null, localPhaseTimings, dictionaryTitle);
+        const recordLocalPhase = this._recordImportLocalPhase.bind(this, dictionaryTitle, localPhaseTimings);
         log.log(`[ImportTiming] [${dictionaryTitle}] starting import`);
         reportDiagnostics('dictionary-import-zip-begin', {
             dictionaryTitle,
@@ -1987,16 +2823,12 @@ export class DictionaryImportController {
         });
 
         const readStartTime = safePerformance.now();
-        // Firefox can leave a page-owned File's sliced Blob read pending after
-        // the backend port and dictionary worker clone it. Read it in its
-        // owning page and transfer the bytes through both boundaries instead.
-        const useArchiveBuffer = !('serviceWorker' in navigator);
-        const archiveContent = useArchiveBuffer ? await file.arrayBuffer() : file;
+        const archiveContent = file;
         const readEndTime = safePerformance.now();
         log.log(`[ImportTiming] [${dictionaryTitle}] prepared archive handle ${formatDurationMs(readEndTime - readStartTime)}`);
         recordLocalPhase('read-archive', readStartTime, readEndTime, {
             sizeBytes: file.size,
-            source: useArchiveBuffer ? 'transferred-buffer' : 'file-handle',
+            source: 'file-handle',
         });
 
         const workerImportStartTime = safePerformance.now();
@@ -2004,7 +2836,7 @@ export class DictionaryImportController {
             ...importDetails,
             ...(useImportSession ? {useImportSession: true, finalizeImportSession} : {}),
         };
-        const importResult = /** @type {import('dictionary-importer').ImportResult & {debug?: {usesFallbackStorage?: boolean, openStorageDiagnostics?: unknown, useImportSession?: boolean, finalizeImportSession?: boolean, importerDebug?: {phaseTimings?: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>|null}|null}}} */ (
+        const importResult = /** @type {ImportResultWithDebug} */ (
             await this._tryImportDictionaryOffscreen(archiveContent, detailsAttempt, onProgress)
         );
         const workerImportEndTime = safePerformance.now();
@@ -2026,6 +2858,7 @@ export class DictionaryImportController {
             importRunGeneration,
             profilesDictionarySettings,
             localPhaseTimings,
+            deferredFinalizations,
         });
     }
 
@@ -2037,14 +2870,19 @@ export class DictionaryImportController {
      * @param {boolean} finalizeImportSession
      * @param {number} importRunGeneration
      * @param {import('dictionary-worker').ImportProgressCallback} onProgress
+     * @param {DeferredDictionaryFinalization[]|null} [deferredFinalizations]
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
-    async _importDictionaryFromUrl(downloadUrl, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress) {
+    async _importDictionaryFromUrl(downloadUrl, profilesDictionarySettings, importDetails, useImportSession, finalizeImportSession, importRunGeneration, onProgress, deferredFinalizations = null) {
+        if (typeof importRunGeneration === 'function' && typeof onProgress === 'undefined') {
+            onProgress = importRunGeneration;
+            importRunGeneration = this._activeImportRunGeneration;
+        }
         const dictionaryTitle = downloadUrl;
         const importStartTime = safePerformance.now();
         /** @type {Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>} */
         const localPhaseTimings = [];
-        const recordLocalPhase = recordImportLocalPhase.bind(null, localPhaseTimings, dictionaryTitle);
+        const recordLocalPhase = this._recordImportLocalPhase.bind(this, dictionaryTitle, localPhaseTimings);
         log.log(`[ImportTiming] [${dictionaryTitle}] starting import from URL`);
         reportDiagnostics('dictionary-import-url-begin', {
             downloadUrl: summarizeUrlForDiagnostics(downloadUrl),
@@ -2075,6 +2913,7 @@ export class DictionaryImportController {
             importRunGeneration,
             profilesDictionarySettings,
             localPhaseTimings,
+            deferredFinalizations,
         });
     }
 
@@ -2090,7 +2929,11 @@ export class DictionaryImportController {
      *   finalizeImportSession: boolean,
      *   importRunGeneration: number,
      *   profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings,
-     *   localPhaseTimings: Array<{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}>
+     *   localPhaseTimings: Array<{phase: string, elapsedMs: number, startEpochMs?: number, endEpochMs?: number, details?: Record<string, string|number|boolean|null>}>,
+     *   deferredFinalizations?: DeferredDictionaryFinalization[]|null,
+     *   workerResultAlreadyRecorded?: boolean,
+     *   notifyDatabaseUpdated?: boolean|null,
+     *   showErrors?: boolean,
      * }} context
      * @returns {Promise<{errors: Error[], importedTitle: string|null}>}
      */
@@ -2106,8 +2949,12 @@ export class DictionaryImportController {
         importRunGeneration,
         profilesDictionarySettings,
         localPhaseTimings,
+        deferredFinalizations = null,
+        workerResultAlreadyRecorded = false,
+        notifyDatabaseUpdated = null,
+        showErrors = true,
     }) {
-        const recordLocalPhase = recordImportLocalPhase.bind(null, localPhaseTimings, dictionaryTitle);
+        const recordLocalPhase = this._recordImportLocalPhase.bind(this, dictionaryTitle, localPhaseTimings);
         /**
          * @param {string} phase
          * @returns {{errors: Error[], importedTitle: string|null}|null}
@@ -2129,18 +2976,20 @@ export class DictionaryImportController {
 
         const {result, errors, debug} = importResult;
         const importerPhaseTimings = normalizeImporterPhaseTimings(debug?.importerDebug?.phaseTimings ?? null);
-        reportDiagnostics('dictionary-import-worker-phase-summary', {
-            dictionaryTitle,
-            elapsedMs: Math.max(0, workerImportEndTime - workerImportStartTime),
-            importerPhaseTimings,
-            localPhaseTimings,
-            memory: getImportMemorySnapshot(),
-        });
-        for (const phase of importerPhaseTimings) {
-            log.log(
-                `[ImportTiming] [${dictionaryTitle}] worker phase "${phase.phase}" ${formatDurationMs(phase.elapsedMs)}` +
-                `${phase.details ? ` details=${JSON.stringify(phase.details)}` : ''}`,
-            );
+        if (!workerResultAlreadyRecorded) {
+            reportDiagnostics('dictionary-import-worker-phase-summary', {
+                dictionaryTitle,
+                elapsedMs: Math.max(0, workerImportEndTime - workerImportStartTime),
+                importerPhaseTimings,
+                localPhaseTimings,
+                memory: getImportMemorySnapshot(),
+            });
+            for (const phase of importerPhaseTimings) {
+                log.log(
+                    `[ImportTiming] [${dictionaryTitle}] worker phase "${phase.phase}" ${formatDurationMs(phase.elapsedMs)}` +
+                    `${phase.details ? ` details=${JSON.stringify(phase.details)}` : ''}`,
+                );
+            }
         }
         if (!result) {
             reportDiagnostics('dictionary-import-zip-no-result', {
@@ -2194,18 +3043,47 @@ export class DictionaryImportController {
         const staleImportResult = getStaleImportResult('before-page-side-finalization');
         if (staleImportResult !== null) { return staleImportResult; }
 
+        if (deferredFinalizations !== null) {
+            deferredFinalizations.push({
+                dictionaryTitle,
+                importStartTime,
+                importDetails,
+                importResult,
+                workerImportStartTime,
+                workerImportEndTime,
+                useImportSession,
+                finalizeImportSession,
+                importRunGeneration,
+                profilesDictionarySettings,
+                localPhaseTimings,
+                workerResultAlreadyRecorded: true,
+            });
+            localPhaseTimings.push({
+                phase: 'page-side-finalization-queued',
+                elapsedMs: 0,
+                details: {deferred: true},
+            });
+            reportDiagnostics('dictionary-import-page-finalization-deferred', {
+                dictionaryTitle,
+                resultTitle: result.title || null,
+                finalizeImportSession,
+                queuedCount: deferredFinalizations.length,
+            });
+            return {errors: [], importedTitle: null};
+        }
+
         const replacementDictionaryTitle = (
             typeof importDetails.replacementDictionaryTitle === 'string' &&
-            importDetails.replacementDictionaryTitle.trim().length > 0
+            importDetails.replacementDictionaryTitle.length > 0
         ) ?
-            importDetails.replacementDictionaryTitle.trim() :
+            importDetails.replacementDictionaryTitle :
             null;
         const sourceDictionaryTitle = (
             typeof result.sourceTitle === 'string' &&
-            result.sourceTitle.trim().length > 0
+            result.sourceTitle.length > 0
         ) ?
-            result.sourceTitle.trim() :
-            String(result.title || '').trim();
+            result.sourceTitle :
+            String(result.title || '');
         if (
             replacementDictionaryTitle !== null &&
             sourceDictionaryTitle.length > 0 &&
@@ -2264,7 +3142,8 @@ export class DictionaryImportController {
         });
         if (replacementDictionaryTitle !== null && shouldAddDictionarySettings) {
             const removeOldSettingsStartTime = safePerformance.now();
-            await this._removeDictionarySettingsByName(replacementDictionaryTitle);
+            const cleanupErrors = await this._removeDictionarySettingsByName(replacementDictionaryTitle);
+            if (Array.isArray(cleanupErrors)) { errors2.push(...cleanupErrors); }
             const removeOldSettingsEndTime = safePerformance.now();
             recordLocalPhase('remove-replaced-dictionary-settings', removeOldSettingsStartTime, removeOldSettingsEndTime, {
                 removedDictionaryTitle: replacementDictionaryTitle,
@@ -2288,7 +3167,8 @@ export class DictionaryImportController {
             localPhaseTimings,
         });
 
-        if (!(useImportSession && !finalizeImportSession)) {
+        const shouldNotifyDatabaseUpdated = notifyDatabaseUpdated ?? !(useImportSession && !finalizeImportSession);
+        if (shouldNotifyDatabaseUpdated) {
             const triggerDatabaseUpdatedStartTime = safePerformance.now();
             await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'import');
             const triggerDatabaseUpdatedEndTime = safePerformance.now();
@@ -2329,7 +3209,11 @@ export class DictionaryImportController {
 
             for (const profile of profiles) {
                 const profileDictionarySettings = profilesDictionarySettings[profile.id];
-                const profileDictionarySetting = Array.isArray(profileDictionarySettings) ? profileDictionarySettings[0] : null;
+                const profileDictionarySetting = (
+                    Array.isArray(profileDictionarySettings) ?
+                        profileDictionarySettings[0] :
+                        /** @type {import('settings').DictionaryOptions|null} */ (profileDictionarySettings ?? null)
+                );
                 if (!(profileDictionarySetting && typeof profileDictionarySetting.name === 'string' && profileDictionarySetting.name.length > 0)) {
                     skippedProfileCount += 1;
                     continue;
@@ -2364,16 +3248,113 @@ export class DictionaryImportController {
             memory: getImportMemorySnapshot(),
         });
 
-        if (errors.length > 0) {
+        if (showErrors && errors.length > 0) {
             errors.push(new Error(`Dictionary may not have been imported properly: ${errors.length} error${errors.length === 1 ? '' : 's'} reported.`));
             this._showErrors([...errors, ...errors2]);
-        } else if (errors2.length > 0) {
+        } else if (showErrors && errors2.length > 0) {
             this._showErrors(errors2);
+        } else if (errors.length > 0) {
+            errors.push(new Error(`Dictionary may not have been imported properly: ${errors.length} error${errors.length === 1 ? '' : 's'} reported.`));
         }
         return {
             errors: [...errors, ...errors2],
             importedTitle: errors.length === 0 && errors2.length === 0 ? (result.title || sourceDictionaryTitle || dictionaryTitle) : null,
         };
+    }
+
+    /**
+     * @param {DeferredDictionaryFinalization[]} deferredFinalizations
+     * @param {number} importRunGeneration
+     * @returns {Promise<{errors: Error[], importedTitles: string[]}>}
+     */
+    async _finalizeDeferredImportedDictionaries(deferredFinalizations, importRunGeneration) {
+        const pending = deferredFinalizations.splice(0, deferredFinalizations.length);
+        /** @type {Error[]} */
+        const errors = [];
+        /** @type {string[]} */
+        const importedTitles = [];
+        /** @type {Array<{context: DeferredDictionaryFinalization, importedTitle: string}>} */
+        const successfulFinalizations = [];
+        for (const context of pending) {
+            if (!this._isImportRunCurrent(importRunGeneration)) {
+                errors.push(new Error(`Ignored stale deferred finalization for ${context.dictionaryTitle}`));
+                continue;
+            }
+            try {
+                const result = await this._finalizeImportedDictionaryResult({
+                    ...context,
+                    deferredFinalizations: null,
+                    notifyDatabaseUpdated: false,
+                    showErrors: false,
+                });
+                errors.push(...result.errors);
+                if (result.importedTitle !== null) {
+                    importedTitles.push(result.importedTitle);
+                    successfulFinalizations.push({context, importedTitle: result.importedTitle});
+                }
+            } catch (error) {
+                const finalizationError = toError(error);
+                errors.push(new Error(`Failed to finalize imported dictionary ${context.dictionaryTitle}: ${finalizationError.message}`, {cause: finalizationError}));
+                reportDiagnostics('dictionary-import-item-deferred-finalization-failed', {
+                    dictionaryTitle: context.dictionaryTitle,
+                    message: finalizationError.message,
+                    importRunGeneration,
+                });
+            }
+        }
+        if (pending.length > 0 && this._isImportRunCurrent(importRunGeneration)) {
+            const triggerStartTime = safePerformance.now();
+            try {
+                await this._settingsController.application.api.triggerDatabaseUpdated('dictionary', 'import');
+                const triggerEndTime = safePerformance.now();
+                reportDiagnostics('dictionary-import-batch-database-updated', {
+                    dictionaryCount: pending.length,
+                    importedTitleCount: importedTitles.length,
+                    elapsedMs: Math.max(0, triggerEndTime - triggerStartTime),
+                    importRunGeneration,
+                });
+            } catch (error) {
+                const triggerError = toError(error);
+                errors.push(triggerError);
+                reportDiagnostics('dictionary-import-batch-database-update-failed', {
+                    dictionaryCount: pending.length,
+                    message: triggerError.message,
+                    importRunGeneration,
+                });
+            }
+        }
+        for (const {context, importedTitle} of successfulFinalizations) {
+            const verifyStartTime = safePerformance.now();
+            try {
+                await this._verifyImportedDictionaryVisible(importedTitle, context.profilesDictionarySettings === null);
+                const verifyEndTime = safePerformance.now();
+                this._recordImportLocalPhase(
+                    context.dictionaryTitle,
+                    context.localPhaseTimings,
+                    'verify-imported-dictionary-visible',
+                    verifyStartTime,
+                    verifyEndTime,
+                    {
+                        dictionaryTitle: importedTitle,
+                        requireEnabledForActiveProfile: context.profilesDictionarySettings === null,
+                        batchFinalization: true,
+                    },
+                );
+            } catch (error) {
+                const verifyError = toError(error);
+                errors.push(verifyError);
+                const importedTitleIndex = importedTitles.indexOf(importedTitle);
+                if (importedTitleIndex >= 0) {
+                    importedTitles.splice(importedTitleIndex, 1);
+                }
+                reportDiagnostics('dictionary-import-batch-visibility-verification-failed', {
+                    dictionaryTitle: importedTitle,
+                    message: verifyError.message,
+                    importRunGeneration,
+                });
+            }
+        }
+        return {errors, importedTitles};
     }
 
     /**
@@ -2385,15 +3366,15 @@ export class DictionaryImportController {
         const {title, sequenced, styles} = summary;
         const sourceTitle = (
             typeof summary.sourceTitle === 'string' &&
-            summary.sourceTitle.trim().length > 0
+            summary.sourceTitle.length > 0
         ) ?
-            summary.sourceTitle.trim() :
+            summary.sourceTitle :
             null;
         const replacedTitle = (
             typeof summary.replacedDictionaryTitle === 'string' &&
-            summary.replacedDictionaryTitle.trim().length > 0
+            summary.replacedDictionaryTitle.length > 0
         ) ?
-            summary.replacedDictionaryTitle.trim() :
+            summary.replacedDictionaryTitle :
             null;
         const selectorSourceTitle = sourceTitle ?? replacedTitle;
         let optionsFull;
@@ -2408,75 +3389,72 @@ export class DictionaryImportController {
         }
         if (!optionsFull) { return [new Error('Failed to automatically set dictionary settings. A page refresh and manual enabling of the dictionary may be required.')]; }
 
-        const profileIndex = this._settingsController.profileIndex;
+        const selectedProfileId = this._settingsController.getOptionsContext?.().profileId;
+        if (typeof selectedProfileId !== 'string' || selectedProfileId.length === 0 || optionsFull.profiles.filter(({id}) => id === selectedProfileId).length !== 1) {
+            return [new Error('Unable to identify the active profile; dictionary settings were not changed.')];
+        }
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         const profileCount = optionsFull.profiles.length;
         for (let i = 0; i < profileCount; ++i) {
             const {options, id: profileId} = optionsFull.profiles[i];
-            const enabled = profileIndex === i;
+            const enabled = profileId === selectedProfileId;
             const defaultSettings = DictionaryController.createDefaultDictionarySettings(title, enabled, styles);
-            const path1 = `profiles[${i}].options.dictionaries`;
 
             const profileDictionarySettings = profilesDictionarySettings?.[profileId];
             if (!Array.isArray(profileDictionarySettings) || profileDictionarySettings.length === 0) {
-                targets.push({action: 'push', path: path1, items: [defaultSettings]});
-                if (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle) {
+                const existingIndex = options.dictionaries.findIndex((dictionary) => dictionary.name === title);
+                if (existingIndex < 0) {
+                    targets.push({action: 'ensureDictionary', profileId, item: defaultSettings});
+                    if (enabled) {
+                        // A databaseUpdated refresh may have queued a disabled
+                        // default row after this snapshot. Apply the selected
+                        // import's enable intent after ensureDictionary so the
+                        // existing row is enabled without replacing its prefs.
+                        targets.push({action: 'setDictionaryEnabled', profileId, name: title, alias: title, value: true});
+                    }
+                } else if (profilesDictionarySettings === null && enabled && !options.dictionaries.some((dictionary) => dictionary.name === title && dictionary.enabled)) {
+                    // A databaseUpdated refresh can auto-create this entry with
+                    // enabled=false before the import finishes. Enable it in
+                    // place rather than inserting another entry with the same name.
                     targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.mainDictionary`,
-                        value: title,
+                        action: 'setDictionaryEnabled',
+                        profileId,
+                        name: title,
+                        alias: options.dictionaries[existingIndex].alias,
+                        value: true,
                     });
+                }
+                if (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle) {
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: selectorSourceTitle, value: title});
                 } else if (sequenced && options.general.mainDictionary === '') {
-                    const path2 = `profiles[${i}].options.general.mainDictionary`;
-                    targets.push({action: 'set', path: path2, value: title});
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: '', value: title});
                 }
                 if (selectorSourceTitle !== null && options.general.sortFrequencyDictionary === selectorSourceTitle) {
-                    targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.sortFrequencyDictionary`,
-                        value: title,
-                    });
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: selectorSourceTitle, value: title});
                 }
             } else {
-                const orderedProfileDictionarySettings = [...profileDictionarySettings]
-                    .sort((a, b) => b.index - a.index);
-                for (const {index, alias, name, ...currentSettings} of orderedProfileDictionarySettings) {
-                    const newAlias = alias === name ? title : alias;
-                    targets.push({
-                        action: 'splice',
-                        path: path1,
-                        start: index,
-                        items: [{
-                            ...currentSettings,
-                            styles,
-                            name: title,
-                            alias: newAlias,
-                        }],
-                        deleteCount: 0,
-                    });
-                }
                 const {name} = profileDictionarySettings[0];
+                targets.push({
+                    action: 'replaceDictionaryName',
+                    profileId,
+                    sourceName: name,
+                    name: title,
+                    styles,
+                    fallbackSettings: profileDictionarySettings.map(({index, ...item}) => ({index, item})),
+                });
                 if (
                     options.general.mainDictionary === name ||
                     (selectorSourceTitle !== null && options.general.mainDictionary === selectorSourceTitle) ||
                     (sequenced && options.general.mainDictionary === '')
                 ) {
-                    targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.mainDictionary`,
-                        value: title,
-                    });
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: options.general.mainDictionary, value: title});
                 }
                 if (
                     options.general.sortFrequencyDictionary === name ||
                     (selectorSourceTitle !== null && options.general.sortFrequencyDictionary === selectorSourceTitle)
                 ) {
-                    targets.push({
-                        action: 'set',
-                        path: `profiles[${i}].options.general.sortFrequencyDictionary`,
-                        value: title,
-                    });
+                    targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: options.general.sortFrequencyDictionary, value: title});
                 }
             }
         }
@@ -2485,7 +3463,7 @@ export class DictionaryImportController {
 
     /**
      * @param {string} dictionaryTitle
-     * @returns {Promise<void>}
+     * @returns {Promise<Error[]>}
      */
     async _removeDictionarySettingsByName(dictionaryTitle) {
         const optionsFull = await this._settingsController.getOptionsFull();
@@ -2493,36 +3471,17 @@ export class DictionaryImportController {
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
-            const {options} = profiles[i];
+            const {options, id: profileId} = profiles[i];
             const {dictionaries, general} = options;
-            for (let j = dictionaries.length - 1; j >= 0; --j) {
-                if (dictionaries[j].name !== dictionaryTitle) { continue; }
-                targets.push({
-                    action: 'splice',
-                    path: `profiles[${i}].options.dictionaries`,
-                    start: j,
-                    deleteCount: 1,
-                    items: [],
-                });
-            }
+            if (dictionaries.some(({name}) => name === dictionaryTitle)) { targets.push({action: 'removeDictionaryByName', profileId, name: dictionaryTitle}); }
             if (general.mainDictionary === dictionaryTitle) {
-                targets.push({
-                    action: 'set',
-                    path: `profiles[${i}].options.general.mainDictionary`,
-                    value: '',
-                });
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: dictionaryTitle, value: '', requireDictionaryUninstalled: dictionaryTitle});
             }
             if (general.sortFrequencyDictionary === dictionaryTitle) {
-                targets.push({
-                    action: 'set',
-                    path: `profiles[${i}].options.general.sortFrequencyDictionary`,
-                    value: null,
-                });
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: dictionaryTitle, value: null, requireDictionaryUninstalled: dictionaryTitle});
             }
         }
-        if (targets.length > 0) {
-            await this._modifyGlobalSettings(targets);
-        }
+        return targets.length > 0 ? await this._modifyGlobalSettings(targets) : [];
     }
 
     /**
@@ -2680,6 +3639,8 @@ export class ImportProgressTracker {
      * @param {number} dictionaryCount
      */
     constructor(steps, dictionaryCount) {
+        /** @type {(() => boolean)|null} */
+        this._isImportRunCurrent = null;
         /** @type {import('dictionary-importer').ImportSteps} */
         this._steps = steps;
         /** @type {number} */
@@ -2717,6 +3678,12 @@ export class ImportProgressTracker {
         this._lastStatusText = '';
         /** @type {number} */
         this._lastPercent = -1;
+        /** @type {number} */
+        this._lastActivityTime = this._importStartTime;
+        /** @type {number} */
+        this._lastForwardProgressTime = this._importStartTime;
+        /** @type {string} */
+        this._lastProgressSignature = '';
 
         this.onProgress({nextStep: false, index: 0, count: 0});
     }
@@ -2741,6 +3708,16 @@ export class ImportProgressTracker {
         return this._dictionaryCount;
     }
 
+    /** @type {number} */
+    get lastActivityTime() {
+        return this._lastActivityTime;
+    }
+
+    /** @type {number} */
+    get lastForwardProgressTime() {
+        return this._lastForwardProgressTime;
+    }
+
     /**
      * @returns {Array<Record<string, unknown>>}
      */
@@ -2748,12 +3725,25 @@ export class ImportProgressTracker {
         return this._stepTimingHistory.map((item) => ({...item}));
     }
 
+    /** @param {() => boolean} check */
+    setImportRunCheck(check) {
+        this._isImportRunCurrent = check;
+    }
+
     /** @type {import('dictionary-worker').ImportProgressCallback} */
     onProgress(data) {
+        if (this._isImportRunCurrent !== null && !this._isImportRunCurrent()) { return; }
+        const now = safePerformance.now();
+        this._lastActivityTime = now;
         const {nextStep, index, count} = data;
         const previousStepIndex = this._stepIndex;
         if (nextStep && this._steps.length > 0) {
             this._stepIndex = Math.min(this._stepIndex + 1, this._steps.length - 1);
+        }
+        const progressSignature = `${this._dictionaryIndex}:${this._stepIndex}:${index}:${count}`;
+        if (progressSignature !== this._lastProgressSignature) {
+            this._lastProgressSignature = progressSignature;
+            this._lastForwardProgressTime = now;
         }
         const currentStep = this.currentStep;
         const currentLabel = currentStep?.label ?? 'Working';
@@ -2787,7 +3777,6 @@ export class ImportProgressTracker {
         }
 
         if (nextStep && this._steps.length > 0 && this._stepIndex !== previousStepIndex) {
-            const now = safePerformance.now();
             const completedStep = this._steps[previousStepIndex];
             const completedLabel = (typeof completedStep?.label === 'string' && completedStep.label.length > 0) ? completedStep.label : 'Starting import state';
             const stepDuration = now - this._stepStartTime;

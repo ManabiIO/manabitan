@@ -16,6 +16,7 @@
  */
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
+import {Mdx} from '../ext/js/comm/mdx.js';
 import {DictionaryWorker} from '../ext/js/dictionary/dictionary-worker.js';
 
 /**
@@ -29,6 +30,14 @@ function createBytes(length, seed = 0) {
         bytes[i] = (seed + i) % 251;
     }
     return bytes;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {ArrayBuffer}
+ */
+function getArrayBuffer(bytes) {
+    return /** @type {ArrayBuffer} */ (/** @type {unknown} */ (bytes.buffer));
 }
 
 class FakeWorker {
@@ -92,18 +101,227 @@ class FakeWorker {
             listener(/** @type {ErrorEvent} */ (/** @type {unknown} */ ({message})));
         }
     }
+
+    /** */
+    emitMessageError() {
+        for (const listener of this._listeners.messageerror) {
+            listener(/** @type {MessageEvent} */ (/** @type {unknown} */ ({data: null})));
+        }
+    }
 }
 
 afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+});
+
+describe('Mdx conversion worker client', () => {
+    test('returns sanitized worker phase timings with converted archive data', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdx = new Mdx();
+        /** @type {Array<{stage: string, completed: number, total: number}>} */
+        const progressEvents = [];
+        const invocationPromise = mdx.convertDictionary(
+            {
+                mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+                mddFiles: [new File([createBytes(3, 9)], 'fixture.mdd')],
+            },
+            (details) => {
+                progressEvents.push(details);
+            },
+        );
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        const [worker] = workerInstances;
+        expect(worker?.url).toBe('/js/dictionary/mdx-worker-main.js');
+        const postMessageCalls = worker?.postMessage.mock.calls ?? [];
+        const [message, transferables] = /** @type {[{action: string, params: {mdxFileName: string, mdxBytes: ArrayBuffer, mddFiles: Array<{name: string, bytes: ArrayBuffer}>}}, Transferable[]]} */ (/** @type {unknown} */ (postMessageCalls[0]));
+        expect(message.action).toBe('convertDictionary');
+        expect(message.params.mdxFileName).toBe('fixture.mdx');
+        expect(message.params.mddFiles[0].name).toBe('fixture.mdd');
+        expect(transferables).toHaveLength(2);
+
+        worker?.emitMessage({
+            action: 'progress',
+            params: {
+                details: {stage: 'convert', completed: 1, total: 2},
+            },
+        });
+        worker?.emitMessage({
+            action: 'complete',
+            params: {
+                result: {
+                    archiveContent: createBytes(5, 21).buffer,
+                    archiveFileName: 'fixture.zip',
+                    phaseTimings: [
+                        {
+                            phase: 'prepare-mdx:convert-entries',
+                            elapsedMs: 12,
+                            details: {
+                                ok: true,
+                                count: 1,
+                                nested: {ignored: true},
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+
+        await expect(invocationPromise).resolves.toStrictEqual({
+            archiveContent: createBytes(5, 21).buffer,
+            archiveFileName: 'fixture.zip',
+            phaseTimings: [
+                {
+                    phase: 'prepare-mdx:convert-entries',
+                    elapsedMs: 12,
+                    details: {
+                        ok: true,
+                        count: 1,
+                    },
+                },
+            ],
+        });
+        expect(progressEvents).toStrictEqual([
+            {stage: 'upload', completed: 4, total: 7},
+            {stage: 'upload', completed: 7, total: 7},
+            {stage: 'convert', completed: 1, total: 2},
+        ]);
+        expect(worker?.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('clears active state when worker startup or message transfer fails', async () => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker() {
+            throw new Error('worker blocked');
+        }));
+
+        const startupFailureMdx = new Mdx();
+        await expect(startupFailureMdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        })).rejects.toThrow('worker blocked');
+        expect(startupFailureMdx.isActive()).toBe(false);
+
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const messageFailureMdx = new Mdx();
+        const invocationPromise = messageFailureMdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        });
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+        workerInstances[0]?.emitMessageError();
+
+        await expect(invocationPromise).rejects.toThrow('MDX conversion worker message deserialization failed');
+        expect(messageFailureMdx.isActive()).toBe(false);
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('fails instead of hanging when worker sends malformed protocol data', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdx = new Mdx();
+        const invocationPromise = mdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        });
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+        workerInstances[0]?.emitMessage({
+            action: 'progress',
+            params: {details: {stage: 'convert', completed: Number.NaN, total: 1}},
+        });
+
+        await expect(invocationPromise).rejects.toThrow('MDX conversion worker returned malformed message');
+        expect(mdx.isActive()).toBe(false);
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('disconnect rejects active conversion instead of leaving it pending', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdx = new Mdx();
+        const invocationPromise = mdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        });
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        mdx.disconnect();
+
+        await expect(invocationPromise).rejects.toThrow('MDX conversion cancelled');
+        expect(mdx.isActive()).toBe(false);
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('times out when worker never sends a completion message', async () => {
+        vi.useFakeTimers();
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdx = new Mdx();
+        const invocationPromise = mdx.convertDictionary({
+            mdxFile: new File([createBytes(4, 3)], 'fixture.mdx'),
+        });
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        // Observe the assertion while advancing time, so a failed expectation
+        // is reported by this test instead of becoming an unhandled rejection.
+        await Promise.all([
+            expect(invocationPromise).rejects.toThrow('MDX conversion timed out while reading or converting files.'),
+            vi.advanceTimersByTimeAsync(180_000),
+        ]);
+
+        expect(mdx.isActive()).toBe(false);
+        expect(mdx.isConnected()).toBe(false);
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+        mdx.disconnect();
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+    });
 });
 
 describe('DictionaryWorker MDX import integration', () => {
     test('imports MDX bytes through the dictionary worker and forwards parser progress', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -112,8 +330,8 @@ describe('DictionaryWorker MDX import integration', () => {
         const dictionaryWorker = new DictionaryWorker();
         /** @type {import('dictionary-importer').ProgressData[]} */
         const progressEvents = [];
-        const mdxBytes = createBytes(12, 11).buffer;
-        const mddBytes = createBytes(8, 47).buffer;
+        const mdxBytes = getArrayBuffer(createBytes(12, 11));
+        const mddBytes = getArrayBuffer(createBytes(8, 47));
 
         const invocationPromise = dictionaryWorker.importMdxDictionary(
             'fixture.mdx',
@@ -136,7 +354,7 @@ describe('DictionaryWorker MDX import integration', () => {
         });
 
         const [worker] = workerInstances;
-        expect(worker?.url).toBe('/js/dictionary/dictionary-worker-main.js');
+        expect(worker?.url).toEqual(new URL('../ext/js/dictionary/dictionary-worker-main.js', import.meta.url));
         expect(worker?.options).toStrictEqual({type: 'module'});
 
         const postMessageCalls = worker?.postMessage.mock.calls ?? [];
@@ -187,7 +405,7 @@ describe('DictionaryWorker MDX import integration', () => {
     test('queries the direct MDX import version through the dictionary worker', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -217,10 +435,128 @@ describe('DictionaryWorker MDX import integration', () => {
         await expect(invocationPromise).resolves.toBe(1);
     });
 
+    test('rejects active reusable worker invocations when destroyed', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const dictionaryWorker = new DictionaryWorker({reuseWorker: true});
+        const invocationPromise = dictionaryWorker.getMdxVersion();
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        const expectation = expect(invocationPromise).rejects.toThrow('Dictionary worker destroyed');
+        dictionaryWorker.destroy();
+        await expectation;
+
+        const [worker] = workerInstances;
+        expect(worker?.terminate).toHaveBeenCalledTimes(1);
+        expect(worker?._listeners.message).toHaveLength(0);
+        expect(worker?._listeners.error).toHaveLength(0);
+        expect(worker?._listeners.messageerror).toHaveLength(0);
+    });
+
+    test('worker failure rejects the active reusable request and admits queued work on a fresh worker', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const dictionaryWorker = new DictionaryWorker({reuseWorker: true});
+        const versionPromise = dictionaryWorker.getMdxVersion();
+        const countPromise = dictionaryWorker.getDictionaryCounts(['Fixture'], true);
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+            expect(workerInstances[0]?.postMessage).toHaveBeenCalledTimes(1);
+        });
+
+        const versionExpectation = expect(versionPromise).rejects.toThrow('Dictionary worker failed: Dictionary worker exploded');
+        workerInstances[0]?.emitError('Dictionary worker exploded');
+        await versionExpectation;
+        expect(workerInstances[0]?.terminate).toHaveBeenCalledTimes(1);
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(2);
+            expect(workerInstances[1]?.postMessage).toHaveBeenCalledTimes(1);
+        });
+
+        const countExpectation = expect(countPromise).rejects.toThrow('Dictionary worker destroyed');
+        dictionaryWorker.destroy();
+        await countExpectation;
+        expect(workerInstances[1]?.terminate).toHaveBeenCalledTimes(1);
+    });
+
+    test('ignores stale image-details response delivery failures after async decode', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const dictionaryWorker = new DictionaryWorker();
+        const getImageDetails = vi.fn(async (content, _mediaType, transfer) => {
+            transfer.push(content);
+            return {
+                content,
+                width: 16,
+                height: 16,
+            };
+        });
+        Reflect.set(dictionaryWorker, '_dictionaryImporterMediaLoader', {getImageDetails});
+
+        const invocationPromise = dictionaryWorker.importDictionary(
+            getArrayBuffer(createBytes(4, 9)),
+            {prefixWildcardsSupported: true, yomitanVersion: '1.2.3.4'},
+            null,
+        );
+
+        await vi.waitFor(() => {
+            expect(workerInstances).toHaveLength(1);
+        });
+
+        const [worker] = workerInstances;
+        worker.postMessage.mockImplementation((message) => {
+            if (message?.action === 'getImageDetails.response') {
+                throw new Error('worker already gone');
+            }
+        });
+        const content = createBytes(3, 17).buffer;
+
+        worker.emitMessage({
+            action: 'getImageDetails',
+            params: {
+                id: 'image-1',
+                content,
+                mediaType: 'image/png',
+            },
+        });
+
+        await vi.waitFor(() => {
+            expect(getImageDetails).toHaveBeenCalledTimes(1);
+        });
+        expect(() => {
+            worker.emitError('Dictionary worker exploded');
+        }).not.toThrow();
+
+        await expect(invocationPromise).rejects.toThrow('Dictionary worker failed: Dictionary worker exploded');
+    });
+
     test('surfaces worker failures and disconnects cleanly during direct MDX import', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -229,7 +565,7 @@ describe('DictionaryWorker MDX import integration', () => {
         const dictionaryWorker = new DictionaryWorker();
         const invocationPromise = dictionaryWorker.importMdxDictionary(
             'fixture.mdx',
-            createBytes(4, 7).buffer,
+            getArrayBuffer(createBytes(4, 7)),
             [],
             {prefixWildcardsSupported: true, yomitanVersion: '1.2.3.4'},
             null,

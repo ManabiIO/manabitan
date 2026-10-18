@@ -17,6 +17,8 @@
  */
 
 import {EventDispatcher} from '../core/event-dispatcher.js';
+import {log} from '../core/log.js';
+import {generateId} from '../core/utilities.js';
 
 /**
  * This class represents a popup that is hosted in a new native window.
@@ -31,6 +33,12 @@ export class PopupWindow extends EventDispatcher {
      */
     constructor(application, id, depth, frameId) {
         super();
+        /** @type {number} */
+        this._publicationGeneration = 0;
+        /** @type {string} */
+        this._publicationSource = generateId(16);
+        /** @type {?(() => void)} */
+        this._cancelPendingPublication = null;
         /** @type {import('../application.js').Application} */
         this._application = application;
         /** @type {string} */
@@ -39,8 +47,12 @@ export class PopupWindow extends EventDispatcher {
         this._depth = depth;
         /** @type {number} */
         this._frameId = frameId;
-        /** @type {?number} */
-        this._popupTabId = null;
+        /** @type {?{id: number}} */
+        this._popupTab = null;
+        /** @type {?Promise<?{id: number}>} */
+        this._popupTabPromise = null;
+        /** @type {?object} */
+        this._showContentToken = null;
     }
 
     /**
@@ -125,6 +137,8 @@ export class PopupWindow extends EventDispatcher {
      * @returns {Promise<void>}
      */
     async setOptionsContext(optionsContext) {
+        this._cancelPendingPublication?.();
+        ++this._publicationGeneration;
         await this._invoke(false, 'displaySetOptionsContext', {optionsContext});
     }
 
@@ -140,7 +154,8 @@ export class PopupWindow extends EventDispatcher {
      * @param {boolean} _changeFocus Whether or not the parent popup or host frame should be focused.
      */
     hide(_changeFocus) {
-        // NOP
+        this._cancelPendingPublication?.();
+        ++this._publicationGeneration;
     }
 
     /**
@@ -148,7 +163,8 @@ export class PopupWindow extends EventDispatcher {
      * @returns {Promise<boolean>} `true` if the popup is visible, `false` otherwise.
      */
     async isVisible() {
-        return (this._popupTabId !== null && await this._application.api.isTabSearchPopup(this._popupTabId));
+        const popupTab = this._popupTab;
+        return (!this._application.webExtension.unloaded && popupTab !== null && await this._application.api.isTabSearchPopup(popupTab.id));
     }
 
     /**
@@ -185,11 +201,37 @@ export class PopupWindow extends EventDispatcher {
      * Shows and updates the positioning and content of the popup.
      * @param {import('popup').ContentDetails} _details Settings for the outer popup.
      * @param {?import('display').ContentDetails} displayDetails The details parameter passed to `Display.setContent`.
+     * @param {import('popup').PublicationGuard} [guard]
      * @returns {Promise<void>}
      */
-    async showContent(_details, displayDetails) {
+    async showContent(_details, displayDetails, guard) {
         if (displayDetails === null) { return; }
-        await this._invoke(true, 'displaySetContent', {details: displayDetails});
+        this._cancelPendingPublication?.();
+        const generation = ++this._publicationGeneration;
+        /** @type {import('popup').PublicationToken} */
+        const publication = {source: this._publicationSource, generation};
+        let dispatched = false;
+        let cancelled = false;
+        const cancel = () => {
+            if (cancelled) { return; }
+            cancelled = true;
+            if (dispatched) {
+                void this._invoke(false, 'displayCancelPublication', {publication}).catch((error) => {
+                    if (!this._application.webExtension.unloaded) { log.error(error); }
+                });
+            }
+        };
+        this._cancelPendingPublication = cancel;
+        const isCurrent = () => !cancelled && generation === this._publicationGeneration && (typeof guard === 'undefined' || guard.isCurrent());
+        const unsubscribe = guard?.subscribe?.(cancel);
+        try {
+            if (isCurrent()) {
+                await this._invoke(true, 'displaySetContent', {details: displayDetails, publication}, isCurrent, () => { dispatched = true; });
+            }
+        } finally {
+            if (this._cancelPendingPublication === cancel) { this._cancelPendingPublication = null; }
+            unsubscribe?.();
+        }
     }
 
     /**
@@ -284,44 +326,88 @@ export class PopupWindow extends EventDispatcher {
      * @param {boolean} open
      * @param {TName} action
      * @param {import('display').DirectApiParams<TName>} params
+     * @param {() => boolean} [isCurrent]
+     * @param {() => void} [onDispatch]
      * @returns {Promise<import('display').DirectApiReturn<TName>|undefined>}
      */
-    async _invoke(open, action, params) {
-        if (this._application.webExtension.unloaded) {
+    async _invoke(open, action, params, isCurrent = () => true, onDispatch = () => {}) {
+        if (this._application.webExtension.unloaded || !isCurrent()) {
             return void 0;
         }
 
         const message = /** @type {import('display').DirectApiMessageAny} */ ({action, params});
 
         const frameId = 0;
-        if (this._popupTabId !== null) {
+        let popupTab = this._popupTab;
+        if (popupTab !== null) {
             try {
+                if (!isCurrent()) { return void 0; }
+                onDispatch();
                 return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
-                    this._popupTabId,
+                    popupTab.id,
                     frameId,
                     'displayPopupMessage2',
                     message,
                 ));
             } catch (e) {
-                if (this._application.webExtension.unloaded) {
-                    open = false;
-                }
+                if (e instanceof Error && e.name === 'PopupContentTimeoutError') { throw e; }
+                if (!this._isInvocationActive(isCurrent)) { return void 0; }
+                if (this._popupTab === popupTab) { this._popupTab = null; }
             }
-            this._popupTabId = null;
         }
 
-        if (!open) {
+        if (!open || !isCurrent()) {
             return void 0;
         }
 
-        const {tabId} = await this._application.api.getOrCreateSearchPopup({focus: 'ifCreated'});
-        this._popupTabId = tabId;
+        popupTab = await this._getPopupTab();
+        if (popupTab === null || !this._isInvocationActive(isCurrent)) { return void 0; }
 
-        return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
-            this._popupTabId,
-            frameId,
-            'displayPopupMessage2',
-            message,
-        ));
+        try {
+            onDispatch();
+            return /** @type {import('display').DirectApiReturn<TName>} */ (await this._application.crossFrame.invokeTab(
+                popupTab.id,
+                frameId,
+                'displayPopupMessage2',
+                message,
+            ));
+        } catch (e) {
+            if (e instanceof Error && e.name === 'PopupContentTimeoutError') { throw e; }
+            if (!this._isInvocationActive(isCurrent)) { return void 0; }
+            if (this._popupTab === popupTab) { this._popupTab = null; }
+            throw e;
+        }
+    }
+
+    /**
+     * @param {() => boolean} isCurrent
+     * @returns {boolean}
+     */
+    _isInvocationActive(isCurrent) {
+        return !this._application.webExtension.unloaded && isCurrent();
+    }
+
+    /** @returns {Promise<?{id: number}>} */
+    async _getPopupTab() {
+        if (this._popupTab !== null) { return this._popupTab; }
+        if (this._popupTabPromise === null) {
+            const promise = this._createPopupTab().finally(() => {
+                if (this._popupTabPromise === promise) { this._popupTabPromise = null; }
+            });
+            this._popupTabPromise = promise;
+        }
+        return await this._popupTabPromise;
+    }
+
+    /** @returns {Promise<?{id: number}>} */
+    async _createPopupTab() {
+        const {tabId} = await this._application.api.getOrCreateSearchPopup({focus: 'ifCreated'});
+        if (this._application.webExtension.unloaded) { return null; }
+        if (typeof tabId !== 'number' || !Number.isSafeInteger(tabId) || tabId < 0) {
+            throw new Error('Invalid popup tab ID');
+        }
+        const popupTab = {id: tabId};
+        this._popupTab = popupTab;
+        return popupTab;
     }
 }

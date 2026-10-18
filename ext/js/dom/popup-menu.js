@@ -18,6 +18,7 @@
 
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {log} from '../core/log.js';
 import {querySelectorNotNull} from './query-selector.js';
 
 /**
@@ -265,8 +266,20 @@ export class PopupMenu extends EventDispatcher {
         PopupMenu.openMenus.delete(this);
 
         this._isClosed = true;
-        this._eventListeners.removeAllEventListeners();
-        this._itemEventListeners.removeAllEventListeners();
+        // Browser/extension context invalidation may make individual listener
+        // removals throw. Both collections must be drained and the menu must
+        // detach even if one of those cleanup operations reports failure.
+        for (const collection of [this._eventListeners, this._itemEventListeners]) {
+            try {
+                collection.removeAllEventListeners();
+            } catch (error) {
+                try {
+                    log.warn(error);
+                } catch (e) {
+                    // Diagnostics cannot prevent menu teardown.
+                }
+            }
+        }
         if (this._containerNode.parentNode !== null) {
             this._containerNode.parentNode.removeChild(this._containerNode);
         }

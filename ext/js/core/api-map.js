@@ -35,10 +35,32 @@ export function createApiMap(init) {
  * @throws {Error}
  */
 export function extendApiMap(map, init) {
-    for (const [key, value] of init) {
-        if (map.has(key)) { throw new Error(`The handler for ${String(key)} has already been registered`); }
-        map.set(key, value);
+    const keys = new Set();
+    for (const [key] of init) {
+        if (map.has(key) || keys.has(key)) { throw new Error(`The handler for ${String(key)} has already been registered`); }
+        keys.add(key);
     }
+    for (const [key, value] of init) { map.set(key, value); }
+}
+
+/**
+ * @template {import('api-map').ApiSurface} [TApiSurface=never]
+ * @template {unknown[]} [TExtraParams=[]]
+ * @param {import('api-map').ApiMap<TApiSurface, TExtraParams>} map
+ * @param {import('api-map').ApiMapInit<TApiSurface, TExtraParams>} init
+ * @returns {() => void}
+ */
+export function registerApiMapScope(map, init) {
+    const entries = /** @type {import('api-map').ApiMapInit<TApiSurface, TExtraParams>} */ (init.map(([key, value]) => [key, value]));
+    extendApiMap(map, entries);
+    let active = true;
+    return () => {
+        if (!active) { return; }
+        active = false;
+        for (const [key, value] of entries) {
+            if (map.get(key) === value) { map.delete(key); }
+        }
+    };
 }
 
 /**
@@ -75,20 +97,37 @@ export function invokeApiMapHandler(map, name, params, extraParams, callback, ha
         }
         return false;
     }
+    /**
+     * A response port can disappear while an async handler is running. Never
+     * mistake delivery failure for a handler failure (or publish twice), and
+     * never leave an unhandled rejection from an async response callback.
+     * @param {import('core').Response<import('api-map').ApiReturnAny<TApiSurface>>} response
+     */
+    const deliver = (response) => {
+        try { callback(response); } catch (_) { /* NOP */ }
+    };
     try {
         const promiseOrResult = handler(/** @type {import('core').SafeAny} */ (params), ...extraParams);
-        if (promiseOrResult instanceof Promise) {
-            /** @type {Promise<unknown>} */ (promiseOrResult).then(
-                (result) => { callback({result}); },
-                (error) => { callback({error: ExtensionError.serialize(error)}); },
+        // Realm-local instanceof rejects foreign Promise instances, and API
+        // handlers may return PromiseLike results. Both must be awaited before
+        // the response crosses an extension message boundary.
+        const asyncResult = (
+            promiseOrResult !== null &&
+            (typeof promiseOrResult === 'object' || typeof promiseOrResult === 'function') &&
+            typeof Reflect.get(promiseOrResult, 'then') === 'function'
+        );
+        if (asyncResult) {
+            void Promise.resolve(promiseOrResult).then(
+                (result) => { deliver({result}); },
+                (error) => { deliver({error: ExtensionError.serialize(error)}); },
             );
             return true;
         } else {
-            callback({result: promiseOrResult});
+            deliver({result: promiseOrResult});
             return false;
         }
     } catch (error) {
-        callback({error: ExtensionError.serialize(error)});
+        deliver({error: ExtensionError.serialize(error)});
         return false;
     }
 }

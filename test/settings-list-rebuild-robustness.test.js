@@ -29,8 +29,8 @@ import {createDomTest} from './fixtures/dom-test.js';
 const test = createDomTest();
 
 /**
- * @param {{options: unknown, instantiateTemplate: (name: string) => unknown}} overrides
- * @returns {{application: {api: object}, on: import('vitest').Mock, getOptions: import('vitest').Mock, getOptionsContext: import('vitest').Mock, instantiateTemplate: import('vitest').Mock, modifyProfileSettings: import('vitest').Mock, getDefaultOptions: import('vitest').Mock, refresh: import('vitest').Mock}}
+ * @param {{options: unknown, instantiateTemplate: (name: string) => Node}} overrides
+ * @returns {{application: {api: object}, on: ReturnType<typeof vi.fn>, getOptions: ReturnType<typeof vi.fn>, getOptionsContext: ReturnType<typeof vi.fn>, instantiateTemplate: ReturnType<typeof vi.fn>, modifyProfileSettings: ReturnType<typeof vi.fn>, getDefaultOptions: ReturnType<typeof vi.fn>, refresh: ReturnType<typeof vi.fn>}}
  */
 function createSettingsController(overrides) {
     return {
@@ -47,7 +47,27 @@ function createSettingsController(overrides) {
     };
 }
 
+/**
+ * @param {HTMLTemplateElement} template
+ * @returns {HTMLElement}
+ */
+function cloneTemplateElement(template) {
+    const element = template.content.firstElementChild;
+    if (element === null) { throw new Error('Template has no root element'); }
+    return /** @type {HTMLElement} */ (element.cloneNode(true));
+}
+
 describe('Settings list rebuild robustness', () => {
+    test('dictionary options refresh does not reconcile against cached database state', async () => {
+        const controller = /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
+        const updateEntries = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_updateEntries', updateEntries);
+
+        await Reflect.get(DictionaryController.prototype, '_refreshEntriesAfterOptionsChanged').call(controller);
+
+        expect(updateEntries).toHaveBeenCalledWith(expect.any(Object), false);
+    });
+
     test('translation text replacements skips broken entries during rebuild', async ({window}) => {
         window.document.body.innerHTML = `
             <button id="translation-text-replacement-add"></button>
@@ -79,7 +99,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'translation-text-replacement-entry') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.translation-text-replacement-test-input')?.remove();
                 }
@@ -127,7 +147,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'sentence-termination-character-entry') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.sentence-termination-character-input2')?.remove();
                 }
@@ -140,7 +160,7 @@ describe('Settings list rebuild robustness', () => {
 
         expect(settingsController.instantiateTemplate).toHaveBeenCalledTimes(2);
         expect(window.document.querySelectorAll('#sentence-termination-character-list .sentence-termination-character-entry')).toHaveLength(1);
-        expect((/** @type {HTMLElement|null} */ (window.document.querySelector('#sentence-termination-character-list-empty')))?.hidden).toBe(true);
+        expect(/** @type {HTMLElement|null} */ (window.document.querySelector('#sentence-termination-character-list-empty'))?.hidden).toBe(true);
     });
 
     test('extension keyboard shortcuts skips broken entries during rebuild', async ({window}) => {
@@ -175,7 +195,7 @@ describe('Settings list rebuild robustness', () => {
                 instantiateTemplate: vi.fn((name) => {
                     if (name !== 'extension-hotkey-list-item') { throw new Error(`Unexpected template: ${name}`); }
                     const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                    const node = /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
+                    const node = cloneTemplateElement(template);
                     if (callIndex === 2) {
                         node.querySelector('input')?.remove();
                     }
@@ -240,7 +260,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'profile-entry') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.profile-entry-menu-button')?.remove();
                 }
@@ -281,11 +301,11 @@ describe('Settings list rebuild robustness', () => {
                     <button id="dictionary-move-up"></button>
                     <button id="dictionary-move-down"></button>
                     <button class="dictionary-menu-button"></button>
-                    <button class="dictionary-outdated-button"></button>
-                    <button class="dictionary-integrity-button-check"></button>
-                    <button class="dictionary-integrity-button-warning"></button>
-                    <button class="dictionary-integrity-button-error"></button>
-                    <button class="dictionary-update-available"></button>
+                    <button class="dictionary-outdated-button" hidden></button>
+                    <button class="dictionary-integrity-button-check" hidden></button>
+                    <button class="dictionary-integrity-button-warning" hidden></button>
+                    <button class="dictionary-integrity-button-error" hidden></button>
+                    <button class="dictionary-update-available" hidden></button>
                     <div class="dictionary-alias"></div>
                     <div class="dictionary-revision"></div>
                     <div class="dictionary-item-title-container"></div>
@@ -298,26 +318,111 @@ describe('Settings list rebuild robustness', () => {
         Reflect.set(controller, '_dictionaryEntries', []);
         Reflect.set(controller, '_dictionaryEntryContainer', window.document.querySelector('#dictionary-list'));
         Reflect.set(controller, '_updateDictionaryEntryCount', vi.fn());
-        Reflect.set(controller, 'instantiateTemplateFragment', vi.fn(() => {
-            const callIndex = vi.mocked(controller.instantiateTemplateFragment).mock.calls.length;
+        const instantiateTemplateFragment = vi.fn(() => {
+            const callIndex = instantiateTemplateFragment.mock.calls.length;
             const fragment = /** @type {DocumentFragment} */ (template.content.cloneNode(true));
             if (callIndex === 2) {
                 fragment.querySelector('.dictionary-menu-button')?.remove();
             }
             return fragment;
-        }));
+        });
+        Reflect.set(controller, 'instantiateTemplateFragment', instantiateTemplateFragment);
         Reflect.set(controller, 'isDictionaryInTaskQueue', vi.fn(() => false));
 
-        const createDictionaryEntry = /** @type {(this: DictionaryController, index: number, dictionaryInfo: any, updateDownloadUrl: string|null, dictionaryDatabaseCounts: any) => void} */ (
+        const createDictionaryEntry = /** @type {(this: DictionaryController, index: number, profileId: string, settings: import('settings').DictionaryOptions, dictionaryInfo: any, updateDownloadUrl: string|null, dictionaryDatabaseCounts: any) => void} */ (
             Reflect.get(DictionaryController.prototype, '_createDictionaryEntry')
         );
 
-        createDictionaryEntry.call(controller, 0, {title: 'Dict 1', revision: '1', version: 3, importSuccess: true}, null, null);
-        createDictionaryEntry.call(controller, 1, {title: 'Dict 2', revision: '1', version: 3, importSuccess: true}, null, null);
+        const dictionarySettings = /** @type {import('settings').DictionaryOptions[]} */ ([
+            {name: 'Dict 1', alias: 'one', enabled: true, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: false},
+            {name: 'Dict 2', alias: 'two', enabled: true, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: false},
+        ]);
+        createDictionaryEntry.call(controller, 0, 'profile-a', dictionarySettings[0], {
+            title: 'Dict 1',
+            revision: '1',
+            version: 3,
+            importSuccess: true,
+            storageHealth: 'reimportRequired',
+        }, null, null);
+        createDictionaryEntry.call(controller, 1, 'profile-a', dictionarySettings[1], {title: 'Dict 2', revision: '1', version: 3, importSuccess: true}, null, null);
 
-        expect(Reflect.get(controller, 'instantiateTemplateFragment')).toHaveBeenCalledTimes(2);
+        expect(instantiateTemplateFragment).toHaveBeenCalledTimes(2);
         expect(window.document.querySelectorAll('#dictionary-list .dictionary-item')).toHaveLength(1);
         expect(Reflect.get(controller, '_dictionaryEntries')).toHaveLength(1);
+        const integrityError = /** @type {HTMLButtonElement} */ (window.document.querySelector('.dictionary-integrity-button-error'));
+        expect(integrityError.hidden).toBe(false);
+        expect(integrityError.title).toBe('Re-import required');
+    });
+
+    test('dictionary reorders rebuild real entries without stale registry nodes', async ({window}) => {
+        window.document.body.innerHTML = `
+            <div id="dictionary-list"><div class="dictionary-item-bottom"></div></div>
+            <template id="dictionary-template">
+                <div class="dictionary-item">
+                    <input class="dictionary-enabled" type="checkbox">
+                    <button id="dictionary-move-up"></button>
+                    <button id="dictionary-move-down"></button>
+                    <button class="dictionary-menu-button"></button>
+                    <button class="dictionary-outdated-button" hidden></button>
+                    <button class="dictionary-integrity-button-check" hidden></button>
+                    <button class="dictionary-integrity-button-warning" hidden></button>
+                    <button class="dictionary-integrity-button-error" hidden></button>
+                    <button class="dictionary-update-available" hidden></button>
+                    <div class="dictionary-alias"></div>
+                    <div class="dictionary-revision"></div>
+                    <div class="dictionary-item-title-container"></div>
+                </div>
+            </template>
+        `;
+
+        const controller = /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
+        const container = /** @type {HTMLElement} */ (window.document.querySelector('#dictionary-list'));
+        const template = /** @type {HTMLTemplateElement} */ (window.document.querySelector('#dictionary-template'));
+        const dictionaryInfo = /** @type {import('dictionary-importer').Summary[]} */ ([
+            {title: 'A', revision: '1', version: 3, importSuccess: true},
+            {title: 'B', revision: '2', version: 3, importSuccess: true},
+        ]);
+        const options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [
+            {name: 'A', alias: 'alpha', enabled: true, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: false},
+            {name: 'B', alias: 'beta', enabled: true, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: false},
+        ]}));
+        const settingsController = {
+            getOptionsContext: () => ({index: 0, profileId: 'profile-a'}),
+            getOptions: vi.fn(async () => structuredClone(options)),
+            async modifyProfileSettings() {
+                const item = options.dictionaries.splice(0, 1)[0];
+                options.dictionaries.splice(1, 0, item);
+                return [{}];
+            },
+            trigger: vi.fn(),
+        };
+
+        Reflect.set(controller, '_settingsController', settingsController);
+        Reflect.set(controller, '_dictionaries', dictionaryInfo);
+        Reflect.set(controller, '_dictionaryEntries', []);
+        Reflect.set(controller, '_dictionaryEntryContainer', container);
+        Reflect.set(controller, '_dictionaryModalBody', {scrollTop: 0, scroll: vi.fn()});
+        Reflect.set(controller, '_updateDictionariesEnabledWarnings', vi.fn());
+        Reflect.set(controller, 'isDictionaryInTaskQueue', vi.fn(() => false));
+        Reflect.set(controller, 'instantiateTemplateFragment', () => /** @type {DocumentFragment} */ (template.content.cloneNode(true)));
+
+        controller._createDictionaryEntry(0, 'profile-a', options.dictionaries[0], dictionaryInfo[0], 'https://example.test/a.zip', null);
+        controller._createDictionaryEntry(1, 'profile-a', options.dictionaries[1], dictionaryInfo[1], 'https://example.test/b.zip', null);
+        const oldEntries = [...Reflect.get(controller, '_dictionaryEntries')];
+        const cleanup = oldEntries.map((entry) => vi.spyOn(entry, 'cleanup'));
+
+        await controller.moveDictionaryOptions(0, 1);
+        await controller.moveDictionaryOptions(0, 1);
+
+        const entries = Reflect.get(controller, '_dictionaryEntries');
+        expect(entries.map((entry) => entry.dictionaryTitle)).toEqual(['A', 'B']);
+        expect(entries.map((entry) => entry.updateDownloadUrl)).toEqual([
+            'https://example.test/a.zip', 'https://example.test/b.zip',
+        ]);
+        expect(container.querySelectorAll('.dictionary-item')).toHaveLength(2);
+        expect(container.dataset.count).toBe('2');
+        expect(cleanup.every((spy) => spy.mock.calls.length === 1)).toBe(true);
+        expect(oldEntries.every((entry) => entry._nodes.length === 0)).toBe(true);
     });
 
     test('scan inputs controller skips broken entries during rebuild', async ({window}) => {
@@ -356,7 +461,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'scan-input') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.mouse-button[data-property=exclude]')?.remove();
                 }
@@ -414,7 +519,7 @@ describe('Settings list rebuild robustness', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'audio-source') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
+                const node = cloneTemplateElement(template);
                 if (callIndex === 2) {
                     node.querySelector('.audio-source-menu-button')?.remove();
                 }
@@ -462,11 +567,11 @@ describe('Settings list rebuild robustness', () => {
         const settingsController = {
             instantiateTemplate: vi.fn((name) => {
                 if (name === 'profile-condition-group') {
-                    return /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (groupTemplate.content.firstElementChild)).cloneNode(true));
+                    return cloneTemplateElement(groupTemplate);
                 }
                 if (name === 'profile-condition') {
                     const callIndex = settingsController.instantiateTemplate.mock.calls.filter(([templateName]) => templateName === 'profile-condition').length;
-                    const node = /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (conditionTemplate.content.firstElementChild)).cloneNode(true));
+                    const node = cloneTemplateElement(conditionTemplate);
                     if (callIndex === 2) {
                         node.querySelector('.profile-condition-menu-button')?.remove();
                     }
@@ -477,6 +582,7 @@ describe('Settings list rebuild robustness', () => {
             getOptionsFull: vi.fn().mockResolvedValue({
                 profiles: [
                     {
+                        id: 'profile-0',
                         conditionGroups: [
                             {conditions: [{type: 'popupLevel', operator: 'equal', value: '0'}]},
                             {conditions: [{type: 'popupLevel', operator: 'equal', value: '1'}]},
@@ -490,7 +596,7 @@ describe('Settings list rebuild robustness', () => {
         const controller = new ProfileConditionsUI(/** @type {any} */ (settingsController));
         controller.os = 'mac';
 
-        await expect(controller.prepare(0)).resolves.toBeUndefined();
+        await expect(controller.prepare(0, 'profile-0')).resolves.toBeUndefined();
 
         expect(window.document.querySelectorAll('#profile-condition-groups .profile-condition-group')).toHaveLength(1);
         expect(window.document.querySelectorAll('#profile-condition-groups .profile-condition')).toHaveLength(1);

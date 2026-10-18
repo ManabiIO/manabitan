@@ -38,74 +38,387 @@ function getDictionaryImportControllerMethod(name) {
 }
 
 describe('DictionaryImportController staged update profile rewrites', () => {
-    const importDictionaryFromZip = /** @type {(this: DictionaryImportController, file: File, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, useImportSession: boolean, finalizeImportSession: boolean, importRunGeneration: number, onProgress: import('dictionary-worker').ImportProgressCallback) => Promise<{errors: Error[], importedTitle: string|null}>} */ (getDictionaryImportControllerMethod('_importDictionaryFromZip'));
+    const importDictionaryFromZip = /** @type {(this: DictionaryImportController, file: File, profilesDictionarySettings: import('settings-controller').ProfilesDictionarySettings, importDetails: import('dictionary-importer').ImportDetails, useImportSession: boolean, finalizeImportSession: boolean, onProgress: import('dictionary-worker').ImportProgressCallback) => Promise<{errors: Error[], importedTitle: string|null}>} */ (getDictionaryImportControllerMethod('_importDictionaryFromZip'));
+    const getImportPerformanceFlags = /** @type {(this: DictionaryImportController) => {skipMediaImport: boolean, mediaResolutionConcurrency: number, zipUseWebWorkers: boolean|null, termContentBlockTargetBytes: number|null}} */ (getDictionaryImportControllerMethod('_getImportPerformanceFlags'));
+    const runImportWithWatchdog = /** @type {(this: DictionaryImportController, importPromise: Promise<void>, label: string, progressTracker?: {lastActivityTime: number, lastForwardProgressTime: number}|null) => Promise<void>} */ (getDictionaryImportControllerMethod('_runImportWithWatchdog'));
+    const finalizeImportedDictionaryResult = /** @type {(this: DictionaryImportController, context: Record<string, unknown>) => Promise<{errors: Error[], importedTitle: string|null}>} */ (getDictionaryImportControllerMethod('_finalizeImportedDictionaryResult'));
+    const finalizeDeferredImportedDictionaries = /** @type {(this: DictionaryImportController, contexts: Record<string, unknown>[], importRunGeneration: number) => Promise<{errors: Error[], importedTitles: string[]}>} */ (getDictionaryImportControllerMethod('_finalizeDeferredImportedDictionaries'));
+    const verifyImportedDictionaryVisible = /** @type {(this: DictionaryImportController, dictionaryTitle: string, requireEnabledForActiveProfile: boolean) => Promise<void>} */ (getDictionaryImportControllerMethod('_verifyImportedDictionaryVisible'));
+    const signalImportSessionCompletion = /** @type {(this: DictionaryImportController, details: {importRunGeneration: number, importRunCurrent: boolean, errorCount: number, importedTitles: string[]}) => void} */ (getDictionaryImportControllerMethod('_signalImportSessionCompletion'));
+    const readAllDirectoryEntries = /** @type {(this: DictionaryImportController, directoryReader: FileSystemDirectoryReader) => Promise<FileSystemEntry[]>} */ (getDictionaryImportControllerMethod('_readAllDirectoryEntries'));
+    const onFileDrop = /** @type {(this: DictionaryImportController, event: DragEvent) => Promise<void>} */ (getDictionaryImportControllerMethod('_onFileDrop'));
 
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+        Reflect.deleteProperty(globalThis, 'manabitanImportPerformanceFlags');
+        Reflect.deleteProperty(globalThis, '__manabitanImportCompletionSignalEnabled');
+        Reflect.deleteProperty(globalThis, '__manabitanImportCompletionSequence');
+        Reflect.deleteProperty(globalThis, '__manabitanLastImportCompletion');
     });
 
-    test.each([true, false])('file import reads the owning page before Firefox transfer=%s', async (firefoxTransport) => {
-        const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
-        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: firefoxTransport ? {} : {serviceWorker: {}}});
-        vi.spyOn(console, 'log').mockImplementation(() => {});
+    test('uses the profiled media concurrency default and clamps debug overrides', () => {
         const controller = createControllerForInternalTests();
-        const file = new File([new Uint8Array([80, 75, 5, 6])], 'replacement.zip', {type: 'application/zip'});
-        const readArchive = vi.spyOn(file, 'arrayBuffer');
-        const importDictionaryOffscreen = vi.fn().mockResolvedValue({result: null, errors: []});
-        Reflect.set(controller, '_settingsController', {application: {api: {importDictionaryOffscreen}}});
-        Reflect.set(controller, '_finalizeImportedDictionaryResult', vi.fn().mockResolvedValue({errors: [], importedTitle: null}));
-        const details = {dictionaryTitleOverride: 'Test [update-staging abc]', updateSessionToken: 'abc'};
-        const onProgress = vi.fn();
-        try {
-            await importDictionaryFromZip.call(controller, file, null, details, false, false, 1, onProgress);
-            expect(importDictionaryOffscreen).toHaveBeenCalledOnce();
-            const [archive, receivedDetails, receivedProgress] = importDictionaryOffscreen.mock.calls[0];
-            expect(receivedDetails).toEqual(details);
-            expect(receivedProgress).toBe(onProgress);
-            if (firefoxTransport) {
-                expect(readArchive).toHaveBeenCalledOnce();
-                expect(archive).toBeInstanceOf(ArrayBuffer);
-                expect([...new Uint8Array(archive)]).toEqual([80, 75, 5, 6]);
-            } else {
-                expect(readArchive).not.toHaveBeenCalled();
-                expect(archive).toBe(file);
-            }
-        } finally {
-            if (typeof navigatorDescriptor === 'undefined') {
-                Reflect.deleteProperty(globalThis, 'navigator');
-            } else {
-                Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
+
+        expect(getImportPerformanceFlags.call(controller).mediaResolutionConcurrency).toBe(16);
+        expect(getImportPerformanceFlags.call(controller).skipMediaImport).toBe(false);
+        expect(getImportPerformanceFlags.call(controller).zipUseWebWorkers).toBeNull();
+        expect(getImportPerformanceFlags.call(controller).termContentBlockTargetBytes).toBeNull();
+
+        Reflect.set(globalThis, 'manabitanImportPerformanceFlags', {
+            mediaResolutionConcurrency: 100,
+            skipMediaImport: true,
+            zipUseWebWorkers: false,
+            termContentBlockTargetBytes: Number.MAX_SAFE_INTEGER,
+        });
+        expect(getImportPerformanceFlags.call(controller).mediaResolutionConcurrency).toBe(32);
+        expect(getImportPerformanceFlags.call(controller).skipMediaImport).toBe(true);
+        expect(getImportPerformanceFlags.call(controller).zipUseWebWorkers).toBe(false);
+        expect(getImportPerformanceFlags.call(controller).termContentBlockTargetBytes).toBe(16 * 1024 * 1024);
+
+        Reflect.set(globalThis, 'manabitanImportPerformanceFlags', {zipUseWebWorkers: true});
+        expect(getImportPerformanceFlags.call(controller).zipUseWebWorkers).toBe(true);
+    });
+
+    test('rejects directory enumeration when the browser reports a read error', async () => {
+        const controller = createControllerForInternalTests();
+        const expectedError = new DOMException('Directory became unavailable', 'NotReadableError');
+        const directoryReader = /** @type {FileSystemDirectoryReader} */ ({
+            readEntries(_success, failure) {
+                failure?.(expectedError);
+            },
+        });
+
+        await expect(readAllDirectoryEntries.call(controller, directoryReader)).rejects.toBe(expectedError);
+    });
+
+    test('surfaces directory enumeration failures instead of leaving a rejected drop event', async () => {
+        const controller = createControllerForInternalTests();
+        const expectedError = new DOMException('Directory became unavailable', 'NotReadableError');
+        const remove = vi.fn();
+        const setVisible = vi.fn();
+        const showErrors = vi.fn();
+        Reflect.set(controller, '_importFileDrop', {classList: {remove}});
+        Reflect.set(controller, '_importModal', {setVisible});
+        Reflect.set(controller, '_getAllFileEntries', vi.fn().mockRejectedValue(expectedError));
+        Reflect.set(controller, '_showErrors', showErrors);
+        const event = /** @type {DragEvent} */ (/** @type {unknown} */ ({
+            preventDefault: vi.fn(),
+            dataTransfer: {items: []},
+        }));
+
+        await expect(onFileDrop.call(controller, event)).resolves.toBeUndefined();
+        expect(showErrors).toHaveBeenCalledWith([expectedError]);
+        expect(setVisible).toHaveBeenCalledWith(false);
+        expect(remove).toHaveBeenCalledWith('drag-over');
+    });
+
+    test('publishes a monotonic import completion boundary only when enabled', () => {
+        const controller = createControllerForInternalTests();
+        const dispatchEvent = vi.fn();
+        class TestCustomEvent {
+            /**
+             * @param {string} type
+             * @param {{detail?: unknown}} [options]
+             */
+            constructor(type, options) {
+                this.type = type;
+                this.detail = options?.detail;
             }
         }
+        vi.stubGlobal('dispatchEvent', dispatchEvent);
+        vi.stubGlobal('CustomEvent', TestCustomEvent);
+        const details = {
+            importRunGeneration: 7,
+            importRunCurrent: true,
+            errorCount: 0,
+            importedTitles: ['JMdict'],
+        };
+
+        signalImportSessionCompletion.call(controller, details);
+        expect(Reflect.has(globalThis, '__manabitanLastImportCompletion')).toBe(false);
+        expect(dispatchEvent).not.toHaveBeenCalled();
+
+        Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
+        Reflect.set(globalThis, '__manabitanImportCompletionSequence', 4);
+        signalImportSessionCompletion.call(controller, details);
+
+        expect(Reflect.get(globalThis, '__manabitanImportCompletionSequence')).toBe(5);
+        const completion = Reflect.get(globalThis, '__manabitanLastImportCompletion');
+        expect(completion).toMatchObject({...details, sequence: 5});
+        const completionRecord = /** @type {{completedAtMonotonicMs?: unknown}} */ (/** @type {unknown} */ (completion));
+        const {completedAtMonotonicMs} = completionRecord;
+        expect(completedAtMonotonicMs).toEqual(expect.any(Number));
+        expect(Number.isFinite(completedAtMonotonicMs)).toBe(true);
+        expect(completedAtMonotonicMs).toBeGreaterThanOrEqual(0);
+        expect(dispatchEvent).toHaveBeenCalledOnce();
+        expect(dispatchEvent.mock.calls[0][0]).toMatchObject({
+            type: 'manabitan:dictionary-import-complete',
+            detail: {...details, sequence: 5},
+        });
     });
 
-    test('owner-page file read failure rejects before admitting a runtime import', async () => {
-        const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
-        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {}});
-        vi.spyOn(console, 'log').mockImplementation(() => {});
+    test('watchdog recovery terminates an active MDX conversion worker', async () => {
         const controller = createControllerForInternalTests();
-        const file = new File(['unreadable archive'], 'replacement.zip');
-        vi.spyOn(file, 'arrayBuffer').mockRejectedValue(new Error('Archive owner read failed'));
-        const importDictionaryOffscreen = vi.fn();
-        const finalize = vi.fn();
-        Reflect.set(controller, '_settingsController', {application: {api: {importDictionaryOffscreen}}});
-        Reflect.set(controller, '_finalizeImportedDictionaryResult', finalize);
-        try {
-            await expect(importDictionaryFromZip.call(controller, file, null, {}, false, false, 1, vi.fn())).rejects.toThrow('Archive owner read failed');
-            expect(importDictionaryOffscreen).not.toHaveBeenCalled();
-            expect(finalize).not.toHaveBeenCalled();
-        } finally {
-            if (typeof navigatorDescriptor === 'undefined') {
-                Reflect.deleteProperty(globalThis, 'navigator');
-            } else {
-                Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
-            }
+        const disconnect = vi.fn();
+        const setDictionaryImportMode = vi.fn().mockResolvedValue(void 0);
+        vi.stubGlobal('document', {querySelectorAll: vi.fn().mockReturnValue([])});
+        Reflect.set(controller, '_activeImportRunGeneration', 4);
+        Reflect.set(controller, '_activeImportOwnerId', 'mdx-owner');
+        Reflect.set(controller, '_activeMdx', {disconnect});
+        Reflect.set(controller, '_setRecommendedError', vi.fn());
+        Reflect.set(controller, '_errorToString', vi.fn().mockReturnValue('timed out'));
+        Reflect.set(controller, '_showErrors', vi.fn());
+        Reflect.set(controller, '_recommendedDictionaryQueue', ['pending']);
+        Reflect.set(controller, '_recommendedDictionaryActiveImport', true);
+        Reflect.set(controller, '_recommendedDictionaryCurrentUrl', 'https://example.test/dictionary.mdx');
+        Reflect.set(controller, '_updateRecommendedImportDebugState', vi.fn());
+        Reflect.set(controller, '_setModifying', vi.fn());
+        Reflect.set(controller, '_statusFooter', null);
+        Reflect.set(controller, '_settingsController', {application: {api: {setDictionaryImportMode}}});
+        Reflect.set(controller, '_triggerStorageChanged', vi.fn());
+
+        Reflect.get(DictionaryImportController.prototype, '_forceRecoverHungImportSession').call(
+            controller,
+            new Error('MDX import did not complete within 180000ms'),
+            'MDX import',
+        );
+        await Promise.resolve();
+
+        expect(disconnect).toHaveBeenCalledOnce();
+        expect(Reflect.get(controller, '_activeMdx')).toBeNull();
+        expect(setDictionaryImportMode).toHaveBeenCalledWith(false, 'mdx-owner');
+        expect(Reflect.get(controller, '_activeImportOwnerId')).toBeUndefined();
+        expect(Reflect.get(controller, '_activeImportRunGeneration')).toBe(5);
+    });
+
+    test('page watchdog allows long imports that continue reporting progress', async () => {
+        vi.useFakeTimers();
+        const controller = createControllerForInternalTests();
+        const forceRecover = vi.fn();
+        Reflect.set(controller, '_forceRecoverHungImportSession', forceRecover);
+        let resolveImport = /** @type {() => void} */ (() => {});
+        const importPromise = new Promise((resolve) => {
+            resolveImport = () => { resolve(void 0); };
+        });
+        const progressTracker = {lastActivityTime: performance.now(), lastForwardProgressTime: performance.now()};
+        const result = runImportWithWatchdog.call(controller, importPromise, 'Test import', progressTracker);
+
+        await vi.advanceTimersByTimeAsync(179_000);
+        progressTracker.lastActivityTime = performance.now();
+        progressTracker.lastForwardProgressTime = performance.now();
+        await vi.advanceTimersByTimeAsync(179_000);
+        resolveImport();
+
+        await expect(result).resolves.toBeUndefined();
+        expect(forceRecover).not.toHaveBeenCalled();
+    });
+
+    test('page watchdog recovers an import after sustained inactivity', async () => {
+        vi.useFakeTimers();
+        const controller = createControllerForInternalTests();
+        const forceRecover = vi.fn();
+        Reflect.set(controller, '_forceRecoverHungImportSession', forceRecover);
+        const importPromise = new Promise(() => {});
+        const progressTracker = {lastActivityTime: performance.now(), lastForwardProgressTime: performance.now()};
+        const result = runImportWithWatchdog.call(controller, importPromise, 'Test import', progressTracker);
+        const expectation = expect(result).rejects.toThrow(/without progress/);
+
+        await vi.advanceTimersByTimeAsync(180_000);
+
+        await expectation;
+        expect(forceRecover).toHaveBeenCalledOnce();
+    });
+
+    test('page watchdog ignores duplicate callback activity without forward progress', async () => {
+        vi.useFakeTimers();
+        const controller = createControllerForInternalTests();
+        const forceRecover = vi.fn();
+        Reflect.set(controller, '_forceRecoverHungImportSession', forceRecover);
+        const importPromise = new Promise(() => {});
+        const progressTracker = {lastActivityTime: performance.now(), lastForwardProgressTime: performance.now()};
+        const result = runImportWithWatchdog.call(controller, importPromise, 'Test import', progressTracker);
+        const expectation = expect(result).rejects.toThrow(/without progress/);
+
+        for (let elapsed = 0; elapsed < 180_000; elapsed += 30_000) {
+            await vi.advanceTimersByTimeAsync(30_000);
+            progressTracker.lastActivityTime = performance.now();
         }
+
+        await expectation;
+        expect(forceRecover).toHaveBeenCalledOnce();
     });
 
-    test('skips profile dictionary rewrites for profiles without carried-over update settings', async () => {
+    test('publishes shared-session settings only after all worker results and enables every dictionary', async () => {
         const controller = createControllerForInternalTests();
-        Reflect.set(controller, '_activeImportRunGeneration', 1);
+        const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
+        const optionsFull = /** @type {import('settings').Options} */ (/** @type {unknown} */ ({
+            profiles: [
+                {
+                    id: 'profile-1',
+                    options: {
+                        dictionaries: [],
+                        general: {mainDictionary: '', sortFrequencyDictionary: null},
+                    },
+                },
+                {
+                    id: 'profile-2',
+                    options: {
+                        dictionaries: [],
+                        general: {mainDictionary: '', sortFrequencyDictionary: null},
+                    },
+                },
+            ],
+        }));
+        const modifyGlobalSettings = vi.fn(async (targets) => {
+            for (const target of targets) {
+                if (target.action !== 'ensureDictionary') { continue; }
+                const profile = optionsFull.profiles.find(({id}) => id === target.profileId);
+                if (profile && !profile.options.dictionaries.some(({name}) => name === target.item.name)) {
+                    profile.options.dictionaries.push(target.item);
+                }
+            }
+            return targets.map(() => ({}));
+        });
+        Reflect.set(controller, '_activeImportRunGeneration', 11);
+        Reflect.set(controller, '_settingsController', {
+            profileIndex: 1,
+            getOptionsContext: () => ({profileId: 'profile-2', index: 1}),
+            application: {api: {triggerDatabaseUpdated}},
+            getOptionsFull: vi.fn(async () => optionsFull),
+            modifyGlobalSettings,
+        });
+        Reflect.set(controller, '_recordImportDebugSnapshot', vi.fn());
+        Reflect.set(controller, '_showErrors', vi.fn());
+
+        /** @type {Record<string, unknown>[]} */
+        const deferredFinalizations = [];
+        /**
+         * @param {string} title
+         * @param {boolean} finalizeImportSession
+         * @returns {Record<string, unknown>}
+         */
+        const createContext = (title, finalizeImportSession) => ({
+            dictionaryTitle: `${title}.zip`,
+            importStartTime: performance.now(),
+            importDetails: {},
+            importResult: {
+                result: {title, revision: '1', sequenced: false, styles: ''},
+                errors: [],
+                debug: {usesFallbackStorage: false, useImportSession: true, finalizeImportSession},
+            },
+            workerImportStartTime: performance.now(),
+            workerImportEndTime: performance.now(),
+            useImportSession: true,
+            finalizeImportSession,
+            importRunGeneration: 11,
+            profilesDictionarySettings: null,
+            localPhaseTimings: [],
+            deferredFinalizations,
+        });
+
+        await finalizeImportedDictionaryResult.call(controller, createContext('JMdict', false));
+        await finalizeImportedDictionaryResult.call(controller, createContext('JMnedict', true));
+
+        expect(deferredFinalizations).toHaveLength(2);
+        expect(modifyGlobalSettings).not.toHaveBeenCalled();
+        expect(triggerDatabaseUpdated).not.toHaveBeenCalled();
+
+        const result = await finalizeDeferredImportedDictionaries.call(controller, deferredFinalizations, 11);
+
+        expect(result.errors).toHaveLength(0);
+        expect(result.importedTitles).toStrictEqual(['JMdict', 'JMnedict']);
+        expect(triggerDatabaseUpdated).toHaveBeenCalledTimes(1);
+        expect(deferredFinalizations).toHaveLength(0);
+        expect(optionsFull.profiles[0].options.dictionaries).toMatchObject([
+            {name: 'JMdict', enabled: false},
+            {name: 'JMnedict', enabled: false},
+        ]);
+        expect(optionsFull.profiles[1].options.dictionaries).toMatchObject([
+            {name: 'JMdict', enabled: true},
+            {name: 'JMnedict', enabled: true},
+        ]);
+    });
+
+    test('continues deferred finalization after an item failure and still refreshes once', async () => {
+        const controller = createControllerForInternalTests();
+        const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
+        const finalizeItem = vi.fn()
+            .mockRejectedValueOnce(new Error('first settings write failed'))
+            .mockResolvedValueOnce({errors: [], importedTitle: 'JMnedict'});
+        const verifyVisible = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_activeImportRunGeneration', 17);
+        Reflect.set(controller, '_settingsController', {application: {api: {triggerDatabaseUpdated}}});
+        Reflect.set(controller, '_finalizeImportedDictionaryResult', finalizeItem);
+        Reflect.set(controller, '_verifyImportedDictionaryVisible', verifyVisible);
+        Reflect.set(controller, '_recordImportLocalPhase', vi.fn());
+        const contexts = [
+            {dictionaryTitle: 'JMdict.zip', profilesDictionarySettings: null, localPhaseTimings: []},
+            {dictionaryTitle: 'JMnedict.zip', profilesDictionarySettings: null, localPhaseTimings: []},
+        ];
+
+        const result = await finalizeDeferredImportedDictionaries.call(controller, contexts, 17);
+
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].message).toContain('JMdict.zip');
+        expect(result.importedTitles).toStrictEqual(['JMnedict']);
+        expect(finalizeItem).toHaveBeenCalledTimes(2);
+        expect(triggerDatabaseUpdated).toHaveBeenCalledTimes(1);
+        expect(verifyVisible).toHaveBeenCalledWith('JMnedict', true);
+        expect(contexts).toHaveLength(0);
+    });
+
+    test('drops stale deferred finalizations without publishing settings or notifications', async () => {
+        const controller = createControllerForInternalTests();
+        const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
+        const finalizeItem = vi.fn();
+        Reflect.set(controller, '_activeImportRunGeneration', 19);
+        Reflect.set(controller, '_settingsController', {application: {api: {triggerDatabaseUpdated}}});
+        Reflect.set(controller, '_finalizeImportedDictionaryResult', finalizeItem);
+        const contexts = [{dictionaryTitle: 'JMdict.zip'}];
+
+        const result = await finalizeDeferredImportedDictionaries.call(controller, contexts, 18);
+
+        expect(result.errors).toHaveLength(1);
+        expect(result.importedTitles).toHaveLength(0);
+        expect(finalizeItem).not.toHaveBeenCalled();
+        expect(triggerDatabaseUpdated).not.toHaveBeenCalled();
+        expect(contexts).toHaveLength(0);
+    });
+
+    test('treats missing active-profile enablement as a failed import verification', async () => {
+        const controller = createControllerForInternalTests();
+        Reflect.set(controller, '_settingsController', {
+            profileIndex: 0,
+            getOptionsFull: vi.fn().mockResolvedValue({
+                profiles: [{id: 'profile-1', options: {dictionaries: [{name: 'JMdict', enabled: false}]}}],
+            }),
+        });
+
+        await expect(verifyImportedDictionaryVisible.call(controller, 'JMdict', true)).rejects.toThrow(/not enabled/);
+    });
+
+
+    test('visibility checks the exact installed title, not its trimmed sibling', async () => {
+        const title = ' \ufeffJMdict ';
+        const controller = createControllerForInternalTests();
+        const exact = {name: title, enabled: true};
+        const sibling = {name: 'JMdict', enabled: false};
+        Reflect.set(controller, '_settingsController', {
+            profileIndex: 0,
+            getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'profile-1', options: {dictionaries: [exact, sibling]}}]}),
+        });
+        await expect(verifyImportedDictionaryVisible.call(controller, title, true)).resolves.toBeUndefined();
+        exact.enabled = false;
+        sibling.enabled = true;
+        await expect(verifyImportedDictionaryVisible.call(controller, title, true)).rejects.toThrow('was not enabled');
+    });
+
+    test.each(['', ' \ufeff'])('profile update preserves exact titles: %j', async (padding) => {
+        const oldTitle = `${padding}Jitendex.org [2025-01-01]${padding}`;
+        const newTitle = `${padding}Jitendex.org [2026-02-05]${padding}`;
+        const controller = createControllerForInternalTests();
         const replaceDictionaryTitle = vi.fn().mockResolvedValue(void 0);
         const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
         const setAllSettings = vi.fn().mockResolvedValue(void 0);
@@ -155,7 +468,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         Reflect.set(controller, '_showErrors', showErrors);
         Reflect.set(controller, '_recordImportDebugSnapshot', vi.fn());
         Reflect.set(controller, '_tryImportDictionaryOffscreen', vi.fn().mockResolvedValue({
-            result: {title: 'Jitendex staged [update-staging token123]', sourceTitle: 'Jitendex.org [2026-02-05]'},
+            result: {title: 'Jitendex staged [update-staging token123]', sourceTitle: newTitle},
             errors: [],
             debug: {importerDebug: {phaseTimings: []}},
         }));
@@ -167,7 +480,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
                 'profile-1': [{
                     index: 0,
                     alias: 'Jitendex',
-                    name: 'Jitendex.org [2025-01-01]',
+                    name: oldTitle,
                     enabled: true,
                     allowSecondarySearches: false,
                     definitionsCollapsible: 'not-collapsible',
@@ -176,24 +489,74 @@ describe('DictionaryImportController staged update profile rewrites', () => {
                 }],
             },
             /** @type {import('dictionary-importer').ImportDetails} */ (/** @type {unknown} */ ({
-                replacementDictionaryTitle: 'Jitendex.org [2025-01-01]',
+                replacementDictionaryTitle: oldTitle,
                 updateSessionToken: 'token123',
                 yomitanVersion: '1.2.3.4',
             })),
             false,
             false,
-            1,
             vi.fn(),
         );
 
-        expect(result.errors).toEqual([]);
-        expect(result.importedTitle).toBe('Jitendex.org [2026-02-05]');
+        expect(result.errors).toHaveLength(0);
+        expect(result.importedTitle).toBe(newTitle);
         expect(replaceDictionaryTitle).toHaveBeenCalledTimes(1);
+        expect(replaceDictionaryTitle).toHaveBeenCalledWith(expect.objectContaining({toDictionaryTitle: newTitle, replacedDictionaryTitle: oldTitle}));
         expect(triggerDatabaseUpdated).toHaveBeenCalledTimes(1);
-        expect(verifyImportedDictionaryVisible).toHaveBeenCalledWith('Jitendex.org [2026-02-05]', false);
+        expect(verifyImportedDictionaryVisible).toHaveBeenCalledWith(newTitle, false);
         expect(setAllSettings).toHaveBeenCalledTimes(1);
         expect(options.profiles[0].options.anki.cardFormats[0].fields.expression.value).toContain('jitendexorg-2026-02-05');
         expect(options.profiles[1].options.anki.cardFormats[0].fields.expression.value).toBe('{{untouched}}');
         expect(showErrors).not.toHaveBeenCalled();
+    });
+});
+
+describe('DictionaryImportController URL download cancellation', () => {
+    const downloadDictionaryFileViaXhr = /** @type {(this: DictionaryImportController, url: string, timeoutMs: number, onProgress: import('dictionary-worker').ImportProgressCallback, abortSignal: AbortSignal) => Promise<File>} */ (getDictionaryImportControllerMethod('_downloadDictionaryFileViaXhr'));
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+    });
+
+    test('does not send XHR when the abort signal is already cancelled', async () => {
+        /** @type {FakeXMLHttpRequest[]} */
+        const requests = [];
+        class FakeXMLHttpRequest {
+            /** */
+            constructor() {
+                this.open = vi.fn();
+                this.send = vi.fn();
+                this.abort = vi.fn();
+                this.getResponseHeader = vi.fn(() => null);
+                this.responseType = '';
+                this.timeout = 0;
+                this.onload = null;
+                this.onerror = null;
+                this.onabort = null;
+                this.ontimeout = null;
+                this.onprogress = null;
+                this.status = 0;
+                this.response = null;
+                requests.push(this);
+            }
+        }
+        vi.stubGlobal('XMLHttpRequest', FakeXMLHttpRequest);
+
+        const controller = createControllerForInternalTests();
+        const abortController = new AbortController();
+        abortController.abort(new Error('Cancelled before download'));
+
+        await expect(downloadDictionaryFileViaXhr.call(
+            controller,
+            'https://example.com/dictionary.zip',
+            1000,
+            vi.fn(),
+            abortController.signal,
+        )).rejects.toThrow('Cancelled before download');
+
+        expect(requests).toHaveLength(1);
+        expect(requests[0].open).toHaveBeenCalledTimes(1);
+        expect(requests[0].send).not.toHaveBeenCalled();
     });
 });

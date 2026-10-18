@@ -46,13 +46,19 @@ export class FrameAncestryHandler {
 
     /**
      * Initializes event event listening.
+     * @throws {unknown}
      */
     prepare() {
         if (this._isPrepared) { return; }
-        window.addEventListener('message', this._onWindowMessage.bind(this), false);
-        this._crossFrameApi.registerHandlers([
+        const dispose = this._crossFrameApi.registerHandlersScoped([
             ['frameAncestryHandlerRequestFrameInfoResponse', this._onFrameAncestryHandlerRequestFrameInfoResponse.bind(this)],
         ]);
+        try {
+            window.addEventListener('message', this._onWindowMessage.bind(this), false);
+        } catch (error) {
+            dispose();
+            throw error;
+        }
         this._isPrepared = true;
     }
 
@@ -72,7 +78,11 @@ export class FrameAncestryHandler {
      */
     async getFrameAncestryInfo() {
         if (this._getFrameAncestryInfoPromise === null) {
-            this._getFrameAncestryInfoPromise = this._getFrameAncestryInfo(5000);
+            const promise = this._getFrameAncestryInfo(5000).catch((error) => {
+                if (this._getFrameAncestryInfoPromise === promise) { this._getFrameAncestryInfoPromise = null; }
+                throw error;
+            });
+            this._getFrameAncestryInfoPromise = promise;
         }
         return await this._getFrameAncestryInfoPromise;
     }
@@ -89,7 +99,7 @@ export class FrameAncestryHandler {
         if (typeof frameInfo === 'undefined') { return null; }
 
         let {frameElement} = frameInfo;
-        if (typeof frameElement === 'undefined') {
+        if (typeof frameElement === 'undefined' || frameElement === null || !frameElement.isConnected) {
             frameElement = this._findFrameElementWithContentWindow(frameInfo.window);
             frameInfo.frameElement = frameElement;
         }
@@ -124,7 +134,7 @@ export class FrameAncestryHandler {
                     clearTimeout(timer);
                     timer = null;
                 }
-                this._removeResponseHandler(uniqueId);
+                if (this._responseHandlers.get(uniqueId) === onMessage) { this._removeResponseHandler(uniqueId); }
             };
             /** @type {import('frame-ancestry-handler').ResponseHandler} */
             const onMessage = (params) => {
@@ -154,9 +164,14 @@ export class FrameAncestryHandler {
             };
 
             // Start
-            this._addResponseHandler(uniqueId, onMessage);
-            resetTimeout();
-            this._requestFrameInfo(targetWindow, frameId, frameId, uniqueId, nonce);
+            try {
+                this._addResponseHandler(uniqueId, onMessage);
+                resetTimeout();
+                this._requestFrameInfo(targetWindow, frameId, frameId, uniqueId, nonce);
+            } catch (error) {
+                cleanup();
+                reject(error);
+            }
         });
     }
 
@@ -190,6 +205,7 @@ export class FrameAncestryHandler {
                 typeof originFrameId !== 'number' ||
                 typeof childFrameId !== 'number' ||
                 !this._isNonNegativeInteger(originFrameId) ||
+                !this._isNonNegativeInteger(childFrameId) ||
                 typeof uniqueId !== 'string' ||
                 typeof nonce !== 'string'
             ) {
@@ -244,9 +260,8 @@ export class FrameAncestryHandler {
      */
     _isNonNegativeInteger(value) {
         return (
-            Number.isFinite(value) &&
-            value >= 0 &&
-            Math.floor(value) === value
+            Number.isSafeInteger(value) &&
+            value >= 0
         );
     }
 
@@ -258,7 +273,7 @@ export class FrameAncestryHandler {
         // Check frameElement, for non-null same-origin frames
         try {
             const {frameElement} = contentWindow;
-            if (frameElement !== null) { return frameElement; }
+            if (frameElement !== null && frameElement.isConnected) { return frameElement; }
         } catch (e) {
             // NOP
         }

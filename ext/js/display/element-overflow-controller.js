@@ -87,6 +87,7 @@ export class ElementOverflowController {
             ...entry.querySelectorAll('.definition-item-inner'),
             ...entry.querySelectorAll('.kanji-glyph-data'),
         ];
+        const measuredElements = [];
         for (const element of elements) {
             const {parentNode} = element;
             if (parentNode === null) { continue; }
@@ -98,7 +99,7 @@ export class ElementOverflowController {
             if (dictionaryInfo.force) {
                 element.classList.add('collapsible', 'collapsible-forced');
             } else {
-                this._updateElement(element);
+                measuredElements.push(element);
                 this._elements.push(element);
             }
 
@@ -112,6 +113,8 @@ export class ElementOverflowController {
             }
         }
 
+        this._updateElements(measuredElements);
+
         if (this._elements.length > 0 && this._windowEventListeners.size === 0) {
             this._windowEventListeners.addEventListener(window, 'resize', this._onWindowResizeBind, false);
         }
@@ -119,6 +122,10 @@ export class ElementOverflowController {
 
     /** */
     clearElements() {
+        if (this._checkTimer !== null) {
+            this._cancelIdleCallback(this._checkTimer);
+            this._checkTimer = null;
+        }
         this._elements.length = 0;
         this._eventListeners.removeAllEventListeners();
         this._windowEventListeners.removeAllEventListeners();
@@ -155,20 +162,28 @@ export class ElementOverflowController {
 
     /** */
     _update() {
-        for (const element of this._elements) {
-            this._updateElement(element);
-        }
+        this._checkTimer = null;
+        this._updateElements(this._elements);
     }
 
     /**
-     * @param {Element} element
+     * Keep geometry reads together: changing a class between reads forces a
+     * new layout for every definition. Initial checks remain synchronous so
+     * entry focus, scrolling and the first paint see the same collapse state.
+     * @param {Element[]} elements
      */
-    _updateElement(element) {
-        const {classList} = element;
-        classList.add('collapse-test');
-        const collapsible = element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
-        classList.toggle('collapsible', collapsible);
-        classList.remove('collapse-test');
+    _updateElements(elements) {
+        for (const element of elements) {
+            element.classList.add('collapse-test');
+        }
+        const collapsible = elements.map((element) => (
+            element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth
+        ));
+        for (let i = 0; i < elements.length; ++i) {
+            const {classList} = elements[i];
+            classList.toggle('collapsible', collapsible[i]);
+            classList.remove('collapse-test');
+        }
     }
 
     /**

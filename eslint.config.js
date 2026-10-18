@@ -45,18 +45,33 @@ const compat = new FlatCompat({
 header.rules.header.meta.schema = false;
 
 const manabitanHeaderFiles = [
+    'ext/js/app/reader-lookup-bridge.js',
+    'ext/js/app/reader-lookup-integration.js',
+    'dev/lib/zstd-simd-module.d.ts',
     'ext/js/data/data-transmission-consent-util.js',
     'ext/js/dictionary/term-entry-content-hash.js',
+    'ext/js/dictionary/term-key-hash.js',
+    'types/ext/dictionary-import-journal.d.ts',
     'ext/js/dictionary/sqlite-wasm.js',
     'ext/js/dictionary/raw-term-content.js',
     'dev/bin/run-playwright.js',
+    'dev/bin/build-zstd-wasm.js',
+    'dev/perf/**/*.js',
     'dev/lib/zstd-wasm.js',
     'ext/js/dictionary/zstd-term-content.js',
+    'ext/js/dictionary/zstd-term-content-compression-worker.js',
+    'ext/js/dictionary/term-content-block-envelope.js',
+    'ext/js/dictionary/dictionary-import-journal.js',
     'ext/js/dictionary/term-content-opfs-store.js',
     'ext/js/dictionary/term-record-opfs-store.js',
-    'ext/js/dictionary/term-record-wasm-encoder.js',
+    'ext/js/dictionary/term-lookup-index.js',
+    'ext/js/dictionary/term-lookup-index-preparation.js',
     'ext/js/dictionary/term-bank-wasm-parser.js',
+    'ext/js/dictionary/term-bank-wasm-parser-worker.js',
     'ext/js/core/diagnostics-reporter.js',
+    'ext/js/core/retryable-promise-cache.js',
+    'ext/js/background/dictionary-runtime-action-policy.js',
+    'ext/js/background/dictionary-worker-client.js',
 ];
 
 const upstreamCopyrightPattern = ' \\* Copyright \\(C\\) (20(23|24|25)-)?202(5|6)  Yomitan Authors(\n \\* Copyright \\(C\\) (20(16|17|18|19|20|21)-)?2022  Yomichan Authors)?\n \\*\n \\* This program is free software: you can redistribute it and/or modify\n \\* it under the terms of the GNU General Public License as published by\n \\* the Free Software Foundation, either version 3 of the License, or\n \\* \\(at your option\\) any later version\\.\n \\*\n \\* This program is distributed in the hope that it will be useful,\n \\* but WITHOUT ANY WARRANTY; without even the implied warranty of\n \\* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\\.  See the\n \\* GNU General Public License for more details\\.\n \\*\n \\* You should have received a copy of the GNU General Public License\n \\* along with this program\\.  If not, see <https://www\\.gnu\\.org/licenses/>\\.\n ';
@@ -88,7 +103,9 @@ async function getDependencies(scriptPaths) {
  */
 export default [
     {
-        ignores: ['.tmp-*', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
+        // Emscripten output is reproduced by build:zstd-wasm and covered by
+        // WASM behavior tests. Keep its handwritten wrapper and types linted.
+        ignores: ['.tmp-*', 'dev/lib/zstd-simd-module.js', 'ext/lib/', 'ext/js/dictionary/mdx/vendor/', 'dev/lib/handlebars/', '**/node_modules/', '**/builds/', 'test-results/', 'playwright/.cache/'],
     },
     ...compat.extends(
         'eslint:recommended',
@@ -130,6 +147,7 @@ export default [
                     './dev/jsconfig.json',
                     './test/jsconfig.json',
                     './benches/jsconfig.json',
+                    './web/tsconfig.json',
                 ],
             },
         },
@@ -630,7 +648,7 @@ export default [
             'sonarjs/no-identical-functions': 'error',
             'sonarjs/no-ignored-return': 'error',
             'sonarjs/no-inverted-boolean-check': 'error',
-            'sonarjs/no-one-iteration-loop': 'error',
+            'no-unreachable-loop': 'error',
             'sonarjs/no-redundant-boolean': 'error',
             'sonarjs/no-redundant-jump': 'error',
             'sonarjs/no-same-line-conditional': 'error',
@@ -823,6 +841,7 @@ export default [
     {
         files: [
             'test/**/*.js',
+            'test/**/*.mjs',
             'dev/**/*.js',
             '**/integration.spec.js',
             '**/playwright.config.js',
@@ -885,12 +904,14 @@ export default [
         files: [
             'benches/**/*.js',
             'test/**/*.js',
+            'test/**/*.mjs',
         ],
     })),
     {
         files: [
             'benches/**/*.js',
             'test/**/*.js',
+            'test/**/*.mjs',
         ],
 
         rules: {
@@ -944,6 +965,53 @@ export default [
                 ...Object.fromEntries(Object.entries(globals.browser).map(([key]) => [key, 'off'])),
                 ...globals.worker,
             },
+        },
+    },
+    {
+        // The static runtime is typed TypeScript and uses SPDX headers. Requiring
+        // JSDoc type duplication would weaken, rather than improve, its types.
+        files: [
+            'ext/web/**/*.ts',
+        ],
+
+        rules: {
+            'header/header': 'off',
+            'jsdoc/require-jsdoc': 'off',
+            'jsdoc/require-param-type': 'off',
+            'jsdoc/require-returns': 'off',
+            'jsdoc/require-throws': 'off',
+        },
+    },
+    {
+        // These Node qualification/build scripts intentionally contain browser
+        // callbacks serialized by Playwright. Model those page globals here.
+        files: [
+            'web/*.mjs',
+        ],
+
+        languageOptions: {
+            globals: {
+                ...globals.node,
+                createRuntime: 'readonly',
+                find: 'readonly',
+                openRuntime: 'readonly',
+                runtime: 'readonly',
+                scan: 'readonly',
+                scanner: 'readonly',
+            },
+        },
+
+        rules: {
+            'header/header': 'off',
+            'no-promise-executor-return': 'off',
+            'no-restricted-syntax': 'off',
+            'no-underscore-dangle': 'off',
+            'no-undefined': 'off',
+            'no-unsanitized/method': 'off',
+            '@stylistic/max-statements-per-line': 'off',
+            'jsdoc/require-jsdoc': 'off',
+            'jsdoc/require-param-type': 'off',
+            'jsdoc/require-returns': 'off',
         },
     },
     {

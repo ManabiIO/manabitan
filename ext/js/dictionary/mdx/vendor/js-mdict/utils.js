@@ -3,7 +3,7 @@ import { ripemd128 } from './ripemd128.js';
 import {concatUint8Arrays} from '../../browser-util.js';
 const REGEXP_STRIPKEY = {
     mdx: /[().,\-&、 '/\\@_$\\!]()/g,
-    // mdd:/[!”#$%&'()\\*\\+,-.\\/:;<=>\\?@\\[\\]\^_`{|}~]()/g,
+    // mdd:/[!”#$%&'()\\*\\+,-.\\/:;<=>\\?@\\[\\]\\^_`{|}~]()/g,
     mdd: /([.][^.]*$)|[()., '/@]/g,
 };
 const UTF_16LE_DECODER = new TextDecoder('utf-16le');
@@ -36,7 +36,7 @@ function readUTF16(buf, offset, length) {
  */
 function getExtension(filename, defaultExt) {
     var _a;
-    return ((_a = /(?:\.([^.]+))?$/.exec(filename)) === null || _a === void 0 ? void 0 : _a[1]) || defaultExt;
+    return (((_a = /(?:\.([^.]+))?$/.exec(filename)) === null || _a === void 0 ? void 0 : _a[1]) || defaultExt).toLowerCase()
 }
 /**
  * 返回三个数字中的最小值。
@@ -90,19 +90,20 @@ function levenshteinDistance(a, b) {
  */
 function parseHeader(header_text) {
     const headerAttr = {};
-    Array.from(header_text.matchAll(/(\w+)="((.|\r|\n)*?)"/g)).forEach((tag) => {
-        headerAttr[tag[1]] = unescapeEntities(tag[2]);
-    });
-    // stylesheet attribute if present takes form of:
-    //   style_number # 1-255
-    //   style_begin  # or ''
-    //   style_end    # or ''
-    // store stylesheet in dict in the form of
-    // {'number' : ('style_begin', 'style_end')}
+    // XML permits either quote and whitespace around '='. Match whole names
+    // so an extension attribute cannot be mistaken for its unqualified suffix.
+    for (const tag of header_text.matchAll(/(?:^|[ \t\r\n])([A-Za-z_][A-Za-z0-9_.:-]*)[ \t\r\n]*=[ \t\r\n]*(?:"([^"]*)"|'([^']*)')/gu)) {
+        headerAttr[tag[1]] = unescapeEntities(tag[2] ?? tag[3]);
+    }
+    // Styles are encoded as strict triplets: id, opening markup, closing markup.
+    // Empty opening/closing fields are meaningful and must not be collapsed.
     if (headerAttr['StyleSheet'] && typeof headerAttr['StyleSheet'] == 'string') {
         const styleSheet = {};
-        const lines = headerAttr['StyleSheet'].split(/[\r\n]+/g);
-        for (let i = 0; i < lines.length; i += 3) {
+        const lines = headerAttr['StyleSheet'].replace(/\r\n?/gu, '\n').split('\n');
+        if (lines.length % 3 === 1 && lines.at(-1) === '') {
+            lines.pop();
+        }
+        for (let i = 0; i + 2 < lines.length; i += 3) {
             styleSheet[lines[i]] = [lines[i + 1], lines[i + 2]];
         }
         headerAttr['StyleSheet'] = styleSheet;
@@ -143,7 +144,7 @@ function uint32BEtoNumber(bytes) {
         n <<= 8;
     }
     n |= bytes[3];
-    return n;
+    return n >>> 0
 }
 /**
  * 将 Uint8Array 转换为无符号 64 位整数(大端序)。
@@ -167,6 +168,28 @@ function uint64BEtoNumber(bytes) {
     high += bytes[6] * 0x100;
     high += bytes[7] & 0xff;
     return high;
+}
+/**
+ * Compute Adler-32 as an unsigned 32-bit integer.
+ * @param {Uint8Array} bytes
+ * @returns {number}
+ */
+function adler32(bytes) {
+    let s1 = 1;
+    let s2 = 0;
+    let offset = 0;
+    let remaining = bytes.length;
+    while (remaining > 0) {
+        let count = Math.min(remaining, 2000);
+        remaining -= count;
+        while (count-- > 0) {
+            s1 += bytes[offset++];
+            s2 += s1;
+        }
+        s1 %= 65521;
+        s2 %= 65521;
+    }
+    return ((s2 << 16) | s1) >>> 0;
 }
 const NUMFMT_UINT8 = Symbol('NUM_FMT_UINT8');
 const NUMFMT_UINT16 = Symbol('NUM_FMT_UINT16');
@@ -224,7 +247,7 @@ function b2n(data) {
         case 8:
             return uint64BEtoNumber(data);
     }
-    return 0;
+    throw new RangeError('Invalid MDict integer width')
 }
 /**
  * 使用简单的加密算法快速解密数据。
@@ -324,21 +347,42 @@ function wordCompare(word1, word2) {
     return word1.length < word2.length ? -1 : 1;
 }
 function unescapeEntities(text) {
-    text = text.replace(/&lt;/g, '<');
-    text = text.replace(/&gt;/g, '>');
-    text = text.replace(/&quot;/g, '"');
-    text = text.replace(/&amp;/g, '&');
-    return text;
+    return text.replace(/&(lt|gt|quot|apos|amp|#\d+|#x[0-9a-f]+);/giu, (match, entity) => {
+        switch (entity.toLowerCase()) {
+            case 'lt': return '<';
+            case 'gt': return '>';
+            case 'quot': return '"';
+            case 'apos': return "'";
+            case 'amp': return '&';
+        }
+        const hexadecimal = entity[1]?.toLowerCase() === 'x';
+        const digits = entity.slice(hexadecimal ? 2 : 1);
+        const codePoint = Number.parseInt(digits, hexadecimal ? 16 : 10);
+        if (!Number.isSafeInteger(codePoint) || codePoint < 0 || codePoint > 0x10ffff ||
+            (codePoint >= 0xd800 && codePoint <= 0xdfff)) {
+            return match;
+        }
+        return String.fromCodePoint(codePoint);
+    });
 }
 function substituteStylesheet(styleSheet, txt) {
-    const txtTag = Array.from(txt.matchAll(/`(\d+)`/g));
-    const txtList = Array.from(txt.split(/`\d+`/g)).slice(1);
-    let styledTxt = '';
-    for (let i = 0; i < txtList.length; i++) {
-        const style = styleSheet[txtTag[i][1]];
-        styledTxt += style[0] + txtList[i] + style[1];
+    const matches = [...txt.matchAll(/`(\d+)`/gu)];
+    if (matches.length === 0) { return txt; }
+    let output = txt.slice(0, matches[0].index);
+    for (let index = 0; index < matches.length; index += 1) {
+        const match = matches[index];
+        const next = matches[index + 1];
+        const segmentStart = match.index + match[0].length;
+        const segmentEnd = typeof next === 'undefined' ? txt.length : next.index;
+        const segment = txt.slice(segmentStart, segmentEnd);
+        const style = styleSheet[match[1]];
+        if (!Array.isArray(style) || style.length < 2) {
+            output += match[0] + segment;
+            continue;
+        }
+        output += String(style[0] ?? '') + segment + String(style[1] ?? '');
     }
-    return styledTxt;
+    return output;
 }
 export default {
     getExtension,
@@ -356,6 +400,7 @@ export default {
     isTrue,
     wordCompare,
     substituteStylesheet,
+    adler32,
     UTF16,
     REGEXP_STRIPKEY,
     NUMFMT_UINT8,

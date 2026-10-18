@@ -101,8 +101,12 @@ function canBuildWasmTarget(compiler) {
             [
                 ...(compiler.args ?? []),
                 `--target=${dictionaryWasmTarget}`,
+                '-matomics',
+                '-mbulk-memory',
                 '-nostdlib',
                 '-Wl,--no-entry',
+                '-Wl,--shared-memory',
+                '-Wl,--max-memory=4294967296',
                 '-Wl,--export=probe',
                 '-Wl,--strip-all',
                 '-o',
@@ -182,9 +186,7 @@ async function copySqliteWasm(out) {
  * @param {string} out
  */
 async function copyZstdAssets(out) {
-    const zstdEntryPath = require.resolve('@bokuweb/zstd-wasm');
-    const zstdPkgPath = path.resolve(path.dirname(zstdEntryPath), '..', '..');
-    const zstdWasmPath = path.join(zstdPkgPath, 'dist/esm/zstd.wasm');
+    const zstdWasmPath = path.join(dirname, 'data', 'zstd-simd.wasm');
     fs.copyFileSync(zstdWasmPath, path.join(out, 'zstd.wasm'));
 
     const zstdDictOutPath = path.join(out, 'zstd-dicts');
@@ -204,12 +206,7 @@ async function buildDictionaryWasm(out) {
         {
             sourcePath: path.join(extDir, 'js', 'dictionary', 'wasm', 'term-bank-parser.c'),
             outputPath: path.join(out, 'term-bank-parser.wasm'),
-            exports: ['wasm_reset_heap', 'wasm_alloc', 'parse_term_bank', 'parse_term_bank_with_media_hints', 'encode_term_content', 'encode_term_content_no_hash'],
-        },
-        {
-            sourcePath: path.join(extDir, 'js', 'dictionary', 'wasm', 'term-record-encoder.c'),
-            outputPath: path.join(out, 'term-record-encoder.wasm'),
-            exports: ['wasm_reset_heap', 'wasm_alloc', 'calc_encoded_size', 'encode_records'],
+            exports: ['wasm_reset_heap', 'wasm_alloc', 'wasm_get_last_parse_capacity', 'wasm_get_last_content_capacity', 'inflate_and_join_term_banks', 'parse_term_bank', 'parse_term_bank_with_media_hints', 'parse_and_encode_term_bank_token_binary_dedup', 'build_term_string_plan', 'encode_term_lookup_index', 'compact_term_lookup_keys', 'encode_term_content', 'encode_term_content_no_hash', 'encode_term_content_token_binary', 'encode_term_content_token_binary_dedup'],
         },
     ];
 
@@ -219,13 +216,18 @@ async function buildDictionaryWasm(out) {
         const args = [
             `--target=${dictionaryWasmTarget}`,
             '-O3',
+            '-matomics',
+            '-mbulk-memory',
+            '-msimd128',
             '-nostdlib',
             '-Wl,--no-entry',
+            '-Wl,--shared-memory',
+            '-Wl,--max-memory=4294967296',
         ];
         for (const exportName of target.exports) {
             args.push(`-Wl,--export=${exportName}`);
         }
-        args.push('-Wl,--strip-all', '-o', target.outputPath, target.sourcePath);
+        args.push('-Wl,--strip-all', '-o', target.outputPath, target.sourcePath, path.join(extDir, 'js', 'dictionary', 'wasm', 'term-bank-inflate.c'));
         execFileSync(compiler.command, [...(compiler.args ?? []), ...args], {stdio: 'inherit'});
     }
 }
@@ -268,7 +270,6 @@ export async function buildLibs() {
     const schemaFileNames = fs.readdirSync(schemaDir);
     const schemas = schemaFileNames.map((schemaFileName) => {
         /** @type {import('ajv').AnySchema} */
-        // eslint-disable-next-line sonarjs/prefer-immediate-return
         const result = parseJson(fs.readFileSync(path.join(schemaDir, schemaFileName), {encoding: 'utf8'}));
         return result;
     });

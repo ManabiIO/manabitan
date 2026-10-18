@@ -49,7 +49,6 @@ export type FindTermsDetails = {
     matchType?: Translation.FindTermsMatchType;
     deinflect?: boolean;
     primaryReading?: string;
-    skipLookupWarmWait?: boolean;
     waitForLookupWarm?: boolean;
 };
 
@@ -68,6 +67,8 @@ export type ParseTextSegment = {
         term: string;
         reading: string;
         sources: Dictionary.TermSource[];
+        frequencies: Dictionary.TermFrequency[];
+        pronunciations: Dictionary.TermPronunciation[];
     }[][];
 };
 
@@ -145,6 +146,7 @@ type ApiSurface = {
         return: {
             dictionaryEntries: Dictionary.TermDictionaryEntry[];
             originalTextLength: number;
+            dictionaryAvailability?: import('dictionary-database').DictionaryAvailability[];
         };
     };
     parseText: {
@@ -154,6 +156,7 @@ type ApiSurface = {
             scanLength: number;
             useInternalParser: boolean;
             useMecabParser: boolean;
+            useAllFrequencyDictionaries?: boolean;
         };
         return: ParseTextResultItem[];
     };
@@ -361,21 +364,16 @@ type ApiSurface = {
     setDictionaryImportMode: {
         params: {
             active: boolean;
+            ownerId?: string;
         };
         return: void;
+    };
+    getDictionaryImportOperationStatus: {
+        params: {operationId: string, workerGeneration?: string};
+        return: import('offscreen').ImportOperationStatus;
     };
     purgeDatabase: {
         params: void;
-        return: void;
-    };
-    exportDictionaryDatabase: {
-        params: void;
-        return: string;
-    };
-    importDictionaryDatabase: {
-        params: {
-            content: string;
-        };
         return: void;
     };
     getMedia: {
@@ -495,6 +493,12 @@ type ApiSurface = {
         params: void;
         return: void;
     };
+    fetchLocalAudioData: {
+        params: {
+            url: string;
+        };
+        return: {data: string, contentType: string} | null;
+    };
 };
 
 type ApiExtraArgs = [sender: chrome.runtime.MessageSender];
@@ -561,8 +565,10 @@ type PmApiSurface = {
     };
     importDictionaryOffscreen: {
         params: {
-            archiveContent: ArrayBuffer | Blob;
+            archiveContent: Blob;
             details: DictionaryImporter.ImportDetails;
+            operationId: string;
+            ownerId?: string;
         };
         return: void;
     };
@@ -570,6 +576,8 @@ type PmApiSurface = {
         params: {
             url: string;
             details: DictionaryImporter.ImportDetails;
+            operationId: string;
+            ownerId?: string;
         };
         return: void;
     };

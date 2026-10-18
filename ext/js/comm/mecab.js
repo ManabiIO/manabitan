@@ -165,12 +165,7 @@ export class Mecab {
     _onDisconnect() {
         if (this._port === null) { return; }
         const e = chrome.runtime.lastError;
-        const error = new Error(e ? e.message : 'MeCab disconnected');
-        for (const {reject, timer} of this._invocations.values()) {
-            clearTimeout(timer);
-            reject(error);
-        }
-        this._clearPort();
+        this._clearPort(new Error(e ? e.message : 'MeCab disconnected'));
     }
 
     /**
@@ -194,7 +189,13 @@ export class Mecab {
 
             this._invocations.set(sequence, {resolve, reject, timer});
 
-            this._port.postMessage({action, params, sequence});
+            try {
+                this._port.postMessage({action, params, sequence});
+            } catch (error) {
+                clearTimeout(timer);
+                this._invocations.delete(sequence);
+                reject(error);
+            }
         });
     }
 
@@ -383,16 +384,22 @@ export class Mecab {
     }
 
     /**
+     * @param {Error} [reason]
      * @returns {void}
      */
-    _clearPort() {
-        if (this._port !== null) {
-            this._port.disconnect();
-            this._port = null;
+    _clearPort(reason = new Error('MeCab disconnected')) {
+        const port = this._port;
+        this._port = null;
+        for (const {reject, timer} of this._invocations.values()) {
+            clearTimeout(timer);
+            reject(reason);
         }
         this._invocations.clear();
         this._eventListeners.removeAllEventListeners();
         this._sequence = 0;
         this._setupPortPromise = null;
+        if (port !== null) {
+            port.disconnect();
+        }
     }
 }

@@ -18,6 +18,7 @@
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
+import {createDictionaryRowOwnership} from './dictionary-row-ownership.js';
 
 export class SecondarySearchDictionaryController {
     /**
@@ -28,6 +29,8 @@ export class SecondarySearchDictionaryController {
         this._settingsController = settingsController;
         /** @type {?import('core').TokenObject} */
         this._getDictionaryInfoToken = null;
+        /** @type {number} */
+        this._optionsRenderRequest = 0;
         /** @type {Map<string, import('dictionary-importer').Summary>} */
         this._dictionaryInfoMap = new Map();
         /** @type {EventListenerCollection} */
@@ -42,7 +45,8 @@ export class SecondarySearchDictionaryController {
 
         this._settingsController.application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
-        this._settingsController.on('dictionarySettingsReordered', this._onDictionarySettingsReordered.bind(this));
+        // Reorder events carry {source}, not the internal database refresh token.
+        this._settingsController.on('dictionarySettingsReordered', this._onDictionarySettingsReordered.bind(this, null));
     }
 
     // Private
@@ -73,14 +77,19 @@ export class SecondarySearchDictionaryController {
     /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
-    _onOptionsChanged({options}) {
+    _onOptionsChanged({options, optionsContext}) {
+        const optionsProfileId = 'profileId' in optionsContext ? optionsContext.profileId : null;
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index || (this._settingsController.getOptionsContext().profileId ?? null) !== optionsProfileId) { return; }
+        ++this._optionsRenderRequest;
         this._eventListeners.removeAllEventListeners();
 
         const fragment = document.createDocumentFragment();
 
         const {dictionaries} = options;
+        const profileId = optionsProfileId ?? '';
         for (let i = 0, ii = dictionaries.length; i < ii; ++i) {
-            const {name} = dictionaries[i];
+            const dictionarySettings = dictionaries[i];
+            const {name} = dictionarySettings;
             const dictionaryInfo = this._dictionaryInfoMap.get(name);
             if (typeof dictionaryInfo === 'undefined') { continue; }
 
@@ -98,6 +107,7 @@ export class SecondarySearchDictionaryController {
             /** @type {HTMLElement} */
             const toggle = querySelectorNotNull(node, '.dictionary-allow-secondary-searches');
             toggle.dataset.setting = `dictionaries[${i}].allowSecondarySearches`;
+            createDictionaryRowOwnership(toggle, profileId, i, dictionarySettings, 'secondary');
             this._eventListeners.addEventListener(toggle, 'settingChanged', this._onEnabledChanged.bind(this, node), false);
         }
 
@@ -120,9 +130,17 @@ export class SecondarySearchDictionaryController {
      * @param {import('core').TokenObject|null|import('settings-controller').EventArgument<'dictionarySettingsReordered'>} [token]
      */
     async _onDictionarySettingsReordered(token = null) {
-        const options = await this._settingsController.getOptions();
-        if (token !== null && this._getDictionaryInfoToken !== token) { return; }
+        const request = ++this._optionsRenderRequest;
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (
+            request !== this._optionsRenderRequest ||
+            (token !== null && this._getDictionaryInfoToken !== token) ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._settingsController.getOptionsContext().profileId !== optionsContext.profileId
+        ) {
+            return;
+        }
         this._onOptionsChanged({options, optionsContext});
     }
 }

@@ -59,7 +59,7 @@ await Application.main(true, async (application) => {
     const popupFrequencyBlurController = new PopupFrequencyBlurController(display);
     popupFrequencyBlurController.prepare();
 
-    display.initializeState();
+    void display.initializeState();
 
     document.documentElement.dataset.loaded = 'true';
 });

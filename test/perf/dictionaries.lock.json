@@ -1,0 +1,38 @@
+{
+    "schemaVersion": 1,
+    "dictionaries": {
+        "jmdict": {
+            "label": "JMdict",
+            "cacheFile": "JMdict.zip",
+            "release": "2026-09-06",
+            "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip",
+            "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+            "sizeBytes": 15587032,
+            "expectedTitle": "JMdict [2026-09-06]",
+            "revision": "JMdict.2026-09-06",
+            "termRows": 526942
+        },
+        "jmnedict": {
+            "label": "JMnedict",
+            "cacheFile": "JMnedict.zip",
+            "release": "2026-09-06",
+            "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMnedict.zip",
+            "sha256": "d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12",
+            "sizeBytes": 11432315,
+            "expectedTitle": "JMnedict [2026-09-06]",
+            "revision": "JMnedict.2026-09-06",
+            "termRows": 667942
+        },
+        "jitendex": {
+            "label": "Jitendex",
+            "cacheFile": "jitendex-yomitan.zip",
+            "release": "2026.08.11.0",
+            "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/jitendex-yomitan.zip",
+            "sha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
+            "sizeBytes": 38698313,
+            "expectedTitle": "Jitendex.org [2026-08-11]",
+            "revision": "2026.08.11.0",
+            "termRows": 435448
+        }
+    }
+}

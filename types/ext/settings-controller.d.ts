@@ -29,7 +29,7 @@ export type PageExitPrevention = {
     end: () => void;
 };
 
-type ProfileDictionarySettings = Settings.DictionaryOptions & {index: number};
+export type ProfileDictionarySettings = Settings.DictionaryOptions & {index: number};
 
 export type ProfilesDictionarySettings = {[profileId: string]: ProfileDictionarySettings[]} | null;
 
@@ -40,6 +40,13 @@ export type ImportDictionaryDoneResult = {
 };
 
 export type ImportDictionaryDoneCallback = ((result: ImportDictionaryDoneResult) => void) | null;
+
+export type ScanInputsMutation = {
+    optionsContext: Settings.OptionsContext;
+    expectedInputs: Settings.ScanningInput[];
+    inputs: Settings.ScanningInput[];
+    previousIndices: (number | null)[];
+};
 
 export type Events = {
     optionsChanged: {
@@ -72,6 +79,7 @@ export type Events = {
     dictionaryEnabled: Record<string, never>;
     scanInputsChanged: {
         source: ScanInputsController | ScanInputsSimpleController;
+        mutation?: ScanInputsMutation;
     };
 };
 

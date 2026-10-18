@@ -119,6 +119,21 @@ describe('DOMTextScanner seek tests', () => {
     const {document} = window;
     window.getComputedStyle = createAbsoluteGetComputedStyle(window);
 
+    test('clamps stale text offsets after a live DOM mutation', () => {
+        const textNode = document.createTextNode('hello');
+        const backward = new DOMTextScanner(textNode, 5, true, false);
+        textNode.nodeValue = 'ab';
+
+        backward.seek(-1);
+        expect(backward.content).toBe('b');
+        expect(backward.offset).toBe(1);
+
+        const forward = new DOMTextScanner(textNode, -3, true, false);
+        forward.seek(1);
+        expect(forward.content).toBe('a');
+        expect(forward.offset).toBe(1);
+    });
+
     for (const testElement of /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('test-case'))) {
         const testDescription = testElement.querySelector('test-description')?.textContent || 'Test description not found.';
 

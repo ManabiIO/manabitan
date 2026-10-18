@@ -22,7 +22,6 @@ import {performance} from 'perf_hooks';
 import {fileURLToPath} from 'url';
 import {getDictionaryArchiveEntries, getDictionaryArchiveJson, getIndexFileName, readArchiveEntryDataJson} from './dictionary-archive-util.js';
 import {parseJson} from './json.js';
-import {uint8ArrayToArrayBuffer} from '../ext/js/data/array-buffer-util.js';
 import {createJsonSchema} from './schema-validate.js';
 import {toError} from './to-error.js';
 
@@ -137,7 +136,7 @@ export async function testDictionaryFiles(mode, dictionaryFileNames) {
         try {
             console.log(`Validating ${dictionaryFileName}...`);
             const source = fs.readFileSync(dictionaryFileName);
-            await validateDictionary(mode, uint8ArrayToArrayBuffer(source), schemas);
+            await validateDictionary(mode, Uint8Array.from(source).buffer, schemas);
             // eslint-disable-next-line no-restricted-syntax
             const end = performance.now();
             console.log(`No issues detected (${((end - start) / 1000).toFixed(2)}s)`);

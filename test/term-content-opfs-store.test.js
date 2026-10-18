@@ -16,8 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect, test, vi} from 'vitest';
+import {afterEach, describe, expect, test, vi} from 'vitest';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
+
+/** @typedef {FileSystemDirectoryHandle & {entries: () => AsyncIterableIterator<[string, FileSystemFileHandle]>}} MutableDirectory */
 
 /**
  * @param {string} message
@@ -49,25 +51,895 @@ function createReadableFile(bytes) {
     };
 }
 
+/**
+ * @param {Map<string, Uint8Array>} fileBytesByName
+ * @param {{removeEntryFailures?: Map<string, number>}} [options]
+ * @returns {MutableDirectory}
+ */
+function createMutableDirectory(fileBytesByName, {removeEntryFailures = new Map()} = {}) {
+    const getFileHandle = async (
+        /** @type {string} */ name,
+        /** @type {{create?: boolean}} */ options = {},
+    ) => {
+        const create = options.create === true;
+        if (!fileBytesByName.has(name)) {
+            if (!create) {
+                const error = new Error(`File not found: ${name}`);
+                error.name = 'NotFoundError';
+                throw error;
+            }
+            fileBytesByName.set(name, new Uint8Array());
+        }
+        return {
+            kind: 'file',
+            name,
+            async getFile() {
+                const bytes = fileBytesByName.get(name) ?? new Uint8Array();
+                return createReadableFile(bytes);
+            },
+            async createWritable() {
+                let nextBytes = new Uint8Array(fileBytesByName.get(name) ?? new Uint8Array());
+                return {
+                    async truncate(/** @type {number} */ length) {
+                        nextBytes = nextBytes.slice(0, length);
+                    },
+                    async close() {
+                        fileBytesByName.set(name, nextBytes);
+                    },
+                };
+            },
+        };
+    };
+    return /** @type {MutableDirectory} */ (/** @type {unknown} */ ({
+        getFileHandle,
+        async removeEntry(/** @type {string} */ name) {
+            const failuresRemaining = removeEntryFailures.get(name) ?? 0;
+            if (failuresRemaining > 0) {
+                removeEntryFailures.set(name, failuresRemaining - 1);
+                throw new Error(`Injected removeEntry failure for ${name}`);
+            }
+            fileBytesByName.delete(name);
+        },
+        async *entries() {
+            for (const name of fileBytesByName.keys()) {
+                yield [name, await getFileHandle(name)];
+            }
+        },
+    }));
+}
+
+afterEach(() => {
+    vi.unstubAllGlobals();
+});
+
 describe('TermContentOpfsStore', () => {
+    test('uses the lower raw-content flush threshold selected by source-import profiling', () => {
+        const store = new TermContentOpfsStore();
+        store.setImportStorageMode('raw-bytes');
+        expect(Reflect.get(store, '_flushThresholdBytes')).toBe(8 * 1024 * 1024);
+    });
+
+    test('starts queued import writes before the sustained flush threshold', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', {});
+        Reflect.set(store, '_importSessionActive', true);
+        Reflect.set(store, '_flushThresholdBytes', 8 * 1024 * 1024);
+        store.setQueueImportWritesEnabled(true);
+        const flush = vi.spyOn(store, '_flushPendingWrites').mockResolvedValue();
+
+        await store.appendBatch([new Uint8Array(4 * 1024 * 1024)]);
+
+        expect(flush).toHaveBeenCalledOnce();
+    });
+
+    test('coalesces concurrent cold snapshot initialization', async () => {
+        /** @type {() => void} */
+        let releaseGetFile = () => {};
+        const file = /** @type {File} */ (/** @type {unknown} */ ({size: 3}));
+        const getFile = vi.fn(() => new Promise((resolve) => {
+            releaseGetFile = () => { resolve(file); };
+        }));
+        const fileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({getFile}));
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_length', 3);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: 3,
+            startOffset: 0,
+            readFile: null,
+        }]);
+
+        const first = store.ensureLoadedForRead();
+        const second = store.ensureLoadedForRead();
+        await vi.waitFor(() => expect(getFile).toHaveBeenCalledOnce());
+        releaseGetFile();
+        await Promise.all([first, second]);
+
+        expect(getFile).toHaveBeenCalledOnce();
+        expect(Reflect.get(store, '_loadedForRead')).toBe(true);
+    });
+
+    test('discards an in-flight snapshot invalidated by a newer generation', async () => {
+        /** @type {() => void} */
+        let releaseOldGetFile = () => {};
+        const oldFile = /** @type {File} */ (/** @type {unknown} */ ({size: 3, generation: 'old'}));
+        const newFile = /** @type {File} */ (/** @type {unknown} */ ({size: 5, generation: 'new'}));
+        const oldGetFile = vi.fn(() => new Promise((resolve) => {
+            releaseOldGetFile = () => { resolve(oldFile); };
+        }));
+        const newGetFile = vi.fn(async () => newFile);
+        const oldFileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({getFile: oldGetFile}));
+        const newFileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({getFile: newGetFile}));
+        const store = new TermContentOpfsStore();
+        const oldState = {
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: oldFileHandle,
+            fileLength: 3,
+            startOffset: 0,
+            readFile: null,
+        };
+        Reflect.set(store, '_fileHandle', oldFileHandle);
+        Reflect.set(store, '_length', 3);
+        Reflect.set(store, '_segmentStates', [oldState]);
+
+        const loading = store.ensureLoadedForRead();
+        await vi.waitFor(() => expect(oldGetFile).toHaveBeenCalledOnce());
+        const newState = {...oldState, fileHandle: newFileHandle, fileLength: 5};
+        Reflect.set(store, '_fileHandle', newFileHandle);
+        Reflect.set(store, '_segmentStates', [newState]);
+        Reflect.get(store, '_invalidateReadState').call(store);
+        releaseOldGetFile();
+        await loading;
+
+        expect(newGetFile).toHaveBeenCalledOnce();
+        expect(oldState.readFile).toBeNull();
+        expect(newState.readFile).toBe(newFile);
+        expect(Reflect.get(store, '_length')).toBe(5);
+        expect(Reflect.get(store, '_loadedForRead')).toBe(true);
+    });
+
+    test('coalesces concurrent reads from the same cold file page', async () => {
+        const bytes = new Uint8Array([1, 2, 3, 4, 5, 6]);
+        /** @type {() => void} */
+        let releaseRead = () => {};
+        const readGate = new Promise((resolve) => {
+            releaseRead = () => { resolve(void 0); };
+        });
+        const arrayBuffer = vi.fn(async () => {
+            await readGate;
+            return bytes.buffer;
+        });
+        const file = /** @type {File} */ (/** @type {unknown} */ ({
+            size: bytes.byteLength,
+            slice: vi.fn(() => ({arrayBuffer})),
+        }));
+        const fileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => file),
+        }));
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: bytes.byteLength,
+            startOffset: 0,
+            readFile: file,
+        }]);
+        Reflect.set(store, '_loadedForRead', true);
+        Reflect.set(store, '_length', bytes.byteLength);
+
+        const first = store.readSlice(1, 3);
+        const second = store.readSlice(2, 2);
+        await vi.waitFor(() => expect(arrayBuffer).toHaveBeenCalledOnce());
+        releaseRead();
+
+        await expect(first).resolves.toStrictEqual(new Uint8Array([2, 3, 4]));
+        await expect(second).resolves.toStrictEqual(new Uint8Array([3, 4]));
+        expect(arrayBuffer).toHaveBeenCalledOnce();
+        expect(Reflect.get(store, '_readPageOperations')).toHaveLength(0);
+    });
+
+    test('reads an import-overlay batch without entering the scalar async reader', async () => {
+        const first = new Uint8Array([1, 2, 3, 4]);
+        const second = new Uint8Array([5, 6, 7]);
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_importReadOverlayChunks', [first, second]);
+        Reflect.set(store, '_importReadOverlayOffsets', [10, 14]);
+        Reflect.set(store, '_importReadOverlayBytes', 7);
+        Reflect.set(store, '_length', 17);
+        const readSlice = vi.spyOn(store, 'readSlice');
+
+        const results = await store.readSlicesDetailed([
+            {offset: 11, length: 2},
+            {offset: 13, length: 3},
+            {offset: -1, length: 1},
+        ]);
+
+        expect(results).toStrictEqual([
+            {status: 'ok', bytes: first.subarray(1, 3)},
+            {status: 'ok', bytes: new Uint8Array([4, 5, 6])},
+            {status: 'unavailable'},
+        ]);
+        expect(readSlice).not.toHaveBeenCalled();
+    });
+
+    test('does not classify a short in-memory batch slice as successful', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_chunks', [new Uint8Array([1, 2, 3])]);
+        Reflect.set(store, '_chunkOffsets', [0]);
+        Reflect.set(store, '_length', 3);
+
+        await expect(store.readSlicesDetailed([{offset: 2, length: 2}])).resolves.toStrictEqual([
+            {status: 'unavailable'},
+        ]);
+    });
+
+    test('settles every scalar fallback in a mixed storage batch', async () => {
+        const store = new TermContentOpfsStore();
+        const resolvers = new Map();
+        const rejecters = new Map();
+        vi.spyOn(store, 'readSlice').mockImplementation(async (offset) => await new Promise((resolve, reject) => {
+            resolvers.set(offset, resolve);
+            rejecters.set(offset, reject);
+        }));
+
+        const reading = store.readSlicesDetailed([
+            {offset: 10, length: 1},
+            {offset: 20, length: 1},
+        ]);
+        await vi.waitFor(() => expect(resolvers).toHaveLength(2));
+        rejecters.get(10)(new Error('injected read failure'));
+        resolvers.get(20)(new Uint8Array([2]));
+
+        const results = await reading;
+        expect(results[0]).toMatchObject({status: 'error', error: expect.any(Error)});
+        expect(results[1]).toStrictEqual({status: 'ok', bytes: new Uint8Array([2])});
+    });
+
+    test('retries a page read invalidated by a newer file snapshot', async () => {
+        const oldBytes = new Uint8Array([1, 2, 3, 4]);
+        const newBytes = new Uint8Array([5, 6, 7, 8]);
+        /** @type {() => void} */
+        let releaseOldRead = () => {};
+        const oldReadGate = new Promise((resolve) => {
+            releaseOldRead = () => { resolve(void 0); };
+        });
+        const oldArrayBuffer = vi.fn(async () => {
+            await oldReadGate;
+            return oldBytes.buffer;
+        });
+        const oldFile = /** @type {File} */ (/** @type {unknown} */ ({
+            size: oldBytes.byteLength,
+            slice: vi.fn(() => ({arrayBuffer: oldArrayBuffer})),
+        }));
+        const newFile = /** @type {File} */ (/** @type {unknown} */ (createReadableFile(newBytes)));
+        const oldFileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => oldFile),
+        }));
+        const newFileHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => newFile),
+        }));
+        const oldState = {
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: oldFileHandle,
+            fileLength: oldBytes.byteLength,
+            startOffset: 0,
+            readFile: oldFile,
+        };
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', oldFileHandle);
+        Reflect.set(store, '_segmentStates', [oldState]);
+        Reflect.set(store, '_loadedForRead', true);
+        Reflect.set(store, '_length', oldBytes.byteLength);
+
+        const reading = store.readSlice(0, oldBytes.byteLength);
+        await vi.waitFor(() => expect(oldArrayBuffer).toHaveBeenCalledOnce());
+        const newState = {...oldState, fileHandle: newFileHandle, readFile: null};
+        Reflect.set(store, '_fileHandle', newFileHandle);
+        Reflect.set(store, '_segmentStates', [newState]);
+        Reflect.get(store, '_invalidateReadState').call(store);
+        releaseOldRead();
+
+        await expect(reading).resolves.toStrictEqual(newBytes);
+        expect(newFileHandle.getFile).toHaveBeenCalledOnce();
+        expect(Reflect.get(store, '_readPageOperations')).toHaveLength(0);
+        expect(Reflect.get(store, '_readPageCache').get('0:0')).toStrictEqual(newBytes);
+    });
+
+    test('keeps queued write failures sticky until rollback resets storage', async () => {
+        const store = new TermContentOpfsStore();
+        const writeError = new Error('injected write failure');
+        const deferredWrite = {
+            /** @type {(error: Error) => void} */
+            reject: () => {},
+        };
+        vi.spyOn(store, '_writePendingChunksCoalesced').mockImplementation(() => {
+            return new Promise((_, reject) => {
+                deferredWrite.reject = reject;
+            });
+        });
+        Reflect.set(store, '_queuedWriteChunks', [new Uint8Array([1])]);
+        Reflect.set(store, '_queuedWriteBytes', 1);
+
+        const drain = Reflect.get(store, '_drainQueuedWrites').call(store);
+        Reflect.set(store, '_queuedWritePromise', drain);
+        Reflect.get(store, '_queueWriteChunks').call(store, [new Uint8Array([2])]);
+        deferredWrite.reject(writeError);
+        await expect(drain).rejects.toBe(writeError);
+
+        expect(Reflect.get(store, '_queuedWriteChunks')).toStrictEqual([]);
+        expect(() => Reflect.get(store, '_queueWriteChunks').call(store, [new Uint8Array([3])])).toThrow(writeError);
+        expect(Reflect.get(store, '_queuedWriteChunks')).toStrictEqual([]);
+        await expect(Reflect.get(store, '_awaitQueuedWrites').call(store)).rejects.toBe(writeError);
+    });
+
+    test('queues a residual import write without waiting for persistence', async () => {
+        const store = new TermContentOpfsStore();
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const releaseWriteDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
+        const writeStarted = vi.fn();
+        vi.spyOn(store, '_writePendingChunksCoalesced').mockImplementation(async () => {
+            writeStarted();
+            await releaseWriteDeferred.promise;
+        });
+        Reflect.set(store, '_fileHandle', {});
+        Reflect.set(store, '_writable', {});
+        Reflect.set(store, '_importSessionActive', true);
+        Reflect.set(store, '_queueImportWritesEnabled', true);
+        Reflect.set(store, '_pendingWriteChunks', [new Uint8Array([1, 2, 3])]);
+        Reflect.set(store, '_pendingWriteBytes', 3);
+
+        await expect(store.queuePendingImportWrites()).resolves.toBeUndefined();
+        expect(writeStarted).toHaveBeenCalledOnce();
+        expect(Reflect.get(store, '_pendingWriteBytes')).toBe(0);
+        const queuedWritePromise = Reflect.get(store, '_queuedWritePromise');
+        expect(queuedWritePromise).toBeInstanceOf(Promise);
+
+        releaseWriteDeferred.resolve();
+        await queuedWritePromise;
+    });
+
+    test('rollback survives a rejected queued write and does not create missing checkpoint files', async () => {
+        const fileName = 'manabitan-term-content.bin';
+        const createdName = 'manabitan-term-content^1.bin';
+        const fileBytesByName = new Map([[fileName, new Uint8Array([1, 2, 3])]]);
+        const root = createMutableDirectory(fileBytesByName);
+        vi.stubGlobal('navigator', {storage: {getDirectory: vi.fn(async () => root)}});
+        const store = new TermContentOpfsStore();
+        await store.prepare();
+        const checkpoint = await store.createImportCheckpoint();
+
+        fileBytesByName.set(fileName, new Uint8Array([1, 2, 3, 4]));
+        fileBytesByName.set(createdName, new Uint8Array([9]));
+        Reflect.set(store, '_queuedWritePromise', Promise.reject(new Error('injected write failure')));
+        await expect(store.rollbackImportSession(checkpoint)).resolves.toBeUndefined();
+        expect(fileBytesByName.get(fileName)).toStrictEqual(new Uint8Array([1, 2, 3]));
+        expect(fileBytesByName.has(createdName)).toBe(false);
+
+        await expect(store.rollbackImportSession({
+            segments: [{fileName: 'manabitan-term-content-2.bin', fileLength: 12}],
+        })).rejects.toThrow(/Failed to roll back term-content import storage/);
+        expect(fileBytesByName.has('manabitan-term-content-2.bin')).toBe(false);
+    });
+
+    test('rejects unsafe and non-canonical segment names in incomplete recovery inventories', async () => {
+        const store = new TermContentOpfsStore();
+        const makeHandle = (size = 1) => /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            kind: 'file',
+            getFile: vi.fn(async () => ({size})),
+        }));
+        for (const fileName of [
+            'manabitan-term-content^9007199254740992.bin',
+            'manabitan-term-content^999999999999999999999999.bin',
+            'manabitan-term-content^01.bin',
+            'manabitan-term-content^0.bin',
+            'manabitan-term-content^-1.bin',
+        ]) {
+            const root = /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+                async *entries() {
+                    yield ['manabitan-term-content.bin', makeHandle()];
+                    yield [fileName, makeHandle()];
+                },
+            }));
+            await expect(Reflect.get(store, '_loadSegmentStates').call(store, root, true))
+                .rejects.toThrow(/Invalid term-content segment name/u);
+        }
+
+        for (const index of [-1, 0.5, Number.MAX_SAFE_INTEGER + 1, Number.POSITIVE_INFINITY]) {
+            expect(() => Reflect.get(store, '_getSegmentFileName').call(store, index))
+                .toThrow(/safe integer range/u);
+        }
+    });
+
+    test('reset does not delete an unsafe rounded segment alias', async () => {
+        const baseName = 'manabitan-term-content.bin';
+        const unsafeName = 'manabitan-term-content^9007199254740992.bin';
+        const fileBytesByName = new Map([
+            [baseName, new Uint8Array([1, 2, 3])],
+            [unsafeName, new Uint8Array([9, 9, 9])],
+        ]);
+        const root = createMutableDirectory(fileBytesByName);
+        vi.stubGlobal('navigator', {storage: {getDirectory: vi.fn(async () => root)}});
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', await root.getFileHandle(baseName));
+
+        await expect(store.reset()).rejects.toThrow(/Invalid term-content segment name/u);
+
+        expect(fileBytesByName.get(baseName)).toStrictEqual(new Uint8Array([1, 2, 3]));
+        expect(fileBytesByName.get(unsafeName)).toStrictEqual(new Uint8Array([9, 9, 9]));
+    });
+
+    test('segment rotation rejects an unsafe successor before closing the active writable', async () => {
+        const store = new TermContentOpfsStore();
+        const closeWritable = vi.spyOn(/** @type {import('core').SafeAny} */ (store), '_closeWritable');
+        Reflect.set(store, '_segmentStates', [{
+            index: Number.MAX_SAFE_INTEGER,
+            fileName: 'manabitan-term-content^9007199254740991.bin',
+            fileHandle: {},
+            fileLength: 128 * 1024 * 1024,
+            startOffset: 0,
+            readFile: null,
+        }]);
+        Reflect.set(store, '_writable', {});
+
+        await expect(Reflect.get(store, '_rollActiveSegmentIfNeeded').call(store, 1))
+            .rejects.toThrow(/safe integer range/u);
+        expect(closeWritable).not.toHaveBeenCalled();
+    });
+
+    test('reset truncates a segment when unlink fails instead of leaving stale bytes', async () => {
+        const fileName = 'manabitan-term-content.bin';
+        const segmentName = 'manabitan-term-content^1.bin';
+        const fileBytesByName = new Map([
+            [fileName, new Uint8Array([1, 2, 3])],
+            [segmentName, new Uint8Array([4, 5, 6])],
+        ]);
+        const root = createMutableDirectory(fileBytesByName, {
+            removeEntryFailures: new Map([[segmentName, 1]]),
+        });
+        vi.stubGlobal('navigator', {storage: {getDirectory: vi.fn(async () => root)}});
+        const store = new TermContentOpfsStore();
+        await store.prepare();
+
+        await expect(store.reset()).resolves.toBeUndefined();
+
+        expect(fileBytesByName.get(fileName)).toStrictEqual(new Uint8Array());
+        expect(fileBytesByName.get(segmentName)).toStrictEqual(new Uint8Array());
+        expect(Reflect.get(store, '_length')).toBe(0);
+
+        const reopened = new TermContentOpfsStore();
+        await reopened.prepare();
+        expect(Reflect.get(reopened, '_length')).toBe(0);
+        expect(await reopened.readSlice(0, 1)).toBeNull();
+    });
+
+    test('reset fails closed when a stale segment cannot be removed or truncated', async () => {
+        const fileName = 'manabitan-term-content.bin';
+        const segmentName = 'manabitan-term-content^1.bin';
+        const fileBytesByName = new Map([
+            [fileName, new Uint8Array([1, 2, 3])],
+            [segmentName, new Uint8Array([4, 5, 6])],
+        ]);
+        const baseRoot = createMutableDirectory(fileBytesByName, {
+            removeEntryFailures: new Map([[segmentName, 1]]),
+        });
+        const segmentHandle = await baseRoot.getFileHandle(segmentName);
+        const root = /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+            getFileHandle: baseRoot.getFileHandle.bind(baseRoot),
+            removeEntry: baseRoot.removeEntry.bind(baseRoot),
+            async *entries() {
+                for await (const [name, handle] of baseRoot.entries()) {
+                    yield name === segmentName ?
+                        [name, {
+                            ...handle,
+                            async createWritable() {
+                                throw new Error('Injected truncate failure');
+                            },
+                            getFile: segmentHandle.getFile.bind(segmentHandle),
+                        }] :
+                        [name, handle];
+                }
+            },
+        }));
+        vi.stubGlobal('navigator', {storage: {getDirectory: vi.fn(async () => root)}});
+        const store = new TermContentOpfsStore();
+        await store.prepare();
+
+        await expect(store.reset()).rejects.toThrow('Failed to reset term-content storage');
+
+        expect(fileBytesByName.get(segmentName)).toStrictEqual(new Uint8Array([4, 5, 6]));
+    });
+
+    test('rejects an unsafe persisted segment map before publishing offsets', async () => {
+        const store = new TermContentOpfsStore();
+        const firstHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            kind: 'file',
+            getFile: vi.fn(async () => ({size: Number.MAX_SAFE_INTEGER})),
+        }));
+        const secondHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            kind: 'file',
+            getFile: vi.fn(async () => ({size: 1})),
+        }));
+        const root = /** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ ({
+            async *entries() {
+                yield ['manabitan-term-content.bin', firstHandle];
+                yield ['manabitan-term-content^1.bin', secondHandle];
+            },
+        }));
+
+        await expect(Reflect.get(store, '_loadSegmentStates').call(store, root))
+            .rejects.toThrow(/safe integer range/u);
+        expect(Reflect.get(store, '_segmentStates')).toStrictEqual([]);
+    });
+
+    test('cold snapshot refresh rejects unsafe cumulative file sizes before publication', async () => {
+        const store = new TermContentOpfsStore();
+        const firstFile = /** @type {File} */ (/** @type {unknown} */ ({size: Number.MAX_SAFE_INTEGER}));
+        const secondFile = /** @type {File} */ (/** @type {unknown} */ ({size: 1}));
+        const firstHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => firstFile),
+        }));
+        const secondHandle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({
+            getFile: vi.fn(async () => secondFile),
+        }));
+        const first = {
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: firstHandle,
+            fileLength: 1,
+            startOffset: 0,
+            readFile: null,
+        };
+        const second = {
+            index: 1,
+            fileName: 'manabitan-term-content^1.bin',
+            fileHandle: secondHandle,
+            fileLength: 1,
+            startOffset: 1,
+            readFile: null,
+        };
+        Reflect.set(store, '_fileHandle', firstHandle);
+        Reflect.set(store, '_length', 2);
+        Reflect.set(store, '_segmentStates', [first, second]);
+
+        await expect(store.ensureLoadedForRead()).rejects.toThrow(/safe integer range/u);
+        expect(first.fileLength).toBe(1);
+        expect(first.startOffset).toBe(0);
+        expect(first.readFile).toBeNull();
+        expect(second.fileLength).toBe(1);
+        expect(second.startOffset).toBe(1);
+        expect(second.readFile).toBeNull();
+        expect(Reflect.get(store, '_length')).toBe(2);
+        expect(Reflect.get(store, '_loadedForRead')).toBe(false);
+    });
+
+    test('segmented length overflow does not partially rewrite existing start offsets', () => {
+        const store = new TermContentOpfsStore();
+        const first = {
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: {},
+            fileLength: Number.MAX_SAFE_INTEGER,
+            startOffset: 111,
+            readFile: null,
+        };
+        const second = {
+            index: 1,
+            fileName: 'manabitan-term-content^1.bin',
+            fileHandle: {},
+            fileLength: 1,
+            startOffset: 222,
+            readFile: null,
+        };
+        Reflect.set(store, '_segmentStates', [first, second]);
+
+        expect(() => Reflect.get(store, '_computeSegmentedLength').call(store))
+            .toThrow(/safe integer range/u);
+        expect(first.startOffset).toBe(111);
+        expect(second.startOffset).toBe(222);
+    });
+
+    test('rejects an unsafe in-memory append before mutating storage state', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_length', Number.MAX_SAFE_INTEGER - 1);
+        const offsets = [123];
+        const lengths = [456];
+
+        await expect(store.appendBatchToArrays([new Uint8Array(2)], offsets, lengths))
+            .rejects.toThrow(/safe integer range/u);
+
+        expect(Reflect.get(store, '_length')).toBe(Number.MAX_SAFE_INTEGER - 1);
+        expect(Reflect.get(store, '_chunks')).toStrictEqual([]);
+        expect(Reflect.get(store, '_chunkOffsets')).toStrictEqual([]);
+        expect(offsets).toStrictEqual([123]);
+        expect(lengths).toStrictEqual([456]);
+    });
+
+    test('rejects unsafe primary derived-chunk planning before invoking the builder', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_length', Number.MAX_SAFE_INTEGER - 1);
+        const createDerivedChunks = vi.fn(() => [new Uint8Array(1)]);
+
+        await expect(store.appendBatchWithDerivedChunks(
+            [new Uint8Array(2)],
+            createDerivedChunks,
+        )).rejects.toThrow(/safe integer range/u);
+
+        expect(createDerivedChunks).not.toHaveBeenCalled();
+        expect(Reflect.get(store, '_length')).toBe(Number.MAX_SAFE_INTEGER - 1);
+        expect(Reflect.get(store, '_chunks')).toStrictEqual([]);
+    });
+
+    test('rejects an unsafe derived-prefix reservation instead of publishing offsets', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_length', Number.MAX_SAFE_INTEGER - 1);
+        const operation = store.beginAppendBatchWithDerivedPrefix(
+            Promise.resolve([new Uint8Array(1)]),
+            [2],
+            () => [new Uint8Array(2)],
+        );
+
+        await expect(operation.reserved).rejects.toThrow(/safe integer range/u);
+        await expect(operation.completion).rejects.toThrow(/safe integer range/u);
+        expect(Reflect.get(store, '_length')).toBe(Number.MAX_SAFE_INTEGER - 1);
+        expect(Reflect.get(store, '_chunks')).toStrictEqual([]);
+    });
+
+    test('rejects an unsafe buffered OPFS cursor before append admission', async () => {
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_fileHandle', {});
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: {},
+            fileLength: Number.MAX_SAFE_INTEGER,
+            startOffset: 0,
+            readFile: null,
+        }]);
+        Reflect.set(store, '_pendingWriteBytes', 1);
+
+        await expect(store.appendBatch([new Uint8Array(1)]))
+            .rejects.toThrow(/safe integer range/u);
+        expect(Reflect.get(store, '_pendingWriteChunks')).toStrictEqual([]);
+    });
+
+    test('appends primary and offset-derived chunks in one logical mutation', async () => {
+        const store = new TermContentOpfsStore();
+        const result = await store.appendBatchWithDerivedChunks(
+            [new Uint8Array([1, 2]), new Uint8Array([3])],
+            (offsets, lengths) => [new Uint8Array([offsets[0], lengths[0], offsets[1], lengths[1]])],
+        );
+
+        expect(result).toStrictEqual({
+            primaryOffsets: [0, 2],
+            primaryLengths: [2, 1],
+            derivedOffsets: [3],
+            derivedLengths: [4],
+        });
+        expect(await store.readSlice(0, 7)).toStrictEqual(new Uint8Array([1, 2, 3, 0, 2, 2, 1]));
+    });
+
+    test('does not mutate storage when derived chunk construction fails', async () => {
+        const store = new TermContentOpfsStore();
+        await store.appendBatch([new Uint8Array([7, 8])]);
+
+        await expect(store.appendBatchWithDerivedChunks(
+            [new Uint8Array([9])],
+            () => { throw new Error('derive failed'); },
+        )).rejects.toThrow('derive failed');
+        expect(await store.readSlice(0, 3)).toBeNull();
+        expect(await store.readSlice(0, 2)).toStrictEqual(new Uint8Array([7, 8]));
+    });
+
+    test('reserves derived-prefix offsets while primary chunks are pending', async () => {
+        const store = new TermContentOpfsStore();
+        /** @type {(value: Uint8Array[]) => void} */
+        let resolvePrimary = () => {};
+        const primaryChunks = new Promise((resolve) => { resolvePrimary = resolve; });
+        const operation = store.beginAppendBatchWithDerivedPrefix(
+            primaryChunks,
+            new Uint32Array([2, 3]),
+            (offsets, lengths) => [
+                new Uint8Array([offsets[0], lengths[0]]),
+                new Uint8Array([offsets[1], lengths[1], 9]),
+            ],
+        );
+
+        await expect(operation.reserved).resolves.toStrictEqual({
+            derivedOffsets: [0, 2],
+            derivedLengths: [2, 3],
+        });
+        expect(Reflect.get(store, '_length')).toBe(0);
+        resolvePrimary([new Uint8Array([1, 2]), new Uint8Array([3])]);
+        await expect(operation.completion).resolves.toStrictEqual({
+            primaryOffsets: [5, 7],
+            primaryLengths: [2, 1],
+            derivedOffsets: [0, 2],
+            derivedLengths: [2, 3],
+        });
+        expect(await store.readSlice(0, 8)).toStrictEqual(new Uint8Array([5, 2, 7, 1, 9, 1, 2, 3]));
+    });
+
+    test('releases a derived-prefix reservation after primary production fails', async () => {
+        const store = new TermContentOpfsStore();
+        const operation = store.beginAppendBatchWithDerivedPrefix(
+            Promise.reject(new Error('injected compression failure')),
+            [4],
+            () => [new Uint8Array(4)],
+        );
+
+        await expect(operation.reserved).resolves.toStrictEqual({derivedOffsets: [0], derivedLengths: [4]});
+        await expect(operation.completion).rejects.toThrow('injected compression failure');
+        expect(Reflect.get(store, '_length')).toBe(0);
+        await expect(store.appendBatch([new Uint8Array([1])])).resolves.toStrictEqual([{offset: 0, length: 1}]);
+    });
+
+    test('releases a derived-prefix reservation after reference construction fails', async () => {
+        const store = new TermContentOpfsStore();
+        const operation = store.beginAppendBatchWithDerivedPrefix(
+            Promise.resolve([new Uint8Array([1, 2])]),
+            [4],
+            () => { throw new Error('injected reference construction failure'); },
+        );
+
+        await expect(operation.reserved).resolves.toStrictEqual({derivedOffsets: [0], derivedLengths: [4]});
+        await expect(operation.completion).rejects.toThrow('injected reference construction failure');
+        expect(Reflect.get(store, '_length')).toBe(0);
+        await expect(store.appendBatch([new Uint8Array([3])])).resolves.toStrictEqual([{offset: 0, length: 1}]);
+    });
+
+    test('writes coalesced Blob data continuously across file segments', async () => {
+        const maxSegmentBytes = 128 * 1024 * 1024;
+        const firstWritable = {
+            write: vi.fn(/** @type {(data: Blob) => Promise<void>} */ (async (_data) => {})),
+            close: vi.fn(async () => {}),
+        };
+        const secondWritable = {
+            write: vi.fn(/** @type {(data: Blob) => Promise<void>} */ (async (_data) => {})),
+            close: vi.fn(async () => {}),
+            seek: vi.fn(async () => {}),
+        };
+        const firstFileHandle = {createWritable: vi.fn(async () => firstWritable)};
+        const secondFileHandle = {
+            createWritable: vi.fn(async () => secondWritable),
+            getFile: vi.fn(async () => ({size: 0})),
+        };
+        vi.stubGlobal('navigator', {
+            storage: {
+                getDirectory: vi.fn(async () => ({
+                    getFileHandle: vi.fn(async () => secondFileHandle),
+                })),
+            },
+        });
+
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_writable', firstWritable);
+        Reflect.set(store, '_fileHandle', firstFileHandle);
+        Reflect.set(store, '_length', maxSegmentBytes - 2);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle: firstFileHandle,
+            fileLength: maxSegmentBytes - 2,
+            startOffset: 0,
+            readFile: null,
+        }]);
+
+        await Reflect.get(store, '_writeDataToActiveSegments').call(store, new Blob([new Uint8Array([1, 2, 3, 4])]));
+
+        expect(firstWritable.write).toHaveBeenCalledTimes(1);
+        expect(Reflect.get(firstWritable.write.mock.calls[0][0], 'size')).toBe(2);
+        expect(secondWritable.write).toHaveBeenCalledTimes(1);
+        expect(Reflect.get(secondWritable.write.mock.calls[0][0], 'size')).toBe(2);
+        expect(Reflect.get(store, '_segmentStates')).toHaveLength(2);
+        expect(Reflect.get(store, '_length')).toBe(maxSegmentBytes + 2);
+    });
+
+    test('reopens and retries a Blob write when Chromium closes the stream', async () => {
+        const closingError = new Error('Cannot write to a closed or closing stream');
+        const firstWritable = {write: vi.fn(async () => { throw closingError; })};
+        const recoveredWritable = {write: vi.fn(async () => {}), seek: vi.fn(async () => {})};
+        const fileHandle = {createWritable: vi.fn(async () => recoveredWritable)};
+        const store = new TermContentOpfsStore();
+        Reflect.set(store, '_writable', firstWritable);
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: 10,
+            startOffset: 0,
+            readFile: null,
+        }]);
+
+        await Reflect.get(store, '_writeDataToActiveSegments').call(store, new Blob([new Uint8Array([1, 2, 3])]));
+
+        expect(fileHandle.createWritable).toHaveBeenCalledTimes(1);
+        expect(recoveredWritable.seek).toHaveBeenCalledWith(10);
+        expect(recoveredWritable.write).toHaveBeenCalledTimes(1);
+        expect(Reflect.get(store, '_length')).toBe(13);
+    });
+
+    test('reads the pre-import snapshot without waiting for queued append writes', async () => {
+        const initialBytes = new Uint8Array([1, 2, 3, 4]);
+        const store = new TermContentOpfsStore();
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const writeStartedDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const releaseWriteDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
+        const writeStarted = writeStartedDeferred.promise;
+        {
+            const writable = {
+                seek: vi.fn(async () => {}),
+                close: vi.fn(async () => {}),
+                write: vi.fn(async () => {
+                    writeStartedDeferred.resolve();
+                    await releaseWriteDeferred.promise;
+                }),
+            };
+            const fileHandle = {
+                createWritable: vi.fn(async () => writable),
+                getFile: vi.fn(async () => createReadableFile(initialBytes)),
+            };
+            Reflect.set(store, '_fileHandle', fileHandle);
+            Reflect.set(store, '_segmentStates', [{
+                index: 0,
+                fileName: 'manabitan-term-content.bin',
+                fileHandle,
+                fileLength: initialBytes.byteLength,
+                startOffset: 0,
+                readFile: createReadableFile(initialBytes),
+            }]);
+            Reflect.set(store, '_loadedForRead', true);
+            Reflect.set(store, '_length', initialBytes.byteLength);
+            Reflect.set(store, '_importSessionActive', true);
+            Reflect.set(store, '_flushThresholdBytes', 1);
+            store.setQueueImportWritesEnabled(true);
+        }
+
+        await store.appendBatch([new Uint8Array([5, 6]), new Uint8Array([7, 8])]);
+        await writeStarted;
+
+        await expect(store.readSlice(1, 2)).resolves.toStrictEqual(new Uint8Array([2, 3]));
+        await expect(store.readSlice(4, 4)).resolves.toStrictEqual(new Uint8Array([5, 6, 7, 8]));
+        expect(Reflect.get(store, '_loadedForRead')).toBe(true);
+        expect(store.getDebugState()).toMatchObject({
+            importReadOverlayChunkCount: 2,
+            importReadOverlayBytes: 4,
+        });
+
+        releaseWriteDeferred.resolve();
+        await store.endImportSession();
+        expect(Reflect.get(store, '_loadedForRead')).toBe(false);
+        expect(store.getDebugState()).toMatchObject({
+            importReadOverlayChunkCount: 0,
+            importReadOverlayBytes: 0,
+        });
+    });
+
     test('import append offsets include bytes in active queued writes', async () => {
         const store = new TermContentOpfsStore();
-        /** @type {(() => void)|null} */
-        let releaseWrite = null;
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const writeStartedDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
+        /** @type {{promise: Promise<void>, resolve: () => void}} */
+        const releaseWriteDeferred = /** @type {{promise: Promise<void>, resolve: () => void}} */ (/** @type {unknown} */ (Promise.withResolvers()));
         let writeCount = 0;
-        const writeStarted = new Promise((resolve) => {
+        const writeStarted = writeStartedDeferred.promise;
+        {
             const writable = {
                 seek: vi.fn(async () => {}),
                 close: vi.fn(async () => {}),
                 write: vi.fn(async () => {
                     ++writeCount;
                     if (writeCount === 1) {
-                        resolve(void 0);
-                        /** @type {Promise<void>} */
-                        const writeGate = new Promise((writeResolve) => {
-                            releaseWrite = writeResolve;
-                        });
-                        await writeGate;
+                        writeStartedDeferred.resolve();
+                        await releaseWriteDeferred.promise;
                     }
                 }),
             };
@@ -87,7 +959,7 @@ describe('TermContentOpfsStore', () => {
             Reflect.set(store, '_importSessionActive', true);
             Reflect.set(store, '_flushThresholdBytes', 1);
             store.setQueueImportWritesEnabled(true);
-        });
+        }
 
         /** @type {number[]} */
         const firstOffsets = [];
@@ -107,9 +979,7 @@ describe('TermContentOpfsStore', () => {
         expect(secondOffsets).toStrictEqual([3]);
         expect(secondLengths).toStrictEqual([2]);
 
-        const release = /** @type {(() => void)|null} */ (releaseWrite);
-        expect(release).not.toBeNull();
-        release?.();
+        releaseWriteDeferred.resolve();
         await store.endImportSession();
     });
 

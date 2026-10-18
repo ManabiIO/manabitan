@@ -23,6 +23,7 @@ import {deferPromise, generateId} from '../../core/utilities.js';
 import {OptionsUtil} from '../../data/options-util.js';
 import {getAllPermissions} from '../../data/permissions-util.js';
 import {HtmlTemplateCollection} from '../../dom/html-template-collection.js';
+import {publishDictionaryRowOwnership} from './dictionary-row-ownership.js';
 
 /**
  * @augments EventDispatcher<import('settings-controller').Events>
@@ -37,6 +38,10 @@ export class SettingsController extends EventDispatcher {
         this._application = application;
         /** @type {number} */
         this._profileIndex = 0;
+        /** @type {string|null} */
+        this._profileId = null;
+        /** @type {number} */
+        this._profileIndexChangeGeneration = 0;
         /** @type {string} */
         this._source = generateId(16);
         /** @type {Set<import('settings-controller').PageExitPrevention>} */
@@ -47,6 +52,8 @@ export class SettingsController extends EventDispatcher {
         this._templates = new HtmlTemplateCollection();
         /** @type {import('settings').Options|null} */
         this._preparedOptionsFull = null;
+        /** @type {?import('core').TokenObject} */
+        this._optionsUpdateToken = null;
     }
 
     /** @type {import('../../application.js').Application} */
@@ -67,6 +74,11 @@ export class SettingsController extends EventDispatcher {
     set profileIndex(value) {
         if (this._profileIndex === value) { return; }
         this._setProfileIndex(value, true);
+    }
+
+    /** @type {number} */
+    get profileIndexChangeGeneration() {
+        return this._profileIndexChangeGeneration;
     }
 
     /** */
@@ -92,6 +104,7 @@ export class SettingsController extends EventDispatcher {
         const {profiles, profileCurrent} = optionsFull;
         if (profileCurrent >= 0 && profileCurrent < profiles.length) {
             this._profileIndex = profileCurrent;
+            this._profileId = this._getUniqueProfileId(profiles[profileCurrent]);
         }
     }
 
@@ -122,7 +135,7 @@ export class SettingsController extends EventDispatcher {
     getPreparedProfileOptions() {
         const optionsFull = this._preparedOptionsFull;
         if (optionsFull === null) { return null; }
-        const profile = optionsFull.profiles[this._profileIndex];
+        const profile = this._getProfileById(optionsFull, this._profileId);
         return profile?.options ?? null;
     }
 
@@ -132,7 +145,15 @@ export class SettingsController extends EventDispatcher {
     async setAllSettings(value) {
         const profileIndex = value.profileCurrent;
         await this._application.api.setAllSettings(value, this._source);
-        this._setProfileIndex(profileIndex, true);
+        this._preparedOptionsFull = value;
+        const profileId = this._getUniqueProfileId(value.profiles[profileIndex]);
+        this._setProfileSelection(profileIndex, profileId, true);
+        // An import replaces settings even when the selected profile has the
+        // same ID and index. Invalidate in-flight UI reads and refresh all
+        // Settings controls because this tab's optionsUpdated is suppressed.
+        this._profileIndexChangeGeneration++;
+        this.trigger('optionsContextChanged', {});
+        await this._onOptionsUpdatedInternal(profileId !== null);
     }
 
     /**
@@ -256,10 +277,10 @@ export class SettingsController extends EventDispatcher {
     }
 
     /**
-     * @returns {import('settings').OptionsContext}
+     * @returns {import('settings').OptionsContext2}
      */
     getOptionsContext() {
-        return {index: this._profileIndex};
+        return {index: this._profileIndex, profileId: this._profileId};
     }
 
     /**
@@ -309,9 +330,33 @@ export class SettingsController extends EventDispatcher {
      * @param {boolean} canUpdateProfileIndex
      */
     _setProfileIndex(value, canUpdateProfileIndex) {
-        this._profileIndex = value;
+        const profiles = this._preparedOptionsFull?.profiles ?? [];
+        const profileId = this._getUniqueProfileId(profiles[value]);
+        this._setProfileSelection(value, profileId, true);
         this.trigger('optionsContextChanged', {});
         void this._onOptionsUpdatedInternal(canUpdateProfileIndex);
+    }
+
+    /**
+     * Update the selected profile after a profile-list operation already identified it by ID.
+     * @param {number} index
+     * @param {string|null} profileId
+     */
+    setProfileSelection(index, profileId) {
+        this._setProfileSelection(index, profileId, true);
+        this.trigger('optionsContextChanged', {});
+        void this._onOptionsUpdatedInternal(true);
+    }
+
+    /**
+     * @param {number} index
+     * @param {string|null} profileId
+     * @param {boolean} explicit
+     */
+    _setProfileSelection(index, profileId, explicit) {
+        if (explicit && (this._profileIndex !== index || this._profileId !== profileId)) { this._profileIndexChangeGeneration++; }
+        this._profileIndex = index;
+        this._profileId = profileId;
     }
 
     /**
@@ -326,13 +371,57 @@ export class SettingsController extends EventDispatcher {
      * @param {boolean} canUpdateProfileIndex
      */
     async _onOptionsUpdatedInternal(canUpdateProfileIndex) {
-        const optionsContext = this.getOptionsContext();
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._optionsUpdateToken = token;
+        const profileIndexChangeGeneration = this._profileIndexChangeGeneration;
+        const profileId = this._profileId;
         try {
+            const optionsFull = await this.getOptionsFull();
+            if (this._optionsUpdateToken !== token || this._profileIndexChangeGeneration !== profileIndexChangeGeneration) { return; }
+            this._preparedOptionsFull = optionsFull;
+            const matchingProfiles = optionsFull.profiles.flatMap((profile, index) => (profile?.id === profileId && typeof profileId === 'string' ? [{profile, index}] : []));
+            if (matchingProfiles.length === 1) {
+                const previousIndex = this._profileIndex;
+                this._setProfileSelection(matchingProfiles[0].index, profileId, false);
+                if (this._profileIndex !== previousIndex) { this.trigger('optionsContextChanged', {}); }
+            } else if (canUpdateProfileIndex && optionsFull.profiles.length > 0) {
+                const index = optionsFull.profileCurrent >= 0 && optionsFull.profileCurrent < optionsFull.profiles.length ? optionsFull.profileCurrent : 0;
+                this._setProfileSelection(index, this._getUniqueProfileId(optionsFull.profiles[index]), false);
+                this.trigger('optionsContextChanged', {});
+            } else {
+                throw new Error('Profile identity changed; reload settings and try again');
+            }
+            const optionsContext = this.getOptionsContext();
+            const selectedProfileId = this._profileId;
             const options = await this.getOptions();
+            if (
+                this._optionsUpdateToken !== token ||
+                this._profileIndexChangeGeneration !== profileIndexChangeGeneration ||
+                this.getOptionsContext().index !== optionsContext.index ||
+                this._profileId !== selectedProfileId
+            ) {
+                return;
+            }
             this.trigger('optionsChanged', {options, optionsContext});
         } catch (e) {
+            if (
+                this._optionsUpdateToken !== token ||
+                this._profileIndexChangeGeneration !== profileIndexChangeGeneration
+            ) {
+                return;
+            }
             if (canUpdateProfileIndex) {
-                this._setProfileIndex(0, false);
+                const optionsFull = this._preparedOptionsFull;
+                if (optionsFull !== null && optionsFull.profiles.length > 0) {
+                    const fallbackIndex = optionsFull.profileCurrent >= 0 && optionsFull.profileCurrent < optionsFull.profiles.length ? optionsFull.profileCurrent : 0;
+                    const fallbackId = this._getUniqueProfileId(optionsFull.profiles[fallbackIndex]);
+                    if (this._profileIndex !== fallbackIndex || this._profileId !== fallbackId) {
+                        this._setProfileSelection(fallbackIndex, fallbackId, false);
+                        this.trigger('optionsContextChanged', {});
+                        void this._onOptionsUpdatedInternal(false).catch(() => {});
+                    }
+                }
                 return;
             }
             throw e;
@@ -343,9 +432,31 @@ export class SettingsController extends EventDispatcher {
      * @param {import('settings-modifications').OptionsScope} target
      */
     _modifyOptionsScope(target) {
-        if (target.scope === 'profile') {
+        if (target.scope === 'profile' && (target.optionsContext === null || typeof target.optionsContext === 'undefined')) {
             target.optionsContext = this.getOptionsContext();
+            if (!Object.hasOwn(target, 'profileId')) { target.profileId = this._profileId; }
         }
+    }
+
+    /**
+     * @param {import('settings').Options} optionsFull
+     * @param {string|null} profileId
+     * @returns {import('settings').Profile|null}
+     */
+    _getProfileById(optionsFull, profileId) {
+        if (profileId === null) { return null; }
+        const profiles = optionsFull.profiles.filter((profile) => profile.id === profileId);
+        return profiles.length === 1 ? profiles[0] : null;
+    }
+
+    /**
+     * @param {import('settings').Profile|undefined} profile
+     * @returns {string|null}
+     */
+    _getUniqueProfileId(profile) {
+        if (typeof profile?.id !== 'string' || profile.id.length === 0) { return null; }
+        const profiles = this._preparedOptionsFull?.profiles ?? [];
+        return (profiles.filter((item) => item.id === profile.id).length === 1 ? profile.id : null);
     }
 
     /**
@@ -375,7 +486,21 @@ export class SettingsController extends EventDispatcher {
             this._modifyOptionsScope(target2);
             return target2;
         });
-        return await this._application.api.modifySettings(targets2, this._source);
+        const results = await this._application.api.modifySettings(targets2, this._source);
+        /** @type {Map<string, Record<string, unknown>>} */
+        const publishedRows = new Map();
+        for (let i = 0; i < targets2.length; ++i) {
+            const target = targets2[i];
+            const response = results[i];
+            if (target.action !== 'setDictionaryField' || response?.error || !isObjectNotArray(response?.result)) { continue; }
+            const {dictionaryEntry} = response.result;
+            if (!isObjectNotArray(dictionaryEntry)) { continue; }
+            const key = JSON.stringify([target.profileId, target.index]);
+            const expectedEntry = publishedRows.get(key) ?? target.expectedEntry;
+            publishDictionaryRowOwnership(target.profileId, target.index, expectedEntry, dictionaryEntry);
+            publishedRows.set(key, dictionaryEntry);
+        }
+        return results;
     }
 
     /**

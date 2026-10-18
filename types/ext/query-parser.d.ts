@@ -22,12 +22,14 @@ import type {InputInfo} from './text-scanner';
 import type {TextSource} from './text-source';
 import type {EventNames, EventArgument as BaseEventArgument} from './core';
 import type {HistoryStateSentence, PageType} from './display';
+import type {DictionaryAvailability} from './translator';
 
 export type Events = {
     searched: {
         textScanner: TextScanner;
         type: PageType;
         dictionaryEntries: DictionaryEntry[];
+        dictionaryAvailability?: DictionaryAvailability[];
         sentence: HistoryStateSentence;
         inputInfo: InputInfo;
         textSource: TextSource;

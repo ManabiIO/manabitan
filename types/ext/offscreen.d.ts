@@ -93,6 +93,12 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.TermEntry[];
     };
+    warmTermLookupCachesOffscreen: {
+        params: {
+            dictionaryNames: string[];
+        };
+        return: void;
+    };
     debugDictionaryStorageStateOffscreen: {
         params: void;
         return: {
@@ -128,16 +134,6 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.Media<string>[];
     };
-    databaseExportOffscreen: {
-        params: void;
-        return: string;
-    };
-    databaseImportOffscreen: {
-        params: {
-            content: string;
-        };
-        return: void;
-    };
     translatorPrepareOffscreen: {
         params: void;
         return: void;
@@ -164,15 +160,13 @@ type ApiSurface = {
         };
         return: Translator.TermFrequencySimple[];
     };
-    warmTermLookupCachesOffscreen: {
-        params: {
-            dictionaryNames: string[];
-        };
-        return: void;
-    };
     clearDatabaseCachesOffscreen: {
         params: void;
         return: void;
+    };
+    cancelDictionaryImportOffscreen: {
+        params: {operationId?: string, lookupOnly?: boolean, workerGeneration?: string};
+        return: ImportOperationStatus | void;
     };
     clipboardSetBrowserOffscreen: {
         params: {
@@ -227,7 +221,10 @@ export type FindTermsOptionsOffscreen = Omit<Translation.FindTermsOptions, 'enab
 };
 
 export type FindTermsTextReplacementOffscreen = Omit<Translation.FindTermsTextReplacement, 'pattern'> & {
-    pattern: string;
+    pattern: {
+        source: string;
+        flags: string;
+    };
 };
 
 export type ApiMap = BaseApiMap<ApiSurface>;
@@ -251,15 +248,39 @@ type McApiSurface = {
     };
     importDictionaryOffscreen: {
         params: {
-            archiveContent: ArrayBuffer | Blob;
+            archiveContent: Blob;
             details: DictionaryImporter.ImportDetails;
+            operationId: string;
         };
         return: void;
+    };
+    findTermsStructuredOffscreen: {
+        params: {
+            mode: Translator.FindTermsMode;
+            text: string;
+            options: Translation.FindTermsOptions;
+        };
+        return: Translator.FindTermsResult;
     };
     dummy: {
         params: void;
         return: void;
     };
+};
+
+/**
+ * IDs are timestamp-prefixed unique tokens, admitted within ten minutes of issue.
+ * Lookup does not replay import; missing volatile receipts reconcile only exact
+ * published summary metadata. Unconfirmed restart/rollback outcomes stay unknown.
+ */
+export type ImportOperationStatus = {
+    operationId: string;
+    workerGeneration: string;
+    state: 'unknown' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+    published?: boolean;
+    outcome?: DictionaryImporter.ImportOutcome;
+    result?: unknown;
+    error?: import('core').SerializedError;
 };
 
 type McApiExtraArgs = [ports: readonly MessagePort[]];
@@ -283,3 +304,5 @@ export type McApiParams<TName extends McApiNames> = BaseApiParams<McApiSurface[T
 export type McApiReturn<TName extends McApiNames> = BaseApiReturn<McApiSurface[TName]>;
 
 export type McApiMessageAny = {[name in McApiNames]: McApiMessage<name>}[McApiNames];
+
+export type McApiRequest = McApiMessageAny & {id: number};

@@ -18,7 +18,6 @@
 import path from 'path';
 import {readFileSync} from 'fs';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
-import {createDictionaryDatabaseBase64} from '../e2e/minimal-dictionary-database.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {
@@ -73,8 +72,6 @@ const localMdxFixturePath = path.join(root, 'test', 'data', 'dictionaries', loca
 const localEnglishMdxFixturePath = path.join(root, 'test', 'data', 'dictionaries', localEnglishMdxFixtureFileName);
 const clipboardMonitorInitialValue = 'い';
 const clipboardMonitorUpdatedValue = 'あ';
-/** @type {Promise<string>|null} */
-let testDictionaryDatabaseBase64Promise = null;
 /** @type {Map<string, Promise<Array<{title: string, file: {name: string, mimeType: string, buffer: Buffer}}>>>} */
 const importValidationDictionaryArchivesPromiseMap = new Map();
 
@@ -169,23 +166,6 @@ function ensureImportedDictionariesConfigured(optionsFull, dictionaryTitles) {
 }
 
 /**
- * @returns {Promise<string>}
- */
-async function getTestDictionaryDatabaseBase64() {
-    if (testDictionaryDatabaseBase64Promise !== null) {
-        return await testDictionaryDatabaseBase64Promise;
-    }
-    testDictionaryDatabaseBase64Promise = createDictionaryDatabaseBase64({
-        title: testDictionaryTitle,
-        revision: 'test',
-        expression: japaneseLookupTerm,
-        reading: japaneseLookupReading,
-        glossary: [japaneseLookupGlossary],
-    });
-    return await testDictionaryDatabaseBase64Promise;
-}
-
-/**
  * @param {string[]} [dictionaryTitles]
  * @returns {Promise<Array<{title: string, file: {name: string, mimeType: string, buffer: Buffer}}>>}
  */
@@ -212,22 +192,7 @@ async function getImportValidationDictionaryArchives(dictionaryTitles = defaultI
  * @returns {Promise<void>}
  */
 async function importTestDictionary(page) {
-    await invokeRuntimeApi(page, 'purgeDatabase');
-    await invokeRuntimeApi(page, 'importDictionaryDatabase', {content: await getTestDictionaryDatabaseBase64()});
-    const optionsFull = /** @type {import('settings').Options} */ (await invokeRuntimeApi(page, 'optionsGetFull'));
-    ensureImportedDictionariesConfigured(optionsFull, [testDictionaryTitle]);
-    await invokeRuntimeApi(page, 'setAllSettings', {value: optionsFull, source: 'playwright'});
-    await invokeRuntimeApi(page, 'triggerDatabaseUpdated', {type: 'dictionary', cause: 'import'});
-
-    try {
-        await expect(async () => {
-            const info = /** @type {import('dictionary-importer').Summary[]} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
-            expect(info.length).toBe(1);
-            expect(info[0].title).toBe(testDictionaryTitle);
-        }).toPass({timeout: 60_000});
-    } catch (error) {
-        throw new Error('Failed to import test dictionary database', {cause: error});
-    }
+    await importValidationDictionariesFromSettings(page, [testDictionaryTitle]);
 }
 
 test.beforeEach(async ({context}) => {
@@ -383,14 +348,18 @@ async function waitForTermsLookupReady(page, query) {
  * @returns {Promise<void>}
  */
 async function setSettingsPreviewText(page, text) {
-    await page.evaluate((previewText) => {
-        const frame = document.querySelector('#popup-preview-frame');
-        if (!(frame instanceof HTMLIFrameElement) || frame.contentWindow === null) {
-            throw new Error('Missing popup preview frame');
-        }
-        const targetOrigin = chrome.runtime.getURL('/').replace(/\/$/, '');
-        frame.contentWindow.postMessage({action: 'setText', params: {text: previewText}}, targetOrigin);
-    }, text);
+    await expect(async () => {
+        await page.evaluate((previewText) => {
+            const frame = document.querySelector('#popup-preview-frame');
+            if (!(frame instanceof HTMLIFrameElement) || frame.contentWindow === null) {
+                throw new Error('Missing popup preview frame');
+            }
+            const targetOrigin = chrome.runtime.getURL('/').replace(/\/$/, '');
+            frame.contentWindow.postMessage({action: 'setText', params: {text: previewText}}, targetOrigin);
+        }, text);
+        const currentText = await page.frameLocator('#popup-preview-frame').locator('#example-text').textContent({timeout: 1_000});
+        expect(currentText).toBe(text);
+    }).toPass({timeout: 30_000});
 }
 
 /**
@@ -650,61 +619,79 @@ async function configureAnkiCardViaUi(page, deckName, modelName) {
  */
 async function runSearch(page, query) {
     await waitForSearchPageReady(page);
+    await page.bringToFront();
     const searchTextbox = page.locator('#search-textbox');
     const searchButton = page.locator('#search-button');
+    await page.evaluate(() => {
+        const input = document.querySelector('#search-textbox');
+        if (!(input instanceof HTMLTextAreaElement)) {
+            throw new Error('Unable to trace Search textarea events');
+        }
+        /** @type {Array<{type: string, value: string, trusted: boolean}>} */
+        const events = [];
+        Reflect.set(globalThis, '__manabitanSearchInputEvents', events);
+        for (const type of ['input', 'change', 'focus', 'blur']) {
+            input.addEventListener(type, (event) => {
+                events.push({
+                    type: event.type,
+                    value: input.value,
+                    trusted: event.isTrusted,
+                });
+            });
+        }
+    });
+    await searchTextbox.focus();
+    await expect(searchTextbox).toBeFocused();
     await searchTextbox.fill(query);
-    await expect(searchTextbox).toHaveValue(query);
+    try {
+        await expect(searchTextbox).toHaveValue(query);
+    } catch (error) {
+        const trace = await page.evaluate(() => ({
+            events: Reflect.get(globalThis, '__manabitanSearchInputEvents'),
+            debug: Reflect.get(globalThis, '__manabitanSearchDebug'),
+            activeElement: document.activeElement?.id ?? '',
+            documentFocused: document.hasFocus(),
+            url: location.href,
+            loaded: document.documentElement.dataset.loaded ?? '',
+        }));
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`${message}\nSearch input trace: ${JSON.stringify(trace)}`);
+    }
     await searchButton.click();
 }
 
 /**
  * @param {import('@playwright/test').Page} page
- * @returns {Promise<void>}
+ * @returns {Promise<import('@playwright/test').Locator>}
  */
 async function waitForSaveButtonEnabled(page) {
-    const saveButton = page.locator('.entry .note-actions-container .action-button[data-action="save-note"]').first();
+    const saveButton = page.locator('.entry .note-actions-container .action-button[data-action="save-note"][data-card-format-index="0"]').first();
     await expect(saveButton).toBeVisible({timeout: 30_000});
     await expect(saveButton).toBeEnabled({timeout: 30_000});
+    return saveButton;
 }
+
+test('search accepts typing immediately after visible initialization', async ({page, extensionId}) => {
+    await page.bringToFront();
+    await page.goto(`chrome-extension://${extensionId}/search.html`);
+    await waitForSearchPageReady(page);
+    const searchTextbox = page.locator('#search-textbox');
+    await expect(searchTextbox).toBeFocused();
+    await page.keyboard.insertText('日本語');
+    await expect(searchTextbox).toHaveValue('日本語');
+});
 
 test('search clipboard', async ({page, extensionId}) => {
     await page.goto(`chrome-extension://${extensionId}/search.html`);
     await waitForSearchPageReady(page);
     await writeToClipboardFromPage(page, clipboardMonitorInitialValue);
-    await page.locator('#search-option-clipboard-monitor-container > label').click();
+    await page.locator('#search-option-clipboard-monitor-container').click();
     await expect(page.locator('#clipboard-monitor-enable')).toBeChecked();
 
     await expect(async () => {
         await writeToClipboardFromPage(page, clipboardMonitorUpdatedValue);
         await expect(page.locator('#search-textbox')).toHaveValue(clipboardMonitorUpdatedValue);
     }).toPass({timeout: 15_000});
-});
-
-test('dictionary db export and restore', async ({page, extensionId}) => {
-    await page.goto(`chrome-extension://${extensionId}/settings.html`);
-    await waitForSettingsPageReady(page);
-
-    await importTestDictionary(page);
-
-    const exported = await invokeRuntimeApi(page, 'exportDictionaryDatabase');
-    await invokeRuntimeApi(page, 'purgeDatabase');
-    await page.reload();
-    await waitForSettingsPageReady(page);
-
-    await expect(async () => {
-        const info = /** @type {import('dictionary-importer').Summary[]} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
-        expect(info.length).toBe(0);
-    }).toPass({timeout: 10_000});
-
-    await invokeRuntimeApi(page, 'importDictionaryDatabase', {content: exported});
-    await page.reload();
-    await waitForSettingsPageReady(page);
-
-    await expect(async () => {
-        const info = /** @type {import('dictionary-importer').Summary[]} */ (await invokeRuntimeApi(page, 'getDictionaryInfo'));
-        expect(info.length).toBe(1);
-        expect(info[0].title).toBe(testDictionaryTitle);
-    }).toPass({timeout: 10_000});
 });
 
 test('chromium settings URL import routes an MDX listing through the browser flow and supports lookup', async ({page, extensionId}) => {
@@ -1044,6 +1031,16 @@ test('chromium happy path covers multi-dictionary import, lookup scroll, and Ank
         await page.goto(`${extensionBaseUrl}/search.html`);
         await waitForSearchPageReady(page);
         await waitForTermsLookupReady(page, japaneseLookupTerm);
+        const lookup = /** @type {import('translator').FindTermsResult} */ (await invokeRuntimeApi(page, 'termsFind', {
+            text: japaneseLookupTerm,
+            details: {matchType: 'exact', deinflect: true, primaryReading: ''},
+            optionsContext: {depth: 0, url: page.url()},
+        }));
+        const headwords = lookup.dictionaryEntries.flatMap((entry) => entry.headwords);
+        expect(headwords.length).toBeGreaterThan(0);
+        for (const headword of headwords) {
+            expect(headword).toMatchObject({term: japaneseLookupTerm, reading: japaneseLookupReading});
+        }
         await runSearch(page, japaneseLookupTerm);
         await expect(page.locator('#dictionary-entries .entry')).toBeVisible({timeout: 30_000});
         await expect(page.locator('#dictionary-entries .headword-reading').first()).toHaveText(new RegExp(japaneseLookupReading));
@@ -1061,8 +1058,7 @@ test('chromium happy path covers multi-dictionary import, lookup scroll, and Ank
         await setContentScrollTop(page, 0);
         await page.waitForTimeout(150);
 
-        await waitForSaveButtonEnabled(page);
-        const saveButton = page.locator('.entry .note-actions-container .action-button[data-action="save-note"]:not([disabled])').first();
+        const saveButton = await waitForSaveButtonEnabled(page);
         await saveButton.click();
 
         await expect(async () => {

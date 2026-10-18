@@ -17,6 +17,7 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {log} from '../core/log.js';
 import {toError} from '../core/to-error.js';
 import {DictionaryImporterMediaLoader} from './dictionary-importer-media-loader.js';
 
@@ -31,6 +32,12 @@ export class DictionaryWorker {
         this._reuseWorker = options.reuseWorker === true;
         /** @type {Worker|null} */
         this._worker = null;
+        /** @type {Set<import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>>} */
+        this._activeInvocations = new Set();
+        /** @type {Array<{start: () => Promise<import('core').SafeAny>, resolve: (value: import('core').SafeAny) => void, reject: (reason?: import('core').RejectionReason) => void}>} */
+        this._reuseInvocationQueue = [];
+        /** @type {object|null} */
+        this._reuseInvocationToken = null;
     }
 
     /**
@@ -96,9 +103,21 @@ export class DictionaryWorker {
 
     /** */
     destroy() {
-        if (this._worker !== null) {
-            this._worker.terminate();
-            this._worker = null;
+        const error = new Error('Dictionary worker destroyed');
+        for (const {reject} of this._reuseInvocationQueue.splice(0)) {
+            reject(error);
+        }
+        this._reuseInvocationToken = null;
+
+        // Non-reused workers are owned by their invocations, not _worker.
+        /** @type {Set<Worker>} */
+        const workers = new Set();
+        if (this._worker !== null) { workers.add(this._worker); }
+        for (const {worker} of this._activeInvocations) {
+            if (worker !== null) { workers.add(worker); }
+        }
+        for (const worker of workers) {
+            this._rejectInvocationsForWorker(worker, error, true);
         }
     }
 
@@ -113,10 +132,89 @@ export class DictionaryWorker {
      * @param {Transferable[]} transfer
      * @param {?(arg: import('core').SafeAny) => void} onProgress
      * @param {?(result: TResponseRaw) => TResponse} formatResult
+     * @returns {Promise<import('core').SafeAny>}
      */
     _invoke(action, params, transfer, onProgress, formatResult) {
+        if (!this._reuseWorker) {
+            return this._invokeDirect(action, params, transfer, onProgress, formatResult);
+        }
+
+        const start = () => this._invokeDirect(action, params, transfer, onProgress, formatResult);
+        if (this._reuseInvocationToken === null && this._reuseInvocationQueue.length === 0) {
+            return this._startReuseInvocation(start);
+        }
+
         return new Promise((resolve, reject) => {
-            const worker = this._worker ?? new Worker('/js/dictionary/dictionary-worker-main.js', {type: 'module'});
+            this._reuseInvocationQueue.push({start, resolve, reject});
+        });
+    }
+
+    /**
+     * @template T
+     * @param {() => Promise<T>} start
+     * @returns {Promise<T>}
+     * @throws {unknown} If starting the invocation throws synchronously.
+     */
+    _startReuseInvocation(start) {
+        const token = {};
+        this._reuseInvocationToken = token;
+        let promise;
+        try {
+            promise = start();
+        } catch (error) {
+            if (this._reuseInvocationToken === token) {
+                this._reuseInvocationToken = null;
+            }
+            this._startNextReuseInvocation();
+            throw error;
+        }
+        void promise.then(
+            () => this._finishReuseInvocation(token),
+            () => this._finishReuseInvocation(token),
+        );
+        return promise;
+    }
+
+    /** */
+    _startNextReuseInvocation() {
+        if (this._reuseInvocationToken !== null) { return; }
+        const queued = this._reuseInvocationQueue.shift();
+        if (typeof queued === 'undefined') { return; }
+
+        let promise;
+        try {
+            promise = this._startReuseInvocation(queued.start);
+        } catch (error) {
+            queued.reject(error);
+            this._startNextReuseInvocation();
+            return;
+        }
+        void promise.then(queued.resolve, queued.reject);
+    }
+
+    /**
+     * @param {object} token
+     */
+    _finishReuseInvocation(token) {
+        if (this._reuseInvocationToken !== token) { return; }
+        this._reuseInvocationToken = null;
+        this._startNextReuseInvocation();
+    }
+
+    /**
+     * @template [TParams=import('core').SerializableObject]
+     * @template [TResponseRaw=unknown]
+     * @template [TResponse=unknown]
+     * @param {string} action
+     * @param {TParams} params
+     * @param {Transferable[]} transfer
+     * @param {?(arg: import('core').SafeAny) => void} onProgress
+     * @param {?(result: TResponseRaw) => TResponse} formatResult
+     * @returns {Promise<TResponse>}
+     */
+    _invokeDirect(action, params, transfer, onProgress, formatResult) {
+        return new Promise((resolve, reject) => {
+            const worker = this._worker ?? new Worker(new URL('dictionary-worker-main.js', import.meta.url), {type: 'module'});
             if (this._reuseWorker && this._worker === null) {
                 this._worker = worker;
             }
@@ -128,25 +226,9 @@ export class DictionaryWorker {
             const fail = (error) => {
                 const details = detailsRef;
                 if (details === null || details.complete) { return; }
-                const {worker: worker2, reject: reject2, onMessage, onError: onError2, onMessageError: onMessageError2} = details;
-                if (worker2 === null || reject2 === null || onMessage === null) { return; }
-                details.complete = true;
-                details.worker = null;
-                details.resolve = null;
-                details.reject = null;
-                details.onMessage = null;
-                details.onError = null;
-                details.onMessageError = null;
-                details.onProgress = null;
-                details.formatResult = null;
-                worker2.removeEventListener('message', onMessage);
-                if (onError2 !== null) { worker2.removeEventListener('error', onError2); }
-                if (onMessageError2 !== null) { worker2.removeEventListener('messageerror', onMessageError2); }
-                worker2.terminate();
-                if (this._worker === worker2) {
-                    this._worker = null;
-                }
-                reject2(error);
+                const {worker: worker2} = details;
+                if (worker2 === null) { return; }
+                this._rejectInvocationsForWorker(worker2, error, true);
             };
             /**
              * @param {ErrorEvent} event
@@ -180,6 +262,7 @@ export class DictionaryWorker {
             details.onError = onError;
             details.onMessageError = onMessageError;
             detailsRef = details;
+            this._activeInvocations.add(/** @type {import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>} */ (details));
             worker.addEventListener('message', onMessage);
             worker.addEventListener('error', onError);
             worker.addEventListener('messageerror', onMessageError);
@@ -199,41 +282,61 @@ export class DictionaryWorker {
      */
     _onMessage(details, event) {
         if (details.complete) { return; }
-        const {action, params} = event.data;
-        switch (action) {
-            case 'complete':
-                {
-                    const {worker, resolve, reject, onMessage, onError, onMessageError, formatResult} = details;
-                    if (worker === null || onMessage === null || resolve === null || reject === null) { return; }
-                    details.complete = true;
-                    details.worker = null;
-                    details.resolve = null;
-                    details.reject = null;
-                    details.onMessage = null;
-                    details.onError = null;
-                    details.onMessageError = null;
-                    details.onProgress = null;
-                    details.formatResult = null;
-                    worker.removeEventListener('message', onMessage);
-                    if (this._reuseWorker) {
-                        if (onError !== null) { worker.removeEventListener('error', onError); }
-                        if (onMessageError !== null) { worker.removeEventListener('messageerror', onMessageError); }
-                    } else {
-                        worker.terminate();
+        try {
+            const {action, params} = event.data;
+            switch (action) {
+                case 'complete':
+                    {
+                        const {worker, resolve, reject, onMessage, onError, onMessageError, formatResult} = details;
+                        if (worker === null || onMessage === null || resolve === null || reject === null) { return; }
+                        details.complete = true;
+                        this._activeInvocations.delete(/** @type {import('dictionary-worker').InvokeDetails<import('core').SafeAny, import('core').SafeAny>} */ (details));
+                        details.worker = null;
+                        details.resolve = null;
+                        details.reject = null;
+                        details.onMessage = null;
+                        details.onError = null;
+                        details.onMessageError = null;
+                        details.onProgress = null;
+                        details.formatResult = null;
+                        worker.removeEventListener('message', onMessage);
+                        if (this._reuseWorker) {
+                            if (onError !== null) { worker.removeEventListener('error', onError); }
+                            if (onMessageError !== null) { worker.removeEventListener('messageerror', onMessageError); }
+                        } else {
+                            worker.terminate();
+                        }
+                        this._onMessageComplete(params, resolve, reject, formatResult);
                     }
-                    this._onMessageComplete(params, resolve, reject, formatResult);
-                }
-                break;
-            case 'progress':
-                this._onMessageProgress(params, details.onProgress);
-                break;
-            case 'getImageDetails':
-                {
-                    const {worker} = details;
-                    if (worker === null) { return; }
-                    void this._onMessageGetImageDetails(params, worker);
-                }
-                break;
+                    break;
+                case 'progress':
+                    if (
+                        typeof params !== 'object' ||
+                        params === null ||
+                        !Array.isArray(Reflect.get(params, 'args'))
+                    ) {
+                        throw new Error('Dictionary worker returned invalid progress parameters');
+                    }
+                    this._onMessageProgress(params, details.onProgress);
+                    break;
+                case 'getImageDetails':
+                    {
+                        const {worker} = details;
+                        if (worker === null) { return; }
+                        if (typeof params !== 'object' || params === null) {
+                            throw new Error('Dictionary worker returned invalid image-details parameters');
+                        }
+                        void this._onMessageGetImageDetails(params, worker);
+                    }
+                    break;
+                default:
+                    throw new Error(`Dictionary worker returned an unknown action: ${String(action)}`);
+            }
+        } catch (error) {
+            const {worker} = details;
+            if (worker !== null) {
+                this._rejectInvocationsForWorker(worker, toError(error), true);
+            }
         }
     }
 
@@ -246,26 +349,25 @@ export class DictionaryWorker {
      * @param {?(result: TResponseRaw) => TResponse} formatResult
      */
     _onMessageComplete(params, resolve, reject, formatResult) {
-        const {error} = params;
-        if (typeof error !== 'undefined') {
-            reject(ExtensionError.deserialize(error));
-        } else {
-            const {result} = params;
-            if (typeof formatResult === 'function') {
-                let result2;
-                try {
-                    result2 = formatResult(result);
-                } catch (e) {
-                    reject(e);
-                    return;
-                }
-                resolve(result2);
+        // Completion has already released invocation ownership. Decode and
+        // format within one guard so a malformed reply still settles its caller.
+        try {
+            const {error} = params;
+            if (typeof error !== 'undefined') {
+                reject(ExtensionError.deserialize(error));
             } else {
-                // If formatResult is not provided, the response is assumed to be the same type
-                // For some reason, eslint thinks the TResponse type is undefined
-                // eslint-disable-next-line jsdoc/no-undefined-types
-                resolve(/** @type {TResponse} */ (/** @type {unknown} */ (result)));
+                const {result} = params;
+                if (typeof formatResult === 'function') {
+                    resolve(formatResult(result));
+                } else {
+                    // If formatResult is not provided, the response is assumed to be the same type
+                    // For some reason, eslint thinks the TResponse type is undefined
+                    // eslint-disable-next-line jsdoc/no-undefined-types
+                    resolve(/** @type {TResponse} */ (/** @type {unknown} */ (result)));
+                }
             }
+        } catch (e) {
+            reject(e);
         }
     }
 
@@ -276,7 +378,48 @@ export class DictionaryWorker {
     _onMessageProgress(params, onProgress) {
         if (typeof onProgress !== 'function') { return; }
         const {args} = params;
-        onProgress(...args);
+        try {
+            onProgress(...args);
+        } catch (error) {
+            // Progress observers are outside the import transaction. A removed
+            // settings view or failing UI callback must not terminate the worker
+            // and turn an otherwise successful import into an unknown outcome.
+            try { log.error(error); } catch (_) { /* NOP */ }
+        }
+    }
+
+    /**
+     * @param {Worker} worker
+     * @param {Error} error
+     * @param {boolean} terminateWorker
+     */
+    _rejectInvocationsForWorker(worker, error, terminateWorker) {
+        if (this._worker === worker) {
+            this._worker = null;
+        }
+
+        for (const details of this._activeInvocations) {
+            if (details.worker !== worker || details.complete) { continue; }
+            const {reject, onMessage, onError, onMessageError} = details;
+            details.complete = true;
+            details.worker = null;
+            details.resolve = null;
+            details.reject = null;
+            details.onMessage = null;
+            details.onError = null;
+            details.onMessageError = null;
+            details.onProgress = null;
+            details.formatResult = null;
+            this._activeInvocations.delete(details);
+            if (onMessage !== null) { worker.removeEventListener('message', onMessage); }
+            if (onError !== null) { worker.removeEventListener('error', onError); }
+            if (onMessageError !== null) { worker.removeEventListener('messageerror', onMessageError); }
+            if (reject !== null) { reject(error); }
+        }
+
+        if (terminateWorker) {
+            worker.terminate();
+        }
     }
 
     /**
@@ -294,7 +437,11 @@ export class DictionaryWorker {
         } catch (e) {
             response = {id, error: ExtensionError.serialize(e)};
         }
-        worker.postMessage({action: 'getImageDetails.response', params: response}, transfer);
+        try {
+            worker.postMessage({action: 'getImageDetails.response', params: response}, transfer);
+        } catch (_) {
+            // The import worker may already have been torn down after the async image decode.
+        }
     }
 
     /**
@@ -302,12 +449,13 @@ export class DictionaryWorker {
      * @returns {import('dictionary-worker').MessageCompleteResult}
      */
     _formatImportDictionaryResult(response) {
-        const {result, errors, debug} = response;
+        const {result, errors, debug, outcome} = response;
         const debugResult = (typeof debug === 'object' && debug !== null && !Array.isArray(debug)) ? debug : null;
         return {
             result,
             errors: errors.map((error) => ExtensionError.deserialize(error)),
             debug: debugResult,
+            ...(typeof outcome === 'undefined' ? {} : {outcome}),
         };
     }
 }

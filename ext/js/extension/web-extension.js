@@ -72,8 +72,11 @@ export class WebExtension extends EventDispatcher {
         try {
             chrome.runtime.sendMessage(message, responseCallback);
         } catch (error) {
-            this.triggerUnloaded();
-            throw toError(error);
+            const normalizedError = toError(error);
+            if (this._shouldTriggerUnloadedForError(normalizedError)) {
+                this.triggerUnloaded();
+            }
+            throw normalizedError;
         }
     }
 
@@ -82,6 +85,9 @@ export class WebExtension extends EventDispatcher {
      * @returns {Promise<unknown>}
      */
     sendMessagePromise(message) {
+        if (this._unloaded) {
+            return Promise.reject(new Error('Lost connection to the extension runtime. Refresh this page to reconnect.'));
+        }
         return new Promise((resolve, reject) => {
             let settled = false;
             /** @type {() => void} */
@@ -145,7 +151,7 @@ export class WebExtension extends EventDispatcher {
                 return lastError;
             }
             const {message} = lastError;
-            const error = new Error(typeof message === 'string' ? message : 'An unknown web extension error occured');
+            const error = new Error(typeof message === 'string' ? message : 'An unknown web extension error occurred');
             if (this._shouldTriggerUnloadedForError(error)) {
                 this.triggerUnloaded();
             }
@@ -167,11 +173,31 @@ export class WebExtension extends EventDispatcher {
      */
     _shouldTriggerUnloadedForError(error) {
         const {message} = error;
-        return (
+        if (
+            message.includes('Extension context invalidated') ||
+            message.includes('extension context has been invalidated') ||
+            message.includes('Message manager disconnected')
+        ) {
+            return true;
+        }
+        if (!(
             message.includes('Receiving end does not exist') ||
             message.includes('Could not establish connection') ||
             message.includes('The message port closed before a response was received')
-        );
+        )) {
+            return false;
+        }
+        // A live recipient can also close or fail its response channel. Confirm
+        // that our own context is gone before poisoning every future request.
+        try {
+            if (typeof chrome.runtime.id !== 'string' || chrome.runtime.id.length === 0) {
+                return true;
+            }
+            chrome.runtime.getManifest();
+            return false;
+        } catch (_) {
+            return true;
+        }
     }
 
     /**

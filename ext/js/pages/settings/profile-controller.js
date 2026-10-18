@@ -18,9 +18,22 @@
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {log} from '../../core/log.js';
+import {ExtensionError} from '../../core/extension-error.js';
 import {clone, generateId} from '../../core/utilities.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {ProfileConditionsUI} from './profile-conditions-ui.js';
+
+/**
+ * @param {import('settings-controller').ModifyResult[]} results
+ * @param {string} action
+ * @throws {Error}
+ */
+function assertSingleProfileModificationResult(results, action) {
+    if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+        throw new Error(`${action} returned an invalid result`);
+    }
+    if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+}
 
 export class ProfileController {
     /**
@@ -36,6 +49,10 @@ export class ProfileController {
         this._profileConditionsUI = new ProfileConditionsUI(settingsController);
         /** @type {?number} */
         this._profileConditionsIndex = null;
+        /** @type {?string} */
+        this._profileConditionsProfileId = null;
+        /** @type {?import('core').TokenObject} */
+        this._profileConditionsOpenToken = null;
         /** @type {HTMLSelectElement} */
         this._profileActiveSelect = querySelectorNotNull(document, '#profile-active-select');
         /** @type {HTMLSelectElement} */
@@ -62,6 +79,12 @@ export class ProfileController {
         this._profileCopyModal = null;
         /** @type {?import('./modal.js').Modal} */
         this._profileConditionsModal = null;
+        /** @type {?import('settings').Profile} */
+        this._profileResetTarget = null;
+        /** @type {?import('settings').Profile} */
+        this._profileRemoveTarget = null;
+        /** @type {?import('settings').Profile} */
+        this._profileCopyDestinationTarget = null;
         /** @type {boolean} */
         this._profileEntriesSupported = false;
         /** @type {ProfileEntry[]} */
@@ -70,6 +93,14 @@ export class ProfileController {
         this._profiles = [];
         /** @type {number} */
         this._profileCurrent = 0;
+        /** @type {?import('core').TokenObject} */
+        this._optionsUpdateToken = null;
+        /** @type {number} */
+        this._defaultProfileWriteGeneration = 0;
+        /** @type {?Promise<void>} */
+        this._profileNameSaveTail = null;
+        /** @type {Map<string|import('settings').Profile, {value: string}>} */
+        this._profileNameSaveEdits = new Map();
     }
 
     /** @type {number} */
@@ -125,14 +156,62 @@ export class ProfileController {
     async setProfileName(profileIndex, value) {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
+        // Use stable identity across profile reordering. Older settings may not
+        // have IDs, so retain the object itself as a fallback edit key.
+        const id = typeof profile.id === 'string' && profile.id.length > 0 ? profile.id : null;
+        const key = id ?? profile;
+        const currentIndex = () => this._profiles.findIndex((item) => item === profile || (id !== null && item.id === id));
 
         profile.name = value;
         this._updateSelectName(profileIndex, value);
-
         const profileEntry = this._getProfileEntry(profileIndex);
         if (profileEntry !== null) { profileEntry.setName(value); }
 
-        await this._settingsController.setGlobalSetting(`profiles[${profileIndex}].name`, value);
+        // Fast typing produces multiple overlapping requests. Coalesce edits
+        // that have not started, and serialize any already in flight. A stale
+        // completion must never overwrite the most recent name.
+        this._profileNameSaveEdits ??= new Map();
+        const edit = {value};
+        this._profileNameSaveEdits.set(key, edit);
+        const previous = this._profileNameSaveTail ?? Promise.resolve();
+        const save = previous.then(async () => {
+            const index = currentIndex();
+            if (index < 0 || this._profileNameSaveEdits.get(key) !== edit) { return; }
+            // A failed predecessor's refresh may have replaced the optimistic
+            // profile object. Restore this still-current edit before dispatch.
+            this._profiles[index].name = value;
+            this._updateSelectName(index, value);
+            const entry = this._getProfileEntry(index);
+            if (entry !== null) { entry.setName(value); }
+            try {
+                const results = await this._settingsController.modifyGlobalSettings([{
+                    action: 'setProfileName', profileId: id ?? profile.id, value,
+                }]);
+                if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                    throw new Error('Profile name update returned an invalid result');
+                }
+                if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+            } catch (error) {
+                if (currentIndex() >= 0 && this._profileNameSaveEdits.get(key) === edit) {
+                    try {
+                        // Refreshing options does not await this controller's async subscriber.
+                        // Reconcile here before allowing the next queued name edit to run.
+                        await this._onOptionsChanged();
+                    } catch (refreshError) {
+                        log.error(refreshError);
+                    }
+                }
+                throw error;
+            }
+        });
+        const tail = save.catch(() => {});
+        this._profileNameSaveTail = tail;
+        try {
+            await save;
+        } finally {
+            if (this._profileNameSaveTail === tail) { this._profileNameSaveTail = null; }
+            if (this._profileNameSaveEdits.get(key) === edit) { this._profileNameSaveEdits.delete(key); }
+        }
     }
 
     /**
@@ -142,14 +221,47 @@ export class ProfileController {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
 
-        /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileIndex}`;
-        this._profileCurrent = profileIndex;
+        const generation = ++this._defaultProfileWriteGeneration;
+        const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
+        const viewedProfileId = this._settingsController.getOptionsContext().profileId;
+        const profileId = profile.id;
+        // Older options notifications may still be fetching a snapshot. Ignore
+        // them so they cannot overwrite the result of this newer user intent.
+        this._optionsUpdateToken = null;
+        try {
+            const results = await this._settingsController.modifyGlobalSettings([{
+                action: 'setDefaultProfile',
+                profileId,
+            }]);
+            if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                throw new Error('Default profile update returned an invalid result');
+            }
+            if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+        } catch (error) {
+            if (generation === this._defaultProfileWriteGeneration) {
+                try {
+                    // SettingsController.refresh() does not await its async
+                    // optionsChanged subscribers. Reconcile directly instead.
+                    await this._onOptionsChanged();
+                } catch (refreshError) {
+                    log.error(refreshError);
+                }
+            }
+            throw error;
+        }
+        if (generation !== this._defaultProfileWriteGeneration) { return; }
 
-        const profileEntry = this._getProfileEntry(profileIndex);
-        if (profileEntry !== null) { profileEntry.setIsDefault(true); }
-
-        this._settingsController.profileIndex = profileIndex;
-        await this._settingsController.setGlobalSetting('profileCurrent', profileIndex);
+        // Changing the default normally switches Settings to that profile.
+        // Keep a profile the user selected while the write was pending.
+        const currentProfileIndex = this._profiles.findIndex((item) => item.id === profileId);
+        if (currentProfileIndex < 0) { return; }
+        if (
+            this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration &&
+            this._settingsController.getOptionsContext().profileId === viewedProfileId
+        ) {
+            this._settingsController.setProfileSelection(currentProfileIndex, this._profiles[currentProfileIndex]?.id ?? null);
+        }
+        await this._onOptionsChanged();
     }
 
     /**
@@ -170,13 +282,23 @@ export class ProfileController {
             destinationProfileEntry.updateState();
         }
 
-        await this._settingsController.modifyGlobalSettings([{
-            action: 'set',
-            path: `profiles[${destinationProfileIndex}].options`,
-            value: options,
-        }]);
-
-        await this._settingsController.refresh();
+        try {
+            const results = await this._settingsController.modifyGlobalSettings([{
+                action: 'copyProfileOptions',
+                sourceProfileId: sourceProfile.id,
+                destinationProfileId: this._profiles[destinationProfileIndex].id,
+                value: options,
+            }]);
+            assertSingleProfileModificationResult(results, 'Profile copy');
+            await this._settingsController.refresh();
+        } catch (error) {
+            try {
+                await this._onOptionsChanged();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
+        }
     }
 
     /**
@@ -200,13 +322,21 @@ export class ProfileController {
         this._updateProfileSelectOptions();
 
         // Modify settings
-        await this._settingsController.modifyGlobalSettings([{
-            action: 'splice',
-            path: 'profiles',
-            start: index,
-            deleteCount: 0,
-            items: [newProfile],
-        }]);
+        try {
+            const results = await this._settingsController.modifyGlobalSettings([{
+                action: 'duplicateProfile',
+                sourceProfileId: profile.id,
+                profile: newProfile,
+            }]);
+            assertSingleProfileModificationResult(results, 'Profile duplication');
+        } catch (error) {
+            try {
+                await this._onOptionsChanged();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
+        }
     }
 
     /**
@@ -216,17 +346,33 @@ export class ProfileController {
         const profile = this._getProfile(profileIndex);
         if (profile === null) { return; }
 
+        const profileId = profile.id;
+        if (typeof profileId !== 'string' || profileId.length === 0) { return; }
         const defaultOptions = await this._settingsController.getDefaultOptions();
+        const matches = this._profiles.filter((item) => item.id === profileId);
+        if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+        const currentProfile = matches[0];
         const defaultProfileOptions = defaultOptions.profiles[0];
-        defaultProfileOptions.name = profile.name;
+        // Reset settings without replacing the profile identity.
+        defaultProfileOptions.id = profileId;
+        defaultProfileOptions.name = currentProfile.name;
 
-        await this._settingsController.modifyGlobalSettings([{
-            action: 'set',
-            path: `profiles[${profileIndex}]`,
-            value: defaultProfileOptions,
-        }]);
-
-        await this._settingsController.refresh();
+        try {
+            const results = await this._settingsController.modifyGlobalSettings([{
+                action: 'resetProfile',
+                profileId,
+                value: defaultProfileOptions,
+            }]);
+            assertSingleProfileModificationResult(results, 'Profile reset');
+            await this._settingsController.refresh();
+        } catch (error) {
+            try {
+                await this._onOptionsChanged();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
+        }
     }
 
     /**
@@ -238,25 +384,18 @@ export class ProfileController {
 
         // Get indices
         let profileCurrentNew = this._profileCurrent;
-        const settingsProfileIndex = this._profileCurrent;
+        const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
+        const viewedProfileId = this._settingsController.getOptionsContext().profileId;
+        const profileId = profile.id;
 
         // Construct settings modifications
         /** @type {import('settings-modifications').Modification[]} */
         const modifications = [{
-            action: 'splice',
-            path: 'profiles',
-            start: profileIndex,
-            deleteCount: 1,
-            items: [],
+            action: 'deleteProfile',
+            profileId,
         }];
-        if (profileCurrentNew >= profileIndex) {
-            profileCurrentNew = Math.min(profileCurrentNew - 1, this._profiles.length - 1);
-            modifications.push({
-                action: 'set',
-                path: 'profileCurrent',
-                value: profileCurrentNew,
-            });
-        }
+        const remainingProfileCount = this._profiles.length - 1;
+        profileCurrentNew = Math.max(0, Math.min(profileCurrentNew - (profileCurrentNew >= profileIndex ? 1 : 0), remainingProfileCount - 1));
 
         // Update state
         this._profileCurrent = profileCurrentNew;
@@ -280,15 +419,36 @@ export class ProfileController {
 
         this._updateProfileSelectOptions();
 
-        // Update profile index
-        if (settingsProfileIndex >= profileIndex) {
-            this._settingsController.profileIndex = settingsProfileIndex - 1;
-        } else {
-            this._settingsController.refreshProfileIndex();
+        // Persist before refreshing the settings context: the profile at the
+        // same numeric index may now refer to a different profile object.
+        try {
+            const results = await this._settingsController.modifyGlobalSettings(modifications);
+            if (!Array.isArray(results) || results.length !== modifications.length) {
+                throw new Error('Profile deletion returned an incomplete response');
+            }
+            for (const result of results) {
+                if (typeof result !== 'object' || result === null) {
+                    throw new Error('Profile deletion returned an invalid response');
+                }
+                if (result.error) { throw ExtensionError.deserialize(result.error); }
+            }
+        } catch (error) {
+            // Reconcile the optimistic list with durable settings after rejection.
+            try {
+                await this._onOptionsChanged();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
         }
 
-        // Modify settings
-        await this._settingsController.modifyGlobalSettings(modifications);
+        // Update profile index after deletion, including index 0. Refresh even
+        // when its numeric value is unchanged because the profile identity moved.
+        if (this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration) {
+            const viewedProfileIndexNew = this._profiles.findIndex(({id}) => id === viewedProfileId);
+            const nextSettingsProfileIndex = typeof viewedProfileId === 'string' && viewedProfileIndexNew >= 0 ? viewedProfileIndexNew : profileCurrentNew;
+            this._settingsController.setProfileSelection(nextSettingsProfileIndex, this._profiles[nextSettingsProfileIndex]?.id ?? null);
+        }
     }
 
     /**
@@ -301,29 +461,19 @@ export class ProfileController {
         if (profile1 === null || profile2 === null || index1 === index2) { return; }
 
         // Get swapped indices
-        const profileCurrent = this._profileCurrent;
-        const profileCurrentNew = this._getSwappedValue(profileCurrent, index1, index2);
-
-        const settingsProfileIndex = this._settingsController.profileIndex;
-        const settingsProfileIndexNew = this._getSwappedValue(settingsProfileIndex, index1, index2);
+        const viewedProfileChangeGeneration = this._settingsController.profileIndexChangeGeneration;
+        const viewedProfileId = this._settingsController.getOptionsContext().profileId;
 
         // Construct settings modifications
         /** @type {import('settings-modifications').Modification[]} */
         const modifications = [{
-            action: 'swap',
-            path1: `profiles[${index1}]`,
-            path2: `profiles[${index2}]`,
+            action: 'swapProfiles',
+            profileId1: profile1.id,
+            profileId2: profile2.id,
         }];
-        if (profileCurrentNew !== profileCurrent) {
-            modifications.push({
-                action: 'set',
-                path: 'profileCurrent',
-                value: profileCurrentNew,
-            });
-        }
 
         // Update state
-        this._profileCurrent = profileCurrentNew;
+        this._profileCurrent = this._getSwappedValue(this._profileCurrent, index1, index2);
 
         this._profiles[index1] = profile2;
         this._profiles[index2] = profile1;
@@ -341,11 +491,25 @@ export class ProfileController {
         this._updateProfileSelectOptions();
 
         // Modify settings
-        await this._settingsController.modifyGlobalSettings(modifications);
+        try {
+            const results = await this._settingsController.modifyGlobalSettings(modifications);
+            if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                throw new Error('Profile reorder returned an invalid result');
+            }
+            if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+        } catch (error) {
+            try {
+                await this._onOptionsChanged();
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            throw error;
+        }
 
         // Update profile index
-        if (settingsProfileIndex !== settingsProfileIndexNew) {
-            this._settingsController.profileIndex = settingsProfileIndexNew;
+        const viewedProfileIndexNew = this._profiles.findIndex(({id}) => id === viewedProfileId);
+        if (viewedProfileIndexNew >= 0 && this._settingsController.profileIndexChangeGeneration === viewedProfileChangeGeneration) {
+            this._settingsController.setProfileSelection(viewedProfileIndexNew, viewedProfileId ?? null);
         }
     }
 
@@ -354,10 +518,10 @@ export class ProfileController {
      */
     openResetProfileModal(profileIndex) {
         const profile = this._getProfile(profileIndex);
-        if (profile === null || this.profileCount <= 1) { return; }
+        if (profile === null) { return; }
 
         /** @type {HTMLElement} */ (this._resetProfileNameElement).textContent = profile.name;
-        /** @type {import('./modal.js').Modal} */ (this._profileResetModal).node.dataset.profileIndex = `${profileIndex}`;
+        this._profileResetTarget = profile;
         /** @type {import('./modal.js').Modal} */ (this._profileResetModal).setVisible(true);
     }
 
@@ -369,7 +533,7 @@ export class ProfileController {
         if (profile === null || this.profileCount <= 1) { return; }
 
         /** @type {HTMLElement} */ (this._removeProfileNameElement).textContent = profile.name;
-        /** @type {import('./modal.js').Modal} */ (this._profileRemoveModal).node.dataset.profileIndex = `${profileIndex}`;
+        this._profileRemoveTarget = profile;
         /** @type {import('./modal.js').Modal} */ (this._profileRemoveModal).setVisible(true);
     }
 
@@ -389,15 +553,16 @@ export class ProfileController {
             }
         }
 
-        const profileIndexString = `${profileIndex}`;
         const select = /** @type {HTMLSelectElement} */ (this._profileCopySourceSelect);
         for (const option of select.querySelectorAll('option')) {
             const {value} = option;
-            option.disabled = (value === profileIndexString);
+            option.disabled = (value === this._getProfileSelectValue(profile, profileIndex));
         }
-        select.value = `${copyFromIndex}`;
+        const copyFromProfile = this._getProfile(copyFromIndex);
+        if (copyFromProfile === null) { return; }
+        select.value = this._getProfileSelectValue(copyFromProfile, copyFromIndex);
 
-        /** @type {import('./modal.js').Modal} */ (this._profileCopyModal).node.dataset.profileIndex = `${profileIndex}`;
+        this._profileCopyDestinationTarget = profile;
         /** @type {import('./modal.js').Modal} */ (this._profileCopyModal).setVisible(true);
     }
 
@@ -409,16 +574,26 @@ export class ProfileController {
         if (profile === null) { return; }
 
         if (this._profileConditionsModal === null) { return; }
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._profileConditionsOpenToken = token;
         try {
             this._profileConditionsUI.cleanup();
-            await this._profileConditionsUI.prepare(profileIndex);
+            await this._profileConditionsUI.prepare(profileIndex, profile.id);
+            if (
+                this._profileConditionsOpenToken !== token ||
+                this._profiles.indexOf(profile) !== profileIndex
+            ) {
+                return;
+            }
             if (this._profileConditionsProfileName !== null) {
                 this._profileConditionsProfileName.textContent = profile.name;
             }
             this._profileConditionsIndex = profileIndex;
+            this._profileConditionsProfileId = profile.id;
             this._profileConditionsModal.setVisible(true);
         } catch (error) {
-            log.error(error);
+            if (this._profileConditionsOpenToken === token) { log.error(error); }
         }
     }
 
@@ -426,24 +601,51 @@ export class ProfileController {
 
     /** */
     async _onOptionsChanged() {
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._optionsUpdateToken = token;
         // Update state
         const {profiles, profileCurrent} = await this._settingsController.getOptionsFull();
+        if (this._optionsUpdateToken !== token) { return; }
         this._profiles = profiles;
         this._profileCurrent = profileCurrent;
 
-        const settingsProfileIndex = this._settingsController.profileIndex;
+        let settingsProfileIndex = this._settingsController.profileIndex;
 
         // Update UI
         this._updateProfileSelectOptions();
-        void this.setDefaultProfile(profileCurrent);
+
+        // Viewing a non-default profile in Settings is intentional. Only
+        // recover an index that is no longer valid after profiles are deleted.
+        if (settingsProfileIndex < 0 || settingsProfileIndex >= profiles.length) {
+            this._settingsController.setProfileSelection(profileCurrent, profiles[profileCurrent]?.id ?? null);
+            settingsProfileIndex = profileCurrent;
+        }
 
         /** @type {HTMLSelectElement} */ (this._profileActiveSelect).value = `${profileCurrent}`;
 
         // Update profile conditions
+        this._profileConditionsOpenToken = null;
         this._profileConditionsUI.cleanup();
-        const conditionsProfile = this._getProfile(this._profileConditionsIndex !== null ? this._profileConditionsIndex : settingsProfileIndex);
+        let conditionsProfileIndex = settingsProfileIndex;
+        if (typeof this._profileConditionsProfileId === 'string') {
+            conditionsProfileIndex = profiles.findIndex(({id}) => id === this._profileConditionsProfileId);
+            if (conditionsProfileIndex < 0) {
+                this._profileConditionsIndex = null;
+                this._profileConditionsProfileId = null;
+                this._profileConditionsModal?.setVisible(false);
+            }
+        } else if (this._profileConditionsIndex !== null) {
+            conditionsProfileIndex = this._profileConditionsIndex;
+        }
+        const conditionsProfile = this._getProfile(conditionsProfileIndex);
         if (conditionsProfile !== null) {
-            void this._profileConditionsUI.prepare(this._profileConditionsIndex !== null ? this._profileConditionsIndex : settingsProfileIndex);
+            this._profileConditionsIndex = conditionsProfileIndex;
+            this._profileConditionsProfileId = conditionsProfile.id;
+            if (this._profileConditionsProfileName !== null) {
+                this._profileConditionsProfileName.textContent = conditionsProfile.name;
+            }
+            void this._profileConditionsUI.prepare(conditionsProfileIndex, conditionsProfile.id);
         }
 
         // Update profile entries
@@ -465,23 +667,25 @@ export class ProfileController {
         const element = /** @type {HTMLSelectElement} */ (e.currentTarget);
         const value = this._tryGetValidProfileIndex(element.value);
         if (value === null) { return; }
-        void this.setDefaultProfile(value);
+        void this.setDefaultProfile(value).catch((error) => { log.error(error); });
     }
 
     /** */
     _onAdd() {
-        void this.duplicateProfile(this._settingsController.profileIndex);
+        const viewedProfileId = this._settingsController.getOptionsContext().profileId;
+        if (typeof viewedProfileId !== 'string' || viewedProfileId.length === 0) { return; }
+        const matches = this._profiles.flatMap((profile, index) => (profile.id === viewedProfileId ? [index] : []));
+        if (matches.length !== 1) { return; }
+        void this.duplicateProfile(matches[0]);
     }
 
     /** */
     _onResetConfirm() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._profileResetModal);
         modal.setVisible(false);
-        const {node} = modal;
-        const profileIndex = node.dataset.profileIndex;
-        delete node.dataset.profileIndex;
-
-        const validProfileIndex = this._tryGetValidProfileIndex(profileIndex);
+        const profile = this._profileResetTarget;
+        this._profileResetTarget = null;
+        const validProfileIndex = this._getCurrentProfileIndex(profile);
         if (validProfileIndex === null) { return; }
 
         void this.resetProfile(validProfileIndex);
@@ -491,11 +695,9 @@ export class ProfileController {
     _onDeleteConfirm() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._profileRemoveModal);
         modal.setVisible(false);
-        const {node} = modal;
-        const profileIndex = node.dataset.profileIndex;
-        delete node.dataset.profileIndex;
-
-        const validProfileIndex = this._tryGetValidProfileIndex(profileIndex);
+        const profile = this._profileRemoveTarget;
+        this._profileRemoveTarget = null;
+        const validProfileIndex = this._getCurrentProfileIndex(profile);
         if (validProfileIndex === null) { return; }
 
         void this.deleteProfile(validProfileIndex);
@@ -505,14 +707,12 @@ export class ProfileController {
     _onCopyConfirm() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._profileCopyModal);
         modal.setVisible(false);
-        const {node} = modal;
-        const destinationProfileIndex = node.dataset.profileIndex;
-        delete node.dataset.profileIndex;
-
-        const validDestinationProfileIndex = this._tryGetValidProfileIndex(destinationProfileIndex);
+        const destinationProfile = this._profileCopyDestinationTarget;
+        this._profileCopyDestinationTarget = null;
+        const validDestinationProfileIndex = this._getCurrentProfileIndex(destinationProfile);
         if (validDestinationProfileIndex === null) { return; }
 
-        const sourceProfileIndex = this._tryGetValidProfileIndex(/** @type {HTMLSelectElement} */ (this._profileCopySourceSelect).value);
+        const sourceProfileIndex = this._getProfileIndexFromSelectValue(/** @type {HTMLSelectElement} */ (this._profileCopySourceSelect).value);
         if (sourceProfileIndex === null) { return; }
 
         void this.copyProfile(sourceProfileIndex, validDestinationProfileIndex);
@@ -521,10 +721,12 @@ export class ProfileController {
     /**
      * @param {import('profile-conditions-ui').EventArgument<'conditionGroupCountChanged'>} details
      */
-    _onConditionGroupCountChanged({count, profileIndex}) {
-        if (profileIndex >= 0 && profileIndex < this._profileEntryList.length) {
-            const profileEntry = this._profileEntryList[profileIndex];
-            profileEntry.setConditionGroupsCount(count);
+    _onConditionGroupCountChanged({count, profileId}) {
+        const matchingProfiles = this._profiles.filter((profile) => profile.id === profileId);
+        if (matchingProfiles.length !== 1) { return; }
+        const resolvedIndex = this._profiles.indexOf(matchingProfiles[0]);
+        if (resolvedIndex >= 0 && resolvedIndex < this._profileEntryList.length) {
+            this._profileEntryList[resolvedIndex].setConditionGroupsCount(count);
         }
     }
 
@@ -550,16 +752,22 @@ export class ProfileController {
     /** */
     _updateProfileSelectOptions() {
         for (const select of this._getAllProfileSelects()) {
+            const previousValue = (select === this._profileCopySourceSelect ? select.value : null);
             const fragment = document.createDocumentFragment();
             for (let i = 0; i < this._profiles.length; ++i) {
                 const profile = this._profiles[i];
                 const option = document.createElement('option');
-                option.value = `${i}`;
+                option.value = (select === this._profileCopySourceSelect ? this._getProfileSelectValue(profile, i) : `${i}`);
                 option.textContent = profile.name;
                 fragment.appendChild(option);
             }
             select.textContent = '';
             select.appendChild(fragment);
+            if (previousValue !== null && [...select.options].some(({value}) => value === previousValue)) {
+                select.value = previousValue;
+            } else if (previousValue !== null) {
+                select.value = '';
+            }
         }
     }
 
@@ -568,8 +776,10 @@ export class ProfileController {
      * @param {string} name
      */
     _updateSelectName(index, name) {
-        const optionValue = `${index}`;
+        const profile = this._getProfile(index);
+        if (profile === null) { return; }
         for (const select of this._getAllProfileSelects()) {
+            const optionValue = (select === this._profileCopySourceSelect ? this._getProfileSelectValue(profile, index) : `${index}`);
             for (const option of select.querySelectorAll('option')) {
                 if (option.value === optionValue) {
                     option.textContent = name;
@@ -602,6 +812,42 @@ export class ProfileController {
             intValue :
             null
         );
+    }
+
+    /**
+     * @param {?import('settings').Profile} profile
+     * @returns {?number}
+     */
+    _getCurrentProfileIndex(profile) {
+        if (profile === null) { return null; }
+        const id = typeof profile.id === 'string' && profile.id.length > 0 ? profile.id : null;
+        const index = this._profiles.findIndex((item) => item === profile || (id !== null && item.id === id));
+        return (index >= 0 ? index : null);
+    }
+
+    /**
+     * @param {import('settings').Profile} profile
+     * @param {number} index
+     * @returns {string}
+     */
+    _getProfileSelectValue(profile, index) {
+        return (typeof profile.id === 'string' && profile.id.length > 0 ? `id:${profile.id}` : `index:${index}`);
+    }
+
+    /**
+     * @param {string} value
+     * @returns {?number}
+     */
+    _getProfileIndexFromSelectValue(value) {
+        if (value.startsWith('id:')) {
+            const id = value.slice(3);
+            const index = this._profiles.findIndex((profile) => profile.id === id);
+            return (index >= 0 ? index : null);
+        }
+        if (value.startsWith('index:')) {
+            return this._tryGetValidProfileIndex(value.slice(6));
+        }
+        return this._tryGetValidProfileIndex(value);
     }
 
     /**
@@ -788,7 +1034,7 @@ class ProfileEntry {
     _onIsDefaultRadioChange(e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         if (!element.checked) { return; }
-        void this._profileController.setDefaultProfile(this._index);
+        void this._profileController.setDefaultProfile(this._index).catch((error) => { log.error(error); });
     }
 
     /**
@@ -797,7 +1043,7 @@ class ProfileEntry {
     _onNameInputInput(e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
         const name = element.value;
-        void this._profileController.setProfileName(this._index, name);
+        void this._profileController.setProfileName(this._index, name).catch((error) => { log.error(error); });
     }
 
     /** */
@@ -823,10 +1069,10 @@ class ProfileEntry {
     _onMenuClose(e) {
         switch (e.detail.action) {
             case 'moveUp':
-                void this._profileController.moveProfile(this._index, -1);
+                void this._profileController.moveProfile(this._index, -1).catch((error) => { log.error(error); });
                 break;
             case 'moveDown':
-                void this._profileController.moveProfile(this._index, 1);
+                void this._profileController.moveProfile(this._index, 1).catch((error) => { log.error(error); });
                 break;
             case 'copyFrom':
                 this._profileController.openCopyProfileModal(this._index);

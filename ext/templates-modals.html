@@ -46,6 +46,7 @@
                 for a list of free dictionaries or click the <em>Import</em> button below to select a dictionary file to import.
             </div>
             <div id="dictionary-error" class="danger-text margin-above" hidden></div>
+            <div class="mdict-import-warnings warning-text margin-above" role="status" aria-live="polite" aria-atomic="false" hidden></div>
             <div id="dictionary-list" class="dictionary-list generic-list" data-count="0">
                 <div class="dictionary-item-top"></div>
                 <label class="dictionary-item-top toggle dictionary-item-enabled-toggle-container"><input type="checkbox" id="all-dictionaries-enabled"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
@@ -55,7 +56,7 @@
                 <div class="dictionary-item-top dictionary-item-button-height"></div>
             </div>
 
-            <div hidden><input type="file" id="dictionary-import-file-input" accept=".zip,.mdx,.mdd,application/zip" multiple></div>
+            <div hidden><input type="file" id="dictionary-import-file-input" accept=".zip,.mdx,.mdd,application/zip" aria-label="Select dictionary files" aria-describedby="dictionary-import-upload-copy mdict-import-summary" multiple></div>
         </div>
         <div class="modal-body-addon dictionary-delete-progress" hidden>
             <div class="progress-labels"><div class="progress-info"></div><div class="progress-status"></div></div>
@@ -77,17 +78,21 @@
 
     <div id="dictionary-import-modal" class="modal" tabindex="-1" role="dialog" hidden><div class="modal-content modal-content-medium">
         <div class="modal-header"><div class="modal-title">Import Dictionaries</div></div>
+        <div class="dictionary-import-scroll-body">
         <div class="modal-body dictionary-import-drop-section">
-            <button type="button" id="dictionary-drop-file-zone" aria-describedby="dictionary-import-upload-copy dictionary-import-helper-copy">
+            <button type="button" id="dictionary-drop-file-zone" aria-describedby="dictionary-import-upload-copy mdict-import-summary">
                 <span id="dictionary-drag-drop-text">
                     <span class="icon" data-icon="book"></span>
                     <h1>Drag and drop dictionaries to import</h1>
-                    <h5>or click here to upload and import</h5>
-                    <p id="dictionary-import-upload-copy" class="dictionary-import-note-text">Dropped or selected files import immediately. Supports <code>.zip</code>, <code>.mdx</code>, and optional matching <code>.mdd</code> files.</p>
+                    <h5>or click here to choose files and import</h5>
+                    <p id="dictionary-import-upload-copy" class="dictionary-import-note-text">Dropped or selected files import immediately. Choose Yomitan <code>.zip</code> dictionaries or <code>.mdx</code> files with any matching <code>.mdd</code> resources.</p>
                 </span>
             </button>
         </div>
         <div class="modal-body dictionary-import-config-body">
+            <p id="mdict-import-summary"><strong>MDict support is experimental.</strong> Choose the MDX and all matching MDD resources together. MDD files cannot be attached afterward. Dictionary audio is not enabled by this import flow.</p>
+            <p><a href="/mdict.html" target="_blank" rel="noopener">MDict import guide and troubleshooting</a></p>
+            <div class="mdict-import-warnings warning-text margin-above" role="status" aria-live="polite" aria-atomic="false" hidden></div>
             <div class="settings-item">
                 <div class="settings-item-inner">
                     <div class="settings-item-left">
@@ -113,6 +118,7 @@
                     <textarea id="dictionary-import-url-text"></textarea>
                 </div>
             </div>
+        </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="low-emphasis dictionary-database-mutating-input" id="dictionary-import-confirm-button" disabled>Import</button>
@@ -199,6 +205,9 @@
                 This dictionary is outdated and may not support new extension features.
                 Re-import the dictionary to enable support for the latest features.
             </div></div>
+            <div class="settings-item dictionary-storage-error-notification" hidden><div class="settings-item-children danger-text">
+                This dictionary's stored data cannot be used. Re-import it to restore lookups.
+            </div></div>
             <div class="settings-item">
                 <div class="settings-item-inner">
                     <div class="settings-item-left">
@@ -278,6 +287,7 @@
             </div></div>
         </div>
         <div class="modal-footer">
+            <button type="button" class="dictionary-reimport-button" hidden>Re-import</button>
             <button type="button" data-modal-action="hide">Close</button>
         </div>
     </div></div>
@@ -386,7 +396,7 @@
         <div class="modal-body">
             <p>
                 For non-English dictionaries, please refer to the list of available
-                <a href="https://yomidevs.github.io/wiktionary-to-yomitan/" target="_blank"> Wiktionary dictionaries</a>.
+                <a href="https://yomidevs.github.io/wiktionary-to-yomitan/download/" target="_blank"> Wiktionary dictionaries</a>.
             </p>
             <div id="recommended-dictionaries-diagnostics" class="recommended-dictionaries-diagnostics" hidden></div>
             <div id="recommended-dictionaries-error" class="danger-text margin-above" hidden></div>
@@ -1344,6 +1354,10 @@
                         <td><code class="anki-field-marker">{url}</code></td>
                         <td>Address of the web page in which the term or kanji appeared in.</td>
                     </tr>
+                    <tr>
+                        <td><code class="anki-field-marker">{url-plain}</code></td>
+                        <td>The raw <code>{url}</code> without HTML.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -1771,9 +1785,10 @@
             <p><b>The only place data transmission is done by default is when the audio icon in the Manabitan popup is clicked to play the audio for a term; in this case a request will be sent to the audio provider configured in your settings.</b></p>
             <p>This request may contain the term, reading, and/or language for the given dictionary entry term. <b>Personally identifying information is never sent.</b></p>
             <p>Full details on Manabitan's use of data transmission are provided in the <a href="https://addons.mozilla.org/en-US/firefox/addon/yomitan/privacy/">Manabitan Privacy Policy</a>.</p>        </div>
+        <p id="data-transmission-consent-save-error" role="alert" hidden></p>
         <div class="modal-footer modal-footer-spaced">
-            <button type="button" class="danger low-emphasis" data-modal-action="hide" id="decline-data-transmission">Decline data transmission<br>(disable audio playback)</button>
-            <button type="button" class="low-emphasis" data-modal-action="hide" id="accept-data-transmission">Agree to data transmission<br>(enable audio playback)</button>
+            <button type="button" class="danger low-emphasis" id="decline-data-transmission">Decline data transmission<br>(disable audio playback)</button>
+            <button type="button" class="low-emphasis" id="accept-data-transmission">Agree to data transmission<br>(enable audio playback)</button>
         </div>
     </div></div>
 </template>

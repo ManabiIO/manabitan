@@ -15,11 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {MessageChannel as NativeMessageChannel} from 'node:worker_threads';
 import {afterEach, describe, expect, test, vi} from 'vitest';
-import {log} from '../ext/js/core/log.js';
+import {deferPromise} from '../ext/js/core/utilities.js';
 
 const {API} = await import('../ext/js/comm/api.js');
+
+/** @typedef {import('dictionary-importer').ImportDetails} ImportDetails */
+
+/**
+ * @typedef {{
+ *   port1: {onmessage: ((event: MessageEvent) => void)|null, onmessageerror: ((event: Event) => void)|null, close: ReturnType<typeof vi.fn>},
+ *   port2: {close: ReturnType<typeof vi.fn>},
+ * }} TestMessageChannel
+ */
 
 describe('API PM transport reliability', () => {
     const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
@@ -252,92 +260,13 @@ describe('API PM transport reliability', () => {
         const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
         vi.spyOn(api, '_pmInvoke').mockImplementation(() => new Promise(() => {}));
 
-        const promise = api.importDictionaryOffscreen(new Blob([]), /** @type {import('dictionary-importer').ImportDetails} */ ({}), null);
+        const promise = api.importDictionaryOffscreen(new Blob([]), /** @type {ImportDetails} */ ({}), null);
         const expectation = expect(promise).rejects.toThrow(/Runtime connections have been shut down/);
 
         api.shutdownRuntimeConnections();
 
         await expectation;
         expect(api._shutdownRejectors.size).toBe(0);
-    });
-
-    test('import diagnostics remain separate from progress and preserve completion', async () => {
-        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {serviceWorker: {}}});
-        const channel = new NativeMessageChannel();
-        vi.spyOn(globalThis, 'MessageChannel').mockImplementation(() => /** @type {MessageChannel} */ (/** @type {unknown} */ (channel)));
-        const logSpy = vi.spyOn(log, 'log').mockImplementation(() => {});
-        const onProgress = vi.fn();
-        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
-        vi.spyOn(api, '_pmInvoke').mockImplementation(async () => {
-            channel.port2.postMessage({type: 'debug', message: 'index read begin'});
-            channel.port2.postMessage({type: 'progress', progress: {index: 1, count: 2}});
-            channel.port2.postMessage({type: 'complete', result: {result: {title: 'Test'}, errors: []}});
-        });
-        try {
-            await expect(api.importDictionaryOffscreen(new Blob([]), /** @type {import('dictionary-importer').ImportDetails} */ ({}), onProgress)).resolves.toEqual({result: {title: 'Test'}, errors: []});
-            expect(logSpy).toHaveBeenCalledWith('[manabitan-import] index read begin');
-            expect(onProgress).toHaveBeenCalledExactlyOnceWith({index: 1, count: 2});
-            expect(api._shutdownRejectors.size).toBe(0);
-        } finally {
-            channel.port1.close();
-            channel.port2.close();
-        }
-    });
-
-    test('file archive buffer transfers ownership to the backend with the response port', async () => {
-        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {serviceWorker: {}}});
-        const channel = new NativeMessageChannel();
-        vi.spyOn(globalThis, 'MessageChannel').mockImplementation(() => /** @type {MessageChannel} */ (/** @type {unknown} */ (channel)));
-        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
-        const archive = new Uint8Array([80, 75, 5, 6]).buffer;
-        /** @type {MessagePort[]} */
-        const receivedPorts = [];
-        vi.spyOn(api, '_pmInvoke').mockImplementation(async (_action, params, transfers) => {
-            expect(_action).toBe('importDictionaryOffscreen');
-            const archiveParams = /** @type {import('api').PmApiParams<'importDictionaryOffscreen'>} */ (params);
-            const responsePort = /** @type {MessagePort} */ (transfers[0]);
-            const received = structuredClone({params: archiveParams, responsePort}, {transfer: transfers});
-            receivedPorts.push(received.responsePort);
-            expect(archive.byteLength).toBe(0);
-            if (!(received.params.archiveContent instanceof ArrayBuffer)) {
-                throw new Error('Expected transferred archive bytes');
-            }
-            expect([...new Uint8Array(received.params.archiveContent)]).toEqual([80, 75, 5, 6]);
-            received.responsePort.postMessage({type: 'complete', result: {result: null, errors: []}});
-        });
-        try {
-            await expect(api.importDictionaryOffscreen(archive, {}, null)).resolves.toEqual({result: null, errors: []});
-            expect(api._shutdownRejectors.size).toBe(0);
-        } finally {
-            for (const receivedPort of receivedPorts) { receivedPort.close(); }
-            channel.port1.close();
-            channel.port2.close();
-        }
-    });
-
-    test('import timeout retains the last diagnostic without extending the deadline', async () => {
-        vi.useFakeTimers();
-        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {serviceWorker: {}}});
-        const channel = new NativeMessageChannel();
-        vi.spyOn(globalThis, 'MessageChannel').mockImplementation(() => /** @type {MessageChannel} */ (/** @type {unknown} */ (channel)));
-        const logSpy = vi.spyOn(log, 'log').mockImplementation(() => {});
-        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
-        vi.spyOn(api, '_pmInvoke').mockImplementation(async () => {
-            channel.port2.postMessage({type: 'debug', message: 'index read begin'});
-            channel.port2.postMessage({type: 'debug', message: 123});
-        });
-        try {
-            const promise = api.importDictionaryOffscreen(new Blob([]), /** @type {import('dictionary-importer').ImportDetails} */ ({}), null);
-            const expectation = expect(promise).rejects.toThrow('Dictionary runtime import response timed out after 150000ms; last importer diagnostic: index read begin');
-            await vi.waitFor(() => expect(logSpy).toHaveBeenCalledWith('[manabitan-import] index read begin'));
-            await vi.advanceTimersByTimeAsync(150_000);
-            await expectation;
-            expect(logSpy).toHaveBeenCalledTimes(1);
-            expect(api._shutdownRejectors.size).toBe(0);
-        } finally {
-            channel.port1.close();
-            channel.port2.close();
-        }
     });
 
     test('importDictionaryUrlOffscreen rejects immediately when runtime shuts down mid-flight', async () => {
@@ -350,12 +279,110 @@ describe('API PM transport reliability', () => {
         const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
         vi.spyOn(api, '_pmInvoke').mockImplementation(() => new Promise(() => {}));
 
-        const promise = api.importDictionaryUrlOffscreen('https://example.com/test.zip', /** @type {import('dictionary-importer').ImportDetails} */ ({}), null);
+        const promise = api.importDictionaryUrlOffscreen('https://example.com/test.zip', /** @type {ImportDetails} */ ({}), null);
         const expectation = expect(promise).rejects.toThrow(/Runtime connections have been shut down/);
 
         api.shutdownRuntimeConnections();
 
         await expectation;
+        expect(api._shutdownRejectors.size).toBe(0);
+    });
+
+    const startFileImport = /** @type {(api: import('../ext/js/comm/api.js').API) => Promise<unknown>} */ ((api) => api.importDictionaryOffscreen(new Blob([]), /** @type {ImportDetails} */ ({}), null));
+    const startUrlImport = /** @type {(api: import('../ext/js/comm/api.js').API) => Promise<unknown>} */ ((api) => api.importDictionaryUrlOffscreen('https://example.com/test.zip', /** @type {ImportDetails} */ ({}), null));
+
+    test.each([
+        ['file', startFileImport],
+        ['url', startUrlImport],
+    ])('%s import watchdog resets when progress is received', async (_kind, startImport) => {
+        vi.useFakeTimers();
+        /** @type {TestMessageChannel[]} */
+        const channels = [];
+        vi.stubGlobal('MessageChannel', class {
+            constructor() {
+                this.port1 = {onmessage: null, onmessageerror: null, close: vi.fn()};
+                this.port2 = {close: vi.fn()};
+                channels.push(this);
+            }
+        });
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {serviceWorker: {}},
+        });
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockResolvedValue();
+
+        const promise = startImport(api);
+        let settled = false;
+        void promise.finally(() => { settled = true; });
+        await vi.advanceTimersByTimeAsync(149_000);
+        channels[0].port1.onmessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({data: {type: 'progress', progress: {index: 1, count: 2}}})));
+        await vi.advanceTimersByTimeAsync(149_000);
+        expect(settled).toBe(false);
+        channels[0].port1.onmessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({data: {type: 'complete', result: {errors: []}}})));
+
+        await expect(promise).resolves.toEqual({errors: []});
+        expect(channels[0].port1.close).toHaveBeenCalledOnce();
+        expect(api._shutdownRejectors.size).toBe(0);
+    });
+
+    test('file import watchdog rejects after sustained inactivity', async () => {
+        vi.useFakeTimers();
+        vi.stubGlobal('MessageChannel', class {
+            constructor() {
+                this.port1 = {onmessage: null, onmessageerror: null, close: vi.fn()};
+                this.port2 = {close: vi.fn()};
+            }
+        });
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {serviceWorker: {}},
+        });
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockResolvedValue();
+        const promise = api.importDictionaryOffscreen(new Blob([]), /** @type {ImportDetails} */ ({}), null);
+        const expectation = expect(promise).rejects.toThrow(/inactive for 150000ms/);
+
+        await vi.advanceTimersByTimeAsync(150_000);
+        await expectation;
+        expect(api._shutdownRejectors.size).toBe(0);
+    });
+
+    test.each([
+        ['file', 'complete', startFileImport],
+        ['file', 'error', startFileImport],
+        ['url', 'complete', startUrlImport],
+        ['url', 'error', startUrlImport],
+    ])('%s import %s response settles when closing the response port throws', async (_kind, responseType, startImport) => {
+        /** @type {TestMessageChannel[]} */
+        const channels = [];
+        vi.stubGlobal('MessageChannel', class {
+            constructor() {
+                this.port1 = {
+                    onmessage: null,
+                    onmessageerror: null,
+                    close: vi.fn(() => { throw new Error('port already closed'); }),
+                };
+                this.port2 = {close: vi.fn()};
+                channels.push(this);
+            }
+        });
+        Object.defineProperty(globalThis, 'navigator', {
+            configurable: true,
+            value: {serviceWorker: {}},
+        });
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})));
+        vi.spyOn(api, '_pmInvoke').mockResolvedValue();
+
+        const promise = startImport(api);
+        channels[0].port1.onmessage?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: responseType === 'complete' ?
+                {type: 'complete', result: {errors: []}} :
+                {type: 'error', error: {name: 'Error', message: 'worker failed', stack: ''}},
+        })));
+
+        await (responseType === 'complete' ? expect(promise).resolves.toEqual({errors: []}) : expect(promise).rejects.toThrow('worker failed'));
+        expect(channels[0].port1.close).toHaveBeenCalledOnce();
         expect(api._shutdownRejectors.size).toBe(0);
     });
 
@@ -528,7 +555,8 @@ describe('API PM transport reliability', () => {
         );
         api._mediaDrawingWorkerConnected = false;
 
-        api.drawMedia(/** @type {Parameters<InstanceType<typeof API>['drawMedia']>[0]} */ (/** @type {unknown} */ ([{canvas: null}])), []);
+        const mediaRequests = /** @type {import('api').PmApiParam<'drawMedia', 'requests'>} */ (/** @type {unknown} */ ([{canvas: null}]));
+        api.drawMedia(mediaRequests, []);
         await vi.waitFor(() => {
             expect(mediaDrawingWorker.postMessage).toHaveBeenCalledTimes(2);
         });
@@ -602,8 +630,8 @@ describe('API PM transport reliability', () => {
                 serviceWorker: {},
             },
         });
-        /** @type {() => void} */
-        let resolvePmInvoke = () => { expect.fail('resolvePmInvoke was not initialized'); };
+        /** @type {(value?: void|PromiseLike<void>) => void} */
+        let resolvePmInvoke = () => {};
         const staleWorker = {
             addEventListener: vi.fn(),
             postMessage: vi.fn(),
@@ -621,7 +649,7 @@ describe('API PM transport reliability', () => {
             /** @type {Worker} */ (/** @type {unknown} */ (staleWorker)),
         );
         vi.spyOn(api, '_pmInvoke').mockImplementation(() => new Promise((resolve) => {
-            resolvePmInvoke = () => resolve();
+            resolvePmInvoke = resolve;
         }));
 
         const pending = api.ensureMediaDrawingWorkerConnected();
@@ -630,6 +658,84 @@ describe('API PM transport reliability', () => {
 
         await expect(pending).rejects.toThrow(/Media drawing worker changed while connecting/);
         expect(api._mediaDrawingWorkerConnected).toBe(false);
+    });
+
+    test('obsolete media connection cleanup cannot discard the replacement single-flight', async () => {
+        Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {serviceWorker: {}}});
+        vi.stubGlobal('MessageChannel', class {
+            constructor() {
+                this.port1 = {close: vi.fn()};
+                this.port2 = {close: vi.fn()};
+            }
+        });
+        const staleWorker = {addEventListener: vi.fn(), postMessage: vi.fn()};
+        const currentWorker = {addEventListener: vi.fn(), postMessage: vi.fn()};
+        const api = new API(
+            /** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})),
+            /** @type {Worker} */ (/** @type {unknown} */ (staleWorker)),
+        );
+        const stale = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+        const current = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise());
+        const invoke = vi.spyOn(api, '_pmInvoke').mockImplementationOnce(() => stale.promise).mockImplementation(() => current.promise);
+        const stalePending = api.ensureMediaDrawingWorkerConnected();
+        const staleFailure = expect(stalePending).rejects.toThrow(/Media drawing worker changed while connecting/);
+        api.setMediaDrawingWorker(/** @type {Worker} */ (/** @type {unknown} */ (currentWorker)));
+        const currentPending = api.ensureMediaDrawingWorkerConnected();
+        try {
+            stale.resolve();
+            await staleFailure;
+            const joined = api.ensureMediaDrawingWorkerConnected();
+            expect(invoke).toHaveBeenCalledTimes(2);
+            expect(currentWorker.postMessage).toHaveBeenCalledTimes(1);
+            current.resolve();
+            await Promise.all([currentPending, joined]);
+            expect(api._mediaDrawingWorkerConnected).toBe(true);
+            expect(api._mediaDrawingWorkerConnectPromise).toBeNull();
+        } finally {
+            current.resolve();
+            await currentPending;
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test('queued draw cannot use a replacement worker before its bridge is connected', async () => {
+        const staleWorker = {addEventListener: vi.fn(), postMessage: vi.fn()};
+        const currentWorker = {addEventListener: vi.fn(), postMessage: vi.fn()};
+        const api = new API(
+            /** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})),
+            /** @type {Worker} */ (/** @type {unknown} */ (staleWorker)),
+        );
+        api._mediaDrawingWorkerConnected = true;
+        const requests = /** @type {import('api').PmApiParam<'drawMedia', 'requests'>} */ (/** @type {unknown} */ ([{
+            path: 'cover.png', dictionary: 'Images', canvas: {width: 1, height: 1},
+        }]));
+        api.drawMedia(requests, []);
+        api.setMediaDrawingWorker(/** @type {Worker} */ (/** @type {unknown} */ (currentWorker)));
+        await new Promise(setImmediate);
+        expect(currentWorker.postMessage).not.toHaveBeenCalled();
+        expect(api._mediaDrawingWorkerConnected).toBe(false);
+    });
+
+    test('obsolete Firefox backend-port errors preserve the replacement transport', () => {
+        const stalePort = {postMessage: vi.fn(), close: vi.fn(), onmessageerror: /** @type {((event: Event) => void)|null} */ (null)};
+        const currentPort = {postMessage: vi.fn(), close: vi.fn(), onmessageerror: /** @type {((event: Event) => void)|null} */ (null)};
+        const api = new API(
+            /** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ ({})),
+            null,
+            /** @type {MessagePort} */ (/** @type {unknown} */ (stalePort)),
+        );
+        const staleError = stalePort.onmessageerror;
+        api._setBackendPort(/** @type {MessagePort} */ (/** @type {unknown} */ (currentPort)));
+        api._mediaDrawingWorkerConnected = true;
+        staleError?.(new Event('messageerror'));
+        expect(api._backendPort).toBe(currentPort);
+        expect(api._mediaDrawingWorkerConnected).toBe(true);
+        expect(stalePort.close).toHaveBeenCalledTimes(1);
+        expect(currentPort.close).not.toHaveBeenCalled();
+        currentPort.onmessageerror?.(new Event('messageerror'));
+        expect(api._backendPort).toBeNull();
+        expect(api._mediaDrawingWorkerConnected).toBe(false);
+        expect(currentPort.close).toHaveBeenCalledTimes(1);
     });
 
     test('shutdownRuntimeConnections clears stale backend and media worker state', () => {

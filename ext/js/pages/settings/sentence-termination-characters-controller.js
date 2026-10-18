@@ -20,20 +20,33 @@ import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
+/** @typedef {import('settings').SentenceParsingTerminationCharacterOption} TerminationCharacter */
+/** @typedef {keyof TerminationCharacter} TerminationField */
+
 export class SentenceTerminationCharactersController {
-    /**
-     * @param {import('./settings-controller.js').SettingsController} settingsController
-     */
+    /** @param {import('./settings-controller.js').SettingsController} settingsController */
     constructor(settingsController) {
         /** @type {import('./settings-controller.js').SettingsController} */
         this._settingsController = settingsController;
-        /** @type {SentenceTerminationCharacterEntry[]} */
+        /** @type {(SentenceTerminationCharacterEntry|null)[]} */
         this._entries = [];
+        /** @type {?import('settings').OptionsContext} */
+        this._viewContext = null;
+        /** @type {number} */
+        this._viewGeneration = 0;
+        /** @type {number} */
+        this._readGeneration = 0;
+        /** @type {Promise<void>} */
+        this._mutationTail = Promise.resolve();
+        /** @type {number} */
+        this._mutationRequestGeneration = 0;
+        /** @type {TerminationCharacter[]} */
+        this._savedRows = [];
         /** @type {HTMLButtonElement} */
         this._addButton = querySelectorNotNull(document, '#sentence-termination-character-list-add');
         /** @type {HTMLButtonElement} */
         this._resetButton = querySelectorNotNull(document, '#sentence-termination-character-list-reset');
-        /** @type {HTMLElement} */
+        /** @type {HTMLTableElement} */
         this._listTable = querySelectorNotNull(document, '#sentence-termination-character-list-table');
         /** @type {HTMLElement} */
         this._listContainer = querySelectorNotNull(document, '#sentence-termination-character-list');
@@ -42,294 +55,537 @@ export class SentenceTerminationCharactersController {
     }
 
     /** @type {import('./settings-controller.js').SettingsController} */
-    get settingsController() {
-        return this._settingsController;
-    }
+    get settingsController() { return this._settingsController; }
 
-    /** */
+    /**
+     * @param {SentenceTerminationCharacterEntry} entry
+     * @returns {number}
+     */
+    getEntryIndex(entry) { return this._entries.indexOf(entry); }
+
+    /**
+     * @param {number} index
+     * @returns {?SentenceTerminationCharacterEntry}
+     */
+    getEntry(index) { return this._entries[index] ?? null; }
+
+    /** @returns {Promise<void>} */
     async prepare() {
         this._addButton.addEventListener('click', this._onAddClick.bind(this));
         this._resetButton.addEventListener('click', this._onResetClick.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
-
+        this._settingsController.on('optionsContextChanged', this._onOptionsContextChanged.bind(this));
         await this._updateOptions();
     }
 
-    /**
-     * @param {import('settings').SentenceParsingTerminationCharacterOption} terminationCharacterEntry
-     */
-    async addEntry(terminationCharacterEntry) {
-        const options = await this._settingsController.getOptions();
-        const {sentenceParsing: {terminationCharacters}} = options;
-
-        await this._settingsController.modifyProfileSettings([{
-            action: 'splice',
-            path: 'sentenceParsing.terminationCharacters',
-            start: terminationCharacters.length,
-            deleteCount: 0,
-            items: [terminationCharacterEntry],
-        }]);
-
-        await this._updateOptions();
+    /** @param {TerminationCharacter} value */
+    async addEntry(value) {
+        const owner = this._captureOwner();
+        if (owner === null) { return; }
+        ++this._mutationRequestGeneration;
+        const item = structuredClone(value);
+        await this._enqueue(async () => {
+            if (!this._owns(owner)) { return; }
+            const next = [...this._savedRows, item];
+            if (!await this._saveRows(next, owner)) { return; }
+            this._createEntry(item, this._entries.length);
+            this._updateEmptyState();
+        });
     }
 
     /**
      * @param {number} index
+     * @param {SentenceTerminationCharacterEntry|null|undefined} [entry]
      * @returns {Promise<boolean>}
      */
-    async deleteEntry(index) {
-        const options = await this._settingsController.getOptions();
-        const {sentenceParsing: {terminationCharacters}} = options;
-
-        if (index < 0 || index >= terminationCharacters.length) { return false; }
-
-        await this._settingsController.modifyProfileSettings([{
-            action: 'splice',
-            path: 'sentenceParsing.terminationCharacters',
-            start: index,
-            deleteCount: 1,
-            items: [],
-        }]);
-
-        await this._updateOptions();
-        return true;
+    async deleteEntry(index, entry = this._entries[index]) {
+        const owner = this._captureOwner();
+        if (owner === null || entry === null || typeof entry === 'undefined') { return false; }
+        ++this._mutationRequestGeneration;
+        return await this._enqueue(async () => {
+            if (!this._ownsEntry(entry, owner)) { return false; }
+            const currentIndex = entry.index;
+            const next = [...this._savedRows];
+            next.splice(currentIndex, 1);
+            if (!await this._saveRows(next, owner)) { return false; }
+            this._entries.splice(currentIndex, 1);
+            for (let i = currentIndex; i < this._entries.length; ++i) { this._entries[i]?.setIndex(i); }
+            entry.cleanup();
+            this._updateEmptyState();
+            return true;
+        });
     }
 
     /**
-     * @param {import('settings-modifications').Modification[]} targets
-     * @returns {Promise<import('settings-controller').ModifyResult[]>}
+     * @param {SentenceTerminationCharacterEntry} entry
+     * @param {TerminationField} field
+     * @param {string|boolean|null} value
+     * @param {boolean} [useCharacter1]
+     * @returns {Promise<boolean>}
      */
-    async modifyProfileSettings(targets) {
-        return await this._settingsController.modifyProfileSettings(targets);
+    async setField(entry, field, value, useCharacter1 = false) {
+        const owner = this._captureOwner();
+        if (owner === null || !this._ownsEntry(entry, owner)) { return false; }
+        ++this._mutationRequestGeneration;
+        return await this._enqueue(async () => {
+            if (!this._ownsEntry(entry, owner)) { return false; }
+            const index = entry.index;
+            const next = structuredClone(this._savedRows);
+            const savedValue = useCharacter1 ? next[index].character1 : value;
+            Object.assign(next[index], {[field]: savedValue});
+            if (!await this._saveRows(next, owner, true)) { return false; }
+            Object.assign(entry.data, {[field]: savedValue});
+            return true;
+        });
     }
-
-    // Private
 
     /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
-    _onOptionsChanged({options}) {
-        for (const entry of this._entries) {
-            entry.cleanup();
-        }
-
-        this._entries = [];
-        const {sentenceParsing: {terminationCharacters}} = options;
-
-        const listContainer = /** @type {HTMLElement} */ (this._listContainer);
-        for (let i = 0, ii = terminationCharacters.length; i < ii; ++i) {
-            const terminationCharacterEntry = terminationCharacters[i];
-            const node = /** @type {HTMLElement} */ (this._settingsController.instantiateTemplate('sentence-termination-character-entry'));
-            listContainer.appendChild(node);
-            const entry = new SentenceTerminationCharacterEntry(this, terminationCharacterEntry, i, node);
-            this._entries.push(entry);
-            try {
-                entry.prepare();
-            } catch (error) {
-                log.error(error);
-                entry.cleanup();
-                this._entries.pop();
-            }
-        }
-
-        const empty = terminationCharacters.length === 0;
-        /** @type {HTMLElement} */ (this._listTable).hidden = empty;
-        /** @type {HTMLElement} */ (this._emptyIndicator).hidden = !empty;
+    _onOptionsChanged({options, optionsContext}) {
+        if (!this._sameContext(optionsContext, this._settingsController.getOptionsContext())) { return; }
+        ++this._readGeneration;
+        ++this._viewGeneration;
+        this._viewContext = {...optionsContext};
+        this._savedRows = structuredClone(options.sentenceParsing.terminationCharacters);
+        this._render(this._savedRows);
     }
 
-    /**
-     * @param {MouseEvent} e
-     */
-    _onAddClick(e) {
-        e.preventDefault();
-        void this._addNewEntry();
+    /** @returns {void} */
+    _onOptionsContextChanged() {
+        ++this._readGeneration;
+        ++this._viewGeneration;
+        this._viewContext = null;
     }
 
-    /**
-     * @param {MouseEvent} e
-     */
-    _onResetClick(e) {
-        e.preventDefault();
-        void this._reset();
+    /** @param {MouseEvent} event */
+    _onAddClick(event) {
+        event.preventDefault();
+        void this._addNewEntry().catch((error) => log.error(error));
     }
 
-    /** */
+    /** @param {MouseEvent} event */
+    _onResetClick(event) {
+        event.preventDefault();
+        void this._reset().catch((error) => log.error(error));
+    }
+
+    /** @returns {Promise<void>} */
     async _addNewEntry() {
-        const newEntry = {
-            enabled: true,
-            character1: '"',
-            character2: '"',
-            includeCharacterAtStart: false,
-            includeCharacterAtEnd: false,
-        };
-        await this.addEntry(newEntry);
+        await this.addEntry({enabled: true, character1: '"', character2: '"', includeCharacterAtStart: false, includeCharacterAtEnd: false});
     }
 
-    /** */
+    /** @returns {Promise<void>} */
     async _updateOptions() {
+        const generation = ++this._readGeneration;
+        const context = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
-        const optionsContext = this._settingsController.getOptionsContext();
-        this._onOptionsChanged({options, optionsContext});
+        if (generation !== this._readGeneration || !this._sameContext(context, this._settingsController.getOptionsContext())) { return; }
+        this._onOptionsChanged({options, optionsContext: context});
+    }
+
+    /** @returns {Promise<void>} */
+    async _reset() {
+        const owner = this._captureOwner();
+        if (owner === null) { return; }
+        const requestGeneration = ++this._mutationRequestGeneration;
+        const defaults = await this._settingsController.getDefaultOptions();
+        const next = structuredClone(defaults.profiles[0].options.sentenceParsing.terminationCharacters);
+        await this._enqueue(async () => {
+            // A newer edit supersedes a reset still waiting for defaults.
+            if (requestGeneration !== this._mutationRequestGeneration || !this._owns(owner) || !await this._saveRows(next, owner)) { return; }
+            ++this._viewGeneration;
+            this._render(next);
+        });
+    }
+
+    /**
+     * @param {TerminationCharacter[]} next
+     * @param {{generation: number, context: import('settings').OptionsContext}} owner
+     * @param {boolean} [preserveRows]
+     * @returns {Promise<boolean>}
+     */
+    async _saveRows(next, owner, preserveRows = false) {
+        if (!this._owns(owner)) { return false; }
+        const expected = structuredClone(this._savedRows);
+        let results;
+        try {
+            results = await this._settingsController.modifySettings([{
+                action: 'set',
+                path: 'sentenceParsing.terminationCharacters',
+                value: next,
+                expectedValue: expected,
+                scope: 'profile',
+                profileId: 'profileId' in owner.context ? owner.context.profileId : null,
+                optionsContext: owner.context,
+            }]);
+        } catch (error) {
+            await this._recoverRows(owner, expected, next, preserveRows);
+            throw error;
+        }
+        const response = results?.[0];
+        if (response?.error) {
+            const data = 'data' in response.error ? response.error.data : null;
+            if (data !== null && typeof data === 'object' && 'code' in data && data.code === 'stale') {
+                await this._recoverRows(owner, expected, next, preserveRows);
+            }
+            return false;
+        }
+        if (!Array.isArray(results) || results.length !== 1 || !Array.isArray(response?.result) || JSON.stringify(response.result) !== JSON.stringify(next)) {
+            await this._recoverRows(owner, expected, next, preserveRows);
+            throw new Error('Invalid sentence settings response');
+        }
+        if (!this._owns(owner)) {
+            // A revisited profile may have loaded before this earlier save
+            // committed. Rebase its confirmed field state without replacing
+            // newly typed inputs, before its queued edits are admitted.
+            if (this._viewContext !== null && this._sameContext(owner.context, this._settingsController.getOptionsContext()) && JSON.stringify(this._savedRows) === JSON.stringify(expected)) {
+                if (preserveRows) {
+                    this._adoptFieldRows(next);
+                } else {
+                    ++this._readGeneration;
+                    ++this._viewGeneration;
+                    this._savedRows = structuredClone(next);
+                    this._render(next);
+                }
+            }
+            return false;
+        }
+        this._savedRows = structuredClone(next);
+        return true;
+    }
+
+    /**
+     * @param {{generation: number, context: import('settings').OptionsContext}} owner
+     * @param {TerminationCharacter[]} expected
+     * @param {TerminationCharacter[]} next
+     * @param {boolean} preserveRows
+     * @returns {Promise<void>}
+     */
+    async _recoverRows(owner, expected, next, preserveRows) {
+        if (!this._owns(owner)) { return; }
+        this._viewContext = null;
+        const readGeneration = ++this._readGeneration;
+        try {
+            const options = await this._settingsController.getOptions();
+            if (owner.generation !== this._viewGeneration || readGeneration !== this._readGeneration || !this._sameContext(owner.context, this._settingsController.getOptionsContext())) { return; }
+            const rows = options.sentenceParsing.terminationCharacters;
+            const serializedRows = JSON.stringify(rows);
+            if (serializedRows === JSON.stringify(expected) || (preserveRows && serializedRows === JSON.stringify(next))) {
+                this._viewContext = {...owner.context};
+                this._adoptFieldRows(rows);
+            } else {
+                // Unknown row structure has no safe positional draft mapping.
+                this._onOptionsChanged({options, optionsContext: owner.context});
+            }
+        } catch (error) {
+            // Leave writes blocked until a later authoritative refresh. The
+            // original save failure remains the caller's primary error.
+            log.error(error);
+        }
+    }
+
+    /** @param {TerminationCharacter[]} rows */
+    _adoptFieldRows(rows) {
+        this._savedRows = structuredClone(rows);
+        for (const entry of this._entries) {
+            if (entry !== null) { entry.adoptData(rows[entry.index]); }
+        }
+    }
+
+    /**
+     * @template T
+     * @param {() => Promise<T>} callback
+     * @returns {Promise<T>}
+     */
+    _enqueue(callback) {
+        const result = this._mutationTail.then(callback);
+        this._mutationTail = result.then(() => {}, () => {});
+        return result;
+    }
+
+    /** @returns {?{generation: number, context: import('settings').OptionsContext}} */
+    _captureOwner() {
+        const context = this._settingsController.getOptionsContext();
+        return this._viewContext !== null && this._sameContext(this._viewContext, context) ? {generation: this._viewGeneration, context: {...context}} : null;
+    }
+
+    /**
+     * @param {{generation: number, context: import('settings').OptionsContext}} owner
+     * @returns {boolean}
+     */
+    _owns(owner) {
+        return owner.generation === this._viewGeneration && this._viewContext !== null && this._sameContext(this._viewContext, owner.context) && this._sameContext(owner.context, this._settingsController.getOptionsContext());
+    }
+
+    /**
+     * @param {SentenceTerminationCharacterEntry} entry
+     * @param {{generation: number, context: import('settings').OptionsContext}} owner
+     * @returns {boolean}
+     */
+    _ownsEntry(entry, owner) {
+        return this._owns(owner) && !entry.retired && entry.generation === owner.generation && this._entries.includes(entry);
+    }
+
+    /**
+     * @param {import('settings').OptionsContext} a
+     * @param {import('settings').OptionsContext} b
+     * @returns {boolean}
+     */
+    _sameContext(a, b) {
+        const profileId1 = 'profileId' in a ? a.profileId : null;
+        const profileId2 = 'profileId' in b ? b.profileId : null;
+        return a.index === b.index && profileId1 === profileId2;
+    }
+
+    /** @param {TerminationCharacter[]} rows */
+    _render(rows) {
+        for (const entry of this._entries) { entry?.cleanup(); }
+        this._entries = [];
+        for (const [index, row] of rows.entries()) { this._createEntry(row, index); }
+        this._updateEmptyState();
+    }
+
+    /**
+     * @param {TerminationCharacter} row
+     * @param {number} index
+     */
+    _createEntry(row, index) {
+        const node = /** @type {HTMLElement} */ (this._settingsController.instantiateTemplate('sentence-termination-character-entry'));
+        this._listContainer.appendChild(node);
+        const entry = new SentenceTerminationCharacterEntry(this, row, node, this._viewGeneration, index);
+        try {
+            entry.prepare();
+            this._entries[index] = entry;
+        } catch (error) {
+            log.error(error);
+            entry.cleanup();
+            this._entries[index] = null;
+        }
     }
 
     /** */
-    async _reset() {
-        const defaultOptions = await this._settingsController.getDefaultOptions();
-        const value = defaultOptions.profiles[0].options.sentenceParsing.terminationCharacters;
-        await this._settingsController.setProfileSetting('sentenceParsing.terminationCharacters', value);
-        await this._updateOptions();
+    _updateEmptyState() {
+        const hasEntries = this._entries.some((entry) => entry !== null);
+        this._listTable.hidden = !hasEntries;
+        this._emptyIndicator.hidden = hasEntries;
     }
 }
 
 class SentenceTerminationCharacterEntry {
     /**
      * @param {SentenceTerminationCharactersController} parent
-     * @param {import('settings').SentenceParsingTerminationCharacterOption} data
-     * @param {number} index
+     * @param {TerminationCharacter} data
      * @param {HTMLElement} node
+     * @param {number} generation
+     * @param {number} index
      */
-    constructor(parent, data, index, node) {
+    constructor(parent, data, node, generation, index) {
         /** @type {SentenceTerminationCharactersController} */
         this._parent = parent;
-        /** @type {import('settings').SentenceParsingTerminationCharacterOption} */
-        this._data = data;
-        /** @type {number} */
-        this._index = index;
+        /** @type {TerminationCharacter} */
+        this._data = structuredClone(data);
         /** @type {HTMLElement} */
         this._node = node;
+        /** @type {number} */
+        this._generation = generation;
+        /** @type {number} */
+        this._index = index;
+        /** @type {boolean} */
+        this._retired = false;
+        /** @type {Map<TerminationField, number>} */
+        this._fieldRevisions = new Map();
+        /** @type {Map<TerminationField, number>} */
+        this._pendingFieldEdits = new Map();
+        /** @type {Map<TerminationField, HTMLInputElement>} */
+        this._fieldInputs = new Map();
+        /** @type {number} */
+        this._typeGeneration = 0;
         /** @type {EventListenerCollection} */
         this._eventListeners = new EventListenerCollection();
         /** @type {?HTMLInputElement} */
         this._character1Input = null;
         /** @type {?HTMLInputElement} */
         this._character2Input = null;
-        /** @type {string} */
-        this._basePath = `sentenceParsing.terminationCharacters[${this._index}]`;
+        /** @type {?HTMLSelectElement} */
+        this._typeSelect = null;
     }
 
-    /** */
+    /** @returns {TerminationCharacter} */
+    get data() { return this._data; }
+
+    /** @returns {boolean} */
+    get retired() { return this._retired; }
+
+    /** @returns {number} */
+    get generation() { return this._generation; }
+
+    /** @returns {number} */
+    get index() { return this._index; }
+
+    /** @param {number} value */
+    setIndex(value) { this._index = value; }
+
+    /** @returns {void} */
     prepare() {
-        const {enabled, character1, character2, includeCharacterAtStart, includeCharacterAtEnd} = this._data;
         const node = this._node;
-
-        /** @type {HTMLInputElement} */
-        const enabledToggle = querySelectorNotNull(node, '.sentence-termination-character-enabled');
-        /** @type {HTMLSelectElement} */
-        const typeSelect = querySelectorNotNull(node, '.sentence-termination-character-type');
-        /** @type {HTMLInputElement} */
-        const character1Input = querySelectorNotNull(node, '.sentence-termination-character-input1');
-        /** @type {HTMLInputElement} */
-        const character2Input = querySelectorNotNull(node, '.sentence-termination-character-input2');
-        /** @type {HTMLInputElement} */
-        const includeAtStartCheckbox = querySelectorNotNull(node, '.sentence-termination-character-include-at-start');
-        /** @type {HTMLInputElement} */
-        const includeAtEndheckbox = querySelectorNotNull(node, '.sentence-termination-character-include-at-end');
-        /** @type {HTMLButtonElement} */
-        const menuButton = querySelectorNotNull(node, '.sentence-termination-character-entry-button');
-
-        this._character1Input = character1Input;
-        this._character2Input = character2Input;
-
-        const type = (character2 === null ? 'terminator' : 'quote');
-        node.dataset.type = type;
-
-        enabledToggle.checked = enabled;
-        typeSelect.value = type;
-        character1Input.value = character1;
-        character2Input.value = (character2 !== null ? character2 : '');
-        includeAtStartCheckbox.checked = includeCharacterAtStart;
-        includeAtEndheckbox.checked = includeCharacterAtEnd;
-
-        enabledToggle.dataset.setting = `${this._basePath}.enabled`;
-        includeAtStartCheckbox.dataset.setting = `${this._basePath}.includeCharacterAtStart`;
-        includeAtEndheckbox.dataset.setting = `${this._basePath}.includeCharacterAtEnd`;
-
-        this._eventListeners.addEventListener(typeSelect, 'change', this._onTypeSelectChange.bind(this), false);
-        this._eventListeners.addEventListener(character1Input, 'change', this._onCharacterChange.bind(this, 1), false);
-        this._eventListeners.addEventListener(character2Input, 'change', this._onCharacterChange.bind(this, 2), false);
-        this._eventListeners.addEventListener(menuButton, 'menuClose', this._onMenuClose.bind(this), false);
+        const enabled = /** @type {HTMLInputElement} */ (querySelectorNotNull(node, '.sentence-termination-character-enabled'));
+        const type = /** @type {HTMLSelectElement} */ (querySelectorNotNull(node, '.sentence-termination-character-type'));
+        const character1 = /** @type {HTMLInputElement} */ (querySelectorNotNull(node, '.sentence-termination-character-input1'));
+        const character2 = /** @type {HTMLInputElement} */ (querySelectorNotNull(node, '.sentence-termination-character-input2'));
+        const includeStart = /** @type {HTMLInputElement} */ (querySelectorNotNull(node, '.sentence-termination-character-include-at-start'));
+        const includeEnd = /** @type {HTMLInputElement} */ (querySelectorNotNull(node, '.sentence-termination-character-include-at-end'));
+        const menu = querySelectorNotNull(node, '.sentence-termination-character-entry-button');
+        this._character1Input = character1;
+        this._character2Input = character2;
+        this._typeSelect = type;
+        this._fieldInputs.set('character1', character1);
+        this._fieldInputs.set('character2', character2);
+        character1.value = this._data.character1;
+        character2.value = this._data.character2 ?? '';
+        type.value = this._data.character2 === null ? 'terminator' : 'quote';
+        node.dataset.type = type.value;
+        for (const [control, field] of /** @type {[HTMLInputElement, 'enabled'|'includeCharacterAtStart'|'includeCharacterAtEnd'][]} */ ([
+            [enabled, 'enabled'], [includeStart, 'includeCharacterAtStart'], [includeEnd, 'includeCharacterAtEnd'],
+        ])) {
+            this._fieldInputs.set(field, control);
+            control.checked = this._data[field];
+            this._eventListeners.addEventListener(control, 'change', () => {
+                void this._setCheckboxValue(control, field, control.checked).catch((error) => log.error(error));
+            });
+        }
+        this._eventListeners.addEventListener(type, 'change', this._onTypeSelectChange.bind(this));
+        this._eventListeners.addEventListener(character1, 'change', this._onCharacterChange.bind(this, 1));
+        this._eventListeners.addEventListener(character2, 'change', this._onCharacterChange.bind(this, 2));
+        this._eventListeners.addEventListener(menu, 'menuClose', this._onMenuClose.bind(this));
     }
 
-    /** */
+    /**
+     * @param {TerminationCharacter} row
+     */
+    adoptData(row) {
+        // Only update controls which still display the previous acknowledgement.
+        // Submitted edits own their controls until their own completion.
+        for (const [field, input] of this._fieldInputs) {
+            if ((this._pendingFieldEdits.get(field) ?? 0) !== 0) { continue; }
+            const previous = this._data[field];
+            const value = row[field];
+            if (typeof previous === 'boolean' && typeof value === 'boolean') {
+                if (input.checked === previous) { input.checked = value; }
+            } else if (input.value === (previous ?? '')) {
+                input.value = typeof value === 'string' ? value : '';
+            }
+        }
+        if ((this._pendingFieldEdits.get('character2') ?? 0) === 0 && this._typeSelect !== null) {
+            const previousType = this._data.character2 === null ? 'terminator' : 'quote';
+            if (this._typeSelect.value === previousType) {
+                this._typeSelect.value = row.character2 === null ? 'terminator' : 'quote';
+                this._node.dataset.type = this._typeSelect.value;
+            }
+        }
+        Object.assign(this._data, row);
+    }
+
+    /** @param {TerminationField} field */
+    _finishFieldEdit(field) {
+        const remaining = (this._pendingFieldEdits.get(field) ?? 1) - 1;
+        if (remaining === 0) {
+            this._pendingFieldEdits.delete(field);
+        } else {
+            this._pendingFieldEdits.set(field, remaining);
+        }
+    }
+
+    /** @returns {void} */
     cleanup() {
+        this._retired = true;
         this._eventListeners.removeAllEventListeners();
-        if (this._node.parentNode !== null) {
-            this._node.parentNode.removeChild(this._node);
-        }
+        this._node.remove();
     }
 
-    // Private
-
-    /**
-     * @param {Event} e
-     */
-    _onTypeSelectChange(e) {
-        const element = /** @type {HTMLSelectElement} */ (e.currentTarget);
-        void this._setHasCharacter2(element.value === 'quote');
+    /** @param {Event} event */
+    _onTypeSelectChange(event) {
+        const select = /** @type {HTMLSelectElement} */ (event.currentTarget);
+        this._node.dataset.type = select.value;
+        void this._setHasCharacter2(select.value === 'quote').catch((error) => log.error(error));
     }
 
     /**
-     * @param {1|2} characterNumber
-     * @param {Event} e
+     * @param {1|2} number
+     * @param {Event} event
      */
-    _onCharacterChange(characterNumber, e) {
-        const node = /** @type {HTMLInputElement} */ (e.currentTarget);
-        if (characterNumber === 2 && this._data.character2 === null) {
-            node.value = '';
-        }
-
-        const value = node.value.substring(0, 1);
-        void this._setCharacterValue(node, characterNumber, value);
+    _onCharacterChange(number, event) {
+        const input = /** @type {HTMLInputElement} */ (event.currentTarget);
+        if (number === 2 && this._typeSelect?.value !== 'quote') { input.value = ''; }
+        void this._setCharacterValue(input, number, input.value.substring(0, 1)).catch((error) => log.error(error));
     }
 
-    /**
-     * @param {import('popup-menu').MenuCloseEvent} e
-     */
-    _onMenuClose(e) {
-        switch (e.detail.action) {
-            case 'delete':
-                void this._delete();
-                break;
-        }
+    /** @param {import('popup-menu').MenuCloseEvent} event */
+    _onMenuClose(event) {
+        if (event.detail.action === 'delete') { void this._delete().catch((error) => log.error(error)); }
     }
 
-    /** */
+    /** @returns {Promise<boolean>} */
     async _delete() {
-        void this._parent.deleteEntry(this._index);
+        return await this._parent.deleteEntry(this._parent.getEntryIndex(this), this);
     }
 
-    /**
-     * @param {boolean} has
-     */
+    /** @param {boolean} has */
     async _setHasCharacter2(has) {
-        if (this._character2Input === null) { return; }
-        const okay = await this._setCharacterValue(this._character2Input, 2, has ? this._data.character1 : null);
-        if (okay) {
-            const type = (!has ? 'terminator' : 'quote');
-            this._node.dataset.type = type;
+        const input = this._character2Input;
+        const select = this._typeSelect;
+        if (input === null || select === null) { return; }
+        const generation = ++this._typeGeneration;
+        const submittedType = has ? 'quote' : 'terminator';
+        const promise = this._setCharacterValue(input, 2, has ? this._data.character1 : null, has);
+        const revision = this._fieldRevisions.get('character2');
+        try {
+            await promise;
+        } finally {
+            if (!this._retired && generation === this._typeGeneration && revision === this._fieldRevisions.get('character2') && select.value === submittedType) {
+                const type = this._data.character2 === null ? 'terminator' : 'quote';
+                this._node.dataset.type = type;
+                select.value = type;
+            }
         }
     }
 
     /**
-     * @param {HTMLInputElement} inputNode
-     * @param {1|2} characterNumber
+     * @param {HTMLInputElement} input
+     * @param {1|2} number
      * @param {?string} value
+     * @param {boolean} [useCharacter1]
      * @returns {Promise<boolean>}
      */
-    async _setCharacterValue(inputNode, characterNumber, value) {
-        if (characterNumber === 1 && typeof value !== 'string') { value = ''; }
-        const r = await this._parent.settingsController.setProfileSetting(`${this._basePath}.character${characterNumber}`, value);
-        const okay = !r[0].error;
-        if (okay) {
-            if (characterNumber === 1) {
-                this._data.character1 = /** @type {string} */ (value);
-            } else {
-                this._data.character2 = value;
-            }
-        } else {
-            value = characterNumber === 1 ? this._data.character1 : this._data.character2;
+    async _setCharacterValue(input, number, value, useCharacter1 = false) {
+        const submitted = input.value;
+        const field = number === 1 ? 'character1' : 'character2';
+        const revision = (this._fieldRevisions.get(field) ?? 0) + 1;
+        this._fieldRevisions.set(field, revision);
+        this._pendingFieldEdits.set(field, (this._pendingFieldEdits.get(field) ?? 0) + 1);
+        try {
+            return await this._parent.setField(this, field, number === 1 && value === null ? '' : value, useCharacter1);
+        } finally {
+            this._finishFieldEdit(field);
+            if (!this._retired && this._fieldRevisions.get(field) === revision && input.value === submitted) { input.value = this._data[field] ?? ''; }
         }
-        inputNode.value = (value !== null ? value : '');
-        return okay;
+    }
+
+    /**
+     * @param {HTMLInputElement} input
+     * @param {'enabled'|'includeCharacterAtStart'|'includeCharacterAtEnd'} field
+     * @param {boolean} value
+     * @returns {Promise<void>}
+     */
+    async _setCheckboxValue(input, field, value) {
+        const revision = (this._fieldRevisions.get(field) ?? 0) + 1;
+        this._fieldRevisions.set(field, revision);
+        this._pendingFieldEdits.set(field, (this._pendingFieldEdits.get(field) ?? 0) + 1);
+        try {
+            await this._parent.setField(this, field, value);
+        } finally {
+            this._finishFieldEdit(field);
+            if (!this._retired && this._fieldRevisions.get(field) === revision && input.checked === value) { input.checked = this._data[field]; }
+        }
     }
 }

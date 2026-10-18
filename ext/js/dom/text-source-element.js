@@ -120,32 +120,26 @@ export class TextSourceElement {
      * Moves the end offset of the text by a set amount of unicode codepoints.
      * @param {number} length The maximum number of codepoints to move by.
      * @param {boolean} fromEnd Whether to move the offset from the current end position (if `true`) or the start position (if `false`).
-     * @returns {number} The actual number of characters (not codepoints) that were read.
+     * @returns {number} The actual number of codepoints that were read.
      */
     setEndOffset(length, fromEnd) {
         const offset = fromEnd ? this._endOffset : this._startOffset;
-        length = Math.min(this._fullContent.length - offset, length);
-        if (length > 0) {
-            length = readCodePointsForward(this._fullContent, offset, length).length;
-        }
-        this._endOffset = offset + length;
+        const content = readCodePointsForward(this._fullContent, offset, length);
+        this._endOffset = offset + content.length;
         this._content = this._fullContent.substring(this._startOffset, this._endOffset);
-        return length;
+        return [...content].length;
     }
 
     /**
      * Moves the start offset of the text by a set amount of unicode codepoints.
      * @param {number} length The maximum number of codepoints to move by.
-     * @returns {number} The actual number of characters (not codepoints) that were read.
+     * @returns {number} The actual number of codepoints that were read.
      */
     setStartOffset(length) {
-        length = Math.min(this._startOffset, length);
-        if (length > 0) {
-            length = readCodePointsBackward(this._fullContent, this._startOffset - 1, length).length;
-        }
-        this._startOffset -= length;
+        const content = readCodePointsBackward(this._fullContent, this._startOffset - 1, length);
+        this._startOffset -= content.length;
         this._content = this._fullContent.substring(this._startOffset, this._endOffset);
-        return length;
+        return [...content].length;
     }
 
     /**

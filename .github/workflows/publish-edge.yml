@@ -9,16 +9,27 @@ jobs:
     outputs:
       result: ${{ steps.webStorePublish.outcome }}
     steps:
-      - uses: robinraju/release-downloader@daf26c55d821e836577a15f77d86ddc078948b05 # pin@v1.12
+      - name: Check Manabitan Edge listing configuration
+        env:
+          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+        run: |
+          : "${EDGE_PRODUCT_ID:?Configure the Manabitan-owned Edge product ID before publishing}"
+          edge_product_id_lower="$(printf '%s' "$EDGE_PRODUCT_ID" | tr '[:upper:]' '[:lower:]')"
+          if [[ "$edge_product_id_lower" == '18e6c4cd-6383-4f38-95e9-92a629f60817' ]]; then
+            echo 'The upstream Yomitan Edge product ID cannot be used for Manabitan.' >&2
+            exit 1
+          fi
+
+      - uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # pin@v1.13
         with:
           tag: ${{ github.ref_name }}
           fileName: "*"
 
       - name: Publish on Microsoft Edge Addons
-        uses: wdzeng/edge-addon@v2
+        uses: wdzeng/edge-addon@9881f57720358040d079eaa06a4596dc9c273eb6 # v2
         id: webStorePublish
         with:
-          product-id: 18e6c4cd-6383-4f38-95e9-92a629f60817
-          zip-path: yomitan-edge.zip
+          product-id: ${{ secrets.EDGE_PRODUCT_ID }}
+          zip-path: manabitan-edge.zip
           client-id: ${{ secrets.EDGE_CLIENT_ID }}
           api-key: ${{ secrets.EDGE_API_KEY }}

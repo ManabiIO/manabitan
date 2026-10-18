@@ -15,11 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {describe, expect, vi} from 'vitest';
+import {afterEach, describe, expect, vi} from 'vitest';
 import {AudioController} from '../ext/js/pages/settings/audio-controller.js';
 import {createDomTest} from './fixtures/dom-test.js';
 
 const test = createDomTest();
+
+afterEach(() => { vi.unstubAllGlobals(); });
 
 /**
  * @returns {AudioController}
@@ -27,6 +29,44 @@ const test = createDomTest();
 function createControllerForInternalTests() {
     return /** @type {AudioController} */ (Object.create(AudioController.prototype));
 }
+
+
+describe('AudioController voice language classification', () => {
+    test.each([
+        ['ja', true],
+        ['JA', true],
+        ['ja-JP', true],
+        ['JA-jp', true],
+        ['ja_JP', true],
+        ['jpn', true],
+        ['JPN', true],
+        ['jpn-Jpan', true],
+        ['en-JP', false],
+        ['zh-JP', false],
+        ['', false],
+    ])('%s Japanese classification is %s', (languageTag, expected) => {
+        const controller = createControllerForInternalTests();
+        expect(controller._languageTagIsJapanese(languageTag)).toBe(expected);
+    });
+});
+
+
+describe('AudioController speech voice discovery', () => {
+    test('a speech-service failure yields an empty voice list without breaking settings', () => {
+        vi.stubGlobal('speechSynthesis', {
+            getVoices() { throw new Error('speech service unavailable'); },
+        });
+        const controller = createControllerForInternalTests();
+        Reflect.set(controller, '_language', 'ja');
+        Reflect.set(controller, '_voices', [{voice: /** @type {SpeechSynthesisVoice} */ ({}), isJapanese: false, index: 0}]);
+        const trigger = vi.fn();
+        Reflect.set(controller, 'trigger', trigger);
+
+        expect(() => controller._updateTextToSpeechVoices()).not.toThrow();
+        expect(controller.getVoices()).toEqual([]);
+        expect(trigger).toHaveBeenCalledWith('voicesUpdated', {});
+    });
+});
 
 describe('AudioController consent refresh', () => {
     test('clears the consent token when a refresh fails', async ({window}) => {

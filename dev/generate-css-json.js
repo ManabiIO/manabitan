@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import css from 'css';
 import fs from 'fs';
 import path from 'path';
+import postcss from 'postcss';
 import {fileURLToPath} from 'url';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -134,8 +134,8 @@ export function formatRulesJson(rules) {
 export function generateRules(cssFilePath, overridesCssFilePath) {
     const cssFileContent = fs.readFileSync(cssFilePath, {encoding: 'utf8'});
     const overridesCssFileContent = fs.readFileSync(overridesCssFilePath, {encoding: 'utf8'});
-    const defaultStylesheet = /** @type {css.StyleRules} */ (css.parse(cssFileContent, {}).stylesheet);
-    const overridesStylesheet = /** @type {css.StyleRules} */ (css.parse(overridesCssFileContent, {}).stylesheet);
+    const defaultStylesheet = postcss.parse(cssFileContent, {from: cssFilePath});
+    const overridesStylesheet = postcss.parse(overridesCssFileContent, {from: overridesCssFilePath});
 
     const removePropertyPattern = /^remove-property\s+([\w\W]+)$/;
     const removeRulePattern = /^remove-rule$/;
@@ -144,21 +144,16 @@ export function generateRules(cssFilePath, overridesCssFilePath) {
     /** @type {import('css-style-applier').RawStyleData} */
     const rules = [];
 
-    for (const rule of defaultStylesheet.rules) {
+    for (const rule of defaultStylesheet.nodes) {
         if (rule.type !== 'rule') { continue; }
-        const {selectors, declarations} = /** @type {css.Rule} */ (rule);
-        if (typeof selectors === 'undefined') { continue; }
+        const selectors = postcss.list.comma(rule.selector);
+        const declarations = rule.nodes;
         /** @type {import('css-style-applier').RawStyleDataStyleArray} */
         const styles = [];
         if (typeof declarations !== 'undefined') {
             for (const declaration of declarations) {
-                if (declaration.type !== 'declaration') {
-                    console.log(declaration);
-                    continue;
-                }
-                const {property, value} = /** @type {css.Declaration} */ (declaration);
-                if (typeof property !== 'string' || typeof value !== 'string') { continue; }
-                styles.push([property, value]);
+                if (declaration.type !== 'decl') { continue; }
+                styles.push([declaration.prop, formatDeclarationValue(declaration)]);
             }
         }
         if (styles.length > 0) {
@@ -166,15 +161,16 @@ export function generateRules(cssFilePath, overridesCssFilePath) {
         }
     }
 
-    for (const rule of overridesStylesheet.rules) {
+    for (const rule of overridesStylesheet.nodes) {
         if (rule.type !== 'rule') { continue; }
-        const {selectors, declarations} = /** @type {css.Rule} */ (rule);
-        if (typeof selectors === 'undefined' || typeof declarations === 'undefined') { continue; }
+        const selectors = postcss.list.comma(rule.selector);
+        const declarations = rule.nodes;
+        if (typeof declarations === 'undefined') { continue; }
         /** @type {Map<string, number>} */
         const removedProperties = new Map();
         for (const declaration of declarations) {
             switch (declaration.type) {
-                case 'declaration':
+                case 'decl':
                     {
                         const index = indexOfRule(rules, selectors);
                         let entry;
@@ -184,18 +180,17 @@ export function generateRules(cssFilePath, overridesCssFilePath) {
                             entry = {selectors, styles: []};
                             rules.push(entry);
                         }
-                        const {property, value} = /** @type {css.Declaration} */ (declaration);
-                        if (typeof property === 'string' && typeof value === 'string') {
-                            removeProperty(entry.styles, property, removedProperties);
-                            entry.styles.push([property, value]);
-                        }
+                        const {prop: property} = declaration;
+                        const value = formatDeclarationValue(declaration);
+                        removeProperty(entry.styles, property, removedProperties);
+                        entry.styles.push([property, value]);
                     }
                     break;
                 case 'comment':
                     {
                         const index = indexOfRule(rules, selectors);
                         if (index < 0) { throw new Error('Could not find rule with matching selectors'); }
-                        const comment = (/** @type {css.Comment} */ (declaration).comment || '').trim();
+                        const comment = declaration.text.trim();
                         let m;
                         if ((m = removePropertyPattern.exec(comment)) !== null) {
                             for (const property of m[1].split(propertySeparator)) {
@@ -220,4 +215,12 @@ export function generateRules(cssFilePath, overridesCssFilePath) {
     }
 
     return rules;
+}
+
+/**
+ * @param {import('postcss').Declaration} declaration
+ * @returns {string}
+ */
+function formatDeclarationValue(declaration) {
+    return declaration.important ? `${declaration.value} !important` : declaration.value;
 }

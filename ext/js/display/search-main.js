@@ -33,8 +33,8 @@ import {SearchPersistentStateController} from './search-persistent-state-control
  * @param {Record<string, unknown>} patch
  */
 function setSearchDebugState(patch) {
-    const previousState = /** @type {unknown} */ (Reflect.get(globalThis, '__manabitanSearchDebug'));
-    const state = typeof previousState === 'object' && previousState !== null ? previousState : {};
+    const previous = /** @type {unknown} */ (Reflect.get(globalThis, '__manabitanSearchDebug'));
+    const state = typeof previous === 'object' && previous !== null ? previous : {};
     Reflect.set(globalThis, '__manabitanSearchDebug', {
         ...state,
         ...patch,
@@ -107,8 +107,9 @@ try {
             const settingsDisplayController = new SettingsDisplayController(settingsController, modalController);
             await settingsDisplayController.prepare();
 
+            await display.initializeState();
+            document.body.hidden = false;
             documentFocusController.focusElement();
-            display.initializeState();
             document.documentElement.dataset.loaded = 'true';
             delete document.documentElement.dataset.loadError;
             setSearchDebugState({

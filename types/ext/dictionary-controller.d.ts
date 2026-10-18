@@ -26,4 +26,10 @@ type DictionaryUpdateTask = {
     downloadUrl: string | undefined;
 };
 
-export type DictionaryTask = DictionaryDeleteTask | DictionaryUpdateTask;
+type DictionaryFileReplacementTask = {
+    type: 'replaceFromFiles';
+    dictionaryTitle: string;
+    files: File[];
+};
+
+export type DictionaryTask = DictionaryDeleteTask | DictionaryUpdateTask | DictionaryFileReplacementTask;

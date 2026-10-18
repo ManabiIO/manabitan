@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {findJapaneseSearch} from '../search/japanese-search.js';
 import {ThemeController} from '../app/theme-controller.js';
 import {FrameEndpoint} from '../comm/frame-endpoint.js';
 import {extendApiMap, invokeApiMapHandler} from '../core/api-map.js';
@@ -23,7 +24,7 @@ import {DynamicProperty} from '../core/dynamic-property.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
-import {reportDiagnostics} from '../core/diagnostics-reporter.js';
+import {reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -36,6 +37,8 @@ import {TextSourceGenerator} from '../dom/text-source-generator.js';
 import {HotkeyHelpController} from '../input/hotkey-help-controller.js';
 import {TextScanner} from '../language/text-scanner.js';
 import {checkPopupPreviewURL} from '../pages/settings/popup-preview-controller.js';
+import {DictionaryCssMediaResolver} from './dictionary-css-media-resolver.js';
+import {collectDictionaryCssMediaTargets} from './dictionary-css-media-targets.js';
 import {DisplayContentManager} from './display-content-manager.js';
 import {DisplayGenerator} from './display-generator.js';
 import {DisplayHistory} from './display-history.js';
@@ -72,6 +75,11 @@ export class Display extends EventDispatcher {
         this._dictionaryEntryNodes = [];
         /** @type {import('settings').OptionsContext} */
         this._optionsContext = {depth: 0, url: window.location.href};
+        // Retain failed requests for existing waiters; new consumers retry them.
+        /** @type {?{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
+        this._optionsContextRequest = null;
+        /** @type {?object} */
+        this._nestedFrontendUpdateToken = null;
         /** @type {?import('settings').ProfileOptions} */
         this._options = null;
         /** @type {number} */
@@ -82,8 +90,14 @@ export class Display extends EventDispatcher {
         this._eventListeners = new EventListenerCollection();
         /** @type {?import('core').TokenObject} */
         this._setContentToken = null;
+        /** @type {{publication: import('popup').PublicationToken, token: import('core').TokenObject|null}|null} */
+        this._activePublication = null;
+        /** @type {Map<string, {generation: number, cancelled: boolean}>} */
+        this._publicationGenerations = new Map();
         /** @type {DisplayContentManager} */
         this._contentManager = new DisplayContentManager(this);
+        /** @type {DictionaryCssMediaResolver} */
+        this._dictionaryCssMediaResolver = new DictionaryCssMediaResolver(application.api);
         /** @type {HotkeyHelpController} */
         this._hotkeyHelpController = new HotkeyHelpController();
         /** @type {DisplayGenerator} */
@@ -152,6 +166,8 @@ export class Display extends EventDispatcher {
         this._navigationNextButton = document.querySelector('#navigate-next-button');
         /** @type {?import('../app/frontend.js').Frontend} */
         this._frontend = null;
+        /** @type {?{frontend: import('../app/frontend.js').Frontend, popupFactory: import('../app/popup-factory.js').PopupFactory}} */
+        this._frontendPending = null;
         /** @type {?Promise<void>} */
         this._frontendSetupPromise = null;
         /** @type {number} */
@@ -178,6 +194,8 @@ export class Display extends EventDispatcher {
         this._contentTextScanner = null;
         /** @type {?import('./display-notification.js').DisplayNotification} */
         this._tagNotification = null;
+        /** @type {?DisplayNotification} */
+        this._dictionaryAvailabilityNotification = null;
         /** @type {?import('./display-notification.js').DisplayNotification} */
         this._inflectionNotification = null;
         /** @type {HTMLElement} */
@@ -231,6 +249,7 @@ export class Display extends EventDispatcher {
         this.registerDirectMessageHandlers([
             ['displaySetOptionsContext', this._onMessageSetOptionsContext.bind(this)],
             ['displaySetContent',        this._onMessageSetContent.bind(this)],
+            ['displayCancelPublication', this._onMessageCancelPublication.bind(this)],
             ['displaySetCustomCss',      this._onMessageSetCustomCss.bind(this)],
             ['displaySetContentScale',   this._onMessageSetContentScale.bind(this)],
             ['displayConfigure',         this._onMessageConfigure.bind(this)],
@@ -394,12 +413,15 @@ export class Display extends EventDispatcher {
         };
     }
 
-    /** */
+    /**
+     * @returns {Promise<void>}
+     */
     initializeState() {
-        void this._onStateChanged();
+        const promise = this._onStateChanged();
         if (this._frameEndpoint !== null) {
             this._frameEndpoint.signal();
         }
+        return promise;
     }
 
     /**
@@ -464,11 +486,28 @@ export class Display extends EventDispatcher {
         await this.updateOptions();
     }
 
-    /** */
-    async updateOptions() {
-        const options = await this._application.api.optionsGet(this.getOptionsContext());
+    /** @returns {Promise<void>} */
+    updateOptions() {
+        /** @type {{optionsContext: import('settings').OptionsContext, promise: ?Promise<void>, failed: boolean}} */
+        const request = {optionsContext: this.getOptionsContext(), promise: null, failed: false};
+        this._optionsContextRequest = request;
+        request.promise = this._updateOptionsInner(request.optionsContext, request).catch((error) => {
+            request.failed = true;
+            throw error;
+        });
+        return request.promise;
+    }
+
+    /**
+     * @param {import('settings').OptionsContext} optionsContext
+     * @param {object} request
+     */
+    async _updateOptionsInner(optionsContext, request) {
+        const options = await this._application.api.optionsGet(optionsContext);
+        if (this._optionsContextRequest !== request) { return; }
         const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
         this._options = options;
+        this._dictionaryCssMediaResolver.prune(options.dictionaries);
 
         this._updateHotkeys(options);
         this._updateDocumentOptions(options);
@@ -486,6 +525,7 @@ export class Display extends EventDispatcher {
             readingMode: options.parsing.readingMode,
             useInternalParser: options.parsing.enableScanningParser,
             useMecabParser: options.parsing.enableMecabParser,
+            useAllFrequencyDictionaries: options.parsing.useAllFrequencyDictionaries,
             language: options.general.language,
             scanning: {
                 inputs: scanningOptions.inputs,
@@ -506,7 +546,7 @@ export class Display extends EventDispatcher {
             },
         });
 
-        void this._updateNestedFrontend(options);
+        void this._updateNestedFrontend(options).catch((e) => { log.error(e); });
         this._updateContentTextScanner(options);
 
         this.trigger('optionsUpdated', {options});
@@ -515,42 +555,67 @@ export class Display extends EventDispatcher {
     /**
      * Updates the content of the display.
      * @param {import('display').ContentDetails} details Information about the content to show.
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
+     * @throws {Error} If request setup or history publication fails.
      */
     setContent(details) {
-        const stateChangeCompletePromise = this._waitForStateChangeComplete(5000);
-        const {focus, params, state, content} = details;
-        const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
+        this._activePublication = null;
+        const {promise, finish} = this._createStateChangeCompletion(5000);
+        try {
+            const {focus, params, state, content} = details;
+            const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
 
-        if (focus) {
-            window.focus();
-        }
+            if (focus) {
+                window.focus();
+            }
 
-        const urlSearchParams = new URLSearchParams();
-        for (const [key, value] of Object.entries(params)) {
-            if (typeof value !== 'string') { continue; }
-            urlSearchParams.append(key, value);
-        }
-        const url = `${location.protocol}//${location.host}${location.pathname}?${urlSearchParams.toString()}`;
+            const urlSearchParams = new URLSearchParams();
+            for (const [key, value] of Object.entries(params)) {
+                if (typeof value !== 'string') { continue; }
+                urlSearchParams.append(key, value);
+            }
+            const url = `${location.protocol}//${location.host}${location.pathname}?${urlSearchParams.toString()}`;
 
-        switch (historyMode) {
-            case 'clear':
-                this._history.clear();
-                this._history.replaceState(state, content, url);
-                break;
-            case 'overwrite':
-                this._history.replaceState(state, content, url);
-                break;
-            case 'new':
-                this._updateHistoryState();
-                this._history.pushState(state, content, url);
-                break;
-        }
+            switch (historyMode) {
+                case 'clear':
+                    this._history.clear();
+                    this._history.replaceState(state, content, url);
+                    break;
+                case 'overwrite':
+                    this._history.replaceState(state, content, url);
+                    break;
+                case 'new':
+                    this._updateHistoryState();
+                    this._history.pushState(state, content, url);
+                    break;
+            }
 
-        if (this._options) {
-            this._setTheme(this._options);
+            if (this._options) {
+                this._setTheme(this._options);
+            }
+        } catch (e) {
+            finish();
+            throw e;
         }
-        return stateChangeCompletePromise;
+        return promise;
+    }
+
+    /** Invalidate stale results immediately when the search draft changes. */
+    invalidateSearchDraft() {
+        this._activePublication = null;
+        this._setContentToken = {};
+        this._dictionaryAvailabilityNotification?.close(false);
+        this._closePopups();
+        this._closeAllPopupMenus();
+        this._eventListeners.removeAllEventListeners();
+        this._contentManager.unloadAll();
+        this._triggerContentClear();
+        this._dictionaryEntries = [];
+        this._dictionaryEntryNodes = [];
+        this._elementOverflowController.clearElements();
+        this._container.textContent = '';
+        this._setNoContentVisible(false);
+        this._setNoDictionariesVisible(false);
     }
 
     /**
@@ -618,10 +683,11 @@ export class Display extends EventDispatcher {
 
     /**
      * @param {boolean} updateOptionsContext
+     * @param {boolean} [preserveSearchInput] Keep an unsent draft during automatic search-page refreshes.
      */
-    searchLast(updateOptionsContext) {
+    searchLast(updateOptionsContext, preserveSearchInput = false) {
         const type = this._contentType;
-        if (type === 'clear') { return; }
+        if (type === 'clear' || type === 'unloaded') { return; }
         const query = this._query;
         const {state} = this._history;
         const hasState = typeof state === 'object' && state !== null;
@@ -648,6 +714,7 @@ export class Display extends EventDispatcher {
             state: newState,
             content: {
                 contentOrigin: this.getContentOrigin(),
+                preserveSearchInput,
             },
         };
         void this.setContent(details);
@@ -765,14 +832,56 @@ export class Display extends EventDispatcher {
 
     /** @type {import('display').DirectApiHandler<'displaySetOptionsContext'>} */
     async _onMessageSetOptionsContext({optionsContext}) {
-        await this.setOptionsContext(optionsContext);
+        const token = this._setContentToken;
+        const promise = this.setOptionsContext(optionsContext);
+        const request = this._optionsContextRequest;
+        await promise;
+        if (this._setContentToken !== token || this._optionsContextRequest !== request) { return; }
         this.searchLast(true);
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetContent'>} */
-    async _onMessageSetContent({details}) {
+    async _onMessageSetContent({details, publication}) {
+        if (typeof publication !== 'undefined') {
+            if (!this._isPublicationValid(publication)) { return; }
+            const state = this._publicationGenerations.get(publication.source);
+            if (state && (state.generation > publication.generation || (state.generation === publication.generation && state.cancelled))) { return; }
+            this._publicationGenerations.set(publication.source, {generation: publication.generation, cancelled: false});
+        }
         safePerformance.mark('invokeDisplaySetContent:end');
-        await this.setContent(details);
+        const completion = this.setContent(details);
+        let activePublication = null;
+        if (typeof publication !== 'undefined') {
+            activePublication = {publication, token: this._setContentToken};
+            this._activePublication = activePublication;
+        }
+        const completed = await completion;
+        if (completed === false && activePublication !== null && this._activePublication === activePublication && activePublication.token === this._setContentToken) {
+            void this._onMessageCancelPublication({publication: activePublication.publication});
+            const error = new Error('Popup content rendering timed out');
+            error.name = 'PopupContentTimeoutError';
+            throw error;
+        }
+    }
+
+    /** @type {import('display').DirectApiHandler<'displayCancelPublication'>} */
+    _onMessageCancelPublication({publication}) {
+        if (!this._isPublicationValid(publication)) { return; }
+        const state = this._publicationGenerations.get(publication.source);
+        if (state && state.generation > publication.generation) { return; }
+        this._publicationGenerations.set(publication.source, {generation: publication.generation, cancelled: true});
+        const active = this._activePublication;
+        if (active === null || active.publication.source !== publication.source || active.publication.generation !== publication.generation || active.token !== this._setContentToken) { return; }
+        this.invalidateSearchDraft();
+    }
+
+    /**
+     * @param {import('popup').PublicationToken} publication
+     * @returns {boolean}
+     */
+    _isPublicationValid(publication) {
+        return publication !== null && typeof publication === 'object' && typeof publication.source === 'string' &&
+        publication.source.length > 0 && publication.source.length <= 64 && Number.isSafeInteger(publication.generation) && publication.generation > 0;
     }
 
     /** @type {import('display').DirectApiHandler<'displaySetCustomCss'>} */
@@ -798,6 +907,7 @@ export class Display extends EventDispatcher {
     /** @type {import('display').DirectApiHandler<'displayVisibilityChanged'>} */
     _onMessageVisibilityChanged({value}) {
         this._frameVisible = value;
+        if (!value) { this._cancelPendingScannerSearches(); }
         this.trigger('frameVisibilityChange', {value});
     }
 
@@ -825,12 +935,15 @@ export class Display extends EventDispatcher {
     async _onStateChanged() {
         if (this._historyChangeIgnore) { return; }
 
-        safePerformance.mark('display:_onStateChanged:start');
+        // History events are synchronous; later requests belong to later renders.
+        const completions = this._stateChangeCompleteResolvers.splice(0);
 
         /** @type {?import('core').TokenObject} */
         const token = {}; // Unique identifier token
         this._setContentToken = token;
         try {
+            safePerformance.mark('display:_onStateChanged:start');
+            this._dictionaryAvailabilityNotification?.close(false);
             // Clear
             safePerformance.mark('display:_onStateChanged:clear:start');
             this._closePopups();
@@ -879,17 +992,27 @@ export class Display extends EventDispatcher {
             safePerformance.mark('display:_onStateChanged:setContent:end');
             safePerformance.measure('display:_onStateChanged:setContent', 'display:_onStateChanged:setContent:start', 'display:_onStateChanged:setContent:end');
         } catch (e) {
-            this.onError(toError(e));
+            try {
+                if (this._setContentToken === token) { this.onError(toError(e)); }
+            } catch (error) {
+                // Reporting must not reject the unawaited history event handler.
+            }
+        } finally {
+            try {
+                safePerformance.mark('display:_onStateChanged:end');
+                safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
+            } catch (error) {
+                // Profiling failures cannot strand completion or reject history events.
+            } finally {
+                for (const finish of completions) { finish(); }
+            }
         }
-        safePerformance.mark('display:_onStateChanged:end');
-        safePerformance.measure('display:_onStateChanged', 'display:_onStateChanged:start', 'display:_onStateChanged:end');
-        this._resolveStateChangeCompleteWaiters();
     }
 
     /**
      * @param {import('query-parser').EventArgument<'searched'>} details
      */
-    _onQueryParserSearch({type, dictionaryEntries, sentence, inputInfo: {eventType}, textSource, optionsContext, sentenceOffset}) {
+    _onQueryParserSearch({type, dictionaryEntries, dictionaryAvailability, sentence, inputInfo: {eventType}, textSource, optionsContext, sentenceOffset}) {
         const query = textSource.text();
         const historyState = this._history.state;
         const historyMode = (
@@ -911,6 +1034,7 @@ export class Display extends EventDispatcher {
             },
             content: {
                 dictionaryEntries,
+                ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
                 contentOrigin: this.getContentOrigin(),
             },
         };
@@ -919,6 +1043,7 @@ export class Display extends EventDispatcher {
 
     /** */
     _onExtensionUnloaded() {
+        this._dictionaryCssMediaResolver.clear();
         const type = 'unloaded';
         if (this._contentType === type) { return; }
         const {tabId, frameId} = this._application;
@@ -984,7 +1109,7 @@ export class Display extends EventDispatcher {
     /**
      * @param {MouseEvent} e
      */
-    async _onKanjiLookup(e) {
+    _onKanjiLookup(e) {
         try {
             e.preventDefault();
             const {state} = this._history;
@@ -997,7 +1122,6 @@ export class Display extends EventDispatcher {
             const element = /** @type {Element} */ (e.currentTarget);
             let query = element.textContent;
             if (query === null) { query = ''; }
-            const dictionaryEntries = await this._application.api.kanjiFind(query, optionsContext);
             /** @type {import('display').ContentDetails} */
             const details = {
                 focus: false,
@@ -1011,7 +1135,6 @@ export class Display extends EventDispatcher {
                     documentTitle,
                 },
                 content: {
-                    dictionaryEntries,
                     contentOrigin: this.getContentOrigin(),
                 },
             };
@@ -1331,11 +1454,50 @@ export class Display extends EventDispatcher {
         for (const {name, enabled, styles = ''} of dictionaries) {
             if (enabled) {
                 const escapedTitle = name.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-                customCss += '\n' + addScopeToCss(styles, `[data-dictionary="${escapedTitle}"]`);
+                const resolvedStyles = this._dictionaryCssMediaResolver.rewriteStyles(name, styles);
+                customCss += '\n' + addScopeToCss(resolvedStyles, `[data-dictionary="${escapedTitle}"]`);
             }
         }
-        this.setCustomCss(customCss);
         return customCss;
+    }
+
+    /**
+     * Resolve only MDict media referenced by CSS which is active on the
+     * currently rendered structured content. This avoids eagerly loading every
+     * image in an MDD merely because a stylesheet mentions it.
+     * @param {import('core').TokenObject} token
+     * @returns {Promise<void>}
+     */
+    async _resolveDictionaryCssMedia(token) {
+        const options = this._options;
+        if (options === null || this._setContentToken !== token) { return; }
+
+        try {
+            const {targets, inlineStyleElements} = collectDictionaryCssMediaTargets(this._container, options.dictionaries, window.location.href);
+            if (targets.length === 0) { return; }
+            await this._dictionaryCssMediaResolver.resolve(targets);
+            if (this._setContentToken !== token) { return; }
+
+            for (const {element, dictionary} of inlineStyleElements) {
+                const source = element.style.cssText;
+                const resolved = this._dictionaryCssMediaResolver.rewriteStyles(dictionary, source);
+                if (resolved !== source) {
+                    element.style.cssText = resolved;
+                }
+            }
+
+            // An obsolete render may have populated the cache without publishing
+            // its stylesheet. The current render must apply those cached URLs too.
+            if (this._options !== null && this._options.dictionaries.some(({name, enabled, styles = ''}) => (
+                enabled && this._dictionaryCssMediaResolver.rewriteStyles(name, styles) !== styles
+            ))) {
+                this._setTheme(this._options);
+            }
+        } catch (error) {
+            if (this._setContentToken === token && !this._application.webExtension.unloaded) {
+                log.error(error);
+            }
+        }
     }
 
     /**
@@ -1344,26 +1506,31 @@ export class Display extends EventDispatcher {
      * @param {string} primaryReading
      * @param {boolean} wildcardsEnabled
      * @param {import('settings').OptionsContext} optionsContext
-     * @returns {Promise<import('dictionary').DictionaryEntry[]>}
+     * @returns {Promise<import('display').DictionarySearchResult>}
      */
     async _findDictionaryEntries(isKanji, source, primaryReading, wildcardsEnabled, optionsContext) {
-        /** @type {import('dictionary').DictionaryEntry[]} */
-        let dictionaryEntries = [];
         const {findDetails, source: source2} = this._getFindDetails(source, primaryReading, wildcardsEnabled);
         if (isKanji) {
-            dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
-            if (dictionaryEntries.length > 0) { return dictionaryEntries; }
-
-            dictionaryEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
-            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, dictionaryEntries);
-        } else {
-            dictionaryEntries = (await this._application.api.termsFind(source2, findDetails, optionsContext)).dictionaryEntries;
-            this._reportTermsFindSnapshot(source, source2, isKanji, findDetails, optionsContext, dictionaryEntries);
-            if (dictionaryEntries.length > 0) { return dictionaryEntries; }
-
-            dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
+            const dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
+            if (dictionaryEntries.length > 0) { return {dictionaryEntries}; }
         }
-        return dictionaryEntries;
+        const search = !isKanji && this._pageType === 'search' && source2.length <= 256 && this.getLanguageSummary().iso === 'ja';
+        const found = search ?
+            await findJapaneseSearch(
+                source2,
+                (query) => this._application.api.termsFind(query, findDetails, optionsContext),
+            ) :
+            null;
+        /** @type {Pick<import('translator').FindTermsResult, 'dictionaryEntries'|'dictionaryAvailability'>} */
+        const result = search ?
+            (found?.result ?? {dictionaryEntries: []}) :
+            await this._application.api.termsFind(source2, findDetails, optionsContext);
+        const {dictionaryEntries, dictionaryAvailability} = result;
+        this._reportTermsFindSnapshot(source, found?.matchedQuery ?? source2, isKanji, findDetails, optionsContext, dictionaryEntries);
+        if (isKanji || dictionaryEntries.length > 0 || dictionaryAvailability?.length) {
+            return {dictionaryEntries, ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {})};
+        }
+        return {dictionaryEntries: await this._application.api.kanjiFind(source, optionsContext)};
     }
 
     /**
@@ -1397,17 +1564,13 @@ export class Display extends EventDispatcher {
      * @param {boolean} isKanji
      * @param {import('api').FindTermsDetails} findDetails
      * @param {import('settings').OptionsContext} optionsContext
-     * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
+     * @param {import('dictionary').TermDictionaryEntry[]} dictionaryEntries
      * @returns {void}
      */
     _reportTermsFindSnapshot(source, normalizedSource, isKanji, findDetails, optionsContext, dictionaryEntries) {
-        try {
-            const resultDictionaries = [...new Set(dictionaryEntries.flatMap((dictionaryEntry) => (
-                dictionaryEntry.type === 'term' ?
-                    dictionaryEntry.definitions.map(({dictionary}) => dictionary) :
-                    [dictionaryEntry.dictionary]
-            )))];
-            reportDiagnostics('display-terms-find-snapshot', {
+        reportDiagnosticsLazy('display-terms-find-snapshot', () => {
+            const resultDictionaries = [...new Set(dictionaryEntries.flatMap((dictionaryEntry) => dictionaryEntry.definitions.map(({dictionary}) => dictionary)))];
+            return {
                 pageType: this._pageType,
                 isKanji,
                 source,
@@ -1416,10 +1579,8 @@ export class Display extends EventDispatcher {
                 findDetails,
                 resultDictionaryCount: dictionaryEntries.length,
                 resultDictionaries,
-            });
-        } catch (error) {
-            log.error(error);
-        }
+            };
+        });
     }
 
     /**
@@ -1470,7 +1631,14 @@ export class Display extends EventDispatcher {
             changeHistory = true;
         }
 
-        let {dictionaryEntries} = content;
+        // Consume before any await: this flag belongs only to this refresh,
+        // not to later history navigation through the same content object.
+        const preserveSearchInput = content.preserveSearchInput === true;
+        if (typeof content.preserveSearchInput !== 'undefined') {
+            delete content.preserveSearchInput;
+            changeHistory = true;
+        }
+        let {dictionaryEntries, dictionaryAvailability} = content;
 
         let contentOriginValid = false;
         const {contentOrigin} = content;
@@ -1503,11 +1671,15 @@ export class Display extends EventDispatcher {
         }
         if (!Array.isArray(dictionaryEntries)) {
             safePerformance.mark('display:findDictionaryEntries:start');
-            dictionaryEntries = hasEnabledDictionaries && lookup && query.length > 0 ? await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext) : [];
+            const result = hasEnabledDictionaries && lookup && query.length > 0 ?
+                await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext) :
+                {dictionaryEntries: []};
+            ({dictionaryEntries, dictionaryAvailability} = result);
             safePerformance.mark('display:findDictionaryEntries:end');
             safePerformance.measure('display:findDictionaryEntries', 'display:findDictionaryEntries:start', 'display:findDictionaryEntries:end');
             if (this._setContentToken !== token) { return; }
             content.dictionaryEntries = void 0;
+            content.dictionaryAvailability = void 0;
             changeHistory = true;
         }
 
@@ -1522,14 +1694,15 @@ export class Display extends EventDispatcher {
         safePerformance.mark('display:updateNavigationAuto:end');
         safePerformance.measure('display:updateNavigationAuto', 'display:updateNavigationAuto:start', 'display:updateNavigationAuto:end');
 
-        this._setNoContentVisible(hasEnabledDictionaries && dictionaryEntries.length === 0 && lookup);
+        this._updateDictionaryAvailability(dictionaryAvailability, token);
+        this._setNoContentVisible(hasEnabledDictionaries && dictionaryEntries.length === 0 && lookup && !dictionaryAvailability?.length);
         this._setNoDictionariesVisible(!hasEnabledDictionaries);
 
         const container = this._container;
         container.textContent = '';
 
         safePerformance.mark('display:contentUpdate:start');
-        this._triggerContentUpdateStart();
+        this._triggerContentUpdateStart(preserveSearchInput);
 
         let i = 0;
         for (const dictionaryEntry of dictionaryEntries) {
@@ -1573,6 +1746,7 @@ export class Display extends EventDispatcher {
         }
         if (this._setContentToken !== token) { return; }
         void this._contentManager.executeMediaRequests();
+        void this._resolveDictionaryCssMedia(token);
 
         if (typeof scrollX === 'number' || typeof scrollY === 'number') {
             let {x, y} = this._windowScroll;
@@ -1589,6 +1763,7 @@ export class Display extends EventDispatcher {
 
     /** */
     _setContentExtensionUnloaded() {
+        this._dictionaryAvailabilityNotification?.close(false);
         /** @type {?HTMLElement} */
         const errorExtensionUnloaded = document.querySelector('#error-extension-unloaded');
 
@@ -1611,6 +1786,7 @@ export class Display extends EventDispatcher {
 
     /** */
     _clearContent() {
+        this._dictionaryAvailabilityNotification?.close(false);
         this._container.textContent = '';
         this._updateNavigationAuto();
         this._setQuery('', '', 0);
@@ -1629,6 +1805,42 @@ export class Display extends EventDispatcher {
         if (noResults !== null) {
             noResults.hidden = !visible;
         }
+    }
+
+    /**
+     * @param {import('translator').DictionaryAvailability[]|undefined} availability
+     * @param {import('core').TokenObject} token
+     */
+    _updateDictionaryAvailability(availability, token) {
+        if (this._setContentToken !== token) { return; }
+        if (!availability?.length) {
+            this._dictionaryAvailabilityNotification?.close(false);
+            return;
+        }
+        if (!this._dictionaryAvailabilityNotification) {
+            this._dictionaryAvailabilityNotification = this.createNotification(false);
+        }
+        const content = document.createElement('ul');
+        for (const {dictionary, status} of availability) {
+            const item = document.createElement('li');
+            let message;
+            switch (status) {
+                case 'repairPending':
+                case 'repairing':
+                    message = 'Dictionary data is being repaired. Results may be incomplete; retry shortly.';
+                    break;
+                case 'reimportRequired':
+                    message = 'Dictionary data is damaged. Reimport this dictionary.';
+                    break;
+                default:
+                    message = 'Dictionary is temporarily unavailable. Results may be incomplete; retry shortly.';
+                    break;
+            }
+            item.textContent = `${dictionary}: ${message}`;
+            content.appendChild(item);
+        }
+        this._dictionaryAvailabilityNotification.setContent(content);
+        this._dictionaryAvailabilityNotification.open();
     }
 
     /**
@@ -1661,7 +1873,8 @@ export class Display extends EventDispatcher {
         const text = this._fullQuery;
         const visible = this._isQueryParserVisible();
         this._queryParserContainer.hidden = !visible || text.length === 0;
-        if (visible && this._queryParser.text !== text) {
+        if (this._queryParserContainer.hidden) { this._queryParser.cancelPendingSearches(); }
+        if (visible && (this._queryParser.text !== text || this._queryParser.needsTextUpdate)) {
             void this._setQueryParserText(text);
         }
     }
@@ -1673,6 +1886,12 @@ export class Display extends EventDispatcher {
         const overrideToken = this._progressIndicatorVisible.setOverride(true);
         try {
             await this._queryParser.setText(text);
+        } catch (error) {
+            try {
+                this.onError(toError(error));
+            } catch (e) {
+                // Reporting cannot reject this fire-and-forget refresh.
+            }
         } finally {
             this._progressIndicatorVisible.clearOverride(overrideToken);
         }
@@ -1994,8 +2213,22 @@ export class Display extends EventDispatcher {
      * @param {import('settings').OptionsContext} optionsContext
      */
     async _setOptionsContextIfDifferent(optionsContext) {
-        if (deepEqual(this._optionsContext, optionsContext)) { return; }
-        await this.setOptionsContext(optionsContext);
+        let request = this._optionsContextRequest;
+        let promise;
+        if (request && !request.failed && deepEqual(request.optionsContext, optionsContext)) { promise = request.promise; } else {
+            promise = this.setOptionsContext(optionsContext);
+            request = this._optionsContextRequest;
+        }
+        for (;;) {
+            try { await promise; } catch (error) {
+                const next = this._optionsContextRequest;
+                if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { throw error; }
+            }
+            const next = this._optionsContextRequest;
+            if (!next || next === request || !deepEqual(next.optionsContext, optionsContext)) { return; }
+            request = next;
+            promise = next.promise;
+        }
     }
 
     /**
@@ -2011,6 +2244,8 @@ export class Display extends EventDispatcher {
      * @param {import('settings').ProfileOptions} options
      */
     async _updateNestedFrontend(options) {
+        const token = {};
+        this._nestedFrontendUpdateToken = token;
         const {tabId, frameId} = this._application;
         if (tabId === null || frameId === null) { return; }
 
@@ -2024,54 +2259,61 @@ export class Display extends EventDispatcher {
             )
         );
 
-        if (this._frontend === null) {
-            if (!isEnabled) { return; }
+        if (this._frontend === null || this._frontendSetupPromise !== null) {
+            if (!isEnabled && this._frontendSetupPromise === null) { return; }
 
+            const promise = this._frontendSetupPromise ?? this._setupNestedFrontend();
+            this._frontendSetupPromise = promise;
             try {
-                if (this._frontendSetupPromise === null) {
-                    this._frontendSetupPromise = this._setupNestedFrontend();
-                }
-                await this._frontendSetupPromise;
+                await promise;
             } catch (e) {
-                log.error(e);
+                if (this._nestedFrontendUpdateToken === token) { log.error(e); }
                 return;
             } finally {
-                this._frontendSetupPromise = null;
+                if (this._frontendSetupPromise === promise) { this._frontendSetupPromise = null; }
             }
         }
 
+        if (this._nestedFrontendUpdateToken !== token) { return; }
         /** @type {import('../app/frontend.js').Frontend} */ (this._frontend).setDisabledOverride(!isEnabled);
     }
 
     /** */
     async _setupNestedFrontend() {
-        const useProxyPopup = this._parentFrameId !== null;
-        const parentPopupId = this._parentPopupId;
-        const parentFrameId = this._parentFrameId;
+        if (this._frontendPending === null) {
+            const useProxyPopup = this._parentFrameId !== null;
+            const parentPopupId = this._parentPopupId;
+            const parentFrameId = this._parentFrameId;
 
-        const [{PopupFactory}, {Frontend}] = await Promise.all([
-            import('../app/popup-factory.js'),
-            import('../app/frontend.js'),
-        ]);
+            const [{PopupFactory}, {Frontend}] = await Promise.all([
+                import('../app/popup-factory.js'),
+                import('../app/frontend.js'),
+            ]);
 
-        const popupFactory = new PopupFactory(this._application);
+            const popupFactory = new PopupFactory(this._application);
+
+            const frontend = new Frontend({
+                application: this._application,
+                useProxyPopup,
+                parentPopupId,
+                parentFrameId,
+                depth: this._depth + 1,
+                popupFactory,
+                pageType: this._pageType,
+                allowRootFramePopupProxy: true,
+                childrenSupported: this._childrenSupported,
+                hotkeyHandler: this._hotkeyHandler,
+                canUseWindowPopup: true,
+                browser: this._browser,
+            });
+            frontend.setDisabledOverride(true);
+            this._frontendPending = {frontend, popupFactory};
+        }
+        const {frontend, popupFactory} = this._frontendPending;
         popupFactory.prepare();
-
-        const frontend = new Frontend({
-            application: this._application,
-            useProxyPopup,
-            parentPopupId,
-            parentFrameId,
-            depth: this._depth + 1,
-            popupFactory,
-            pageType: this._pageType,
-            allowRootFramePopupProxy: true,
-            childrenSupported: this._childrenSupported,
-            hotkeyHandler: this._hotkeyHandler,
-            canUseWindowPopup: true,
-        });
-        this._frontend = frontend;
         await frontend.prepare();
+        this._frontend = frontend;
+        this._frontendPending = null;
     }
 
     /**
@@ -2179,6 +2421,7 @@ export class Display extends EventDispatcher {
                 searchOnClick: true,
                 searchOnClickOnly: true,
                 textSourceGenerator: this._textSourceGenerator,
+                browser: this._browser,
             });
             this._contentTextScanner.includeSelector = '.click-scannable,.click-scannable *';
             this._contentTextScanner.excludeSelector = '.scan-disable,.scan-disable *';
@@ -2238,7 +2481,7 @@ export class Display extends EventDispatcher {
     /**
      * @param {import('text-scanner').EventArgument<'searchSuccess'>} details
      */
-    _onContentTextScannerSearchSuccess({type, dictionaryEntries, sentence, textSource, optionsContext}) {
+    _onContentTextScannerSearchSuccess({type, dictionaryEntries, dictionaryAvailability, sentence, textSource, optionsContext}) {
         const query = textSource.text();
         const url = window.location.href;
         const documentTitle = document.title;
@@ -2261,6 +2504,7 @@ export class Display extends EventDispatcher {
             },
             content: {
                 dictionaryEntries: dictionaryEntries !== null ? dictionaryEntries : void 0,
+                ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
                 contentOrigin: this.getContentOrigin(),
             },
         };
@@ -2282,6 +2526,11 @@ export class Display extends EventDispatcher {
      */
     _onDatabaseUpdated({type}) {
         if (type !== 'dictionary') { return; }
+        this._dictionaryCssMediaResolver?.clear();
+        const options = this._options;
+        if (options?.general && Array.isArray(options.dictionaries)) {
+            this._setTheme(options);
+        }
         void this._refreshAfterDictionaryDatabaseUpdate();
     }
 
@@ -2318,6 +2567,7 @@ export class Display extends EventDispatcher {
     async _refreshSearchEmptyStateAfterOptionsUpdate() {
         try {
             await this.updateOptions();
+            if (this._contentType !== 'clear') { return; }
             const hasEnabledDictionaries = this._options ? this._options.dictionaries.some(({enabled}) => enabled) : false;
             this._setNoContentVisible(false);
             this._setNoDictionariesVisible(!hasEnabledDictionaries);
@@ -2346,6 +2596,7 @@ export class Display extends EventDispatcher {
             await this._refreshDictionaryInfo();
             if (this._pageType === 'search' && this._contentType === 'clear') {
                 await this.updateOptions();
+                if (this._contentType !== 'clear') { return; }
                 const hasEnabledDictionaries = this._options ? this._options.dictionaries.some(({enabled}) => enabled) : false;
                 this._setNoContentVisible(false);
                 this._setNoDictionariesVisible(!hasEnabledDictionaries);
@@ -2449,11 +2700,12 @@ export class Display extends EventDispatcher {
      * @returns {boolean}
      */
     _closeSinglePopupMenu() {
-        for (const popupMenu of PopupMenu.openMenus) {
-            popupMenu.close();
-            return true;
-        }
-        return false;
+        const popupMenuIterator = /** @type {Iterator<unknown>} */ (PopupMenu.openMenus.values());
+        const firstPopupMenu = /** @type {unknown} */ (popupMenuIterator.next().value);
+        const popupMenu = firstPopupMenu instanceof PopupMenu ? firstPopupMenu : void 0;
+        if (popupMenu === void 0) { return false; }
+        popupMenu.close();
+        return true;
     }
 
     /**
@@ -2477,13 +2729,23 @@ export class Display extends EventDispatcher {
     }
 
     /** */
-    _triggerContentClear() {
-        this.trigger('contentClear', {});
+    _cancelPendingScannerSearches() {
+        this._contentTextScanner?.cancelPendingSearches();
+        this._queryParser.cancelPendingSearches();
     }
 
     /** */
-    _triggerContentUpdateStart() {
-        this.trigger('contentUpdateStart', {type: this._contentType, query: this._query});
+    _triggerContentClear() {
+        this._cancelPendingScannerSearches();
+        this._contentTextScanner?.clearSelection();
+        this.trigger('contentClear', {});
+    }
+
+    /**
+     * @param {boolean} [preserveSearchInput]
+     */
+    _triggerContentUpdateStart(preserveSearchInput = false) {
+        this.trigger('contentUpdateStart', {type: this._contentType, query: this._query, preserveSearchInput});
     }
 
     /**
@@ -2502,17 +2764,18 @@ export class Display extends EventDispatcher {
 
     /**
      * @param {number} timeoutMs
-     * @returns {Promise<void>}
+     * @returns {{promise: Promise<boolean>, finish: (completed?: boolean) => void}}
      */
-    _waitForStateChangeComplete(timeoutMs) {
+    _createStateChangeCompletion(timeoutMs) {
         /** @type {import('core').Timeout|null} */
         let timeout = null;
-        /** @type {(value?: void) => void} */
+        /** @type {(value: boolean) => void} */
         let resolvePromise;
+        /** @type {Promise<boolean>} */
         const promise = new Promise((resolve) => {
             resolvePromise = resolve;
         });
-        const finish = () => {
+        const finish = (completed = true) => {
             const index = this._stateChangeCompleteResolvers.indexOf(finish);
             if (index >= 0) {
                 this._stateChangeCompleteResolvers.splice(index, 1);
@@ -2521,19 +2784,11 @@ export class Display extends EventDispatcher {
                 clearTimeout(timeout);
                 timeout = null;
             }
-            resolvePromise();
+            resolvePromise(completed);
         };
         this._stateChangeCompleteResolvers.push(finish);
-        timeout = setTimeout(finish, timeoutMs);
-        return promise;
-    }
-
-    /** */
-    _resolveStateChangeCompleteWaiters() {
-        const resolvers = this._stateChangeCompleteResolvers.splice(0);
-        for (const resolve of resolvers) {
-            resolve();
-        }
+        timeout = setTimeout(() => finish(false), timeoutMs);
+        return {promise, finish};
     }
 
     /**

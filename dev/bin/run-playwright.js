@@ -21,9 +21,9 @@ import {fileURLToPath} from 'node:url';
 import path from 'path';
 
 const nodeMajorVersion = Number.parseInt(process.versions.node.split('.')[0], 10);
-if (!Number.isFinite(nodeMajorVersion) || nodeMajorVersion < 18 || nodeMajorVersion > 22) {
+if (!Number.isFinite(nodeMajorVersion) || nodeMajorVersion < 22) {
     console.error(
-        `Playwright tests require Node.js 18-22. Detected ${process.version}. ` +
+        `Playwright tests require Node.js 22 or newer. Detected ${process.version}. ` +
         'Use a supported Node version for deterministic Playwright execution.',
     );
     process.exit(1);

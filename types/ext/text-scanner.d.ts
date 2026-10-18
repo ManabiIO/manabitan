@@ -19,9 +19,11 @@ import type {TextSourceGenerator} from '../../ext/js/dom/text-source-generator';
 import type {API} from '../../ext/js/comm/api';
 import type * as Dictionary from './dictionary';
 import type * as Display from './display';
+import type * as Environment from './environment';
 import type * as Input from './input';
 import type * as Settings from './settings';
 import type * as TextSource from './text-source';
+import type {DictionaryAvailability} from './translator';
 import type {EventNames, EventArgument as BaseEventArgument} from './core';
 import {PageType} from 'frontend';
 
@@ -124,12 +126,16 @@ export type Events = {
     searchSuccess: {
         type: 'terms' | 'kanji';
         dictionaryEntries: Dictionary.DictionaryEntry[];
+        dictionaryAvailability?: DictionaryAvailability[];
         sentence: Display.HistoryStateSentence;
         inputInfo: InputInfo;
         textSource: TextSource.TextSource;
         optionsContext: Settings.OptionsContext;
         detail: SearchResultDetail;
         pageTheme: 'dark' | 'light';
+    };
+    searchSame: {
+        inputInfo: InputInfo;
     };
     searchEmpty: {
         inputInfo: InputInfo;
@@ -151,8 +157,10 @@ export type GetSearchContextCallbackSync = () => SearchContext;
 
 export type GetSearchContextCallbackAsync = () => Promise<SearchContext>;
 
+export type ScannerApi = Pick<API, 'termsFind' | 'kanjiFind' | 'isTextLookupWorthy'>;
+
 export type ConstructorDetails = {
-    api: API;
+    api: ScannerApi;
     node: HTMLElement | Window;
     getSearchContext: GetSearchContextCallback;
     ignoreElements?: (() => Element[]) | null;
@@ -162,6 +170,7 @@ export type ConstructorDetails = {
     searchOnClick?: boolean;
     searchOnClickOnly?: boolean;
     textSourceGenerator: TextSourceGenerator;
+    browser: Environment.Browser | null;
 };
 
 export type SearchContext = {
@@ -177,12 +186,14 @@ export type TermSearchResults = {
     type: 'terms';
     dictionaryEntries: Dictionary.TermDictionaryEntry[];
     sentence: Sentence;
+    dictionaryAvailability?: DictionaryAvailability[];
 };
 
 export type KanjiSearchResults = {
     type: 'kanji';
     dictionaryEntries: Dictionary.KanjiDictionaryEntry[];
     sentence: Sentence;
+    dictionaryAvailability?: DictionaryAvailability[];
 };
 
 export type SearchResults = TermSearchResults | KanjiSearchResults;

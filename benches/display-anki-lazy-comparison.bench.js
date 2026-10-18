@@ -81,6 +81,7 @@ function createTermEntry() {
         headwords: [
             {
                 index: 0,
+                headwordIndex: 0,
                 term: 'term',
                 reading: 'reading',
                 sources: [

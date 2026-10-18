@@ -406,6 +406,12 @@ try {
         }, false);
 
         await Promise.all(preparePromises);
+        const settingsUrl = new URL(location.href);
+        if (settingsUrl.searchParams.get('readerInstall') === 'jitendex') {
+            settingsUrl.searchParams.delete('readerInstall');
+            history.replaceState(history.state, '', settingsUrl);
+            dictionaryImportController.openReaderJitendexSetup();
+        }
         const totalElapsedMs = Math.max(0, getNowMs() - startupStartedAt);
         const slowestPhases = [...startupPhases]
             .sort((a, b) => b.durationMs - a.durationMs)

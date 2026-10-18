@@ -111,11 +111,8 @@ export class DisplayController {
         this._updateProfileSelect(profiles, profileCurrent);
     }
 
-    /**
-     * @param {{source?: string}} _details
-     * @returns {void}
-     */
-    _onOptionsUpdated(_details) {
+    /** */
+    _onOptionsUpdated() {
         void this._refreshOptionsState().catch((error) => {
             log.error(error);
         });
@@ -294,7 +291,9 @@ export class DisplayController {
                 toggle.checked = extensionEnabled;
             }
             if (!this._toggleListenersSetup) {
-                toggle.addEventListener('change', this._onToggleChanged.bind(this), false);
+                // Bound in the constructor.
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                toggle.addEventListener('change', this._onToggleChanged, false);
             }
         }
         this._toggleListenersSetup = true;
@@ -428,15 +427,33 @@ export class DisplayController {
         }
 
         let enabledCount = 0;
-        for (const {title} of dictionaries) {
+        let unavailableEnabledCount = 0;
+        let temporarilyUnavailableEnabledCount = 0;
+        let repairPendingEnabledCount = 0;
+        for (const {title, storageHealth} of dictionaries) {
             if (enabledDictionaries.has(title)) {
-                ++enabledCount;
+                switch (storageHealth) {
+                    case 'reimportRequired':
+                        ++unavailableEnabledCount;
+                        break;
+                    case 'repairPending':
+                        ++enabledCount;
+                        ++repairPendingEnabledCount;
+                        break;
+                    case 'repairing':
+                    case 'temporarilyUnavailable':
+                        ++temporarilyUnavailableEnabledCount;
+                        break;
+                    default:
+                        ++enabledCount;
+                        break;
+                }
             }
         }
 
         updateDictionaryWarningTooltips(tooltip, enabledCount > 0, () => {
             void this._updateDisplayModifierKey();
-        });
+        }, unavailableEnabledCount > 0, temporarilyUnavailableEnabledCount > 0, repairPendingEnabledCount > 0);
     }
 
     /**
@@ -448,7 +465,7 @@ export class DisplayController {
         if (generation !== this._optionsSetupGeneration) { return; }
         if (hasRequiredPermissionsForOptions(permissions, options)) { return; }
 
-        const tooltip = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tooltip'));
+        const tooltip = document.querySelectorAll('.tooltip');
         for (let i = 0; i < tooltip.length; i++) {
             tooltip[i].innerHTML = '<a class="action-open-permissions">Please enable permissions</a>';
         }

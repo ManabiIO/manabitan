@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - uses: ./.github/actions/setup
 
@@ -36,7 +36,7 @@ jobs:
           echo "MANABITAN_FIREFOX_BINARY=$HOME/firefox-devedition/firefox/firefox" >> "$GITHUB_ENV"
 
       - name: Restore Firefox E2E dictionary cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: builds/e2e-dictionary-cache
           key: firefox-e2e-dictionaries-${{ runner.os }}-v1
@@ -46,7 +46,7 @@ jobs:
         env:
           MANABITAN_FIREFOX_XPI: ${{ github.workspace }}/builds/manabitan-firefox-dev.xpi
           MANABITAN_FIREFOX_HEADLESS: '0'
-          MANABITAN_E2E_STRICT_RUNTIME: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
         run: xvfb-run -a npm run test:e2e:firefox-extension
 
       - name: Enforce Firefox extension E2E success
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload Firefox extension E2E report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: firefox-extension-e2e-report
           path: |

@@ -19,13 +19,17 @@ SPEC.loader.exec_module(upstream)
 HAS_ZSTD = importlib.util.find_spec("zstandard") is not None
 
 
-def database(modern=False, fields=("Word", "Reading")):
+def database(modern=False, fields=("Word", "Reading"), anki_collation=False):
     with tempfile.TemporaryDirectory() as folder:
         path = Path(folder) / "test.sqlite"
         with closing(sqlite3.connect(path)) as db, db:
             if modern:
                 db.execute("CREATE TABLE notetypes (id INTEGER PRIMARY KEY, name TEXT)")
-                db.execute("CREATE TABLE fields (ntid INTEGER, ord INTEGER, name TEXT)")
+                if anki_collation:
+                    db.create_collation("unicase", lambda a, b: (a.casefold() > b.casefold()) - (a.casefold() < b.casefold()))
+                    db.execute("CREATE TABLE fields (ntid INTEGER NOT NULL, ord INTEGER NOT NULL, name TEXT COLLATE unicase, PRIMARY KEY (ntid, ord)) WITHOUT ROWID")
+                else:
+                    db.execute("CREATE TABLE fields (ntid INTEGER, ord INTEGER, name TEXT)")
                 db.execute("INSERT INTO notetypes VALUES (1, 'Example')")
                 db.executemany("INSERT INTO fields VALUES (1, ?, ?)", list(enumerate(fields))[::-1])
             else:
@@ -64,6 +68,11 @@ class PackageReaderTests(unittest.TestCase):
     def test_corrupt_zstandard_does_not_fall_back_to_dummy(self):
         with self.assertRaises(Exception):
             upstream.extract_models(package(("collection.anki2", database()), ("collection.anki21b", b"corrupt")))
+
+    def test_modern_without_rowid_fields_with_anki_collation(self):
+        data = database(modern=True, anki_collation=True)
+        self.assertEqual(upstream.extract_models(package(("collection.anki21", data))),
+                         [{"name": "Example", "fields": ["Word", "Reading"]}])
 
     def test_corrupt_modern_does_not_fall_back(self):
         with self.assertRaisesRegex(ValueError, "not SQLite"):

@@ -4,6 +4,12 @@ on:
     tags:
       - "*.*.*.*"
   workflow_dispatch:
+    inputs:
+      dispatch_development_publishers:
+        description: "Dispatch development publishers (requires the MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS repository variable to be true)"
+        type: boolean
+        required: false
+        default: false
 permissions:
   contents: read
 jobs:
@@ -15,10 +21,10 @@ jobs:
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: "package.json"
 
@@ -44,11 +50,28 @@ jobs:
         run: npm run-script build -- --all --version ${{ steps.releaseVersion.outputs.version }}
         shell: bash
 
+      - name: Archive Firefox Android package
+        shell: bash
+        run: |
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          from zipfile import ZIP_DEFLATED, ZipFile
+          source = Path('builds/manabitan-firefox-android')
+          if not (source / 'manifest.json').is_file():
+              raise SystemExit('Firefox Android build is missing its manifest')
+          with ZipFile('builds/manabitan-firefox-android.zip', 'w', compression=ZIP_DEFLATED) as package:
+              for path in sorted(source.rglob('*')):
+                  if path.is_file():
+                      package.write(path, path.relative_to(source).as_posix())
+          PYTHON
+
       - name: Generate hashes
         id: hash
+        shell: bash
         run: |
           cd builds
-          echo "hashes=$(sha256sum -- * | base64 -w0)" >> "$GITHUB_OUTPUT"
+          hashes="$(sha256sum -- *.zip | base64 -w0)"
+          echo "hashes=${hashes}" >> "$GITHUB_OUTPUT"
 
       - name: Release
         id: release
@@ -57,22 +80,33 @@ jobs:
           tag_name: ${{ steps.releaseVersion.outputs.version }}
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
+          body: |
+            These attached packages are unsigned release builds. A successful build and provenance attestation do not establish store signing, ordinary end-user installation, or automatic updates.
+
+            The Firefox for Android package is experimental and unqualified. Current CI coverage is limited to temporary add-on installation and post-install debugging smoke; dictionary import, lookup, mining, and updating remain unverified.
+
+            Generated release notes follow this qualification notice.
           prerelease: true
-          files: builds/*
+          files: builds/*.zip
+          fail_on_unmatched_files: true
 
       - name: Dispatch publish-chrome-development
+        if: github.event_name == 'workflow_dispatch' && inputs.dispatch_development_publishers == true && vars.MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS == 'true'
         uses: aurelien-baudet/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # pin@v2
         with:
           workflow: publish-chrome-development
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ steps.releaseVersion.outputs.version }}
           wait-for-completion: false
           inputs: '{ "upload_url": "${{ steps.release.outputs.upload_url }}", "tag": "${{ steps.releaseVersion.outputs.version }}" }'
 
       - name: Dispatch publish-firefox-development
+        if: github.event_name == 'workflow_dispatch' && inputs.dispatch_development_publishers == true && vars.MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS == 'true'
         uses: aurelien-baudet/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # pin@v2
         with:
           workflow: publish-firefox-development
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ steps.releaseVersion.outputs.version }}
           wait-for-completion: false
           inputs: '{ "upload_url": "${{ steps.release.outputs.upload_url }}", "tag": "${{ steps.releaseVersion.outputs.version }}" }'
 
@@ -82,6 +116,7 @@ jobs:
       actions: read # To read the workflow path.
       id-token: write # To sign the provenance.
       contents: write # To add assets to a release.
+    # The generator requires a full version tag for verifier identity validation.
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"

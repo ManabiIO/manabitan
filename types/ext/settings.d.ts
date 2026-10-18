@@ -32,6 +32,8 @@ export type OptionsContext1 = {
 
 export type OptionsContext2 = {
     index: number;
+    /** Stable profile identity used by Settings pages across profile reorders. */
+    profileId?: string | null;
     url?: undefined;
     depth?: undefined;
     current?: undefined;
@@ -64,6 +66,7 @@ export type Options = {
 export type GlobalOptions = {
     database: GlobalDatabaseOptions;
     dataTransmissionConsentShown: boolean;
+    dataTransmissionConsentState: 'unknown' | 'accepted' | 'declined';
     dictionaryAutoUpdates: string[];
 };
 
@@ -117,6 +120,7 @@ export type GeneralOptions = {
     fontSize: number;
     lineHeight: string;
     popupDisplayMode: PopupDisplayMode;
+    popupFullWidthPosition: PopupFullWidthPosition;
     popupWidth: number;
     popupHeight: number;
     popupHorizontalOffset: number;
@@ -302,6 +306,7 @@ export type ParsingOptions = {
     selectedParser: string | null;
     termSpacing: boolean;
     readingMode: ParsingReadingMode;
+    useAllFrequencyDictionaries: boolean;
 };
 
 export type AnkiOptions = {
@@ -404,6 +409,8 @@ export type ResultOutputMode = 'group' | 'merge' | 'split' | 'term';
 
 export type PopupDisplayMode = 'default' | 'full-width';
 
+export type PopupFullWidthPosition = 'top' | 'above-cursor' | 'bottom';
+
 export type PopupHorizontalTextPosition = 'below' | 'above';
 
 export type PopupVerticalTextPosition = 'default' | 'before' | 'after' | 'left' | 'right';
@@ -422,7 +429,7 @@ export type PopupActionBarVisibility = 'auto' | 'always';
 
 export type PopupActionBarLocation = 'left' | 'right' | 'top' | 'bottom';
 
-export type FrequencyDisplayMode = 'tags' | 'tags-grouped' | 'split-tags' | 'split-tags-grouped' | 'inline-list' | 'list';
+export type FrequencyDisplayMode = 'tags' | 'tags-grouped' | 'split-tags' | 'split-tags-grouped' | 'inline-list' | 'list' | 'list-bordered';
 
 export type TermDisplayMode = 'ruby' | 'ruby-and-reading' | 'term-and-reading' | 'term-only';
 

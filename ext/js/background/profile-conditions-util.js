@@ -76,17 +76,31 @@ const descriptors = new Map([
  */
 export function createSchema(conditionGroups) {
     const anyOf = [];
+    let hasUnsupportedConditions = false;
     for (const {conditions} of conditionGroups) {
         const allOf = [];
+        let unsupported = false;
         for (const {type, operator, value} of conditions) {
             const conditionDescriptor = descriptors.get(type);
-            if (typeof conditionDescriptor === 'undefined') { continue; }
+            if (typeof conditionDescriptor === 'undefined') {
+                unsupported = true;
+                break;
+            }
 
             const createSchema2 = conditionDescriptor.operators.get(operator);
-            if (typeof createSchema2 === 'undefined') { continue; }
+            if (typeof createSchema2 === 'undefined') {
+                unsupported = true;
+                break;
+            }
 
             const schema = createSchema2(value);
             allOf.push(schema);
+        }
+        if (unsupported) {
+            // An unknown condition must not turn a restricted profile into an
+            // unconditional match or silently weaken a conjunction.
+            hasUnsupportedConditions = true;
+            continue;
         }
         switch (allOf.length) {
             case 0: break;
@@ -96,7 +110,7 @@ export function createSchema(conditionGroups) {
     }
     let schema;
     switch (anyOf.length) {
-        case 0: schema = {}; break;
+        case 0: schema = hasUnsupportedConditions ? {not: {}} : {}; break;
         case 1: schema = anyOf[0]; break;
         default: schema = {anyOf}; break;
     }
@@ -237,9 +251,13 @@ function createSchemaPopupLevelGreaterThanOrEqual(value) {
  */
 function createSchemaUrlMatchDomain(value) {
     const oneOf = [];
+    /** @type {Set<string>} */
+    const seen = new Set();
     for (let domain of split(value)) {
         if (domain.length === 0) { continue; }
         domain = domain.toLowerCase();
+        if (seen.has(domain)) { continue; }
+        seen.add(domain);
         oneOf.push({const: domain});
     }
     return {
@@ -351,8 +369,11 @@ function createSchemaFlagsNotInclude(value) {
 function createSchemaArrayCheck(key, value, exact, none) {
     /** @type {import('ext/json-schema').Schema[]} */
     const containsList = [];
+    /** @type {Set<string>} */
+    const seen = new Set();
     for (const item of split(value)) {
-        if (item.length === 0) { continue; }
+        if (item.length === 0 || seen.has(item)) { continue; }
+        seen.add(item);
         containsList.push({
             contains: {
                 const: item,

@@ -37,7 +37,7 @@ jobs:
               return attempt < max ? attempt + 1 : '';
             }
 
-      - uses: robinraju/release-downloader@daf26c55d821e836577a15f77d86ddc078948b05 # pin@v1.12
+      - uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # pin@v1.13
         with:
           tag: ${{ github.ref_name }}
           fileName: "*"
@@ -55,7 +55,7 @@ jobs:
         continue-on-error: true
         uses: cardinalby/webext-buildtools-chrome-webstore-upload-action@3d829e042b559c35f7fb71676cbaf6031892a313 # v1.0.11
         with:
-          zipFilePath: yomitan-chrome.zip
+          zipFilePath: manabitan-chrome.zip
           extensionId: ${{ secrets.G_STABLE_EXTENSION_ID }}
           apiAccessToken: ${{ steps.fetchAccessToken.outputs.accessToken }}
           waitForUploadCheckCount: 10
@@ -71,6 +71,7 @@ jobs:
         with:
           workflow: delay
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref }}
           wait-for-completion: false
           inputs: |
             {

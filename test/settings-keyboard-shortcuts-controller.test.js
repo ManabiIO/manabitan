@@ -76,7 +76,9 @@ describe('KeyboardShortcutController rebuild', () => {
             instantiateTemplate: vi.fn((name) => {
                 if (name !== 'hotkey-list-item') { throw new Error(`Unexpected template: ${name}`); }
                 const callIndex = settingsController.instantiateTemplate.mock.calls.length;
-                const node = /** @type {HTMLElement} */ ((/** @type {HTMLElement} */ (template.content.firstElementChild)).cloneNode(true));
+                const templateNode = template.content.firstElementChild;
+                if (templateNode === null) { throw new Error('Missing hotkey template'); }
+                const node = /** @type {HTMLElement} */ (templateNode.cloneNode(true));
                 if (callIndex === 2) {
                     node.querySelector('.hotkey-list-item-input')?.remove();
                 }
@@ -94,6 +96,7 @@ describe('KeyboardShortcutController rebuild', () => {
 
         expect(settingsController.instantiateTemplate).toHaveBeenCalledTimes(2);
         expect(window.document.querySelectorAll('#hotkey-list .hotkey-list-item')).toHaveLength(1);
-        expect((/** @type {HTMLElement|null} */ (window.document.querySelector('#hotkey-list-empty')))?.hidden).toBe(true);
+        const emptyIndicator = /** @type {HTMLElement} */ (window.document.querySelector('#hotkey-list-empty'));
+        expect(emptyIndicator.hidden).toBe(true);
     });
 });

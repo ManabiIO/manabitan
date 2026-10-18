@@ -12,6 +12,104 @@ const BIG5_DECODER = new TextDecoder('big5');
 const BIG5 = 'BIG5';
 const GB18030_DECODER = new TextDecoder('gb18030');
 const GB18030 = 'GB18030';
+
+/**
+ * Normalize an MDict Encoding header without silently treating supported
+ * non-UTF encodings as UTF-8.
+ * @param {unknown} value
+ * @returns {{encoding: string, decoder: TextDecoder}}
+ */
+function resolveEncoding(value) {
+    const label = typeof value === 'string' ? value.trim() : '';
+    if (label.length === 0) {
+        return {encoding: UTF8, decoder: UTF_8_DECODER};
+    }
+    const normalized = label.toLowerCase().replaceAll('_', '-');
+    switch (normalized) {
+        case 'utf8':
+        case 'utf-8':
+            return {encoding: UTF8, decoder: UTF_8_DECODER};
+        case 'utf16':
+        case 'utf16le':
+        case 'utf-16':
+        case 'utf-16le':
+            return {encoding: UTF16, decoder: UTF_16LE_DECODER};
+        case 'gbk':
+        case 'gb2312':
+        case 'gb18030':
+        case 'gb-18030':
+            return {encoding: GB18030, decoder: GB18030_DECODER};
+        case 'big5':
+            return {encoding: BIG5, decoder: BIG5_DECODER};
+    }
+    try {
+        const decoder = new TextDecoder(label);
+        // Key lengths and terminators use code units, regardless of which
+        // accepted UTF-16 label selected the decoder or its byte order.
+        const encoding = decoder.encoding === 'utf-16le' || decoder.encoding === 'utf-16be' ? UTF16 : label.toUpperCase();
+        return {encoding, decoder};
+    } catch (_error) {
+        throw new Error(`Unsupported MDict encoding: ${label}`);
+    }
+}
+
+/**
+ * Parse the format's encryption bitmask without allowing malformed metadata to
+ * fall through as if it were unencrypted.
+ * @param {unknown} value
+ * @returns {number}
+ */
+function parseEncryptionFlag(value) {
+    if (typeof value === 'undefined' || value === null) { return 0; }
+    const normalized = String(value).trim();
+    if (normalized.length === 0 || /^(?:no|false)$/iu.test(normalized)) { return 0; }
+    if (/^(?:yes|true)$/iu.test(normalized)) { return 1; }
+    if (!/^\d+$/u.test(normalized)) {
+        throw new Error(`Unsupported encryption flag in MDict header: ${normalized}`);
+    }
+    const result = Number.parseInt(normalized, 10);
+    if (!Number.isSafeInteger(result) || result < 0 || result > 3) {
+        throw new Error(`Unsupported encryption flag in MDict header: ${normalized}`);
+    }
+    return result;
+}
+
+/**
+ * Parse the declared file-format version without accepting parseFloat prefixes.
+ * @param {unknown} value
+ * @returns {number}
+ */
+function parseEngineVersion(value) {
+    const normalized = typeof value === 'string' ? value.trim() : '';
+    if (!/^\d+(?:\.\d+)?$/u.test(normalized)) {
+        throw new Error(`Unsupported MDict engine version: ${String(value)}`);
+    }
+    const result = Number(normalized);
+    if (!Number.isFinite(result) || result < 1 || result >= 3) {
+        throw new Error(`Unsupported MDict engine version: ${String(value)}`);
+    }
+    return result;
+}
+
+/** Read a declared integer without allowing a clipped slice to change its type. */
+function readNumber(bytes, offset, width) {
+    if (!Number.isSafeInteger(offset) || offset < 0 || offset > bytes.length - width) {
+        throw new RangeError('Truncated MDict numeric field');
+    }
+    return common.b2n(bytes.subarray(offset, offset + width));
+}
+
+/** Validate the complete key-info string, including its required terminator. */
+function readKeyInfoText(bytes, offset, size, terminatorWidth) {
+    if (!Number.isSafeInteger(size) || size < terminatorWidth || offset > bytes.length - size) {
+        throw new RangeError('Truncated MDict key info text');
+    }
+    const end = offset + size;
+    for (let index = end - terminatorWidth; index < end; index += 1) {
+        if (bytes[index] !== 0) { throw new Error('Invalid MDict key info terminator'); }
+    }
+    return bytes.subarray(offset, end - terminatorWidth);
+}
 export class MdictMeta {
     constructor() {
         this.fname = '';
@@ -29,6 +127,8 @@ export class MdictMeta {
         this.encoding = '';
         // decoder 解码器
         this.decoder = new TextDecoder();
+        // Keys are fields, not standalone documents with byte-order marks.
+        this.keyDecoder = null;
         // 是否加密
         this.encrypt = 0;
     }
@@ -70,7 +170,7 @@ class MDictBase {
         // the dictionary file decrypt pass code
         this.meta.passcode = passcode;
         // the dictionary file extension
-        this.meta.ext = common.getExtension(fname, 'mdx');
+        this.meta.ext = common.getExtension(fname, 'mdx').toLowerCase();
         // the file scanner
         this.scanner = new FileScanner(source);
         // set options
@@ -166,7 +266,8 @@ class MDictBase {
             key = key.replace(common.REGEXP_STRIPKEY[this.meta.ext], '$1');
             key = key.replace(/_/g, '!');
         }
-        return key.toLowerCase().trim();
+        // Whitespace is part of key identity unless the dictionary's StripKey rule removes it.
+        return key;
     }
     comp(word1, word2) {
         return word1.localeCompare(word2);
@@ -247,10 +348,12 @@ class MDictBase {
     //   return result;
     // }
     _isKeyCaseSensitive() {
-        return this.options.isCaseSensitive || common.isTrue(this.header['isCaseSensitive']);
+        if (typeof this._isCaseSensitiveOverride === 'boolean') { return this._isCaseSensitiveOverride; }
+        return common.isTrue(this.header['KeyCaseSensitive']);
     }
     _isStripKey() {
-        return this.options.isStripKey || common.isTrue(this.header['StripKey']);
+        if (typeof this._isStripKeyOverride === 'boolean') { return this._isStripKeyOverride; }
+        return common.isTrue(this.header['StripKey']);
     }
     readDict() {
         // STEP1: read header
@@ -272,10 +375,39 @@ class MDictBase {
         // STEP7: read record block
         // _readRecordBlock method is very slow, avoid invoke directly
         // this._readRecordBlock();
+        const recordEndOffset = this.recordInfoList.length > 0 ?
+            this.recordInfoList.at(-1).unpackAccumulatorOffset + this.recordInfoList.at(-1).unpackSize :
+            0;
+        for (const {recordStartOffset} of this.keywordList) {
+            if (
+                !Number.isSafeInteger(recordStartOffset) ||
+                recordStartOffset < 0 ||
+                recordStartOffset > recordEndOffset
+            ) {
+                throw new RangeError(`Invalid MDict record start offset: ${String(recordStartOffset)}`);
+            }
+        }
         // Finally: resort the keyword list
         this.keywordList.sort((ki1, ki2) => {
             return ki1.keyText.localeCompare(ki2.keyText);
         });
+        // Record boundaries are offsets in the record stream, not key-order
+        // boundaries. Recompute them after sorting so dictionaries whose key
+        // blocks are not in lexical order cannot return truncated records.
+        if (this.keywordList.length > 0) {
+            const starts = [...new Set(this.keywordList.map(({recordStartOffset}) => recordStartOffset))]
+                .sort((a, b) => a - b);
+            const ends = new Map();
+            let end = recordEndOffset;
+            for (let i = starts.length - 1; i >= 0; --i) {
+                const start = starts[i];
+                ends.set(start, end);
+                end = start;
+            }
+            for (const item of this.keywordList) {
+                item.recordEndOffset = ends.get(item.recordStartOffset) ?? recordEndOffset;
+            }
+        }
     }
     /**
      * STEP 4.2. split keys from key block
@@ -289,9 +421,7 @@ class MDictBase {
         // because 0-7 is the leading number, we start at keyblock[7]
         let keyStartIndex = 0;
         while (keyStartIndex < keyBlock.length) {
-            let meaningOffset = 0;
-            const meaningOffsetBuff = keyBlock.slice(keyStartIndex, keyStartIndex + this.meta.numWidth);
-            meaningOffset = common.b2n(meaningOffsetBuff);
+            const meaningOffset = readNumber(keyBlock, keyStartIndex, this.meta.numWidth);
             let keyEndIndex = -1;
             let i = keyStartIndex + this.meta.numWidth;
             while (i < keyBlock.length) {
@@ -302,10 +432,11 @@ class MDictBase {
                 i += width;
             }
             if (keyEndIndex == -1) {
-                break;
+                throw new Error('Unterminated MDict key block entry');
             }
-            const keyTextBuffer = keyBlock.slice(keyStartIndex + this.meta.numWidth, keyEndIndex);
-            const keyText = this.meta.decoder.decode(keyTextBuffer);
+            // Decoding is synchronous and returns an independent string; no byte copy is needed.
+            const keyTextBuffer = keyBlock.subarray(keyStartIndex + this.meta.numWidth, keyEndIndex);
+            const keyText = this.meta.keyDecoder.decode(keyTextBuffer);
             if (keyList.length > 0) {
                 keyList[keyList.length - 1].recordEndOffset = meaningOffset;
             }
@@ -335,10 +466,10 @@ class MDictBase {
         const headerByteSize = common.b2n(headerByteSizeBuff);
         // [4:header_byte_size + 4] header_bytes
         const headerBuffer = this.scanner.readBuffer(4, headerByteSize);
-        // TODO: SKIP 4 bytes alder32 checksum
-        // header_b_cksum should skip for now, because cannot get alder32 sum by js
-        // const header_b_cksum = readChunk.sync(this.meta.fname, header_byte_size + 4, 4);
-        // assert(header_b_cksum), "header_bytes checksum failed");
+        const headerChecksum = this.scanner.readNumber(headerByteSize + 4, 4).getUint32(0, true);
+        if (common.adler32(headerBuffer) !== headerChecksum) {
+            throw new Error('MDict header checksum mismatch');
+        }
         // 4 bytes header size + header_bytes_size + 4bytes alder checksum
         this._headerEndOffset = headerByteSize + 4 + 4;
         this._keyHeaderStartOffset = headerByteSize + 4 + 4;
@@ -354,16 +485,12 @@ class MDictBase {
         // 0x00 - no encryption
         // 0x01 - encrypt record block
         // 0x02 - encrypt key info block
-        if (!this.header.Encrypted || this.header.Encrypted == '' || this.header.Encrypted == 'No') {
-            this.meta.encrypt = 0;
-        }
-        else if (this.header.Encrypted == 'Yes') {
-            this.meta.encrypt = 1;
-        }
-        else {
-            this.meta.encrypt = parseInt(this.header['Encrypted'], 10);
-        }
-        if (this.options.encryptType && this.options.encryptType != -1) {
+        this.meta.encrypt = parseEncryptionFlag(this.header.Encrypted);
+        if (this.options.encryptType !== -1) {
+            if (!Number.isSafeInteger(this.options.encryptType) ||
+                this.options.encryptType < 0 || this.options.encryptType > 3) {
+                throw new Error(`Unsupported encryption override for MDict: ${this.options.encryptType}`);
+            }
             this.meta.encrypt = this.options.encryptType;
         }
         // stylesheet attribute if present takes from of:
@@ -378,7 +505,7 @@ class MDictBase {
         //        header_info['_stylesheet'][lines[i]] = (lines[i + 1], lines[i + 2])
         // before version 2.0, number is 4 bytes integer alias, int32
         // version 2.0 and above use 8 bytes, alias int64
-        this.meta.version = parseFloat(this.header['GeneratedByEngineVersion']);
+        this.meta.version = parseEngineVersion(this.header['GeneratedByEngineVersion']);
         if (this.meta.version >= 2.0) {
             this.meta.numWidth = 8;
             this.meta.numFmt = common.NUMFMT_UINT64;
@@ -387,36 +514,19 @@ class MDictBase {
             this.meta.numWidth = 4;
             this.meta.numFmt = common.NUMFMT_UINT32;
         }
-        if (!this.header.Encoding || this.header.Encoding == '') {
-            this.meta.encoding = UTF8;
-            this.meta.decoder = UTF_8_DECODER;
-        }
-        else if (this.header.Encoding == 'GBK' || this.header.Encoding == 'GB2312') {
-            this.meta.encoding = GB18030;
-            this.meta.decoder = GB18030_DECODER;
-        }
-        else if (this.header['Encoding'].toLowerCase() == 'big5') {
-            this.meta.encoding = BIG5;
-            this.meta.decoder = BIG5_DECODER;
-        }
-        else {
-            this.meta.encoding =
-                this.header['Encoding'].toLowerCase() == 'utf16' ||
-                    this.header['Encoding'].toLowerCase() == 'utf-16'
-                    ? UTF16
-                    : UTF8;
-            if (this.meta.encoding == UTF16) {
-                this.meta.decoder = UTF_16LE_DECODER;
-            }
-            else {
-                this.meta.decoder = UTF_8_DECODER;
-            }
-        }
-        // determine the encoding and decoder, if extension is *.mdd
         if (this.meta.ext === 'mdd') {
+            // MDD resource keys are UTF-16LE even when the header omits an
+            // Encoding attribute, as required by the MDict resource format.
             this.meta.encoding = UTF16;
             this.meta.decoder = UTF_16LE_DECODER;
+        } else {
+            const resolvedEncoding = resolveEncoding(this.header.Encoding);
+            this.meta.encoding = resolvedEncoding.encoding;
+            this.meta.decoder = resolvedEncoding.decoder;
         }
+        // Preserve literal leading U+FEFF in keys and key-info boundaries.
+        // Header and definition decoding retain their existing BOM handling.
+        this.meta.keyDecoder = new TextDecoder(this.meta.decoder.encoding, {ignoreBOM: true});
     }
     /**
      * STEP 2. read key block header
@@ -429,8 +539,8 @@ class MDictBase {
         // [16:24]/[8:12] - key block info decompressed size (if version >= 2.0, else not exist)
         // [24:32]/null - key block info size
         // [32:40]/[12:16] - key block size
-        // note: if version <2.0, the key info buffer size is 4 * 4
-        //       otherwise, ths key info buffer size is 5 * 8
+        // note: if version <2.0, number of key blocks, entry count, info size and block size are all present
+        //       otherwise, ths key block header includes an unpacked key-info size too
         // <2.0  the order of number is same
         // set offset
         this._keyHeaderStartOffset = this._headerEndOffset;
@@ -444,7 +554,8 @@ class MDictBase {
                 // TODO: encrypted file not support yet
                 throw Error(' user identification is needed to read encrypted file');
             }
-            // regcode, userid = header_info['_passcode']
+            // regcode, userid = passcode
+            // if user_id is email, the regcode is encrypted with the email string
             if (this.header.RegisterBy == 'Email') {
                 // encrypted_key = _decrypt_regcode_by_email(regcode, userid);
                 throw Error('encrypted file not support yet');
@@ -468,6 +579,7 @@ class MDictBase {
             const keyInfoUnpackSizeBuff = keyHeaderBuff.slice(offset, offset + this.meta.numWidth);
             const keyInfoUnpackSize = common.b2n(keyInfoUnpackSizeBuff);
             offset += this.meta.numWidth;
+            assert(keyInfoUnpackSize <= this.options.maxDecompressedBlockBytes, 'MDict key info exceeds decompressed block limit');
             this.keyHeader.keyInfoUnpackSize = keyInfoUnpackSize;
         }
         // [24:32] - number of key block info compress size
@@ -480,7 +592,12 @@ class MDictBase {
         const keywordBlockPackedSize = common.b2n(keywordBlockPackedSizeBuff);
         offset += this.meta.numWidth;
         this.keyHeader.keywordBlockPackedSize = keywordBlockPackedSize;
-        // 4 bytes alder32 checksum, after key info block (only >= v2.0)
+        if (this.meta.version >= 2.0) {
+            const checksum = common.b2n(this.scanner.readBuffer(this._keyHeaderStartOffset + headerMetaSize, 4));
+            if (common.adler32(keyHeaderBuff) !== checksum) {
+                throw new Error('MDict key header checksum mismatch');
+            }
+        }
         // set end offset
         this._keyHeaderEndOffset = this._keyHeaderStartOffset +
             headerMetaSize + (this.meta.version >= 2.0 ? 4 : 0); /* 4 bytes adler32 checksum length, only for version >= 2.0 */
@@ -508,9 +625,15 @@ class MDictBase {
      */
     _decodeKeyInfo(keyInfoBuff) {
         const keyBlockNum = this.keyHeader.keywordBlocksNum;
-        if (this.meta.version == 2.0) {
+        if (this.meta.version >= 2.0) {
+            if (keyInfoBuff.length < 8) {
+                throw new Error('Truncated MDict key info block');
+            }
             const packType = keyInfoBuff.subarray(0, 4).join('');
-            // const _alder32Buff = keyInfoBuff.slice(4, 8)
+            if (packType !== '2000') {
+                throw new Error('Unsupported MDict key info compression');
+            }
+            const keyInfoChecksum = common.b2n(keyInfoBuff.subarray(4, 8));
             // const numEntries = this.keyHeader.entriesNum;
             if (this.meta.encrypt === 2) {
                 keyInfoBuff = common.mdxDecrypt(keyInfoBuff);
@@ -519,10 +642,10 @@ class MDictBase {
             if (this.meta.version >= 2.0 && packType == '2000') {
                 // For version 2.0, will compress by zlib, lzo just for 1.0
                 // key_block_info_compressed[0:8] => compress_type
-                const keyInfoBuffUnpacked = inflateSync(keyInfoBuff.slice(8));
-                // TODO: check the alder32 checksum
-                // adler32 = unpack('>I', key_block_info_compressed[4:8])[0]
-                // assert(adler32 == zlib.adler32(key_block_info) & 0xffffffff)
+                const keyInfoBuffUnpacked = inflateSync(keyInfoBuff.slice(8), this.keyHeader.keyInfoUnpackSize);
+                if (common.adler32(keyInfoBuffUnpacked) !== keyInfoChecksum) {
+                    throw new Error('MDict key info checksum mismatch');
+                }
                 // this.keyHeader.keyInfoUnpackSize only exist when version >= 2.0
                 assert(this.keyHeader.keyInfoUnpackSize == keyInfoBuffUnpacked.length, `key_block_info keyInfoUnpackSize  ${this.keyHeader.keyInfoUnpackSize} should equal to keyInfoBuffUnpacked buffer length ${keyInfoBuffUnpacked.length}`);
                 keyInfoBuff = keyInfoBuffUnpacked;
@@ -543,9 +666,9 @@ class MDictBase {
             let lastWordSize = 0;
             let firstKey = '';
             let lastKey = '';
-            blockWordCount = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth));
+            blockWordCount = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth);
             indexOffset += this.meta.numWidth;
-            firstWordSize = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth / 4));
+            firstWordSize = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth / 4);
             indexOffset += this.meta.numWidth / 4;
             if (this.meta.version >= 2.0) {
                 if (this.meta.encoding === UTF16) {
@@ -560,9 +683,14 @@ class MDictBase {
                     firstWordSize = firstWordSize * 2;
                 }
             }
-            const firstWordBuffer = keyInfoBuff.slice(indexOffset, indexOffset + firstWordSize);
+            const firstWordBuffer = readKeyInfoText(
+                keyInfoBuff,
+                indexOffset,
+                firstWordSize,
+                this.meta.version >= 2 ? (this.meta.encoding === UTF16 ? 2 : 1) : 0,
+            );
             indexOffset += firstWordSize;
-            lastWordSize = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth / 4));
+            lastWordSize = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth / 4);
             indexOffset += this.meta.numWidth / 4;
             if (this.meta.version >= 2.0) {
                 if (this.meta.encoding === UTF16) {
@@ -577,19 +705,25 @@ class MDictBase {
                     lastWordSize = lastWordSize * 2;
                 }
             }
-            const lastWordBuffer = keyInfoBuff.slice(indexOffset, indexOffset + lastWordSize);
+            const lastWordBuffer = readKeyInfoText(
+                keyInfoBuff,
+                indexOffset,
+                lastWordSize,
+                this.meta.version >= 2 ? (this.meta.encoding === UTF16 ? 2 : 1) : 0,
+            );
             indexOffset += lastWordSize;
-            packSize = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth));
+            packSize = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth);
             indexOffset += this.meta.numWidth;
-            unpackSize = common.b2n(keyInfoBuff.slice(indexOffset, indexOffset + this.meta.numWidth));
+            unpackSize = readNumber(keyInfoBuff, indexOffset, this.meta.numWidth);
             indexOffset += this.meta.numWidth;
+            assert(unpackSize <= this.options.maxDecompressedBlockBytes, 'MDict key block exceeds decompressed block limit');
             if (this.meta.encoding === UTF16) {
-                firstKey = this.meta.decoder.decode(firstWordBuffer);
-                lastKey = this.meta.decoder.decode(lastWordBuffer);
+                firstKey = this.meta.keyDecoder.decode(firstWordBuffer);
+                lastKey = this.meta.keyDecoder.decode(lastWordBuffer);
             }
             else {
-                firstKey = this.meta.decoder.decode(firstWordBuffer);
-                lastKey = this.meta.decoder.decode(lastWordBuffer);
+                firstKey = this.meta.keyDecoder.decode(firstWordBuffer);
+                lastKey = this.meta.keyDecoder.decode(lastWordBuffer);
             }
             keyBlockInfoList.push({
                 firstKey,
@@ -606,11 +740,10 @@ class MDictBase {
             entriesCount += blockWordCount;
             kbPackSizeAccu += packSize;
             kbUnpackSizeAccu += unpackSize;
+            assert(Number.isSafeInteger(entriesCount) && Number.isSafeInteger(kbPackSizeAccu) && Number.isSafeInteger(kbUnpackSizeAccu), 'MDict key info totals exceed safe integer range');
         }
-        // assert(
-        //   countEntriesNum === numEntries,
-        //   `the number_entries ${numEntries} should equal the count_num_entries ${countEntriesNum}`
-        // );
+        assert(entriesCount === this.keyHeader.keywordNum, 'MDict key info entry count mismatch');
+        assert(indexOffset === keyInfoBuff.length, 'MDict key info size mismatch');
         assert(kbPackSizeAccu === this.keyHeader.keywordBlockPackedSize);
         return keyBlockInfoList;
     }
@@ -621,26 +754,36 @@ class MDictBase {
      * @param unpackSize
      */
     unpackKeyBlock(kbPackedBuff, unpackSize) {
+        assert(kbPackedBuff.length >= 8 && Number.isSafeInteger(unpackSize) && unpackSize >= 0 &&
+            unpackSize <= this.options.maxDecompressedBlockBytes, 'Invalid or oversized MDict key block size');
         //  4 bytes : compression type
         const compType = bytesToHex(kbPackedBuff.slice(0, 4));
-        // TODO 4 bytes adler32 checksum
-        // 4 bytes : adler checksum of decompressed key block
-        // adler32 = unpack('>I', key_block_compressed[start + 4:start + 8])[0]
+        const keyBlockChecksum = common.b2n(kbPackedBuff.subarray(4, 8));
         let keyBlock;
         if (compType == '00000000') {
+            // Stored bytes must match the declaration before allocating a copy.
+            if (kbPackedBuff.length - 8 !== unpackSize) {
+                throw Error(`MDict key block size mismatch: expected ${unpackSize}, got ${kbPackedBuff.length - 8}`);
+            }
             keyBlock = kbPackedBuff.slice(8);
         } else if (compType == '01000000') {
             // TODO: tests for v2.0 dictionary
-            const decompressedBuff = lzo1x.decompress(kbPackedBuff.slice(8), unpackSize, 0);
+            const decompressedBuff = lzo1x.decompress(kbPackedBuff.slice(8), unpackSize);
             keyBlock = decompressedBuff;
         } else if (compType === '02000000') {
-            keyBlock = inflateSync(kbPackedBuff.slice(8));
+            keyBlock = inflateSync(kbPackedBuff.slice(8), unpackSize);
             // extract one single key block into a key list
             // notice that adler32 returns signed value
             // TODO compare with previous word
             // assert(adler32 == zlib.adler32(key_block) & 0xffffffff)
         } else {
             throw Error(`cannot determine the compress type: ${compType}`);
+        }
+        if (keyBlock.length !== unpackSize) {
+            throw Error(`MDict key block size mismatch: expected ${unpackSize}, got ${keyBlock.length}`);
+        }
+        if (common.adler32(keyBlock) !== keyBlockChecksum) {
+            throw new Error('MDict key block checksum mismatch');
         }
         return keyBlock;
     }
@@ -662,13 +805,22 @@ class MDictBase {
             const kbCompBuff = this.scanner.readBuffer(start, packSize);
             const keyBlock = this.unpackKeyBlock(kbCompBuff, unpackSize);
             const splitKeyBlock = this.splitKeyBlock(keyBlock, idx);
-            if (keyBlockList.length > 0 && keyBlockList[keyBlockList.length - 1].recordEndOffset == -1) {
+            if (splitKeyBlock.length !== this.keyInfoList[idx].keyBlockEntriesNum) {
+                throw Error(`MDict key block entry count mismatch: expected ${this.keyInfoList[idx].keyBlockEntriesNum}, got ${splitKeyBlock.length}`);
+            }
+            if (splitKeyBlock.length > 0 && keyBlockList.length > 0 && keyBlockList[keyBlockList.length - 1].recordEndOffset == -1) {
                 keyBlockList[keyBlockList.length - 1].recordEndOffset = splitKeyBlock[0].recordStartOffset;
             }
-            keyBlockList = keyBlockList.concat(splitKeyBlock);
+            // Keep the first owned block, then append only new keys instead of
+            // recopying the accumulated list. Spread can exceed argument limits.
+            if (keyBlockList.length === 0) {
+                keyBlockList = splitKeyBlock;
+            } else {
+                for (const item of splitKeyBlock) { keyBlockList.push(item); }
+            }
             kbStartOffset += packSize;
         }
-        if (keyBlockList[keyBlockList.length - 1].recordEndOffset === -1) {
+        if (keyBlockList.length > 0 && keyBlockList[keyBlockList.length - 1].recordEndOffset === -1) {
             keyBlockList[keyBlockList.length - 1].recordEndOffset = -1; // the latest one
         }
         assert(keyBlockList.length === this.keyHeader.keywordNum, `key list length: ${keyBlockList.length} should equal to key entries num: ${this.keyHeader.keywordNum}`);
@@ -691,14 +843,14 @@ class MDictBase {
         this._recordHeaderEndOffset = this._recordHeaderStartOffset + recordHeaderLen;
         const recordHeaderBuffer = this.scanner.readBuffer(this._recordHeaderStartOffset, recordHeaderLen);
         let ofset = 0;
-        const recordBlocksNum = common.b2n(recordHeaderBuffer.slice(ofset, ofset + this.meta.numWidth));
+        const recordBlocksNum = readNumber(recordHeaderBuffer, ofset, this.meta.numWidth);
         ofset += this.meta.numWidth;
-        const entriesNum = common.b2n(recordHeaderBuffer.slice(ofset, ofset + this.meta.numWidth));
+        const entriesNum = readNumber(recordHeaderBuffer, ofset, this.meta.numWidth);
         assert(entriesNum === this.keyHeader.keywordNum);
         ofset += this.meta.numWidth;
-        const recordInfoCompSize = common.b2n(recordHeaderBuffer.slice(ofset, ofset + this.meta.numWidth));
+        const recordInfoCompSize = readNumber(recordHeaderBuffer, ofset, this.meta.numWidth);
         ofset += this.meta.numWidth;
-        const recordBlockCompSize = common.b2n(recordHeaderBuffer.slice(ofset, ofset + this.meta.numWidth));
+        const recordBlockCompSize = readNumber(recordHeaderBuffer, ofset, this.meta.numWidth);
         this.recordHeader = {
             recordBlocksNum,
             entriesNum,
@@ -713,6 +865,8 @@ class MDictBase {
     _readRecordInfos() {
         this._recordInfoStartOffset = this._recordHeaderEndOffset;
         const recordInfoBuff = this.scanner.readBuffer(this._recordInfoStartOffset, this.recordHeader.recordInfoCompSize);
+        assert(this.recordHeader.recordBlocksNum * this.meta.numWidth * 2 === recordInfoBuff.length, 'MDict record info size mismatch');
+        assert(this.keywordList.length === 0 || this.recordHeader.recordBlocksNum > 0, 'MDict entries have no record blocks');
         /**
          * record_block_info_list:
          * [{
@@ -728,10 +882,12 @@ class MDictBase {
         let compressedAdder = 0;
         let decompressionAdder = 0;
         for (let i = 0; i < this.recordHeader.recordBlocksNum; i++) {
-            const packSize = common.b2n(recordInfoBuff.slice(offset, offset + this.meta.numWidth));
+            const packSize = readNumber(recordInfoBuff, offset, this.meta.numWidth);
             offset += this.meta.numWidth;
-            const unpackSize = common.b2n(recordInfoBuff.slice(offset, offset + this.meta.numWidth));
+            const unpackSize = readNumber(recordInfoBuff, offset, this.meta.numWidth);
             offset += this.meta.numWidth;
+            assert(packSize >= 8, 'Invalid MDict record block size');
+            assert(unpackSize <= this.options.maxDecompressedBlockBytes, 'MDict record block exceeds decompressed block limit');
             recordInfoList.push({
                 packSize: packSize,
                 packAccumulateOffset: compressedAdder,
@@ -740,6 +896,7 @@ class MDictBase {
             });
             compressedAdder += packSize;
             decompressionAdder += unpackSize;
+            assert(Number.isSafeInteger(compressedAdder) && Number.isSafeInteger(decompressionAdder), 'Invalid MDict record info totals');
         }
         assert(offset === this.recordHeader.recordInfoCompSize);
         assert(compressedAdder === this.recordHeader.recordBlockCompSize);
@@ -751,6 +908,9 @@ class MDictBase {
         this._recordInfoEndOffset = this._recordInfoStartOffset + this.recordHeader.recordInfoCompSize;
         // avoid user not invoke the _decodeRecordBlock method
         this._recordBlockStartOffset = this._recordInfoEndOffset;
+        // Lazy record lookup must not hide a truncated, unreferenced block.
+        // Validate the section endpoint without copying or decompressing data.
+        this.scanner.readBuffer(this._recordBlockStartOffset + compressedAdder, 0);
     }
     /**
      * STEP 7.
@@ -777,10 +937,8 @@ class MDictBase {
             const rbCompType = bytesToHex(rbPackBuff.slice(0, 4));
             // record_block stores the final record data
             let recordBlock = new Uint8Array(rbPackBuff.length);
-            // TODO: ignore adler32 offset
-            // Note: here ignore the checksum part
-            // bytes: adler32 checksum of decompressed record block
-            // adler32 = unpack('>I', record_block_compressed[4:8])[0]
+            if (rbPackBuff.length < 8) { throw new Error('Truncated MDict record block'); }
+            const recordBlockChecksum = common.b2n(rbPackBuff.subarray(4, 8));
             if (rbCompType === '00000000') {
                 recordBlock = rbPackBuff.slice(8, rbPackBuff.length);
             }
@@ -808,17 +966,17 @@ class MDictBase {
                     // recordBlock = Buffer.from(
                     // lzo1x.decompress(common.appendBuffer(header, blockBufDecrypted), decompSize, 1308672)
                     // );
-                    recordBlock = lzo1x.decompress(blockBufDecrypted, unpackSize, 0);
+                    recordBlock = lzo1x.decompress(blockBufDecrypted, unpackSize);
                 } else if (rbCompType === '02000000') {
                     compressType = 'zlib';
                     // zlib decompress
-                    recordBlock = inflateSync(blockBufDecrypted);
+                    recordBlock = inflateSync(blockBufDecrypted, unpackSize);
                 }
             }
-            // notice that adler32 return signed value
-            // TODO: ignore the checksum
-            // assert(adler32 == zlib.adler32(record_block) & 0xffffffff)
             assert(recordBlock.length === unpackSize);
+            if (common.adler32(recordBlock) !== recordBlockChecksum) {
+                throw new Error('MDict record block checksum mismatch');
+            }
             /**
              * 请注意，block 是会有很多个的，而每个block都可能会被压缩
              * 而 key_list中的 record_start, key_text是相对每一个block而言的，end是需要每次解析的时候算出来的

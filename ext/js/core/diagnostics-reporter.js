@@ -44,10 +44,6 @@ const BASIC_DIAGNOSTICS_EVENTS = new Set([
     'dictionary-import-step-final',
     'dictionary-import-zip-complete',
     'dictionary-import-worker-phase-summary',
-    'dictionary-lookup-db-query',
-    'dictionary-lookup-snapshot',
-    'display-terms-find-snapshot',
-    'dictionary-lookup-translator-stage',
 ]);
 /** @type {Promise<DiagnosticsConfig>|null} */
 let diagnosticsConfigPromise = null;
@@ -112,6 +108,15 @@ function getManifestOrNull() {
  */
 function isDevBuildManifest(manifest) {
     return typeof manifest.name === 'string' && manifest.name.includes('(dev)');
+}
+
+/**
+ * Synchronous hot-path guard for work that exists only to enrich diagnostics.
+ * @returns {boolean}
+ */
+export function isDevDiagnosticsBuild() {
+    const manifest = getManifestOrNull();
+    return manifest !== null && isDevBuildManifest(manifest);
 }
 
 /**
@@ -534,6 +539,7 @@ function submitDiagnostics(event, payload, endpoint) {
  * @returns {void}
  */
 export function reportDiagnostics(event, payload = {}) {
+    if (!isDevDiagnosticsBuild()) { return; }
     void (async () => {
         const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
         if (!enabled) { return; }
@@ -548,6 +554,7 @@ export function reportDiagnostics(event, payload = {}) {
  * @returns {void}
  */
 export function reportDiagnosticsLazy(event, createPayload) {
+    if (!isDevDiagnosticsBuild()) { return; }
     void (async () => {
         const {enabled, endpoint, verbosity} = await getDiagnosticsConfig();
         if (!enabled) { return; }

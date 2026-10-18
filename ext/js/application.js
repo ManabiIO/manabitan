@@ -18,6 +18,7 @@
 
 import {API} from './comm/api.js';
 import {CrossFrameAPI} from './comm/cross-frame-api.js';
+import {createFirefoxBackendPort} from './comm/firefox-backend-port.js';
 import {createApiMap, invokeApiMapHandler} from './core/api-map.js';
 import {EventDispatcher} from './core/event-dispatcher.js';
 import {ExtensionError} from './core/extension-error.js';
@@ -53,8 +54,7 @@ function checkChromeNotAvailable() {
 // Set up chrome alias if it's not available (Edge Legacy)
 if (checkChromeNotAvailable()) {
     // @ts-expect-error - objects should have roughly the same interface
-    // eslint-disable-next-line no-global-assign
-    chrome = browser;
+    globalThis.chrome = browser;
 }
 
 /**
@@ -146,14 +146,29 @@ async function waitForBackendReady(webExtension) {
     let timeoutId = null;
     let unloaded = false;
     try {
-        await sendExtensionMessageWithRetry(webExtension, {action: 'requestBackendReadySignal'});
+        // Start the deadline before the handshake itself: a stalled runtime
+        // message must not make the page wait indefinitely for startup.
         const timeoutPromise = new Promise((_, reject) => {
-            timeoutId = setTimeout(async () => {
-                const storedFailureMessage = await getStoredBackendStartupFailureMessage();
-                const suffix = storedFailureMessage.length > 0 ? ` Startup failure: ${storedFailureMessage}` : '';
-                reject(new Error(`Timed out waiting for backend ready signal after ${String(backendReadyTimeoutMs)}ms.${suffix}`));
+            timeoutId = setTimeout(() => {
+                const timeoutMessage = `Timed out waiting for backend ready signal after ${String(backendReadyTimeoutMs)}ms.`;
+                reject(new Error(timeoutMessage));
+
+                // Failure storage is diagnostic only. A hung storage API must
+                // never delay rejecting the startup timeout.
+                void getStoredBackendStartupFailureMessage().then((message) => {
+                    if (message.length > 0 && !webExtension.unloaded) {
+                        showStartupFailureUi(new Error(`${timeoutMessage} Startup failure: ${message}`));
+                    }
+                }).catch(() => {});
             }, backendReadyTimeoutMs);
         });
+        const response = /** @type {unknown} */ (await Promise.race([
+            sendExtensionMessageWithRetry(webExtension, {action: 'requestBackendReadySignal'}),
+            timeoutPromise,
+        ]));
+        if (typeof response === 'object' && response !== null && 'error' in response && typeof response.error !== 'undefined') {
+            throw ExtensionError.deserialize(/** @type {import('core').SerializedError} */ (response.error));
+        }
         await Promise.race([
             promise.then(() => {
                 unloaded = webExtension.unloaded;
@@ -185,24 +200,7 @@ function showStartupFailureUi(error) {
         if (document.body !== null) {
             document.body.hidden = false;
         }
-        let container = document.querySelector('#startup-error-message');
-        if (!(container instanceof HTMLElement)) {
-            const errorContainer = document.createElement('div');
-            errorContainer.id = 'startup-error-message';
-            errorContainer.style.whiteSpace = 'pre-wrap';
-            errorContainer.style.margin = '16px';
-            errorContainer.style.padding = '12px 16px';
-            errorContainer.style.border = '1px solid rgba(208, 2, 27, 0.35)';
-            errorContainer.style.background = 'rgba(208, 2, 27, 0.08)';
-            errorContainer.style.color = '#7a1020';
-            errorContainer.style.fontFamily = 'monospace';
-            errorContainer.style.fontSize = '13px';
-            errorContainer.style.lineHeight = '1.5';
-            if (document.body !== null) {
-                document.body.prepend(errorContainer);
-            }
-            container = errorContainer;
-        }
+        const container = getOrCreateStartupErrorContainer();
         container.textContent = (
             'Manabitan failed to start the dictionary backend.\n' +
             `error=${message}`
@@ -224,28 +222,35 @@ function showRuntimeDisconnectedUi(message) {
         if (document.body !== null) {
             document.body.hidden = false;
         }
-        let container = document.querySelector('#startup-error-message');
-        if (!(container instanceof HTMLElement)) {
-            const errorContainer = document.createElement('div');
-            errorContainer.id = 'startup-error-message';
-            errorContainer.style.whiteSpace = 'pre-wrap';
-            errorContainer.style.margin = '16px';
-            errorContainer.style.padding = '12px 16px';
-            errorContainer.style.border = '1px solid rgba(208, 2, 27, 0.35)';
-            errorContainer.style.background = 'rgba(208, 2, 27, 0.08)';
-            errorContainer.style.color = '#7a1020';
-            errorContainer.style.fontFamily = 'monospace';
-            errorContainer.style.fontSize = '13px';
-            errorContainer.style.lineHeight = '1.5';
-            if (document.body !== null) {
-                document.body.prepend(errorContainer);
-            }
-            container = errorContainer;
-        }
+        const container = getOrCreateStartupErrorContainer();
         container.textContent = message;
     } catch (_) {
         // NOP
     }
+}
+
+/**
+ * @returns {HTMLElement}
+ * @throws {Error} If the browser cannot create or attach the error element.
+ */
+function getOrCreateStartupErrorContainer() {
+    const existing = document.querySelector('#startup-error-message');
+    if (existing instanceof HTMLElement) {
+        return existing;
+    }
+    const container = document.createElement('div');
+    container.id = 'startup-error-message';
+    container.style.whiteSpace = 'pre-wrap';
+    container.style.margin = '16px';
+    container.style.padding = '12px 16px';
+    container.style.border = '1px solid rgba(208, 2, 27, 0.35)';
+    container.style.background = 'rgba(208, 2, 27, 0.08)';
+    container.style.color = '#7a1020';
+    container.style.fontFamily = 'monospace';
+    container.style.fontSize = '13px';
+    container.style.lineHeight = '1.5';
+    document.body?.prepend(container);
+    return container;
 }
 
 /**
@@ -263,38 +268,6 @@ function waitForDomContentLoaded() {
         };
         document.addEventListener('DOMContentLoaded', onDomContentLoaded);
     });
-}
-
-/**
- * @returns {MessagePort}
- * @throws {Error} When the Firefox backend bridge cannot be connected.
- */
-function createFirefoxBackendPort() {
-    const sharedWorkerBridge = new SharedWorker(new URL('comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
-    const backendChannel = new MessageChannel();
-    try {
-        sharedWorkerBridge.port.postMessage({action: 'connectToBackend1'}, [backendChannel.port1]);
-        sharedWorkerBridge.port.close();
-        return backendChannel.port2;
-    } catch (error) {
-        try {
-            sharedWorkerBridge.port.close();
-        } catch (_) {
-            // NOP
-        }
-        try {
-            backendChannel.port1.close();
-        } catch (_) {
-            // NOP
-        }
-        try {
-            backendChannel.port2.close();
-        } catch (_) {
-            // NOP
-        }
-        const normalizedError = error instanceof Error ? error : new Error(String(error));
-        throw new Error(`Failed to initialize Firefox backend bridge. You may need to refresh the page. ${normalizedError.message}`);
-    }
 }
 
 /**
@@ -412,18 +385,24 @@ export class Application extends EventDispatcher {
     static async main(waitForDom, mainFunction) {
         const supportsServiceWorker = 'serviceWorker' in navigator; // Basically, all browsers except Firefox. But it's possible Firefox will support it in the future, so we check in this fashion to be future-proof.
         const inExtensionContext = window.location.protocol === new URL(import.meta.url).protocol; // This code runs both in content script as well as in the iframe, so we need to differentiate the situation
+        const webExtension = new WebExtension();
+        log.configure(webExtension.extensionName);
         /** @type {MessagePort | null} */
         // If this is Firefox, we don't have a service worker and can't postMessage,
         // so we temporarily create a SharedWorker in order to establish a MessageChannel
         // which we can use to postMessage with the backend.
         // This can only be done in the extension context (aka iframe within popup),
         // not in the content script context.
-        const backendPort = !supportsServiceWorker && inExtensionContext ?
-            createFirefoxBackendPort() :
-            null;
-
-        const webExtension = new WebExtension();
-        log.configure(webExtension.extensionName);
+        let backendPort = null;
+        try {
+            if (!supportsServiceWorker && inExtensionContext) {
+                backendPort = createFirefoxBackendPort();
+            }
+        } catch (error) {
+            showStartupFailureUi(error);
+            log.error(error);
+            throw error;
+        }
 
         /** @type {Worker|null} */
         let mediaDrawingWorker = null;
@@ -473,15 +452,15 @@ export class Application extends EventDispatcher {
                     throw new Error('Media drawing worker startup was interrupted by runtime shutdown');
                 }
                 nextWorker.addEventListener('error', (event) => {
-                    if (runtimeResourcesClosed) { return; }
+                    if (runtimeResourcesClosed || mediaDrawingWorker !== nextWorker) { return; }
                     const message = typeof event.message === 'string' && event.message.length > 0 ? event.message : 'unknown media worker failure';
                     log.error(new Error(`Media drawing worker failed: ${message}`));
-                    void restartMediaDrawingWorker('error');
+                    requestMediaDrawingWorkerRestart('error');
                 });
                 nextWorker.addEventListener('messageerror', () => {
-                    if (runtimeResourcesClosed) { return; }
+                    if (runtimeResourcesClosed || mediaDrawingWorker !== nextWorker) { return; }
                     log.error(new Error('Media drawing worker message deserialization failed'));
-                    void restartMediaDrawingWorker('messageerror');
+                    requestMediaDrawingWorkerRestart('messageerror');
                 });
                 mediaDrawingWorker = nextWorker;
                 api.setMediaDrawingWorker(nextWorker);
@@ -516,6 +495,21 @@ export class Application extends EventDispatcher {
                 mediaDrawingWorker = null;
             }
         };
+        /**
+         * @param {string} reason
+         * @returns {void}
+         */
+        const requestMediaDrawingWorkerRestart = (reason) => {
+            void restartMediaDrawingWorker(reason).catch((error) => {
+                log.error(error);
+                if (runtimeResourcesClosed) { return; }
+                closeRuntimeResources();
+                showRuntimeDisconnectedUi(
+                    'Manabitan could not restart its media rendering worker.\n' +
+                    `Refresh this page to reconnect. ${error instanceof Error ? error.message : String(error)}`,
+                );
+            });
+        };
         webExtension.on('unloaded', () => {
             closeRuntimeResources();
             showRuntimeDisconnectedUi(
@@ -523,13 +517,13 @@ export class Application extends EventDispatcher {
                 'Refresh this page to reconnect.',
             );
         });
-        if (inExtensionContext) {
-            await restartMediaDrawingWorker('initial');
-        }
         /** @type {boolean} */
         let heartbeatFailureLogged = false;
         let startupCompleted = false;
         try {
+            if (inExtensionContext) {
+                await restartMediaDrawingWorker('initial');
+            }
             await waitForBackendReady(webExtension);
             if (mediaDrawingWorker !== null) {
                 await api.ensureMediaDrawingWorkerConnected();

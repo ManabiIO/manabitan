@@ -32,8 +32,8 @@ import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-repo
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 import {clone, deferPromise, promiseTimeout} from '../core/utilities.js';
-import {generateAnkiNoteMediaFileName, INVALID_NOTE_ID, isNoteDataValid} from '../data/anki-util.js';
-import {arrayBufferToBase64, base64ToArrayBuffer} from '../data/array-buffer-util.js';
+import {generateAnkiNoteMediaFileName, generateAnkiNoteMediaFileNameWithUniqueTimestamp, INVALID_NOTE_ID, isNoteDataValid, mediaFileNameHashOrTimestamp} from '../data/anki-util.js';
+import {arrayBufferToBase64} from '../data/array-buffer-util.js';
 import {OptionsUtil} from '../data/options-util.js';
 import {getAllPermissions, hasPermissions, hasRequiredPermissionsForOptions} from '../data/permissions-util.js';
 import {DictionaryDatabase} from '../dictionary/dictionary-database.js';
@@ -52,6 +52,90 @@ import {injectStylesheet} from './script-manager.js';
 
 const STARTUP_DIAGNOSTICS_STORAGE_KEY = 'manabitanStartupDiagnostics';
 const DICTIONARY_REFRESH_RETRY_DELAYS_MS = [250, 1000, 3000, 10000];
+
+/**
+ * @param {string} url
+ * @param {string} contentDisposition
+ * @returns {string}
+ */
+function getDictionaryArchiveFileName(url, contentDisposition) {
+    /** @type {Map<string, string>} */
+    const parameters = new Map();
+    // Quoted parameter values may contain semicolons and escaped quotes.
+    for (const match of contentDisposition.matchAll(/(?:^|;)\s*([^=;\s]+)\s*=\s*("(?:[^"\\]|\\.)*"|[^;]*)/g)) {
+        const name = match[1].toLowerCase();
+        if (name !== 'filename' && name !== 'filename*') { continue; }
+        let value = match[2].trim();
+        if (value.startsWith('"')) {
+            if (!value.endsWith('"')) { continue; }
+            value = value.slice(1, -1).replace(/\\(.)/g, '$1');
+        }
+        if (!parameters.has(name)) { parameters.set(name, value); }
+    }
+    const candidates = [];
+    const extendedName = parameters.get('filename*');
+    const encodedMatch = typeof extendedName === 'string' ? /^UTF-8'[^']*'(.*)$/i.exec(extendedName) : null;
+    if (encodedMatch !== null) {
+        try {
+            candidates.push(decodeURIComponent(encodedMatch[1]));
+        } catch (_) {
+            // Invalid extended parameters fall back to an ordinary filename or URL.
+        }
+    }
+    const ordinaryName = parameters.get('filename');
+    if (typeof ordinaryName === 'string') { candidates.push(ordinaryName); }
+    try {
+        const pathPart = new URL(url).pathname.split('/').reverse().find((part) => part.length > 0);
+        if (typeof pathPart === 'string') {
+            let decodedName = pathPart;
+            try {
+                decodedName = decodeURIComponent(pathPart);
+            } catch (_) {
+                // Preserve malformed URL names without failing the completed download.
+            }
+            candidates.push(decodedName);
+        }
+    } catch (_) {
+        // The request has already validated its URL; this is only a naming fallback.
+    }
+    for (const candidate of candidates) {
+        // A server-supplied filename is not a filesystem path.
+        const name = candidate.split(/[\\/]/).pop()?.trim() ?? '';
+        if (name.length > 0 && name !== '.' && name !== '..') { return name; }
+    }
+    return 'fileFromURL.zip';
+}
+
+/**
+ * @param {?MessagePort} responsePort
+ * @param {unknown} message
+ * @returns {boolean}
+ */
+function postDictionaryImportResponseMessage(responsePort, message) {
+    if (responsePort === null) {
+        return false;
+    }
+    try {
+        responsePort.postMessage(message);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+/**
+ * @param {?MessagePort} responsePort
+ */
+function closeDictionaryImportResponsePort(responsePort) {
+    if (responsePort === null) {
+        return;
+    }
+    try {
+        responsePort.close();
+    } catch (_) {
+        // Ignore close failures for dead import response ports.
+    }
+}
 
 /**
  * This class controls the core logic of the extension, including API calls
@@ -111,8 +195,12 @@ export class Backend {
         this._clipboardMonitor = new ClipboardMonitor(this._clipboardReader);
         /** @type {?import('settings').Options} */
         this._options = null;
+        /** @type {Promise<void>|null} */
+        this._optionsMutationTail = null;
         /** @type {import('../data/json-schema.js').JsonSchema[]} */
         this._profileConditionsSchemaCache = [];
+        /** @type {WeakMap<import('settings').ProfileOptions, {enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>, textReplacements: (?(import('translation').FindTermsTextReplacement[]))[]}>} */
+        this._translatorProfileOptionsCache = new WeakMap();
         /** @type {?string} */
         this._ankiClipboardImageFilenameCache = null;
         /** @type {?string} */
@@ -216,9 +304,8 @@ export class Backend {
             ['debugDictionaryStorageState',  this._onApiDebugDictionaryStorageState.bind(this)],
             ['downloadDictionaryArchive',    this._onApiDownloadDictionaryArchive.bind(this)],
             ['setDictionaryImportMode',      this._onApiSetDictionaryImportMode.bind(this)],
+            ['getDictionaryImportOperationStatus', this._onApiGetDictionaryImportOperationStatus.bind(this)],
             ['purgeDatabase',                this._onApiPurgeDatabase.bind(this)],
-            ['exportDictionaryDatabase',     this._onApiExportDictionaryDatabase.bind(this)],
-            ['importDictionaryDatabase',     this._onApiImportDictionaryDatabase.bind(this)],
             ['getMedia',                     this._onApiGetMedia.bind(this)],
             ['logGenericErrorBackend',       this._onApiLogGenericErrorBackend.bind(this)],
             ['logIndicatorClear',            this._onApiLogIndicatorClear.bind(this)],
@@ -237,6 +324,7 @@ export class Backend {
             ['getLanguageSummaries',         this._onApiGetLanguageSummaries.bind(this)],
             ['heartbeat',                    this._onApiHeartbeat.bind(this)],
             ['forceSync',                    this._onApiForceSync.bind(this)],
+            ['fetchLocalAudioData',          this._onApiFetchLocalAudioData.bind(this)],
         ]);
 
         /** @type {import('api').PmApiMap} */
@@ -253,7 +341,9 @@ export class Backend {
             ['toggleTextScanning', this._onCommandToggleTextScanning.bind(this)],
             ['openInfoPage', this._onCommandOpenInfoPage.bind(this)],
             ['openSettingsPage', this._onCommandOpenSettingsPage.bind(this)],
+            ['openReaderJitendexSetup', this._onCommandOpenReaderJitendexSetup.bind(this)],
             ['openSearchPage', this._onCommandOpenSearchPage.bind(this)],
+            ['openSearchPageCurrentTab', this._onCommandOpenSearchPageCurrentTab.bind(this)],
             ['openPopupWindow', this._onCommandOpenPopupWindow.bind(this)],
         ]));
 
@@ -271,6 +361,10 @@ export class Backend {
         this._pendingDatabaseUpdatedNotifications = [];
         /** @type {Promise<void>|null} */
         this._setDictionaryImportModePromise = null;
+        /** @type {Set<string>} */
+        this._dictionaryImportOwners = new Set();
+        /** @type {Map<string, {ownerId: string, cancelled: boolean, settled: boolean, completed: boolean, runtimeAdmissionAttempted?: boolean, downloadAbortController?: AbortController, responseCleanup?: () => void}>} */
+        this._ownedDictionaryImports = new Map();
         /** @type {Record<string, unknown>|null} */
         this._lastDictionaryUrlImportDebug = null;
         /** @type {SharedWorker|null} */
@@ -354,28 +448,34 @@ export class Backend {
     }
 
     /** @type {import('api').PmApiHandler<'importDictionaryOffscreen'>} */
-    async _onPmImportDictionaryOffscreen({archiveContent, details}, ports) {
+    async _onPmImportDictionaryOffscreen({archiveContent, details, operationId, ownerId}, ports) {
         const responsePort = ports !== null && ports.length > 0 ? ports[0] : null;
+        let admitted = false;
+        let failed = false;
         try {
+            this._registerDictionaryImportOwner(operationId, ownerId);
+            admitted = true;
             if (responsePort === null) {
                 throw new Error('Offscreen import response port missing');
             }
-            await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort);
+            await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort, operationId, ownerId);
         } catch (error) {
-            try {
-                responsePort?.postMessage({type: 'error', error: ExtensionError.serialize(error)});
-            } catch (_) {
-                // Best effort error delivery to the import caller.
-            } finally {
-                responsePort?.close();
-            }
+            failed = true;
+            postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
+            closeDictionaryImportResponsePort(responsePort);
+        } finally {
+            if (admitted) { this._settleDictionaryImportOwnership(operationId, ownerId, failed); }
         }
     }
 
     /** @type {import('api').PmApiHandler<'importDictionaryUrlOffscreen'>} */
-    async _onPmImportDictionaryUrlOffscreen({url, details}, ports) {
+    async _onPmImportDictionaryUrlOffscreen({url, details, operationId, ownerId}, ports) {
         const responsePort = ports !== null && ports.length > 0 ? ports[0] : null;
+        let admitted = false;
+        let failed = false;
         try {
+            this._registerDictionaryImportOwner(operationId, ownerId);
+            admitted = true;
             if (responsePort === null) {
                 throw new Error('Offscreen import response port missing');
             }
@@ -392,15 +492,24 @@ export class Backend {
             try {
                 // Without an explicit download progress phase here, fallback URL imports
                 // mislabel long download time as the later archive-loading step.
-                responsePort.postMessage({type: 'progress', progress: {nextStep: true, index: 0, count: 0}});
-                const archiveContent = await this._downloadDictionaryArchiveBlobViaXhr(normalizedUrl, downloadTimeoutMs, (phase) => {
-                    this._lastDictionaryUrlImportDebug = {
-                        ...this._lastDictionaryUrlImportDebug,
-                        ...phase,
-                    };
-                }, (loaded, total) => {
-                    responsePort.postMessage({type: 'progress', progress: {nextStep: false, index: loaded, count: total}});
-                });
+                postDictionaryImportResponseMessage(responsePort, {type: 'progress', progress: {nextStep: true, index: 0, count: 0}});
+                const operation = this._ownedDictionaryImports?.get(operationId);
+                const controller = new AbortController();
+                if (operation) { operation.downloadAbortController = controller; }
+                /** @type {Blob} */
+                let archiveContent;
+                try {
+                    archiveContent = await this._downloadDictionaryArchiveBlobViaXhr(normalizedUrl, downloadTimeoutMs, (phase) => {
+                        this._lastDictionaryUrlImportDebug = {
+                            ...this._lastDictionaryUrlImportDebug,
+                            ...phase,
+                        };
+                    }, (loaded, total) => {
+                        postDictionaryImportResponseMessage(responsePort, {type: 'progress', progress: {nextStep: false, index: loaded, count: total}});
+                    }, controller.signal);
+                } finally {
+                    if (operation?.downloadAbortController === controller) { delete operation.downloadAbortController; }
+                }
                 this._lastDictionaryUrlImportDebug = {
                     ...this._lastDictionaryUrlImportDebug,
                     stage: 'blob-ready',
@@ -412,7 +521,7 @@ export class Backend {
                     stage: 'forward-to-runtime',
                     forwardedAtIso: new Date().toISOString(),
                 };
-                await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort);
+                await this._forwardDictionaryImportToRuntime(archiveContent, details, responsePort, operationId, ownerId);
                 this._lastDictionaryUrlImportDebug = {
                     ...this._lastDictionaryUrlImportDebug,
                     stage: 'runtime-forwarded',
@@ -429,6 +538,7 @@ export class Backend {
                 throw normalizedError;
             }
         } catch (error) {
+            failed = true;
             const normalizedError = toError(error);
             this._lastDictionaryUrlImportDebug = {
                 ...this._lastDictionaryUrlImportDebug,
@@ -436,13 +546,10 @@ export class Backend {
                 errorMessage: normalizedError.message,
                 failedAtIso: new Date().toISOString(),
             };
-            try {
-                responsePort?.postMessage({type: 'error', error: ExtensionError.serialize(normalizedError)});
-            } catch (_) {
-                // Best effort error delivery to the import caller.
-            } finally {
-                responsePort?.close();
-            }
+            postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(normalizedError)});
+            closeDictionaryImportResponsePort(responsePort);
+        } finally {
+            if (admitted) { this._settleDictionaryImportOwnership(operationId, ownerId, failed); }
         }
     }
 
@@ -450,13 +557,19 @@ export class Backend {
      * @param {string} url
      * @param {number} timeoutMs
      * @param {(details: Record<string, string|number|null>) => void} onPhase
-     * @param {((loaded: number, total: number) => void)|null} [onProgress]
+     * @param {(loaded: number, total: number) => void} [onProgress]
+     * @param {AbortSignal} [signal]
      * @returns {Promise<Blob>}
      */
-    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = null) {
+    async _downloadDictionaryArchiveBlobViaXhr(url, timeoutMs, onPhase, onProgress = void 0, signal = void 0) {
         return await new Promise((resolve, reject) => {
+            if (signal?.aborted) {
+                reject(new Error('Dictionary import cancelled before admission'));
+                return;
+            }
             const request = new XMLHttpRequest();
             const cleanup = () => {
+                signal?.removeEventListener('abort', abort);
                 request.onload = null;
                 request.onerror = null;
                 request.onabort = null;
@@ -464,10 +577,18 @@ export class Backend {
                 request.onprogress = null;
                 request.onreadystatechange = null;
             };
-            /** @param {unknown} error */
+            /** @param {Error|Event|string} error */
             const fail = (error) => {
                 cleanup();
                 reject(toError(error));
+            };
+            const abort = () => {
+                fail(new Error('Dictionary import cancelled before admission'));
+                try {
+                    request.abort();
+                } catch (_) {
+                    // The promise is already rejected and all handlers are detached.
+                }
             };
             request.open('GET', url, true);
             request.responseType = 'blob';
@@ -509,7 +630,12 @@ export class Backend {
                 if (typeof onProgress !== 'function' || !event.lengthComputable) { return; }
                 onProgress(event.loaded, event.total);
             };
-            request.send();
+            signal?.addEventListener('abort', abort, {once: true});
+            try {
+                request.send();
+            } catch (error) {
+                fail(toError(error));
+            }
         });
     }
 
@@ -521,23 +647,130 @@ export class Backend {
     }
 
     /**
-     * @param {ArrayBuffer|Blob} archiveContent
+     * @param {Blob} archiveContent
      * @param {import('dictionary-importer').ImportDetails} details
      * @param {MessagePort} responsePort
+     * @param {string} operationId
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<void>}
      */
-    async _forwardDictionaryImportToRuntime(archiveContent, details, responsePort) {
-        const transfers = archiveContent instanceof ArrayBuffer ? [responsePort, archiveContent] : [responsePort];
+    async _forwardDictionaryImportToRuntime(archiveContent, details, responsePort, operationId, ownerId) {
+        const operation = typeof ownerId === 'string' ? this._ownedDictionaryImports.get(operationId) : void 0;
+        if (operation && operation.ownerId !== ownerId) { throw new Error('Dictionary import session owner mismatch'); }
+        const assertNotCancelled = () => {
+            if (operation?.cancelled) { throw new Error('Dictionary import cancelled before admission'); }
+        };
+        assertNotCancelled();
         if (this._offscreen !== null) {
             await this._offscreen.prepare();
-            await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, transfers);
+            assertNotCancelled();
+            const relay = operation ? this._superviseOwnedDictionaryImport(operationId, responsePort) : null;
+            try {
+                if (operation) { operation.runtimeAdmissionAttempted = true; }
+                await this._offscreen.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details, operationId}}, [relay?.port ?? responsePort]);
+            } catch (error) {
+                if (relay) {
+                    postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
+                    relay.close();
+                }
+                throw error;
+            }
             return;
         }
         if (this._localDictionaryRuntime !== null) {
-            await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details}}, transfers);
+            const relay = operation ? this._superviseOwnedDictionaryImport(operationId, responsePort) : null;
+            try {
+                if (operation) { operation.runtimeAdmissionAttempted = true; }
+                await this._localDictionaryRuntime.sendMessageViaPort({action: 'importDictionaryOffscreen', params: {archiveContent, details, operationId}}, [relay?.port ?? responsePort]);
+            } catch (error) {
+                if (relay) {
+                    postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
+                    relay.close();
+                }
+                throw error;
+            }
             return;
         }
         throw new Error('Dictionary runtime import is unavailable');
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {MessagePort} responsePort
+     * @returns {{port: MessagePort, close: () => void}}
+     */
+    _superviseOwnedDictionaryImport(operationId, responsePort) {
+        const operation = this._ownedDictionaryImports.get(operationId);
+        const channel = new MessageChannel();
+        let closed = false;
+        const close = () => {
+            if (closed) { return; }
+            closed = true;
+            channel.port1.onmessage = null;
+            channel.port1.onmessageerror = null;
+            channel.port2.onmessage = null;
+            channel.port2.onmessageerror = null;
+            responsePort.onmessage = null;
+            responsePort.onmessageerror = null;
+            closeDictionaryImportResponsePort(channel.port1);
+            closeDictionaryImportResponsePort(channel.port2);
+            closeDictionaryImportResponsePort(responsePort);
+            if (operation?.responseCleanup === close) { delete operation.responseCleanup; }
+        };
+        if (operation) { operation.responseCleanup = close; }
+        channel.port1.onmessage = (event) => {
+            if (closed) { return; }
+            /** @type {unknown} */
+            const message = event.data;
+            const details = isObjectNotArray(message) ? message : null;
+            const terminal = details?.type === 'complete' || details?.type === 'error';
+            const errorName = isObjectNotArray(details?.error) && typeof details.error.name === 'string' ? details.error.name : '';
+            const uncertain = details?.type === 'error' && ['DictionaryImportTransportError', 'DictionaryWorkerTransportError', 'OffscreenControlTransportError'].includes(errorName);
+            if (terminal && !uncertain && operation && this._ownedDictionaryImports.get(operationId) === operation) {
+                operation.completed = true;
+                if (operation.settled) { this._ownedDictionaryImports.delete(operationId); }
+            }
+            postDictionaryImportResponseMessage(responsePort, message);
+            if (terminal) {
+                close();
+            }
+        };
+        channel.port1.onmessageerror = () => {
+            if (closed) { return; }
+            const error = new Error('Backend dictionary import response channel failed');
+            error.name = 'DictionaryImportTransportError';
+            postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
+            close();
+        };
+        return {port: channel.port2, close};
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {string|undefined} ownerId
+     * @throws {Error}
+     */
+    _registerDictionaryImportOwner(operationId, ownerId) {
+        if (typeof operationId !== 'string' || !/^[a-zA-Z0-9:_-]{1,128}$/.test(operationId)) { throw new Error('Invalid dictionary import operation ID'); }
+        if (this._ownedDictionaryImports?.has(operationId)) { throw new Error('Duplicate dictionary import operation ID'); }
+        if (typeof ownerId === 'undefined') { return; }
+        if (!this._dictionaryImportOwners?.has(ownerId)) { throw new Error('Dictionary import session owner is not active'); }
+        if (this._ownedDictionaryImports.size >= 128) { throw new Error('Dictionary import ownership registry is full'); }
+        this._ownedDictionaryImports.set(operationId, {ownerId, cancelled: false, settled: false, completed: false});
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {string|undefined} ownerId
+     * @param {boolean} [failed]
+     */
+    _settleDictionaryImportOwnership(operationId, ownerId, failed = false) {
+        const operation = this._ownedDictionaryImports?.get(operationId);
+        if (!operation || operation.ownerId !== ownerId) { return; }
+        operation.settled = true;
+        // Once dispatch is attempted, a failed acknowledgement does not prove non-admission.
+        if (failed && !operation.runtimeAdmissionAttempted) { operation.completed = true; }
+        if (operation.cancelled || operation.completed) { this._ownedDictionaryImports.delete(operationId); }
     }
 
     /**
@@ -847,30 +1080,48 @@ export class Backend {
 
     /**
      * @returns {void}
-     * @throws {Error} When the shared worker bridge cannot be created.
+     * @throws {Error} If the shared worker cannot be constructed.
      */
     _setupSharedWorkerBridge() {
+        if (this._sharedWorkerBridge !== null) { return; }
         const sharedWorkerBridge = new SharedWorker(new URL('../comm/shared-worker-bridge.js', import.meta.url), {type: 'module'});
         this._sharedWorkerBridge = sharedWorkerBridge;
-        sharedWorkerBridge.port.addEventListener('message', (/** @type {MessageEvent} */ e) => {
-            // connectToBackend2
-            e.ports[0].onmessage = this._onPmMessage.bind(this);
-        });
-        sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent<import('api').PmApiMessageAny>} */ event) => {
-            this._onPmMessageError(event);
-            this._resetSharedWorkerBridge(sharedWorkerBridge, 'messageerror', new Error('Shared worker backend bridge message deserialization failed'));
-        });
-        sharedWorkerBridge.onerror = (event) => {
-            const message = typeof event.message === 'string' && event.message.length > 0 ? event.message : 'unknown shared worker failure';
-            this._resetSharedWorkerBridge(sharedWorkerBridge, 'error', new Error(message));
-        };
-        sharedWorkerBridge.port.start();
+        let stage = 'configurePort';
         try {
+            sharedWorkerBridge.port.addEventListener('message', (/** @type {MessageEvent} */ e) => {
+                if (this._sharedWorkerBridge !== sharedWorkerBridge || e.ports.length !== 1) {
+                    for (const port of e.ports) {
+                        try {
+                            port.close();
+                        } catch (_) {
+                            // Release every port received by the obsolete or malformed handshake.
+                        }
+                    }
+                    if (this._sharedWorkerBridge === sharedWorkerBridge) {
+                        log.error(new Error('Backend bridge connection message must contain exactly one frontend port'));
+                    }
+                    return;
+                }
+                // connectToBackend2
+                e.ports[0].onmessage = this._onPmMessage.bind(this);
+            });
+            sharedWorkerBridge.port.addEventListener('messageerror', (/** @type {MessageEvent<import('api').PmApiMessageAny>} */ event) => {
+                if (this._sharedWorkerBridge !== sharedWorkerBridge) { return; }
+                this._onPmMessageError(event);
+                this._resetSharedWorkerBridge(sharedWorkerBridge, 'messageerror', new Error('Shared worker backend bridge message deserialization failed'));
+            });
+            sharedWorkerBridge.onerror = (event) => {
+                const message = typeof event.message === 'string' && event.message.length > 0 ? event.message : 'unknown shared worker failure';
+                this._resetSharedWorkerBridge(sharedWorkerBridge, 'error', new Error(message));
+            };
+            stage = 'start';
+            sharedWorkerBridge.port.start();
+            stage = 'registerBackendPort';
             sharedWorkerBridge.port.postMessage({action: 'registerBackendPort'});
         } catch (error) {
             this._resetSharedWorkerBridge(
                 sharedWorkerBridge,
-                'registerBackendPort',
+                stage,
                 error instanceof Error ? error : new Error(String(error)),
             );
             throw error;
@@ -903,15 +1154,18 @@ export class Backend {
         }
         this._sharedWorkerBridgeReconnectScheduled = true;
         queueMicrotask(() => {
-            this._sharedWorkerBridgeReconnectScheduled = false;
             try {
-                this._setupSharedWorkerBridge();
+                if (this._sharedWorkerBridge === null) {
+                    this._setupSharedWorkerBridge();
+                }
             } catch (reconnectError) {
                 const normalizedError = reconnectError instanceof Error ? reconnectError : new Error(String(reconnectError));
                 reportDiagnostics('shared-worker-bridge-reconnect-failed', {
                     message: normalizedError.message,
                 });
                 log.error(normalizedError);
+            } finally {
+                this._sharedWorkerBridgeReconnectScheduled = false;
             }
         });
     }
@@ -923,9 +1177,23 @@ export class Backend {
         return typeof self !== 'undefined' && self !== null && self.constructor?.name === 'Window';
     }
 
+    /** @returns {void} */
+    _ensureSharedWorkerBridge() {
+        if (this._sharedWorkerBridge !== null || this._sharedWorkerBridgeReconnectScheduled || !this._isWindowBackgroundRuntime()) {
+            return;
+        }
+        // Retry a missing bridge on later demand, never through a self-scheduling loop.
+        this._sharedWorkerBridgeReconnectScheduled = true;
+        try {
+            this._setupSharedWorkerBridge();
+        } finally {
+            this._sharedWorkerBridgeReconnectScheduled = false;
+        }
+    }
+
 
     /**
-     * @param {Parameters<Parameters<typeof chrome.tabs.onZoomChange.addListener>[0]>[0]} event
+     * @param {chrome.tabs.OnZoomChangeInfo} event
      */
     _onZoomChange({tabId, oldZoomFactor, newZoomFactor}) {
         this._sendMessageTabIgnoreResponse(tabId, {action: 'applicationZoomChanged', params: {oldZoomFactor, newZoomFactor}}, {});
@@ -965,6 +1233,7 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'requestBackendReadySignal'>} */
     _onApiRequestBackendReadySignal(_params, sender) {
+        this._ensureSharedWorkerBridge();
         // Tab ID isn't set in background (e.g. browser_action)
         /** @type {import('application').ApiMessage<'applicationBackendReady'>} */
         const data = {action: 'applicationBackendReady'};
@@ -1013,69 +1282,8 @@ export class Backend {
         }
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
-        let findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-        let {dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions);
-        let installedDictionaryCount = null;
-        let installedDictionaryTitles = null;
-        /** @type {unknown|null} */
-        let debugLookupState = null;
-        let hasInstalledDictionaries = true;
-        if (
-            dictionaryEntries.length === 0 &&
-            findTermsOptions.enabledDictionaryMap.size > 0
-        ) {
-            try {
-                const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
-                if (Array.isArray(dictionaryInfo)) {
-                    installedDictionaryCount = dictionaryInfo.length;
-                    installedDictionaryTitles = dictionaryInfo
-                        .map((dictionary) => (typeof dictionary?.title === 'string' ? dictionary.title : null))
-                        .filter((title) => typeof title === 'string' && title.length > 0);
-                }
-            } catch (e) {
-                installedDictionaryCount = null;
-                installedDictionaryTitles = null;
-                reportDiagnostics('dictionary-lookup-installed-dictionary-info-failed', {
-                    textLength: text.length,
-                    mode,
-                    error: toError(e).message,
-                });
-            }
-            hasInstalledDictionaries = installedDictionaryCount === null ?
-                await this._hasInstalledDictionaries() :
-                installedDictionaryCount > 0;
-            if (hasInstalledDictionaries) {
-                reportDiagnostics('dictionary-lookup-self-heal-begin', {
-                    textLength: text.length,
-                    enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
-                    mode,
-                });
-                await this._refreshDictionaryDatabaseAfterUpdate();
-                void this._translator.clearDatabaseCaches();
-                findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-                ({dictionaryEntries, originalTextLength} = await this._translator.findTerms(mode, text, findTermsOptions));
-                if (dictionaryEntries.length === 0) {
-                    try {
-                        debugLookupState = await this._debugDictionaryLookupState(
-                            text,
-                            [...findTermsOptions.enabledDictionaryMap.keys()],
-                        );
-                    } catch (e) {
-                        debugLookupState = {
-                            ok: false,
-                            reason: 'debug lookup capture failed',
-                            error: toError(e).message,
-                        };
-                    }
-                }
-                reportDiagnostics('dictionary-lookup-self-heal-complete', {
-                    textLength: text.length,
-                    enabledDictionaryCount: findTermsOptions.enabledDictionaryMap.size,
-                    mode,
-                    recovered: dictionaryEntries.length > 0,
-                });
-            }
-        }
+        const findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
+        const {dictionaryEntries, originalTextLength, dictionaryAvailability} = await this._translator.findTerms(mode, text, findTermsOptions);
         const hasExactHeadwordMatch = (
             text.length > 0 &&
             dictionaryEntries.some((entry) => (
@@ -1083,40 +1291,7 @@ export class Backend {
                 entry.headwords.some(({term, reading}) => term === text || reading === text)
             ))
         );
-        const shouldCaptureSuspiciousResultDebugState = (
-            debugLookupState === null &&
-            text.length > 0 &&
-            dictionaryEntries.length > 0 &&
-            dictionaryEntries.length <= 20 &&
-            findTermsOptions.enabledDictionaryMap.size > 0 &&
-            !hasExactHeadwordMatch
-        );
-        if (
-            (
-                dictionaryEntries.length === 0 ||
-                shouldCaptureSuspiciousResultDebugState
-            ) &&
-            findTermsOptions.enabledDictionaryMap.size > 0 &&
-            debugLookupState === null
-        ) {
-            try {
-                debugLookupState = await this._debugDictionaryLookupState(
-                    text,
-                    [...findTermsOptions.enabledDictionaryMap.keys()],
-                );
-            } catch (e) {
-                debugLookupState = {
-                    ok: false,
-                    reason: 'debug lookup capture failed',
-                    error: toError(e).message,
-                };
-            }
-        }
-        const includeDetailedLookupSnapshot = (
-            debugLookupState !== null ||
-            dictionaryEntries.length === 0 ||
-            !hasExactHeadwordMatch
-        );
+        const includeDetailedLookupSnapshot = dictionaryEntries.length === 0 || !hasExactHeadwordMatch;
         dictionaryEntries.splice(maxResults);
         reportDiagnosticsLazy('dictionary-lookup-snapshot', () => ({
             text,
@@ -1144,17 +1319,17 @@ export class Backend {
                 partsOfSpeechFilter,
                 useDeinflections,
             })),
-            installedDictionaryCount,
-            installedDictionaryTitles,
+            installedDictionaryCount: null,
+            installedDictionaryTitles: null,
             hasExactHeadwordMatch,
             resultDictionaryCount: dictionaryEntries.length,
-            resultDictionaries: [...new Set(dictionaryEntries.flatMap((entry) => (
-                entry.definitions.map(({dictionary}) => dictionary)
-            )))],
-            resultDictionaryAliases: [...new Set(dictionaryEntries.flatMap((entry) => (
-                entry.definitions.map(({dictionaryAlias}) => dictionaryAlias)
-            )))],
-            debugLookupState,
+            resultDictionaries: [...new Set(dictionaryEntries.flatMap(
+                ({definitions}) => definitions.map(({dictionary}) => dictionary),
+            ))],
+            resultDictionaryAliases: [...new Set(dictionaryEntries.flatMap(
+                ({definitions}) => definitions.map(({dictionaryAlias}) => dictionaryAlias),
+            ))],
+            debugLookupState: null,
             resultEntries: includeDetailedLookupSnapshot ?
                 dictionaryEntries.map((entry) => ({
                     type: entry.type,
@@ -1170,19 +1345,19 @@ export class Backend {
                 })) :
                 void 0,
         }));
-        return {dictionaryEntries, originalTextLength};
+        return {dictionaryEntries, originalTextLength, ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {})};
     }
 
     /** @type {import('api').ApiHandler<'parseText'>} */
-    async _onApiParseText({text, optionsContext, scanLength, useInternalParser, useMecabParser}) {
+    async _onApiParseText({text, optionsContext, scanLength, useInternalParser, useMecabParser, useAllFrequencyDictionaries}) {
         /** @type {import('api').ParseTextResultItem[]} */
         const results = [];
 
         const [internalResults, mecabResults] = await Promise.all([
             useInternalParser ?
                 (Array.isArray(text) ?
-                    Promise.all(text.map((t) => this._textParseScanning(t, scanLength, optionsContext))) :
-                    Promise.all([this._textParseScanning(text, scanLength, optionsContext)])) :
+                    Promise.all(text.map((t) => this._textParseScanning(t, scanLength, optionsContext, useAllFrequencyDictionaries))) :
+                    Promise.all([this._textParseScanning(text, scanLength, optionsContext, useAllFrequencyDictionaries)])) :
                 null,
             useMecabParser ?
                 (Array.isArray(text) ?
@@ -1580,7 +1755,7 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'getDictionaryTermProbe'>} */
     async _onApiGetDictionaryTermProbe({dictionaryTitle}) {
-        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle : '';
         if (normalizedTitle.length === 0) { return null; }
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
@@ -1613,36 +1788,70 @@ export class Backend {
      * @returns {Promise<unknown>}
      */
     async _debugDictionaryLookupState(text, dictionaryNames) {
-        // The runtime owns the database. The background proxy has no local
-        // indexes or content store to inspect alongside the authoritative result.
         if (this._offscreen !== null) {
-            return await this._offscreen.sendMessagePromise({
-                action: 'debugDictionaryLookupStateOffscreen',
-                params: {text, dictionaryNames},
-            });
+            const [localState, offscreenState] = await Promise.all([
+                this._debugDictionaryLookupStateLocal(
+                    text,
+                    dictionaryNames,
+                ),
+                this._offscreen.sendMessagePromise({
+                    action: 'debugDictionaryLookupStateOffscreen',
+                    params: {text, dictionaryNames},
+                }),
+            ]);
+            return {
+                ok: Boolean((/** @type {{ok?: unknown}|null|undefined} */ (localState))?.ok) && Boolean((/** @type {{ok?: unknown}|null|undefined} */ (offscreenState))?.ok),
+                text,
+                dictionaryNames,
+                localState,
+                offscreenState,
+            };
         }
         if (this._localDictionaryRuntime !== null) {
-            return await this._localDictionaryRuntime.sendMessagePromise({
-                action: 'debugDictionaryLookupStateOffscreen',
-                params: {text, dictionaryNames},
-            });
+            const [localState, workerState] = await Promise.all([
+                this._debugDictionaryLookupStateLocal(
+                    text,
+                    dictionaryNames,
+                ),
+                this._localDictionaryRuntime.sendMessagePromise({
+                    action: 'debugDictionaryLookupStateOffscreen',
+                    params: {text, dictionaryNames},
+                }),
+            ]);
+            return {
+                ok: Boolean((/** @type {{ok?: unknown}|null|undefined} */ (localState))?.ok) && Boolean((/** @type {{ok?: unknown}|null|undefined} */ (workerState))?.ok),
+                text,
+                dictionaryNames,
+                localState,
+                workerState,
+            };
         }
         return await this._debugDictionaryLookupStateLocal(text, dictionaryNames);
     }
 
-    /** @type {import('api').ApiHandler<'debugDictionaryStorageState'>} */
+    /** @returns {Promise<unknown>} */
     async _onApiDebugDictionaryStorageState() {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
         await this._ensureDictionaryDatabaseReady();
-        const dictionaryRows = this._dictionaryDatabase instanceof DictionaryDatabase ?
-            await this._dictionaryDatabase.debugGetDictionaryRows() :
-            [];
-        const offscreenDictionaryRowsResult = this._offscreen !== null ?
-            await this._offscreen.sendMessagePromise({action: 'debugDictionaryStorageStateOffscreen'}) :
+        const usesFallbackStorageValue = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'usesFallbackStorage'));
+        const getOpenStorageDiagnosticsValue = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'getOpenStorageDiagnostics'));
+        const rowsMethod = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'debugGetDictionaryRows'));
+        const dictionaryRows = (typeof rowsMethod === 'function') ?
+            await /** @type {() => Promise<unknown>} */ (rowsMethod).call(this._dictionaryDatabase) :
             null;
-        const usesFallbackStorage = this._dictionaryDatabase.usesFallbackStorage();
-        const openStorageDiagnostics = this._dictionaryDatabase.getOpenStorageDiagnostics();
+        const offscreenDictionaryRows = (this._offscreen !== null) ?
+(() => this._offscreen.sendMessagePromise({
+    action: 'debugDictionaryStorageStateOffscreen',
+}))() :
+null;
+        const offscreenDictionaryRowsResult = (offscreenDictionaryRows !== null) ? await offscreenDictionaryRows : null;
+        const usesFallbackStorage = typeof usesFallbackStorageValue === 'function' ?
+            /** @type {() => boolean} */ (usesFallbackStorageValue).call(this._dictionaryDatabase) :
+            null;
+        const openStorageDiagnostics = typeof getOpenStorageDiagnosticsValue === 'function' ?
+            /** @type {() => unknown} */ (getOpenStorageDiagnosticsValue).call(this._dictionaryDatabase) :
+            null;
         return {
             usesFallbackStorage: typeof usesFallbackStorage === 'boolean' ? usesFallbackStorage : null,
             openStorageDiagnostics: (
@@ -1650,16 +1859,41 @@ export class Backend {
                 openStorageDiagnostics !== null &&
                 !Array.isArray(openStorageDiagnostics)
             ) ?
-                openStorageDiagnostics :
-                null,
+openStorageDiagnostics :
+null,
             startupDiagnosticsSnapshot: this._startupDiagnosticsSnapshot,
             lastDictionaryUrlImportDebug: this._lastDictionaryUrlImportDebug,
-            dictionaryRows,
-            offscreenDictionaryRows: offscreenDictionaryRowsResult?.dictionaryRows ?? [],
-            offscreenLastReplaceDictionaryTitleDebug: offscreenDictionaryRowsResult?.lastReplaceDictionaryTitleDebug ?? null,
-            offscreenStartupCleanupIncompleteImportsSummary: offscreenDictionaryRowsResult?.startupCleanupIncompleteImportsSummary ?? null,
-            offscreenStartupCleanupMissingTermRecordShardsSummary: offscreenDictionaryRowsResult?.startupCleanupMissingTermRecordShardsSummary ?? null,
-            offscreenTermRecordShardFileNames: offscreenDictionaryRowsResult?.termRecordShardFileNames ?? [],
+            dictionaryRows: Array.isArray(dictionaryRows) ? dictionaryRows : [],
+            offscreenDictionaryRows: Array.isArray(offscreenDictionaryRowsResult?.dictionaryRows) ? offscreenDictionaryRowsResult.dictionaryRows : [],
+            offscreenLastReplaceDictionaryTitleDebug: (
+                offscreenDictionaryRowsResult !== null &&
+                typeof offscreenDictionaryRowsResult === 'object' &&
+                !Array.isArray(offscreenDictionaryRowsResult)
+            ) ?
+(offscreenDictionaryRowsResult.lastReplaceDictionaryTitleDebug ?? null) :
+null,
+            offscreenStartupCleanupIncompleteImportsSummary: (
+                offscreenDictionaryRowsResult !== null &&
+                typeof offscreenDictionaryRowsResult === 'object' &&
+                !Array.isArray(offscreenDictionaryRowsResult)
+            ) ?
+(offscreenDictionaryRowsResult.startupCleanupIncompleteImportsSummary ?? null) :
+null,
+            offscreenStartupCleanupMissingTermRecordShardsSummary: (
+                offscreenDictionaryRowsResult !== null &&
+                typeof offscreenDictionaryRowsResult === 'object' &&
+                !Array.isArray(offscreenDictionaryRowsResult)
+            ) ?
+(offscreenDictionaryRowsResult.startupCleanupMissingTermRecordShardsSummary ?? null) :
+null,
+            offscreenTermRecordShardFileNames: (
+                offscreenDictionaryRowsResult !== null &&
+                typeof offscreenDictionaryRowsResult === 'object' &&
+                !Array.isArray(offscreenDictionaryRowsResult) &&
+                Array.isArray(offscreenDictionaryRowsResult.termRecordShardFileNames)
+            ) ?
+offscreenDictionaryRowsResult.termRecordShardFileNames :
+[],
         };
     }
 
@@ -1759,7 +1993,7 @@ export class Backend {
      */
     async _runDictionaryMutation(task) {
         const previousPromise = this._dictionaryMutationPromise;
-        // Publish the tail before any caller-provided task can re-enter this queue.
+        // Publish the tail before caller code can synchronously re-enter this queue.
         const mutationPromise = Promise.resolve().then(async () => {
             if (previousPromise !== null) {
                 try {
@@ -1791,9 +2025,8 @@ export class Backend {
         const timeoutId = globalThis.setTimeout(() => {
             abortController.abort(new Error(`Timed out fetching dictionary archive after ${String(downloadTimeoutMs)}ms: ${normalizedUrl}`));
         }, downloadTimeoutMs);
-        let response;
         try {
-            response = await fetch(normalizedUrl, {
+            const response = await fetch(normalizedUrl, {
                 method: 'GET',
                 cache: 'no-store',
                 credentials: 'omit',
@@ -1801,6 +2034,17 @@ export class Backend {
                 referrerPolicy: 'no-referrer',
                 signal: abortController.signal,
             });
+            if (!response.ok) {
+                // Reject promptly, but do not leave an unread error-body download running.
+                void response.body?.cancel().catch(() => {});
+                throw new Error(`Failed to fetch dictionary archive: ${normalizedUrl} (status=${String(response.status)})`);
+            }
+            const content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
+            return {
+                contentBase64: arrayBufferToBase64(content),
+                fileName: getDictionaryArchiveFileName(normalizedUrl, response.headers.get('Content-Disposition') || ''),
+                contentType: response.headers.get('Content-Type'),
+            };
         } catch (error) {
             const abortReason = /** @type {unknown} */ (abortController.signal.reason);
             if (abortController.signal.aborted && abortReason instanceof Error) {
@@ -1810,41 +2054,24 @@ export class Backend {
         } finally {
             globalThis.clearTimeout(timeoutId);
         }
-        if (!response.ok) {
-            throw new Error(`Failed to fetch dictionary archive: ${normalizedUrl} (status=${String(response.status)})`);
-        }
-        const content = await RequestBuilder.readFetchResponseArrayBuffer(response, null);
-        const fileName = (() => {
-            const contentDisposition = response.headers.get('Content-Disposition') || '';
-            const match = /filename\\*?=(?:UTF-8''|"?)([^";]+)/i.exec(contentDisposition);
-            if (match) {
-                try {
-                    return decodeURIComponent(match[1].replace(/^"|"$/g, ''));
-                } catch (_) {
-                    return match[1].replace(/^"|"$/g, '');
-                }
-            }
-            try {
-                const parsed = new URL(normalizedUrl);
-                const pathPart = parsed.pathname.split('/').reverse().find((part) => part.length > 0);
-                if (typeof pathPart === 'string' && pathPart.length > 0) {
-                    return pathPart;
-                }
-            } catch (_) {
-                // Ignore malformed URL parsing here; we already attempted the request.
-            }
-            return 'fileFromURL.zip';
-        })();
-        return {
-            contentBase64: arrayBufferToBase64(content),
-            fileName,
-            contentType: response.headers.get('Content-Type'),
-        };
     }
 
     /** @type {import('api').ApiHandler<'setDictionaryImportMode'>} */
-    async _onApiSetDictionaryImportMode({active}) {
-        await this._setDictionaryImportMode(active);
+    async _onApiSetDictionaryImportMode({active, ownerId}) {
+        await this._setDictionaryImportMode(active, ownerId);
+    }
+
+    /** @type {import('api').ApiHandler<'getDictionaryImportOperationStatus'>} */
+    async _onApiGetDictionaryImportOperationStatus({operationId, workerGeneration}) {
+        /** @type {import('offscreen').ApiMessage<'cancelDictionaryImportOffscreen'>} */
+        const message = {action: 'cancelDictionaryImportOffscreen', params: {operationId, workerGeneration, lookupOnly: true}};
+        if (this._offscreen !== null) {
+            return /** @type {import('offscreen').ImportOperationStatus} */ (await this._offscreen.sendMessagePromise(/** @type {import('offscreen').ApiMessage<'cancelDictionaryImportOffscreen'>} */ (message)));
+        }
+        if (this._localDictionaryRuntime !== null) {
+            return await this._localDictionaryRuntime.sendMessagePromise(message);
+        }
+        return {operationId, workerGeneration: '', state: 'unknown'};
     }
 
     /** @type {import('api').ApiHandler<'purgeDatabase'>} */
@@ -1860,24 +2087,6 @@ export class Backend {
             await this._ensureDictionaryDatabaseReady();
             await this._dictionaryDatabase.purge();
             await this._triggerDatabaseUpdated('dictionary', 'purge');
-        });
-    }
-
-    /** @type {import('api').ApiHandler<'exportDictionaryDatabase'>} */
-    async _onApiExportDictionaryDatabase() {
-        await this._awaitDictionaryMutationSettled();
-        await this._awaitDictionaryRefreshSettled();
-        await this._ensureDictionaryDatabaseReady();
-        const content = await this._dictionaryDatabase.exportDatabase();
-        return arrayBufferToBase64(content);
-    }
-
-    /** @type {import('api').ApiHandler<'importDictionaryDatabase'>} */
-    async _onApiImportDictionaryDatabase({content}) {
-        await this._runDictionaryMutation(async () => {
-            await this._ensureDictionaryDatabaseReady();
-            await this._dictionaryDatabase.importDatabase(base64ToArrayBuffer(content));
-            await this._triggerDatabaseUpdated('dictionary', 'import');
         });
     }
 
@@ -1919,20 +2128,16 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'setAllSettings'>} */
     async _onApiSetAllSettings({value, source}) {
-        this._optionsUtil.validate(value);
-        const previousOptions = this._options;
-        const previousEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(previousOptions);
-        this._options = clone(value);
-        try {
-            await this._saveOptions(source);
-        } catch (e) {
-            this._options = previousOptions;
-            throw e;
-        }
-        const nextEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(this._options);
-        if (!this._areStringArraysEqual(previousEnabledDictionaries, nextEnabledDictionaries)) {
-            this._warmEnabledDictionaryLookupCaches('settings-enabled-dictionaries-changed');
-        }
+        await this._runOptionsMutation(async () => {
+            this._optionsUtil.validate(value);
+            const previousEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(this._options);
+            // Do not expose the replacement to read APIs before persistence.
+            await this._saveOptions(source, clone(value));
+            const nextEnabledDictionaries = this._getCurrentProfileEnabledDictionaryNames(this._options);
+            if (!this._areStringArraysEqual(previousEnabledDictionaries, nextEnabledDictionaries)) {
+                this._warmEnabledDictionaryLookupCaches('settings-enabled-dictionaries-changed');
+            }
+        });
     }
 
     /** @type {import('api').ApiHandlerNoExtraArgs<'getOrCreateSearchPopup'>} */
@@ -2079,30 +2284,48 @@ export class Backend {
             otherFrameId: sourceFrameId,
         };
         /** @type {?chrome.runtime.Port} */
-        let sourcePort = chrome.tabs.connect(sourceTabId, {frameId: sourceFrameId, name: JSON.stringify(sourceDetails)});
+        let sourcePort = null;
         /** @type {?chrome.runtime.Port} */
-        let targetPort = chrome.tabs.connect(targetTabId, {frameId: targetFrameId, name: JSON.stringify(targetDetails)});
+        let targetPort = null;
 
         const cleanup = () => {
             this._checkLastError(chrome.runtime.lastError);
-            if (targetPort !== null) {
-                targetPort.disconnect();
-                targetPort = null;
-            }
-            if (sourcePort !== null) {
-                sourcePort.disconnect();
-                sourcePort = null;
+            const ports = [targetPort, sourcePort];
+            targetPort = null;
+            sourcePort = null;
+            for (const port of ports) {
+                if (port === null) { continue; }
+                try {
+                    port.disconnect();
+                } catch (e) {
+                    // An invalidated endpoint must not prevent closing its peer.
+                }
             }
         };
 
-        sourcePort.onMessage.addListener((message) => {
-            if (targetPort !== null) { targetPort.postMessage(message); }
-        });
-        targetPort.onMessage.addListener((message) => {
-            if (sourcePort !== null) { sourcePort.postMessage(message); }
-        });
-        sourcePort.onDisconnect.addListener(cleanup);
-        targetPort.onDisconnect.addListener(cleanup);
+        try {
+            sourcePort = chrome.tabs.connect(sourceTabId, {frameId: sourceFrameId, name: JSON.stringify(sourceDetails)});
+            targetPort = chrome.tabs.connect(targetTabId, {frameId: targetFrameId, name: JSON.stringify(targetDetails)});
+            sourcePort.onMessage.addListener((message) => {
+                try {
+                    if (targetPort !== null) { targetPort.postMessage(message); }
+                } catch (e) {
+                    cleanup();
+                }
+            });
+            targetPort.onMessage.addListener((message) => {
+                try {
+                    if (sourcePort !== null) { sourcePort.postMessage(message); }
+                } catch (e) {
+                    cleanup();
+                }
+            });
+            sourcePort.onDisconnect.addListener(cleanup);
+            targetPort.onDisconnect.addListener(cleanup);
+        } catch (error) {
+            cleanup();
+            throw error;
+        }
 
         return {targetTabId, targetFrameId};
     }
@@ -2114,6 +2337,7 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'heartbeat'>} */
     _onApiHeartbeat() {
+        this._ensureSharedWorkerBridge();
         return void 0;
     }
 
@@ -2126,6 +2350,29 @@ export class Backend {
             throw e;
         }
         return void 0;
+    }
+
+    /** @type {import('api').ApiHandler<'fetchLocalAudioData'>} */
+    async _onApiFetchLocalAudioData({url}) {
+        const response = await fetch(url);
+        if (!response.ok) {
+            log.error(`Local server responded with HTTP status code ${response.status}`);
+            return null;
+        }
+
+        const contentType = response.headers.get('content-type') || 'audio/mpeg';
+        const arrayBuffer = await response.arrayBuffer();
+
+        let binary = '';
+        const bytes = new Uint8Array(arrayBuffer);
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+
+        return {
+            data: btoa(binary),
+            contentType: contentType,
+        };
     }
 
     // Command handlers
@@ -2159,7 +2406,8 @@ export class Backend {
             const parsedUrl = new URL(url);
             const parsedBaseUrl = `${parsedUrl.origin}${parsedUrl.pathname}`;
             const parsedMode = parsedUrl.searchParams.get('mode');
-            return parsedBaseUrl === baseUrl && (parsedMode === mode || (!parsedMode && mode === 'existingOrNewTab'));
+            const modeIsNotSpecial = mode === 'existingOrNewTab' || mode === 'existingOrCurrentTab';
+            return parsedBaseUrl === baseUrl && (parsedMode === mode || (!parsedMode && modeIsNotSpecial));
         };
 
         const openInTab = async () => {
@@ -2187,12 +2435,32 @@ export class Backend {
                 }
                 await this._createTab(queryUrl);
                 return;
+            case 'existingOrCurrentTab':
+                try {
+                    if (await openInTab()) { return; }
+                } catch (e) {
+                    // NOP
+                }
+                await this._updateTab(queryUrl);
+                return;
             case 'newTab':
                 await this._createTab(queryUrl);
                 return;
             case 'popup':
                 return;
         }
+    }
+
+    /**
+     * @param {undefined|{mode: import('backend').Mode, query?: string}} params
+     */
+    async _onCommandOpenSearchPageCurrentTab(params) {
+        /** @type {{mode: import('backend').Mode, query?: string}} */
+        const newParams = {mode: 'existingOrCurrentTab'};
+        if (typeof params === 'object' && params !== null) {
+            newParams.query = params.query;
+        }
+        await this._onCommandOpenSearchPage(newParams);
     }
 
     /**
@@ -2212,6 +2480,11 @@ export class Backend {
             mode = this._normalizeOpenSettingsPageMode(params.mode, mode);
         }
         await this._openSettingsPage(mode);
+    }
+
+    /** Open the normal Settings page and its existing dictionary installer. */
+    async _onCommandOpenReaderJitendexSetup() {
+        await this._createTab(chrome.runtime.getURL('/settings.html?readerInstall=jitendex'));
     }
 
     /**
@@ -2245,18 +2518,116 @@ export class Backend {
      * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
      */
     async _modifySettings(targets, source) {
-        /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
-        const results = [];
-        for (const target of targets) {
-            try {
-                const result = this._modifySetting(target);
-                results.push({result: clone(result)});
-            } catch (e) {
-                results.push({error: ExtensionError.serialize(e)});
-            }
+        if (targets.some(({action}) => (
+            action === 'removeDictionary' ||
+            action === 'removeDictionaryByName' ||
+            action === 'ensureDictionary' ||
+            action === 'setDictionarySelector'
+        ))) {
+            // Read installed state after earlier options writes commit. The
+            // database proxy serializes this read with import publication.
+            // This also prevents stale reconciliation snapshots from restoring
+            // settings for a title deleted before this queued operation.
+            return await this._modifySettingsQueued(targets, source, async () => {
+                await this._ensureDictionaryDatabaseReady();
+                const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
+                return new Set(dictionaryInfo.map(({title}) => title));
+            });
         }
-        await this._saveOptions(source);
-        return results;
+        return await this._modifySettingsQueued(targets, source);
+    }
+
+    /**
+     * @param {import('settings-modifications').ScopedModification[]} targets
+     * @param {string} source
+     * @param {null|(() => Promise<Set<string>>)} [getInstalledDictionaryNames]
+     * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
+     */
+    async _modifySettingsQueued(targets, source, getInstalledDictionaryNames = null) {
+        return await this._runOptionsMutation(async () => {
+            // This runs inside the options queue and before staging or writing.
+            // Do not acquire the dictionary mutation queue here: imports can
+            // themselves need to commit settings after publishing.
+            const installedDictionaryNames = getInstalledDictionaryNames !== null ?
+                await getInstalledDictionaryNames() :
+                null;
+            // Stage synchronous mutations on an isolated copy. Read APIs
+            // continue to observe the last committed options while storage is
+            // pending, including when a write eventually fails.
+            const previousOptions = this._getOptionsFull(false);
+            const stagedOptions = clone(previousOptions);
+            /** @type {Map<string, Record<string, unknown>>} */
+            const expectedDictionaryRows = new Map();
+            for (const target of targets) {
+                if (target.action !== 'setDictionaryField' || typeof target.profileId !== 'string' || !Number.isInteger(target.index)) { continue; }
+                const originalProfile = previousOptions.profiles.find((profile) => isObjectNotArray(profile) && profile.id === target.profileId);
+                const originalDictionaries = originalProfile?.options?.dictionaries;
+                const stagedProfile = stagedOptions.profiles.find((profile) => isObjectNotArray(profile) && profile.id === target.profileId);
+                const stagedDictionaries = stagedProfile?.options?.dictionaries;
+                const originalEntry = Array.isArray(originalDictionaries) ? originalDictionaries[target.index] : null;
+                const stagedEntry = Array.isArray(stagedDictionaries) ? stagedDictionaries[target.index] : null;
+                const rowKey = `${target.profileId}:${target.index}`;
+                if (!expectedDictionaryRows.has(rowKey) && isObjectNotArray(originalEntry) && isObjectNotArray(stagedEntry)) {
+                    expectedDictionaryRows.set(rowKey, /** @type {Record<string, unknown>} */ (stagedEntry));
+                }
+            }
+            /** @type {import('core').Response<import('settings-modifications').ModificationResult>[]} */
+            const results = [];
+            let hasChanges = false;
+            this._options = stagedOptions;
+            try {
+                for (const target of targets) {
+                    try {
+                        if (target.action === 'removeDictionary' && installedDictionaryNames?.has(target.name)) {
+                            this._getDictionarySettingsRemovalArray(target);
+                            results.push({result: []});
+                            continue;
+                        }
+                        /** @type {Record<string, unknown>|null} */
+                        const expectedDictionaryEntry = target.action === 'setDictionaryField' ?
+                            expectedDictionaryRows.get(`${target.profileId}:${target.index}`) ?? null :
+null;
+                        const result = this._modifySetting(target, installedDictionaryNames, previousOptions, expectedDictionaryEntry);
+                        results.push({result: clone(result)});
+                        const noOpAction = (
+                            target.action === 'ensureDictionary' ||
+                            target.action === 'setDictionaryEnabled' ||
+                            target.action === 'setDictionarySelector' ||
+                            target.action === 'replaceDictionaryName' ||
+                            target.action === 'setDictionaryField'
+                        );
+                        const removalAction = target.action === 'removeDictionary' || target.action === 'removeDictionaryByName';
+                        const dictionaryFieldChanged = target.action === 'setDictionaryField' && result !== null && typeof result === 'object' && /** @type {{changed?: unknown}} */ (result).changed === true;
+                        if (noOpAction ? (target.action === 'setDictionaryField' ? dictionaryFieldChanged : result === true) : (!removalAction || (Array.isArray(result) && result.length > 0))) { hasChanges = true; }
+                    } catch (e) {
+                        results.push({error: ExtensionError.serialize(e)});
+                    }
+                }
+            } finally {
+                this._options = previousOptions;
+            }
+            if (!hasChanges) {
+                // No successful mutation: keep the previous state and skip
+                // persistence, notifications, and runtime cache resets.
+                return results;
+            }
+            await this._saveOptions(source, stagedOptions);
+            return results;
+        });
+    }
+
+    /**
+     * Serialize settings mutations, not just storage operations. A transport
+     * error must not let an older rollback clobber a newer user change.
+     * @template T
+     * @param {() => Promise<T>} operation
+     * @returns {Promise<T>}
+     */
+    _runOptionsMutation(operation) {
+        const previous = this._optionsMutationTail ?? Promise.resolve();
+        const current = previous.then(operation);
+        this._optionsMutationTail = current.then(() => {}, () => {});
+        return current;
     }
 
     /**
@@ -2453,6 +2824,7 @@ export class Backend {
      * @param {string} source
      */
     _applyOptions(source) {
+        this._translatorProfileOptionsCache = new WeakMap();
         const options = this._getProfileOptions({current: true}, false);
         this._updateBadge();
 
@@ -2553,10 +2925,21 @@ export class Backend {
     _getProfile(optionsContext, useSchema) {
         const options = this._getOptionsFull(useSchema);
         const profiles = options.profiles;
+        if (
+            !optionsContext.current &&
+            typeof optionsContext.index === 'number' &&
+            Object.hasOwn(optionsContext, 'profileId')
+        ) {
+            const {profileId} = optionsContext;
+            if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+            const matches = profiles.filter((profile) => isObjectNotArray(profile) && profile.id === profileId);
+            if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+            return matches[0];
+        }
         if (!optionsContext.current) {
-            // Specific index
-            const {index} = optionsContext;
-            if (typeof index === 'number') {
+            if (typeof optionsContext.index === 'number') {
+                // Specific index
+                const {index} = optionsContext;
                 if (index < 0 || index >= profiles.length) {
                     throw this._createDataError(`Invalid profile index: ${index}`, optionsContext);
                 }
@@ -2647,9 +3030,10 @@ export class Backend {
      * @param {string} text
      * @param {number} scanLength
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {import('api').ApiParam<'parseText', 'useAllFrequencyDictionaries'>} useAllFrequencyDictionaries
      * @returns {Promise<import('api').ParseTextLine[]>}
      */
-    async _textParseScanning(text, scanLength, optionsContext) {
+    async _textParseScanning(text, scanLength, optionsContext, useAllFrequencyDictionaries) {
         await this._ensureDictionaryDatabaseReady();
         /** @type {import('translator').FindTermsMode} */
         const mode = 'simple';
@@ -2658,6 +3042,7 @@ export class Backend {
         /** @type {import('api').FindTermsDetails} */
         const details = {matchType: 'exact', deinflect: true};
         const findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
+        if (useAllFrequencyDictionaries) { findTermsOptions.useAllFrequencyDictionaries = true; }
         /** @type {import('api').ParseTextLine[]} */
         const results = [];
         let previousUngroupedSegment = null;
@@ -2667,7 +3052,8 @@ export class Backend {
             const codePoint = /** @type {number} */ (text.codePointAt(i));
             const character = String.fromCodePoint(codePoint);
             const substring = text.substring(i, i + scanLength);
-            const cacheKey = `${optionsContext.index}:${substring}`;
+            const metadataMode = useAllFrequencyDictionaries === true ? 1 : 0;
+            const cacheKey = `${optionsContext.index}:${metadataMode}:${substring}`;
             let cached = this._textParseCache.get(cacheKey);
             if (typeof cached === 'undefined') {
                 const {dictionaryEntries, originalTextLength} = await this._translator.findTerms(
@@ -2699,7 +3085,15 @@ export class Backend {
                                     if (src.matchType !== 'exact') { continue; }
                                     validSources.push(src);
                                 }
-                                if (validSources.length > 0) { validHeadwords.push({term: headword.term, reading: headword.reading, sources: validSources}); }
+                                if (validSources.length > 0) {
+                                    validHeadwords.push({
+                                        term: headword.term,
+                                        reading: headword.reading,
+                                        sources: validSources,
+                                        frequencies: dictionaryEntry.frequencies.filter((f) => f.headwordIndex === headword.headwordIndex),
+                                        pronunciations: dictionaryEntry.pronunciations.filter((p) => p.headwordIndex === headword.headwordIndex),
+                                    });
+                                }
                             }
                             if (validHeadwords.length > 0) { trimmedHeadwords.push(validHeadwords); }
                         }
@@ -2773,6 +3167,14 @@ export class Backend {
         switch (scope) {
             case 'profile':
             {
+                if (Object.hasOwn(target, 'profileId')) {
+                    const {profileId} = target;
+                    if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                    const {profiles} = this._getOptionsFull(true);
+                    const matches = profiles.filter((profile) => isObjectNotArray(profile) && profile.id === profileId);
+                    if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                    return matches[0].options;
+                }
                 const {optionsContext} = target;
                 if (typeof optionsContext !== 'object' || optionsContext === null) { throw new Error('Invalid optionsContext'); }
                 return /** @type {import('settings').ProfileOptions} */ (this._getProfileOptions(optionsContext, true));
@@ -2799,19 +3201,218 @@ export class Backend {
 
     /**
      * @param {import('settings-modifications').ScopedModification} target
+     * @param {Set<string>|null} [installedDictionaryNames]
+     * @param {import('settings').Options|null} [originalOptions]
+     * @param {Record<string, unknown>|null} [expectedDraftEntry]
      * @returns {import('settings-modifications').ModificationResult}
      * @throws {Error}
      */
-    _modifySetting(target) {
+    _modifySetting(target, installedDictionaryNames = null, originalOptions = null, expectedDraftEntry = null) {
         const options = this._getModifySettingObject(target);
         const accessor = new ObjectPropertyAccessor(options);
         const action = target.action;
         switch (action) {
+            case 'setDictionaryField':
+            {
+                const {profileId, index, expectedEntry, field, value} = target;
+                const allowedFields = new Set([
+                    'alias',
+                    'enabled',
+                    'allowSecondarySearches',
+                    'definitionsCollapsible',
+                    'partsOfSpeechFilter',
+                    'useDeinflections',
+                ]);
+                if (
+                    target.scope !== 'profile' ||
+                    typeof profileId !== 'string' || profileId.length === 0 ||
+                    !Number.isInteger(index) || index < 0 ||
+                    !isObjectNotArray(expectedEntry) ||
+                    typeof field !== 'string' || !allowedFields.has(field)
+                ) {
+                    throw new Error('Invalid dictionary field update');
+                }
+                if (originalOptions === null) { throw new Error('Missing dictionary field snapshot'); }
+                if (expectedDraftEntry === null) { return {stale: true}; }
+                const originalProfiles = originalOptions.profiles.filter((profile) => isObjectNotArray(profile) && profile.id === profileId);
+                if (originalProfiles.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                const originalDictionaries = originalProfiles[0].options?.dictionaries;
+                if (!Array.isArray(originalDictionaries)) { return {stale: true}; }
+                const originalEntry = originalDictionaries[index];
+                if (!isObjectNotArray(originalEntry) || JSON.stringify(originalEntry) !== JSON.stringify(expectedEntry)) { return {stale: true}; }
+
+                const profile = /** @type {import('settings').ProfileOptions} */ (this._getModifySettingObject(target));
+                const dictionaries = profile.dictionaries;
+                const entry = dictionaries[index];
+                if (!isObjectNotArray(entry)) { return {stale: true}; }
+                // Validation proxies may wrap the row differently on each read.
+                // Check ownership against the raw staged object before writing
+                // through the validating proxy.
+                const stagedProfiles = this._getOptionsFull(false).profiles.filter((item) => item.id === profileId);
+                if (stagedProfiles.length !== 1 || stagedProfiles[0].options.dictionaries[index] !== expectedDraftEntry) { return {stale: true}; }
+                const current = /** @type {Record<string, unknown>} */ (entry);
+                const changed = current[field] !== value;
+                if (changed) { current[field] = clone(value); }
+                return {dictionaryEntry: clone(current), value: clone(current[field]), changed};
+            }
+            case 'ensureDictionary':
+            {
+                const {profileId, item} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                if (!isObjectNotArray(item) || typeof item.name !== 'string') { throw new Error('Invalid dictionary settings'); }
+                if (installedDictionaryNames !== null && !installedDictionaryNames.has(item.name)) { return false; }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown, options?: {dictionaries?: unknown} }[]} */ (profilesValue);
+                const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                const dictionaries = profiles[matches[0]].options?.dictionaries;
+                if (!Array.isArray(dictionaries)) { throw new Error('Invalid dictionary settings target'); }
+                if (dictionaries.some((entry) => isObjectNotArray(entry) && entry.name === item.name)) { return false; }
+                dictionaries.push(clone(item));
+                return true;
+            }
+            case 'setDictionaryEnabled':
+            case 'setDictionarySelector':
+            case 'removeDictionaryByName':
+            case 'replaceDictionaryName':
+            {
+                const {profileId} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown, options?: {dictionaries?: unknown, general?: Record<string, unknown>} }[]} */ (profilesValue);
+                const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                const profile = profiles[matches[0]];
+                if (!isObjectNotArray(profile.options)) { throw new Error('Invalid profile settings target'); }
+                if (action === 'setDictionaryEnabled') {
+                    const {name, alias, value} = target;
+                    if (typeof name !== 'string' || typeof alias !== 'string' || typeof value !== 'boolean') { throw new Error('Invalid dictionary settings'); }
+                    const dictionaries = profile.options.dictionaries;
+                    if (!Array.isArray(dictionaries)) { throw new Error('Invalid dictionary settings target'); }
+                    let entry = null;
+                    for (const item of dictionaries) {
+                        if (isObjectNotArray(item) && item.name === name && item.alias === alias) {
+                            entry = item;
+                            break;
+                        }
+                    }
+                    if (entry === null) { return false; }
+                    if (entry.enabled === value) { return false; }
+                    entry.enabled = value;
+                    return true;
+                }
+                if (action === 'setDictionarySelector') {
+                    const {selector, expectedValue, value} = target;
+                    if (selector !== 'mainDictionary' && selector !== 'sortFrequencyDictionary') { throw new Error('Invalid dictionary selector'); }
+                    if (typeof target.requireDictionaryUninstalled === 'string' && installedDictionaryNames?.has(target.requireDictionaryUninstalled)) { return false; }
+                    if (!isObjectNotArray(profile.options.general)) { throw new Error('Invalid profile general settings'); }
+                    if (profile.options.general[selector] !== expectedValue) { return false; }
+                    if (profile.options.general[selector] === value) { return false; }
+                    profile.options.general[selector] = value;
+                    return true;
+                }
+                if (action === 'replaceDictionaryName') {
+                    const {sourceName, name, styles} = target;
+                    if (typeof sourceName !== 'string' || typeof name !== 'string' || typeof styles !== 'string') { throw new Error('Invalid dictionary replacement'); }
+                    if (sourceName === name) { return false; }
+                    const dictionariesValue = profile.options.dictionaries;
+                    if (!Array.isArray(dictionariesValue)) { throw new Error('Invalid dictionary settings target'); }
+                    const dictionaries = /** @type {unknown[]} */ (dictionariesValue);
+                    const liveSourceIndices = dictionaries.flatMap((entry, index) => (
+                        isObjectNotArray(entry) && entry.name === sourceName ? [index] : []
+                    ));
+                    if (liveSourceIndices.length > 0) {
+                        // Only target rows present before this operation may
+                        // absorb source occurrences. Converted rows must not
+                        // collapse later source rows with the same alias.
+                        /** @type {Map<unknown, number>} */
+                        const initialTargetOccurrences = new Map();
+                        for (const candidate of dictionaries) {
+                            if (!isObjectNotArray(candidate) || candidate.name !== name) { continue; }
+                            const alias = candidate.alias;
+                            initialTargetOccurrences.set(alias, (initialTargetOccurrences.get(alias) ?? 0) + 1);
+                        }
+                        for (let i = liveSourceIndices.length - 1; i >= 0; --i) {
+                            const index = liveSourceIndices[i];
+                            const entryValue = dictionaries[index];
+                            if (!isObjectNotArray(entryValue)) { continue; }
+                            const entry = /** @type {Record<string, unknown>} */ (entryValue);
+                            const originalAlias = /** @type {unknown} */ (entry.alias);
+                            const alias = /** @type {unknown} */ (originalAlias === sourceName ? name : originalAlias);
+                            const targetCount = initialTargetOccurrences.get(alias) ?? 0;
+                            if (targetCount > 0) {
+                                // Keep a newer target alias row and its settings
+                                // rather than producing a duplicate from source.
+                                initialTargetOccurrences.set(alias, targetCount - 1);
+                                dictionaries.splice(index, 1);
+                                continue;
+                            }
+                            entry.name = name;
+                            entry.alias = alias;
+                            entry.styles = styles;
+                        }
+                        return true;
+                    }
+
+                    const fallbackSettings = target.fallbackSettings;
+                    if (!Array.isArray(fallbackSettings)) { return false; }
+                    let changed = false;
+                    const orderedFallbacks = [...fallbackSettings].sort((a, b) => a.index - b.index);
+                    /** @type {Map<unknown, number>} */
+                    const initialTargetOccurrences = new Map();
+                    for (const candidate of dictionaries) {
+                        if (!isObjectNotArray(candidate) || candidate.name !== name) { continue; }
+                        const alias = candidate.alias;
+                        initialTargetOccurrences.set(alias, (initialTargetOccurrences.get(alias) ?? 0) + 1);
+                    }
+                    for (const {index: _index, item} of orderedFallbacks) {
+                        if (!isObjectNotArray(item) || item.name !== sourceName) { continue; }
+                        const alias = /** @type {unknown} */ (item.alias === sourceName ? name : item.alias);
+                        // Finalization can be retried after a prior replacement,
+                        // or another producer can already have created the target
+                        // alias. Preserve that live row and its newer settings.
+                        const targetCount = initialTargetOccurrences.get(alias) ?? 0;
+                        if (targetCount > 0) {
+                            initialTargetOccurrences.set(alias, targetCount - 1);
+                            continue;
+                        }
+                        const replacement = clone(item);
+                        replacement.name = name;
+                        replacement.alias = alias;
+                        replacement.styles = styles;
+                        dictionaries.splice(Math.min(_index, dictionaries.length), 0, replacement);
+                        changed = true;
+                    }
+                    return changed;
+                }
+                const {name} = target;
+                if (typeof name !== 'string') { throw new Error('Invalid dictionary name'); }
+                const dictionaries = /** @type {unknown[]} */ (profile.options.dictionaries);
+                if (!Array.isArray(dictionaries)) { throw new Error('Invalid dictionary settings target'); }
+                if (installedDictionaryNames !== null && installedDictionaryNames.has(name)) { return []; }
+                /** @type {unknown[]} */
+                const removed = [];
+                for (let i = dictionaries.length - 1; i >= 0; --i) {
+                    const entry = dictionaries[i];
+                    if (!isObjectNotArray(entry) || entry.name !== name) { continue; }
+                    removed.unshift(...dictionaries.splice(i, 1));
+                }
+                return removed;
+            }
             case 'set':
             {
-                const {path, value} = target;
+                const {path, value, expectedValue} = target;
                 if (typeof path !== 'string') { throw new Error('Invalid path'); }
                 const pathArray = ObjectPropertyAccessor.getPathArray(path);
+                if (Object.hasOwn(target, 'expectedValue') && JSON.stringify(accessor.get(pathArray)) !== JSON.stringify(expectedValue)) {
+                    const error = new ExtensionError('Setting value changed before update');
+                    error.data = {code: 'stale'};
+                    throw error;
+                }
                 accessor.set(pathArray, value);
                 return accessor.get(pathArray);
             }
@@ -2830,6 +3431,167 @@ export class Backend {
                 accessor.swap(ObjectPropertyAccessor.getPathArray(path1), ObjectPropertyAccessor.getPathArray(path2));
                 return true;
             }
+            case 'moveDictionary':
+            {
+                const {path, currentIndex, targetIndex, expectedNames, expectedEntries} = target;
+                if (typeof path !== 'string') { throw new Error('Invalid path'); }
+                if (!/^dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
+                if (!Number.isInteger(currentIndex) || !Number.isInteger(targetIndex)) { throw new Error('Invalid dictionary settings index'); }
+                if (!Array.isArray(expectedNames) || !expectedNames.every((name) => typeof name === 'string')) { throw new Error('Invalid expected dictionary names'); }
+                if (!Array.isArray(expectedEntries) || !expectedEntries.every(isObjectNotArray)) { throw new Error('Invalid expected dictionary entries'); }
+                const dictionariesValue = accessor.get(ObjectPropertyAccessor.getPathArray(path));
+                if (!Array.isArray(dictionariesValue)) { throw new Error('Invalid target type'); }
+                const dictionaries = /** @type {unknown[]} */ (dictionariesValue);
+                const currentNames = dictionaries.map((entry) => (
+                    isObjectNotArray(entry) ? entry.name : void 0
+                ));
+                if (
+                    currentNames.length !== expectedNames.length ||
+                    currentNames.some((name, index) => name !== expectedNames[index])
+                ) {
+                    throw new Error('Dictionary order changed; reload settings and try again');
+                }
+                if (expectedEntries.length !== currentNames.length) { throw new Error('Invalid expected dictionary entries'); }
+                const duplicateNames = new Set(expectedNames.filter((name, index) => expectedNames.indexOf(name) !== index));
+                for (let i = 0; i < expectedNames.length; ++i) {
+                    if (duplicateNames.has(expectedNames[i])) {
+                        const currentEntry = dictionaries[i];
+                        if (!isObjectNotArray(currentEntry) || JSON.stringify(currentEntry) !== JSON.stringify(expectedEntries[i])) {
+                            throw new Error('Duplicate dictionary identity changed; reload settings and try again');
+                        }
+                    }
+                }
+                if (currentIndex < 0 || currentIndex >= dictionaries.length || targetIndex < 0 || targetIndex >= dictionaries.length) { throw new Error('Invalid dictionary settings index'); }
+                if (currentIndex !== targetIndex) {
+                    const dictionary = dictionaries[currentIndex];
+                    dictionaries.splice(currentIndex, 1);
+                    dictionaries.splice(targetIndex, 0, dictionary);
+                }
+                return true;
+            }
+            case 'setDefaultProfile':
+            {
+                const {profileId} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown}[]} */ (profilesValue);
+                const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                accessor.set(['profileCurrent'], matches[0]);
+                return matches[0];
+            }
+            case 'setProfileConditionGroups':
+            {
+                const {profileId, expectedConditionGroups, value} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                if (!Array.isArray(expectedConditionGroups) || !Array.isArray(value)) { throw new Error('Invalid profile condition groups'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {Record<string, unknown>[]} */ (profilesValue);
+                const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                const index = matches[0];
+                const conditionGroups = profiles[index].conditionGroups;
+                if (!Array.isArray(conditionGroups)) { throw new Error('Invalid profile condition groups target'); }
+                if (JSON.stringify(conditionGroups) !== JSON.stringify(expectedConditionGroups)) {
+                    throw new Error('Profile conditions changed; reload settings and try again');
+                }
+                accessor.set(['profiles', index, 'conditionGroups'], value);
+                return value;
+            }
+            case 'swapProfiles':
+            {
+                const {profileId1, profileId2} = target;
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                if (typeof profileId1 !== 'string' || profileId1.length === 0 || typeof profileId2 !== 'string' || profileId2.length === 0 || profileId1 === profileId2) {
+                    throw new Error('Invalid profile IDs');
+                }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {{id?: unknown}[]} */ (profilesValue);
+                const findUniqueProfileIndex = (/** @type {string} */ profileId) => {
+                    const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                    if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                    return matches[0];
+                };
+                const index1 = findUniqueProfileIndex(profileId1);
+                const index2 = findUniqueProfileIndex(profileId2);
+                const profileCurrent = accessor.get(['profileCurrent']);
+                if (typeof profileCurrent !== 'number' || !Number.isInteger(profileCurrent) || profileCurrent < 0 || profileCurrent >= profiles.length) { throw new Error('Invalid current profile index'); }
+                accessor.swap(['profiles', index1], ['profiles', index2]);
+                if (profileCurrent === index1 || profileCurrent === index2) {
+                    accessor.set(['profileCurrent'], profileCurrent === index1 ? index2 : index1);
+                }
+                return true;
+            }
+            case 'setProfileName':
+            case 'copyProfileOptions':
+            case 'resetProfile':
+            case 'deleteProfile':
+            case 'duplicateProfile':
+            {
+                if (target.scope !== 'global') { throw new Error('Invalid profile settings scope'); }
+                const profilesValue = accessor.get(['profiles']);
+                if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
+                const profiles = /** @type {Record<string, unknown>[]} */ (profilesValue);
+                const findUniqueProfileIndex = (/** @type {unknown} */ profileId) => {
+                    if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+                    const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
+                    if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+                    return matches[0];
+                };
+                switch (target.action) {
+                    case 'setProfileName':
+                    {
+                        if (typeof target.value !== 'string') { throw new Error('Invalid profile name'); }
+                        const index = findUniqueProfileIndex(target.profileId);
+                        accessor.set(['profiles', index, 'name'], target.value);
+                        return target.value;
+                    }
+                    case 'copyProfileOptions':
+                    {
+                        findUniqueProfileIndex(target.sourceProfileId);
+                        const destinationIndex = findUniqueProfileIndex(target.destinationProfileId);
+                        accessor.set(['profiles', destinationIndex, 'options'], target.value);
+                        return true;
+                    }
+                    case 'resetProfile':
+                    {
+                        const index = findUniqueProfileIndex(target.profileId);
+                        if (!isObjectNotArray(target.value)) { throw new Error('Invalid profile reset value'); }
+                        const profile = clone(target.value);
+                        profile.id = profiles[index].id;
+                        profile.name = profiles[index].name;
+                        accessor.set(['profiles', index], profile);
+                        return profile;
+                    }
+                    case 'deleteProfile':
+                    {
+                        if (profiles.length <= 1) { throw new Error('Cannot delete the last profile'); }
+                        const index = findUniqueProfileIndex(target.profileId);
+                        const profileCurrent = accessor.get(['profileCurrent']);
+                        if (typeof profileCurrent !== 'number' || !Number.isInteger(profileCurrent) || profileCurrent < 0 || profileCurrent >= profiles.length) { throw new Error('Invalid current profile index'); }
+                        profiles.splice(index, 1);
+                        if (profileCurrent >= index) {
+                            accessor.set(['profileCurrent'], Math.max(0, Math.min(profileCurrent - 1, profiles.length - 1)));
+                        }
+                        return true;
+                    }
+                    case 'duplicateProfile':
+                    {
+                        const sourceIndex = findUniqueProfileIndex(target.sourceProfileId);
+                        const duplicateProfile = target.profile;
+                        if (!isObjectNotArray(duplicateProfile) || typeof duplicateProfile.id !== 'string' || duplicateProfile.id.length === 0) { throw new Error('Invalid duplicate profile'); }
+                        if (profiles.some((profile) => isObjectNotArray(profile) && profile.id === duplicateProfile.id)) { throw new Error('Duplicate profile ID'); }
+                        profiles.splice(profiles.length, 0, {...profiles[sourceIndex], ...duplicateProfile});
+                        return profiles.length - 1;
+                    }
+                    default: throw new Error('Invalid profile action');
+                }
+            }
             case 'splice':
             {
                 const {path, start, deleteCount, items} = target;
@@ -2839,7 +3601,24 @@ export class Backend {
                 if (!Array.isArray(items)) { throw new Error('Invalid items'); }
                 const array = accessor.get(ObjectPropertyAccessor.getPathArray(path));
                 if (!Array.isArray(array)) { throw new Error('Invalid target type'); }
-                return array.splice(start, deleteCount, ...items);
+                const nextArray = clone(array);
+                const removed = nextArray.splice(start, deleteCount, ...items);
+                accessor.set(ObjectPropertyAccessor.getPathArray(path), nextArray);
+                return removed;
+            }
+            case 'removeDictionary':
+            {
+                const {array, name} = this._getDictionarySettingsRemovalArray(target);
+                /** @type {unknown[]} */
+                const removed = [];
+                for (let i = array.length - 1; i >= 0; --i) {
+                    const entry = /** @type {unknown} */ (array[i]);
+                    if (isObjectNotArray(entry) && entry.name === name) {
+                        array.splice(i, 1);
+                        removed.unshift(entry);
+                    }
+                }
+                return removed;
             }
             case 'push':
             {
@@ -2855,6 +3634,24 @@ export class Backend {
             default:
                 throw new Error(`Unknown action: ${action}`);
         }
+    }
+
+    /**
+     * Validates a dictionary removal and returns its target array without
+     * changing it. Also used when an installed title makes the removal a no-op.
+     * @param {import('settings-modifications').ScopedModificationRemoveDictionary} target
+     * @returns {{array: unknown[], name: string}}
+     * @throws {Error}
+     */
+    _getDictionarySettingsRemovalArray(target) {
+        const options = this._getModifySettingObject(target);
+        const accessor = new ObjectPropertyAccessor(options);
+        const {path, name} = target;
+        if (typeof path !== 'string' || !/^profiles\[\d+\]\.options\.dictionaries$/.test(path)) { throw new Error('Invalid dictionary settings path'); }
+        if (typeof name !== 'string') { throw new Error('Invalid dictionary name'); }
+        const array = accessor.get(ObjectPropertyAccessor.getPathArray(path));
+        if (!Array.isArray(array)) { throw new Error('Invalid target type'); }
+        return {array, name};
     }
 
     /**
@@ -3416,7 +4213,7 @@ export class Backend {
 
         let extension = contentType !== null ? getFileExtensionFromAudioMediaType(contentType) : null;
         if (extension === null) { extension = '.mp3'; }
-        let fileName = generateAnkiNoteMediaFileName('yomitan_audio', extension, timestamp);
+        let fileName = await mediaFileNameHashOrTimestamp('yomitan_audio', data, extension, null, timestamp);
         fileName = fileName.replace(/\]/g, '');
         return await ankiConnect.storeMediaFile(fileName, data);
     }
@@ -3437,7 +4234,10 @@ export class Backend {
             throw new Error('Unknown media type for screenshot image');
         }
 
-        const fileName = generateAnkiNoteMediaFileName('yomitan_browser_screenshot', extension, timestamp);
+        // Concurrent saves can share a timestamp while capturing different tabs.
+        // Keep each screenshot distinct so AnkiConnect cannot replace another
+        // note's image under the same media filename.
+        const fileName = generateAnkiNoteMediaFileName('yomitan_browser_screenshot', extension, `${timestamp}_${crypto.randomUUID()}`);
         return await ankiConnect.storeMediaFile(fileName, data);
     }
 
@@ -3460,7 +4260,7 @@ export class Backend {
 
         const fileName = dataUrl === this._ankiClipboardImageDataUrlCache && this._ankiClipboardImageFilenameCache ?
             this._ankiClipboardImageFilenameCache :
-            generateAnkiNoteMediaFileName('yomitan_clipboard_image', extension, timestamp);
+            generateAnkiNoteMediaFileNameWithUniqueTimestamp('yomitan_clipboard_image', extension, timestamp);
 
         const storedFileName = await ankiConnect.storeMediaFile(fileName, data);
 
@@ -3510,11 +4310,7 @@ export class Backend {
             if (media !== null) {
                 const {content, mediaType} = media;
                 const extension = getFileExtensionFromImageMediaType(mediaType);
-                fileName = generateAnkiNoteMediaFileName(
-                    `yomitan_dictionary_media_${i + 1}`,
-                    extension !== null ? extension : '',
-                    timestamp,
-                );
+                fileName = await mediaFileNameHashOrTimestamp('yomitan_dictionary_media', content, extension, i, timestamp);
                 try {
                     fileName = await ankiConnect.storeMediaFile(fileName, content);
                 } catch (e) {
@@ -3615,7 +4411,12 @@ export class Backend {
      * @param {import('backend').DatabaseUpdateCause} cause
      */
     async _triggerDatabaseUpdated(type, cause) {
-        void this._translator.clearDatabaseCaches();
+        // The dictionary worker clears translator caches before acknowledging a
+        // successful import. Avoid queueing a redundant request behind that
+        // import; all other update paths still invalidate explicitly here.
+        if (type !== 'dictionary' || cause !== 'import') {
+            await Promise.resolve(this._translator.clearDatabaseCaches());
+        }
         if (type === 'dictionary') {
             if (this._dictionaryImportModeActive) {
                 this._deferredDictionaryRefreshDuringImport = true;
@@ -3624,7 +4425,9 @@ export class Backend {
                 return;
             } else {
                 try {
-                    await this._refreshDictionaryDatabaseAfterUpdate();
+                    await this._refreshDictionaryDatabaseAfterUpdate({
+                        reuseActiveImportConnection: cause === 'import',
+                    });
                 } catch (error) {
                     this._deferredDictionaryRefreshDuringImport = true;
                     this._queueDeferredDatabaseUpdatedNotification(type, cause);
@@ -3713,42 +4516,77 @@ export class Backend {
     }
 
     /**
+     * Legacy fallback for direct database instances paired with an offscreen translator.
+     * DictionaryDatabaseProxy.refreshConnection already refreshes the offscreen runtime.
+     * @returns {Promise<void>}
+     */
+    async _refreshOffscreenDictionaryRuntimeAfterUpdate() {
+        if (this._offscreen === null) {
+            return;
+        }
+        try {
+            await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
+        } catch (error) {
+            reportDiagnostics('dictionary-offscreen-refresh-after-update-failed', {
+                action: 'databaseRefreshOffscreen',
+                error: toError(error).message,
+            });
+            return;
+        }
+        try {
+            await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
+        } catch (error) {
+            reportDiagnostics('dictionary-offscreen-refresh-after-update-failed', {
+                action: 'clearDatabaseCachesOffscreen',
+                error: toError(error).message,
+            });
+        }
+    }
+
+    /**
      * Reloads the background dictionary DB connection so updates performed in
      * worker/offscreen contexts become visible to lookup queries.
      * @returns {Promise<void>}
+     * @param {{reuseActiveImportConnection?: boolean}} [options]
      */
-    async _refreshDictionaryDatabaseAfterUpdate() {
+    async _refreshDictionaryDatabaseAfterUpdate({reuseActiveImportConnection = false} = {}) {
         if (this._dictionaryImportModeActive) {
             this._deferredDictionaryRefreshDuringImport = true;
             return;
         }
         const dictionaryDatabase = this._dictionaryDatabase;
+        const adoptCurrentConnectionMethod = /** @type {unknown} */ (
+            Reflect.get(dictionaryDatabase, 'adoptCurrentConnectionAfterImport')
+        );
+        if (reuseActiveImportConnection && typeof adoptCurrentConnectionMethod === 'function') {
+            try {
+                await /** @type {() => Promise<void>} */ (adoptCurrentConnectionMethod).call(dictionaryDatabase);
+                reportDiagnostics('dictionary-import-connection-adopted', {});
+                log.log('[ImportTiming] dictionary refresh reused active import connection');
+                this._warmEnabledDictionaryLookupCaches('dictionary-import-connection-adopted');
+                return;
+            } catch (error) {
+                reportDiagnostics('dictionary-import-connection-adoption-failed', {
+                    error: `${error}`,
+                });
+                log.log(`[ImportTiming] dictionary refresh active-connection adoption failed: ${error}`);
+            }
+        } else if (reuseActiveImportConnection) {
+            log.log('[ImportTiming] dictionary refresh active-connection adoption unsupported');
+        }
         const refreshConnectionMethod = /** @type {unknown} */ (Reflect.get(dictionaryDatabase, 'refreshConnection'));
         let rerunRefresh = false;
         do {
             rerunRefresh = false;
-            const refreshOffscreenPromise = (async () => {
-                if (this._offscreen === null) {
-                    return;
-                }
-                try {
-                    await this._offscreen.sendMessagePromise({action: 'databaseRefreshOffscreen'});
-                    await this._offscreen.sendMessagePromise({action: 'clearDatabaseCachesOffscreen'});
-                } catch (error) {
-                    reportDiagnostics('dictionary-offscreen-refresh-after-update-failed', {
-                        error: `${error}`,
-                    });
-                }
-            })();
             if (this._dictionaryRefreshPromise !== null) {
                 this._dictionaryRefreshQueued = true;
-                await Promise.all([refreshOffscreenPromise, this._dictionaryRefreshPromise]);
+                await this._dictionaryRefreshPromise;
                 continue;
             }
             if (typeof refreshConnectionMethod === 'function') {
                 this._dictionaryRefreshPromise = /** @type {() => Promise<void>} */ (refreshConnectionMethod).call(dictionaryDatabase);
                 try {
-                    await Promise.all([refreshOffscreenPromise, this._dictionaryRefreshPromise]);
+                    await this._dictionaryRefreshPromise;
                 } finally {
                     this._dictionaryRefreshPromise = null;
                     rerunRefresh = this._dictionaryRefreshQueued;
@@ -3761,11 +4599,12 @@ export class Backend {
                 typeof dictionaryDatabase.isPrepared === 'function' &&
                 dictionaryDatabase.isPrepared()
             )) {
-                await refreshOffscreenPromise;
+                await this._refreshOffscreenDictionaryRuntimeAfterUpdate();
                 rerunRefresh = this._dictionaryRefreshQueued;
                 this._dictionaryRefreshQueued = false;
                 continue;
             }
+            const refreshOffscreenPromise = this._refreshOffscreenDictionaryRuntimeAfterUpdate();
             this._dictionaryRefreshPromise = (async () => {
                 if ('close' in dictionaryDatabase && typeof dictionaryDatabase.close === 'function') {
                     await dictionaryDatabase.close();
@@ -3800,7 +4639,7 @@ export class Backend {
      * @returns {Promise<boolean>}
      */
     async _probeDictionaryVisibilityDirect(dictionaryTitle, probe) {
-        const candidates = [...new Set([probe.expression, probe.reading].map((value) => value.trim()).filter((value) => value.length > 0))];
+        const candidates = [...new Set([probe.expression, probe.reading].filter((value) => value.length > 0))];
         if (candidates.length === 0) { return false; }
         const dictionarySet = new Set([dictionaryTitle]);
         const entries = await this._dictionaryDatabase.findTermsBulk(candidates, dictionarySet, 'exact');
@@ -3838,7 +4677,7 @@ export class Backend {
         findTermsOptions.enabledDictionaryMap = enabledDictionaryMap;
         findTermsOptions.mainDictionary = dictionaryTitle;
         findTermsOptions.excludeDictionaryDefinitions = null;
-        const searchText = probe.expression.trim().length > 0 ? probe.expression.trim() : probe.reading.trim();
+        const searchText = probe.expression.length > 0 ? probe.expression : probe.reading;
         if (searchText.length === 0) { return false; }
         const {dictionaryEntries} = await this._translator.findTerms('split', searchText, findTermsOptions);
         return dictionaryEntries.length > 0;
@@ -3850,7 +4689,7 @@ export class Backend {
      * @returns {Promise<import('api').ApiReturn<'verifyDictionaryVisibility'>>}
      */
     async _verifyDictionaryVisibilityInternal(dictionaryTitle, requireEnabledForActiveProfile) {
-        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle.trim() : '';
+        const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle : '';
         if (normalizedTitle.length === 0) {
             return {
                 ok: false,
@@ -3874,7 +4713,7 @@ export class Backend {
         const installed = dictionaryInfo.some((dictionary) => dictionary.title === normalizedTitle);
         const counts = Array.isArray(dictionaryCounts.counts) && dictionaryCounts.counts.length > 0 ? dictionaryCounts.counts[0] : null;
         const options = this._getProfileOptions({current: true}, false);
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
+        const {enabledDictionaryMap} = this._getTranslatorPreparedProfileOptions(options);
         const enabled = !requireEnabledForActiveProfile || enabledDictionaryMap.has(normalizedTitle);
         const termCount = typeof counts?.terms === 'number' ? counts.terms : 0;
         const requiresTermProbe = termCount > 0;
@@ -4050,13 +4889,22 @@ export class Backend {
     }
 
     /**
+     * Persist a staged snapshot, then publish it atomically to read APIs.
+     * Call only from _runOptionsMutation so saves cannot overlap.
      * @param {string} source
+     * @param {import('settings').Options} options
      */
-    async _saveOptions(source) {
-        this._clearProfileConditionsSchemaCache();
-        const options = this._getOptionsFull(false);
+    async _saveOptions(source, options) {
         await this._optionsUtil.save(options);
-        this._applyOptions(source);
+        this._options = options;
+        this._clearProfileConditionsSchemaCache();
+        // Persistence has committed. A runtime notification failure must not
+        // roll back memory to disagree with the stored settings.
+        try {
+            this._applyOptions(source);
+        } catch (error) {
+            try { log.error(error); } catch (_) { /* Persistence is already committed. */ }
+        }
     }
 
     /**
@@ -4323,7 +5171,8 @@ export class Backend {
         if (typeof openStorageDiagnostics === 'object' && openStorageDiagnostics !== null && !Array.isArray(openStorageDiagnostics)) {
             const mode = /** @type {unknown} */ (Reflect.get(openStorageDiagnostics, 'mode'));
             if (typeof mode === 'string') {
-                opfsReady = (mode !== 'opfs-unavailable' && mode !== 'fallback-memory' && mode !== 'fallback-memory-open-failed');
+                // An unrecognized or failed storage mode is not evidence of readiness.
+                opfsReady = (mode === 'opfs-sahpool');
             }
         }
         if (usesFallbackStorage === true) {
@@ -4398,18 +5247,15 @@ export class Backend {
         if (typeof matchType !== 'string') { matchType = /** @type {import('translation').FindTermsMatchType} */ ('exact'); }
         if (typeof deinflect !== 'boolean') { deinflect = true; }
         if (typeof primaryReading !== 'string') { primaryReading = ''; }
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
+        let {enabledDictionaryMap, textReplacements} = this._getTranslatorPreparedProfileOptions(options);
         const {
             general: {mainDictionary, sortFrequencyDictionary, sortFrequencyDictionaryOrder, language},
             scanning: {alphanumeric},
-            translation: {
-                textReplacements: textReplacementsOptions,
-                searchResolution,
-            },
+            translation: {searchResolution},
         } = options;
-        const textReplacements = this._getTranslatorTextReplacements(textReplacementsOptions);
         let excludeDictionaryDefinitions = null;
         if (mode === 'merge' && !enabledDictionaryMap.has(mainDictionary)) {
+            enabledDictionaryMap = new Map(enabledDictionaryMap);
             enabledDictionaryMap.set(mainDictionary, {
                 index: enabledDictionaryMap.size,
                 alias: mainDictionary,
@@ -4433,6 +5279,7 @@ export class Backend {
             enabledDictionaryMap,
             excludeDictionaryDefinitions,
             language,
+            useAllFrequencyDictionaries: false,
         };
     }
 
@@ -4442,11 +5289,26 @@ export class Backend {
      * @returns {import('translation').FindKanjiOptions} An options object.
      */
     _getTranslatorFindKanjiOptions(options) {
-        const enabledDictionaryMap = this._getTranslatorEnabledDictionaryMap(options);
+        const {enabledDictionaryMap} = this._getTranslatorPreparedProfileOptions(options);
         return {
             enabledDictionaryMap,
             removeNonJapaneseCharacters: !options.scanning.alphanumeric,
         };
+    }
+
+    /**
+     * @param {import('settings').ProfileOptions} options
+     * @returns {{enabledDictionaryMap: Map<string, import('translation').FindTermDictionary>, textReplacements: (?(import('translation').FindTermsTextReplacement[]))[]}}
+     */
+    _getTranslatorPreparedProfileOptions(options) {
+        const cached = this._translatorProfileOptionsCache.get(options);
+        if (typeof cached !== 'undefined') { return cached; }
+        const value = {
+            enabledDictionaryMap: this._getTranslatorEnabledDictionaryMap(options),
+            textReplacements: this._getTranslatorTextReplacements(options.translation.textReplacements),
+        };
+        this._translatorProfileOptionsCache.set(options, value);
+        return value;
     }
 
     /**
@@ -4575,6 +5437,23 @@ export class Backend {
     }
 
     /**
+     * @param {string} url
+     * @returns {Promise<chrome.tabs.Tab>}
+     */
+    _updateTab(url) {
+        return new Promise((resolve, reject) => {
+            chrome.tabs.update({url}, (tab) => {
+                const e = chrome.runtime.lastError;
+                if (e || !tab) {
+                    reject(new Error(e ? e.message : 'No active tab to update.'));
+                } else {
+                    resolve(tab);
+                }
+            });
+        });
+    }
+
+    /**
      * @param {number} tabId
      * @returns {Promise<chrome.tabs.Tab>}
      */
@@ -4691,21 +5570,177 @@ export class Backend {
      * @returns {Promise<unknown>}
      */
     async _debugDictionaryLookupStateLocal(text, dictionaryNames) {
-        if (!(this._dictionaryDatabase instanceof DictionaryDatabase)) {
-            throw new Error('Local dictionary lookup diagnostics require the direct database');
+        const database = this._dictionaryDatabase;
+        const findDirectTermIdsValue = /** @type {unknown} */ (Reflect.get(database, '_findDirectTermIds'));
+        const fetchTermRowsByIdsValue = /** @type {unknown} */ (Reflect.get(database, '_fetchTermRowsByIds'));
+        const ensureRecordDictionariesLoadedValue = /** @type {unknown} */ (Reflect.get(database, '_ensureDirectTermIndexesLoaded'));
+        if (typeof findDirectTermIdsValue !== 'function' || typeof fetchTermRowsByIdsValue !== 'function') {
+            return {
+                ok: false,
+                reason: 'debug lookup unavailable',
+                text,
+                dictionaryNames,
+            };
         }
-        return await this._dictionaryDatabase.debugDictionaryLookupState(text, dictionaryNames);
+        // These hooks are present only on the local database, not its worker
+        // proxy. Check availability before applying their source contracts.
+        const findDirectTermIds = /** @type {(dictionary: string, query: string, field: 'expression'|'reading') => number[]} */ (findDirectTermIdsValue);
+        const fetchTermRowsByIds = /** @type {(ids: Iterable<number>) => Promise<Map<number, import('dictionary-database').DatabaseTermEntryWithId>>} */ (fetchTermRowsByIdsValue);
+        if (typeof ensureRecordDictionariesLoadedValue === 'function') {
+            const ensureRecordDictionariesLoaded = /** @type {(names: Iterable<string>) => Promise<void>} */ (ensureRecordDictionariesLoadedValue);
+            await ensureRecordDictionariesLoaded.call(database, dictionaryNames);
+        }
+        /** @type {Map<number, {dictionary: string, matchSource: string}>} */
+        const ids = new Map();
+        /** @type {Array<Record<string, unknown>>} */
+        const directHits = [];
+        const recordStoreValue = /** @type {unknown} */ (Reflect.get(database, '_termRecordStore'));
+        const contentStoreValue = /** @type {unknown} */ (Reflect.get(database, '_termContentStore'));
+        const termRecordStore = /** @type {Partial<import('../dictionary/term-record-opfs-store.js').TermRecordOpfsStore>|null} */ (
+            typeof recordStoreValue === 'object' && recordStoreValue !== null ? recordStoreValue : null
+        );
+        const termContentStore = /** @type {Partial<import('../dictionary/term-content-opfs-store.js').TermContentOpfsStore>|null} */ (
+            typeof contentStoreValue === 'object' && contentStoreValue !== null ? contentStoreValue : null
+        );
+        const getRecordById = termRecordStore?.getById?.bind(termRecordStore);
+        const readSlice = termContentStore?.readSlice;
+        const getLastReadErrorDetails = termContentStore?.getLastReadErrorDetails;
+        const getDebugState = termContentStore?.getDebugState;
+        const textDecoder = new TextDecoder();
+        for (const dictionaryNameRaw of dictionaryNames) {
+            const dictionaryName = String(dictionaryNameRaw || '');
+            if (dictionaryName.length === 0) { continue; }
+            const expressionIds = /** @type {number[]} */ (
+                findDirectTermIds.call(database, dictionaryName, text, 'expression')
+            );
+            const readingIds = /** @type {number[]} */ (
+                findDirectTermIds.call(database, dictionaryName, text, 'reading')
+            );
+            for (const id of expressionIds) {
+                if (typeof id === 'number' && id > 0 && !ids.has(id)) {
+                    ids.set(id, {dictionary: dictionaryName, matchSource: 'expression'});
+                }
+            }
+            for (const id of readingIds) {
+                if (typeof id === 'number' && id > 0 && !ids.has(id)) {
+                    ids.set(id, {dictionary: dictionaryName, matchSource: 'reading'});
+                }
+            }
+            directHits.push({
+                dictionary: dictionaryName,
+                expressionHitCount: expressionIds.length,
+                readingHitCount: readingIds.length,
+                firstExpressionIds: expressionIds.slice(0, 5),
+                firstReadingIds: readingIds.slice(0, 5),
+            });
+        }
+        const rowsById = await fetchTermRowsByIds.call(database, ids.keys());
+        const rows = [];
+        for (const [id, match] of ids) {
+            const row = rowsById.get(id);
+            const rawRecord = typeof getRecordById === 'function' ? getRecordById(id) : null;
+            let rawContentPreview = null;
+            let readErrorDetails = null;
+            if (
+                rawRecord &&
+                typeof rawRecord.entryContentOffset === 'number' &&
+                rawRecord.entryContentOffset >= 0 &&
+                typeof rawRecord.entryContentLength === 'number' &&
+                rawRecord.entryContentLength > 0 &&
+                typeof readSlice === 'function'
+            ) {
+                try {
+                    const bytes = await readSlice.call(
+                        termContentStore,
+                        rawRecord.entryContentOffset,
+                        Math.min(rawRecord.entryContentLength, 120),
+                    );
+                    if (!(bytes instanceof Uint8Array)) {
+                        rawContentPreview = '<read-null>';
+                        readErrorDetails = typeof getLastReadErrorDetails === 'function' ?
+                            getLastReadErrorDetails.call(termContentStore) :
+                            null;
+                    } else {
+                        rawContentPreview = textDecoder.decode(bytes).replaceAll(/\s+/g, ' ').slice(0, 120);
+                    }
+                } catch (_) {
+                    rawContentPreview = '<read-failed>';
+                    readErrorDetails = typeof getLastReadErrorDetails === 'function' ?
+                        getLastReadErrorDetails.call(termContentStore) :
+                        null;
+                }
+            }
+            rows.push({
+                id,
+                dictionary: row?.dictionary ?? match.dictionary,
+                matchSource: match.matchSource,
+                expression: row?.expression ?? '',
+                reading: row?.reading ?? '',
+                glossaryLength: Array.isArray(row?.glossary) ? row.glossary.length : null,
+                rawEntryContentOffset: rawRecord?.entryContentOffset ?? null,
+                rawEntryContentLength: rawRecord?.entryContentLength ?? null,
+                rawEntryContentDictName: rawRecord?.entryContentDictName ?? null,
+                rawContentPreview,
+                readErrorDetails,
+            });
+            if (rows.length >= 10) { break; }
+        }
+        return {
+            ok: true,
+            text,
+            dictionaryNames,
+            directHits,
+            rowSample: rows,
+            termContentStoreDebugState: typeof getDebugState === 'function' ? getDebugState.call(termContentStore) : null,
+        };
     }
 
     /**
      * @param {boolean} active
+     * @param {string|undefined} [ownerId]
      * @returns {Promise<void>}
      */
-    async _setDictionaryImportMode(active) {
-        if (this._setDictionaryImportModePromise !== null) {
-            await this._setDictionaryImportModePromise;
+    async _setDictionaryImportMode(active, ownerId) {
+        while (this._setDictionaryImportModePromise !== null) {
+            try {
+                await this._setDictionaryImportModePromise;
+            } catch (_) {
+                // A later transition must still run so it can recover the requested state.
+            }
         }
-        this._setDictionaryImportModePromise = (async () => {
+        const transitionPromise = (async () => {
+            this._dictionaryImportOwners ??= new Set();
+            this._ownedDictionaryImports ??= new Map();
+            if (typeof ownerId !== 'undefined') {
+                if (!/^[a-zA-Z0-9:_-]{1,128}$/.test(ownerId)) { throw new Error('Invalid dictionary import session owner'); }
+                if (active) {
+                    if (!this._dictionaryImportOwners.has(ownerId) && this._dictionaryImportOwners.size >= 128) { throw new Error('Dictionary import session owner registry is full'); }
+                    this._dictionaryImportOwners.add(ownerId);
+                } else {
+                    if (!this._dictionaryImportOwners.delete(ownerId)) { return; }
+                    const ownedOperations = [...this._ownedDictionaryImports].filter(([, operation]) => operation.ownerId === ownerId);
+                    for (const [, operation] of ownedOperations) {
+                        operation.cancelled = true;
+                        operation.downloadAbortController?.abort();
+                        operation.responseCleanup?.();
+                    }
+                    for (const [operationId, operation] of ownedOperations) {
+                        try {
+                            if (this._offscreen !== null) {
+                                await this._offscreen.sendMessagePromise({action: 'cancelDictionaryImportOffscreen', params: {operationId}});
+                            } else if (this._localDictionaryRuntime !== null) {
+                                await this._localDictionaryRuntime.sendMessagePromise({action: 'cancelDictionaryImportOffscreen', params: {operationId}});
+                            }
+                        } catch (error) {
+                            reportDiagnostics('dictionary-import-cancel-failed', {operationId, error: toError(error).message});
+                        }
+                        if (operation.settled) { this._ownedDictionaryImports.delete(operationId); }
+                    }
+                    if (this._dictionaryImportOwners.size > 0) { return; }
+                }
+            } else if (!active && this._dictionaryImportOwners.size > 0) {
+                return;
+            }
             const hasDeferredRefresh = (
                 this._deferredDictionaryRefreshDuringImport ||
                 this._pendingDatabaseUpdatedNotifications.length > 0
@@ -4734,7 +5769,14 @@ export class Backend {
             this._deferredDictionaryRefreshDuringImport = false;
             reportDiagnostics('dictionary-refresh-on-import-mode-exit', {hadDeferredRefresh});
             try {
-                await this._refreshDictionaryDatabaseAfterUpdate();
+                const pendingNotifications = this._pendingDatabaseUpdatedNotifications;
+                const canReuseActiveImportConnection = (
+                    pendingNotifications.length > 0 &&
+                    pendingNotifications.every(({type, cause}) => type === 'dictionary' && cause === 'import')
+                );
+                await this._refreshDictionaryDatabaseAfterUpdate({
+                    reuseActiveImportConnection: canReuseActiveImportConnection,
+                });
             } catch (error) {
                 if (hadDeferredRefresh) {
                     this._deferredDictionaryRefreshDuringImport = true;
@@ -4757,10 +5799,13 @@ export class Backend {
             }
             this._clearDictionaryRefreshRetry();
         })();
+        this._setDictionaryImportModePromise = transitionPromise;
         try {
-            await this._setDictionaryImportModePromise;
+            await transitionPromise;
         } finally {
-            this._setDictionaryImportModePromise = null;
+            if (this._setDictionaryImportModePromise === transitionPromise) {
+                this._setDictionaryImportModePromise = null;
+            }
         }
     }
 
@@ -4772,6 +5817,7 @@ export class Backend {
     _normalizeOpenSettingsPageMode(mode, defaultValue) {
         switch (mode) {
             case 'existingOrNewTab':
+            case 'existingOrCurrentTab':
             case 'newTab':
             case 'popup':
                 return mode;

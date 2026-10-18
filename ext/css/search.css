@@ -29,7 +29,7 @@
     --separator-color1: #cccccc;
 
     --search-textbox-height: calc(var(--textarea-line-height) + var(--textarea-padding) * 2);
-    --search-textbox-min-height: calc(var(--textarea-line-height) + var(--textarea-padding) * 2);
+    --search-textbox-min-height: max(calc(var(--textarea-line-height) + var(--textarea-padding) * 2), 44px);
     --search-textbox-max-height: calc(var(--textarea-line-height) * 5 + var(--textarea-padding) * 2);
 
     --cog-icon-size: 26px;
@@ -104,10 +104,13 @@ h1 {
     white-space: pre-wrap;
     z-index: 1;
 }
+#search-textbox:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--accent-color);
+}
 .search-button {
     flex: 0 0 auto;
     position: relative;
-    width: 2.5em;
+    width: max(2.5em, 44px);
     height: var(--search-textbox-height);
     min-height: var(--search-textbox-min-height);
     max-height: var(--search-textbox-max-height);
@@ -149,7 +152,7 @@ h1 {
 .clear-button {
     flex: 0 0 auto;
     position: relative;
-    width: 2.5em;
+    width: max(2.5em, 44px);
     height: var(--search-textbox-height);
     min-height: var(--search-textbox-min-height);
     max-height: var(--search-textbox-max-height);
@@ -201,11 +204,29 @@ h1 {
     filter: invert(0.5);
 }
 #search-settings-button {
-    margin-right: 0;
-    float: right;
+    margin: 0 0 0 auto;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+#search-settings-button:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+#search-settings-button:hover>.icon,
+#search-settings-button:focus-visible>.icon {
+    filter: invert(0.5);
 }
 .search-options-right {
     flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 .search-options {
     display: flex;

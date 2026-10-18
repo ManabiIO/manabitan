@@ -29,6 +29,9 @@ const SCAN_RESOLUTION_EXCLUDED_LANGUAGES = new Set(['ja', 'zh', 'yue', 'ko']);
 const TERM_SEARCH_SEGMENT_TERMINATOR_PATTERN = /[。．.!?！？\n\r\t,、，;；:：]/;
 const TERM_SEARCH_PARTICLE_BOUNDARY_PATTERN = /[はがをにへでとものや]/u;
 
+/** @typedef {{type: 'refresh', textSource: import('text-source').TextSource}} RescanRequest */
+/** @typedef {{type: 'manual'} | RescanRequest} SearchRequest */
+
 /**
  * @augments EventDispatcher<import('text-scanner').Events>
  */
@@ -47,9 +50,10 @@ export class TextScanner extends EventDispatcher {
         searchOnClick = false,
         searchOnClickOnly = false,
         textSourceGenerator,
+        browser = null,
     }) {
         super();
-        /** @type {import('../comm/api.js').API} */
+        /** @type {import('text-scanner').ScannerApi} */
         this._api = api;
         /** @type {HTMLElement|Window} */
         this._node = node;
@@ -72,6 +76,8 @@ export class TextScanner extends EventDispatcher {
 
         /** @type {boolean} */
         this._isPrepared = false;
+        /** @type {number} */
+        this._externalLookupGeneration = 0;
         /** @type {?string} */
         this._includeSelector = null;
         /** @type {?string} */
@@ -80,6 +86,8 @@ export class TextScanner extends EventDispatcher {
         this._touchExcludeSelector = null;
         /** @type {?string} */
         this._language = null;
+        /** @type {?import('environment').Browser} */
+        this._browser = browser;
 
         /** @type {?import('text-scanner').InputInfo} */
         this._inputInfoCurrent = null;
@@ -89,10 +97,18 @@ export class TextScanner extends EventDispatcher {
         this._scanTimerPromiseResolve = null;
         /** @type {?import('text-source').TextSource} */
         this._textSourceCurrent = null;
+        /** @type {boolean} Incomplete searches must permit same-position retries. */
+        this._textSourceCurrentIncomplete = false;
         /** @type {boolean} */
         this._textSourceCurrentSelected = false;
         /** @type {boolean} */
         this._pendingLookup = false;
+        /** @type {number} Pointer admission lifetime; programmatic search is independent. */
+        this._pointerGeneration = 0;
+        /** @type {number} Admitted user scans and explicit dismissal invalidate older results. */
+        this._searchGeneration = 0;
+        /** @type {?RescanRequest} */
+        this._rescanRequest = null;
         /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
         this._queuedLookup = null;
         /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */
@@ -107,6 +123,12 @@ export class TextScanner extends EventDispatcher {
         this._lookupSequence = 0;
         /** @type {?number} */
         this._activeLookupSequence = null;
+        /** @type {?ThemeController} */
+        this._themeController = null;
+        /** @type {'light'|'dark'} */
+        this._siteTheme = 'light';
+        /** @type {number} */
+        this._siteThemeComputedAt = 0;
         /** @type {?import('text-scanner').SelectionRestoreInfo} */
         this._selectionRestoreInfo = null;
 
@@ -256,6 +278,11 @@ export class TextScanner extends EventDispatcher {
         const value = enabled && this._isPrepared;
         if (this._enabledValue === value) { return; }
 
+        this._cancelPointerLookups();
+        if (this._preventNextClickScanTimer !== null) { clearTimeout(this._preventNextClickScanTimer); }
+        this._preventNextClickScanTimer = null;
+        this._preventNextClickScan = false;
+        this._lastMouseMove = null;
         this._eventListeners.removeAllEventListeners();
         this._primaryTouchIdentifier = null;
         this._preventNextContextMenu = false;
@@ -394,6 +421,7 @@ export class TextScanner extends EventDispatcher {
     /** */
     clearSelection() {
         if (!this._canClearSelection) { return; }
+        this._rescanRequest = null;
         if (this._textSourceCurrent !== null) {
             if (this._textSourceCurrentSelected) {
                 this._textSourceCurrent.deselect();
@@ -403,6 +431,7 @@ export class TextScanner extends EventDispatcher {
                 }
             }
             this._textSourceCurrent = null;
+            this._textSourceCurrentIncomplete = false;
             this._textSourceCurrentSelected = false;
             this._inputInfoCurrent = null;
         }
@@ -414,6 +443,15 @@ export class TextScanner extends EventDispatcher {
     }
 
     /**
+     * Abandons publication and queued admission, not the underlying API readers.
+     * New input remains enabled; automatic selection hiding does not call this.
+     */
+    cancelPendingSearches() {
+        ++this._searchGeneration;
+        this._cancelPointerLookups();
+    }
+
+    /**
      * @returns {?import('text-source').TextSource}
      */
     getCurrentTextSource() {
@@ -421,10 +459,20 @@ export class TextScanner extends EventDispatcher {
     }
 
     /**
+     * Permit fresh user input to retry failed publication without discarding the
+     * selected anchor or its selection-restoration state.
+     * @param {import('text-source').TextSource} textSource
+     */
+    allowCurrentTextSourceRetry(textSource) {
+        if (this._textSourceCurrent === textSource) { this._textSourceCurrentIncomplete = true; }
+    }
+
+    /**
      * @param {?import('text-source').TextSource} textSource
      */
     setCurrentTextSource(textSource) {
         this._textSourceCurrent = textSource;
+        this._textSourceCurrentIncomplete = false;
         if (this._selectText && this._userHasNotSelectedAnythingManually && textSource !== null) {
             this._yomitanIsChangingTextSelectionNow = true;
             textSource.select();
@@ -442,11 +490,34 @@ export class TextScanner extends EventDispatcher {
     }
 
     /**
+     * Cancel any queued/in-flight scanner result before an external exact lookup.
+     * @returns {void}
+     */
+    beginExternalLookup() {
+        ++this._externalLookupGeneration;
+        this._cancelPointerLookups();
+        this._inputInfoCurrent = null;
+        this.clearSelection();
+    }
+
+    /**
      * @returns {Promise<boolean>}
      */
     async searchLast() {
         if (this._textSourceCurrent !== null && this._inputInfoCurrent !== null) {
-            await this._search(this._textSourceCurrent, this._searchTerms, this._searchKanji, this._inputInfoCurrent);
+            const inputInfo = this._inputInfoCurrent;
+            const {input} = inputInfo;
+            const searchTerms = this._searchTerms && (input === null || input.searchTerms);
+            const searchKanji = this._searchKanji && (input === null || input.searchKanji);
+            /** @type {RescanRequest} */
+            const request = {type: 'refresh', textSource: this._textSourceCurrent};
+            const textSource = request.textSource.clone();
+            this._rescanRequest = request;
+            try {
+                await this._search(textSource, searchTerms, searchKanji, inputInfo, false, false, null, request);
+            } finally {
+                if (this._rescanRequest === request) { this._rescanRequest = null; }
+            }
             return true;
         }
         return false;
@@ -459,11 +530,25 @@ export class TextScanner extends EventDispatcher {
      * @param {boolean} disallowExpandStartOffset disallows expanding the start offset of the range
      */
     async search(textSource, inputDetail, showEmpty = false, disallowExpandStartOffset = false) {
+        this._cancelPointerLookups();
         const inputInfo = this._createInputInfo(null, 'script', 'script', true, [], [], inputDetail);
-        await this._search(textSource, this._searchTerms, this._searchKanji, inputInfo, showEmpty, disallowExpandStartOffset);
+        await this._search(textSource, this._searchTerms, this._searchKanji, inputInfo, showEmpty, disallowExpandStartOffset, null, {type: 'manual'});
     }
 
     // Private
+
+    /** */
+    _cancelPointerLookups() {
+        ++this._pointerGeneration;
+        this._activeLookupSequence = null;
+        this._pendingLookup = false;
+        this._queuedLookup = null;
+        this._queuedMouseMoveLookup = null;
+        this._scanTimerClear();
+        if (this._mouseMoveLookupTimer !== null) { clearTimeout(this._mouseMoveLookupTimer); }
+        this._mouseMoveLookupTimer = null;
+        this._isMouseOverText = false;
+    }
 
     /**
      * @param {import('settings').OptionsContext} baseOptionsContext
@@ -487,18 +572,27 @@ export class TextScanner extends EventDispatcher {
      * @param {boolean} showEmpty shows a "No results found" popup if no results are found
      * @param {boolean} disallowExpandStartOffset disallows expanding the start offset of the range
      * @param {?number} lookupSequence
+     * @param {?SearchRequest} searchRequest
      * @returns {Promise<?boolean>}
      */
-    async _search(textSource, searchTerms, searchKanji, inputInfo, showEmpty = false, disallowExpandStartOffset = false, lookupSequence = null) {
+    async _search(textSource, searchTerms, searchKanji, inputInfo, showEmpty = false, disallowExpandStartOffset = false, lookupSequence = null, searchRequest = null) {
+        const rescanRequest = searchRequest?.type === 'refresh' ? searchRequest : null;
+        const isManual = searchRequest?.type === 'manual';
+        let searchGeneration = this._searchGeneration;
         const searchStartedAt = safePerformance.now();
+        const externalLookupGeneration = this._externalLookupGeneration;
         let contextDurationMs = 0;
         let findDurationMs = 0;
         try {
             safePerformance.mark('scanner:_search:start');
-            if (this._isLookupStale(lookupSequence)) { return null; }
-            const isAltText = textSource instanceof TextSourceElement;
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
+            // Clone mutable range state, not ownership of creator-owned DOM
+            // resources. Manual callers may reuse a source while a reader waits.
+            if (isManual) {
+                textSource = textSource.clone();
+            }
             if (inputInfo.pointerType === 'touch') {
-                if (isAltText) {
+                if (textSource instanceof TextSourceElement) {
                     return null;
                 }
                 const {imposterSourceElement, rangeStartOffset} = textSource;
@@ -510,12 +604,15 @@ export class TextScanner extends EventDispatcher {
                 }
             }
 
-            const inputInfoDetail = inputInfo.detail;
-            const selectionRestoreInfo = (
-                (typeof inputInfoDetail === 'object' && inputInfoDetail !== null && inputInfoDetail.restoreSelection) ?
-                (this._inputInfoCurrent === null ? this._createSelectionRestoreInfo() : null) :
-                null
-            );
+            let selectionRestoreInfo = this._selectionRestoreInfo;
+            if (rescanRequest === null) {
+                const inputInfoDetail = inputInfo.detail;
+                selectionRestoreInfo = (
+                    (typeof inputInfoDetail === 'object' && inputInfoDetail !== null && inputInfoDetail.restoreSelection) ?
+                    (this._inputInfoCurrent === null ? this._createSelectionRestoreInfo() : null) :
+                    null
+                );
+            }
 
             if (this._scanResolution === 'word' && !disallowExpandStartOffset &&
             (this._language === null || !SCAN_RESOLUTION_EXCLUDED_LANGUAGES.has(this._language))) {
@@ -523,15 +620,21 @@ export class TextScanner extends EventDispatcher {
                 textSource.setStartOffset(this._scanLength, this._layoutAwareScan, true);
             }
 
-            if (this._textSourceCurrent !== null && this._textSourceCurrent.hasSameStart(textSource)) {
+            if (!isManual && rescanRequest === null && !this._textSourceCurrentIncomplete && this._textSourceCurrent !== null && this._textSourceCurrent.hasSameStart(textSource)) {
+                // A repeated hover is not a new lookup, but the frontend must
+                // still know that the pointer returned to cancel pending hide.
+                this.trigger('searchSame', {inputInfo});
                 return null;
             }
+            // A refresh is lower priority than user input, and repeated hover
+            // no-ops must not invalidate useful refresh work.
+            if (rescanRequest === null) { searchGeneration = ++this._searchGeneration; }
 
             let phaseStartedAt = safePerformance.now();
             const getSearchContextPromise = this._getSearchContext();
             const getSearchContextResult = getSearchContextPromise instanceof Promise ? await getSearchContextPromise : getSearchContextPromise;
             contextDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
-            if (this._isLookupStale(lookupSequence)) { return null; }
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
             const {detail} = getSearchContextResult;
             const optionsContext = this._createOptionsContextForInput(getSearchContextResult.optionsContext, inputInfo);
 
@@ -541,28 +644,38 @@ export class TextScanner extends EventDispatcher {
             let sentence = null;
             /** @type {'terms'|'kanji'} */
             let type = 'terms';
+            /** @type {import('translator').DictionaryAvailability[]|undefined} */
+            let dictionaryAvailability;
             phaseStartedAt = safePerformance.now();
             const result = await this._findDictionaryEntries(textSource, searchTerms, searchKanji, optionsContext);
             findDurationMs = Math.max(0, safePerformance.now() - phaseStartedAt);
-            if (this._isLookupStale(lookupSequence)) { return null; }
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
             if (result !== null) {
-                ({dictionaryEntries, sentence, type} = result);
-            } else if (showEmpty || (textSource !== null && isAltText && await this._isTextLookupWorthy(textSource.content))) {
+                ({dictionaryEntries, sentence, type, dictionaryAvailability} = result);
+            } else if (showEmpty || (textSource instanceof TextSourceElement && await this._isTextLookupWorthy(textSource.content))) {
                 // Shows a "No results found" message
                 dictionaryEntries = [];
                 sentence = {text: '', offset: 0};
             }
-            if (this._isLookupStale(lookupSequence)) { return null; }
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
 
             if (dictionaryEntries !== null && sentence !== null) {
                 this._inputInfoCurrent = inputInfo;
+                if (rescanRequest !== null) { rescanRequest.textSource = textSource; }
                 this.setCurrentTextSource(textSource);
+                this._textSourceCurrentIncomplete = (dictionaryAvailability?.length ?? 0) > 0;
                 this._selectionRestoreInfo = selectionRestoreInfo;
 
-                /** @type {ThemeController} */
-                this._themeController = new ThemeController(document.documentElement);
-                const pageTheme = this._themeController.computeSiteTheme();
+                const pageTheme = this._getSiteTheme();
 
+                this._updateDebugState({
+                    scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
+                    scannerSearchContextDurationMs: Math.round(contextDurationMs),
+                    scannerFindDurationMs: Math.round(findDurationMs),
+                    scannerSearchResultCount: dictionaryEntries.length,
+                    scannerSearchType: type,
+                    scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
+                });
                 this.trigger('searchSuccess', {
                     type,
                     dictionaryEntries,
@@ -572,20 +685,12 @@ export class TextScanner extends EventDispatcher {
                     optionsContext,
                     detail,
                     pageTheme,
-                });
-                this._updateDebugState({
-                    scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
-                    scannerSearchContextDurationMs: Math.round(contextDurationMs),
-                    scannerFindDurationMs: Math.round(findDurationMs),
-                    scannerSearchResultCount: dictionaryEntries.length,
-                    scannerSearchType: type,
-                    scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
+                    ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
                 });
                 safePerformance.mark('scanner:_search:end');
                 safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
                 return true;
             } else {
-                this._triggerSearchEmpty(inputInfo);
                 this._updateDebugState({
                     scannerSearchDurationMs: Math.round(safePerformance.now() - searchStartedAt),
                     scannerSearchContextDurationMs: Math.round(contextDurationMs),
@@ -594,12 +699,14 @@ export class TextScanner extends EventDispatcher {
                     scannerSearchType: 'empty',
                     scannerSearchTextSample: this.getTextSourceContent(textSource, Math.min(this._scanLength, 24), this._layoutAwareScan, optionsContext.pointerType).slice(0, 24),
                 });
+                this._triggerSearchEmpty(inputInfo);
                 safePerformance.mark('scanner:_search:end');
                 safePerformance.measure('scanner:_search', 'scanner:_search:start', 'scanner:_search:end');
                 return false;
             }
         } catch (error) {
-            if (this._isLookupStale(lookupSequence)) { return null; }
+            if (externalLookupGeneration !== this._externalLookupGeneration || this._isSearchStale(lookupSequence, searchGeneration, rescanRequest)) { return null; }
+            this.allowCurrentTextSourceRetry(textSource);
             this.trigger('searchError', {
                 error: error instanceof Error ? error : new Error(`A search error occurred: ${error}`),
                 textSource,
@@ -662,6 +769,7 @@ export class TextScanner extends EventDispatcher {
      */
     _onSearchClickPointerDown(e) {
         if (e.button !== 0) { return; }
+        this.cancelPendingSearches();
         this._resetPreventNextClickScan();
     }
 
@@ -850,7 +958,7 @@ export class TextScanner extends EventDispatcher {
 
         const languageNotNull = this._language !== null ? this._language : '';
         const selection = window.getSelection();
-        if (selection !== null && isPointInSelection(x, y, selection, languageNotNull)) {
+        if (selection !== null && isPointInSelection(x, y, selection, languageNotNull, this._browser)) {
             return;
         }
 
@@ -1328,15 +1436,18 @@ export class TextScanner extends EventDispatcher {
         if (searchText.length === 0) { return null; }
 
         /** @type {import('api').FindTermsDetails} */
-        const details = {skipLookupWarmWait: true};
+        const details = {};
         const searchTextPrimary = this._getPrimaryTermSearchText(searchText);
-        let {dictionaryEntries, originalTextLength} = await this._api.termsFind(searchTextPrimary, details, optionsContext);
-        if (dictionaryEntries.length === 0 && searchTextPrimary !== searchText) {
-            ({dictionaryEntries, originalTextLength} = await this._api.termsFind(searchText, details, optionsContext));
+        let {dictionaryEntries, originalTextLength, dictionaryAvailability} = await this._api.termsFind(searchText, details, optionsContext);
+        if (dictionaryEntries.length === 0 && !dictionaryAvailability?.length && searchTextPrimary !== searchText) {
+            ({dictionaryEntries, originalTextLength, dictionaryAvailability} = await this._api.termsFind(searchTextPrimary, details, optionsContext));
         }
-        if (dictionaryEntries.length === 0) { return null; }
+        if (dictionaryEntries.length === 0 && !dictionaryAvailability?.length) { return null; }
 
-        textSource.setEndOffset(originalTextLength, false, layoutAwareScan);
+        // Translator spans use UTF-16 offsets; text sources move by code points.
+        const matchedText = searchText.slice(0, originalTextLength);
+        const matchedLength = dictionaryEntries.length === 0 ? 1 : [...matchedText].length;
+        textSource.setEndOffset(matchedLength, false, layoutAwareScan);
         const sentence = this._textSourceGenerator.extractSentence(
             textSource,
             layoutAwareScan,
@@ -1347,7 +1458,7 @@ export class TextScanner extends EventDispatcher {
             sentenceBackwardQuoteMap,
         );
 
-        return {dictionaryEntries, sentence, type: 'terms'};
+        return {dictionaryEntries, sentence, type: 'terms', ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {})};
     }
 
     /**
@@ -1367,6 +1478,21 @@ export class TextScanner extends EventDispatcher {
             }
         }
         return segment;
+    }
+
+    /**
+     * @returns {'light'|'dark'}
+     */
+    _getSiteTheme() {
+        const now = safePerformance.now();
+        if (this._themeController === null) {
+            this._themeController = new ThemeController(document.documentElement);
+        }
+        if (this._siteThemeComputedAt === 0 || now - this._siteThemeComputedAt >= 5000) {
+            this._siteTheme = this._themeController.computeSiteTheme();
+            this._siteThemeComputedAt = now;
+        }
+        return this._siteTheme;
     }
 
     /**
@@ -1407,6 +1533,7 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').InputInfo} inputInfo
      */
     async _searchAt(x, y, inputInfo) {
+        if (!this._enabledValue) { return; }
         if (this._pendingLookup) {
             this._queuedLookup = {x, y, inputInfo};
             return;
@@ -1414,95 +1541,87 @@ export class TextScanner extends EventDispatcher {
 
         const lookupSequence = ++this._lookupSequence;
         this._activeLookupSequence = lookupSequence;
+        this._pendingLookup = true;
         this._queuedLookup = null;
-        /** @type {?import('text-source').TextSource} */
-        let activeTextSource = null;
-        let replayQueuedLookup = false;
+        /** @type {?import('core').Timeout} */
+        let timeout = null;
         try {
             safePerformance.mark('scanner:_searchAt:start');
             const sourceInput = inputInfo.input;
-            let searchTerms = this._searchTerms;
-            let searchKanji = this._searchKanji;
-            if (sourceInput !== null) {
-                if (searchTerms && !sourceInput.searchTerms) { searchTerms = false; }
-                if (searchKanji && !sourceInput.searchKanji) { searchKanji = false; }
-            }
-
-            this._pendingLookup = true;
+            const searchTerms = this._searchTerms && (sourceInput === null || sourceInput.searchTerms);
+            const searchKanji = this._searchKanji && (sourceInput === null || sourceInput.searchKanji);
             this._scanTimerClear();
 
-            if (typeof this._ignorePoint === 'function' && await this._ignorePoint(x, y)) {
-                return;
+            // Frame hit testing can wait on extension messaging too. One deadline
+            // covers admission and lookup; expiration rejects the point.
+            /** @type {Promise<boolean>|null} */
+            const deadline = Number.isFinite(this._lookupTimeoutMs) && this._lookupTimeoutMs > 0 ?
+                new Promise((resolve) => { timeout = setTimeout(() => resolve(true), this._lookupTimeoutMs); }) :
+                null;
+            if (typeof this._ignorePoint === 'function') {
+                const ignored = this._ignorePoint(x, y);
+                if (await (deadline === null ? ignored : Promise.race([ignored, deadline]))) { return; }
             }
-
-            activeTextSource = this._textSourceGenerator.getRangeFromPoint(x, y, {
+            if (this._isLookupStale(lookupSequence)) { return; }
+            const textSource = this._textSourceGenerator.getRangeFromPoint(x, y, {
                 deepContentScan: this._deepContentScan,
                 normalizeCssZoom: this._normalizeCssZoom,
                 language: this._language,
+                browser: this._browser,
             });
-            if (activeTextSource !== null) {
-                try {
-                    this._isMouseOverText = true;
-                    const searchPromise = this._search(activeTextSource, searchTerms, searchKanji, inputInfo, false, false, lookupSequence);
-                    const timeoutMs = this._lookupTimeoutMs;
-                    if (Number.isFinite(timeoutMs) && timeoutMs > 0) {
-                        /** @type {?import('core').Timeout} */
-                        let timeout = null;
-                        /** @type {Promise<boolean>} */
-                        const timeoutPromise = new Promise((resolve) => {
-                            timeout = setTimeout(() => {
-                                timeout = null;
-                                resolve(true);
-                            }, timeoutMs);
-                        });
-                        const timedOut = await Promise.race([
-                            searchPromise.then((result) => {
-                                replayQueuedLookup = result === false;
-                                return false;
-                            }),
-                            timeoutPromise,
-                        ]);
-                        if (timeout !== null) {
-                            clearTimeout(timeout);
-                            timeout = null;
-                        }
-                        if (this._isLookupStale(lookupSequence) || timedOut) {
-                            return;
-                        }
-                    } else {
-                        replayQueuedLookup = await searchPromise === false;
-                    }
-                } finally {
-                    activeTextSource.cleanup();
-                }
+            if (textSource !== null) {
+                this._isMouseOverText = true;
+                // A timeout abandons publication, not the underlying asynchronous
+                // reader. Release its text source only when that reader settles.
+                const search = this._search(textSource, searchTerms, searchKanji, inputInfo, false, false, lookupSequence)
+                    .finally(() => textSource.cleanup());
+                await (deadline === null ? search : Promise.race([search, deadline]));
             } else {
                 this._isMouseOverText = false;
                 this._triggerSearchEmpty(inputInfo);
-                replayQueuedLookup = true;
             }
             safePerformance.mark('scanner:_searchAt:end');
             safePerformance.measure('scanner:_searchAt', 'scanner:_searchAt:start', 'scanner:_searchAt:end');
-        } catch (e) {
-            log.error(e);
+        } catch (error) {
+            if (!this._isLookupStale(lookupSequence)) { log.error(error); }
         } finally {
+            if (timeout !== null) { clearTimeout(timeout); }
+            // Only the current operation owns queue and busy-state cleanup.
+            // Disabled or timed-out completions cannot clear the next owner.
             if (this._activeLookupSequence === lookupSequence) {
                 this._activeLookupSequence = null;
-            }
-            this._pendingLookup = false;
-            const queuedLookup = /** @type {?{x: number, y: number, inputInfo: import('text-scanner').InputInfo}} */ (this._queuedLookup);
-            this._queuedLookup = null;
-            if (replayQueuedLookup && queuedLookup !== null) {
-                void this._searchAt(queuedLookup.x, queuedLookup.y, queuedLookup.inputInfo);
+                this._pendingLookup = false;
+                const next = /** @type {{x: number, y: number, inputInfo: import('text-scanner').InputInfo}|null} */ (
+                    /** @type {unknown} */ (this._queuedLookup)
+                );
+                this._queuedLookup = null;
+                if (this._enabledValue && next !== null) {
+                    void this._searchAt(next.x, next.y, next.inputInfo);
+                }
             }
         }
     }
 
     /**
      * @param {?number} lookupSequence
+     * @param {number} [searchGeneration]
      * @returns {boolean}
      */
-    _isLookupStale(lookupSequence) {
-        return (lookupSequence !== null && this._activeLookupSequence !== lookupSequence);
+    _isLookupStale(lookupSequence, searchGeneration = this._searchGeneration) {
+        return (searchGeneration !== this._searchGeneration || (lookupSequence !== null && this._activeLookupSequence !== lookupSequence));
+    }
+
+    /**
+     * @param {?number} lookupSequence
+     * @param {number} searchGeneration
+     * @param {?RescanRequest} rescanRequest
+     * @returns {boolean}
+     */
+    _isSearchStale(lookupSequence, searchGeneration, rescanRequest) {
+        return (
+            this._isLookupStale(lookupSequence, searchGeneration) ||
+            (rescanRequest !== null && (this._rescanRequest !== rescanRequest || this._textSourceCurrent !== rescanRequest.textSource))
+        );
     }
 
     /**
@@ -1511,12 +1630,15 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').InputInfo} inputInfo
      */
     async _searchAtFromMouseMove(x, y, inputInfo) {
+        if (!this._enabledValue) { return; }
+        const generation = this._pointerGeneration;
         const waitedForScanDelay = inputInfo.passive && this._delay > 0;
         if (inputInfo.passive && !await this._scanTimerWait()) {
             // Aborted
             return;
         }
 
+        if (!this._enabledValue || generation !== this._pointerGeneration) { return; }
         this._queuedMouseMoveLookup = {x, y, inputInfo};
         if (this._mouseMoveLookupTimer !== null) {
             clearTimeout(this._mouseMoveLookupTimer);
@@ -1538,7 +1660,7 @@ export class TextScanner extends EventDispatcher {
     _flushQueuedMouseMoveLookup() {
         const lookup = this._queuedMouseMoveLookup;
         this._queuedMouseMoveLookup = null;
-        if (lookup === null) { return; }
+        if (!this._enabledValue || lookup === null) { return; }
         void this._searchAt(lookup.x, lookup.y, lookup.inputInfo);
     }
 
@@ -1548,11 +1670,13 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').InputInfo} inputInfo
      */
     async _searchAtFromTouchStart(x, y, inputInfo) {
+        const generation = this._pointerGeneration;
         const textSourceCurrentPrevious = this._textSourceCurrent !== null ? this._textSourceCurrent.clone() : null;
         const {input} = inputInfo;
         const preventScroll = input !== null && input.preventTouchScrolling;
 
         await this._searchAt(x, y, inputInfo);
+        if (!this._enabledValue || generation !== this._pointerGeneration) { return; }
 
         if (
             this._textSourceCurrent !== null &&
@@ -1570,9 +1694,11 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').InputInfo} inputInfo
      */
     async _searchAtFromTouchEnd(x, y, inputInfo) {
+        const generation = this._pointerGeneration;
         const textSourceCurrentPrevious = this._textSourceCurrent !== null ? this._textSourceCurrent.clone() : null;
 
         await this._searchAt(x, y, inputInfo);
+        if (!this._enabledValue || generation !== this._pointerGeneration) { return; }
 
         if (
             this._textSourceCurrent !== null &&
@@ -1588,6 +1714,7 @@ export class TextScanner extends EventDispatcher {
      * @param {boolean} prevent
      */
     async _searchAtFromPen(e, eventType, prevent) {
+        const generation = this._pointerGeneration;
         if (this._pendingLookup) { return; }
 
         const inputInfo = this._getMatchingInputGroupFromEvent('pen', eventType, e);
@@ -1599,6 +1726,7 @@ export class TextScanner extends EventDispatcher {
         const preventScroll = input !== null && input.preventPenScrolling;
 
         await this._searchAt(e.clientX, e.clientY, inputInfo);
+        if (!this._enabledValue || generation !== this._pointerGeneration) { return; }
 
         if (
             prevent &&
@@ -1864,6 +1992,7 @@ export class TextScanner extends EventDispatcher {
      * @param {import('text-scanner').ClearReason} reason
      */
     _triggerClear(reason) {
+        this.cancelPendingSearches();
         this.trigger('clear', {reason});
     }
 

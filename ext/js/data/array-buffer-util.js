@@ -31,45 +31,35 @@ export function arrayBufferUtf8Decode(arrayBuffer) {
 
 /**
  * Converts the contents of an ArrayBuffer to a base64 string.
- * @param {ArrayBufferLike|Uint8Array} arrayBuffer The input buffer or byte view.
+ * @param {ArrayBuffer} arrayBuffer The input ArrayBuffer.
  * @returns {string} A base64 string representing the binary content.
  */
 export function arrayBufferToBase64(arrayBuffer) {
-    return btoa(arrayBufferToBinaryString(arrayBuffer));
+    // Stay below typical function argument limits and avoid allocating a second
+    // archive-sized intermediate binary string before the base64 result.
+    // The chunk size is divisible by 3, so only the final chunk is padded.
+    const bytes = new Uint8Array(arrayBuffer);
+    const chunkSize = 24_576;
+    const parts = [];
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        parts.push(btoa(String.fromCharCode(...bytes.subarray(i, i + chunkSize))));
+    }
+    return parts.join('');
 }
 
 /**
  * Converts the contents of an ArrayBuffer to a binary string.
- * @param {ArrayBufferLike|Uint8Array} arrayBuffer The input buffer or byte view.
+ * @param {ArrayBuffer} arrayBuffer The input ArrayBuffer.
  * @returns {string} A string representing the binary content.
  */
 export function arrayBufferToBinaryString(arrayBuffer) {
-    const bytes = arrayBuffer instanceof Uint8Array ? Uint8Array.from(arrayBuffer) : new Uint8Array(arrayBuffer);
-    try {
-        return String.fromCharCode(...bytes);
-    } catch (e) {
-        let binary = '';
-        for (let i = 0, ii = bytes.byteLength; i < ii; ++i) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return binary;
+    const bytes = new Uint8Array(arrayBuffer);
+    const chunkSize = 32_768;
+    const parts = [];
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        parts.push(String.fromCharCode(...bytes.subarray(i, i + chunkSize)));
     }
-}
-
-/**
- * Returns an ArrayBuffer containing exactly the byte view's span.
- * Reuses a complete ordinary backing buffer and copies shared or partial views.
- * @param {Uint8Array} bytes The input byte view.
- * @returns {ArrayBuffer} The exact bytes in an ordinary ArrayBuffer.
- */
-export function uint8ArrayToArrayBuffer(bytes) {
-    const {buffer, byteOffset, byteLength} = bytes;
-    if (buffer instanceof ArrayBuffer) {
-        return byteOffset === 0 && byteLength === buffer.byteLength ?
-            buffer :
-            buffer.slice(byteOffset, byteOffset + byteLength);
-    }
-    return Uint8Array.from(bytes).buffer;
+    return parts.join('');
 }
 
 /**

@@ -135,6 +135,11 @@ def extract_models(data: bytes) -> list[dict]:
         path.write_bytes(collection)
         db = sqlite3.connect(path.as_uri() + "?mode=ro&immutable=1", uri=True)
         try:
+            # Modern Anki fields tables are WITHOUT ROWID and declare unicase.
+            # SQLite needs the collation registered to plan even integer-key
+            # metadata reads. No query compares or orders names; integer ord
+            # remains the authority for field order.
+            db.create_collation("unicase", lambda a, b: (a.casefold() > b.casefold()) - (a.casefold() < b.casefold()))
             db.execute("PRAGMA trusted_schema=OFF")
             db.execute("PRAGMA query_only=ON")
             # Bound pathological queries as well as the downloaded bytes.

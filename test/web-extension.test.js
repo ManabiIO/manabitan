@@ -27,6 +27,7 @@ describe('WebExtension', () => {
         originalChrome = globalThis.chrome;
         globalThis.chrome = /** @type {typeof globalThis.chrome} */ (/** @type {unknown} */ ({
             runtime: {
+                id: 'test',
                 getURL: vi.fn((path) => `chrome-extension://test${path}`),
                 getManifest: vi.fn(() => ({name: 'Manabitan', version: '0.0.0.0'})),
                 sendMessage: vi.fn(),
@@ -37,7 +38,8 @@ describe('WebExtension', () => {
 
     afterEach(() => {
         if (typeof originalChrome === 'undefined') {
-            Reflect.deleteProperty(globalThis, 'chrome');
+            // @ts-expect-error - restoring deleted global
+            delete globalThis.chrome;
         } else {
             globalThis.chrome = originalChrome;
         }
@@ -57,20 +59,58 @@ describe('WebExtension', () => {
         await expectation;
     });
 
-    test('sendMessagePromise marks extension unloaded on retryable runtime disconnect', async () => {
+    test('sendMessagePromise rejects already-unloaded runtime without dispatch or timers', async () => {
+        vi.useFakeTimers();
         const webExtension = new WebExtension();
-        vi.spyOn(globalThis.chrome.runtime, 'sendMessage').mockImplementation(/** @type {typeof chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn((/** @type {unknown} */ _message, /** @type {(response?: unknown) => void} */ callback) => {
+        webExtension.triggerUnloaded();
+        const request = webExtension.sendMessagePromise({action: 'noop'});
+        const expectation = expect(request).rejects.toThrow(/Lost connection to the extension runtime/);
+        expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+        expect(vi.getTimerCount()).toBe(0);
+        await vi.advanceTimersByTimeAsync(30_000);
+        await expectation;
+    });
+
+    test('sendMessagePromise does not mark a live extension unloaded when a recipient disconnects', async () => {
+        const webExtension = new WebExtension();
+        globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {
             Reflect.set(globalThis.chrome.runtime, 'lastError', {message: 'Could not establish connection. Receiving end does not exist.'});
             callback();
         }))));
 
         await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow(/Could not establish connection/);
+        expect(webExtension.unloaded).toBe(false);
+    });
+
+    test.each([
+        'Could not establish connection. Receiving end does not exist.',
+        'The message port closed before a response was received.',
+    ])('sendMessagePromise marks extension unloaded when its context is gone: %s', async (message) => {
+        const webExtension = new WebExtension();
+        globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {
+            Reflect.set(globalThis.chrome.runtime, 'id', '');
+            Reflect.set(globalThis.chrome.runtime, 'lastError', {message});
+            callback();
+        }))));
+
+        await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow();
+        expect(webExtension.unloaded).toBe(true);
+    });
+
+    test('sendMessagePromise marks an explicitly invalidated extension context unloaded', async () => {
+        const webExtension = new WebExtension();
+        globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback: (response?: unknown) => void) => void} */ ((_message, callback) => {
+            Reflect.set(globalThis.chrome.runtime, 'lastError', {message: 'Extension context invalidated.'});
+            callback();
+        }))));
+
+        await expect(webExtension.sendMessagePromise({action: 'noop'})).rejects.toThrow(/context invalidated/);
         expect(webExtension.unloaded).toBe(true);
     });
 
     test('sendMessagePromise rejects immediately when runtime unloads before callback returns', async () => {
         const webExtension = new WebExtension();
-        vi.spyOn(globalThis.chrome.runtime, 'sendMessage').mockImplementation(/** @type {typeof chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(() => {}))));
+        globalThis.chrome.runtime.sendMessage = /** @type {typeof globalThis.chrome.runtime.sendMessage} */ (/** @type {unknown} */ (vi.fn(/** @type {(message: unknown, callback?: (response?: unknown) => void) => void} */ ((_message, _callback) => {}))));
 
         const promise = webExtension.sendMessagePromise({action: 'noop'});
         const expectation = expect(promise).rejects.toThrow(/Lost connection to the extension runtime/);

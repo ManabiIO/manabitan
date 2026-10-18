@@ -1,0 +1,257 @@
+/*
+ * Copyright (C) 2026  Yomitan Authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import {toError} from '../core/to-error.js';
+
+export class DictionaryImportSession {
+    /**
+     * @param {{
+     *   dictionaryDatabase: import('./dictionary-database.js').DictionaryDatabase,
+     *   dictionaryTitle: string,
+     *   dictionarySummaryPrimaryKey: number,
+     *   errors: Error[],
+     *   archiveReader: {close: () => Promise<void>}|null,
+     *   disposeParser: () => Promise<void>,
+     * }} options
+     */
+    constructor({dictionaryDatabase, dictionaryTitle, dictionarySummaryPrimaryKey, errors, archiveReader, disposeParser}) {
+        /** @type {import('./dictionary-database.js').DictionaryDatabase} */
+        this._dictionaryDatabase = dictionaryDatabase;
+        /** @type {string} */
+        this._dictionaryTitle = dictionaryTitle;
+        /** @type {number} */
+        this._dictionarySummaryPrimaryKey = dictionarySummaryPrimaryKey;
+        /** @type {Error[]} */
+        this._errors = errors;
+        /** @type {Set<Error>} */
+        this._recordedErrors = new Set(errors);
+        /** @type {{close: () => Promise<void>}|null} */
+        this._archiveReader = archiveReader;
+        /** @type {() => Promise<void>} */
+        this._disposeParser = disposeParser;
+        /** @type {{dispose: () => Promise<void>}|null} */
+        this._sourcePipeline = null;
+        /** @type {Promise<void>|null} */
+        this._startPromise = null;
+        /** @type {string|null} */
+        this._bulkImportSessionId = null;
+        /** @type {Promise<void>|null} */
+        this._resourceDisposalPromise = null;
+        /** @type {Promise<void>|null} */
+        this._archiveClosePromise = null;
+        /** @type {Promise<Record<string, unknown>|null>|null} */
+        this._bulkFinalizationPromise = null;
+        /** @type {Promise<void>|null} */
+        this._placeholderCleanupPromise = null;
+        /** @type {'idle'|'starting'|'active'|'committed'|'aborted'|'failed'} */
+        this._bulkState = 'idle';
+        /** @type {boolean} */
+        this._published = false;
+        /** @type {boolean} */
+        this._failed = false;
+        /** @type {string[]} */
+        this._warnings = [];
+    }
+
+    /** @returns {boolean} */
+    get failed() {
+        return this._failed;
+    }
+
+    /** @returns {string} */
+    get state() {
+        if (this._published) { return 'published'; }
+        return this._bulkState;
+    }
+
+    /** @returns {import('dictionary-importer').ImportOutcome} */
+    get outcome() {
+        return {
+            status: this._published ? 'published' : (this._bulkState === 'aborted' ? 'aborted' : 'unknown'),
+            ...(this._published && this._bulkImportSessionId !== null ? {generationId: this._bulkImportSessionId} : {}),
+            ...(this._warnings.length > 0 ? {warnings: [...this._warnings]} : {}),
+        };
+    }
+
+    /** @param {unknown} error */
+    recordWarning(error) {
+        const message = toError(error).message;
+        if (!this._warnings.includes(message)) { this._warnings.push(message); }
+    }
+
+    /**
+     * @param {{dispose: () => Promise<void>}} sourcePipeline
+     * @throws {Error} If resources are already owned or being disposed.
+     */
+    setSourcePipeline(sourcePipeline) {
+        if (this._sourcePipeline !== null && this._sourcePipeline !== sourcePipeline) {
+            throw new Error('Dictionary import source pipeline is already owned');
+        }
+        if (this._resourceDisposalPromise !== null) {
+            throw new Error('Dictionary import resources are already being disposed');
+        }
+        this._sourcePipeline = sourcePipeline;
+    }
+
+    /**
+     * @param {unknown} error
+     * @returns {Error}
+     */
+    recordFailure(error) {
+        const normalizedError = toError(error);
+        this._failed = true;
+        if (!this._recordedErrors.has(normalizedError)) {
+            this._recordedErrors.add(normalizedError);
+            this._errors.push(normalizedError);
+        }
+        return normalizedError;
+    }
+
+    /** @returns {Promise<void>} */
+    startBulkImport() {
+        if (this._startPromise !== null) { return this._startPromise; }
+        if (this._bulkFinalizationPromise !== null || this._resourceDisposalPromise !== null) {
+            this._bulkState = 'failed';
+            this._startPromise = Promise.reject(this.recordFailure(new Error('Dictionary import resources are already being finalized')));
+            return this._startPromise;
+        }
+        this._bulkState = 'starting';
+        // Publish the shared promise before invoking callbacks that can reenter.
+        this._startPromise = Promise.resolve().then(async () => {
+            try {
+                this._bulkImportSessionId = await this._dictionaryDatabase.startBulkImport();
+                this._bulkState = 'active';
+            } catch (error) {
+                this._bulkState = 'failed';
+                throw this.recordFailure(error);
+            }
+        });
+        return this._startPromise;
+    }
+
+    /**
+     * Source reads and parser workers settle before the archive is closed.
+     * @returns {Promise<void>}
+     */
+    disposeImportResources() {
+        this._resourceDisposalPromise ??= Promise.resolve().then(async () => {
+            if (this._sourcePipeline !== null) {
+                try {
+                    await this._sourcePipeline.dispose();
+                } catch (error) {
+                    this.recordFailure(error);
+                }
+            }
+            try {
+                await this._disposeParser();
+            } catch (error) {
+                this.recordFailure(error);
+            }
+            try {
+                await this.closeArchive();
+            } catch (error) {
+                const closeError = toError(error);
+                this.recordFailure(new Error(`Failed to close dictionary archive: ${closeError.message}`));
+            }
+        });
+        return this._resourceDisposalPromise;
+    }
+
+    /** @returns {Promise<void>} */
+    closeArchive() {
+        if (this._archiveClosePromise === null) {
+            const archiveReader = this._archiveReader;
+            this._archiveReader = null;
+            this._archiveClosePromise = archiveReader === null ?
+                Promise.resolve() :
+                Promise.resolve().then(async () => { await archiveReader.close(); });
+        }
+        return this._archiveClosePromise;
+    }
+
+    /**
+     * @param {(checkpointIndex: number, total: number) => void} onCheckpoint
+     * @param {import('dictionary-importer').Summary} summary
+     * @returns {Promise<Record<string, unknown>|null>}
+     */
+    finalizeBulkImport(onCheckpoint, summary) {
+        this._bulkFinalizationPromise ??= Promise.resolve().then(async () => {
+            try {
+                await this.disposeImportResources();
+                if (this._startPromise !== null) {
+                    try {
+                        await this._startPromise;
+                    } catch (_) {
+                        // startBulkImport already recorded the failure.
+                    }
+                }
+                // A rejected start never acquired the database's import owner.
+                // Aborting here would roll back another session's transaction.
+                if (this._bulkState !== 'active') {
+                    if (!this._failed) {
+                        this._bulkState = 'failed';
+                        this.recordFailure(new Error('Dictionary import session was not started'));
+                    }
+                    return null;
+                }
+                if (this._failed) {
+                    await this._dictionaryDatabase.abortBulkImport(this._bulkImportSessionId);
+                    this._bulkState = 'aborted';
+                    return {aborted: true};
+                }
+                const details = await this._dictionaryDatabase.finishBulkImport(onCheckpoint, {
+                    summary,
+                    primaryKey: this._dictionarySummaryPrimaryKey,
+                }, this._bulkImportSessionId);
+                if (details === null) {
+                    throw new Error('Dictionary import was not published');
+                }
+                this._bulkState = 'committed';
+                this._published = true;
+                if ('housekeepingErrors' in details && Array.isArray(details.housekeepingErrors)) {
+                    for (const error of /** @type {unknown[]} */ (details.housekeepingErrors)) { this.recordWarning(error); }
+                }
+                // Housekeeping warnings stay in finalization details, not the
+                // import errors which settings treats as failed activation.
+                return details;
+            } catch (error) {
+                this._bulkState = 'failed';
+                this.recordFailure(error);
+                return null;
+            }
+        });
+        return this._bulkFinalizationPromise;
+    }
+
+    /** @returns {Promise<void>} */
+    cleanupIncompleteSummary() {
+        // A no-op observation must not consume the later cleanup opportunity.
+        if (!this._failed || this._published) { return Promise.resolve(); }
+        this._placeholderCleanupPromise ??= Promise.resolve().then(async () => {
+            if (!this._failed || this._published) { return; }
+            try {
+                // The database owns atomic rollback. A rejected finalization may
+                // also follow a successful commit, so never delete by title.
+                await this._dictionaryDatabase.deleteDictionaryImportPlaceholder(this._dictionarySummaryPrimaryKey);
+            } catch (error) {
+                const cleanupError = toError(error);
+                this.recordFailure(new Error(`Failed to remove incomplete dictionary summary ${this._dictionaryTitle}: ${cleanupError.message}`));
+            }
+        });
+        return this._placeholderCleanupPromise;
+    }
+}

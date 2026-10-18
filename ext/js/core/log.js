@@ -88,11 +88,18 @@ class Logger extends EventDispatcher {
                     `${error}`
                 );
                 if (/^\[object \w+\]$/.test(errorString)) {
-                    errorString = JSON.stringify(error);
+                    const serialized = JSON.stringify(error);
+                    if (typeof serialized === 'string') { errorString = serialized; }
                 }
             }
         } catch (e) {
-            errorString = `${error}`;
+            // Unknown thrown values can be Symbols or have a throwing
+            // toString()/toJSON(). Error reporting must not throw again.
+            try {
+                errorString = String(error);
+            } catch (error_) {
+                errorString = 'Unknown error';
+            }
         }
 
         let errorStack;
@@ -125,7 +132,14 @@ class Logger extends EventDispatcher {
         message += `\nOriginating URL: ${context.url}\n`;
         message += errorString;
         if (typeof errorData !== 'undefined') {
-            message += `\nData: ${JSON.stringify(errorData, null, 4)}`;
+            let serializedData;
+            try {
+                serializedData = JSON.stringify(errorData, null, 4);
+            } catch (e) {
+                // Circular objects and BigInts cannot be JSON-serialized.
+                serializedData = '[unserializable]';
+            }
+            message += `\nData: ${serializedData ?? '[unserializable]'}`;
         }
         if (this._issueUrl !== null) {
             message += `\n\nIssues can be reported at ${this._issueUrl}`;
@@ -139,7 +153,15 @@ class Logger extends EventDispatcher {
         }
         /* eslint-enable no-console */
 
-        this.trigger('logGenericError', {error, level, context});
+        try {
+            this.trigger('logGenericError', {error, level, context});
+        } catch (e) {
+            // Avoid recursive logging if a diagnostics listener itself fails.
+            // The original error has already been written to the console.
+            /* eslint-disable no-console */
+            console.error('Error in logGenericError listener', e);
+            /* eslint-enable no-console */
+        }
     }
 }
 

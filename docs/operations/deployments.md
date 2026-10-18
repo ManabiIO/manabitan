@@ -1,26 +1,43 @@
 # Deployments
 
-We deploy Manabitan to the Firefox and Chrome web stores via two channels: the dev build and the stable build. We do this via a series of GitHub Actions.
+Manabitan builds GitHub release packages and has separate publication workflows for Chrome, Firefox and Edge. Development builds use the Chrome development listing and the Firefox offline update channel; the stable channel also includes Edge. Only collaborators with deployment permissions should run publication workflows.
 
-Only collaborators with deployment permissions are allowed to deploy.
+A successful unsigned ZIP build does not prove store installation, signing or automatic updates. Configure Manabitan-owned listings and credentials in the `cd` environment before publishing. Never reuse Yomitan listing IDs. Do not put credentials in documentation or workflow inputs.
 
-## Deploying a dev build
+## Qualify the release candidate
 
-1. Tag the commit with a version number. Like: `git tag 24.4.28.0 HEAD` (do this after pulling in the latest changes in master) or `git tag 24.4.28.0 abc123`
+Active development belongs on `develop`. Integrate a tested candidate into `main` through the normal review process before tagging. Review any divergence between the branches; do not substitute an untested release-branch checkout.
 
-> [!WARNING]
-> You can not use leading zeroes in the version tags (e.g. `24.04.28.0`). Firefox store does not allow them and the deploy will fail.
+Run the repository validation and the blocking Chromium, Edge, Firefox and Firefox Android CI lanes against the exact candidate commit. Inspect the uploaded browser reports for failures, unsupported-runtime skips and storage fallback. The Android lane currently establishes temporary add-on installation and post-install debugging smoke; it does not establish full mobile dictionary import, lookup, mining, or updating. Treat the Firefox for Android release package as experimental and unqualified until those paths are verified.
 
-2. Push the tag to origin. `git push origin 24.4.28.0`
-3. The [`Create prerelease on tag`](https://github.com/yomidevs/yomitan/actions/workflows/create-prerelease-on-tag.yml) GH workflow will run and will publish a new release in [Releases](https://github.com/yomidevs/yomitan/releases) as well as kick off a workflow each for publishing to Firefox and Chrome.
-4. Find the corresponding `publish-chrome-development` GH action run and unblock the deployment.
-5. Find the corresponding `publish-firefox-development` GH action run and unblock the deployment.
-6. Wait anywhere between 5mins to a few hours for the build to show up on the [Chrome extension page](https://chromewebstore.google.com/detail/yomitan-development-build/glnaenfapkkecknnmginabpmgkenenml). Firefox does not have a yomitan dev listing and users would have to down the extension locally from "Assets" section of each release.
+Require CodeQL to pass for the exact active `develop` candidate and review its findings against `main` during promotion qualification. Manually dispatched CI includes four browser lanes; it does not replace CodeQL security analysis.
 
-## Deploying a stable build
+Build fresh packages with Node 22 and the supported WASM compiler. From the repository root:
 
-1. If this is the first standalone Manabitan Firefox stable release, create the AMO listing manually first using the stable Firefox add-on ID from `dev/data/manifest-variants.json`, then update the `FF_EXTENSION_ID` secret to match that listing before continuing. Existing Firefox installs of Yomitan will not auto-upgrade to the new Manabitan listing because the add-on ID changes.
-2. Go to ["Releases"](https://github.com/yomidevs/yomitan/releases) and pick a version you want to promote to stable.
-3. On the top right corner click on "Edit" and on the bottom there are two options `Set as a pre-release` and `Set as the latest release`. Uncheck `Set as a pre-release` and check `Set as the latest release`.
-4. This will trigger the [`release`](https://github.com/yomidevs/yomitan/actions/workflows/release.yml) workflow which will in turn trigger the `publish-chrome` and `publish-firefox` GH workflows.
-5. Unblock `publish-chrome` and `publish-firefox` respectively and wait 5 mins to a few hours for the extensions to reflect on [Chrome](https://chromewebstore.google.com/detail/yomitan/likgccmbimhjbgkjambclfkhldnlhbnn) and the Firefox AMO listing configured by `FF_EXTENSION_ID`.
+```sh
+npm ci
+npm run build:source-release
+```
+
+This rebuilds runtime libraries, generates the dependency license page and packages every buildable variant. The six desktop ZIPs are `manabitan-chrome.zip`, `manabitan-chrome-dev.zip`, `manabitan-chrome-playwright.zip`, `manabitan-edge.zip`, `manabitan-firefox.zip` and `manabitan-firefox-dev.zip`. The all-target build also produces an unpacked Firefox Android directory. The prerelease workflow archives that directory as `manabitan-firefox-android.zip` with `manifest.json` at the ZIP root and includes it in release hashes and assets. This is an unsigned package; the installation smoke lane does not establish ordinary end-user installation or automatic updating. Verify package manifests, versions, file sets and hashes before distribution.
+
+Keep documentation link changes gated on publicly available destinations and a passing link check. A website build or publication receipt alone does not establish that the canonical routes are reachable.
+
+## Create a development prerelease
+
+Pushing a version tag publishes a public all-target prerelease with generated release notes, SHA-256 hashes and provenance. Tag pushes do not dispatch the Chrome or Firefox development publishers. The packages remain unsigned; a successful build or provenance attestation does not prove store signing, end-user installation, or automatic updates. Before tagging, build locally with the intended version and verify package manifests and hashes. The all-target release includes an explicitly experimental and unqualified Firefox for Android package. Current CI coverage is only temporary add-on installation and post-install debugging smoke; dictionary import, lookup, mining and updating remain unverified. An unsigned `0.0.0.0` qualification build does not qualify future versioned or signed delivery.
+
+1. On `main`, finish pending Git operations, preserve or commit working changes, and ensure HEAD matches `origin/main` exactly. The [tag helper](../../tag.sh) checks these conditions after fetching.
+2. Run `./tag.sh`. It selects an unused four-part CalVer tag such as `26.10.17.0`, asks for confirmation, creates a signed tag at the displayed commit and separately asks before pushing it. A working Git signing key is required. Components must not have leading zeroes. `MANABITAN_RELEASE_BRANCH` overrides the expected branch only for an intentional alternate release process.
+3. Confirm that [Create prerelease on tag](https://github.com/ManabiIO/manabitan/actions/workflows/create-prerelease-on-tag.yml) builds the tagged source and publishes the intended [GitHub prerelease](https://github.com/ManabiIO/manabitan/releases) with package assets.
+4. For an intentional development-channel publication, either run the development publisher workflows manually with the exact release tag and upload URL, or manually dispatch [Create prerelease on tag](https://github.com/ManabiIO/manabitan/actions/workflows/create-prerelease-on-tag.yml) with “Dispatch development publishers” enabled. The latter only dispatches when the `MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS` repository variable is also exactly `true`; its default-off state and the workflow input keep tag pushes from dispatching publishers. Approve the `cd` environment where required. These workflows can skip publication when signing/store credentials are absent; a green skipped run is not publication evidence.
+5. Check the actual destination. Chrome development publication uses the configured `G_DEVELOPMENT_EXTENSION_ID`; offline CRX signing has its own key. Firefox development signs `manabitan-firefox-dev.zip`, uploads an XPI and updates the `metadata` branch's `updates.json` only after successful signing. Verify the uploaded signed package identity/version and update-feed hash before treating installation or updating as qualified. Manual publishing does not qualify Firefox Android.
+
+The build-only `0.0.0.0` version is for qualification. Assign a real release version through the tag process before publication.
+
+## Promote a stable release
+
+1. Confirm the selected prerelease's packages and source are qualified. Create the Manabitan-owned store listings and configure Chrome, Firefox and Edge publication credentials before promoting it. For Firefox, `FF_EXTENSION_ID` must match the stable Gecko ID in [manifest variants](../../dev/data/manifest-variants.json). Existing Yomitan installs do not automatically migrate to Manabitan's distinct add-on identity.
+2. In [Manabitan Releases](https://github.com/ManabiIO/manabitan/releases), edit the intended prerelease, clear “Set as a pre-release” and select the latest-release option as appropriate.
+3. Confirm the [release workflow](https://github.com/ManabiIO/manabitan/actions/workflows/release.yml) dispatches [publish-chrome](https://github.com/ManabiIO/manabitan/actions/workflows/publish-chrome.yml), [publish-firefox](https://github.com/ManabiIO/manabitan/actions/workflows/publish-firefox.yml) and [publish-edge](https://github.com/ManabiIO/manabitan/actions/workflows/publish-edge.yml) for that release tag. Approve required environment deployments.
+4. Inspect each publication result and verify the version available from each Manabitan-owned listing. Store review timing varies. Verify a clean installation and an update from the prior signed version separately; uploading an archive does not establish either result.

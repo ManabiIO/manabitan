@@ -55,7 +55,7 @@ function createCacheKey(term, reading) {
  * @returns {DisplayAudio}
  */
 function createDisplayAudio() {
-    const display = /** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ ({}));
+    const display = /** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ ({application: {api: {}}}));
     return new DisplayAudio(display);
 }
 

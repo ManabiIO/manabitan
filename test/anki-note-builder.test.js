@@ -161,7 +161,99 @@ function createContext() {
     };
 }
 
+describe('AnkiNoteBuilder dictionary media safety', () => {
+    test('keeps dictionary titles and paths named __proto__ as serializable own fields', async () => {
+        const dictionaryMedia = [
+            {dictionary: '__proto__', path: '__proto__', fileName: 'first.png'},
+            {dictionary: '__proto__', path: 'normal', fileName: 'second.png'},
+            {dictionary: 'normal', path: '__proto__', fileName: 'third.png'},
+        ];
+        const api = {
+            injectAnkiNoteMedia: vi.fn().mockResolvedValue({
+                audioFileName: null,
+                screenshotFileName: null,
+                clipboardImageFileName: null,
+                clipboardText: null,
+                dictionaryMedia,
+                errors: [],
+            }),
+        };
+        const builder = new AnkiNoteBuilder(/** @type {any} */ (api), asTemplateRenderer(createTemplateRenderer()));
+        const requirements = dictionaryMedia.map(({dictionary, path}) => ({
+            type: /** @type {'dictionaryMedia'} */ ('dictionaryMedia'),
+            dictionary,
+            path,
+        }));
+        const result = await builder._injectMedia(
+            createTermEntry(),
+            requirements,
+            /** @type {any} */ ({}),
+        );
+
+        const resultMedia = result.media.dictionaryMedia;
+        if (typeof resultMedia === 'undefined') { throw new Error('Dictionary media was not returned'); }
+        expect(Object.prototype.hasOwnProperty.call(resultMedia, '__proto__')).toBe(true);
+        expect(Object.prototype.hasOwnProperty.call(resultMedia.__proto__, '__proto__')).toBe(true);
+        expect(resultMedia.__proto__.__proto__).toStrictEqual({value: 'first.png'});
+        expect(resultMedia.__proto__.normal).toStrictEqual({value: 'second.png'});
+        expect(resultMedia.normal.__proto__).toStrictEqual({value: 'third.png'});
+        expect(Object.getPrototypeOf(resultMedia)).toBe(Object.prototype);
+        expect(JSON.stringify(resultMedia)).toContain('"__proto__":');
+    });
+});
+
 describe('AnkiNoteBuilder.createDuplicateCheckNote', () => {
+    test('preserves __proto__ as an ordinary note field in full and duplicate notes', async () => {
+        const api = {
+            injectAnkiNoteMedia: vi.fn(async () => {
+                throw new Error('Media injection is not expected');
+            }),
+            parseText: vi.fn(async () => []),
+        };
+        const ankiNoteBuilder = new AnkiNoteBuilder(api, asTemplateRenderer(createTemplateRenderer()));
+        const cardFormat = createSingleFieldCardFormat('term', 'unused');
+        const dictionaryEntry = createTermEntry();
+        cardFormat.fields = {};
+        Object.defineProperty(cardFormat.fields, '__proto__', {
+            value: {value: '{first}', overwriteMode: 'overwrite'},
+            enumerable: true,
+            configurable: true,
+            writable: true,
+        });
+
+        const {note} = await ankiNoteBuilder.createNote(/** @type {import('anki-note-builder').CreateNoteDetails} */ ({
+            dictionaryEntry,
+            cardFormat,
+            context: createContext(),
+            template: 'unused',
+        }));
+        expect(Object.prototype.hasOwnProperty.call(note.fields, '__proto__')).toBe(true);
+        expect(note.fields.__proto__).toBe('[first]');
+        expect(Object.getPrototypeOf(note.fields)).toBe(Object.prototype);
+
+        const renderedDuplicate = await ankiNoteBuilder.createDuplicateCheckNote(/** @type {import('anki-note-builder').CreateDuplicateCheckNoteDetails} */ ({
+            dictionaryEntry,
+            cardFormat,
+            context: createContext(),
+            template: 'unused',
+        }));
+        expect(Object.prototype.hasOwnProperty.call(renderedDuplicate.fields, '__proto__')).toBe(true);
+        expect(renderedDuplicate.fields.__proto__).toBe('[first]');
+
+        Object.defineProperty(cardFormat.fields, '__proto__', {
+            value: {value: 'literal', overwriteMode: 'overwrite'},
+            enumerable: true,
+            configurable: true,
+            writable: true,
+        });
+        const fastDuplicate = ankiNoteBuilder.createDuplicateCheckNoteFast({
+            dictionaryEntry,
+            cardFormat,
+        });
+        expect(Object.prototype.hasOwnProperty.call(fastDuplicate?.fields, '__proto__')).toBe(true);
+        expect(fastDuplicate?.fields.__proto__).toBe('literal');
+    });
+
     test.each([
         ['term', createTermEntry()],
         ['kanji', createKanjiEntry()],

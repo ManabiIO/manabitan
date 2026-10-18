@@ -15,16 +15,256 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {parseJson} from '../core/json.js';
+
 const RAW_TERM_CONTENT_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x31]);
 const RAW_TERM_CONTENT_HEADER_BYTES = 20;
 const RAW_TERM_CONTENT_SHARED_GLOSSARY_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x32]);
 const RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES = 28;
+const RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x35]);
+const RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32 = 0x3552424d;
+const RAW_TERM_CONTENT_TOKEN_MAGIC = new Uint8Array([0x4d, 0x42, 0x52, 0x36]);
+const RAW_TERM_CONTENT_TOKEN_HEADER_BYTES = 4;
+const U32_RANGE = 0x100000000;
+const JSON_TOKEN_INLINE_SCAN_MAX_BYTES = 64;
+
+export const RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES = 28;
+
+export const RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES = 20;
 
 export const RAW_TERM_CONTENT_DICT_NAME = 'raw-v2';
 
 export const RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME = 'raw-v3';
 
 export const RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME = 'raw-v4';
+
+export const RAW_TERM_CONTENT_TOKEN_DICT_NAME = 'raw-v6';
+
+export const RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX = 'raw-block-v1';
+
+export const RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX = 'raw-block-v2';
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+export function isRawTermContentTokenBinary(bytes) {
+    return (
+        bytes.byteLength >= RAW_TERM_CONTENT_TOKEN_HEADER_BYTES &&
+        bytes[0] === RAW_TERM_CONTENT_TOKEN_MAGIC[0] &&
+        bytes[1] === RAW_TERM_CONTENT_TOKEN_MAGIC[1] &&
+        bytes[2] === RAW_TERM_CONTENT_TOKEN_MAGIC[2] &&
+        bytes[3] === RAW_TERM_CONTENT_TOKEN_MAGIC[3]
+    );
+}
+
+/**
+ * @param {string|null} compressionDictName
+ * @returns {string}
+ */
+export function createRawTermContentBlockDictName(compressionDictName) {
+    return compressionDictName === null ? RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX : `${RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX}:${compressionDictName}`;
+}
+
+/**
+ * @param {string} contentDictName
+ * @returns {string|null|undefined} Undefined when the name is not a block format.
+ */
+export function getRawTermContentBlockCompressionDictName(contentDictName) {
+    if (contentDictName === RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX) { return null; }
+    const prefix = `${RAW_TERM_CONTENT_BLOCK_DICT_NAME_PREFIX}:`;
+    if (contentDictName.startsWith(prefix)) { return contentDictName.substring(prefix.length); }
+    if (contentDictName === RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX) { return null; }
+    const compactPrefix = `${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:`;
+    if (contentDictName.startsWith(compactPrefix)) { return contentDictName.substring(compactPrefix.length); }
+    return void 0;
+}
+
+/**
+ * @param {string|null} compressionDictName
+ * @returns {string}
+ */
+export function createRawTermContentCompactBlockDictName(compressionDictName) {
+    return compressionDictName === null ? RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX : `${RAW_TERM_CONTENT_DIRECT_BLOCK_DICT_NAME_PREFIX}:${compressionDictName}`;
+}
+
+/**
+ * @param {number} blockOffset
+ * @param {number} blockCompressedLength
+ * @param {number} blockUncompressedLength
+ * @param {number} entryOffset
+ * @returns {Uint8Array}
+ */
+export function encodeRawTermContentCompactBlockReference(blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset) {
+    const bytes = new Uint8Array(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
+    writeRawTermContentCompactBlockReference(
+        new DataView(bytes.buffer),
+        0,
+        blockOffset,
+        blockCompressedLength,
+        blockUncompressedLength,
+        entryOffset,
+    );
+    return bytes;
+}
+
+/**
+ * @param {DataView} view
+ * @param {number} offset
+ * @param {number} blockOffset
+ * @param {number} blockCompressedLength
+ * @param {number} blockUncompressedLength
+ * @param {number} entryOffset
+ * @throws {RangeError} When a reference field or its destination lies outside the supported bounds.
+ */
+export function writeRawTermContentCompactBlockReference(
+    view,
+    offset,
+    blockOffset,
+    blockCompressedLength,
+    blockUncompressedLength,
+    entryOffset,
+) {
+    if (
+        !Number.isSafeInteger(blockOffset) || blockOffset < 0 ||
+        !Number.isSafeInteger(blockCompressedLength) || blockCompressedLength <= 0 || blockCompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(blockUncompressedLength) || blockUncompressedLength <= 0 || blockUncompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength ||
+        !Number.isSafeInteger(offset) || offset < 0 || offset + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES > view.byteLength ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength)
+    ) {
+        throw new RangeError('Invalid compact term-content block reference');
+    }
+    view.setUint32(offset, blockOffset, true);
+    view.setUint32(offset + 4, Math.floor(blockOffset / U32_RANGE), true);
+    view.setUint32(offset + 8, blockCompressedLength, true);
+    view.setUint32(offset + 12, blockUncompressedLength, true);
+    view.setUint32(offset + 16, entryOffset, true);
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {number} entryLength
+ * @returns {{blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number, entryOffset: number, entryLength: number}|null}
+ */
+export function decodeRawTermContentCompactBlockReference(bytes, entryLength) {
+    if (
+        bytes.byteLength !== RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES ||
+        !Number.isSafeInteger(entryLength) || entryLength <= 0 || entryLength >= U32_RANGE
+    ) { return null; }
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const blockOffset = view.getUint32(0, true) + view.getUint32(4, true) * U32_RANGE;
+    const blockCompressedLength = view.getUint32(8, true);
+    const blockUncompressedLength = view.getUint32(12, true);
+    const entryOffset = view.getUint32(16, true);
+    if (
+        !Number.isSafeInteger(blockOffset) ||
+        blockCompressedLength <= 0 ||
+        blockUncompressedLength <= 0 ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength) ||
+        entryOffset + entryLength > blockUncompressedLength
+    ) {
+        return null;
+    }
+    return {blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset, entryLength};
+}
+
+/**
+ * @param {number} blockOffset
+ * @param {number} blockCompressedLength
+ * @param {number} blockUncompressedLength
+ * @param {number} entryOffset
+ * @param {number} entryLength
+ * @returns {Uint8Array}
+ */
+export function encodeRawTermContentBlockReference(blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset, entryLength) {
+    const bytes = new Uint8Array(RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES);
+    writeRawTermContentBlockReference(
+        new DataView(bytes.buffer),
+        0,
+        blockOffset,
+        blockCompressedLength,
+        blockUncompressedLength,
+        entryOffset,
+        entryLength,
+    );
+    return bytes;
+}
+
+/**
+ * Writes a reference into an existing slab without allocating a per-reference view.
+ * Validates the complete reference before the first write to avoid narrowing
+ * invalid numbers or leaving a partially written reference in the slab.
+ * @param {DataView} view
+ * @param {number} offset
+ * @param {number} blockOffset
+ * @param {number} blockCompressedLength
+ * @param {number} blockUncompressedLength
+ * @param {number} entryOffset
+ * @param {number} entryLength
+ * @throws {RangeError} When a reference field or its destination lies outside the supported bounds.
+ */
+export function writeRawTermContentBlockReference(
+    view,
+    offset,
+    blockOffset,
+    blockCompressedLength,
+    blockUncompressedLength,
+    entryOffset,
+    entryLength,
+) {
+    if (
+        !Number.isSafeInteger(blockOffset) || blockOffset < 0 ||
+        !Number.isSafeInteger(blockCompressedLength) || blockCompressedLength <= 0 || blockCompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(blockUncompressedLength) || blockUncompressedLength <= 0 || blockUncompressedLength >= U32_RANGE ||
+        !Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength ||
+        !Number.isSafeInteger(entryLength) || entryLength <= 0 || entryLength > blockUncompressedLength - entryOffset ||
+        !Number.isSafeInteger(offset) || offset < 0 || offset > view.byteLength - RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength)
+    ) {
+        throw new RangeError('Invalid term-content block reference');
+    }
+    view.setUint32(offset, RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC_U32, true);
+    view.setUint32(offset + 4, blockOffset, true);
+    view.setUint32(offset + 8, Math.floor(blockOffset / U32_RANGE), true);
+    view.setUint32(offset + 12, blockCompressedLength, true);
+    view.setUint32(offset + 16, blockUncompressedLength, true);
+    view.setUint32(offset + 20, entryOffset, true);
+    view.setUint32(offset + 24, entryLength, true);
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {{blockOffset: number, blockCompressedLength: number, blockUncompressedLength: number, entryOffset: number, entryLength: number}|null}
+ */
+export function decodeRawTermContentBlockReference(bytes) {
+    if (
+        bytes.byteLength !== RAW_TERM_CONTENT_BLOCK_REFERENCE_BYTES ||
+        bytes[0] !== RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC[0] ||
+        bytes[1] !== RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC[1] ||
+        bytes[2] !== RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC[2] ||
+        bytes[3] !== RAW_TERM_CONTENT_BLOCK_REFERENCE_MAGIC[3]
+    ) {
+        return null;
+    }
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const blockOffset = view.getUint32(4, true) + view.getUint32(8, true) * U32_RANGE;
+    const blockCompressedLength = view.getUint32(12, true);
+    const blockUncompressedLength = view.getUint32(16, true);
+    const entryOffset = view.getUint32(20, true);
+    const entryLength = view.getUint32(24, true);
+    if (
+        !Number.isSafeInteger(blockOffset) ||
+        blockCompressedLength <= 0 ||
+        blockUncompressedLength <= 0 ||
+        entryLength <= 0 ||
+        !Number.isSafeInteger(blockOffset + blockCompressedLength) ||
+        entryOffset + entryLength > blockUncompressedLength
+    ) {
+        return null;
+    }
+    return {blockOffset, blockCompressedLength, blockUncompressedLength, entryOffset, entryLength};
+}
 
 /**
  * @param {Uint8Array} bytes
@@ -45,11 +285,11 @@ export function decodeRawTermContentHeader(bytes, textDecoder) {
         return null;
     }
     let offset = RAW_TERM_CONTENT_HEADER_BYTES;
-    const rules = textDecoder.decode(bytes.subarray(offset, offset + rulesLength));
+    const rules = decodeRawTermString(bytes, offset, rulesLength, textDecoder);
     offset += rulesLength;
-    const definitionTags = textDecoder.decode(bytes.subarray(offset, offset + definitionTagsLength));
+    const definitionTags = decodeRawTermString(bytes, offset, definitionTagsLength, textDecoder);
     offset += definitionTagsLength;
-    const termTags = textDecoder.decode(bytes.subarray(offset, offset + termTagsLength));
+    const termTags = decodeRawTermString(bytes, offset, termTagsLength, textDecoder);
     offset += termTagsLength;
     return {rules, definitionTags, termTags, glossaryJsonOffset: offset, glossaryJsonLength};
 }
@@ -79,6 +319,30 @@ export function isRawTermContentBinary(bytes) {
 }
 
 /**
+ * Validates the complete length-delimited ordinary raw-content header without
+ * decoding its strings or glossary JSON.
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+export function isValidRawTermContentBinary(bytes) {
+    if (!isRawTermContentBinary(bytes)) {
+        return false;
+    }
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const rulesLength = view.getUint32(4, true);
+    const definitionTagsLength = view.getUint32(8, true);
+    const termTagsLength = view.getUint32(12, true);
+    const glossaryJsonLength = view.getUint32(16, true);
+    return (
+        RAW_TERM_CONTENT_HEADER_BYTES +
+        rulesLength +
+        definitionTagsLength +
+        termTagsLength +
+        glossaryJsonLength
+    ) === bytes.byteLength;
+}
+
+/**
  * @param {Uint8Array} bytes
  * @returns {boolean}
  */
@@ -90,6 +354,37 @@ export function isRawTermContentSharedGlossaryBinary(bytes) {
         bytes[2] === RAW_TERM_CONTENT_SHARED_GLOSSARY_MAGIC[2] &&
         bytes[3] === RAW_TERM_CONTENT_SHARED_GLOSSARY_MAGIC[3]
     );
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {{rulesLength: number, definitionTagsLength: number, termTagsLength: number, glossaryOffset: number, glossaryLength: number}|null}
+ */
+function getRawTermContentSharedGlossaryFields(bytes) {
+    if (!isRawTermContentSharedGlossaryBinary(bytes)) {
+        return null;
+    }
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const rulesLength = view.getUint32(4, true);
+    const definitionTagsLength = view.getUint32(8, true);
+    const termTagsLength = view.getUint32(12, true);
+    const glossaryOffset = Number(view.getBigUint64(16, true));
+    const glossaryLength = view.getUint32(24, true);
+    const totalLength = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES + rulesLength + definitionTagsLength + termTagsLength;
+    if (totalLength !== bytes.byteLength || !isValidSharedGlossaryRange(glossaryOffset, glossaryLength)) {
+        return null;
+    }
+    return {rulesLength, definitionTagsLength, termTagsLength, glossaryOffset, glossaryLength};
+}
+
+/**
+ * Validates the complete length-delimited shared-glossary header without
+ * decoding its tag strings.
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+export function isValidRawTermContentSharedGlossaryBinary(bytes) {
+    return getRawTermContentSharedGlossaryFields(bytes) !== null;
 }
 
 /**
@@ -137,8 +432,12 @@ export function encodeRawTermContentBinary(rules, definitionTags, termTags, glos
  * @param {number} glossaryLength
  * @param {TextEncoder} textEncoder
  * @returns {Uint8Array}
+ * @throws {RangeError} When the glossary range cannot be represented exactly.
  */
 export function encodeRawTermContentSharedGlossaryBinary(rules, definitionTags, termTags, glossaryOffset, glossaryLength, textEncoder) {
+    if (!isValidSharedGlossaryRange(glossaryOffset, glossaryLength)) {
+        throw new RangeError('Invalid shared term-content glossary range');
+    }
     const rulesBytes = textEncoder.encode(rules);
     const definitionTagsBytes = textEncoder.encode(definitionTags);
     const termTagsBytes = textEncoder.encode(termTags);
@@ -169,23 +468,27 @@ export function encodeRawTermContentSharedGlossaryBinary(rules, definitionTags, 
  * @param {Uint8Array} bytes
  * @param {number} baseOffset
  * @returns {Uint8Array}
+ * @throws {RangeError} When a nonzero rebase uses an invalid original or resulting range.
  */
 export function rebaseRawTermContentSharedGlossaryBinary(bytes, baseOffset) {
     if (!isRawTermContentSharedGlossaryBinary(bytes) || baseOffset === 0) {
         return bytes;
     }
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const rulesLength = view.getUint32(4, true);
-    const definitionTagsLength = view.getUint32(8, true);
-    const termTagsLength = view.getUint32(12, true);
-    const totalLength = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES + rulesLength + definitionTagsLength + termTagsLength;
-    if (totalLength !== bytes.byteLength) {
-        return bytes;
+    const fields = getRawTermContentSharedGlossaryFields(bytes);
+    if (fields === null) {
+        throw new RangeError('Invalid shared term-content glossary reference');
+    }
+    const {glossaryOffset, glossaryLength} = fields;
+    const rebasedOffset = glossaryOffset + baseOffset;
+    if (
+        !Number.isSafeInteger(baseOffset) ||
+        !isValidSharedGlossaryRange(rebasedOffset, glossaryLength)
+    ) {
+        throw new RangeError('Invalid rebased shared term-content glossary range');
     }
     const rebasedBytes = Uint8Array.from(bytes);
     const rebasedView = new DataView(rebasedBytes.buffer, rebasedBytes.byteOffset, rebasedBytes.byteLength);
-    const glossaryOffset = Number(rebasedView.getBigUint64(16, true));
-    rebasedView.setBigUint64(16, BigInt(glossaryOffset + baseOffset), true);
+    rebasedView.setBigUint64(16, BigInt(rebasedOffset), true);
     return rebasedBytes;
 }
 
@@ -195,25 +498,17 @@ export function rebaseRawTermContentSharedGlossaryBinary(bytes, baseOffset) {
  * @returns {{rules: string, definitionTags: string, termTags: string, glossaryOffset: number, glossaryLength: number}|null}
  */
 export function decodeRawTermContentSharedGlossaryHeader(bytes, textDecoder) {
-    if (!isRawTermContentSharedGlossaryBinary(bytes)) {
+    const fields = getRawTermContentSharedGlossaryFields(bytes);
+    if (fields === null) {
         return null;
     }
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const rulesLength = view.getUint32(4, true);
-    const definitionTagsLength = view.getUint32(8, true);
-    const termTagsLength = view.getUint32(12, true);
-    const glossaryOffset = Number(view.getBigUint64(16, true));
-    const glossaryLength = view.getUint32(24, true);
-    const totalLength = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES + rulesLength + definitionTagsLength + termTagsLength;
-    if (totalLength !== bytes.byteLength) {
-        return null;
-    }
+    const {rulesLength, definitionTagsLength, termTagsLength, glossaryOffset, glossaryLength} = fields;
     let offset = RAW_TERM_CONTENT_SHARED_GLOSSARY_HEADER_BYTES;
-    const rules = textDecoder.decode(bytes.subarray(offset, offset + rulesLength));
+    const rules = decodeRawTermString(bytes, offset, rulesLength, textDecoder);
     offset += rulesLength;
-    const definitionTags = textDecoder.decode(bytes.subarray(offset, offset + definitionTagsLength));
+    const definitionTags = decodeRawTermString(bytes, offset, definitionTagsLength, textDecoder);
     offset += definitionTagsLength;
-    const termTags = textDecoder.decode(bytes.subarray(offset, offset + termTagsLength));
+    const termTags = decodeRawTermString(bytes, offset, termTagsLength, textDecoder);
     return {rules, definitionTags, termTags, glossaryOffset, glossaryLength};
 }
 
@@ -227,6 +522,142 @@ export function decodeRawTermContentBinary(bytes, textDecoder) {
     if (header === null) {
         return null;
     }
-    const glossaryJson = textDecoder.decode(getRawTermContentGlossaryJsonBytes(bytes, header.glossaryJsonOffset, header.glossaryJsonLength));
+    const glossaryJson = decodeRawTermBytes(getRawTermContentGlossaryJsonBytes(bytes, header.glossaryJsonOffset, header.glossaryJsonLength), textDecoder);
     return {rules: header.rules, definitionTags: header.definitionTags, termTags: header.termTags, glossaryJson};
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {TextDecoder} textDecoder
+ * @returns {{rules: string, definitionTags: string, termTags: string, glossaryJsonOffset: number, glossaryJsonLength: number}|null}
+ */
+export function decodeRawTermContentTokenHeader(bytes, textDecoder) {
+    if (!isRawTermContentTokenBinary(bytes)) {
+        return null;
+    }
+    let offset = RAW_TERM_CONTENT_TOKEN_HEADER_BYTES;
+    const decodeToken = () => {
+        const end = bytes.indexOf(0, offset);
+        if (end < 0) { return null; }
+        const start = offset;
+        offset = end + 1;
+        if (end - start >= 2 && bytes[start] === 0x22 && bytes[end - 1] === 0x22) {
+            if (end - start === 2) { return ''; }
+            if (isSimpleJsonStringContent(bytes, start + 1, end - 1)) {
+                return decodeRawTermBytes(bytes.subarray(start + 1, end - 1), textDecoder);
+            }
+        }
+        const token = decodeRawTermBytes(bytes.subarray(start, end), textDecoder);
+        try {
+            const value = /** @type {unknown} */ (parseJson(token));
+            return typeof value === 'string' ? value : null;
+        } catch {
+            return null;
+        }
+    };
+    const rules = decodeToken();
+    const definitionTags = decodeToken();
+    const termTags = decodeToken();
+    if (rules === null || definitionTags === null || termTags === null) {
+        return null;
+    }
+    const glossaryJsonOffset = offset;
+    const glossaryJsonLength = bytes.byteLength - glossaryJsonOffset;
+    if (glossaryJsonLength <= 0) { return null; }
+    return {rules, definitionTags, termTags, glossaryJsonOffset, glossaryJsonLength};
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {TextDecoder} textDecoder
+ * @returns {{rules: string, definitionTags: string, termTags: string, glossaryJson: string}|null}
+ */
+export function decodeRawTermContentTokenBinary(bytes, textDecoder) {
+    const header = decodeRawTermContentTokenHeader(bytes, textDecoder);
+    if (header === null) {
+        return null;
+    }
+    const glossaryJson = decodeRawTermBytes(bytes.subarray(
+        header.glossaryJsonOffset,
+        header.glossaryJsonOffset + header.glossaryJsonLength,
+    ), textDecoder);
+    return {rules: header.rules, definitionTags: header.definitionTags, termTags: header.termTags, glossaryJson};
+}
+
+/**
+ * OPFS range arithmetic uses JavaScript numbers even though offsets are stored
+ * as uint64. Reject values that would be rounded or narrowed by that boundary.
+ * @param {number} offset
+ * @param {number} length
+ * @returns {boolean}
+ */
+function isValidSharedGlossaryRange(offset, length) {
+    return (
+        Number.isSafeInteger(offset) && offset >= 0 &&
+        Number.isSafeInteger(length) && length >= 0 && length < U32_RANGE &&
+        Number.isSafeInteger(offset + length)
+    );
+}
+
+/**
+ * TextDecoder rejects shared WASM views in Chromium. Copy only the selected
+ * field or glossary, retaining the zero-copy path for ordinary buffers.
+ * A shared buffer can exist even when its global constructor is hidden.
+ * @param {Uint8Array} bytes
+ * @param {TextDecoder} textDecoder
+ * @returns {string}
+ */
+function decodeRawTermBytes(bytes, textDecoder) {
+    return textDecoder.decode(bytes.buffer instanceof ArrayBuffer ? bytes : Uint8Array.from(bytes));
+}
+
+/**
+ * Length-delimited tag strings preserve a leading U+FEFF as content. Respect
+ * the caller's decoding/error policy and restore only a BOM it actually strips.
+ * @param {Uint8Array} bytes
+ * @param {number} offset
+ * @param {number} length
+ * @param {TextDecoder} textDecoder
+ * @returns {string}
+ */
+function decodeRawTermString(bytes, offset, length, textDecoder) {
+    const value = decodeRawTermBytes(bytes.subarray(offset, offset + length), textDecoder);
+    if (
+        length >= 3 &&
+        bytes[offset] === 0xef &&
+        bytes[offset + 1] === 0xbb &&
+        bytes[offset + 2] === 0xbf &&
+        textDecoder.encoding === 'utf-8' &&
+        !textDecoder.ignoreBOM
+    ) {
+        return `\ufeff${value}`;
+    }
+    return value;
+}
+
+/**
+ * Scans only short token contents, never subsequent fields or the glossary.
+ * Long, escaped, or malformed tokens use JSON parsing instead.
+ * @param {Uint8Array} bytes
+ * @param {number} start
+ * @param {number} end
+ * @returns {boolean}
+ */
+function isSimpleJsonStringContent(bytes, start, end) {
+    if (
+        end - start > JSON_TOKEN_INLINE_SCAN_MAX_BYTES ||
+        (
+            end - start >= 3 &&
+            bytes[start] === 0xef &&
+            bytes[start + 1] === 0xbb &&
+            bytes[start + 2] === 0xbf
+        )
+    ) {
+        return false;
+    }
+    for (let i = start; i < end; ++i) {
+        const value = bytes[i];
+        if (value === 0x5c || value === 0x22 || value < 0x20) { return false; }
+    }
+    return true;
 }

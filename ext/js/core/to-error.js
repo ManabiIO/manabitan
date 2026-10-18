@@ -22,5 +22,13 @@
  * @returns {Error}
  */
 export function toError(value) {
-    return value instanceof Error ? value : new Error(`${value}`);
+    if (value instanceof Error) { return value; }
+    try {
+        // String() supports Symbol values, unlike template interpolation.
+        return new Error(String(value));
+    } catch (e) {
+        // Unknown thrown values can have a missing or throwing toString().
+        // Converting an exception into an Error must never throw again.
+        return new Error('Unknown error');
+    }
 }

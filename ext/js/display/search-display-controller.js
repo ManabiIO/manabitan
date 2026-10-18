@@ -19,6 +19,7 @@
 import {ClipboardMonitor} from '../comm/clipboard-monitor.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
@@ -28,8 +29,8 @@ import {convertToKana, convertToKanaIME} from '../language/ja/japanese-wanakana.
  * @param {Record<string, unknown>} patch
  */
 function updateSearchDebugState(patch) {
-    const previousState = /** @type {unknown} */ (Reflect.get(globalThis, '__manabitanSearchDebug'));
-    const state = typeof previousState === 'object' && previousState !== null ? previousState : {};
+    const previous = /** @type {unknown} */ (Reflect.get(globalThis, '__manabitanSearchDebug'));
+    const state = typeof previous === 'object' && previous !== null ? previous : {};
     Reflect.set(globalThis, '__manabitanSearchDebug', {
         ...state,
         ...patch,
@@ -98,6 +99,24 @@ export class SearchDisplayController {
         ]);
         /** @type {number} */
         this._profileSelectRefreshGeneration = 0;
+        /** @type {import('settings').Profile[]} */
+        this._profileSelectProfiles = [];
+        /** @type {number} */
+        this._profileSelectWriteGeneration = 0;
+        /** @type {Promise<void>} */
+        this._profileSelectWriteTail = Promise.resolve();
+        /** @type {number} */
+        this._searchRequestSequence = 0;
+        /** @type {number} */
+        this._clipboardUpdateSequence = 0;
+        /** @type {number} */
+        this._contentUpdateSequence = 0;
+        /** @type {string} */
+        this._contentUpdateQuery = '';
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        this._liveSearchTimer = null;
+        /** @type {boolean} */
+        this._composing = false;
     }
 
     /** */
@@ -108,15 +127,13 @@ export class SearchDisplayController {
             prepareStarted: true,
         });
         window.addEventListener('manabitan-e2e-trigger-search', (event) => {
-            const eventDetail = event instanceof CustomEvent ? /** @type {unknown} */ (event.detail) : null;
-            const detail = typeof eventDetail === 'object' && eventDetail !== null ? /** @type {Record<string, unknown>} */ (eventDetail) : {};
+            const value = event instanceof CustomEvent ? /** @type {unknown} */ (event.detail) : null;
+            const detail = /** @type {Record<string, unknown>} */ (typeof value === 'object' && value !== null ? value : {});
             const query = typeof detail.query === 'string' ? detail.query : '';
             const animate = Boolean(detail.animate ?? true);
-            const historyMode = /** @type {import('display').HistoryMode} */ (typeof detail.historyMode === 'string' ? detail.historyMode : 'new');
+            const historyMode = detail.historyMode === 'clear' || detail.historyMode === 'overwrite' ? detail.historyMode : 'new';
             const lookup = Boolean(detail.lookup ?? true);
-            const flags = Array.isArray(detail.flags) ?
-                (/** @type {unknown[]} */ (detail.flags)).filter((flag) => flag === 'clipboard') :
-                null;
+            const flags = Array.isArray(detail.flags) ? detail.flags.filter((flag) => flag === 'clipboard') : null;
             updateSearchDebugState({
                 debugEventTriggerSearch: {
                     query,
@@ -133,7 +150,7 @@ export class SearchDisplayController {
             /**
              * @param {string} query
              * @param {{animate?: boolean, historyMode?: import('display').HistoryMode, lookup?: boolean, flags?: string[]|null}} [details]
-             * @returns {{ok: boolean, query?: string, error?: string}}
+             * @returns {{ok: boolean, query?: string, sequence?: number, error?: string}}
              */
             triggerSearch: (query, {animate = true, historyMode = 'new', lookup = true, flags = null} = {}) => {
                 try {
@@ -151,6 +168,7 @@ export class SearchDisplayController {
                     return {
                         ok: true,
                         query: this._queryInput.value,
+                        sequence: this._searchRequestSequence,
                     };
                 } catch (error) {
                     updateSearchDebugState({
@@ -172,6 +190,7 @@ export class SearchDisplayController {
 
         this._display.on('optionsUpdated', this._onDisplayOptionsUpdated.bind(this));
         this._display.on('contentUpdateStart', this._onContentUpdateStart.bind(this));
+        this._display.on('contentUpdateComplete', this._onContentUpdateComplete.bind(this));
 
         this._display.hotkeyHandler.registerActions([
             ['focusSearchBox', this._onActionFocusSearchBox.bind(this)],
@@ -185,6 +204,17 @@ export class SearchDisplayController {
 
         this._searchButton.addEventListener('click', this._onSearch.bind(this), false);
         this._clearButton.addEventListener('click', this._onClear.bind(this), false);
+        this._queryInput.addEventListener('compositionstart', () => {
+            ++this._clipboardUpdateSequence;
+            this._composing = true;
+            this._cancelLiveSearch();
+            this._display.invalidateSearchDraft();
+        });
+        this._queryInput.addEventListener('compositionend', () => {
+            this._composing = false;
+            this._scheduleLiveSearch();
+        });
+        window.addEventListener('pagehide', () => this._cancelLiveSearch());
 
         this._searchBackButton.addEventListener('click', this._onSearchBackButtonClick.bind(this), false);
         this._wanakanaEnableCheckbox.addEventListener('change', this._onWanakanaEnableChange.bind(this));
@@ -277,8 +307,9 @@ export class SearchDisplayController {
         if (contentType === 'unloaded') { return; }
         try {
             await this._display.updateOptions();
-            if (contentType !== 'clear') {
-                this._display.searchLast(false);
+            const currentType = Reflect.get(this._display, '_contentType');
+            if (currentType === 'terms' || currentType === 'kanji') {
+                this._display.searchLast(false, true);
             }
         } catch (error) {
             if (!this._display.application.webExtension.unloaded) {
@@ -299,9 +330,13 @@ export class SearchDisplayController {
      * @returns {Promise<void>}
      */
     async _refreshAfterDictionaryDatabaseUpdate() {
+        if (Reflect.get(this._display, '_contentType') === 'unloaded') { return; }
         try {
             await this._display.updateOptions();
-            this._display.searchLast(false);
+            const contentType = Reflect.get(this._display, '_contentType');
+            if (contentType === 'terms' || contentType === 'kanji') {
+                this._display.searchLast(false, true);
+            }
         } catch (error) {
             if (!this._display.application.webExtension.unloaded) {
                 log.error(error);
@@ -335,11 +370,20 @@ export class SearchDisplayController {
     /**
      * @param {import('display').EventArgument<'contentUpdateStart'>} details
      */
-    _onContentUpdateStart({type, query}) {
+    _onContentUpdateStart({type, query, preserveSearchInput = false}) {
+        // A fresh Search page can publish its initial clear state after the
+        // textarea is already interactive. Preserve text typed before the first
+        // submitted search; later clear/history events retain normal syncing.
+        if (type === 'clear' && this._searchRequestSequence === 0 && this._queryInput.value.length > 0) {
+            preserveSearchInput = true;
+        }
+        this._contentUpdateSequence = this._searchRequestSequence;
+        this._contentUpdateQuery = typeof query === 'string' ? query : '';
         updateSearchDebugState({
             lastContentUpdateStart: {
                 type,
-                query: typeof query === 'string' ? query : '',
+                query: this._contentUpdateQuery,
+                sequence: this._contentUpdateSequence,
             },
         });
         let animate = false;
@@ -353,7 +397,7 @@ export class SearchDisplayController {
                     animate = (typeof content === 'object' && content !== null && content.animate === true);
                     showBackButton = (typeof state === 'object' && state !== null && state.cause === 'queryParser');
                     valid = (typeof query === 'string' && query.length > 0);
-                    this._display.blurElement(this._queryInput);
+                    if (!preserveSearchInput) { this._display.blurElement(this._queryInput); }
                 }
                 break;
             case 'clear':
@@ -367,7 +411,7 @@ export class SearchDisplayController {
 
         this._searchBackButton.hidden = !showBackButton;
 
-        if (this._queryInput.value !== query) {
+        if (!preserveSearchInput && this._queryInput.value !== query) {
             this._queryInput.value = query.trimEnd();
             this._updateSearchHeight(true);
         }
@@ -375,15 +419,56 @@ export class SearchDisplayController {
     }
 
     /**
+     * @param {import('display').EventArgument<'contentUpdateComplete'>} details
+     */
+    _onContentUpdateComplete({type}) {
+        updateSearchDebugState({
+            lastContentUpdateComplete: {
+                type,
+                query: this._contentUpdateQuery,
+                sequence: this._contentUpdateSequence,
+            },
+        });
+    }
+
+    /**
      * @param {InputEvent} e
      */
     _onSearchInput(e) {
+        ++this._clipboardUpdateSequence;
         this._updateSearchHeight(true);
 
         const element = /** @type {HTMLTextAreaElement} */ (e.currentTarget);
         if (this._wanakanaEnabled) {
             this._searchTextKanaConversion(element, e);
         }
+        if (e.isComposing || this._composing) { return; }
+        this._scheduleLiveSearch();
+    }
+
+    /** */
+    _cancelLiveSearch() {
+        if (this._liveSearchTimer !== null) { clearTimeout(this._liveSearchTimer); }
+        this._liveSearchTimer = null;
+    }
+
+    /** */
+    _scheduleLiveSearch() {
+        this._cancelLiveSearch();
+        this._display.invalidateSearchDraft();
+        // Keep the established explicit-submit path for pasted blocks of text.
+        // Count Unicode code points, not UTF-16 code units, so supplementary
+        // Japanese characters do not disable live search at half the limit.
+        let characters = 0;
+        for (let index = 0; index < this._queryInput.value.length;) {
+            const codePoint = this._queryInput.value.codePointAt(index);
+            index += typeof codePoint === 'number' && codePoint > 0xffff ? 2 : 1;
+            if (++characters > 256) { return; }
+        }
+        this._liveSearchTimer = setTimeout(() => {
+            this._liveSearchTimer = null;
+            this._search(false, 'overwrite', !!this._queryInput.value.trim(), null, true);
+        }, 100);
     }
 
     /**
@@ -405,7 +490,7 @@ export class SearchDisplayController {
     _onSearchKeydown(e) {
         // Keycode 229 is a special value for events processed by the IME.
         // https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event#keydown_events_with_ime
-        if (e.isComposing || e.keyCode === 229) { return; }
+        if (e.isComposing || this._composing || e.keyCode === 229) { return; }
         const {code, key} = e;
         if (!((code === 'Enter' || key === 'Enter' || code === 'NumpadEnter') && !e.shiftKey)) { return; }
 
@@ -437,6 +522,9 @@ export class SearchDisplayController {
         this._queryInput.value = '';
         this._queryInput.focus();
         this._updateSearchHeight(true);
+        this._cancelLiveSearch();
+        this._display.invalidateSearchDraft();
+        this._search(false, 'overwrite', false, null, true);
     }
 
     /** */
@@ -446,23 +534,24 @@ export class SearchDisplayController {
 
     /** */
     async _onCopy() {
-        // Ignore copy from search page
-        this._clipboardMonitor.setPreviousText(document.hasFocus() ? await this._clipboardReaderLike.getText(false) : '');
+        // Ignore copy from search page; clipboard access can be denied.
+        try {
+            this._clipboardMonitor.setPreviousText(document.hasFocus() ? await this._clipboardReaderLike.getText(false) : '');
+        } catch (error) {
+            if (!this._display.application.webExtension.unloaded) { log.error(error); }
+        }
     }
 
     /**
      * @param {ClipboardEvent} e
      */
     _onPaste(e) {
-        if (e.target === this._queryInput) {
-            return;
-        }
+        // Keep native paste working in inputs and editable result content.
+        if (e.defaultPrevented || (e.target instanceof Element && this._isElementInput(e.target))) { return; }
+        const text = e.clipboardData?.getData('text');
+        if (!text) { return; }
         e.stopPropagation();
         e.preventDefault();
-        const text = e.clipboardData?.getData('text');
-        if (!text) {
-            return;
-        }
         if (this._queryInput.value !== text) {
             this._queryInput.value = text;
             this._updateSearchHeight(true);
@@ -478,14 +567,14 @@ export class SearchDisplayController {
                 animate,
             },
         });
-        void this._updateSearchFromClipboard(text, animate, false);
+        void this._updateSearchFromClipboard(text, animate, false).catch((error) => { log.error(error); });
     }
 
     /**
      * @param {import('clipboard-monitor').Events['change']} event
      */
     _onClipboardMonitorChange({text}) {
-        void this._updateSearchFromClipboard(text, true, true);
+        void this._updateSearchFromClipboard(text, true, true).catch((error) => { log.error(error); });
     }
 
     /**
@@ -494,9 +583,16 @@ export class SearchDisplayController {
      * @param {boolean} checkText
      */
     async _updateSearchFromClipboard(text, animate, checkText) {
+        const generation = ++this._clipboardUpdateSequence;
+        const searchSequence = this._searchRequestSequence;
+        const currentQuery = this._queryInput.value;
         const options = this._display.getOptions();
         if (options === null) { return; }
         if (checkText && !await this._display.application.api.isTextLookupWorthy(text, options.general.language)) { return; }
+        // Validation crosses an async boundary: a newer clipboard event, user
+        // edit, search, or disabled monitor must retire this older candidate.
+        if (generation !== this._clipboardUpdateSequence || searchSequence !== this._searchRequestSequence ||
+        currentQuery !== this._queryInput.value || this._composing || (checkText && !this._clipboardMonitorEnabled)) { return; }
         const {clipboard: {autoSearchContent, maximumSearchLength}} = options;
         if (text.length > maximumSearchLength) {
             text = text.substring(0, maximumSearchLength);
@@ -576,16 +672,36 @@ export class SearchDisplayController {
      * @param {Event} event
      */
     async _onProfileSelectChange(event) {
-        const node = /** @type {HTMLInputElement} */ (event.currentTarget);
-        const value = Number.parseInt(node.value, 10);
-        const optionsFull = await this._display.application.api.optionsGetFull();
-        if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < optionsFull.profiles.length) {
-            try {
-                await this._setDefaultProfileIndex(value);
-            } catch (error) {
-                await this._updateProfileSelect();
-                throw error;
+        const node = /** @type {HTMLSelectElement} */ (event.currentTarget);
+        const value = Number(node.value);
+        if (!Number.isSafeInteger(value) || value < 0 || value >= this._profileSelectProfiles.length) { return; }
+        const selectedProfile = this._profileSelectProfiles[value];
+        const selectedId = selectedProfile?.id;
+        const selectedSnapshot = typeof selectedProfile === 'undefined' ? null : JSON.stringify(selectedProfile);
+        const generation = ++this._profileSelectWriteGeneration;
+        // Writes must finish in the user's order; obsolete queued selections
+        // should not write after a newer choice or restore stale UI on error.
+        const operation = this._profileSelectWriteTail.then(async () => {
+            if (generation !== this._profileSelectWriteGeneration) { return; }
+            const {profiles} = await this._display.application.api.optionsGetFull();
+            if (generation !== this._profileSelectWriteGeneration) { return; }
+            const matchingIndices = profiles.flatMap((profile, index) => {
+                const matches = typeof selectedId === 'string' && selectedId.length > 0 ?
+                    profile.id === selectedId :
+                    selectedSnapshot !== null && JSON.stringify(profile) === selectedSnapshot;
+                return matches ? [index] : [];
+            });
+            if (matchingIndices.length !== 1) {
+                throw new RangeError('Selected search profile is no longer available');
             }
+            await this._setDefaultProfileIndex(matchingIndices[0]);
+        });
+        this._profileSelectWriteTail = operation.catch(() => {});
+        try {
+            await operation;
+        } catch (error) {
+            if (generation === this._profileSelectWriteGeneration) { await this._updateProfileSelect(); }
+            throw error;
         }
     }
 
@@ -601,7 +717,11 @@ export class SearchDisplayController {
             scope: 'global',
             optionsContext: null,
         };
-        await this._display.application.api.modifySettings([modification], 'search');
+        const results = await this._display.application.api.modifySettings([modification], 'search');
+        if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
+            throw new Error('Search profile update returned an invalid result');
+        }
+        if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
     }
 
     /**
@@ -736,7 +856,7 @@ export class SearchDisplayController {
     }
 
     /**
-     * @param {NonNullable<chrome.permissions.Permissions['permissions']>} permissions
+     * @param {chrome.runtime.ManifestPermission[]} permissions
      * @returns {Promise<boolean>}
      */
     _requestPermissions(permissions) {
@@ -756,11 +876,15 @@ export class SearchDisplayController {
      * @param {import('display').HistoryMode} historyMode
      * @param {boolean} lookup
      * @param {?import('settings').OptionsContextFlag[]} flags
+     * @param {boolean} [preserveSearchInput]
      */
-    _search(animate, historyMode, lookup, flags) {
-        this._updateSearchText();
+    _search(animate, historyMode, lookup, flags, preserveSearchInput = false) {
+        ++this._clipboardUpdateSequence;
+        this._cancelLiveSearch();
+        if (!preserveSearchInput) { this._updateSearchText(); }
 
         const query = this._queryInput.value;
+        const sequence = ++this._searchRequestSequence;
         updateSearchDebugState({
             lastSearchRequest: {
                 animate,
@@ -768,6 +892,7 @@ export class SearchDisplayController {
                 lookup,
                 flags,
                 query,
+                sequence,
             },
         });
         const depth = this._display.depth;
@@ -795,12 +920,13 @@ export class SearchDisplayController {
             },
             content: {
                 dictionaryEntries: void 0,
+                preserveSearchInput,
                 animate,
                 contentOrigin: {tabId, frameId},
             },
         };
         if (!lookup) { details.params.lookup = 'false'; }
-        void this._display.setContent(details).catch((error) => { log.error(error); });
+        void this._display.setContent(details);
     }
 
     /**
@@ -861,6 +987,7 @@ export class SearchDisplayController {
             optionGroup.removeChild(optionGroup.firstChild);
         }
 
+        this._profileSelectProfiles = profiles;
         this._profileSelectContainer.hidden = profiles.length <= 1;
 
         const fragment = document.createDocumentFragment();

@@ -48,8 +48,11 @@ function getConfiguredExtensionId() {
     return [...hash].map((character) => String.fromCharCode('a'.charCodeAt(0) + Number.parseInt(character, 16))).join('');
 }
 
-/** @type {import('@playwright/test').Fixtures<{extensionId: string}, {}, import('@playwright/test').PlaywrightTestArgs & import('@playwright/test').PlaywrightTestOptions, import('@playwright/test').PlaywrightWorkerArgs & import('@playwright/test').PlaywrightWorkerOptions>} */
-const extensionFixtures = {
+/** @typedef {import('@playwright/test').PlaywrightTestArgs & import('@playwright/test').PlaywrightTestOptions} BaseTestArgs */
+/** @typedef {import('@playwright/test').PlaywrightWorkerArgs & import('@playwright/test').PlaywrightWorkerOptions} BaseWorkerArgs */
+
+/** @type {import('@playwright/test').Fixtures<{extensionId: string}, {}, BaseTestArgs, BaseWorkerArgs>} */
+const fixtures = {
     // eslint-disable-next-line no-empty-pattern
     context: async ({}, /** @type {(r: import('playwright').BrowserContext) => Promise<void>} */ use) => {
         let createdManifest = false;
@@ -70,6 +73,9 @@ const extensionFixtures = {
             '--disable-crash-reporter',
             '--disable-crashpad',
         ];
+        if (process.platform === 'darwin') {
+            launchArgs.push('--disable-features=MacAppCodeSignClone');
+        }
         if (!runHeadless && hideWindow) {
             launchArgs.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
         }
@@ -131,8 +137,7 @@ const extensionFixtures = {
     },
 };
 
-export const test = base.extend(extensionFixtures);
-
+export const test = base.extend(fixtures);
 export const expect = test.expect;
 
 /**

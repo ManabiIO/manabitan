@@ -23,7 +23,7 @@ jobs:
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
     steps:
-      - uses: robinraju/release-downloader@daf26c55d821e836577a15f77d86ddc078948b05 # pin@v1.12
+      - uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # pin@v1.13
         with:
           tag: ${{ inputs.tag }}
           zipBall: true
@@ -38,6 +38,22 @@ jobs:
             echo "enabled=false" >> "$GITHUB_OUTPUT"
             echo "Firefox signing secrets are not configured; skipping signing and metadata update."
           fi
+
+      - name: Verify Firefox package identity before signing
+        if: steps.signingConfig.outputs.enabled == 'true'
+        env:
+          EXPECTED_ID: ${{ secrets.FF_OFFLINE_EXT_ID }}
+          RELEASE_VERSION: ${{ inputs.tag }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os, zipfile
+          with zipfile.ZipFile('manabitan-firefox-dev.zip') as package:
+              assert package.namelist().count('manifest.json') == 1
+              manifest = json.loads(package.read('manifest.json'))
+          assert os.environ['EXPECTED_ID'] == '{accbebce-862b-48a9-bb9a-1da9ad1f8702}', 'Configure the Manabitan development signing ID'
+          assert manifest['browser_specific_settings']['gecko']['id'] == os.environ['EXPECTED_ID'], 'Package/signing ID mismatch'
+          assert manifest['version'] == os.environ['RELEASE_VERSION'], 'Package/release version mismatch'
+          PYTHON
 
       - name: Sign Firefox xpi for offline distribution
         id: ffSignXpi
@@ -61,6 +77,26 @@ jobs:
           steps.ffSignXpi.outputs.sameVersionAlreadyUploadedError != 'true'
         run: exit 1
 
+      - name: Verify the signed package before upload and update-feed publication
+        id: signedPackage
+        if: steps.ffSignXpi.outcome == 'success'
+        env:
+          EXPECTED_ID: ${{ secrets.FF_OFFLINE_EXT_ID }}
+          RELEASE_VERSION: ${{ inputs.tag }}
+        run: |
+          python3 - <<'PYTHON'
+          import hashlib, json, os, zipfile
+          from pathlib import Path
+          path = Path('manabitan-firefox-dev.xpi')
+          with zipfile.ZipFile(path) as package:
+              assert package.namelist().count('manifest.json') == 1
+              manifest = json.loads(package.read('manifest.json'))
+          assert manifest['browser_specific_settings']['gecko']['id'] == os.environ['EXPECTED_ID'], 'Signed package ID mismatch'
+          assert manifest['version'] == os.environ['RELEASE_VERSION'], 'Signed package version mismatch'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+              stream.write('hash=sha256:' + hashlib.sha256(path.read_bytes()).hexdigest() + '\n')
+          PYTHON
+
       - name: Generate hashes
         id: hash
         if: steps.ffSignXpi.outcome == 'success'
@@ -70,7 +106,7 @@ jobs:
       - name: Upload offline xpi release asset
         id: uploadReleaseAsset
         if: steps.ffSignXpi.outcome == 'success'
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -81,7 +117,7 @@ jobs:
 
       # update updates.json so that all people who have the dev version installed get the new update
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         id: checkoutMetadata
         if: steps.ffSignXpi.outcome == 'success'
         continue-on-error: true
@@ -106,7 +142,8 @@ jobs:
                       "updates": [
                           {
                               "version": "${{ inputs.tag }}",
-                              "update_link": "${{ steps.uploadReleaseAsset.outputs.browser_download_url }}"
+                              "update_link": "${{ steps.uploadReleaseAsset.outputs.browser_download_url }}",
+                              "update_hash": "${{ steps.signedPackage.outputs.hash }}"
                           }
                       ]
                   }
@@ -136,6 +173,7 @@ jobs:
       actions: read # To read the workflow path.
       id-token: write # To sign the provenance.
       contents: write # To add assets to a release.
+    # The generator requires a full version tag for verifier identity validation.
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"

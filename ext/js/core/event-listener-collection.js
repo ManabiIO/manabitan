@@ -76,22 +76,31 @@ export class EventListenerCollection {
 
     /**
      * Removes all event listeners added to objects for this instance and clears the internal list of event listeners.
+     * @throws {unknown} The first removal failure, after attempting every registered removal.
      */
     removeAllEventListeners() {
         if (this._eventListeners.length === 0) { return; }
-        for (const item of this._eventListeners) {
-            switch (item.type) {
-                case 'removeEventListener':
-                    item.target.removeEventListener(item.eventName, item.listener, item.options);
-                    break;
-                case 'removeListener':
-                    item.target.removeListener(item.callback, ...item.args);
-                    break;
-                case 'off':
-                    item.target.off(item.eventName, item.callback);
-                    break;
+        const eventListeners = this._eventListeners;
+        this._eventListeners = [];
+        /** @type {unknown[]} */
+        const errors = [];
+        for (const item of eventListeners) {
+            try {
+                switch (item.type) {
+                    case 'removeEventListener':
+                        item.target.removeEventListener(item.eventName, item.listener, item.options);
+                        break;
+                    case 'removeListener':
+                        item.target.removeListener(item.callback, ...item.args);
+                        break;
+                    case 'off':
+                        item.target.off(item.eventName, item.callback);
+                        break;
+                }
+            } catch (error) {
+                errors.push(error);
             }
         }
-        this._eventListeners = [];
+        if (errors.length > 0) { throw errors[0]; }
     }
 }

@@ -123,7 +123,18 @@ function cloneObject(value, visited) {
         const result = {};
         for (const key in value) {
             if (Object.prototype.hasOwnProperty.call(value, key)) {
-                result[key] = cloneInternal(value[key], visited);
+                const clonedValue = cloneInternal(value[key], visited);
+                if (key === '__proto__') {
+                    // Preserve an own data property without invoking the inherited setter.
+                    Object.defineProperty(result, key, {
+                        value: clonedValue,
+                        writable: true,
+                        enumerable: true,
+                        configurable: true,
+                    });
+                } else {
+                    result[key] = clonedValue;
+                }
             }
         }
         return result;
@@ -174,11 +185,16 @@ function deepEqualInternal(value1, value2, visited1) {
             if (array !== Array.isArray(value2)) { return false; }
             if (visited1.has(value1)) { return false; }
             visited1.add(value1);
-            return (
-                    array ?
-                    areArraysEqual(/** @type {unknown[]} */ (value1), /** @type {unknown[]} */ (value2), visited1) :
-                    areObjectsEqual(/** @type {import('core').UnknownObject} */ (value1), /** @type {import('core').UnknownObject} */ (value2), visited1)
-            );
+            try {
+                return (
+                        array ?
+                        areArraysEqual(/** @type {unknown[]} */ (value1), /** @type {unknown[]} */ (value2), visited1) :
+                        areObjectsEqual(/** @type {import('core').UnknownObject} */ (value1), /** @type {import('core').UnknownObject} */ (value2), visited1)
+                );
+            } finally {
+                // Only ancestors form a cycle; siblings can share an object.
+                visited1.delete(value1);
+            }
         }
         default:
             return false;
@@ -319,4 +335,52 @@ export function addScopeToCssLegacy(css, scopeSelector) {
         log.log('addScopeToCssLegacy failed, falling back on addScopeToCss: ' + toError(e).message);
         return addScopeToCss(css, scopeSelector);
     }
+}
+
+/**
+ * @param {'SHA-256'|'SHA-384'|'SHA-512'} algorithm
+ * @param {ArrayBuffer} arrayBuffer
+ * @returns {Promise<string>}
+ */
+export async function arrayBufferDigest(algorithm, arrayBuffer) {
+    const hash = new Uint8Array(await crypto.subtle.digest(algorithm, new Uint8Array(arrayBuffer)));
+    let digest = '';
+    for (const byte of hash) {
+        digest += byte.toString(16).padStart(2, '0');
+    }
+    return digest;
+}
+
+/**
+ * @param {'SHA-1'|'SHA-256'|'SHA-384'|'SHA-512'} algorithm
+ * @param {ArrayBuffer} arrayBuffer
+ * @returns {Promise<string>}
+ */
+export async function unsafeArrayBufferDigest(algorithm, arrayBuffer) {
+    // @ts-expect-error - Allow SHA-1 here
+    return arrayBufferDigest(algorithm, arrayBuffer);
+}
+
+/**
+ * @param {string} urlString
+ * @returns {boolean}
+ */
+export function isLocalhostUrl(urlString) {
+    try {
+        const url = new URL(urlString);
+        switch (url.hostname.toLowerCase()) {
+            case 'localhost':
+            case '127.0.0.1':
+            case '[::1]':
+                switch (url.protocol.toLowerCase()) {
+                    case 'http:':
+                    case 'https:':
+                        return true;
+                }
+                break;
+        }
+    } catch (e) {
+        // NOP
+    }
+    return false;
 }

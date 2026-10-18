@@ -1,0 +1,494 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+import {TextReader, Uint8ArrayReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js';
+import {beforeEach, describe, expect, test, vi} from 'vitest';
+import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
+
+const state = vi.hoisted(() => ({
+    events: /** @type {string[]} */ ([]),
+    readGate: /** @type {((path: string) => Promise<void>)|null} */ (null),
+    sizeOverride: /** @type {number|undefined|null} */ (null),
+    cancelled: false,
+}));
+
+// Substitute only the archive I/O provider. ZIP parsing and decompression, the
+// complete importer, requirement resolution and session ownership are real.
+vi.mock('../ext/lib/zip.js', async (importOriginal) => {
+    const original = /** @type {typeof import('@zip.js/zip.js')} */ (await importOriginal());
+    /** @augments {original.ZipReader<unknown>} */
+    class ObservedZipReader extends original.ZipReader {
+        /** @returns {Promise<import('@zip.js/zip.js').Entry[]>} */
+        async getEntries() {
+            const entries = await super.getEntries();
+            return entries.map((entry) => {
+                if (!/\.(?:png|wav)$/i.test(entry.filename) || entry.directory || typeof entry.getData !== 'function') { return entry; }
+                const getData = entry.getData;
+                const observed = {...entry};
+                if (state.sizeOverride !== null) { Reflect.set(observed, 'uncompressedSize', state.sizeOverride); }
+                Reflect.set(observed, 'getData', async (/** @type {unknown[]} */ ...args) => {
+                    state.events.push(`read:${entry.filename}`);
+                    try {
+                        await state.readGate?.(entry.filename);
+                        return await Reflect.apply(getData, entry, args);
+                    } finally {
+                        state.events.push(`settled:${entry.filename}`);
+                    }
+                });
+                return observed;
+            });
+        }
+
+        /** @returns {Promise<void>} */
+        async close() {
+            state.events.push('archive-close');
+            await super.close();
+        }
+    }
+    return {...original, ZipReader: ObservedZipReader};
+});
+
+/** @returns {{promise: Promise<void>, release: () => void}} */
+function gate() {
+    /** @type {() => void} */
+    let release = () => {};
+    const promise = new Promise((resolve) => { release = () => resolve(void 0); });
+    return {promise, release};
+}
+
+/**
+ * @param {{missing?: boolean, imageCount?: number, duplicate?: boolean}} [options]
+ * @returns {Promise<ArrayBuffer>}
+ */
+async function archive({missing = false, imageCount = 2, duplicate = false} = {}) {
+    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+    await writer.add('index.json', new TextReader(JSON.stringify({title: 'Media test', revision: '1', format: 3})));
+    for (let i = 0; i < imageCount; ++i) {
+        const image = duplicate ? 0 : i;
+        const row = [`term${i}`, '', '', '', 0, [{type: 'image', path: `image${image}.png`}], i, ''];
+        await writer.add(`term_bank_${i + 1}.json`, new TextReader(JSON.stringify([row])));
+        if (!missing && (!duplicate || i === 0)) {
+            await writer.add(`image${i}.png`, new Uint8ArrayReader(Uint8Array.of(i & 255, 17, 255)));
+        }
+    }
+    if (missing) { await writer.add('unused.png', new Uint8ArrayReader(Uint8Array.of(0))); }
+    const bytes = await writer.close();
+    return new Uint8Array(bytes).buffer;
+}
+
+/**
+ * @param {number} [extraImageCount]
+ * @returns {Promise<ArrayBuffer>}
+ */
+async function cssArchive(extraImageCount = 0) {
+    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+    await writer.add('index.json', new TextReader(JSON.stringify({title: 'Media test', revision: '1', format: 3})));
+    await writer.add('term_bank_1.json', new TextReader(JSON.stringify([
+        ['term', '', '', '', 0, [{type: 'image', path: 'mdict-media/term.png'}], 0, ''],
+    ])));
+    await writer.add('styles.css', new TextReader('.image { background: url("mdict-media/css%2Fonly.png"); }'));
+    await writer.add('mdict-media/term.png', new Uint8ArrayReader(Uint8Array.of(1, 17, 255)));
+    await writer.add('mdict-media/css%2Fonly.png', new Uint8ArrayReader(Uint8Array.of(2, 17, 255)));
+    for (let index = 0; index < extraImageCount; ++index) {
+        await writer.add(`mdict-media/extra${index}.png`, new Uint8ArrayReader(Uint8Array.of(index & 255, 17, 255)));
+    }
+    await writer.add('unused.png', new Uint8ArrayReader(Uint8Array.of(3, 17, 255)));
+    return new Uint8Array(await writer.close()).buffer;
+}
+
+/**
+ * @param {boolean} [withImage]
+ * @returns {Promise<ArrayBuffer>}
+ */
+async function audioArchive(withImage = false) {
+    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+    await writer.add('index.json', new TextReader(JSON.stringify({title: 'Media test', revision: '1', format: 3})));
+    const glossary = [{type: 'structured-content', content: {tag: 'a', href: 'media:mdict-media/audio%252Fping.WAV', content: 'play'}}];
+    await writer.add('term_bank_1.json', new TextReader(JSON.stringify([
+        ['term', '', '', '', 0, glossary, 0, ''],
+    ])));
+    await writer.add('mdict-media/audio%2Fping.WAV', new Uint8ArrayReader(Uint8Array.of(82, 73, 70, 70, 0, 255)));
+    if (withImage) {
+        await writer.add('mdict-media/css.png', new Uint8ArrayReader(Uint8Array.of(1, 17, 255)));
+    }
+    await writer.add('unused.wav', new Uint8ArrayReader(Uint8Array.of(0)));
+    await writer.add('mdict-media/unsafe.html', new TextReader('<script>throw 0;</script>'));
+    return new Uint8Array(await writer.close()).buffer;
+}
+
+/**
+ * @typedef {{
+ * isPrepared: () => boolean,
+ * setImportOptimizationFlags: () => void,
+ * setTermEntryContentDedupEnabled: () => void,
+ * setImportDebugLogging: () => void,
+ * dictionaryExists: () => Promise<boolean>,
+ * addWithResult: () => Promise<number>,
+ * startBulkImport: import('vitest').Mock<() => Promise<string>>,
+ * finishBulkImport: import('vitest').Mock<() => Promise<object>>,
+ * abortBulkImport: import('vitest').Mock<() => Promise<void>>,
+ * deleteDictionaryImportPlaceholder: import('vitest').Mock<() => Promise<void>>,
+ * getLastBulkAddTermsMetrics: () => null,
+ * queuePendingTermContentImportWrites: () => Promise<void>,
+ * bulkAdd: import('vitest').Mock<(store: string, entries: unknown[]) => Promise<void>>,
+ * }} TestDatabase
+ */
+
+/** @returns {TestDatabase} */
+function database() {
+    return {
+        isPrepared: () => true,
+        setImportOptimizationFlags() {},
+        setTermEntryContentDedupEnabled() {},
+        setImportDebugLogging() {},
+        dictionaryExists: async () => false,
+        addWithResult: async () => 1,
+        startBulkImport: vi.fn(async () => 'media-import-session'),
+        finishBulkImport: vi.fn(async () => { state.events.push('commit'); return {}; }),
+        abortBulkImport: vi.fn(async () => { state.events.push('abort'); }),
+        deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
+        getLastBulkAddTermsMetrics: () => null,
+        queuePendingTermContentImportWrites: async () => {},
+        bulkAdd: vi.fn(/**
+                        * @param {string} store
+                        * @param {unknown[]} entries
+                        */ async (store, entries) => {
+                state.events.push(`${store}:${entries.length}`);
+            },
+        ),
+    };
+}
+
+/**
+ * @param {ArrayBuffer} bytes
+ * @param {ReturnType<typeof database>} db
+ * @param {Partial<import('dictionary-importer').ImportDetails>} [options]
+ * @returns {Promise<import('dictionary-importer').ImportResult>}
+ */
+async function run(bytes, db, options = {}) {
+    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), void 0, () => state.cancelled);
+    return await importer.importDictionary(
+        /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+        bytes,
+        /** @type {import('dictionary-importer').ImportDetails} */ ({
+            skipImageMetadata: true,
+            zipUseWebWorkers: false,
+            enableTermEntryContentDedup: false,
+            disableTermBankWasmFastPath: true,
+            ...options,
+        }),
+    );
+}
+
+beforeEach(() => {
+    state.events = [];
+    state.readGate = null;
+    state.sizeOverride = null;
+    state.cancelled = false;
+});
+
+describe('bounded referenced-media prefetch', () => {
+    test('does not reread images or audio already persisted by the artifact path', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const importedPaths = ['mdict-media/prior.wav', 'mdict-media/prior.png'];
+        /** @type {Map<string, unknown>} */
+        const files = new Map();
+        for (const path of importedPaths) {
+            files.set(path, {filename: path, getData: vi.fn(() => { throw new Error('Already imported media was read again'); })});
+        }
+        files.set('mdict-media/new.wav', {filename: 'mdict-media/new.wav', bytes: Uint8Array.of(0, 1, 255)});
+        const fileMap = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (files));
+        const write = vi.fn();
+        await Reflect.get(importer, '_importMdictMediaFiles').call(importer, fileMap, 'Media test', importedPaths.map((path) => ({path})), write);
+        expect(write).toHaveBeenCalledOnce();
+        expect(write).toHaveBeenCalledWith([
+            expect.objectContaining({path: 'mdict-media/new.wav', mediaType: 'audio/wav', content: Uint8Array.of(0, 1, 255).buffer}),
+        ]);
+    });
+
+    test.each([false, true])('retains converted MDX audio with exact identity (withImage=%s)', async (withImage) => {
+        const db = database();
+        const result = await run(await audioArchive(withImage), db);
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(withImage ? 2 : 1);
+        const media = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').flatMap(([, entries]) => entries);
+        expect(media).toContainEqual({
+            dictionary: 'Media test',
+            path: 'mdict-media/audio%2Fping.WAV',
+            mediaType: 'audio/wav',
+            width: 0,
+            height: 0,
+            content: Uint8Array.of(82, 73, 70, 70, 0, 255).buffer,
+        });
+        expect(state.events.filter((event) => event === 'read:mdict-media/audio%2Fping.WAV')).toHaveLength(1);
+        expect(state.events).not.toContain('read:unused.wav');
+        expect(media).not.toEqual(expect.arrayContaining([expect.objectContaining({path: 'mdict-media/unsafe.html'})]));
+    });
+
+    test('audio read failure rolls back instead of publishing an unusable link', async () => {
+        const failure = new Error('Audio read failed');
+        state.readGate = async (path) => {
+            if (path.endsWith('.WAV')) { throw failure; }
+        };
+        const db = database();
+        const result = await run(await audioArchive(), db);
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(failure);
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(state.events.indexOf('archive-close')).toBeGreaterThan(state.events.indexOf('settled:mdict-media/audio%2Fping.WAV'));
+    });
+
+    test('cancellation during audio loading prevents publication', async () => {
+        state.readGate = async (path) => {
+            if (path.endsWith('.WAV')) { state.cancelled = true; }
+        };
+        const db = database();
+        const result = await run(await audioArchive(), db);
+        expect(result.result).toBeNull();
+        expect(result.errors.some(({message}) => message.includes('cancelled'))).toBe(true);
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+    });
+
+    test('disabled media imports do not read converted audio', async () => {
+        const db = database();
+        const result = await run(await audioArchive(), db, {skipMediaImport: true});
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(0);
+        expect(state.events.some((event) => event.startsWith('read:'))).toBe(false);
+    });
+
+    test.each([
+        {skipImageMetadata: true, disableTermBankWasmFastPath: true},
+        {skipImageMetadata: false, disableTermBankWasmFastPath: true},
+        {skipImageMetadata: true, disableTermBankWasmFastPath: false},
+        {skipImageMetadata: false, disableTermBankWasmFastPath: false},
+    ])('retains CSS-only converted MDX images without duplicating term images ($skipImageMetadata/$disableTermBankWasmFastPath)', async (options) => {
+        const db = database();
+        const result = await run(await cssArchive(), db, options);
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(2);
+        const media = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').flatMap(([, entries]) => entries);
+        expect(media).toHaveLength(2);
+        expect(media).toEqual(expect.arrayContaining([
+            expect.objectContaining({path: 'mdict-media/term.png', content: Uint8Array.of(1, 17, 255).buffer}),
+            expect.objectContaining({path: 'mdict-media/css%2Fonly.png', content: Uint8Array.of(2, 17, 255).buffer}),
+        ]));
+        expect(state.events.filter((event) => event === 'read:mdict-media/term.png')).toHaveLength(1);
+        expect(state.events.filter((event) => event === 'read:mdict-media/css%2Fonly.png')).toHaveLength(1);
+        expect(state.events).not.toContain('read:unused.png');
+    });
+
+    test('imports converted MDX media across bounded batches', async () => {
+        const db = database();
+        const result = await run(await cssArchive(260), db);
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(262);
+        const batches = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').map(([, entries]) => entries);
+        expect(batches.every((batch) => batch.length <= 128)).toBe(true);
+        const paths = batches.flat().map((entry) => /** @type {{path: string}} */ (entry).path);
+        expect(new Set(paths).size).toBe(262);
+        expect(paths).toContain('mdict-media/extra259.png');
+    });
+
+    test('CSS-only media failure rolls back and preserves the read error', async () => {
+        const failure = new Error('CSS media read failed');
+        state.readGate = async (path) => {
+            if (path.includes('css%2Fonly')) { throw failure; }
+        };
+        const db = database();
+        const result = await run(await cssArchive(), db);
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(failure);
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(state.events.indexOf('archive-close')).toBeGreaterThan(state.events.indexOf('settled:mdict-media/css%2Fonly.png'));
+    });
+
+    test('cancellation during CSS-only media loading prevents publication', async () => {
+        state.readGate = async (path) => {
+            if (path.includes('css%2Fonly')) { state.cancelled = true; }
+        };
+        const db = database();
+        const result = await run(await cssArchive(), db);
+        expect(result.result).toBeNull();
+        expect(result.errors.some(({message}) => message.includes('cancelled'))).toBe(true);
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+    });
+
+    test('disabled media imports do not read CSS-only assets', async () => {
+        const db = database();
+        const result = await run(await cssArchive(), db, {skipMediaImport: true});
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(0);
+        expect(state.events.some((event) => event.startsWith('read:'))).toBe(false);
+    });
+
+    test('reads referenced media before all terms finish and writes it before commit', async () => {
+        const db = database();
+        const result = await run(await archive(), db);
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(2);
+        expect(state.events.indexOf('read:image0.png')).toBeLessThan(state.events.lastIndexOf('terms:1'));
+        expect(state.events.indexOf('media:2')).toBeLessThan(state.events.indexOf('commit'));
+        expect(state.events.filter((event) => event === 'archive-close')).toHaveLength(1);
+        const media = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').flatMap(([, entries]) => entries);
+        expect(media).toHaveLength(2);
+        for (const entry of media) {
+            const value = /** @type {{path: string, content: ArrayBuffer}} */ (entry);
+            const index = Number(value.path.replace(/\D/g, ''));
+            expect(new Uint8Array(value.content)).toEqual(Uint8Array.of(index, 17, 255));
+        }
+    });
+
+    test.each([void 0, -1, 0.5, Number.NaN, 9 * 1024 * 1024])('defers unsupported or over-budget size %s', async (size) => {
+        state.sizeOverride = size;
+        const result = await run(await archive(), database());
+        expect(result.errors).toEqual([]);
+        expect(state.events.indexOf('read:image0.png')).toBeGreaterThan(state.events.lastIndexOf('terms:1'));
+    });
+
+    test('deduplicates referenced paths across term banks', async () => {
+        const result = await run(await archive({duplicate: true}), database());
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(1);
+        expect(state.events.filter((event) => event === 'read:image0.png')).toHaveLength(1);
+    });
+
+    test('missing media aborts without publishing', async () => {
+        const db = database();
+        const result = await run(await archive({missing: true}), db);
+        expect(result.result).toBeNull();
+        expect(result.errors.length).toBeGreaterThan(0);
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+    });
+    test('a prefetched read failure aborts and preserves its error', async () => {
+        const failure = new Error('media read failed');
+        state.readGate = async () => { throw failure; };
+        const db = database();
+        const result = await run(await archive(), db);
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(failure);
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(state.events.indexOf('archive-close')).toBeGreaterThan(state.events.indexOf('settled:image0.png'));
+    });
+
+    test('joins a started media read before closing an archive after a term write failure', async () => {
+        const started = gate();
+        const release = gate();
+        const termFailed = gate();
+        const failure = new Error('term write failed');
+        state.readGate = async () => {
+            started.release();
+            await release.promise;
+        };
+        const db = database();
+        db.bulkAdd.mockImplementation(async (store) => {
+            if (store !== 'terms') { return; }
+            await started.promise;
+            termFailed.release();
+            throw failure;
+        });
+        const operation = run(await archive(), db);
+        try {
+            await termFailed.promise;
+            expect(state.events).not.toContain('archive-close');
+            expect(db.finishBulkImport).not.toHaveBeenCalled();
+        } finally {
+            release.release();
+        }
+        const result = await operation;
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(failure);
+        expect(state.events.indexOf('archive-close')).toBeGreaterThan(state.events.indexOf('settled:image0.png'));
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+    });
+
+    test('cancellation drains started media and prevents publication', async () => {
+        const started = gate();
+        const release = gate();
+        state.readGate = async () => {
+            started.release();
+            await release.promise;
+        };
+        const db = database();
+        const operation = run(await archive(), db);
+        try {
+            await started.promise;
+            state.cancelled = true;
+            expect(state.events).not.toContain('archive-close');
+        } finally {
+            release.release();
+        }
+        const result = await operation;
+        expect(result.result).toBeNull();
+        expect(result.errors.some(({message}) => message.includes('cancelled'))).toBe(true);
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(state.events.indexOf('archive-close')).toBeGreaterThan(state.events.indexOf('settled:image0.png'));
+        expect(state.events).not.toContain('read:image1.png');
+    });
+
+    test('preserves both media failure and term failure before resource disposal', async () => {
+        const started = gate();
+        const release = gate();
+        const termFailed = gate();
+        const mediaFailure = new Error('concurrent media failure');
+        const termFailure = new Error('concurrent term failure');
+        state.readGate = async () => {
+            started.release();
+            await release.promise;
+            throw mediaFailure;
+        };
+        const db = database();
+        db.bulkAdd.mockImplementation(async (store) => {
+            if (store !== 'terms') { return; }
+            await started.promise;
+            termFailed.release();
+            throw termFailure;
+        });
+        const operation = run(await archive(), db);
+        try {
+            await termFailed.promise;
+            expect(state.events).not.toContain('archive-close');
+        } finally {
+            release.release();
+        }
+        const result = await operation;
+        expect(result.result).toBeNull();
+        expect(result.errors).toEqual(expect.arrayContaining([mediaFailure, termFailure]));
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(state.events.indexOf('archive-close')).toBeGreaterThan(state.events.indexOf('settled:image0.png'));
+    });
+
+    test('bounds cumulative admitted bytes rather than only individual image sizes', async () => {
+        state.sizeOverride = 3 * 1024 * 1024;
+        const result = await run(await archive(), database());
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(2);
+        expect(state.events.indexOf('read:image0.png')).toBeLessThan(state.events.lastIndexOf('terms:1'));
+        expect(state.events.indexOf('read:image1.png')).toBeGreaterThan(state.events.lastIndexOf('terms:1'));
+    });
+
+    test('keeps metadata decoding on the existing eager path', async () => {
+        const db = database();
+        const result = await run(await archive(), db, {skipImageMetadata: false});
+        expect(result.errors).toEqual([]);
+        expect(state.events.indexOf('media:1')).toBeLessThan(state.events.indexOf('terms:1'));
+        const media = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').flatMap(([, entries]) => entries);
+        for (const entry of media) { expect(entry).toMatchObject({width: 100, height: 100}); }
+    });
+
+    test('does not load media when media import is disabled', async () => {
+        const result = await run(await archive(), database(), {skipMediaImport: true});
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(0);
+        expect(state.events.some((event) => event.startsWith('read:'))).toBe(false);
+    });
+});

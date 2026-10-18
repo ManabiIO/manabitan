@@ -17,7 +17,9 @@
  */
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
+import {createDictionaryRowOwnership} from './dictionary-row-ownership.js';
 
 export class CollapsibleDictionaryController {
     /**
@@ -38,6 +40,10 @@ export class CollapsibleDictionaryController {
         this._selects = [];
         /** @type {?HTMLSelectElement} */
         this._allSelect = null;
+        /** @type {number} */
+        this._optionsRenderRequest = 0;
+        /** @type {number} */
+        this._allSelectRefreshRequest = 0;
     }
 
     /** */
@@ -46,7 +52,8 @@ export class CollapsibleDictionaryController {
 
         this._settingsController.application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
-        this._settingsController.on('dictionarySettingsReordered', this._onDictionarySettingsReordered.bind(this));
+        // Event payload is not the internal database refresh token.
+        this._settingsController.on('dictionarySettingsReordered', this._onDictionarySettingsReordered.bind(this, null));
     }
 
     // Private
@@ -77,7 +84,12 @@ export class CollapsibleDictionaryController {
     /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
-    _onOptionsChanged({options}) {
+    _onOptionsChanged({options, optionsContext}) {
+        const optionsProfileId = 'profileId' in optionsContext ? optionsContext.profileId : null;
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index || this._settingsController.getOptionsContext().profileId !== optionsProfileId) { return; }
+        // An options event supersedes any older asynchronous settings snapshot.
+        ++this._optionsRenderRequest;
+        ++this._allSelectRefreshRequest;
         this._eventListeners.removeAllEventListeners();
         this._selects = [];
 
@@ -86,8 +98,10 @@ export class CollapsibleDictionaryController {
         this._setupAllSelect(fragment, options);
 
         const {dictionaries} = options;
+        const profileId = optionsProfileId ?? '';
         for (let i = 0, ii = dictionaries.length; i < ii; ++i) {
-            const {name} = dictionaries[i];
+            const dictionarySettings = dictionaries[i];
+            const {name} = dictionarySettings;
             const dictionaryInfo = this._dictionaryInfoMap.get(name);
             if (!dictionaryInfo?.counts?.terms?.total && !dictionaryInfo?.counts?.kanji?.total) {
                 continue;
@@ -96,6 +110,7 @@ export class CollapsibleDictionaryController {
 
             const select = this._addSelect(fragment, name, `rev.${dictionaryInfo.revision}`);
             select.dataset.setting = `dictionaries[${i}].definitionsCollapsible`;
+            createDictionaryRowOwnership(select, profileId, i, dictionarySettings, 'collapsible');
             this._eventListeners.addEventListener(select, 'settingChanged', this._onDefinitionsCollapsibleChange.bind(this), false);
 
             this._selects.push(select);
@@ -108,7 +123,9 @@ export class CollapsibleDictionaryController {
 
     /** */
     _onDefinitionsCollapsibleChange() {
-        void this._updateAllSelectFresh();
+        void this._updateAllSelectFresh().catch((error) => {
+            log.error(error);
+        });
     }
 
     /**
@@ -118,7 +135,13 @@ export class CollapsibleDictionaryController {
         const {value} = /** @type {HTMLSelectElement} */ (e.currentTarget);
         const value2 = this._normalizeDictionaryDefinitionsCollapsible(value);
         if (value2 === null) { return; }
-        void this._setDefinitionsCollapsibleAll(value2);
+        void this._setDefinitionsCollapsibleAll(value2).catch((error) => {
+            log.error(error);
+            // Reconcile the all-selector with persisted settings after failure.
+            void this._updateAllSelectFresh().catch((refreshError) => {
+                log.error(refreshError);
+            });
+        });
     }
 
     /** */
@@ -126,9 +149,17 @@ export class CollapsibleDictionaryController {
      * @param {import('core').TokenObject|null|import('settings-controller').EventArgument<'dictionarySettingsReordered'>} [token]
      */
     async _onDictionarySettingsReordered(token = null) {
-        const options = await this._settingsController.getOptions();
-        if (token !== null && this._getDictionaryInfoToken !== token) { return; }
+        const request = ++this._optionsRenderRequest;
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (
+            request !== this._optionsRenderRequest ||
+            (token !== null && this._getDictionaryInfoToken !== token) ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._settingsController.getOptionsContext().profileId !== optionsContext.profileId
+        ) {
+            return;
+        }
         this._onOptionsChanged({options, optionsContext});
     }
 
@@ -174,7 +205,19 @@ export class CollapsibleDictionaryController {
 
     /** */
     async _updateAllSelectFresh() {
-        this._updateAllSelect(await this._settingsController.getOptions());
+        const request = ++this._allSelectRefreshRequest;
+        const select = this._allSelect;
+        const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (
+            request !== this._allSelectRefreshRequest ||
+            this._allSelect !== select ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._settingsController.getOptionsContext().profileId !== optionsContext.profileId
+        ) {
+            return;
+        }
+        this._updateAllSelect(options);
     }
 
     /**
@@ -201,16 +244,45 @@ export class CollapsibleDictionaryController {
      * @param {import('settings').DictionaryDefinitionsCollapsible} value
      */
     async _setDefinitionsCollapsibleAll(value) {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index || this._settingsController.getOptionsContext().profileId !== optionsContext.profileId) { return; }
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
         const {dictionaries} = options;
         for (let i = 0, ii = dictionaries.length; i < ii; ++i) {
-            const path = `dictionaries[${i}].definitionsCollapsible`;
-            targets.push({action: 'set', path, value});
+            targets.push({
+                action: 'setDictionaryField',
+                profileId: optionsContext.profileId ?? '',
+                index: i,
+                expectedEntry: structuredClone(dictionaries[i]),
+                field: 'definitionsCollapsible',
+                value,
+            });
         }
-        await this._settingsController.modifyProfileSettings(targets);
-        for (const select of this._selects) {
+        const selects = this._selects;
+        try {
+            const results = await this._settingsController.modifyProfileSettings(targets);
+            if (results.some(({error, result}) => typeof error !== 'undefined' || (result !== null && typeof result === 'object' && /** @type {{stale?: unknown}} */ (result).stale === true))) {
+                await this._settingsController.refresh();
+                return;
+            }
+        } catch (error) {
+            if (this._selects === selects && this._settingsController.getOptionsContext().index === optionsContext.index && this._settingsController.getOptionsContext().profileId === optionsContext.profileId) {
+                this._updateAllSelect(options);
+            }
+            throw error;
+        }
+        // A profile change or options rerender can replace these controls while
+        // the mutation is in flight. Never update the new controls with old state.
+        if (
+            this._settingsController.getOptionsContext().index !== optionsContext.index ||
+            this._settingsController.getOptionsContext().profileId !== optionsContext.profileId ||
+            this._selects !== selects
+        ) {
+            return;
+        }
+        for (const select of selects) {
             select.value = value;
         }
     }

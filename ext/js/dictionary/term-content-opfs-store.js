@@ -34,10 +34,33 @@ const RAW_BYTES_WRITE_COALESCE_MAX_CHUNKS = 8192;
 const DEFAULT_WRITE_FLUSH_THRESHOLD_BYTES = 16 * 1024 * 1024;
 const LOW_MEMORY_WRITE_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const HIGH_MEMORY_WRITE_FLUSH_THRESHOLD_BYTES = 128 * 1024 * 1024;
-const RAW_BYTES_WRITE_FLUSH_THRESHOLD_BYTES = 16 * 1024 * 1024;
+const RAW_BYTES_WRITE_FLUSH_THRESHOLD_BYTES = 8 * 1024 * 1024;
+const EAGER_IMPORT_WRITE_START_BYTES = 4 * 1024 * 1024;
 const LARGE_IMPORT_WRITE_COALESCE_TARGET_BYTES = 64 * 1024 * 1024;
 const LARGE_IMPORT_WRITE_FLUSH_THRESHOLD_BYTES = 128 * 1024 * 1024;
 const LARGE_IMPORT_EXPECTED_BYTES_THRESHOLD = 128 * 1024 * 1024;
+const DEFAULT_QUEUED_WRITE_BUDGET_BYTES = 64 * 1024 * 1024;
+const LOW_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 24 * 1024 * 1024;
+const HIGH_MEMORY_QUEUED_WRITE_BUDGET_BYTES = 512 * 1024 * 1024;
+
+/**
+ * @param {number} offset
+ * @param {number} length
+ * @returns {number}
+ * @throws {RangeError} If the resulting byte offset cannot be represented safely.
+ */
+function addSafeByteLength(offset, length) {
+    if (
+        !Number.isSafeInteger(offset) ||
+        offset < 0 ||
+        !Number.isSafeInteger(length) ||
+        length < 0 ||
+        offset > Number.MAX_SAFE_INTEGER - length
+    ) {
+        throw new RangeError('Term-content storage offset exceeds the safe integer range');
+    }
+    return offset + length;
+}
 
 export class TermContentOpfsStore {
     constructor() {
@@ -59,8 +82,14 @@ export class TermContentOpfsStore {
         this._pendingWriteChunks = [];
         /** @type {Promise<void>|null} */
         this._queuedWritePromise = null;
+        /** @type {Error|null} */
+        this._queuedWriteError = null;
         /** @type {Uint8Array[]} */
         this._queuedWriteChunks = [];
+        /** @type {number} */
+        this._queuedWriteBytes = 0;
+        /** @type {number} */
+        this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {number} */
         this._inFlightWriteBytes = 0;
         /** @type {number} */
@@ -70,9 +99,23 @@ export class TermContentOpfsStore {
         /** @type {boolean} */
         this._queueImportWritesEnabled = false;
         /** @type {boolean} */
+        this._importWriteStarted = false;
+        /** @type {Uint8Array[]} */
+        this._importReadOverlayChunks = [];
+        /** @type {number[]} */
+        this._importReadOverlayOffsets = [];
+        /** @type {number} */
+        this._importReadOverlayBytes = 0;
+        /** @type {boolean} */
         this._loadedForRead = false;
+        /** @type {number} */
+        this._readStateGeneration = 0;
+        /** @type {{generation: number, promise: Promise<void>}|null} */
+        this._ensureLoadedForReadOperation = null;
         /** @type {Map<string, Uint8Array>} */
         this._readPageCache = new Map();
+        /** @type {Map<string, {generation: number, promise: Promise<Uint8Array|null>}>} */
+        this._readPageOperations = new Map();
         /** @type {string} */
         this._lastSliceCacheKey = '';
         /** @type {Uint8Array|null} */
@@ -89,9 +132,9 @@ export class TermContentOpfsStore {
         this._writeCoalesceMaxChunksOverride = null;
         /** @type {number|null} */
         this._expectedImportBytes = null;
-        /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, persistedLengthAfterClose: number, logicalLengthAfterClose: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}|null} */
+        /** @type {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, persistedLengthAfterClose: number, logicalLengthAfterClose: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number, writeFlushThresholdBytes: number}|null} */
         this._lastEndImportSessionMetrics = null;
-        /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}} */
+        /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number, writeFlushThresholdBytes: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
         /** @type {'baseline'|'raw-bytes'} */
         this._importStorageMode = 'baseline';
@@ -142,11 +185,14 @@ export class TermContentOpfsStore {
             this._syncActiveSegmentState();
             this._chunks = [];
             this._chunkOffsets = [];
+            this._clearImportReadOverlay();
             this._invalidateReadState();
             this._pendingWriteBytes = 0;
             this._pendingWriteChunks = [];
             this._queuedWritePromise = null;
+            this._queuedWriteError = null;
             this._queuedWriteChunks = [];
+            this._queuedWriteBytes = 0;
             this._inFlightWriteBytes = 0;
             this._importSessionActive = false;
             this._lastEndImportSessionMetrics = null;
@@ -159,26 +205,203 @@ export class TermContentOpfsStore {
      */
     async beginImportSession() {
         await this._runMutationExclusive(async () => {
+            if (this._queuedWriteError !== null) { throw this._queuedWriteError; }
             if (this._importSessionActive) {
                 return;
             }
             await this._awaitQueuedWrites();
+            if (this._fileHandle !== null && !this._loadedForRead) {
+                await this._ensureLoadedForRead();
+            }
             this._importSessionActive = true;
+            this._importWriteStarted = false;
+            this._clearImportReadOverlay();
             this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
             this._writeCoalesceMaxChunks = this._computeWriteCoalesceMaxChunks();
             this._flushThresholdBytes = this._computeWriteFlushThresholdBytes();
             this._pendingWriteBytes = 0;
             this._pendingWriteChunks = [];
             this._queuedWritePromise = null;
+            this._queuedWriteError = null;
             this._queuedWriteChunks = [];
+            this._queuedWriteBytes = 0;
+            this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
             this._inFlightWriteBytes = 0;
             this._lastEndImportSessionMetrics = null;
             this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
             if (this._fileHandle === null) {
                 return;
             }
-            this._writable = await this._fileHandle.createWritable({keepExistingData: true});
-            await this._writable.seek(this._getActiveSegmentState()?.fileLength ?? 0);
+            try {
+                this._writable = await this._fileHandle.createWritable({keepExistingData: true});
+                await this._writable.seek(this._getActiveSegmentState()?.fileLength ?? 0);
+            } catch (error) {
+                this._queuedWriteError ??= error instanceof Error ? error : new Error(String(error));
+                throw this._queuedWriteError;
+            }
+        });
+    }
+
+    /**
+     * Captures persisted file lengths before an import mutates OPFS.
+     * @returns {Promise<import('dictionary-import-journal').TermContentCheckpoint>}
+     */
+    async createImportCheckpoint() {
+        return await this._runMutationExclusive(async () => {
+            await this._flushPendingWrites();
+            await this._awaitQueuedWrites();
+            await this._closeWritable();
+            if (!this._hasStorageDirectoryApi()) { return {segments: []}; }
+            const root = await navigator.storage.getDirectory();
+            const states = await this._loadSegmentStates(root);
+            return {segments: states.map(({fileName, fileLength}) => ({fileName, fileLength}))};
+        });
+    }
+
+    /**
+     * @param {import('dictionary-import-journal').TermContentCheckpoint} checkpoint
+     * @returns {Promise<void>}
+     */
+    async rollbackImportSession(checkpoint) {
+        const rollback = async () => {
+            if (
+                typeof checkpoint !== 'object' ||
+                checkpoint === null ||
+                !Array.isArray(checkpoint.segments)
+            ) {
+                throw new TypeError('Invalid term-content import checkpoint');
+            }
+            /** @type {Map<string, number>} */
+            const checkpointByName = new Map();
+            for (let index = 0; index < checkpoint.segments.length; ++index) {
+                const segment = checkpoint.segments[index];
+                if (
+                    typeof segment !== 'object' ||
+                    segment === null ||
+                    typeof segment.fileName !== 'string' ||
+                    segment.fileName !== this._getSegmentFileName(index) ||
+                    !Number.isSafeInteger(segment.fileLength) ||
+                    segment.fileLength < 0 ||
+                    checkpointByName.has(segment.fileName)
+                ) {
+                    throw new TypeError('Failed to roll back term-content import storage: invalid checkpoint segment');
+                }
+                checkpointByName.set(segment.fileName, segment.fileLength);
+            }
+            // Validate the complete restoration target before abandoning writes.
+            // A corrupt journal must not mutate a live import before rejection.
+            this._importSessionActive = false;
+            this._clearImportReadOverlay();
+            this._pendingWriteBytes = 0;
+            this._pendingWriteChunks = [];
+            this._queuedWriteChunks = [];
+            this._queuedWriteBytes = 0;
+            const queuedWrite = this._queuedWritePromise;
+            if (queuedWrite !== null) {
+                try {
+                    await queuedWrite;
+                } catch (error) {
+                    reportDiagnostics('term-content-store-rollback-abandoned-write-error', {
+                        error: error instanceof Error ? error.message : String(error),
+                    });
+                }
+            }
+            this._queuedWritePromise = null;
+            this._queuedWriteError = null;
+            this._inFlightWriteBytes = 0;
+            const writable = this._writable;
+            this._writable = null;
+            if (writable !== null) {
+                try {
+                    const abort = /** @type {unknown} */ (Reflect.get(writable, 'abort'));
+                    const closePromise = typeof abort === 'function' ?
+                        /** @type {() => Promise<void>} */ (abort).call(writable) :
+                        writable.close();
+                    await closePromise;
+                } catch (_) {
+                    // Restoration below uses fresh handles and verifies every checkpoint file.
+                }
+            }
+            if (!this._hasStorageDirectoryApi()) { return; }
+            const root = await navigator.storage.getDirectory();
+            /** @type {Error[]} */
+            const errors = [];
+            /** @type {Array<{index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}>} */
+            let currentStates = [];
+            try {
+                // Interrupted-only files may contain a gap. They are never
+                // published as a readable address map and are removed below.
+                currentStates = await this._loadSegmentStates(root, true);
+            } catch (error) {
+                errors.push(error instanceof Error ? error : new Error(String(error)));
+            }
+            // Truncation can extend a short file with zeroes. Confirm that every
+            // committed prefix exists before changing or deleting any storage file.
+            for (const [fileName, fileLength] of checkpointByName) {
+                try {
+                    const handle = await root.getFileHandle(fileName);
+                    if ((await handle.getFile()).size < fileLength) {
+                        throw new Error(`Cannot restore missing term-content bytes for ${fileName}`);
+                    }
+                } catch (error) {
+                    errors.push(error instanceof Error ? error : new Error(String(error)));
+                }
+            }
+            if (errors.length > 0) {
+                throw new AggregateError(errors, 'Failed to roll back term-content import storage');
+            }
+            for (const state of currentStates) {
+                try {
+                    const fileLength = checkpointByName.get(state.fileName);
+                    if (typeof fileLength === 'undefined') {
+                        await root.removeEntry(state.fileName);
+                        continue;
+                    }
+                    const nextWritable = await state.fileHandle.createWritable({keepExistingData: true});
+                    try {
+                        await nextWritable.truncate(fileLength);
+                    } finally {
+                        await nextWritable.close();
+                    }
+                } catch (error) {
+                    errors.push(error instanceof Error ? error : new Error(String(error)));
+                }
+            }
+            for (const {fileName, fileLength} of checkpoint.segments) {
+                try {
+                    const handle = await root.getFileHandle(fileName);
+                    if ((await handle.getFile()).size !== fileLength) {
+                        throw new Error(`Cannot restore missing term-content bytes for ${fileName}`);
+                    }
+                } catch (error) {
+                    errors.push(error instanceof Error ? error : new Error(String(error)));
+                }
+            }
+            if (errors.length > 0) {
+                throw new AggregateError(errors, 'Failed to roll back term-content import storage');
+            }
+            this._segmentStates = await this._loadSegmentStates(root);
+            if (this._segmentStates.length === 0) {
+                const fileHandle = await root.getFileHandle(FILE_NAME, {create: true});
+                this._segmentStates = [this._createSegmentState(0, FILE_NAME, fileHandle, 0, 0)];
+            }
+            this._length = this._computeSegmentedLength();
+            this._syncActiveSegmentState();
+            this._chunks = [];
+            this._chunkOffsets = [];
+            this._queuedWriteChunks = [];
+            this._queuedWriteBytes = 0;
+            this._inFlightWriteBytes = 0;
+            this._invalidateReadState();
+        };
+        await this._runMutationExclusive(async () => {
+            try {
+                await rollback();
+            } catch (error) {
+                // Failed restoration cannot reopen admission over unverified bytes.
+                this._queuedWriteError ??= error instanceof Error ? error : new Error(String(error));
+                throw this._queuedWriteError;
+            }
         });
     }
 
@@ -187,6 +410,7 @@ export class TermContentOpfsStore {
      */
     async endImportSession() {
         await this._runMutationExclusive(async () => {
+            if (this._queuedWriteError !== null) { throw this._queuedWriteError; }
             if (!this._importSessionActive && this._writable === null) {
                 return;
             }
@@ -220,6 +444,8 @@ export class TermContentOpfsStore {
                 logicalLengthAfterClose,
                 ...this._writeDrainMetrics,
             };
+            this._clearImportReadOverlay();
+            this._invalidateReadState();
         });
     }
 
@@ -235,7 +461,19 @@ export class TermContentOpfsStore {
     }
 
     /**
-     * @returns {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, persistedLengthAfterClose: number, logicalLengthAfterClose: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}|null}
+     * Starts writing the current import buffer without waiting for the OPFS
+     * write to finish. Finalization remains the durability boundary.
+     * @returns {Promise<void>}
+     */
+    async queuePendingImportWrites() {
+        await this._runMutationExclusive(async () => {
+            if (!this._importSessionActive || !this._queueImportWritesEnabled) { return; }
+            await this._flushPendingWrites();
+        });
+    }
+
+    /**
+     * @returns {{flushPendingWritesMs: number, awaitQueuedWritesMs: number, closeWritableMs: number, totalMs: number, persistedLengthAfterClose: number, logicalLengthAfterClose: number, drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number, writeFlushThresholdBytes: number}|null}
      */
     getLastEndImportSessionMetrics() {
         return this._lastEndImportSessionMetrics;
@@ -308,20 +546,47 @@ export class TermContentOpfsStore {
                 this._pendingWriteChunks = [];
                 this._queuedWritePromise = null;
                 this._queuedWriteChunks = [];
+                this._queuedWriteBytes = 0;
                 this._inFlightWriteBytes = 0;
                 this._importSessionActive = false;
+                this._clearImportReadOverlay();
                 this._lastEndImportSessionMetrics = null;
                 this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
                 this._invalidateReadState();
                 return;
             }
             const root = await navigator.storage.getDirectory();
-            for (const state of await this._loadSegmentStates(root)) {
+            /** @type {Error[]} */
+            const resetErrors = [];
+            for (const state of await this._loadSegmentStates(root, true)) {
                 try {
                     await root.removeEntry(state.fileName);
-                } catch (_) {
-                    // NOP
+                    continue;
+                } catch (removeError) {
+                    try {
+                        const writable = await state.fileHandle.createWritable({keepExistingData: true});
+                        try {
+                            await writable.truncate(0);
+                        } finally {
+                            await writable.close();
+                        }
+                        if ((await state.fileHandle.getFile()).size > 0) {
+                            throw new Error(`Failed to truncate term-content reset segment ${state.fileName}`);
+                        }
+                    } catch (truncateError) {
+                        resetErrors.push(new AggregateError(
+                            [
+                                removeError instanceof Error ? removeError : new Error(String(removeError)),
+                                truncateError instanceof Error ? truncateError : new Error(String(truncateError)),
+                            ],
+                            `Failed to remove or truncate term-content reset segment ${state.fileName}`,
+                        ));
+                    }
                 }
+            }
+            if (resetErrors.length > 0) {
+                this._invalidateReadState();
+                throw new AggregateError(resetErrors, 'Failed to reset term-content storage');
             }
             const fileHandle = await root.getFileHandle(FILE_NAME, {create: true});
             const writable = await fileHandle.createWritable();
@@ -337,8 +602,10 @@ export class TermContentOpfsStore {
             this._pendingWriteChunks = [];
             this._queuedWritePromise = null;
             this._queuedWriteChunks = [];
+            this._queuedWriteBytes = 0;
             this._inFlightWriteBytes = 0;
             this._importSessionActive = false;
+            this._clearImportReadOverlay();
             this._lastEndImportSessionMetrics = null;
             this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
         });
@@ -374,6 +641,7 @@ export class TermContentOpfsStore {
         return await this._runMutationExclusive(async () => {
             const length = blob.size;
             const offset = this._getBufferedLength();
+            addSafeByteLength(offset, length);
             if (length <= 0) {
                 return {offset, length: 0};
             }
@@ -387,7 +655,9 @@ export class TermContentOpfsStore {
                 await this._finalizeAppendBatch([bytes]);
                 return {offset: offsets[0] ?? offset, length: lengths[0] ?? bytes.byteLength};
             }
-            this._invalidateReadState();
+            if (!this._importSessionActive) {
+                this._invalidateReadState();
+            }
             if (this._pendingWriteBytes > 0 || this._pendingWriteChunks.length > 0) {
                 await this._flushPendingWrites();
             }
@@ -414,15 +684,165 @@ export class TermContentOpfsStore {
     }
 
     /**
+     * Appends primary chunks and references derived from their final logical
+     * offsets as one exclusive mutation. Import-session rollback remains the
+     * durability boundary if the underlying OPFS write later fails.
+     * @param {Uint8Array[]} primaryChunks
+     * @param {(offsets: number[], lengths: number[]) => Uint8Array[]} createDerivedChunks
+     * @returns {Promise<{primaryOffsets: number[], primaryLengths: number[], derivedOffsets: number[], derivedLengths: number[]}>}
+     */
+    async appendBatchWithDerivedChunks(primaryChunks, createDerivedChunks) {
+        return await this._runMutationExclusive(async () => {
+            if (primaryChunks.length === 0) {
+                return {primaryOffsets: [], primaryLengths: [], derivedOffsets: [], derivedLengths: []};
+            }
+            const startOffset = this._getBufferedLength();
+            /** @type {number[]} */
+            const primaryOffsets = new Array(primaryChunks.length);
+            /** @type {number[]} */
+            const primaryLengths = new Array(primaryChunks.length);
+            let nextOffset = startOffset;
+            for (let i = 0; i < primaryChunks.length; ++i) {
+                primaryOffsets[i] = nextOffset;
+                primaryLengths[i] = primaryChunks[i].byteLength;
+                nextOffset = addSafeByteLength(nextOffset, primaryLengths[i]);
+            }
+            const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
+            if (!Array.isArray(derivedChunks)) {
+                throw new TypeError('Derived term-content chunks must be an array');
+            }
+            const allChunks = [...primaryChunks, ...derivedChunks];
+            /** @type {number[]} */
+            const allOffsets = [];
+            /** @type {number[]} */
+            const allLengths = [];
+            this._appendBatchInternal(allChunks, allOffsets, allLengths);
+            await this._finalizeAppendBatch(allChunks);
+            return {
+                primaryOffsets: allOffsets.slice(0, primaryChunks.length),
+                primaryLengths: allLengths.slice(0, primaryChunks.length),
+                derivedOffsets: allOffsets.slice(primaryChunks.length),
+                derivedLengths: allLengths.slice(primaryChunks.length),
+            };
+        });
+    }
+
+    /**
+     * Reserves a fixed-size derived prefix while primary chunks are still being
+     * produced. The exclusive mutation remains held until completion, so the
+     * published offsets cannot be invalidated by another append.
+     * @param {Promise<Uint8Array[]>} primaryChunksPromise
+     * @param {number[]|Uint32Array} derivedChunkLengths
+     * @param {(primaryOffsets: number[], primaryLengths: number[]) => Uint8Array[]} createDerivedChunks
+     * @returns {{reserved: Promise<{derivedOffsets: number[], derivedLengths: number[]}>, completion: Promise<{primaryOffsets: number[], primaryLengths: number[], derivedOffsets: number[], derivedLengths: number[]}>}}
+     * @throws {TypeError|RangeError} If the reservation lengths are invalid.
+     */
+    beginAppendBatchWithDerivedPrefix(primaryChunksPromise, derivedChunkLengths, createDerivedChunks) {
+        if (
+            !(derivedChunkLengths instanceof Uint32Array) &&
+            !Array.isArray(derivedChunkLengths)
+        ) {
+            throw new TypeError('Reserved term-content chunk lengths must be an array');
+        }
+        const normalizedDerivedLengths = Array.from(derivedChunkLengths, (length) => {
+            if (!Number.isSafeInteger(length) || length < 0) {
+                throw new RangeError('Reserved term-content chunk length is invalid');
+            }
+            return length;
+        });
+        const primaryPromise = Promise.resolve(primaryChunksPromise);
+        void primaryPromise.catch(() => {});
+        /** @type {(value: {derivedOffsets: number[], derivedLengths: number[]}) => void} */
+        let resolveReserved = () => {};
+        /** @type {(reason?: unknown) => void} */
+        let rejectReserved = () => {};
+        let reservationSettled = false;
+        /** @type {Promise<{derivedOffsets: number[], derivedLengths: number[]}>} */
+        const reserved = new Promise((resolve, reject) => {
+            resolveReserved = resolve;
+            rejectReserved = reject;
+        });
+        void reserved.catch(() => {});
+        const completion = this._runMutationExclusive(async () => {
+            try {
+                const startOffset = this._getBufferedLength();
+                /** @type {number[]} */
+                const derivedOffsets = new Array(normalizedDerivedLengths.length);
+                let primaryStartOffset = startOffset;
+                for (let i = 0; i < normalizedDerivedLengths.length; ++i) {
+                    derivedOffsets[i] = primaryStartOffset;
+                    primaryStartOffset = addSafeByteLength(primaryStartOffset, normalizedDerivedLengths[i]);
+                }
+                reservationSettled = true;
+                resolveReserved({
+                    derivedOffsets: [...derivedOffsets],
+                    derivedLengths: [...normalizedDerivedLengths],
+                });
+
+                const primaryChunks = await primaryPromise;
+                if (!Array.isArray(primaryChunks) || primaryChunks.some((chunk) => !(chunk instanceof Uint8Array))) {
+                    throw new TypeError('Primary term-content chunks must be Uint8Arrays');
+                }
+                /** @type {number[]} */
+                const primaryOffsets = new Array(primaryChunks.length);
+                /** @type {number[]} */
+                const primaryLengths = new Array(primaryChunks.length);
+                let nextOffset = primaryStartOffset;
+                for (let i = 0; i < primaryChunks.length; ++i) {
+                    primaryOffsets[i] = nextOffset;
+                    primaryLengths[i] = primaryChunks[i].byteLength;
+                    nextOffset = addSafeByteLength(nextOffset, primaryLengths[i]);
+                }
+                const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
+                if (
+                    !Array.isArray(derivedChunks) ||
+                    derivedChunks.length !== normalizedDerivedLengths.length ||
+                    derivedChunks.some((chunk, index) => (
+                        !(chunk instanceof Uint8Array) ||
+                        chunk.byteLength !== normalizedDerivedLengths[index]
+                    ))
+                ) {
+                    throw new TypeError('Derived term-content chunks do not match their reservation');
+                }
+                const chunks = [...derivedChunks, ...primaryChunks];
+                /** @type {number[]} */
+                const offsets = [];
+                /** @type {number[]} */
+                const lengths = [];
+                this._appendBatchInternal(chunks, offsets, lengths);
+                await this._finalizeAppendBatch(chunks);
+                return {primaryOffsets, primaryLengths, derivedOffsets, derivedLengths: normalizedDerivedLengths};
+            } catch (error) {
+                if (!reservationSettled) {
+                    reservationSettled = true;
+                    rejectReserved(error);
+                }
+                throw error;
+            }
+        });
+        void completion.catch(() => {});
+        return {reserved, completion};
+    }
+
+    /**
      * @param {Uint8Array[]} chunks
      * @param {number[]} offsets
      * @param {number[]} lengths
      * @returns {void}
      */
     _appendBatchInternal(chunks, offsets, lengths) {
+        const startOffset = this._getBufferedLength();
+        let totalBytes = 0;
+        for (const chunk of chunks) {
+            totalBytes = addSafeByteLength(totalBytes, chunk.byteLength);
+        }
+        // Validate the complete reservation before mutating output arrays,
+        // in-memory chunks, import overlays, or the logical length.
+        addSafeByteLength(startOffset, totalBytes);
+
+        let nextOffset = startOffset;
         offsets.length = 0;
         lengths.length = 0;
-        let nextOffset = this._getBufferedLength();
         for (const chunk of chunks) {
             const length = chunk.byteLength;
             offsets.push(nextOffset);
@@ -431,6 +851,10 @@ export class TermContentOpfsStore {
                 if (this._fileHandle === null) {
                     this._chunkOffsets.push(nextOffset);
                     this._chunks.push(chunk);
+                } else if (this._importSessionActive) {
+                    this._importReadOverlayOffsets.push(nextOffset);
+                    this._importReadOverlayChunks.push(chunk);
+                    this._importReadOverlayBytes += length;
                 }
                 nextOffset += length;
             }
@@ -442,19 +866,19 @@ export class TermContentOpfsStore {
      * Returns the logical append cursor derived from persisted bytes plus buffered writes.
      * This is more robust than trusting `_length` alone when OPFS write buffering is active.
      * @returns {number}
+     * @throws {Error} If an earlier storage write failed.
      */
     _getBufferedLength() {
+        // Every append reserves its cursor here. Do not admit more work after
+        // a background write has failed, even when its promise has settled.
+        if (this._queuedWriteError !== null) { throw this._queuedWriteError; }
         if (this._fileHandle === null) {
             return this._length;
         }
         let total = this._computeSegmentedLength();
-        total += this._pendingWriteBytes;
-        total += this._inFlightWriteBytes;
-        if (this._queuedWriteChunks.length > 0) {
-            for (const chunk of this._queuedWriteChunks) {
-                total += chunk.byteLength;
-            }
-        }
+        total = addSafeByteLength(total, this._pendingWriteBytes);
+        total = addSafeByteLength(total, this._inFlightWriteBytes);
+        total = addSafeByteLength(total, this._queuedWriteBytes);
         return total;
     }
 
@@ -469,20 +893,24 @@ export class TermContentOpfsStore {
                 totalBytes += chunk.byteLength;
             }
             if (totalBytes > 0) {
-                this._invalidateReadState();
+                if (!this._importSessionActive) {
+                    this._invalidateReadState();
+                }
                 for (const chunk of chunks) {
                     if (chunk.byteLength <= 0) { continue; }
                     this._pendingWriteBytes += chunk.byteLength;
                     this._pendingWriteChunks.push(chunk);
                 }
-                if (this._importSessionActive) {
-                    if (
+                if (
+                    this._importSessionActive &&
+                    (
                         !this._queueImportWritesEnabled ||
+                        (!this._importWriteStarted && this._pendingWriteBytes >= EAGER_IMPORT_WRITE_START_BYTES) ||
                         this._pendingWriteBytes >= this._flushThresholdBytes ||
                         this._pendingWriteChunks.length >= this._writeCoalesceMaxChunks
-                    ) {
-                        await this._flushPendingWrites();
-                    }
+                    )
+                ) {
+                    await this._flushPendingWrites();
                 } else if (this._pendingWriteBytes >= this._flushThresholdBytes) {
                     await this._flushPendingWrites();
                     await this._awaitQueuedWrites();
@@ -496,12 +924,49 @@ export class TermContentOpfsStore {
      * @returns {Promise<void>}
      */
     async ensureLoadedForRead() {
+        if (this._loadedForRead) { return; }
+        await this._runMutationExclusive(() => this._ensureLoadedForRead());
+    }
+
+    /** @returns {Promise<void>} */
+    async _ensureLoadedForRead() {
+        while (!this._loadedForRead) {
+            const generation = this._readStateGeneration;
+            let operation = this._ensureLoadedForReadOperation;
+            if (operation === null || operation.generation !== generation) {
+                const promise = this._ensureLoadedForReadGeneration(generation);
+                operation = {generation, promise};
+                this._ensureLoadedForReadOperation = operation;
+            }
+            try {
+                await operation.promise;
+            } finally {
+                if (this._ensureLoadedForReadOperation === operation) {
+                    this._ensureLoadedForReadOperation = null;
+                }
+            }
+            // A mutation can invalidate snapshots while an OPFS getFile call
+            // is in flight. Loop onto the new generation instead of publishing
+            // or consuming the stale snapshot.
+            if (generation === this._readStateGeneration && !this._loadedForRead) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * @param {number} generation
+     * @returns {Promise<void>}
+     */
+    async _ensureLoadedForReadGeneration(generation) {
         await this._flushPendingWrites();
         await this._awaitQueuedWrites();
         await this._closeWritable();
+        if (generation !== this._readStateGeneration) { return; }
         if (this._fileHandle === null && this._chunks.length === 0 && this._hasStorageDirectoryApi()) {
             await this._reloadSegmentHandlesIfAvailable();
         }
+        if (generation !== this._readStateGeneration) { return; }
         if (this._loadedForRead) { return; }
         if (this._fileHandle === null) {
             // Non-OPFS environments rely on in-memory chunks only.
@@ -513,23 +978,36 @@ export class TermContentOpfsStore {
             return;
         }
         try {
+            const states = this._segmentStates;
+            /** @type {Array<{state: {index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}, file: File, startOffset: number}>} */
+            const snapshots = [];
             let startOffset = 0;
-            for (const state of this._segmentStates) {
+            for (const state of states) {
                 const file = await state.fileHandle.getFile();
+                snapshots.push({state, file, startOffset});
+                startOffset = addSafeByteLength(startOffset, file.size);
+            }
+            if (generation !== this._readStateGeneration || states !== this._segmentStates) { return; }
+            this._assertReadableSegmentGrowth(snapshots.map(({state, file}) => ({
+                index: state.index, fileName: state.fileName, fileLength: file.size,
+            })));
+            for (const {state, file, startOffset: snapshotStartOffset} of snapshots) {
                 state.fileLength = file.size;
-                state.startOffset = startOffset;
+                state.startOffset = snapshotStartOffset;
                 state.readFile = file;
-                startOffset += file.size;
             }
             this._length = startOffset;
             this._readPageCache.clear();
             this._loadedForRead = true;
         } catch (error) {
+            if (generation !== this._readStateGeneration) { return; }
             if (!this._isNotReadableFileError(error)) {
                 throw error;
             }
             const recovered = await this._recoverFromNotReadableFileError('ensure-loaded', error);
-            this._loadedForRead = recovered;
+            if (generation === this._readStateGeneration) {
+                this._loadedForRead = recovered;
+            }
         }
     }
 
@@ -537,19 +1015,21 @@ export class TermContentOpfsStore {
      * @returns {Promise<void>}
      */
     async _flushPendingWrites() {
+        if (this._queuedWriteError !== null) { throw this._queuedWriteError; }
         if (this._pendingWriteBytes <= 0 || this._pendingWriteChunks.length === 0 || this._fileHandle === null) {
             return;
         }
-        if (this._writable === null) {
-            this._writable = await this._fileHandle.createWritable({keepExistingData: true});
-            await this._writable.seek(this._getActiveSegmentState()?.fileLength ?? 0);
-        }
+        // The drain owns stream creation and segment rollover. Opening here
+        // can race its awaited rollover and replace a stream with a stale copy.
         const chunks = this._pendingWriteChunks;
         this._pendingWriteBytes = 0;
         this._pendingWriteChunks = [];
         if (this._importSessionActive) {
             if (this._queueImportWritesEnabled) {
                 this._queueWriteChunks(chunks);
+                if (this._queuedWriteBytes + this._inFlightWriteBytes >= this._queuedWriteBudgetBytes) {
+                    await this._awaitQueuedWrites();
+                }
             } else {
                 if (this._queuedWritePromise !== null) {
                     await this._awaitQueuedWrites();
@@ -568,24 +1048,36 @@ export class TermContentOpfsStore {
     /**
      * @param {Uint8Array[]} chunks
      * @returns {void}
+     * @throws {Error} If an earlier storage write failed.
      */
     _queueWriteChunks(chunks) {
         if (chunks.length === 0) {
             return;
         }
+        if (this._queuedWriteError !== null) {
+            throw this._queuedWriteError;
+        }
+        this._importWriteStarted = true;
         for (const chunk of chunks) {
             this._queuedWriteChunks.push(chunk);
+            this._queuedWriteBytes += chunk.byteLength;
         }
         if (this._queuedWritePromise !== null) {
             return;
         }
         this._queuedWritePromise = this._drainQueuedWrites();
+        // The producer may return before writeback settles. Observe rejection
+        // now; _awaitQueuedWrites still throws the retained original failure.
+        void this._queuedWritePromise.catch(() => {});
     }
 
     /**
      * @returns {Promise<void>}
      */
     async _awaitQueuedWrites() {
+        if (this._queuedWriteError !== null) {
+            throw this._queuedWriteError;
+        }
         const promise = this._queuedWritePromise;
         if (promise === null) {
             return;
@@ -606,6 +1098,7 @@ export class TermContentOpfsStore {
                 for (const chunk of chunks) {
                     inFlightBytes += chunk.byteLength;
                 }
+                this._queuedWriteBytes = Math.max(0, this._queuedWriteBytes - inFlightBytes);
                 this._inFlightWriteBytes += inFlightBytes;
                 try {
                     await this._writePendingChunksCoalesced(chunks);
@@ -613,11 +1106,13 @@ export class TermContentOpfsStore {
                     this._inFlightWriteBytes = Math.max(0, this._inFlightWriteBytes - inFlightBytes);
                 }
             }
+        } catch (error) {
+            this._queuedWriteError = error instanceof Error ? error : new Error(String(error));
+            this._queuedWriteChunks = [];
+            this._queuedWriteBytes = 0;
+            throw error;
         } finally {
             this._queuedWritePromise = null;
-            if (this._queuedWriteChunks.length > 0) {
-                this._queuedWritePromise = this._drainQueuedWrites();
-            }
         }
     }
 
@@ -670,13 +1165,9 @@ export class TermContentOpfsStore {
                 this._writeDrainMetrics.minMergedGroupChunkCount = group.length;
             }
             this._writeDrainMetrics.mergedWriteBytes += groupBytes;
-            const merged = new Uint8Array(groupBytes);
-            let offset = 0;
-            for (const chunk of group) {
-                merged.set(chunk, offset);
-                offset += chunk.byteLength;
-            }
-            await this._writeChunkToActiveSegment(merged);
+            // Blob construction lets the browser assemble the write payload
+            // without allocating and filling another large JavaScript buffer.
+            await this._writeDataToActiveSegments(new Blob(group));
             group = [];
             groupBytes = 0;
         };
@@ -706,7 +1197,8 @@ export class TermContentOpfsStore {
             await this._writable.close();
         } catch (error) {
             if (!this._isClosingWritableStreamError(error)) {
-                throw error;
+                this._queuedWriteError ??= error instanceof Error ? error : new Error(String(error));
+                throw this._queuedWriteError;
             }
         } finally {
             this._writable = null;
@@ -744,7 +1236,11 @@ export class TermContentOpfsStore {
      * @returns {Promise<Uint8Array|null>}
      */
     async readSlice(offset, length) {
-        if (offset < 0 || length <= 0) { return null; }
+        if (
+            !Number.isSafeInteger(offset) || offset < 0 ||
+            !Number.isSafeInteger(length) || length <= 0 ||
+            !Number.isSafeInteger(offset + length)
+        ) { return null; }
         let end = offset + length;
         if (end > this._length) {
             const reloaded = await this._reloadForPotentialExternalGrowth();
@@ -753,19 +1249,31 @@ export class TermContentOpfsStore {
                 return null;
             }
         }
+        const generation = this._readStateGeneration;
         const cacheKey = `${offset}:${length}`;
         if (this._exactSliceCacheEnabled && this._lastSliceCacheKey === cacheKey && this._lastSliceCacheValue instanceof Uint8Array) {
             return this._lastSliceCacheValue;
         }
         /** @type {Uint8Array|null} */
-        let result;
-        if (this._fileHandle === null) {
+        let result = this._readSliceFromImportOverlay(offset, length);
+        if (result !== null) {
+            this._lastReadErrorDetails = null;
+        } else if (this._fileHandle === null) {
             if (this._chunks.length === 0 && this._hasStorageDirectoryApi()) {
                 await this.ensureLoadedForRead();
             }
             if (this._chunks.length === 0) { return null; }
             result = this._readSliceFromMemory(offset, length);
         } else {
+            // An import keeps old snapshots readable while new bytes live in
+            // the overlay. A range spanning both needs a committed snapshot;
+            // do not mistake the logical append length for the File's size.
+            if (this._loadedForRead) {
+                const tail = this._findSegmentStateForOffset(end - 1);
+                if (tail === null || tail.readFile === null || end > tail.startOffset + tail.readFile.size) {
+                    this._invalidateReadState();
+                }
+            }
             if (!this._loadedForRead) {
                 await this.ensureLoadedForRead();
             }
@@ -812,11 +1320,125 @@ export class TermContentOpfsStore {
                 this._lastReadErrorDetails = null;
             }
         }
-        if (this._exactSliceCacheEnabled && result instanceof Uint8Array) {
+        // Snapshot/page readers already fence their caches. The exact-slice
+        // cache needs the same fence when an old read finishes after invalidation.
+        if (generation === this._readStateGeneration && this._exactSliceCacheEnabled && result instanceof Uint8Array) {
             this._lastSliceCacheKey = cacheKey;
             this._lastSliceCacheValue = result;
         }
         return result;
+    }
+
+    /**
+     * Reads a verification wave directly from the import overlay when
+     * possible, avoiding one async operation per short block reference.
+     * Requests which need file I/O retain the scalar reader's snapshot and
+     * retry behavior, and all started reads settle before this method returns.
+     * @param {Array<{offset: number, length: number}>} spans
+     * @returns {Promise<Array<{status: 'ok', bytes: Uint8Array}|{status: 'unavailable'}|{status: 'error', error: unknown}>>}
+     */
+    async readSlicesDetailed(spans) {
+        const results = new Array(spans.length);
+        const pending = [];
+        for (let index = 0; index < spans.length; ++index) {
+            const {offset, length} = spans[index];
+            if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(length) || length <= 0) {
+                results[index] = {status: 'unavailable'};
+                continue;
+            }
+            const end = offset + length;
+            if (!Number.isSafeInteger(end) || end > this._length) {
+                pending.push({index, operation: this.readSlice(offset, length)});
+                continue;
+            }
+            const overlay = this._readSliceFromImportOverlay(offset, length);
+            if (overlay !== null) {
+                results[index] = {status: 'ok', bytes: overlay};
+                continue;
+            }
+            if (this._fileHandle === null && this._chunks.length > 0) {
+                const bytes = this._readSliceFromMemory(offset, length);
+                results[index] = bytes === null ? {status: 'unavailable'} : {status: 'ok', bytes};
+                continue;
+            }
+            pending.push({index, operation: this.readSlice(offset, length)});
+        }
+        const settled = await Promise.allSettled(pending.map(({operation}) => operation));
+        for (let i = 0; i < pending.length; ++i) {
+            const {index} = pending[i];
+            const result = settled[i];
+            if (result.status === 'rejected') {
+                const error = /** @type {unknown} */ (result.reason);
+                results[index] = {status: 'error', error};
+            } else {
+                results[index] = result.value === null ?
+                    {status: 'unavailable'} :
+                    {status: 'ok', bytes: result.value};
+            }
+        }
+        return results;
+    }
+
+    /**
+     * @param {number} offset
+     * @param {number} length
+     * @returns {Uint8Array|null}
+     */
+    _readSliceFromImportOverlay(offset, length) {
+        const chunks = this._importReadOverlayChunks;
+        if (chunks.length === 0) { return null; }
+        const offsets = this._importReadOverlayOffsets;
+        let low = 0;
+        let high = offsets.length - 1;
+        while (low <= high) {
+            const mid = (low + high) >>> 1;
+            const start = offsets[mid];
+            const end = start + chunks[mid].byteLength;
+            if (offset < start) {
+                high = mid - 1;
+            } else if (offset >= end) {
+                low = mid + 1;
+            } else {
+                low = mid;
+                break;
+            }
+        }
+        let chunkIndex = low;
+        if (
+            chunkIndex >= chunks.length ||
+            offset < offsets[chunkIndex] ||
+            offset >= offsets[chunkIndex] + chunks[chunkIndex].byteLength
+        ) {
+            return null;
+        }
+        const firstChunk = chunks[chunkIndex];
+        const firstOffset = offset - offsets[chunkIndex];
+        if (firstOffset + length <= firstChunk.byteLength) {
+            return firstChunk.subarray(firstOffset, firstOffset + length);
+        }
+        const output = new Uint8Array(length);
+        let outputOffset = 0;
+        let cursor = offset;
+        while (outputOffset < length && chunkIndex < chunks.length) {
+            const chunk = chunks[chunkIndex];
+            const chunkOffset = offsets[chunkIndex];
+            if (cursor < chunkOffset) { return null; }
+            const startInChunk = cursor - chunkOffset;
+            const copyLength = Math.min(length - outputOffset, chunk.byteLength - startInChunk);
+            if (copyLength <= 0) { return null; }
+            output.set(chunk.subarray(startInChunk, startInChunk + copyLength), outputOffset);
+            outputOffset += copyLength;
+            cursor += copyLength;
+            ++chunkIndex;
+        }
+        return outputOffset === length ? output : null;
+    }
+
+    /** */
+    _clearImportReadOverlay() {
+        this._importReadOverlayChunks = [];
+        this._importReadOverlayOffsets = [];
+        this._importReadOverlayBytes = 0;
     }
 
     /**
@@ -830,7 +1452,7 @@ export class TermContentOpfsStore {
         if (!this._loadedForRead) {
             await this.ensureLoadedForRead();
         }
-        /** @type {Array<{state: {index: number, readFile: File|null, fileLength: number}, pageIndex: number}>} */
+        /** @type {Array<{state: {index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}, pageIndex: number}>} */
         const pages = [];
         const seen = new Set();
         const maxPages = Math.max(0, this._readPageCacheMaxPages >>> 3);
@@ -868,14 +1490,21 @@ export class TermContentOpfsStore {
         if (this._fileHandle === null || !this._hasStorageDirectoryApi()) {
             return false;
         }
-        this._invalidateReadState();
-        try {
-            await this._reloadSegmentHandlesIfAvailable();
-            await this.ensureLoadedForRead();
-            return true;
-        } catch (_) {
-            return false;
-        }
+        return await this._runMutationExclusive(async () => {
+            this._invalidateReadState();
+            try {
+                // Snapshot replacement must not discard an unclosed writer or
+                // rewind the cursor to the last committed file length.
+                await this._flushPendingWrites();
+                await this._awaitQueuedWrites();
+                await this._closeWritable();
+                if (!await this._reloadSegmentHandlesIfAvailable()) { return false; }
+                await this._ensureLoadedForRead();
+                return true;
+            } catch (_) {
+                return false;
+            }
+        });
     }
 
     /**
@@ -930,30 +1559,42 @@ export class TermContentOpfsStore {
             return null;
         }
         for (let attempt = 0; attempt < 2; ++attempt) {
+            const generation = this._readStateGeneration;
             try {
                 const output = new Uint8Array(length);
                 let outputOffset = 0;
                 let cursor = offset;
+                let unavailable = false;
                 while (outputOffset < length) {
                     const state = this._findSegmentStateForOffset(cursor);
                     if (state === null || state.readFile === null) {
-                        return null;
+                        unavailable = true;
+                        break;
                     }
                     const localOffset = cursor - state.startOffset;
                     const copyLength = Math.min(length - outputOffset, state.fileLength - localOffset);
                     if (copyLength <= 0) {
-                        return null;
+                        unavailable = true;
+                        break;
                     }
                     await this._copyFileRangeIntoOutput(state, localOffset, copyLength, output, outputOffset);
                     outputOffset += copyLength;
                     cursor += copyLength;
                 }
+                if (generation !== this._readStateGeneration) {
+                    if (attempt > 0) { return null; }
+                    if (!this._loadedForRead) { await this.ensureLoadedForRead(); }
+                    continue;
+                }
+                if (unavailable) { return null; }
                 return outputOffset === length ? output : null;
             } catch (error) {
                 if (attempt > 0 || !this._isNotReadableFileError(error)) {
                     throw error;
                 }
-                const recovered = await this._recoverFromNotReadableFileError('read-slice', error);
+                const recovered = await this._runMutationExclusive(
+                    () => this._recoverFromNotReadableFileError('read-slice', error),
+                );
                 if (!recovered) {
                     return null;
                 }
@@ -963,7 +1604,7 @@ export class TermContentOpfsStore {
     }
 
     /**
-     * @param {{index: number, readFile: File|null, fileLength: number}} state
+     * @param {{index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}} state
      * @param {number} pageIndex
      * @returns {Promise<Uint8Array|null>}
      */
@@ -982,10 +1623,34 @@ export class TermContentOpfsStore {
         if (pageOffset >= state.fileLength) {
             return null;
         }
-        const pageEnd = Math.min(state.fileLength, pageOffset + READ_PAGE_SIZE_BYTES);
-        const bytes = new Uint8Array(await file.slice(pageOffset, pageEnd).arrayBuffer());
-        this._setReadPage(cacheKey, bytes);
-        return bytes;
+        const generation = this._readStateGeneration;
+        const pending = this._readPageOperations.get(cacheKey);
+        if (typeof pending !== 'undefined' && pending.generation === generation) {
+            return await pending.promise;
+        }
+        const operation = {
+            generation,
+            promise: (async () => {
+                const pageEnd = Math.min(state.fileLength, pageOffset + READ_PAGE_SIZE_BYTES);
+                const bytes = new Uint8Array(await file.slice(pageOffset, pageEnd).arrayBuffer());
+                if (
+                    generation === this._readStateGeneration &&
+                    state.readFile === file &&
+                    this._segmentStates.includes(state)
+                ) {
+                    this._setReadPage(cacheKey, bytes);
+                }
+                return bytes;
+            })(),
+        };
+        this._readPageOperations.set(cacheKey, operation);
+        try {
+            return await operation.promise;
+        } finally {
+            if (this._readPageOperations.get(cacheKey) === operation) {
+                this._readPageOperations.delete(cacheKey);
+            }
+        }
     }
 
     /**
@@ -1036,6 +1701,7 @@ export class TermContentOpfsStore {
 
     /** */
     _invalidateReadState() {
+        ++this._readStateGeneration;
         this._loadedForRead = false;
         for (const state of this._segmentStates) {
             state.readFile = null;
@@ -1064,6 +1730,11 @@ export class TermContentOpfsStore {
             chunkCount: this._chunks.length,
             chunkOffsetCount: this._chunkOffsets.length,
             segmentCount: this._segmentStates.length,
+            queuedWriteBytes: this._queuedWriteBytes,
+            importReadOverlayChunkCount: this._importReadOverlayChunks.length,
+            importReadOverlayBytes: this._importReadOverlayBytes,
+            queuedWriteBudgetBytes: this._queuedWriteBudgetBytes,
+            writeFlushThresholdBytes: this._flushThresholdBytes,
             activeSegmentIndex: this._getActiveSegmentState()?.index ?? null,
             segments: this._segmentStates.map((state) => ({
                 index: state.index,
@@ -1132,10 +1803,7 @@ export class TermContentOpfsStore {
             reason: this._asErrorText(error),
             action: 'retry-open-file',
         });
-        for (const state of this._segmentStates) {
-            state.readFile = null;
-        }
-        this._readPageCache.clear();
+        this._invalidateReadState();
         const refreshed = await this._refreshReadFileSnapshot({reacquireHandle: false});
         if (refreshed) {
             return true;
@@ -1151,6 +1819,11 @@ export class TermContentOpfsStore {
         if (this._fileHandle === null) {
             return false;
         }
+        // Called only by the mutation owner. Publish durable lengths after
+        // all current writes settle, never lengths from an older snapshot.
+        await this._flushPendingWrites();
+        await this._awaitQueuedWrites();
+        await this._closeWritable();
         if (reacquireHandle) {
             try {
                 if (
@@ -1159,26 +1832,32 @@ export class TermContentOpfsStore {
                     'getDirectory' in navigator.storage
                 ) {
                     const root = await navigator.storage.getDirectory();
-                    this._segmentStates = await this._loadSegmentStates(root);
-                    if (this._segmentStates.length === 0) {
-                        const fileHandle = await root.getFileHandle(FILE_NAME, {create: true});
-                        const file = await fileHandle.getFile();
-                        this._segmentStates.push(this._createSegmentState(0, FILE_NAME, fileHandle, file.size, 0));
-                    }
+                    const states = await this._loadSegmentStates(root);
+                    this._assertReadableSegmentGrowth(states);
+                    this._segmentStates = states;
                     this._syncActiveSegmentState();
                 }
             } catch (_) {
-                // NOP
+                return false;
             }
         }
         try {
+            const snapshots = [];
             let startOffset = 0;
             for (const state of this._segmentStates) {
                 const file = await state.fileHandle.getFile();
-                state.fileLength = file.size;
-                state.startOffset = startOffset;
-                state.readFile = file;
+                snapshots.push({state, file, startOffset});
                 startOffset += file.size;
+            }
+            this._assertReadableSegmentGrowth(snapshots.map(({state, file}) => ({
+                index: state.index, fileName: state.fileName, fileLength: file.size,
+            })));
+            // Publish only after every file succeeds. A failed later getFile
+            // must not leave a partly rebased address map behind.
+            for (const {state, file, startOffset: snapshotStartOffset} of snapshots) {
+                state.fileLength = file.size;
+                state.startOffset = snapshotStartOffset;
+                state.readFile = file;
             }
             this._length = startOffset;
             this._readPageCache.clear();
@@ -1204,14 +1883,36 @@ export class TermContentOpfsStore {
             return false;
         }
         const root = await navigator.storage.getDirectory();
-        this._segmentStates = await this._loadSegmentStates(root);
-        if (this._segmentStates.length === 0) {
+        const states = await this._loadSegmentStates(root);
+        this._assertReadableSegmentGrowth(states);
+        if (states.length === 0) {
             return false;
         }
+        this._segmentStates = states;
         this._length = this._computeSegmentedLength();
         this._syncActiveSegmentState();
         this._invalidateReadState();
         return this._fileHandle !== null;
+    }
+
+    /**
+     * Read refresh may observe an append, but may never rebase existing bytes.
+     * Explicit reset and checkpoint restoration publish their own new map.
+     * @param {Array<{index: number, fileName: string, fileLength: number}>} states
+     * @throws {Error} If a previously observed committed prefix has changed.
+     */
+    _assertReadableSegmentGrowth(states) {
+        for (let i = 0; i < this._segmentStates.length; ++i) {
+            const previous = this._segmentStates[i];
+            const next = states[i];
+            if (
+                typeof next === 'undefined' || next.index !== previous.index ||
+                next.fileName !== previous.fileName || next.fileLength < previous.fileLength ||
+                (i + 1 < this._segmentStates.length && next.fileLength !== previous.fileLength)
+            ) {
+                throw new Error(`Term-content segment changed during read: ${previous.fileName}`);
+            }
+        }
     }
 
     /**
@@ -1230,9 +1931,11 @@ export class TermContentOpfsStore {
 
     /**
      * @param {FileSystemDirectoryHandle} root
+     * @param {boolean} [allowIncomplete] Restoration or deletion may inventory interrupted files with gaps.
      * @returns {Promise<Array<{index: number, fileName: string, fileHandle: FileSystemFileHandle, fileLength: number, startOffset: number, readFile: File|null}>>}
+     * @throws {Error} If the persisted segment inventory is ambiguous or incomplete.
      */
-    async _loadSegmentStates(root) {
+    async _loadSegmentStates(root, allowIncomplete = false) {
         const entriesMethod = /** @type {unknown} */ (Reflect.get(root, 'entries'));
         if (typeof entriesMethod !== 'function') {
             return [];
@@ -1244,21 +1947,29 @@ export class TermContentOpfsStore {
             if (handle.kind !== 'file') { continue; }
             const fileName = String(name);
             const index = this._parseSegmentIndexFromFileName(fileName);
-            if (index === null) { continue; }
-            const fileHandle = /** @type {FileSystemFileHandle} */ (handle);
-            let fileLength = 0;
-            try {
-                fileLength = (await fileHandle.getFile()).size;
-            } catch (_) {
+            if (index === null) {
+                if (this._isSegmentFileNameCandidate(fileName)) {
+                    throw new Error(`Invalid term-content segment name: ${fileName}`);
+                }
                 continue;
             }
+            if (this._getSegmentFileName(index) !== fileName) {
+                throw new Error(`Invalid term-content segment name: ${fileName}`);
+            }
+            const fileHandle = /** @type {FileSystemFileHandle} */ (handle);
+            // Skipping an unreadable segment would shift every later address.
+            const fileLength = (await fileHandle.getFile()).size;
             states.push(this._createSegmentState(index, fileName, fileHandle, fileLength, 0));
         }
         states.sort((a, b) => a.index - b.index);
         let startOffset = 0;
-        for (const state of states) {
+        for (let index = 0; index < states.length; ++index) {
+            const state = states[index];
+            if (!allowIncomplete && state.index !== index) {
+                throw new Error('Term-content segments are not contiguous');
+            }
             state.startOffset = startOffset;
-            startOffset += state.fileLength;
+            startOffset = addSafeByteLength(startOffset, state.fileLength);
         }
         return states;
     }
@@ -1281,8 +1992,12 @@ export class TermContentOpfsStore {
     _computeSegmentedLength() {
         let total = 0;
         for (const state of this._segmentStates) {
-            state.startOffset = total;
-            total += state.fileLength;
+            total = addSafeByteLength(total, state.fileLength);
+        }
+        let startOffset = 0;
+        for (const state of this._segmentStates) {
+            state.startOffset = startOffset;
+            startOffset += state.fileLength;
         }
         return total;
     }
@@ -1290,9 +2005,13 @@ export class TermContentOpfsStore {
     /**
      * @param {number} index
      * @returns {string}
+     * @throws {RangeError} If the segment index is outside the safe integer range.
      */
     _getSegmentFileName(index) {
-        if (index <= 0) {
+        if (!Number.isSafeInteger(index) || index < 0) {
+            throw new RangeError('Term-content segment index exceeds the safe integer range');
+        }
+        if (index === 0) {
             return FILE_NAME;
         }
         const suffixIndex = FILE_NAME.lastIndexOf('.');
@@ -1320,7 +2039,24 @@ export class TermContentOpfsStore {
             return null;
         }
         const value = fileName.slice(prefix.length + FILE_NAME_SEGMENT_SEPARATOR.length, fileName.length - suffix.length);
-        return /^[0-9]+$/.test(value) ? Number.parseInt(value, 10) : null;
+        if (!/^[1-9][0-9]*$/.test(value)) { return null; }
+        const index = Number(value);
+        return Number.isSafeInteger(index) && String(index) === value ? index : null;
+    }
+
+    /**
+     * @param {string} fileName
+     * @returns {boolean}
+     */
+    _isSegmentFileNameCandidate(fileName) {
+        if (fileName === FILE_NAME) { return true; }
+        const suffixIndex = FILE_NAME.lastIndexOf('.');
+        if (suffixIndex < 0) {
+            return fileName.startsWith(`${FILE_NAME}${FILE_NAME_SEGMENT_SEPARATOR}`);
+        }
+        const prefix = FILE_NAME.slice(0, suffixIndex);
+        const suffix = FILE_NAME.slice(suffixIndex);
+        return fileName.startsWith(`${prefix}${FILE_NAME_SEGMENT_SEPARATOR}`) && fileName.endsWith(suffix);
     }
 
     /**
@@ -1365,7 +2101,10 @@ export class TermContentOpfsStore {
             }
             const pageStartOffset = pageIndex * pageSize;
             const rangeStart = Math.max(localOffset, pageStartOffset);
-            const rangeEnd = Math.min(localOffset + length, pageStartOffset + page.byteLength);
+            const rangeEnd = Math.min(localOffset + length, pageStartOffset + pageSize);
+            if (rangeEnd > pageStartOffset + page.byteLength) {
+                throw new Error('Truncated term-content page');
+            }
             const copyLength = rangeEnd - rangeStart;
             if (copyLength <= 0) { continue; }
             const pageStart = rangeStart - pageStartOffset;
@@ -1384,23 +2123,21 @@ export class TermContentOpfsStore {
             return;
         }
         if (this._writable === null) {
-            this._writable = await activeSegment.fileHandle.createWritable({keepExistingData: true});
-            await this._writable.seek(activeSegment.fileLength);
+            await this._reopenWritableAtActiveSegmentOffset();
         }
         if (activeSegment.fileLength <= 0 || (activeSegment.fileLength + nextChunkBytes) <= MAX_FILE_SEGMENT_BYTES) {
             return;
         }
-        await this._closeWritable();
-        const root = await navigator.storage.getDirectory();
         const nextIndex = activeSegment.index + 1;
         const nextFileName = this._getSegmentFileName(nextIndex);
+        await this._closeWritable();
+        const root = await navigator.storage.getDirectory();
         const nextFileHandle = await root.getFileHandle(nextFileName, {create: true});
         const nextFile = await nextFileHandle.getFile();
         const nextState = this._createSegmentState(nextIndex, nextFileName, nextFileHandle, nextFile.size, activeSegment.startOffset + activeSegment.fileLength);
         this._segmentStates.push(nextState);
         this._syncActiveSegmentState();
-        this._writable = await nextFileHandle.createWritable({keepExistingData: true});
-        await this._writable.seek(nextState.fileLength);
+        await this._reopenWritableAtActiveSegmentOffset();
     }
 
     /**
@@ -1408,37 +2145,7 @@ export class TermContentOpfsStore {
      * @returns {Promise<void>}
      */
     async _writeChunkToActiveSegment(chunk) {
-        if (chunk.byteLength <= 0) {
-            return;
-        }
-        await this._rollActiveSegmentIfNeeded(chunk.byteLength);
-        if (this._writable === null) {
-            return;
-        }
-        const activeSegment = this._getActiveSegmentState();
-        if (activeSegment === null) {
-            return;
-        }
-        let wrote = false;
-        try {
-            await /** @type {FileSystemWritableFileStream} */ (this._writable).write(chunk);
-            wrote = true;
-        } catch (error) {
-            if (!this._isClosingWritableStreamError(error)) {
-                throw error;
-            }
-            this._writable = null;
-            await this._reopenWritableAtActiveSegmentOffset();
-            if (this._writable === null) {
-                throw error;
-            }
-            await /** @type {FileSystemWritableFileStream} */ (this._writable).write(chunk);
-            wrote = true;
-        }
-        if (wrote) {
-            activeSegment.fileLength += chunk.byteLength;
-            this._length = Math.max(this._length, activeSegment.startOffset + activeSegment.fileLength);
-        }
+        await this._writeDataToActiveSegments(chunk);
     }
 
     /**
@@ -1446,8 +2153,32 @@ export class TermContentOpfsStore {
      * @returns {Promise<void>}
      */
     async _writeBlobToActiveSegments(blob) {
+        await this._writeDataToActiveSegments(blob, true);
+    }
+
+    /**
+     * @param {Uint8Array|Blob} data
+     * @param {boolean} [recordMetrics]
+     * @returns {Promise<void>}
+     */
+    async _writeDataToActiveSegments(data, recordMetrics = false) {
+        try {
+            await this._writeDataToActiveSegmentsInternal(data, recordMetrics);
+        } catch (error) {
+            this._queuedWriteError ??= error instanceof Error ? error : new Error(String(error));
+            throw this._queuedWriteError;
+        }
+    }
+
+    /**
+     * @param {Uint8Array|Blob} data
+     * @param {boolean} recordMetrics
+     * @returns {Promise<void>}
+     */
+    async _writeDataToActiveSegmentsInternal(data, recordMetrics) {
+        const size = data instanceof Blob ? data.size : data.byteLength;
         let blobOffset = 0;
-        while (blobOffset < blob.size) {
+        while (blobOffset < size) {
             const activeSegment = this._getActiveSegmentState();
             if (activeSegment === null) {
                 return;
@@ -1457,7 +2188,7 @@ export class TermContentOpfsStore {
                 continue;
             }
             const remainingInSegment = MAX_FILE_SEGMENT_BYTES - activeSegment.fileLength;
-            const chunkSize = Math.min(remainingInSegment, blob.size - blobOffset);
+            const chunkSize = Math.min(remainingInSegment, size - blobOffset);
             if (chunkSize <= 0) {
                 await this._rollActiveSegmentIfNeeded(1);
                 continue;
@@ -1466,20 +2197,42 @@ export class TermContentOpfsStore {
             if (this._writable === null) {
                 return;
             }
-            const chunk = blob.slice(blobOffset, blobOffset + chunkSize);
-            ++this._writeDrainMetrics.writeCallCount;
-            ++this._writeDrainMetrics.singleChunkWriteCount;
-            this._writeDrainMetrics.totalWriteBytes += chunkSize;
-            if (chunkSize > this._writeDrainMetrics.maxWriteBytes) {
-                this._writeDrainMetrics.maxWriteBytes = chunkSize;
+            const chunk = data instanceof Blob ?
+                data.slice(blobOffset, blobOffset + chunkSize) :
+                data.subarray(blobOffset, blobOffset + chunkSize);
+            if (recordMetrics) {
+                ++this._writeDrainMetrics.writeCallCount;
+                ++this._writeDrainMetrics.singleChunkWriteCount;
+                this._writeDrainMetrics.totalWriteBytes += chunkSize;
+                if (chunkSize > this._writeDrainMetrics.maxWriteBytes) {
+                    this._writeDrainMetrics.maxWriteBytes = chunkSize;
+                }
+                if (this._writeDrainMetrics.minWriteBytes === 0 || chunkSize < this._writeDrainMetrics.minWriteBytes) {
+                    this._writeDrainMetrics.minWriteBytes = chunkSize;
+                }
             }
-            if (this._writeDrainMetrics.minWriteBytes === 0 || chunkSize < this._writeDrainMetrics.minWriteBytes) {
-                this._writeDrainMetrics.minWriteBytes = chunkSize;
+            try {
+                await /** @type {FileSystemWritableFileStream} */ (this._writable).write(chunk);
+            } catch (error) {
+                if (!this._isClosingWritableStreamError(error)) {
+                    throw error;
+                }
+                this._writable = null;
+                await this._reopenWritableAtActiveSegmentOffset();
+                if (this._writable === null) {
+                    throw error;
+                }
+                await /** @type {FileSystemWritableFileStream} */ (this._writable).write(chunk);
             }
-            await this._writable.write(chunk);
             const currentActiveSegment = this._getActiveSegmentState();
             if (currentActiveSegment !== null) {
                 currentActiveSegment.fileLength += chunkSize;
+                // The append cursor adds persisted and still-in-flight bytes.
+                // Once a queued write advances the persisted length, subtract
+                // exactly that progress before another append can observe it.
+                // Keeping the entire drain batch counted until completion would
+                // double-count completed groups and publish offsets past EOF.
+                this._inFlightWriteBytes = Math.max(0, this._inFlightWriteBytes - chunkSize);
                 this._length = Math.max(this._length, currentActiveSegment.startOffset + currentActiveSegment.fileLength);
             }
             blobOffset += chunkSize;
@@ -1551,6 +2304,16 @@ export class TermContentOpfsStore {
     /**
      * @returns {number}
      */
+    _computeQueuedWriteBudgetBytes() {
+        const memoryGiB = this._getDeviceMemoryGiB();
+        if (memoryGiB !== null && memoryGiB <= 4) { return LOW_MEMORY_QUEUED_WRITE_BUDGET_BYTES; }
+        if (memoryGiB !== null && memoryGiB >= 8) { return HIGH_MEMORY_QUEUED_WRITE_BUDGET_BYTES; }
+        return DEFAULT_QUEUED_WRITE_BUDGET_BYTES;
+    }
+
+    /**
+     * @returns {number}
+     */
     _computeWriteCoalesceMaxChunks() {
         if (this._writeCoalesceMaxChunksOverride !== null) {
             return this._writeCoalesceMaxChunksOverride;
@@ -1559,7 +2322,7 @@ export class TermContentOpfsStore {
     }
 
     /**
-     * @returns {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number}}
+     * @returns {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, flushDueToBytesCount: number, flushDueToChunkCount: number, flushFinalGroupCount: number, writeCoalesceTargetBytes: number, writeCoalesceMaxChunks: number, writeFlushThresholdBytes: number}}
      */
     _createEmptyWriteDrainMetrics() {
         return {
@@ -1579,6 +2342,7 @@ export class TermContentOpfsStore {
             flushFinalGroupCount: 0,
             writeCoalesceTargetBytes: this._writeCoalesceTargetBytes,
             writeCoalesceMaxChunks: this._writeCoalesceMaxChunks,
+            writeFlushThresholdBytes: this._flushThresholdBytes,
         };
     }
 

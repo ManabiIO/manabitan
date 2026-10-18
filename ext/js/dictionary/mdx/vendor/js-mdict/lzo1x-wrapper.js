@@ -1,11 +1,23 @@
 // @ts-nocheck
 import lzo from './lzo1x.js';
-function decompress(buf, initSize, blockSize) {
+
+const INITIAL_OUTPUT_BYTES = 16 * 1024;
+const GROWTH_BLOCK_BYTES = 16 * 1024;
+
+function decompress(buf, expectedSize) {
+    if (!(buf instanceof Uint8Array) ||
+        !Number.isSafeInteger(expectedSize) || expectedSize < 0) {
+        throw new RangeError('Invalid MDict LZO decompression bounds');
+    }
     const result = lzo.decompress({
         inputBuffer: buf,
-        initSize: 16000,
-        blockSize: 8192,
+        initSize: Math.min(expectedSize, INITIAL_OUTPUT_BYTES),
+        blockSize: GROWTH_BLOCK_BYTES,
+        maxOutputSize: expectedSize,
     });
+    if (!(result instanceof Uint8Array)) {
+        throw new Error(`MDict LZO decompression failed with status ${String(result)}`);
+    }
     return result;
 }
 function compress(state) {

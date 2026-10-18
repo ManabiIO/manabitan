@@ -19,9 +19,24 @@
  * @param {NodeListOf<HTMLElement>|HTMLElement[]} tooltips
  * @param {boolean} hasEnabledDictionaries
  * @param {() => void} restoreDefaultTooltips
+ * @param {boolean} [hasUnavailableEnabledDictionaries=false]
+ * @param {boolean} [hasTemporarilyUnavailableEnabledDictionaries=false]
+ * @param {boolean} [hasRepairPendingEnabledDictionaries=false]
  */
-export function updateDictionaryWarningTooltips(tooltips, hasEnabledDictionaries, restoreDefaultTooltips) {
-    if (hasEnabledDictionaries) {
+export function updateDictionaryWarningTooltips(
+    tooltips,
+    hasEnabledDictionaries,
+    restoreDefaultTooltips,
+    hasUnavailableEnabledDictionaries = false,
+    hasTemporarilyUnavailableEnabledDictionaries = false,
+    hasRepairPendingEnabledDictionaries = false,
+) {
+    if (
+        !hasUnavailableEnabledDictionaries &&
+        !hasTemporarilyUnavailableEnabledDictionaries &&
+        !hasRepairPendingEnabledDictionaries &&
+        hasEnabledDictionaries
+    ) {
         for (const tooltip of tooltips) {
             tooltip.classList.remove('enable-dictionary-tooltip');
         }
@@ -30,7 +45,15 @@ export function updateDictionaryWarningTooltips(tooltips, hasEnabledDictionaries
     }
 
     for (const tooltip of tooltips) {
-        tooltip.textContent = 'No dictionary enabled';
+        if (hasUnavailableEnabledDictionaries) {
+            tooltip.textContent = hasEnabledDictionaries ? 'Some dictionaries need re-import' : 'Dictionary re-import required';
+        } else if (hasRepairPendingEnabledDictionaries) {
+            tooltip.textContent = 'Dictionary lookup index repair pending';
+        } else if (hasTemporarilyUnavailableEnabledDictionaries) {
+            tooltip.textContent = hasEnabledDictionaries ? 'Some dictionaries temporarily unavailable' : 'Dictionary temporarily unavailable';
+        } else {
+            tooltip.textContent = 'No dictionary enabled';
+        }
         tooltip.classList.add('enable-dictionary-tooltip');
     }
 }

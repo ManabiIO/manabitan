@@ -19,11 +19,14 @@
 import {RequestBuilder} from '../background/request-builder.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {readResponseJson} from '../core/json.js';
+import {arrayBufferDigest, escapeRegExp} from '../core/utilities.js';
 import {arrayBufferToBase64} from '../data/array-buffer-util.js';
 import {JsonSchema} from '../data/json-schema.js';
 import {NativeSimpleDOMParser} from '../dom/native-simple-dom-parser.js';
 import {SimpleDOMParser} from '../dom/simple-dom-parser.js';
 import {isStringEntirelyKana} from '../language/ja/japanese.js';
+
+const AUDIO_SOURCE_REQUEST_TIMEOUT_MS = 15000;
 
 /** @type {RequestInit} */
 const DEFAULT_REQUEST_INIT_PARAMS = {
@@ -92,9 +95,12 @@ export class AudioDownloader {
     async downloadTermAudio(sources, preferredAudioIndex, term, reading, idleTimeout, languageSummary, enableDefaultAudioSources) {
         const errors = [];
         const requiredAudioSources = enableDefaultAudioSources ? getRequiredAudioSources(languageSummary.iso, sources) : [];
-        for (const source of [...sources, ...requiredAudioSources]) {
+        const sourceCount = sources.length;
+        for (const [sourceIndex, source] of [...sources, ...requiredAudioSources].entries()) {
             let infoList = await this.getTermAudioInfoList(source, term, reading, languageSummary);
-            if (typeof preferredAudioIndex === 'number') {
+            // A preferred recording belongs to the explicit source list, not
+            // unrelated default providers with their own recording order.
+            if (sourceIndex < sourceCount && typeof preferredAudioIndex === 'number') {
                 infoList = (preferredAudioIndex >= 0 && preferredAudioIndex < infoList.length ? [infoList[preferredAudioIndex]] : []);
             }
             for (const info of infoList) {
@@ -116,6 +122,49 @@ export class AudioDownloader {
     }
 
     // Private
+
+    /**
+     * Bounds each provider request, including body consumption. Keeping the
+     * deadline per request lets Commons retain successful sibling recordings.
+     * @template T
+     * @param {string} url
+     * @param {RequestInit} init
+     * @param {(response: Response) => Promise<T>} readResponse
+     * @returns {Promise<T>}
+     */
+    async _fetchAudioSourceData(url, init, readResponse) {
+        const controller = new AbortController();
+        const timeoutError = new Error('Audio source request timed out');
+        /** @type {?import('core').Timeout} */
+        let timer = null;
+        /** @type {Promise<never>} */
+        const timeout = new Promise((_resolve, reject) => {
+            timer = setTimeout(() => {
+                controller.abort(timeoutError);
+                reject(timeoutError);
+            }, AUDIO_SOURCE_REQUEST_TIMEOUT_MS);
+        });
+        const request = async () => {
+            const response = await this._requestBuilder.fetchAnonymous(url, {...init, signal: controller.signal});
+            if (controller.signal.aborted || !response.ok) {
+                // A delayed transport may deliver headers even after abort.
+                // Do not parse or retain that obsolete response body.
+                void response.body?.cancel().catch(() => {});
+                throw controller.signal.aborted ? timeoutError : new Error(`Invalid response: ${response.status}`);
+            }
+            return await readResponse(response);
+        };
+        try {
+            // Race as well as abort: a stalled extension bridge may not honor
+            // the signal promptly, but must not block the next audio source.
+            return await Promise.race([request(), timeout]);
+        } catch (e) {
+            controller.abort(e);
+            throw e;
+        } finally {
+            if (timer !== null) { clearTimeout(timer); }
+        }
+    }
 
     /**
      * @param {string} url
@@ -156,15 +205,18 @@ export class AudioDownloader {
             search_query: term,
             vulgar: 'true',
         });
-        const response = await this._requestBuilder.fetchAnonymous(fetchUrl, {
-            ...DEFAULT_REQUEST_INIT_PARAMS,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+        const {responseUrl, responseText} = await this._fetchAudioSourceData(
+            fetchUrl,
+            {
+                ...DEFAULT_REQUEST_INIT_PARAMS,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: data,
             },
-            body: data,
-        });
-        const responseText = await response.text();
+            async (response) => ({responseUrl: response.url, responseText: await response.text()}),
+        );
 
         const dom = this._createSimpleDOMParser(responseText);
         /** @type {Set<string>} */
@@ -181,7 +233,7 @@ export class AudioDownloader {
                 if (url === null) { continue; }
 
                 if (!this._validateLanguagePod101Row(language, dom, row, term, reading)) { continue; }
-                url = this._normalizeUrl(url, response.url);
+                url = this._normalizeUrl(url, responseUrl);
                 urls.add(url);
             } catch (e) {
                 // NOP
@@ -279,9 +331,12 @@ export class AudioDownloader {
 
     /** @type {import('audio-downloader').GetInfoHandler} */
     async _getInfoJisho(term, reading) {
-        const fetchUrl = `https://jisho.org/search/${term}`;
-        const response = await this._requestBuilder.fetchAnonymous(fetchUrl, DEFAULT_REQUEST_INIT_PARAMS);
-        const responseText = await response.text();
+        const fetchUrl = `https://jisho.org/search/${encodeURIComponent(term)}`;
+        const {responseUrl, responseText} = await this._fetchAudioSourceData(
+            fetchUrl,
+            DEFAULT_REQUEST_INIT_PARAMS,
+            async (response) => ({responseUrl: response.url, responseText: await response.text()}),
+        );
 
         const dom = this._createSimpleDOMParser(responseText);
         try {
@@ -291,7 +346,7 @@ export class AudioDownloader {
                 if (source !== null) {
                     let url = dom.getAttribute(source, 'src');
                     if (url !== null) {
-                        url = this._normalizeUrl(url, response.url);
+                        url = this._normalizeUrl(url, responseUrl);
                         return [{type: 'url', url}];
                     }
                 }
@@ -310,8 +365,10 @@ export class AudioDownloader {
         }
         const {iso639_3} = languageSummary;
         const searchCategory = `incategory:"Lingua_Libre_pronunciation-${iso639_3}"`;
-        const searchString = `-${term}.wav`;
-        const fetchUrl = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=intitle:/${searchString}/i+${searchCategory}&srnamespace=6&origin=*`;
+        const escapedTerm = escapeRegExp(term);
+        const searchString = `-${this._escapeWikimediaSearchTerm(term)}\\.wav`;
+        const searchQuery = `intitle:/${searchString}/i ${searchCategory}`;
+        const fetchUrl = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(searchQuery)}&srnamespace=6&origin=*`;
 
         /**
          * @param {string} filename
@@ -319,7 +376,7 @@ export class AudioDownloader {
          * @returns {boolean}
          */
         const validateFilename = (filename, fileUser) => {
-            const validFilenameTest = new RegExp(`^File:LL-Q\\d+\\s+\\(${iso639_3}\\)-${fileUser}-${term}\\.wav$`, 'i');
+            const validFilenameTest = new RegExp(`^File:LL-Q\\d+\\s+\\(${iso639_3}\\)-${escapeRegExp(fileUser)}-${escapedTerm}\\.wav$`, 'i');
             return validFilenameTest.test(filename);
         };
 
@@ -332,15 +389,17 @@ export class AudioDownloader {
             throw new Error('Invalid arguments');
         }
         const {iso} = languageSummary;
-        const searchString = `${iso}(-[a-zA-Z]{2})?-${term}[0123456789]*.ogg`;
-        const fetchUrl = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=intitle:/${searchString}/i&srnamespace=6&origin=*`;
+        const escapedTerm = escapeRegExp(term);
+        const searchString = `${iso}(-[a-zA-Z]{2})?-${this._escapeWikimediaSearchTerm(term)}[0123456789]*\\.ogg`;
+        const searchQuery = `intitle:/${searchString}/i`;
+        const fetchUrl = `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(searchQuery)}&srnamespace=6&origin=*`;
 
         /**
          * @param {string} filename
          * @returns {boolean}
          */
         const validateFilename = (filename) => {
-            const validFilenameTest = new RegExp(`^File:${iso}(-\\w\\w)?-${term}\\d*\\.ogg$`, 'i');
+            const validFilenameTest = new RegExp(`^File:${iso}(-\\w\\w)?-${escapedTerm}\\d*\\.ogg$`, 'i');
             return validFilenameTest.test(filename);
         };
 
@@ -350,7 +409,7 @@ export class AudioDownloader {
          * @returns {string}
          */
         const displayName = (filename, fileUser) => {
-            const match = filename.match(new RegExp(`^File:${iso}(-\\w\\w)-${term}`, 'i'));
+            const match = filename.match(new RegExp(`^File:${iso}(-\\w\\w)-${escapedTerm}`, 'i'));
             if (match === null) {
                 return fileUser;
             }
@@ -363,28 +422,38 @@ export class AudioDownloader {
     }
 
     /**
+     * Escapes literal data for CirrusSearch's slash-delimited Lucene regex syntax.
+     * @param {string} term
+     * @returns {string}
+     */
+    _escapeWikimediaSearchTerm(term) {
+        // Escape literal regex metacharacters and CirrusSearch delimiters in one pass.
+        return term.replace(/[.*+?^${}()|[\]\\/"#@&<>~]/g, '\\$&');
+    }
+
+    /**
      * @param {string} fetchUrl
      * @param {(filename: string, fileUser: string) => boolean} validateFilename
      * @param {(filename: string, fileUser: string) => string} [displayName]
      * @returns {Promise<import('audio-downloader').Info1[]>}
      */
     async _getInfoWikimediaCommons(fetchUrl, validateFilename, displayName = (_filename, fileUser) => fileUser) {
-        const response = await this._requestBuilder.fetchAnonymous(fetchUrl, DEFAULT_REQUEST_INIT_PARAMS);
-
         /** @type {import('audio-downloader').WikimediaCommonsLookupResponse} */
-        const lookupResponse = await readResponseJson(response);
+        const lookupResponse = await this._fetchAudioSourceData(fetchUrl, DEFAULT_REQUEST_INIT_PARAMS, (response) => readResponseJson(response));
         const lookupResults = lookupResponse.query.search;
 
         const fetchFileInfos = lookupResults.map(async ({title}) => {
-            const fileInfoURL = `https://commons.wikimedia.org/w/api.php?action=query&format=json&titles=${title}&prop=imageinfo&iiprop=user|url&origin=*`;
-            const response2 = await this._requestBuilder.fetchAnonymous(fileInfoURL, DEFAULT_REQUEST_INIT_PARAMS);
+            const fileInfoURL = `https://commons.wikimedia.org/w/api.php?action=query&format=json&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=user|url&origin=*`;
             /** @type {import('audio-downloader').WikimediaCommonsFileResponse} */
-            const fileResponse = await readResponseJson(response2);
+            const fileResponse = await this._fetchAudioSourceData(fileInfoURL, DEFAULT_REQUEST_INIT_PARAMS, (response) => readResponseJson(response));
             const fileResults = fileResponse.query.pages;
             const results = [];
             for (const page of Object.values(fileResults)) {
-                const fileUrl = page.imageinfo[0].url;
-                const fileUser = page.imageinfo[0].user;
+                if (typeof page !== 'object' || page === null || !Array.isArray(page.imageinfo)) { continue; }
+                const info = page.imageinfo[0];
+                if (typeof info !== 'object' || info === null || typeof info.url !== 'string' || typeof info.user !== 'string') { continue; }
+                const fileUrl = info.url;
+                const fileUser = info.user;
                 if (validateFilename(title, fileUser)) {
                     results.push({type: 'url', url: fileUrl, name: displayName(title, fileUser)});
                 }
@@ -392,7 +461,9 @@ export class AudioDownloader {
             return /** @type {import('audio-downloader').Info1[]} */ (results);
         });
 
-        return (await Promise.all(fetchFileInfos)).flat();
+        // Deleted files and individual request failures must not discard valid
+        // recordings. Settled results preserve the original search ordering.
+        return (await Promise.allSettled(fetchFileInfos)).flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
     }
 
     /** @type {import('audio-downloader').GetInfoHandler} */
@@ -443,14 +514,8 @@ export class AudioDownloader {
         }
         url = this._getCustomUrl(term, reading, url, languageSummary);
 
-        const response = await this._requestBuilder.fetchAnonymous(url, DEFAULT_REQUEST_INIT_PARAMS);
-
-        if (!response.ok) {
-            throw new Error(`Invalid response: ${response.status}`);
-        }
-
         /** @type {import('audio-downloader').CustomAudioList} */
-        const responseJson = await readResponseJson(response);
+        const responseJson = await this._fetchAudioSourceData(url, DEFAULT_REQUEST_INIT_PARAMS, (response) => readResponseJson(response));
 
         if (this._customAudioListSchema === null) {
             const schema = await this._getCustomAudioListSchema();
@@ -493,7 +558,7 @@ export class AudioDownloader {
          */
         const replacer = (m0, m1) => (
             Object.prototype.hasOwnProperty.call(data, m1) ?
-            `${data[/** @type {'term'|'reading'|'language'} */ (m1)]}` :
+            encodeURIComponent(data[/** @type {'term'|'reading'|'language'} */ (m1)]) :
             m0
         );
         return url.replace(/\{([^}]*)\}/g, replacer);
@@ -506,39 +571,59 @@ export class AudioDownloader {
      * @returns {Promise<import('audio-downloader').AudioBinaryBase64>}
      */
     async _downloadAudioFromUrl(url, sourceType, idleTimeout) {
-        let signal;
+        const abortController = typeof idleTimeout === 'number' ? new AbortController() : null;
+        const signal = abortController?.signal;
+        const timeoutError = new Error('Audio download idle timeout');
+        let active = true;
         /** @type {?import('request-builder.js').ProgressCallback} */
         let onProgress = null;
         /** @type {?import('core').Timeout} */
         let idleTimer = null;
-        if (typeof idleTimeout === 'number') {
-            const abortController = new AbortController();
-            ({signal} = abortController);
-            const onIdleTimeout = () => {
-                abortController.abort('Idle timeout');
-            };
-            onProgress = (done) => {
-                if (idleTimer !== null) {
-                    clearTimeout(idleTimer);
-                }
-                idleTimer = done ? null : setTimeout(onIdleTimeout, idleTimeout);
-            };
-            idleTimer = setTimeout(onIdleTimeout, idleTimeout);
+        /** @type {?Promise<never>} */
+        let timeout = null;
+        if (abortController !== null) {
+            timeout = new Promise((_resolve, reject) => {
+                const onIdleTimeout = () => {
+                    if (!active) { return; }
+                    active = false;
+                    // An extension bridge or response body may ignore abort.
+                    // Release fallback independently of transport settlement.
+                    reject(timeoutError);
+                    abortController.abort(timeoutError);
+                };
+                onProgress = (done) => {
+                    if (!active) { return; }
+                    if (idleTimer !== null) { clearTimeout(idleTimer); }
+                    active = !done;
+                    idleTimer = done ? null : setTimeout(onIdleTimeout, /** @type {number} */ (idleTimeout));
+                };
+                idleTimer = setTimeout(onIdleTimeout, /** @type {number} */ (idleTimeout));
+            });
         }
 
-        const response = await this._requestBuilder.fetchAnonymous(url, {
-            ...DEFAULT_REQUEST_INIT_PARAMS,
-            signal,
-        });
-
-        if (!response.ok) {
-            throw new Error(`Invalid response: ${response.status}`);
-        }
-
-        const arrayBuffer = await RequestBuilder.readFetchResponseArrayBuffer(response, onProgress);
-
-        if (idleTimer !== null) {
-            clearTimeout(idleTimer);
+        const request = async () => {
+            const response = await this._requestBuilder.fetchAnonymous(url, {
+                ...DEFAULT_REQUEST_INIT_PARAMS,
+                signal,
+            });
+            if (signal?.aborted || !response.ok) {
+                // Do not consume a late response delivered after the timeout.
+                void response.body?.cancel().catch(() => {});
+                throw signal?.aborted ? timeoutError : new Error(`Invalid response: ${response.status}`);
+            }
+            const arrayBuffer = await RequestBuilder.readFetchResponseArrayBuffer(response, onProgress, signal ?? null);
+            return {response, arrayBuffer};
+        };
+        let response;
+        let arrayBuffer;
+        try {
+            ({response, arrayBuffer} = await (timeout === null ? request() : Promise.race([request(), timeout])));
+        } finally {
+            active = false;
+            if (idleTimer !== null) {
+                clearTimeout(idleTimer);
+                idleTimer = null;
+            }
         }
 
         if (!await this._isAudioBinaryValid(arrayBuffer, sourceType)) {
@@ -551,15 +636,16 @@ export class AudioDownloader {
     }
 
     /**
-     * @param {ArrayBuffer|Uint8Array} arrayBuffer
+     * @param {ArrayBuffer} arrayBuffer
      * @param {import('settings').AudioSourceType} sourceType
      * @returns {Promise<boolean>}
      */
     async _isAudioBinaryValid(arrayBuffer, sourceType) {
+        if (arrayBuffer.byteLength === 0) { return false; }
         switch (sourceType) {
             case 'jpod101':
             {
-                const digest = await this._arrayBufferDigest(arrayBuffer);
+                const digest = await arrayBufferDigest('SHA-256', arrayBuffer);
                 switch (digest) {
                     case 'ae6398b5a27bc8c0a771df6c907ade794be15518174773c58c7c7ddd17098906': // Invalid audio
                         return false;
@@ -570,20 +656,6 @@ export class AudioDownloader {
             default:
                 return true;
         }
-    }
-
-    /**
-     * @param {ArrayBuffer|Uint8Array} arrayBuffer
-     * @returns {Promise<string>}
-     */
-    async _arrayBufferDigest(arrayBuffer) {
-        const bytes = arrayBuffer instanceof Uint8Array ? Uint8Array.from(arrayBuffer) : new Uint8Array(arrayBuffer);
-        const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
-        let digest = '';
-        for (const byte of hash) {
-            digest += byte.toString(16).padStart(2, '0');
-        }
-        return digest;
     }
 
     /**

@@ -16,7 +16,7 @@ jobs:
   link-checker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
       - name: Install dependencies
@@ -27,21 +27,17 @@ jobs:
         id: inputs
         shell: bash
         run: |
-          args="--exclude-path node_modules --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'"
+          args="--exclude-path node_modules --root-dir '${{ github.workspace }}/ext' --verbose --no-progress './**/*.md' './**/*.html' './**/*.rst'"
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            # The companion manabitan-wiki + Manabi deployment PRs establish this
-            # canonical root. Do not make this PR depend on a site that cannot be
-            # live until those changes land. Scheduled checks on main intentionally
-            # do not carry this exclusion, so production links are still monitored.
-            args="--exclude-path node_modules --verbose --no-progress --exclude ^https://manabi\\.io/manabitan"
             mapfile -t files < <(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- '*.md' '*.html' '*.rst')
             if (( ${#files[@]} > 0 )); then
+              printf -v args '%s' "--exclude-path node_modules --root-dir '${{ github.workspace }}/ext' --verbose --no-progress"
               printf -v file_args ' %q' "${files[@]}"
               args+="${file_args}"
             fi
           fi
           printf 'args=%s\n' "${args}" >> "${GITHUB_OUTPUT}"
-      - uses: lycheeverse/lychee-action@v2.6.1
+      - uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
         with:
           fail: true
           jobSummary: false

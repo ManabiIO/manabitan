@@ -18,9 +18,11 @@
 
 import {EventDispatcher} from '../../core/event-dispatcher.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
+import {ExtensionError} from '../../core/extension-error.js';
 import {log} from '../../core/log.js';
 import {normalizeModifier} from '../../dom/document-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
+import {clone} from '../../core/utilities.js';
 import {KeyboardMouseInputField} from './keyboard-mouse-input-field.js';
 
 /**
@@ -48,6 +50,14 @@ export class ProfileConditionsUI extends EventDispatcher {
         this._defaultType = 'popupLevel';
         /** @type {number} */
         this._profileIndex = 0;
+        /** @type {string|null} */
+        this._profileId = null;
+        /** @type {import('settings').ProfileConditionGroup[]} */
+        this._conditionGroups = [];
+        /** @type {number} */
+        this._conditionGroupsMutationGeneration = 0;
+        /** @type {?import('core').TokenObject} */
+        this._prepareToken = null;
         const validateInteger = this._validateInteger.bind(this);
         const normalizeInteger = this._normalizeInteger.bind(this);
         const validateFlags = this._validateFlags.bind(this);
@@ -136,14 +146,23 @@ export class ProfileConditionsUI extends EventDispatcher {
 
     /**
      * @param {number} profileIndex
+     * @param {string} profileId
      */
-    async prepare(profileIndex) {
+    async prepare(profileIndex, profileId) {
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._prepareToken = token;
         const options = await this._settingsController.getOptionsFull();
+        if (this._prepareToken !== token) { return; }
         const {profiles} = options;
-        if (profileIndex < 0 || profileIndex >= profiles.length) { return; }
-        const {conditionGroups} = profiles[profileIndex];
+        const matchingProfiles = profiles.filter((profile) => profile.id === profileId);
+        if (matchingProfiles.length !== 1) { return; }
+        const profile = matchingProfiles[0];
+        const conditionGroups = profile.conditionGroups;
 
-        this._profileIndex = profileIndex;
+        this._profileIndex = profiles.indexOf(profile);
+        this._profileId = profileId;
+        this._conditionGroups = clone(conditionGroups);
 
         for (let i = 0, ii = conditionGroups.length; i < ii; ++i) {
             this._addConditionGroup(conditionGroups[i], i);
@@ -154,6 +173,10 @@ export class ProfileConditionsUI extends EventDispatcher {
 
     /** */
     cleanup() {
+        this._prepareToken = null;
+        this._profileId = null;
+        this._conditionGroups = [];
+        ++this._conditionGroupsMutationGeneration;
         this._eventListeners.removeAllEventListeners();
 
         for (const child of this._children) {
@@ -267,13 +290,7 @@ export class ProfileConditionsUI extends EventDispatcher {
             this._children[i].index = i;
         }
 
-        void this.settingsController.modifyGlobalSettings([{
-            action: 'splice',
-            path: this.getPath('conditionGroups'),
-            start: index,
-            deleteCount: 1,
-            items: [],
-        }]);
+        void this.updateConditionGroups((conditionGroups) => { conditionGroups.splice(index, 1); });
 
         this._triggerConditionGroupCountChanged(this._children.length);
 
@@ -289,12 +306,81 @@ export class ProfileConditionsUI extends EventDispatcher {
     }
 
     /**
-     * @param {string} property
-     * @returns {string}
+     * Applies an optimistic condition edit and persists it with a profile-ID
+     * scoped compare-and-swap. The full condition snapshot protects nested
+     * group and condition indexes from stale edits in another settings tab.
+     * @param {(conditionGroups: import('settings').ProfileConditionGroup[]) => void} update
+     * @returns {Promise<void>}
      */
-    getPath(property) {
-        property = (typeof property === 'string' ? `.${property}` : '');
-        return `profiles[${this.profileIndex}]${property}`;
+    updateConditionGroups(update) {
+        const profileId = this._profileId;
+        if (profileId === null) { return Promise.resolve(); }
+        const prepareToken = this._prepareToken;
+        if (prepareToken === null) { return Promise.resolve(); }
+        const expectedConditionGroups = clone(this._conditionGroups);
+        const conditionGroups = clone(expectedConditionGroups);
+        update(conditionGroups);
+        this._conditionGroups = conditionGroups;
+        const generation = ++this._conditionGroupsMutationGeneration;
+        return (async () => {
+            try {
+                const results = await this.settingsController.modifyGlobalSettings([{
+                    action: 'setProfileConditionGroups',
+                    profileId,
+                    expectedConditionGroups,
+                    value: conditionGroups,
+                }]);
+                if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                    throw new Error('Condition update returned an invalid result');
+                }
+                if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+            } catch (error) {
+                if (
+                    this._prepareToken === prepareToken &&
+                    this._profileId === profileId &&
+                    generation === this._conditionGroupsMutationGeneration
+                ) {
+                    await this._reconcileConditionGroups(profileId, generation, prepareToken);
+                }
+                log.error(error);
+            }
+        })();
+    }
+
+    /**
+     * Refreshes the open dialog from the current profile snapshot after a
+     * rejected compare-and-swap, without changing dialog ownership.
+     * @param {string} profileId
+     * @param {number} generation
+     * @param {import('core').TokenObject} prepareToken
+     */
+    async _reconcileConditionGroups(profileId, generation, prepareToken) {
+        if (
+            this._prepareToken !== prepareToken ||
+            this._profileId !== profileId ||
+            this._conditionGroupsMutationGeneration !== generation
+        ) { return; }
+        try {
+            const {profiles} = await this.settingsController.getOptionsFull();
+            if (
+                this._prepareToken !== prepareToken ||
+                this._profileId !== profileId ||
+                this._conditionGroupsMutationGeneration !== generation
+            ) { return; }
+            const matches = profiles.filter((profile) => profile.id === profileId);
+            if (matches.length !== 1 || !Array.isArray(matches[0].conditionGroups)) { return; }
+            const profile = matches[0];
+            this._profileIndex = profiles.indexOf(profile);
+            this._conditionGroups = clone(profile.conditionGroups);
+            for (const child of this._children) { child.cleanup(); }
+            this._children = [];
+            for (let i = 0, ii = this._conditionGroups.length; i < ii; ++i) {
+                this._addConditionGroup(this._conditionGroups[i], i);
+            }
+            this._triggerConditionGroupCountChanged(this._conditionGroups.length);
+        } catch (error) {
+            log.error(error);
+        }
     }
 
     /**
@@ -334,13 +420,7 @@ export class ProfileConditionsUI extends EventDispatcher {
 
         this._addConditionGroup(conditionGroup, index);
 
-        void this.settingsController.modifyGlobalSettings([{
-            action: 'splice',
-            path: this.getPath('conditionGroups'),
-            start: index,
-            deleteCount: 0,
-            items: [conditionGroup],
-        }]);
+        void this.updateConditionGroups((conditionGroups) => { conditionGroups.splice(index, 0, conditionGroup); });
 
         this._triggerConditionGroupCountChanged(this._children.length);
     }
@@ -448,7 +528,9 @@ export class ProfileConditionsUI extends EventDispatcher {
      * @param {number} count
      */
     _triggerConditionGroupCountChanged(count) {
-        this.trigger('conditionGroupCountChanged', {count, profileIndex: this._profileIndex});
+        const profileId = this._profileId;
+        if (profileId === null) { return; }
+        this.trigger('conditionGroupCountChanged', {count, profileIndex: this._profileIndex, profileId});
     }
 }
 
@@ -550,28 +632,13 @@ class ProfileConditionGroupUI {
             this._children[i].index = i;
         }
 
-        void this.settingsController.modifyGlobalSettings([{
-            action: 'splice',
-            path: this.getPath('conditions'),
-            start: index,
-            deleteCount: 1,
-            items: [],
-        }]);
+        void this._parent.updateConditionGroups((conditionGroups) => { conditionGroups[this._index].conditions.splice(index, 1); });
 
         if (this._children.length === 0) {
             this.removeSelf();
         }
 
         return true;
-    }
-
-    /**
-     * @param {string} property
-     * @returns {string}
-     */
-    getPath(property) {
-        property = (typeof property === 'string' ? `.${property}` : '');
-        return this._parent.getPath(`conditionGroups[${this._index}]${property}`);
     }
 
     /** */
@@ -588,13 +655,7 @@ class ProfileConditionGroupUI {
 
         this._addCondition(condition, index);
 
-        void this.settingsController.modifyGlobalSettings([{
-            action: 'splice',
-            path: this.getPath('conditions'),
-            start: index,
-            deleteCount: 0,
-            items: [condition],
-        }]);
+        void this._parent.updateConditionGroups((conditionGroups) => { conditionGroups[this._index].conditions.splice(index, 0, condition); });
     }
 
     /**
@@ -709,15 +770,6 @@ class ProfileConditionUI {
         }
     }
 
-    /**
-     * @param {string} property
-     * @returns {string}
-     */
-    getPath(property) {
-        property = (typeof property === 'string' ? `.${property}` : '');
-        return this._parent.getPath(`conditions[${this._index}]${property}`);
-    }
-
     // Private
 
     /**
@@ -753,7 +805,7 @@ class ProfileConditionUI {
         if (okay) {
             const normalizedValue = this._normalizeValue(value, normalize);
             node.value = normalizedValue;
-            void this.settingsController.setGlobalSetting(this.getPath('value'), normalizedValue);
+            this._setConditionValue(normalizedValue);
         }
     }
 
@@ -767,7 +819,7 @@ class ProfileConditionUI {
         this._value = modifiers;
         if (okay) {
             const normalizedValue = this._normalizeValue(modifiers, normalize);
-            void this.settingsController.setGlobalSetting(this.getPath('value'), normalizedValue);
+            this._setConditionValue(normalizedValue);
         }
     }
 
@@ -981,11 +1033,12 @@ class ProfileConditionUI {
         const {defaultValue} = operatorDetails;
         this._updateSelect(this._operatorInput, this._operatorOptionContainer, operators, operator);
         this._updateValueInput(defaultValue, operatorDetails);
-        await this.settingsController.modifyGlobalSettings([
-            {action: 'set', path: this.getPath('type'), value: type},
-            {action: 'set', path: this.getPath('operator'), value: operator},
-            {action: 'set', path: this.getPath('value'), value: defaultValue},
-        ]);
+        await this._parent.parent.updateConditionGroups((conditionGroups) => {
+            const condition = conditionGroups[this._parent.index].conditions[this._index];
+            condition.type = type;
+            condition.operator = operator;
+            condition.value = defaultValue;
+        });
     }
 
     /**
@@ -994,16 +1047,29 @@ class ProfileConditionUI {
      */
     async _setOperator(type, operator) {
         const operatorDetails = this._getOperatorDetails(type, operator);
-        /** @type {import('settings-modifications').Modification[]} */
-        const settingsModifications = [{action: 'set', path: this.getPath('operator'), value: operator}];
+        /** @type {string|undefined} */
+        let value;
         if (operatorDetails.resetDefaultOnChange) {
             const {defaultValue} = operatorDetails;
             const okay = this._updateValueInput(defaultValue, operatorDetails);
             if (okay) {
-                settingsModifications.push({action: 'set', path: this.getPath('value'), value: defaultValue});
+                value = defaultValue;
             }
         }
-        await this.settingsController.modifyGlobalSettings(settingsModifications);
+        await this._parent.parent.updateConditionGroups((conditionGroups) => {
+            const condition = conditionGroups[this._parent.index].conditions[this._index];
+            condition.operator = operator;
+            if (typeof value === 'string') { condition.value = value; }
+        });
+    }
+
+    /**
+     * @param {string} value
+     */
+    _setConditionValue(value) {
+        void this._parent.parent.updateConditionGroups((conditionGroups) => {
+            conditionGroups[this._parent.index].conditions[this._index].value = value;
+        });
     }
 
     /** */

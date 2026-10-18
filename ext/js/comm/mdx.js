@@ -16,9 +16,14 @@
  */
 
 const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported compression, encryption, or format variant. Convert it externally first or try a different MDX source.';
+const CONVERSION_TIMEOUT_MS = 180_000;
 
 /**
  * @typedef {{stage: 'upload'|'convert'|'download', completed: number, total: number}} MdxProgressDetails
+ */
+
+/**
+ * @typedef {{phase: string, elapsedMs: number, details?: Record<string, string|number|boolean|null>}} MdxPhaseTiming
  */
 
 /**
@@ -34,7 +39,7 @@ const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported com
  */
 
 /**
- * @typedef {{action: 'progress', params: {details: MdxProgressDetails}} | {action: 'complete', params: {result?: {archiveContent?: ArrayBuffer, archiveFileName?: string}, error?: string}}} MdxWorkerMessage
+ * @typedef {{action: 'progress', params: {details: MdxProgressDetails}} | {action: 'complete', params: {result?: {archiveContent?: ArrayBuffer, archiveFileName?: string, phaseTimings?: MdxPhaseTiming[]}, error?: string}}} MdxWorkerMessage
  */
 
 /**
@@ -42,7 +47,41 @@ const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported com
  * @returns {value is Record<string, unknown>}
  */
 function isRecord(value) {
-    return typeof value === 'object' && value !== null;
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {MdxPhaseTiming[]}
+ */
+function parsePhaseTimings(value) {
+    if (!Array.isArray(value)) { return []; }
+    /** @type {MdxPhaseTiming[]} */
+    const timings = [];
+    for (const item of value) {
+        if (!isRecord(item)) { continue; }
+        const {phase, elapsedMs, details} = item;
+        if (typeof phase !== 'string' || typeof elapsedMs !== 'number' || !Number.isFinite(elapsedMs)) { continue; }
+        /** @type {MdxPhaseTiming} */
+        const timing = {phase, elapsedMs};
+        if (isRecord(details)) {
+            /** @type {Record<string, string|number|boolean|null>} */
+            const normalizedDetails = {};
+            for (const [key, detailValue] of Object.entries(details)) {
+                if (
+                    typeof detailValue === 'string' ||
+                    typeof detailValue === 'number' ||
+                    typeof detailValue === 'boolean' ||
+                    detailValue === null
+                ) {
+                    normalizedDetails[key] = detailValue;
+                }
+            }
+            timing.details = normalizedDetails;
+        }
+        timings.push(timing);
+    }
+    return timings;
 }
 
 /**
@@ -64,7 +103,12 @@ function parseWorkerMessage(value) {
             if (
                 (stage !== 'upload' && stage !== 'convert' && stage !== 'download') ||
                 typeof completed !== 'number' ||
-                typeof total !== 'number'
+                typeof total !== 'number' ||
+                !Number.isFinite(completed) ||
+                !Number.isFinite(total) ||
+                completed < 0 ||
+                total < 0 ||
+                completed > total
             ) {
                 return null;
             }
@@ -79,7 +123,7 @@ function parseWorkerMessage(value) {
                 completeParams.error = error;
             }
             if (isRecord(result)) {
-                /** @type {{archiveContent?: ArrayBuffer, archiveFileName?: string}} */
+                /** @type {{archiveContent?: ArrayBuffer, archiveFileName?: string, phaseTimings?: MdxPhaseTiming[]}} */
                 const archiveResult = {};
                 if (result.archiveContent instanceof ArrayBuffer) {
                     archiveResult.archiveContent = result.archiveContent;
@@ -87,6 +131,7 @@ function parseWorkerMessage(value) {
                 if (typeof result.archiveFileName === 'string') {
                     archiveResult.archiveFileName = result.archiveFileName;
                 }
+                archiveResult.phaseTimings = parsePhaseTimings(result.phaseTimings);
                 completeParams.result = archiveResult;
             }
             return {action, params: completeParams};
@@ -106,6 +151,8 @@ export class Mdx {
         this._version = 2;
         /** @type {boolean} */
         this._active = false;
+        /** @type {((error: Error) => void)|null} */
+        this._activeReject = null;
     }
 
     /**
@@ -138,17 +185,14 @@ export class Mdx {
 
     /** */
     disconnect() {
-        if (this._worker !== null) {
-            this._worker.terminate();
-            this._worker = null;
-        }
-        this._active = false;
+        // One settlement path owns cleanup during both file reads and conversion.
+        this._activeReject?.(new Error('MDX conversion cancelled'));
     }
 
     /**
      * @param {{mdxFile: File, mddFiles?: File[], titleOverride?: string, descriptionOverride?: string, revision?: string, enableAudio?: boolean, includeAssets?: boolean, termBankSize?: number}} details
      * @param {?(details: {stage: 'upload'|'convert'|'download', completed: number, total: number}) => void} onProgress
-     * @returns {Promise<{archiveContent: ArrayBuffer, archiveFileName: string}>}
+     * @returns {Promise<{archiveContent: ArrayBuffer, archiveFileName: string, phaseTimings: MdxPhaseTiming[]}>}
      */
     async convertDictionary(details, onProgress = null) {
         const {
@@ -161,104 +205,148 @@ export class Mdx {
             includeAssets = true,
             termBankSize = 10000,
         } = details;
-
-        const uploadFiles = [mdxFile, ...mddFiles];
-        const totalUploadBytes = uploadFiles.reduce((sum, file) => sum + file.size, 0);
-        let uploadedBytes = 0;
-        /**
-         * @param {File} file
-         * @returns {Promise<ArrayBuffer>}
-         */
-        const readFileWithProgress = async (file) => {
-            const buffer = await file.arrayBuffer();
-            uploadedBytes += file.size;
-            if (typeof onProgress === 'function') {
-                onProgress({stage: 'upload', completed: uploadedBytes, total: totalUploadBytes});
-            }
-            return buffer;
-        };
-
-        const mdxBytes = await readFileWithProgress(mdxFile);
-        /** @type {MdxWorkerInputFile[]} */
-        const mddInputs = [];
-        for (const file of mddFiles) {
-            mddInputs.push({
-                name: file.name,
-                bytes: await readFileWithProgress(file),
-            });
-        }
-
+        // Snapshot the selection. Callers must not change a pending request by
+        // mutating their resource array while a file read is in flight.
+        const resourceFiles = [...mddFiles];
         this.disconnect();
-        this._active = true;
 
         return await new Promise((resolve, reject) => {
-            const worker = new Worker('/js/dictionary/mdx-worker-main.js', {type: 'module'});
-            this._worker = worker;
+            /** @type {Worker|null} */
+            let worker = null;
+            /** @type {ReturnType<typeof setTimeout>|null} */
+            let timeout = null;
+            let settled = false;
+            let uploadedBytes = 0;
+            const totalUploadBytes = mdxFile.size + resourceFiles.reduce((sum, file) => sum + file.size, 0);
 
-            /**
-             * @param {Error} error
-             */
+            /** @returns {void} */
+            const cleanup = () => {
+                if (timeout !== null) {
+                    clearTimeout(timeout);
+                    timeout = null;
+                }
+                if (worker !== null) {
+                    worker.terminate();
+                    worker = null;
+                }
+                // Late file completions and queued messages from an old request
+                // must not reset the worker or timeout of a newer request.
+                if (this._activeReject === fail) {
+                    this._activeReject = null;
+                    this._active = false;
+                    this._worker = null;
+                }
+            };
+            /** @param {Error} error */
             const fail = (error) => {
-                this.disconnect();
+                if (settled) { return; }
+                settled = true;
+                cleanup();
                 reject(error);
             };
+            /** @param {{archiveContent: ArrayBuffer, archiveFileName: string, phaseTimings: MdxPhaseTiming[]}} result */
+            const complete = (result) => {
+                if (settled) { return; }
+                settled = true;
+                cleanup();
+                resolve(result);
+            };
+            /** @param {MdxProgressDetails} progress */
+            const reportProgress = (progress) => {
+                if (!settled && typeof onProgress === 'function') {
+                    onProgress(progress);
+                }
+            };
+            /**
+             * Blob.arrayBuffer itself cannot be aborted. Reject the public
+             * request immediately on disconnect and ignore its late result.
+             * @param {File} file
+             * @returns {Promise<ArrayBuffer|null>}
+             */
+            const readFile = async (file) => {
+                // Cancellation can run between a completed read and the next
+                // continuation. Do not begin another File read in that gap.
+                if (settled) { return null; }
+                const bytes = await file.arrayBuffer();
+                if (settled) { return null; }
+                if (!(bytes instanceof ArrayBuffer)) {
+                    throw new Error(`MDX import could not read ${file.name}: invalid file data`);
+                }
+                uploadedBytes += file.size;
+                reportProgress({stage: 'upload', completed: uploadedBytes, total: totalUploadBytes});
+                return settled ? null : bytes;
+            };
 
-            worker.addEventListener('message', (event) => {
-                const message = parseWorkerMessage(event.data);
-                if (message === null) { return; }
-                switch (message.action) {
-                    case 'progress': {
-                        if (typeof onProgress === 'function') {
-                            onProgress(message.params.details);
+            this._active = true;
+            this._activeReject = fail;
+            // Cover file reads too: a stuck read used to outlive cancellation
+            // and had no timeout at all.
+            timeout = setTimeout(() => {
+                fail(new Error('MDX conversion timed out while reading or converting files. Try one dictionary at a time, or convert it to a Yomitan ZIP with a compatible converter.'));
+            }, CONVERSION_TIMEOUT_MS);
+
+            /** @returns {Promise<void>} */
+            const prepare = async () => {
+                const mdxBytes = await readFile(mdxFile);
+                if (mdxBytes === null) { return; }
+                /** @type {MdxWorkerInputFile[]} */
+                const mddInputs = [];
+                for (const file of resourceFiles) {
+                    const bytes = await readFile(file);
+                    if (bytes === null) { return; }
+                    mddInputs.push({name: file.name, bytes});
+                }
+                if (settled) { return; }
+                worker = new Worker('/js/dictionary/mdx-worker-main.js', {type: 'module'});
+                this._worker = worker;
+                worker.addEventListener('message', (event) => {
+                    if (settled) { return; }
+                    try {
+                        const message = parseWorkerMessage(event.data);
+                        if (message === null) {
+                            fail(new Error('MDX conversion worker returned malformed message'));
+                            return;
                         }
-                        break;
-                    }
-                    case 'complete': {
-                        this._active = false;
+                        if (message.action === 'progress') {
+                            reportProgress(message.params.details);
+                            return;
+                        }
                         const {error = '', result} = message.params;
                         if (error.length > 0) {
                             fail(this._normalizeError(error));
                             return;
                         }
                         const archiveContent = result?.archiveContent;
-                        const archiveFileName = typeof result?.archiveFileName === 'string' && result.archiveFileName.length > 0 ? result.archiveFileName : `${mdxFile.name.replace(/\.mdx$/iu, '') || 'dictionary'}.zip`;
                         if (!(archiveContent instanceof ArrayBuffer)) {
                             fail(new Error('MDX conversion worker returned invalid archive data'));
                             return;
                         }
-                        this.disconnect();
-                        resolve({archiveContent, archiveFileName});
-                        break;
+                        const archiveFileName = typeof result?.archiveFileName === 'string' && result.archiveFileName.length > 0 ? result.archiveFileName : `${mdxFile.name.replace(/\.mdx$/iu, '') || 'dictionary'}.zip`;
+                        complete({archiveContent, archiveFileName, phaseTimings: result?.phaseTimings ?? []});
+                    } catch (error) {
+                        fail(error instanceof Error ? error : new Error(String(error)));
                     }
-                }
-            });
-            worker.addEventListener('error', /** @param {ErrorEvent} event */ (event) => {
-                fail(new Error(event.message || 'MDX conversion worker failed'));
-            });
-            try {
+                });
+                worker.addEventListener('error', /** @param {ErrorEvent} event */ (event) => {
+                    fail(new Error(event.message || 'MDX conversion worker failed'));
+                });
+                worker.addEventListener('messageerror', () => {
+                    fail(new Error('MDX conversion worker message deserialization failed'));
+                });
                 /** @type {MdxWorkerConvertParams} */
                 const params = {
                     mdxFileName: mdxFile.name,
                     mdxBytes,
                     mddFiles: mddInputs,
-                    options: {
-                        titleOverride,
-                        descriptionOverride,
-                        revision,
-                        enableAudio,
-                        includeAssets,
-                        termBankSize,
-                    },
+                    options: {titleOverride, descriptionOverride, revision, enableAudio, includeAssets, termBankSize},
                 };
                 /** @type {Transferable[]} */
                 const transferables = [mdxBytes, ...mddInputs.map(({bytes}) => bytes)];
-                worker.postMessage({
-                    action: 'convertDictionary',
-                    params,
-                }, transferables);
-            } catch (e) {
-                fail(e instanceof Error ? e : new Error(String(e)));
-            }
+                worker.postMessage({action: 'convertDictionary', params}, transferables);
+            };
+            // Handle rejection even after cancellation so a late file failure
+            // never becomes an unhandled promise rejection.
+            void prepare().catch((error) => fail(error instanceof Error ? error : new Error(String(error))));
         });
     }
 
@@ -277,6 +365,9 @@ export class Mdx {
             lowered.includes('encrypted')
         ) {
             return new Error(`${UNSUPPORTED_VARIANT_ERROR_MESSAGE} Worker detail: ${message}`);
+        }
+        if (lowered.includes('checksum') || lowered.includes('truncated') || lowered.includes('out of bounds') || lowered.includes('length mismatch')) {
+            return new Error(`This MDX or MDD file could not be read completely or failed an integrity check. Try a fresh copy of the original files; renaming them will not repair the data. Worker detail: ${message}`);
         }
         return new Error(message);
     }

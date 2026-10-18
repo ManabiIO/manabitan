@@ -95,6 +95,56 @@ describe('EventListenerCollection', () => {
         collection.removeAllEventListeners();
         expect(collection.size).toBe(0);
     });
+
+    test.each(['dom', 'extension', 'dispatcher'])('a failed %s removal does not skip the remaining listeners or retain cleanup ownership', (kind) => {
+        const collection = new EventListenerCollection();
+        const failure = new Error('listener target unavailable');
+        const callback = vi.fn();
+        const dom = {addEventListener: vi.fn(), removeEventListener: vi.fn()};
+        const extension = {addListener: vi.fn(), removeListener: vi.fn()};
+        const dispatcher = new EventDispatcher();
+        const off = vi.spyOn(dispatcher, 'off');
+        const fault = kind === 'dom' ? dom.removeEventListener : (kind === 'extension' ? extension.removeListener : off);
+        fault.mockImplementation(() => { throw failure; });
+        const last = {addListener: vi.fn(), removeListener: vi.fn()};
+        collection.addEventListener(dom, 'click', callback);
+        collection.addListener(extension, callback);
+        collection.on(dispatcher, 'event', callback);
+        collection.addListener(last, callback);
+
+        expect(() => collection.removeAllEventListeners()).toThrow(failure);
+        expect(dom.removeEventListener).toHaveBeenCalledTimes(1);
+        expect(extension.removeListener).toHaveBeenCalledTimes(1);
+        expect(off).toHaveBeenCalledTimes(1);
+        expect(last.removeListener).toHaveBeenCalledTimes(1);
+        expect(collection.size).toBe(0);
+        expect(() => collection.removeAllEventListeners()).not.toThrow();
+        expect(last.removeListener).toHaveBeenCalledTimes(1);
+    });
+
+    test('reentrant removal cannot remove the same listener twice', () => {
+        const collection = new EventListenerCollection();
+        const target = {addListener: vi.fn(), removeListener: vi.fn()};
+        target.removeListener.mockImplementationOnce(() => collection.removeAllEventListeners());
+        collection.addListener(target, vi.fn());
+        collection.removeAllEventListeners();
+        expect(target.removeListener).toHaveBeenCalledTimes(1);
+        expect(collection.size).toBe(0);
+    });
+
+    test('listeners added during cleanup belong to the next lifecycle', () => {
+        const collection = new EventListenerCollection();
+        const next = {addListener: vi.fn(), removeListener: vi.fn()};
+        const target = {addListener: vi.fn(), removeListener: vi.fn(() => collection.addListener(next, vi.fn()))};
+        collection.addListener(target, vi.fn());
+        collection.removeAllEventListeners();
+        expect(target.removeListener).toHaveBeenCalledTimes(1);
+        expect(next.removeListener).not.toHaveBeenCalled();
+        expect(collection.size).toBe(1);
+        collection.removeAllEventListeners();
+        expect(next.removeListener).toHaveBeenCalledTimes(1);
+        expect(collection.size).toBe(0);
+    });
 });
 
 describe('object-utilities', () => {

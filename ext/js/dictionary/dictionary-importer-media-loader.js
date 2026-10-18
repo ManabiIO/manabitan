@@ -18,33 +18,110 @@
 
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 
+const imageDetailsLoadTimeoutMs = 60_000;
+
 /**
  * Class used for loading and validating media during the dictionary import process.
  */
 export class DictionaryImporterMediaLoader {
     /** @type {import('dictionary-importer-media-loader').GetImageDetailsFunction} */
     getImageDetails(content, mediaType, transfer) {
+        if (typeof Image === 'function') {
+            return this._getImageDetailsWithImage(content, mediaType, transfer);
+        }
+        if (typeof createImageBitmap === 'function') {
+            return this._getImageDetailsWithImageBitmap(content, mediaType, transfer);
+        }
+        return Promise.reject(new Error('Image metadata decoding is not supported in this runtime'));
+    }
+
+    /**
+     * @param {ArrayBuffer} content
+     * @param {string} mediaType
+     * @param {Transferable[]} [transfer]
+     * @returns {Promise<import('dictionary-worker-media-loader').ImageDetails>}
+     */
+    _getImageDetailsWithImage(content, mediaType, transfer) {
         return new Promise((resolve, reject) => {
             const image = new Image();
             const eventListeners = new EventListenerCollection();
-            const cleanup = () => {
-                image.removeAttribute('src');
-                URL.revokeObjectURL(url);
-                eventListeners.removeAllEventListeners();
-            };
-            eventListeners.addEventListener(image, 'load', () => {
-                const {naturalWidth: width, naturalHeight: height} = image;
-                if (Array.isArray(transfer)) { transfer.push(content); }
-                cleanup();
-                resolve({content, width, height});
-            }, false);
-            eventListeners.addEventListener(image, 'error', () => {
-                cleanup();
-                reject(new Error('Image failed to load'));
-            }, false);
             const blob = new Blob([content], {type: mediaType});
             const url = URL.createObjectURL(blob);
-            image.src = url;
+            /** @type {?import('core').Timeout} */
+            let timeout = null;
+            const cleanup = () => {
+                if (timeout !== null) {
+                    clearTimeout(timeout);
+                    timeout = null;
+                }
+                eventListeners.removeAllEventListeners();
+                image.removeAttribute('src');
+                URL.revokeObjectURL(url);
+            };
+            try {
+                eventListeners.addEventListener(image, 'load', () => {
+                    try {
+                        const {naturalWidth: width, naturalHeight: height} = image;
+                        if (Array.isArray(transfer)) { transfer.push(content); }
+                        resolve({content, width, height});
+                    } catch (error) {
+                        reject(error);
+                    } finally {
+                        cleanup();
+                    }
+                }, false);
+                eventListeners.addEventListener(image, 'error', () => {
+                    cleanup();
+                    reject(new Error('Image failed to load'));
+                }, false);
+                timeout = setTimeout(() => {
+                    cleanup();
+                    reject(new Error(`Timed out loading image metadata after ${String(imageDetailsLoadTimeoutMs)}ms`));
+                }, imageDetailsLoadTimeoutMs);
+                image.src = url;
+            } catch (error) {
+                cleanup();
+                reject(error);
+            }
         });
+    }
+
+    /**
+     * @param {ArrayBuffer} content
+     * @param {string} mediaType
+     * @param {Transferable[]} [transfer]
+     * @returns {Promise<import('dictionary-worker-media-loader').ImageDetails>}
+     */
+    async _getImageDetailsWithImageBitmap(content, mediaType, transfer) {
+        const blob = new Blob([content], {type: mediaType});
+        const bitmapPromise = createImageBitmap(blob);
+        let expired = false;
+        /** @type {?import('core').Timeout} */
+        let timeout = null;
+        /** @type {Promise<never>} */
+        const timeoutPromise = new Promise((_resolve, reject) => {
+            timeout = setTimeout(() => {
+                expired = true;
+                reject(new Error(`Timed out loading image metadata after ${String(imageDetailsLoadTimeoutMs)}ms`));
+            }, imageDetailsLoadTimeoutMs);
+        });
+        // Decoding cannot be cancelled. Keep observing it after a timeout so
+        // a late bitmap is closed and a late rejection remains handled.
+        const observedBitmapPromise = bitmapPromise.then((image) => {
+            if (expired) { image.close(); }
+            return image;
+        });
+        try {
+            const image = await Promise.race([observedBitmapPromise, timeoutPromise]);
+            try {
+                const {width, height} = image;
+                if (Array.isArray(transfer)) { transfer.push(content); }
+                return {content, width, height};
+            } finally {
+                image.close();
+            }
+        } finally {
+            if (timeout !== null) { clearTimeout(timeout); }
+        }
     }
 }

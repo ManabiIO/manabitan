@@ -1,0 +1,551 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
+
+import {describe, expect, test} from 'vitest';
+import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {DictionaryImporterMediaLoader} from '../ext/js/dictionary/dictionary-importer-media-loader.js';
+import {
+    decodeRawTermContentSharedGlossaryHeader,
+    encodeRawTermContentSharedGlossaryBinary,
+    RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+} from '../ext/js/dictionary/raw-term-content.js';
+import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
+import {getTermRecordPreinternedPlan} from '../ext/js/dictionary/term-record-preinterned-plan.js';
+
+/**
+ * @param {Uint8Array} [content]
+ * @param {[number, number]} [hashPair]
+ * @param {number} [score]
+ * @param {number} [sequence]
+ * @returns {Uint8Array}
+ */
+function createArtifactWithEmptyReadingSentinel(content = new Uint8Array(0), hashPair = [0, 0], score = 10, sequence = -1) {
+    const [hash1, hash2] = hashPair;
+    const expression = new TextEncoder().encode('term');
+    const headerBytes = 8 + 4 + 8;
+    const stringLengthsBytes = 4;
+    const indexesStart = headerBytes + stringLengthsBytes + expression.byteLength;
+    const indexPaddingBytes = (-indexesStart) & 3;
+    const rowBytes = 20 + content.byteLength;
+    const bytes = new Uint8Array(indexesStart + indexPaddingBytes + 8 + rowBytes);
+    const view = new DataView(bytes.buffer);
+    bytes.set(new TextEncoder().encode('MBTB0005'), 0);
+    let cursor = 8;
+    view.setUint32(cursor, 1, true); cursor += 4;
+    view.setUint32(cursor, 2, true); cursor += 4;
+    view.setUint32(cursor, expression.byteLength, true); cursor += 4;
+    view.setUint16(cursor, expression.byteLength, true); cursor += 2;
+    view.setUint16(cursor, 0, true); cursor += 2;
+    bytes.set(expression, cursor); cursor += expression.byteLength;
+    cursor += (-cursor) & 3;
+    view.setUint32(cursor, 0, true); cursor += 4;
+    view.setUint32(cursor, 1, true); cursor += 4;
+    view.setInt32(cursor, score, true); cursor += 4;
+    view.setInt32(cursor, sequence, true); cursor += 4;
+    view.setUint32(cursor, hash1, true); cursor += 4;
+    view.setUint32(cursor, hash2, true); cursor += 4;
+    view.setUint32(cursor, content.byteLength, true); cursor += 4;
+    bytes.set(content, cursor);
+    return bytes;
+}
+
+/**
+ * Starts with the raw-v3/shared-glossary magic but declares one tag byte
+ * without actually containing it.
+ * @returns {Uint8Array}
+ */
+function createMalformedSharedGlossaryContent() {
+    const bytes = new Uint8Array(28);
+    bytes.set([0x4d, 0x42, 0x52, 0x32]);
+    const view = new DataView(bytes.buffer);
+    view.setUint32(4, 1, true);
+    view.setBigUint64(16, 0n, true);
+    view.setUint32(24, 2, true);
+    return bytes;
+}
+
+describe('DictionaryImporter term artifacts', () => {
+    test('keeps direct artifact score and sequence columns in their native int32 width', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            createArtifactWithEmptyReadingSentinel(new Uint8Array(0), [0, 0], -2147483648, 2147483647),
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            0,
+            true,
+            1,
+            'raw-v4',
+        );
+
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        expect(chunk.scoreList).toBeInstanceOf(Int32Array);
+        expect(chunk.sequenceList).toBeInstanceOf(Int32Array);
+        expect(chunk.scoreList[0]).toBe(-2147483648);
+        expect(chunk.sequenceList[0]).toBe(2147483647);
+    });
+
+    test('normalizes an empty reading sentinel without mutating the source artifact', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+        const bytes = createArtifactWithEmptyReadingSentinel();
+        const originalBytes = Uint8Array.from(bytes);
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            bytes,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            0,
+            true,
+            1,
+            'raw-v4',
+        );
+
+        expect(capturedChunk).not.toBeNull();
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([1]));
+        expect(chunk.readingBytesList[0]).toBe(chunk.expressionBytesList[0]);
+        expect(chunk.termRecordPreinternedPlan.readingIndexes[0])
+            .toBe(chunk.termRecordPreinternedPlan.expressionIndexes[0]);
+        expect(bytes).toStrictEqual(originalBytes);
+        expect(chunk.termRecordPreinternedPlan.readingIndexes.buffer).not.toBe(bytes.buffer);
+    });
+
+    test('borrows the preinterned string arena only for awaited streaming chunks', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const streamedBytes = createArtifactWithEmptyReadingSentinel();
+        /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} */
+        let streamedPlan = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            streamedBytes,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {Record<string, import('core').SafeAny>} chunk */
+            async (chunk) => {
+                streamedPlan = /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (chunk.termRecordPreinternedPlan);
+                await Promise.resolve();
+                expect(streamedPlan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
+            },
+            0,
+            0,
+            true,
+            1,
+            'raw-v4',
+        );
+
+        expect(streamedPlan).not.toBeNull();
+        const completedStreamedPlan = /** @type {import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} */ (
+            /** @type {unknown} */ (streamedPlan)
+        );
+        expect(completedStreamedPlan.stringsBuffer.buffer).toBe(streamedBytes.buffer);
+
+        const retainedBytes = createArtifactWithEmptyReadingSentinel();
+        const result = await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            retainedBytes,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+        );
+        const retainedPlan = getTermRecordPreinternedPlan(result.termList);
+        expect(retainedPlan).not.toBeNull();
+        expect(retainedPlan?.stringsBuffer.buffer).not.toBe(retainedBytes.buffer);
+    });
+
+
+    test('recomputes direct-chunk content hashes after shared-glossary rebasing', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const sourceContent = encodeRawTermContentSharedGlossaryBinary(
+            '',
+            '',
+            '',
+            7,
+            11,
+            new TextEncoder(),
+        );
+        const sourceHash = hashTermEntryContentBytesPair(sourceContent);
+        const artifact = createArtifactWithEmptyReadingSentinel(sourceContent, sourceHash);
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            4096,
+            true,
+            1,
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        );
+
+        expect(capturedChunk).not.toBeNull();
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        const rebasedContent = /** @type {Uint8Array} */ (chunk.contentBytesList[0]);
+        const rebasedHeader = decodeRawTermContentSharedGlossaryHeader(rebasedContent, new TextDecoder());
+        expect(rebasedHeader?.glossaryOffset).toBe(4103);
+        const rebasedHash = hashTermEntryContentBytesPair(rebasedContent);
+        expect([chunk.contentHash1List[0], chunk.contentHash2List[0]]).toStrictEqual(rebasedHash);
+        expect(rebasedHash).not.toStrictEqual(sourceHash);
+    });
+
+    test('recomputes direct-chunk hashes when legacy JSON is converted to raw binary', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const sourceContent = new TextEncoder().encode(JSON.stringify({
+            rules: 'rule',
+            definitionTags: 'tag',
+            termTags: '',
+            glossary: ['definition'],
+        }));
+        const sourceHash = hashTermEntryContentBytesPair(sourceContent);
+        const artifact = createArtifactWithEmptyReadingSentinel(sourceContent, sourceHash);
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            0,
+            true,
+            1,
+            null,
+        );
+
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        const normalizedBytes = /** @type {Uint8Array} */ (chunk.contentBytesList[0]);
+        const normalizedHash = hashTermEntryContentBytesPair(normalizedBytes);
+        expect(normalizedBytes).not.toStrictEqual(sourceContent);
+        expect([chunk.contentHash1List[0], chunk.contentHash2List[0]]).toStrictEqual(normalizedHash);
+        expect(normalizedHash).not.toStrictEqual(sourceHash);
+    });
+
+    test('recomputes materialized-row hashes after shared-glossary rebasing', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const sourceContent = encodeRawTermContentSharedGlossaryBinary(
+            '',
+            '',
+            '',
+            13,
+            5,
+            new TextEncoder(),
+        );
+        const sourceHash = hashTermEntryContentBytesPair(sourceContent);
+        const artifact = createArtifactWithEmptyReadingSentinel(sourceContent, sourceHash);
+
+        const result = await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            void 0,
+            0,
+            512,
+            false,
+            1,
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        );
+
+        expect(result.termList).toHaveLength(1);
+        const entry = result.termList[0];
+        const rebasedBytes = /** @type {Uint8Array} */ (entry.termEntryContentBytes);
+        const rebasedHash = hashTermEntryContentBytesPair(rebasedBytes);
+        expect([entry.termEntryContentHash1, entry.termEntryContentHash2]).toStrictEqual(rebasedHash);
+        expect(rebasedHash).not.toStrictEqual(sourceHash);
+        expect(decodeRawTermContentSharedGlossaryHeader(rebasedBytes, new TextDecoder())?.glossaryOffset).toBe(525);
+    });
+
+    test('preserves artifact content hashes when normalization does not change bytes', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const contentBytes = encodeRawTermContentSharedGlossaryBinary(
+            '',
+            '',
+            '',
+            7,
+            11,
+            new TextEncoder(),
+        );
+        const sourceHash = hashTermEntryContentBytesPair(contentBytes);
+        const artifact = createArtifactWithEmptyReadingSentinel(contentBytes, sourceHash);
+        /** @type {Record<string, import('core').SafeAny>|null} */
+        let capturedChunk = null;
+
+        await Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            artifact,
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            /** @param {unknown} chunk */
+            (chunk) => {
+                capturedChunk = /** @type {Record<string, import('core').SafeAny>} */ (chunk);
+            },
+            0,
+            0,
+            true,
+            1,
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        );
+
+        const chunk = /** @type {Record<string, import('core').SafeAny>} */ (/** @type {unknown} */ (capturedChunk));
+        expect(chunk.contentBytesList[0]).toStrictEqual(contentBytes);
+        expect([chunk.contentHash1List[0], chunk.contentHash2List[0]]).toStrictEqual(sourceHash);
+    });
+
+    test('rejects malformed zero-base shared-glossary artifact rows before chunk delivery', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        let chunkDelivered = false;
+
+        await expect(Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            createArtifactWithEmptyReadingSentinel(createMalformedSharedGlossaryContent()),
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            () => { chunkDelivered = true; },
+            0,
+            0,
+            true,
+            1,
+            RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
+        )).rejects.toThrow(/shared glossary/i);
+
+        expect(chunkDelivered).toBe(false);
+    });
+
+    test('rejects malformed shared-glossary artifact rows before rebasing', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        let chunkDelivered = false;
+
+        await expect(Reflect.get(importer, '_decodeTermBankArtifactBytes').call(
+            importer,
+            createArtifactWithEmptyReadingSentinel(createMalformedSharedGlossaryContent()),
+            'term_bank_1.mbtb',
+            'Test dictionary',
+            false,
+            'raw-bytes',
+            () => { chunkDelivered = true; },
+            0,
+            4096,
+            true,
+            1,
+            null,
+        )).rejects.toThrow(/shared glossary/i);
+
+        expect(chunkDelivered).toBe(false);
+    });
+});
+
+describe('DictionaryImporter packed artifact validation', () => {
+    test('rejects term spans which would be silently clamped by Uint8Array.subarray', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedTermArtifactManifest');
+        /** @type {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null}} */
+        const manifest = {
+            termBanksByArtifact: new Map([
+                ['term_bank_1.mbtb', {packedOffset: 8, packedLength: 4, rows: null}],
+            ]),
+            sharedGlossaryPackedOffset: null,
+            sharedGlossaryPackedLength: null,
+        };
+
+        expect(() => validate.call(importer, manifest, 10)).toThrow(/term_bank_1\.mbtb/u);
+        manifest.termBanksByArtifact.set('term_bank_1.mbtb', {packedOffset: 6, packedLength: 4, rows: null});
+        expect(() => validate.call(importer, manifest, 10)).not.toThrow();
+    });
+
+    test('rejects negative row hints and incomplete packed shared-glossary spans', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedTermArtifactManifest');
+        /** @type {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null}} */
+        const manifest = {
+            termBanksByArtifact: new Map([
+                ['term_bank_1.mbtb', {packedOffset: 0, packedLength: 10, rows: -1}],
+            ]),
+            sharedGlossaryPackedOffset: null,
+            sharedGlossaryPackedLength: null,
+        };
+
+        expect(() => validate.call(importer, manifest, 10)).toThrow(/row count/u);
+        manifest.termBanksByArtifact.set('term_bank_1.mbtb', {packedOffset: 0, packedLength: 10, rows: 0});
+        expect(() => validate.call(importer, manifest, 10)).not.toThrow();
+
+        manifest.sharedGlossaryPackedOffset = 0;
+        expect(() => validate.call(importer, manifest, 10)).toThrow(/incomplete/u);
+        manifest.sharedGlossaryPackedOffset = null;
+        manifest.sharedGlossaryPackedLength = 10;
+        expect(() => validate.call(importer, manifest, 10)).toThrow(/incomplete/u);
+        manifest.sharedGlossaryPackedOffset = 0;
+        expect(() => validate.call(importer, manifest, 10)).not.toThrow();
+    });
+
+    test('validates shared glossary compression descriptors without breaking legacy raw-v4', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validateSharedGlossaryArtifactDescriptor');
+        /** @type {{sharedGlossaryFileName: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null, sharedGlossaryCompression: string|null, sharedGlossaryUncompressedLength: number|null, termContentMode: string|null}} */
+        const descriptor = {
+            sharedGlossaryFileName: 'manabitan-term-glossary-shared.bin',
+            sharedGlossaryPackedOffset: null,
+            sharedGlossaryPackedLength: null,
+            sharedGlossaryCompression: null,
+            sharedGlossaryUncompressedLength: 100,
+            termContentMode: 'raw-v4',
+        };
+
+        expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = 'zstd';
+        expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = 'brotli';
+        expect(() => validate.call(importer, descriptor)).toThrow(/compression/u);
+        descriptor.sharedGlossaryCompression = null;
+        descriptor.sharedGlossaryUncompressedLength = null;
+        expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
+        descriptor.termContentMode = 'raw-v3';
+        expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = 'zstd';
+        expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
+        descriptor.sharedGlossaryUncompressedLength = 100;
+        expect(() => validate.call(importer, descriptor)).not.toThrow();
+        descriptor.sharedGlossaryCompression = null;
+        descriptor.sharedGlossaryUncompressedLength = -1;
+        expect(() => validate.call(importer, descriptor)).toThrow(/uncompressed length/u);
+    });
+
+    test('requires a shared glossary source only when shared-glossary artifact terms are selected', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validateSelectedSharedGlossaryArtifactSource');
+        /** @type {{termContentMode: string|null, sharedGlossaryPackedOffset: number|null, sharedGlossaryPackedLength: number|null}} */
+        const manifest = {
+            termContentMode: 'raw-v3',
+            sharedGlossaryPackedOffset: null,
+            sharedGlossaryPackedLength: null,
+        };
+
+        expect(() => validate.call(importer, manifest, false, false, false)).not.toThrow();
+        expect(() => validate.call(importer, manifest, true, false, false)).toThrow(/missing.*glossary artifact/u);
+        expect(() => validate.call(importer, manifest, true, false, true)).not.toThrow();
+
+        manifest.sharedGlossaryPackedOffset = 10;
+        manifest.sharedGlossaryPackedLength = 20;
+        expect(() => validate.call(importer, manifest, false, true, false)).not.toThrow();
+
+        manifest.sharedGlossaryPackedLength = null;
+        expect(() => validate.call(importer, manifest, false, true, false)).toThrow(/missing.*glossary artifact/u);
+
+        manifest.termContentMode = 'raw-v4';
+        expect(() => validate.call(importer, manifest, true, false, true)).not.toThrow();
+
+        manifest.termContentMode = 'raw-v2';
+        expect(() => validate.call(importer, manifest, true, false, false)).not.toThrow();
+    });
+
+    test('rejects packed media spans and invalid preserved compression descriptors', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedMediaArtifactManifest');
+
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 9, packedLength: 2, compressionMethod: 0, uncompressedLength: 2,
+        }], 10, false)).toThrow(/image\.webp/u);
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 99, uncompressedLength: 10,
+        }], 10, true)).toThrow(/compression method 99/u);
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 8, uncompressedLength: 25,
+        }], 10, true)).not.toThrow();
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 0, uncompressedLength: 11,
+        }], 10, true)).toThrow(/length mismatch/u);
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 8, uncompressedLength: 0,
+        }], 10, true)).toThrow(/uncompressed length/u);
+    });
+
+    test('ignores compression metadata when packed media is imported uncompressed', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedMediaArtifactManifest');
+        expect(() => validate.call(importer, [{
+            path: 'image.webp', packedOffset: 0, packedLength: 10, compressionMethod: 99, uncompressedLength: 123,
+        }], 10, false)).not.toThrow();
+    });
+
+    test('rejects duplicate packed media paths before creating ambiguous database rows', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const validate = Reflect.get(importer, '_validatePackedMediaArtifactManifest');
+        const entries = [
+            {path: 'same.png', packedOffset: 0, packedLength: 4, compressionMethod: 0, uncompressedLength: 4},
+            {path: 'same.png', packedOffset: 4, packedLength: 4, compressionMethod: 0, uncompressedLength: 4},
+        ];
+        expect(() => validate.call(importer, entries, 8, true)).toThrow(/Duplicate packed media artifact path/u);
+    });
+
+    test('span validation rejects unsafe integer arithmetic', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const isValid = Reflect.get(importer, '_isValidPackedArtifactSpan');
+        expect(isValid.call(importer, Number.MAX_SAFE_INTEGER, 2, Number.MAX_SAFE_INTEGER)).toBe(false);
+        expect(isValid.call(importer, 4, 6, 10)).toBe(true);
+    });
+
+    test('rejects duplicate packed term artifact descriptors instead of silently taking the last one', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const read = Reflect.get(importer, '_readTermArtifactManifest');
+        Reflect.set(importer, '_getData', async () => JSON.stringify({
+            termBanks: [
+                {artifact: 'term_bank_1.mbtb', packedOffset: 0, packedLength: 4, rows: 1},
+                {artifact: 'term_bank_1.mbtb', packedOffset: 4, packedLength: 4, rows: 1},
+            ],
+        }));
+        const fileMap = new Map([
+            ['manabitan-import-artifact.json', /** @type {import('@zip.js/zip.js').Entry} */ ({})],
+        ]);
+        await expect(read.call(importer, fileMap)).rejects.toThrow(/Duplicate packed term artifact descriptor/u);
+    });
+});

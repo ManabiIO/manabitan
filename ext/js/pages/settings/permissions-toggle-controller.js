@@ -19,6 +19,7 @@
 import {getAllPermissions, hasPermissions, setPermissionsGranted} from '../../data/permissions-util.js';
 import {ObjectPropertyAccessor} from '../../general/object-property-accessor.js';
 import {log} from '../../core/log.js';
+import {ExtensionError} from '../../core/extension-error.js';
 
 export class PermissionsToggleController {
     /**
@@ -41,9 +42,11 @@ export class PermissionsToggleController {
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
         this._settingsController.on('permissionsChanged', this._onPermissionsChanged.bind(this));
 
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
-        this._onOptionsChanged({options, optionsContext});
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
+            this._onOptionsChanged({options, optionsContext});
+        }
     }
 
     // Private
@@ -70,7 +73,7 @@ export class PermissionsToggleController {
             }
             toggle.checked = !!value;
         }
-        void this._updateValidity();
+        void this._updateValidity().catch((error) => { log.error(error); });
     }
 
     /**
@@ -82,6 +85,7 @@ export class PermissionsToggleController {
         const valuePre = !value;
         const {permissionsSetting} = toggle.dataset;
         const hasPermissionsSetting = typeof permissionsSetting === 'string';
+        const optionsContext = hasPermissionsSetting ? this._settingsController.getOptionsContext() : null;
 
         if (value || !hasPermissionsSetting) {
             toggle.checked = valuePre;
@@ -100,9 +104,14 @@ export class PermissionsToggleController {
         }
 
         if (hasPermissionsSetting) {
+            if (optionsContext === null || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
             this._setToggleValid(toggle, true);
             try {
-                await this._settingsController.setProfileSetting(permissionsSetting, value);
+                const results = await this._settingsController.setProfileSetting(permissionsSetting, value);
+                if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
+                    throw new Error('Permission setting update returned an invalid result');
+                }
+                if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
             } catch (error) {
                 toggle.checked = valuePre;
                 this._setToggleValid(toggle, !valuePre || await hasPermissions({permissions: this._getRequiredPermissions(toggle)}));
@@ -169,10 +178,10 @@ export class PermissionsToggleController {
 
     /**
      * @param {HTMLInputElement} toggle
-     * @returns {NonNullable<chrome.permissions.Permissions['permissions']>}
+     * @returns {chrome.runtime.ManifestPermission[]}
      */
     _getRequiredPermissions(toggle) {
         const requiredPermissions = toggle.dataset.requiredPermissions;
-        return (typeof requiredPermissions === 'string' && requiredPermissions.length > 0 ? /** @type {NonNullable<chrome.permissions.Permissions['permissions']>} */ (requiredPermissions.split(' ')) : []);
+        return /** @type {chrome.runtime.ManifestPermission[]} */ (typeof requiredPermissions === 'string' && requiredPermissions.length > 0 ? requiredPermissions.split(' ') : []);
     }
 }

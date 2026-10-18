@@ -92,19 +92,28 @@ export class ClipboardReader {
 
         if (useRichText) {
             const target = this._getRichContentPasteTarget();
-            target.focus();
-            document.execCommand('paste');
-            const result = /** @type {string} */ (target.textContent);
+            // A failed paste must never reuse the previous contents of this
+            // hidden target, including previously pasted data-URL images.
             this._clearRichContent(target);
-            return result;
+            try {
+                target.focus();
+                document.execCommand('paste');
+                return /** @type {string} */ (target.textContent);
+            } finally {
+                this._clearRichContent(target);
+            }
         } else {
             const target = this._getPasteTarget();
             target.value = '';
-            target.focus();
-            document.execCommand('paste');
-            const result = target.value;
-            target.value = '';
-            return (typeof result === 'string' ? result : '');
+            try {
+                target.focus();
+                document.execCommand('paste');
+                const result = target.value;
+                return (typeof result === 'string' ? result : '');
+            } finally {
+                // A thrown paste can still leave private text in the target.
+                target.value = '';
+            }
         }
     }
 
@@ -149,12 +158,15 @@ export class ClipboardReader {
         }
 
         const target = this._getRichContentPasteTarget();
-        target.focus();
-        document.execCommand('paste');
-        const image = target.querySelector('img[src^="data:"]');
-        const result = (image !== null ? image.getAttribute('src') : null);
         this._clearRichContent(target);
-        return result;
+        try {
+            target.focus();
+            document.execCommand('paste');
+            const image = target.querySelector('img[src^="data:"]');
+            return (image !== null ? image.getAttribute('src') : null);
+        } finally {
+            this._clearRichContent(target);
+        }
     }
 
     // Private

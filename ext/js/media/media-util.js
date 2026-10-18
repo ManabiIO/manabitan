@@ -35,7 +35,25 @@ export function getFileNameExtension(path) {
  *   otherwise `null`.
  */
 export function getImageMediaTypeFromFileName(path) {
-    switch (getFileNameExtension(path).toLowerCase()) {
+    // The longest supported image extension is ".pjpeg" (6 code units).
+    // Avoid scanning the complete path or running the generic extension regex
+    // for this import-hot classifier.
+    const length = path.length;
+    const minIndex = Math.max(0, length - 6);
+    let extensionStart = -1;
+    for (let i = length - 1; i >= minIndex; --i) {
+        const code = path.charCodeAt(i);
+        if (code === 0x2e) {
+            extensionStart = i;
+            break;
+        }
+        if (code === 0x2f || code === 0x5c) {
+            break;
+        }
+    }
+    if (extensionStart < 0) { return null; }
+
+    switch (path.slice(extensionStart).toLowerCase()) {
         case '.apng':
             return 'image/apng';
         case '.avif':

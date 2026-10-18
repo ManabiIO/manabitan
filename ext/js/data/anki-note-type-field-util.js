@@ -63,20 +63,18 @@ export function buildAnkiFieldsForModel({
     const fields = {};
     for (let i = 0, ii = fieldNames.length; i < ii; ++i) {
         const fieldName = fieldNames[i];
-        // Anki permits arbitrary field names. Define an own data property even
-        // for __proto__, rather than invoking Object.prototype's setter.
         Object.defineProperty(fields, fieldName, {
-            enumerable: true,
-            configurable: true,
-            writable: true,
             value: {
                 value: (
                     preset !== null ?
-                    getPresetFieldValue(preset, fieldName) :
-                    getDefaultAnkiFieldValue(fieldName, i, dictionaryEntryType, oldFields)
+                        getPresetFieldValue(preset, fieldName) :
+                        getDefaultAnkiFieldValue(fieldName, i, dictionaryEntryType, oldFields)
                 ),
                 overwriteMode: 'coalesce',
             },
+            enumerable: true,
+            configurable: true,
+            writable: true,
         });
     }
     return fields;
@@ -95,7 +93,10 @@ export function getDefaultAnkiFieldValue(fieldName, index, dictionaryEntryType, 
         oldFields !== null &&
         Object.prototype.hasOwnProperty.call(oldFields, fieldName)
     ) {
-        return oldFields[fieldName].value;
+        const field = oldFields[fieldName];
+        if (field !== null && typeof field === 'object' && typeof field.value === 'string') {
+            return field.value;
+        }
     }
 
     if (index === 0) {

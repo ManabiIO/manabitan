@@ -84,13 +84,14 @@ export async function loadStyle(application, id, type, value, useWebExtensionApi
     }
 
     if (useWebExtensionApi) {
-        // Inject via WebExtension API
+        // Only publish the persistent "injected via API" marker after the
+        // browser acknowledges insertion. A permissions/transport failure must
+        // be retryable and must not discard an existing DOM stylesheet.
+        await application.api.injectStylesheet(type, value);
         if (styleNode !== null && styleNode.parentNode !== null) {
             styleNode.parentNode.removeChild(styleNode);
         }
-
         setInjectedStylesheet(id, parentNode, null);
-        await application.api.injectStylesheet(type, value);
         return null;
     }
 

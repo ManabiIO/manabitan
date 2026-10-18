@@ -144,6 +144,7 @@ function createTermEntry(frequencies) {
             headwordIndex: 0,
             dictionaryIndex: 0,
             dictionaryAlias: dictionary,
+            frequencyMode: null,
             hasReading: false,
             frequency,
             displayValue,

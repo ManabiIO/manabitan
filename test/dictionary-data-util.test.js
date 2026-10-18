@@ -27,6 +27,23 @@ describe('compareRevisions', () => {
         ['4.8', '4.8', false],
         ['version1', 'version2', true],
         ['version2', 'version100', false],
+        ['9007199254740992', '9007199254740993', true],
+        ['9007199254740993', '9007199254740992', false],
+        ['1.9007199254740992', '1.9007199254740993', true],
+        ['1.9007199254740993', '1.9007199254740992', false],
+        ['0009007199254740993', '9007199254740993', false],
+        ['9007199254740993', '0009007199254740993', false],
+        ['9'.repeat(310), `1${'0'.repeat(310)}`, true],
+        [`1${'0'.repeat(310)}`, '9'.repeat(310), false],
+        ['1.9007199254740993.9', '1.9007199254740992.10', false],
+        ['1.9007199254740992.10', '1.9007199254740993.9', true],
+        ['000.001.000', '0.1.0', false],
+        ['0.1.0', '000.001.000', false],
+        ['0.0', '0.0001', true],
+        // Preserve the existing lexical policy for differently shaped revisions.
+        ['2', '10.0', false],
+        ['1.0', '1', false],
+        ['release-2', 'release-10', false],
     ];
 
     test.each(data)('compare revisions %s -> %s', (current, latest, hasUpdate) => {

@@ -140,13 +140,17 @@ export class Environment {
             if (this._isSafari()) {
                 return 'safari';
             }
-            if (os === 'android') {
-                return 'firefox-mobile';
+            // Chrome 148+ exposes the WebExtensions `browser` namespace too, so
+            // its mere presence no longer identifies Firefox. `runtime.getBrowserInfo`
+            // remains a Firefox-specific discriminator for the browsers supported here.
+            if (typeof browser.runtime?.getBrowserInfo === 'function') {
+                if (os === 'android') {
+                    return 'firefox-mobile';
+                }
+                return 'firefox';
             }
-            return 'firefox';
-        } else {
-            return 'chrome';
         }
+        return 'chrome';
     }
 
     /**

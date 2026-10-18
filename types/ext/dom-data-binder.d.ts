@@ -43,6 +43,10 @@ export type ElementObserver<T = unknown> = {
     type: NormalizedElementType;
     value: unknown;
     hasValue: boolean;
+    /** Increments whenever the user edits the element. */
+    editVersion: number;
+    /** Prevent stale settings fetches from replacing an uncommitted local edit. */
+    pendingAssign: boolean;
     eventType: EventType;
     onChange: null | (() => void);
     metadata: T;

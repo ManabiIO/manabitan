@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Content-Length is an untrusted allocation hint, not a body-size limit.
+const RESPONSE_PREALLOCATION_MAX_BYTES = 16 * 1024 * 1024;
+
 /**
  * This class is used to generate `fetch()` requests on the background page
  * with additional controls over anonymity and error handling.
@@ -51,10 +54,13 @@ export class RequestBuilder {
      */
     async fetchAnonymous(url, init) {
         const id = this._getNewRuleId();
+        const parsedUrl = new URL(url);
+        parsedUrl.hash = '';
+        url = parsedUrl.href;
         const originUrl = this._getOriginURL(url);
-        url = encodeURI(decodeURIComponent(url));
 
         this._ruleIds.add(id);
+        let releaseRuleId = true;
         try {
             /** @type {chrome.declarativeNetRequest.Rule[]} */
             const addRules = [{
@@ -92,24 +98,29 @@ export class RequestBuilder {
             try {
                 return await fetch(url, init);
             } finally {
-                await this._tryUpdateSessionRules({removeRuleIds: [id]});
+                // A failed browser cleanup leaves the rule alive. Keep its ID
+                // reserved locally so a later request cannot collide with it.
+                releaseRuleId = await this._tryUpdateSessionRules({removeRuleIds: [id]});
             }
         } finally {
-            this._ruleIds.delete(id);
+            if (releaseRuleId) {
+                this._ruleIds.delete(id);
+            }
         }
     }
 
     /**
-     * Reads the array buffer body of a fetch response, with an optional `onProgress` callback.
+     * Reads the array buffer body of a fetch response, with optional progress and cancellation.
      * @param {Response} response The response of a `fetch` call.
      * @param {?(done: boolean) => void} onProgress The progress callback.
+     * @param {?AbortSignal} [signal] Cancels consumption as well as the underlying reader.
      * @returns {Promise<Uint8Array>} The resulting binary data.
      */
-    static async readFetchResponseArrayBuffer(response, onProgress) {
+    static async readFetchResponseArrayBuffer(response, onProgress, signal = null) {
         /** @type {ReadableStreamDefaultReader<Uint8Array>|undefined} */
         let reader;
         try {
-            if (onProgress !== null) {
+            if (onProgress !== null || signal !== null) {
                 const {body} = response;
                 if (body !== null) {
                     reader = body.getReader();
@@ -119,51 +130,94 @@ export class RequestBuilder {
             // Not supported
         }
 
-        if (typeof reader === 'undefined') {
-            const result = await response.arrayBuffer();
+        const checkAborted = () => {
+            if (signal !== null && signal.aborted) { throw signal.reason; }
+        };
+        /** @returns {Promise<Uint8Array>} */
+        const consume = async () => {
+            checkAborted();
+            if (typeof reader === 'undefined') {
+                const result = await response.arrayBuffer();
+                checkAborted();
+                if (onProgress !== null) {
+                    onProgress(true);
+                }
+                checkAborted();
+                return new Uint8Array(result);
+            }
+
+            const contentLengthString = response.headers.get('Content-Length');
+            const contentLength = contentLengthString !== null && /^\d+$/.test(contentLengthString) ?
+                Number(contentLengthString) :
+                Number.NaN;
+            let target = Number.isSafeInteger(contentLength) && contentLength <= RESPONSE_PREALLOCATION_MAX_BYTES ?
+                new Uint8Array(contentLength) :
+                null;
+            let targetPosition = 0;
+            let totalLength = 0;
+            const targets = [];
+
+            while (true) {
+                const {done, value} = await reader.read();
+                checkAborted();
+                if (done) { break; }
+                // Empty chunks do not advance an idle download or need storage.
+                if (value.length === 0) { continue; }
+                if (onProgress !== null) {
+                    onProgress(false);
+                }
+                checkAborted();
+                if (target === null) {
+                    targets.push({array: value, length: value.length});
+                } else if (targetPosition + value.length > target.length) {
+                    targets.push({array: target.subarray(0, targetPosition), length: targetPosition}, {array: value, length: value.length});
+                    target = null;
+                } else {
+                    target.set(value, targetPosition);
+                    targetPosition += value.length;
+                }
+                totalLength += value.length;
+            }
+
+            if (target === null) {
+                target = this._joinUint8Arrays(targets, totalLength);
+            } else if (totalLength < target.length) {
+                target = target.slice(0, totalLength);
+            }
+
             if (onProgress !== null) {
                 onProgress(true);
             }
-            return new Uint8Array(result);
-        }
 
-        const contentLengthString = response.headers.get('Content-Length');
-        const contentLength = contentLengthString !== null ? Number.parseInt(contentLengthString, 10) : null;
-        /** @type {Uint8Array|null} */
-        let target = contentLength !== null && Number.isFinite(contentLength) ? new Uint8Array(contentLength) : null;
-        let targetPosition = 0;
-        let totalLength = 0;
-        const targets = [];
-
-        while (true) {
-            const {done, value} = await reader.read();
-            if (done) { break; }
-            if (onProgress !== null) {
-                onProgress(false);
+            checkAborted();
+            return /** @type {Uint8Array} */ (target);
+        };
+        /** @type {?(() => void)} */
+        let onAbort = null;
+        try {
+            if (signal === null) { return await consume(); }
+            /** @type {Promise<never>} */
+            const aborted = new Promise((_resolve, reject) => {
+                onAbort = () => { reject(signal.reason); };
+                signal.addEventListener('abort', onAbort);
+            });
+            // Native cancellation may settle late or not at all. Retire the
+            // caller independently; consume also checks before publishing data.
+            return await Promise.race([consume(), aborted]);
+        } catch (error) {
+            // Own cancellation failures without awaiting an uncooperative
+            // stream. This also covers the arrayBuffer fallback path.
+            try {
+                const cancellation = typeof reader === 'undefined' ? response.body?.cancel(error) : reader.cancel(error);
+                if (cancellation) { void cancellation.catch(() => {}); }
+            } catch (e) {
+                // Preserve the original read/consumer/cancellation error.
             }
-            if (target === null) {
-                targets.push({array: value, length: value.length});
-            } else if (targetPosition + value.length > target.length) {
-                targets.push({array: target, length: targetPosition});
-                target = null;
-            } else {
-                target.set(value, targetPosition);
-                targetPosition += value.length;
-            }
-            totalLength += value.length;
+            throw error;
+        } finally {
+            if (signal !== null && onAbort !== null) { signal.removeEventListener('abort', onAbort); }
+            if (typeof reader !== 'undefined') { reader.releaseLock(); }
         }
-
-        if (target === null) {
-            target = this._joinUint8Arrays(targets, totalLength);
-        } else if (totalLength < target.length) {
-            target = target.slice(0, totalLength);
-        }
-
-        if (onProgress !== null) {
-            onProgress(true);
-        }
-
-        return /** @type {Uint8Array} */ (target);
     }
 
     // Private
@@ -332,7 +386,7 @@ export class RequestBuilder {
         const result = new Uint8Array(totalLength);
         let position = 0;
         for (const {array, length} of items) {
-            result.set(array, position);
+            result.set(array.subarray(0, length), position);
             position += length;
         }
         return result;

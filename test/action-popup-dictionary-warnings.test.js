@@ -49,6 +49,49 @@ describe('action popup dictionary warnings', () => {
         expect(tooltip.classList.contains('enable-dictionary-tooltip')).toBe(false);
         expect(restoreDefaultTooltips).toHaveBeenCalledOnce();
     });
+
+    test('shows recovery warning when an enabled dictionary requires reimport', () => {
+        const {document} = window;
+        document.body.innerHTML = '<p class="tooltip">Hover over text to scan</p>';
+        const tooltip = /** @type {HTMLElement} */ (document.querySelector('.tooltip'));
+
+        updateDictionaryWarningTooltips(document.querySelectorAll('.tooltip'), false, vi.fn(), true);
+
+        expect(tooltip.textContent).toBe('Dictionary re-import required');
+        expect(tooltip.classList.contains('enable-dictionary-tooltip')).toBe(true);
+    });
+
+    test('shows temporary warning while enabled dictionary storage is repairing', () => {
+        const {document} = window;
+        document.body.innerHTML = '<p class="tooltip">Hover over text to scan</p>';
+        const tooltip = /** @type {HTMLElement} */ (document.querySelector('.tooltip'));
+
+        updateDictionaryWarningTooltips(document.querySelectorAll('.tooltip'), false, vi.fn(), false, true);
+
+        expect(tooltip.textContent).toBe('Dictionary temporarily unavailable');
+    });
+
+    test('keeps a reimport warning visible when another enabled dictionary is healthy', () => {
+        const {document} = window;
+        document.body.innerHTML = '<p class="tooltip">Hover over text to scan</p>';
+        const tooltip = /** @type {HTMLElement} */ (document.querySelector('.tooltip'));
+        const restoreDefaultTooltips = vi.fn();
+
+        updateDictionaryWarningTooltips(document.querySelectorAll('.tooltip'), true, restoreDefaultTooltips, true);
+
+        expect(tooltip.textContent).toBe('Some dictionaries need re-import');
+        expect(restoreDefaultTooltips).not.toHaveBeenCalled();
+    });
+
+    test('shows repair-pending warning without treating the dictionary as unavailable', () => {
+        const {document} = window;
+        document.body.innerHTML = '<p class="tooltip">Hover over text to scan</p>';
+        const tooltip = /** @type {HTMLElement} */ (document.querySelector('.tooltip'));
+
+        updateDictionaryWarningTooltips(document.querySelectorAll('.tooltip'), true, vi.fn(), false, false, true);
+
+        expect(tooltip.textContent).toBe('Dictionary lookup index repair pending');
+    });
 });
 
 afterAll(() => teardown(global));

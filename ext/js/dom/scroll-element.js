@@ -37,8 +37,10 @@ export class ScrollElement {
         this._animationEndX = 0;
         /** @type {number} */
         this._animationEndY = 0;
+        /** @type {number} */
+        this._animationGeneration = 0;
         /** @type {(time: number) => void} */
-        this._requestAnimationFrameCallback = this._onAnimationFrame.bind(this);
+        this._requestAnimationFrameCallback = () => {};
     }
 
     /** @type {number} */
@@ -80,20 +82,32 @@ export class ScrollElement {
      * @param {number} time
      */
     animate(x, y, time) {
+        // A previous callback can already be queued by the browser; invalidate
+        // its generation as well as cancelling the scheduled frame.
+        this.stop();
+        if (!Number.isFinite(time) || time <= 0) {
+            this._scroll(x, y);
+            return;
+        }
+
         this._animationStartX = this.x;
         this._animationStartY = this.y;
         this._animationStartTime = window.performance.now();
         this._animationEndX = x;
         this._animationEndY = y;
         this._animationEndTime = this._animationStartTime + time;
+        const generation = this._animationGeneration;
+        this._requestAnimationFrameCallback = (frameTime) => {
+            if (generation !== this._animationGeneration) { return; }
+            this._onAnimationFrame(frameTime);
+        };
         this._animationRequestId = window.requestAnimationFrame(this._requestAnimationFrameCallback);
     }
 
     /** */
     stop() {
-        if (this._animationRequestId === null) {
-            return;
-        }
+        ++this._animationGeneration;
+        if (this._animationRequestId === null) { return; }
 
         window.cancelAnimationFrame(this._animationRequestId);
         this._animationRequestId = null;
@@ -115,6 +129,7 @@ export class ScrollElement {
         if (time >= this._animationEndTime) {
             this._scroll(this._animationEndX, this._animationEndY);
             this._animationRequestId = null;
+            ++this._animationGeneration;
             return;
         }
 

@@ -17,7 +17,10 @@
  */
 
 import {ExtensionError} from '../core/extension-error.js';
+import {toError} from '../core/to-error.js';
 import {generateId} from '../core/utilities.js';
+
+const imageDetailsResponseTimeoutMs = 60_000;
 
 /**
  * Class used for loading and validating media from a worker thread
@@ -28,7 +31,7 @@ export class DictionaryWorkerMediaLoader {
      * Creates a new instance of the media loader.
      */
     constructor() {
-        /** @type {Map<string, {resolve: (result: import('dictionary-worker-media-loader').ImageDetails) => void, reject: (reason?: import('core').RejectionReason) => void}>} */
+        /** @type {Map<string, {resolve: (result: import('dictionary-worker-media-loader').ImageDetails) => void, reject: (reason?: import('core').RejectionReason) => void, timer: import('core').Timeout}>} */
         this._requests = new Map();
     }
 
@@ -41,11 +44,32 @@ export class DictionaryWorkerMediaLoader {
         const request = this._requests.get(id);
         if (typeof request === 'undefined') { return; }
         this._requests.delete(id);
+        clearTimeout(request.timer);
         const {error} = params;
         if (typeof error !== 'undefined') {
-            request.reject(ExtensionError.deserialize(error));
+            try {
+                request.reject(ExtensionError.deserialize(error));
+            } catch (e) {
+                // The timeout is already cleared; decoding must not leave the request pending.
+                request.reject(toError(e));
+            }
         } else {
-            request.resolve(params.result);
+            const result = params.result;
+            if (
+                typeof result !== 'object' ||
+                result === null ||
+                !(result.content instanceof ArrayBuffer) ||
+                typeof result.width !== 'number' ||
+                !Number.isSafeInteger(result.width) ||
+                result.width < 0 ||
+                typeof result.height !== 'number' ||
+                !Number.isSafeInteger(result.height) ||
+                result.height < 0
+            ) {
+                request.reject(new Error('Dictionary image-details response is invalid'));
+                return;
+            }
+            request.resolve(result);
         }
     }
 
@@ -53,12 +77,27 @@ export class DictionaryWorkerMediaLoader {
     getImageDetails(content, mediaType) {
         return new Promise((resolve, reject) => {
             const id = generateId(16);
-            this._requests.set(id, {resolve, reject});
+            const timer = setTimeout(() => {
+                const request = this._requests.get(id);
+                if (typeof request === 'undefined') { return; }
+                this._requests.delete(id);
+                request.reject(new Error(`Timed out waiting for image details response after ${String(imageDetailsResponseTimeoutMs)}ms`));
+            }, imageDetailsResponseTimeoutMs);
+            this._requests.set(id, {resolve, reject, timer});
             // This is executed in a Worker context, so the self needs to be force cast
-            /** @type {Worker} */ (/** @type {unknown} */ (self)).postMessage({
-                action: 'getImageDetails',
-                params: {id, content, mediaType},
-            }, [content]);
+            try {
+                // Metadata is optional: retain the importer's original payload if
+                // decoding fails or the host never replies. Structured clone gives
+                // the host its own buffer without detaching the fallback bytes.
+                /** @type {Worker} */ (/** @type {unknown} */ (self)).postMessage({
+                    action: 'getImageDetails',
+                    params: {id, content, mediaType},
+                });
+            } catch (error) {
+                this._requests.delete(id);
+                clearTimeout(timer);
+                reject(error);
+            }
         });
     }
 }

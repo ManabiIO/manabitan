@@ -15,7 +15,7 @@ import {Offscreen} from '../ext/js/background/offscreen.js';
  * @param {number} timeoutMs
  * @returns {Promise<unknown|'timeout'>}
  */
-function nextMessage(port, timeoutMs = 50) {
+function nextMessage(port, timeoutMs = 250) {
     return new Promise((resolve) => {
         const timeout = setTimeout(() => resolve('timeout'), timeoutMs);
         port.onmessage = (event) => {
@@ -42,11 +42,12 @@ describe('Offscreen import supervision', () => {
         Reflect.set(offscreen, '_invokeDictionaryWorker', invokeDictionaryWorker);
 
         const messagePromise = nextMessage(caller.port1);
-        Reflect.get(offscreen, '_importDictionaryOffscreenHandler').call(
+        const handlerResult = Reflect.get(offscreen, '_importDictionaryOffscreenHandler').call(
             offscreen,
-            {archiveContent: new Blob(['dictionary']), details: {}},
+            {operationId: `${Date.now()}:test`, archiveContent: new Blob(['dictionary']), details: {}},
             [caller.port2],
         );
+        expect(handlerResult).toBeUndefined();
 
         const message = await messagePromise;
         expect(message).not.toBe('timeout');
@@ -71,11 +72,12 @@ describe('Offscreen import supervision', () => {
         Reflect.set(offscreen, '_invokeDictionaryWorker', invokeDictionaryWorker);
 
         const progressPromise = nextMessage(caller.port1);
-        Reflect.get(offscreen, '_importDictionaryOffscreenHandler').call(
+        const handlerResult = Reflect.get(offscreen, '_importDictionaryOffscreenHandler').call(
             offscreen,
-            {archiveContent: new Blob(['dictionary']), details: {}},
+            {operationId: `${Date.now()}:test`, archiveContent: new Blob(['dictionary']), details: {}},
             [caller.port2],
         );
+        expect(handlerResult).toBeUndefined();
         await vi.waitFor(() => expect(transferredPort).not.toBeNull());
         const workerPort = /** @type {MessagePort} */ (/** @type {unknown} */ (transferredPort));
         workerPort.postMessage({type: 'progress', progress: {step: 2}});

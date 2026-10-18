@@ -1,0 +1,72 @@
+{
+    "measuredAt": "2026-09-20",
+    "environment": {
+        "node": "v22.16.0"
+    },
+    "method": {
+        "order": "ABBA",
+        "rounds": 8,
+        "cacheBudgetBytes": 8388608,
+        "cacheEntryLimit": 64,
+        "recordBlockBytes": 32768,
+        "entries": 2048
+    },
+    "workloads": [
+        {
+            "name": "compressible-conversion-preparation",
+            "mdxBytes": 34084,
+            "baselineMedianMs": 242.8675774999997,
+            "candidateMedianMs": 70.88020000000006,
+            "pairedMedianReductionPercent": 70.64862710784436,
+            "roundReductionPercent": [
+                70.65541952434131,
+                68.84988813246294,
+                70.94193323976134,
+                71.75107432060886,
+                70.37061330631813,
+                70.64183469134741,
+                72.05857319163202,
+                69.46456098892047
+            ],
+            "outputVerification": "SHA-256 over sorted generated files identical"
+        },
+        {
+            "name": "compressible-conversion-plus-zip",
+            "mdxBytes": 34100,
+            "archiveBytes": 1703666,
+            "baselineMedianMs": 283.34087,
+            "candidateMedianMs": 79.93339549999973,
+            "pairedMedianReductionPercent": 71.29125119390147,
+            "roundReductionPercent": [
+                71.06404417074563,
+                70.77825077390155,
+                71.08940855590642,
+                71.29470214247868,
+                71.28780024532426,
+                72.68869329338618,
+                72.81946540093307,
+                72.94499718226311
+            ],
+            "outputVerification": "archive byte length identical; conversion-prep content independently hash-verified"
+        },
+        {
+            "name": "randomized-text-conversion-preparation",
+            "mdxBytes": 848452,
+            "baselineMedianMs": 751.7437140000002,
+            "candidateMedianMs": 101.94915000000037,
+            "pairedMedianReductionPercent": 86.12697734903122,
+            "roundReductionPercent": [
+                85.9,
+                85.76,
+                86.08,
+                85.55,
+                86.18,
+                87.73,
+                87.56,
+                87.34
+            ],
+            "outputVerification": "SHA-256 over sorted generated files identical"
+        }
+    ],
+    "scope": "Conversion preparation and ZIP preparation only; excludes OPFS/database publication."
+}

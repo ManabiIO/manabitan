@@ -1,0 +1,566 @@
+/*
+ * Copyright (C) 2023-2025  Yomitan Authors
+ * Copyright (C) 2020-2022  Yomichan Authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import {afterAll, afterEach, describe, expect, test, vi} from 'vitest';
+import {TextScanner} from '../ext/js/language/text-scanner.js';
+import {setupDomTest} from './fixtures/dom-test.js';
+
+const testEnv = await setupDomTest();
+
+/**
+ * @typedef {object} TermsFindResult
+ * @property {import('dictionary').TermDictionaryEntry[]} dictionaryEntries
+ * @property {number} originalTextLength
+ */
+
+/**
+ * @returns {(scanner: TextScanner, x: number, y: number, inputInfo: import('text-scanner').InputInfo) => Promise<void>}
+ * @throws {Error}
+ */
+function getSearchAtMethod() {
+    const searchAt = Reflect.get(TextScanner.prototype, '_searchAt');
+    if (typeof searchAt !== 'function') {
+        throw new Error('Expected TextScanner._searchAt to be available');
+    }
+    return (scanner, x, y, inputInfo) => searchAt.call(scanner, x, y, inputInfo);
+}
+
+/**
+ * @param {string} text
+ * @returns {import('text-source').TextSource}
+ */
+function createFakeTextSource(text) {
+    return /** @type {import('text-source').TextSource} */ (/** @type {unknown} */ ({
+        content: text,
+        clone() { return createFakeTextSource(text); },
+        text() { return text; },
+        setStartOffset() { return 0; },
+        setEndOffset() { return 0; },
+        getNodesInRange() { return []; },
+        getRects() { return []; },
+        getWritingMode() { return 'horizontal-tb'; },
+        hasSameStart() { return false; },
+        cleanup() {},
+    }));
+}
+
+/**
+ * @returns {import('text-scanner').InputInfo}
+ */
+function createInputInfo() {
+    /** @type {import('input').Modifier[]} */
+    const modifiers = [];
+    /** @type {import('input').ModifierKey[]} */
+    const modifierKeys = [];
+    return {
+        input: null,
+        pointerType: 'mouse',
+        eventType: 'mouseMove',
+        passive: false,
+        modifiers,
+        modifierKeys,
+        detail: null,
+    };
+}
+
+/**
+ * @param {import('../ext/js/comm/api.js').API['termsFind']} termsFindImpl
+ * @param {import('text-source').TextSource[]} sourceQueue
+ * @returns {TextScanner}
+ */
+function createScanner(termsFindImpl, sourceQueue) {
+    /** @type {import('text-scanner').GetSearchContextCallback} */
+    const getSearchContext = () => ({
+        optionsContext: {
+            depth: 0,
+            url: 'https://example.test/',
+            modifiers: [],
+            modifierKeys: [],
+            pointerType: 'mouse',
+        },
+        detail: {
+            documentTitle: 'scanner-test',
+        },
+    });
+    const textSourceGenerator = /** @type {import('../ext/js/dom/text-source-generator.js').TextSourceGenerator} */ (/** @type {unknown} */ ({
+        getRangeFromPoint() {
+            return sourceQueue.shift() ?? createFakeTextSource('暗記');
+        },
+        extractSentence() {
+            return {text: '', offset: 0};
+        },
+    }));
+    const api = /** @type {import('../ext/js/comm/api.js').API} */ (/** @type {unknown} */ ({
+        termsFind: termsFindImpl,
+        kanjiFind: async () => [],
+        isTextLookupWorthy: async () => false,
+    }));
+    const scanner = new TextScanner({
+        browser: 'chrome',
+        api,
+        node: window,
+        getSearchContext,
+        searchTerms: true,
+        searchKanji: false,
+        textSourceGenerator,
+    });
+    scanner.prepare();
+    scanner.setEnabled(true);
+    return scanner;
+}
+
+/**
+ * @returns {import('dictionary').TermDictionaryEntry}
+ */
+function createMockTermEntry() {
+    return /** @type {import('dictionary').TermDictionaryEntry} */ (/** @type {unknown} */ ({
+        dictionary: 'JMdict',
+        definitions: [],
+    }));
+}
+
+/** @returns {{promise: Promise<TermsFindResult>, resolve: (value: TermsFindResult) => void, reject: (error: Error) => void}} */
+function deferredLookup() {
+    /** @type {(value: TermsFindResult) => void} */
+    let resolve = () => {};
+    /** @type {(error: Error) => void} */
+    let reject = () => {};
+    const promise = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+    return {promise, resolve, reject};
+}
+
+/** @returns {TermsFindResult} */
+function hit() { return {dictionaryEntries: [createMockTermEntry()], originalTextLength: 1}; }
+
+describe('Reader integration scanner lifecycle regressions', () => {
+    const searchAt = getSearchAtMethod();
+    afterAll(async () => { await testEnv.teardown(global); });
+    afterEach(() => { vi.useRealTimers(); });
+
+    test('latest queued pointer lookup is not discarded when the previous lookup succeeds', async () => {
+        /** @type {(value: TermsFindResult) => void} */
+        let resolveFirst = () => {};
+        const first = new Promise((resolve) => { resolveFirst = resolve; });
+        const termsFindImpl = vi.fn()
+            .mockImplementationOnce(async () => await first)
+            .mockResolvedValue({dictionaryEntries: [createMockTermEntry()], originalTextLength: 2});
+        const termsFind = /** @type {import('../ext/js/comm/api.js').API['termsFind']} */ (/** @type {unknown} */ (termsFindImpl));
+        const scanner = createScanner(termsFind, [createFakeTextSource('猫'), createFakeTextSource('学校')]);
+        try {
+            const active = searchAt(scanner, 10, 10, createInputInfo());
+            await vi.waitFor(() => { expect(termsFindImpl).toHaveBeenCalledOnce(); });
+            await searchAt(scanner, 20, 10, createInputInfo());
+            resolveFirst({dictionaryEntries: [createMockTermEntry()], originalTextLength: 1});
+            await active;
+            await vi.waitFor(() => { expect(termsFindImpl).toHaveBeenCalledTimes(2); });
+        } finally {
+            scanner.setEnabled(false);
+        }
+    });
+
+    test('disabling the scanner invalidates an already running result before publication', async () => {
+        /** @type {(value: TermsFindResult) => void} */
+        let resolveFirst = () => {};
+        const first = new Promise((resolve) => { resolveFirst = resolve; });
+        const termsFindImpl = vi.fn().mockImplementationOnce(async () => await first);
+        const termsFind = /** @type {import('../ext/js/comm/api.js').API['termsFind']} */ (/** @type {unknown} */ (termsFindImpl));
+        const scanner = createScanner(termsFind, [createFakeTextSource('猫')]);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        try {
+            const active = searchAt(scanner, 10, 10, createInputInfo());
+            await vi.waitFor(() => { expect(termsFindImpl).toHaveBeenCalledOnce(); });
+            scanner.setEnabled(false);
+            resolveFirst({dictionaryEntries: [createMockTermEntry()], originalTextLength: 1});
+            await active;
+            expect(success).not.toHaveBeenCalled();
+        } finally {
+            scanner.setEnabled(false);
+        }
+    });
+
+    test('external lookup releases pointer admission without publishing its stale result', async () => {
+        const old = deferredLookup();
+        const current = deferredLookup();
+        const lookup = vi.fn().mockImplementationOnce(() => old.promise)
+            .mockImplementationOnce(() => current.promise);
+        const scanner = createScanner(lookup, [createFakeTextSource('猫'), createFakeTextSource('学校')]);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        try {
+            const active = searchAt(scanner, 1, 1, createInputInfo());
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
+            scanner.beginExternalLookup();
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(false);
+            const newer = searchAt(scanner, 2, 2, createInputInfo());
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledTimes(2); });
+            old.resolve(hit());
+            await active;
+            expect(success).not.toHaveBeenCalled();
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(true);
+            current.resolve(hit());
+            await newer;
+            expect(success).toHaveBeenCalledOnce();
+        } finally {
+            scanner.setEnabled(false);
+            old.resolve(hit());
+            current.resolve(hit());
+        }
+    });
+
+    test.each([
+        {kind: 'touch-start', external: true},
+        {kind: 'touch-end', external: true},
+        {kind: 'pen', external: true},
+        {kind: 'touch-start', external: false},
+        {kind: 'touch-end', external: false},
+        {kind: 'pen', external: false},
+    ])('$kind completion suppresses page input only while it owns the selection (external lookup: $external)', async ({kind, external}) => {
+        const pending = deferredLookup();
+        const lookup = vi.fn(() => pending.promise);
+        const scanner = createScanner(lookup, [createFakeTextSource('old')]);
+        const inputInfo = createInputInfo();
+        inputInfo.pointerType = kind === 'pen' ? 'pen' : 'touch';
+        inputInfo.input = /** @type {import('text-scanner').InputConfig} */ (/** @type {unknown} */ ({
+            searchTerms: true, searchKanji: false, preventTouchScrolling: true, preventPenScrolling: true, scanOnPenPress: true,
+        }));
+        Reflect.set(scanner, '_getMatchingInputGroupFromEvent', () => inputInfo);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        try {
+            const active = kind === 'pen' ?
+                Reflect.get(scanner, '_searchAtFromPen').call(scanner, /** @type {PointerEvent} */ (/** @type {unknown} */ ({clientX: 1, clientY: 1})), 'pointerDown', true) :
+                Reflect.get(scanner, kind === 'touch-start' ? '_searchAtFromTouchStart' : '_searchAtFromTouchEnd').call(scanner, 1, 1, inputInfo);
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
+            const readerSource = createFakeTextSource('reader');
+            if (external) {
+                scanner.beginExternalLookup();
+                scanner.setCurrentTextSource(readerSource);
+            }
+            pending.resolve(hit());
+            await active;
+            if (external) {
+                expect(scanner.getCurrentTextSource()).toBe(readerSource);
+                expect(success).not.toHaveBeenCalled();
+            } else {
+                expect(scanner.getCurrentTextSource()?.text()).toBe('old');
+                expect(success).toHaveBeenCalledOnce();
+            }
+
+            const mouseDown = /** @type {PointerEvent} */ (/** @type {unknown} */ (new MouseEvent('mousedown', {button: 0, cancelable: true})));
+            Reflect.get(scanner, '_onMouseDown').call(scanner, mouseDown);
+            expect(mouseDown.defaultPrevented).toBe(!external);
+            const contextMenu = /** @type {PointerEvent} */ (/** @type {unknown} */ (new MouseEvent('contextmenu', {cancelable: true})));
+            Reflect.get(scanner, '_onContextMenu').call(scanner, contextMenu);
+            expect(contextMenu.defaultPrevented).toBe(!external && kind !== 'touch-end');
+            const click = /** @type {PointerEvent} */ (/** @type {unknown} */ (new MouseEvent('click', {button: 0, cancelable: true})));
+            Reflect.get(scanner, '_onClick').call(scanner, click);
+            expect(click.defaultPrevented).toBe(!external);
+            expect(Reflect.get(scanner, '_preventScroll')).toBe(!external && kind !== 'touch-end');
+        } finally {
+            scanner.setEnabled(false);
+            pending.resolve(hit());
+        }
+    });
+
+    test('several queued pointer moves coalesce to the newest eligible position', async () => {
+        const first = deferredLookup();
+        const lookup = vi.fn().mockImplementationOnce(() => first.promise).mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('猫'), createFakeTextSource('学校')]);
+        const generator = Reflect.get(scanner, '_textSourceGenerator');
+        const range = vi.spyOn(generator, 'getRangeFromPoint');
+        try {
+            const active = searchAt(scanner, 1, 1, createInputInfo());
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
+            await searchAt(scanner, 2, 2, createInputInfo());
+            await searchAt(scanner, 3, 3, createInputInfo());
+            first.resolve(hit());
+            await active;
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledTimes(2); });
+            expect(range.mock.calls.map((args) => args.slice(0, 2))).toEqual([[1, 1], [3, 3]]);
+        } finally {
+            scanner.setEnabled(false);
+            first.resolve(hit());
+            range.mockRestore();
+        }
+    });
+
+    test.each(['empty', 'rejection'])('queued work continues after a %s response', async (outcome) => {
+        const first = deferredLookup();
+        const lookup = vi.fn().mockImplementationOnce(() => first.promise).mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('猫'), createFakeTextSource('学校')]);
+        try {
+            const active = searchAt(scanner, 1, 1, createInputInfo());
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
+            await searchAt(scanner, 2, 2, createInputInfo());
+            if (outcome === 'empty') {
+                first.resolve({dictionaryEntries: [], originalTextLength: 0});
+            } else {
+                first.reject(new Error('Test provider failure'));
+            }
+            await active;
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledTimes(2); });
+        } finally { scanner.setEnabled(false); first.resolve(hit()); }
+    });
+
+    test('old completion after disable/re-enable cannot clear newer busy state or its queued scan', async () => {
+        const old = deferredLookup();
+        const current = deferredLookup();
+        const lookup = vi.fn().mockImplementationOnce(() => old.promise)
+            .mockImplementationOnce(() => current.promise)
+            .mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('猫'), createFakeTextSource('学校'), createFakeTextSource('魚')]);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        try {
+            const active = searchAt(scanner, 1, 1, createInputInfo());
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
+            scanner.setEnabled(false);
+            scanner.setEnabled(true);
+            const newer = searchAt(scanner, 2, 2, createInputInfo());
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledTimes(2); });
+            await searchAt(scanner, 3, 3, createInputInfo());
+            old.resolve(hit());
+            await active;
+            expect(success).not.toHaveBeenCalled();
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(true);
+            expect(Reflect.get(scanner, '_queuedLookup')).toMatchObject({x: 3, y: 3});
+            current.resolve(hit());
+            await newer;
+            await vi.waitFor(() => { expect(success).toHaveBeenCalledTimes(2); });
+            expect(lookup).toHaveBeenCalledTimes(3);
+        } finally {
+            scanner.setEnabled(false);
+            old.resolve(hit());
+            current.resolve(hit());
+        }
+    });
+
+    test('timeout advances the queue but retains source ownership until the actual operation settles', async () => {
+        const first = deferredLookup();
+        const source = createFakeTextSource('猫');
+        const cleanup = vi.spyOn(source, 'cleanup');
+        const lookup = vi.fn().mockImplementationOnce(() => first.promise).mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [source, createFakeTextSource('学校')]);
+        Reflect.set(scanner, '_lookupTimeoutMs', 20);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        try {
+            const active = searchAt(scanner, 1, 1, createInputInfo());
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); }, {interval: 1});
+            await searchAt(scanner, 2, 2, createInputInfo());
+            await active;
+            await vi.waitFor(() => { expect(success).toHaveBeenCalledOnce(); });
+            expect(cleanup).not.toHaveBeenCalled();
+            first.resolve(hit());
+            await vi.waitFor(() => { expect(cleanup).toHaveBeenCalledOnce(); });
+            expect(success).toHaveBeenCalledOnce();
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(false);
+        } finally {
+            scanner.setEnabled(false);
+            first.resolve(hit());
+            cleanup.mockRestore();
+        }
+    });
+
+    test('disabled pointer entry points do not initiate lookups', async () => {
+        const lookup = vi.fn().mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('猫')]);
+        scanner.setEnabled(false);
+        await searchAt(scanner, 1, 1, createInputInfo());
+        await Reflect.get(scanner, '_searchAtFromMouseMove').call(scanner, 1, 1, createInputInfo());
+        expect(lookup).not.toHaveBeenCalled();
+    });
+
+    test('explicit programmatic search still works when pointer scanning is disabled', async () => {
+        const lookup = vi.fn().mockResolvedValue(hit());
+        const scanner = createScanner(lookup, []);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        scanner.setEnabled(false);
+        await scanner.search(createFakeTextSource('猫'));
+        expect(lookup).toHaveBeenCalledOnce();
+        expect(success).toHaveBeenCalledOnce();
+    });
+
+    test('a passive scan delay cannot resurrect pointer work in the next enabled session', async () => {
+        vi.useFakeTimers();
+        const lookup = vi.fn().mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('猫')]);
+        Reflect.set(scanner, '_delay', 50);
+        try {
+            const pending = Reflect.get(scanner, '_searchAtFromMouseMove').call(scanner, 1, 1, {...createInputInfo(), passive: true});
+            scanner.setEnabled(false);
+            scanner.setEnabled(true);
+            await vi.advanceTimersByTimeAsync(100);
+            await pending;
+            expect(lookup).not.toHaveBeenCalled();
+            expect(Reflect.get(scanner, '_queuedMouseMoveLookup')).toBe(null);
+        } finally { scanner.setEnabled(false); }
+    });
+
+    test('a scheduled coalesced pointer scan is cancelled on disable', async () => {
+        vi.useFakeTimers();
+        const lookup = vi.fn().mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('猫')]);
+        try {
+            await Reflect.get(scanner, '_searchAtFromMouseMove').call(scanner, 1, 1, createInputInfo());
+            scanner.setEnabled(false);
+            scanner.setEnabled(true);
+            await vi.advanceTimersByTimeAsync(100);
+            expect(lookup).not.toHaveBeenCalled();
+        } finally { scanner.setEnabled(false); }
+    });
+
+    test('an asynchronous ignored point replays the latest queued eligible point', async () => {
+        /** @type {(ignored: boolean) => void} */
+        let decide = () => {};
+        const decision = new Promise((resolve) => { decide = resolve; });
+        const lookup = vi.fn().mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('猫')]);
+        Reflect.set(scanner, '_ignorePoint', vi.fn().mockImplementationOnce(() => decision).mockResolvedValue(false));
+        try {
+            const active = searchAt(scanner, 1, 1, createInputInfo());
+            await searchAt(scanner, 2, 2, createInputInfo());
+            decide(true);
+            await active;
+            await vi.waitFor(() => { expect(lookup).toHaveBeenCalledOnce(); });
+        } finally { scanner.setEnabled(false); decide(true); }
+    });
+
+    test('disable invalidates an asynchronous point-admission callback before it starts a lookup', async () => {
+        /** @type {(ignored: boolean) => void} */
+        let decide = () => {};
+        const decision = new Promise((resolve) => { decide = resolve; });
+        const lookup = vi.fn().mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('猫')]);
+        Reflect.set(scanner, '_ignorePoint', () => decision);
+        const active = searchAt(scanner, 1, 1, createInputInfo());
+        scanner.setEnabled(false);
+        decide(false);
+        await active;
+        expect(lookup).not.toHaveBeenCalled();
+    });
+
+    test.each(['eligible', 'ignored', 'rejected'])('hit-test timeout releases the newest queued hover and ignores a late %s response', async (outcome) => {
+        vi.useFakeTimers();
+        const admission = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+        const current = deferredLookup();
+        const lookup = vi.fn(() => current.promise);
+        const scanner = createScanner(lookup, [createFakeTextSource('current')]);
+        const range = vi.spyOn(Reflect.get(scanner, '_textSourceGenerator'), 'getRangeFromPoint');
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        Reflect.set(scanner, '_lookupTimeoutMs', 25);
+        Reflect.set(scanner, '_ignorePoint', vi.fn().mockReturnValueOnce(admission.promise).mockResolvedValue(false));
+        const done = vi.fn();
+        const active = searchAt(scanner, 1, 1, createInputInfo()).then(done);
+        try {
+            await searchAt(scanner, 2, 2, createInputInfo());
+            await searchAt(scanner, 3, 3, createInputInfo());
+            await vi.advanceTimersByTimeAsync(25);
+            expect(done).toHaveBeenCalledOnce();
+            expect(range.mock.calls.map((args) => args.slice(0, 2))).toEqual([[3, 3]]);
+            expect(lookup).toHaveBeenCalledOnce();
+            expect(success).not.toHaveBeenCalled();
+
+            if (outcome === 'rejected') {
+                admission.reject(new Error('Old hit-test failed'));
+            } else {
+                admission.resolve(outcome === 'ignored');
+            }
+            await vi.advanceTimersByTimeAsync(0);
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(true);
+            expect(range).toHaveBeenCalledOnce();
+            current.resolve(hit());
+            await vi.advanceTimersByTimeAsync(0);
+            expect(success).toHaveBeenCalledOnce();
+            expect(Reflect.get(scanner, '_pendingLookup')).toBe(false);
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            scanner.setEnabled(false);
+            admission.resolve(false);
+            current.resolve(hit());
+            await active;
+            range.mockRestore();
+        }
+    });
+
+    test('hit testing and dictionary work share one timeout while the reader retains its source', async () => {
+        vi.useFakeTimers();
+        const admission = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+        const reader = deferredLookup();
+        const lookup = vi.fn(() => reader.promise);
+        const source = createFakeTextSource('pending');
+        const cleanup = vi.spyOn(source, 'cleanup');
+        const scanner = createScanner(lookup, [source]);
+        const success = vi.fn();
+        scanner.on('searchSuccess', success);
+        Reflect.set(scanner, '_lookupTimeoutMs', 25);
+        Reflect.set(scanner, '_ignorePoint', () => admission.promise);
+        const done = vi.fn();
+        const active = searchAt(scanner, 1, 1, createInputInfo()).then(done);
+        try {
+            await vi.advanceTimersByTimeAsync(15);
+            admission.resolve(false);
+            await vi.advanceTimersByTimeAsync(0);
+            expect(lookup).toHaveBeenCalledOnce();
+            await vi.advanceTimersByTimeAsync(10);
+            expect(done).toHaveBeenCalledOnce();
+            expect(cleanup).not.toHaveBeenCalled();
+            reader.resolve(hit());
+            await vi.advanceTimersByTimeAsync(0);
+            expect(cleanup).toHaveBeenCalledOnce();
+            expect(success).not.toHaveBeenCalled();
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            scanner.setEnabled(false);
+            admission.resolve(false);
+            reader.resolve(hit());
+            await active;
+            cleanup.mockRestore();
+        }
+    });
+
+    test('disabled watchdog preserves asynchronous hit testing without leaking a timer', async () => {
+        vi.useFakeTimers();
+        const admission = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+        const lookup = vi.fn().mockResolvedValue(hit());
+        const scanner = createScanner(lookup, [createFakeTextSource('current')]);
+        Reflect.set(scanner, '_lookupTimeoutMs', 0);
+        Reflect.set(scanner, '_ignorePoint', () => admission.promise);
+        const done = vi.fn();
+        const active = searchAt(scanner, 1, 1, createInputInfo()).then(done);
+        try {
+            await vi.advanceTimersByTimeAsync(60_000);
+            expect(done).not.toHaveBeenCalled();
+            expect(lookup).not.toHaveBeenCalled();
+            admission.resolve(false);
+            await active;
+            expect(lookup).toHaveBeenCalledOnce();
+            expect(vi.getTimerCount()).toBe(0);
+        } finally {
+            scanner.setEnabled(false);
+            admission.resolve(false);
+            await active;
+        }
+    });
+});

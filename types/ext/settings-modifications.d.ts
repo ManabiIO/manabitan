@@ -20,6 +20,8 @@ import type * as Settings from './settings';
 export type OptionsScope = {
     scope: OptionsScopeType;
     optionsContext: Settings.OptionsContext | null;
+    /** Stable Settings-page owner for profile-scoped reads and writes. */
+    profileId?: string | null;
 };
 
 export type OptionsScopeType = 'profile' | 'global';
@@ -32,6 +34,8 @@ export type ModificationSet = {
     action: 'set';
     path: string;
     value: unknown;
+    /** Optional JSON snapshot precondition, checked inside the options mutation queue. */
+    expectedValue?: unknown;
 };
 
 export type ModificationDelete = {
@@ -43,6 +47,64 @@ export type ModificationSwap = {
     action: 'swap';
     path1: string;
     path2: string;
+};
+
+export type ModificationMoveDictionary = {
+    action: 'moveDictionary';
+    path: string;
+    currentIndex: number;
+    targetIndex: number;
+    expectedNames: string[];
+    expectedEntries: Record<string, unknown>[];
+};
+
+export type ModificationSetDictionaryField = {
+    action: 'setDictionaryField';
+    profileId: string;
+    index: number;
+    expectedEntry: Record<string, unknown>;
+    field: 'alias' | 'enabled' | 'allowSecondarySearches' | 'definitionsCollapsible' | 'partsOfSpeechFilter' | 'useDeinflections';
+    value: unknown;
+};
+
+export type ModificationSetDefaultProfile = {
+    action: 'setDefaultProfile';
+    profileId: string;
+};
+
+export type ModificationSwapProfiles = {
+    action: 'swapProfiles';
+    profileId1: string;
+    profileId2: string;
+};
+
+export type ModificationProfileAction = {
+    action: 'setProfileName';
+    profileId: string;
+    value: string;
+} | {
+    action: 'copyProfileOptions';
+    sourceProfileId: string;
+    destinationProfileId: string;
+    value: unknown;
+} | {
+    action: 'resetProfile';
+    profileId: string;
+    value: unknown;
+} | {
+    action: 'deleteProfile';
+    profileId: string;
+} | {
+    action: 'duplicateProfile';
+    sourceProfileId: string;
+    profile: unknown;
+};
+
+export type ModificationSetProfileConditionGroups = {
+    action: 'setProfileConditionGroups';
+    profileId: string;
+    expectedConditionGroups: Settings.ProfileConditionGroup[];
+    value: Settings.ProfileConditionGroup[];
 };
 
 export type ModificationSplice = {
@@ -59,12 +121,71 @@ export type ModificationPush = {
     items: unknown[];
 };
 
+export type ModificationRemoveDictionary = {
+    action: 'removeDictionary';
+    path: string;
+    name: string;
+};
+
+export type ModificationEnsureDictionary = {
+    action: 'ensureDictionary';
+    profileId: string;
+    item: Record<string, unknown>;
+};
+
+export type ModificationSetDictionaryEnabled = {
+    action: 'setDictionaryEnabled';
+    profileId: string;
+    name: string;
+    alias: string;
+    value: boolean;
+};
+
+export type ModificationSetDictionarySelector = {
+    action: 'setDictionarySelector';
+    profileId: string;
+    selector: 'mainDictionary' | 'sortFrequencyDictionary';
+    expectedValue: unknown;
+    value: unknown;
+    requireDictionaryUninstalled?: string;
+};
+
+export type ModificationRemoveDictionaryByName = {
+    action: 'removeDictionaryByName';
+    profileId: string;
+    name: string;
+};
+
+export type ModificationReplaceDictionaryName = {
+    action: 'replaceDictionaryName';
+    profileId: string;
+    sourceName: string;
+    name: string;
+    styles: string;
+    fallbackSettings?: {
+        index: number;
+        item: Record<string, unknown>;
+    }[];
+};
+
 export type Modification = (
     ModificationSet |
     ModificationDelete |
     ModificationSwap |
+    ModificationMoveDictionary |
+    ModificationSetDictionaryField |
+    ModificationSetDefaultProfile |
+    ModificationSwapProfiles |
+    ModificationProfileAction |
+    ModificationSetProfileConditionGroups |
     ModificationSplice |
-    ModificationPush
+    ModificationPush |
+    ModificationRemoveDictionary |
+    ModificationEnsureDictionary |
+    ModificationSetDictionaryEnabled |
+    ModificationSetDictionarySelector |
+    ModificationRemoveDictionaryByName |
+    ModificationReplaceDictionaryName
 );
 
 export type ScopedRead = Read & OptionsScope;
@@ -75,16 +196,52 @@ export type ScopedModificationDelete = ModificationDelete & OptionsScope;
 
 export type ScopedModificationSwap = ModificationSwap & OptionsScope;
 
+export type ScopedModificationMoveDictionary = ModificationMoveDictionary & OptionsScope;
+
+export type ScopedModificationSetDictionaryField = ModificationSetDictionaryField & OptionsScope;
+
+export type ScopedModificationSetDefaultProfile = ModificationSetDefaultProfile & OptionsScope;
+
+export type ScopedModificationSwapProfiles = ModificationSwapProfiles & OptionsScope;
+
+export type ScopedModificationProfileAction = ModificationProfileAction & OptionsScope;
+
+export type ScopedModificationSetProfileConditionGroups = ModificationSetProfileConditionGroups & OptionsScope;
+
 export type ScopedModificationSplice = ModificationSplice & OptionsScope;
 
 export type ScopedModificationPush = ModificationPush & OptionsScope;
+
+export type ScopedModificationRemoveDictionary = ModificationRemoveDictionary & OptionsScope;
+
+export type ScopedModificationEnsureDictionary = ModificationEnsureDictionary & OptionsScope;
+
+export type ScopedModificationSetDictionaryEnabled = ModificationSetDictionaryEnabled & OptionsScope;
+
+export type ScopedModificationSetDictionarySelector = ModificationSetDictionarySelector & OptionsScope;
+
+export type ScopedModificationRemoveDictionaryByName = ModificationRemoveDictionaryByName & OptionsScope;
+
+export type ScopedModificationReplaceDictionaryName = ModificationReplaceDictionaryName & OptionsScope;
 
 export type ScopedModification = (
     ScopedModificationSet |
     ScopedModificationDelete |
     ScopedModificationSwap |
+    ScopedModificationMoveDictionary |
+    ScopedModificationSetDictionaryField |
+    ScopedModificationSetDefaultProfile |
+    ScopedModificationSwapProfiles |
+    ScopedModificationProfileAction |
+    ScopedModificationSetProfileConditionGroups |
     ScopedModificationSplice |
-    ScopedModificationPush
+    ScopedModificationPush |
+    ScopedModificationRemoveDictionary |
+    ScopedModificationEnsureDictionary |
+    ScopedModificationSetDictionaryEnabled |
+    ScopedModificationSetDictionarySelector |
+    ScopedModificationRemoveDictionaryByName |
+    ScopedModificationReplaceDictionaryName
 );
 
 export type ModificationSetResult = unknown;

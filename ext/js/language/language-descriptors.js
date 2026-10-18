@@ -30,6 +30,7 @@ import {normalizeRadicalCharacters} from './CJK-util.js';
 import {eszettPreprocessor} from './de/german-text-preprocessors.js';
 import {germanTransforms} from './de/german-transforms.js';
 import {removeDoubleAcuteAccents} from './el/modern-greek-processors.js';
+import {modernGreekTransforms} from './el/modern-greek-transforms.js';
 import {englishTransforms} from './en/english-transforms.js';
 import {esperantoTransforms} from './eo/esperanto-transforms.js';
 import {spanishTransforms} from './es/spanish-transforms.js';
@@ -64,6 +65,9 @@ import {addSerboCroatianDiacritics, removeSerboCroatianAccentMarks} from './sh/s
 import {albanianTransforms} from './sq/albanian-transforms.js';
 import {capitalizeFirstLetter, decapitalize, removeAlphabeticDiacritics} from './text-processors.js';
 import {tagalogTransforms} from './tl/tagalog-transforms.js';
+import {removeUkrainianDiacritics, ukrainianApostropheVariants} from './uk/ukrainian-text-preprocessors.js';
+import {ukrainianTransforms} from './uk/ukrainian-transforms.js';
+import {isStringPartiallyUkrainian} from './uk/ukrainian.js';
 import {normalizeDiacritics} from './vi/viet-text-preprocessors.js';
 import {convertFinalLetters, convertYiddishLigatures} from './yi/yiddish-text-postprocessors.js';
 import {combineYiddishLigatures, removeYiddishDiacritics} from './yi/yiddish-text-preprocessors.js';
@@ -138,6 +142,13 @@ const languageDescriptors = [
         textPreprocessors: capitalizationPreprocessors,
     },
     {
+        iso: 'br',
+        iso639_3: 'bre',
+        name: 'Breton',
+        exampleText: 'lenn',
+        textPreprocessors: capitalizationPreprocessors,
+    },
+    {
         iso: 'cs',
         iso639_3: 'ces',
         name: 'Czech',
@@ -173,6 +184,7 @@ const languageDescriptors = [
             ...capitalizationPreprocessors,
             removeDoubleAcuteAccents,
         },
+        languageTransforms: modernGreekTransforms,
     },
     {
         iso: 'en',
@@ -249,6 +261,13 @@ const languageDescriptors = [
         languageTransforms: irishTransforms,
     },
     {
+        iso: 'gd',
+        iso639_3: 'gla',
+        name: 'Scottish Gaelic',
+        exampleText: 'leugh',
+        textPreprocessors: capitalizationPreprocessors,
+    },
+    {
         iso: 'grc',
         iso639_3: 'grc',
         name: 'Ancient Greek',
@@ -259,6 +278,13 @@ const languageDescriptors = [
             convertLatinToGreek,
         },
         languageTransforms: ancientGreekTransforms,
+    },
+    {
+        iso: 'gv',
+        iso639_3: 'glv',
+        name: 'Manx',
+        exampleText: 'lhaih',
+        textPreprocessors: capitalizationPreprocessors,
     },
     {
         // no 2 letter iso for hawaiian
@@ -384,6 +410,13 @@ const languageDescriptors = [
             reassembleHangul,
         },
         languageTransforms: koreanTransforms,
+    },
+    {
+        iso: 'kw',
+        iso639_3: 'cor',
+        name: 'Cornish',
+        exampleText: 'lenna',
+        textPreprocessors: capitalizationPreprocessors,
     },
     {
         iso: 'mn',
@@ -523,7 +556,13 @@ const languageDescriptors = [
         iso639_3: 'ukr',
         name: 'Ukrainian',
         exampleText: 'читати',
-        textPreprocessors: capitalizationPreprocessors,
+        isTextLookupWorthy: isStringPartiallyUkrainian,
+        textPreprocessors: {
+            ...capitalizationPreprocessors,
+            removeUkrainianDiacritics,
+            ukrainianApostropheVariants,
+        },
+        languageTransforms: ukrainianTransforms,
     },
     {
         iso: 'vi',

@@ -27,16 +27,20 @@ export class FrameOffsetForwarder {
         this._crossFrameApi = crossFrameApi;
         /** @type {FrameAncestryHandler} */
         this._frameAncestryHandler = new FrameAncestryHandler(crossFrameApi);
+        /** @type {boolean} */
+        this._prepared = false;
     }
 
     /**
      * @returns {void}
      */
     prepare() {
+        if (this._prepared) { return; }
         this._frameAncestryHandler.prepare();
         this._crossFrameApi.registerHandlers([
             ['frameOffsetForwarderGetChildFrameRect', this._onMessageGetChildFrameRect.bind(this)],
         ]);
+        this._prepared = true;
     }
 
     /**

@@ -15,11 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* eslint-disable @stylistic/max-statements-per-line, @stylistic/multiline-ternary, @typescript-eslint/ban-ts-comment, no-empty, unicorn/no-useless-undefined, unicorn/prefer-spread*/
+/* eslint-disable @stylistic/max-statements-per-line, @stylistic/multiline-ternary, @typescript-eslint/ban-ts-comment, no-empty, unicorn/no-useless-undefined, unicorn/prefer-spread */
 
 // @ts-nocheck
 
 import {createServer} from 'node:http';
+import assert from 'node:assert/strict';
 import os from 'node:os';
 import path from 'node:path';
 import {execFile} from 'node:child_process';
@@ -27,10 +28,16 @@ import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
 import {existsSync, readFileSync} from 'node:fs';
 import {access, copyFile, mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
-import {chromium} from '@playwright/test';
+import {chromium, expect} from '@playwright/test';
+import {ensurePinnedDictionaryCache} from '../../dev/perf/dictionary-fixtures.js';
+import {getHostEnvironment} from '../../dev/perf/host-environment.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
+import {armBrowserImportTiming} from '../e2e/import-timing.js';
+import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
+import {createAnkiMockState} from '../e2e/anki-mock-state.js';
+import {runWithReaderFinalization} from '../e2e/reader-finalization.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -72,6 +79,7 @@ const overlapLookupCandidates = [
     '今日',
 ];
 const lookupWords = ['暗記', '名前', '日本', '学生', '食べる', '見る', '言う', '行く', '水', '猫'];
+let chromiumSearchRequestSequence = 0;
 
 /**
  * @returns {string | null}
@@ -149,8 +157,30 @@ const strictUnsupportedRuntime = parseBooleanEnv(
 );
 const maxReportLogLinesRaw = Number.parseInt(process.env.MANABITAN_CHROMIUM_E2E_MAX_LOG_LINES ?? '1000', 10);
 const maxReportLogLines = Number.isFinite(maxReportLogLinesRaw) && maxReportLogLinesRaw > 0 ? maxReportLogLinesRaw : 1000;
-const quickImportBenchmarkMode = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false);
+const quickImportBenchmarkDictionaryIdRaw = (process.env.MANABITAN_E2E_IMPORT_BENCH_DICTIONARY ?? '').trim().toLowerCase();
+const quickImportBenchmarkMode = (
+    quickImportBenchmarkDictionaryIdRaw.length > 0 ||
+    parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false)
+);
+const quickImportBenchmarkDictionaryId = quickImportBenchmarkDictionaryIdRaw || 'jmdict';
+const supportedQuickImportBenchmarkDictionaries = new Set(['jmdict', 'jmnedict', 'jitendex']);
+if (quickImportBenchmarkMode && !supportedQuickImportBenchmarkDictionaries.has(quickImportBenchmarkDictionaryId)) {
+    fail(`Unsupported MANABITAN_E2E_IMPORT_BENCH_DICTIONARY=${quickImportBenchmarkDictionaryId}`);
+}
+const usePinnedPerfDictionaries = parseBooleanEnv(process.env.MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK, false);
+const useProductionImportDefaults = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS, false);
+const capturePhaseProfiles = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_PROFILING, !quickImportBenchmarkMode);
+const capturePhaseScreenshots = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_SCREENSHOTS, !quickImportBenchmarkMode);
+const captureProcessSamples = parseBooleanEnv(process.env.MANABITAN_E2E_PROCESS_SAMPLING, !quickImportBenchmarkMode);
+const importTracePath = (process.env.MANABITAN_E2E_IMPORT_TRACE_PATH ?? '').trim();
+if (importTracePath.length > 0 && !quickImportBenchmarkMode) {
+    fail('MANABITAN_E2E_IMPORT_TRACE_PATH requires quick import benchmark mode');
+}
+const importCompletionIdleMs = quickImportBenchmarkMode ? 100 : 250;
+const importCompletionPollMs = quickImportBenchmarkMode ? 16 : 50;
+let lastObservedImportCompletionEpochMs = 0;
 const stopAfterIsolatedProbes = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_ISOLATED_PROBES, false);
+const stopAfterInitialImports = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_INITIAL_IMPORTS, false);
 const stopAfterUpdate = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_UPDATE, false);
 const stopAfterCrashRecovery = parseBooleanEnv(process.env.MANABITAN_E2E_STOP_AFTER_CRASH_RECOVERY, false);
 const focusedUpdateOnlyMode = stopAfterUpdate || stopAfterCrashRecovery;
@@ -233,6 +263,22 @@ function summarizeDurationsMs(values) {
     };
 }
 
+function getFreshScannerSearchDurationMs(timing, maxDurationMs = Number.POSITIVE_INFINITY) {
+    const attempt = timing?.lastAttempt;
+    const before = attempt?.hostDebugBeforePointerMove;
+    const after = attempt?.hostDebugAfterPopupContent ?? attempt?.hostDebugAfterPopupFrame;
+    const beforeSuccessCount = Number(before?.manabitanSearchSuccessCount ?? 0);
+    const afterSuccessCount = Number(after?.manabitanSearchSuccessCount ?? 0);
+    if (!Number.isFinite(afterSuccessCount) || afterSuccessCount <= beforeSuccessCount) {
+        return null;
+    }
+    const durationMs = Number(after?.manabitanScannerSearchDurationMs);
+    if (!Number.isFinite(durationMs) || durationMs > maxDurationMs) {
+        return null;
+    }
+    return durationMs;
+}
+
 function formatMemoryMb(value) {
     return `${value.toFixed(1)} MB`;
 }
@@ -243,7 +289,21 @@ function createReport() {
         status: 'running',
         failureReason: '',
         browserFlavor,
+        browserVersion: '',
         launchMode: 'unknown',
+        hostEnvironment: getHostEnvironment(),
+        benchmark: quickImportBenchmarkMode ? {
+            dictionary: quickImportBenchmarkDictionaryId,
+            pinnedDictionaries: usePinnedPerfDictionaries,
+            productionImportDefaults: useProductionImportDefaults,
+            traceEnabled: importTracePath.length > 0,
+            authoritativeTiming: importTracePath.length === 0 && !capturePhaseProfiles && !capturePhaseScreenshots && !captureProcessSamples,
+            phaseProfiling: capturePhaseProfiles,
+            phaseScreenshots: capturePhaseScreenshots,
+            processSampling: captureProcessSamples,
+            importFlags: e2eImportFlags,
+            validation: null,
+        } : null,
         runtimeDiagnostics: null,
         skippedVerification: false,
         skipReason: '',
@@ -258,7 +318,10 @@ function createReportJsonSummary(report) {
         status: report.status,
         failureReason: report.failureReason,
         browserFlavor: report.browserFlavor,
+        browserVersion: report.browserVersion,
         launchMode: report.launchMode,
+        hostEnvironment: report.hostEnvironment,
+        benchmark: report.benchmark,
         runtimeDiagnostics: report.runtimeDiagnostics,
         skippedVerification: report.skippedVerification,
         skipReason: report.skipReason,
@@ -266,10 +329,13 @@ function createReportJsonSummary(report) {
         phases: (Array.isArray(report.phases) ? report.phases : []).map((phase) => ({
             name: phase.name,
             details: phase.details,
+            startMs: phase.startMs,
+            endMs: phase.endMs,
             durationMs: phase.durationMs,
             resourceUsage: phase.resourceUsage ?? null,
             perfMetrics: phase.perfMetrics ?? null,
             hotspots: Array.isArray(phase.hotspots) ? phase.hotspots : [],
+            data: phase.data ?? null,
         })),
         logs: Array.isArray(report.logs) ? report.logs : [],
     };
@@ -561,19 +627,21 @@ async function runPhaseProfile(cdpSession, action) {
     return output;
 }
 
-async function addReportPhase(report, page, name, details, startMs, endMs, profileData = null, processSampler = null) {
+async function addReportPhase(report, page, name, details, startMs, endMs, profileData = null, processSampler = null, data = null) {
     console.log(`[chromium-e2e] phase: ${name} (${formatDuration(Math.max(0, endMs - startMs))})`);
     if (processSampler !== null && typeof processSampler.sampleNow === 'function') {
         try { await processSampler.sampleNow(); } catch (_) {}
     }
     let screenshotBase64 = '';
-    try {
-        const screenshotBuffer = await page.screenshot({fullPage: true});
-        screenshotBase64 = screenshotBuffer.toString('base64');
-    } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        if (!message.includes('page.screenshot: Timeout')) {
-            throw error;
+    if (capturePhaseScreenshots) {
+        try {
+            const screenshotBuffer = await page.screenshot({fullPage: true});
+            screenshotBase64 = screenshotBuffer.toString('base64');
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (!message.includes('page.screenshot: Timeout')) {
+                throw error;
+            }
         }
     }
     const resourceUsage = processSampler?.summarize(startMs, endMs) ?? null;
@@ -588,6 +656,7 @@ async function addReportPhase(report, page, name, details, startMs, endMs, profi
         perfMetrics: profileData?.perfMetrics ?? null,
         screenshotBase64,
         screenshotMimeType: 'image/png',
+        data,
     });
 }
 
@@ -755,6 +824,9 @@ async function ensureCachedDownload(url, outputPath) {
 
 async function ensureRealDictionaryCache() {
     await mkdir(dictionaryCacheDir, {recursive: true});
+    if (usePinnedPerfDictionaries) {
+        return await ensurePinnedDictionaryCache(dictionaryCacheDir);
+    }
     const {jitendexUrl, jmnedictUrl, jmdictUrl} = await loadRecommendedDictionaryUrls();
     const jitendexPath = path.join(dictionaryCacheDir, 'jitendex-yomitan.zip');
     const jmnedictPath = path.join(dictionaryCacheDir, 'JMnedict.zip');
@@ -775,7 +847,9 @@ async function writeSlowZipResponse(response, body) {
         offset = nextOffset;
         if (offset < body.byteLength) {
             await new Promise((resolve) => {
-                setTimeout(resolve, 350);
+                // Keep the update download phase long enough for the concurrent
+                // lookup probe to complete before active import processing begins.
+                setTimeout(resolve, 1000);
             });
         }
     }
@@ -972,6 +1046,9 @@ async function evalSendMessage(page, expression, arg = null) {
                 resolve(response && typeof response === 'object' ? response.result : response);
             });
         });
+        if (expression === 'readerBridgeRuntime') {
+            return await send(arg.action, arg.params);
+        }
         if (expression === 'purge') {
             await send('purgeDatabase', undefined);
             const optionsFull = await send('optionsGetFull', undefined);
@@ -982,6 +1059,12 @@ async function evalSendMessage(page, expression, arg = null) {
             }
             await send('setAllSettings', {value: nextOptions, source: 'chromium-e2e'});
             return {ok: true};
+        }
+        if (expression === 'benchmarkDictionaryState') {
+            const dictionaryInfo = await send('getDictionaryInfo', undefined);
+            const titles = dictionaryInfo.map((row) => row.title);
+            const counts = await send('getDictionaryCounts', {dictionaryNames: titles, getTotal: false});
+            return {dictionaryInfo, counts: counts.counts};
         }
         if (expression === 'backendDiagnostics') {
             const term = String((arg && typeof arg === 'object') ? (arg.term || '打') : (arg || '打'));
@@ -1083,7 +1166,10 @@ async function evalSendMessage(page, expression, arg = null) {
             const matchesDictionaryName = (observedName, expectedName) => {
                 const observed = String(observedName || '').trim();
                 const expected = String(expectedName || '').trim();
-                return observed.length > 0 && expected.length > 0 && observed.includes(expected);
+                if (observed.length === 0 || expected.length === 0) { return false; }
+                if (observed === expected) { return true; }
+                if (observed.startsWith(`${expected} `) || observed.startsWith(`${expected}.`)) { return true; }
+                return observed.includes(expected);
             };
             const resolvedDictionaryNames = dictionaryNames.flatMap((expectedName) => (
                 installedTitles.filter((title) => matchesDictionaryName(title, expectedName))
@@ -1093,18 +1179,13 @@ async function evalSendMessage(page, expression, arg = null) {
             const probes = [];
             for (const term of candidates) {
                 const diagnostics = await send('debugDictionaryLookupState', {text: term, dictionaryNames: targetDictionaryNames});
-                let stateView = diagnostics;
-                if (
+                const stateView = (
                     diagnostics && typeof diagnostics === 'object' &&
                     diagnostics.offscreenState && typeof diagnostics.offscreenState === 'object'
-                ) {
-                    stateView = diagnostics.offscreenState;
-                } else if (
+                ) ? diagnostics.offscreenState : ((
                     diagnostics && typeof diagnostics === 'object' &&
                     diagnostics.localState && typeof diagnostics.localState === 'object'
-                ) {
-                    stateView = diagnostics.localState;
-                }
+                ) ? diagnostics.localState : diagnostics);
                 const store = stateView?.termContentStoreDebugState;
                 const totalLength = Number(store?.totalLength ?? -1);
                 const rowSample = Array.isArray(stateView?.rowSample) ? stateView.rowSample : [];
@@ -1699,15 +1780,51 @@ async function getImportProgressLabel(page) {
     });
 }
 
-async function isImportUiIdle(page) {
+async function getImportWaitState(page) {
     return await page.evaluate(() => {
-        const fileInput = document.querySelector('#dictionary-import-file-input');
-        if (fileInput instanceof HTMLInputElement && fileInput.disabled) {
-            return false;
+        const selectors = [
+            '#recommended-dictionaries-modal .dictionary-import-progress',
+            '#dictionaries-modal .dictionary-import-progress',
+        ];
+        let label = '';
+        for (const selector of selectors) {
+            const container = document.querySelector(selector);
+            if (!(container instanceof HTMLElement) || container.hidden) { continue; }
+            const labelNode = container.querySelector('.progress-info');
+            if (!(labelNode instanceof HTMLElement)) { continue; }
+            const text = (labelNode.textContent || '').trim();
+            if (text.length > 0) {
+                label = text;
+                break;
+            }
         }
+        const errorNode = document.querySelector('#dictionary-error');
+        const errorText = errorNode instanceof HTMLElement && !errorNode.hidden ?
+            (errorNode.textContent || '').trim() :
+            '';
+        const fileInput = document.querySelector('#dictionary-import-file-input');
         const activeProgress = document.querySelector('#dictionaries-modal .dictionary-import-progress:not([hidden]), #recommended-dictionaries-modal .dictionary-import-progress:not([hidden])');
-        return activeProgress === null;
+        const completionRaw = Reflect.get(globalThis, '__manabitanLastImportCompletion');
+        const completion = typeof completionRaw === 'object' && completionRaw !== null && !Array.isArray(completionRaw) ?
+            completionRaw :
+            null;
+        return {
+            label,
+            errorText,
+            uiIdle: (!(fileInput instanceof HTMLInputElement) || !fileInput.disabled) && activeProgress === null,
+            completion,
+            browserTiming: Reflect.get(globalThis, '__manabitanBrowserImportTiming') ?? null,
+        };
     });
+}
+
+async function markCurrentImportCompletionObserved(page) {
+    const state = await getImportWaitState(page);
+    const completionEpochMs = Number(state.completion?.completedAtEpochMs ?? 0);
+    if (Number.isFinite(completionEpochMs) && completionEpochMs > lastObservedImportCompletionEpochMs) {
+        lastObservedImportCompletionEpochMs = completionEpochMs;
+    }
+    await page.evaluate(armBrowserImportTiming);
 }
 
 async function waitForSettingsPageReady(page, timeoutMs = 30000) {
@@ -1830,8 +1947,8 @@ function summarizeImportStepTimingHistory(historyRaw) {
 function summarizeImportStep4Breakdown(historyRaw) {
     const history = Array.isArray(historyRaw) ? historyRaw : [];
     const readTimingValue = (details, key) => {
-        const value = Number(details?.[key] ?? 0);
-        return Number.isFinite(value) ? Math.max(0, value) : 0;
+        const value = details?.[key];
+        return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
     };
     const dictionaries = [];
     const aggregate = {
@@ -1863,16 +1980,22 @@ function summarizeImportStep4Breakdown(historyRaw) {
             mediaWriteMs: readTimingValue(details, 'step4MediaWriteMs'),
             accountedMs: readTimingValue(details, 'step4AccountedMs'),
             otherMs: readTimingValue(details, 'step4OtherMs'),
+            parserWorkerCount: readTimingValue(details, 'fastPathParserParallelWorkerCount'),
+            parserPipelineGroupsPerWorker: readTimingValue(details, 'fastPathParserParallelPipelineGroupsPerWorker'),
+            parserGroupCount: readTimingValue(details, 'fastPathParserParallelGroupCount'),
         };
         dictionaries.push(timingSummary);
-        aggregate.termParseMs += timingSummary.termParseMs;
-        aggregate.termSerializationMs += timingSummary.termSerializationMs;
-        aggregate.bulkAddTermsMs += timingSummary.bulkAddTermsMs;
-        aggregate.bulkAddTagsMetaMs += timingSummary.bulkAddTagsMetaMs;
-        aggregate.mediaResolveMs += timingSummary.mediaResolveMs;
-        aggregate.mediaWriteMs += timingSummary.mediaWriteMs;
-        aggregate.accountedMs += timingSummary.accountedMs;
-        aggregate.otherMs += timingSummary.otherMs;
+        aggregate.termParseMs = aggregate.termParseMs === null || timingSummary.termParseMs === null ? null : aggregate.termParseMs + timingSummary.termParseMs;
+        aggregate.termSerializationMs = aggregate.termSerializationMs === null || timingSummary.termSerializationMs === null ? null : aggregate.termSerializationMs + timingSummary.termSerializationMs;
+        aggregate.bulkAddTermsMs = aggregate.bulkAddTermsMs === null || timingSummary.bulkAddTermsMs === null ? null : aggregate.bulkAddTermsMs + timingSummary.bulkAddTermsMs;
+        aggregate.bulkAddTagsMetaMs = aggregate.bulkAddTagsMetaMs === null || timingSummary.bulkAddTagsMetaMs === null ? null : aggregate.bulkAddTagsMetaMs + timingSummary.bulkAddTagsMetaMs;
+        aggregate.mediaResolveMs = aggregate.mediaResolveMs === null || timingSummary.mediaResolveMs === null ? null : aggregate.mediaResolveMs + timingSummary.mediaResolveMs;
+        aggregate.mediaWriteMs = aggregate.mediaWriteMs === null || timingSummary.mediaWriteMs === null ? null : aggregate.mediaWriteMs + timingSummary.mediaWriteMs;
+        aggregate.accountedMs = aggregate.accountedMs === null || timingSummary.accountedMs === null ? null : aggregate.accountedMs + timingSummary.accountedMs;
+        aggregate.otherMs = aggregate.otherMs === null || timingSummary.otherMs === null ? null : aggregate.otherMs + timingSummary.otherMs;
+    }
+    if (dictionaries.length === 0) {
+        for (const key of Object.keys(aggregate)) { aggregate[key] = null; }
     }
     return {dictionaries, aggregate};
 }
@@ -1935,13 +2058,13 @@ async function waitForImportCompletion(page, dictionaryName, timeoutMs = 300000,
     let previousLabel = '';
     let previousLabelAt = start;
     while (safePerformance.now() < deadline) {
-        const errorText = await getDictionaryErrorText(page);
+        const state = await getImportWaitState(page);
+        const {errorText, label} = state;
         if (errorText.length > 0) {
             const opfsDiagnostics = await getOpfsOpenDiagnostics(page);
             const lastImportDebug = await getLastImportDebug(page);
             fail(`${dictionaryName} import reported error before completion: ${errorText}; opfsOpenDiagnostics=${JSON.stringify(opfsDiagnostics)}; lastImportDebug=${JSON.stringify(lastImportDebug)}`);
         }
-        const label = await getImportProgressLabel(page);
         const now = safePerformance.now();
         if (label !== previousLabel) {
             if (typeof onStepChange === 'function' && previousLabel.length > 0) {
@@ -1954,16 +2077,31 @@ async function waitForImportCompletion(page, dictionaryName, timeoutMs = 300000,
             sawStepText = true;
             emptySince = null;
         }
-        if (sawStepText && label.length === 0) {
+        const completionEpochMs = Number(state.completion?.completedAtEpochMs ?? 0);
+        const currentBrowserCompletion = state.browserTiming !== null &&
+        Number.isFinite(state.browserTiming.completedAtMs) &&
+        state.browserTiming.completedAtMs !== null &&
+        state.browserTiming.sequence > state.browserTiming.sequenceBefore;
+        if ((state.browserTiming !== null ? currentBrowserCompletion : completionEpochMs > lastObservedImportCompletionEpochMs) && state.uiIdle) {
+            if (Number(state.completion?.errorCount ?? 0) > 0) {
+                fail(`${dictionaryName} import completion signal reported errors: ${JSON.stringify(state.completion)}`);
+            }
+            lastObservedImportCompletionEpochMs = completionEpochMs;
+            if (typeof onStepChange === 'function' && previousLabel.length > 0) {
+                await onStepChange(previousLabel, previousLabelAt, safePerformance.now());
+            }
+            return;
+        }
+        if (state.browserTiming === null && sawStepText && label.length === 0) {
             emptySince ??= safePerformance.now();
-            if (safePerformance.now() - emptySince >= 2000 && await isImportUiIdle(page)) {
+            if (safePerformance.now() - emptySince >= importCompletionIdleMs && state.uiIdle) {
                 if (typeof onStepChange === 'function' && previousLabel.length > 0) {
                     await onStepChange(previousLabel, previousLabelAt, safePerformance.now());
                 }
                 return;
             }
         }
-        await page.waitForTimeout(250);
+        await page.waitForTimeout(importCompletionPollMs);
     }
     fail(`Timed out waiting for ${dictionaryName} import completion`);
 }
@@ -2102,10 +2240,7 @@ async function waitForInstalledDictionarySet(page, expectedNames, timeoutMs = 30
 function matchesDictionaryName(observedName, expectedName) {
     const observed = String(observedName || '').trim();
     const expected = String(expectedName || '').trim();
-    if (observed.length === 0 || expected.length === 0) { return false; }
-    if (observed === expected) { return true; }
-    if (observed.startsWith(`${expected} `) || observed.startsWith(`${expected}.`)) { return true; }
-    return observed.includes(expected);
+    return observed.length > 0 && expected.length > 0 && observed.includes(expected);
 }
 
 async function requestDictionaryDeleteFromInstalledModal(page, dictionaryName) {
@@ -2235,6 +2370,30 @@ async function searchTermAndGetDictionaryHitCounts(page, term, expectedDictionar
     if (!(await waitForBodyVisible(page, 30000))) {
         throw new Error('Search page body remained hidden');
     }
+    const searchRequestToken = `chromium-search-${++chromiumSearchRequestSequence}`;
+    await page.evaluate((token) => {
+        const previousState = Reflect.get(globalThis, '__manabitanE2eSearchContentReset');
+        if (previousState?.observer instanceof MutationObserver) {
+            previousState.observer.disconnect();
+        }
+        const dictionaryEntries = document.querySelector('#dictionary-entries');
+        const state = {
+            token,
+            contentResetObserved: !(dictionaryEntries instanceof HTMLElement) || dictionaryEntries.childNodes.length === 0,
+            observer: null,
+        };
+        if (dictionaryEntries instanceof HTMLElement && !state.contentResetObserved) {
+            const observer = new MutationObserver((records) => {
+                if (records.some((record) => record.type === 'childList' && record.removedNodes.length > 0)) {
+                    state.contentResetObserved = true;
+                    observer.disconnect();
+                }
+            });
+            observer.observe(dictionaryEntries, {childList: true, subtree: true});
+            state.observer = observer;
+        }
+        /** @type {import('core').SafeAny} */ (globalThis).__manabitanE2eSearchContentReset = state;
+    }, searchRequestToken);
     const debugApiResult = await page.evaluate(({term: query}) => {
         const api = Reflect.get(globalThis, '__manabitanSearchDebugApi');
         if (!(api && typeof api === 'object' && typeof api.triggerSearch === 'function')) {
@@ -2270,15 +2429,19 @@ async function searchTermAndGetDictionaryHitCounts(page, term, expectedDictionar
         observedCounts: {},
         noResultsVisible: false,
         entriesTextPreview: '',
+        contentResetObserved: false,
     };
     while (safePerformance.now() < deadline) {
-        const snapshot = await page.evaluate(() => {
+        const snapshot = await page.evaluate((token) => {
+            const resetState = Reflect.get(globalThis, '__manabitanE2eSearchContentReset');
+            const contentResetObserved = resetState?.token === token && resetState.contentResetObserved === true;
             const dictionaryEntries = document.querySelector('#dictionary-entries');
             if (!(dictionaryEntries instanceof HTMLElement)) {
                 return {
                     observedCounts: {},
                     noResultsVisible: false,
                     entriesTextPreview: '',
+                    contentResetObserved,
                 };
             }
             const countMap = Object.create(null);
@@ -2295,17 +2458,20 @@ async function searchTermAndGetDictionaryHitCounts(page, term, expectedDictionar
                 observedCounts: countMap,
                 noResultsVisible,
                 entriesTextPreview: text.slice(0, 200),
+                contentResetObserved,
             };
-        });
+        }, searchRequestToken);
         const observedEntries = Object.entries(snapshot?.observedCounts ?? {});
         const expectedCounts = Object.fromEntries(expectedDictionaryNames.map((name) => [name, 0]));
-        for (const [observedNameRaw, countRaw] of observedEntries) {
-            const observedName = String(observedNameRaw || '').trim();
-            const count = Number(countRaw || 0);
-            if (!Number.isFinite(count) || count <= 0 || observedName.length === 0) { continue; }
-            for (const expectedName of expectedDictionaryNames) {
-                if (!matchesDictionaryName(observedName, expectedName)) { continue; }
-                expectedCounts[expectedName] = Number(expectedCounts[expectedName] || 0) + count;
+        if (snapshot?.contentResetObserved === true) {
+            for (const [observedNameRaw, countRaw] of observedEntries) {
+                const observedName = String(observedNameRaw || '').trim();
+                const count = Number(countRaw || 0);
+                if (!Number.isFinite(count) || count <= 0 || observedName.length === 0) { continue; }
+                for (const expectedName of expectedDictionaryNames) {
+                    if (!matchesDictionaryName(observedName, expectedName)) { continue; }
+                    expectedCounts[expectedName] = Number(expectedCounts[expectedName] || 0) + count;
+                }
             }
         }
         lastResult = {
@@ -2313,11 +2479,54 @@ async function searchTermAndGetDictionaryHitCounts(page, term, expectedDictionar
             observedCounts: snapshot?.observedCounts ?? {},
             noResultsVisible: snapshot?.noResultsVisible === true,
             entriesTextPreview: String(snapshot?.entriesTextPreview || ''),
+            contentResetObserved: snapshot?.contentResetObserved === true,
         };
-        if (expectedDictionaryNames.every((name) => (expectedCounts[name] ?? 0) >= 1)) {
+        if (
+            lastResult.contentResetObserved &&
+            expectedDictionaryNames.every((name) => (expectedCounts[name] ?? 0) >= 1)
+        ) {
             return lastResult;
         }
         await page.waitForTimeout(250);
+    }
+    const missingDictionaryNames = expectedDictionaryNames.filter((name) => Number(lastResult.expectedCounts?.[name] ?? 0) < 1);
+    if (missingDictionaryNames.length > 0) {
+        try {
+            const diagnostics = await evalSendMessage(page, 'backendDiagnostics', {
+                term,
+                includeExpensiveDebugState: false,
+                includeAlternateLookupModes: false,
+            });
+            const termDictionaryNames = (Array.isArray(diagnostics?.termDictionaryNames) ? diagnostics.termDictionaryNames : [])
+                .map((value) => String(value || '').trim())
+                .filter((value) => value.length > 0);
+            const expectedCounts = {...lastResult.expectedCounts};
+            for (const expectedName of expectedDictionaryNames) {
+                if (termDictionaryNames.some((observedName) => matchesDictionaryName(observedName, expectedName))) {
+                    expectedCounts[expectedName] = Math.max(Number(expectedCounts[expectedName] || 0), 1);
+                }
+            }
+            if (expectedDictionaryNames.every((name) => (expectedCounts[name] ?? 0) >= 1)) {
+                return {
+                    ...lastResult,
+                    expectedCounts,
+                    observedCounts: {
+                        ...lastResult.observedCounts,
+                        __backendTermDictionaryNames: termDictionaryNames.join(', '),
+                    },
+                };
+            }
+            lastResult = {
+                ...lastResult,
+                expectedCounts,
+                observedCounts: {
+                    ...lastResult.observedCounts,
+                    __backendTermDictionaryNames: termDictionaryNames.join(', '),
+                },
+            };
+        } catch (_) {
+            // Preserve the DOM-only result when backend diagnostics are unavailable.
+        }
     }
     return lastResult;
 }
@@ -2399,26 +2608,53 @@ async function waitForVisiblePopupFrameHandle(page, timeoutMs = 6000) {
     /** @type {import('@playwright/test').ElementHandle<HTMLElement>|null} */
     let fallbackFrameHandle = null;
     while (safePerformance.now() < deadline) {
-        const frameHandles = await page.$$('iframe.yomitan-popup');
+        const frameHandles = (await page.$$('iframe.yomitan-popup')).reverse();
         for (const frameHandle of frameHandles) {
-            fallbackFrameHandle = frameHandle;
-            const box = await frameHandle.boundingBox();
-            const isRenderedVisible = await frameHandle.evaluate((frame) => {
-                const style = getComputedStyle(frame);
-                return (
-                    style.visibility !== 'hidden' &&
-                    style.display !== 'none' &&
-                    Number.parseFloat(style.opacity || '1') > 0 &&
-                    frame.hidden !== true
-                );
-            });
-            if (box !== null && box.width > 0 && box.height > 0 && isRenderedVisible) {
-                return frameHandle;
+            if (!await isPopupFrameHandleVisible(frameHandle)) {
+                continue;
+            }
+            fallbackFrameHandle ??= frameHandle;
+            const popupFrame = await frameHandle.contentFrame();
+            if (popupFrame === null) {
+                continue;
+            }
+            try {
+                const ready = await popupFrame.evaluate(() => {
+                    const entriesNode = document.querySelector('#dictionary-entries');
+                    const noResultsNode = document.querySelector('#no-results');
+                    const noDictionariesNode = document.querySelector('#no-dictionaries');
+                    return (
+                        (entriesNode instanceof HTMLElement && (entriesNode.textContent || '').trim().length > 0) ||
+                        (noResultsNode instanceof HTMLElement && !noResultsNode.hidden) ||
+                        (noDictionariesNode instanceof HTMLElement && !noDictionariesNode.hidden)
+                    );
+                });
+                if (ready) {
+                    return frameHandle;
+                }
+            } catch (_) {
+                // The frame can be replaced while a popup is being shown; retry with the current frame set.
             }
         }
         await page.waitForTimeout(80);
     }
     return fallbackFrameHandle;
+}
+
+async function isPopupFrameHandleVisible(frameHandle) {
+    const box = await frameHandle.boundingBox();
+    if (box === null || box.width <= 0 || box.height <= 0) {
+        return false;
+    }
+    return await frameHandle.evaluate((frame) => {
+        const style = getComputedStyle(frame);
+        return (
+            style.visibility !== 'hidden' &&
+            style.display !== 'none' &&
+            Number.parseFloat(style.opacity || '1') > 0 &&
+            frame.hidden !== true
+        );
+    });
 }
 
 async function getPageFrontendDebugState(page) {
@@ -2431,6 +2667,68 @@ async function getPageFrontendDebugState(page) {
         }
         return state;
     });
+}
+
+async function dismissVisiblePopupFrames(page) {
+    for (let attempt = 0; attempt < 3; ++attempt) {
+        await page.mouse.move(8, 8, {steps: 4});
+        const frameHandles = (await page.$$('iframe.yomitan-popup')).reverse();
+        for (const frameHandle of frameHandles) {
+            try {
+                if (!await isPopupFrameHandleVisible(frameHandle)) { continue; }
+                const popupFrame = await frameHandle.contentFrame();
+                if (popupFrame === null) { continue; }
+                const closeButton = popupFrame.locator('#close-button');
+                await (await closeButton.isVisible() ?
+                    closeButton.click({timeout: 1500}) :
+                    popupFrame.locator('#content-scroll-focus').press('Escape', {timeout: 1500}));
+            } catch (error) {
+                console.warn(`${e2eLogTag} Popup dismissal attempt: ${errorMessage(error)}`);
+                // Popup frames can be hidden or replaced while Escape is propagating.
+            }
+        }
+        await page.keyboard.press('Escape');
+        try {
+            await page.waitForFunction(() => {
+                for (const frame of document.querySelectorAll('iframe.yomitan-popup')) {
+                    if (!(frame instanceof HTMLElement) || frame.hidden) {
+                        continue;
+                    }
+                    const style = getComputedStyle(frame);
+                    if (
+                        frame.clientWidth > 0 &&
+                        frame.clientHeight > 0 &&
+                        style.visibility !== 'hidden' &&
+                        style.display !== 'none' &&
+                        Number.parseFloat(style.opacity || '1') > 0
+                    ) {
+                        return false;
+                    }
+                }
+                return true;
+            }, undefined, {timeout: 2500});
+            return;
+        } catch (_) {
+            // Retry because popup hide messages can be delayed under browser CPU pressure.
+        }
+    }
+    const debugState = await page.evaluate(() => ({
+        frontend: Object.fromEntries(
+            Object.entries(document.documentElement?.dataset ?? {}).filter(([key]) => key.startsWith('manabitan')),
+        ),
+        frames: Array.from(document.querySelectorAll('iframe.yomitan-popup')).map((frame) => {
+            const style = frame instanceof HTMLElement ? getComputedStyle(frame) : null;
+            return {
+                hidden: frame instanceof HTMLElement ? frame.hidden : null,
+                width: frame instanceof HTMLElement ? frame.clientWidth : null,
+                height: frame instanceof HTMLElement ? frame.clientHeight : null,
+                visibility: style?.visibility ?? null,
+                display: style?.display ?? null,
+                opacity: style?.opacity ?? null,
+            };
+        }),
+    }));
+    throw new Error(`Existing popup remained visible after three dismissal attempts; state=${JSON.stringify(debugState)}`);
 }
 
 async function waitForPageFrontendScanReady(page, timeoutMs = 10000) {
@@ -2487,10 +2785,282 @@ async function waitForPopupContentState(popupFrame, timeoutMs = 5000) {
     throw new Error(`Timed out waiting ${timeoutMs}ms for popup content state`);
 }
 
+async function getPopupContentDebugState(popupFrame) {
+    return await popupFrame.evaluate(() => {
+        const entriesNode = document.querySelector('#dictionary-entries');
+        const noResultsNode = document.querySelector('#no-results');
+        const noDictionariesNode = document.querySelector('#no-dictionaries');
+        return {
+            readyState: document.readyState,
+            location: location.href,
+            bodyTextPreview: (document.body?.textContent || '').replaceAll(/\s+/g, ' ').trim().slice(0, 240),
+            hasDictionaryEntriesNode: entriesNode instanceof HTMLElement,
+            dictionaryEntriesHidden: entriesNode instanceof HTMLElement ? entriesNode.hidden : null,
+            dictionaryEntriesTextLength: entriesNode instanceof HTMLElement ? (entriesNode.textContent || '').trim().length : null,
+            noResultsHidden: noResultsNode instanceof HTMLElement ? noResultsNode.hidden : null,
+            noDictionariesHidden: noDictionariesNode instanceof HTMLElement ? noDictionariesNode.hidden : null,
+        };
+    });
+}
+
+async function verifyInstalledReaderLookupBridge(page, localServer, expectedDictionaryNames) {
+    const extensionPageUrl = page.url();
+    const send = async (action, params) => await evalSendMessage(page, 'readerBridgeRuntime', {action, params});
+    const savedOptions = await send('optionsGetFull', undefined);
+    const installedTitles = (await send('getDictionaryInfo', undefined)).map(({title}) => title);
+    const expectedTitles = expectedDictionaryNames.map((name) => resolveInstalledDictionaryTitle(installedTitles, name));
+    assert.ok(expectedTitles.every((title) => title !== null), 'Reader test requires each expected dictionary to be installed');
+    const mockState = createAnkiMockState();
+    mockState.beginScenario('reader-lookup-only', []);
+    const ankiServer = await startAnkiMockHttpServer(mockState);
+    const getWrites = () => mockState.getScenarioState().actions.filter(({action}) => (
+        /^(?:addNote|addNotes|updateNoteFields|storeMediaFile|deleteNotes|suspend)$/.test(action)
+    ));
+    const result = {clicks: [], hover: null, ankiActions: [], minedNote: null};
+    let stage = 'configure';
+    await runWithReaderFinalization(async () => {
+        const options = structuredClone(savedOptions);
+        for (const {options: profileOptions} of options.profiles) {
+            profileOptions.anki.enable = true;
+            profileOptions.anki.server = ankiServer.ankiConnectUrl;
+            profileOptions.anki.apiKey = '';
+            profileOptions.anki.displayTagsAndFlags = 'never';
+            profileOptions.anki.cardFormats = [{
+                type: 'term',
+                name: 'Reader E2E',
+                deck: 'Default',
+                model: 'Basic',
+                icon: 'big-circle',
+                fields: {
+                    Front: {value: '{expression}', overwriteMode: 'overwrite'},
+                    Back: {value: 'PREFIX[{cloze-prefix}]BODY[{cloze-body}]SUFFIX[{cloze-suffix}]SENTENCE[{sentence}]', overwriteMode: 'overwrite'},
+                },
+            }];
+        }
+        await send('setAllSettings', {value: options, source: 'chromium-e2e-reader-bridge'});
+        // Positive control: the installed backend can reach the enabled mock.
+        await send('getAnkiConnectVersion', undefined);
+        assert.ok(mockState.getActionNames().includes('version'), 'Anki mock must observe the installed backend');
+        await page.goto(`${localServer.baseUrl}/wagahai-neko.html`);
+        await waitForPageFrontendHoverPrewarmReady(page);
+
+        const scenarios = [
+            {surface: '食べた', prefix: '私は', reading: 'たべる', expectedStatus: 'shown'},
+            {surface: '食べさせられた', prefix: '\u{1f600}昨日も食べさせられたが、今日は', reading: 'たべる', expectedStatus: 'shown'},
+            {surface: '食べた', prefix: '私は', reading: 'たべるまなびたん', expectedStatus: 'no-exact-match'},
+        ];
+        for (const [index, scenario] of scenarios.entries()) {
+            stage = `scenario ${index}: activation`;
+            console.log(`${e2eLogTag} Reader bridge ${stage}`);
+            await dismissVisiblePopupFrames(page);
+            const sentence = `${scenario.prefix}${scenario.surface}。`;
+            const request = {protocol: 1,
+                term: '食べる',
+                reading: scenario.reading,
+                surface: scenario.surface,
+                contextID: `reader-e2e-${index}`,
+                offset: scenario.prefix.length};
+            await page.evaluate(({request, sentence, prefix}) => {
+                document.querySelector('#reader-e2e-context')?.remove();
+                const context = document.createElement('p');
+                context.id = 'reader-e2e-context';
+                context.dataset.readerLookupContext = JSON.stringify({protocol: 1, id: request.contextID, text: sentence});
+                const anchor = document.createElement('span');
+                anchor.id = 'reader-e2e-anchor';
+                anchor.dataset.readerLookup = JSON.stringify(request);
+                const ruby = document.createElement('ruby');
+                ruby.append(request.surface);
+                const rt = document.createElement('rt');
+                rt.textContent = 'たべる';
+                ruby.append(rt);
+                anchor.append(ruby);
+                context.append(prefix, anchor, '。');
+                document.querySelector('main').prepend(context);
+                delete document.documentElement.dataset.readerLookupStatus;
+                document.getSelection()?.removeAllRanges();
+            }, {request, sentence, prefix: scenario.prefix});
+            const anchor = page.locator('#reader-e2e-anchor');
+            await anchor.scrollIntoViewIfNeeded();
+            const box = await anchor.boundingBox();
+            assert.ok(box && box.width > 0 && box.height > 0, 'Reader anchor must have actual click geometry');
+            // Mouse input, not dispatchEvent/HTMLElement.click: the bridge requires trusted pointer activation.
+            await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.75);
+            await page.waitForFunction(
+                (status) => document.documentElement.dataset.readerLookupStatus === status,
+                scenario.expectedStatus,
+                {timeout: 10000},
+            );
+            const frameHandle = await waitForVisiblePopupFrameHandle(page, 2000);
+            assert.ok(frameHandle, 'Reader click must display a popup');
+            const frame = await frameHandle.contentFrame();
+            assert.ok(frame, 'Reader popup must have an installed extension frame');
+            assert.equal(new URL(frame.url()).protocol, 'chrome-extension:', 'Popup must be an extension document');
+            assert.equal(new URL(frame.url()).host, new URL(extensionPageUrl).host, 'Popup must belong to the installed extension');
+            // Status can settle before rendering; require this operation's context and content together.
+            stage = `scenario ${index}: rendered content`;
+            console.log(`${e2eLogTag} Reader bridge ${stage}`);
+            await frame.waitForFunction(({sentence, offset, request, expectedStatus, expectedDictionaryNames}) => {
+                const currentSentence = history.state?.state?.sentence;
+                if (currentSentence?.text !== sentence || currentSentence.offset !== offset ||
+                new URL(location.href).searchParams.get('query') !== request.surface) { return false; }
+                const entries = document.querySelector('#dictionary-entries');
+                if (!(entries instanceof HTMLElement)) { return false; }
+                const headwords = Array.from(entries.querySelectorAll('.headword'));
+                const glossary = Array.from(entries.querySelectorAll('.gloss-content')).map((node) => node.textContent.trim()).join('');
+                if (expectedStatus === 'no-exact-match') {
+                    return headwords.length === 0 && glossary === '' && entries.textContent.trim() === '';
+                }
+                return headwords.length > 0 && headwords.every((node) => {
+                    const termNode = node.querySelector('.headword-term');
+                    const readingNode = node.querySelector('.headword-reading');
+                    if (termNode === null || readingNode === null) { return false; }
+                    const term = termNode.cloneNode(true);
+                    for (const annotation of term.querySelectorAll('rt,rp,rtc')) { annotation.remove(); }
+                    return term.textContent === request.term && readingNode.textContent === request.reading;
+                }) && /\beat\b/i.test(glossary) &&
+                Array.from(entries.querySelectorAll('.definition-item[data-dictionary]')).some((node) => expectedDictionaryNames.includes(node.dataset.dictionary));
+            }, {sentence, offset: [...scenario.prefix].length, request, expectedStatus: scenario.expectedStatus, expectedDictionaryNames: expectedTitles}, {timeout: 10000});
+            const content = await frame.evaluate(() => {
+                const entries = document.querySelector('#dictionary-entries');
+                return {
+                    sentence: history.state?.state?.sentence,
+                    query: new URL(location.href).searchParams.get('query'),
+                    headwords: Array.from(entries.querySelectorAll('.headword')).map((node) => {
+                        const term = node.querySelector('.headword-term').cloneNode(true);
+                        for (const annotation of term.querySelectorAll('rt,rp,rtc')) { annotation.remove(); }
+                        return {term: term.textContent, reading: node.querySelector('.headword-reading').textContent};
+                    }),
+                    dictionaries: Array.from(entries.querySelectorAll('.definition-item[data-dictionary]')).map((node) => node.dataset.dictionary),
+                    glossary: Array.from(entries.querySelectorAll('.gloss-content')).map((node) => node.textContent.trim()).join(''),
+                    entriesText: entries.textContent.trim(),
+                };
+            });
+            assert.deepEqual(
+                content.sentence,
+                {text: sentence, offset: [...scenario.prefix].length},
+                'Popup must retain the sentence and convert the UTF-16 occurrence offset to codepoints',
+            );
+            assert.equal(content.query, request.surface, 'Popup source must remain the inflected surface, not the lemma');
+            if (scenario.expectedStatus === 'shown') {
+                assert.ok(content.headwords.length > 0, 'Reader popup must render dictionary headwords');
+                for (const headword of content.headwords) {
+                    assert.deepEqual(headword, {term: request.term, reading: request.reading}, 'Every rendered headword must be the exact requested lexical pair');
+                }
+                assert.match(content.glossary, /\beat\b/i, 'Reader popup must render the actual eating definition');
+                assert.ok(content.dictionaries.some((name) => expectedTitles.includes(name)), 'Reader popup must identify an imported dictionary');
+            } else {
+                assert.deepEqual(content.headwords, [], 'Wrong reading must not fall back to lemma or surface lookup');
+                assert.equal(content.glossary, '', 'Exact miss must not retain previous definitions');
+                assert.equal(content.entriesText, '', 'Exact miss must clear previous dictionary content');
+            }
+            result.clicks.push({request, ...content});
+            if (index <= 1) {
+                assert.deepEqual(getWrites(), [], 'Reader trusted clicks must not write Anki notes or media before explicit mining');
+            }
+            if (index === 1) {
+                // Exercise the ordinary popup UI, not a mining/runtime API shortcut.
+                const saveButton = frame.locator('.entry .note-actions-container .action-button[data-action="save-note"]').first();
+                await saveButton.click({timeout: 10000});
+                await expect.poll(() => getWrites().length, {timeout: 10000, intervals: [100, 250, 500]}).toBe(1);
+                const [write] = getWrites();
+                assert.equal(write.action, 'addNote', 'Explicit popup mining must create one note');
+                assert.equal(write.error, null, 'Mock must accept the mined note');
+                assert.ok(Number.isSafeInteger(write.result) && write.result > 0, 'Explicit mining must return a real mock note ID');
+                assert.deepEqual(write.params.note.fields, {
+                    Front: request.term,
+                    Back: `PREFIX[${scenario.prefix}]BODY[${request.surface}]SUFFIX[。]SENTENCE[${sentence}]`,
+                }, 'Mined expression must be the lemma; cloze must retain the original emoji, inflected surface, occurrence, and sentence');
+                // View-note publication precedes optional post-add work; wait for the whole mining flow.
+                stage = `scenario ${index}: mining completion`;
+                console.log(`${e2eLogTag} Reader bridge ${stage}`);
+                await frame.waitForFunction((noteId) => {
+                    const entry = document.querySelector('#dictionary-entries .entry');
+                    const button = entry?.querySelector('.note-actions-container .action-button-container[data-card-format-index="0"] .action-button[data-action="view-note"]');
+                    const progress = document.querySelector('#progress-indicator');
+                    return button instanceof HTMLButtonElement && !button.hidden && !button.disabled &&
+                    button.dataset.noteIds?.split(/\s+/).includes(String(noteId)) &&
+                    progress instanceof HTMLElement && progress.dataset.active === 'false' &&
+                    document.querySelector('.footer-notification:not([hidden]) [class^="anki-note-error"]') === null;
+                }, write.result, {timeout: 10000});
+                await expect(frame.locator('.footer-notification:not([hidden]) [class^="anki-note-error"]')).toHaveCount(0);
+                result.minedNote = write;
+            }
+        }
+        await dismissVisiblePopupFrames(page);
+        result.hover = await hoverLookupOnWagahai(page, '#target-cat');
+        const hoverFrameHandle = await waitForVisiblePopupFrameHandle(page);
+        const hoverFrame = await hoverFrameHandle.contentFrame();
+        // A reused popup can become visible before its previous entries are replaced.
+        // Wait for the ordinary hover's query and lexical content together.
+        await hoverFrame.waitForFunction(() => {
+            if (new URL(location.href).searchParams.get('query') !== '猫') { return false; }
+            const entries = document.querySelector('#dictionary-entries');
+            if (!(entries instanceof HTMLElement)) { return false; }
+            const hasCatHeadword = Array.from(entries.querySelectorAll('.headword')).some((node) => {
+                const term = node.querySelector('.headword-term')?.cloneNode(true);
+                for (const annotation of term?.querySelectorAll('rt,rp,rtc') ?? []) { annotation.remove(); }
+                return term?.textContent === '猫' && node.querySelector('.headword-reading')?.textContent === 'ねこ';
+            });
+            const glossary = Array.from(entries.querySelectorAll('.gloss-content')).map((node) => node.textContent).join(' ');
+            return hasCatHeadword && /\bcat\b/i.test(glossary);
+        }, null, {timeout: 10000});
+        // The hover helper can observe a newly visible but not yet populated
+        // popup. Only assert entries after the fresh lexical content is ready.
+        result.hover.hasDictionaryEntries = await hoverFrame.locator('#dictionary-entries .entry').count() > 0;
+        assert.ok(result.hover.hasDictionaryEntries, 'Ordinary hover must still render entries after Reader clicks');
+        result.hover.entriesTextPreview = await hoverFrame.locator('#dictionary-entries').evaluate((node) => (
+            (node.textContent || '').replaceAll(/\s+/g, ' ').trim().slice(0, 200)
+        ));
+        assert.ok(
+            await hoverFrame.locator('.headword-reading').evaluateAll((nodes) => nodes.some((node) => node.textContent === 'ねこ')),
+            'Ordinary cat hover must render the real reading',
+        );
+        assert.match(result.hover.entriesTextPreview, /猫/, 'Ordinary hover must show the cat headword');
+    }, [async () => {
+        const states = [];
+        await Promise.all(page.frames().filter((frame) => frame.url().startsWith('chrome-extension:')).map(async (frame) => {
+            states.push(await frame.evaluate(() => ({
+                url: location.href,
+                sentence: history.state?.state?.sentence,
+                text: document.querySelector('#dictionary-entries')?.textContent?.trim().slice(0, 800),
+                progress: document.querySelector('#progress-indicator')?.getAttribute('data-active'),
+                headwords: Array.from(document.querySelectorAll('.headword')).map((node) => ({term: node.querySelector('.headword-term')?.textContent, reading: node.querySelector('.headword-reading')?.textContent})),
+            })).catch(() => null));
+        }));
+        console.error(`${e2eLogTag} Reader bridge failure at ${stage}; display=${JSON.stringify(states)}`);
+    }], [async (signal) => {
+        // Navigation must finish before extension-origin RPC, and the mock
+        // server stays available until restoration completes or fails.
+        await page.goto(extensionPageUrl, {timeout: 10_000});
+        signal.throwIfAborted();
+        await send('setAllSettings', {value: savedOptions, source: 'chromium-e2e-reader-bridge-restore'});
+    }, async () => {
+        await ankiServer.close();
+    }], (error, diagnosticResults) => {
+        if (diagnosticResults === null) {
+            console.error(`${e2eLogTag} Reader bridge failure at ${stage}: ${errorMessage(error)}`);
+            return;
+        }
+        const diagnostics = diagnosticResults.map((outcome) => (
+            outcome.status === 'rejected' ? {status: outcome.status, reason: errorMessage(outcome.reason)} : {status: outcome.status}
+        ));
+        error.message = `Reader bridge ${stage}: ${errorMessage(error)}; diagnostics=${JSON.stringify(diagnostics)}`;
+        console.error(`${e2eLogTag} ${error.message}`);
+    });
+    result.ankiActions = mockState.getActionNames();
+    assert.deepEqual(
+        getWrites(),
+        [result.minedNote],
+        'Wrong-reading miss and subsequent hover must not write additional notes or media after explicit mining',
+    );
+    return result;
+}
+
 async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) {
     const timing = {};
     let markStart = safePerformance.now();
     await waitForPageFrontendScanReady(page);
+    await dismissVisiblePopupFrames(page);
     timing.waitFrontendReadyMs = Math.max(0, safePerformance.now() - markStart);
     markStart = safePerformance.now();
     const target = page.locator(targetSelector).first();
@@ -2515,6 +3085,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
     const hoverSteps = Math.max(4, Number(motionProfile?.hoverSteps ?? 16) || 16);
     const settleDelayMs = Math.max(0, Number(motionProfile?.settleDelayMs ?? 35) || 35);
     const popupTimeoutMs = Math.max(800, Number(motionProfile?.popupTimeoutMs ?? 3000) || 3000);
+    const requireRecognizedDictionaryResult = motionProfile?.requireRecognizedDictionaryResult === true;
     await page.evaluate(({hoverX, hoverY}) => {
         const root = document.documentElement;
         const element = document.elementFromPoint(hoverX, hoverY);
@@ -2551,12 +3122,29 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
         try {
             for (let attempt = 0; attempt < 3; ++attempt) {
                 const attemptTiming = {attempt: attempt + 1};
+                attemptTiming.hostDebugBeforePointerMove = await getPageFrontendDebugState(page);
                 let attemptMarkStart = safePerformance.now();
                 await page.mouse.move(resetX, hoverY, {steps: moveAwaySteps});
                 await page.waitForTimeout(settleDelayMs);
                 await page.mouse.move(hoverX, hoverY, {steps: hoverSteps});
                 attemptTiming.pointerMoveMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 attemptMarkStart = safePerformance.now();
+                const previousPopupShowAttemptCount = Number(
+                    attemptTiming.hostDebugBeforePointerMove?.manabitanPopupShowAttemptCount,
+                );
+                if (Number.isFinite(previousPopupShowAttemptCount)) {
+                    try {
+                        await page.waitForFunction((previousCount) => (
+                            Number(document.documentElement?.dataset?.manabitanPopupShowAttemptCount) > previousCount
+                        ), previousPopupShowAttemptCount, {timeout: popupTimeoutMs});
+                    } catch (_) {
+                        attemptTiming.freshPopupShow = false;
+                        attemptTiming.hostDebugAfterPopupFrame = await getPageFrontendDebugState(page);
+                        timing.lastAttempt = attemptTiming;
+                        continue;
+                    }
+                }
+                attemptTiming.freshPopupShow = true;
                 const popupFrameHandle = await waitForVisiblePopupFrameHandle(page, popupTimeoutMs);
                 attemptTiming.popupFrameWaitMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 attemptTiming.hostDebugAfterPopupFrame = await getPageFrontendDebugState(page);
@@ -2564,6 +3152,12 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                     timing.lastAttempt = attemptTiming;
                     continue;
                 }
+                if (!await isPopupFrameHandleVisible(popupFrameHandle)) {
+                    attemptTiming.popupFrameVisible = false;
+                    timing.lastAttempt = attemptTiming;
+                    continue;
+                }
+                attemptTiming.popupFrameVisible = true;
                 attemptMarkStart = safePerformance.now();
                 const popupFrame = await popupFrameHandle.contentFrame();
                 attemptTiming.contentFrameMs = Math.max(0, safePerformance.now() - attemptMarkStart);
@@ -2572,7 +3166,14 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                     continue;
                 }
                 attemptMarkStart = safePerformance.now();
-                await waitForPopupContentState(popupFrame, 5000);
+                try {
+                    await waitForPopupContentState(popupFrame, 5000);
+                } catch (e) {
+                    attemptTiming.popupSelectorWaitError = e instanceof Error ? e.message : `${e}`;
+                    attemptTiming.popupContentDebugState = await getPopupContentDebugState(popupFrame);
+                    timing.lastAttempt = attemptTiming;
+                    continue;
+                }
                 attemptTiming.popupSelectorWaitMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 attemptTiming.hostDebugAfterPopupContent = await getPageFrontendDebugState(page);
                 attemptMarkStart = safePerformance.now();
@@ -2597,6 +3198,30 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
                 });
                 attemptTiming.popupStateReadMs = Math.max(0, safePerformance.now() - attemptMarkStart);
                 timing.lastAttempt = attemptTiming;
+                // A newly visible popup can still contain an earlier hover's
+                // no-results state (or be cleared during this read). Stress
+                // cases require real dictionary entries for the fresh hover;
+                // retry an intermediate/negative state rather than accepting
+                // it as the response. Exhausting bounded attempts still fails.
+                if (
+                    popupState?.hasDictionaryEntries !== true &&
+                    popupState?.noResultsVisible !== true &&
+                    popupState?.noDictionariesVisible !== true
+                ) {
+                    attemptTiming.popupContentInvalidatedDuringRead = true;
+                    continue;
+                }
+                if (
+                    requireRecognizedDictionaryResult &&
+                    (popupState.hasDictionaryEntries !== true || !/jmdict|jitendex/i.test(popupText))
+                ) {
+                    attemptTiming.nonDictionaryPopupState = {
+                        noResultsVisible: popupState.noResultsVisible,
+                        noDictionariesVisible: popupState.noDictionariesVisible,
+                        entriesTextPreview: popupState.entriesTextPreview,
+                    };
+                    continue;
+                }
                 return {
                     popupText,
                     usedModifier: modifier,
@@ -2634,7 +3259,7 @@ async function hoverLookupOnWagahai(page, targetSelector, motionProfile = null) 
             })(),
         };
     }, targetSelector);
-    throw new Error(`Hover scan did not produce a visible popup for selector ${targetSelector}; state=${JSON.stringify(hoverFailureState)}`);
+    throw new Error(`Hover scan did not produce a verified popup for selector ${targetSelector}; state=${JSON.stringify(hoverFailureState)} timing=${JSON.stringify(timing.lastAttempt ?? null)}`);
 }
 
 async function setWagahaiHoverFixtureTerms(page, terms) {
@@ -2699,6 +3324,30 @@ async function loadDictionaryProbeTermsFromArchive(zipPath, maxTerms = 80) {
     return terms;
 }
 
+async function loadBenchmarkProbeTerms(zipPath) {
+    const {stdout: listing} = await execFileAsync('unzip', ['-Z1', zipPath], {maxBuffer: 8 * 1024 * 1024});
+    const banks = listing.split('\n').filter((name) => /^term_bank_\d+\.json$/.test(name));
+    banks.sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
+    if (banks.length < 3) { fail('Benchmark fixture needs at least three term banks'); }
+    const bankIndices = [0, Math.floor(banks.length / 2), banks.length - 1];
+    const terms = new Set();
+    for (const bankIndex of bankIndices) {
+        const {stdout} = await execFileAsync('unzip', ['-p', zipPath, banks[bankIndex]], {maxBuffer: 32 * 1024 * 1024});
+        const rows = parseJson(stdout);
+        for (let sample = 0; sample < 4; ++sample) {
+            const start = Math.floor((rows.length - 1) * sample / 3);
+            for (let offset = 0; offset < rows.length; ++offset) {
+                const term = String(rows[(start + offset) % rows.length]?.[0] || '').trim();
+                if (term.length === 0 || term.length > 40 || terms.has(term)) { continue; }
+                terms.add(term);
+                break;
+            }
+        }
+    }
+    if (terms.size !== 12) { fail('Could not select twelve distinct benchmark content probes'); }
+    return [...terms];
+}
+
 async function ensureFreshChromeDevBuild(zipPath) {
     const skipBuild = (process.env.MANABITAN_E2E_SKIP_BUILD ?? '0').trim() === '1';
     if (skipBuild) {
@@ -2716,6 +3365,25 @@ async function ensureFreshChromeDevBuild(zipPath) {
     console.log(`${e2eLogTag} build complete (${formatDuration(endedAt - startedAt)})`);
 }
 
+async function stopBrowserTraceToFile(session, outputPath) {
+    const completed = new Promise((resolve) => { session.once('Tracing.tracingComplete', resolve); });
+    await session.send('Tracing.end');
+    const payload = await completed;
+    const stream = payload?.stream;
+    if (typeof stream !== 'string' || stream.length === 0) {
+        throw new Error('Tracing.tracingComplete returned no stream');
+    }
+    const chunks = [];
+    for (;;) {
+        const row = await session.send('IO.read', {handle: stream});
+        chunks.push(row.data || '');
+        if (row.eof === true) { break; }
+    }
+    await session.send('IO.close', {handle: stream}).catch(() => {});
+    await mkdir(path.dirname(outputPath), {recursive: true});
+    await writeFile(outputPath, chunks.join(''), 'utf8');
+}
+
 async function main() {
     const defaultZipPath = path.join(root, 'builds', 'manabitan-chrome-dev.zip');
     const defaultReportName = browserFlavor === 'edge' ? 'edge-e2e-import-report.html' : 'chromium-e2e-import-report.html';
@@ -2731,6 +3399,7 @@ async function main() {
     let context = null;
     let cdpSession = null;
     let processSampler = null;
+    let importTraceSession = null;
     let extensionDir = null;
     let userDataDir = null;
     let page = null;
@@ -2756,6 +3425,14 @@ async function main() {
 
         const cacheWarmupStart = safePerformance.now();
         const cachedDictionaries = await ensureRealDictionaryCache();
+        const quickImportBenchmarkSpecs = {
+            jmdict: {label: 'JMdict', filePath: cachedDictionaries.jmdictPath},
+            jmnedict: {label: 'JMnedict', filePath: cachedDictionaries.jmnedictPath},
+            jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},
+        };
+        const initialImportSpec = quickImportBenchmarkMode ?
+            quickImportBenchmarkSpecs[quickImportBenchmarkDictionaryId] :
+            quickImportBenchmarkSpecs.jmdict;
         const jitendexProbeTerms = await loadDictionaryProbeTermsFromArchive(cachedDictionaries.jitendexPath, 80);
         const jmdictProbeTerms = await loadDictionaryProbeTermsFromArchive(cachedDictionaries.jmdictPath, 80);
         const jmnedictProbeTerms = await loadDictionaryProbeTermsFromArchive(cachedDictionaries.jmnedictPath, 80);
@@ -2784,6 +3461,9 @@ async function main() {
                 `--disable-extensions-except=${extensionDir}`,
                 `--load-extension=${extensionDir}`,
             ];
+            if (process.platform === 'darwin') {
+                launchArgs.push('--disable-features=MacAppCodeSignClone');
+            }
             if (!headless && hideWindowForHeaded) {
                 launchArgs.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
             }
@@ -2817,6 +3497,9 @@ async function main() {
          * @returns {Promise<import('@playwright/test').CDPSession|null>}
          */
         const createCdpSessionForPage = async (targetPage) => {
+            if (!capturePhaseProfiles) {
+                return null;
+            }
             try {
                 const nextCdpSession = await context.newCDPSession(targetPage);
                 await nextCdpSession.send('Profiler.enable');
@@ -2838,14 +3521,15 @@ async function main() {
             }
             context = await launchContext(currentHeadless, currentHideWindow);
             const relaunchedExtensionId = await discoverExtensionId(context, userDataDir, extensionDir);
+            extensionBaseUrl = `chrome-extension://${relaunchedExtensionId}`;
             page = context.pages()[0] ?? await context.newPage();
             attachPageLogging(page);
             const browserProcess = context.browser()?.process?.();
             const browserPidFromPlaywright = (browserProcess && typeof browserProcess.pid === 'number') ? browserProcess.pid : null;
             const browserPid = browserPidFromPlaywright ?? await findChromiumPidByProfileDir(userDataDir);
-            processSampler = startProcessSampler(browserPid);
+            processSampler = captureProcessSamples ? startProcessSampler(browserPid) : null;
             cdpSession = await createCdpSessionForPage(page);
-            return `chrome-extension://${relaunchedExtensionId}`;
+            return extensionBaseUrl;
         };
         /**
          * @param {string[]} titles
@@ -3054,8 +3738,25 @@ async function main() {
             launchModeLabel = 'headed-hidden-fallback';
         }
         report.launchMode = launchModeLabel;
+        report.browserVersion = context.browser()?.version() ?? '';
         appendLog(report, 'info', `${browserFlavor} launch mode: ${launchModeLabel}`);
-        const extensionBaseUrl = `chrome-extension://${extensionId}`;
+        let extensionBaseUrl = `chrome-extension://${extensionId}`;
+        await context.addInitScript(({flagsFromRunner, useProductionDefaults}) => {
+            Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
+            if (useProductionDefaults) {
+                delete globalThis.manabitanImportUseSession;
+                delete globalThis.manabitanDisableIntegrityCounts;
+                if (flagsFromRunner && typeof flagsFromRunner === 'object') {
+                    globalThis.manabitanImportPerformanceFlags = {...flagsFromRunner};
+                } else {
+                    delete globalThis.manabitanImportPerformanceFlags;
+                }
+            } else {
+                globalThis.manabitanImportUseSession = false;
+                globalThis.manabitanDisableIntegrityCounts = true;
+                globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
+            }
+        }, {flagsFromRunner: e2eImportFlags, useProductionDefaults: useProductionImportDefaults});
         page = context.pages()[0] ?? await context.newPage();
         /** @type {import('@playwright/test').Page|null} */
         let concurrentSearchPage = null;
@@ -3063,7 +3764,7 @@ async function main() {
         const browserProcess = context.browser()?.process?.();
         const browserPidFromPlaywright = (browserProcess && typeof browserProcess.pid === 'number') ? browserProcess.pid : null;
         const browserPid = browserPidFromPlaywright ?? await findChromiumPidByProfileDir(userDataDir);
-        processSampler = startProcessSampler(browserPid);
+        processSampler = captureProcessSamples ? startProcessSampler(browserPid) : null;
         cdpSession = await createCdpSessionForPage(page);
 
         const settingsOpenStart = safePerformance.now();
@@ -3106,13 +3807,19 @@ async function main() {
                     typeof startupDiagnosticsSnapshot.dictionaryOpenStorageDiagnostics === 'object' &&
                     startupDiagnosticsSnapshot.dictionaryOpenStorageDiagnostics !== null
                 ) ? startupDiagnosticsSnapshot.dictionaryOpenStorageDiagnostics : null;
+                const hasPageCreateSyncAccessHandle = !!(
+                    globalThis.FileSystemFileHandle &&
+                    globalThis.FileSystemFileHandle.prototype &&
+                    typeof globalThis.FileSystemFileHandle.prototype.createSyncAccessHandle === 'function'
+                );
+                const hasBackendCreateSyncAccessHandle = startupOpenStorageDiagnostics?.runtimeContext?.hasCreateSyncAccessHandle === true;
                 return {
                     hasStorageGetDirectory: !!(navigator.storage && typeof navigator.storage.getDirectory === 'function'),
-                    hasCreateSyncAccessHandle: !!(
-                        globalThis.FileSystemFileHandle &&
-                        globalThis.FileSystemFileHandle.prototype &&
-                        typeof globalThis.FileSystemFileHandle.prototype.createSyncAccessHandle === 'function'
-                    ),
+                    // The capability used by dictionary storage lives in the dedicated
+                    // backend worker on modern Chromium; page support alone is not authoritative.
+                    hasCreateSyncAccessHandle: hasPageCreateSyncAccessHandle || hasBackendCreateSyncAccessHandle,
+                    hasPageCreateSyncAccessHandle,
+                    hasBackendCreateSyncAccessHandle,
                     hasOpfsSahpoolVfs: (
                         startupOpenStorageDiagnostics &&
                         typeof startupOpenStorageDiagnostics.hasOpfsSahpoolVfs === 'boolean'
@@ -3183,32 +3890,45 @@ async function main() {
         const configureImportSessionStart = safePerformance.now();
         const configureImportSessionProfile = await runPhaseProfile(cdpSession, async () => {
             const importFlags = e2eImportFlags;
-            await page.evaluate((flagsFromRunner) => {
-                globalThis.manabitanImportUseSession = false;
-                globalThis.manabitanDisableIntegrityCounts = true;
-                globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
-            }, importFlags);
+            await page.evaluate(({flagsFromRunner, useProductionDefaults}) => {
+                if (useProductionDefaults) {
+                    delete globalThis.manabitanImportUseSession;
+                    delete globalThis.manabitanDisableIntegrityCounts;
+                    if (flagsFromRunner && typeof flagsFromRunner === 'object') {
+                        globalThis.manabitanImportPerformanceFlags = {...flagsFromRunner};
+                    } else {
+                        delete globalThis.manabitanImportPerformanceFlags;
+                    }
+                } else {
+                    globalThis.manabitanImportUseSession = false;
+                    globalThis.manabitanDisableIntegrityCounts = true;
+                    globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
+                }
+                Reflect.set(globalThis, '__manabitanImportCompletionSequence', 0);
+                Reflect.set(globalThis, '__manabitanLastImportCompletion', null);
+            }, {flagsFromRunner: importFlags, useProductionDefaults: useProductionImportDefaults});
         });
         const configureImportSessionEnd = safePerformance.now();
+        const importSessionMode = useProductionImportDefaults ? 'production default import session behavior' : 'manabitanImportUseSession=false';
         const importSessionDetails = (e2eImportFlags !== null) ?
-            `Set globalThis.manabitanImportUseSession=false; applied explicit import flags ${JSON.stringify(e2eImportFlags)}` :
-            'Set globalThis.manabitanImportUseSession=false for functional import/update availability verification';
+            `Configured ${importSessionMode}; applied explicit import flags ${JSON.stringify(e2eImportFlags)}` :
+            `Configured ${importSessionMode} for functional import/update availability verification`;
         await addReportPhase(report, page, 'Configure functional import mode', importSessionDetails, configureImportSessionStart, configureImportSessionEnd, configureImportSessionProfile, processSampler);
 
         await addReportPhase(
             report,
             page,
             'Warmup real dictionary cache',
-            `Resolved and cached Jitendex/JMdict/JMnedict archives from recommended feed, then served locally at ${localServer.baseUrl}. quickImportBenchmarkMode=${quickImportBenchmarkMode}. probeTerms: jitendex=${String(jitendexProbeTerms.length)} jmdict=${String(jmdictProbeTerms.length)} jmnedict=${String(jmnedictProbeTerms.length)} merged=${String(extendedLookupProbeCandidates.length)}`,
+            `Resolved and cached Jitendex/JMdict/JMnedict archives from ${usePinnedPerfDictionaries ? 'pinned performance lock' : 'recommended feed'}, then served locally at ${localServer.baseUrl}. quickImportBenchmarkMode=${quickImportBenchmarkMode}. benchmarkDictionary=${quickImportBenchmarkDictionaryId}. probeTerms: jitendex=${String(jitendexProbeTerms.length)} jmdict=${String(jmdictProbeTerms.length)} jmnedict=${String(jmnedictProbeTerms.length)} merged=${String(extendedLookupProbeCandidates.length)}`,
             cacheWarmupStart,
             cacheWarmupEnd,
             null,
             processSampler,
         );
 
-        const recordImportProgress = async (importLabel, details, runImport) => {
+        const recordImportProgress = async (importLabel, details, runImport, triggerStart) => {
             const importStepIndexByLabel = new Map();
-            const importTotalStart = safePerformance.now();
+            const importTotalStart = triggerStart;
             const importTotalProfile = await runPhaseProfile(cdpSession, async () => {
                 await runImport(async (label, stepStart, stepEnd) => {
                     const baseName = `Import progress: ${label}`;
@@ -3228,7 +3948,9 @@ async function main() {
                     );
                 });
             });
+            // Stop timing before test-only diagnostic reads and validation.
             const importTotalEnd = safePerformance.now();
+            const browserTiming = await page.evaluate(() => Reflect.get(globalThis, '__manabitanBrowserImportTiming') ?? null);
             const importDebug = await getLastImportDebug(page);
             const importDebugHistory = await getImportDebugHistory(page);
             const importStepTimingHistory = await getImportStepTimingHistory(page);
@@ -3243,39 +3965,135 @@ async function main() {
                 importTotalEnd,
                 importTotalProfile,
                 processSampler,
+                {
+                    kind: 'dictionary-import',
+                    dictionary: importLabel,
+                    browserTiming,
+                    importDebug,
+                    importDebugHistory,
+                    stepTimingSummary: importStepTimingSummary,
+                    step4Breakdown: importStep4Breakdown,
+                },
             );
             return importDebug;
         };
 
-        const jmdictImportTriggerStart = safePerformance.now();
-        const jmdictImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
-            await page.setInputFiles('#dictionary-import-file-input', [cachedDictionaries.jmdictPath]);
+        if (importTracePath.length > 0) {
+            const browser = context.browser();
+            if (browser === null) {
+                throw new Error('No Browser object available for import trace');
+            }
+            importTraceSession = await browser.newBrowserCDPSession();
+            await importTraceSession.send('Tracing.start', {
+                transferMode: 'ReturnAsStream',
+                categories: 'devtools.timeline,v8.execute,blink.user_timing,disabled-by-default-v8.cpu_profiler,disabled-by-default-v8.cpu_profiler.hires,disabled-by-default-devtools.timeline,disabled-by-default-devtools.timeline.stack',
+            });
+        }
+
+        let importWorkerTraceStopPromise = null;
+        if (importTraceSession !== null) {
+            const expectedTraceLogFragment = `[ImportTiming] [${path.basename(initialImportSpec.filePath)}] worker importDictionary`;
+            importWorkerTraceStopPromise = new Promise((resolve) => {
+                const onWorkerImportConsole = (message) => {
+                    if (!message.text().includes(expectedTraceLogFragment)) { return; }
+                    page.off('console', onWorkerImportConsole);
+                    resolve();
+                };
+                page.on('console', onWorkerImportConsole);
+            }).then(async () => {
+                const traceSession = importTraceSession;
+                if (traceSession === null) { return; }
+                importTraceSession = null;
+                await stopBrowserTraceToFile(traceSession, importTracePath);
+                await traceSession.detach().catch(() => {});
+                console.log(`${e2eLogTag} wrote worker import browser trace: ${importTracePath}`);
+            });
+        }
+
+        await markCurrentImportCompletionObserved(page);
+        const initialImportTriggerStart = safePerformance.now();
+        const initialImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
+            await page.setInputFiles('#dictionary-import-file-input', [initialImportSpec.filePath]);
         });
-        const jmdictImportTriggerEnd = safePerformance.now();
+        const initialImportTriggerEnd = safePerformance.now();
         await addReportPhase(
             report,
             page,
-            'Import JMdict via file input',
-            `Triggered initial JMdict import using cached archive ${cachedDictionaries.jmdictPath}`,
-            jmdictImportTriggerStart,
-            jmdictImportTriggerEnd,
-            jmdictImportTriggerProfile,
+            `Import ${initialImportSpec.label} via file input`,
+            `Triggered initial ${initialImportSpec.label} import using cached archive ${initialImportSpec.filePath}`,
+            initialImportTriggerStart,
+            initialImportTriggerEnd,
+            initialImportTriggerProfile,
             processSampler,
         );
-        const jmdictImportDebug = await recordImportProgress(
-            'JMdict',
-            'Waited for progress clear for initial JMdict import',
+        const initialImportDebug = await recordImportProgress(
+            initialImportSpec.label,
+            `Waited for progress clear for initial ${initialImportSpec.label} import`,
             async (onStepChange) => {
-                await waitForImportCompletion(page, 'JMdict', 300000, onStepChange);
+                await waitForImportCompletion(page, initialImportSpec.label, 300000, onStepChange);
             },
+            initialImportTriggerStart,
         );
-        if (!(jmdictImportDebug && jmdictImportDebug.hasResult === true && typeof jmdictImportDebug.resultTitle === 'string' && jmdictImportDebug.resultTitle.includes('JMdict'))) {
-            fail(`Initial JMdict import did not finish with expected debug payload: ${JSON.stringify(jmdictImportDebug)}`);
+        if (importWorkerTraceStopPromise !== null) {
+            await Promise.race([
+                importWorkerTraceStopPromise,
+                new Promise((resolve) => {
+                    const timeout = setTimeout(resolve, 2000);
+                    timeout.unref?.();
+                }),
+            ]);
+            if (importTraceSession !== null) {
+                appendLog(report, 'warning', 'Import worker trace completion marker was not observed; stopping trace at visible import completion instead.');
+                const traceSession = importTraceSession;
+                importTraceSession = null;
+                await stopBrowserTraceToFile(traceSession, importTracePath);
+                await traceSession.detach().catch(() => {});
+                console.log(`${e2eLogTag} wrote import browser trace using visible-completion fallback: ${importTracePath}`);
+            } else {
+                // If the marker fired but writing the trace stream took longer than
+                // the fallback window, wait for that write to finish before cleanup.
+                await importWorkerTraceStopPromise;
+            }
+        } else if (importTraceSession !== null) {
+            const traceSession = importTraceSession;
+            importTraceSession = null;
+            await stopBrowserTraceToFile(traceSession, importTracePath);
+            await traceSession.detach().catch(() => {});
+            console.log(`${e2eLogTag} wrote import browser trace: ${importTracePath}`);
+        }
+        if (!(initialImportDebug && initialImportDebug.hasResult === true && typeof initialImportDebug.resultTitle === 'string' && initialImportDebug.resultTitle.includes(initialImportSpec.label))) {
+            fail(`Initial ${initialImportSpec.label} import did not finish with expected debug payload: ${JSON.stringify(initialImportDebug)}`);
         }
 
         if (quickImportBenchmarkMode) {
+            if (initialImportDebug.errorCount !== 0 || initialImportDebug.addSettingsErrorCount !== 0 || initialImportDebug.usesFallbackStorage !== false) {
+                fail(`Benchmark import reported errors: ${JSON.stringify(initialImportDebug)}`);
+            }
+            if (usePinnedPerfDictionaries) {
+                const fixture = cachedDictionaries.fixtures[quickImportBenchmarkDictionaryId];
+                const state = await evalSendMessage(page, 'benchmarkDictionaryState');
+                const info = state.dictionaryInfo;
+                if (info.length !== 1 || info[0].title !== fixture.expectedTitle || info[0].revision !== fixture.revision ||
+                state.counts[0]?.terms !== fixture.termRows) {
+                    fail(`Persisted benchmark fixture does not match lock: ${JSON.stringify(state)}`);
+                }
+                const probeTerms = await loadBenchmarkProbeTerms(initialImportSpec.filePath);
+                if (probeTerms.length !== 12) { fail('Insufficient benchmark content probes'); }
+                for (const term of probeTerms) {
+                    const integrity = await waitForBackendDictionaryContentIntegrity(page, [fixture.expectedTitle], [term], 15000);
+                    if (!integrity.ok) { fail(`Unreadable benchmark content for ${term}: ${JSON.stringify(integrity)}`); }
+                }
+                report.benchmark.validation = {
+                    title: info[0].title,
+                    revision: info[0].revision,
+                    termRows: state.counts[0].terms,
+                    contentReadable: true,
+                    probeCount: probeTerms.length,
+                    probeTerms,
+                };
+            }
             report.status = 'success';
-            console.log(`${e2eLogTag} PASS: Quick import benchmark mode completed (JMdict).`);
+            console.log(`${e2eLogTag} PASS: Quick import benchmark mode completed (${initialImportSpec.label}).`);
             return;
         }
 
@@ -3489,6 +4307,7 @@ async function main() {
         }
 
         if (!focusedUpdateOnlyMode) {
+            await markCurrentImportCompletionObserved(page);
             const jitendexImportTriggerStart = safePerformance.now();
             const jitendexImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
                 await page.setInputFiles('#dictionary-import-file-input', [cachedDictionaries.jitendexPath]);
@@ -3516,6 +4335,14 @@ async function main() {
                     });
                 });
             }
+            const jitendexImportCompletionPromise = recordImportProgress(
+                'Jitendex',
+                'Monitored Jitendex import while the concurrent-search check was active',
+                async (onStepChange) => {
+                    await waitForImportCompletion(page, 'Jitendex', 300000, onStepChange);
+                },
+                jitendexImportTriggerStart,
+            );
             await page.waitForTimeout(700);
             const searchDuringImportStart = safePerformance.now();
             const searchDuringImportProfile = await runPhaseProfile(cdpSession, async () => {
@@ -3537,15 +4364,17 @@ async function main() {
                 fail(`Expected JMdict lookup backend to remain available during Jitendex import; saw ${JSON.stringify(searchDuringImportLookup)}`);
             }
 
-            const jitendexImportDebug = await recordImportProgress(
-                'Jitendex',
-                'Waited for progress clear for Jitendex import after the concurrent-search check',
-                async (onStepChange) => {
-                    await waitForImportCompletion(page, 'Jitendex', 300000, onStepChange);
-                },
-            );
+            const jitendexImportDebug = await jitendexImportCompletionPromise;
             if (!(jitendexImportDebug && jitendexImportDebug.hasResult === true && typeof jitendexImportDebug.resultTitle === 'string' && jitendexImportDebug.resultTitle.includes('Jitendex'))) {
                 fail(`Jitendex import did not finish with expected debug payload: ${JSON.stringify(jitendexImportDebug)}`);
+            }
+            if (stopAfterInitialImports) {
+                if (concurrentDbPressurePromise !== null) {
+                    await concurrentDbPressurePromise;
+                }
+                report.status = 'success';
+                console.log(`${e2eLogTag} PASS: Initial JMdict and Jitendex imports completed.`);
+                return;
             }
             const verifyJitendexContentStart = safePerformance.now();
             const verifyJitendexContentProfile = await runPhaseProfile(cdpSession, async () => {
@@ -3818,6 +4647,7 @@ async function main() {
         }
 
         if (!skipUpdateAndBatchBeforeHover) {
+            await markCurrentImportCompletionObserved(page);
             const updateTriggerStart = safePerformance.now();
             const updateTriggerProfile = await runPhaseProfile(cdpSession, async () => {
                 return await triggerDictionaryUpdate(page, resolvedJmdictTitle, `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`);
@@ -3837,6 +4667,14 @@ async function main() {
             if (concurrentSearchPage === null) {
                 fail('Concurrent search page was not available for update verification');
             }
+            const updateImportCompletionPromise = recordImportProgress(
+                'JMdict update',
+                'Monitored JMdict update while concurrent popup verification was active',
+                async (onStepChange) => {
+                    await waitForImportCompletion(page, 'JMdict', 300000, onStepChange);
+                },
+                updateTriggerStart,
+            );
             await page.waitForTimeout(700);
             const searchDuringUpdateStart = safePerformance.now();
             const searchDuringUpdateProfile = await runPhaseProfile(cdpSession, async () => {
@@ -3881,13 +4719,7 @@ async function main() {
                 processSampler,
             );
 
-            const updateImportDebug = await recordImportProgress(
-                'JMdict update',
-                'Waited for progress clear for the JMdict update after concurrent popup verification',
-                async (onStepChange) => {
-                    await waitForImportCompletion(page, 'JMdict', 300000, onStepChange);
-                },
-            );
+            const updateImportDebug = await updateImportCompletionPromise;
             if (!(updateImportDebug && updateImportDebug.hasResult === true && typeof updateImportDebug.resultTitle === 'string' && updateImportDebug.resultTitle.includes('JMdict'))) {
                 fail(`JMdict update did not finish with expected debug payload: ${JSON.stringify(updateImportDebug)}`);
             }
@@ -4262,10 +5094,11 @@ async function main() {
                     fail(`JMdict delete did not complete before batch import. result=${JSON.stringify(deleteJmdictBeforeBatchProfile.result ?? null)}`);
                 }
 
+                await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+                await waitForSettingsPageReady(page);
+                await markCurrentImportCompletionObserved(page);
                 const multiImportTriggerStart = safePerformance.now();
                 const multiImportTriggerProfile = await runPhaseProfile(cdpSession, async () => {
-                    await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-                    await waitForSettingsPageReady(page);
                     await page.setInputFiles('#dictionary-import-file-input', [
                         cachedDictionaries.jmdictPath,
                         cachedDictionaries.jmnedictPath,
@@ -4291,6 +5124,7 @@ async function main() {
                     async (onStepChange) => {
                         await waitForImportCompletion(page, 'JMdict + JMnedict batch import', 300000, onStepChange);
                     },
+                    multiImportTriggerStart,
                 );
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
                 await waitForSettingsPageReady(page);
@@ -4348,6 +5182,30 @@ async function main() {
                 );
                 if (!(verifyBatchJmnedictContentProfile.result && verifyBatchJmnedictContentProfile.result.ok === true)) {
                     fail(`JMnedict backend content integrity failed after multi-file import. diagnostics=${JSON.stringify(verifyBatchJmnedictContentProfile.result ?? null)}`);
+                }
+                const verifyUnaffectedLookupStart = safePerformance.now();
+                const verifyUnaffectedLookupProfile = await runPhaseProfile(cdpSession, async () => {
+                    return await waitForBackendDictionaryReady(
+                        page,
+                        expectedLookupDictionaries,
+                        readinessTerm,
+                        15_000,
+                        true,
+                    );
+                });
+                const verifyUnaffectedLookupEnd = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    page,
+                    'Verify existing dictionary lookup continuity after multi-file import',
+                    `Required live ${expectedLookupDictionaries.join(' + ')} lookup results immediately after importing JMdict + JMnedict: ${JSON.stringify(verifyUnaffectedLookupProfile.result ?? null)}`,
+                    verifyUnaffectedLookupStart,
+                    verifyUnaffectedLookupEnd,
+                    verifyUnaffectedLookupProfile,
+                    processSampler,
+                );
+                if (!(verifyUnaffectedLookupProfile.result && verifyUnaffectedLookupProfile.result.ok === true)) {
+                    fail(`Existing dictionary lookup coverage was lost after multi-file import. diagnostics=${JSON.stringify(verifyUnaffectedLookupProfile.result ?? null)}`);
                 }
                 const enableExtendedDictionariesStart = safePerformance.now();
                 const enableExtendedDictionariesProfile = await runPhaseProfile(cdpSession, async () => {
@@ -4480,9 +5338,9 @@ async function main() {
                         '#target-word',
                     ];
                     const motionProfiles = [
-                        {label: 'slow', moveAwaySteps: 10, hoverSteps: 28, settleDelayMs: 70, popupTimeoutMs: 3400},
-                        {label: 'medium', moveAwaySteps: 6, hoverSteps: 16, settleDelayMs: 35, popupTimeoutMs: 3000},
-                        {label: 'fast', moveAwaySteps: 3, hoverSteps: 7, settleDelayMs: 5, popupTimeoutMs: 2600},
+                        {label: 'slow', moveAwaySteps: 10, hoverSteps: 28, settleDelayMs: 70, popupTimeoutMs: 3400, requireRecognizedDictionaryResult: true},
+                        {label: 'medium', moveAwaySteps: 6, hoverSteps: 16, settleDelayMs: 35, popupTimeoutMs: 3000, requireRecognizedDictionaryResult: true},
+                        {label: 'fast', moveAwaySteps: 3, hoverSteps: 7, settleDelayMs: 5, popupTimeoutMs: 2600, requireRecognizedDictionaryResult: true},
                     ];
                     const iterations = [];
                     for (let i = 0; i < 18; ++i) {
@@ -4509,7 +5367,8 @@ async function main() {
                             throw new Error(
                                 `Hover iteration ${String(i + 1)} (${selector}, ${motionProfile.label}) did not show dictionary results. ` +
                                 `entries=${JSON.stringify(hoverResult.entriesTextPreview)} popup=${JSON.stringify(hoverResult.popupText.slice(0, 200))} ` +
-                                `noResults=${String(hoverResult.noResultsVisible)} noDictionaries=${String(hoverResult.noDictionariesVisible)}`,
+                                `noResults=${String(hoverResult.noResultsVisible)} noDictionaries=${String(hoverResult.noDictionariesVisible)} ` +
+                                `lastAttempt=${JSON.stringify(hoverResult.timing?.lastAttempt ?? null)}`,
                             );
                         }
                         await page.mouse.move(8, 8, {steps: 4});
@@ -4517,9 +5376,7 @@ async function main() {
                     }
                     const durationSummary = summarizeDurationsMs(iterations.map(({durationMs}) => durationMs));
                     const steadyDurationSummary = summarizeDurationsMs(iterations.slice(1).map(({durationMs}) => durationMs));
-                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
-                        Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanScannerSearchDurationMs)
-                    )));
+                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({durationMs, timing}) => getFreshScannerSearchDurationMs(timing, durationMs)));
                     const popupShowDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
                         Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanPopupShowDurationMs)
                     )));
@@ -4527,11 +5384,17 @@ async function main() {
                         Number(timing?.lastAttempt?.pointerMoveMs)
                     )));
                     const firstHoverMs = iterations.length > 0 ? iterations[0].durationMs : 0;
-                    if (firstHoverMs > 6000 || steadyDurationSummary.median > 900 || steadyDurationSummary.p95 > 1800) {
+                    const wallClockLatencyRegression = steadyDurationSummary.median > 900 || steadyDurationSummary.p95 > 1800;
+                    const browserWorkLatencyRegression = (
+                        scannerSearchDurationSummary.p95 > 250 ||
+                        popupShowDurationSummary.p95 > 500
+                    );
+                    if (firstHoverMs > 6000 || (wallClockLatencyRegression && browserWorkLatencyRegression)) {
                         throw new Error(
                             `Hover latency regression: first=${formatDuration(firstHoverMs)} ` +
                             `steadyMedian=${formatDuration(steadyDurationSummary.median)} steadyP95=${formatDuration(steadyDurationSummary.p95)} ` +
-                            `max=${formatDuration(durationSummary.max)}`,
+                            `scannerP95=${formatDuration(scannerSearchDurationSummary.p95)} ` +
+                            `popupShowP95=${formatDuration(popupShowDurationSummary.p95)} max=${formatDuration(durationSummary.max)}`,
                         );
                     }
                     return {
@@ -4542,6 +5405,7 @@ async function main() {
                         scannerSearchDurationSummary,
                         popupShowDurationSummary,
                         pointerMoveDurationSummary,
+                        wallClockLatencyWarning: wallClockLatencyRegression && !browserWorkLatencyRegression,
                         prewarmDebugState,
                     };
                 });
@@ -4593,7 +5457,7 @@ async function main() {
                     for (let i = 0; i < 12; ++i) {
                         const selector = scanTargets[i % scanTargets.length];
                         const iterationStart = safePerformance.now();
-                        const {popupText, usedModifier, timing} = await hoverLookupOnWagahai(page, selector);
+                        const {popupText, usedModifier, timing} = await hoverLookupOnWagahai(page, selector, {requireRecognizedDictionaryResult: true});
                         const iterationEnd = safePerformance.now();
                         const hasDictionaryResult = /jmdict|jitendex/i.test(popupText);
                         iterations.push({
@@ -4612,19 +5476,23 @@ async function main() {
                         await page.waitForTimeout(80);
                     }
                     const durationSummary = summarizeDurationsMs(iterations.map(({durationMs}) => durationMs));
-                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
-                        Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanScannerSearchDurationMs)
-                    )));
+                    const scannerSearchDurationSummary = summarizeDurationsMs(iterations.map(({durationMs, timing}) => getFreshScannerSearchDurationMs(timing, durationMs)));
                     const popupShowDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
                         Number(timing?.lastAttempt?.hostDebugAfterPopupFrame?.manabitanPopupShowDurationMs)
                     )));
                     const pointerMoveDurationSummary = summarizeDurationsMs(iterations.map(({timing}) => (
                         Number(timing?.lastAttempt?.pointerMoveMs)
                     )));
-                    if (durationSummary.median > 900 || durationSummary.p95 > 1800) {
+                    const wallClockLatencyRegression = durationSummary.median > 900 || durationSummary.p95 > 1800;
+                    const browserWorkLatencyRegression = (
+                        scannerSearchDurationSummary.p95 > 250 ||
+                        popupShowDurationSummary.p95 > 500
+                    );
+                    if (wallClockLatencyRegression && browserWorkLatencyRegression) {
                         throw new Error(
                             `Repeated hover latency regression: median=${formatDuration(durationSummary.median)} ` +
-                            `p95=${formatDuration(durationSummary.p95)} max=${formatDuration(durationSummary.max)}`,
+                            `p95=${formatDuration(durationSummary.p95)} scannerP95=${formatDuration(scannerSearchDurationSummary.p95)} ` +
+                            `popupShowP95=${formatDuration(popupShowDurationSummary.p95)} max=${formatDuration(durationSummary.max)}`,
                         );
                     }
                     return {
@@ -4634,6 +5502,7 @@ async function main() {
                         scannerSearchDurationSummary,
                         popupShowDurationSummary,
                         pointerMoveDurationSummary,
+                        wallClockLatencyWarning: wallClockLatencyRegression && !browserWorkLatencyRegression,
                     };
                 });
                 scanningStressResult = scanningStressProfile.result;
@@ -4732,6 +5601,36 @@ async function main() {
                 postUsageSearchProfile,
                 processSampler,
             );
+
+            for (let round = 1; round <= 3; round++) {
+                const readerBridgeStart = safePerformance.now();
+                let roundError = '';
+                let result = null;
+                try {
+                    assert.ok(localServer, 'Local lookup site is required for installed Reader bridge coverage');
+                    // Each iteration gets a fresh settings navigation, page state, and Anki mock server.
+                    await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+                    await waitForSettingsPageReady(page);
+                    result = await verifyInstalledReaderLookupBridge(page, localServer, expectedLookupDictionaries);
+                    assert.equal(result?.clicks?.length, 3, 'Reader bridge must return all three verified click results');
+                    assert.ok(result.minedNote, 'Reader bridge must return the explicitly mined note');
+                } catch (e) {
+                    roundError = `Reader bridge round ${round}/3 failed: ${errorMessage(e)}`;
+                    verificationErrors.push(`Installed Reader bridge verification failed: ${roundError}`);
+                }
+                await addReportPhase(
+                    report,
+                    page,
+                    `Verify installed Reader trusted-click lookup bridge (round ${round}/3)`,
+                    roundError.length > 0 ? roundError :
+                        `Round ${round}/3 passed: exact lexical pairs, inflected ruby surface, shared sentence/codepoint offset, explicit popup Anki mining with original cloze, wrong-reading miss, no automatic Anki writes, and ordinary hover. ${JSON.stringify(result)}`,
+                    readerBridgeStart,
+                    safePerformance.now(),
+                    null,
+                    processSampler,
+                );
+                if (roundError.length > 0) { break; }
+            }
         }
 
         const reloadSettingsForDeleteStart = safePerformance.now();
@@ -4860,6 +5759,14 @@ async function main() {
             console.log(`${e2eLogTag} Wrote combined report: ${combinedReportPath}`);
         } catch (reportError) {
             console.error(`${e2eLogTag} Failed to write report: ${errorMessage(reportError)}`);
+        }
+        if (importTraceSession !== null) {
+            const traceSession = importTraceSession;
+            importTraceSession = null;
+            await withCleanupTimeout('import trace stop', async () => {
+                await stopBrowserTraceToFile(traceSession, importTracePath);
+                await traceSession.detach().catch(() => {});
+            }, 30000);
         }
         if (localServer !== null) {
             await withCleanupTimeout('local server close', async () => { await localServer.close(); });

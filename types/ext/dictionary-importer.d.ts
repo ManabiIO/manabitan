@@ -38,6 +38,13 @@ export type ImportResult = {
     errors: Error[];
     fallbackDatabaseContentBase64?: string | null;
     debug?: ImportDebug;
+    outcome?: ImportOutcome;
+};
+
+export type ImportOutcome = {
+    status: 'published' | 'aborted' | 'unknown';
+    generationId?: string;
+    warnings?: string[];
 };
 
 export type ImportDebug = {
@@ -50,7 +57,29 @@ export type ImportPhaseTiming = {
     details?: Record<string, unknown>;
 };
 
-export type ImportDetails = {
+/** Experimental parser paths; absent and non-true runtime values remain off. */
+export type ImportExperiments = {
+    experimentalParserWorkers3?: boolean;
+    experimentalLibdeflate?: boolean;
+    experimentalGenericSpanCompression?: boolean;
+    experimentalSkipFusedParse?: boolean;
+    /** Qualified production default: true. Explicit false retains the allocation oracle. */
+    experimentalLookupScratchReuse?: boolean;
+    /** Qualified production default: true. Explicit false retains portable large-group lookup construction. */
+    experimentalNativeSegmentedLookup?: boolean;
+    experimentalDirectLookupArena?: boolean;
+    experimentalSinglePassLookupCompaction?: boolean;
+    experimentalTermBankSpans?: boolean;
+    experimentalNativeEscapedKeys?: boolean;
+    experimentalValidatedGlossaryReuse?: boolean;
+    experimentalFusedSingleBank?: boolean;
+    experimentalGlobalExactContentReuse?: boolean;
+    experimentalFastGlossaryNormalization?: boolean;
+};
+
+export type ImportDetails = ImportExperiments & {
+    /** Internal request identity; persisted only with successful publication. */
+    operationId?: string;
     prefixWildcardsSupported?: boolean;
     yomitanVersion?: string;
     existingDatabaseContentBase64?: string;
@@ -69,8 +98,10 @@ export type ImportDetails = {
     skipMediaImport?: boolean;
     zipMaxWorkers?: number | null;
     zipChunkSize?: number | null;
+    zipUseWebWorkers?: boolean | null;
     artifactFixedPackMinTotalRows?: number | null;
     wasmPreallocateChunkRows?: boolean;
+    termContentBlockTargetBytes?: number | null;
     updateSessionToken?: string | null;
 };
 
@@ -82,8 +113,13 @@ export type DictionaryAutoUpdateInfo = {
     nextUpdateAt: number | null;
 };
 
+export type DictionaryStorageHealth = 'available' | 'repairPending' | 'repairing' | 'temporarilyUnavailable' | 'reimportRequired';
+
 export type Summary = {
     title: string;
+    termRecordStorageName?: string;
+    storageGenerationId?: string;
+    storageImportOperationId?: string;
     sourceTitle?: string | null;
     replacedDictionaryTitle?: string | null;
     transientUpdateStage?: string | null;
@@ -105,8 +141,10 @@ export type Summary = {
     attribution?: string;
     sourceLanguage?: string;
     targetLanguage?: string;
-    frequencyMode?: 'occurrence-based' | 'rank-based';
+    frequencyMode?: DictionaryData.FrequencyMode;
     importSuccess?: boolean;
+    storageHealth?: DictionaryStorageHealth;
+    storageHealthReason?: string | null;
     autoUpdate?: DictionaryAutoUpdateInfo;
     metadataOverrides?: SummaryMetadataOverrides;
 };

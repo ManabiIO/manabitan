@@ -179,7 +179,12 @@ export class AnkiController {
         if (promise === null) {
             promise = this._getAnkiData();
             this._getAnkiDataPromise = promise;
-            void promise.finally(() => { this._getAnkiDataPromise = null; });
+            const clearPromise = () => {
+                if (this._getAnkiDataPromise === promise) {
+                    this._getAnkiDataPromise = null;
+                }
+            };
+            void promise.then(clearPromise, clearPromise);
         }
         return promise;
     }
@@ -194,7 +199,7 @@ export class AnkiController {
 
     /**
      * @param {string} fieldValue
-     * @returns {NonNullable<chrome.permissions.Permissions['permissions']>}
+     * @returns {chrome.runtime.ManifestPermission[]}
      */
     getRequiredPermissions(fieldValue) {
         return getRequiredPermissionsForAnkiFieldValue(fieldValue);
@@ -214,8 +219,9 @@ export class AnkiController {
 
     /** */
     async _updateOptions() {
-        const options = await this._settingsController.getOptions();
         const optionsContext = this._settingsController.getOptionsContext();
+        const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         this._onOptionsChanged({options, optionsContext});
     }
 
@@ -692,7 +698,9 @@ export class AnkiController {
 
     /** */
     async _addNewFormat() {
+        const optionsContext = this._settingsController.getOptionsContext();
         const options = await this._settingsController.getOptions();
+        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
         const ankiOptions = options.anki;
         const index = ankiOptions.cardFormats.length;
 
@@ -1162,6 +1170,7 @@ class AnkiCardController {
      */
     async _setModel(value) {
         const select = this._modelController.select;
+        const optionsContext = this._settingsController.getOptionsContext();
         if (this._modelChangingTo !== null) {
             // Revert
             select.value = this._modelChangingTo;
@@ -1189,13 +1198,32 @@ class AnkiCardController {
             this._modelChangingTo = null;
         }
 
+        if (
+            this._cleaned ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            select.value = this._modelController.value;
+            return;
+        }
+
         const cardFormat = this._getCardFormat(options.anki, this._cardFormatIndex);
-        const oldFields = cardFormat !== null ? cardFormat.fields : null;
+        if (cardFormat === null) {
+            select.value = this._modelController.value;
+            return;
+        }
+        const oldFields = cardFormat.fields;
         if (cardFormat.type === 'term') {
             try {
                 dictionaryInfo = await this._ankiController.settingsController.getDictionaryInfo();
             } catch (e) {
                 // If dictionary info is unavailable, presets can still be applied without a primary dictionary marker.
+            }
+            if (
+                this._cleaned ||
+                this._settingsController.getOptionsContext().index !== optionsContext.index
+            ) {
+                select.value = this._modelController.value;
+                return;
             }
         }
         const fields = buildAnkiFieldsForModel({
@@ -1224,6 +1252,14 @@ class AnkiCardController {
             },
         ];
 
+        if (
+            this._cleaned ||
+            this._settingsController.getOptionsContext().index !== optionsContext.index
+        ) {
+            select.value = this._modelController.value;
+            return;
+        }
+
         this._modelController.value = value;
         this._fields = fields;
 
@@ -1239,7 +1275,7 @@ class AnkiCardController {
     }
 
     /**
-     * @param {NonNullable<chrome.permissions.Permissions['permissions']>} permissions
+     * @param {chrome.runtime.ManifestPermission[]} permissions
      */
     async _requestPermissions(permissions) {
         try {
@@ -1277,12 +1313,12 @@ class AnkiCardController {
      * @param {import('settings-controller').EventArgument<'permissionsChanged'>} details
      */
     _onPermissionsChanged({permissions: {permissions}}) {
-        const permissionsSet = new Set(/** @type {string[]|undefined} */ (permissions));
+        const permissionsSet = new Set(permissions);
         for (let i = 0, ii = this._fieldEntries.length; i < ii; ++i) {
             const {inputField} = this._fieldEntries[i];
             const {requiredPermission} = inputField.dataset;
             if (typeof requiredPermission !== 'string') { continue; }
-            const requiredPermissionArray = (requiredPermission.length === 0 ? [] : requiredPermission.split(' '));
+            const requiredPermissionArray = /** @type {chrome.runtime.ManifestPermission[]} */ (requiredPermission.length === 0 ? [] : requiredPermission.split(' '));
 
             let hasPermissions2 = true;
             for (const permission of requiredPermissionArray) {

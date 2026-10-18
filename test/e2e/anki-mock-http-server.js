@@ -78,9 +78,11 @@ export async function startAnkiMockHttpServer(mockState) {
                     'Content-Length': String(Buffer.byteLength(body)),
                 });
                 response.end(body);
-            } catch (e) {
-                const message = e instanceof Error ? e.message : String(e);
-                const body = JSON.stringify({error: message});
+            } catch {
+                // Exceptions can contain local paths, request data, or stack
+                // details. This server is a local test fixture, but its CORS
+                // response can be read by any page that reaches its port.
+                const body = JSON.stringify({error: 'Mock server request failed'});
                 response.writeHead(200, {
                     ...headers,
                     'Content-Type': 'application/json; charset=utf-8',
@@ -123,6 +125,10 @@ export async function startAnkiMockHttpServer(mockState) {
                     }
                     resolve(void 0);
                 });
+                // A failed browser may leave an unfinished request body open.
+                // Stop active connections after closing admission so shutdown
+                // cannot wait forever for that client.
+                server.closeAllConnections();
             });
         },
     };

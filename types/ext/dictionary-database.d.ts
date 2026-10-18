@@ -28,6 +28,13 @@ export type DictionaryTermProbe = {
     reading: string;
 };
 
+export type DictionaryAvailability = {
+    dictionary: string;
+    generationId: string;
+    status: 'repairPending' | 'repairing' | 'temporarilyUnavailable' | 'reimportRequired';
+    reason: string | null;
+};
+
 export type MediaDataBase<TContentType = unknown> = {
     dictionary: string;
     path: string;
