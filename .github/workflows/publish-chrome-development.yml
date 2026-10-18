@@ -26,6 +26,7 @@ jobs:
       result: ${{ steps.webStorePublish.outcome }}
     permissions:
       actions: write
+      contents: read # release-downloader reads the private release asset metadata.
     steps:
       - name: Get the next attempt number
         id: getNextAttemptNumber
@@ -145,7 +146,7 @@ jobs:
 
       - name: Sign Chrome crx for offline distribution
         if: steps.crxConfig.outputs.enabled == 'true'
-        uses: cardinalby/webext-buildtools-chrome-crx-action@v2
+        uses: cardinalby/webext-buildtools-chrome-crx-action@2d3b64d6a82a252eac2dc82ee90760c5217024fa # branch v2
         with:
           zipFilePath: 'manabitan-chrome-dev.zip'
           crxFilePath: 'yomitan-chrome-dev.crx'
