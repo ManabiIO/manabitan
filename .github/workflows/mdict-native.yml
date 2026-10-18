@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: ./.github/actions/setup
         with:
           node-version: '22'
@@ -52,7 +52,7 @@ jobs:
           node --test --test-reporter=tap test/util/mdict-native-cases.js test/util/mdict-lookup-cases.js test/util/mdict-client-cases.js test/util/mdict-client-edge-cases.js test/util/search-refresh-cases.js test/util/mdict-import-source-cases.js test/util/mdict-import-feedback-cases.js test/util/mdict-import-integration-cases.js test/util/mdict-import-cache-cases.js test/util/mdict-checksum-cases.js test/util/mdict-decompression-limit-cases.js test/util/mdict-lzo-validation-cases.js 2>&1 | tee builds/mdict-native/tests.tap
       - name: Retain reproducible source and test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: mdict-native-${{ github.event.pull_request.number }}-${{ github.sha }}
           path: builds/mdict-native/
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: ./.github/actions/setup
         with:
           node-version: '22'
@@ -82,7 +82,7 @@ jobs:
           xvfb-run -a node dev/bin/run-playwright.js test integration.spec.js mdict-native.spec.js mdict-inline-style.spec.js mdict-help.spec.js mdict-import-feedback.spec.js --project=chromium --workers=1 --retries=0 --reporter=line --grep MDX 2>&1 | tee builds/mdict-browser/tests.log
       - name: Retain MDict browser results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: mdict-browser-${{ github.event.pull_request.number }}-${{ github.sha }}
           path: |
