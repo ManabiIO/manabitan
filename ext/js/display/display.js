@@ -2700,11 +2700,12 @@ export class Display extends EventDispatcher {
      * @returns {boolean}
      */
     _closeSinglePopupMenu() {
-        for (const popupMenu of PopupMenu.openMenus) {
-            popupMenu.close();
-            return true;
-        }
-        return false;
+        const popupMenuIterator = /** @type {Iterator<unknown>} */ (PopupMenu.openMenus.values());
+        const firstPopupMenu = /** @type {unknown} */ (popupMenuIterator.next().value);
+        const popupMenu = firstPopupMenu instanceof PopupMenu ? firstPopupMenu : void 0;
+        if (popupMenu === void 0) { return false; }
+        popupMenu.close();
+        return true;
     }
 
     /**
