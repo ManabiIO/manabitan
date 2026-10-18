@@ -25,7 +25,7 @@ function entries(character) {
  * @returns {{display: Display, kanjiFind: import('vitest').Mock<(query: string) => Promise<import('dictionary').KanjiDictionaryEntry[]>>, termsFind: import('vitest').Mock, report: import('vitest').MockInstance<Display['onError']>, publish: import('vitest').MockInstance<Display['setContent']>, click: (query: string) => Promise<void>, settle: () => Promise<void>}}
  */
 function setup() {
-    const kanjiFind = vi.fn(async (/** @type {string} */ query) => entries(query));
+    const kanjiFind = /** @type {import('vitest').Mock<(query: string) => Promise<import('dictionary').KanjiDictionaryEntry[]>>} */ (/** @type {unknown} */ (vi.fn(async (/** @type {string} */ query) => entries(query))));
     const termsFind = vi.fn().mockResolvedValue({dictionaryEntries: []});
     const application = /** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ ({
         api: {kanjiFind, termsFind}, tabId: 1, frameId: 2, triggerClosePopups: vi.fn(), webExtension: {unloaded: false},

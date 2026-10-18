@@ -50,10 +50,5 @@ export default defineConfig({
             'test/search/glossary-search.test.mjs',
             '.tmp-*.test.js',
         ],
-        poolOptions: {
-            threads: {
-                useAtomics: true,
-            },
-        },
     },
 });
