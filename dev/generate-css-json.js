@@ -153,7 +153,7 @@ export function generateRules(cssFilePath, overridesCssFilePath) {
         if (typeof declarations !== 'undefined') {
             for (const declaration of declarations) {
                 if (declaration.type !== 'decl') { continue; }
-                styles.push([declaration.prop, declaration.value]);
+                styles.push([declaration.prop, formatDeclarationValue(declaration)]);
             }
         }
         if (styles.length > 0) {
@@ -180,7 +180,8 @@ export function generateRules(cssFilePath, overridesCssFilePath) {
                             entry = {selectors, styles: []};
                             rules.push(entry);
                         }
-                        const {prop: property, value} = declaration;
+                        const {prop: property} = declaration;
+                        const value = formatDeclarationValue(declaration);
                         removeProperty(entry.styles, property, removedProperties);
                         entry.styles.push([property, value]);
                     }
@@ -214,4 +215,12 @@ export function generateRules(cssFilePath, overridesCssFilePath) {
     }
 
     return rules;
+}
+
+/**
+ * @param {import('postcss').Declaration} declaration
+ * @returns {string}
+ */
+function formatDeclarationValue(declaration) {
+    return declaration.important ? `${declaration.value} !important` : declaration.value;
 }

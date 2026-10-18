@@ -454,7 +454,7 @@ export class AnkiNoteBuilder {
             return str;
         }
         parts.push(str.substring(index));
-        return (await Promise.all(parts.map((part) => Promise.resolve(part)))).join('');
+        return (await Promise.all(parts)).join('');
     }
 
     /**

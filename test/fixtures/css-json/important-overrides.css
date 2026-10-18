@@ -1,0 +1,8 @@
+.parent, .child:is(.x, .y) {
+    color: orange !important;
+    /* remove-property background-color */
+}
+
+.removed {
+    /* remove-rule */
+}

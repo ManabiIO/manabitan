@@ -17,13 +17,28 @@
  */
 
 import fs from 'fs';
+import path from 'path';
+import {fileURLToPath} from 'url';
 import {describe, expect, test} from 'vitest';
 import {formatRulesJson, generateRules, getTargets} from '../dev/generate-css-json.js';
+
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe('css-json', () => {
     test.each(getTargets())('css-json-test-%#', ({cssFilePath, overridesCssFilePath, outputPath}) => {
         const actual = fs.readFileSync(outputPath, {encoding: 'utf8'});
         const expected = formatRulesJson(generateRules(cssFilePath, overridesCssFilePath));
         expect(actual).toStrictEqual(expected);
+    });
+
+    test('preserves declaration priority while applying selector and removal overrides', () => {
+        const cssFilePath = path.join(dirname, 'fixtures/css-json/important.css');
+        const overridesCssFilePath = path.join(dirname, 'fixtures/css-json/important-overrides.css');
+        expect(generateRules(cssFilePath, overridesCssFilePath)).toStrictEqual([
+            {
+                selectors: ['.parent', '.child:is(.x, .y)'],
+                styles: [['color', 'orange !important'], ['border-color', 'green !important']],
+            },
+        ]);
     });
 });

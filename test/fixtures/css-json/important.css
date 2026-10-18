@@ -1,0 +1,9 @@
+.parent, .child:is(.x, .y) {
+    color: red !important;
+    background-color: blue;
+    border-color: green !important;
+}
+
+.removed {
+    color: red;
+}
