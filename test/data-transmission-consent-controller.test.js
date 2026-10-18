@@ -120,6 +120,7 @@ describe('DataTransmissionConsentController', () => {
             modifySettings: vi.fn()
                 .mockReturnValueOnce(pending.promise)
                 .mockResolvedValueOnce([{result: null}, {result: null}]),
+            refresh: vi.fn(),
             getOptionsContext: vi.fn(() => ({})),
         };
         const modal = {setVisible: vi.fn()};
@@ -169,5 +170,35 @@ describe('DataTransmissionConsentController', () => {
         await controller.prepare();
         await expect(controller._onAccept()).rejects.toThrow('incomplete response');
         expect(modal.setVisible).not.toHaveBeenCalled();
+    });
+
+    test('a UI refresh failure after saved consent does not report the save as failed', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <button id="accept-data-transmission"></button>
+            <button id="decline-data-transmission"></button>
+            <p id="data-transmission-consent-save-error" hidden></p>
+        `;
+        const {DataTransmissionConsentController} = await import('../ext/js/pages/settings/data-transmission-consent-controller.js');
+        const modal = {setVisible: vi.fn()};
+        const settingsController = {
+            modifySettings: vi.fn()
+                .mockResolvedValueOnce([{result: null}, {result: null}])
+                .mockResolvedValueOnce([{result: null}]),
+            refresh: vi.fn().mockRejectedValue(new Error('options refresh failed')),
+            getOptionsContext: vi.fn(() => ({})),
+        };
+        const controller = new DataTransmissionConsentController(
+            /** @type {any} */ (settingsController),
+            /** @type {any} */ ({getModal: () => modal}),
+        );
+        await controller.prepare();
+
+        await expect(controller._onAccept()).resolves.toBeUndefined();
+        expect(settingsController.refresh).toHaveBeenCalledOnce();
+        expect(modal.setVisible).toHaveBeenCalledWith(false);
+        expect(/** @type {HTMLElement} */ (window.document.querySelector('#data-transmission-consent-save-error')).hidden).toBe(true);
+        expect(logError).toHaveBeenCalledWith(expect.objectContaining({message: 'options refresh failed'}));
     });
 });
