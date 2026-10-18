@@ -121,6 +121,7 @@
         "eslint-plugin-unicorn": "^56.0.1",
         "eslint-plugin-unused-imports": "^4.1.4",
         "fake-indexeddb": "^6.0.0",
+        "fast-check": "^4.10.2",
         "globals": "^15.14.0",
         "handlebars": "^4.7.10",
         "html-validate": "^10.5.0",
