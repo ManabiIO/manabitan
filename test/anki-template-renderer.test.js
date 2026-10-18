@@ -22,8 +22,87 @@ import {createAnkiTemplateRendererTest} from './fixtures/anki-template-renderer-
 const test = await createAnkiTemplateRendererTest();
 
 describe('AnkiTemplateRenderer', () => {
+    /**
+     * @param {'html'|'text'} mode
+     * @param {{expect: typeof import('vitest').expect, window: import('jsdom').DOMWindow}} context
+     * @returns {Promise<void>}
+     */
+    const verifyNormalizationFailureRecovery = async (mode, {expect, window}) => {
+        const renderer = new AnkiTemplateRenderer(window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+        await renderer.prepare();
+        const normalizeHtml = renderer._normalizeHtml.bind(renderer);
+        let shouldFail = true;
+        renderer._normalizeHtml = (...args) => {
+            if (shouldFail) {
+                shouldFail = false;
+                throw new Error('injected normalization failure');
+            }
+            normalizeHtml(...args);
+        };
+        /**
+         * @param {Element} node
+         * @returns {string}
+         */
+        const getResult = (node) => (mode === 'html' ? renderer._getHtml(node, renderer._structuredContentStyleApplier, renderer._structuredContentDatasetKeyIgnorePattern) : renderer._getText(node, renderer._structuredContentStyleApplier, renderer._structuredContentDatasetKeyIgnorePattern));
+        const failedNode = window.document.createElement('div');
+        failedNode.appendChild(window.document.createTextNode('stale content'));
+        expect(() => getResult(failedNode)).toThrow('injected normalization failure');
+
+        const healthyNode = window.document.createElement('div');
+        const healthyBold = window.document.createElement('b');
+        healthyBold.appendChild(window.document.createTextNode('healthy content'));
+        healthyNode.appendChild(healthyBold);
+        const result = String(getResult(healthyNode));
+        expect(result).toBe(mode === 'html' ? '<div><b>healthy content</b></div>' : 'healthy content');
+    };
+
+    test('plain structured text preserves NBSP, ruby readings, and controlled line breaks', async ({expect, window}) => {
+        const renderer = new AnkiTemplateRenderer(window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+        await renderer.prepare();
+
+        const node = window.document.createElement('div');
+        node.appendChild(window.document.createTextNode('\u00a0'));
+        const ruby = window.document.createElement('ruby');
+        ruby.appendChild(window.document.createTextNode('漢'));
+        const reading = window.document.createElement('rt');
+        reading.appendChild(window.document.createTextNode('かん'));
+        ruby.appendChild(reading);
+        node.appendChild(ruby);
+        node.appendChild(window.document.createElement('br'));
+        node.appendChild(window.document.createTextNode('x<&>'));
+
+        const result = String(renderer._getText(node, renderer._structuredContentStyleApplier, renderer._structuredContentDatasetKeyIgnorePattern));
+        expect(result).toBe('&nbsp; 漢[かん]<br>\nx&lt;&amp;&gt;');
+    });
+
+    test('plain structured text serializes deeply nested DOM iteratively', async ({expect, window}) => {
+        const renderer = new AnkiTemplateRenderer(window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+        await renderer.prepare();
+
+        const node = window.document.createElement('div');
+        /** @type {Element} */
+        let parent = node;
+        for (let i = 0; i < 1200; ++i) {
+            const child = window.document.createElement('i');
+            parent.appendChild(child);
+            parent = child;
+        }
+        parent.appendChild(window.document.createTextNode('deep text'));
+
+        const result = String(renderer._getText(node, renderer._structuredContentStyleApplier, renderer._structuredContentDatasetKeyIgnorePattern));
+        expect(result).toBe('deep text');
+    });
+
+    test('clears the shared container when HTML normalization fails', async ({expect, window}) => {
+        await verifyNormalizationFailureRecovery('html', {expect, window});
+    });
+
+    test('clears the shared container when text normalization fails', async ({expect, window}) => {
+        await verifyNormalizationFailureRecovery('text', {expect, window});
+    });
+
     test('plain structured text escapes markup and emits only controlled line breaks', async ({expect, window}) => {
-        const renderer = new AnkiTemplateRenderer(window.document, window);
+        const renderer = new AnkiTemplateRenderer(window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
         await renderer.prepare();
 
         const node = window.document.createElement('div');

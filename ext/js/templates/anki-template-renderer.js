@@ -622,9 +622,13 @@ export class AnkiTemplateRenderer {
     _getHtml(node, styleApplier, datasetKeyIgnorePattern) {
         const container = this._getTemporaryElement();
         container.appendChild(node);
-        this._normalizeHtml(container, styleApplier, datasetKeyIgnorePattern);
-        const result = container.innerHTML;
-        container.textContent = '';
+        let result = '';
+        try {
+            this._normalizeHtml(container, styleApplier, datasetKeyIgnorePattern);
+            result = container.innerHTML;
+        } finally {
+            container.textContent = '';
+        }
         return this._safeString(result);
     }
 
@@ -637,58 +641,70 @@ export class AnkiTemplateRenderer {
     _getText(node, styleApplier, datasetKeyIgnorePattern) {
         const container = this._getTemporaryElement();
         container.appendChild(node);
-        this._normalizeHtml(container, styleApplier, datasetKeyIgnorePattern);
-        /**
-         * @param {string} text
-         * @returns {string}
-         */
-        const escapeText = (text) => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-        /**
-         * @param {Node} currentNode
-         * @returns {string}
-         */
-        const serializeText = (currentNode) => {
-            if (currentNode.nodeType === this._document.TEXT_NODE) {
-                const textNode = /** @type {Text} */ (currentNode);
-                return escapeText(textNode.nodeValue ?? '');
-            }
-            if (currentNode.nodeType !== this._document.ELEMENT_NODE) { return ''; }
+        let result = '';
+        try {
+            this._normalizeHtml(container, styleApplier, datasetKeyIgnorePattern);
+            /**
+             * @param {string} text
+             * @returns {string}
+             */
+            const escapeText = (text) => text
+                .replaceAll('&', '&amp;')
+                .replaceAll('\u00a0', '&nbsp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;');
+            /** @type {(Node|string)[]} */
+            const stack = [container];
+            /** @type {string[]} */
+            const output = [];
+            while (stack.length > 0) {
+                const currentNode = stack.pop();
+                if (currentNode === void 0) { continue; }
+                if (typeof currentNode === 'string') {
+                    output.push(currentNode);
+                    continue;
+                }
+                if (currentNode.nodeType === this._document.TEXT_NODE) {
+                    const textNode = /** @type {Text} */ (currentNode);
+                    output.push(escapeText(textNode.nodeValue ?? ''));
+                    continue;
+                }
+                if (currentNode.nodeType !== this._document.ELEMENT_NODE) { continue; }
 
-            const element = /** @type {Element} */ (currentNode);
-            const tagName = element.tagName.toLowerCase();
-            let prefix = '';
-            switch (tagName) {
-                case 'div':
-                case 'li':
-                case 'ol':
-                case 'ul':
-                case 'br':
-                case 'details':
-                case 'summary':
-                case 'hr':
-                    prefix = '\n';
-                    break;
-                case 'span':
-                case 'a':
-                case 'ruby':
-                    prefix = ' ';
-                    break;
-                case 'rt':
-                    prefix = '[';
-                    break;
+                const element = /** @type {Element} */ (currentNode);
+                const tagName = element.tagName.toLowerCase();
+                switch (tagName) {
+                    case 'div':
+                    case 'li':
+                    case 'ol':
+                    case 'ul':
+                    case 'br':
+                    case 'details':
+                    case 'summary':
+                    case 'hr':
+                        output.push('\n');
+                        break;
+                    case 'span':
+                    case 'a':
+                    case 'ruby':
+                        output.push(' ');
+                        break;
+                    case 'rt':
+                        output.push('[');
+                        stack.push(']');
+                        break;
+                }
+                for (let i = element.childNodes.length - 1; i >= 0; --i) {
+                    stack.push(element.childNodes[i]);
+                }
             }
-            let result = prefix;
-            for (const child of element.childNodes) {
-                result += serializeText(child);
-            }
-            if (tagName === 'rt') { result += ']'; }
-            return result;
-        };
-        const result = serializeText(container)
-            .replaceAll(/\n+/g, '<br>') // convert newlines into linebreaks and condense newlines
-            .replaceAll(/^(\s*<br>\s*|\s)*/g, '') // remove leading linebreaks and whitespace
-            .replaceAll('<br>', '<br>\n');
-        container.textContent = '';
+            result = output.join('')
+                .replaceAll(/\n+/g, '<br>') // convert newlines into linebreaks and condense newlines
+                .replaceAll(/^(\s*<br>\s*|\s)*/g, '') // remove leading linebreaks and whitespace
+                .replaceAll('<br>', '<br>\n');
+        } finally {
+            container.textContent = '';
+        }
         return this._safeString(result);
     }
 
