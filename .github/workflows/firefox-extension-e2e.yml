@@ -126,5 +126,8 @@ jobs:
           path: |
             builds/firefox-e2e-import-report.html
             builds/firefox-e2e-import-report.json
+            builds/firefox-e2e-import-report-geckodriver.log
+            builds/firefox-e2e-import-report-live.json
+            builds/firefox-e2e-import-report-crash/
             builds/extension-e2e-report.html
           if-no-files-found: ignore

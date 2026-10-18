@@ -40,7 +40,7 @@
         <div class="settings-item"><div class="settings-item-inner">
             <div class="settings-item-left">
                 <div class="settings-item-label">Enable optional permissions</div>
-                <div class="settings-item-description">This will allow Manabitan to read the clipboard and communicate with external programs.</div>
+                <div class="settings-item-description">This will allow Manabitan to read the clipboard and communicate with external programs. Enable these only for integrations you intend to use.</div>
             </div>
             <div class="settings-item-right">
                 <label class="toggle"><input type="checkbox" id="optional-permissions-toggle" data-origin="&lt;all_urls&gt;"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
@@ -52,7 +52,7 @@
                 <div class="settings-item-description" data-show-for-browser="firefox firefox-mobile">Further configuration is available on the <a href="/permissions.html" rel="noopener">Permissions page</a> and the web browser's extension settings page.</div>
                 <div class="danger-text margin-above" id="permissions-disabled" hidden><strong>Manabitan features will be limited if the recommended permissions are not enabled.</strong></div>
                 <div class="success-text margin-above" id="recommended-permissions-enabled" hidden><strong>Recommended permissions are enabled. Some features still depend on browser runtime support.</strong></div>
-                <div class="success-text margin-above" id="full-permissions-enabled" hidden><strong>All Manabitan features are available.</strong></div>
+                <div class="success-text margin-above" id="full-permissions-enabled" hidden><strong>Requested permissions are enabled. Feature availability still depends on your browser, dictionaries, and configured integrations.</strong></div>
                 <div id="recommended-permissions-error" class="margin-above danger-text" hidden></div>
             </div>
         </div></div>
@@ -63,8 +63,7 @@
       <div class="settings-item">
         <div class="settings-item-inner settings-item-inner-wrappable"><div class="settings-item-left"><div class="settings-item-label">
               <p>
-                There are custom Anki templates in your settings. Note that <a href="https://yomitan.wiki/yomichan-migration/#custom-templates" target="_blank" rel="noopener noreferrer">some syntax has changed from previous versions of Manabitan.</a>
-                Please ensure that your custom templates are using the updated syntax.
+                There are custom Anki templates in your settings. Check the <a href="https://manabi.io/manabitan/yomichan-migration/#custom-anki-templates" target="_blank" rel="noopener noreferrer">inherited Yomichan template migration changes</a> and preview a test note before relying on an older template.
               </p>
           </div></div></div>
       </div>
@@ -117,7 +116,7 @@
                 <div class="settings-item-label">Enable audio playback for terms</div>
                 <div class="settings-item-description">Show a clickable speaker icon next to search results.</div>
                 <div class="settings-item-description">
-                    This option may send term, reading, and/or language outside of Manabitan to fetch audio when the speaker icon is clicked. Personally identifying information is never sent<span data-show-for-browser="firefox firefox-mobile"> (<a href="https://addons.mozilla.org/en-US/firefox/addon/yomitan/privacy/">Privacy Policy</a>)</span>.
+                    Audio requests may send the term, reading, and language to configured sources, along with normal network metadata such as an IP address. Autoplay settings can also trigger requests. Read the <a href="https://manabi.io/manabitan/privacy/" rel="noopener noreferrer">Manabitan privacy and permissions guide</a> before enabling external integrations.
                     <div data-show-for-browser="firefox firefox-mobile">Disabling this option will disallow pronunciation audio playback for any terms searched.</div>
                 </div>
             </div>
@@ -129,9 +128,9 @@
 
     <h2>Here are some basics to get started</h2>
     <div class="settings-group">
-        <a href="https://yomitan.wiki/" rel="noopener noreferrer" class="settings-item settings-item-button"><div class="settings-item-inner">
+        <a href="https://manabi.io/manabitan/getting-started/" rel="noopener noreferrer" class="settings-item settings-item-button"><div class="settings-item-inner">
             <div class="settings-item-left">
-                <div class="settings-item-label outer-link"><strong>New to Manabitan? Head to the Yomitan Wiki!</strong></div>
+                <div class="settings-item-label outer-link"><strong>Read the Manabitan setup guide</strong></div>
             </div>
             <div class="settings-item-right open-panel-button-container">
                 <button type="button" class="icon-button"><span class="icon-button-inner"><span class="icon" data-icon="material-right-arrow"></span></span></button>
@@ -143,6 +142,11 @@
             </div>
             <div class="settings-item-right open-panel-button-container">
                 <button type="button" class="icon-button"><span class="icon-button-inner"><span class="icon" data-icon="material-right-arrow"></span></span></button>
+            </div>
+        </div></a>
+        <a href="https://manabi.io/manabitan/yomitan-migration/" rel="noopener noreferrer" class="settings-item settings-item-button"><div class="settings-item-inner">
+            <div class="settings-item-left">
+                <div class="settings-item-label outer-link">Moving from Yomitan? Keep your backups and follow the migration guide.</div>
             </div>
         </div></a>
     </div>

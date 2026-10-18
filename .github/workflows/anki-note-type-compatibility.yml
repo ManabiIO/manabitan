@@ -12,6 +12,8 @@ on:
       - 'test/data/anki-note-types/**'
       - '.github/workflows/anki-note-type-compatibility.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '23 9 * * 1'
 
 permissions:
   contents: read

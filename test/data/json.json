@@ -15,6 +15,7 @@
         {"path": "ext/manifest.json", "ignore": true},
         {"path": "test/data/anki-note-types/contracts.json", "ignore": true},
         {"path": "test/data/anki-note-types/upstream-snapshot.json", "ignore": true},
+        {"path": "test/data/manabitan-lookup-regressions/suffix-match-classification.json", "ignore": true},
         {"path": "test/data/dictionaries/invalid-dictionary1/index.json", "ignore": true},
         {"path": "test/data/dictionaries/invalid-dictionary2/kanji_bank_1.json", "ignore": true},
         {"path": "test/data/dictionaries/invalid-dictionary2/index.json", "ignore": true},
