@@ -71,6 +71,8 @@ function escapeHtml(value) {
  *   startedAtIso: string,
  *   finishedAtIso: string,
  *   status: 'running'|'success'|'failure',
+ *   verificationScope: 'temporary-installation-smoke',
+ *   unverifiedCapabilities: string[],
  *   failureReason: string,
  *   adbDevice: string,
  *   firefoxPackage: string,
@@ -84,6 +86,8 @@ function createReport() {
         startedAtIso: new Date().toISOString(),
         finishedAtIso: '',
         status: 'running',
+        verificationScope: 'temporary-installation-smoke',
+        unverifiedCapabilities: ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update'],
         failureReason: '',
         adbDevice: '',
         firefoxPackage: '',
@@ -144,6 +148,8 @@ function renderReportHtml(report) {
     <div><strong>Started:</strong> ${escapeHtml(report.startedAtIso)}</div>
     <div><strong>Finished:</strong> ${escapeHtml(report.finishedAtIso)}</div>
     <div><strong>Status:</strong> ${escapeHtml(report.status)}</div>
+    <div><strong>Verification scope:</strong> ${escapeHtml(report.verificationScope)}</div>
+    <div><strong>Unverified capabilities:</strong> ${escapeHtml(report.unverifiedCapabilities.join(', '))}</div>
     <div><strong>Failure:</strong> ${escapeHtml(report.failureReason || 'none')}</div>
     <div><strong>ADB Device:</strong> ${escapeHtml(report.adbDevice || 'unknown')}</div>
     <div><strong>Firefox package:</strong> ${escapeHtml(report.firefoxPackage || 'unknown')}</div>
