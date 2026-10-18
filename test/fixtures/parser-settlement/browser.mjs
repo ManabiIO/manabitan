@@ -24,9 +24,11 @@ const server = createServer(async (request, response) => {
 })
 await new Promise((done) => { server.listen(0, '127.0.0.1', done) })
 let browser
+let context
 try {
-    browser = await chromium.launch({headless: true, args: ['--no-sandbox']})
-    const page = await browser.newPage()
+    browser = await chromium.launch({headless: true, args: ['--no-sandbox', ...(process.platform === 'darwin' ? ['--disable-features=MacAppCodeSignClone'] : [])]})
+    context = await browser.newContext()
+    const page = await context.newPage()
     const pageErrors = []
     page.on('pageerror', (error) => pageErrors.push(String(error)))
     await page.goto(`http://127.0.0.1:${server.address().port}`)
@@ -133,6 +135,13 @@ try {
     assert.ok(report.empty.every((x) => x.passed))
     assert.deepEqual(pageErrors, [])
 } finally {
-    await browser?.close()
-    await new Promise((done) => { server.close(done) })
+    try {
+        try {
+            await context?.close()
+        } finally {
+            await browser?.close()
+        }
+    } finally {
+        await new Promise((done) => { server.close(done) })
+    }
 }

@@ -37,9 +37,12 @@ await /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
 }))
 const address = server.address()
 assert(address && typeof address === 'object')
-const browser = await chromium.launch({headless: true, args: ['--no-sandbox']})
+let browser
+let context
 try {
-    const page = await browser.newPage()
+    browser = await chromium.launch({headless: true, args: ['--no-sandbox', ...(process.platform === 'darwin' ? ['--disable-features=MacAppCodeSignClone'] : [])]})
+    context = await browser.newContext()
+    const page = await context.newPage()
     await page.goto(`http://127.0.0.1:${address.port}`)
     const result = await page.evaluate(async () => {
         /**
@@ -111,14 +114,21 @@ try {
     assert.equal(result.status, expectFailure ? 'shared-decoder-failure' : 'success', JSON.stringify(result))
     console.log(JSON.stringify({browser: browser.version(), expectedFailure: expectFailure, ...result}))
 } finally {
-    await browser.close()
-    await /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
-        server.close((error) => {
-            if (error) {
-                reject(error)
-                return
-            }
-            resolve()
-        })
-    }))
+    try {
+        try {
+            await context?.close()
+        } finally {
+            await browser?.close()
+        }
+    } finally {
+        await /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
+            server.close((error) => {
+                if (error) {
+                    reject(error)
+                    return
+                }
+                resolve()
+            })
+        }))
+    }
 }

@@ -60,7 +60,7 @@ async function check(name, fn) { const start = Date.now(); try { const data = aw
  *
  */
 async function launch() {
-    context = await chromium.launchPersistentContext(profile, {channel: 'chromium', headless: true}); context.setDefaultTimeout(20000); page = context.pages()[0] || await context.newPage();
+    context = await chromium.launchPersistentContext(profile, {channel: 'chromium', headless: true, args: process.platform === 'darwin' ? ['--disable-features=MacAppCodeSignClone'] : []}); context.setDefaultTimeout(20000); page = context.pages()[0] || await context.newPage();
     context.on('page', watch); watch(page); await page.goto(origin); await page.waitForFunction(() => window.hostReady);
 }
 /**
