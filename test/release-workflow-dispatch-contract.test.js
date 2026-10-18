@@ -4,6 +4,10 @@ import {describe, expect, test} from 'vitest';
 
 const repositoryRoot = process.cwd();
 
+/**
+ * @param {string} workflowPath
+ * @returns {string[]}
+ */
 function dispatchSteps(workflowPath) {
     const lines = readFileSync(join(repositoryRoot, workflowPath), 'utf8').split('\n');
     const result = [];
