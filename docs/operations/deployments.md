@@ -10,6 +10,8 @@ Active development belongs on `develop`. Integrate a tested candidate into `main
 
 Run the repository validation and the blocking Chromium, Edge, Firefox and Firefox Android CI lanes against the exact candidate commit. Inspect the uploaded browser reports for failures, unsupported-runtime skips and storage fallback. The Android lane currently establishes temporary add-on installation and post-install debugging smoke; it does not establish full mobile dictionary import and lookup.
 
+Require CodeQL to pass for the exact active `develop` candidate and review its findings against `main` during promotion qualification. Manual 16-browser CI provides browser coverage; it is not a security gate and does not replace CodeQL.
+
 Build fresh packages with Node 22 and the supported WASM compiler. From the repository root:
 
 ```sh
