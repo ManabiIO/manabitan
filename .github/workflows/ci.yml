@@ -83,9 +83,6 @@ jobs:
       - name: Build Firefox dev package
         run: npm run build -- --target firefox-dev
 
-      - name: Install Selenium driver dependency
-        run: npm install --no-save selenium-webdriver@4.38.0
-
       - name: Install Firefox Developer Edition
         run: |
           curl -fsSL "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US" -o /tmp/firefox-devedition.tar.bz2

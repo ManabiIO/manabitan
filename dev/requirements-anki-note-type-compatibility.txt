@@ -1,0 +1,4 @@
+# PyPI-published artifacts for zstandard 0.25.0 (Python 3.13, Linux x86_64 wheel; sdist fallback).
+zstandard==0.25.0 \
+    --hash=sha256:8e735494da3db08694d26480f1493ad2cf86e99bdd53e8e9771b2752a5c0246a \
+    --hash=sha256:7713e1179d162cf5c7906da876ec2ccb9c3a9dcbdffef0cc7f70c3667a205f0b
