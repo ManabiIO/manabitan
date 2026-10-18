@@ -42,7 +42,7 @@ jobs:
           fi
           echo "sha=${source_sha}" >> "${GITHUB_OUTPUT}"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ steps.source.outputs.sha }}
           persist-credentials: false
@@ -99,14 +99,14 @@ jobs:
           tar -C "${bundle_root}" -czf "${RUNNER_TEMP}/manabitan-perf-workspace.tar.gz" workspace
           tar -C "${bundle_root}" -czf "${RUNNER_TEMP}/manabitan-perf-runtime.tar.gz" runtime
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: manabitan-perf-workspace-linux-x64
           path: ${{ runner.temp }}/manabitan-perf-workspace.tar.gz
           compression-level: 0
           retention-days: 7
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: manabitan-perf-runtime-linux-x64
           path: ${{ runner.temp }}/manabitan-perf-runtime.tar.gz
