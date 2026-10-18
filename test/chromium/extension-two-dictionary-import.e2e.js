@@ -5602,31 +5602,37 @@ async function main() {
                 processSampler,
             );
 
-            const readerBridgeStart = safePerformance.now();
-            let readerBridgeResult = null;
             let readerBridgeError = '';
-            try {
-                assert.ok(localServer, 'Local lookup site is required for installed Reader bridge coverage');
-                await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
-                await waitForSettingsPageReady(page);
-                readerBridgeResult = await verifyInstalledReaderLookupBridge(page, localServer, expectedLookupDictionaries);
-                assert.equal(readerBridgeResult?.clicks?.length, 3, 'Reader bridge must return all three verified click results');
-                assert.ok(readerBridgeResult.minedNote, 'Reader bridge must return the explicitly mined note');
-            } catch (e) {
-                readerBridgeError = errorMessage(e);
-                verificationErrors.push(`Installed Reader bridge verification failed: ${readerBridgeError}`);
+            for (let round = 1; round <= 3; round++) {
+                const readerBridgeStart = safePerformance.now();
+                let roundError = '';
+                let result = null;
+                try {
+                    assert.ok(localServer, 'Local lookup site is required for installed Reader bridge coverage');
+                    // Each iteration gets a fresh settings navigation, page state, and Anki mock server.
+                    await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+                    await waitForSettingsPageReady(page);
+                    result = await verifyInstalledReaderLookupBridge(page, localServer, expectedLookupDictionaries);
+                    assert.equal(result?.clicks?.length, 3, 'Reader bridge must return all three verified click results');
+                    assert.ok(result.minedNote, 'Reader bridge must return the explicitly mined note');
+                } catch (e) {
+                    roundError = `Reader bridge round ${round}/3 failed: ${errorMessage(e)}`;
+                    readerBridgeError = roundError;
+                    verificationErrors.push(`Installed Reader bridge verification failed: ${roundError}`);
+                }
+                await addReportPhase(
+                    report,
+                    page,
+                    `Verify installed Reader trusted-click lookup bridge (round ${round}/3)`,
+                    roundError.length > 0 ? roundError :
+                        `Round ${round}/3 passed: exact lexical pairs, inflected ruby surface, shared sentence/codepoint offset, explicit popup Anki mining with original cloze, wrong-reading miss, no automatic Anki writes, and ordinary hover. ${JSON.stringify(result)}`,
+                    readerBridgeStart,
+                    safePerformance.now(),
+                    null,
+                    processSampler,
+                );
+                if (roundError.length > 0) { break; }
             }
-            await addReportPhase(
-                report,
-                page,
-                'Verify installed Reader trusted-click lookup bridge',
-                readerBridgeError.length > 0 ? `Reader bridge failed: ${readerBridgeError}` :
-                    `Exact lexical pairs, inflected ruby surface, shared sentence/codepoint offset, explicit popup Anki mining with original cloze, wrong-reading miss, no automatic Anki writes, and ordinary hover: ${JSON.stringify(readerBridgeResult)}`,
-                readerBridgeStart,
-                safePerformance.now(),
-                null,
-                processSampler,
-            );
         }
 
         const reloadSettingsForDeleteStart = safePerformance.now();
