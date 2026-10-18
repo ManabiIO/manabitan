@@ -1241,6 +1241,8 @@ export class DisplayAnki {
 
         // Standard first-field probes need no template work. Dispatch them
         // before the renderer occupies this thread instead of yielding first.
+        // Promise.all also accepts synchronous first-field notes beside async notes.
+        // eslint-disable-next-line @typescript-eslint/await-thenable -- preserve native mixed-value aggregation without wrapping notes.
         const notes = hasAsyncNotes ? await Promise.all(notePromises) : /** @type {import('anki').Note[]} */ (notePromises);
         const validNotes = [];
         const validNoteIndices = [];

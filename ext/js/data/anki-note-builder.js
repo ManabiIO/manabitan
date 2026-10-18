@@ -454,6 +454,8 @@ export class AnkiNoteBuilder {
             return str;
         }
         parts.push(str.substring(index));
+        // Promise.all accepts plain string segments beside asynchronous replacements.
+        // eslint-disable-next-line @typescript-eslint/await-thenable -- preserve native mixed-value aggregation without wrapping strings.
         return (await Promise.all(parts)).join('');
     }
 
