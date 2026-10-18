@@ -59,6 +59,8 @@ export class DisplayAudio {
         this._fallbackSoundType = 'none';
         /** @type {?import('core').Timeout} */
         this._autoPlayAudioTimer = null;
+        /** @type {boolean} */
+        this._deferredAutoPlayIntent = false;
         /** @type {number} */
         this._autoPlayAudioDelay = 400;
         /** @type {EventListenerCollection} */
@@ -158,9 +160,11 @@ export class DisplayAudio {
 
     /** */
     clearAutoPlayTimer() {
-        if (this._autoPlayAudioTimer === null) { return; }
-        clearTimeout(this._autoPlayAudioTimer);
-        this._autoPlayAudioTimer = null;
+        if (this._autoPlayAudioTimer !== null) {
+            clearTimeout(this._autoPlayAudioTimer);
+            this._autoPlayAudioTimer = null;
+        }
+        this._deferredAutoPlayIntent = false;
     }
 
     /** */
@@ -328,9 +332,8 @@ export class DisplayAudio {
 
     /** */
     _onContentUpdateComplete() {
-        if (!this._autoPlay || !this._display.frameVisible || !this._canPlayAudio()) { return; }
-
         this.clearAutoPlayTimer();
+        if (!this._autoPlay || !this._canPlayAudio()) { return; }
 
         const {dictionaryEntries} = this._display;
         if (dictionaryEntries.length === 0) { return; }
@@ -338,6 +341,16 @@ export class DisplayAudio {
         const firstDictionaryEntries = dictionaryEntries[0];
         if (firstDictionaryEntries.type === 'kanji') { return; }
 
+        if (!this._display.frameVisible) {
+            this._deferredAutoPlayIntent = true;
+            return;
+        }
+
+        this._scheduleAutoPlay();
+    }
+
+    /** */
+    _scheduleAutoPlay() {
         const callback = () => {
             this._autoPlayAudioTimer = null;
             void this.playAudio(0, 0);
@@ -359,6 +372,10 @@ export class DisplayAudio {
             // is not stopped, as this is a valid use case for some users.
             this._invalidatePlayback();
             this.clearAutoPlayTimer();
+        } else if (this._deferredAutoPlayIntent) {
+            this.clearAutoPlayTimer();
+            if (!this._autoPlay || !this._canPlayAudio()) { return; }
+            this._scheduleAutoPlay();
         }
     }
 
