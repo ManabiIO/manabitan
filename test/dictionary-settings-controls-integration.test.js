@@ -108,4 +108,96 @@ describe('real dictionary settings controls', () => {
             await vi.waitFor(() => expect(h.getRows()[1]?.alias).toBe('ordinary save'));
         } finally { h.cleanup(); }
     });
+
+    domTest('recovery-required dictionary without a download URL opens local file selection', async ({window}) => {
+        for (const downloadUrl of [undefined, null, '', 'undefined']) {
+            const h = await createDictionarySettingsHarness(window, [dictionaryRow('JMdict')]);
+            try {
+                const dictionaries = /** @type {import('dictionary-importer').Summary[]} */ (/** @type {unknown} */ (Reflect.get(h.dictionary, '_dictionaries')));
+                const info = dictionaries[0];
+                if (!info) { throw new Error('Expected installed dictionary info'); }
+                info.storageHealth = 'reimportRequired';
+                if (downloadUrl === undefined) {
+                    delete info.downloadUrl;
+                } else {
+                    Reflect.set(info, 'downloadUrl', downloadUrl);
+                }
+                const entry = h.dictionary._dictionaryEntries[0];
+                const detailsModal = h.modals.get('dictionary-details');
+                if (!detailsModal) { throw new Error('Expected dictionary details modal'); }
+                const originalCreateElement = window.document.createElement.bind(window.document);
+                const fileInputState = /** @type {{value: HTMLInputElement|null, clickCount: number}} */ ({value: null, clickCount: 0});
+                vi.spyOn(window.document, 'createElement').mockImplementation((name, options) => {
+                    const element = originalCreateElement(name, options);
+                    if (name === 'input') {
+                        fileInputState.value = /** @type {HTMLInputElement} */ (element);
+                        vi.spyOn(element, 'click').mockImplementation(() => { ++fileInputState.clickCount; });
+                    }
+                    return element;
+                });
+                const enqueue = vi.spyOn(h.dictionary, '_enqueueTask').mockImplementation(() => {});
+                const update = vi.spyOn(h.dictionary, 'updateDictionary').mockImplementation(() => {});
+
+                entry._showDetails();
+                const buttonNode = detailsModal.node.querySelector('.dictionary-reimport-button');
+                if (!(buttonNode instanceof window.HTMLButtonElement)) { throw new Error('Expected recovery button'); }
+                buttonNode.click();
+                const fileInput = fileInputState.value;
+                if (fileInput === null) { throw new Error('Expected file picker input'); }
+                expect(fileInputState.clickCount).toBe(1);
+                expect(fileInput.type).toBe('file');
+                expect(fileInput.multiple).toBe(true);
+                expect(enqueue).not.toHaveBeenCalled();
+                expect(update).not.toHaveBeenCalled();
+                const file = new window.File(['dictionary'], 'jmdict.zip', {type: 'application/zip'});
+                Object.defineProperty(fileInput, 'files', {configurable: true, value: [file]});
+                fileInput.dispatchEvent(new window.Event('change'));
+                expect(enqueue).toHaveBeenCalledWith({type: 'replaceFromFiles', dictionaryTitle: 'JMdict', files: [file]});
+                expect(update).not.toHaveBeenCalled();
+                expect(buttonNode.textContent).toBe('Choose file...');
+            } finally {
+                vi.restoreAllMocks();
+                h.cleanup();
+            }
+        }
+    });
+
+    domTest('recovery-required dictionary prefers its available update URL and ordinary dictionaries hide recovery action', async ({window}) => {
+        const h = await createDictionarySettingsHarness(window, [dictionaryRow('JMdict')]);
+        try {
+            const dictionaries = /** @type {import('dictionary-importer').Summary[]} */ (/** @type {unknown} */ (Reflect.get(h.dictionary, '_dictionaries')));
+            const info = dictionaries[0];
+            if (!info) { throw new Error('Expected installed dictionary info'); }
+            info.storageHealth = 'reimportRequired';
+            info.downloadUrl = 'https://example.invalid/current.zip';
+            const entry = h.dictionary._dictionaryEntries[0];
+            const detailsModal = h.modals.get('dictionary-details');
+            if (!detailsModal) { throw new Error('Expected dictionary details modal'); }
+            const update = vi.spyOn(h.dictionary, 'updateDictionary').mockImplementation(() => {});
+            const reimport = vi.spyOn(h.dictionary, 'reimportDictionaryFromFile');
+
+            Reflect.set(entry, '_updateDownloadUrl', 'https://example.invalid/newer.zip');
+            entry._showDetails();
+            const button = detailsModal.node.querySelector('.dictionary-reimport-button');
+            if (!(button instanceof window.HTMLButtonElement)) { throw new Error('Expected recovery button'); }
+            expect(button.textContent).toBe('Download again');
+            button.click();
+            expect(update).toHaveBeenCalledWith('JMdict', 'https://example.invalid/newer.zip');
+            expect(reimport).not.toHaveBeenCalled();
+
+            update.mockClear();
+            Reflect.set(entry, '_updateDownloadUrl', null);
+            entry._showDetails();
+            button.click();
+            expect(update).toHaveBeenCalledWith('JMdict', 'https://example.invalid/current.zip');
+
+            info.storageHealth = 'available';
+            entry._showDetails();
+            expect(button.hidden).toBe(true);
+            expect(button.onclick).toBeNull();
+        } finally {
+            vi.restoreAllMocks();
+            h.cleanup();
+        }
+    });
 });
