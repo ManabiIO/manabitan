@@ -38,7 +38,6 @@ export function isComposing(event, platform, browser) {
     if (event.isComposing && platform !== 'android') { return true; }
 
     // Android Composing
-    // eslint-disable-next-line sonarjs/prefer-single-boolean-return
     if (event.isComposing && !isFakeComposing(event) && platform === 'android' && browser !== 'firefox-mobile') { return true; }
 
     return false;

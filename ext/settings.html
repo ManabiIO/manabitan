@@ -1970,7 +1970,10 @@
                 <div class="settings-item-description">Pass a secret value to AnkiConnect API calls.</div>
             </div>
             <div class="settings-item-right">
+                <!-- Keep this API key out of browser password autofill. -->
+                <!-- [html-validate-disable autocomplete-password] -->
                 <input type="password" placeholder="Disabled" spellcheck="false" autocomplete="off" data-setting="anki.apiKey" id="anki-api-key-input">
+                <!-- [html-validate-enable autocomplete-password] -->
             </div>
         </div></div>
         <div class="settings-item advanced-only">

@@ -57,5 +57,6 @@ jobs:
         with:
           workflow: ${{ github.event.inputs.workflow }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref }}
           wait-for-completion: false
           inputs: ${{ steps.retryInputs.outputs.inputs }}

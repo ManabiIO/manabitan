@@ -61,7 +61,7 @@ npx vitest run test/anki-note-type-field-util.test.js
 npx eslint ext/js/data/anki-note-type-field-util.js dev/anki-note-type-compatibility.js dev/tests/anki-note-type-compatibility.js
 ```
 
-The normal development TypeScript configuration includes both new JavaScript tools. The dedicated workflow runs on relevant PRs; its manual schedule and manual dispatch become available on the default branch after merge. Pinned and latest package checks run separately, so upstream availability does not get confused with an offline mapping regression.
+The normal development TypeScript configuration includes both new JavaScript tools. The dedicated workflow runs on relevant PRs; its weekly schedule and manual dispatch become available on the default branch after merge. Pinned and latest package checks run separately, so upstream availability does not get confused with an offline mapping regression.
 
 ## What these checks guarantee
 

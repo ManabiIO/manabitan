@@ -287,14 +287,9 @@ describe('DictionaryDatabase import cleanup', () => {
     test('post-commit progress failures do not interrupt deletion cleanup', async () => {
         const database = new DictionaryDatabase();
         const deleteByDictionary = vi.fn().mockResolvedValue(3);
-        const cleanupTermContent = vi.spyOn(
-            database,
-            /** @type {never} */ ('_cleanupTermContentAfterDictionaryDelete'),
-        ).mockImplementation(resolveVoid);
-        const clearDirectTermIndexCaches = vi.spyOn(
-            database,
-            /** @type {never} */ ('_clearDirectTermIndexCaches'),
-        );
+        const databaseMethods = /** @type {Record<'_cleanupTermContentAfterDictionaryDelete'|'_clearDirectTermIndexCaches', (...args: never[]) => unknown>} */ (/** @type {unknown} */ (database));
+        const cleanupTermContent = vi.spyOn(databaseMethods, '_cleanupTermContentAfterDictionaryDelete').mockImplementation(resolveVoid);
+        const clearDirectTermIndexCaches = vi.spyOn(databaseMethods, '_clearDirectTermIndexCaches');
         Reflect.set(database, '_db', {
             exec: vi.fn(),
             selectValue: vi.fn((sql) => (sql.includes('COUNT(*) FROM dictionaries') ? 1 : 0)),

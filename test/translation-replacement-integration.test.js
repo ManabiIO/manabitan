@@ -27,7 +27,7 @@ function deferred() {
 /**
  * @param {import('jsdom').DOMWindow} window
  * @param {boolean} [prepareController]
- * @returns {Promise<{backend: Backend, settings: SettingsController, settingsApi: {optionsGetFull: ReturnType<typeof vi.fn>, optionsGet: ReturnType<typeof vi.fn>, modifySettings: ReturnType<typeof vi.fn>, getSettings: ReturnType<typeof vi.fn>}, controller: TranslationTextReplacementsController, generic: GenericSettingController, dispose: () => void}>}
+ * @returns {Promise<{backend: Backend, settings: SettingsController, settingsApi: {optionsGetFull: import('vitest').Mock, optionsGet: import('vitest').Mock, modifySettings: import('vitest').Mock, getSettings: import('vitest').Mock}, controller: TranslationTextReplacementsController, generic: GenericSettingController, dispose: () => void}>}
  */
 async function createHarness(window, prepareController = true) {
     const {document} = window;

@@ -328,7 +328,10 @@ export class SettingsDisplayController {
 
     /** */
     _closeTopMenuOrModal() {
-        for (const popupMenu of PopupMenu.openMenus) {
+        const popupMenuIterator = /** @type {Iterator<unknown>} */ (PopupMenu.openMenus.values());
+        const firstPopupMenu = /** @type {unknown} */ (popupMenuIterator.next().value);
+        const popupMenu = firstPopupMenu instanceof PopupMenu ? firstPopupMenu : void 0;
+        if (popupMenu !== void 0) {
             popupMenu.close();
             return;
         }

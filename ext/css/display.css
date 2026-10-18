@@ -640,6 +640,7 @@ a:has(rt) {
     color: var(--text-color-light1);
     font-size: var(--font-size-small);
     line-height: 1.3;
+    /* stylelint-disable-next-line declaration-property-value-keyword-no-deprecated -- retain legacy wrapping behavior */
     word-break: break-word;
 }
 :root[data-has-navigation-previous=true] .content-sidebar,
@@ -708,7 +709,6 @@ a:has(rt) {
 :root[data-popup-action-bar-location=right] #profile-name,
 :root[data-popup-action-bar-location=left] #profile-name {
     writing-mode: vertical-rl;
-    text-orientation: vertical;
     letter-spacing: 2px;
 }
 

@@ -421,7 +421,7 @@ jobs:
           if-no-files-found: ignore
 
   test-firefox-android-extension-e2e:
-    name: Full Extension E2E (Firefox Android)
+    name: Firefox Android Installation Smoke (blocking)
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
     timeout-minutes: 35
@@ -482,6 +482,15 @@ jobs:
             console.error(`Firefox Android extension E2E status is not success: ${String(report.status)} failure=${String(report.failureReason || '')}`);
             process.exit(1);
           }
+          if (report.verificationScope !== 'temporary-installation-smoke') {
+            console.error(`Unexpected Firefox Android verification scope: ${String(report.verificationScope || '')}`);
+            process.exit(1);
+          }
+          const requiredUnverified = ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update'];
+          if (!requiredUnverified.every((capability) => Array.isArray(report.unverifiedCapabilities) && report.unverifiedCapabilities.includes(capability))) {
+            console.error(`Firefox Android report must retain unverified capabilities: ${requiredUnverified.join(', ')}`);
+            process.exit(1);
+          }
           NODE
 
       - name: Summarize Firefox Android extension E2E
@@ -491,15 +500,17 @@ jobs:
           const fs = require('node:fs');
           const path = 'builds/firefox-android-e2e-report.json';
           if (!fs.existsSync(path)) {
-            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '## Firefox Android Extension E2E\nReport JSON not found.\n');
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '## Firefox Android Installation Smoke\nReport JSON not found.\n');
             process.exit(0);
           }
           const report = JSON.parse(fs.readFileSync(path, 'utf8'));
           const phases = Array.isArray(report.phases) ? report.phases : [];
           const top = [...phases].sort((a, b) => Number(b.durationMs || 0) - Number(a.durationMs || 0)).slice(0, 5);
           const lines = [
-            '## Firefox Android Extension E2E',
+            '## Firefox Android Installation Smoke',
             `- Status: \`${String(report.status || 'unknown')}\``,
+            `- Verification scope: \`${String(report.verificationScope || 'unknown')}\``,
+            `- Unverified capabilities: ${(Array.isArray(report.unverifiedCapabilities) ? report.unverifiedCapabilities : []).map((value) => `\`${String(value)}\``).join(', ') || 'not reported'}`,
             `- Failure: ${report.failureReason ? `\`${String(report.failureReason)}\`` : 'none'}`,
             `- ADB device: \`${String(report.adbDevice || 'unknown')}\``,
             `- Firefox package: \`${String(report.firefoxPackage || 'unknown')}\``,

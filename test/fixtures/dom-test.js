@@ -44,7 +44,7 @@ function prepareWindow(window) {
 /**
  *
  * @param {string} [htmlFilePath]
- * @returns {Promise<{window: import('jsdom').DOMWindow; teardown: (global: unknown) => import('vitest').Awaitable<void>}>}
+ * @returns {Promise<{window: import('jsdom').DOMWindow; teardown: (global: unknown) => PromiseLike<void> | void}>}
  */
 export async function setupDomTest(htmlFilePath) {
     const html = typeof htmlFilePath === 'string' ? fs.readFileSync(htmlFilePath, {encoding: 'utf8'}) : '<!DOCTYPE html>';

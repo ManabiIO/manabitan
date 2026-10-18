@@ -122,7 +122,8 @@
         "content_security_policy": {
             "extension_pages": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src blob: 'self'; style-src 'self' 'unsafe-inline'; media-src * blob:; connect-src *",
             "sandbox": "sandbox allow-scripts; default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'unsafe-inline'"
-        }
+        },
+        "homepage_url": "https://github.com/ManabiIO/manabitan"
     },
     "defaultVariant": "base",
     "variants": [

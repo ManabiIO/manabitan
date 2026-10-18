@@ -1011,9 +1011,8 @@ function getCloze(dictionaryEntry, context) {
  */
 function getTermFuriganaSegments(dictionaryEntry, type) {
     if (type === 'term') {
-        for (const {term, reading} of dictionaryEntry.headwords) {
-            return getTermHeadwordFuriganaSegments(term, reading);
-        }
+        const headword = dictionaryEntry.headwords[0];
+        if (headword !== void 0) { return getTermHeadwordFuriganaSegments(headword.term, headword.reading); }
     }
     return void 0;
 }
