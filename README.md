@@ -58,9 +58,9 @@ I am also [actively](https://github.com/yomidevs/yomitan/issues?q=is%3Apr%20auth
 
 Using this fork and telling me what works and doesn't will allow me to contribute back to Yomitan easier.
 
-# Visit [yomitan.wiki](https://yomitan.wiki) to learn more!
+# Visit [the Yomitan Wiki (legacy guidance)](https://yomitan.wiki) to learn more!
 
-> Documentation currently lives on the legacy Yomitan wiki. Manabitan is feature-compatible, so the Yomitan wiki guides still apply.
+> Manabitan-specific documentation is being prepared. The Yomitan Wiki remains a legacy reference for general usage; Yomitan is the upstream project.
 
 :wave: **Manabitan is a fast Yomitan.** It forks Yomitan to provide the same functionality with much faster imports and lookups. It also deduplicates and compresses Yomitan entries to reduce storage use.
 
@@ -93,7 +93,7 @@ Manabitan provides powerful features not available in other browser-based dictio
 
 ## Documentation/How To
 
-**Please visit the [Yomitan Wiki](https://yomitan.wiki) for the most up-to-date usage documentation (legacy docs, feature-compatible with Manabitan).**
+**Please visit the [Yomitan Wiki (legacy guidance)](https://yomitan.wiki) for general usage guidance.**
 
 ### Developer Documentation
 

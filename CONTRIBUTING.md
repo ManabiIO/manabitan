@@ -65,6 +65,20 @@ Several command line arguments are available for these scripts:
 
 If no arguments are specified, the command is equivalent to `build.bat --all`.
 
+### Isolated browser qualification on macOS
+
+Use Node 22 for the extension harness. If the expected Playwright browser reports a different version, or a minimal control extension cannot load, inspect the resolved browser executable before changing extension code. A cached executable can be a wrapper around the regular installed Chrome, which does not provide the same automated extension loading support.
+
+Preserve shared caches and installed applications. Install the lockfile-pinned browsers in a fresh directory for qualification:
+
+```sh
+export PLAYWRIGHT_BROWSERS_PATH="$(mktemp -d "${TMPDIR:-/tmp}/manabitan-browsers.XXXXXXXX")"
+npx playwright install chromium
+MANABITAN_E2E_STRICT_RUNTIME=1 npm run test:e2e:chromium-extension
+```
+
+The extension E2E command rebuilds before launch. On macOS, automated Chromium launch arguments must include `--disable-features=MacAppCodeSignClone`, including temporary diagnostic tools. Await context/browser shutdown in cleanup. A local browser startup or content-script loading failure is not an import-performance result; retain its browser version and diagnostics and qualify visible behavior in a supported fresh runtime.
+
 ### Loading an unpacked build into Chromium browsers
 
 After building, you can load the compiled extension into Chromium browsers.
