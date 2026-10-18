@@ -7,11 +7,15 @@ import {fileURLToPath} from 'node:url';
 import {promisify} from 'node:util';
 import {runWebExtInstallHandshake} from './web-ext-install-handshake.js';
 import {findWebExtRdpPort, GeckoRdpProtocolError, probeInstalledAddon} from './firefox-android-rdp.js';
+import {qualifyAndroidDictionaryRuntime} from './firefox-android-runtime-qualification.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const execFileAsync = promisify(execFile);
 const outputPath = resolve(root, process.env.MANABITAN_ANDROID_CAPABILITY_REPORT || path.join(root, 'builds', 'firefox-android-capability-report.json'));
-/** @typedef {{startedAtIso: string, finishedAtIso: string, status: string, verificationScope: string, adbDevice: string, androidVersion: string, androidApiLevel: string, firefoxPackage: string, firefoxVersion: string, sourceCommit: string, buildIdentity: {sourceDir: string, manifestSha256: string, packageTreeSha256: string, extensionId: string, version: string|number}, extensionId: string, rdpPort: number|null, rdpTargetIdentity: Record<string, unknown>|null, addonContext: Record<string, unknown>|null, contextProbeStatus: string, contextBlocker: string, protocolErrorResponse: Record<string, unknown>|null, executedCapabilities: string[], unverifiedCapabilities: string[], failureReason: string}} CapabilityReport */
+const runtimeQualificationTimeoutMs = Number(process.env.MANABITAN_ANDROID_RUNTIME_QUALIFICATION_TIMEOUT_MS || 600_000);
+assert.ok(Number.isFinite(runtimeQualificationTimeoutMs) && runtimeQualificationTimeoutMs > 0, 'MANABITAN_ANDROID_RUNTIME_QUALIFICATION_TIMEOUT_MS must be a finite positive number');
+/** @typedef {{status: string, timeoutMs: number, stages: Array<{name?: string, value?: unknown}>, errors: string[], verifiedCapabilities: string[], unverifiedCapabilities: string[]}} RuntimeQualificationReport */
+/** @typedef {{startedAtIso: string, finishedAtIso: string, status: string, verificationScope: string, adbDevice: string, androidVersion: string, androidApiLevel: string, firefoxPackage: string, firefoxVersion: string, sourceCommit: string, buildIdentity: {sourceDir: string, manifestSha256: string, packageTreeSha256: string, extensionId: string, version: string|number}, extensionId: string, rdpPort: number|null, rdpTargetIdentity: Record<string, unknown>|null, addonContext: Record<string, unknown>|null, contextProbeStatus: string, contextBlocker: string, protocolErrorResponse: Record<string, unknown>|null, executedCapabilities: string[], unverifiedCapabilities: string[], failureReason: string, runtimeQualification: RuntimeQualificationReport}} CapabilityReport */
 /** @type {CapabilityReport} */
 const report = {
     startedAtIso: new Date().toISOString(),
@@ -35,6 +39,7 @@ const report = {
     executedCapabilities: [],
     unverifiedCapabilities: ['extension-context-evaluation', 'dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update'],
     failureReason: '',
+    runtimeQualification: {status: 'not-run', timeoutMs: runtimeQualificationTimeoutMs, stages: [], errors: [], verifiedCapabilities: [], unverifiedCapabilities: ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update']},
 };
 
 /**
@@ -85,14 +90,43 @@ async function main() {
             packageName: report.firefoxPackage,
             sourceDir,
             timeoutMs: Number(process.env.MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS || 45_000),
-            onInstallAcknowledgedTimeoutMs: Number(process.env.MANABITAN_ANDROID_RDP_PROBE_TIMEOUT_MS || 60_000),
+            onInstallAcknowledgedTimeoutMs: runtimeQualificationTimeoutMs,
             cwd: root,
             onOutput: (line) => console.log(`[firefox-android-capability] web-ext: ${line}`),
             onInstallAcknowledged: async (outputLines) => {
                 report.executedCapabilities.push('temporary-addon-installation');
                 report.rdpPort = findWebExtRdpPort(outputLines);
                 assert.ok(report.rdpPort, 'web-ext did not announce its Android RDP TCP port after install acknowledgement');
-                report.addonContext = await probeInstalledAddon(report.rdpPort, report.extensionId, (capability) => report.executedCapabilities.push(capability), /** @param {Record<string, unknown>} evidence */ (evidence) => { report.addonContext = evidence; });
+                report.addonContext = await probeInstalledAddon(report.rdpPort, report.extensionId, (capability) => report.executedCapabilities.push(capability), /** @param {Record<string, unknown>} evidence */ (evidence) => { report.addonContext = evidence; }, async (session) => {
+                    report.runtimeQualification.status = 'running';
+                    report.contextProbeStatus = 'passed';
+                    report.executedCapabilities.push('gecko-rdp-evaluate-extension-context');
+                    report.verificationScope = 'actual-gecko-rdp-extension-context+android-runtime-qualification';
+                    report.unverifiedCapabilities = report.unverifiedCapabilities.filter((capability) => capability !== 'extension-context-evaluation');
+                    assert.ok(session.backgroundTarget, 'Accepted runtime context has no background target');
+                    let runtimeReport;
+                    try {
+                        runtimeReport = await qualifyAndroidDictionaryRuntime({
+                            extensionId: session.extensionId,
+                            backgroundTarget: session.backgroundTarget,
+                            evaluate: session.evaluate,
+                            waitForTarget: session.waitForTarget,
+                            fixtureDirectory: path.join(root, 'test', 'data', 'dictionaries', 'valid-dictionary1'),
+                            adbDevice: report.adbDevice,
+                            runtimeQualificationTimeoutMs,
+                        });
+                    } catch (error) {
+                        report.runtimeQualification = isRecord(error) && isRecord(error.runtimeQualification) ? /** @type {RuntimeQualificationReport} */ (error.runtimeQualification) : {status: 'failure', timeoutMs: runtimeQualificationTimeoutMs, stages: [], errors: [error instanceof Error ? `${error.name}: ${error.message}` : String(error)], verifiedCapabilities: [], unverifiedCapabilities: ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update']};
+                        report.runtimeQualification.timeoutMs = runtimeQualificationTimeoutMs;
+                        report.verificationScope = 'actual-gecko-rdp-extension-context+partial-android-runtime-qualification';
+                        report.executedCapabilities.push(...report.runtimeQualification.verifiedCapabilities);
+                        report.unverifiedCapabilities = [...new Set([...report.unverifiedCapabilities.filter((capability) => !report.runtimeQualification.verifiedCapabilities.includes(capability)), ...report.runtimeQualification.unverifiedCapabilities])];
+                        throw error;
+                    }
+                    report.runtimeQualification = runtimeReport;
+                    report.executedCapabilities.push(...runtimeReport.verifiedCapabilities);
+                    report.unverifiedCapabilities = [...new Set(runtimeReport.unverifiedCapabilities)];
+                }, 60_000);
                 const target = report.addonContext;
                 const targetForm = isRecord(target.targetForm) ? target.targetForm : {};
                 const watcherResponse = isRecord(target.watcherResponse) ? target.watcherResponse : {};
@@ -126,9 +160,9 @@ async function main() {
                     }
                     assert.equal(evaluation?.hasExtensionRuntime, true, 'Gecko RDP evaluation did not run in an extension API context');
                     assert.equal(evaluation.runtimeId, report.extensionId, 'Evaluated runtime id does not match the built extension');
-                    report.verificationScope = 'actual-gecko-rdp-extension-context';
+                    report.verificationScope = report.runtimeQualification.status === 'success' ? 'actual-gecko-rdp-extension-context+android-runtime-qualification' : 'actual-gecko-rdp-extension-context+partial-android-runtime-qualification';
                     report.contextProbeStatus = 'passed';
-                    report.executedCapabilities.push('gecko-rdp-evaluate-extension-context');
+                    if (!report.executedCapabilities.includes('gecko-rdp-evaluate-extension-context')) { report.executedCapabilities.push('gecko-rdp-evaluate-extension-context'); }
                     report.unverifiedCapabilities = report.unverifiedCapabilities.filter((capability) => capability !== 'extension-context-evaluation');
                 }
             },

@@ -590,7 +590,7 @@ jobs:
             process.exit(1);
           }
           const report = JSON.parse(fs.readFileSync(path, 'utf8'));
-          const allowedScopes = ['actual-gecko-rdp-actor-discovery', 'actual-gecko-rdp-extension-context'];
+          const allowedScopes = ['actual-gecko-rdp-extension-context+android-runtime-qualification'];
           if (report.status !== 'success' || !allowedScopes.includes(report.verificationScope)) {
             console.error(`Gecko RDP probe did not pass: status=${String(report.status)} scope=${String(report.verificationScope)} failure=${String(report.failureReason || '')}`);
             process.exit(1);
@@ -599,9 +599,10 @@ jobs:
             console.error('Capability report is missing source, package, browser, Android, or target identity evidence.');
             process.exit(1);
           }
-          const requiredUnverified = ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update'];
-          if (!requiredUnverified.every((capability) => report.unverifiedCapabilities.includes(capability))) {
-            console.error('Capability report must preserve unverified product capabilities.');
+          const runtime = report.runtimeQualification;
+          const requiredVerified = ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update'];
+          if (runtime?.status !== 'success' || !requiredVerified.every((capability) => runtime.verifiedCapabilities?.includes(capability)) || runtime.unverifiedCapabilities?.length !== 0) {
+            console.error(`Android runtime qualification did not preserve truthful capability scope: ${JSON.stringify(runtime)}`);
             process.exit(1);
           }
           NODE

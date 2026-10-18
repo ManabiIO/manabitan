@@ -211,14 +211,15 @@ describe('Firefox Android Gecko RDP capability helper', () => {
         /** @type {string[]} */
         const capabilities = [];
         try {
-            const result = await probeInstalledAddon(fixture.port, 'fixture@example.test', (capability) => capabilities.push(capability));
+            const result = await probeInstalledAddon(fixture.port, 'fixture@example.test', (capability) => capabilities.push(capability), undefined, undefined, 60_000);
             expect(result).toMatchObject({
                 watcherResponse: {actor: 'watcher1'},
                 targetActor: 'target1',
-                evidence: {targetForms: [
-                    {actor: 'fallback', isFallbackExtensionDocument: true},
-                    {actor: 'target1', isFallbackExtensionDocument: false},
-                ]},
+                evidence: {runtimeQualificationTimeoutMs: 60_000,
+                    targetForms: [
+                        {actor: 'fallback', isFallbackExtensionDocument: true},
+                        {actor: 'target1', isFallbackExtensionDocument: false},
+                    ]},
                 consoleActor: 'console1',
                 evaluation: {acknowledgement: {resultID: 'evaluation-17'}, result: {type: 'evaluationResult', resultID: 'evaluation-17', hasException: false}},
             });

@@ -122,6 +122,24 @@ export class GeckoRdpClient {
     }
 
     /**
+     * Run one operation with a temporary per-packet timeout.
+     * @template T
+     * @param {number} timeoutMs
+     * @param {() => Promise<T>} operation
+     * @returns {Promise<T>}
+     */
+    async withTimeoutMs(timeoutMs, operation) {
+        if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) { throw new Error(`Invalid Gecko RDP operation timeout: ${String(timeoutMs)}`); }
+        const originalTimeoutMs = this._timeoutMs;
+        this._timeoutMs = timeoutMs;
+        try {
+            return await operation();
+        } finally {
+            this._timeoutMs = originalTimeoutMs;
+        }
+    }
+
+    /**
      * Wait for one queued packet matching the predicate. Nonmatching packets remain queued.
      * @param {PacketPredicate} [predicate]
      * @returns {Promise<RdpPacket>}
@@ -271,11 +289,14 @@ export function findWebExtRdpPort(lines) {
  * @param {string} extensionId
  * @param {(capability: string) => void} [onCapability]
  * @param {(evidence: ProbeEvidence) => void} [onEvidence]
+ * @param {(session: {evaluate: (actor: string, script: string, stage: string) => Promise<RdpPacket>, waitForTarget: (predicate: (target: RdpPacket) => boolean, stage: string) => Promise<RdpPacket>, backgroundTarget: RdpPacket|null, consoleActor: string|null, extensionId: string, identity: Record<string, unknown>}) => Promise<void>} [onExtensionContext]
+ * @param {number} [runtimeQualificationTimeoutMs] Explicit bounded timeout for the post-install runtime qualification callback.
  * @returns {Promise<RdpPacket>}
  */
-export async function probeInstalledAddon(port, extensionId, onCapability = /** @type {(capability: string) => void} */ (() => {}), onEvidence = /** @type {(evidence: ProbeEvidence) => void} */ (() => {})) {
+export async function probeInstalledAddon(port, extensionId, onCapability = /** @type {(capability: string) => void} */ (() => {}), onEvidence = /** @type {(evidence: ProbeEvidence) => void} */ (() => {}), onExtensionContext = /** @type {(session: {evaluate: (actor: string, script: string, stage: string) => Promise<RdpPacket>, waitForTarget: (predicate: (target: RdpPacket) => boolean, stage: string) => Promise<RdpPacket>, backgroundTarget: RdpPacket|null, consoleActor: string|null, extensionId: string, identity: Record<string, unknown>}) => Promise<void>} */ (async () => {}), runtimeQualificationTimeoutMs = defaultTimeoutMs) {
     /** @type {ProbeEvidence} */
     const evidence = {extensionId, stage: 'connect', packets: [], targetForms: [], selectedTarget: null, requests: []};
+    evidence.runtimeQualificationTimeoutMs = runtimeQualificationTimeoutMs;
     const publish = () => onEvidence(JSON.parse(JSON.stringify(evidence)));
     const client = await GeckoRdpClient.connect(port, {onPacket: (direction, packet) => {
         const packetText = JSON.stringify(packet);
@@ -367,15 +388,82 @@ export async function probeInstalledAddon(port, extensionId, onCapability = /** 
             consoleActor = typeof attachResponse.consoleActor === 'string' ? attachResponse.consoleActor : null;
         }
         let evaluation = null;
+        /**
+         * Evaluate in an owned extension page and wait for its correlated result packet.
+         * @param {string} actor
+         * @param {string} script
+         * @param {string} stage
+         * @returns {Promise<RdpPacket>}
+         */
+        const evaluate = async (actor, script, stage) => {
+            evidence.stage = `${stage}:ack`; publish();
+            const acknowledgement = await client.request(actor, 'evaluateJSAsync', {text: script}, (packet) => packet.from === actor && packet.type === undefined && typeof packet.resultID === 'string');
+            evidence.stage = `${stage}:result`; publish();
+            const result = await client.readPacket((packet) => packet.from === actor && packet.type === 'evaluationResult' && packet.resultID === acknowledgement.resultID);
+            const entry = {stage, acknowledgement, result};
+            const evaluations = Array.isArray(evidence.evaluations) ? evidence.evaluations : [];
+            evaluations.push(entry);
+            evidence.evaluations = evaluations.slice(-20);
+            publish();
+            return entry;
+        };
+        /**
+         * Wait for an actual target-available-form from the add-on watcher.
+         * @param {(target: RdpPacket) => boolean} predicate
+         * @param {string} stage
+         * @returns {Promise<RdpPacket>}
+         */
+        const waitForTarget = async (predicate, stage) => {
+            if (typeof watcherResponse?.actor !== 'string') { throw new Error('Watcher target selection is unavailable on the legacy descriptor path'); }
+            evidence.stage = stage; publish();
+            const deadline = Date.now() + 30_000;
+            for (let count = 0; count < 100; count++) {
+                const remaining = deadline - Date.now();
+                if (remaining <= 0) { break; }
+                const event = await client.readPacket((packet) => packet.from === watcherResponse.actor && packet.type === 'target-available-form');
+                const target = isRecord(event.target) ? event.target : null;
+                if (target) {
+                    evidence.targetForms.push(target);
+                    if (evidence.targetForms.length > 50) { evidence.targetForms.shift(); }
+                    publish();
+                }
+                if (target?.addonId === extensionId && target.isFallbackExtensionDocument !== true && predicate(target)) { return target; }
+            }
+            throw new Error(`Timed out waiting for matching Firefox extension target at ${stage}; observed=${JSON.stringify(evidence.targetForms)}`);
+        };
         if (typeof consoleActor === 'string') {
             const script = 'JSON.stringify({runtimeId: globalThis.browser?.runtime?.id ?? globalThis.chrome?.runtime?.id ?? null, hasExtensionRuntime: Boolean(globalThis.browser?.runtime || globalThis.chrome?.runtime)})';
-            evidence.stage = 'evaluateJSAsync'; publish();
-            const acknowledgement = await client.request(consoleActor, 'evaluateJSAsync', {text: script}, (packet) => packet.from === consoleActor && packet.type === undefined && typeof packet.resultID === 'string');
-            const expectedResultId = acknowledgement.resultID;
-            evidence.stage = 'evaluationResult'; publish();
-            const event = await client.readPacket((packet) => packet.from === consoleActor && packet.type === 'evaluationResult' && packet.resultID === expectedResultId);
-            evaluation = {acknowledgement, result: event};
+            const result = await evaluate(consoleActor, script, 'runtime-identity');
+            evaluation = {acknowledgement: result.acknowledgement, result: result.result};
             onCapability('gecko-rdp-evaluate-extension-context-result');
+        }
+        if (evaluation !== null) {
+            const evaluationEvent = isRecord(evaluation.result) ? evaluation.result : null;
+            if (evaluationEvent === null) { throw new Error('Gecko RDP evaluation result event is malformed'); }
+            const evaluationPayload = evaluationEvent.result;
+            const evaluationText = isRecord(evaluationPayload) ? evaluationPayload.value : evaluationPayload;
+            let identity = null;
+            if (typeof evaluationText === 'string') {
+                try { identity = JSON.parse(evaluationText); } catch { /* Caller receives raw evaluation evidence. */ }
+            }
+            if (identity?.runtimeId !== extensionId || identity?.hasExtensionRuntime !== true) {
+                throw new Error(`Extension context runtime identity did not match add-on ${extensionId}: ${JSON.stringify(identity)}`);
+            }
+            evidence.stage = 'runtime-qualification'; publish();
+            await client.withTimeoutMs(runtimeQualificationTimeoutMs, async () => {
+                /** @type {NodeJS.Timeout|undefined} */
+                let timeout;
+                try {
+                    await Promise.race([
+                        onExtensionContext({evaluate, waitForTarget, backgroundTarget: targetForm, consoleActor, extensionId, identity}),
+                        new Promise((_, reject) => {
+                            timeout = setTimeout(() => reject(new Error(`Android runtime qualification exceeded ${runtimeQualificationTimeoutMs}ms`)), runtimeQualificationTimeoutMs);
+                        }),
+                    ]);
+                } finally {
+                    if (timeout !== undefined) { clearTimeout(timeout); }
+                }
+            });
         }
         evidence.stage = 'complete'; publish();
         return {

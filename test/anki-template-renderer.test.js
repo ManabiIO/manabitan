@@ -16,12 +16,65 @@
  */
 
 import {describe} from 'vitest';
+import {readFileSync} from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {AnkiTemplateRenderer} from '../ext/js/templates/anki-template-renderer.js';
 import {createAnkiTemplateRendererTest} from './fixtures/anki-template-renderer-test.js';
+import {androidMiningBackTemplate} from './android/firefox-android-runtime-qualification.js';
 
 const test = await createAnkiTemplateRendererTest();
 
 describe('AnkiTemplateRenderer', () => {
+    test('shipped default Back template renders the runtime mining markers and glossary text', ({expect, ankiTemplateRenderer}) => {
+        const templatePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../ext/data/templates/default-anki-field-templates.handlebars');
+        const template = readFileSync(templatePath, 'utf8');
+        /** @type {import('dictionary').TermDictionaryEntry} */
+        const dictionaryEntry = {
+            type: 'term',
+            isPrimary: true,
+            textProcessorRuleChainCandidates: [],
+            inflectionRuleChainCandidates: [],
+            score: 0,
+            frequencyOrder: 0,
+            dictionaryIndex: 0,
+            dictionaryAlias: 'Android fixture',
+            sourceTermExactMatchCount: 1,
+            matchPrimaryReading: true,
+            maxOriginalTextLength: 2,
+            headwords: [{index: 0, headwordIndex: 0, term: '読む', reading: 'よむ', sources: [{originalText: '読む', transformedText: '読む', deinflectedText: '読む', matchType: 'exact', matchSource: 'term', isPrimary: true}], tags: [], wordClasses: []}],
+            definitions: [{index: 0, headwordIndices: [0], dictionary: 'Android fixture', dictionaryIndex: 0, dictionaryAlias: 'Android fixture', id: 1, score: 0, frequencyOrder: 0, sequences: [-1], isPrimary: true, tags: [], entries: ['to read revision 2']}],
+            pronunciations: [],
+            frequencies: [],
+        };
+        /** @type {import('anki-templates-internal').CreateDetails} */
+        const commonData = {
+            dictionaryEntry,
+            cardFormat: {type: 'term', name: 'Android fixture', deck: 'Android Capability Deck', model: 'Android Capability Model', fields: {}, icon: 'big-circle'},
+            resultOutputMode: 'split',
+            glossaryLayoutMode: 'default',
+            compactTags: false,
+            context: {url: '', sentence: {text: '読む', offset: 0}, documentTitle: '', query: '読む', fullQuery: '読む'},
+            media: {},
+            dictionaryStylesMap: new Map(),
+        };
+        /**
+         * @param {string} marker
+         * @param {import('dictionary').TermDictionaryEntry} [entry]
+         * @returns {string}
+         */
+        const render = (marker, entry = dictionaryEntry) => ankiTemplateRenderer.templateRenderer.render(template, {marker, commonData: {...commonData, dictionaryEntry: entry}}, 'ankiNote').result;
+        const renderedBack = `${render('reading')} / ${render('glossary-plain-no-dictionary')}`;
+        expect(renderedBack).toBe('よむ / to read revision 2');
+        const wrongReadingEntry = {...dictionaryEntry, headwords: [{...dictionaryEntry.headwords[0], reading: 'べつ'}]};
+        const oldGlossaryEntry = {...dictionaryEntry, definitions: [{...dictionaryEntry.definitions[0], entries: ['to read revision 1']}]};
+        expect(`${render('reading', wrongReadingEntry)} / ${render('glossary-plain-no-dictionary', wrongReadingEntry)}`).not.toBe('よむ / to read revision 2');
+        expect(`${render('reading', oldGlossaryEntry)} / ${render('glossary-plain-no-dictionary', oldGlossaryEntry)}`).not.toBe('よむ / to read revision 2');
+        expect(render('glossary')).toContain('<div');
+        expect(render('glossary')).toContain('to read revision 2');
+        expect(androidMiningBackTemplate).toBe('{reading} / {glossary-plain-no-dictionary}');
+    });
+
     /**
      * @param {'html'|'text'} mode
      * @param {{expect: typeof import('vitest').expect, window: import('jsdom').DOMWindow}} context
