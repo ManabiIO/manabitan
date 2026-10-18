@@ -117,6 +117,85 @@ afterEach(() => {
 });
 
 describe('Mdx conversion worker client', () => {
+    test.each(['unreadable', 'pending'])('does not read %s MDD resources when asset inclusion is disabled', async (readMode) => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            worker.postMessage.mockImplementation(() => {
+                queueMicrotask(() => worker.emitMessage({
+                    action: 'complete',
+                    params: {result: {archiveContent: new ArrayBuffer(1), archiveFileName: 'fixture.zip'}},
+                }));
+            });
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdxFile = new File([createBytes(4, 3)], 'fixture.mdx');
+        const mddFile = new File([createBytes(3, 9)], 'fixture.mdd');
+        const mddArrayBuffer = vi.spyOn(mddFile, 'arrayBuffer');
+        if (readMode === 'unreadable') {
+            mddArrayBuffer.mockRejectedValue(new DOMException('Resource unavailable', 'NotReadableError'));
+        } else {
+            /** @type {(bytes: ArrayBuffer) => void} */
+            let resolvePendingRead;
+            mddArrayBuffer.mockImplementation(() => new Promise((resolve) => {
+                resolvePendingRead = resolve;
+                setTimeout(() => resolvePendingRead(createBytes(3, 9).buffer), 0);
+            }));
+        }
+        /** @type {Array<{stage: 'upload'|'convert'|'download', completed: number, total: number}>} */
+        const progressEvents = [];
+        const mdx = new Mdx();
+        const outcome = await mdx.convertDictionary(
+            {mdxFile, mddFiles: [mddFile], includeAssets: false},
+            (details) => progressEvents.push(details),
+        ).then(
+            (result) => ({status: 'resolved', result}),
+            (error) => ({status: 'rejected', error: `${error.name}: ${error.message}`}),
+        );
+
+        expect(mddArrayBuffer).not.toHaveBeenCalled();
+        expect(outcome).toMatchObject({status: 'resolved'});
+        expect(progressEvents).toStrictEqual([
+            {stage: 'upload', completed: mdxFile.size, total: mdxFile.size},
+        ]);
+        const [worker] = workerInstances;
+        const postMessageCalls = worker?.postMessage.mock.calls ?? [];
+        const [message, transferables] = /** @type {[{params: {mddFiles: unknown[], options: {includeAssets: boolean}}}, Transferable[]]} */ (/** @type {unknown} */ (postMessageCalls[0]));
+        expect(message.params.mddFiles).toStrictEqual([]);
+        expect(message.params.options.includeAssets).toBe(false);
+        expect(transferables).toHaveLength(1);
+    });
+
+    test('still reads MDD resources and reports read failures when asset inclusion is enabled', async () => {
+        /** @type {FakeWorker[]} */
+        const workerInstances = [];
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
+            const worker = new FakeWorker(url, options);
+            workerInstances.push(worker);
+            return worker;
+        }));
+
+        const mdxFile = new File([createBytes(4, 3)], 'fixture.mdx');
+        const mddFile = new File([createBytes(3, 9)], 'fixture.mdd');
+        const mddArrayBuffer = vi.spyOn(mddFile, 'arrayBuffer').mockRejectedValue(new DOMException('Resource unavailable', 'NotReadableError'));
+        /** @type {Array<{stage: 'upload'|'convert'|'download', completed: number, total: number}>} */
+        const progressEvents = [];
+        const mdx = new Mdx();
+        await expect(mdx.convertDictionary(
+            {mdxFile, mddFiles: [mddFile], includeAssets: true},
+            (details) => progressEvents.push(details),
+        )).rejects.toThrow('Resource unavailable');
+
+        expect(mddArrayBuffer).toHaveBeenCalledOnce();
+        expect(workerInstances).toHaveLength(0);
+        expect(progressEvents).toStrictEqual([
+            {stage: 'upload', completed: mdxFile.size, total: mdxFile.size + mddFile.size},
+        ]);
+    });
+
     test('returns sanitized worker phase timings with converted archive data', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
