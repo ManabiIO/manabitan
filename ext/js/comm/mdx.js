@@ -205,9 +205,9 @@ export class Mdx {
             includeAssets = true,
             termBankSize = 10000,
         } = details;
-        // Snapshot the selection. Callers must not change a pending request by
-        // mutating their resource array while a file read is in flight.
-        const resourceFiles = [...mddFiles];
+        // Snapshot only the files the converter will consume. Disabled assets
+        // must not trigger reads of MDD files that will be discarded.
+        const resourceFiles = includeAssets ? [...mddFiles] : [];
         this.disconnect();
 
         return await new Promise((resolve, reject) => {
