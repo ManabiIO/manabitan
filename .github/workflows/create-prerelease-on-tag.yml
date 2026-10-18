@@ -4,6 +4,12 @@ on:
     tags:
       - "*.*.*.*"
   workflow_dispatch:
+    inputs:
+      dispatch_development_publishers:
+        description: "Dispatch development publishers (requires the MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS repository variable to be true)"
+        type: boolean
+        required: false
+        default: false
 permissions:
   contents: read
 jobs:
@@ -74,11 +80,18 @@ jobs:
           tag_name: ${{ steps.releaseVersion.outputs.version }}
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
+          body: |
+            These attached packages are unsigned release builds. A successful build and provenance attestation do not establish store signing, ordinary end-user installation, or automatic updates.
+
+            The Firefox for Android package is experimental and unqualified. Current CI coverage is limited to temporary add-on installation and post-install debugging smoke; dictionary import, lookup, mining, and updating remain unverified.
+
+            Generated release notes follow this qualification notice.
           prerelease: true
           files: builds/*.zip
           fail_on_unmatched_files: true
 
       - name: Dispatch publish-chrome-development
+        if: github.event_name == 'workflow_dispatch' && inputs.dispatch_development_publishers == true && vars.MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS == 'true'
         uses: aurelien-baudet/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # pin@v2
         with:
           workflow: publish-chrome-development
@@ -88,6 +101,7 @@ jobs:
           inputs: '{ "upload_url": "${{ steps.release.outputs.upload_url }}", "tag": "${{ steps.releaseVersion.outputs.version }}" }'
 
       - name: Dispatch publish-firefox-development
+        if: github.event_name == 'workflow_dispatch' && inputs.dispatch_development_publishers == true && vars.MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS == 'true'
         uses: aurelien-baudet/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # pin@v2
         with:
           workflow: publish-firefox-development
