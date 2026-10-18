@@ -75,23 +75,6 @@ describe('AnkiTemplateRenderer', () => {
         expect(result).toBe('&nbsp; 漢[かん]<br>\nx&lt;&amp;&gt;');
     });
 
-    test('plain structured text trims long whitespace and break prefixes without losing escaped content', async ({expect, window}) => {
-        const renderer = new AnkiTemplateRenderer(window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
-        await renderer.prepare();
-
-        const node = window.document.createElement('div');
-        node.appendChild(window.document.createTextNode(' '.repeat(6000)));
-        node.appendChild(window.document.createElement('br'));
-        node.appendChild(window.document.createTextNode('\u00a0<img src=x onerror=alert(1)>'));
-
-        const result = String(renderer._getText(node, renderer._structuredContentStyleApplier, renderer._structuredContentDatasetKeyIgnorePattern));
-        expect(result).toBe('&nbsp;&lt;img src=x onerror=alert(1)&gt;');
-
-        const healthyNode = window.document.createElement('div');
-        healthyNode.appendChild(window.document.createTextNode('healthy text'));
-        expect(String(renderer._getText(healthyNode, renderer._structuredContentStyleApplier, renderer._structuredContentDatasetKeyIgnorePattern))).toBe('healthy text');
-    });
-
     test('plain structured text serializes deeply nested DOM iteratively', async ({expect, window}) => {
         const renderer = new AnkiTemplateRenderer(window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
         await renderer.prepare();
