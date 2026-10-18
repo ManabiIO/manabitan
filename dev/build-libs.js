@@ -270,7 +270,6 @@ export async function buildLibs() {
     const schemaFileNames = fs.readdirSync(schemaDir);
     const schemas = schemaFileNames.map((schemaFileName) => {
         /** @type {import('ajv').AnySchema} */
-        // eslint-disable-next-line sonarjs/prefer-immediate-return
         const result = parseJson(fs.readFileSync(path.join(schemaDir, schemaFileName), {encoding: 'utf8'}));
         return result;
     });
