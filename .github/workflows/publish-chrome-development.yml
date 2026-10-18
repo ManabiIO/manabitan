@@ -91,6 +91,7 @@ jobs:
         with:
           workflow: delay
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref }}
           wait-for-completion: false
           inputs: |
             {

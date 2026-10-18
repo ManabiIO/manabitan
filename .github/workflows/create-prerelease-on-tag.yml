@@ -83,6 +83,7 @@ jobs:
         with:
           workflow: publish-chrome-development
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ steps.releaseVersion.outputs.version }}
           wait-for-completion: false
           inputs: '{ "upload_url": "${{ steps.release.outputs.upload_url }}", "tag": "${{ steps.releaseVersion.outputs.version }}" }'
 
@@ -91,6 +92,7 @@ jobs:
         with:
           workflow: publish-firefox-development
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ steps.releaseVersion.outputs.version }}
           wait-for-completion: false
           inputs: '{ "upload_url": "${{ steps.release.outputs.upload_url }}", "tag": "${{ steps.releaseVersion.outputs.version }}" }'
 
