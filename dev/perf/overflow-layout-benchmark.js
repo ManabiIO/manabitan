@@ -55,10 +55,12 @@ const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const styles = ['material.css', 'display.css', 'display-pronunciation.css', 'structured-content.css'];
 const styleHashes = {};
 for (const name of styles) { Reflect.set(styleHashes, name, hash(await readFile(path.join(root, 'ext/css', name)))); }
-const browser = await chromium.launch({headless: true});
+const browser = await chromium.launch({headless: true, args: process.platform === 'darwin' ? ['--disable-features=MacAppCodeSignClone'] : []});
 const results = [];
+let context;
 try {
-    const page = await browser.newPage({viewport: {width: 800, height: 600}});
+    context = await browser.newContext({viewport: {width: 800, height: 600}});
+    const page = await context.newPage();
     await page.route('http://layout.test/**', async (route) => {
         const url = new URL(route.request().url());
         // eslint-disable-next-line unicorn/prefer-switch -- preserve the benchmark route order
@@ -191,5 +193,9 @@ try {
     await writeFile(output, JSON.stringify({schemaVersion: 1, scope: 'Overflow component: entry insertion + addElements + final layout; not full popup or Anki latency', browserVersion: browser.version(), baselineRef: values.baseline, baselineSha256: hash(baseline), candidateSha256: hash(candidate), fontSha256: hash(fontBytes), fonts, styleHashes, results}, null, 2));
     console.log(`Validated ${results.length} adjacent pairs; report: ${output}`);
 } finally {
-    await browser.close();
+    try {
+        await context?.close();
+    } finally {
+        await browser.close();
+    }
 }
