@@ -59,7 +59,7 @@ export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTa
         const initialArchive = await createQualifiedArchive(fixtureDirectory, 'android-runtime-revision-1', `${glossary} revision 1`, fixtureServer.baseUrl);
         fixtureServer.setRevision('android-runtime-revision-1', initialArchive);
         const archive = Buffer.from(initialArchive).toString('base64');
-        const openSettings = await evaluate(String(backgroundTarget.consoleActor), `(() => { globalThis.__manabitanAndroidRuntimeQualification = {phase:'opening-settings', ownedExtensionPageTabs:[]}; return ${buildOwnedExtensionPageOpenScript('settings.html')}; })()`, 'open-settings-page');
+        const openSettings = await evaluate(String(backgroundTarget.consoleActor), `(() => { globalThis.__manabitanAndroidRuntimeQualification = {phase:'opening-settings', ownedExtensionPageTabs:[], ownedExtensionPageTabIds:{}}; return ${buildOwnedExtensionPageOpenScript('settings.html')}; })()`, 'open-settings-page');
         stage('open-settings-page', openSettings);
         const settingsTarget = await waitForTarget((target) => target.url === `moz-extension://${new URL(String(backgroundTarget.url)).host}/settings.html`, 'settings-extension-page');
         assert.equal(settingsTarget.addonId, extensionId);
@@ -68,6 +68,10 @@ export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTa
         assert.ok(typeof settingsTarget.innerWindowId === 'number' || (typeof settingsTarget.innerWindowId === 'string' && settingsTarget.innerWindowId.length > 0), `Settings target has no actual innerWindowID: ${JSON.stringify(settingsTarget)}`);
         const settingsActor = String(settingsTarget.consoleActor || '');
         assert.ok(settingsActor, 'Settings extension target has no console actor');
+        const settingsFocus = await evaluateJSON(evaluate, String(backgroundTarget.consoleActor), buildOwnedPageActivationScript('settings.html'), 'activate-owned-settings-after-open');
+        stage('activate-owned-settings-after-open', settingsFocus);
+        const settingsVisibility = await evaluateJSON(evaluate, settingsActor, buildDocumentVisibilityWaitScript('settings.html'), 'wait-settings-visible');
+        stage('settings-document-visible', settingsVisibility);
         stage('settings-extension-page', {actor: settingsTarget.actor, url: settingsTarget.url, innerWindowId: settingsTarget.innerWindowId});
 
         const importStart = await evaluate(settingsActor, buildSettingsFileImportStartScript(archive), 'start-settings-import');
@@ -117,6 +121,10 @@ export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTa
         assert.notEqual(searchTarget.actor, settingsTarget.actor, 'Search watcher matched Settings rather than the new Search page');
         const searchActor = String(searchTarget.consoleActor || '');
         assert.ok(searchActor, 'Search extension target has no console actor');
+        const searchFocus = await evaluateJSON(evaluate, String(backgroundTarget.consoleActor), buildOwnedPageActivationScript('search.html'), 'activate-owned-search');
+        stage('activate-owned-search', searchFocus);
+        const searchVisibility = await evaluateJSON(evaluate, searchActor, buildDocumentVisibilityWaitScript('search.html'), 'wait-search-visible');
+        stage('search-document-visible', searchVisibility);
         const audioConsent = await evaluateJSON(evaluate, searchActor, 'new Promise((resolve,reject)=>{const deadline=Date.now()+20000;const ready=()=>document.documentElement?.dataset?.loaded===\'true\'&&document.documentElement.dataset.audioConsentRequired!==undefined&&document.documentElement.dataset.audioConsentState!==undefined;if(!ready()){const wait=()=>{if(ready()){setTimeout(inspect,500);return;}if(Date.now()>deadline){reject(new Error(\'Search page did not settle product audio-consent state\'));return;}setTimeout(wait,100);};wait();return;}inspect();function inspect(){const modal=document.querySelector(\'#firefox-data-transmission-consent-modal\');const state={required:document.documentElement.dataset.audioConsentRequired||null,consentState:document.documentElement.dataset.audioConsentState||null,modalPresent:modal instanceof HTMLElement,modalVisible:modal instanceof HTMLElement&&!modal.hidden};if(!(modal instanceof HTMLElement)||modal.hidden){resolve({...state,action:\'no-visible-consent-modal\'});return;}const decline=modal.querySelector(\'#decline-data-transmission\');if(!(decline instanceof HTMLButtonElement)||decline.hidden){reject(new Error(\'Visible Firefox audio consent modal has no visible Decline control\'));return;}decline.click();const finish=()=>{const error=document.querySelector(\'#data-transmission-consent-save-error\');if(error instanceof HTMLElement&&!error.hidden&&error.textContent.trim()){reject(new Error(\'Firefox audio consent decline failed: \'+error.textContent.trim()));return;}if(modal.hidden){resolve({...state,action:\'declined-through-product-ui\',finalState:document.documentElement.dataset.audioConsentState||null});return;}if(Date.now()>deadline){reject(new Error(\'Firefox audio consent modal remained visible after Decline\'));return;}setTimeout(finish,100);};finish();}})', 'handle-search-audio-consent');
         stage('search-audio-consent', audioConsent);
         const visibleSearch = /** @type {{expression: string, reading: string, glossary: string[], dictionary: string, render: {visible: boolean, width: number, height: number, display: string, visibility: string, consentModalVisible: boolean}}} */ (await evaluateJSON(evaluate, searchActor, buildVisibleSearchScript({expression, reading, glossary: `${glossary} revision 1`, dictionaryTitle}), 'visible-search-result'));
@@ -128,8 +136,16 @@ export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTa
         stage('visible-search-result', visibleSearch);
         report.verifiedCapabilities.push('dictionary-import', 'dictionary-lookup');
         report.unverifiedCapabilities = ['anki-mining', 'dictionary-update'];
-        const dictionaryModal = await evaluateJSON(evaluate, settingsActor, 'new Promise((resolve,reject)=>{const trigger=document.querySelector(\'.settings-item-button[data-modal-action="show,dictionaries"]\');const visible=node=>{const rect=node?.getBoundingClientRect();const style=node&&getComputedStyle(node);let shown=Boolean(rect&&style&&rect.width>0&&rect.height>0&&style.display!==\'none\'&&style.visibility!==\'hidden\');for(let parent=node;shown&&parent instanceof HTMLElement;parent=parent.parentElement){if(parent.hidden||parent.getAttribute(\'aria-hidden\')===\'true\')shown=false;}return {shown,width:rect?.width||0,height:rect?.height||0};};if(!(trigger instanceof HTMLElement)||!visible(trigger).shown){reject(new Error(\'Shipped visible Configure installed and enabled dictionaries trigger is unavailable\'));return;}trigger.click();const deadline=Date.now()+15000;const inspect=()=>{const modal=document.querySelector(\'#dictionaries-modal\');const render=modal instanceof HTMLElement?visible(modal):{shown:false,width:0,height:0};if(modal instanceof HTMLElement&&!modal.hidden&&render.shown){resolve({openedThroughProductTrigger:true,modalVisible:true,render});return;}if(Date.now()>deadline){reject(new Error(\'Shipped Dictionaries modal did not become visible\'));return;}setTimeout(inspect,100);};inspect();})', 'open-dictionaries-modal-through-product-ui');
+        const settingsModalFocus = await evaluateJSON(evaluate, String(backgroundTarget.consoleActor), buildOwnedPageActivationScript('settings.html'), 'activate-owned-settings-before-modal');
+        stage('activate-owned-settings-before-modal', settingsModalFocus);
+        const settingsModalVisibility = await evaluateJSON(evaluate, settingsActor, buildDocumentVisibilityWaitScript('settings.html'), 'wait-settings-visible-before-modal');
+        stage('settings-visible-before-modal', settingsModalVisibility);
+        const dictionaryModal = await evaluateJSON(evaluate, settingsActor, buildDictionaryModalOpenScript({id: settingsModalFocus.activeTabId, url: settingsModalFocus.url}), 'open-dictionaries-modal-through-product-ui');
         stage('open-dictionaries-modal-through-product-ui', dictionaryModal);
+        const settingsUpdateFocus = await evaluateJSON(evaluate, String(backgroundTarget.consoleActor), buildOwnedPageActivationScript('settings.html'), 'activate-settings-before-update-ui');
+        stage('activate-settings-before-update-ui', settingsUpdateFocus);
+        const settingsUpdateVisibility = await evaluateJSON(evaluate, settingsActor, buildDocumentVisibilityWaitScript('settings.html'), 'wait-settings-visible-before-update-ui');
+        stage('settings-visible-before-update-ui', settingsUpdateVisibility);
         assert.ok(fixtureServer, 'Local dictionary update server was not started');
         const updateArchive = await createQualifiedArchive(fixtureDirectory, 'android-runtime-revision-2', `${glossary} revision 2`, fixtureServer.baseUrl);
         fixtureServer.setRevision('android-runtime-revision-2', updateArchive);
@@ -155,13 +171,17 @@ export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTa
         assert.equal(updatedInfo.some((item) => String(item.title).includes('staging')), false, `A staging dictionary remained after update: ${JSON.stringify(updatedInfo)}`);
         stage('updated-exact-lookup', {revision: updated.imported.revision, glossary: `${glossary} revision 2`, oldRevisionGlossaryAbsent: true, durableDictionaryCount: 1, stagingDictionaryPresent: false});
         assert.ok(backgroundActor, 'Accepted background target has no console actor for owned Settings reload');
-        const reloadSettings = await evaluateJSON(evaluate, backgroundActor, 'new Promise((resolve,reject)=>{const state=globalThis.__manabitanAndroidRuntimeQualification;const tabId=state?.tabId;if(!Number.isInteger(tabId)){reject(new Error(\'Owned Settings tab ID is unavailable for reload\'));return;}browser.tabs.reload(tabId).then(()=>resolve({reloaded:true,tabId}),reject);})', 'reload-owned-settings-tab');
+        const reloadSettings = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageReloadScript('settings.html'), 'reload-owned-settings-tab');
         stage('reload-owned-settings-tab', reloadSettings);
         const reloadedSettings = await waitForTarget((target) => target.url === `moz-extension://${new URL(String(backgroundTarget.url)).host}/settings.html` && target.innerWindowId !== settingsTarget.innerWindowId, 'settings-page-reload');
         assert.ok(typeof reloadedSettings.innerWindowId === 'number' || (typeof reloadedSettings.innerWindowId === 'string' && reloadedSettings.innerWindowId.length > 0), `Reloaded Settings target has no actual innerWindowID: ${JSON.stringify(reloadedSettings)}`);
         assert.notEqual(reloadedSettings.innerWindowId, settingsTarget.innerWindowId, 'Settings reload did not expose a fresh innerWindowID');
         const reloadedSettingsActor = String(reloadedSettings.consoleActor || '');
         assert.ok(reloadedSettingsActor, 'Reloaded Settings page has no console actor');
+        const reloadedSettingsFocus = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageActivationScript('settings.html'), 'activate-reloaded-owned-settings');
+        stage('activate-reloaded-owned-settings', reloadedSettingsFocus);
+        const reloadedSettingsVisibility = await evaluateJSON(evaluate, reloadedSettingsActor, buildDocumentVisibilityWaitScript('settings.html'), 'wait-reloaded-settings-visible');
+        stage('reloaded-settings-document-visible', reloadedSettingsVisibility);
         const freshPageLookup = /** @type {LookupResult} */ (await evaluateJSON(evaluate, reloadedSettingsActor, `new Promise((resolve,reject)=>{if(document.documentElement?.dataset?.loaded!=='true'){const deadline=Date.now()+30000;const check=()=>{if(document.documentElement?.dataset?.loaded==='true'){browser.runtime.sendMessage({action:'termsFind',params:{text:'${expression}',details:{matchType:'exact',deinflect:true,primaryReading:''},optionsContext:{current:true}}},response=>{const error=browser.runtime.lastError;if(error)reject(new Error(error.message));else if(response?.error)reject(new Error(JSON.stringify(response.error)));else resolve(response?.result??response)});return;}if(Date.now()>deadline){reject(new Error('Reloaded Settings did not reach ready state'));return;}setTimeout(check,100);};check();}else browser.runtime.sendMessage({action:'termsFind',params:{text:'${expression}',details:{matchType:'exact',deinflect:true,primaryReading:''},optionsContext:{current:true}}},response=>{const error=browser.runtime.lastError;if(error)reject(new Error(error.message));else if(response?.error)reject(new Error(JSON.stringify(response.error)));else resolve(response?.result??response)});})`, 'fresh-page-lookup-after-settings-reload'));
         const freshPageEntries = freshPageLookup.dictionaryEntries?.filter((entry) => entry.headwords?.some((headword) => headword.term === expression && headword.reading === reading)) || [];
         const freshPageDefinitions = freshPageEntries.flatMap((entry) => entry.definitions || []).filter((definition) => definition.dictionary === dictionaryTitle);
@@ -170,9 +190,13 @@ export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTa
         stage('fresh-page-lookup-after-settings-reload', {revision: 'android-runtime-revision-2', glossary: `${glossary} revision 2`, boundary: 'fresh extension page; backend/browser restart remains unverified'});
         report.verifiedCapabilities.push('dictionary-update');
         report.unverifiedCapabilities = ['anki-mining'];
+        const refreshedSearchFocus = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageActivationScript('search.html'), 'activate-search-before-updated-visible-result');
+        stage('activate-search-before-updated-visible-result', refreshedSearchFocus);
+        const refreshedSearchVisibility = await evaluateJSON(evaluate, searchActor, buildDocumentVisibilityWaitScript('search.html'), 'wait-search-visible-before-updated-result');
+        stage('search-document-visible-before-updated-result', refreshedSearchVisibility);
         const refreshedVisibleSearch = await evaluateJSON(evaluate, searchActor, buildVisibleSearchScript({expression, reading, glossary: `${glossary} revision 2`, dictionaryTitle}), 'updated-visible-search-result');
         stage('updated-visible-search-result', refreshedVisibleSearch);
-        await qualifyMiningAction({evaluate, settingsActor: reloadedSettingsActor, searchActor, adbDevice, stage});
+        await qualifyMiningAction({evaluate, backgroundActor, settingsActor: reloadedSettingsActor, searchActor, adbDevice, stage});
         report.verifiedCapabilities.push('anki-mining');
         report.unverifiedCapabilities = [];
         report.status = 'success';
@@ -257,7 +281,7 @@ export async function evaluateJSON(evaluate, actor, expression, stage) {
         while (Date.now() < deadline) {
             const state = decodeRuntimeEvaluation(await evaluate(actor, `JSON.stringify(globalThis[${keyLiteral}] ?? null)`, `${stage}:poll`), stage);
             if (state !== null && typeof state === 'object') {
-                if (state.status === 'rejected') { throw new Error(`Page operation ${stage} rejected: ${state.error}`); }
+                if (state.status === 'rejected') { throw new Error(`Page operation ${stage} rejected: ${JSON.stringify(state.error)}`); }
                 if (state.status === 'fulfilled') {
                     operationResult = /** @type {import('core').SafeAny} */ (state.value);
                     operationCompleted = true;
@@ -304,11 +328,12 @@ export function buildRuntimeJobStart(key, expression) {
     return `(() => {
         const key = ${JSON.stringify(key)};
         if (Object.hasOwn(globalThis, key)) throw new Error('Harness operation key already exists');
+        const serializeRuntimeError = error => { const record=typeof error==='object'&&error!==null?error:{};return {name:typeof record.name==='string'?record.name:'Error',message:typeof record.message==='string'?record.message:String(error),stack:typeof record.stack==='string'?record.stack:null,diagnostic:record.diagnostic??null}; };
         const state = {status:'pending'};
         globalThis[key] = state;
         Promise.resolve().then(() => (${expression})).then(
             value => { state.status='fulfilled'; state.value=value; },
-            error => { state.status='rejected'; state.error=String(error?.stack || error); }
+            error => { state.status='rejected'; state.error=serializeRuntimeError(error); }
         );
         return JSON.stringify({started:true, key});
     })()`;
@@ -319,14 +344,47 @@ export function buildRuntimeJobStart(key, expression) {
  * @returns {string}
  */
 export function buildOwnedExtensionPageOpenScript(page) {
-    return `(() => { const state=globalThis.__manabitanAndroidRuntimeQualification; if(!state||!Array.isArray(state.ownedExtensionPageTabs)) throw new Error('Harness background tab ownership state is unavailable'); browser.tabs.create({url:browser.runtime.getURL(${JSON.stringify(page)})}).then(tab=>{state.ownedExtensionPageTabs.push(tab.id);state.lastOpenedPage=${JSON.stringify(page)};state.phase='page-open';},error=>{state.error=String(error);state.phase='failed';}); return JSON.stringify({started:true,page:${JSON.stringify(page)}}); })()`;
+    return `(() => { const serializeRuntimeError=error=>{const record=typeof error==='object'&&error!==null?error:{};return {name:typeof record.name==='string'?record.name:'Error',message:typeof record.message==='string'?record.message:String(error),stack:typeof record.stack==='string'?record.stack:null,diagnostic:record.diagnostic??null};}; const state=globalThis.__manabitanAndroidRuntimeQualification; const page=${JSON.stringify(page)}; if(!state||!Array.isArray(state.ownedExtensionPageTabs)) throw new Error('Harness background tab ownership state is unavailable'); state.ownedExtensionPageTabIds??={}; browser.tabs.create({url:browser.runtime.getURL(page)}).then(tab=>{if(!Number.isInteger(tab?.id)){state.error=serializeRuntimeError(new Error('Created extension page has no tab ID'));state.phase='failed';return;}state.ownedExtensionPageTabs.push(tab.id);state.ownedExtensionPageTabIds[page]=tab.id;state.lastOpenedPage=page;state.phase='page-open';},error=>{state.error=serializeRuntimeError(error);state.phase='failed';}); return JSON.stringify({started:true,page}); })()`;
+}
+
+/**
+ * @param {string} page
+ * @returns {string}
+ */
+export function buildOwnedPageActivationScript(page) {
+    return `new Promise(async(resolve,reject)=>{try{const state=globalThis.__manabitanAndroidRuntimeQualification;const page=${JSON.stringify(page)};const id=state?.ownedExtensionPageTabIds?.[page];const expectedUrl=browser.runtime.getURL(page);if(!Number.isInteger(id)||!Array.isArray(state.ownedExtensionPageTabs)||!state.ownedExtensionPageTabs.includes(id)){throw new Error('Owned '+page+' tab ID is unavailable or not in the owned tab list');}const tab=await browser.tabs.get(id);if(tab.url!==expectedUrl){throw new Error('Owned '+page+' tab URL mismatch: '+JSON.stringify({id,expectedUrl,actualUrl:tab.url}));}await browser.tabs.update(id,{active:true});const active=await browser.tabs.query({active:true,currentWindow:true});const actual=active.find(item=>item.id===id);if(!actual||actual.url!==expectedUrl){throw new Error('Owned '+page+' tab did not become the active expected page: '+JSON.stringify(active));}resolve({page,tabId:id,activeTabId:actual.id,url:actual.url});}catch(error){reject(error);}})`;
+}
+
+/**
+ * @param {string} page
+ * @returns {string}
+ */
+export function buildOwnedPageReloadScript(page) {
+    return `new Promise(async(resolve,reject)=>{try{const state=globalThis.__manabitanAndroidRuntimeQualification;const page=${JSON.stringify(page)};const id=state?.ownedExtensionPageTabIds?.[page];const expectedUrl=browser.runtime.getURL(page);if(!Number.isInteger(id)||!Array.isArray(state.ownedExtensionPageTabs)||!state.ownedExtensionPageTabs.includes(id)){throw new Error('Owned '+page+' tab ID is unavailable or not in the owned tab list');}const tab=await browser.tabs.get(id);if(tab.url!==expectedUrl){throw new Error('Owned '+page+' tab URL mismatch: '+JSON.stringify({id,expectedUrl,actualUrl:tab.url}));}await browser.tabs.reload(id);resolve({reloaded:true,page,tabId:id,url:tab.url});}catch(error){reject(error);}})`;
+}
+
+/**
+ * @param {string} page
+ * @returns {string}
+ */
+export function buildDocumentVisibilityWaitScript(page) {
+    return `new Promise((resolve,reject)=>{const expectedUrl=browser.runtime.getURL(${JSON.stringify(page)});const deadline=Date.now()+15000;const inspect=()=>{if(location.href!==expectedUrl){reject(new Error('Document URL changed while waiting for visible '+${JSON.stringify(page)}+': '+location.href));return;}if(document.visibilityState==='visible'){resolve({page:${JSON.stringify(page)},url:location.href,visibilityState:document.visibilityState});return;}if(Date.now()>deadline){reject(new Error('Owned '+${JSON.stringify(page)}+' document did not become visible: '+JSON.stringify({url:location.href,visibilityState:document.visibilityState})));return;}setTimeout(inspect,100);};inspect();})`;
+}
+
+/**
+ * @param {{id: number, url: string}} activeOwnedSettingsTab
+ * @returns {string}
+ */
+// The template literal is emitted as source in the Firefox page actor.
+export function buildDictionaryModalOpenScript(activeOwnedSettingsTab) {
+    return `new Promise((resolve,reject)=>{const visible=node=>{const rect=node?.getBoundingClientRect();const style=node&&getComputedStyle(node);let shown=Boolean(rect&&style&&rect.width>0&&rect.height>0&&style.display!=='none'&&style.visibility!=='hidden');for(let parent=node;shown&&parent instanceof HTMLElement;parent=parent.parentElement){if(parent.hidden||parent.getAttribute('aria-hidden')==='true')shown=false;}return {shown,width:rect?.width||0,height:rect?.height||0};};const diagnostic=()=>{const triggerSelector='.settings-item-button[data-modal-action="show,dictionaries"]';const modalSelector='#dictionaries-modal';const trigger=document.querySelector(triggerSelector);const modal=document.querySelector(modalSelector);const describe=node=>{if(!(node instanceof HTMLElement))return null;const rect=node.getBoundingClientRect();const style=getComputedStyle(node);return {tag:node.tagName,id:node.id||null,className:String(node.className||''),disabled:node instanceof HTMLButtonElement?node.disabled:null,hidden:node.hidden,ariaHidden:node.getAttribute('aria-hidden'),rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},display:style.display,visibility:style.visibility,position:style.position};};return {documentReadyState:document.readyState,documentVisibilityState:document.visibilityState,documentUrl:location.href,triggerSelector,modalSelector,activeOwnedTab:${JSON.stringify(activeOwnedSettingsTab)},trigger:describe(trigger),modal:describe(modal)};};const trigger=document.querySelector('.settings-item-button[data-modal-action="show,dictionaries"]');if(!(trigger instanceof HTMLElement)||!visible(trigger).shown){reject(Object.assign(new Error('Shipped visible Configure installed and enabled dictionaries trigger is unavailable'),{diagnostic:diagnostic()}));return;}trigger.scrollIntoView({block:'center',inline:'nearest'});trigger.click();const deadline=Date.now()+15000;const inspect=()=>{const modal=document.querySelector('#dictionaries-modal');const render=modal instanceof HTMLElement?visible(modal):{shown:false,width:0,height:0};if(modal instanceof HTMLElement&&!modal.hidden&&render.shown){resolve({openedThroughProductTrigger:true,modalVisible:true,render,diagnostic:diagnostic()});return;}if(Date.now()>deadline){reject(Object.assign(new Error('Shipped Dictionaries modal did not become visible'),{diagnostic:diagnostic()}));return;}setTimeout(inspect,100);};inspect();})`;
 }
 
 /**
  * @returns {string}
  */
 export function buildOwnedTabCleanupScript() {
-    return 'new Promise((resolve,reject)=>{const state=globalThis.__manabitanAndroidRuntimeQualification;const ids=Array.isArray(state?.ownedExtensionPageTabs)?[...new Set(state.ownedExtensionPageTabs.filter(Number.isInteger))]:[];Promise.all(ids.map(async id=>{try{await browser.tabs.remove(id);return {id,removed:true};}catch(error){return {id,removed:false,error:String(error)};}})).then(results=>{if(state)state.ownedExtensionPageTabs=[];resolve({ownedIds:ids,removed:results.filter(item=>item.removed).map(item=>item.id),failures:results.filter(item=>!item.removed)});},reject);})';
+    return 'new Promise((resolve,reject)=>{const state=globalThis.__manabitanAndroidRuntimeQualification;const ids=Array.isArray(state?.ownedExtensionPageTabs)?[...new Set(state.ownedExtensionPageTabs.filter(Number.isInteger))]:[];Promise.all(ids.map(async id=>{try{await browser.tabs.remove(id);return {id,removed:true};}catch(error){return {id,removed:false,error:{name:error?.name||\'Error\',message:error?.message||String(error),stack:error?.stack||null}};}})).then(results=>{if(state){state.ownedExtensionPageTabs=[];state.ownedExtensionPageTabIds={};}resolve({ownedIds:ids,removed:results.filter(item=>item.removed).map(item=>item.id),failures:results.filter(item=>!item.removed)});},reject);})';
 }
 
 /**
@@ -334,7 +392,7 @@ export function buildOwnedTabCleanupScript() {
  * @returns {string}
  */
 export function buildSettingsFileImportStartScript(archive) {
-    return `(() => { const state={phase:'waiting-settings', error:null, imported:null}; globalThis.__manabitanAndroidRuntimeQualification=state; state.promise=(async()=>{ const deadline=Date.now()+180000; while(Date.now()<deadline && document.documentElement?.dataset?.loaded!=='true') await new Promise(r=>setTimeout(r,100)); if(document.documentElement?.dataset?.loaded!=='true') throw new Error('Settings page did not reach normal loaded state'); const input=document.querySelector('#dictionary-import-file-input'); if(!(input instanceof HTMLInputElement)) throw new Error('Shipped dictionary import file input is unavailable'); const bytes=Uint8Array.from(atob('${archive}'),c=>c.charCodeAt(0)); const file=new File([bytes],'android-runtime-fixture.zip',{type:'application/zip'}); const transfer=new DataTransfer(); transfer.items.add(file); input.files=transfer.files; input.dispatchEvent(new Event('change',{bubbles:true})); state.phase='import-started'; while(Date.now()<deadline){ const error=document.querySelector('#dictionary-error'); if(error instanceof HTMLElement && !error.hidden && error.textContent.trim()) throw new Error('Product import UI reported: '+error.textContent.trim()); try { const info=await new Promise((resolve,reject)=>browser.runtime.sendMessage({action:'getDictionaryInfo'},response=>{const e=browser.runtime.lastError;if(e)reject(new Error(e.message));else if(response?.error)reject(new Error(JSON.stringify(response.error)));else resolve(response?.result??response);})); if(Array.isArray(info)&&info.some(item=>item.title==='${dictionaryTitle}')){state.imported=info.find(item=>item.title==='${dictionaryTitle}');state.phase='import-visible';return state.imported;} } catch(error){if(!String(error).includes('dictionary import is in progress')) throw error;} await new Promise(r=>setTimeout(r,250)); } throw new Error('Timed out waiting for production import publication'); })().catch(error=>{state.phase='failed';state.error=String(error?.stack||error)}); return JSON.stringify({started:true}); })()`;
+    return `(() => { const serializeRuntimeError=error=>{const record=typeof error==='object'&&error!==null?error:{};return {name:typeof record.name==='string'?record.name:'Error',message:typeof record.message==='string'?record.message:String(error),stack:typeof record.stack==='string'?record.stack:null,diagnostic:record.diagnostic??null};}; const state={phase:'waiting-settings', error:null, imported:null}; globalThis.__manabitanAndroidRuntimeQualification=state; state.promise=(async()=>{ const deadline=Date.now()+180000; while(Date.now()<deadline && document.documentElement?.dataset?.loaded!=='true') await new Promise(r=>setTimeout(r,100)); if(document.documentElement?.dataset?.loaded!=='true') throw new Error('Settings page did not reach normal loaded state'); const input=document.querySelector('#dictionary-import-file-input'); if(!(input instanceof HTMLInputElement)) throw new Error('Shipped dictionary import file input is unavailable'); const bytes=Uint8Array.from(atob('${archive}'),c=>c.charCodeAt(0)); const file=new File([bytes],'android-runtime-fixture.zip',{type:'application/zip'}); const transfer=new DataTransfer(); transfer.items.add(file); input.files=transfer.files; input.dispatchEvent(new Event('change',{bubbles:true})); state.phase='import-started'; while(Date.now()<deadline){ const error=document.querySelector('#dictionary-error'); if(error instanceof HTMLElement && !error.hidden && error.textContent.trim()) throw new Error('Product import UI reported: '+error.textContent.trim()); try { const info=await new Promise((resolve,reject)=>browser.runtime.sendMessage({action:'getDictionaryInfo'},response=>{const e=browser.runtime.lastError;if(e)reject(new Error(e.message));else if(response?.error)reject(new Error(JSON.stringify(response.error)));else resolve(response?.result??response);})); if(Array.isArray(info)&&info.some(item=>item.title==='${dictionaryTitle}')){state.imported=info.find(item=>item.title==='${dictionaryTitle}');state.phase='import-visible';return state.imported;} } catch(error){if(!String(error?.message||error).includes('dictionary import is in progress')) throw error;} await new Promise(r=>setTimeout(r,250)); } throw new Error('Timed out waiting for production import publication'); })().catch(error=>{state.phase='failed';state.error=serializeRuntimeError(error)}); return JSON.stringify({started:true}); })()`;
 }
 
 /**
@@ -380,15 +438,15 @@ export function decodeRuntimeEvaluation(entry, stage) {
  * @param {string} actor
  * @param {string} stage
  * @param {number} timeoutMs
- * @returns {Promise<{phase: string, error: string|null, imported: DictionaryInfo}>}
+ * @returns {Promise<{phase: string, error: {name: string, message: string, stack: string|null, diagnostic: unknown}|null, imported: DictionaryInfo}>}
  */
 async function pollPageState(evaluate, actor, stage, timeoutMs) {
     const deadline = Date.now() + timeoutMs;
     let lastState = null;
     while (Date.now() < deadline) {
         lastState = await evaluateJSON(evaluate, actor, '(globalThis.__manabitanAndroidRuntimeQualification||null)', stage);
-        if (lastState?.phase === 'failed') { throw new Error(`Owned import operation failed: ${lastState.error}`); }
-        if (lastState?.phase === 'import-visible' && typeof lastState.imported === 'object' && lastState.imported !== null) { return /** @type {{phase: string, error: string|null, imported: DictionaryInfo}} */ (lastState); }
+        if (lastState?.phase === 'failed') { throw new Error(`Owned import operation failed: ${JSON.stringify(lastState.error)}`); }
+        if (lastState?.phase === 'import-visible' && typeof lastState.imported === 'object' && lastState.imported !== null) { return /** @type {{phase: string, error: {name: string, message: string, stack: string|null, diagnostic: unknown}|null, imported: DictionaryInfo}} */ (lastState); }
         await new Promise((resolve) => {
             setTimeout(resolve, 250);
         });
@@ -532,10 +590,10 @@ export function assertMiningDeliveryOracle(scenario, addNote) {
 }
 
 /**
- * @param {{evaluate: RuntimeEvaluate, settingsActor: string, searchActor: string, adbDevice: string, stage: (name: string, value: unknown) => number}} options
+ * @param {{evaluate: RuntimeEvaluate, backgroundActor: string, settingsActor: string, searchActor: string, adbDevice: string, stage: (name: string, value: unknown) => number}} options
  * @returns {Promise<void>}
  */
-async function qualifyMiningAction({evaluate, settingsActor, searchActor, adbDevice, stage}) {
+async function qualifyMiningAction({evaluate, backgroundActor, settingsActor, searchActor, adbDevice, stage}) {
     assert.ok(adbDevice, 'Android device identity is missing for local mock Anki routing');
     const mockState = createAnkiMockState();
     const server = await startAnkiMockHttpServer(mockState);
@@ -552,8 +610,16 @@ async function qualifyMiningAction({evaluate, settingsActor, searchActor, adbDev
         mockState.beginScenario('android-capability-mining', [{noteId: 91_001, cardId: 92_001, deckName: 'Android Capability Deck', modelName: 'Android Capability Model', fields: {Front: 'seed', Back: 'seed'}, tags: [], queue: 0, flags: 0, findable: true}]);
         const configured = await evaluateJSON(evaluate, settingsActor, `new Promise((resolve,reject)=>{const call=(action,params)=>new Promise((done,fail)=>browser.runtime.sendMessage({action,params},response=>{const error=browser.runtime.lastError;if(error)fail(new Error(error.message));else if(response?.error)fail(new Error(JSON.stringify(response.error)));else done(response?.result??response)}));(async()=>{const options=await call('optionsGetFull');for(const profile of options.profiles){const anki=profile.options.anki;anki.server='${server.ankiConnectUrl.replace('127.0.0.1', '127.0.0.1')}';anki.apiKey='';anki.enable=true;if(!Array.isArray(anki.cardFormats))throw new Error('Product options have no Anki card-format list');const format=anki.cardFormats.find(value=>value.type==='term');if(!format)throw new Error('Product has no term card format');format.name='Android Capability Model';format.deck='Android Capability Deck';format.model='Android Capability Model';format.fields.Front={...(format.fields.Front||{}),value:'{expression}'};format.fields.Back={...(format.fields.Back||{}),value:'${androidMiningBackTemplate}'};}await call('setAllSettings',{value:options,source:'firefox-android-capability-mining'});resolve({enabled:true,deck:'Android Capability Deck',model:'Android Capability Model',front:'{expression}',back:'${androidMiningBackTemplate}'});})().catch(reject);})`, 'configure-mock-anki');
         stage('configure-mock-anki', configured);
+        const settingsFocus = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageActivationScript('settings.html'), 'activate-settings-before-anki-status');
+        stage('activate-settings-before-anki-status', settingsFocus);
+        const visibleSettings = await evaluateJSON(evaluate, settingsActor, buildDocumentVisibilityWaitScript('settings.html'), 'wait-settings-visible-before-anki-status');
+        stage('settings-visible-before-anki-status', visibleSettings);
         const ready = await evaluateJSON(evaluate, settingsActor, 'new Promise((resolve,reject)=>{const deadline=Date.now()+30000;const inspect=()=>{const message=document.querySelector(\'#anki-error-message\');const text=message instanceof HTMLElement?message.textContent||\'\':\'\';if(text.trim()===\'Connected\'){resolve({message:text});return;}if(Date.now()>deadline){reject(new Error(\'Product Settings Anki connection did not report Connected: \'+text));return;}setTimeout(inspect,250);};inspect();})', 'wait-mock-anki-connected');
         stage('mock-anki-connected', ready);
+        const searchFocus = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageActivationScript('search.html'), 'activate-search-before-mining-click');
+        stage('activate-search-before-mining-click', searchFocus);
+        const visibleSearch = await evaluateJSON(evaluate, searchActor, buildDocumentVisibilityWaitScript('search.html'), 'wait-search-visible-before-mining-click');
+        stage('search-visible-before-mining-click', visibleSearch);
         const miningClickScript = `new Promise((resolve,reject)=>{const deadline=Date.now()+30000;const visible=node=>{const rect=node?.getBoundingClientRect();const style=node&&getComputedStyle(node);const consentModal=document.querySelector('#firefox-data-transmission-consent-modal');let shown=Boolean(rect&&style&&rect.width>0&&rect.height>0&&style.display!=='none'&&style.visibility!=='hidden'&&!(consentModal instanceof HTMLElement&&!consentModal.hidden));for(let parent=node;shown&&parent instanceof HTMLElement;parent=parent.parentElement){if(parent.hidden||parent.getAttribute('aria-hidden')==='true')shown=false;}return {visible:shown,width:rect?.width||0,height:rect?.height||0,display:style?.display||'',visibility:style?.visibility||'',consentModalVisible:consentModal instanceof HTMLElement&&!consentModal.hidden};};const inspect=()=>{const entry=[...document.querySelectorAll('#dictionary-entries .entry')].find(entry=>[...entry.querySelectorAll('.headword')].some(headword=>{const term=headword.querySelector('.headword-term');const reading=headword.querySelector('.headword-reading');const copy=term?.cloneNode(true);for(const node of copy?.querySelectorAll('rt,rp')||[])node.remove();return String(copy?.textContent||'').replace(/\\s+/g,'').trim()===${JSON.stringify(expression)}&&String(reading?.textContent||'').trim()===${JSON.stringify(reading)};})&&[...entry.querySelectorAll('.definition-item[data-dictionary]')].some(item=>item.dataset.dictionary===${JSON.stringify(dictionaryTitle)}&&[...item.querySelectorAll('.gloss-content')].some(node=>String(node.textContent||'').includes(${JSON.stringify(`${glossary} revision 2`)}))));const button=entry?.querySelector('.note-actions-container .action-button[data-action="save-note"]');const render=button instanceof HTMLButtonElement?visible(button):{visible:false};if(button instanceof HTMLButtonElement&&!button.disabled&&render.visible){button.click();resolve({clicked:true,selector:button.dataset.action,render});return;}if(Date.now()>deadline){reject(new Error('Shipped Search save-note button did not become enabled and rendered: '+JSON.stringify(render)));return;}setTimeout(inspect,250);};inspect();})`;
         const clicked = await evaluateJSON(evaluate, searchActor, miningClickScript, 'click-mining-ui');
         assert.equal(clicked.render?.visible, true, `Mining save-note action was not visibly rendered and unoccluded: ${JSON.stringify(clicked)}`);

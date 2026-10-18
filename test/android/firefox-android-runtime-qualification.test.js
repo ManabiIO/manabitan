@@ -3,8 +3,10 @@ import {readFileSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {JSDOM} from 'jsdom';
-import {describe, expect, test} from 'vitest';
-import {assertMiningDeliveryOracle, buildOwnedExtensionPageOpenScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON} from './firefox-android-runtime-qualification.js';
+import {describe, expect, test, vi} from 'vitest';
+import {SettingsDisplayController} from '../../ext/js/pages/settings/settings-display-controller.js';
+import {ModalController} from '../../ext/js/pages/settings/modal-controller.js';
+import {assertMiningDeliveryOracle, buildDictionaryModalOpenScript, buildOwnedExtensionPageOpenScript, buildOwnedPageActivationScript, buildOwnedPageReloadScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON} from './firefox-android-runtime-qualification.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 
 /**
@@ -25,6 +27,8 @@ function tick() {
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const displayTemplates = readFileSync(path.join(projectRoot, 'ext/templates-display.html'), 'utf8');
+const settingsHtml = readFileSync(path.join(projectRoot, 'ext/settings.html'), 'utf8');
+const modalTemplates = readFileSync(path.join(projectRoot, 'ext/templates-modals.html'), 'utf8');
 
 /**
  * @param {{splitIdentity?: boolean}} [options]
@@ -136,7 +140,16 @@ describe('Android runtime qualification emitted scripts', () => {
         await tick();
         const state = JSON.parse(vm.runInContext('JSON.stringify(globalThis.__rejected_job_fixture)', context));
         expect(state.status).toBe('rejected');
-        expect(state.error).toContain('fixture failure');
+        expect(state.error).toMatchObject({name: 'Error', message: 'fixture failure'});
+        expect(state.error.stack).toContain('fixture failure');
+    });
+
+    test('owned rejection preserves message when the remote stack does not contain it', async () => {
+        const context = vm.createContext({});
+        vm.runInContext(buildRuntimeJobStart('__stack_only_rejection', "Promise.reject(Object.assign(new Error('actionable failure message'), {stack:'at debugger eval code:1:1'}))"), context);
+        await tick();
+        const state = JSON.parse(vm.runInContext('JSON.stringify(globalThis.__stack_only_rejection)', context));
+        expect(state.error).toEqual({name: 'Error', message: 'actionable failure message', stack: 'at debugger eval code:1:1', diagnostic: null});
     });
 
     test('background ownership records both extension pages and closes the exact owned tabs', async () => {
@@ -164,7 +177,7 @@ describe('Android runtime qualification emitted scripts', () => {
                 },
             },
         });
-        vm.runInContext('globalThis.__manabitanAndroidRuntimeQualification={ownedExtensionPageTabs:[]}', context);
+        vm.runInContext('globalThis.__manabitanAndroidRuntimeQualification={ownedExtensionPageTabs:[],ownedExtensionPageTabIds:{}}', context);
         expect(JSON.parse(vm.runInContext(buildOwnedExtensionPageOpenScript('settings.html'), context))).toEqual({started: true, page: 'settings.html'});
         await tick();
         expect(JSON.parse(vm.runInContext('JSON.stringify({phase:globalThis.__manabitanAndroidRuntimeQualification.phase,lastOpenedPage:globalThis.__manabitanAndroidRuntimeQualification.lastOpenedPage})', context))).toEqual({phase: 'page-open', lastOpenedPage: 'settings.html'});
@@ -172,8 +185,128 @@ describe('Android runtime qualification emitted scripts', () => {
         await tick();
         expect(created.map(({url}) => url)).toEqual(['moz-extension://fixture/settings.html', 'moz-extension://fixture/search.html']);
         expect(JSON.parse(vm.runInContext('JSON.stringify(globalThis.__manabitanAndroidRuntimeQualification.ownedExtensionPageTabs)', context))).toEqual([1, 2]);
+        expect(JSON.parse(vm.runInContext('JSON.stringify(globalThis.__manabitanAndroidRuntimeQualification.ownedExtensionPageTabIds)', context))).toEqual({'settings.html': 1, 'search.html': 2});
         await expect(vm.runInContext(buildOwnedTabCleanupScript(), context)).resolves.toEqual({ownedIds: [1, 2], removed: [1, 2], failures: []});
         expect(removed).toEqual([1, 2]);
+        expect(JSON.parse(vm.runInContext('JSON.stringify(globalThis.__manabitanAndroidRuntimeQualification.ownedExtensionPageTabIds)', context))).toEqual({});
+    });
+
+    test('owned page activation and reload require the mapped owned ID and its exact expected URL', async () => {
+        let activeTabId = 14;
+        const tabs = new Map([[14, {id: 14, url: 'moz-extension://fixture/settings.html'}], [15, {id: 15, url: 'moz-extension://fixture/search.html'}], [99, {id: 99, url: 'https://example.org/'}]]);
+        /** @type {number[]} */
+        const reloaded = [];
+        const context = vm.createContext({browser: {
+            runtime: {getURL: (/** @type {string} */ page) => `moz-extension://fixture/${page}`},
+            tabs: {
+                get: async (/** @type {number} */ id) => tabs.get(id),
+                update: async (/** @type {number} */ id, /** @type {{active?: boolean}} */ update) => {
+                    if (update.active) { activeTabId = id; }
+                    return tabs.get(id);
+                },
+                query: async () => [{...tabs.get(activeTabId), active: true}],
+                reload: async (/** @type {number} */ id) => { reloaded.push(id); },
+            },
+        }});
+        vm.runInContext('globalThis.__manabitanAndroidRuntimeQualification={ownedExtensionPageTabs:[14,15],ownedExtensionPageTabIds:{"settings.html":14,"search.html":15}}', context);
+        await expect(vm.runInContext(buildOwnedPageActivationScript('settings.html'), context)).resolves.toEqual({page: 'settings.html', tabId: 14, activeTabId: 14, url: 'moz-extension://fixture/settings.html'});
+        await expect(vm.runInContext(buildOwnedPageActivationScript('search.html'), context)).resolves.toEqual({page: 'search.html', tabId: 15, activeTabId: 15, url: 'moz-extension://fixture/search.html'});
+        await expect(vm.runInContext(buildOwnedPageReloadScript('settings.html'), context)).resolves.toMatchObject({reloaded: true, page: 'settings.html', tabId: 14});
+        expect(reloaded).toEqual([14]);
+        await expect(vm.runInContext(buildOwnedPageActivationScript('other.html'), context)).rejects.toThrow(/unavailable or not in the owned tab list/);
+        vm.runInContext('globalThis.__manabitanAndroidRuntimeQualification.ownedExtensionPageTabs.push(99);globalThis.__manabitanAndroidRuntimeQualification.ownedExtensionPageTabIds["settings.html"]=99', context);
+        await expect(vm.runInContext(buildOwnedPageReloadScript('settings.html'), context)).rejects.toThrow(/URL mismatch/);
+        expect(activeTabId).toBe(15);
+        expect(reloaded).toEqual([14]);
+    });
+
+    test('Dictionaries modal failure captures actual trigger and modal DOM diagnostics', async () => {
+        const dom = new JSDOM(`<!doctype html><html><body>${settingsHtml}${modalTemplates}</body></html>`, {runScripts: 'outside-only', url: 'moz-extension://fixture/settings.html'});
+        const {document, HTMLElement, HTMLButtonElement, location, getComputedStyle} = dom.window;
+        const trigger = document.querySelector('.settings-item-button[data-modal-action="show,dictionaries"]');
+        if (!(trigger instanceof HTMLElement)) { throw new Error('Modal test trigger is missing'); }
+        const modalTemplate = document.querySelector('#shared-modals-template');
+        if (!(modalTemplate instanceof dom.window.HTMLTemplateElement)) { throw new Error('Product modal template is missing'); }
+        document.body.append(modalTemplate.content.cloneNode(true));
+        document.body.hidden = false;
+        const modal = document.querySelector('#dictionaries-modal');
+        Object.defineProperty(trigger, 'getBoundingClientRect', {value: () => ({x: 1, y: 2, width: 80, height: 24})});
+        Object.defineProperty(trigger, 'scrollIntoView', {value: () => {}});
+        Object.defineProperty(modal, 'getBoundingClientRect', {value: () => ({x: 0, y: 0, width: 0, height: 0})});
+        let now = 0;
+        const context = vm.createContext({
+            document,
+            HTMLElement,
+            HTMLButtonElement,
+            location,
+            getComputedStyle,
+            setTimeout,
+            Error,
+            Date: {now: () => { now += 20_000; return now; }},
+        });
+        let clicks = 0;
+        trigger.addEventListener('click', () => { clicks += 1; });
+        /** @type {Error & {diagnostic?: Record<string, unknown>}|null} */
+        let modalFailure = null;
+        try {
+            await vm.runInContext(buildDictionaryModalOpenScript({id: 77, url: 'moz-extension://fixture/settings.html'}), context);
+        } catch (error) {
+            modalFailure = error instanceof Error ? /** @type {Error & {diagnostic?: Record<string, unknown>}} */ (error) : new Error(String(error));
+        }
+        expect(modalFailure).toBeInstanceOf(Error);
+        if (modalFailure === null) { throw new Error('Expected the modal probe to reject'); }
+        expect(modalFailure.message).toBe('Shipped Dictionaries modal did not become visible');
+        expect(modalFailure.diagnostic).toMatchObject({
+            documentReadyState: 'loading',
+            documentVisibilityState: 'prerender',
+            documentUrl: 'moz-extension://fixture/settings.html',
+            triggerSelector: '.settings-item-button[data-modal-action="show,dictionaries"]',
+            modalSelector: '#dictionaries-modal',
+            activeOwnedTab: {id: 77, url: 'moz-extension://fixture/settings.html'},
+            trigger: expect.objectContaining({tag: 'DIV', disabled: null, rect: {x: 1, y: 2, width: 80, height: 24}}),
+            modal: expect.objectContaining({tag: 'DIV', hidden: true, rect: {x: 0, y: 0, width: 0, height: 0}}),
+        });
+        expect(clicks).toBe(1);
+    });
+
+    test('Dictionaries modal helper opens the shipped modal through the real settings controllers', async () => {
+        const dom = new JSDOM(`<!doctype html><html><body>${settingsHtml}${modalTemplates}</body></html>`, {runScripts: 'outside-only', url: 'moz-extension://fixture/settings.html'});
+        const {document, HTMLElement, HTMLButtonElement, location, getComputedStyle} = dom.window;
+        const trigger = document.querySelector('.settings-item-button[data-modal-action="show,dictionaries"]');
+        const modalTemplate = document.querySelector('#shared-modals-template');
+        if (!(trigger instanceof HTMLElement) || !(modalTemplate instanceof dom.window.HTMLTemplateElement)) { throw new Error('Shipped Dictionaries trigger or modal template is missing'); }
+        document.body.append(modalTemplate.content.cloneNode(true));
+        document.body.hidden = false;
+        document.body.hidden = false;
+        const modal = document.querySelector('#dictionaries-modal');
+        if (!(modal instanceof HTMLElement)) { throw new Error('Shipped Dictionaries modal is missing'); }
+        Object.defineProperty(trigger, 'getBoundingClientRect', {value: () => ({x: 1, y: 2, width: 80, height: 24})});
+        Object.defineProperty(modal, 'getBoundingClientRect', {value: () => ({x: 0, y: 0, width: 480, height: 320})});
+        Object.defineProperty(trigger, 'scrollIntoView', {value: vi.fn()});
+        vi.stubGlobal('document', document);
+        vi.stubGlobal('window', dom.window);
+        vi.stubGlobal('window', Object.assign(dom.window, {matchMedia: () => ({matches: false, addEventListener: () => {}})}));
+        vi.stubGlobal('HTMLElement', HTMLElement);
+        vi.stubGlobal('Node', dom.window.Node);
+        vi.stubGlobal('HTMLButtonElement', HTMLButtonElement);
+        vi.stubGlobal('MutationObserver', dom.window.MutationObserver);
+        vi.stubGlobal('CustomEvent', dom.window.CustomEvent);
+        vi.stubGlobal('getComputedStyle', getComputedStyle);
+        try {
+            const modalController = new ModalController([]);
+            await modalController.prepare();
+            const settingsController = {getPreparedProfileOptions: () => ({general: {popupTheme: 'light', popupThemePreset: 'default'}})};
+            const displayController = new SettingsDisplayController(/** @type {import('../../ext/js/pages/settings/settings-controller.js').SettingsController} */ (/** @type {unknown} */ (settingsController)), modalController);
+            await displayController.prepare();
+            const result = await vm.runInContext(buildDictionaryModalOpenScript({id: 77, url: 'moz-extension://fixture/settings.html'}), vm.createContext({document, HTMLElement, HTMLButtonElement, location, getComputedStyle, setTimeout, Error, Date}));
+            expect(result).toMatchObject({openedThroughProductTrigger: true, modalVisible: true, render: {shown: true}});
+            expect(modal.hidden).toBe(false);
+            expect(trigger.scrollIntoView).toHaveBeenCalledWith({block: 'center', inline: 'nearest'});
+        } finally {
+            dom.window.close();
+            await tick();
+            vi.unstubAllGlobals();
+        }
     });
 
     test('evaluation decoder requires correlated actual evaluationResult packets and parses string grips', () => {
