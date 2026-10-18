@@ -36,6 +36,8 @@ const dictionaryTitles = ['firefox-happy-path-a', 'firefox-happy-path-b', 'firef
 const japaneseLookupTerm = '読む';
 const japaneseLookupReading = 'よむ';
 const japaneseLookupGlossary = 'to read';
+const firefoxDevGeckoId = '{accbebce-862b-48a9-bb9a-1da9ad1f8702}';
+const firefoxDevExtensionUuid = '6d1d0bf0-9b57-4ff8-9d93-64e13ae0f5da';
 const deckName = 'Firefox Happy Deck';
 const modelName = 'Firefox Happy Model';
 const seedNotes = [{
@@ -173,31 +175,24 @@ async function resolveFirefoxAddonPath() {
 
 async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
     const normalizedAddonId = String(installedAddonId || '').trim();
-    const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
-    const deadline = Date.now() + 30_000;
-    let fallbackBaseUrl = '';
-    while (Date.now() < deadline) {
-        const handles = await driver.getAllWindowHandles();
-        for (const handle of handles) {
-            await driver.switchTo().window(handle);
-            const url = String(await driver.getCurrentUrl());
-            const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/u.exec(url);
-            if (match !== null) {
-                fallbackBaseUrl = match[1];
-                if (expectedBaseUrl.length === 0 || expectedBaseUrl === match[1]) {
-                    return match[1];
-                }
-            }
-        }
-        await driver.sleep(300);
+    if (normalizedAddonId.length > 0 && normalizedAddonId !== firefoxDevGeckoId) {
+        fail(`Unexpected Firefox addon ID: ${normalizedAddonId}`);
     }
-    if (fallbackBaseUrl.length > 0) {
-        return fallbackBaseUrl;
+    const expectedBaseUrl = `moz-extension://${firefoxDevExtensionUuid}`;
+    await driver.get(`${expectedBaseUrl}/settings.html`);
+    const runtimeIdentity = await driver.executeScript(`
+        const runtime = globalThis.browser?.runtime ?? globalThis.chrome?.runtime;
+        return {origin: location.origin, addonId: runtime?.id ?? ''};
+    `);
+    if (runtimeIdentity.origin !== expectedBaseUrl || runtimeIdentity.addonId !== firefoxDevGeckoId) {
+        fail(`Firefox extension origin/runtime identity mismatch: ${JSON.stringify(runtimeIdentity)}`);
     }
-    if (expectedBaseUrl.length > 0) {
-        return expectedBaseUrl;
+    const url = String(await driver.getCurrentUrl());
+    const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/u.exec(url);
+    if (match === null || match[1] !== expectedBaseUrl) {
+        fail(`Unable to validate Firefox extension base URL: ${url}`);
     }
-    fail('Unable to discover Firefox extension base URL');
+    return match[1];
 }
 
 async function sendRuntimeMessage(driver, action, params = void 0) {
@@ -295,7 +290,14 @@ async function importDictionariesFromSettings(driver, extensionBaseUrl) {
     const deadline = Date.now() + 60_000;
     let importedTitles = [];
     while (Date.now() < deadline) {
-        const dictionaryInfo = await sendRuntimeMessage(driver, 'getDictionaryInfo');
+        let dictionaryInfo;
+        try {
+            dictionaryInfo = await sendRuntimeMessage(driver, 'getDictionaryInfo');
+        } catch (error) {
+            if (!errorMessage(error).includes('dictionary import is in progress')) { throw error; }
+            await driver.sleep(250);
+            continue;
+        }
         importedTitles = Array.isArray(dictionaryInfo) ? dictionaryInfo.map(({title}) => String(title || '')).filter((value) => value.length > 0).sort() : [];
         const allPresent = dictionaryTitles.every((title) => importedTitles.includes(title));
         if (allPresent) {
@@ -373,18 +375,32 @@ async function configureAnkiCardViaUi(driver, deck, model) {
         if (!(modal instanceof HTMLElement)) { throw new Error('Anki cards modal not found'); }
         const deckSelect = modal.querySelector('select.anki-card-deck');
         const modelSelect = modal.querySelector('select.anki-card-model');
-        const frontField = modal.querySelector('[data-setting="anki.cardFormats[0].fields.Front.value"]');
-        const backField = modal.querySelector('[data-setting="anki.cardFormats[0].fields.Back.value"]');
         if (!(deckSelect instanceof HTMLSelectElement) ||
-            !(modelSelect instanceof HTMLSelectElement) ||
-            !(frontField instanceof HTMLInputElement || frontField instanceof HTMLTextAreaElement) ||
-            !(backField instanceof HTMLInputElement || backField instanceof HTMLTextAreaElement)) {
-            throw new Error('Anki card modal controls are unavailable');
+            !(modelSelect instanceof HTMLSelectElement)) {
+            throw new Error('Anki card modal selectors are unavailable');
         }
         deckSelect.value = Array.from(deckSelect.options).find((option) => option.label === arguments[0])?.value || '';
         deckSelect.dispatchEvent(new Event('change', {bubbles: true}));
         modelSelect.value = Array.from(modelSelect.options).find((option) => option.label === arguments[1])?.value || '';
         modelSelect.dispatchEvent(new Event('change', {bubbles: true}));
+    `, deck, model);
+    await driver.wait(async () => {
+        return await driver.executeScript(`
+            const modal = document.querySelector('#anki-cards-modal');
+            return modal instanceof HTMLElement &&
+                modal.querySelector('[data-setting="anki.cardFormats[0].fields.Front.value"]') instanceof HTMLInputElement &&
+                modal.querySelector('[data-setting="anki.cardFormats[0].fields.Back.value"]') instanceof HTMLInputElement;
+        `);
+    }, 30_000);
+    await driver.executeScript(`
+        const modal = document.querySelector('#anki-cards-modal');
+        if (!(modal instanceof HTMLElement)) { throw new Error('Anki cards modal not found'); }
+        const frontField = modal.querySelector('[data-setting="anki.cardFormats[0].fields.Front.value"]');
+        const backField = modal.querySelector('[data-setting="anki.cardFormats[0].fields.Back.value"]');
+        if (!(frontField instanceof HTMLInputElement || frontField instanceof HTMLTextAreaElement) ||
+            !(backField instanceof HTMLInputElement || backField instanceof HTMLTextAreaElement)) {
+            throw new Error('Anki card modal fields are unavailable');
+        }
         frontField.value = '{expression}';
         frontField.dispatchEvent(new Event('input', {bubbles: true}));
         frontField.dispatchEvent(new Event('change', {bubbles: true}));
@@ -418,6 +434,7 @@ async function waitForTermsLookupReady(driver, query) {
                 deinflect: true,
                 primaryReading: '',
             },
+            optionsContext: {current: true},
         });
         if (result && typeof result === 'object' && Array.isArray(result.dictionaryEntries) && result.dictionaryEntries.length > 0) {
             return;
@@ -553,8 +570,7 @@ async function clickSaveButton(driver) {
 async function waitForSaveButtonEnabled(driver) {
     await driver.wait(async () => {
         return await driver.executeScript(`
-            const saveButton = document.querySelector('.entry .note-actions-container .action-button[data-action="save-note"]');
-            return saveButton instanceof HTMLButtonElement && !saveButton.disabled;
+            return document.querySelector('.entry .note-actions-container .action-button[data-action="save-note"]:not([disabled])') instanceof HTMLButtonElement;
         `);
     }, 30_000);
 }
@@ -575,13 +591,23 @@ async function main() {
     firefoxOptions.setPreference('xpinstall.signatures.required', false);
     firefoxOptions.setPreference('extensions.manifestV3.enabled', true);
     firefoxOptions.setPreference('extensions.backgroundServiceWorker.enabled', true);
+    firefoxOptions.setPreference(
+        'extensions.webextensions.uuids',
+        JSON.stringify({[firefoxDevGeckoId]: firefoxDevExtensionUuid}),
+    );
+    firefoxOptions.setPreference('javascript.options.shared_memory', true);
+    firefoxOptions.setPreference('dom.postMessage.sharedArrayBuffer.withCOOP_COEP', true);
+    firefoxOptions.setPreference('dom.postMessage.sharedArrayBuffer.bypassCOOP_COEP.insecure.enabled', true);
 
     let driver = null;
     let runError;
     try {
+        const firefoxService = new firefox.ServiceBuilder();
+        firefoxService.addArguments('--allow-system-access');
         driver = new Builder()
             .forBrowser(Browser.FIREFOX)
             .setFirefoxOptions(firefoxOptions)
+            .setFirefoxService(firefoxService)
             .build();
 
         const installStart = safePerformance.now();
