@@ -13,16 +13,16 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with: {persist-credentials: false}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: {node-version: '24.21.0'}
       - run: npm ci
       - run: npm run build:libs
       - run: node web/build.mjs
       - run: npm run test:ts:main && npm run test:ts:test && npx tsc -p web/tsconfig.json
       - run: npx vitest run test/reader-scanner-lifecycle.test.js test/dictionary-importer-shared-buffer.test.js test/term-content-opfs-store.test.js test/term-content-queued-cursor.test.js
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: ManabiIO/manabi-reader-web
           ref: bca91f6fff6300d10ba47d046dfb1a20a7c97e5e
@@ -38,7 +38,7 @@ jobs:
       - name: Run real no-extension browser acceptance
         env: {DICTIONARY_FIXTURES: '${{ runner.temp }}/dictionaries'}
         run: node web/e2e.mjs
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: manabitan-static-web-results

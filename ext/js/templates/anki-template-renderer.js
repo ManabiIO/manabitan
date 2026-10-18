@@ -700,7 +700,7 @@ export class AnkiTemplateRenderer {
             }
             result = output.join('')
                 .replaceAll(/\n+/g, '<br>') // convert newlines into linebreaks and condense newlines
-                .replaceAll(/^(\s*<br>\s*|\s)*/g, '') // remove leading linebreaks and whitespace
+                .replaceAll(/^(?:\s|<br>)*/g, '') // remove leading linebreaks and whitespace
                 .replaceAll('<br>', '<br>\n');
         } finally {
             container.textContent = '';

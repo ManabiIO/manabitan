@@ -382,6 +382,38 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(Reflect.get(database, '_deferTermsVirtualTableSync')).toBe(false);
     });
 
+    test('releases import ownership when cryptographic session ID generation fails', async () => {
+        const database = new DictionaryDatabase();
+        const termContentStore = {
+            createImportCheckpoint: vi.fn().mockResolvedValue({segments: []}),
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
+        };
+        const termRecordStore = {
+            createImportCheckpoint: vi.fn().mockResolvedValue({shards: []}),
+            beginImportSession: vi.fn(resolveVoid),
+            rollbackImportSession: vi.fn(resolveVoid),
+        };
+        const journal = {write: vi.fn(resolveVoid), clear: vi.fn(resolveVoid)};
+        Reflect.set(database, '_db', {exec: vi.fn(), selectValue: vi.fn(() => 0)});
+        Reflect.set(database, '_termContentStore', termContentStore);
+        Reflect.set(database, '_termRecordStore', termRecordStore);
+        Reflect.set(database, '_importJournal', journal);
+
+        vi.stubGlobal('crypto', {});
+        try {
+            await expect(database.startBulkImport()).rejects.toThrow('require cryptographic randomness');
+        } finally {
+            vi.unstubAllGlobals();
+        }
+
+        expect(journal.write).not.toHaveBeenCalled();
+        expect(termContentStore.beginImportSession).not.toHaveBeenCalled();
+        expect(termRecordStore.beginImportSession).not.toHaveBeenCalled();
+        expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
+        expect(Reflect.get(database, '_bulkImportJournalRecord')).toBeNull();
+    });
+
     test('keeps bulk-import ownership until all failed startup checkpoints settle', async () => {
         const database = new DictionaryDatabase();
         /** @type {() => void} */
