@@ -55,7 +55,8 @@ describe.skipIf(process.platform === 'win32')('Firefox Android web-ext install h
     });
 
     test.skipIf(process.platform === 'win32')('times out a hanging handshake and cleans up the whole process group', async () => {
-        const childScript = "const {spawn}=require('node:child_process'); const child=spawn(process.execPath,['-e',\"process.on('SIGTERM',()=>{}); setInterval(()=>{},1000)\"],{stdio:'ignore'}); console.log('child-pid='+child.pid); console.log('Waiting for RemoteDebuggingServer'); setInterval(()=>{},1000);";
+        const grandchildScript = "process.on('SIGTERM',()=>{}); console.log('grandchild-ready'); setInterval(()=>{},1000);";
+        const childScript = `const {spawn}=require('node:child_process'); const child=spawn(process.execPath,['-e',${JSON.stringify(grandchildScript)}],{stdio:['ignore','pipe','ignore']}); let readiness=''; child.stdout.on('data',(chunk)=>{readiness+=chunk.toString(); if(readiness.includes('grandchild-ready\\n')) { console.log('child-pid='+child.pid); console.log('Waiting for RemoteDebuggingServer'); }}); setInterval(()=>{},1000);`;
         /** @type {string[]} */
         const output = [];
         const realNow = Date.now;
@@ -69,6 +70,7 @@ describe.skipIf(process.platform === 'win32')('Firefox Android web-ext install h
                 commandArgs: ['-e', childScript],
                 onOutput: (line) => {
                     output.push(line);
+                    // The parent prints this only after the grandchild has installed its SIGTERM handler.
                     if (line.startsWith('child-pid=')) { fixtureNow = realNow() + 101; }
                 },
             })).rejects.toThrow('Timed out after 100 ms waiting for Firefox Android remote debugger install acknowledgement');
