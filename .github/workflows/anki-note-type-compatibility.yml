@@ -7,6 +7,7 @@ on:
       - 'ext/js/data/anki-template-util.js'
       - 'ext/js/pages/settings/anki-controller.js'
       - 'dev/anki-note-type-*'
+      - 'dev/requirements-anki-note-type-compatibility.txt'
       - 'dev/tests/*anki*'
       - 'test/anki-note-type-field-util.test.js'
       - 'test/data/anki-note-types/**'
@@ -39,7 +40,7 @@ jobs:
       - name: Test offline field contracts and negative controls
         run: node --test dev/tests/anki-note-type-compatibility.js
       - name: Install archive reader
-        run: python -m pip install zstandard==0.25.0
+        run: python -m pip install --require-hashes -r dev/requirements-anki-note-type-compatibility.txt
       - name: Test APKG reader and integrity checks
         run: python -m unittest discover -s dev/tests -p 'test_anki*.py' -v
       - name: Install repository test dependencies
@@ -69,7 +70,7 @@ jobs:
         with:
           python-version: '3.13'
       - name: Install archive reader
-        run: python -m pip install zstandard==0.25.0
+        run: python -m pip install --require-hashes -r dev/requirements-anki-note-type-compatibility.txt
       - name: Download actual upstream packages and extract fields
         env:
           GITHUB_TOKEN: ${{ github.token }}

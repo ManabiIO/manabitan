@@ -25,9 +25,6 @@ jobs:
           npm run build -- --target firefox-dev
           cp builds/manabitan-firefox-dev.zip builds/manabitan-firefox-dev.xpi
 
-      - name: Install Selenium driver dependency
-        run: npm install --no-save selenium-webdriver@4.38.0
-
       - name: Install Firefox Developer Edition
         run: |
           curl -fsSL "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US" -o /tmp/firefox-devedition.tar.bz2
