@@ -25,6 +25,8 @@ Keep documentation link changes gated on publicly available destinations and a p
 
 ## Create a development prerelease
 
+Pushing a version tag automatically publishes a public all-target prerelease and dispatches the Chrome and Firefox development publishers. Before tagging, build locally with the intended version and verify package manifests and hashes. The all-target tag includes the Firefox Android package; keep it explicitly experimental and unqualified unless full mobile runtime testing qualifies it. An unsigned `0.0.0.0` qualification build does not qualify future versioned or signed delivery.
+
 1. On `main`, finish pending Git operations, preserve or commit working changes, and ensure HEAD matches `origin/main` exactly. The [tag helper](../../tag.sh) checks these conditions after fetching.
 2. Run `./tag.sh`. It selects an unused four-part CalVer tag such as `26.10.17.0`, asks for confirmation, creates a signed tag at the displayed commit and separately asks before pushing it. A working Git signing key is required. Components must not have leading zeroes. `MANABITAN_RELEASE_BRANCH` overrides the expected branch only for an intentional alternate release process.
 3. Confirm that [Create prerelease on tag](https://github.com/ManabiIO/manabitan/actions/workflows/create-prerelease-on-tag.yml) builds the tagged source and publishes the intended [GitHub prerelease](https://github.com/ManabiIO/manabitan/releases) with package assets.

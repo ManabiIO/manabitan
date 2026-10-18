@@ -427,8 +427,7 @@ export class AudioDownloader {
      * @returns {string}
      */
     _escapeWikimediaSearchTerm(term) {
-        // Escape regex metacharacters and CirrusSearch delimiters in one pass so
-        // backslashes emitted for earlier characters are not escaped a second time.
+        // Escape literal regex metacharacters and CirrusSearch delimiters in one pass.
         return term.replace(/[.*+?^${}()|[\]\\/"#@&<>~]/g, '\\$&');
     }
 

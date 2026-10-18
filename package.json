@@ -16,7 +16,7 @@
         "build:libs": "node ./dev/bin/build-libs.js",
         "build:zstd-wasm": "node ./dev/bin/build-zstd-wasm.js",
         "build:source-release": "npm run build:libs && npm run license-report:html && npm run-script build -- --all",
-        "build:serve:firefox-android": "node ./dev/bin/build.js --target firefox-android && web-ext run -s ./builds/yomitan-firefox-android",
+        "build:serve:firefox-android": "node ./dev/bin/build.js --target firefox-android && web-ext run -s ./builds/manabitan-firefox-android",
         "build:serve:kiwi-browser": "node ./dev/bin/build.js --target chrome-dev && adb shell mkdir -p /sdcard/yomitan && adb push ./builds/manabitan-chrome-dev.zip /sdcard/yomitan/manabitan-kiwi-browser.zip",
         "//WARNING": "These are convenience entry points for local CLI use. Keep the test:ci:* scripts and workflows aligned when changing CI coverage.",
         "test": "npm run test:js && npm run test:ts && npm run test:css && npm run test:html && npm run test:unit && npm run test:unit:options && npm run test:json && npm run test:md && npm run test:build",
