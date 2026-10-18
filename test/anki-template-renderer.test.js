@@ -16,11 +16,37 @@
  */
 
 import {describe} from 'vitest';
+import {AnkiTemplateRenderer} from '../ext/js/templates/anki-template-renderer.js';
 import {createAnkiTemplateRendererTest} from './fixtures/anki-template-renderer-test.js';
 
 const test = await createAnkiTemplateRendererTest();
 
 describe('AnkiTemplateRenderer', () => {
+    test('plain structured text escapes markup and emits only controlled line breaks', async ({expect, window}) => {
+        const renderer = new AnkiTemplateRenderer(window.document, window);
+        await renderer.prepare();
+
+        const node = window.document.createElement('div');
+        const span = window.document.createElement('span');
+        span.appendChild(window.document.createTextNode('safe & '));
+        const bold = window.document.createElement('b');
+        bold.appendChild(window.document.createTextNode('nested'));
+        span.appendChild(bold);
+        node.appendChild(span);
+        const script = window.document.createElement('script');
+        script.appendChild(window.document.createTextNode('alert(1)'));
+        node.appendChild(script);
+        const block = window.document.createElement('div');
+        block.setAttribute('title', '>');
+        block.appendChild(window.document.createTextNode('tail'));
+        node.appendChild(block);
+        node.appendChild(window.document.createTextNode('<script><img src=x onerror=alert(1)>'));
+        const result = String(renderer._getText(node, renderer._structuredContentStyleApplier, renderer._structuredContentDatasetKeyIgnorePattern));
+
+        expect(result).toBe('safe &amp; nestedalert(1)<br>\ntail&lt;script&gt;&lt;img src=x onerror=alert(1)&gt;');
+        expect(result.match(/<[^>]*>/g)).toEqual(['<br>']);
+    });
+
     /** @type {import('template-renderer').CompositeRenderData} */
     const data = {
         marker: 'test',

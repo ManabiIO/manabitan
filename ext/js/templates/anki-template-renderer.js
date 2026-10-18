@@ -638,14 +638,53 @@ export class AnkiTemplateRenderer {
         const container = this._getTemporaryElement();
         container.appendChild(node);
         this._normalizeHtml(container, styleApplier, datasetKeyIgnorePattern);
-        const result = container.innerHTML
-            .replaceAll(/<(div|li|ol|ul|br|details|summary|hr)(\s.*?>|>)/g, '\n') // tags that usually cause line breaks
-            .replaceAll(/<(span|a|ruby)(\s.*?>|>)/g, ' ') // tags that usually signify some change in content
-            .replaceAll(/<rt(\s.*?>|>)/g, '[') // ruby start
-            .replaceAll('</rt>', ']') // ruby end
-            .replaceAll(/<.*?>/gs, '') // remove all remaining tags
-            .replaceAll('<', '&lt;') // escape remaining <
-            .replaceAll('>', '&rt;') // and >
+        /**
+         * @param {string} text
+         * @returns {string}
+         */
+        const escapeText = (text) => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        /**
+         * @param {Node} currentNode
+         * @returns {string}
+         */
+        const serializeText = (currentNode) => {
+            if (currentNode.nodeType === this._document.TEXT_NODE) {
+                const textNode = /** @type {Text} */ (currentNode);
+                return escapeText(textNode.nodeValue ?? '');
+            }
+            if (currentNode.nodeType !== this._document.ELEMENT_NODE) { return ''; }
+
+            const element = /** @type {Element} */ (currentNode);
+            const tagName = element.tagName.toLowerCase();
+            let prefix = '';
+            switch (tagName) {
+                case 'div':
+                case 'li':
+                case 'ol':
+                case 'ul':
+                case 'br':
+                case 'details':
+                case 'summary':
+                case 'hr':
+                    prefix = '\n';
+                    break;
+                case 'span':
+                case 'a':
+                case 'ruby':
+                    prefix = ' ';
+                    break;
+                case 'rt':
+                    prefix = '[';
+                    break;
+            }
+            let result = prefix;
+            for (const child of element.childNodes) {
+                result += serializeText(child);
+            }
+            if (tagName === 'rt') { result += ']'; }
+            return result;
+        };
+        const result = serializeText(container)
             .replaceAll(/\n+/g, '<br>') // convert newlines into linebreaks and condense newlines
             .replaceAll(/^(\s*<br>\s*|\s)*/g, '') // remove leading linebreaks and whitespace
             .replaceAll('<br>', '<br>\n');
