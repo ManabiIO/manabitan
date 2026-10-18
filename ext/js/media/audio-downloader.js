@@ -427,8 +427,9 @@ export class AudioDownloader {
      * @returns {string}
      */
     _escapeWikimediaSearchTerm(term) {
-        // Lucene operators and CirrusSearch delimiters extend JavaScript's regex syntax.
-        return escapeRegExp(term).replace(/[/"#@&<>~]/g, '\\$&');
+        // Escape regex metacharacters and CirrusSearch delimiters in one pass so
+        // backslashes emitted for earlier characters are not escaped a second time.
+        return term.replace(/[.*+?^${}()|[\]\\/"#@&<>~]/g, '\\$&');
     }
 
     /**
