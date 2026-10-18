@@ -5602,7 +5602,6 @@ async function main() {
                 processSampler,
             );
 
-            let readerBridgeError = '';
             for (let round = 1; round <= 3; round++) {
                 const readerBridgeStart = safePerformance.now();
                 let roundError = '';
@@ -5617,7 +5616,6 @@ async function main() {
                     assert.ok(result.minedNote, 'Reader bridge must return the explicitly mined note');
                 } catch (e) {
                     roundError = `Reader bridge round ${round}/3 failed: ${errorMessage(e)}`;
-                    readerBridgeError = roundError;
                     verificationErrors.push(`Installed Reader bridge verification failed: ${roundError}`);
                 }
                 await addReportPhase(
