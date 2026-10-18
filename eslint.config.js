@@ -648,7 +648,7 @@ export default [
             'sonarjs/no-identical-functions': 'error',
             'sonarjs/no-ignored-return': 'error',
             'sonarjs/no-inverted-boolean-check': 'error',
-            'sonarjs/no-one-iteration-loop': 'error',
+            'no-unreachable-loop': 'error',
             'sonarjs/no-redundant-boolean': 'error',
             'sonarjs/no-redundant-jump': 'error',
             'sonarjs/no-same-line-conditional': 'error',

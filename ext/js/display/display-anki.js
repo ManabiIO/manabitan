@@ -1241,7 +1241,7 @@ export class DisplayAnki {
 
         // Standard first-field probes need no template work. Dispatch them
         // before the renderer occupies this thread instead of yielding first.
-        const notes = hasAsyncNotes ? await Promise.all(notePromises) : /** @type {import('anki').Note[]} */ (notePromises);
+        const notes = hasAsyncNotes ? await Promise.all(notePromises.map((note) => Promise.resolve(note))) : /** @type {import('anki').Note[]} */ (notePromises);
         const validNotes = [];
         const validNoteIndices = [];
         for (let i = 0, ii = notes.length; i < ii; ++i) {
