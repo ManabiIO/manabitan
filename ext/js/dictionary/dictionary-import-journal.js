@@ -229,10 +229,24 @@ export class DictionaryImportJournal {
 
 /**
  * @returns {string}
+ * @throws {Error} If cryptographic randomness is unavailable.
  */
 export function createDictionaryImportSessionId() {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    if (typeof crypto === 'undefined') {
+        throw new Error('Dictionary import session IDs require cryptographic randomness');
+    }
+    if (typeof crypto.randomUUID === 'function') {
         return crypto.randomUUID();
     }
-    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    if (typeof crypto.getRandomValues !== 'function') {
+        throw new Error('Dictionary import session IDs require cryptographic randomness');
+    }
+
+    // Preserve UUID-shaped opaque IDs in browsers without randomUUID, using
+    // only the cryptographic source already required for OPFS imports.
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
