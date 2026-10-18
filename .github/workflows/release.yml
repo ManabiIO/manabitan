@@ -15,6 +15,7 @@ jobs:
         with:
           workflow: publish-chrome
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.release.tag_name }}
           wait-for-completion: false
 
       - name: Dispatch publish-firefox
@@ -22,6 +23,7 @@ jobs:
         with:
           workflow: publish-firefox
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.release.tag_name }}
           wait-for-completion: false
 
       - name: Dispatch publish-edge
@@ -29,4 +31,5 @@ jobs:
         with:
           workflow: publish-edge
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.release.tag_name }}
           wait-for-completion: false
