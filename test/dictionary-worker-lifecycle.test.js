@@ -58,7 +58,7 @@ class MockWorker {
 function installWorkerMock() {
     /** @type {MockWorker[]} */
     const workers = [];
-    vi.stubGlobal('Worker', vi.fn(() => {
+    vi.stubGlobal('Worker', vi.fn(function mockWorker() {
         const worker = new MockWorker();
         workers.push(worker);
         return worker;

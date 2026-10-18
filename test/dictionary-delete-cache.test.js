@@ -21,7 +21,7 @@ afterEach(() => {
  * @param {'records'|'content'|'commit'|'progress'|'none'} failure
  * @param {string} [title]
  * @param {string} [storageName]
- * @returns {{database: DictionaryDatabase, exec: ReturnType<typeof vi.fn>, removeShard: import('vitest').MockInstance, resetContent: import('vitest').MockInstance, onProgress: ReturnType<typeof vi.fn>, title: string, storageName: string, healthRows: Set<string>}}
+ * @returns {{database: DictionaryDatabase, exec: ReturnType<typeof vi.fn>, removeShard: import('vitest').MockInstance, resetContent: import('vitest').MockInstance, onProgress: import('vitest').Mock<import('dictionary-database').DeleteDictionaryProgressCallback>, title: string, storageName: string, healthRows: Set<string>}}
  */
 function createFixture(failure, title = 'Fixture', storageName = title) {
     const database = new DictionaryDatabase();
@@ -85,9 +85,9 @@ function createFixture(failure, title = 'Fixture', storageName = title) {
         termTags: '',
         glossary: ['definition'],
     });
-    const onProgress = vi.fn(() => {
+    const onProgress = /** @type {import('vitest').Mock<import('dictionary-database').DeleteDictionaryProgressCallback>} */ (/** @type {unknown} */ (vi.fn(() => {
         if (failure === 'progress' && !committed) { throw new Error('progress failed'); }
-    });
+    })));
     return {database, exec, removeShard, resetContent, onProgress, title, storageName, healthRows};
 }
 

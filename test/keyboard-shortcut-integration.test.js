@@ -26,7 +26,7 @@ function deferred() {
 /**
  * @param {import('jsdom').DOMWindow} window
  * @param {boolean} [prepareController]
- * @returns {Promise<{backend: Backend, settings: SettingsController, api: Record<string, ReturnType<typeof vi.fn>>, controller: KeyboardShortcutController, generic: GenericSettingController, dispose: () => Promise<void>}>}
+ * @returns {Promise<{backend: Backend, settings: SettingsController, api: Record<string, import('vitest').Mock>, controller: KeyboardShortcutController, generic: GenericSettingController, dispose: () => Promise<void>}>}
  */
 async function createHarness(window, prepareController = true) {
     const {document} = window;

@@ -120,7 +120,7 @@ describe('Mdx conversion worker client', () => {
     test('returns sanitized worker phase timings with converted archive data', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -202,7 +202,7 @@ describe('Mdx conversion worker client', () => {
     });
 
     test('clears active state when worker startup or message transfer fails', async () => {
-        vi.stubGlobal('Worker', vi.fn(() => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker() {
             throw new Error('worker blocked');
         }));
 
@@ -214,7 +214,7 @@ describe('Mdx conversion worker client', () => {
 
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -237,7 +237,7 @@ describe('Mdx conversion worker client', () => {
     test('fails instead of hanging when worker sends malformed protocol data', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -263,7 +263,7 @@ describe('Mdx conversion worker client', () => {
     test('disconnect rejects active conversion instead of leaving it pending', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -288,7 +288,7 @@ describe('Mdx conversion worker client', () => {
         vi.useFakeTimers();
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -321,7 +321,7 @@ describe('DictionaryWorker MDX import integration', () => {
     test('imports MDX bytes through the dictionary worker and forwards parser progress', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -405,7 +405,7 @@ describe('DictionaryWorker MDX import integration', () => {
     test('queries the direct MDX import version through the dictionary worker', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -438,7 +438,7 @@ describe('DictionaryWorker MDX import integration', () => {
     test('rejects active reusable worker invocations when destroyed', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -465,7 +465,7 @@ describe('DictionaryWorker MDX import integration', () => {
     test('worker failure rejects the active reusable request and admits queued work on a fresh worker', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -499,7 +499,7 @@ describe('DictionaryWorker MDX import integration', () => {
     test('ignores stale image-details response delivery failures after async decode', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;
@@ -556,7 +556,7 @@ describe('DictionaryWorker MDX import integration', () => {
     test('surfaces worker failures and disconnects cleanly during direct MDX import', async () => {
         /** @type {FakeWorker[]} */
         const workerInstances = [];
-        vi.stubGlobal('Worker', vi.fn((url, options) => {
+        vi.stubGlobal('Worker', vi.fn(function mockWorker(url, options) {
             const worker = new FakeWorker(url, options);
             workerInstances.push(worker);
             return worker;

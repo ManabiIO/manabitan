@@ -30,9 +30,9 @@ const sourceBytes = [0x3c, 0x73, 0x76, 0x67, 0x2f, 0x3e];
  * @returns {ReturnType<typeof vi.fn<(message: ImageRequest, transfer?: Transferable[]) => ImageRequest>>}
  */
 function createHost() {
-    const postMessage = vi.fn((/** @type {ImageRequest} */ message, /** @type {Transferable[]} */ transfer = []) => (
+    const postMessage = vi.fn(/** @type {(message: ImageRequest, transfer?: Transferable[] | undefined) => ImageRequest} */ ((message, transfer = []) => (
         structuredClone(message, {transfer})
-    ));
+    )));
     vi.stubGlobal('self', {postMessage});
     return postMessage;
 }
