@@ -80,9 +80,9 @@
         }
     ],
     "bugs": {
-        "url": "https://manabi.io/manabitan/support/"
+        "url": "https://github.com/ManabiIO/manabitan/issues"
     },
-    "homepage": "https://manabi.io/manabitan/",
+    "homepage": "https://github.com/ManabiIO/manabitan",
     "webExt": {
         "sourceDir": "ext"
     },

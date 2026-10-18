@@ -26,10 +26,10 @@ The optional external API allows other applications to request data when enabled
 
 Clipboard permissions support explicitly enabled search, copying, or note-field features. Settings and diagnostic exports may contain URLs, dictionary names, custom templates, error text, and local paths. Review and redact exports before sharing them; do not post credentials, private page content, or proprietary dictionary data in a public report.
 
-Keep backups somewhere you control. Settings exports, original dictionary packages, and whole-database backups are not interchangeable. See the [backup guide](https://manabi.io/manabitan/dictionaries/#backups-and-settings).
+Keep backups somewhere you control. Settings exports, original dictionary packages, and whole-database backups are different formats and are not interchangeable. The [legacy Yomitan dictionary guide](https://yomitan.wiki/dictionaries/) covers dictionary packages and settings; Manabitan's storage behavior is described here.
 
 ## Permissions and documentation website
 
-See [Privacy and permissions](https://manabi.io/manabitan/privacy/) for the purpose of the browser permissions, including storage, scheduled alarms, website access, Chromium offscreen documents, and optional integrations. The exact permissions are defined by the distributed browser package.
+The browser packages request permissions for extension storage, scheduled dictionary update checks, access to sites where scanning is enabled, and the extension runtime features they use. Chromium packages also use an offscreen document for background dictionary work. Clipboard reading, native messaging, and optional site access are requested only for features that need them. Browser support and user-granted access can limit feature availability.
 
-The Manabitan documentation website is separate from the extension. Its server and any configured delivery proxy receive normal website requests. Following a third-party link or visiting a community, store, or service is subject to that destination's practices.
+The legacy Yomitan guides remain available and are feature-compatible for many Manabitan workflows, but they do not document Manabitan's storage changes. The Manabitan project repository is hosted on GitHub. Following a third-party link or visiting a community, store, or service is subject to that destination's practices.
