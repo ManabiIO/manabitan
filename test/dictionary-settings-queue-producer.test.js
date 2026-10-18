@@ -308,6 +308,232 @@ describe('dictionary settings producers through the real options queue', () => {
             .toEqual(['Unrelated', 'Fresh title', 'Fresh title', 'Fresh title', 'Fresh title', 'Fresh title']);
     });
 
+    test('settings-read exhaustion during replacement recovers captured preferences before cleanup and refresh', async () => {
+        const {backend, settingsController, installed} = await createHarness();
+        installed.push('Old title');
+        const options = /** @type {import('settings').Options} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
+        options.profiles[0].options.dictionaries = [
+            {name: 'Old title', alias: 'Jitendex', enabled: true, allowSecondarySearches: true, definitionsCollapsible: 'collapsed', partsOfSpeechFilter: false, useDeinflections: true},
+            {name: 'Old title', alias: 'Second copy', enabled: false, allowSecondarySearches: false, definitionsCollapsible: 'expanded', partsOfSpeechFilter: false, useDeinflections: true},
+        ];
+        options.profiles[0].options.general.mainDictionary = 'Old title';
+        options.profiles[1].options.dictionaries = [
+            {name: 'Old title', alias: 'Quiet copy', enabled: false, allowSecondarySearches: false, definitionsCollapsible: 'expanded', partsOfSpeechFilter: false, useDeinflections: true},
+        ];
+        options.profiles[1].options.general.sortFrequencyDictionary = 'Old title';
+        for (const profile of options.profiles) {
+            profile.options.anki = /** @type {import('settings').AnkiOptions} */ (/** @type {unknown} */ ({cardFormats: []}));
+        }
+        Reflect.set(Reflect.get(backend, '_optionsUtil'), 'validate', vi.fn());
+
+        const captured = /** @type {import('settings-controller').ProfilesDictionarySettings} */ (/** @type {unknown} */ ({
+            'profile-a': [
+                {name: 'Old title', alias: 'Jitendex', enabled: true, allowSecondarySearches: true, definitionsCollapsible: 'collapsed', partsOfSpeechFilter: false, useDeinflections: true, index: 0},
+                {name: 'Old title', alias: 'Second copy', enabled: false, allowSecondarySearches: false, definitionsCollapsible: 'expanded', partsOfSpeechFilter: false, useDeinflections: true, index: 1},
+            ],
+            'profile-b': [{name: 'Old title', alias: 'Quiet copy', enabled: false, allowSecondarySearches: false, definitionsCollapsible: 'expanded', partsOfSpeechFilter: false, useDeinflections: true, index: 0}],
+        }));
+        let injectedReadFailures = 0;
+        let fallbackQueued = false;
+        /** @type {string[]} */
+        const operationSequence = [];
+        const originalModifyGlobalSettings = settingsController.modifyGlobalSettings.bind(settingsController);
+        vi.spyOn(settingsController, 'modifyGlobalSettings').mockImplementation(async (targets) => {
+            if (targets.some(({action}) => action === 'replaceDictionaryName')) {
+                fallbackQueued = true;
+                operationSequence.push('replacement-fallback');
+            }
+            return await originalModifyGlobalSettings(targets);
+        });
+        vi.spyOn(settingsController, 'getOptionsFull').mockImplementation(async () => {
+            if (!fallbackQueued) {
+                ++injectedReadFailures;
+                throw new Error(`transient options read failure ${injectedReadFailures}`);
+            }
+            return await backend._onApiOptionsGetFull(undefined, /** @type {chrome.runtime.MessageSender} */ (/** @type {unknown} */ ({})));
+        });
+
+        const replacementCutover = vi.fn(async () => {
+            // Model the completed storage title cutover: only the new title is
+            // installed by the time settings publication begins.
+            installed.splice(installed.indexOf('Old title'), 1, 'Fresh title');
+        });
+        const databaseRefresh = vi.fn(async () => {
+            operationSequence.push('refresh');
+            await DictionaryController.ensureDictionarySettings(
+                settingsController,
+                [importSummary('Fresh title')],
+                undefined,
+                true,
+                false,
+            );
+        });
+        const application = /** @type {import('../ext/js/application.js').Application} */ (Reflect.get(settingsController, '_application'));
+        application.api.replaceDictionaryTitle = replacementCutover;
+        application.api.triggerDatabaseUpdated = databaseRefresh;
+        application.api.setAllSettings = async (value, source) => await backend._onApiSetAllSettings({value, source}, /** @type {chrome.runtime.MessageSender} */ (/** @type {unknown} */ ({})));
+
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+        Reflect.set(importer, '_recordImportLocalPhase', vi.fn());
+        Reflect.set(importer, '_recordImportDebugSnapshot', vi.fn());
+        Reflect.set(importer, '_isImportRunCurrent', () => true);
+        Reflect.set(importer, '_verifyImportedDictionaryVisible', vi.fn().mockResolvedValue(void 0));
+        const removeOldSettings = vi.spyOn(importer, '_removeDictionarySettingsByName');
+        removeOldSettings.mockImplementation(async (title) => {
+            operationSequence.push('cleanup');
+            return await DictionaryImportController.prototype._removeDictionarySettingsByName.call(importer, title);
+        });
+        const finalize = Reflect.get(importer, '_finalizeImportedDictionaryResult');
+        const result = await finalize.call(importer, {
+            dictionaryTitle: 'Old title',
+            importStartTime: 0,
+            importDetails: {replacementDictionaryTitle: 'Old title'},
+            importResult: {
+                result: /** @type {import('dictionary-importer').Summary} */ (/** @type {unknown} */ ({...importSummary('Fresh title staged'), sourceTitle: 'Fresh title', styles: ''})),
+                errors: [],
+                debug: /** @type {import('dictionary-importer').ImportDebug} */ (/** @type {unknown} */ ({importerDebug: {phaseTimings: []}})),
+            },
+            workerImportStartTime: 0,
+            workerImportEndTime: 0,
+            useImportSession: false,
+            finalizeImportSession: false,
+            importRunGeneration: 1,
+            profilesDictionarySettings: captured,
+            localPhaseTimings: [],
+            showErrors: false,
+        });
+
+        const finalOptions = /** @type {import('settings').Options} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
+        const profileA = finalOptions.profiles.find(({id}) => id === 'profile-a');
+        const profileB = finalOptions.profiles.find(({id}) => id === 'profile-b');
+        expect({
+            cutoverCalls: replacementCutover.mock.calls.length,
+            injectedReadFailures,
+            fallbackQueued,
+            cleanupCalled: removeOldSettings.mock.calls.length,
+            refreshCalls: databaseRefresh.mock.calls.length,
+            resultErrors: result.errors.map(({message}) => message),
+            importedTitle: result.importedTitle,
+        }).toEqual({
+            cutoverCalls: 1,
+            injectedReadFailures: 10,
+            fallbackQueued: true,
+            cleanupCalled: 1,
+            refreshCalls: 1,
+            resultErrors: [],
+            importedTitle: 'Fresh title',
+        });
+        expect(operationSequence).toEqual(['replacement-fallback', 'cleanup', 'refresh']);
+        expect({
+            profileADictionaries: profileA?.options.dictionaries,
+            profileAMainDictionary: profileA?.options.general.mainDictionary,
+            profileBDictionaries: profileB?.options.dictionaries,
+            profileBSortFrequencyDictionary: profileB?.options.general.sortFrequencyDictionary,
+        }).toEqual({
+            profileADictionaries: [
+                expect.objectContaining({
+                    name: 'Fresh title', alias: 'Jitendex', enabled: true, allowSecondarySearches: true, definitionsCollapsible: 'collapsed',
+                }),
+                expect.objectContaining({
+                    name: 'Fresh title', alias: 'Second copy', enabled: false, allowSecondarySearches: false, definitionsCollapsible: 'expanded',
+                }),
+            ],
+            profileAMainDictionary: 'Fresh title',
+            profileBDictionaries: [expect.objectContaining({
+                name: 'Fresh title', alias: 'Quiet copy', enabled: false, allowSecondarySearches: false, definitionsCollapsible: 'expanded',
+            })],
+            profileBSortFrequencyDictionary: 'Fresh title',
+        });
+    });
+
+    test('replacement fallback queues captured rows through persistent options-read failures and preserves newer target choices', async () => {
+        const {backend, settingsController, installed} = await createHarness();
+        installed.push('Fresh title');
+        const options = /** @type {import('settings').Options} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
+        options.profiles[0].options.dictionaries = [
+            {name: 'Old title', alias: 'Source', enabled: true, allowSecondarySearches: true, definitionsCollapsible: 'collapsed', partsOfSpeechFilter: false, useDeinflections: true},
+            {name: 'Fresh title', alias: 'Keep', enabled: false, allowSecondarySearches: false, definitionsCollapsible: 'expanded', partsOfSpeechFilter: false, useDeinflections: true},
+        ];
+        options.profiles[0].options.general.mainDictionary = 'Old title';
+        options.profiles[0].options.general.sortFrequencyDictionary = 'Old title';
+        const captured = /** @type {import('settings-controller').ProfilesDictionarySettings} */ (/** @type {unknown} */ ({
+            'profile-a': [{name: 'Old title', alias: 'Source', enabled: true, allowSecondarySearches: true, definitionsCollapsible: 'collapsed', partsOfSpeechFilter: false, useDeinflections: true, index: 0}],
+        }));
+        const originalGetOptionsFull = settingsController.getOptionsFull.bind(settingsController);
+        let injectedReadFailures = 0;
+        vi.spyOn(settingsController, 'getOptionsFull').mockImplementation(async () => {
+            if (injectedReadFailures === 0) {
+                await settingsController.modifyGlobalSettings([
+                    {action: 'set', path: 'profiles[0].options.general.mainDictionary', value: 'User main choice'},
+                    {action: 'set', path: 'profiles[0].options.general.sortFrequencyDictionary', value: 'User frequency choice'},
+                    {action: 'set', path: 'profiles[0].options.dictionaries[1].definitionsCollapsible', value: 'not-collapsible'},
+                ]);
+            }
+            ++injectedReadFailures;
+            throw new Error('persistent options read failure');
+        });
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+
+        await expect(Reflect.get(importer, '_addDictionarySettings').call(importer, importSummary('Fresh title'), captured)).resolves.toEqual([]);
+
+        const profile = /** @type {import('settings').Options} */ (/** @type {unknown} */ (Reflect.get(backend, '_options'))).profiles[0];
+        expect(injectedReadFailures).toBeGreaterThan(0);
+        expect(profile.options.dictionaries).toEqual([
+            {name: 'Fresh title', alias: 'Source', enabled: true, allowSecondarySearches: true, definitionsCollapsible: 'collapsed', partsOfSpeechFilter: false, useDeinflections: true, styles: ''},
+            {name: 'Fresh title', alias: 'Keep', enabled: false, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: true},
+        ]);
+        expect(profile.options.general.mainDictionary).toBe('User main choice');
+        expect(profile.options.general.sortFrequencyDictionary).toBe('User frequency choice');
+        settingsController.getOptionsFull = originalGetOptionsFull;
+    });
+
+    test('new import keeps the original settings error when options reads fail', async () => {
+        const {settingsController} = await createHarness();
+        vi.spyOn(settingsController, 'getOptionsFull').mockRejectedValue(new Error('persistent options read failure'));
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+
+        const errors = await Reflect.get(importer, '_addDictionarySettings').call(importer, importSummary('New import'), null);
+        expect(errors).toHaveLength(1);
+        expect(errors[0].message).toBe('Failed to automatically set dictionary settings. A page refresh and manual enabling of the dictionary may be required.');
+    });
+
+    test('replacement with no captured profile rows keeps the original settings error', async () => {
+        const {settingsController} = await createHarness();
+        vi.spyOn(settingsController, 'getOptionsFull').mockRejectedValue(new Error('persistent options read failure'));
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+
+        const emptyCapture = /** @type {import('settings-controller').ProfilesDictionarySettings} */ (/** @type {unknown} */ ({}));
+        const errors = await Reflect.get(importer, '_addDictionarySettings').call(importer, importSummary('Fresh title'), emptyCapture);
+        expect(errors).toHaveLength(1);
+        expect(errors[0].message).toBe('Failed to automatically set dictionary settings. A page refresh and manual enabling of the dictionary may be required.');
+    });
+
+    test.each([
+        ['missing', [{id: 'profile-b', name: 'B', conditionGroups: [], options: {dictionaries: [], general: {mainDictionary: 'Old title', sortFrequencyDictionary: null}}}]],
+        ['duplicate', [
+            {id: 'profile-a', name: 'A', conditionGroups: [], options: {dictionaries: [{name: 'Old title', alias: 'A', enabled: true}], general: {mainDictionary: 'Old title', sortFrequencyDictionary: null}}},
+            {id: 'profile-a', name: 'A duplicate', conditionGroups: [], options: {dictionaries: [{name: 'Old title', alias: 'B', enabled: true}], general: {mainDictionary: 'Old title', sortFrequencyDictionary: null}}},
+        ]],
+    ])('replacement fallback reports a %s captured profile identity without mutating its rows', async (_kind, profiles) => {
+        const {backend, settingsController, installed} = await createHarness();
+        installed.push('Fresh title');
+        Reflect.set(backend, '_options', {profileCurrent: 0, profiles});
+        vi.spyOn(settingsController, 'getOptionsFull').mockRejectedValue(new Error('persistent options read failure'));
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+        const captured = /** @type {import('settings-controller').ProfilesDictionarySettings} */ (/** @type {unknown} */ ({
+            'profile-a': [{name: 'Old title', alias: 'Captured', enabled: true, index: 0}],
+        }));
+
+        const errors = await Reflect.get(importer, '_addDictionarySettings').call(importer, importSummary('Fresh title'), captured);
+        expect(errors.map(({message}) => message).join('; ')).toContain('Profile identity changed');
+        expect(profiles.every(({options}) => options.dictionaries.every(({name}) => name === 'Old title'))).toBe(true);
+    });
+
     test.each(['live', 'pruned'])('replacement preserves repeated same-alias source rows when %s', async (sourceState) => {
         const {backend, settingsController, installed} = await createHarness();
         installed.push('Exact Fresh Title');

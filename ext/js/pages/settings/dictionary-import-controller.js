@@ -3387,7 +3387,32 @@ export class DictionaryImportController {
                 log.error(error);
             }
         }
-        if (!optionsFull) { return [new Error('Failed to automatically set dictionary settings. A page refresh and manual enabling of the dictionary may be required.')]; }
+        if (!optionsFull) {
+            const readError = new Error('Failed to automatically set dictionary settings. A page refresh and manual enabling of the dictionary may be required.');
+            if (profilesDictionarySettings !== null) {
+                /** @type {import('settings-modifications').Modification[]} */
+                const targets = [];
+                for (const [profileId, profileDictionarySettings] of Object.entries(profilesDictionarySettings)) {
+                    if (!Array.isArray(profileDictionarySettings) || profileDictionarySettings.length === 0) { continue; }
+                    const sourceName = profileDictionarySettings[0].name;
+                    if (typeof sourceName !== 'string' || sourceName.length === 0 || sourceName === title) { continue; }
+                    targets.push(
+                        {
+                            action: 'replaceDictionaryName',
+                            profileId,
+                            sourceName,
+                            name: title,
+                            styles,
+                            fallbackSettings: profileDictionarySettings.map(({index, ...item}) => ({index, item})),
+                        },
+                        {action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: sourceName, value: title},
+                        {action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: sourceName, value: title},
+                    );
+                }
+                if (targets.length > 0) { return await this._modifyGlobalSettings(targets); }
+            }
+            return [readError];
+        }
 
         const selectedProfileId = this._settingsController.getOptionsContext?.().profileId;
         if (typeof selectedProfileId !== 'string' || selectedProfileId.length === 0 || optionsFull.profiles.filter(({id}) => id === selectedProfileId).length !== 1) {
