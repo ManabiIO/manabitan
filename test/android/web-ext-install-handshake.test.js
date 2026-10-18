@@ -11,7 +11,7 @@ const baseOptions = {
 
 /**
  * @param {string} script
- * @param {{timeoutMs?: number, diagnosticTimeoutMs?: number, command?: string, commandArgs?: string[], onOutput?: (line: string) => void, onBeforeFailureCleanup?: () => Promise<void>, cwd?: string}} [overrides]
+ * @param {{timeoutMs?: number, diagnosticTimeoutMs?: number, onInstallAcknowledgedTimeoutMs?: number, command?: string, commandArgs?: string[], onOutput?: (line: string) => void, onInstallAcknowledged?: (lines: string[]) => Promise<void>, onBeforeFailureCleanup?: () => Promise<void>, cwd?: string}} [overrides]
  * @returns {Promise<string[]>}
  */
 function runScript(script, overrides = {}) {
@@ -32,6 +32,44 @@ describe.skipIf(process.platform === 'win32')('Firefox Android web-ext install h
     test('accepts an unterminated install acknowledgement from a live runner', async () => {
         const output = await runScript("process.stdout.write('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);");
         expect(output).toContain('Installed /data/local/tmp/extension.xpi as a temporary add-on');
+    });
+
+    test('holds the live web-ext runner during the callback and cleans it after callback success', async () => {
+        let probeCalled = false;
+        let runnerPid = 0;
+        const output = await runScript("console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);", {
+            onOutput: (line) => { if (line.startsWith('runner-pid=')) { runnerPid = Number(line.slice('runner-pid='.length)); } },
+            commandArgs: ['-e', "console.log('runner-pid='+process.pid); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);"],
+            onInstallAcknowledged: async (lines) => {
+                probeCalled = true;
+                expect(lines).toContain('Installed /data/local/tmp/extension.xpi as a temporary add-on');
+                process.kill(runnerPid, 0);
+            },
+        });
+        expect(probeCalled).toBe(true);
+        expect(output).toContain('Installed /data/local/tmp/extension.xpi as a temporary add-on');
+        await expectProcessToExit(runnerPid);
+    });
+
+    test('cleans up the live runner after callback rejection', async () => {
+        let runnerPid = 0;
+        await expect(runScript("console.log('runner-pid='+process.pid); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);", {
+            onOutput: (line) => { if (line.startsWith('runner-pid=')) { runnerPid = Number(line.slice('runner-pid='.length)); } },
+            onInstallAcknowledged: async () => { throw new Error('probe rejected'); },
+        })).rejects.toThrow('probe rejected');
+        expect(runnerPid).toBeGreaterThan(0);
+        await expectProcessToExit(runnerPid);
+    });
+
+    test('times out a hung callback and cleans up the live runner', async () => {
+        let runnerPid = 0;
+        await expect(runScript("console.log('runner-pid='+process.pid); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);", {
+            onOutput: (line) => { if (line.startsWith('runner-pid=')) { runnerPid = Number(line.slice('runner-pid='.length)); } },
+            onInstallAcknowledgedTimeoutMs: 50,
+            onInstallAcknowledged: async () => await new Promise(() => {}),
+        })).rejects.toThrow('Timed out after 50 ms waiting for the post-acknowledgement callback');
+        expect(runnerPid).toBeGreaterThan(0);
+        await expectProcessToExit(runnerPid);
     });
 
     test('rejects runner error output even when it later prints an install marker', async () => {

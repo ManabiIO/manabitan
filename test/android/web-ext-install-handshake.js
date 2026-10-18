@@ -59,15 +59,18 @@ async function stopProcessTree(child, closePromise) {
 
 /**
  * Runs web-ext until its remote debugger confirms extension installation.
- * @param {{device: string, packageName: string, sourceDir: string, timeoutMs: number, onOutput?: (line: string) => void, onBeforeFailureCleanup?: () => Promise<void>, diagnosticTimeoutMs?: number, command?: string, commandArgs?: string[], cwd?: string}} options
+ * @param {{device: string, packageName: string, sourceDir: string, timeoutMs: number, onOutput?: (line: string) => void, onInstallAcknowledged?: (outputLines: string[]) => Promise<void>, onInstallAcknowledgedTimeoutMs?: number, onBeforeFailureCleanup?: () => Promise<void>, diagnosticTimeoutMs?: number, command?: string, commandArgs?: string[], cwd?: string}} options
  * @returns {Promise<string[]>}
  */
-export async function runWebExtInstallHandshake({device, packageName, sourceDir, timeoutMs, onOutput = () => {}, onBeforeFailureCleanup = async () => {}, diagnosticTimeoutMs = 60_000, command = 'npx', commandArgs, cwd = process.cwd()}) {
+export async function runWebExtInstallHandshake({device, packageName, sourceDir, timeoutMs, onOutput = () => {}, onInstallAcknowledged = async () => {}, onInstallAcknowledgedTimeoutMs = 60_000, onBeforeFailureCleanup = async () => {}, diagnosticTimeoutMs = 60_000, command = 'npx', commandArgs, cwd = process.cwd()}) {
     if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
         throw new Error(`Invalid web-ext install handshake timeout: ${String(timeoutMs)}`);
     }
     if (!Number.isFinite(diagnosticTimeoutMs) || diagnosticTimeoutMs <= 0) {
         throw new Error(`Invalid web-ext diagnostic timeout: ${String(diagnosticTimeoutMs)}`);
+    }
+    if (!Number.isFinite(onInstallAcknowledgedTimeoutMs) || onInstallAcknowledgedTimeoutMs <= 0) {
+        throw new Error(`Invalid post-acknowledgement callback timeout: ${String(onInstallAcknowledgedTimeoutMs)}`);
     }
     if (process.platform === 'win32') {
         throw new Error('Firefox Android web-ext process-tree cleanup requires POSIX process-group signaling.');
@@ -169,6 +172,17 @@ export async function runWebExtInstallHandshake({device, packageName, sourceDir,
         await Promise.race([closePromise, delay(10)]);
         if (exitState.value) {
             throw new Error(`web-ext exited after reporting installation (code=${String(exitState.value.code)} signal=${String(exitState.value.signal)}).`);
+        }
+        let callbackTimer;
+        try {
+            await Promise.race([
+                Promise.resolve().then(() => onInstallAcknowledged([...outputLines])),
+                new Promise((resolve, reject) => {
+                    callbackTimer = setTimeout(() => reject(new Error(`Timed out after ${onInstallAcknowledgedTimeoutMs} ms waiting for the post-acknowledgement callback.`)), onInstallAcknowledgedTimeoutMs);
+                }),
+            ]);
+        } finally {
+            if (callbackTimer !== undefined) { clearTimeout(callbackTimer); }
         }
         // Stop the runner before declaring success. Errors reported during teardown
         // also invalidate the handshake, including errors arriving after the marker.
