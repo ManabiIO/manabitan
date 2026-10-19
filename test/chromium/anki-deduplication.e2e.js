@@ -431,9 +431,15 @@ async function importDictionaryFixture(page, extensionBaseUrl) {
     await sendRuntimeMessage(page, 'triggerDatabaseUpdated', {type: 'dictionary', cause: 'import'});
     const deadline = safePerformance.now() + 60_000;
     while (safePerformance.now() < deadline) {
-        const dictionaryInfo = /** @type {Array<{title: string}>} */ (await sendRuntimeMessage(page, 'getDictionaryInfo', void 0));
-        if (Array.isArray(dictionaryInfo) && dictionaryInfo.some((item) => String(item?.title || '') === dedupeDictionaryTitle)) {
-            return;
+        try {
+            const dictionaryInfo = /** @type {Array<{title: string}>} */ (await sendRuntimeMessage(page, 'getDictionaryInfo', void 0));
+            if (Array.isArray(dictionaryInfo) && dictionaryInfo.some((item) => String(item?.title || '') === dedupeDictionaryTitle)) {
+                return;
+            }
+        } catch (error) {
+            if (!errorMessage(error).includes('dictionary import is in progress')) {
+                throw error;
+            }
         }
         await page.waitForTimeout(200);
     }
