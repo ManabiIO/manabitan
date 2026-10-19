@@ -191,9 +191,9 @@ export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTa
         stage('fresh-page-lookup-after-settings-reload', {revision: 'android-runtime-revision-2', glossary: `${glossary} revision 2`, boundary: 'fresh extension page; backend/browser restart remains unverified'});
         report.verifiedCapabilities.push('dictionary-update');
         report.unverifiedCapabilities = ['anki-mining'];
-        const refreshedSearchFocus = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageActivationScript('search.html'), 'activate-search-before-updated-visible-result');
+        const refreshedSearchFocus = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageActivationScript('search.html', {searchQuery: expression}), 'activate-search-before-updated-visible-result');
         stage('activate-search-before-updated-visible-result', refreshedSearchFocus);
-        const refreshedSearchVisibility = await evaluateJSON(evaluate, searchActor, buildDocumentVisibilityWaitScript('search.html'), 'wait-search-visible-before-updated-result');
+        const refreshedSearchVisibility = await evaluateJSON(evaluate, searchActor, buildDocumentVisibilityWaitScript('search.html', {searchQuery: expression}), 'wait-search-visible-before-updated-result');
         stage('search-document-visible-before-updated-result', refreshedSearchVisibility);
         const refreshedVisibleSearch = await evaluateJSON(evaluate, searchActor, buildVisibleSearchScript({expression, reading, glossary: `${glossary} revision 2`, dictionaryTitle}), 'updated-visible-search-result');
         stage('updated-visible-search-result', refreshedVisibleSearch);
@@ -359,10 +359,12 @@ export function buildOwnedExtensionPageOpenScript(page) {
 
 /**
  * @param {string} page
+ * @param {{searchQuery?: string}} [options]
  * @returns {string}
  */
-export function buildOwnedPageActivationScript(page) {
-    return `new Promise(async(resolve,reject)=>{try{const state=globalThis.__manabitanAndroidRuntimeQualification;const page=${JSON.stringify(page)};const id=state?.ownedExtensionPageTabIds?.[page];const expectedUrl=browser.runtime.getURL(page);if(!Number.isInteger(id)||!Array.isArray(state.ownedExtensionPageTabs)||!state.ownedExtensionPageTabs.includes(id)){throw new Error('Owned '+page+' tab ID is unavailable or not in the owned tab list');}const tab=await browser.tabs.get(id);if(tab.url!==expectedUrl){throw new Error('Owned '+page+' tab URL mismatch: '+JSON.stringify({id,expectedUrl,actualUrl:tab.url}));}await browser.tabs.update(id,{active:true});const active=await browser.tabs.query({active:true,currentWindow:true});const actual=active.find(item=>item.id===id);if(!actual||actual.url!==expectedUrl){throw new Error('Owned '+page+' tab did not become the active expected page: '+JSON.stringify(active));}resolve({page,tabId:id,activeTabId:actual.id,url:actual.url});}catch(error){reject(error);}})`;
+export function buildOwnedPageActivationScript(page, {searchQuery} = {}) {
+    const searchUrlSuffix = searchQuery === undefined ? '' : `?${new URLSearchParams({query: searchQuery, type: 'terms'})}`;
+    return `new Promise(async(resolve,reject)=>{try{const state=globalThis.__manabitanAndroidRuntimeQualification;const page=${JSON.stringify(page)};const id=state?.ownedExtensionPageTabIds?.[page];const expectedUrl=browser.runtime.getURL(page)+${JSON.stringify(searchUrlSuffix)};if(!Number.isInteger(id)||!Array.isArray(state.ownedExtensionPageTabs)||!state.ownedExtensionPageTabs.includes(id)){throw new Error('Owned '+page+' tab ID is unavailable or not in the owned tab list');}const tab=await browser.tabs.get(id);if(tab.url!==expectedUrl){throw new Error('Owned '+page+' tab URL mismatch: '+JSON.stringify({id,expectedUrl,actualUrl:tab.url}));}await browser.tabs.update(id,{active:true});const active=await browser.tabs.query({active:true,currentWindow:true});const actual=active.find(item=>item.id===id);if(!actual||actual.url!==expectedUrl){throw new Error('Owned '+page+' tab did not become the active expected page: '+JSON.stringify(active));}resolve({page,tabId:id,activeTabId:actual.id,url:actual.url});}catch(error){reject(error);}})`;
 }
 
 /**
@@ -375,10 +377,12 @@ export function buildOwnedPageReloadScript(page) {
 
 /**
  * @param {string} page
+ * @param {{searchQuery?: string}} [options]
  * @returns {string}
  */
-export function buildDocumentVisibilityWaitScript(page) {
-    return `new Promise((resolve,reject)=>{const expectedUrl=browser.runtime.getURL(${JSON.stringify(page)});const deadline=Date.now()+15000;const inspect=()=>{const viewport={innerWidth,innerHeight,outerWidth,outerHeight,documentElementWidth:document.documentElement?.clientWidth||0,documentElementHeight:document.documentElement?.clientHeight||0};if(location.href!==expectedUrl){reject(new Error('Document URL changed while waiting for visible '+${JSON.stringify(page)}+': '+location.href));return;}if(document.visibilityState==='visible'&&viewport.innerWidth>0&&viewport.innerHeight>0){resolve({page:${JSON.stringify(page)},url:location.href,visibilityState:document.visibilityState,viewport});return;}if(Date.now()>deadline){reject(new Error('Owned '+${JSON.stringify(page)}+' document did not become visible with a nonzero page viewport: '+JSON.stringify({url:location.href,visibilityState:document.visibilityState,viewport})));return;}setTimeout(inspect,100);};inspect();})`;
+export function buildDocumentVisibilityWaitScript(page, {searchQuery} = {}) {
+    const searchUrlSuffix = searchQuery === undefined ? '' : `?${new URLSearchParams({query: searchQuery, type: 'terms'})}`;
+    return `new Promise((resolve,reject)=>{const expectedUrl=browser.runtime.getURL(${JSON.stringify(page)})+${JSON.stringify(searchUrlSuffix)};const deadline=Date.now()+15000;const inspect=()=>{const viewport={innerWidth,innerHeight,outerWidth,outerHeight,documentElementWidth:document.documentElement?.clientWidth||0,documentElementHeight:document.documentElement?.clientHeight||0};if(location.href!==expectedUrl){reject(new Error('Document URL changed while waiting for visible '+${JSON.stringify(page)}+': '+location.href));return;}if(document.visibilityState==='visible'&&viewport.innerWidth>0&&viewport.innerHeight>0){resolve({page:${JSON.stringify(page)},url:location.href,visibilityState:document.visibilityState,viewport});return;}if(Date.now()>deadline){reject(new Error('Owned '+${JSON.stringify(page)}+' document did not become visible with a nonzero page viewport: '+JSON.stringify({url:location.href,visibilityState:document.visibilityState,viewport})));return;}setTimeout(inspect,100);};inspect();})`;
 }
 
 /**
@@ -652,9 +656,9 @@ async function qualifyMiningAction({evaluate, backgroundActor, settingsActor, se
         stage('settings-visible-before-anki-status', visibleSettings);
         const ready = await evaluateJSON(evaluate, settingsActor, 'new Promise((resolve,reject)=>{const deadline=Date.now()+30000;const inspect=()=>{const message=document.querySelector(\'#anki-error-message\');const text=message instanceof HTMLElement?message.textContent||\'\':\'\';if(text.trim()===\'Connected\'){resolve({message:text});return;}if(Date.now()>deadline){reject(new Error(\'Product Settings Anki connection did not report Connected: \'+text));return;}setTimeout(inspect,250);};inspect();})', 'wait-mock-anki-connected');
         stage('mock-anki-connected', ready);
-        const searchFocus = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageActivationScript('search.html'), 'activate-search-before-mining-click');
+        const searchFocus = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageActivationScript('search.html', {searchQuery: expression}), 'activate-search-before-mining-click');
         stage('activate-search-before-mining-click', searchFocus);
-        const visibleSearch = await evaluateJSON(evaluate, searchActor, buildDocumentVisibilityWaitScript('search.html'), 'wait-search-visible-before-mining-click');
+        const visibleSearch = await evaluateJSON(evaluate, searchActor, buildDocumentVisibilityWaitScript('search.html', {searchQuery: expression}), 'wait-search-visible-before-mining-click');
         stage('search-visible-before-mining-click', visibleSearch);
         const miningClickScript = `new Promise((resolve,reject)=>{const deadline=Date.now()+30000;const visible=node=>{const rect=node?.getBoundingClientRect();const style=node&&getComputedStyle(node);const consentModal=document.querySelector('#firefox-data-transmission-consent-modal');let shown=Boolean(rect&&style&&rect.width>0&&rect.height>0&&style.display!=='none'&&style.visibility!=='hidden'&&!(consentModal instanceof HTMLElement&&!consentModal.hidden));for(let parent=node;shown&&parent instanceof HTMLElement;parent=parent.parentElement){if(parent.hidden||parent.getAttribute('aria-hidden')==='true')shown=false;}return {visible:shown,width:rect?.width||0,height:rect?.height||0,display:style?.display||'',visibility:style?.visibility||'',consentModalVisible:consentModal instanceof HTMLElement&&!consentModal.hidden};};const inspect=()=>{const entry=[...document.querySelectorAll('#dictionary-entries .entry')].find(entry=>[...entry.querySelectorAll('.headword')].some(headword=>{const term=headword.querySelector('.headword-term');const reading=headword.querySelector('.headword-reading');const copy=term?.cloneNode(true);for(const node of copy?.querySelectorAll('rt,rp')||[])node.remove();return String(copy?.textContent||'').replace(/\\s+/g,'').trim()===${JSON.stringify(expression)}&&String(reading?.textContent||'').trim()===${JSON.stringify(reading)};})&&[...entry.querySelectorAll('.definition-item[data-dictionary]')].some(item=>item.dataset.dictionary===${JSON.stringify(dictionaryTitle)}&&[...item.querySelectorAll('.gloss-content')].some(node=>String(node.textContent||'').includes(${JSON.stringify(`${glossary} revision 2`)}))));const button=entry?.querySelector('.note-actions-container .action-button[data-action="save-note"]');const render=button instanceof HTMLButtonElement?visible(button):{visible:false};if(button instanceof HTMLButtonElement&&!button.disabled&&render.visible){button.click();resolve({clicked:true,selector:button.dataset.action,render});return;}if(Date.now()>deadline){reject(new Error('Shipped Search save-note button did not become enabled and rendered: '+JSON.stringify(render)));return;}setTimeout(inspect,250);};inspect();})`;
         const clicked = await evaluateJSON(evaluate, searchActor, miningClickScript, 'click-mining-ui');

@@ -154,6 +154,24 @@ describe('Android runtime qualification emitted scripts', () => {
         await expect(vm.runInContext(buildDocumentVisibilityWaitScript(page), emptyContext)).rejects.toThrow(/nonzero page viewport/);
     });
 
+    test('visible Search URL accepts only the explicitly expected query', async () => {
+        const searchQuery = '読む';
+        const expectedUrl = `moz-extension://fixture/search.html?${new URLSearchParams({query: searchQuery, type: 'terms'})}`;
+        const context = vm.createContext({
+            browser: {runtime: {getURL: (/** @type {string} */ page) => `moz-extension://fixture/${page}`}},
+            location: {href: expectedUrl},
+            document: {visibilityState: 'visible', documentElement: {clientWidth: 414, clientHeight: 758}},
+            innerWidth: 414,
+            innerHeight: 758,
+            outerWidth: 414,
+            outerHeight: 758,
+            Date,
+            setTimeout,
+        });
+        await expect(vm.runInContext(buildDocumentVisibilityWaitScript('search.html', {searchQuery}), context)).resolves.toMatchObject({page: 'search.html', url: expectedUrl, visibilityState: 'visible'});
+        await expect(vm.runInContext(buildDocumentVisibilityWaitScript('search.html'), context)).rejects.toThrow(/URL changed/);
+    });
+
     test('captures failure evidence before owned tab cleanup and preserves the runtime failure', async () => {
         /** @type {string[]} */
         const events = [];
@@ -303,6 +321,59 @@ describe('Android runtime qualification emitted scripts', () => {
         await expect(vm.runInContext(buildOwnedPageReloadScript('settings.html'), context)).rejects.toThrow(/URL mismatch/);
         expect(activeTabId).toBe(15);
         expect(reloaded).toEqual([14]);
+    });
+
+    test('queried Search activation requires the owned ID and exact expected Search URL before activation', async () => {
+        const searchQuery = '読む';
+        const expectedUrl = `moz-extension://fixture/search.html?${new URLSearchParams({query: searchQuery, type: 'terms'})}`;
+        let activeTabId = 14;
+        let updateCount = 0;
+        const tabs = new Map([[14, {id: 14, url: 'moz-extension://fixture/settings.html'}], [15, {id: 15, url: expectedUrl}]]);
+        const context = vm.createContext({browser: {
+            runtime: {getURL: (/** @type {string} */ page) => `moz-extension://fixture/${page}`},
+            tabs: {
+                get: async (/** @type {number} */ id) => tabs.get(id),
+                update: async (/** @type {number} */ id, /** @type {{active?: boolean}} */ update) => {
+                    updateCount++;
+                    if (update.active) { activeTabId = id; }
+                    return tabs.get(id);
+                },
+                query: async () => [{...tabs.get(activeTabId), active: true}],
+            },
+        }});
+        vm.runInContext('globalThis.__manabitanAndroidRuntimeQualification={ownedExtensionPageTabs:[14,15],ownedExtensionPageTabIds:{"settings.html":14,"search.html":15}}', context);
+        await expect(vm.runInContext(buildOwnedPageActivationScript('search.html', {searchQuery}), context)).resolves.toEqual({page: 'search.html', tabId: 15, activeTabId: 15, url: expectedUrl});
+        expect(activeTabId).toBe(15);
+        expect(updateCount).toBe(1);
+
+        activeTabId = 14;
+        updateCount = 0;
+        const invalidUrls = [
+            `moz-extension://fixture/search.html?${new URLSearchParams({query: '読', type: 'terms'})}`,
+            `moz-extension://fixture/search.html?${new URLSearchParams({query: searchQuery, type: 'kanji'})}`,
+            `${expectedUrl}&query=${encodeURIComponent(searchQuery)}`,
+            expectedUrl.replace('moz-extension://fixture/', 'moz-extension://foreign/'),
+            expectedUrl.replace('/search.html?', '/settings.html?'),
+        ];
+        for (const url of invalidUrls) {
+            tabs.set(15, {id: 15, url});
+            await expect(vm.runInContext(buildOwnedPageActivationScript('search.html', {searchQuery}), context)).rejects.toThrow(/URL mismatch/);
+            expect(activeTabId).toBe(14);
+            expect(updateCount).toBe(0);
+
+            const visibilityContext = vm.createContext({
+                browser: {runtime: {getURL: (/** @type {string} */ page) => `moz-extension://fixture/${page}`}},
+                location: {href: url},
+                document: {visibilityState: 'visible', documentElement: {clientWidth: 414, clientHeight: 758}},
+                innerWidth: 414,
+                innerHeight: 758,
+                outerWidth: 414,
+                outerHeight: 758,
+                Date,
+                setTimeout,
+            });
+            await expect(vm.runInContext(buildDocumentVisibilityWaitScript('search.html', {searchQuery}), visibilityContext)).rejects.toThrow(/URL changed/);
+        }
     });
 
     test('Dictionaries modal failure captures actual trigger and modal DOM diagnostics', async () => {
