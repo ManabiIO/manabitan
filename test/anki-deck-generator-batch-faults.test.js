@@ -235,3 +235,28 @@ test('non-Error Anki failures are reported instead of treated as a successful se
     expect(result).toBe(false);
     expect(error).toHaveBeenCalledWith(expect.stringContaining('offline'));
 });
+
+
+test('cancelling an already dispatched Anki batch prevents subsequent batches', async () => {
+    const {controller, timers, generateNoteData} = createController(Array.from({length: 101}, (_, i) => String(i)).join('\n'));
+    /** @type {ReturnType<typeof deferred<number[]>>} */
+    const pending = deferred();
+    /** @type {ReturnType<typeof deferred<void>>} */
+    const dispatched = deferred();
+    const addNotes = vi.fn(() => {
+        dispatched.resolve();
+        return pending.promise;
+    });
+    Reflect.set(controller, '_ankiController', {addNotes});
+    Reflect.set(controller, '_sendNotes', AnkiDeckGeneratorController.prototype._sendNotes);
+    await controller._onSendToAnkiConfirm(createEvent());
+    const operation = timers[0]();
+    await dispatched.promise;
+    expect(addNotes).toHaveBeenCalledOnce();
+    controller._cancel = true;
+    pending.resolve(Array.from({length: 100}, (_, i) => i + 1));
+    await operation;
+    expect(addNotes).toHaveBeenCalledOnce();
+    expect(generateNoteData).toHaveBeenCalledTimes(100);
+    expect(controller._inProgress).toBe(false);
+});
