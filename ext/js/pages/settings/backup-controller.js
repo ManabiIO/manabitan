@@ -638,21 +638,22 @@ export class BackupController {
         // Get default options
         const optionsFull = this._optionsUtil.getDefault();
 
-        // Update dictionaries
-        await DictionaryController.ensureDictionarySettings(this._settingsController, void 0, optionsFull, false, false);
+        try {
+            // Update dictionaries
+            await DictionaryController.ensureDictionarySettings(this._settingsController, void 0, optionsFull, false, false);
 
-        // Update display theme
+            // Assign options
+            await this._settingsImportSetOptionsFull(optionsFull);
+        } catch (e) {
+            this._showSettingsImportError(toError(e));
+            return;
+        }
+
+        // Update display theme only after the replacement settings are persisted.
         this._themeController.theme = optionsFull.profiles[optionsFull.profileCurrent].options.general.popupTheme;
         this._themeController.themePreset = optionsFull.profiles[optionsFull.profileCurrent].options.general.popupThemePreset;
         this._themeController.prepare();
         this._themeController.siteOverride = true;
         this._themeController.updateTheme();
-
-        // Assign options
-        try {
-            await this._settingsImportSetOptionsFull(optionsFull);
-        } catch (e) {
-            log.error(e);
-        }
     }
 }
