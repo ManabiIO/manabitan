@@ -566,53 +566,66 @@ async function main() {
         const killDeadline = Date.now() + timeoutMs;
         let killBoundary = null;
         let armedSessionId = null;
+        let journalParseRetryCount = 0;
+        let lastJournalParseError = null;
         while (Date.now() < killDeadline) {
             const [label, journalText] = await Promise.all([
                 page.evaluate(() => document.querySelector('#dictionaries-modal .dictionary-import-progress .progress-info')?.textContent?.trim() || ''),
                 readImportJournal(page),
             ]);
             if (journalText !== null) {
-                const journal = JSON.parse(journalText);
-                assert.equal(journal.version, 1, `unexpected journal version: ${JSON.stringify(journal)}`);
-                assert.equal(typeof journal.sessionId, 'string');
-                assert.ok(journal.sessionId.length > 0);
-                assert.ok(Number.isSafeInteger(journal.createdAt) && journal.createdAt > 0);
-                assert.ok(Array.isArray(journal.recordCheckpoint?.shards));
-                assert.ok(Array.isArray(journal.contentCheckpoint?.segments));
-                assert.equal(journal.recordCheckpoint.shards.length, baselineOpfs.records.length, 'journal must checkpoint every pre-import term-record and lookup-index file');
-                for (const priorShard of journal.recordCheckpoint.shards) {
-                    const observed = baselineOpfs.records.find(({name}) => name === priorShard.fileName);
-                    assert.ok(observed, `journal pre-import checkpoint references a missing pre-import shard: ${priorShard.fileName}`);
-                    assert.equal(priorShard.fileLength, observed.size, `journal checkpoint length differs for ${priorShard.fileName}`);
+                let journal = null;
+                try {
+                    journal = JSON.parse(journalText);
+                } catch (error) {
+                    if (!(error instanceof SyntaxError)) { throw error; }
+                    ++journalParseRetryCount;
+                    lastJournalParseError = error.message;
                 }
-                if (armedSessionId === null) {
-                    armedSessionId = journal.sessionId;
-                    const armResponse = await fetch(`${baseUrl}/arm`, {method: 'POST', body: JSON.stringify({sessionId: armedSessionId, title})});
-                    assert.equal(armResponse.status, 204, 'test-only observer gate failed to arm for the active update session');
-                }
-                assert.equal(journal.sessionId, armedSessionId, 'active update session changed while observer gate was armed');
-                const observedWrites = observerEvents.filter(({fileName, dictionaryName, bytes, sessionId, held}) => sessionId === armedSessionId && fileName.endsWith('.mbtr') && (dictionaryName === title || (dictionaryName?.startsWith(`${title} [update-staging `) && dictionaryName.endsWith(']'))) && Number.isSafeInteger(bytes) && bytes > 4096 && held === true);
-                const observedWrite = observedWrites[observedWrites.length - 1];
-                if (observedWrite) {
-                    const checkpointEntry = journal.recordCheckpoint.shards.find(({fileName}) => fileName === observedWrite.fileName) ?? null;
-                    assert.equal(checkpointEntry, null, 'interrupted session write must target a new staging shard rather than a checkpointed old shard');
-                    killBoundary = {
-                        observedAtIso: new Date().toISOString(),
-                        label,
-                        journal,
-                        observedWrite,
-                        checkpointEntry,
-                        observerEventCount: observedWrites.length,
-                        observerMechanism: `controlled test-only pause: instrumented extracted package awaits a held loopback response after FileSystemWritableFileStream.write(chunk); the packaged store decoder reports the dictionary name, and active session journal plus new staging shard are validated before release and SIGKILL; UI phase was ${label}`,
-                    };
-                    break;
+                if (journal !== null) {
+                    assert.equal(journal.version, 1, `unexpected journal version: ${JSON.stringify(journal)}`);
+                    assert.equal(typeof journal.sessionId, 'string');
+                    assert.ok(journal.sessionId.length > 0);
+                    assert.ok(Number.isSafeInteger(journal.createdAt) && journal.createdAt > 0);
+                    assert.ok(Array.isArray(journal.recordCheckpoint?.shards));
+                    assert.ok(Array.isArray(journal.contentCheckpoint?.segments));
+                    assert.equal(journal.recordCheckpoint.shards.length, baselineOpfs.records.length, 'journal must checkpoint every pre-import term-record and lookup-index file');
+                    for (const priorShard of journal.recordCheckpoint.shards) {
+                        const observed = baselineOpfs.records.find(({name}) => name === priorShard.fileName);
+                        assert.ok(observed, `journal pre-import checkpoint references a missing pre-import shard: ${priorShard.fileName}`);
+                        assert.equal(priorShard.fileLength, observed.size, `journal checkpoint length differs for ${priorShard.fileName}`);
+                    }
+                    if (armedSessionId === null) {
+                        armedSessionId = journal.sessionId;
+                        const armResponse = await fetch(`${baseUrl}/arm`, {method: 'POST', body: JSON.stringify({sessionId: armedSessionId, title})});
+                        assert.equal(armResponse.status, 204, 'test-only observer gate failed to arm for the active update session');
+                    }
+                    assert.equal(journal.sessionId, armedSessionId, 'active update session changed while observer gate was armed');
+                    const observedWrites = observerEvents.filter(({fileName, dictionaryName, bytes, sessionId, held}) => sessionId === armedSessionId && fileName.endsWith('.mbtr') && (dictionaryName === title || (dictionaryName?.startsWith(`${title} [update-staging `) && dictionaryName.endsWith(']'))) && Number.isSafeInteger(bytes) && bytes > 4096 && held === true);
+                    const observedWrite = observedWrites[observedWrites.length - 1];
+                    if (observedWrite) {
+                        const checkpointEntry = journal.recordCheckpoint.shards.find(({fileName}) => fileName === observedWrite.fileName) ?? null;
+                        assert.equal(checkpointEntry, null, 'interrupted session write must target a new staging shard rather than a checkpointed old shard');
+                        killBoundary = {
+                            observedAtIso: new Date().toISOString(),
+                            label,
+                            journal,
+                            observedWrite,
+                            checkpointEntry,
+                            observerEventCount: observedWrites.length,
+                            journalParseRetryCount,
+                            lastJournalParseError,
+                            observerMechanism: `controlled test-only pause: instrumented extracted package awaits a held loopback response after FileSystemWritableFileStream.write(chunk); the packaged store decoder reports the dictionary name, and active session journal plus new staging shard are validated before release and SIGKILL; UI phase was ${label}`,
+                        };
+                        break;
+                    }
                 }
             }
             const error = await page.evaluate(() => document.querySelector('#dictionary-error:not([hidden])')?.textContent?.trim() || '');
             assert.equal(error, '', `update UI failed before the kill boundary: ${error}`);
             await page.waitForTimeout(10);
         }
-        assert.ok(killBoundary, 'did not observe a held test-only post-write response plus the matching active journal and new staging shard');
+        assert.ok(killBoundary, `did not observe a held test-only post-write response plus the matching active journal and new staging shard; journal parse retries=${journalParseRetryCount}, last parse error=${String(lastJournalParseError)}`);
         report.phases.push({name: 'controlled test-only post-write interruption boundary', status: 'observed', ...killBoundary});
         const updateKillProcesses = captureBrowserProcessTree(profilePath, chromium.executablePath());
         report.phases.push({name: 'captured owned Chromium process tree before SIGKILL', status: 'observed', processes: updateKillProcesses});

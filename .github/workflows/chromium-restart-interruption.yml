@@ -65,6 +65,7 @@ jobs:
           const boundary = phases.get('controlled test-only post-write interruption boundary');
           const kill = phases.get('SIGKILL active Chromium process tree after successful term-record write before publication (test-only gate)');
           const oracle = phases.get('restart recovery all-or-nothing generation oracle');
+          const processCapture = phases.get('captured owned Chromium process tree before SIGKILL');
           const required = [
             phases.get('completed import baseline')?.status === 'passed',
             phases.get('captured owned Chromium process tree before SIGKILL')?.status === 'observed',
@@ -83,7 +84,12 @@ jobs:
             (write.dictionaryName === fixtureTitle || stagedTitle) && Number.isSafeInteger(write.bytes) &&
             write.bytes > 4096 && boundary.checkpointEntry === null &&
             !boundary.journal.recordCheckpoint.shards.some(({fileName}) => fileName === write.fileName) &&
-            Array.isArray(kill?.exitedPids) && kill.exitedPids.includes(kill.rootPid) && kill.signalledPids.includes(kill.rootPid);
+            Array.isArray(processCapture?.processes) && processCapture.processes.some(({pid, startedAt, command}) =>
+              pid === kill?.rootPid && typeof startedAt === 'string' && startedAt.length > 0 &&
+              typeof command === 'string' && command.includes('--user-data-dir=') &&
+              !/--type=|crashpad_handler/u.test(command)) &&
+            Array.isArray(kill?.signalledPids) && kill.signalledPids.includes(kill.rootPid) &&
+            Array.isArray(kill?.exitedPids) && kill.exitedPids.includes(kill.rootPid);
           const launches = Array.isArray(report.launches) ? report.launches : [];
           const validLaunches = ['initial', 'recovery'].every((name) => {
             const launch = launches.find((item) => item.name === name);
@@ -102,8 +108,9 @@ jobs:
             typeof oracle.exactExpression === 'string' && typeof oracle.exactContent === 'string' &&
             typeof oracle.absentExpression === 'string' && oracle.missCount === 0 && oracle.noTransientRows === true &&
             oracle.strictOpfs === true;
+          const gitObjectId = (value) => typeof value === 'string' && /^[a-f0-9]{40}$/u.test(value);
           const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/u.test(value);
-          const identities = sha256(report.sourceHead) && sha256(report.sourceTree) &&
+          const identities = gitObjectId(report.sourceHead) && gitObjectId(report.sourceTree) &&
             sha256(report.packageSha256) && sha256(report.harnessSha256) &&
             sha256(report.fixtureHashes?.revisionOneSha256) && sha256(report.fixtureHashes?.revisionTwoSha256) &&
             sha256(report.testOnlyPackageObserver?.originalSha256) &&
