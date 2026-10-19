@@ -626,7 +626,7 @@ export class AudioDownloader {
             }
         }
 
-        if (!await this._isAudioBinaryValid(arrayBuffer, sourceType)) {
+        if (!await this._isAudioBinaryValid(arrayBuffer, sourceType, response.headers.get('Content-Type'))) {
             throw new Error('Could not retrieve audio');
         }
 
@@ -638,10 +638,30 @@ export class AudioDownloader {
     /**
      * @param {ArrayBuffer} arrayBuffer
      * @param {import('settings').AudioSourceType} sourceType
+     * @param {?string} contentType
      * @returns {Promise<boolean>}
      */
-    async _isAudioBinaryValid(arrayBuffer, sourceType) {
+    async _isAudioBinaryValid(arrayBuffer, sourceType, contentType = null) {
         if (arrayBuffer.byteLength === 0) { return false; }
+        // Some providers return an HTTP 200 document/error response for
+        // unavailable recordings. Anki stores downloads without decoding
+        // them, so reject explicit document media types before they become
+        // [sound:...] files. Other MIME types are advisory and remain accepted.
+        const mediaType = contentType?.split(';', 1)[0].trim().toLowerCase() ?? '';
+        const isApplicationError = mediaType.startsWith('application/') && (
+            mediaType.endsWith('+json') ||
+            mediaType.endsWith('+xml')
+        );
+        if (
+            mediaType === 'text/html' ||
+            mediaType === 'text/xml' ||
+            mediaType === 'application/json' ||
+            mediaType === 'application/xml' ||
+            mediaType === 'application/xhtml+xml' ||
+            isApplicationError
+        ) {
+            return false;
+        }
         switch (sourceType) {
             case 'jpod101':
             {
