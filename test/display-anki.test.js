@@ -381,6 +381,7 @@ describe('DisplayAnki preload and save flow', () => {
         const {display, api} = createDisplay(window.document, dictionaryEntries);
         const displayAnki = new DisplayAnki(display, createDisplayAudio());
         const cardFormat = createCardFormat();
+        displayAnki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
         displayAnki._cardFormats = [cardFormat];
         displayAnki._duplicateBehavior = 'new';
         displayAnki._dictionaryEntryDetails = /** @type {import('display-anki').DictionaryEntryDetails[]} */ ([{
@@ -409,8 +410,10 @@ describe('DisplayAnki preload and save flow', () => {
 
         await displayAnki._saveAnkiNote(0, 0);
 
-        expect(createNoteSpy).toHaveBeenNthCalledWith(1, dictionaryEntries[0], 0, []);
-        expect(createNoteSpy).toHaveBeenNthCalledWith(2, dictionaryEntries[0], 0, [{type: 'audio'}]);
+        expect(createNoteSpy.mock.calls.map((args) => args.slice(0, 3))).toEqual([
+            [dictionaryEntries[0], 0, []],
+            [dictionaryEntries[0], 0, [{type: 'audio'}]],
+        ]);
         expect(api.addAnkiNote).toHaveBeenCalledWith(finalNote);
     });
 
@@ -528,6 +531,7 @@ describe('DisplayAnki preload and save flow', () => {
         const {display, api} = createDisplay(window.document, dictionaryEntries);
         const displayAnki = new DisplayAnki(display, createDisplayAudio());
         const cardFormat = createCardFormat();
+        displayAnki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
         displayAnki._cardFormats = [cardFormat];
         displayAnki._duplicateBehavior = 'overwrite';
         displayAnki._dictionaryEntryDetails = [{
@@ -679,4 +683,420 @@ describe('DisplayAnki render-overlapped duplicate preparation', () => {
             expect(anki._dictionaryEntryDetailsPreload).toBeNull();
         });
     }
+});
+
+describe('DisplayAnki save invocation ownership', () => {
+    /**
+     * @param {Document} document
+     * @param {'new'|'overwrite'} [behavior]
+     * @returns {{anki: DisplayAnki, display: import('../ext/js/display/display.js').Display, api: any, replace: () => HTMLDivElement}}
+     */
+    function createSaveHarness(document, behavior = 'new') {
+        setupDocument(document);
+        const {display, api} = createDisplay(document, [createTermEntry()]);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormat = createCardFormat();
+        anki._cardFormats = [cardFormat];
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({url: 'original'});
+        anki._ankiFieldTemplates = 'original template';
+        anki._duplicateBehavior = behavior;
+        const details = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: behavior === 'overwrite',
+            noteIds: behavior === 'overwrite' ? [101] : null,
+            noteInfos: behavior === 'overwrite' ? [createNoteInfo(101, 'original fields')] : [],
+            ankiError: null,
+        }]])}];
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const replace = () => {
+            anki._onContentClear();
+            const row = document.createElement('div');
+            row.innerHTML = '<div class="note-actions-container"></div>';
+            document.body.appendChild(row);
+            display.dictionaryEntries[0] = createTermEntry();
+            display.dictionaryEntryNodes[0] = row;
+            anki._dictionaryEntryDetails = [{noteMap: new Map([[0, {
+                cardFormat,
+                canAdd: true,
+                valid: true,
+                isDuplicate: false,
+                noteIds: null,
+                noteInfos: [],
+                ankiError: null,
+            }]])}];
+            anki._updateSaveButtons(anki._dictionaryEntryDetails);
+            return row;
+        };
+        return {anki, display, api, replace};
+    }
+
+    for (const blockedPass of [1, 2]) {
+        test('retains original overwrite when build pass ' + blockedPass + ' is pending', async ({window}) => {
+            const {anki, api, replace} = createSaveHarness(window.document, 'overwrite');
+            const pendingBuild = Promise.withResolvers();
+            let calls = 0;
+            const note = createCollectionNote('original saved payload');
+            vi.spyOn(anki._ankiNoteBuilder, 'createNote').mockImplementation(() => {
+                ++calls;
+                return calls === blockedPass ? pendingBuild.promise : Promise.resolve({note, errors: [], requirements: []});
+            });
+            const saving = anki._saveAnkiNote(0, 0);
+            await vi.waitFor(() => expect(calls).toBe(blockedPass));
+            const replacement = replace();
+            const replacementBefore = replacement.innerHTML;
+            pendingBuild.resolve({note, errors: [], requirements: []});
+            await saving;
+            expect(api.updateAnkiNote).toHaveBeenCalledExactlyOnceWith({...note, id: 101});
+            expect(replacement.innerHTML).toBe(replacementBefore);
+        });
+    }
+
+
+    test('audio consent is reevaluated before the second media build pass', async ({window}) => {
+        const {anki, api} = createSaveHarness(window.document);
+        let allowed = true;
+        const getAudio = vi.spyOn(anki._displayAudio, 'getAnkiNoteMediaAudioDetails').mockImplementation(() => ({
+            sources: allowed ? [{type: 'custom', url: 'https://audio.example/{term}', voice: ''}] : [],
+            preferredAudioIndex: null,
+            enableDefaultAudioSources: allowed,
+        }));
+        const note = createCollectionNote('saved');
+        const build = vi.spyOn(anki._ankiNoteBuilder, 'createNote')
+            .mockImplementationOnce(async () => {
+                allowed = false;
+                return {note, errors: [], requirements: [{type: 'audio'}]};
+            })
+            .mockResolvedValueOnce({note, errors: [], requirements: []});
+        await anki._saveAnkiNote(0, 0);
+        expect(getAudio).toHaveBeenCalledTimes(2);
+        expect(build.mock.calls[0][0].mediaOptions?.audio?.enableDefaultAudioSources).toBe(true);
+        expect(build.mock.calls[1][0].mediaOptions?.audio).toMatchObject({sources: [], enableDefaultAudioSources: false});
+        expect(api.addAnkiNote).toHaveBeenCalledTimes(1);
+    });
+
+    test('stale Anki failure cannot replace the current result notifications', async ({window}) => {
+        const {anki, api, replace} = createSaveHarness(window.document);
+        const pendingAdd = Promise.withResolvers();
+        api.addAnkiNote.mockImplementation(() => pendingAdd.promise);
+        vi.spyOn(anki._ankiNoteBuilder, 'createNote').mockResolvedValue({note: createCollectionNote('old'), errors: [], requirements: []});
+        const show = vi.spyOn(anki, '_showErrorNotification').mockImplementation(() => {});
+        const hide = vi.spyOn(anki, '_hideErrorNotification').mockImplementation(() => {});
+        const saving = anki._saveAnkiNote(0, 0);
+        await vi.waitFor(() => expect(api.addAnkiNote).toHaveBeenCalledTimes(1));
+        const replacement = replace();
+        const replacementBefore = replacement.innerHTML;
+        show.mockClear();
+        hide.mockClear();
+        pendingAdd.reject(new Error('old save failed'));
+        await saving;
+        expect(show).not.toHaveBeenCalled();
+        expect(hide).not.toHaveBeenCalled();
+        expect(replacement.innerHTML).toBe(replacementBefore);
+    });
+    test('overwrite keeps the original target and field policy when the row is replaced during note building', async ({window}) => {
+        setupDocument(window.document);
+        const originalEntry = createTermEntry();
+        const replacementEntry = createTermEntry();
+        const {display, api} = createDisplay(window.document, [originalEntry]);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormat = createCardFormat();
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        anki._cardFormats = [cardFormat];
+        anki._duplicateBehavior = 'overwrite';
+        const originalDetails = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: true,
+            noteIds: [101],
+            noteInfos: [createNoteInfo(101, 'original value')],
+            ankiError: null,
+        }]])}];
+        anki._dictionaryEntryDetails = originalDetails;
+        anki._updateSaveButtons(originalDetails);
+
+        const firstBuild = Promise.withResolvers();
+        const firstNote = createCollectionNote('first');
+        const finalNote = createCollectionNote('updated value');
+        const build = vi.spyOn(anki, '_createNote')
+            .mockReturnValueOnce(firstBuild.promise)
+            .mockResolvedValueOnce({note: finalNote, errors: [], requirements: []});
+        const saving = anki._saveAnkiNote(0, 0);
+        expect(build).toHaveBeenCalledTimes(1);
+
+        cardFormat.fields.Front.overwriteMode = 'skip';
+        const replacementRow = window.document.createElement('div');
+        replacementRow.className = 'entry';
+        replacementRow.innerHTML = '<div class="note-actions-container"></div>';
+        display.dictionaryEntries = [replacementEntry];
+        display.dictionaryEntryNodes = [replacementRow];
+        window.document.body.appendChild(replacementRow);
+        const replacementDetails = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: true,
+            noteIds: [202],
+            noteInfos: [createNoteInfo(202, 'replacement value')],
+            ankiError: null,
+        }]])}];
+        anki._dictionaryEntryDetails = replacementDetails;
+        anki._updateSaveButtons(replacementDetails);
+
+        firstBuild.resolve({note: firstNote, errors: [], requirements: []});
+        await saving;
+
+        expect(api.updateAnkiNote).toHaveBeenCalledWith({...finalNote, id: 101});
+        expect(api.updateAnkiNote.mock.calls[0][0].fields.Front).toBe('updated value');
+    });
+
+    test('captures save inputs before synchronous progress observers replace the result', async ({window}) => {
+        setupDocument(window.document);
+        const originalEntry = createTermEntry();
+        const replacementEntry = createTermEntry();
+        const {display, api} = createDisplay(window.document, [originalEntry]);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormat = createCardFormat();
+        anki._cardFormats = [cardFormat];
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({url: 'original'});
+        anki._ankiFieldTemplates = 'original template';
+        anki._duplicateBehavior = 'overwrite';
+        const details = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: true,
+            noteIds: [101],
+            noteInfos: [createNoteInfo(101, 'existing')],
+            ankiError: null,
+        }]])}];
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const replacementRow = window.document.createElement('div');
+        replacementRow.className = 'entry';
+        replacementRow.innerHTML = '<div class="note-actions-container"></div>';
+        const replacementDetails = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: true,
+            noteIds: [202],
+            noteInfos: [createNoteInfo(202, 'replacement')],
+            ankiError: null,
+        }]])}];
+        const override = vi.fn(() => {
+            display.dictionaryEntries = [replacementEntry];
+            display.dictionaryEntryNodes = [replacementRow];
+            window.document.body.appendChild(replacementRow);
+            anki._dictionaryEntryDetails = replacementDetails;
+            anki._cardFormats = [{...createCardFormat(), deck: 'Replacement Deck', model: 'Replacement Model'}];
+            anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({url: 'replacement'});
+            anki._ankiFieldTemplates = 'replacement template';
+            return 9;
+        });
+        display.progressIndicatorVisible.setOverride = override;
+        const build = vi.spyOn(anki._ankiNoteBuilder, 'createNote')
+            .mockResolvedValueOnce({note: createCollectionNote('first'), errors: [], requirements: []})
+            .mockResolvedValueOnce({note: createCollectionNote('saved'), errors: [], requirements: []});
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(api.updateAnkiNote).toHaveBeenCalledWith({...createCollectionNote('saved'), id: 101});
+        expect(build).toHaveBeenCalledTimes(2);
+        expect(build.mock.calls.map(([options]) => ({
+            deck: options.cardFormat.deck,
+            model: options.cardFormat.model,
+            url: options.context.url,
+            template: options.template,
+        }))).toEqual(new Array(2).fill({deck: 'Deck', model: 'Model', url: 'original', template: 'original template'}));
+        expect(override).toHaveBeenCalledTimes(1);
+        expect(display.progressIndicatorVisible.clearOverride).toHaveBeenCalledWith(9);
+    });
+
+    test('cold save template lookup uses captured options and does not alter the shared template cache', async ({window}) => {
+        setupDocument(window.document);
+        const {display, api} = createDisplay(window.document, [createTermEntry()]);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormat = createCardFormat();
+        anki._cardFormats = [cardFormat];
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({url: 'captured'});
+        anki._ankiFieldTemplates = null;
+        anki._duplicateBehavior = 'new';
+        const details = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: false,
+            noteIds: null,
+            noteInfos: [],
+            ankiError: null,
+        }]])}];
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const originalOptions = {anki: {enable: true, fieldTemplates: 'original options'}};
+        let activeOptions = originalOptions;
+        display.getOptions = () => activeOptions;
+        const getTemplates = vi.spyOn(anki, '_getAnkiFieldTemplates').mockResolvedValue('captured template');
+        const build = vi.spyOn(anki._ankiNoteBuilder, 'createNote')
+            .mockResolvedValue({note: createCollectionNote('built'), errors: [], requirements: []});
+        display.progressIndicatorVisible.setOverride = vi.fn(() => {
+            activeOptions = {anki: {enable: true, fieldTemplates: 'replacement options'}};
+            anki._ankiFieldTemplates = 'replacement cache';
+            anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({url: 'replacement'});
+            return 5;
+        });
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(getTemplates).toHaveBeenCalledExactlyOnceWith(originalOptions);
+        expect(build).toHaveBeenCalledTimes(2);
+        expect(build.mock.calls.map(([options]) => options.template)).toEqual(['captured template', 'captured template']);
+        expect(build.mock.calls.map(([options]) => options.context.url)).toEqual(['captured', 'captured']);
+        expect(anki._ankiFieldTemplates).toBe('replacement cache');
+        expect(api.addAnkiNote).toHaveBeenCalledTimes(1);
+    });
+
+    test('ordinary cold common-note preparation populates the reusable template cache', async ({window}) => {
+        setupDocument(window.document);
+        const {display} = createDisplay(window.document, [createTermEntry()]);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        anki._cardFormats = [createCardFormat()];
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        const getTemplates = vi.spyOn(anki, '_getAnkiFieldTemplates').mockResolvedValue('cached templates');
+
+        await anki._getCommonNoteBuildData(0);
+        await anki._getCommonNoteBuildData(0);
+
+        expect(getTemplates).toHaveBeenCalledTimes(1);
+        expect(anki._ankiFieldTemplates).toBe('cached templates');
+    });
+
+    test('add completion does not attach its note ID to a replacement row', async ({window}) => {
+        setupDocument(window.document);
+        const originalEntry = createTermEntry();
+        const replacementEntry = createTermEntry();
+        const add = Promise.withResolvers();
+        const {display, api} = createDisplay(window.document, [originalEntry], {
+            addAnkiNote: vi.fn(() => add.promise),
+        });
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormat = createCardFormat();
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        anki._cardFormats = [cardFormat];
+        anki._duplicateBehavior = 'new';
+        const details = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: false,
+            noteIds: null,
+            noteInfos: [],
+            ankiError: null,
+        }]])}];
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const note = createCollectionNote('pending note');
+        vi.spyOn(anki, '_createNote')
+            .mockResolvedValueOnce({note, errors: [], requirements: []})
+            .mockResolvedValueOnce({note, errors: [], requirements: []});
+
+        const saving = anki._saveAnkiNote(0, 0);
+        await vi.waitFor(() => expect(api.addAnkiNote).toHaveBeenCalledTimes(1));
+
+        const replacementRow = window.document.createElement('div');
+        replacementRow.className = 'entry';
+        replacementRow.innerHTML = '<div class="note-actions-container"></div>';
+        display.dictionaryEntries = [replacementEntry];
+        display.dictionaryEntryNodes = [replacementRow];
+        window.document.body.appendChild(replacementRow);
+        const replacementDetails = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: false,
+            noteIds: null,
+            noteInfos: [],
+            ankiError: null,
+        }]])}];
+        anki._dictionaryEntryDetails = replacementDetails;
+        anki._updateSaveButtons(replacementDetails);
+
+        add.resolve(700);
+        await saving;
+
+        expect(api.addAnkiNote).toHaveBeenCalledWith(note);
+        expect(replacementRow.querySelector('.action-button[data-action="view-note"]')).toBeNull();
+    });
+
+    test('both real note-build passes use the captured card format after an in-place options change', async ({window}) => {
+        setupDocument(window.document);
+        const dictionaryEntries = [createTermEntry()];
+        const {display, api} = createDisplay(window.document, dictionaryEntries);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormat = createCardFormat();
+        anki._cardFormats = [cardFormat];
+        anki._duplicateBehavior = 'new';
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        anki._ankiFieldTemplates = 'captured template';
+        const details = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: false,
+            noteIds: null,
+            noteInfos: [],
+            ankiError: null,
+        }]])}];
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const build = vi.spyOn(anki._ankiNoteBuilder, 'createNote')
+            .mockImplementationOnce(async () => {
+                cardFormat.fields.Front.overwriteMode = 'skip';
+                return {note: createCollectionNote('first pass'), errors: [], requirements: [{type: 'audio'}]};
+            })
+            .mockResolvedValueOnce({note: createCollectionNote('built'), errors: [], requirements: []});
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(build).toHaveBeenCalledTimes(2);
+        expect(build.mock.calls.map(([options]) => options.cardFormat.fields.Front.overwriteMode)).toEqual(['overwrite', 'overwrite']);
+        expect(build.mock.calls.map(([options]) => options.template)).toEqual(['captured template', 'captured template']);
+        expect(cardFormat.fields.Front.overwriteMode).toBe('skip');
+        expect(api.addAnkiNote).toHaveBeenCalledTimes(1);
+    });
+
+    test('same-row Anki failure is still reported', async ({window}) => {
+        setupDocument(window.document);
+        const {display} = createDisplay(window.document, [createTermEntry()], {
+            addAnkiNote: vi.fn(async () => { throw new Error('Anki write failed'); }),
+        });
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormat = createCardFormat();
+        anki._cardFormats = [cardFormat];
+        anki._duplicateBehavior = 'new';
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        anki._dictionaryEntryDetails = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: false,
+            noteIds: null,
+            noteInfos: [],
+            ankiError: null,
+        }]])}];
+        anki._updateSaveButtons(anki._dictionaryEntryDetails);
+        const note = createCollectionNote('write attempt');
+        vi.spyOn(anki, '_createNote')
+            .mockResolvedValueOnce({note, errors: [], requirements: []})
+            .mockResolvedValueOnce({note, errors: [], requirements: []});
+        const showError = vi.spyOn(anki, '_showErrorNotification').mockImplementation(() => {});
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(showError).toHaveBeenCalledTimes(1);
+        expect(showError.mock.calls[0][0][0].message).toBe('Anki write failed');
+    });
 });
