@@ -58,7 +58,7 @@ function createController(words) {
 
     const saveBlob = vi.fn();
     const sendNotes = vi.fn(async () => true);
-    const generateNoteData = vi.fn(async () => ({fields: {}, tags: []}));
+    const generateNoteData = vi.fn(async () => ({fields: {}, tags: [], modelName: 'Basic', deckName: 'Japanese'}));
     const error = vi.fn();
     const controller = /** @type {AnkiDeckGeneratorController} */ (Object.assign(
         Object.create(AnkiDeckGeneratorController.prototype),
@@ -78,6 +78,10 @@ function createController(words) {
             _saveBlob: saveBlob,
             _sendNotes: sendNotes,
             _generateNoteData: generateNoteData,
+            _settingsController: {
+                profileIndexChangeGeneration: 0,
+                getOptionsContext: () => ({index: 0, profileId: 'profile-a'}),
+            },
             _fieldsToTSV: () => 'field',
             _updateProgressBar: vi.fn(),
             _updateProgressBarError: error,
@@ -138,6 +142,23 @@ test('export cancellation during note generation prevents the file download', as
     expect(saveBlob).not.toHaveBeenCalled();
     expect(controller._inProgress).toBe(false);
 });
+
+test('export uses generated note metadata when selection changes during generation', async () => {
+    const {controller, timers, saveBlob, generateNoteData} = createController('one');
+    /** @type {ReturnType<typeof deferred<any>>} */
+    const pending = deferred();
+    generateNoteData.mockReturnValueOnce(pending.promise);
+    await controller._onExportConfirm(createEvent());
+    const operation = timers[0]();
+    await flush();
+    controller._activeNoteType = 'Changed Model';
+    controller._activeAnkiDeck = 'Changed Deck';
+    pending.resolve({fields: {Front: 'word'}, tags: [], modelName: 'Basic', deckName: 'Japanese'});
+    await operation;
+    const blob = saveBlob.mock.calls[0][0];
+    await expect(blob.text()).resolves.toContain('Basic\tJapanese\t');
+});
+
 
 test('send cancellation during note generation prevents any Anki request', async () => {
     const {controller, timers, sendNotes, generateNoteData} = createController('one');
@@ -259,4 +280,86 @@ test('cancelling an already dispatched Anki batch prevents subsequent batches', 
     expect(addNotes).toHaveBeenCalledOnce();
     expect(generateNoteData).toHaveBeenCalledTimes(100);
     expect(controller._inProgress).toBe(false);
+});
+
+
+for (const method of ['_onExportConfirm', '_onSendToAnkiConfirm']) {
+    for (const boundary of ['before timer', 'pending generation']) {
+        for (const replacement of ['different ID', 'same-ID settings import']) {
+            test(method + ' stops ' + replacement + ' at the same index during ' + boundary, async () => {
+                const {controller, timers, generateNoteData, saveBlob, sendNotes, error} = createController('one');
+                const state = {context: {index: 0, profileId: 'a'}, generation: 0};
+                Reflect.set(controller, '_settingsController', {
+                    getOptionsContext: () => ({...state.context}),
+                    get profileIndexChangeGeneration() { return state.generation; },
+                });
+                /** @type {ReturnType<typeof deferred<any>>} */
+                const pending = deferred();
+                generateNoteData.mockReturnValueOnce(pending.promise);
+                await Reflect.apply(Reflect.get(controller, method), controller, [createEvent()]);
+                const operation = boundary === 'pending generation' ? timers[0]() : null;
+                await flush();
+                if (replacement === 'different ID') {
+                    state.context = {index: 0, profileId: 'b'};
+                } else {
+                    ++state.generation;
+                }
+                pending.resolve({fields: {Front: 'word'}, tags: [], modelName: 'Basic', deckName: 'Japanese'});
+                await (operation ?? timers[0]());
+                expect(saveBlob).not.toHaveBeenCalled();
+                expect(sendNotes).not.toHaveBeenCalled();
+                expect(error).toHaveBeenCalledWith(expect.stringContaining('Profile changed'));
+                expect(controller._inProgress).toBe(false);
+                expect(controller._sendToAnkiButtonConfirmButton.disabled).toBe(false);
+                expect(controller._exportButtonConfirmButton.disabled).toBe(false);
+            });
+        }
+    }
+}
+
+for (const replacement of ['different ID', 'same-ID settings import']) {
+    test(replacement + ' during duplicate detection prevents actual addNotes dispatch', async () => {
+        const {controller, timers} = createController('one');
+        const state = {context: {index: 0, profileId: 'a'}, generation: 0};
+        Reflect.set(controller, '_settingsController', {
+            getOptionsContext: () => ({...state.context}),
+            get profileIndexChangeGeneration() { return state.generation; },
+        });
+        /** @type {ReturnType<typeof deferred<boolean[]>>} */
+        const pending = deferred();
+        const canAddNotes = vi.fn(() => pending.promise);
+        const addNotes = vi.fn(async () => [123]);
+        Reflect.set(controller, '_ankiController', {canAddNotes, addNotes});
+        Reflect.set(controller, '_sendNotes', AnkiDeckGeneratorController.prototype._sendNotes);
+        controller._disallowDuplicatesCheckbox.checked = true;
+        await controller._onSendToAnkiConfirm(createEvent());
+        const operation = timers[0]();
+        await flush();
+        expect(canAddNotes).toHaveBeenCalledOnce();
+        if (replacement === 'different ID') {
+            state.context = {index: 0, profileId: 'b'};
+        } else {
+            ++state.generation;
+        }
+        pending.resolve([true]);
+        await operation;
+        expect(addNotes).not.toHaveBeenCalled();
+        expect(controller._inProgress).toBe(false);
+    });
+}
+
+test("export labels each row with that generated note's own model and deck", async () => {
+    const {controller, timers, generateNoteData, saveBlob} = createController('one\ntwo');
+    Reflect.set(controller, '_fieldsToTSV', AnkiDeckGeneratorController.prototype._fieldsToTSV);
+    generateNoteData.mockResolvedValueOnce({fields: {Front: 'first'}, tags: [], modelName: 'First Model', deckName: 'First Deck'});
+    generateNoteData.mockResolvedValueOnce({fields: {Front: 'second'}, tags: [], modelName: 'Second Model', deckName: 'Second Deck'});
+    await controller._onExportConfirm(createEvent());
+    await timers[0]();
+    /** @type {string} */
+    const contents = await saveBlob.mock.calls[0][0].text();
+    const rows = contents.split('\n').slice(5, -1).map((row) => row.split('\t'));
+    expect(rows).toStrictEqual([
+        ['First Model', 'First Deck', '', 'first', ''],
+        ['Second Model', 'Second Deck', '', 'second', ''],
+    ]);
 });
