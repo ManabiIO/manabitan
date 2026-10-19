@@ -644,7 +644,7 @@ async function main() {
                             observerEventCount: observedWrites.length,
                             journalParseRetryCount,
                             lastJournalParseError,
-                            observerMechanism: `controlled test-only pause: instrumented extracted package awaits a held loopback response after the authoritative state.lookupIndexWritable.write(new Blob(chunks)) to the .mbtr.mbti term container; the packaged store decoder reports the dictionary name, and active session journal plus new staging container and descriptor are validated before release and SIGKILL; UI phase was ${label}`,
+                            observerMechanism: `controlled test-only pause: instrumented extracted package awaits a held loopback response after the authoritative state.lookupIndexWritable.write(new Blob(chunks)) to the .mbtr.mbti term container; the packaged store decoder reports the dictionary name, and active session journal plus new staging container and descriptor are validated; Chromium is SIGKILLed while held and the response is released only after all captured process identities exit; UI phase was ${label}`,
                         };
                         await persistReport();
                         break;
@@ -710,6 +710,47 @@ async function main() {
             exactExpression: revision.startsWith('revision-one') ? oldExpression : newExpression,
             exactContent: revision.startsWith('revision-one') ? oldGloss : newGloss,
             absentExpression: revision.startsWith('revision-one') ? newExpression : oldExpression,
+            missCount: 0,
+            noTransientRows: true,
+            strictOpfs: recoveredStorage.usesFallbackStorage === false && recoveredStorage.openStorageDiagnostics?.mode === 'opfs-sahpool' && recoveredStorage.openStorageDiagnostics?.hasOpfsSahpoolVfs === true && recoveredStorage.openStorageDiagnostics?.opfsSahpoolInstallResult === 'installed',
+        });
+        await persistReport();
+
+        await page.evaluate(() => {
+            const trigger = [...document.querySelectorAll('.settings-item[data-modal-action="show,dictionaries"]')]
+                .find((item) => (item.querySelector('.settings-item-label')?.textContent || '').includes('Configure installed and enabled dictionaries'));
+            if (!(trigger instanceof HTMLElement)) { throw new Error('installed dictionary modal trigger missing for complete large update'); }
+            trigger.click();
+        });
+        await page.waitForSelector('#dictionaries-modal:not([hidden])', {timeout: 30_000});
+        await page.evaluate(({dictionaryTitle, downloadUrl}) => {
+            const modal = document.querySelector('#dictionary-confirm-update-modal');
+            const button = document.querySelector('#dictionary-confirm-update-button');
+            if (!(modal instanceof HTMLElement) || !(button instanceof HTMLElement)) { throw new Error('update controls missing for complete large update'); }
+            modal.dataset.dictionaryTitle = dictionaryTitle;
+            modal.dataset.downloadUrl = downloadUrl;
+            setTimeout(() => button.click(), 0);
+        }, {dictionaryTitle: title, downloadUrl: `${baseUrl}/new.zip`});
+        const publishedLargeUpdate = await waitForImport(page, 'revision-two-c92a');
+        const publishedLargeInventory = await inventory(page);
+        assert.equal(publishedLargeInventory.row?.revision, 'revision-two-c92a');
+        assert.equal(publishedLargeInventory.row?.storageHealth, 'available');
+        assert.notEqual(publishedLargeInventory.row?.storageGenerationId, oldPublished.storageGenerationId);
+        assert.equal(publishedLargeInventory.counts?.terms, updateEntryCount + 1);
+        assertLookup(await lookup(page, newExpression), newExpression, newGloss);
+        assert.equal((await lookup(page, oldExpression))?.dictionaryEntries?.length, 0, 'completed large update must remove the prior revision expression');
+        assert.equal((await lookup(page, missingExpression))?.dictionaryEntries?.length, 0, 'completed large update ordinary miss must remain empty');
+        const publishedLargeInfo = publishedLargeInventory.dictionaryInfo.filter((row) => String(row?.title || '').includes(title));
+        assert.equal(publishedLargeInfo.length, 1, `transient/mixed dictionary rows remained after complete large update: ${JSON.stringify(publishedLargeInfo)}`);
+        report.phases.push({
+            name: 'completed full large update publication oracle',
+            status: 'passed',
+            revision: publishedLargeUpdate.revision,
+            generationId: publishedLargeInventory.row.storageGenerationId,
+            inventory: publishedLargeInventory.counts,
+            exactExpression: newExpression,
+            exactContent: newGloss,
+            absentExpression: oldExpression,
             missCount: 0,
             noTransientRows: true,
             strictOpfs: recoveredStorage.usesFallbackStorage === false && recoveredStorage.openStorageDiagnostics?.mode === 'opfs-sahpool' && recoveredStorage.openStorageDiagnostics?.hasOpfsSahpoolVfs === true && recoveredStorage.openStorageDiagnostics?.opfsSahpoolInstallResult === 'installed',

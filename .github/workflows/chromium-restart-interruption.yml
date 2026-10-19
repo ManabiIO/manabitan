@@ -65,6 +65,7 @@ jobs:
           const boundary = phases.get('controlled authoritative term-container payload interruption boundary');
           const kill = phases.get('SIGKILL active Chromium process tree after successful authoritative term-container payload write before publication (test-only gate)');
           const oracle = phases.get('restart recovery all-or-nothing generation oracle');
+          const largeUpdate = phases.get('completed full large update publication oracle');
           const processCapture = phases.get('captured owned Chromium process tree before SIGKILL');
           const required = [
             phases.get('completed import baseline')?.status === 'passed',
@@ -72,6 +73,7 @@ jobs:
             boundary?.status === 'observed',
             kill?.status === 'passed',
             oracle?.status === 'passed',
+            largeUpdate?.status === 'passed',
           ];
           const write = boundary?.observedWrite;
           const sessionId = boundary?.journal?.sessionId;
@@ -112,6 +114,12 @@ jobs:
             typeof oracle.exactExpression === 'string' && typeof oracle.exactContent === 'string' &&
             typeof oracle.absentExpression === 'string' && oracle.missCount === 0 && oracle.noTransientRows === true &&
             oracle.strictOpfs === true;
+          const largeUpdateWitness = largeUpdate?.revision === 'revision-two-c92a' &&
+            typeof largeUpdate.generationId === 'string' && largeUpdate.generationId !== oracle?.generationId &&
+            largeUpdate.inventory?.terms === 350001 && largeUpdate.exactExpression === '再起動証拠新' &&
+            largeUpdate.exactContent === 'RESTART_CAMPAIGN_REVISION_TWO_CONTENT_C92A' &&
+            largeUpdate.absentExpression === '再起動証拠旧' && largeUpdate.missCount === 0 &&
+            largeUpdate.noTransientRows === true && largeUpdate.strictOpfs === true;
           const gitObjectId = (value) => typeof value === 'string' && /^[a-f0-9]{40}$/u.test(value);
           const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/u.test(value);
           const identities = gitObjectId(report.sourceHead) && gitObjectId(report.sourceTree) &&
@@ -124,10 +132,10 @@ jobs:
             report.testOnlyPackageObserver?.originalPackageZipSha256 === report.packageSha256 &&
             typeof report.browserVersion === 'string' && report.browserVersion.length > 0;
           if (report.status !== 'success' || required.some((passed) => !passed) || !boundaryWitness ||
-              !validLaunches || !oracleWitness || !identities || !report.runtimeExtensionId || !report.browserVersion ||
+              !validLaunches || !oracleWitness || !largeUpdateWitness || !identities || !report.runtimeExtensionId || !report.browserVersion ||
               report.nodeVersion !== 'v22.22.0') {
             console.error(JSON.stringify({status: report.status, requiredPhaseStatuses: required, boundaryWitness: Boolean(boundaryWitness),
-              validLaunches, oracleWitness: Boolean(oracleWitness), identities: Boolean(identities), runtimeExtensionId: report.runtimeExtensionId,
+              validLaunches, oracleWitness: Boolean(oracleWitness), largeUpdateWitness: Boolean(largeUpdateWitness), identities: Boolean(identities), runtimeExtensionId: report.runtimeExtensionId,
               browserVersion: report.browserVersion, nodeVersion: report.nodeVersion, sourceStatus: report.sourceStatus}, null, 2));
             process.exit(1);
           }
