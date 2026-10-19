@@ -19,8 +19,10 @@ import {readFileSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, vi} from 'vitest';
+import {AnkiConnect} from '../ext/js/comm/anki-connect.js';
 import {AnkiNoteBuilder} from '../ext/js/data/anki-note-builder.js';
 import {createAnkiNoteData} from '../ext/js/data/anki-note-data-creator.js';
+import {Backend} from '../ext/js/background/backend.js';
 import {DisplayAnki} from '../ext/js/display/display-anki.js';
 import {TemplateRenderer} from '../ext/js/templates/template-renderer.js';
 import {createDomTest} from './fixtures/dom-test.js';
@@ -336,6 +338,174 @@ function createCollectionNote(front) {
 }
 
 describe('DisplayAnki preload and save flow', () => {
+    test('native duplicate candidates drive overwrite to the true first-field match', async ({window}) => {
+        const originalFetch = globalThis.fetch;
+        /** @type {import('anki').MessageBody[]} */
+        const transportRequests = [];
+        /** @type {number[]} */
+        const updatedNoteIds = [];
+        /**
+         * @param {number} noteId
+         * @param {string} modelName
+         * @param {Record<string, string>} fields
+         * @returns {Record<string, unknown>}
+         */
+        const noteInfo = (noteId, modelName, fields) => ({
+            noteId,
+            tags: [],
+            fields: Object.fromEntries(Object.entries(fields).map(([name, value], order) => [name, {value, order}])),
+            modelName,
+            cards: [noteId + 1000],
+        });
+        vi.stubGlobal('fetch', vi.fn(async (_url, options) => {
+            const body = /** @type {import('anki').MessageBody} */ (JSON.parse(String(options?.body)));
+            transportRequests.push(body);
+            let result;
+            switch (body.action) {
+                case 'version': result = 6; break;
+                case 'modelNamesAndIds': result = {Model: 11, 'Term Model': 12}; break;
+                case 'canAddNotesWithErrorDetail':
+                    result = /** @type {import('anki').Note[]} */ (body.params.notes).map(() => ({canAdd: false, error: 'cannot create note because it is a duplicate'}));
+                    break;
+                case 'multi': {
+                    result = /** @type {{params: {query: string}}[]} */ (body.params.actions).map(({params: {query}}) => {
+                        if (query.includes('dupe:11,Alpha')) { return [202]; }
+                        if (/front:Alpha/i.test(query)) { return [101, 202]; }
+                        throw new Error(`Unexpected duplicate query: ${query}`);
+                    });
+                    break;
+                }
+                case 'notesInfo': result = /** @type {number[]} */ (body.params.notes).map((id) => noteInfo(id, 'Model', {Front: 'Alpha', Back: 'Original'})); break;
+                case 'cardsInfo': result = /** @type {number[]} */ (body.params.cards).map((cardId) => ({cardId, noteId: cardId - 1000, flags: 0, cardState: 0})); break;
+                case 'updateNoteFields':
+                    updatedNoteIds.push((/** @type {import('anki').Note & {id: number}} */ (body.params.note)).id);
+                    result = null;
+                    break;
+                default: throw new Error(`Unexpected AnkiConnect action: ${body.action}`);
+            }
+            return new Response(JSON.stringify(result));
+        }));
+
+        try {
+            const anki = new AnkiConnect();
+            anki.enabled = true;
+            anki.server = 'http://localhost:8765';
+            anki.apiKey = 'test-key';
+            const backend = Object.create(Backend.prototype);
+            backend._anki = anki;
+            const updateAnkiNote = vi.fn((noteWithId) => backend._onApiUpdateAnkiNote({noteWithId}));
+            /**
+             * @param {{notes: import('anki').Note[], fetchAdditionalInfo: boolean}} request
+             * @returns {Promise<import('anki').NoteInfoWrapper[]>}
+             */
+            const getAnkiNoteInfo = (request) => backend._onApiGetAnkiNoteInfo(request);
+
+            setupDocument(window.document);
+            const {display} = createDisplay(window.document, [createTermEntry()], {
+                getAnkiNoteInfo,
+                updateAnkiNote,
+            });
+            const displayAnki = new DisplayAnki(display, createDisplayAudio());
+            displayAnki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+            displayAnki._cardFormats = [createCardFormat()];
+            displayAnki._duplicateBehavior = 'overwrite';
+            displayAnki._ankiFieldTemplates = 'test template';
+            const [duplicateInfo] = await backend._onApiGetAnkiNoteInfo({
+                notes: [createCollectionNote('Alpha')],
+                fetchAdditionalInfo: true,
+            });
+            displayAnki._dictionaryEntryDetails = [{noteMap: new Map([[0, {
+                cardFormat: displayAnki._cardFormats[0],
+                ...duplicateInfo,
+                ankiError: null,
+            }]])}];
+            displayAnki._updateSaveButtons(displayAnki._dictionaryEntryDetails);
+            const updatedNote = createCollectionNote('Alpha');
+            vi.spyOn(displayAnki._ankiNoteBuilder, 'createNote')
+                .mockResolvedValueOnce({note: updatedNote, errors: [], requirements: []})
+                .mockResolvedValueOnce({note: updatedNote, errors: [], requirements: []});
+            await displayAnki._saveAnkiNote(0, 0);
+
+            expect(updatedNoteIds).toEqual([202]);
+            expect(transportRequests.find(({action}) => action === 'updateNoteFields')?.params.note).toMatchObject({id: 202, fields: {Front: 'Alpha'}});
+            expect(transportRequests).toContainEqual(expect.objectContaining({action: 'modelNamesAndIds', key: 'test-key'}));
+            expect(transportRequests.filter(({action}) => action === 'multi')).toContainEqual(expect.objectContaining({
+                action: 'multi',
+                key: 'test-key',
+                params: {actions: [{action: 'findNotes', key: 'test-key', params: {query: '"dupe:11,Alpha"'}}]},
+            }));
+            expect(updateAnkiNote).toHaveBeenCalledTimes(1);
+        } finally {
+            globalThis.fetch = originalFetch;
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test('all-model native duplicate search excludes a secondary-field false candidate', async () => {
+        const originalFetch = globalThis.fetch;
+        /** @type {import('anki').MessageBody[]} */
+        const transportRequests = [];
+        vi.stubGlobal('fetch', vi.fn(async (_url, options) => {
+            const body = /** @type {import('anki').MessageBody} */ (JSON.parse(String(options?.body)));
+            transportRequests.push(body);
+            let result;
+            switch (body.action) {
+                case 'version': result = 6; break;
+                case 'modelNamesAndIds': result = {Model: 11, 'Other Model': 12}; break;
+                case 'canAddNotesWithErrorDetail': result = [{canAdd: false, error: 'cannot create note because it is a duplicate'}]; break;
+                case 'findNotes': result = String(body.params.query).includes('front:Alpha') ? [101] : [101, 202]; break;
+                case 'multi':
+                    result = /** @type {{params: {query: string}}[]} */ (body.params.actions).map(({params: {query}}) => (query.includes('dupe:12,Alpha') ? [202] : []));
+                    break;
+                case 'notesInfo': result = [{
+                    noteId: 202,
+                    tags: [],
+                    fields: {Front: {value: 'Gamma', order: 0}, Back: {value: 'Alpha', order: 1}},
+                    modelName: 'Other Model',
+                    cards: [1202],
+                }]; break;
+                case 'cardsInfo': result = [{cardId: 1202, noteId: 202, flags: 0, cardState: 0}]; break;
+                default: throw new Error(`Unexpected AnkiConnect action: ${body.action}`);
+            }
+            return new Response(JSON.stringify(result));
+        }));
+
+        try {
+            const anki = new AnkiConnect();
+            anki.enabled = true;
+            anki.server = 'http://localhost:8765';
+            anki.apiKey = 'test-key';
+            const oldFieldSearchCandidates = await anki.findNotes('"front:Alpha"');
+            expect(oldFieldSearchCandidates).toEqual([101]);
+            const backend = Object.create(Backend.prototype);
+            backend._anki = anki;
+            const [info] = await backend._onApiGetAnkiNoteInfo({
+                notes: [{
+                    fields: {Front: 'Alpha', Back: 'incoming content'},
+                    tags: [],
+                    deckName: 'Deck',
+                    modelName: 'Model',
+                    options: {
+                        allowDuplicate: true,
+                        duplicateScope: 'collection',
+                        duplicateScopeOptions: {deckName: null, checkChildren: false, checkAllModels: true},
+                    },
+                }],
+                fetchAdditionalInfo: true,
+            });
+
+            expect(info.noteIds).toEqual([202]);
+            expect(info.noteInfos?.[0]).toMatchObject({noteId: 202, modelName: 'Other Model'});
+            const queries = /** @type {{params: {query: string}}[]} */ (transportRequests.find(({action}) => action === 'multi')?.params.actions ?? []).map(({params: {query}}) => query);
+            expect(queries).toHaveLength(1);
+            expect(queries[0]).toContain('"dupe:11,Alpha"');
+            expect(queries[0]).toContain('"dupe:12,Alpha"');
+        } finally {
+            globalThis.fetch = originalFetch;
+            vi.unstubAllGlobals();
+        }
+    });
+
     test('stale anki field-template refresh does not overwrite newer dictionary-backed templates', async ({window}) => {
         setupDocument(window.document);
         const dictionaryEntries = [createTermEntry()];

@@ -60,6 +60,7 @@ function setup() {
             case 'version': result = 6; break;
             case 'addNote': result = 123; break;
             case 'findNotes': result = [11, 22]; break;
+            case 'modelNamesAndIds': result = {Basic: 101}; break;
             default: result = [[11], [22]]; break;
         }
         return new Response(JSON.stringify(result));
@@ -187,7 +188,7 @@ test.each(['server', 'apiKey'])('does not mix candidate note IDs across %s confi
     const invoke = client._invoke.bind(client);
     vi.spyOn(client, '_invoke').mockImplementation((...args) => {
         const pending = invoke(...args);
-        if (args[0] === 'findNotes') {
+        if (args[0] === 'modelNamesAndIds') {
             // This runs after transport completion, before the composite caller resumes.
             void pending.then(() => { changeConnection(client, setting); }, () => {});
         }
@@ -196,7 +197,7 @@ test.each(['server', 'apiKey'])('does not mix candidate note IDs across %s confi
 
     await expect(client.findNoteIds([note('cat'), note('dog')])).rejects.toThrow('Anki connection settings changed');
     expect(fetch).toHaveBeenCalledOnce();
-    expect(requestBody(fetch.mock.calls[0][1]).action).toBe('findNotes');
+    expect(requestBody(fetch.mock.calls[0][1]).action).toBe('modelNamesAndIds');
 });
 
 test('unchanged connection adds a note normally', async () => {
