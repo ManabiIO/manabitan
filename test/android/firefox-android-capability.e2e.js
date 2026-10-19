@@ -159,7 +159,7 @@ async function main() {
                     report.runtimeQualification = runtimeReport;
                     report.executedCapabilities.push(...runtimeReport.verifiedCapabilities);
                     report.unverifiedCapabilities = [...new Set(runtimeReport.unverifiedCapabilities)];
-                }, 60_000);
+                }, runtimeQualificationTimeoutMs);
                 const target = report.addonContext;
                 const targetForm = isRecord(target.targetForm) ? target.targetForm : {};
                 const watcherResponse = isRecord(target.watcherResponse) ? target.watcherResponse : {};

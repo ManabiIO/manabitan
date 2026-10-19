@@ -291,7 +291,9 @@ export async function evaluateJSON(evaluate, actor, expression, stage) {
         while (Date.now() < deadline) {
             const state = decodeRuntimeEvaluation(await evaluate(actor, `JSON.stringify(globalThis[${keyLiteral}] ?? null)`, `${stage}:poll`), stage);
             if (state !== null && typeof state === 'object') {
-                if (state.status === 'rejected') { throw new Error(`Page operation ${stage} rejected: ${JSON.stringify(state.error)}`); }
+                if (state.status === 'rejected') {
+                    throw Object.assign(new Error(`Page operation ${stage} rejected: ${JSON.stringify(state.error)}`), {remoteError: state.error});
+                }
                 if (state.status === 'fulfilled') {
                     operationResult = /** @type {import('core').SafeAny} */ (state.value);
                     operationCompleted = true;
@@ -630,6 +632,24 @@ export function assertMiningDeliveryOracle(scenario, addNote) {
 }
 
 /**
+ * Build in-page diagnostics for the exact Search entry and every Save control.
+ * @param {{expression: string, reading: string, glossary: string, dictionaryTitle: string}} expected
+ * @returns {string}
+ */
+export function buildMiningSaveButtonDiagnosticScript({expression: expectedExpression, reading: expectedReading, glossary: expectedGlossary, dictionaryTitle}) {
+    return `(()=>{const expected=${JSON.stringify({expression: expectedExpression, reading: expectedReading, glossary: expectedGlossary, dictionaryTitle})};const plainTerm=node=>{const copy=node.cloneNode(true);for(const part of copy.querySelectorAll('rt,rp'))part.remove();return String(copy.textContent||'').replace(/\\s+/g,'').trim();};const isHidden=node=>{for(let parent=node;parent instanceof HTMLElement;parent=parent.parentElement){const style=getComputedStyle(parent);if(parent.hidden||parent.getAttribute('aria-hidden')==='true'||style.display==='none'||style.visibility==='hidden')return true;}return false;};const describe=(button,entry)=>{const container=button.closest('[data-card-format-index]');const rect=button.getBoundingClientRect();const style=getComputedStyle(button);const headword=entry?.querySelector('.headword-term');return {entryTitle:headword?String(headword.textContent||'').trim():null,buttonTitle:button.title||null,cardFormatIndex:container?.dataset.cardFormatIndex??button.dataset.cardFormatIndex??null,disabled:button.disabled,hidden:button.hidden||isHidden(button),display:style.display,visibility:style.visibility,width:rect.width,height:rect.height};};const entries=[...document.querySelectorAll('#dictionary-entries .entry')];const entryIndex=entries.findIndex(candidate=>[...candidate.querySelectorAll('.headword')].some(headword=>{const term=headword.querySelector('.headword-term');const reading=headword.querySelector('.headword-reading');return term&&reading&&plainTerm(term)===expected.expression&&String(reading.textContent||'').trim()===expected.reading;})&&[...candidate.querySelectorAll('.definition-item[data-dictionary]')].some(item=>item.dataset.dictionary===expected.dictionaryTitle&&[...item.querySelectorAll('.gloss-content')].some(node=>String(node.textContent||'').includes(expected.glossary))));const entry=entryIndex<0?null:entries[entryIndex];const controls=[...document.querySelectorAll('#dictionary-entries .entry')].flatMap(candidate=>[...candidate.querySelectorAll('.action-button[data-action="save-note"]')].map(button=>describe(button,candidate)));const matchedControls=entry?[...entry.querySelectorAll('.action-button[data-action="save-note"]')].map(button=>describe(button,entry)):[];return {entryFound:Boolean(entry),entryIndex,entryTitle:entry?.querySelector('.headword-term')?.textContent?.trim()??null,matchedSaveControls:matchedControls,allSaveControls:controls.slice(0,50),saveControlCount:controls.length};})()`;
+}
+
+/**
+ * @param {{cardFormatIndex: number, expression: string, reading: string, glossary: string, dictionaryTitle: string}} options
+ * @returns {string}
+ */
+export function buildMiningClickScript({cardFormatIndex, expression: expectedExpression, reading: expectedReading, glossary: expectedGlossary, dictionaryTitle}) {
+    assert.ok(Number.isSafeInteger(cardFormatIndex) && cardFormatIndex >= 0, 'Mining requires a configured card-format index');
+    return `new Promise((resolve,reject)=>{const deadline=Date.now()+30000;const configuredCardFormatIndex=${JSON.stringify(cardFormatIndex)};const diagnostics=()=>${buildMiningSaveButtonDiagnosticScript({expression: expectedExpression, reading: expectedReading, glossary: expectedGlossary, dictionaryTitle})};const visible=node=>{const rect=node?.getBoundingClientRect();const style=node&&getComputedStyle(node);const consentModal=document.querySelector('#firefox-data-transmission-consent-modal');let shown=Boolean(rect&&style&&rect.width>0&&rect.height>0&&style.display!=='none'&&style.visibility!=='hidden'&&!(consentModal instanceof HTMLElement&&!consentModal.hidden));for(let parent=node;shown&&parent instanceof HTMLElement;parent=parent.parentElement){if(parent.hidden||parent.getAttribute('aria-hidden')==='true')shown=false;}return {visible:shown,width:rect?.width||0,height:rect?.height||0,display:style?.display||'',visibility:style?.visibility||'',consentModalVisible:consentModal instanceof HTMLElement&&!consentModal.hidden};};const inspect=()=>{const state=diagnostics();const entry=state.entryIndex>=0?document.querySelectorAll('#dictionary-entries .entry')[state.entryIndex]:null;const buttons=entry?[...entry.querySelectorAll('.note-actions-container .action-button[data-action="save-note"]')].filter(button=>button.dataset.cardFormatIndex===String(configuredCardFormatIndex)):[];if(buttons.length>1){reject(Object.assign(new Error('Multiple Save controls matched the configured card format'),{diagnostic:{...state,configuredCardFormatIndex}}));return;}const button=buttons[0];const render=button instanceof HTMLButtonElement?visible(button):{visible:false};if(button instanceof HTMLButtonElement&&!button.disabled&&render.visible){button.click();resolve({clicked:true,cardFormatIndex:configuredCardFormatIndex,selector:button.dataset.action,render});return;}if(Date.now()>deadline){const diagnostic={...state,configuredCardFormatIndex,selectedButton:state.matchedSaveControls.find(control=>control.cardFormatIndex===String(configuredCardFormatIndex))??null,render};reject(Object.assign(new Error('Shipped Search save-note button did not become enabled and rendered'),{diagnostic}));return;}setTimeout(inspect,250);};inspect();})`;
+}
+
+/**
  * @param {{evaluate: RuntimeEvaluate, backgroundActor: string, settingsActor: string, searchActor: string, adbDevice: string, stage: (name: string, value: unknown) => number}} options
  * @returns {Promise<void>}
  */
@@ -639,6 +659,8 @@ async function qualifyMiningAction({evaluate, backgroundActor, settingsActor, se
     const server = await startAnkiMockHttpServer(mockState);
     const port = new URL(server.ankiConnectUrl).port;
     let reverseInstalled = false;
+    /** @type {unknown} */
+    let appliedMockAnkiConfig = null;
     /** @type {(Error & {cleanupErrors?: string[]})|null} */
     let primaryError = null;
     /** @type {Error|null} */
@@ -648,7 +670,10 @@ async function qualifyMiningAction({evaluate, backgroundActor, settingsActor, se
         reverseInstalled = true;
         stage('local-mock-anki-route', {device: adbDevice, hostUrl: server.ankiConnectUrl, reverse: String(reverse.stdout || '').trim(), noExternalEndpoint: true});
         mockState.beginScenario('android-capability-mining', [{noteId: 91_001, cardId: 92_001, deckName: 'Android Capability Deck', modelName: 'Android Capability Model', fields: {Front: 'seed', Back: 'seed'}, tags: [], queue: 0, flags: 0, findable: true}]);
-        const configured = await evaluateJSON(evaluate, settingsActor, `new Promise((resolve,reject)=>{const call=(action,params)=>new Promise((done,fail)=>browser.runtime.sendMessage({action,params},response=>{const error=browser.runtime.lastError;if(error)fail(new Error(error.message));else if(response?.error)fail(new Error(JSON.stringify(response.error)));else done(response?.result??response)}));(async()=>{const options=await call('optionsGetFull');for(const profile of options.profiles){const anki=profile.options.anki;anki.server='${server.ankiConnectUrl.replace('127.0.0.1', '127.0.0.1')}';anki.apiKey='';anki.enable=true;if(!Array.isArray(anki.cardFormats))throw new Error('Product options have no Anki card-format list');const format=anki.cardFormats.find(value=>value.type==='term');if(!format)throw new Error('Product has no term card format');format.name='Android Capability Model';format.deck='Android Capability Deck';format.model='Android Capability Model';format.fields.Front={...(format.fields.Front||{}),value:'{expression}'};format.fields.Back={...(format.fields.Back||{}),value:'${androidMiningBackTemplate}'};}await call('setAllSettings',{value:options,source:'firefox-android-capability-mining'});resolve({enabled:true,deck:'Android Capability Deck',model:'Android Capability Model',front:'{expression}',back:'${androidMiningBackTemplate}'});})().catch(reject);})`, 'configure-mock-anki');
+        const configured = await evaluateJSON(evaluate, settingsActor, `new Promise((resolve,reject)=>{const call=(action,params)=>new Promise((done,fail)=>browser.runtime.sendMessage({action,params},response=>{const error=browser.runtime.lastError;if(error)fail(new Error(error.message));else if(response?.error)fail(new Error(JSON.stringify(response.error)));else done(response?.result??response)}));(async()=>{const options=await call('optionsGetFull');const safeFormats=[];for(let profileIndex=0;profileIndex<options.profiles.length;profileIndex++){const anki=options.profiles[profileIndex].options.anki;anki.server='${server.ankiConnectUrl}';anki.apiKey='';anki.enable=true;if(!Array.isArray(anki.cardFormats))throw new Error('Product options have no Anki card-format list');const cardFormatIndex=anki.cardFormats.findIndex(value=>value.type==='term');if(cardFormatIndex<0)throw new Error('Product has no term card format');const format=anki.cardFormats[cardFormatIndex];format.name='Android Capability Model';format.deck='Android Capability Deck';format.model='Android Capability Model';format.fields.Front={...(format.fields.Front||{}),value:'{expression}'};format.fields.Back={...(format.fields.Back||{}),value:'${androidMiningBackTemplate}'};safeFormats.push({profileIndex,cardFormatIndex,name:format.name,icon:format.icon,deck:format.deck,model:format.model,type:format.type,fields:{Front:{value:format.fields.Front.value,overwriteMode:format.fields.Front.overwriteMode??null},Back:{value:format.fields.Back.value,overwriteMode:format.fields.Back.overwriteMode??null}}});}await call('setAllSettings',{value:options,source:'firefox-android-capability-mining'});resolve({enabled:true,cardFormatIndex:safeFormats.find(format=>format.profileIndex===options.profileCurrent)?.cardFormatIndex,cardFormats:safeFormats});})().catch(reject);})`, 'configure-mock-anki');
+        const configuredCardFormatIndex = configured.cardFormatIndex;
+        assert.ok(typeof configuredCardFormatIndex === 'number' && Number.isSafeInteger(configuredCardFormatIndex) && configuredCardFormatIndex >= 0, 'Mining configuration did not return its active card-format index');
+        appliedMockAnkiConfig = configured;
         stage('configure-mock-anki', configured);
         const settingsFocus = await evaluateJSON(evaluate, backgroundActor, buildOwnedPageActivationScript('settings.html'), 'activate-settings-before-anki-status');
         stage('activate-settings-before-anki-status', settingsFocus);
@@ -660,7 +685,7 @@ async function qualifyMiningAction({evaluate, backgroundActor, settingsActor, se
         stage('activate-search-before-mining-click', searchFocus);
         const visibleSearch = await evaluateJSON(evaluate, searchActor, buildDocumentVisibilityWaitScript('search.html', {searchQuery: expression}), 'wait-search-visible-before-mining-click');
         stage('search-visible-before-mining-click', visibleSearch);
-        const miningClickScript = `new Promise((resolve,reject)=>{const deadline=Date.now()+30000;const visible=node=>{const rect=node?.getBoundingClientRect();const style=node&&getComputedStyle(node);const consentModal=document.querySelector('#firefox-data-transmission-consent-modal');let shown=Boolean(rect&&style&&rect.width>0&&rect.height>0&&style.display!=='none'&&style.visibility!=='hidden'&&!(consentModal instanceof HTMLElement&&!consentModal.hidden));for(let parent=node;shown&&parent instanceof HTMLElement;parent=parent.parentElement){if(parent.hidden||parent.getAttribute('aria-hidden')==='true')shown=false;}return {visible:shown,width:rect?.width||0,height:rect?.height||0,display:style?.display||'',visibility:style?.visibility||'',consentModalVisible:consentModal instanceof HTMLElement&&!consentModal.hidden};};const inspect=()=>{const entry=[...document.querySelectorAll('#dictionary-entries .entry')].find(entry=>[...entry.querySelectorAll('.headword')].some(headword=>{const term=headword.querySelector('.headword-term');const reading=headword.querySelector('.headword-reading');const copy=term?.cloneNode(true);for(const node of copy?.querySelectorAll('rt,rp')||[])node.remove();return String(copy?.textContent||'').replace(/\\s+/g,'').trim()===${JSON.stringify(expression)}&&String(reading?.textContent||'').trim()===${JSON.stringify(reading)};})&&[...entry.querySelectorAll('.definition-item[data-dictionary]')].some(item=>item.dataset.dictionary===${JSON.stringify(dictionaryTitle)}&&[...item.querySelectorAll('.gloss-content')].some(node=>String(node.textContent||'').includes(${JSON.stringify(`${glossary} revision 2`)}))));const button=entry?.querySelector('.note-actions-container .action-button[data-action="save-note"]');const render=button instanceof HTMLButtonElement?visible(button):{visible:false};if(button instanceof HTMLButtonElement&&!button.disabled&&render.visible){button.click();resolve({clicked:true,selector:button.dataset.action,render});return;}if(Date.now()>deadline){reject(new Error('Shipped Search save-note button did not become enabled and rendered: '+JSON.stringify(render)));return;}setTimeout(inspect,250);};inspect();})`;
+        const miningClickScript = buildMiningClickScript({cardFormatIndex: configuredCardFormatIndex, expression, reading, glossary: `${glossary} revision 2`, dictionaryTitle});
         const clicked = await evaluateJSON(evaluate, searchActor, miningClickScript, 'click-mining-ui');
         assert.equal(clicked.render?.visible, true, `Mining save-note action was not visibly rendered and unoccluded: ${JSON.stringify(clicked)}`);
         stage('mining-ui-action', clicked);
@@ -697,6 +722,12 @@ async function qualifyMiningAction({evaluate, backgroundActor, settingsActor, se
         stage('mock-anki-add-note-oracle', {actionLog: addNote, scenarioSnapshots: scenario.snapshots, scenarioActions: scenario.actions, exactlyOneAddNote: true});
     } catch (error) {
         primaryError = error instanceof Error ? /** @type {Error & {cleanupErrors?: string[]}} */ (error) : new Error(String(error));
+        const remoteError = Reflect.get(primaryError, 'remoteError');
+        stage('mining-action-failure-diagnostics', {
+            error: remoteError ?? {name: primaryError.name, message: primaryError.message},
+            appliedMockAnkiConfig,
+            mockAnkiScenario: mockState.getScenarioState(),
+        });
         throw error;
     } finally {
         /** @type {string[]} */

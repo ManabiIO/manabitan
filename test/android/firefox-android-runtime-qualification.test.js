@@ -6,7 +6,7 @@ import {JSDOM} from 'jsdom';
 import {describe, expect, test, vi} from 'vitest';
 import {SettingsDisplayController} from '../../ext/js/pages/settings/settings-display-controller.js';
 import {ModalController} from '../../ext/js/pages/settings/modal-controller.js';
-import {assertMiningDeliveryOracle, buildDictionaryModalOpenScript, buildDocumentVisibilityWaitScript, buildOwnedExtensionPageOpenScript, buildOwnedPageActivationScript, buildOwnedPageReloadScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON, qualifyAndroidDictionaryRuntime} from './firefox-android-runtime-qualification.js';
+import {assertMiningDeliveryOracle, buildDictionaryModalOpenScript, buildDocumentVisibilityWaitScript, buildMiningClickScript, buildOwnedExtensionPageOpenScript, buildOwnedPageActivationScript, buildOwnedPageReloadScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON, qualifyAndroidDictionaryRuntime} from './firefox-android-runtime-qualification.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 
 /**
@@ -98,6 +98,55 @@ function createSearchDom({splitIdentity = false} = {}) {
 }
 
 describe('Android runtime qualification emitted scripts', () => {
+    test('mining selects the configured format in the exact entry regardless of button order', async () => {
+        for (const scenario of ['configured-enabled', 'configured-disabled', 'wrong-format-only', 'wrong-entry']) {
+            const {dom, globals} = createSearchDom({splitIdentity: scenario === 'wrong-entry'});
+            try {
+                const {document} = dom.window;
+                const entry = document.querySelector('#dictionary-entries .entry');
+                if (!(entry instanceof dom.window.HTMLElement)) { throw new Error('Fixture entry missing'); }
+                const container = document.createElement('div');
+                container.className = 'note-actions-container';
+                entry.append(container);
+                /** @type {number[]} */
+                const clicked = [];
+                for (const index of scenario === 'wrong-format-only' ? [1] : [1, 0]) {
+                    const template = document.querySelector('#action-button-container-template');
+                    if (!(template instanceof dom.window.HTMLTemplateElement)) { throw new Error('Shipped Save template missing'); }
+                    const node = template.content.cloneNode(true);
+                    if (!(node instanceof dom.window.DocumentFragment)) { throw new Error('Shipped Save fragment missing'); }
+                    const button = node.querySelector('button');
+                    if (!(button instanceof dom.window.HTMLButtonElement)) { throw new Error('Shipped Save button missing'); }
+                    button.dataset.cardFormatIndex = String(index);
+                    button.disabled = index === 1 || scenario === 'configured-disabled';
+                    Object.defineProperty(button, 'getBoundingClientRect', {
+                        value: () => ({x: 0, y: 0, width: 24, height: 24}),
+                    });
+                    button.addEventListener('click', () => { clicked.push(index); });
+                    container.append(node);
+                }
+                let now = 0;
+                const context = vm.createContext({
+                    ...globals,
+                    getComputedStyle: dom.window.getComputedStyle.bind(dom.window),
+                    Date: {now: () => { now += 40_000; return now; }},
+                    setTimeout,
+                });
+                const script = buildMiningClickScript({cardFormatIndex: 0, expression: '読む', reading: 'よむ', glossary: 'to read revision 2', dictionaryTitle: 'android-runtime-fixture'});
+                if (scenario === 'configured-enabled') {
+                    await expect(vm.runInContext(script, context)).resolves.toMatchObject({clicked: true, cardFormatIndex: 0, render: {visible: true}});
+                    expect(clicked).toEqual([0]);
+                } else {
+                    await expect(vm.runInContext(script, context)).rejects.toThrow(/did not become enabled and rendered/);
+                    expect(clicked).toEqual([]);
+                }
+            } finally {
+                dom.window.close();
+            }
+        }
+        expect(() => buildMiningClickScript({cardFormatIndex: -1, expression: '読む', reading: 'よむ', glossary: 'to read revision 2', dictionaryTitle: 'android-runtime-fixture'})).toThrow(/configured card-format index/);
+    });
+
     test('native readiness runs before the first owned extension page is opened', async () => {
         /** @type {string[]} */
         const events = [];
