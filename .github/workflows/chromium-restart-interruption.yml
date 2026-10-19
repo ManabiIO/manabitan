@@ -62,8 +62,8 @@ jobs:
           }
           const report = JSON.parse(fs.readFileSync(path, 'utf8'));
           const phases = new Map((report.phases || []).map((phase) => [phase.name, phase]));
-          const boundary = phases.get('controlled test-only post-write interruption boundary');
-          const kill = phases.get('SIGKILL active Chromium process tree after successful term-record write before publication (test-only gate)');
+          const boundary = phases.get('controlled authoritative term-container payload interruption boundary');
+          const kill = phases.get('SIGKILL active Chromium process tree after successful authoritative term-container payload write before publication (test-only gate)');
           const oracle = phases.get('restart recovery all-or-nothing generation oracle');
           const processCapture = phases.get('captured owned Chromium process tree before SIGKILL');
           const required = [
@@ -80,10 +80,14 @@ jobs:
             write.dictionaryName.startsWith(`${fixtureTitle} [update-staging `) && write.dictionaryName.endsWith(']');
           const boundaryWitness = boundary?.journal?.recordCheckpoint?.shards &&
             typeof sessionId === 'string' && sessionId.length > 0 && write?.held === true &&
-            write.sessionId === sessionId && typeof write.fileName === 'string' && write.fileName.endsWith('.mbtr') &&
-            (write.dictionaryName === fixtureTitle || stagedTitle) && Number.isSafeInteger(write.bytes) &&
+            write.sessionId === sessionId && typeof write.fileName === 'string' && write.fileName.endsWith('.mbtr.mbti') &&
+            typeof write.descriptorFileName === 'string' && write.descriptorFileName === write.fileName.slice(0, -'.mbti'.length) && write.descriptorFileName.endsWith('.mbtr') &&
+            (write.dictionaryName === fixtureTitle || stagedTitle) && Number.isSafeInteger(write.bytes) && Number.isSafeInteger(write.recordCount) && write.recordCount > 0 &&
             write.bytes > 4096 && boundary.checkpointEntry === null &&
-            !boundary.journal.recordCheckpoint.shards.some(({fileName}) => fileName === write.fileName) &&
+            boundary.preUpdateFilesAbsent === true &&
+            !boundary.journal.recordCheckpoint.shards.some(({fileName}) => fileName === write.fileName || fileName === write.descriptorFileName) &&
+            Array.isArray(kill?.exitedPids) && Array.isArray(processCapture?.processes) &&
+            processCapture.processes.every(({pid}) => kill.exitedPids.includes(pid)) &&
             Array.isArray(processCapture?.processes) && processCapture.processes.some(({pid, startedAt, command}) =>
               pid === kill?.rootPid && typeof startedAt === 'string' && startedAt.length > 0 &&
               typeof command === 'string' && command.includes('--user-data-dir=') &&
