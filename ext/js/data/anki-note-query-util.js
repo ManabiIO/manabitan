@@ -171,3 +171,34 @@ export function createAnkiNoteDuplicateSearchDetails(note, fieldValueMode = 'exa
         modelName,
     };
 }
+
+/**
+ * Builds a native Anki duplicate-check query for one or more note type IDs.
+ * @param {import('anki').Note} note
+ * @param {number[]} modelIds
+ * @returns {?{query: string}}
+ */
+export function createAnkiNoteNativeDuplicateSearchDetails(note, modelIds) {
+    const primaryField = getAnkiNotePrimaryField(note);
+    if (primaryField === null || modelIds.length === 0) { return null; }
+
+    const {duplicateScope, deckName, checkChildren} = normalizeAnkiDuplicateScope(note);
+    /** @type {string[]} */
+    const queryParts = [];
+    if (duplicateScope === 'deck') {
+        if (typeof deckName !== 'string' || deckName.length === 0) { return null; }
+        queryParts.push(createAnkiSearchToken('deck', deckName));
+        if (!checkChildren) {
+            queryParts.push(createAnkiSearchToken('deck', deckName, true, '::*'));
+        }
+    }
+
+    const escapedValue = primaryField.value.replace(/[\\"]/g, '\\$&');
+    const duplicateTokens = [...new Set(modelIds)]
+        .filter((modelId) => Number.isSafeInteger(modelId) && modelId > 0)
+        .map((modelId) => `"dupe:${modelId},${escapedValue}"`);
+    if (duplicateTokens.length === 0) { return null; }
+
+    queryParts.push(duplicateTokens.length === 1 ? duplicateTokens[0] : `(${duplicateTokens.join(' or ')})`);
+    return {query: queryParts.join(' ')};
+}

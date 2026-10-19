@@ -19,7 +19,7 @@
 import {ExtensionError} from '../core/extension-error.js';
 import {parseJson} from '../core/json.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
-import {createAnkiNoteDuplicateSearchDetails} from '../data/anki-note-query-util.js';
+import {createAnkiNoteNativeDuplicateSearchDetails, getAnkiNotePrimaryField, normalizeAnkiDuplicateScope} from '../data/anki-note-query-util.js';
 
 /**
  * This class controls communication with Anki via the AnkiConnect plugin.
@@ -340,7 +340,23 @@ export class AnkiConnect {
      */
     async findNoteIds(notes) {
         if (!this._enabled) { return []; }
+        if (notes.length === 0) { return []; }
         const generation = await this._checkVersion();
+
+        const modelNamesAndIdsResult = await this._invoke('modelNamesAndIds', {}, generation);
+        this._assertConnectionGeneration(generation);
+        if (typeof modelNamesAndIdsResult !== 'object' || modelNamesAndIdsResult === null || Array.isArray(modelNamesAndIdsResult)) {
+            throw this._createUnexpectedResultError('object', modelNamesAndIdsResult);
+        }
+        /** @type {Map<string, number>} */
+        const modelIdsByName = new Map();
+        /** @type {number[]} */
+        const allModelIds = [];
+        for (const [modelName, modelId] of Object.entries(modelNamesAndIdsResult)) {
+            if (typeof modelId !== 'number' || !Number.isSafeInteger(modelId) || modelId <= 0) { continue; }
+            modelIdsByName.set(modelName, modelId);
+            allModelIds.push(modelId);
+        }
 
         const queries = [];
         const actionsTargetsList = [];
@@ -350,7 +366,12 @@ export class AnkiConnect {
         const allNoteIds = [];
 
         for (const note of notes) {
-            const duplicateSearchDetails = createAnkiNoteDuplicateSearchDetails(note);
+            const primaryField = getAnkiNotePrimaryField(note);
+            const {checkAllModels} = normalizeAnkiDuplicateScope(note);
+            const modelIds = checkAllModels ? allModelIds : [modelIdsByName.get(note.modelName)];
+            const duplicateSearchDetails = primaryField === null || modelIds.some((id) => typeof id !== 'number') ?
+                null :
+                createAnkiNoteNativeDuplicateSearchDetails(note, /** @type {number[]} */ (modelIds));
             if (duplicateSearchDetails === null) {
                 allNoteIds.push([]);
                 continue;

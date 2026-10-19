@@ -16,7 +16,7 @@
  */
 
 import {describe, expect, test} from 'vitest';
-import {createAnkiNoteDuplicateSearchDetails} from '../ext/js/data/anki-note-query-util.js';
+import {createAnkiNoteDuplicateSearchDetails, createAnkiNoteNativeDuplicateSearchDetails} from '../ext/js/data/anki-note-query-util.js';
 
 /**
  * @param {{
@@ -155,5 +155,39 @@ describe('Anki duplicate search query escaping', () => {
     test('all-model mode permits an empty model name', () => {
         expect(createAnkiNoteDuplicateSearchDetails(createNote({modelName: '', checkAllModels: true}))?.query)
             .toBe('"front:value"');
+    });
+});
+
+describe('Anki native duplicate search query', () => {
+    test('uses native model IDs and exact first-field value without field-name search escaping', () => {
+        expect(createAnkiNoteNativeDuplicateSearchDetails(createNote({field: 'Alpha', fieldName: 'Term'}), [21])?.query)
+            .toBe('"dupe:21,Alpha"');
+        expect(createAnkiNoteNativeDuplicateSearchDetails(createNote({field: 'alpha'}), [21])?.query)
+            .toBe('"dupe:21,alpha"');
+    });
+
+    test('quotes dupe tokens and escapes only native quote and backslash syntax', () => {
+        expect(createAnkiNoteNativeDuplicateSearchDetails(createNote({field: 'a"\\b:*_,x'}), [21])?.query)
+            .toBe('"dupe:21,a\\"\\\\b:*_,x"');
+    });
+
+    test('groups multiple note types and retains exact, child-inclusive, and root deck scopes', () => {
+        expect(createAnkiNoteNativeDuplicateSearchDetails(createNote({field: 'Alpha'}), [21, 22, 21])?.query)
+            .toBe('("dupe:21,Alpha" or "dupe:22,Alpha")');
+        expect(createAnkiNoteNativeDuplicateSearchDetails(createNote({
+            field: 'Alpha', duplicateScope: 'deck', deckName: 'Scope',
+        }), [21])?.query).toBe('"deck:Scope" -"deck:Scope::*" "dupe:21,Alpha"');
+        expect(createAnkiNoteNativeDuplicateSearchDetails(createNote({
+            field: 'Alpha', duplicateScope: 'deck', deckName: 'Scope', checkChildren: true,
+        }), [21])?.query).toBe('"deck:Scope" "dupe:21,Alpha"');
+        expect(createAnkiNoteNativeDuplicateSearchDetails(createNote({
+            field: 'Alpha', duplicateScope: 'deck-root', deckName: 'Scope::Child',
+        }), [21])?.query).toBe('"deck:Scope" "dupe:21,Alpha"');
+    });
+
+    test('rejects empty or unsafe model IDs instead of widening the search', () => {
+        expect(createAnkiNoteNativeDuplicateSearchDetails(createNote(), [])).toBeNull();
+        expect(createAnkiNoteNativeDuplicateSearchDetails(createNote(), [0, -1, Infinity, Number.MAX_SAFE_INTEGER + 1]))
+            .toBeNull();
     });
 });

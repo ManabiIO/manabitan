@@ -82,23 +82,49 @@ function getPrimaryField(fields) {
 
 /**
  * @param {string} query
- * @returns {{deckQuery: string|null, excludedDeckQueries: string[], noteName: string|null, fieldName: string|null, fieldValue: string|null}}
+ * @returns {{deckQuery: string|null, excludedDeckQueries: string[], noteName: string|null, fieldName: string|null, fieldValue: string|null, duplicateQueries: {modelId: number, value: string}[], noteIds: number[], hasNoteIdFilter: boolean}}
  */
 function parseFindNotesQuery(query) {
     /** @type {string[]} */
     const tokens = [];
-    const pattern = /"([^"]*)"|(\S+)/g;
-    while (true) {
-        const match = pattern.exec(query);
-        if (match === null) { break; }
-        tokens.push(typeof match[1] === 'string' ? match[1] : String(match[2] || ''));
+    let token = '';
+    let quoted = false;
+    let escaped = false;
+    for (const character of query) {
+        if (escaped) {
+            token += character;
+            escaped = false;
+        } else if (character === '\\' && quoted) {
+            escaped = true;
+        } else if (character === '"') {
+            quoted = !quoted;
+            if (!quoted) {
+                tokens.push(token);
+                token = '';
+            }
+        } else if (!quoted && /[\s()]/.test(character)) {
+            if (token.length > 0) {
+                tokens.push(token);
+                token = '';
+            }
+            if (character === '(' || character === ')') { tokens.push(character); }
+        } else {
+            token += character;
+        }
     }
+    if (escaped) { token += '\\'; }
+    if (token.length > 0) { tokens.push(token); }
     let deckQuery = null;
     /** @type {string[]} */
     const excludedDeckQueries = [];
     let noteName = null;
     let fieldName = null;
     let fieldValue = null;
+    /** @type {{modelId: number, value: string}[]} */
+    const duplicateQueries = [];
+    /** @type {number[]} */
+    let noteIds = [];
+    let hasNoteIdFilter = false;
     for (let token of tokens) {
         let negative = false;
         if (token.startsWith('-')) {
@@ -120,12 +146,87 @@ function parseFindNotesQuery(query) {
             if (!negative) {
                 noteName = value;
             }
-        } else if (!negative) {
+        } else if (key.toLowerCase() === 'dupe' && !negative) {
+            const comma = value.indexOf(',');
+            const modelId = Number(value.slice(0, comma));
+            if (comma > 0 && Number.isSafeInteger(modelId) && modelId > 0) {
+                duplicateQueries.push({modelId, value: value.slice(comma + 1)});
+            }
+        } else if (key.toLowerCase() === 'nid' && !negative) {
+            hasNoteIdFilter = true;
+            noteIds = value.split(',').map(Number).filter((id) => Number.isSafeInteger(id));
+        } else if (!negative && key !== 'or' && key !== '(' && key !== ')') {
             fieldName = key;
             fieldValue = value;
         }
     }
-    return {deckQuery, excludedDeckQueries, noteName, fieldName, fieldValue};
+    return {deckQuery, excludedDeckQueries, noteName, fieldName, fieldValue, duplicateQueries, noteIds, hasNoteIdFilter};
+}
+
+/**
+ * @param {string} query
+ * @returns {string[]}
+ */
+function splitFindNotesQueryGroups(query) {
+    /** @type {string[]} */
+    const groups = [];
+    let start = 0;
+    let depth = 0;
+    let quoted = false;
+    let escaped = false;
+    for (let i = 0; i < query.length; ++i) {
+        const character = query[i];
+        if (escaped) {
+            escaped = false;
+            continue;
+        }
+        if (character === '\\' && quoted) {
+            escaped = true;
+            continue;
+        }
+        if (character === '"') {
+            quoted = !quoted;
+            continue;
+        }
+        if (quoted) {
+            continue;
+        }
+        if (character === '(') {
+            ++depth;
+            continue;
+        }
+        if (character === ')') {
+            --depth;
+            continue;
+        }
+        if (depth === 0 && query.slice(i, i + 4) === ' or ') {
+            groups.push(query.slice(start, i));
+            start = i + 4;
+            i += 3;
+        }
+    }
+    groups.push(query.slice(start));
+    return groups;
+}
+
+/**
+ * Bounded stand-in for native dupe comparison: strip simple HTML tags and decode
+ * common fixture entities. It does not model Anki's full HTML/media normalizer.
+ * @param {string} value
+ * @returns {string}
+ */
+function normalizeNativeDuplicateValue(value) {
+    return value
+        .replace(/<br\s*\/?\s*>/gi, '')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&(?:nbsp|amp|lt|gt|quot|#39);/gi, (entity) => ({
+            '&nbsp;': ' ',
+            '&amp;': '&',
+            '&lt;': '<',
+            '&gt;': '>',
+            '&quot;': '"',
+            '&#39;': "'",
+        })[entity.toLowerCase()] || entity);
 }
 
 /**
@@ -267,10 +368,23 @@ export function createAnkiMockState() {
     let sequence = 0;
     let nextNoteId = 10_000;
     let nextCardId = 20_000;
+    /** @type {Map<string, number>} */
+    let modelIds = new Map();
 
     /**
-     * @param {string} reason
+     * @param {string} modelName
+     * @returns {number}
      */
+    const getModelId = (modelName) => {
+        let modelId = modelIds.get(modelName);
+        if (modelId === undefined) {
+            modelId = modelIds.size + 1;
+            modelIds.set(modelName, modelId);
+        }
+        return modelId;
+    };
+
+    /** @param {string} reason */
     const captureSnapshot = (reason) => {
         snapshots.push({
             reason,
@@ -377,27 +491,31 @@ export function createAnkiMockState() {
             }
             case 'findNotes': {
                 const query = String(payload.query || '');
-                const {deckQuery, excludedDeckQueries, noteName, fieldName, fieldValue} = parseFindNotesQuery(query);
+                const queryGroups = splitFindNotesQueryGroups(query).map((group) => parseFindNotesQuery(group.replace(/^\s*\(|\)\s*$/g, '')));
                 return notes.filter((item) => {
                     if (!item.findable) { return false; }
-                    if (deckQuery !== null && !matchesDeckQuery(item, deckQuery)) {
-                        return false;
-                    }
-                    if (excludedDeckQueries.some((value) => matchesDeckQuery(item, value))) {
-                        return false;
-                    }
-                    if (noteName !== null && item.modelName.toLowerCase() !== noteName.toLowerCase()) {
-                        return false;
-                    }
-                    if (fieldName !== null && fieldValue !== null) {
-                        const fieldsLower = Object.fromEntries(
-                            Object.entries(item.fields).map(([name, value]) => [name.toLowerCase(), value]),
-                        );
-                        if (fieldsLower[fieldName.toLowerCase()] !== fieldValue) {
-                            return false;
+                    return queryGroups.some(({deckQuery, excludedDeckQueries, noteName, fieldName, fieldValue, duplicateQueries, noteIds, hasNoteIdFilter}) => {
+                        if (hasNoteIdFilter && !noteIds.includes(item.noteId)) { return false; }
+                        if (deckQuery !== null && !matchesDeckQuery(item, deckQuery)) { return false; }
+                        if (excludedDeckQueries.some((value) => {
+                            return value.endsWith('::*') ?
+                                item.deckName.startsWith(`${value.slice(0, -3)}::`) :
+                                matchesDeckQuery(item, value);
+                        })) { return false; }
+                        if (noteName !== null && item.modelName.toLowerCase() !== noteName.toLowerCase()) { return false; }
+                        if (fieldName !== null && fieldValue !== null) {
+                            const fieldsLower = Object.fromEntries(Object.entries(item.fields).map(([name, value]) => [name.toLowerCase(), value]));
+                            if (fieldsLower[fieldName.toLowerCase()] !== fieldValue) { return false; }
                         }
-                    }
-                    return true;
+                        if (duplicateQueries.length > 0) {
+                            const primaryField = getPrimaryField(item.fields);
+                            if (primaryField === null || !duplicateQueries.some(({modelId, value}) => (
+                                modelId === getModelId(item.modelName) &&
+                                normalizeNativeDuplicateValue(primaryField.value) === normalizeNativeDuplicateValue(value)
+                            ))) { return false; }
+                        }
+                        return true;
+                    });
                 }).map((item) => item.noteId);
             }
             case 'multi': {
@@ -449,6 +567,10 @@ export function createAnkiMockState() {
             }
             case 'modelNames': {
                 return [...new Set(notes.map((item) => item.modelName))];
+            }
+            case 'modelNamesAndIds': {
+                const modelNames = [...new Set(notes.map((item) => item.modelName))].sort();
+                return Object.fromEntries(modelNames.map((modelName) => [modelName, getModelId(modelName)]));
             }
             case 'modelFieldNames': {
                 return ['Front', 'Back'];
@@ -515,6 +637,8 @@ export function createAnkiMockState() {
             actions = [];
             snapshots = [];
             notes = normalizeSeedNotes(seedNotes);
+            modelIds = new Map();
+            for (const {modelName} of notes) { getModelId(modelName); }
             let maxNoteId = 9_999;
             let maxCardId = 19_999;
             for (const note of notes) {
