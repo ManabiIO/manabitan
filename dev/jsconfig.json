@@ -15,6 +15,9 @@
             "api-map": [
                 "../types/ext/api-map"
             ],
+            "anki": [
+                "../types/ext/anki"
+            ],
             "anki-templates": [
                 "../types/ext/anki-templates"
             ],
