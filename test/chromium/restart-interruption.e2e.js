@@ -504,6 +504,14 @@ async function main() {
     let observerEvents = [];
     let disarmObserver = () => {};
     let releaseHeldObserver = () => {};
+    const interruptionObservation = {
+        polls: 0,
+        lastProgressLabel: '',
+        lastJournalByteLength: null,
+        journalParseRetryCount: 0,
+        lastJournalParseError: null,
+        lastUpdateUiError: '',
+    };
     try {
         ({server, baseUrl, observerEvents, disarmObserver, releaseHeldObserver} = await startServer(oldArchive, newArchive));
         report.testOnlyPackageObserver = await instrumentPackageForTestObserver(`${baseUrl}/observer`);
@@ -569,10 +577,13 @@ async function main() {
         let journalParseRetryCount = 0;
         let lastJournalParseError = null;
         while (Date.now() < killDeadline) {
+            ++interruptionObservation.polls;
             const [label, journalText] = await Promise.all([
                 page.evaluate(() => document.querySelector('#dictionaries-modal .dictionary-import-progress .progress-info')?.textContent?.trim() || ''),
                 readImportJournal(page),
             ]);
+            interruptionObservation.lastProgressLabel = label;
+            interruptionObservation.lastJournalByteLength = journalText === null ? null : Buffer.byteLength(journalText);
             if (journalText !== null) {
                 let journal = null;
                 try {
@@ -581,6 +592,8 @@ async function main() {
                     if (!(error instanceof SyntaxError)) { throw error; }
                     ++journalParseRetryCount;
                     lastJournalParseError = error.message;
+                    interruptionObservation.journalParseRetryCount = journalParseRetryCount;
+                    interruptionObservation.lastJournalParseError = lastJournalParseError;
                 }
                 if (journal !== null) {
                     assert.equal(journal.version, 1, `unexpected journal version: ${JSON.stringify(journal)}`);
@@ -622,6 +635,7 @@ async function main() {
                 }
             }
             const error = await page.evaluate(() => document.querySelector('#dictionary-error:not([hidden])')?.textContent?.trim() || '');
+            interruptionObservation.lastUpdateUiError = error;
             assert.equal(error, '', `update UI failed before the kill boundary: ${error}`);
             await page.waitForTimeout(10);
         }
@@ -726,6 +740,9 @@ async function main() {
             ]);
         }
         report.finishedAtIso = new Date().toISOString();
+        report.interruptionObservation = interruptionObservation;
+        report.observerEventCount = observerEvents.length;
+        if (report.status !== 'success') { report.observerEvents = observerEvents.slice(-500); }
         await writeFile(reportPath, JSON.stringify(report, null, 2));
         if (report.cleanupFailure) { process.exitCode = 1; }
     }
