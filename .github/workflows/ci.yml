@@ -612,5 +612,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: firefox-android-gecko-rdp-capability-report
-          path: builds/firefox-android-capability-report.json
+          path: |
+            builds/firefox-android-capability-report.json
+            builds/firefox-android-capability-diagnostics/
           if-no-files-found: ignore

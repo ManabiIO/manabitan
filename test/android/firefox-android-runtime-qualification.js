@@ -27,10 +27,10 @@ const execFileAsync = promisify(execFile);
 /**
  * Runs a bounded import and lookup through real Firefox Android extension pages and product APIs.
  * All async work is owned by a namespaced page state and every RDP evaluation is resultID-correlated.
- * @param {{extensionId: string, backgroundTarget: Record<string, unknown>, evaluate: RuntimeEvaluate, waitForTarget: (predicate: (target: Record<string, unknown>) => boolean, stage: string) => Promise<Record<string, unknown>>, fixtureDirectory: string, adbDevice: string, runtimeQualificationTimeoutMs: number}} options
+ * @param {{extensionId: string, backgroundTarget: Record<string, unknown>, evaluate: RuntimeEvaluate, waitForTarget: (predicate: (target: Record<string, unknown>) => boolean, stage: string) => Promise<Record<string, unknown>>, fixtureDirectory: string, adbDevice: string, runtimeQualificationTimeoutMs: number, onFailureEvidence?: (stage: string) => Promise<unknown>}} options
  * @returns {Promise<RuntimeQualificationReport>}
  */
-export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTarget, evaluate, waitForTarget, fixtureDirectory, adbDevice, runtimeQualificationTimeoutMs}) {
+export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTarget, evaluate, waitForTarget, fixtureDirectory, adbDevice, runtimeQualificationTimeoutMs, onFailureEvidence}) {
     /** @type {RuntimeQualificationReport} */
     const report = {status: 'running', timeoutMs: runtimeQualificationTimeoutMs, extensionId, backgroundTarget, stages: [], errors: [], verifiedCapabilities: [], unverifiedCapabilities: ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update']};
     /**
@@ -204,6 +204,15 @@ export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTa
         report.status = 'failure';
         report.errors.push(error instanceof Error ? `${error.name}: ${error.message}` : String(error));
         qualificationFailure = error instanceof Error ? /** @type {Error & {cleanupError?: string}} */ (error) : new Error(String(error));
+        if (onFailureEvidence) {
+            const capturedAtIso = new Date().toISOString();
+            try {
+                const evidence = await onFailureEvidence('runtime-failure-before-owned-tab-cleanup');
+                stage('native-failure-evidence', {capturedAtIso, evidence});
+            } catch (evidenceError) {
+                stage('native-failure-evidence', {capturedAtIso, status: 'error', error: evidenceError instanceof Error ? `${evidenceError.name}: ${evidenceError.message}` : String(evidenceError)});
+            }
+        }
         throw Object.assign(error instanceof Error ? error : new Error(String(error)), {runtimeQualification: report});
     } finally {
         const backgroundActor = typeof backgroundTarget.consoleActor === 'string' ? backgroundTarget.consoleActor : null;
@@ -377,7 +386,33 @@ export function buildDocumentVisibilityWaitScript(page) {
  */
 // The template literal is emitted as source in the Firefox page actor.
 export function buildDictionaryModalOpenScript(activeOwnedSettingsTab) {
-    return `new Promise((resolve,reject)=>{const visible=node=>{const rect=node?.getBoundingClientRect();const style=node&&getComputedStyle(node);let shown=Boolean(rect&&style&&rect.width>0&&rect.height>0&&style.display!=='none'&&style.visibility!=='hidden');for(let parent=node;shown&&parent instanceof HTMLElement;parent=parent.parentElement){if(parent.hidden||parent.getAttribute('aria-hidden')==='true')shown=false;}return {shown,width:rect?.width||0,height:rect?.height||0};};const diagnostic=()=>{const triggerSelector='.settings-item-button[data-modal-action="show,dictionaries"]';const modalSelector='#dictionaries-modal';const trigger=document.querySelector(triggerSelector);const modal=document.querySelector(modalSelector);const describe=node=>{if(!(node instanceof HTMLElement))return null;const rect=node.getBoundingClientRect();const style=getComputedStyle(node);return {tag:node.tagName,id:node.id||null,className:String(node.className||''),disabled:node instanceof HTMLButtonElement?node.disabled:null,hidden:node.hidden,ariaHidden:node.getAttribute('aria-hidden'),rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},display:style.display,visibility:style.visibility,position:style.position};};return {documentReadyState:document.readyState,documentVisibilityState:document.visibilityState,documentUrl:location.href,triggerSelector,modalSelector,activeOwnedTab:${JSON.stringify(activeOwnedSettingsTab)},trigger:describe(trigger),modal:describe(modal)};};const trigger=document.querySelector('.settings-item-button[data-modal-action="show,dictionaries"]');if(!(trigger instanceof HTMLElement)||!visible(trigger).shown){reject(Object.assign(new Error('Shipped visible Configure installed and enabled dictionaries trigger is unavailable'),{diagnostic:diagnostic()}));return;}trigger.scrollIntoView({block:'center',inline:'nearest'});trigger.click();const deadline=Date.now()+15000;const inspect=()=>{const modal=document.querySelector('#dictionaries-modal');const render=modal instanceof HTMLElement?visible(modal):{shown:false,width:0,height:0};if(modal instanceof HTMLElement&&!modal.hidden&&render.shown){resolve({openedThroughProductTrigger:true,modalVisible:true,render,diagnostic:diagnostic()});return;}if(Date.now()>deadline){reject(Object.assign(new Error('Shipped Dictionaries modal did not become visible'),{diagnostic:diagnostic()}));return;}setTimeout(inspect,100);};inspect();})`;
+    return `new Promise((resolve,reject)=>{
+        const visible=node=>{const rect=node?.getBoundingClientRect();const style=node&&getComputedStyle(node);let shown=Boolean(rect&&style&&rect.width>0&&rect.height>0&&style.display!=='none'&&style.visibility!=='hidden');for(let parent=node;shown&&parent instanceof HTMLElement;parent=parent.parentElement){if(parent.hidden||parent.getAttribute('aria-hidden')==='true')shown=false;}return {shown,width:rect?.width||0,height:rect?.height||0};};
+        const diagnostic=()=>{
+            const triggerSelector='.settings-item-button[data-modal-action="show,dictionaries"]';
+            const modalSelector='#dictionaries-modal';
+            const trigger=document.querySelector(triggerSelector);
+            const modal=document.querySelector(modalSelector);
+            const describe=node=>{
+                if(!(node instanceof HTMLElement))return null;
+                const rect=node.getBoundingClientRect();
+                const style=getComputedStyle(node);
+                return {tag:node.tagName,id:node.id||null,className:String(node.className||''),disabled:node instanceof HTMLButtonElement?node.disabled:null,hidden:node.hidden,ariaHidden:node.getAttribute('aria-hidden'),rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},display:style.display,visibility:style.visibility,position:style.position,transform:style.transform,contain:style.contain,overflow:style.overflow,overflowX:style.overflowX,overflowY:style.overflowY};
+            };
+            const ancestors=node=>{const result=[];for(let parent=node;parent instanceof HTMLElement;parent=parent.parentElement)result.push(describe(parent));return result;};
+            const hitTest=(x,y)=>{if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||y<0||x>=innerWidth||y>=innerHeight)return null;const element=document.elementFromPoint(x,y);return element instanceof HTMLElement?{tag:element.tagName,id:element.id||null,className:String(element.className||'')}:null;};
+            const viewport={innerWidth,innerHeight,outerWidth,outerHeight,devicePixelRatio,documentElement:{clientWidth:document.documentElement?.clientWidth||0,clientHeight:document.documentElement?.clientHeight||0,scrollWidth:document.documentElement?.scrollWidth||0,scrollHeight:document.documentElement?.scrollHeight||0},body:{clientWidth:document.body?.clientWidth||0,clientHeight:document.body?.clientHeight||0,scrollWidth:document.body?.scrollWidth||0,scrollHeight:document.body?.scrollHeight||0},visualViewport:globalThis.visualViewport?{width:visualViewport.width,height:visualViewport.height,offsetLeft:visualViewport.offsetLeft,offsetTop:visualViewport.offsetTop,scale:visualViewport.scale}:null};
+            const center={x:Math.floor(innerWidth/2),y:Math.floor(innerHeight/2)};
+            return {documentReadyState:document.readyState,documentVisibilityState:document.visibilityState,documentUrl:location.href,triggerSelector,modalSelector,activeOwnedTab:${JSON.stringify(activeOwnedSettingsTab)},viewport,root:describe(document.documentElement),body:describe(document.body),trigger:describe(trigger),modal:describe(modal),triggerAncestors:ancestors(trigger),modalAncestors:ancestors(modal),viewportCenterHit:hitTest(center.x,center.y),modalCenterHit:modal instanceof HTMLElement?hitTest((()=>{const rect=modal.getBoundingClientRect();return rect.left+rect.width/2;})(),(()=>{const rect=modal.getBoundingClientRect();return rect.top+rect.height/2;})()):null};
+        };
+        const trigger=document.querySelector('.settings-item-button[data-modal-action="show,dictionaries"]');
+        if(!(trigger instanceof HTMLElement)||!visible(trigger).shown){reject(Object.assign(new Error('Shipped visible Configure installed and enabled dictionaries trigger is unavailable'),{diagnostic:diagnostic()}));return;}
+        trigger.scrollIntoView({block:'center',inline:'nearest'});
+        trigger.click();
+        const deadline=Date.now()+15000;
+        const inspect=()=>{const modal=document.querySelector('#dictionaries-modal');const render=modal instanceof HTMLElement?visible(modal):{shown:false,width:0,height:0};if(modal instanceof HTMLElement&&!modal.hidden&&render.shown){resolve({openedThroughProductTrigger:true,modalVisible:true,render,diagnostic:diagnostic()});return;}if(Date.now()>deadline){reject(Object.assign(new Error('Shipped Dictionaries modal did not become visible'),{diagnostic:diagnostic()}));return;}setTimeout(inspect,100);};
+        inspect();
+    })`;
 }
 
 /**

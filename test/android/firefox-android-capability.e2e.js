@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {promisify} from 'node:util';
 import {runWebExtInstallHandshake} from './web-ext-install-handshake.js';
 import {findWebExtRdpPort, GeckoRdpProtocolError, probeInstalledAddon} from './firefox-android-rdp.js';
+import {collectAndroidNativeFailureEvidence} from './firefox-android-native-failure-evidence.js';
 import {qualifyAndroidDictionaryRuntime} from './firefox-android-runtime-qualification.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -104,6 +105,15 @@ async function main() {
                     report.verificationScope = 'actual-gecko-rdp-extension-context+android-runtime-qualification';
                     report.unverifiedCapabilities = report.unverifiedCapabilities.filter((capability) => capability !== 'extension-context-evaluation');
                     assert.ok(session.backgroundTarget, 'Accepted runtime context has no background target');
+                    const acceptedTarget = session.backgroundTarget;
+                    report.rdpTargetIdentity = {
+                        extensionId: report.extensionId,
+                        targetActor: acceptedTarget.actor ?? null,
+                        targetType: acceptedTarget.targetType ?? acceptedTarget.type ?? null,
+                        innerWindowId: acceptedTarget.innerWindowId ?? null,
+                        url: acceptedTarget.url ?? null,
+                        consoleActor: acceptedTarget.consoleActor ?? null,
+                    };
                     let runtimeReport;
                     try {
                         runtimeReport = await qualifyAndroidDictionaryRuntime({
@@ -114,6 +124,11 @@ async function main() {
                             fixtureDirectory: path.join(root, 'test', 'data', 'dictionaries', 'valid-dictionary1'),
                             adbDevice: report.adbDevice,
                             runtimeQualificationTimeoutMs,
+                            onFailureEvidence: (stage) => collectAndroidNativeFailureEvidence({
+                                adbDevice: report.adbDevice,
+                                outputDirectory: path.join(root, 'builds', 'firefox-android-capability-diagnostics'),
+                                stage,
+                            }),
                         });
                     } catch (error) {
                         report.runtimeQualification = isRecord(error) && isRecord(error.runtimeQualification) ? /** @type {RuntimeQualificationReport} */ (error.runtimeQualification) : {status: 'failure', timeoutMs: runtimeQualificationTimeoutMs, stages: [], errors: [error instanceof Error ? `${error.name}: ${error.message}` : String(error)], verifiedCapabilities: [], unverifiedCapabilities: ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update']};

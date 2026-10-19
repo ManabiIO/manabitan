@@ -6,7 +6,7 @@ import {JSDOM} from 'jsdom';
 import {describe, expect, test, vi} from 'vitest';
 import {SettingsDisplayController} from '../../ext/js/pages/settings/settings-display-controller.js';
 import {ModalController} from '../../ext/js/pages/settings/modal-controller.js';
-import {assertMiningDeliveryOracle, buildDictionaryModalOpenScript, buildOwnedExtensionPageOpenScript, buildOwnedPageActivationScript, buildOwnedPageReloadScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON} from './firefox-android-runtime-qualification.js';
+import {assertMiningDeliveryOracle, buildDictionaryModalOpenScript, buildOwnedExtensionPageOpenScript, buildOwnedPageActivationScript, buildOwnedPageReloadScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON, qualifyAndroidDictionaryRuntime} from './firefox-android-runtime-qualification.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 
 /**
@@ -98,6 +98,35 @@ function createSearchDom({splitIdentity = false} = {}) {
 }
 
 describe('Android runtime qualification emitted scripts', () => {
+    test('captures failure evidence before owned tab cleanup and preserves the runtime failure', async () => {
+        /** @type {string[]} */
+        const events = [];
+        const failure = await qualifyAndroidDictionaryRuntime({
+            extensionId: 'expected-addon',
+            backgroundTarget: {addonId: 'different-addon', consoleActor: 'background-console'},
+            evaluate: async (_actor, _script, stage) => {
+                events.push(`evaluate:${stage}`);
+                if (stage.endsWith(':start')) { return rdpEntry({started: true}); }
+                if (stage.endsWith(':poll')) { return rdpEntry({status: 'fulfilled', value: {ownedIds: [71], removed: [71], failures: []}}); }
+                return rdpEntry({cleaned: true});
+            },
+            waitForTarget: async () => { throw new Error('unexpected target wait'); },
+            fixtureDirectory: '',
+            adbDevice: 'emulator-test',
+            runtimeQualificationTimeoutMs: 1000,
+            onFailureEvidence: async (stage) => {
+                events.push(`evidence:${stage}`);
+                return {artifacts: {screenshot: {status: 'error', error: 'adb unavailable'}}};
+            },
+        }).catch((error) => error);
+
+        expect(failure).toBeInstanceOf(Error);
+        expect(failure.message).toMatch(/belongs to another add-on/);
+        expect(events[0]).toBe('evidence:runtime-failure-before-owned-tab-cleanup');
+        expect(events[1]).toBe('evaluate:cleanup-owned-extension-tabs:start');
+        expect(failure.runtimeQualification.stages).toContainEqual(expect.objectContaining({name: 'native-failure-evidence', value: expect.objectContaining({evidence: expect.objectContaining({artifacts: {screenshot: {status: 'error', error: 'adb unavailable'}}})})}));
+    });
+
     test('mining oracle requires a successful reply and the exact persisted note from the real mock state', () => {
         const mock = createAnkiMockState();
         mock.beginScenario('delivery-oracle-test', [{noteId: 91_001, cardId: 92_001, deckName: 'Android Capability Deck', modelName: 'Android Capability Model', fields: {Front: 'seed', Back: 'seed'}, tags: [], queue: 0, flags: 0, findable: true}]);
@@ -233,6 +262,7 @@ describe('Android runtime qualification emitted scripts', () => {
         Object.defineProperty(trigger, 'getBoundingClientRect', {value: () => ({x: 1, y: 2, width: 80, height: 24})});
         Object.defineProperty(trigger, 'scrollIntoView', {value: () => {}});
         Object.defineProperty(modal, 'getBoundingClientRect', {value: () => ({x: 0, y: 0, width: 0, height: 0})});
+        document.elementFromPoint = vi.fn(() => document.body);
         let now = 0;
         const context = vm.createContext({
             document,
@@ -240,6 +270,11 @@ describe('Android runtime qualification emitted scripts', () => {
             HTMLButtonElement,
             location,
             getComputedStyle,
+            innerWidth: 320,
+            innerHeight: 640,
+            outerWidth: 360,
+            outerHeight: 720,
+            devicePixelRatio: 2,
             setTimeout,
             Error,
             Date: {now: () => { now += 20_000; return now; }},
@@ -263,9 +298,14 @@ describe('Android runtime qualification emitted scripts', () => {
             triggerSelector: '.settings-item-button[data-modal-action="show,dictionaries"]',
             modalSelector: '#dictionaries-modal',
             activeOwnedTab: {id: 77, url: 'moz-extension://fixture/settings.html'},
+            viewport: expect.objectContaining({innerWidth: 320, innerHeight: 640, outerWidth: 360, outerHeight: 720, devicePixelRatio: 2}),
             trigger: expect.objectContaining({tag: 'DIV', disabled: null, rect: {x: 1, y: 2, width: 80, height: 24}}),
             modal: expect.objectContaining({tag: 'DIV', hidden: true, rect: {x: 0, y: 0, width: 0, height: 0}}),
+            triggerAncestors: expect.arrayContaining([expect.objectContaining({tag: 'DIV'}), expect.objectContaining({tag: 'BODY'}), expect.objectContaining({tag: 'HTML'})]),
+            modalAncestors: expect.arrayContaining([expect.objectContaining({id: 'dictionaries-modal'}), expect.objectContaining({tag: 'BODY'})]),
+            viewportCenterHit: expect.objectContaining({tag: 'BODY'}),
         });
+        expect(document.elementFromPoint).toHaveBeenCalledWith(160, 320);
         expect(clicks).toBe(1);
     });
 
@@ -298,8 +338,10 @@ describe('Android runtime qualification emitted scripts', () => {
             const settingsController = {getPreparedProfileOptions: () => ({general: {popupTheme: 'light', popupThemePreset: 'default'}})};
             const displayController = new SettingsDisplayController(/** @type {import('../../ext/js/pages/settings/settings-controller.js').SettingsController} */ (/** @type {unknown} */ (settingsController)), modalController);
             await displayController.prepare();
-            const result = await vm.runInContext(buildDictionaryModalOpenScript({id: 77, url: 'moz-extension://fixture/settings.html'}), vm.createContext({document, HTMLElement, HTMLButtonElement, location, getComputedStyle, setTimeout, Error, Date}));
+            document.elementFromPoint = vi.fn(() => modal);
+            const result = await vm.runInContext(buildDictionaryModalOpenScript({id: 77, url: 'moz-extension://fixture/settings.html'}), vm.createContext({document, HTMLElement, HTMLButtonElement, location, getComputedStyle, innerWidth: 320, innerHeight: 640, outerWidth: 360, outerHeight: 720, devicePixelRatio: 2, setTimeout, Error, Date}));
             expect(result).toMatchObject({openedThroughProductTrigger: true, modalVisible: true, render: {shown: true}});
+            expect(result.diagnostic).toMatchObject({viewport: expect.objectContaining({innerWidth: 320, innerHeight: 640}), modalAncestors: expect.arrayContaining([expect.objectContaining({id: 'dictionaries-modal'})])});
             expect(modal.hidden).toBe(false);
             expect(trigger.scrollIntoView).toHaveBeenCalledWith({block: 'center', inline: 'nearest'});
         } finally {
