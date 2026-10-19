@@ -263,7 +263,7 @@ async function importFile(page, filePath) {
     await page.setInputFiles('#dictionary-import-file-input', filePath);
 }
 
-async function waitForImport(page, expectedRevision) {
+async function waitForImport(page, expectedRevision, previousGenerationId = null) {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
         let rows;
@@ -274,7 +274,7 @@ async function waitForImport(page, expectedRevision) {
             await page.waitForTimeout(100);
             continue;
         }
-        const row = Array.isArray(rows) ? rows.find((item) => item?.title === title && item?.revision === expectedRevision && item?.importSuccess === true) : null;
+        const row = Array.isArray(rows) ? rows.find((item) => item?.title === title && item?.revision === expectedRevision && item?.importSuccess === true && (previousGenerationId === null || item?.storageGenerationId !== previousGenerationId)) : null;
         if (row) { return row; }
         const state = await page.evaluate(() => ({
             label: document.querySelector('#dictionaries-modal .dictionary-import-progress .progress-info')?.textContent?.trim() || '',
@@ -731,11 +731,11 @@ async function main() {
             modal.dataset.downloadUrl = downloadUrl;
             setTimeout(() => button.click(), 0);
         }, {dictionaryTitle: title, downloadUrl: `${baseUrl}/new.zip`});
-        const publishedLargeUpdate = await waitForImport(page, 'revision-two-c92a');
+        const publishedLargeUpdate = await waitForImport(page, 'revision-two-c92a', recovered.row.storageGenerationId);
         const publishedLargeInventory = await inventory(page);
         assert.equal(publishedLargeInventory.row?.revision, 'revision-two-c92a');
         assert.equal(publishedLargeInventory.row?.storageHealth, 'available');
-        assert.notEqual(publishedLargeInventory.row?.storageGenerationId, oldPublished.storageGenerationId);
+        assert.notEqual(publishedLargeInventory.row?.storageGenerationId, recovered.row.storageGenerationId);
         assert.equal(publishedLargeInventory.counts?.terms, updateEntryCount + 1);
         assertLookup(await lookup(page, newExpression), newExpression, newGloss);
         assert.equal((await lookup(page, oldExpression))?.dictionaryEntries?.length, 0, 'completed large update must remove the prior revision expression');
@@ -746,6 +746,7 @@ async function main() {
             name: 'completed full large update publication oracle',
             status: 'passed',
             revision: publishedLargeUpdate.revision,
+            previousGenerationId: recovered.row.storageGenerationId,
             generationId: publishedLargeInventory.row.storageGenerationId,
             inventory: publishedLargeInventory.counts,
             exactExpression: newExpression,

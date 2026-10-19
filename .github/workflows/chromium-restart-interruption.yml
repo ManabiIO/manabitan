@@ -115,7 +115,8 @@ jobs:
             typeof oracle.absentExpression === 'string' && oracle.missCount === 0 && oracle.noTransientRows === true &&
             oracle.strictOpfs === true;
           const largeUpdateWitness = largeUpdate?.revision === 'revision-two-c92a' &&
-            typeof largeUpdate.generationId === 'string' && largeUpdate.generationId !== oracle?.generationId &&
+            typeof largeUpdate.previousGenerationId === 'string' && largeUpdate.previousGenerationId === oracle?.generationId &&
+            typeof largeUpdate.generationId === 'string' && largeUpdate.generationId !== largeUpdate.previousGenerationId &&
             largeUpdate.inventory?.terms === 350001 && largeUpdate.exactExpression === '再起動証拠新' &&
             largeUpdate.exactContent === 'RESTART_CAMPAIGN_REVISION_TWO_CONTENT_C92A' &&
             largeUpdate.absentExpression === '再起動証拠旧' && largeUpdate.missCount === 0 &&
