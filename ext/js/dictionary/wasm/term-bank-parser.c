@@ -318,19 +318,20 @@ static int grow_term_row_buffer(
     uint32_t old_capacity,
     uint32_t* out_capacity
 ) {
-    const uint32_t max_capacity = UINT32_MAX / (uint32_t)sizeof(TermRowMeta);
+    const uint32_t row_size = (uint32_t)sizeof(TermRowMeta);
+    const uint32_t max_capacity = (UINT32_MAX - 7u) / row_size;
     if (old_capacity >= max_capacity) { return 0; }
     uint32_t growth = old_capacity / 2u;
     if (growth < 8192u) { growth = 8192u; }
     const uint32_t new_capacity = old_capacity > max_capacity - growth ?
         max_capacity :
         old_capacity + growth;
-    const uint32_t old_bytes = old_capacity * (uint32_t)sizeof(TermRowMeta);
-    const uint32_t extra_bytes = (new_capacity - old_capacity) * (uint32_t)sizeof(TermRowMeta);
+    const uint32_t old_bytes = align8(old_capacity * row_size);
+    const uint32_t new_bytes = align8(new_capacity * row_size);
     if (out_ptr > UINT32_MAX - old_bytes) { return 0; }
     const uint32_t expected_end = out_ptr + old_bytes;
     if (heap_ptr != expected_end) { return 0; }
-    const uint32_t extra_ptr = wasm_alloc(extra_bytes);
+    const uint32_t extra_ptr = wasm_alloc(new_bytes - old_bytes);
     if (extra_ptr == 0u || extra_ptr != expected_end) { return 0; }
     *out_capacity = new_capacity;
     last_parse_capacity = new_capacity;
