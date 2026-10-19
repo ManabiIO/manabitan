@@ -126,6 +126,7 @@ export class AnkiNoteBuilder {
 
     /**
      * Creates a minimal note for duplicate checks using only the first configured field.
+     * Marker shortcuts are disabled unless the caller confirms standard templates are active.
      * @param {import('anki-note-builder').CreateDuplicateCheckNoteDetails} details
      * @returns {Promise<import('anki').Note>}
      */
@@ -141,6 +142,7 @@ export class AnkiNoteBuilder {
         glossaryLayoutMode = 'default',
         compactTags = false,
         dictionaryStylesMap = new Map(),
+        allowStandardFieldMarkerFastPath = false,
     }) {
         const fastNote = this.createDuplicateCheckNoteFast({
             dictionaryEntry,
@@ -149,6 +151,7 @@ export class AnkiNoteBuilder {
             duplicateScope,
             duplicateScopeCheckAllModels,
             resultOutputMode,
+            allowStandardFieldMarkerFastPath,
         });
         if (fastNote !== null) {
             return fastNote;
@@ -181,6 +184,9 @@ export class AnkiNoteBuilder {
     /**
      * Attempts to create a duplicate-check note without template rendering.
      * Returns `null` when the first field requires template evaluation.
+     * `true` for the marker flag is authorized only when built-in field-marker
+     * semantics are known to be active; literal first fields remain eligible
+     * without the flag.
      * @param {object} details
      * @param {import('dictionary').DictionaryEntry} details.dictionaryEntry
      * @param {import('settings').AnkiCardFormat} details.cardFormat
@@ -188,6 +194,7 @@ export class AnkiNoteBuilder {
      * @param {import('settings').AnkiDuplicateScope} [details.duplicateScope]
      * @param {boolean} [details.duplicateScopeCheckAllModels]
      * @param {import('settings').ResultOutputMode} [details.resultOutputMode]
+     * @param {boolean} [details.allowStandardFieldMarkerFastPath]
      * @returns {import('anki').Note|null}
      */
     createDuplicateCheckNoteFast({
@@ -197,13 +204,14 @@ export class AnkiNoteBuilder {
         duplicateScope = 'collection',
         duplicateScopeCheckAllModels = false,
         resultOutputMode = 'split',
+        allowStandardFieldMarkerFastPath = false,
     }) {
         const fields = this._getCardFormatFields(cardFormat);
         /** @type {import('anki').NoteFields} */
         const noteFields = {};
         if (fields.length > 0) {
             const [fieldName, {value: fieldValue}] = fields[0];
-            const fastValue = this._getFastDuplicateCheckFieldValue(fieldValue, dictionaryEntry, resultOutputMode);
+            const fastValue = allowStandardFieldMarkerFastPath ? this._getFastDuplicateCheckFieldValue(fieldValue, dictionaryEntry, resultOutputMode) : null;
             if (typeof fastValue === 'string') {
                 setOwnProperty(noteFields, fieldName, fastValue);
             } else if (!stringContainsAnyFieldMarker(fieldValue)) {

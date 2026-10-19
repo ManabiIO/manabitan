@@ -371,6 +371,7 @@ describe('AnkiNoteBuilder.createDuplicateCheckNote', () => {
             glossaryLayoutMode: 'default',
             compactTags: false,
             dictionaryStylesMap: new Map(),
+            allowStandardFieldMarkerFastPath: true,
         }));
 
         expect(note.fields).toStrictEqual({Front: '&lt;term&gt;&amp;'});
@@ -406,6 +407,7 @@ describe('AnkiNoteBuilder.createDuplicateCheckNote', () => {
             glossaryLayoutMode: 'default',
             compactTags: false,
             dictionaryStylesMap: new Map(),
+            allowStandardFieldMarkerFastPath: true,
         }));
 
         expect(note.fields).toStrictEqual({Front: '打ち込む、撃ち込む'});
@@ -434,6 +436,7 @@ describe('AnkiNoteBuilder.createDuplicateCheckNote', () => {
             glossaryLayoutMode: 'default',
             compactTags: false,
             dictionaryStylesMap: new Map(),
+            allowStandardFieldMarkerFastPath: true,
         }));
 
         expect(note.fields).toStrictEqual({Front: '字'});
