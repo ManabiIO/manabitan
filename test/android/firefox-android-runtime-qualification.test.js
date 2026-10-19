@@ -6,7 +6,7 @@ import {JSDOM} from 'jsdom';
 import {describe, expect, test, vi} from 'vitest';
 import {SettingsDisplayController} from '../../ext/js/pages/settings/settings-display-controller.js';
 import {ModalController} from '../../ext/js/pages/settings/modal-controller.js';
-import {assertMiningDeliveryOracle, buildDictionaryModalOpenScript, buildDocumentVisibilityWaitScript, buildMiningClickScript, buildOwnedExtensionPageOpenScript, buildOwnedPageActivationScript, buildOwnedPageReloadScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON, qualifyAndroidDictionaryRuntime} from './firefox-android-runtime-qualification.js';
+import {assertMiningDeliveryOracle, buildDictionaryModalOpenScript, buildDocumentVisibilityWaitScript, buildMiningClickScript, buildOwnedExtensionPageOpenScript, buildOwnedPageActivationScript, buildOwnedPageReloadScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON, qualifyAndroidDictionaryRuntime, serializeJavaScriptDataLiteral} from './firefox-android-runtime-qualification.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 
 /**
@@ -98,6 +98,66 @@ function createSearchDom({splitIdentity = false} = {}) {
 }
 
 describe('Android runtime qualification emitted scripts', () => {
+    test('JavaScript data literals preserve JSON values and escape HTML script delimiters', () => {
+        const value = {
+            text: '</script><script>globalThis.injected = true;</script> "quoted" \\ slash\u000aline\u0009\u0001\u2028\u2029 雪',
+            nested: [{key: '</script>'}, {'</script>': ['\\', '\n', '\u2028']}],
+        };
+        const literal = serializeJavaScriptDataLiteral(value);
+        expect(literal).not.toMatch(/[<>\u2028\u2029]/);
+        expect(literal).toContain('\\u003C/script\\u003E');
+        expect(JSON.parse(JSON.stringify(vm.runInNewContext(`(${literal})`)))).toEqual(value);
+        expect(serializeJavaScriptDataLiteral()).toBeUndefined();
+        expect(serializeJavaScriptDataLiteral('\\u003C')).toBe('"\\\\u003C"');
+    });
+
+    test('hostile runtime job keys remain data while the supplied program expression still executes', async () => {
+        const key = '</script>\';globalThis.injected = true;// " \\ \u000a\u2028\u2029';
+        const context = vm.createContext({});
+        const script = buildRuntimeJobStart(key, 'Promise.resolve({ready:true})');
+        expect(script).not.toContain('</script>');
+        vm.runInContext(script, context);
+        await tick();
+        expect(context.injected).toBeUndefined();
+        expect(context[key]).toEqual({status: 'fulfilled', value: {ready: true}});
+    });
+
+    test('visible Search emitted script carries hostile expected values as data', async () => {
+        const expected = {
+            expression: '</script>\';globalThis.injected = true;// " \\ \u000a\u2028',
+            reading: '</script>\u2029',
+            glossary: 'quote \' slash \\ newline\n and </script>',
+            dictionaryTitle: '</script><script>globalThis.injected = true;</script>',
+        };
+        const script = buildVisibleSearchScript(expected, {timeoutMs: 1, pollIntervalMs: 1});
+        expect(script).not.toContain('</script>');
+        class FakeTextArea {
+            value = '';
+            dispatchEvent() {}
+        }
+        class FakeButton {
+            click() {}
+        }
+        const input = new FakeTextArea();
+        const context = vm.createContext({
+            document: {
+                documentElement: {dataset: {loaded: 'true'}},
+                querySelector(/** @type {string} */ selector) { return selector === '#search-textbox' ? input : new FakeButton(); },
+                querySelectorAll() { return []; },
+            },
+            HTMLTextAreaElement: FakeTextArea,
+            HTMLButtonElement: FakeButton,
+            Event: class Event {},
+            HTMLElement: class HTMLElement {},
+            getComputedStyle() { return {}; },
+            Date: {now: (() => { let now = 0; return () => now += 2; })()},
+            setTimeout(/** @type {() => void} */ callback) { callback(); },
+        });
+        await expect(vm.runInContext(script, context)).rejects.toThrow(/No single visible Search entry/);
+        expect(input.value).toBe(expected.expression);
+        expect(context.injected).toBeUndefined();
+    });
+
     test('mining selects the configured format in the exact entry regardless of button order', async () => {
         for (const scenario of ['configured-enabled', 'configured-disabled', 'wrong-format-only', 'wrong-entry']) {
             const {dom, globals} = createSearchDom({splitIdentity: scenario === 'wrong-entry'});
@@ -282,8 +342,9 @@ describe('Android runtime qualification emitted scripts', () => {
         const acknowledgement = vm.runInContext(start, context);
         expect(JSON.parse(acknowledgement)).toEqual({started: true, key});
         await tick();
-        expect(JSON.parse(vm.runInContext(`JSON.stringify(globalThis[${JSON.stringify(key)}])`, context))).toEqual({status: 'fulfilled', value: {ready: true, count: 38}});
-        expect(JSON.parse(vm.runInContext(`(() => { delete globalThis[${JSON.stringify(key)}]; return JSON.stringify({cleaned:!Object.hasOwn(globalThis,${JSON.stringify(key)})}); })()`, context))).toEqual({cleaned: true});
+        const keyLiteral = serializeJavaScriptDataLiteral(key);
+        expect(JSON.parse(vm.runInContext(`JSON.stringify(globalThis[${keyLiteral}])`, context))).toEqual({status: 'fulfilled', value: {ready: true, count: 38}});
+        expect(JSON.parse(vm.runInContext(`(() => { delete globalThis[${keyLiteral}]; return JSON.stringify({cleaned:!Object.hasOwn(globalThis,${keyLiteral})}); })()`, context))).toEqual({cleaned: true});
     });
 
     test('owned start script records rejection without creating an unhandled rejected job promise', async () => {
