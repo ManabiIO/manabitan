@@ -27,7 +27,7 @@ import {fileURLToPath} from 'node:url';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
 import {ManifestUtil} from '../../dev/manifest-util.js';
-import {applyAnkiDedupeOptions, dedupeDictionaryTitle, dedupeSearchTerm, getAnkiDedupeMatrix, normalizeExpectedButtonState} from '../e2e/anki-dedupe-matrix.js';
+import {applyAnkiDedupeOptions, dedupeDictionaryTitle, dedupeSearchTerm, getAnkiDedupeMatrix, isExpectedWriteResult, normalizeExpectedButtonState} from '../e2e/anki-dedupe-matrix.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
@@ -238,25 +238,20 @@ async function launchExtensionContext() {
  */
 async function discoverExtensionId(context) {
     const configuredExtensionId = getConfiguredExtensionId();
-    if (configuredExtensionId !== null) {
-        return configuredExtensionId;
-    }
-
     const parseId = (url) => {
         const match = /^chrome-extension:\/\/([^/]+)\//.exec(String(url));
         return match ? match[1] : null;
     };
 
-    for (const worker of context.serviceWorkers()) {
-        const id = parseId(worker.url());
-        if (id !== null) {
-            return id;
-        }
+    if (context.serviceWorkers().length === 0) {
+        await context.waitForEvent('serviceworker', {timeout: 15_000});
     }
-    await context.waitForEvent('serviceworker', {timeout: 15_000});
     for (const worker of context.serviceWorkers()) {
         const id = parseId(worker.url());
         if (id !== null) {
+            if (configuredExtensionId !== null && id !== configuredExtensionId) {
+                fail(`Loaded extension ID ${id} does not match manifest key ID ${configuredExtensionId}`);
+            }
             return id;
         }
     }
@@ -295,7 +290,9 @@ async function gotoExtensionPage(page, url, readySelector) {
  * @returns {Promise<unknown>}
  */
 async function sendRuntimeMessage(page, action, params = void 0) {
-    return await page.evaluate(async ({actionName, paramsValue}) => {
+    const paramsJson = params === void 0 ? null : JSON.stringify(params);
+    return await page.evaluate(async ({actionName, serializedParams}) => {
+        const paramsValue = serializedParams === null ? void 0 : JSON.parse(serializedParams);
         return await new Promise((resolve, reject) => {
             chrome.runtime.sendMessage({action: actionName, params: paramsValue}, (response) => {
                 const runtimeError = chrome.runtime.lastError;
@@ -310,7 +307,7 @@ async function sendRuntimeMessage(page, action, params = void 0) {
                 resolve(response && typeof response === 'object' ? response.result : response);
             });
         });
-    }, {actionName: action, paramsValue: params});
+    }, {actionName: action, serializedParams: paramsJson});
 }
 
 /**
@@ -444,18 +441,20 @@ function getWriteActions(scenarioState) {
 }
 
 /**
+ * @param {{actions: Array<{action: string, error: string|null, result: unknown}>}} scenarioState
+ * @returns {Array<{action: string, error: string|null, result: unknown}>}
+ */
+function getWriteAttempts(scenarioState) {
+    return scenarioState.actions.filter(({action}) => action === 'addNote' || action === 'updateNoteFields');
+}
+
+/**
  * @param {'addNote'|'updateNoteFields'|'none'} expectedAction
- * @param {Array<'addNote'|'updateNoteFields'>} observedActions
+ * @param {Array<{action: string, error: string|null, result: unknown}>} observedAttempts
  * @returns {boolean}
  */
-function isExpectedWriteAction(expectedAction, observedActions) {
-    if (expectedAction === 'none') {
-        return observedActions.length === 0;
-    }
-    if (expectedAction === 'addNote') {
-        return observedActions.includes('addNote') && !observedActions.includes('updateNoteFields');
-    }
-    return observedActions.includes('updateNoteFields') && !observedActions.includes('addNote');
+function isExpectedWriteAction(expectedAction, observedAttempts) {
+    return isExpectedWriteResult(expectedAction, observedAttempts);
 }
 
 /**
@@ -498,6 +497,12 @@ async function main() {
         report.extensionBaseUrl = extensionBaseUrl;
         const page = context.pages()[0] ?? await context.newPage();
 
+        await gotoExtensionPage(page, `${extensionBaseUrl}/settings.html`, '#dictionary-import-file-input');
+        const runtimeIdentity = await page.evaluate(() => ({origin: location.origin, runtimeId: chrome.runtime?.id ?? ''}));
+        if (runtimeIdentity.origin !== extensionBaseUrl || runtimeIdentity.runtimeId !== extensionId) {
+            fail(`Chromium extension origin/runtime identity mismatch: ${JSON.stringify(runtimeIdentity)}`);
+        }
+
         await importDictionaryFixture(page, extensionBaseUrl);
 
         const matrix = getAnkiDedupeMatrix();
@@ -517,7 +522,7 @@ async function main() {
                 }
                 const scenarioState = mockState.getScenarioState();
                 const writeActions = getWriteActions(scenarioState);
-                const pass = isExpectedWriteAction(scenario.expected.writeAction, writeActions);
+                const pass = isExpectedWriteAction(scenario.expected.writeAction, getWriteAttempts(scenarioState));
                 const endedAt = safePerformance.now();
                 report.scenarios.push({
                     id: scenario.id,

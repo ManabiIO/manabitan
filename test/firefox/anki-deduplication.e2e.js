@@ -25,7 +25,7 @@ import {Builder, Browser, By} from 'selenium-webdriver';
 import * as firefox from 'selenium-webdriver/firefox.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
-import {applyAnkiDedupeOptions, dedupeDictionaryTitle, dedupeSearchTerm, getAnkiDedupeMatrix, normalizeExpectedButtonState} from '../e2e/anki-dedupe-matrix.js';
+import {applyAnkiDedupeOptions, dedupeDictionaryTitle, dedupeSearchTerm, getAnkiDedupeMatrix, isExpectedWriteResult, normalizeExpectedButtonState} from '../e2e/anki-dedupe-matrix.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
@@ -33,6 +33,8 @@ import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
 const logTag = '[firefox-anki-dedupe-e2e]';
+const firefoxDevGeckoId = '{accbebce-862b-48a9-bb9a-1da9ad1f8702}';
+const firefoxDevExtensionUuid = '6d1d0bf0-9b57-4ff8-9d93-64e13ae0f5da';
 
 /**
  * @param {unknown} value
@@ -196,31 +198,24 @@ async function resolveFirefoxAddonPath() {
  */
 async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
     const normalizedAddonId = String(installedAddonId || '').trim();
-    const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
-    const deadline = Date.now() + 30_000;
-    let fallbackBaseUrl = '';
-    while (Date.now() < deadline) {
-        const handles = await driver.getAllWindowHandles();
-        for (const handle of handles) {
-            await driver.switchTo().window(handle);
-            const url = String(await driver.getCurrentUrl());
-            const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/.exec(url);
-            if (match !== null) {
-                fallbackBaseUrl = match[1];
-                if (expectedBaseUrl.length === 0 || expectedBaseUrl === match[1]) {
-                    return match[1];
-                }
-            }
-        }
-        await driver.sleep(300);
+    if (normalizedAddonId.length > 0 && normalizedAddonId !== firefoxDevGeckoId) {
+        fail(`Unexpected Firefox addon ID: ${normalizedAddonId}`);
     }
-    if (fallbackBaseUrl.length > 0) {
-        return fallbackBaseUrl;
+    const expectedBaseUrl = `moz-extension://${firefoxDevExtensionUuid}`;
+    await driver.get(`${expectedBaseUrl}/settings.html`);
+    const runtimeIdentity = await driver.executeScript(`
+        const runtime = globalThis.browser?.runtime ?? globalThis.chrome?.runtime;
+        return {origin: location.origin, addonId: runtime?.id ?? ''};
+    `);
+    if (runtimeIdentity.origin !== expectedBaseUrl || runtimeIdentity.addonId !== firefoxDevGeckoId) {
+        fail(`Firefox extension origin/runtime identity mismatch: ${JSON.stringify(runtimeIdentity)}`);
     }
-    if (expectedBaseUrl.length > 0) {
-        return expectedBaseUrl;
+    const url = String(await driver.getCurrentUrl());
+    const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/u.exec(url);
+    if (match === null || match[1] !== expectedBaseUrl) {
+        fail(`Unable to validate Firefox extension base URL: ${url}`);
     }
-    fail('Unable to discover Firefox extension base URL');
+    return match[1];
 }
 
 /**
@@ -231,7 +226,8 @@ async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
  */
 async function sendRuntimeMessage(driver, action, params = void 0) {
     return await driver.executeAsyncScript(`
-        const [actionName, paramsValue, done] = arguments;
+        const [actionName, paramsJson, done] = arguments;
+        const paramsValue = paramsJson === null ? void 0 : JSON.parse(paramsJson);
         chrome.runtime.sendMessage({action: actionName, params: paramsValue}, (response) => {
             const runtimeError = chrome.runtime.lastError;
             if (runtimeError) {
@@ -244,7 +240,7 @@ async function sendRuntimeMessage(driver, action, params = void 0) {
             }
             done({ok: true, result: response && typeof response === 'object' ? response.result : response});
         });
-    `, action, params).then((payload) => {
+    `, action, params === void 0 ? null : JSON.stringify(params)).then((payload) => {
         if (!(payload && typeof payload === 'object' && !Array.isArray(payload))) {
             throw new Error(`Unexpected runtime message payload: ${String(payload)}`);
         }
@@ -253,6 +249,46 @@ async function sendRuntimeMessage(driver, action, params = void 0) {
         }
         return payload.result;
     });
+}
+
+/**
+ * @param {import('selenium-webdriver').ThenableWebDriver} driver
+ * @returns {Promise<Record<string, unknown>>}
+ */
+async function captureSearchDom(driver) {
+    try {
+        return await driver.executeScript(`
+        const maxItems = 20;
+        const maxTextLength = 2000;
+        const boundedText = (value) => String(value).slice(0, maxTextLength);
+        const boundedCount = (selector) => Math.min(document.querySelectorAll(selector).length, 1_000_000);
+        const describe = (selector) => [...document.querySelectorAll(selector)].slice(0, maxItems).map((element) => boundedText(element.outerHTML));
+        return {
+            location: boundedText(location.href),
+            loaded: boundedText(document.documentElement.dataset.loaded || ''),
+            searchValue: boundedText(document.querySelector('#search-textbox')?.value || ''),
+            counts: {
+                entries: boundedCount('.entry'),
+                noteActionContainers: boundedCount('.note-actions-container'),
+                actionButtonContainers: boundedCount('.action-button-container'),
+                saveButtons: boundedCount('[data-action="save-note"]'),
+            },
+            pageErrors: (window.__ankiDedupePageErrors || []).slice(0, maxItems).map((error) => ({
+                type: boundedText(error?.type || ''),
+                message: boundedText(error?.message || ''),
+                filename: boundedText(error?.filename || ''),
+                line: Number(error?.line || 0),
+            })),
+            entries: describe('.entry'),
+            noteActionContainers: describe('.note-actions-container'),
+            actionButtonContainers: describe('.action-button-container'),
+            saveButtons: describe('[data-action="save-note"]'),
+            pageText: boundedText(document.body?.innerText || ''),
+        };
+    `);
+    } catch (error) {
+        return {error: errorMessage(error).slice(0, 2000)};
+    }
 }
 
 /**
@@ -273,14 +309,20 @@ async function importDictionaryFixture(driver, extensionBaseUrl) {
     await (await driver.findElement(By.id('dictionary-import-file-input'))).sendKeys(archivePath);
     await sendRuntimeMessage(driver, 'triggerDatabaseUpdated', {type: 'dictionary', cause: 'import'});
     const deadline = safePerformance.now() + 60_000;
+    let lastError = null;
     while (safePerformance.now() < deadline) {
-        const dictionaryInfo = /** @type {Array<{title: string}>} */ (await sendRuntimeMessage(driver, 'getDictionaryInfo', void 0));
-        if (Array.isArray(dictionaryInfo) && dictionaryInfo.some((item) => String(item?.title || '') === dedupeDictionaryTitle)) {
-            return;
+        try {
+            const dictionaryInfo = /** @type {Array<{title: string}>} */ (await sendRuntimeMessage(driver, 'getDictionaryInfo', void 0));
+            if (Array.isArray(dictionaryInfo) && dictionaryInfo.some((item) => String(item?.title || '') === dedupeDictionaryTitle)) {
+                return;
+            }
+            lastError = null;
+        } catch (error) {
+            lastError = error;
         }
         await driver.sleep(200);
     }
-    fail(`Timed out waiting for dictionary import: ${dedupeDictionaryTitle}`);
+    fail(`Timed out waiting for dictionary import: ${dedupeDictionaryTitle}${lastError === null ? '' : ` (${errorMessage(lastError)})`}`);
 }
 
 /**
@@ -302,36 +344,30 @@ async function applyScenarioOptions(driver, ankiConnectUrl, scenarioOptions) {
  */
 async function openSearchAndLookup(driver, extensionBaseUrl) {
     await driver.get(`${extensionBaseUrl}/search.html`);
+    await driver.wait(async () => await driver.executeScript(`
+        return document.documentElement.dataset.loaded === 'true' &&
+            document.querySelector('#search-textbox') instanceof HTMLTextAreaElement &&
+            document.querySelector('#search-button') instanceof HTMLButtonElement;
+    `), 30_000);
+    await driver.executeScript(`
+        window.__ankiDedupePageErrors = [];
+        window.addEventListener('error', (event) => window.__ankiDedupePageErrors.push({type: 'error', message: event.message, filename: event.filename, line: event.lineno}));
+        window.addEventListener('unhandledrejection', (event) => window.__ankiDedupePageErrors.push({type: 'unhandledrejection', message: String(event.reason)}));
+    `);
     await driver.executeScript(`
         const textbox = document.querySelector('#search-textbox');
-        if (!(textbox instanceof HTMLTextAreaElement)) {
-            throw new Error('Search textbox not found');
+        const button = document.querySelector('#search-button');
+        if (!(textbox instanceof HTMLTextAreaElement) || !(button instanceof HTMLButtonElement)) {
+            throw new Error('Search controls are unavailable');
         }
-        textbox.value = '';
-        textbox.dispatchEvent(new Event('input', {bubbles: true, cancelable: true}));
         textbox.value = arguments[0];
         textbox.dispatchEvent(new Event('input', {bubbles: true, cancelable: true}));
-        textbox.dispatchEvent(new KeyboardEvent('keydown', {
-            bubbles: true,
-            cancelable: true,
-            key: 'Enter',
-            code: 'Enter',
-        }));
+        button.click();
     `, dedupeSearchTerm);
-    const deadline = safePerformance.now() + 30_000;
-    while (safePerformance.now() < deadline) {
-        const hasEntry = await driver.executeScript(`
-            if (document.querySelector('.entry') instanceof HTMLElement) {
-                return true;
-            }
-            const noResults = document.querySelector('#no-results');
-            return noResults instanceof HTMLElement && !noResults.hidden;
-        `);
-        if (hasEntry === true) {
-            break;
-        }
-        await driver.sleep(200);
-    }
+    await driver.wait(async () => await driver.executeScript(`
+        const entries = [...document.querySelectorAll('#dictionary-entries .entry')];
+        return entries.some((entry) => entry.textContent?.includes(arguments[0]));
+    `, dedupeSearchTerm), 30_000);
     const hasEntry = await driver.executeScript('return document.querySelector(".entry") instanceof HTMLElement;');
     if (hasEntry !== true) {
         fail(`Search returned no entry for fixture term: ${dedupeSearchTerm}`);
@@ -380,10 +416,10 @@ async function waitForExpectedButtonState(driver, expectedState, timeoutMs = 15_
         if (
             lastState.ready &&
             lastState.disabled === expected.disabled &&
-            lastState.title === expected.title &&
-            lastState.icon === expected.icon &&
-            lastState.overwrite === expected.overwrite &&
-            lastState.viewNoteIds === expected.viewNoteIds
+            (typeof expected.title === 'undefined' || lastState.title === expected.title) &&
+            (typeof expected.icon === 'undefined' || lastState.icon === expected.icon) &&
+            (typeof expected.overwrite === 'undefined' || lastState.overwrite === expected.overwrite) &&
+            (typeof expected.viewNoteIds === 'undefined' || lastState.viewNoteIds === expected.viewNoteIds)
         ) {
             return lastState;
         }
@@ -407,18 +443,20 @@ function getWriteActions(scenarioState) {
 }
 
 /**
+ * @param {{actions: Array<{action: string, error: string|null, result: unknown}>}} scenarioState
+ * @returns {Array<{action: string, error: string|null, result: unknown}>}
+ */
+function getWriteAttempts(scenarioState) {
+    return scenarioState.actions.filter(({action}) => action === 'addNote' || action === 'updateNoteFields');
+}
+
+/**
  * @param {'addNote'|'updateNoteFields'|'none'} expectedAction
- * @param {Array<'addNote'|'updateNoteFields'>} observedActions
+ * @param {Array<{action: string, error: string|null, result: unknown}>} observedAttempts
  * @returns {boolean}
  */
-function isExpectedWriteAction(expectedAction, observedActions) {
-    if (expectedAction === 'none') {
-        return observedActions.length === 0;
-    }
-    if (expectedAction === 'addNote') {
-        return observedActions.includes('addNote') && !observedActions.includes('updateNoteFields');
-    }
-    return observedActions.includes('updateNoteFields') && !observedActions.includes('addNote');
+function isExpectedWriteAction(expectedAction, observedAttempts) {
+    return isExpectedWriteResult(expectedAction, observedAttempts);
 }
 
 /**
@@ -456,16 +494,23 @@ async function main() {
     firefoxOptions.setPreference('xpinstall.signatures.required', false);
     firefoxOptions.setPreference('extensions.manifestV3.enabled', true);
     firefoxOptions.setPreference('extensions.backgroundServiceWorker.enabled', true);
+    firefoxOptions.setPreference(
+        'extensions.webextensions.uuids',
+        JSON.stringify({[firefoxDevGeckoId]: firefoxDevExtensionUuid}),
+    );
 
     /** @type {import('selenium-webdriver').ThenableWebDriver|null} */
     let driver = null;
     /** @type {Error|undefined} */
     let runError;
     try {
+        const firefoxService = new firefox.ServiceBuilder();
+        firefoxService.addArguments('--allow-system-access');
         driver = /** @type {import('selenium-webdriver').ThenableWebDriver} */ (
             new Builder()
                 .forBrowser(Browser.FIREFOX)
                 .setFirefoxOptions(firefoxOptions)
+                .setFirefoxService(firefoxService)
                 .build()
         );
 
@@ -477,7 +522,12 @@ async function main() {
         await importDictionaryFixture(driver, extensionBaseUrl);
 
         const matrix = getAnkiDedupeMatrix();
-        for (const scenario of matrix) {
+        const requestedScenarioId = String(process.env.MANABITAN_FIREFOX_ANKI_DEDUPE_SCENARIO || '').trim();
+        const scenarios = requestedScenarioId.length === 0 ? matrix : matrix.filter(({id}) => id === requestedScenarioId);
+        if (scenarios.length === 0) {
+            fail(`Unknown requested scenario: ${requestedScenarioId}`);
+        }
+        for (const scenario of scenarios) {
             const startedAt = safePerformance.now();
             try {
                 mockState.beginScenario(scenario.id, scenario.seedNotes);
@@ -493,8 +543,19 @@ async function main() {
                 }
                 const scenarioState = mockState.getScenarioState();
                 const writeActions = getWriteActions(scenarioState);
-                const pass = isExpectedWriteAction(scenario.expected.writeAction, writeActions);
+                const pass = isExpectedWriteAction(scenario.expected.writeAction, getWriteAttempts(scenarioState));
                 const endedAt = safePerformance.now();
+                let diagnostics;
+                if (String(process.env.MANABITAN_FIREFOX_ANKI_DEDUPE_CAPTURE_DOM || '').trim() === '1') {
+                    diagnostics = {
+                        cardFormatFieldOrders: scenarioState.actions
+                            .filter(({action}) => action === 'canAddNotesWithErrorDetail')
+                            .flatMap(({params}) => {
+                                return Array.isArray(params?.notes) ? params.notes.map(({fields}) => Object.keys(fields || {})) : [];
+                            }),
+                        dom: await captureSearchDom(driver),
+                    };
+                }
                 report.scenarios.push({
                     id: scenario.id,
                     description: scenario.description,
@@ -505,6 +566,7 @@ async function main() {
                         button: observedButtonState,
                         clickAttempted,
                         writeActions,
+                        ...(typeof diagnostics === 'undefined' ? {} : {diagnostics}),
                     },
                     actionLog: scenarioState.actions,
                     snapshots: scenarioState.snapshots,
@@ -522,6 +584,12 @@ async function main() {
                     observed: {
                         error: errorMessage(scenarioError),
                         writeActions: getWriteActions(scenarioState),
+                        cardFormatFieldOrders: scenarioState.actions
+                            .filter(({action}) => action === 'canAddNotesWithErrorDetail')
+                            .flatMap(({params}) => {
+                                return Array.isArray(params?.notes) ? params.notes.map(({fields}) => Object.keys(fields || {})) : [];
+                            }),
+                        dom: await captureSearchDom(driver),
                     },
                     actionLog: scenarioState.actions,
                     snapshots: scenarioState.snapshots,

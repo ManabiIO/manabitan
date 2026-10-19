@@ -158,3 +158,20 @@ test('native duplicate mock extracts fragment text without changing literal fiel
     expect(await client.findNoteIds([note('Basic', {Expression: 'say "hi" \\ path'})])).toEqual([[85]]);
     expect(query('&lt;b&gt;literal&lt;/b&gt;')).toEqual([86]);
 });
+
+test('native duplicate mock normalizes NBSP after one entity decode', async () => {
+    const {state} = await setup([
+        {noteId: 87, cardId: 97, modelName: 'Basic', deckName: 'Japanese', fields: {Front: 'one&nbsp;two'}},
+        {noteId: 88, cardId: 98, modelName: 'Basic', deckName: 'Japanese', fields: {Front: 'one two'}},
+        {noteId: 89, cardId: 99, modelName: 'Basic', deckName: 'Japanese', fields: {Front: 'one&amp;nbsp;two'}},
+    ]);
+    const modelIds = /** @type {Record<string, number>} */ (state.handleRequestBody({action: 'modelNamesAndIds', params: {}}).result);
+    /**
+     * @param {string} value
+     * @returns {unknown}
+     */
+    const query = (value) => state.handleRequestBody({action: 'findNotes', params: {query: `"dupe:${modelIds.Basic},${value}"`}}).result;
+    expect(query('one two')).toEqual([87, 88]);
+    expect(query('one&nbsp;two')).toEqual([87, 88]);
+    expect(query('one&amp;nbsp;two')).toEqual([89]);
+});

@@ -234,7 +234,7 @@ function normalizeNativeDuplicateValue(value) {
         }
         return text;
     }
-    return getText(fragment.childNodes);
+    return getText(fragment.childNodes).replaceAll('\u00a0', ' ');
 }
 
 /**
