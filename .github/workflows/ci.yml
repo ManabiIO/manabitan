@@ -279,6 +279,73 @@ jobs:
             builds/extension-e2e-report.html
           if-no-files-found: ignore
 
+  test-chromium-anki-dedupe-e2e:
+    name: Anki Deduplication Matrix (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Chromium Anki deduplication matrix
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        run: xvfb-run -a npm run test:e2e:chromium-anki-dedupe
+
+      - name: Enforce Chromium Anki matrix success
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const reportPath = 'builds/chromium-e2e-anki-dedupe-report.json';
+          if (!fs.existsSync(reportPath)) {
+            console.error('Chromium Anki deduplication report JSON not found.');
+            process.exit(1);
+          }
+          const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+          const failures = report.scenarios.filter((scenario) => scenario.pass !== true);
+          const sourceIdentity = report.sourceIdentity && typeof report.sourceIdentity === 'object' ? report.sourceIdentity : null;
+          const packageIdentity = report.packageIdentity && typeof report.packageIdentity === 'object' ? report.packageIdentity : null;
+          const browserIdentity = report.browserIdentity && typeof report.browserIdentity === 'object' ? report.browserIdentity : null;
+          const runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;
+          const storage = runtime?.openStorageDiagnostics;
+          const worker = storage?.runtimeContext;
+          const opfsReady = runtime !== null && (
+            runtime.usesFallbackStorage === false &&
+            worker?.hasStorageGetDirectory === true &&
+            worker?.isDedicatedWorkerGlobalScope === true &&
+            worker?.hasCreateSyncAccessHandle === true &&
+            storage?.hasOpfsSahpoolVfs === true &&
+            storage?.opfsSahpoolInstallResult === 'installed' &&
+            storage?.mode === 'opfs-sahpool'
+          );
+          const identityReady = (
+            typeof sourceIdentity?.commit === 'string' && sourceIdentity.commit.length > 0 &&
+            typeof packageIdentity?.sha256 === 'string' && /^[0-9a-f]{64}$/.test(packageIdentity.sha256) &&
+            typeof browserIdentity?.version === 'string' && browserIdentity.version.length > 0 &&
+            typeof browserIdentity?.commandLine === 'string' && browserIdentity.commandLine.length > 0
+          );
+          if (report.status !== 'success' || report.scenarios.length !== 10 || failures.length !== 0 || !opfsReady || !identityReady) {
+            console.error(`Chromium Anki matrix failed: status=${report.status} scenarios=${report.scenarios.length} failures=${failures.length} opfsReady=${opfsReady} identityReady=${identityReady} reason=${report.failureReason || 'none'}`);
+            process.exit(1);
+          }
+          console.log(`Chromium Anki matrix passed all ${report.scenarios.length} scenarios.`);
+          NODE
+
+      - name: Upload Chromium Anki deduplication report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: chromium-anki-deduplication-e2e-report
+          path: |
+            builds/chromium-e2e-anki-dedupe-report.html
+            builds/chromium-e2e-anki-dedupe-report.json
+            builds/extension-e2e-anki-dedupe-report.html
+          if-no-files-found: ignore
+
   test-edge-extension-e2e:
     name: Full Extension E2E (Edge)
     runs-on: ubuntu-latest

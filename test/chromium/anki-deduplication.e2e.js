@@ -20,13 +20,14 @@
 
 import {chromium} from '@playwright/test';
 import {createHash} from 'node:crypto';
-import {existsSync, readFileSync, writeFileSync} from 'node:fs';
-import {mkdir, rm, writeFile} from 'node:fs/promises';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import os from 'node:os';
+import {access, mkdir, mkdtemp, readFile, realpath, rename, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
-import {ManifestUtil} from '../../dev/manifest-util.js';
 import {applyAnkiDedupeOptions, dedupeDictionaryTitle, dedupeSearchTerm, getAnkiDedupeMatrix, isExpectedWriteResult, normalizeExpectedButtonState} from '../e2e/anki-dedupe-matrix.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
@@ -34,8 +35,7 @@ import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
-const extensionPath = path.join(root, 'ext');
-const manifestPath = path.join(extensionPath, 'manifest.json');
+const execFileAsync = promisify(execFile);
 const logTag = '[chromium-anki-dedupe-e2e]';
 
 /**
@@ -51,26 +51,6 @@ function errorMessage(value) {
  */
 function fail(message) {
     throw new Error(`${logTag} ${message}`);
-}
-
-/**
- * @returns {string | null}
- */
-function getConfiguredExtensionId() {
-    if (!existsSync(manifestPath)) {
-        return null;
-    }
-
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-    if (typeof manifest?.key !== 'string' || manifest.key.length === 0) {
-        return null;
-    }
-
-    const hash = createHash('sha256')
-        .update(Buffer.from(manifest.key, 'base64'))
-        .digest('hex')
-        .slice(0, 32);
-    return [...hash].map((character) => String.fromCharCode('a'.charCodeAt(0) + Number.parseInt(character, 16))).join('');
 }
 
 /**
@@ -105,6 +85,10 @@ function createReport() {
         failureReason: '',
         extensionBaseUrl: '',
         ankiConnectUrl: '',
+        sourceIdentity: null,
+        packageIdentity: null,
+        browserIdentity: null,
+        runtimeDiagnostics: null,
         scenarios: [],
     };
 }
@@ -154,6 +138,9 @@ function renderReportHtml(report) {
     <div><strong>Failure:</strong> ${escapeHtml(report.failureReason || 'none')}</div>
     <div><strong>Extension Base URL:</strong> ${escapeHtml(report.extensionBaseUrl)}</div>
     <div><strong>AnkiConnect URL:</strong> ${escapeHtml(report.ankiConnectUrl)}</div>
+    <div><strong>Source:</strong> ${escapeHtml(report.sourceIdentity ? `${report.sourceIdentity.commit} (${report.sourceIdentity.tree})` : 'unknown')}</div>
+    <div><strong>Package SHA-256:</strong> ${escapeHtml(report.packageIdentity?.sha256 || 'unknown')}</div>
+    <div><strong>Browser:</strong> ${escapeHtml(report.browserIdentity ? `${report.browserIdentity.version} at ${report.browserIdentity.executablePath}` : 'unknown')}</div>
   </div>
   <table>
     <thead>
@@ -190,18 +177,11 @@ function shouldHideWindow() {
 }
 
 /**
- * @returns {Promise<{context: import('@playwright/test').BrowserContext, cleanup: () => Promise<void>}>}
+ * @param {string} extensionPath
+ * @param {string} userDataDir
+ * @returns {Promise<{context: import('@playwright/test').BrowserContext, headless: boolean, args: string[]}>}
  */
-async function launchExtensionContext() {
-    const originalManifest = existsSync(manifestPath) ? readFileSync(manifestPath, 'utf8') : null;
-    const manifestUtil = new ManifestUtil();
-    const variant = manifestUtil.getManifest('chrome-playwright');
-    writeFileSync(
-        manifestPath,
-        ManifestUtil.createManifestString(variant).replace('$YOMITAN_VERSION', '0.0.0.0'),
-        'utf8',
-    );
-
+async function launchExtensionContext(extensionPath, userDataDir) {
     const headless = shouldRunHeadless();
     /** @type {string[]} */
     const args = [
@@ -213,49 +193,170 @@ async function launchExtensionContext() {
         args.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
     }
 
-    const context = await chromium.launchPersistentContext('', {
+    const context = await chromium.launchPersistentContext(userDataDir, {
         channel: 'chromium',
         headless,
         args,
     });
-
-    return {
-        context,
-        cleanup: async () => {
-            await context.close();
-            if (originalManifest === null) {
-                await rm(manifestPath, {force: true});
-            } else {
-                writeFileSync(manifestPath, originalManifest, 'utf8');
-            }
-        },
-    };
+    return {context, headless, args};
 }
 
 /**
  * @param {import('@playwright/test').BrowserContext} context
+ * @param {string} userDataDir
+ * @param {string} extensionPath
  * @returns {Promise<string>}
  */
-async function discoverExtensionId(context) {
-    const configuredExtensionId = getConfiguredExtensionId();
+async function discoverExtensionId(context, userDataDir, extensionPath) {
     const parseId = (url) => {
         const match = /^chrome-extension:\/\/([^/]+)\//.exec(String(url));
         return match ? match[1] : null;
     };
 
     if (context.serviceWorkers().length === 0) {
-        await context.waitForEvent('serviceworker', {timeout: 15_000});
+        await context.waitForEvent('serviceworker', {timeout: 15_000}).catch(() => {});
     }
     for (const worker of context.serviceWorkers()) {
         const id = parseId(worker.url());
         if (id !== null) {
-            if (configuredExtensionId !== null && id !== configuredExtensionId) {
-                fail(`Loaded extension ID ${id} does not match manifest key ID ${configuredExtensionId}`);
-            }
             return id;
         }
     }
+    for (const page of context.pages()) {
+        const id = parseId(page.url());
+        if (id !== null) {
+            return id;
+        }
+    }
+    const extensionId = await readExtensionIdFromProfilePreferences(userDataDir, extensionPath);
+    if (extensionId !== null) {
+        return extensionId;
+    }
     fail('Unable to discover extension id');
+}
+
+/**
+ * @param {string} userDataDir
+ * @param {string} extensionPath
+ * @returns {Promise<string | null>}
+ */
+async function readExtensionIdFromProfilePreferences(userDataDir, extensionPath) {
+    let manifestName = '';
+    try {
+        const manifest = JSON.parse(await readFile(path.join(extensionPath, 'manifest.json'), 'utf8'));
+        manifestName = String(manifest?.name || '').trim();
+    } catch (_) {
+        return null;
+    }
+    const preferencesPaths = [
+        path.join(userDataDir, 'Default', 'Preferences'),
+        path.join(userDataDir, 'Preferences'),
+    ];
+    for (const preferencesPath of preferencesPaths) {
+        try {
+            const preferences = JSON.parse(await readFile(preferencesPath, 'utf8'));
+            const settings = preferences?.extensions?.settings;
+            if (!(settings && typeof settings === 'object' && !Array.isArray(settings))) {
+                continue;
+            }
+            for (const [candidateId, value] of Object.entries(settings)) {
+                if (!(value && typeof value === 'object' && !Array.isArray(value))) {
+                    continue;
+                }
+                const candidatePath = String(value.path || '').trim();
+                const normalizedCandidatePath = candidatePath.length > 0 ? path.resolve(userDataDir, candidatePath) : '';
+                const candidateManifest = value.manifest && typeof value.manifest === 'object' && !Array.isArray(value.manifest) ? value.manifest : null;
+                const candidateName = String(candidateManifest?.name || '').trim();
+                if (normalizedCandidatePath === extensionPath || (manifestName.length > 0 && candidateName === manifestName)) {
+                    return candidateId;
+                }
+            }
+        } catch (_) {
+            // Preferences may not exist until Chromium finishes extension registration.
+        }
+    }
+    return null;
+}
+
+/**
+ * @param {string} userDataDir
+ * @returns {Promise<string>}
+ */
+async function readBrowserCommandLine(userDataDir) {
+    const psArgs = process.platform === 'darwin' ? ['-axww', '-o', 'pid=,command='] : ['-eww', '-o', 'pid=,args='];
+    const {stdout} = await execFileAsync('ps', psArgs);
+    const executablePath = chromium.executablePath();
+    const profileArgument = `--user-data-dir=${userDataDir}`;
+    const commandLine = stdout.split('\n').map((line) => line.trim()).find((line) => (
+        line.includes(executablePath) && line.includes(profileArgument)
+    ));
+    return commandLine || '';
+}
+
+/**
+ * @param {string} ownedPath
+ * @param {string} expectedPrefix
+ * @returns {Promise<string>}
+ */
+async function moveOwnedPathToTrash(ownedPath, expectedPrefix) {
+    const resolvedPath = await realpath(ownedPath);
+    const resolvedTempDir = await realpath(os.tmpdir());
+    if (path.dirname(resolvedPath) !== resolvedTempDir || !path.basename(resolvedPath).startsWith(expectedPrefix)) {
+        fail(`Refusing to move unexpected temporary path to Trash: ${resolvedPath}`);
+    }
+    const trashDir = path.join(os.homedir(), '.Trash');
+    await mkdir(trashDir, {recursive: true});
+    const resolvedTrashDir = await realpath(trashDir);
+    const destination = path.join(resolvedTrashDir, `${path.basename(resolvedPath)}-${Date.now()}-${process.pid}`);
+    await rename(resolvedPath, destination);
+    return destination;
+}
+
+/**
+ * @returns {Promise<{packagePath: string, packageSha256: string, extensionPath: string, packageTempPath: string}>}
+ */
+async function buildAndExtractExtensionPackage() {
+    const packagePath = path.join(root, 'builds', 'manabitan-chrome-playwright.zip');
+    await execFileAsync(process.execPath, ['./dev/bin/build.js', '--target', 'chrome-playwright'], {
+        cwd: root,
+        maxBuffer: 20 * 1024 * 1024,
+    });
+    await access(packagePath);
+    const packageBytes = await readFile(packagePath);
+    const packageSha256 = createHash('sha256').update(packageBytes).digest('hex');
+    const packageTempPath = await mkdtemp(path.join(os.tmpdir(), 'manabitan-chromium-anki-extension-'));
+    try {
+        await execFileAsync('unzip', ['-oq', packagePath, '-d', packageTempPath]);
+    } catch (error) {
+        try {
+            await moveOwnedPathToTrash(packageTempPath, 'manabitan-chromium-anki-extension-');
+        } catch (cleanupError) {
+            throw new Error(`Package extraction failed: ${errorMessage(error)}; temporary extraction cleanup failed: ${errorMessage(cleanupError)}`, {cause: error});
+        }
+        throw error;
+    }
+    return {packagePath, packageSha256, extensionPath: packageTempPath, packageTempPath};
+}
+
+/**
+ * @returns {Promise<{commit: string, tree: string}>}
+ */
+async function getSourceIdentity() {
+    const [{stdout: commit}, {stdout: tree}] = await Promise.all([
+        execFileAsync('git', ['rev-parse', 'HEAD'], {cwd: root}),
+        execFileAsync('git', ['rev-parse', 'HEAD^{tree}'], {cwd: root}),
+    ]);
+    const [{stdout: status}, {stdout: diff}] = await Promise.all([
+        execFileAsync('git', ['status', '--porcelain=v1', '--untracked-files=no'], {cwd: root}),
+        execFileAsync('git', ['diff', '--binary', 'HEAD'], {cwd: root, maxBuffer: 20 * 1024 * 1024}),
+    ]);
+    return {
+        commit: commit.trim(),
+        tree: tree.trim(),
+        workingTreeDirty: status.trim().length > 0,
+        diffSha256: createHash('sha256').update(diff).digest('hex'),
+        nodeVersion: process.version,
+    };
 }
 
 /**
@@ -330,9 +431,15 @@ async function importDictionaryFixture(page, extensionBaseUrl) {
     await sendRuntimeMessage(page, 'triggerDatabaseUpdated', {type: 'dictionary', cause: 'import'});
     const deadline = safePerformance.now() + 60_000;
     while (safePerformance.now() < deadline) {
-        const dictionaryInfo = /** @type {Array<{title: string}>} */ (await sendRuntimeMessage(page, 'getDictionaryInfo', void 0));
-        if (Array.isArray(dictionaryInfo) && dictionaryInfo.some((item) => String(item?.title || '') === dedupeDictionaryTitle)) {
-            return;
+        try {
+            const dictionaryInfo = /** @type {Array<{title: string}>} */ (await sendRuntimeMessage(page, 'getDictionaryInfo', void 0));
+            if (Array.isArray(dictionaryInfo) && dictionaryInfo.some((item) => String(item?.title || '') === dedupeDictionaryTitle)) {
+                return;
+            }
+        } catch (error) {
+            if (!errorMessage(error).includes('dictionary import is in progress')) {
+                throw error;
+            }
         }
         await page.waitForTimeout(200);
     }
@@ -478,13 +585,38 @@ async function main() {
     const localServer = await startAnkiMockHttpServer(mockState);
     report.ankiConnectUrl = localServer.ankiConnectUrl;
 
-    let cleanup = null;
+    let context = null;
+    let packageTempPath = null;
+    let userDataDir = null;
     /** @type {Error|undefined} */
     let runError;
     try {
-        const launched = await launchExtensionContext();
-        cleanup = launched.cleanup;
-        const {context} = launched;
+        if (process.versions.node !== '22.22.0') {
+            fail(`Chromium Anki qualification requires Node.js 22.22.0; current runtime is ${process.version}`);
+        }
+        report.sourceIdentity = await getSourceIdentity();
+        const builtPackage = await buildAndExtractExtensionPackage();
+        packageTempPath = builtPackage.packageTempPath;
+        userDataDir = await mkdtemp(path.join(os.tmpdir(), 'manabitan-chromium-anki-profile-'));
+        report.packageIdentity = {
+            path: builtPackage.packagePath,
+            sha256: builtPackage.packageSha256,
+            extractedPath: builtPackage.extensionPath,
+        };
+        const launched = await launchExtensionContext(builtPackage.extensionPath, userDataDir);
+        context = launched.context;
+        report.browserIdentity = {
+            channel: 'chromium',
+            headless: launched.headless,
+            requestedArgs: launched.args,
+            version: context.browser()?.version() ?? '',
+            executablePath: chromium.executablePath(),
+            userDataDir,
+            commandLine: await readBrowserCommandLine(userDataDir),
+        };
+        if (report.browserIdentity.commandLine.length === 0) {
+            fail(`Unable to capture Chromium command line for profile ${userDataDir}`);
+        }
 
         for (const page of context.pages()) {
             if (page.url().endsWith('/welcome.html')) {
@@ -492,7 +624,7 @@ async function main() {
             }
         }
 
-        const extensionId = await discoverExtensionId(context);
+        const extensionId = await discoverExtensionId(context, userDataDir, builtPackage.extensionPath);
         const extensionBaseUrl = `chrome-extension://${extensionId}`;
         report.extensionBaseUrl = extensionBaseUrl;
         const page = context.pages()[0] ?? await context.newPage();
@@ -503,6 +635,22 @@ async function main() {
             fail(`Chromium extension origin/runtime identity mismatch: ${JSON.stringify(runtimeIdentity)}`);
         }
 
+        const runtimeDiagnostics = await sendRuntimeMessage(page, 'debugDictionaryStorageState');
+        report.runtimeDiagnostics = runtimeDiagnostics;
+        const storageDiagnostics = runtimeDiagnostics?.openStorageDiagnostics;
+        const worker = storageDiagnostics?.runtimeContext;
+        const opfsReady = (
+            runtimeDiagnostics?.usesFallbackStorage === false &&
+            worker?.hasStorageGetDirectory === true &&
+            worker?.isDedicatedWorkerGlobalScope === true &&
+            worker?.hasCreateSyncAccessHandle === true &&
+            storageDiagnostics?.hasOpfsSahpoolVfs === true &&
+            storageDiagnostics?.opfsSahpoolInstallResult === 'installed' &&
+            storageDiagnostics?.mode === 'opfs-sahpool'
+        );
+        if (!opfsReady) {
+            fail(`Chromium Anki matrix OPFS runtime check failed: ${JSON.stringify(runtimeDiagnostics)}`);
+        }
         await importDictionaryFixture(page, extensionBaseUrl);
 
         const matrix = getAnkiDedupeMatrix();
@@ -569,6 +717,46 @@ async function main() {
         report.failureReason = errorMessage(e);
         runError = new Error(`${logTag} ${report.failureReason}`);
     } finally {
+        try {
+            await localServer.close();
+        } catch (cleanupError) {
+            console.error(`${logTag} mock server cleanup failed: ${errorMessage(cleanupError)}`);
+            runError ??= new Error(`${logTag} mock server cleanup failed: ${errorMessage(cleanupError)}`);
+            report.status = 'failure';
+            report.failureReason ||= errorMessage(runError);
+        }
+        if (context !== null) {
+            try {
+                await context.close();
+            } catch (cleanupError) {
+                console.error(`${logTag} browser cleanup failed: ${errorMessage(cleanupError)}`);
+                try {
+                    await context.browser()?.close();
+                } catch (browserCleanupError) {
+                    console.error(`${logTag} browser process cleanup failed: ${errorMessage(browserCleanupError)}`);
+                }
+                runError ??= new Error(`${logTag} browser cleanup failed: ${errorMessage(cleanupError)}`);
+                report.status = 'failure';
+                report.failureReason ||= errorMessage(runError);
+            }
+        }
+        for (const [ownedPath, expectedPrefix] of [
+            [userDataDir, 'manabitan-chromium-anki-profile-'],
+            [packageTempPath, 'manabitan-chromium-anki-extension-'],
+        ]) {
+            if (ownedPath === null) {
+                continue;
+            }
+            try {
+                const trashedPath = await moveOwnedPathToTrash(ownedPath, expectedPrefix);
+                console.log(`${logTag} moved temporary browser data to Trash: ${trashedPath}`);
+            } catch (cleanupError) {
+                console.error(`${logTag} temporary data cleanup failed: ${errorMessage(cleanupError)}`);
+                runError ??= new Error(`${logTag} temporary data cleanup failed: ${errorMessage(cleanupError)}`);
+                report.status = 'failure';
+                report.failureReason ||= errorMessage(runError);
+            }
+        }
         report.finishedAtIso = new Date().toISOString();
         try {
             await mkdir(path.dirname(reportPath), {recursive: true});
@@ -583,19 +771,8 @@ async function main() {
             console.log(`${logTag} wrote report json: ${reportJsonPath}`);
             console.log(`${logTag} wrote combined report: ${combinedReportPath}`);
         } catch (reportError) {
-            console.error(`${logTag} failed to write report: ${errorMessage(reportError)}`);
-        }
-        try {
-            await localServer.close();
-        } catch (_) {
-            // Ignore close errors.
-        }
-        if (cleanup !== null) {
-            try {
-                await cleanup();
-            } catch (_) {
-                // Ignore cleanup errors.
-            }
+            console.error(`${logTag} failed to write final report: ${errorMessage(reportError)}`);
+            runError ??= new Error(`${logTag} failed to write final report: ${errorMessage(reportError)}`);
         }
     }
 
