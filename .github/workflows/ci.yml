@@ -530,3 +530,90 @@ jobs:
             builds/firefox-android-e2e-report.html
             builds/firefox-android-e2e-report.json
           if-no-files-found: ignore
+
+  test-firefox-android-capability-probe:
+    name: Firefox Android Gecko RDP Capability Probe (manual)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+
+      - name: Build Firefox Android package
+        run: npm run build -- --target firefox-android
+
+      - name: Enable Android emulator KVM
+        run: |
+          if [ ! -e /dev/kvm ]; then
+            echo 'KVM device /dev/kvm is unavailable on this runner.' >&2
+            exit 1
+          fi
+          sudo chmod 0666 /dev/kvm
+          if [ ! -r /dev/kvm ] || [ ! -w /dev/kvm ]; then
+            echo 'The runner cannot read and write /dev/kvm.' >&2
+            exit 1
+          fi
+
+      - name: Run installation smoke then actual Gecko RDP probe
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        env:
+          MANABITAN_ANDROID_AUTO_INSTALL_FIREFOX: '1'
+          MANABITAN_ANDROID_FIREFOX_PACKAGE: org.mozilla.firefox
+          MANABITAN_ANDROID_ENABLE_FIREFOX_REMOTE_DEBUGGING: '1'
+          MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS: '45000'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        with:
+          api-level: 34
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-linux-hw-accel: false
+          disable-animations: true
+          script: |
+            adb wait-for-device
+            adb devices
+            npm run test:e2e:firefox-android-extension
+            npm run test:e2e:firefox-android-capability
+
+      - name: Enforce Gecko RDP capability probe success
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'builds/firefox-android-capability-report.json';
+          if (!fs.existsSync(path)) {
+            console.error('Firefox Android capability report not found.');
+            process.exit(1);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const allowedScopes = ['actual-gecko-rdp-extension-context+android-runtime-qualification'];
+          if (report.status !== 'success' || !allowedScopes.includes(report.verificationScope)) {
+            console.error(`Gecko RDP probe did not pass: status=${String(report.status)} scope=${String(report.verificationScope)} failure=${String(report.failureReason || '')}`);
+            process.exit(1);
+          }
+          if (!report.sourceCommit || !report.buildIdentity?.packageTreeSha256 || !report.buildIdentity?.manifestSha256 || !report.androidVersion || !report.firefoxVersion || !report.rdpTargetIdentity?.targetActor) {
+            console.error('Capability report is missing source, package, browser, Android, or target identity evidence.');
+            process.exit(1);
+          }
+          const runtime = report.runtimeQualification;
+          const requiredVerified = ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update'];
+          if (runtime?.status !== 'success' || !requiredVerified.every((capability) => runtime.verifiedCapabilities?.includes(capability)) || runtime.unverifiedCapabilities?.length !== 0) {
+            console.error(`Android runtime qualification did not preserve truthful capability scope: ${JSON.stringify(runtime)}`);
+            process.exit(1);
+          }
+          NODE
+
+      - name: Upload Gecko RDP capability report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: firefox-android-gecko-rdp-capability-report
+          path: |
+            builds/firefox-android-capability-report.json
+            builds/firefox-android-capability-diagnostics/
+            builds/firefox-android-native-readiness/
+          if-no-files-found: ignore
