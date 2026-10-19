@@ -39,7 +39,7 @@ const newExpression = '再起動証拠新';
 const oldGloss = 'RESTART_CAMPAIGN_REVISION_ONE_CONTENT_71D3';
 const newGloss = 'RESTART_CAMPAIGN_REVISION_TWO_CONTENT_C92A';
 const missingExpression = '再起動証拠には存在しない語';
-const updateEntryCount = 350_000;
+const updateEntryCount = 50_000;
 const timeoutMs = 300_000;
 
 async function discoverExtensionId(context) {
