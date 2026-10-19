@@ -91,6 +91,40 @@ function createFastProbeCardFormat() {
 }
 
 /**
+ * @param {import('settings').AnkiCardFormat} cardFormat
+ * @param {string} fieldTemplates
+ * @returns {import('settings').ProfileOptions}
+ */
+function createTemplateOptions(cardFormat, fieldTemplates) {
+    return /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+        general: {
+            resultOutputMode: 'split',
+            glossaryLayoutMode: 'default',
+            compactTags: false,
+        },
+        dictionaries: [],
+        anki: {
+            tags: [],
+            targetTags: [],
+            duplicateScope: 'collection',
+            duplicateScopeCheckAllModels: false,
+            duplicateBehavior: 'new',
+            suspendNewCards: false,
+            checkForDuplicates: false,
+            displayTagsAndFlags: 'never',
+            cardFormats: [cardFormat],
+            noteGuiMode: 'browse',
+            screenshot: {format: 'png', quality: 90},
+            downloadTimeout: 0,
+            forceSync: false,
+            noteDupeCheckFirst: false,
+            fieldTemplates,
+        },
+        scanning: {length: 10},
+    }));
+}
+
+/**
  * @param {Document} document
  * @returns {void}
  */
@@ -669,6 +703,75 @@ describe('DisplayAnki render-overlapped duplicate preparation', () => {
         expect(anki._updateSaveButtonsPromise).toBeNull();
     });
 
+    test('stale quick duplicate completion cannot publish to a replacement render or start full work', async ({window}) => {
+        const pendingInfo = Promise.withResolvers();
+        const {display, api, anki} = setup(window.document, {
+            getAnkiNoteInfo: vi.fn(() => pendingInfo.promise),
+        });
+        const oldEntries = display.dictionaryEntries;
+        const oldRow = display.dictionaryEntryNodes[0];
+        oldRow.innerHTML = '<div class="note-actions-container"></div>';
+        anki._noteDupeCheckFirst = true;
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        anki._ankiFieldTemplates = 'templates';
+        anki._ankiFieldTemplatesCacheOptionsGeneration = 0;
+        vi.spyOn(anki._ankiNoteBuilder, 'createNote').mockResolvedValue({note: createCollectionNote('front'), errors: [], requirements: []});
+        const fullWork = vi.spyOn(anki, '_getDictionaryEntryDetails');
+
+        const completion = anki._updateDictionaryEntryDetails();
+        await vi.waitFor(() => expect(api.getAnkiNoteInfo).toHaveBeenCalledTimes(1));
+        anki._onContentClear();
+        const replacementEntry = createTermEntry();
+        display.dictionaryEntries = [replacementEntry];
+        const replacementRow = window.document.createElement('div');
+        replacementRow.innerHTML = '<div class="note-actions-container"></div>';
+        display.dictionaryEntryNodes = [replacementRow];
+        window.document.body.appendChild(replacementRow);
+        pendingInfo.resolve([{noteIds: [777]}]);
+        await completion;
+
+        expect(oldEntries[0]).not.toBe(replacementEntry);
+        expect(replacementRow.querySelector('.duplicate-indicator')).toBeNull();
+        expect(fullWork).not.toHaveBeenCalled();
+    });
+
+    test('stale rejected quick duplicate check cannot start full work', async ({window}) => {
+        const pendingConnectionCheck = Promise.withResolvers();
+        const {display, api, anki} = setup(window.document, {
+            isAnkiConnected: vi.fn(() => pendingConnectionCheck.promise),
+        });
+        anki._noteDupeCheckFirst = true;
+        const fullWork = vi.spyOn(anki, '_getDictionaryEntryDetails');
+
+        const completion = anki._updateDictionaryEntryDetails();
+        await vi.waitFor(() => expect(api.isAnkiConnected).toHaveBeenCalledTimes(1));
+        anki._onContentClear();
+        display.dictionaryEntries = [createTermEntry()];
+        pendingConnectionCheck.reject(new Error('connection check failed'));
+        await completion;
+
+        expect(fullWork).not.toHaveBeenCalled();
+    });
+
+    test('current quick duplicate completion publishes and continues the normal details pass', async ({window}) => {
+        const {display, api, anki} = setup(window.document, {
+            getAnkiNoteInfo: vi.fn(async () => [{noteIds: [777]}]),
+        });
+        display.dictionaryEntryNodes[0].innerHTML = '<div class="note-actions-container"></div>';
+        anki._noteDupeCheckFirst = true;
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        anki._ankiFieldTemplates = 'templates';
+        anki._ankiFieldTemplatesCacheOptionsGeneration = 0;
+        vi.spyOn(anki._ankiNoteBuilder, 'createNote').mockResolvedValue({note: createCollectionNote('front'), errors: [], requirements: []});
+        const fullWork = vi.spyOn(anki, '_getDictionaryEntryDetails').mockResolvedValue([{noteMap: new Map()}]);
+
+        await anki._updateDictionaryEntryDetails();
+
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledTimes(1);
+        expect(display.dictionaryEntryNodes[0].querySelector('.duplicate-indicator .action-icon')?.dataset.icon).toBe('big-circle');
+        expect(fullWork).toHaveBeenCalledTimes(1);
+    });
+
     for (const mode of ['disabled', 'duplicates-disabled', 'quick-check', 'busy', 'empty']) {
         test(`preserves the existing ${mode} path`, async ({window}) => {
             const {anki, display} = setup(window.document);
@@ -972,6 +1075,179 @@ describe('DisplayAnki save invocation ownership', () => {
 
         expect(getTemplates).toHaveBeenCalledTimes(1);
         expect(anki._ankiFieldTemplates).toBe('cached templates');
+    });
+
+    test('ordinary common-note preparation returns its captured template after options change', async ({window}) => {
+        setupDocument(window.document);
+        const {display} = createDisplay(window.document, [createTermEntry()]);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormatA = {...createCardFormat(), deck: 'Deck A', model: 'Model A'};
+        const cardFormatB = {...createCardFormat(), deck: 'Deck B', model: 'Model B'};
+        anki._cardFormats = [cardFormatA];
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        const templateA = Promise.withResolvers();
+        const getTemplates = vi.spyOn(anki, '_getAnkiFieldTemplates').mockImplementation((options) => (
+            options.anki.fieldTemplates === 'A-template' ? templateA.promise : Promise.resolve('B-template')
+        ));
+        display.getOptions = () => createTemplateOptions(cardFormatA, 'A-template');
+
+        const oldBuildData = anki._getCommonNoteBuildData(0);
+        await vi.waitFor(() => expect(getTemplates).toHaveBeenCalledTimes(1));
+        const optionsB = createTemplateOptions(cardFormatB, 'B-template');
+        anki._onOptionsUpdated({options: optionsB});
+        await anki._ankiFieldTemplatesPromise;
+        templateA.resolve('A-template');
+        const resultA = await oldBuildData;
+
+        expect(resultA).toMatchObject({cardFormat: cardFormatA, template: 'A-template'});
+        expect(anki._ankiFieldTemplates?.trimEnd()).toBe('B-template');
+    });
+
+    test('save waits for its options generation template and uses it in both build passes', async ({window}) => {
+        setupDocument(window.document);
+        const {display, api} = createDisplay(window.document, [createTermEntry()]);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormatA = {...createCardFormat(), deck: 'Deck A', model: 'Model A'};
+        const cardFormatB = {...createCardFormat(), deck: 'Deck B', model: 'Model B'};
+        const details = [{noteMap: new Map([[0, {
+            cardFormat: cardFormatA,
+            canAdd: true,
+            valid: true,
+            isDuplicate: false,
+            noteIds: null,
+            noteInfos: [],
+            ankiError: null,
+        }]])}];
+        anki._cardFormats = [cardFormatA];
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({url: 'original'});
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const dictionaryInfo = Promise.withResolvers();
+        api.getDictionaryInfo = vi.fn(() => dictionaryInfo.promise);
+        display.getOptions = () => createTemplateOptions(cardFormatB, 'B-template');
+        /** @type {import('template-renderer').RenderMultiItem[][]} */
+        const renderCalls = [];
+        anki._ankiNoteBuilder._templateRenderer = /** @type {import('../ext/js/templates/template-renderer-proxy.js').TemplateRendererProxy} */ (/** @type {unknown} */ ({
+            renderMulti: vi.fn(async (/** @type {import('template-renderer').RenderMultiItem[]} */ items) => {
+                renderCalls.push(items);
+                return items.flatMap(({template, templateItems}) => templateItems.flatMap(({datas}) => datas.map(({marker}) => ({result: {result: `${template.trimEnd()}::${marker}`, requirements: []}}))));
+            }),
+        }));
+        anki._onOptionsUpdated({options: createTemplateOptions(cardFormatB, 'B-template')});
+        expect(anki._ankiFieldTemplates).toBeNull();
+        const saving = anki._saveAnkiNote(0, 0);
+        await Promise.resolve();
+        expect(renderCalls).toHaveLength(0);
+        dictionaryInfo.resolve([]);
+        await saving;
+
+        expect(renderCalls).toHaveLength(2);
+        expect(renderCalls.flatMap((items) => items.map(({template}) => template.trimEnd()))).toEqual(['B-template', 'B-template']);
+        expect(api.addAnkiNote).toHaveBeenCalledTimes(1);
+        expect(api.addAnkiNote.mock.calls[0][0]).toMatchObject({
+            deckName: 'Deck B', modelName: 'Model B', fields: {Front: 'B-template::first'},
+        });
+    });
+
+    test('accepted save keeps its original template after a newer options refresh completes', async ({window}) => {
+        setupDocument(window.document);
+        const {display, api} = createDisplay(window.document, [createTermEntry()]);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormatA = {...createCardFormat(), deck: 'Deck A', model: 'Model A'};
+        const cardFormatB = {...createCardFormat(), deck: 'Deck B', model: 'Model B'};
+        const details = [{noteMap: new Map([[0, {
+            cardFormat: cardFormatA,
+            canAdd: true,
+            valid: true,
+            isDuplicate: false,
+            noteIds: null,
+            noteInfos: [],
+            ankiError: null,
+        }]])}];
+        anki._cardFormats = [cardFormatA];
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({url: 'original'});
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        display.getOptions = () => createTemplateOptions(cardFormatA, 'A-template');
+        anki._onOptionsUpdated({options: createTemplateOptions(cardFormatA, 'A-template')});
+        await anki._ankiFieldTemplatesPromise;
+
+        const firstRender = Promise.withResolvers();
+        /** @type {import('template-renderer').RenderMultiItem[][]} */
+        const renderCalls = [];
+        anki._ankiNoteBuilder._templateRenderer = /** @type {import('../ext/js/templates/template-renderer-proxy.js').TemplateRendererProxy} */ (/** @type {unknown} */ ({
+            renderMulti: vi.fn((/** @type {import('template-renderer').RenderMultiItem[]} */ items) => {
+                renderCalls.push(items);
+                if (renderCalls.length === 1) { return firstRender.promise; }
+                return Promise.resolve(items.flatMap(({template, templateItems}) => templateItems.flatMap(({datas}) => datas.map(({marker}) => ({result: {result: `${template.trimEnd()}::${marker}`, requirements: []}})))));
+            }),
+        }));
+        const saving = anki._saveAnkiNote(0, 0);
+        await vi.waitFor(() => expect(renderCalls).toHaveLength(1));
+        const dictionaryInfo = Promise.withResolvers();
+        api.getDictionaryInfo = vi.fn(() => dictionaryInfo.promise);
+        display.getOptions = () => createTemplateOptions(cardFormatB, 'B-template');
+        anki._onOptionsUpdated({options: createTemplateOptions(cardFormatB, 'B-template')});
+        dictionaryInfo.resolve([]);
+        await anki._ankiFieldTemplatesPromise;
+        firstRender.resolve(renderCalls[0].flatMap(({template, templateItems}) => templateItems.flatMap(({datas}) => datas.map(({marker}) => ({result: {result: `${template.trimEnd()}::${marker}`, requirements: []}})))));
+        await saving;
+
+        expect(renderCalls).toHaveLength(2);
+        expect(renderCalls.flatMap((items) => items.map(({template}) => template.trimEnd()))).toEqual(['A-template', 'A-template']);
+        expect(api.addAnkiNote.mock.calls[0][0]).toMatchObject({
+            deckName: 'Deck A', modelName: 'Model A', fields: {Front: 'A-template::first'},
+        });
+        expect(anki._ankiFieldTemplates?.trimEnd()).toBe('B-template');
+    });
+
+    test('rejected template refresh retries on a save in the same options generation', async ({window}) => {
+        setupDocument(window.document);
+        const {display, api} = createDisplay(window.document, [createTermEntry()]);
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const cardFormat = createCardFormat();
+        anki._cardFormats = [cardFormat];
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        const details = [{noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: false,
+            noteIds: null,
+            noteInfos: [],
+            ankiError: null,
+        }]])}];
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const failedDictionaryInfo = Promise.withResolvers();
+        api.getDictionaryInfo = vi.fn()
+            .mockImplementationOnce(() => failedDictionaryInfo.promise)
+            .mockResolvedValueOnce([]);
+        const failedOptions = createTemplateOptions(cardFormat, 'failed-template');
+        display.getOptions = () => failedOptions;
+        anki._onOptionsUpdated({options: failedOptions});
+        const failedRefresh = anki._ankiFieldTemplatesPromise;
+        if (failedRefresh === null) { throw new Error('Expected template refresh'); }
+        failedDictionaryInfo.reject(new Error('dictionary information unavailable'));
+        await expect(failedRefresh).rejects.toThrow('dictionary information unavailable');
+
+        /** @type {import('template-renderer').RenderMultiItem[][]} */
+        const renderCalls = [];
+        anki._ankiNoteBuilder._templateRenderer = /** @type {import('../ext/js/templates/template-renderer-proxy.js').TemplateRendererProxy} */ (/** @type {unknown} */ ({
+            renderMulti: vi.fn(async (/** @type {import('template-renderer').RenderMultiItem[]} */ items) => {
+                renderCalls.push(items);
+                return items.flatMap(({template, templateItems}) => templateItems.flatMap(({datas}) => datas.map(({marker}) => ({result: {result: `${template.trimEnd()}::${marker}`, requirements: []}}))));
+            }),
+        }));
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(api.getDictionaryInfo).toHaveBeenCalledTimes(2);
+        expect(renderCalls).toHaveLength(2);
+        expect(renderCalls.flatMap((items) => items.map(({template}) => template.trimEnd()))).toEqual(['failed-template', 'failed-template']);
+        expect(anki._ankiFieldTemplates?.trimEnd()).toBe('failed-template');
+        expect(anki._ankiFieldTemplatesCacheOptionsGeneration).toBe(anki._optionsGeneration);
+        expect(api.addAnkiNote.mock.calls[0][0]).toMatchObject({fields: {Front: 'failed-template::first'}});
     });
 
     test('add completion does not attach its note ID to a replacement row', async ({window}) => {
