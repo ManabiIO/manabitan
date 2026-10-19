@@ -67,6 +67,53 @@ export function parseAndroidNativeHierarchy(xml) {
 }
 
 /**
+ * @param {NativeNode} node
+ * @returns {boolean}
+ */
+function hasPositiveNativeBounds(node) {
+    const {bounds} = node;
+    return Boolean(bounds && [bounds.left, bounds.top, bounds.right, bounds.bottom].every(Number.isSafeInteger) && bounds.left >= 0 && bounds.top >= 0 && bounds.right > bounds.left && bounds.bottom > bounds.top);
+}
+
+/**
+ * @param {NativeNode[]} nodes
+ * @param {number} nodeIndex
+ * @param {number} ancestorIndex
+ * @returns {boolean}
+ */
+function hasNativeAncestor(nodes, nodeIndex, ancestorIndex) {
+    let parentIndex = nodes[nodeIndex]?.parentIndex ?? null;
+    while (parentIndex !== null) {
+        if (parentIndex === ancestorIndex) { return true; }
+        parentIndex = nodes[parentIndex]?.parentIndex ?? null;
+    }
+    return false;
+}
+
+/**
+ * Recognizes Firefox's native toolbar using resource IDs and hierarchy structure only.
+ * @param {NativeNode[]} nodes
+ * @param {string} packageName
+ * @returns {boolean}
+ */
+export function hasRecognizedNativeBrowserUi(nodes, packageName) {
+    const ownedNodes = nodes.map((node, index) => ({node, index})).filter(({node}) => node.packageName === packageName && hasPositiveNativeBounds(node));
+    const legacyToolbar = ownedNodes.some(({node}) => /(?:^|:id\/)(?:url_bar|mozac_browser_toolbar_url_view|browser_toolbar|home_toolbar)$/.test(node.resourceId));
+    if (legacyToolbar) { return true; }
+
+    const browserLayout = ownedNodes.filter(({node}) => node.resourceId === `${packageName}:id/browserLayout`);
+    const toolbar = ownedNodes.filter(({node}) => node.resourceId === `${packageName}:id/composable_toolbar`);
+    const addressBar = ownedNodes.filter(({node}) => node.resourceId === 'ADDRESSBAR_URL_BOX');
+    const engineView = ownedNodes.filter(({node}) => node.resourceId === `${packageName}:id/engineView`);
+    return browserLayout.some((layout) => toolbar.some((bar) => {
+        const toolbarInLayout = hasNativeAncestor(nodes, bar.index, layout.index);
+        const addressBarInToolbar = addressBar.some((address) => hasNativeAncestor(nodes, address.index, bar.index));
+        const engineInLayout = engineView.some((engine) => hasNativeAncestor(nodes, engine.index, layout.index));
+        return toolbarInLayout && addressBarInToolbar && engineInLayout;
+    }));
+}
+
+/**
  * @param {NativeNode[]} nodes
  * @param {string} packageName
  * @param {string} extensionName
@@ -237,7 +284,7 @@ export async function prepareAndroidNativeReadiness({adbDevice, packageName, ext
             if (findOwnedAddedSheetButton(nodes, packageName, extensionName)) { throw new Error('The owned extension-added sheet remained visible after its validated button tap'); }
         }
 
-        const meaningfulBrowserUiBeforeIntent = nodes.some((node) => /(?:url_bar|mozac_browser_toolbar_url_view|browser_toolbar|home_toolbar)$/.test(node.resourceId)) || nodes.some((node) => /^(?:Search or enter address|Search or enter URL|Search the web|Firefox Home)$/.test(node.text));
+        const meaningfulBrowserUiBeforeIntent = hasRecognizedNativeBrowserUi(nodes, packageName);
         const recognizedOnboardingBeforeIntent = nodes.some((node) => node.packageName === packageName && onboardingActions.some(({titles}) => titles.includes(node.text)));
         if (!meaningfulBrowserUiBeforeIntent && !recognizedOnboardingBeforeIntent) {
             throw new Error('Unrecognized Firefox native UI state after install acknowledgement; refusing to launch browser intent');
@@ -261,8 +308,7 @@ export async function prepareAndroidNativeReadiness({adbDevice, packageName, ext
                 stableBrowserObservations = 0;
                 continue;
             }
-            const ids = nodes.map((node) => node.resourceId);
-            const meaningfulBrowserUi = ids.some((id) => /(?:url_bar|mozac_browser_toolbar_url_view|browser_toolbar|home_toolbar)/.test(id)) || nodes.some((node) => /^(?:Search or enter address|Search or enter URL|Search the web|Firefox Home)$/.test(node.text));
+            const meaningfulBrowserUi = hasRecognizedNativeBrowserUi(nodes, packageName);
             const onboarding = findKnownOnboardingAction(nodes, packageName);
             if (onboarding) {
                 await action(onboarding.action, {title: onboarding.title, buttonText: onboarding.buttonText, buttonResourceId: onboarding.resourceId, bounds: onboarding.bounds, tapCenter: onboarding.tapCenter}, ['shell', 'input', 'tap', String(onboarding.tapCenter.x), String(onboarding.tapCenter.y)]);

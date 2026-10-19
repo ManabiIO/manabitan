@@ -3,9 +3,10 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, test} from 'vitest';
-import {findOwnedAddedSheetButton, parseAndroidNativeHierarchy, prepareAndroidNativeReadiness} from './firefox-android-native-readiness.js';
+import {findOwnedAddedSheetButton, hasRecognizedNativeBrowserUi, parseAndroidNativeHierarchy, prepareAndroidNativeReadiness} from './firefox-android-native-readiness.js';
 
 const fixturePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../data/android/firefox-android-extension-added-sheet-ci-39180206332.xml');
+const composeBrowserFixturePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../data/android/firefox-android-native-readiness-run39184416158-compose-browser.xml');
 const ownedTitle = 'Manabitan Popup Dictionary was added';
 const firefoxPackage = 'org.mozilla.firefox';
 
@@ -26,6 +27,48 @@ function hierarchy(body) {
 }
 
 describe('Firefox Android native readiness', () => {
+    test('recognizes the captured Compose browser tree and requires native ownership, bounds, and structure', async () => {
+        const xml = await readFile(composeBrowserFixturePath, 'utf8');
+        const nodes = parseAndroidNativeHierarchy(xml);
+        expect(hasRecognizedNativeBrowserUi(nodes, firefoxPackage)).toBe(true);
+
+        const zeroBounds = parseAndroidNativeHierarchy(xml.replace('bounds="[0,128][1080,296]"', 'bounds="[0,128][0,296]"'));
+        expect(hasRecognizedNativeBrowserUi(zeroBounds, firefoxPackage)).toBe(false);
+        const anotherPackage = parseAndroidNativeHierarchy(xml.replaceAll('package="org.mozilla.firefox"', 'package="com.example.spoof"'));
+        expect(hasRecognizedNativeBrowserUi(anotherPackage, firefoxPackage)).toBe(false);
+        const spoofedContent = parseAndroidNativeHierarchy(hierarchy(nativeNode({text: 'Example Domain Search or enter address', resourceId: 'org.mozilla.firefox:id/web_content'})));
+        expect(hasRecognizedNativeBrowserUi(spoofedContent, firefoxPackage)).toBe(false);
+        const detachedAddressBar = parseAndroidNativeHierarchy(hierarchy(`${nativeNode({resourceId: 'org.mozilla.firefox:id/browserLayout'})}${nativeNode({resourceId: 'org.mozilla.firefox:id/composable_toolbar'})}${nativeNode({resourceId: 'ADDRESSBAR_URL_BOX'})}${nativeNode({resourceId: 'org.mozilla.firefox:id/engineView'})}`));
+        expect(hasRecognizedNativeBrowserUi(detachedAddressBar, firefoxPackage)).toBe(false);
+    });
+
+    test('accepts the captured normal Compose browser after two stable observations without onboarding taps', async () => {
+        const root = await mkdtemp(path.join(os.tmpdir(), 'manabitan-android-native-readiness-compose-'));
+        const browser = await readFile(composeBrowserFixturePath, 'utf8');
+        /** @type {string[][]} */
+        const commands = [];
+        const result = await prepareAndroidNativeReadiness({
+            adbDevice: 'emulator-5554',
+            packageName: firefoxPackage,
+            extensionName: 'Manabitan Popup Dictionary',
+            outputDirectory: path.join(root, 'native-readiness'),
+            runCommand: async (args) => {
+                commands.push(args);
+                const joined = args.join(' ');
+                if (joined.endsWith('screencap -p')) { return {stdout: Buffer.from([1])}; }
+                if (joined.endsWith('dumpsys activity activities') || joined.endsWith('dumpsys window windows')) { return {stdout: 'activity'}; }
+                if (joined.includes('uiautomator dump')) { return {stdout: 'dumped'}; }
+                if (joined.includes('exec-out cat')) { return {stdout: browser}; }
+                return {stdout: ''};
+            },
+            sleep: async () => {},
+        });
+        expect(result.ready).toBe(true);
+        expect(result.observations).toBe(2);
+        expect(result.actions.map(({name}) => name)).toEqual(['open-normal-browser-with-action-view']);
+        expect(commands.some((args) => args.includes('input') && args.includes('tap'))).toBe(false);
+    });
+
     test('recognizes the actual CI extension-added sheet and computes its tap center from captured bounds', async () => {
         const xml = await readFile(fixturePath, 'utf8');
         const nodes = parseAndroidNativeHierarchy(xml);
