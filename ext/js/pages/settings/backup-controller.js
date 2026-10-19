@@ -55,6 +55,8 @@ export class BackupController {
         this._settingsImportWarningModal = null;
         /** @type {?OptionsUtil} */
         this._optionsUtil = null;
+        /** @type {?Promise<void>} */
+        this._settingsReplacementTail = null;
 
         try {
             this._optionsUtil = new OptionsUtil();
@@ -378,6 +380,25 @@ export class BackupController {
     }
 
     /**
+     * Serialize full settings replacements so concurrent imports and resets
+     * cannot persist stale snapshots over a later user action.
+     * @param {() => Promise<void>} callback
+     * @returns {Promise<void>}
+     */
+    _runSettingsReplacement(callback) {
+        const previous = this._settingsReplacementTail ?? Promise.resolve();
+        const operation = previous.then(callback);
+        const tail = operation.catch(() => {});
+        this._settingsReplacementTail = tail;
+        void tail.then(() => {
+            if (this._settingsReplacementTail === tail) {
+                this._settingsReplacementTail = null;
+            }
+        });
+        return operation;
+    }
+
+    /**
      * @param {Error} error
      */
     _showSettingsImportError(error) {
@@ -613,7 +634,7 @@ export class BackupController {
         const file = files[0];
         element.value = '';
         try {
-            await this._importSettingsFile(file);
+            await this._runSettingsReplacement(async () => await this._importSettingsFile(file));
         } catch (error) {
             this._showSettingsImportError(toError(error));
         }
@@ -629,31 +650,33 @@ export class BackupController {
 
     /** */
     async _onSettingsResetConfirmClick() {
-        if (this._optionsUtil === null) { throw new Error('OptionsUtil invalid'); }
-
         if (this._settingsResetModal !== null) {
             this._settingsResetModal.setVisible(false);
         }
 
-        // Get default options
-        const optionsFull = this._optionsUtil.getDefault();
+        await this._runSettingsReplacement(async () => {
+            if (this._optionsUtil === null) { throw new Error('OptionsUtil invalid'); }
 
-        try {
-            // Update dictionaries
-            await DictionaryController.ensureDictionarySettings(this._settingsController, void 0, optionsFull, false, false);
+            // Get default options
+            const optionsFull = this._optionsUtil.getDefault();
 
-            // Assign options
-            await this._settingsImportSetOptionsFull(optionsFull);
-        } catch (e) {
-            this._showSettingsImportError(toError(e));
-            return;
-        }
+            try {
+                // Update dictionaries
+                await DictionaryController.ensureDictionarySettings(this._settingsController, void 0, optionsFull, false, false);
 
-        // Update display theme only after the replacement settings are persisted.
-        this._themeController.theme = optionsFull.profiles[optionsFull.profileCurrent].options.general.popupTheme;
-        this._themeController.themePreset = optionsFull.profiles[optionsFull.profileCurrent].options.general.popupThemePreset;
-        this._themeController.prepare();
-        this._themeController.siteOverride = true;
-        this._themeController.updateTheme();
+                // Assign options
+                await this._settingsImportSetOptionsFull(optionsFull);
+            } catch (e) {
+                this._showSettingsImportError(toError(e));
+                return;
+            }
+
+            // Update display theme only after the replacement settings are persisted.
+            this._themeController.theme = optionsFull.profiles[optionsFull.profileCurrent].options.general.popupTheme;
+            this._themeController.themePreset = optionsFull.profiles[optionsFull.profileCurrent].options.general.popupThemePreset;
+            this._themeController.prepare();
+            this._themeController.siteOverride = true;
+            this._themeController.updateTheme();
+        });
     }
 }

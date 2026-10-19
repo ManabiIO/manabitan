@@ -574,6 +574,7 @@ export class AudioDownloader {
         const abortController = typeof idleTimeout === 'number' ? new AbortController() : null;
         const signal = abortController?.signal;
         const timeoutError = new Error('Audio download idle timeout');
+        timeoutError.name = 'AbortError';
         let active = true;
         /** @type {?import('request-builder.js').ProgressCallback} */
         let onProgress = null;
