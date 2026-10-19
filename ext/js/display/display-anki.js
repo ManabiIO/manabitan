@@ -28,6 +28,27 @@ import {PopupMenu} from '../dom/popup-menu.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {TemplateRendererProxy} from '../templates/template-renderer-proxy.js';
 
+/**
+ * @typedef {object} SaveNoteBuildOptions
+ * @property {import('anki-templates-internal').Context} context
+ * @property {import('settings').AnkiCardFormat} cardFormat
+ * @property {string[]} tags
+ * @property {import('settings').AnkiDuplicateScope} duplicateScope
+ * @property {boolean} duplicateScopeCheckAllModels
+ * @property {import('settings').ResultOutputMode} resultOutputMode
+ * @property {import('settings').GlossaryLayoutMode} glossaryLayoutMode
+ * @property {boolean} compactTags
+ * @property {import('settings').AnkiScreenshotFormat} screenshotFormat
+ * @property {number} screenshotQuality
+ * @property {number} scanLength
+ * @property {import('extension').ContentOrigin} contentOrigin
+ * @property {import('settings').OptionsContext} optionsContext
+ * @property {import('settings').DictionariesOptions} dictionaries
+ * @property {string|null} template
+ * @property {import('settings').ProfileOptions|null} displayOptions
+ * @property {Promise<Awaited<ReturnType<DisplayAnki['_getCommonNoteBuildData']>>>} [commonNoteBuildData]
+ */
+
 export class DisplayAnki {
     /**
      * @param {import('./display.js').Display} display
@@ -120,6 +141,8 @@ export class DisplayAnki {
         this.__noteDupeCheckFirst = false;
         /** @type {number} */
         this._ankiFieldTemplatesGeneration = 0;
+        /** @type {number} */
+        this._optionsGeneration = 0;
     }
 
     /** */
@@ -198,6 +221,7 @@ export class DisplayAnki {
      * @param {import('display').EventArgument<'optionsUpdated'>} details
      */
     _onOptionsUpdated({options}) {
+        ++this._optionsGeneration;
         this._dictionaryEntryDetailsPreload = null;
         const {
             general: {
@@ -840,47 +864,119 @@ export class DisplayAnki {
         const button = this._saveButtonFind(dictionaryEntryIndex, cardFormatIndex);
         if (button === null || button.disabled) { return; }
 
+        // Bind this accepted save to the render and duplicate metadata it was
+        // started for. An index can refer to a different entry after a render.
+        const entryNode = this._getEntry(dictionaryEntryIndex);
+        const entryDetails = dictionaryEntryDetails[dictionaryEntryIndex];
+        const optionsGeneration = this._optionsGeneration;
+        let overwriteNoteDetails;
+        let overwriteFieldOptions;
+        let overwrite;
+        let suspendNewCards;
+        let forceSync;
+        /** @type {import('settings').AnkiDuplicateBehavior} */
+        let duplicateBehavior = this._duplicateBehavior;
+        /** @type {SaveNoteBuildOptions|null} */
+        let noteBuildOptions = null;
+        const snapshotErrors = [];
+        try {
+            const cardFormat = structuredClone(this._cardFormats[cardFormatIndex]);
+            overwriteNoteDetails = structuredClone(details);
+            overwriteFieldOptions = structuredClone(cardFormat.fields);
+            overwrite = button.dataset.overwrite === 'true';
+            suspendNewCards = this._suspendNewCards;
+            forceSync = this._forceSync;
+            duplicateBehavior = this._duplicateBehavior;
+            const dictionaries = structuredClone(this._dictionaries);
+            const noteContext = structuredClone(this._noteContext);
+            if (noteContext === null) { throw new Error('Note context not initialized'); }
+            const displayOptions = structuredClone(this._display.getOptions());
+            noteBuildOptions = {
+                context: noteContext,
+                cardFormat,
+                tags: [...this._noteTags],
+                duplicateScope: this._duplicateScope,
+                duplicateScopeCheckAllModels: this._duplicateScopeCheckAllModels,
+                resultOutputMode: this._resultOutputMode,
+                glossaryLayoutMode: this._glossaryLayoutMode,
+                compactTags: this._compactTags,
+                screenshotFormat: this._screenshotFormat,
+                screenshotQuality: this._screenshotQuality,
+                scanLength: this._scanLength,
+                contentOrigin: structuredClone(this._display.getContentOrigin()),
+                optionsContext: structuredClone(this._display.getOptionsContext()),
+                dictionaries,
+                template: this._ankiFieldTemplates,
+                displayOptions,
+            };
+            const commonNoteBuildData = this._getCommonNoteBuildData(cardFormatIndex, noteBuildOptions);
+            noteBuildOptions.commonNoteBuildData = commonNoteBuildData;
+            void commonNoteBuildData.catch(() => {});
+        } catch (e) {
+            snapshotErrors.push(toError(e));
+        }
+        const isCurrentSaveOwner = () => (
+            this._display.dictionaryEntries === dictionaryEntries &&
+            this._display.dictionaryEntries[dictionaryEntryIndex] === dictionaryEntry &&
+            this._dictionaryEntryDetails?.[dictionaryEntryIndex] === entryDetails &&
+            this._optionsGeneration === optionsGeneration &&
+            this._getEntry(dictionaryEntryIndex) === entryNode &&
+            entryNode?.contains(button) === true
+        );
+
         /** @type {Error[]} */
         const allErrors = [];
 
-        button.disabled = true;
+        if (snapshotErrors.length === 0) { button.disabled = true; }
         setTimeout(() => {
-            if (this._duplicateBehavior !== 'prevent' || allErrors.length > 0) {
+            if (snapshotErrors.length === 0 && isCurrentSaveOwner() && (duplicateBehavior !== 'prevent' || allErrors.length > 0)) {
                 button.disabled = false;
             }
         }, 2500);
 
-        this._hideErrorNotification(true);
+        if (snapshotErrors.length === 0 && isCurrentSaveOwner()) { this._hideErrorNotification(true); }
 
         const progressIndicatorVisible = this._display.progressIndicatorVisible;
-        const overrideToken = progressIndicatorVisible.setOverride(true);
+        const overrideToken = (isCurrentSaveOwner() ? progressIndicatorVisible.setOverride(true) : null);
+        let progressOverrideCleared = false;
+        const clearProgressOverride = () => {
+            if (progressOverrideCleared) { return; }
+            progressOverrideCleared = true;
+            if (overrideToken !== null) { progressIndicatorVisible.clearOverride(overrideToken); }
+        };
         try {
-            const {requirements} = await this._createNote(dictionaryEntry, cardFormatIndex, []);
-            const {note, errors, requirements: outputRequirements} = await this._createNote(dictionaryEntry, cardFormatIndex, requirements);
+            if (snapshotErrors.length > 0) { throw snapshotErrors[0]; }
+            if (noteBuildOptions === null) { throw new Error('Note build context not initialized'); }
+            const {requirements} = await this._createNote(dictionaryEntry, cardFormatIndex, [], noteBuildOptions);
+            if (!isCurrentSaveOwner()) { clearProgressOverride(); }
+            const {note, errors, requirements: outputRequirements} = await this._createNote(dictionaryEntry, cardFormatIndex, requirements, noteBuildOptions);
+            if (!isCurrentSaveOwner()) { clearProgressOverride(); }
             allErrors.push(...errors);
 
             const error = this._getAddNoteRequirementsError(requirements, outputRequirements);
             if (error !== null) { allErrors.push(error); }
-            if (button.dataset.overwrite) {
-                const overwrittenNote = await this._getOverwrittenNote(note, dictionaryEntryIndex, cardFormatIndex);
+            if (overwrite) {
+                const overwrittenNote = await this._getOverwrittenNote(note, dictionaryEntryIndex, cardFormatIndex, overwriteNoteDetails, overwriteFieldOptions);
                 if (overwrittenNote === null) {
                     allErrors.push(new Error('Could not determine which duplicate note to overwrite'));
                 } else {
                     await this._updateAnkiNote(overwrittenNote, allErrors);
                 }
             } else {
-                await this._addNewAnkiNote(note, allErrors, button, dictionaryEntryIndex);
+                await this._addNewAnkiNote(note, allErrors, button, dictionaryEntryIndex, isCurrentSaveOwner, suspendNewCards, forceSync);
             }
         } catch (e) {
             allErrors.push(toError(e));
         } finally {
-            progressIndicatorVisible.clearOverride(overrideToken);
+            clearProgressOverride();
         }
 
-        if (allErrors.length > 0) {
-            this._showErrorNotification(allErrors);
-        } else {
-            this._hideErrorNotification(true);
+        if (isCurrentSaveOwner()) {
+            if (allErrors.length > 0) {
+                this._showErrorNotification(allErrors);
+            } else {
+                this._hideErrorNotification(true);
+            }
         }
     }
 
@@ -903,15 +999,17 @@ export class DisplayAnki {
      * @param {import('anki').Note} note
      * @param {number} dictionaryEntryIndex
      * @param {number} cardFormatIndex
+     * @param {import('display-anki').DictionaryEntryNoteDetails} [noteDetails]
+     * @param {import('settings').AnkiCardFormat['fields']} [fieldOptions]
      * @returns {Promise<import('anki').NoteWithId | null>}
      */
-    async _getOverwrittenNote(note, dictionaryEntryIndex, cardFormatIndex) {
+    async _getOverwrittenNote(note, dictionaryEntryIndex, cardFormatIndex, noteDetails, fieldOptions) {
         const allEntryDetails = this._dictionaryEntryDetails;
-        if (!(allEntryDetails !== null && dictionaryEntryIndex >= 0 && dictionaryEntryIndex < allEntryDetails.length)) {
+        if (typeof noteDetails === 'undefined' && !(allEntryDetails !== null && dictionaryEntryIndex >= 0 && dictionaryEntryIndex < allEntryDetails.length)) {
             return null;
         }
-        const relevantEntryDetails = allEntryDetails[dictionaryEntryIndex];
-        const relevantNoteDetails = relevantEntryDetails.noteMap.get(cardFormatIndex);
+        const relevantEntryDetails = allEntryDetails?.[dictionaryEntryIndex];
+        const relevantNoteDetails = noteDetails ?? relevantEntryDetails?.noteMap.get(cardFormatIndex);
         if (typeof relevantNoteDetails === 'undefined') { return null; }
         const {noteIds, noteInfos} = relevantNoteDetails;
         if (noteIds === null || !Array.isArray(noteInfos)) { return null; }
@@ -920,7 +1018,7 @@ export class DisplayAnki {
         const overwriteInfo = noteInfos.find((info) => info !== null && info.noteId === overwriteId);
         if (!overwriteInfo) { return null; }
         const existingFields = overwriteInfo.fields;
-        const fieldOptions = this._cardFormats[cardFormatIndex].fields;
+        fieldOptions ??= this._cardFormats[cardFormatIndex].fields;
         if (!fieldOptions) { return null; }
 
         const newValues = note.fields;
@@ -967,8 +1065,11 @@ export class DisplayAnki {
      * @param {Error[]} allErrors
      * @param {HTMLButtonElement} button
      * @param {number} dictionaryEntryIndex
+     * @param {() => boolean} [isCurrentSaveOwner]
+     * @param {boolean} [suspendNewCards]
+     * @param {boolean} [forceSync]
      */
-    async _addNewAnkiNote(note, allErrors, button, dictionaryEntryIndex) {
+    async _addNewAnkiNote(note, allErrors, button, dictionaryEntryIndex, isCurrentSaveOwner = () => true, suspendNewCards = this._suspendNewCards, forceSync = this._forceSync) {
         let noteId = null;
         let addNoteOkay = false;
         try {
@@ -983,20 +1084,20 @@ export class DisplayAnki {
             if (noteId === null) {
                 allErrors.push(new Error('Note could not be added'));
             } else {
-                if (this._suspendNewCards) {
+                if (suspendNewCards) {
                     try {
                         await this._display.application.api.suspendAnkiCardsForNote(noteId);
                     } catch (e) {
                         allErrors.push(toError(e));
                     }
                 }
-                const cardFormatIndex = this._getCardFormatIndex(button);
+                if (isCurrentSaveOwner()) {
+                    const cardFormatIndex = this._getCardFormatIndex(button);
+                    this._updateSaveButtonForDuplicateBehavior(button, [noteId]);
+                    this._updateViewNoteButton(dictionaryEntryIndex, cardFormatIndex, [noteId]);
+                }
 
-                this._updateSaveButtonForDuplicateBehavior(button, [noteId]);
-
-                this._updateViewNoteButton(dictionaryEntryIndex, cardFormatIndex, [noteId]);
-
-                if (this._forceSync) {
+                if (forceSync) {
                     try {
                         await this._display.application.api.forceSync();
                     } catch (e) {
@@ -1368,21 +1469,28 @@ export class DisplayAnki {
      *  template: string,
      *  dictionaryStylesMap: Map<string, string>,
      * }>}
+     * @param {SaveNoteBuildOptions} [saveOptions]
      */
-    async _getCommonNoteBuildData(cardFormatIndex) {
-        const context = this._noteContext;
+    async _getCommonNoteBuildData(cardFormatIndex, saveOptions) {
+        const context = saveOptions?.context ?? this._noteContext;
         if (context === null) { throw new Error('Note context not initialized'); }
-        const cardFormat = this._cardFormats?.[cardFormatIndex];
+        const cardFormat = saveOptions?.cardFormat ?? this._cardFormats?.[cardFormatIndex];
         if (typeof cardFormat === 'undefined') { throw new Error('Unsupported note type}'); }
-        if (!this._ankiFieldTemplates) {
-            const options = this._display.getOptions();
-            if (options) {
-                await this._updateAnkiFieldTemplates(options);
+        let template;
+        if (typeof saveOptions === 'undefined') {
+            if (!this._ankiFieldTemplates) {
+                const options = this._display.getOptions();
+                if (options) { await this._updateAnkiFieldTemplates(options); }
+            }
+            template = this._ankiFieldTemplates;
+        } else {
+            template = saveOptions.template;
+            if (typeof template !== 'string' && saveOptions.displayOptions) {
+                template = await this._getAnkiFieldTemplates(saveOptions.displayOptions);
             }
         }
-        const template = this._ankiFieldTemplates;
         if (typeof template !== 'string') { throw new Error('Invalid template'); }
-        const dictionaryStylesMap = this._ankiNoteBuilder.getDictionaryStylesMap(this._dictionaries);
+        const dictionaryStylesMap = this._ankiNoteBuilder.getDictionaryStylesMap(saveOptions?.dictionaries ?? this._dictionaries);
         return {context, cardFormat, template, dictionaryStylesMap};
     }
 
@@ -1441,36 +1549,38 @@ export class DisplayAnki {
      * @param {import('dictionary').DictionaryEntry} dictionaryEntry
      * @param {number} cardFormatIndex
      * @param {import('anki-note-builder').Requirement[]} requirements
+     * @param {SaveNoteBuildOptions} [saveOptions]
      * @returns {Promise<import('display-anki').CreateNoteResult>}
      */
-    async _createNote(dictionaryEntry, cardFormatIndex, requirements) {
-        const {context, cardFormat, template, dictionaryStylesMap} = await this._getCommonNoteBuildData(cardFormatIndex);
-        const contentOrigin = this._display.getContentOrigin();
+    async _createNote(dictionaryEntry, cardFormatIndex, requirements, saveOptions) {
+        const {context, cardFormat, template, dictionaryStylesMap} = await (saveOptions?.commonNoteBuildData ?? this._getCommonNoteBuildData(cardFormatIndex));
+        const saved = saveOptions ?? /** @type {SaveNoteBuildOptions} */ ({});
+        const contentOrigin = saveOptions?.contentOrigin ?? this._display.getContentOrigin();
         const details = this._ankiNoteBuilder.getDictionaryEntryDetailsForNote(dictionaryEntry);
         const audioDetails = this._getAnkiNoteMediaAudioDetails(details);
-        const optionsContext = this._display.getOptionsContext();
+        const optionsContext = saveOptions?.optionsContext ?? this._display.getOptionsContext();
 
         const {note, errors, requirements: outputRequirements} = await this._ankiNoteBuilder.createNote({
             dictionaryEntry,
-            cardFormat,
-            context,
+            cardFormat: saved.cardFormat ?? cardFormat,
+            context: saved.context ?? context,
             template,
-            tags: this._noteTags,
-            duplicateScope: this._duplicateScope,
-            duplicateScopeCheckAllModels: this._duplicateScopeCheckAllModels,
-            resultOutputMode: this._resultOutputMode,
-            glossaryLayoutMode: this._glossaryLayoutMode,
-            compactTags: this._compactTags,
+            tags: saved.tags ?? this._noteTags,
+            duplicateScope: saved.duplicateScope ?? this._duplicateScope,
+            duplicateScopeCheckAllModels: saved.duplicateScopeCheckAllModels ?? this._duplicateScopeCheckAllModels,
+            resultOutputMode: saved.resultOutputMode ?? this._resultOutputMode,
+            glossaryLayoutMode: saved.glossaryLayoutMode ?? this._glossaryLayoutMode,
+            compactTags: saved.compactTags ?? this._compactTags,
             mediaOptions: {
                 audio: audioDetails,
                 screenshot: {
-                    format: this._screenshotFormat,
-                    quality: this._screenshotQuality,
+                    format: saved.screenshotFormat ?? this._screenshotFormat,
+                    quality: saved.screenshotQuality ?? this._screenshotQuality,
                     contentOrigin,
                 },
                 textParsing: {
                     optionsContext,
-                    scanLength: this._scanLength,
+                    scanLength: saved.scanLength ?? this._scanLength,
                 },
             },
             requirements,
