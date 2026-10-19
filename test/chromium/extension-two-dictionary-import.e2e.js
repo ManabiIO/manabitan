@@ -4571,7 +4571,7 @@ async function main() {
                     return await searchTermAndGetDictionaryHitCounts(concurrentSearchPage, readinessTerm, ['JMdict'], 6000);
                 });
                 if (Number(crashRecoveryLookupProfile.result?.expectedCounts?.JMdict ?? 0) < 1) {
-                    throw new Error(`Expected JMdict lookup backend to be available before crash-recovery update trigger; saw ${JSON.stringify(crashRecoveryLookupProfile.result)}`);
+                    throw new Error(`Expected JMdict lookup backend to be available before the update-trigger restart check; saw ${JSON.stringify(crashRecoveryLookupProfile.result)}`);
                 }
                 crashRecoveryTriggerDiagnostics = await triggerDictionaryUpdate(page, resolvedJmdictTitle, `${localServer.baseUrl}/dictionaries/jmdict-slow.zip`);
                 await page.waitForTimeout(updateCrashDelayMs);
@@ -4585,7 +4585,7 @@ async function main() {
                     backendReadyDictionaryNames: [resolvedJmdictTitle],
                     backendReadyTerm: readinessTerm,
                     searchChecks: [{
-                        label: 'JMdict after mid-update crash',
+                        label: 'JMdict after orderly restart following update trigger',
                         term: readinessTerm,
                         dictionaryNames: ['JMdict'],
                     }],
@@ -4602,8 +4602,8 @@ async function main() {
                 await addReportPhase(
                     report,
                     concurrentSearchPage,
-                    'Restore concurrent lookup tab after update crash recovery',
-                    `Reopened concurrent search tab after simulated browser crash during staged update: ${JSON.stringify({
+                    'Restore concurrent lookup tab after orderly update-trigger restart',
+                    `Reopened concurrent search tab after the orderly browser restart: ${JSON.stringify({
                         backendReady: reopenConcurrentSearchProfile.result?.backendReady ?? null,
                         searchReady: reopenConcurrentSearchProfile.result?.searchReady ?? null,
                         searchDebug: reopenConcurrentSearchProfile.result?.searchDebug ?? null,
@@ -4626,22 +4626,22 @@ async function main() {
             await addReportPhase(
                 report,
                 page,
-                'Verify crash recovery during staged JMdict update',
+                'Verify persistence after orderly restart following JMdict update trigger',
                 crashRecoveryError.length > 0 ?
-                    `Crash recovery verification failed: ${crashRecoveryError}; trigger=${JSON.stringify(crashRecoveryTriggerDiagnostics)}` :
-                    `Forced a browser restart during JMdict update Step 4 and verified the live dictionary remained usable with no staged-title leftovers: ${JSON.stringify(crashRecoveryResult)}`,
+                    `Orderly restart verification failed: ${crashRecoveryError}; trigger=${JSON.stringify(crashRecoveryTriggerDiagnostics)}` :
+                    `Waited ${String(updateCrashDelayMs)}ms after the slow JMdict update trigger, closed the persistent browser context, relaunched it with the same profile, and verified the installed dictionary remained usable with no staged-title leftovers: ${JSON.stringify(crashRecoveryResult)}`,
                 crashRecoveryStart,
                 crashRecoveryEnd,
                 null,
                 processSampler,
             );
             if (crashRecoveryError.length > 0) {
-                fail(`Crash recovery verification failed: ${crashRecoveryError}`);
+                fail(`Orderly restart verification failed: ${crashRecoveryError}`);
             }
             if (stopAfterCrashRecovery) {
                 report.status = 'success';
-                appendLog(report, 'info', 'Stopped after crash recovery verification by MANABITAN_E2E_STOP_AFTER_CRASH_RECOVERY=1.');
-                console.log(`${e2eLogTag} PASS: Stopped after crash recovery verification by MANABITAN_E2E_STOP_AFTER_CRASH_RECOVERY=1.`);
+                appendLog(report, 'info', 'Stopped after orderly restart verification by MANABITAN_E2E_STOP_AFTER_CRASH_RECOVERY=1.');
+                console.log(`${e2eLogTag} PASS: Stopped after orderly restart verification by MANABITAN_E2E_STOP_AFTER_CRASH_RECOVERY=1.`);
                 return;
             }
         }

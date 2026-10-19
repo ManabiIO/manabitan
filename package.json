@@ -55,6 +55,7 @@
         "test:e2e:firefox-android-extension": "node ./test/android/firefox-extension-smoke.e2e.js",
         "test:e2e:firefox-android-capability": "node ./test/android/firefox-android-capability.e2e.js",
         "test:e2e:chromium-extension": "node ./test/chromium/extension-two-dictionary-import.e2e.js",
+        "test:e2e:chromium-restart-interruption": "node ./test/chromium/restart-interruption.e2e.js",
         "test:e2e:chromium-freemdict-soak": "node ./test/chromium/freemdict-import-soak.e2e.js",
         "test:e2e:chromium-android-extension": "node ./test/android/chromium-extension-smoke.e2e.js",
         "test:e2e:chromium-anki-dedupe": "node ./test/chromium/anki-deduplication.e2e.js",

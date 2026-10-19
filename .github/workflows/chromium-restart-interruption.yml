@@ -1,0 +1,131 @@
+name: Chromium Restart Interruption
+
+on:
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - '.github/workflows/chromium-restart-interruption.yml'
+      - 'dev/data/manifest-variants.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'test/chromium/restart-interruption.e2e.js'
+      - 'test/chromium/restart-interruption-process-tree.js'
+      - 'test/chromium/restart-interruption-process-tree.test.js'
+      - '.github/actions/setup/**'
+      - 'ext/**'
+      - 'dev/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chromium-restart-interruption-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  restart-interruption:
+    name: Restart and interruption recovery (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+
+      - name: Build stable-key Chromium package
+        run: npm run build -- --target chrome-playwright
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Test owned process-tree selection
+        run: npm run test:unit -- test/chromium/restart-interruption-process-tree.test.js
+
+      - name: Create fresh evidence directory
+        run: |
+          evidence_dir=$(mktemp -d "$RUNNER_TEMP/manabitan-restart.XXXXXX")
+          printf 'MANABITAN_RESTART_EVIDENCE_DIR=%s\n' "$evidence_dir" >> "$GITHUB_ENV"
+
+      - name: Run witnessed interruption recovery campaign
+        run: xvfb-run -a npm run test:e2e:chromium-restart-interruption
+
+      - name: Enforce recovery report
+        if: always()
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = `${process.env.MANABITAN_RESTART_EVIDENCE_DIR}/restart-interruption-campaign.json`;
+          if (!fs.existsSync(path)) {
+            console.error('Restart interruption report was not written.');
+            process.exit(1);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const phases = new Map((report.phases || []).map((phase) => [phase.name, phase]));
+          const boundary = phases.get('controlled test-only post-write interruption boundary');
+          const kill = phases.get('SIGKILL active Chromium process tree after successful term-record write before publication (test-only gate)');
+          const oracle = phases.get('restart recovery all-or-nothing generation oracle');
+          const required = [
+            phases.get('completed import baseline')?.status === 'passed',
+            phases.get('captured owned Chromium process tree before SIGKILL')?.status === 'observed',
+            boundary?.status === 'observed',
+            kill?.status === 'passed',
+            oracle?.status === 'passed',
+          ];
+          const write = boundary?.observedWrite;
+          const sessionId = boundary?.journal?.sessionId;
+          const fixtureTitle = 'Restart Campaign Fixture';
+          const stagedTitle = typeof write?.dictionaryName === 'string' &&
+            write.dictionaryName.startsWith(`${fixtureTitle} [update-staging `) && write.dictionaryName.endsWith(']');
+          const boundaryWitness = boundary?.journal?.recordCheckpoint?.shards &&
+            typeof sessionId === 'string' && sessionId.length > 0 && write?.held === true &&
+            write.sessionId === sessionId && typeof write.fileName === 'string' && write.fileName.endsWith('.mbtr') &&
+            (write.dictionaryName === fixtureTitle || stagedTitle) && Number.isSafeInteger(write.bytes) &&
+            write.bytes > 4096 && boundary.checkpointEntry === null &&
+            !boundary.journal.recordCheckpoint.shards.some(({fileName}) => fileName === write.fileName) &&
+            Array.isArray(kill?.exitedPids) && kill.exitedPids.includes(kill.rootPid) && kill.signalledPids.includes(kill.rootPid);
+          const launches = Array.isArray(report.launches) ? report.launches : [];
+          const validLaunches = ['initial', 'recovery'].every((name) => {
+            const launch = launches.find((item) => item.name === name);
+            const diagnostics = launch?.diagnostics;
+            const storage = diagnostics?.openStorageDiagnostics;
+            const worker = storage?.runtimeContext;
+            return launch?.runtimeIdentity?.origin === `chrome-extension://${report.runtimeExtensionId}` &&
+              launch.runtimeIdentity.runtimeId === report.runtimeExtensionId &&
+              launch.serviceWorkerExtensionId === report.runtimeExtensionId && diagnostics?.usesFallbackStorage === false &&
+              storage?.mode === 'opfs-sahpool' && storage.hasOpfsSahpoolVfs === true &&
+              storage.opfsSahpoolInstallResult === 'installed' && worker?.isDedicatedWorkerGlobalScope === true &&
+              worker.hasStorageGetDirectory === true && worker.hasCreateSyncAccessHandle === true;
+          });
+          const oracleWitness = oracle?.revision && typeof oracle.generationId === 'string' &&
+            Number.isSafeInteger(oracle.inventory?.terms) && oracle.inventory.terms > 0 &&
+            typeof oracle.exactExpression === 'string' && typeof oracle.exactContent === 'string' &&
+            typeof oracle.absentExpression === 'string' && oracle.missCount === 0 && oracle.noTransientRows === true &&
+            oracle.strictOpfs === true;
+          const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/u.test(value);
+          const identities = sha256(report.sourceHead) && sha256(report.sourceTree) &&
+            sha256(report.packageSha256) && sha256(report.harnessSha256) &&
+            sha256(report.fixtureHashes?.revisionOneSha256) && sha256(report.fixtureHashes?.revisionTwoSha256) &&
+            sha256(report.testOnlyPackageObserver?.originalSha256) &&
+            sha256(report.testOnlyPackageObserver?.instrumentedSha256) &&
+            sha256(report.testOnlyPackageObserver?.originalPackageZipSha256) &&
+            sha256(report.testOnlyPackageObserver?.instrumentedExtractedPackageTreeSha256) &&
+            report.testOnlyPackageObserver?.originalPackageZipSha256 === report.packageSha256 &&
+            typeof report.browserVersion === 'string' && report.browserVersion.length > 0;
+          if (report.status !== 'success' || required.some((passed) => !passed) || !boundaryWitness ||
+              !validLaunches || !oracleWitness || !identities || !report.runtimeExtensionId || !report.browserVersion ||
+              report.nodeVersion !== 'v22.22.0') {
+            console.error(JSON.stringify({status: report.status, requiredPhaseStatuses: required, boundaryWitness: Boolean(boundaryWitness),
+              validLaunches, oracleWitness: Boolean(oracleWitness), identities: Boolean(identities), runtimeExtensionId: report.runtimeExtensionId,
+              browserVersion: report.browserVersion, nodeVersion: report.nodeVersion, sourceStatus: report.sourceStatus}, null, 2));
+            process.exit(1);
+          }
+          NODE
+
+      - name: Upload restart interruption evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: chromium-restart-interruption-evidence
+          path: ${{ env.MANABITAN_RESTART_EVIDENCE_DIR }}
+          if-no-files-found: error
