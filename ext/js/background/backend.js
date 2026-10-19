@@ -4392,6 +4392,7 @@ null;
             if (hasIssueId) {
                 data.referenceUrl = `/issues.html#${issueId}`;
             }
+            error.data = data;
         }
         return error;
     }
