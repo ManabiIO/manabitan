@@ -615,4 +615,5 @@ jobs:
           path: |
             builds/firefox-android-capability-report.json
             builds/firefox-android-capability-diagnostics/
+            builds/firefox-android-native-readiness/
           if-no-files-found: ignore

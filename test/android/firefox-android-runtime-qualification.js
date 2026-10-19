@@ -27,10 +27,10 @@ const execFileAsync = promisify(execFile);
 /**
  * Runs a bounded import and lookup through real Firefox Android extension pages and product APIs.
  * All async work is owned by a namespaced page state and every RDP evaluation is resultID-correlated.
- * @param {{extensionId: string, backgroundTarget: Record<string, unknown>, evaluate: RuntimeEvaluate, waitForTarget: (predicate: (target: Record<string, unknown>) => boolean, stage: string) => Promise<Record<string, unknown>>, fixtureDirectory: string, adbDevice: string, runtimeQualificationTimeoutMs: number, onFailureEvidence?: (stage: string) => Promise<unknown>}} options
+ * @param {{extensionId: string, backgroundTarget: Record<string, unknown>, evaluate: RuntimeEvaluate, waitForTarget: (predicate: (target: Record<string, unknown>) => boolean, stage: string) => Promise<Record<string, unknown>>, fixtureDirectory: string, adbDevice: string, runtimeQualificationTimeoutMs: number, prepareNativeReadiness?: () => Promise<unknown>, onFailureEvidence?: (stage: string) => Promise<unknown>}} options
  * @returns {Promise<RuntimeQualificationReport>}
  */
-export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTarget, evaluate, waitForTarget, fixtureDirectory, adbDevice, runtimeQualificationTimeoutMs, onFailureEvidence}) {
+export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTarget, evaluate, waitForTarget, fixtureDirectory, adbDevice, runtimeQualificationTimeoutMs, prepareNativeReadiness, onFailureEvidence}) {
     /** @type {RuntimeQualificationReport} */
     const report = {status: 'running', timeoutMs: runtimeQualificationTimeoutMs, extensionId, backgroundTarget, stages: [], errors: [], verifiedCapabilities: [], unverifiedCapabilities: ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update']};
     /**
@@ -51,6 +51,7 @@ export async function qualifyAndroidDictionaryRuntime({extensionId, backgroundTa
     try {
         assert.equal(backgroundTarget.addonId, extensionId, 'The accepted initial target belongs to another add-on');
         assert.equal(backgroundTarget.isFallbackExtensionDocument, false, 'The accepted initial target is a fallback context');
+        if (prepareNativeReadiness) { stage('native-readiness', await prepareNativeReadiness()); }
         fixtureServer = await startDictionaryFixtureServer();
         const candidateReversePort = Number(new URL(fixtureServer.baseUrl).port);
         await execFileAsync('adb', ['-s', adbDevice, 'reverse', '--no-rebind', `tcp:${candidateReversePort}`, `tcp:${candidateReversePort}`], {timeout: 10_000});
@@ -377,7 +378,7 @@ export function buildOwnedPageReloadScript(page) {
  * @returns {string}
  */
 export function buildDocumentVisibilityWaitScript(page) {
-    return `new Promise((resolve,reject)=>{const expectedUrl=browser.runtime.getURL(${JSON.stringify(page)});const deadline=Date.now()+15000;const inspect=()=>{if(location.href!==expectedUrl){reject(new Error('Document URL changed while waiting for visible '+${JSON.stringify(page)}+': '+location.href));return;}if(document.visibilityState==='visible'){resolve({page:${JSON.stringify(page)},url:location.href,visibilityState:document.visibilityState});return;}if(Date.now()>deadline){reject(new Error('Owned '+${JSON.stringify(page)}+' document did not become visible: '+JSON.stringify({url:location.href,visibilityState:document.visibilityState})));return;}setTimeout(inspect,100);};inspect();})`;
+    return `new Promise((resolve,reject)=>{const expectedUrl=browser.runtime.getURL(${JSON.stringify(page)});const deadline=Date.now()+15000;const inspect=()=>{const viewport={innerWidth,innerHeight,outerWidth,outerHeight,documentElementWidth:document.documentElement?.clientWidth||0,documentElementHeight:document.documentElement?.clientHeight||0};if(location.href!==expectedUrl){reject(new Error('Document URL changed while waiting for visible '+${JSON.stringify(page)}+': '+location.href));return;}if(document.visibilityState==='visible'&&viewport.innerWidth>0&&viewport.innerHeight>0){resolve({page:${JSON.stringify(page)},url:location.href,visibilityState:document.visibilityState,viewport});return;}if(Date.now()>deadline){reject(new Error('Owned '+${JSON.stringify(page)}+' document did not become visible with a nonzero page viewport: '+JSON.stringify({url:location.href,visibilityState:document.visibilityState,viewport})));return;}setTimeout(inspect,100);};inspect();})`;
 }
 
 /**

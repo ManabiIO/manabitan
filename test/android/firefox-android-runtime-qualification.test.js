@@ -6,7 +6,7 @@ import {JSDOM} from 'jsdom';
 import {describe, expect, test, vi} from 'vitest';
 import {SettingsDisplayController} from '../../ext/js/pages/settings/settings-display-controller.js';
 import {ModalController} from '../../ext/js/pages/settings/modal-controller.js';
-import {assertMiningDeliveryOracle, buildDictionaryModalOpenScript, buildOwnedExtensionPageOpenScript, buildOwnedPageActivationScript, buildOwnedPageReloadScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON, qualifyAndroidDictionaryRuntime} from './firefox-android-runtime-qualification.js';
+import {assertMiningDeliveryOracle, buildDictionaryModalOpenScript, buildDocumentVisibilityWaitScript, buildOwnedExtensionPageOpenScript, buildOwnedPageActivationScript, buildOwnedPageReloadScript, buildOwnedTabCleanupScript, buildRuntimeJobStart, buildSettingsFileImportStartScript, buildVisibleSearchScript, decodeRuntimeEvaluation, evaluateJSON, qualifyAndroidDictionaryRuntime} from './firefox-android-runtime-qualification.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 
 /**
@@ -98,6 +98,62 @@ function createSearchDom({splitIdentity = false} = {}) {
 }
 
 describe('Android runtime qualification emitted scripts', () => {
+    test('native readiness runs before the first owned extension page is opened', async () => {
+        /** @type {string[]} */
+        const events = [];
+        const failure = await qualifyAndroidDictionaryRuntime({
+            extensionId: 'expected-addon',
+            backgroundTarget: {addonId: 'expected-addon', isFallbackExtensionDocument: false},
+            evaluate: async (_actor, _script, stage) => { events.push(`evaluate:${stage}`); return rdpEntry({cleaned: true}); },
+            waitForTarget: async () => { throw new Error('unexpected target wait'); },
+            fixtureDirectory: '',
+            adbDevice: 'emulator-test',
+            runtimeQualificationTimeoutMs: 1000,
+            prepareNativeReadiness: async () => { events.push('native-readiness'); throw new Error('stop after native readiness'); },
+        }).catch((error) => error);
+        expect(failure).toBeInstanceOf(Error);
+        expect(events[0]).toBe('native-readiness');
+        expect(failure.message).toBe('stop after native readiness');
+        expect(events.some((event) => event.includes('open-settings-page'))).toBe(false);
+        expect(failure.runtimeQualification.errors).toContain('Error: stop after native readiness');
+    });
+
+    test('owned page visibility requires a nonzero actual page viewport and waits for delayed dimensions', async () => {
+        const page = 'search.html';
+        const context = vm.createContext({
+            browser: {runtime: {getURL: /** @type {(value: string) => string} */ ((value) => `moz-extension://fixture/${value}`)}},
+            location: {href: `moz-extension://fixture/${page}`},
+            document: {visibilityState: 'visible', documentElement: {clientWidth: 0, clientHeight: 0}},
+            innerWidth: 0,
+            innerHeight: 0,
+            outerWidth: 0,
+            outerHeight: 0,
+            Date: {now: () => 0},
+            setTimeout: /** @type {(callback: () => void) => void} */ ((callback) => {
+                context.innerWidth = 320;
+                context.innerHeight = 640;
+                context.document.documentElement.clientWidth = 320;
+                context.document.documentElement.clientHeight = 640;
+                callback();
+            }),
+        });
+        const visible = await vm.runInContext(buildDocumentVisibilityWaitScript(page), context);
+        expect(visible).toEqual({page, url: `moz-extension://fixture/${page}`, visibilityState: 'visible', viewport: {innerWidth: 320, innerHeight: 640, outerWidth: 0, outerHeight: 0, documentElementWidth: 320, documentElementHeight: 640}});
+
+        const emptyContext = vm.createContext({
+            browser: {runtime: {getURL: /** @type {(value: string) => string} */ ((value) => `moz-extension://fixture/${value}`)}},
+            location: {href: `moz-extension://fixture/${page}`},
+            document: {visibilityState: 'visible', documentElement: {clientWidth: 0, clientHeight: 0}},
+            innerWidth: 0,
+            innerHeight: 0,
+            outerWidth: 0,
+            outerHeight: 0,
+            Date: {now: (() => { let time = 0; return () => (time += 20_000); })()},
+            setTimeout: /** @type {(callback: () => void) => void} */ ((callback) => callback()),
+        });
+        await expect(vm.runInContext(buildDocumentVisibilityWaitScript(page), emptyContext)).rejects.toThrow(/nonzero page viewport/);
+    });
+
     test('captures failure evidence before owned tab cleanup and preserves the runtime failure', async () => {
         /** @type {string[]} */
         const events = [];

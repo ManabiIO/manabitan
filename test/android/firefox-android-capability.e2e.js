@@ -8,6 +8,7 @@ import {promisify} from 'node:util';
 import {runWebExtInstallHandshake} from './web-ext-install-handshake.js';
 import {findWebExtRdpPort, GeckoRdpProtocolError, probeInstalledAddon} from './firefox-android-rdp.js';
 import {collectAndroidNativeFailureEvidence} from './firefox-android-native-failure-evidence.js';
+import {prepareAndroidNativeReadiness} from './firefox-android-native-readiness.js';
 import {qualifyAndroidDictionaryRuntime} from './firefox-android-runtime-qualification.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -16,7 +17,7 @@ const outputPath = resolve(root, process.env.MANABITAN_ANDROID_CAPABILITY_REPORT
 const runtimeQualificationTimeoutMs = Number(process.env.MANABITAN_ANDROID_RUNTIME_QUALIFICATION_TIMEOUT_MS || 600_000);
 assert.ok(Number.isFinite(runtimeQualificationTimeoutMs) && runtimeQualificationTimeoutMs > 0, 'MANABITAN_ANDROID_RUNTIME_QUALIFICATION_TIMEOUT_MS must be a finite positive number');
 /** @typedef {{status: string, timeoutMs: number, stages: Array<{name?: string, value?: unknown}>, errors: string[], verifiedCapabilities: string[], unverifiedCapabilities: string[]}} RuntimeQualificationReport */
-/** @typedef {{startedAtIso: string, finishedAtIso: string, status: string, verificationScope: string, adbDevice: string, androidVersion: string, androidApiLevel: string, firefoxPackage: string, firefoxVersion: string, sourceCommit: string, buildIdentity: {sourceDir: string, manifestSha256: string, packageTreeSha256: string, extensionId: string, version: string|number}, extensionId: string, rdpPort: number|null, rdpTargetIdentity: Record<string, unknown>|null, addonContext: Record<string, unknown>|null, contextProbeStatus: string, contextBlocker: string, protocolErrorResponse: Record<string, unknown>|null, executedCapabilities: string[], unverifiedCapabilities: string[], failureReason: string, runtimeQualification: RuntimeQualificationReport}} CapabilityReport */
+/** @typedef {{startedAtIso: string, finishedAtIso: string, status: string, verificationScope: string, adbDevice: string, androidVersion: string, androidApiLevel: string, firefoxPackage: string, firefoxVersion: string, sourceCommit: string, buildIdentity: {sourceDir: string, manifestSha256: string, packageTreeSha256: string, extensionId: string, extensionName: string, version: string|number}, extensionId: string, rdpPort: number|null, rdpTargetIdentity: Record<string, unknown>|null, addonContext: Record<string, unknown>|null, nativeReadiness: Record<string, unknown>|null, contextProbeStatus: string, contextBlocker: string, protocolErrorResponse: Record<string, unknown>|null, executedCapabilities: string[], unverifiedCapabilities: string[], failureReason: string, runtimeQualification: RuntimeQualificationReport}} CapabilityReport */
 /** @type {CapabilityReport} */
 const report = {
     startedAtIso: new Date().toISOString(),
@@ -29,11 +30,12 @@ const report = {
     firefoxPackage: process.env.MANABITAN_ANDROID_FIREFOX_PACKAGE || 'org.mozilla.firefox',
     firefoxVersion: '',
     sourceCommit: '',
-    buildIdentity: {sourceDir: '', manifestSha256: '', packageTreeSha256: '', extensionId: '', version: ''},
+    buildIdentity: {sourceDir: '', manifestSha256: '', packageTreeSha256: '', extensionId: '', extensionName: '', version: ''},
     extensionId: '',
     rdpPort: null,
     rdpTargetIdentity: null,
     addonContext: null,
+    nativeReadiness: null,
     contextProbeStatus: 'not-run',
     contextBlocker: '',
     protocolErrorResponse: null,
@@ -78,6 +80,7 @@ async function main() {
             manifestSha256: createHash('sha256').update(manifestBytes).digest('hex'),
             packageTreeSha256: await hashBuildTree(sourceDir),
             extensionId: report.extensionId,
+            extensionName: manifest.name,
             version: manifest.version,
         };
 
@@ -124,6 +127,21 @@ async function main() {
                             fixtureDirectory: path.join(root, 'test', 'data', 'dictionaries', 'valid-dictionary1'),
                             adbDevice: report.adbDevice,
                             runtimeQualificationTimeoutMs,
+                            prepareNativeReadiness: async () => {
+                                try {
+                                    const nativeReadiness = await prepareAndroidNativeReadiness({
+                                        adbDevice: report.adbDevice,
+                                        packageName: report.firefoxPackage,
+                                        extensionName: String(manifest.name || ''),
+                                        outputDirectory: path.join(root, 'builds', 'firefox-android-native-readiness'),
+                                    });
+                                    report.nativeReadiness = nativeReadiness;
+                                    return nativeReadiness;
+                                } catch (error) {
+                                    if (isRecord(error) && isRecord(error.nativeReadiness)) { report.nativeReadiness = error.nativeReadiness; }
+                                    throw error;
+                                }
+                            },
                             onFailureEvidence: (stage) => collectAndroidNativeFailureEvidence({
                                 adbDevice: report.adbDevice,
                                 outputDirectory: path.join(root, 'builds', 'firefox-android-capability-diagnostics'),
