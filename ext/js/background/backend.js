@@ -1550,12 +1550,22 @@ export class Backend {
         // @ts-expect-error - ts is not smart enough to realize that filtering !!x removes null and undefined
         const cardIds = notesInfo.flatMap((x) => x?.cards).filter((x) => !!x);
         const cardsInfo = await this._anki.cardsInfo(cardIds);
-        for (let i = 0; i < notesInfo.length; i++) {
-            if (notesInfo[i] !== null) {
-                const cardInfo = cardsInfo.find((x) => x?.noteId === notesInfo[i]?.noteId);
-                if (cardInfo) {
-                    notesInfo[i]?.cardsInfo.push(cardInfo);
-                }
+        /** @type {Map<number, import('anki').CardInfo[]>} */
+        const cardsInfoByNoteId = new Map();
+        for (const cardInfo of cardsInfo) {
+            if (cardInfo === null) { continue; }
+            let noteCardsInfo = cardsInfoByNoteId.get(cardInfo.noteId);
+            if (noteCardsInfo === void 0) {
+                noteCardsInfo = [];
+                cardsInfoByNoteId.set(cardInfo.noteId, noteCardsInfo);
+            }
+            noteCardsInfo.push(cardInfo);
+        }
+        for (const noteInfo of notesInfo) {
+            if (noteInfo === null) { continue; }
+            const noteCardsInfo = cardsInfoByNoteId.get(noteInfo.noteId);
+            if (noteCardsInfo !== void 0) {
+                noteInfo.cardsInfo.push(...noteCardsInfo);
             }
         }
         return notesInfo;
