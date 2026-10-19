@@ -22,7 +22,6 @@ import {parseJson, readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {safePerformance} from '../../core/safe-performance.js';
 import {toError} from '../../core/to-error.js';
-import {getKebabCase} from '../../data/anki-template-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {Mdx} from '../../comm/mdx.js';
 import {createMdictImportSources, compareMddImportPaths, resolveMddImportKey} from '../../dictionary/mdict-import-sources.js';
@@ -3198,41 +3197,15 @@ export class DictionaryImportController {
             });
         }
 
-        // Only runs if updating a dictionary
         if (profilesDictionarySettings !== null && shouldAddDictionarySettings) {
-            const staleBeforeProfileUpdateResult = getStaleImportResult('before-update-profile-dictionary-references');
-            if (staleBeforeProfileUpdateResult !== null) { return staleBeforeProfileUpdateResult; }
-            const profileUpdateStartTime = safePerformance.now();
-            const options = await this._settingsController.getOptionsFull();
-            const {profiles} = options;
-            let skippedProfileCount = 0;
-
-            for (const profile of profiles) {
-                const profileDictionarySettings = profilesDictionarySettings[profile.id];
-                const profileDictionarySetting = (
-                    Array.isArray(profileDictionarySettings) ?
-                        profileDictionarySettings[0] :
-                        /** @type {import('settings').DictionaryOptions|null} */ (profileDictionarySettings ?? null)
-                );
-                if (!(profileDictionarySetting && typeof profileDictionarySetting.name === 'string' && profileDictionarySetting.name.length > 0)) {
-                    skippedProfileCount += 1;
-                    continue;
-                }
-                for (const cardFormat of profile.options.anki.cardFormats) {
-                    const ankiTermFields = cardFormat.fields;
-                    const oldFieldSegmentRegex = new RegExp(getKebabCase(profileDictionarySetting.name), 'g');
-                    const newFieldSegment = getKebabCase(result.title);
-                    for (const key of Object.keys(ankiTermFields)) {
-                        ankiTermFields[key].value = ankiTermFields[key].value.replace(oldFieldSegmentRegex, newFieldSegment);
-                    }
-                }
-            }
-            await this._settingsController.setAllSettings(options);
-            const profileUpdateEndTime = safePerformance.now();
-            log.log(`[ImportTiming] [${dictionaryTitle}] update profile dictionary references ${formatDurationMs(profileUpdateEndTime - profileUpdateStartTime)}`);
-            recordLocalPhase('update-profile-dictionary-references', profileUpdateStartTime, profileUpdateEndTime, {
-                skippedProfileCount,
-            });
+            const staleBeforeRefreshResult = getStaleImportResult('before-refresh-profile-dictionary-references');
+            if (staleBeforeRefreshResult !== null) { return staleBeforeRefreshResult; }
+            const refreshStartTime = safePerformance.now();
+            // This tab suppresses its own optionsUpdated messages. Refresh
+            // live forms after the queued marker migration without replacing
+            // any settings from a page-side snapshot.
+            await this._settingsController.refresh();
+            recordLocalPhase('refresh-profile-dictionary-references', refreshStartTime, safePerformance.now());
         }
 
         const importEndTime = safePerformance.now();

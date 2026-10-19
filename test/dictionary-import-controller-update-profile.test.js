@@ -421,46 +421,18 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         const controller = createControllerForInternalTests();
         const replaceDictionaryTitle = vi.fn().mockResolvedValue(void 0);
         const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
-        const setAllSettings = vi.fn().mockResolvedValue(void 0);
         const verifyImportedDictionaryVisible = vi.fn().mockResolvedValue(void 0);
         const addDictionarySettings = vi.fn().mockResolvedValue([]);
         const removeDictionarySettingsByName = vi.fn().mockResolvedValue(void 0);
         const showErrors = vi.fn();
-        const options = /** @type {import('settings').Options} */ (/** @type {unknown} */ ({
-            profiles: [
-                {
-                    id: 'profile-1',
-                    name: 'Profile 1',
-                    options: {
-                        anki: {
-                            cardFormats: [
-                                {fields: {expression: {value: '{{jitendexorg-2025-01-01}}'}}},
-                            ],
-                        },
-                    },
-                },
-                {
-                    id: null,
-                    name: 'Profile 2',
-                    options: {
-                        anki: {
-                            cardFormats: [
-                                {fields: {expression: {value: '{{untouched}}'}}},
-                            ],
-                        },
-                    },
-                },
-            ],
-        }));
         Reflect.set(controller, '_settingsController', {
+            refresh: vi.fn().mockResolvedValue(void 0),
             application: {
                 api: {
                     replaceDictionaryTitle,
                     triggerDatabaseUpdated,
                 },
             },
-            getOptionsFull: vi.fn().mockResolvedValue(options),
-            setAllSettings,
         });
         Reflect.set(controller, '_verifyImportedDictionaryVisible', verifyImportedDictionaryVisible);
         Reflect.set(controller, '_addDictionarySettings', addDictionarySettings);
@@ -504,9 +476,10 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         expect(replaceDictionaryTitle).toHaveBeenCalledWith(expect.objectContaining({toDictionaryTitle: newTitle, replacedDictionaryTitle: oldTitle}));
         expect(triggerDatabaseUpdated).toHaveBeenCalledTimes(1);
         expect(verifyImportedDictionaryVisible).toHaveBeenCalledWith(newTitle, false);
-        expect(setAllSettings).toHaveBeenCalledTimes(1);
-        expect(options.profiles[0].options.anki.cardFormats[0].fields.expression.value).toContain('jitendexorg-2026-02-05');
-        expect(options.profiles[1].options.anki.cardFormats[0].fields.expression.value).toBe('{{untouched}}');
+        expect(addDictionarySettings).toHaveBeenCalledTimes(1);
+        expect(addDictionarySettings).toHaveBeenCalledWith(expect.objectContaining({title: newTitle}), expect.objectContaining({
+            'profile-1': [expect.objectContaining({name: oldTitle})],
+        }));
         expect(showErrors).not.toHaveBeenCalled();
     });
 });

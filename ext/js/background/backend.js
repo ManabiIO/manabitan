@@ -28,6 +28,7 @@ import {readResponseJson} from '../core/json.js';
 import {logErrorLevelToNumber} from '../core/log-utilities.js';
 import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
+import {replaceDictionaryNameFieldMarkers} from '../data/anki-template-util.js';
 import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -3293,7 +3294,7 @@ null;
                 if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
                 const profilesValue = accessor.get(['profiles']);
                 if (!Array.isArray(profilesValue)) { throw new Error('Invalid profiles target'); }
-                const profiles = /** @type {{id?: unknown, options?: {dictionaries?: unknown, general?: Record<string, unknown>} }[]} */ (profilesValue);
+                const profiles = /** @type {{id?: unknown, options?: {dictionaries?: unknown, general?: Record<string, unknown>, anki?: {cardFormats?: unknown}} }[]} */ (profilesValue);
                 const matches = profiles.flatMap((profile, index) => (isObjectNotArray(profile) && profile.id === profileId ? [index] : []));
                 if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
                 const profile = profiles[matches[0]];
@@ -3332,6 +3333,26 @@ null;
                     const dictionariesValue = profile.options.dictionaries;
                     if (!Array.isArray(dictionariesValue)) { throw new Error('Invalid dictionary settings target'); }
                     const dictionaries = /** @type {unknown[]} */ (dictionariesValue);
+                    const replaceFieldMarkers = () => {
+                        let changed = false;
+                        const ankiOptions = /** @type {{cardFormats?: unknown}|undefined} */ (/** @type {unknown} */ (profile.options?.anki));
+                        const cardFormats = ankiOptions?.cardFormats;
+                        if (Array.isArray(cardFormats)) {
+                            for (const cardFormat of cardFormats) {
+                                if (!isObjectNotArray(cardFormat) || !isObjectNotArray(cardFormat.fields)) { continue; }
+                                for (const field of Object.values(cardFormat.fields)) {
+                                    if (!isObjectNotArray(field) || typeof field.value !== 'string') { continue; }
+                                    const result = replaceDictionaryNameFieldMarkers(field.value, sourceName, name);
+                                    if (result.changed) {
+                                        field.value = result.value;
+                                        changed = true;
+                                    }
+                                }
+                            }
+                        }
+                        return changed;
+                    };
+                    let changed = false;
                     const liveSourceIndices = dictionaries.flatMap((entry, index) => (
                         isObjectNotArray(entry) && entry.name === sourceName ? [index] : []
                     ));
@@ -3365,12 +3386,12 @@ null;
                             entry.alias = alias;
                             entry.styles = styles;
                         }
+                        replaceFieldMarkers();
                         return true;
                     }
 
                     const fallbackSettings = target.fallbackSettings;
-                    if (!Array.isArray(fallbackSettings)) { return false; }
-                    let changed = false;
+                    if (!Array.isArray(fallbackSettings)) { return replaceFieldMarkers(); }
                     const orderedFallbacks = [...fallbackSettings].sort((a, b) => a.index - b.index);
                     /** @type {Map<unknown, number>} */
                     const initialTargetOccurrences = new Map();
@@ -3397,7 +3418,7 @@ null;
                         dictionaries.splice(Math.min(_index, dictionaries.length), 0, replacement);
                         changed = true;
                     }
-                    return changed;
+                    return replaceFieldMarkers() || changed;
                 }
                 const {name} = target;
                 if (typeof name !== 'string') { throw new Error('Invalid dictionary name'); }

@@ -81,4 +81,23 @@ describe('DictionaryController active and pending tasks', () => {
         expect(update.mock.calls).toEqual([['JMdict', 'first'], ['JMdict', 'latest']]);
         expect(Reflect.get(value, '_dictionaryTaskQueue')).toEqual([]);
     });
+
+    test('restores the update action after a failed task leaves the queue', async () => {
+        const value = controller();
+        let updateActionVisible = false;
+        Reflect.set(value, '_dictionaryTaskQueue', [{type: 'update', dictionaryTitle: 'JMdict', downloadUrl: 'first'}]);
+        Reflect.set(value, '_updateDictionary', vi.fn().mockRejectedValue(new Error('download failed')));
+        Reflect.set(value, '_showMutationError', vi.fn());
+        Reflect.set(value, '_dictionaryEntries', [{
+            dictionaryTitle: 'JMdict',
+            showUpdatesAvailableButton() {
+                if (!value.isDictionaryInTaskQueue('JMdict')) { updateActionVisible = true; }
+            },
+        }]);
+
+        await method('_runTaskQueue').call(value);
+
+        expect(Reflect.get(value, '_dictionaryTaskQueue')).toEqual([]);
+        expect(updateActionVisible).toBe(true);
+    });
 });

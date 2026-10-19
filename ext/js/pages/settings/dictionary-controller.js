@@ -1735,6 +1735,7 @@ export class DictionaryController {
         try {
             while (this._dictionaryTaskQueue.length > 0) {
                 const task = this._dictionaryTaskQueue[0];
+                let taskFailed = false;
                 try {
                     switch (task.type) {
                         case 'delete':
@@ -1750,6 +1751,7 @@ export class DictionaryController {
                             break;
                     }
                 } catch (error) {
+                    taskFailed = true;
                     const normalizedError = error instanceof Error ? error : new Error(String(error));
                     reportDiagnostics('dictionary-task-queue-failed', {
                         taskType: task.type,
@@ -1758,11 +1760,11 @@ export class DictionaryController {
                     });
                     log.error(normalizedError);
                     this._showMutationError(normalizedError);
-                    if (task.type === 'update' || task.type === 'delete') {
-                        this._showUpdatesAvailableButton(task.dictionaryTitle);
-                    }
                 } finally {
                     void this._dictionaryTaskQueue.shift();
+                    if (taskFailed && (task.type === 'update' || task.type === 'delete')) {
+                        this._showUpdatesAvailableButton(task.dictionaryTitle);
+                    }
                 }
             }
         } finally {

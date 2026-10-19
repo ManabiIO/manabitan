@@ -200,4 +200,102 @@ describe('real dictionary settings controls', () => {
             h.cleanup();
         }
     });
+
+    domTest('failed update renders an error and restores a clickable retry with its URL after queue retirement', async ({window}) => {
+        vi.stubGlobal('document', window.document);
+        vi.stubGlobal('HTMLElement', window.HTMLElement);
+        const h = await createDictionarySettingsHarness(window, [dictionaryRow('JMdict')]);
+        try {
+            const entry = h.dictionary._dictionaryEntries[0];
+            const updateUrl = 'https://example.invalid/jmdict-retry.zip';
+            const errorNode = /** @type {HTMLElement} */ (window.document.querySelector('#dictionary-error'));
+            errorNode.textContent = '';
+            errorNode.hidden = true;
+            expect(globalThis.document.querySelector('#dictionary-error')).toBe(errorNode);
+            expect(globalThis.HTMLElement).toBe(window.HTMLElement);
+            Reflect.set(entry, '_updateDownloadUrl', updateUrl);
+            entry.showUpdatesAvailableButton();
+
+            const confirmationNode = window.document.querySelector('#dictionary-confirm-update-modal');
+            if (!(confirmationNode instanceof window.HTMLElement)) { throw new Error('Expected update confirmation modal'); }
+            const confirmModal = {node: confirmationNode, setVisible: (/** @type {boolean} */ visible) => { confirmationNode.hidden = !visible; }};
+            Reflect.set(h.dictionary, '_updateDictionaryModal', confirmModal);
+
+            const updateButton = /** @type {HTMLButtonElement} */ (window.document.querySelector('.dictionary-update-available'));
+            updateButton.click();
+            expect(confirmModal.node.hidden).toBe(false);
+            expect(confirmModal.node.dataset).toMatchObject({dictionaryTitle: 'JMdict', downloadUrl: updateUrl});
+
+            const confirmButton = /** @type {HTMLButtonElement} */ (confirmModal.node.querySelector('#dictionary-confirm-update-button'));
+            confirmButton.addEventListener('click', (event) => h.dictionary._onDictionaryConfirmUpdate(event));
+            vi.spyOn(h.dictionary, '_updateDictionary')
+                .mockRejectedValueOnce(new Error('controlled update failure'))
+                .mockImplementation(async () => {});
+            confirmButton.click();
+
+            await vi.waitFor(() => {
+                expect(errorNode.hidden).toBe(false);
+                expect(errorNode.textContent).toContain('controlled update failure');
+                expect(updateButton.hidden).toBe(false);
+                expect(updateButton.dataset.downloadUrl).toBe(updateUrl);
+                expect(h.dictionary._dictionaryTaskQueue).toHaveLength(0);
+            });
+            await vi.waitFor(() => expect(Reflect.get(h.dictionary, '_isTaskQueueRunning')).toBe(false));
+
+            confirmModal.setVisible(false);
+            updateButton.click();
+            expect(confirmModal.node.hidden).toBe(false);
+            expect(confirmModal.node.dataset.downloadUrl).toBe(updateUrl);
+            confirmButton.click();
+            await vi.waitFor(() => {
+                expect(h.dictionary._updateDictionary).toHaveBeenCalledTimes(2);
+            });
+            await vi.waitFor(() => expect(Reflect.get(h.dictionary, '_isTaskQueueRunning')).toBe(false));
+            expect(h.dictionary._dictionaryTaskQueue).toHaveLength(0);
+            expect(h.dictionary._updateDictionary).toHaveBeenCalledTimes(2);
+            expect(h.dictionary._updateDictionary).toHaveBeenNthCalledWith(1, 'JMdict', updateUrl);
+            expect(h.dictionary._updateDictionary).toHaveBeenNthCalledWith(2, 'JMdict', updateUrl);
+        } finally { h.cleanup(); }
+    });
+
+    domTest('same-dictionary queued retry keeps the badge suppressed through failure while adjacent work continues', async ({window}) => {
+        vi.stubGlobal('document', window.document);
+        vi.stubGlobal('HTMLElement', window.HTMLElement);
+        const h = await createDictionarySettingsHarness(window, [dictionaryRow('JMdict'), dictionaryRow('Kanjidic')]);
+        try {
+            const [jmdictEntry, kanjidicEntry] = h.dictionary._dictionaryEntries;
+            if (!jmdictEntry || !kanjidicEntry) { throw new Error('Expected both dictionary rows'); }
+            const updateUrl = 'https://example.invalid/jmdict-retry.zip';
+            Reflect.set(jmdictEntry, '_updateDownloadUrl', updateUrl);
+            jmdictEntry.showUpdatesAvailableButton();
+            const updateButton = /** @type {HTMLButtonElement} */ (jmdictEntry._updatesAvailable);
+            const errorNode = /** @type {HTMLElement} */ (window.document.querySelector('#dictionary-error'));
+            errorNode.textContent = '';
+            errorNode.hidden = true;
+
+            let rejectFirst = () => {};
+            const firstUpdate = new Promise((_, reject) => { rejectFirst = () => reject(new Error('first controlled failure')); });
+            const update = vi.spyOn(h.dictionary, '_updateDictionary')
+                .mockImplementationOnce(() => firstUpdate)
+                .mockImplementation(async () => {});
+            h.dictionary._enqueueTask({type: 'update', dictionaryTitle: 'JMdict', downloadUrl: updateUrl});
+            h.dictionary._hideUpdatesAvailableButton('JMdict');
+            await vi.waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+            h.dictionary._enqueueTask({type: 'update', dictionaryTitle: 'JMdict', downloadUrl: updateUrl});
+            h.dictionary._enqueueTask({type: 'update', dictionaryTitle: 'Kanjidic', downloadUrl: 'https://example.invalid/kanjidic.zip'});
+            jmdictEntry.showUpdatesAvailableButton();
+            expect(updateButton.hidden).toBe(true);
+            expect(h.dictionary.isDictionaryInTaskQueue('JMdict')).toBe(true);
+            rejectFirst();
+
+            await vi.waitFor(() => {
+                expect(update).toHaveBeenCalledTimes(3);
+                expect(h.dictionary._dictionaryTaskQueue).toHaveLength(0);
+            });
+            expect(updateButton.hidden).toBe(true);
+            expect(errorNode.textContent).toContain('first controlled failure');
+            expect(update.mock.calls.map(([title]) => title)).toEqual(['JMdict', 'JMdict', 'Kanjidic']);
+            expect(update.mock.calls.map(([, url]) => url)).toEqual([updateUrl, updateUrl, 'https://example.invalid/kanjidic.zip']);
+        } finally { h.cleanup(); }
+    });
 });
