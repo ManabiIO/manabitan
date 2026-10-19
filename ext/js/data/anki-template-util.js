@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {cloneFieldMarkerPattern} from './anki-util.js';
+
 /**
  * Gets a list of field markers from the standard Handlebars template.
  * @param {import('dictionary').DictionaryEntryType} type What type of dictionary entry to get the fields for.
@@ -111,6 +113,36 @@ export function getStandardFieldMarkers(type, language = 'ja') {
         default:
             throw new Error(`Unsupported type: ${type}`);
     }
+}
+
+/**
+ * Rewrites only generated dictionary-specific Anki template markers when a
+ * dictionary title changes. Literal text and unrelated marker names are kept.
+ * @param {string} value
+ * @param {string} sourceName
+ * @param {string} name
+ * @returns {{value: string, changed: boolean}}
+ */
+export function replaceDictionaryNameFieldMarkers(value, sourceName, name) {
+    const sourceSlug = getKebabCase(sourceName);
+    const targetSlug = getKebabCase(name);
+    if (sourceSlug === targetSlug) { return {value, changed: false}; }
+    /** @type {Map<string, string>} */
+    const replacements = new Map();
+    for (const suffix of ['', '-no-dictionary', '-brief', '-plain', '-plain-no-dictionary']) {
+        replacements.set(`single-glossary-${sourceSlug}${suffix}`, `single-glossary-${targetSlug}${suffix}`);
+    }
+    replacements.set(`single-frequency-${sourceSlug}`, `single-frequency-${targetSlug}`);
+    replacements.set(`single-frequency-number-${sourceSlug}`, `single-frequency-number-${targetSlug}`);
+    let changed = false;
+    const pattern = cloneFieldMarkerPattern(true);
+    const result = value.replace(pattern, (/** @type {string} */ marker, /** @type {string} */ markerName) => {
+        const replacement = replacements.get(markerName);
+        if (typeof replacement !== 'string') { return marker; }
+        changed = true;
+        return `{${replacement}}`;
+    });
+    return {value: result, changed};
 }
 
 /**
