@@ -64,20 +64,30 @@ describe('Firefox Android remote debugging preference helper', () => {
         expect(await readFile(fixture.backupPath, 'utf8')).toContain('name="pref_key_remote_debugging" value="true"');
     });
 
-    test('fails closed on permanently invalid preferences without writes or PackageManager changes', async () => {
-        const fixture = await createFixture({initialPreference: '<map><string name="broken">'});
-        expect(() => runHelper(fixture)).toThrow(/did not produce a valid map.*invalid XML/);
+    test.each([
+        ['empty', ''],
+        ['malformed', '<map><string name="broken">'],
+        ['wrong root', '<preferences/>'],
+    ])('fails closed on permanently invalid %s preferences without writes or PackageManager changes', async (_description, initialPreference) => {
+        const fixture = await createFixture({initialPreference});
+        let stderr = '';
+        try {
+            runHelper(fixture);
+        } catch (caught) {
+            if (caught instanceof Error && 'stderr' in caught) {
+                stderr = String(caught.stderr);
+            }
+        }
+        expect(stderr).toContain('Fenix did not produce a valid map');
 
-        const commands = (await readFile(fixture.logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line).join(' '));
-        expect(commands.some((command) => command.includes('am force-stop --user 0 org.mozilla.firefox'))).toBe(false);
-        expect(commands.some((command) => command.includes('pm disable-user --user 0 org.mozilla.firefox'))).toBe(false);
-        expect(commands.some((command) => command.startsWith('push '))).toBe(false);
-        expect(commands.some((command) => {
-            return /^(chown|chmod|chcon|mv -f) /.test(command);
-        })).toBe(false);
-        expect(await readFile(fixture.preferencePath, 'utf8')).toBe('<map><string name="broken">');
+        const commands = (await readFile(fixture.logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line));
+        expect(commands.some((args) => args[2] === 'shell' && args[3] === 'am force-stop --user 0 org.mozilla.firefox')).toBe(false);
+        expect(commands.some((args) => args[2] === 'shell' && args[3] === 'pm disable-user --user 0 org.mozilla.firefox')).toBe(false);
+        expect(commands.some((args) => args[2] === 'push')).toBe(false);
+        expect(commands.some((args) => args[2] === 'shell' && /^(chown|chmod|chcon|mv -f) /.test(args[3]))).toBe(false);
+        expect(await readFile(fixture.preferencePath, 'utf8')).toBe(initialPreference);
         expect(await readFile(fixture.packageStatePath, 'utf8')).toBe('0');
-    });
+    }, 15_000);
 
     test('fails closed on unexpected preference ownership and restores package enabled state', async () => {
         const fixture = await createFixture({wrongOwner: true});
@@ -157,7 +167,6 @@ async function createFixture(options = {}) {
     const backupPath = path.join(directory, 'fenix_preferences.xml.bak');
     const logPath = path.join(directory, 'adb.jsonl');
     const packageStatePath = path.join(directory, 'package-state');
-    const pullCountPath = path.join(directory, 'preference-pull-count');
     await writeFile(packageStatePath, options.initialPackageState ?? '0');
     await writeFile(preferencePath, options.initialPreference ?? '<?xml version="1.0" encoding="utf-8"?><map><boolean name="pref_key_remote_debugging" value="false"/></map>');
     if (options.hasBackup) {

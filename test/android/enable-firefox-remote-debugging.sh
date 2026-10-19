@@ -93,8 +93,8 @@ if root.tag != "map":
     raise SystemExit(f"unexpected XML root {root.tag!r}; expected 'map'")
 PY
 )"; then
-        ready=1
-        break
+            ready=1
+            break
         fi
     else
         readiness_error="adb could not pull ${preferences}"
