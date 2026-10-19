@@ -470,62 +470,20 @@ export class DisplayAnki {
             return;
         }
         const len = dictionaryEntries.length;
-        const empty = /** @type {import('dictionary').DictionaryEntry} */ ({});
-        const context = this._noteContext;
-        if (context === null) { throw new Error('Note context not initialized'); }
-        if (this._ankiFieldTemplatesCacheOptionsGeneration !== optionsGeneration || typeof this._ankiFieldTemplates !== 'string') {
-            const options = this._display.getOptions();
-            if (options) {
-                await (this._ankiFieldTemplatesPromise ?? this._updateAnkiFieldTemplates(options));
-            }
-        }
-        if (!isCurrent()) { return false; }
-        const template = this._ankiFieldTemplates;
-        if (typeof template !== 'string') { throw new Error('Invalid template'); }
-        const skeletonNoteTemplates = [];
-        for (const cardFormat of this._cardFormats.values()) {
-            skeletonNoteTemplates.push(await this._ankiNoteBuilder.createNote(
-                {dictionaryEntry: empty,
-                    cardFormat: cardFormat,
-                    template: template,
-                    duplicateScope: this._duplicateScope,
-                    duplicateScopeCheckAllModels: this._duplicateScopeCheckAllModels,
-                    context: context,
-                    tags: [],
-                    requirements: [],
-                    resultOutputMode: 'split',
-                    glossaryLayoutMode: 'default',
-                    compactTags: false,
-                    mediaOptions: null,
-                    dictionaryStylesMap: new Map()},
-            ));
-        }
         const notesToCheck = [];
         const noteTargets = [];
         try {
             for (let i = 0, ii = len; i < ii; ++i) {
                 const {type} = dictionaryEntries[i];
-                const details = this._ankiNoteBuilder.getDictionaryEntryDetailsForNote(dictionaryEntries[i]);
                 for (const [cardFormatIndex, cardFormat] of this._cardFormats.entries()) {
                     if (cardFormat.type !== type) { continue; }
-                    const skeleton = skeletonNoteTemplates[cardFormatIndex];
-                    const fieldValue = details.type === 'kanji' ? details.character : details.term;
-                    const firstFieldName = Object.keys(skeletonNoteTemplates[cardFormatIndex].note.fields)[0];
-                    const skeletonNoteCardCopy = {
-                        ...skeleton,
-                        note: {
-                            ...skeleton.note,
-                            deckName: cardFormat.deck,
-                            modelName: cardFormat.model,
-                            fields: {
-                                ...skeleton.note.fields,
-                                [firstFieldName]: fieldValue,
-                            },
-                        },
-                    };
-                    notesToCheck.push(skeletonNoteCardCopy);
+                    const note = this._tryCreateDuplicateCheckNoteFast(dictionaryEntries[i], cardFormat);
+                    // Interim indicators are useful only when every first field is known
+                    // synchronously. The ordinary details pass renders custom templates.
+                    if (note === null) { return; }
+                    notesToCheck.push(note);
                     noteTargets.push({index: i, cardFormatIndex, cardFormat});
-                }//
+                }
             }
         } catch (e) {
             ankiError = (e instanceof ExtensionError && e.message.includes('Anki connection failure')) ?
@@ -536,7 +494,7 @@ export class DisplayAnki {
         if (!isCurrent()) { return false; }
         let infos;
         try {
-            infos = await this._display.application.api.getAnkiNoteInfo(notesToCheck.map((note) => note.note), this._isAdditionalInfoEnabled());
+            infos = await this._display.application.api.getAnkiNoteInfo(notesToCheck, this._isAdditionalInfoEnabled());
         } catch (e) {
             ankiError = new Error('Anki not connected');
             return;
@@ -1589,6 +1547,7 @@ export class DisplayAnki {
      * @returns {import('anki').Note|null}
      */
     _tryCreateDuplicateCheckNoteFast(dictionaryEntry, cardFormat) {
+        const options = this._display.getOptions();
         return this._ankiNoteBuilder.createDuplicateCheckNoteFast({
             dictionaryEntry,
             cardFormat,
@@ -1596,6 +1555,9 @@ export class DisplayAnki {
             duplicateScope: this._duplicateScope,
             duplicateScopeCheckAllModels: this._duplicateScopeCheckAllModels,
             resultOutputMode: this._resultOutputMode,
+            // Custom Anki templates can redefine even built-in markers. The
+            // shortcut is safe only when no custom template string is active.
+            allowStandardFieldMarkerFastPath: typeof options?.anki.fieldTemplates !== 'string',
         });
     }
 
