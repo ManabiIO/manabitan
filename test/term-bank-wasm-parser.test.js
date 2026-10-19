@@ -2216,6 +2216,53 @@ describe('term-bank WASM parser', () => {
         expect(profile?.metaAllocatedBytes).toBe((profile?.metaCapacity ?? 0) * 17 * 4);
     });
 
+    maybeTest('grows past an unaligned metadata capacity without losing row fields or content', async () => {
+        const rowCount = 95_000;
+        const source = textEncoder.encode(JSON.stringify(
+            Array.from({length: rowCount}, (_, index) => [
+                `entry-${index}`,
+                `reading-${index}`,
+                'tag',
+                'rule',
+                index,
+                [`definition-${index}`],
+                index,
+                'term-tag',
+            ]),
+        ));
+        let processedRows = 0;
+        await parseTermBankWithWasmChunks(
+            source,
+            3,
+            (chunk) => {
+                for (let i = 0; i < chunk.length; ++i) {
+                    const index = processedRows + i;
+                    const row = chunk[i];
+                    if (
+                        row.expression !== `entry-${index}` ||
+                        row.reading !== `reading-${index}` ||
+                        row.definitionTags !== 'tag' ||
+                        row.rules !== 'rule' ||
+                        row.termTags !== 'term-tag' ||
+                        row.score !== index ||
+                        row.sequence !== index ||
+                        getContentString(row) !== `{"rules":"rule","definitionTags":"tag","termTags":"term-tag","glossary":["definition-${index}"]}`
+                    ) {
+                        throw new Error(`Parsed row ${index} did not preserve its complete metadata and content`);
+                    }
+                }
+                processedRows += chunk.length;
+            },
+            4096,
+            {copyContentBytes: true},
+        );
+        const profile = consumeLastTermBankWasmParseProfile();
+
+        expect(processedRows).toBe(rowCount);
+        expect(profile?.rowCount).toBe(rowCount);
+        expect(profile?.metaCapacity).toBeGreaterThanOrEqual(rowCount);
+    });
+
     maybeTest('grows the content buffer while preserving a large row', async () => {
         const definition = 'x'.repeat(2 * 1024 * 1024);
         const [row] = await parseRows([
