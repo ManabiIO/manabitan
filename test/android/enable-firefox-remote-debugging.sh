@@ -171,37 +171,13 @@ if [[ -z "${file_context}" ]]; then
     exit 1
 fi
 
-write_preference_file() {
-    local remote_path="$1"
-    local local_path="$2"
-    adb -s "${device}" pull "${remote_path}" "${local_path}" >/dev/null
-    python3 - "${local_path}" "${preference_key}" <<'PY'
-import sys
-import xml.etree.ElementTree as ET
-
-file_path, key = sys.argv[1:]
-tree = ET.parse(file_path)
-root = tree.getroot()
-if root.tag != "map":
-    raise SystemExit(f"Unexpected Fenix preferences XML root: {root.tag!r}")
-for entry in list(root):
-    if entry.attrib.get("name") == key:
-        root.remove(entry)
-ET.SubElement(root, "boolean", {"name": key, "value": "true"})
-tree.write(file_path, encoding="utf-8", xml_declaration=True)
-PY
-    local remote_temp="${remote_path}.manabitan-${$}.tmp"
-    adb -s "${device}" push "${local_path}" "${remote_temp}" >/dev/null
-    adb -s "${device}" shell "chown ${file_uid}:${file_gid} ${remote_temp}"
-    adb -s "${device}" shell "chmod ${file_mode} ${remote_temp}"
-    adb -s "${device}" shell "chcon ${file_context} ${remote_temp}"
-    adb -s "${device}" shell "mv -f ${remote_temp} ${remote_path}"
-}
-
-write_preference_file "${preferences}" "${local_dir}/fenix_preferences.xml"
-# Android SharedPreferences restores .bak over XML on load. Update an existing
-# backup too, so a stale pending write cannot undo the setting at first launch.
+# SharedPreferences restores an existing .bak before reading the primary XML.
+# Quiescing may interrupt a primary write after the running readiness snapshot;
+# validate the authoritative stopped snapshot before changing either file.
+source_remote="${preferences}"
+has_backup=0
 if adb -s "${device}" shell test -f "${preferences}.bak"; then
+    has_backup=1
     backup_metadata="$(adb -s "${device}" shell "toybox stat -c '%u %g %a' ${preferences}.bak" | tr -d '\r')"
     read -r backup_uid backup_gid backup_mode <<<"${backup_metadata}"
     if [[ "${backup_uid}" != "${app_uid}" || -z "${backup_gid}" || -z "${backup_mode}" ]]; then
@@ -213,11 +189,43 @@ if adb -s "${device}" shell test -f "${preferences}.bak"; then
         echo "Could not capture SELinux context for ${preferences}.bak." >&2
         exit 1
     fi
-    # Use the backup's original metadata/context while applying the same value.
-    saved_uid="${file_uid}"; saved_gid="${file_gid}"; saved_mode="${file_mode}"; saved_context="${file_context}"
-    file_uid="${backup_uid}"; file_gid="${backup_gid}"; file_mode="${backup_mode}"; file_context="${backup_context}"
-    write_preference_file "${preferences}.bak" "${local_dir}/fenix_preferences.xml.bak"
-    file_uid="${saved_uid}"; file_gid="${saved_gid}"; file_mode="${saved_mode}"; file_context="${saved_context}"
+    source_remote="${preferences}.bak"
+fi
+source_local="${local_dir}/authoritative-preferences.xml"
+adb -s "${device}" pull "${source_remote}" "${source_local}" >/dev/null
+python3 - "${source_local}" "${preference_key}" "${source_remote}" <<'PY'
+import sys
+import xml.etree.ElementTree as ET
+
+file_path, key, source = sys.argv[1:]
+try:
+    tree = ET.parse(file_path)
+except (ET.ParseError, OSError) as error:
+    raise SystemExit(f"Invalid authoritative Fenix preferences XML at {source}: {error}")
+root = tree.getroot()
+if root.tag != "map":
+    raise SystemExit(f"Unexpected authoritative Fenix preferences XML root at {source}: {root.tag!r}")
+for entry in list(root):
+    if entry.attrib.get("name") == key:
+        root.remove(entry)
+ET.SubElement(root, "boolean", {"name": key, "value": "true"})
+tree.write(file_path, encoding="utf-8", xml_declaration=True)
+PY
+
+write_preference_file() {
+    local remote_path="$1"
+    local owner_uid="$2" owner_gid="$3" permissions_mode="$4" security_context="$5"
+    local remote_temp="${remote_path}.manabitan-${$}.tmp"
+    adb -s "${device}" push "${source_local}" "${remote_temp}" >/dev/null
+    adb -s "${device}" shell "chown ${owner_uid}:${owner_gid} ${remote_temp}"
+    adb -s "${device}" shell "chmod ${permissions_mode} ${remote_temp}"
+    adb -s "${device}" shell "chcon ${security_context} ${remote_temp}"
+    adb -s "${device}" shell "mv -f ${remote_temp} ${remote_path}"
+}
+
+write_preference_file "${preferences}" "${file_uid}" "${file_gid}" "${file_mode}" "${file_context}"
+if [[ "${has_backup}" == "1" ]]; then
+    write_preference_file "${preferences}.bak" "${backup_uid}" "${backup_gid}" "${backup_mode}" "${backup_context}"
 fi
 
 # Confirm the staged value while the package is still unable to restore a stale cache.
