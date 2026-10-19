@@ -15,11 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {readFileSync} from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {describe, expect, vi} from 'vitest';
+import {AnkiNoteBuilder} from '../ext/js/data/anki-note-builder.js';
+import {createAnkiNoteData} from '../ext/js/data/anki-note-data-creator.js';
 import {DisplayAnki} from '../ext/js/display/display-anki.js';
+import {TemplateRenderer} from '../ext/js/templates/template-renderer.js';
 import {createDomTest} from './fixtures/dom-test.js';
 
 const test = createDomTest();
+const defaultAnkiFieldTemplates = readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../ext/data/templates/default-anki-field-templates.handlebars'), 'utf8');
 
 /**
  * @param {string} text
@@ -37,10 +44,10 @@ function createSource(text) {
 }
 
 /**
- * @returns {import('dictionary').DictionaryEntry}
+ * @returns {import('dictionary').TermDictionaryEntry}
  */
 function createTermEntry() {
-    return /** @type {import('dictionary').DictionaryEntry} */ ({
+    return /** @type {import('dictionary').TermDictionaryEntry} */ ({
         type: 'term',
         headwords: [
             {
@@ -88,6 +95,37 @@ function createFastProbeCardFormat() {
         },
         icon: 'big-circle',
     };
+}
+
+/**
+ * @returns {AnkiNoteBuilder}
+ */
+function createTemplateNoteBuilder() {
+    const renderer = new TemplateRenderer();
+    renderer.registerDataType('ankiNote', {
+        modifier: ({marker, commonData}) => createAnkiNoteData(marker, commonData),
+        composeData: ({marker}, commonData) => ({marker, commonData}),
+    });
+    renderer.setRenderCallbacks(() => ({requirements: []}), null);
+    return new AnkiNoteBuilder({
+        injectAnkiNoteMedia: async () => ({
+            screenshotFileName: null,
+            clipboardImageFileName: null,
+            clipboardText: null,
+            audioFileName: null,
+            dictionaryMedia: [],
+            errors: [],
+        }),
+        parseText: async () => [],
+    }, renderer);
+}
+
+/**
+ * @param {import('anki').Note[]} notes
+ * @returns {Promise<import('anki').NoteInfoWrapper[]>}
+ */
+async function createNoDuplicateInfo(notes) {
+    return notes.map(() => ({canAdd: true, valid: true, isDuplicate: false, noteIds: [], noteInfos: []}));
 }
 
 /**
@@ -611,6 +649,7 @@ describe('DisplayAnki render-overlapped duplicate preparation', () => {
         const {display, api} = createDisplay(document, [createTermEntry()], apiOverrides);
         const anki = new DisplayAnki(display, createDisplayAudio());
         anki._checkForDuplicates = true;
+        anki._checkForDuplicates = true;
         anki._duplicateBehavior = 'prevent';
         anki._cardFormats = [createFastProbeCardFormat()];
         vi.spyOn(anki, '_getNoteContext').mockReturnValue(null);
@@ -636,22 +675,96 @@ describe('DisplayAnki render-overlapped duplicate preparation', () => {
         expect(anki._updateSaveButtonsPromise).toBeNull();
     });
 
-    test('retains asynchronous custom first-field template preparation', async ({window}) => {
-        const {anki, api, update} = setup(window.document);
-        const cardFormat = createCardFormat();
-        anki._cardFormats = [cardFormat];
-        const common = {context: {}, cardFormat, template: 'custom', dictionaryStylesMap: new Map()};
-        vi.spyOn(anki, '_getCommonNoteBuildData').mockResolvedValue(/** @type {Awaited<ReturnType<DisplayAnki['_getCommonNoteBuildData']>>} */ (common));
-        const note = createCollectionNote('custom output');
-        const build = vi.spyOn(anki, '_createDuplicateCheckNoteWithCommonBuildData').mockResolvedValue(note);
+    /**
+     * @param {Document} document
+     * @param {'prevent'|'overwrite'} duplicateBehavior
+     * @returns {Promise<{display: ReturnType<typeof createDisplay>['display'], anki: DisplayAnki, api: ReturnType<typeof createDisplay>['api'], note: import('anki').Note}>}
+     */
+    async function prepareCustomDuplicate(document, duplicateBehavior) {
+        const customTemplate = `${defaultAnkiFieldTemplates}\n\n{{#*inline "expression"}}CUSTOM-EXPRESSION{{/inline}}`;
+        /**
+         * @param {import('anki').Note[]} notes
+         * @returns {Promise<import('anki').NoteInfoWrapper[]>}
+         */
+        async function getDuplicateInfo(notes) {
+            return notes.map((note) => {
+                const custom = note.fields.Front === 'CUSTOM-EXPRESSION';
+                const noteId = custom ? 456 : 789;
+                return {
+                    canAdd: true,
+                    valid: true,
+                    isDuplicate: true,
+                    noteIds: duplicateBehavior === 'overwrite' ? [noteId] : null,
+                    noteInfos: duplicateBehavior === 'overwrite' ? [createNoteInfo(noteId, 'old target')] : [],
+                };
+            });
+        }
+        setupDocument(document);
+        const {display, api} = createDisplay(document, [createTermEntry()], {
+            getAnkiNoteInfo: vi.fn(getDuplicateInfo),
+        });
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        display.getOptions = () => ({anki: {enable: true, fieldTemplates: customTemplate}});
+        anki._duplicateBehavior = duplicateBehavior;
+        anki._displayTagsAndFlags = 'never';
+        anki._cardFormats = [createFastProbeCardFormat()];
+        anki._noteContext = {url: 'chrome-extension://test/search.html', sentence: {text: 'term', offset: 0}, documentTitle: 'title', query: 'term', fullQuery: 'term'};
+        anki._ankiFieldTemplates = customTemplate;
+        anki._ankiFieldTemplatesCacheOptionsGeneration = 0;
+        anki._ankiNoteBuilder = createTemplateNoteBuilder();
+        anki._checkForDuplicates = true;
+        anki._dictionaries = [];
+        const details = await anki._getDictionaryEntryDetails(display.dictionaryEntries, true);
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const notes = api.getAnkiNoteInfo.mock.calls[0]?.[0];
+        if (!Array.isArray(notes) || notes.length !== 1) { throw new Error('Expected one custom-template duplicate probe'); }
+        expect(notes[0].fields.Front).toBe('CUSTOM-EXPRESSION');
+        expect(notes[0].fields.Front).not.toBe('term');
+        return {display, anki, api, note: notes[0]};
+    }
+
+    test('uses the rendered custom first field to prevent duplicate saves', async ({window}) => {
+        const {display, api} = await prepareCustomDuplicate(window.document, 'prevent');
+        const saveButton = display.dictionaryEntryNodes[0].querySelector('.action-button[data-action="save-note"]');
+        expect(saveButton?.disabled).toBe(true);
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledExactlyOnceWith([expect.objectContaining({fields: {Front: 'CUSTOM-EXPRESSION'}})], false);
+    });
+
+    test('overwrites the custom-template duplicate target with fields built by the real save pipeline', async ({window}) => {
+        const {display, anki, api} = await prepareCustomDuplicate(window.document, 'overwrite');
+        await anki._saveAnkiNote(0, 0);
+        expect(api.updateAnkiNote).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+            id: 456,
+            fields: {Front: 'CUSTOM-EXPRESSION'},
+        }));
+        expect(api.updateAnkiNote.mock.calls[0]?.[0].id).not.toBe(789);
+    });
+
+    test('custom first-field preload starts before completion and publishes only after it', async ({window}) => {
+        const customTemplate = `${defaultAnkiFieldTemplates}\n\n{{#*inline "first"}}CUSTOM-FIRST{{/inline}}`;
+        const {display, anki, api, update} = setup(window.document, {
+            getAnkiNoteInfo: vi.fn(async () => [{canAdd: true, valid: true, isDuplicate: false, noteIds: null, noteInfos: []}]),
+        });
+        display.getOptions = () => ({anki: {enable: true, fieldTemplates: customTemplate}});
+        anki._cardFormats = [createCardFormat()];
+        anki._noteContext = {url: 'chrome-extension://test/search.html', sentence: {text: 'term', offset: 0}, documentTitle: 'title', query: 'term', fullQuery: 'term'};
+        anki._ankiFieldTemplates = customTemplate;
+        anki._ankiFieldTemplatesCacheOptionsGeneration = 0;
+        anki._ankiNoteBuilder = createTemplateNoteBuilder();
+        vi.spyOn(anki, '_getNoteContext').mockReturnValue({url: 'chrome-extension://test/search.html', sentence: {text: 'term', offset: 0}, documentTitle: 'title', query: 'term', fullQuery: 'term'});
+
         anki._onContentUpdateStart();
-        expect(api.getAnkiNoteInfo).not.toHaveBeenCalled();
-        await anki._dictionaryEntryDetailsPreload?.promise;
-        expect(build).toHaveBeenCalledTimes(1);
-        expect(api.getAnkiNoteInfo).toHaveBeenCalledExactlyOnceWith([note], false);
+        const preload = anki._dictionaryEntryDetailsPreload;
+        expect(preload).not.toBeNull();
+        if (preload === null) { throw new Error('Expected custom-template preload'); }
+        await preload.promise;
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledTimes(1);
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledExactlyOnceWith([expect.objectContaining({fields: {Front: 'CUSTOM-FIRST'}})], false);
         expect(update).not.toHaveBeenCalled();
+        expect(anki._dictionaryEntryDetails).toBeNull();
         await anki._updateDictionaryEntryDetails();
-        expect(build).toHaveBeenCalledTimes(1);
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledTimes(1);
         expect(update).toHaveBeenCalledTimes(1);
     });
 
@@ -770,6 +883,66 @@ describe('DisplayAnki render-overlapped duplicate preparation', () => {
         expect(api.getAnkiNoteInfo).toHaveBeenCalledTimes(1);
         expect(display.dictionaryEntryNodes[0].querySelector('.duplicate-indicator .action-icon')?.dataset.icon).toBe('big-circle');
         expect(fullWork).toHaveBeenCalledTimes(1);
+    });
+
+    test('quick duplicate check probes literal fields exactly without fetching templates', async ({window}) => {
+        const {display, api, anki} = setup(window.document, {getAnkiNoteInfo: vi.fn(createNoDuplicateInfo)});
+        const cardFormat = createFastProbeCardFormat();
+        cardFormat.fields.Front.value = 'literal-first-field';
+        anki._cardFormats = [cardFormat];
+        display.getOptions = () => ({anki: {enable: true, fieldTemplates: 'custom template'}});
+        const token = /** @type {import('core').TokenObject} */ ({});
+        anki._updateDictionaryEntryDetailsToken = token;
+        const createNote = vi.spyOn(anki._ankiNoteBuilder, 'createNote');
+
+        await anki._quickDupeCheck(display.dictionaryEntries, token, anki._optionsGeneration);
+
+        expect(api.getAnkiNoteInfo.mock.calls[0]?.[0][0]?.fields).toStrictEqual({Front: 'literal-first-field'});
+        expect(api.getDefaultAnkiFieldTemplates).not.toHaveBeenCalled();
+        expect(createNote).not.toHaveBeenCalled();
+    });
+
+    test('quick duplicate check defers default reading and custom marker fields to full rendering', async ({window}) => {
+        const {display, api, anki} = setup(window.document, {getAnkiNoteInfo: vi.fn(createNoDuplicateInfo)});
+        const readingFormat = createFastProbeCardFormat();
+        readingFormat.fields.Front.value = '{reading}';
+        anki._cardFormats = [readingFormat];
+        const token = /** @type {import('core').TokenObject} */ ({});
+        anki._updateDictionaryEntryDetailsToken = token;
+
+        const readingResult = await anki._quickDupeCheck(display.dictionaryEntries, token, anki._optionsGeneration);
+
+        expect(readingResult).toBeUndefined();
+        expect(api.getAnkiNoteInfo).not.toHaveBeenCalled();
+        display.getOptions = () => ({anki: {enable: true, fieldTemplates: 'custom template'}});
+        anki._cardFormats = [createFastProbeCardFormat()];
+
+        const result = await anki._quickDupeCheck(display.dictionaryEntries, token, anki._optionsGeneration);
+
+        expect(result).toBeUndefined();
+        expect(api.getAnkiNoteInfo).not.toHaveBeenCalled();
+        expect(api.getDefaultAnkiFieldTemplates).not.toHaveBeenCalled();
+    });
+
+    test('quick duplicate check keeps merge expression parity and filters card formats by entry type', async ({window}) => {
+        const termEntry = createTermEntry();
+        termEntry.headwords.push({index: 1, headwordIndex: 1, term: 'alternate', reading: 'alternate-reading', sources: [createSource('alternate')], tags: [], wordClasses: []});
+        const kanjiEntry = /** @type {import('dictionary').DictionaryEntry} */ ({type: 'kanji', character: '字'});
+        const {display, api, anki} = setup(window.document, {getAnkiNoteInfo: vi.fn(createNoDuplicateInfo)});
+        display.dictionaryEntries = [termEntry, kanjiEntry];
+        anki._resultOutputMode = 'merge';
+        anki._cardFormats = [createFastProbeCardFormat(), {
+            ...createFastProbeCardFormat(),
+            type: 'kanji',
+            name: 'Kanji',
+            fields: {Front: {value: '{character}', overwriteMode: 'overwrite'}},
+        }];
+        const token = /** @type {import('core').TokenObject} */ ({});
+        anki._updateDictionaryEntryDetailsToken = token;
+
+        await anki._quickDupeCheck(display.dictionaryEntries, token, anki._optionsGeneration);
+
+        expect(api.getAnkiNoteInfo.mock.calls[0]?.[0].map((/** @type {import('anki').Note} */ note) => note.fields.Front)).toEqual(['term、alternate', '字']);
     });
 
     for (const mode of ['disabled', 'duplicates-disabled', 'quick-check', 'busy', 'empty']) {

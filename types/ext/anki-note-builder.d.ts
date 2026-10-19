@@ -54,6 +54,8 @@ export type CreateDuplicateCheckNoteDetails = {
     glossaryLayoutMode?: Settings.GlossaryLayoutMode;
     compactTags?: boolean;
     dictionaryStylesMap?: Map<string, string>;
+    /** True only when built-in marker semantics are known to be active. */
+    allowStandardFieldMarkerFastPath?: boolean;
 };
 
 export type Field = [
