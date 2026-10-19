@@ -77,3 +77,39 @@ test('HTTP errors retain the existing fallback behavior', async () => {
     expect(result).toEqual({data: wav, contentType: 'audio/wav'});
     expect(requests).toEqual(sources.map(({url}) => url));
 });
+
+for (const contentType of [
+    'TEXT/HTML; Charset=UTF-8',
+    'application/xhtml+xml; charset=utf-8',
+    'application/json; charset=utf-8',
+    'text/xml; charset=utf-8',
+    'application/xml; charset=utf-8',
+    'application/problem+json; charset=utf-8',
+    'application/atom+xml; charset=utf-8',
+]) {
+    test(`a successful ${contentType} error response falls through to the next recording`, async () => {
+        const {downloader, requests, sources} = setup(
+            () => new Response('<html>Access denied</html>', {headers: {'Content-Type': contentType}}),
+        );
+        const result = await downloader.downloadTermAudio(sources, null, '音', 'おと', null, language, false);
+        expect(result).toEqual({data: wav, contentType: 'audio/wav'});
+        expect(requests).toEqual(sources.map(({url}) => url));
+    });
+}
+
+for (const {contentType, expectedContentType} of [
+    {contentType: 'text/plain; charset=UTF-8', expectedContentType: 'text/plain; charset=UTF-8'},
+    {contentType: 'video/mp4', expectedContentType: 'video/mp4'},
+    {contentType: 'application/ogg', expectedContentType: 'application/ogg'},
+    {contentType: 'application/octet-stream', expectedContentType: 'application/octet-stream'},
+    {contentType: 'audio/mpeg', expectedContentType: 'audio/mpeg'},
+    {contentType: null, expectedContentType: null},
+]) {
+    test(`a WAV response with ${contentType ?? 'no Content-Type'} preserves its bytes`, async () => {
+        const headers = contentType === null ? undefined : {'Content-Type': contentType};
+        const {downloader, requests, sources} = setup(() => new Response(wavBytes, {headers}));
+        const result = await downloader.downloadTermAudio(sources, null, '音', 'おと', null, language, false);
+        expect(result).toEqual({data: wav, contentType: expectedContentType});
+        expect(requests).toEqual([sources[0].url]);
+    });
+}
