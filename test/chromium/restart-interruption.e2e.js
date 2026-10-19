@@ -90,12 +90,12 @@ async function startServer(oldArchive, newArchive) {
             request.on('end', () => {
                 try {
                     const event = JSON.parse(body);
-                    const observed = {...event, sessionId: armedSession?.sessionId ?? null, observedAtIso: new Date().toISOString()};
+                    const observed = {...event, observedAtIso: new Date().toISOString()};
                     observerEvents.push(observed);
                     const dictionaryName = event.dictionaryName;
                     const matchingDictionary = dictionaryName === armedSession?.title ||
                     (dictionaryName?.startsWith(`${armedSession?.title} [update-staging `) && dictionaryName.endsWith(']'));
-                    if (armedSession && matchingDictionary && event.fileName.endsWith('.mbtr') && event.bytes > 4096 && heldResponse === null) {
+                    if (armedSession && typeof event.sessionId === 'string' && event.sessionId.length > 0 && matchingDictionary && event.fileName.endsWith('.mbtr') && event.bytes > 4096 && heldResponse === null) {
                         observed.held = true;
                         heldResponse = response;
                         return;
@@ -115,7 +115,6 @@ async function startServer(oldArchive, newArchive) {
                 try {
                     assert.equal(heldResponse, null, 'cannot arm while an observer response is held');
                     armedSession = JSON.parse(body);
-                    assert.equal(typeof armedSession.sessionId, 'string');
                     assert.equal(typeof armedSession.title, 'string');
                     response.writeHead(204).end();
                 } catch (error) {
@@ -171,7 +170,7 @@ async function instrumentPackageForTestObserver(observerUrl) {
     const source = await readFile(storePath, 'utf8');
     const originalHash = createHash('sha256').update(source).digest('hex');
     const target = 'await /** @type {FileSystemWritableFileStream} */ (state.writable).write(chunk);\n                writtenBytes += chunk.byteLength;';
-    const replacement = `${target}\n                if (state.fileName.endsWith('.mbtr')) {\n                    const observerResponse = await fetch('${observerUrl}', {method: 'POST', mode: 'cors', body: JSON.stringify({fileName: state.fileName, dictionaryName: this._decodeShardInfoFromShardFileName(state.fileName)?.dictionaryName ?? null, bytes: chunk.byteLength, writeStartOffset})});\n                    if (!observerResponse.ok) { throw new Error('Test-only OPFS write observer rejected the completed record write'); }\n                }`;
+    const replacement = `${target}\n                if (state.fileName.endsWith('.mbtr')) {\n                    let sessionId = null;\n                    for (let attempt = 0; attempt < 8 && sessionId === null; ++attempt) {\n                        try {\n                            const opfsRoot = await navigator.storage.getDirectory();\n                            const journalHandle = await opfsRoot.getFileHandle('manabitan-dictionary-import-journal.json', {create: false});\n                            const journal = JSON.parse(await (await journalHandle.getFile()).text());\n                            sessionId = typeof journal.sessionId === 'string' ? journal.sessionId : null;\n                        } catch {}\n                        if (sessionId === null) { await new Promise((resolve) => setTimeout(resolve, 10)); }\n                    }\n                    const observerResponse = await fetch('${observerUrl}', {method: 'POST', mode: 'cors', body: JSON.stringify({fileName: state.fileName, dictionaryName: this._decodeShardInfoFromShardFileName(state.fileName)?.dictionaryName ?? null, sessionId, bytes: chunk.byteLength, writeStartOffset})});\n                    if (!observerResponse.ok) { throw new Error('Test-only OPFS write observer rejected the completed record write'); }\n                }`;
     const occurrences = source.split(target).length - 1;
     assert.equal(occurrences, 2, `test observer instrumentation expected two record-write branches, found ${occurrences}`);
     const instrumented = source.split(target).join(replacement);
@@ -202,12 +201,26 @@ async function instrumentPackageForTestObserver(observerUrl) {
         originalPackageZipSha256: createHash('sha256').update(await readFile(extensionPackagePath)).digest('hex'),
         instrumentedExtractedPackageTreeSha256: packageTreeHash.digest('hex'),
         replacements: occurrences,
-        hook: 'await loopback observer POST after each awaited _writeChunksForShard FileSystemWritableFileStream.write(chunk) success, including the packaged store decoder dictionary name',
+        hook: 'await loopback observer POST after each awaited _writeChunksForShard FileSystemWritableFileStream.write(chunk) success, including the packaged store decoder dictionary name and current persisted import-journal session ID',
     };
 }
 
+async function withTimeout(promise, timeoutMs, operation) {
+    let timer;
+    try {
+        return await Promise.race([
+            promise,
+            new Promise((resolve, reject) => {
+                timer = setTimeout(() => { reject(new Error(`Timed out after ${timeoutMs}ms waiting for ${operation}`)); }, timeoutMs);
+            }),
+        ]);
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 async function send(page, action, params) {
-    return await page.evaluate(({actionName, parameters}) => new Promise((resolve, reject) => {
+    return await withTimeout(page.evaluate(({actionName, parameters}) => new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({action: actionName, params: parameters}, (response) => {
             const runtimeError = chrome.runtime.lastError;
             if (runtimeError) {
@@ -220,7 +233,7 @@ async function send(page, action, params) {
             }
             resolve(response && typeof response === 'object' ? response.result : response);
         });
-    }), {actionName: action, parameters: params});
+    }), {actionName: action, parameters: params}), 30_000, `extension RPC ${action}`);
 }
 
 async function waitForSettings(page) {
@@ -362,7 +375,7 @@ async function opfsState(page) {
 }
 
 async function readImportJournal(page) {
-    return await page.evaluate(async () => {
+    return await withTimeout(page.evaluate(async () => {
         const root = await navigator.storage.getDirectory();
         try {
             const handle = await root.getFileHandle('manabitan-dictionary-import-journal.json');
@@ -371,7 +384,7 @@ async function readImportJournal(page) {
             if (error?.name === 'NotFoundError') { return null; }
             throw error;
         }
-    });
+    }), 10_000, 'OPFS import journal read');
 }
 
 function chromiumProcesses(profilePath, expectedExecutable) {
@@ -434,7 +447,7 @@ async function killBrowserProcessTree(processes) {
 async function closeContext(context, killed = false) {
     if (context === null) { return null; }
     try {
-        await context.close();
+        await withTimeout(context.close(), 10_000, 'Playwright persistent browser context close');
         return null;
     } catch (error) {
         if (killed) { return {expectedKilledContextCloseError: error instanceof Error ? error.message : String(error)}; }
@@ -499,6 +512,7 @@ async function main() {
         phases: [],
         status: 'running',
     };
+    const persistReport = async () => await writeFile(reportPath, JSON.stringify(report, null, 2));
     let server = null;
     let baseUrl = '';
     let observerEvents = [];
@@ -515,6 +529,7 @@ async function main() {
     try {
         ({server, baseUrl, observerEvents, disarmObserver, releaseHeldObserver} = await startServer(oldArchive, newArchive));
         report.testOnlyPackageObserver = await instrumentPackageForTestObserver(`${baseUrl}/observer`);
+        await persistReport();
         const launch = async () => await chromium.launchPersistentContext(profilePath, {
             channel: 'chromium',
             headless: true,
@@ -531,6 +546,7 @@ async function main() {
         let page = context.pages()[0] ?? await context.newPage();
         const initialRuntime = await waitForSettings(page);
         report.launches.push({name: 'initial', serviceWorkerExtensionId: activeExtensionId, ...initialRuntime});
+        await persistReport();
         const initialArchivePath = path.join(fixtures, 'revision-one.zip');
         await writeFile(initialArchivePath, oldArchive);
         await importFile(page, initialArchivePath);
@@ -551,6 +567,7 @@ async function main() {
             exactContent: oldGloss,
             missCount: 0,
         });
+        await persistReport();
 
         const baselineOpfs = await opfsState(page);
         observerEvents.length = 0;
@@ -563,6 +580,10 @@ async function main() {
             trigger.click();
         });
         await page.waitForSelector('#dictionaries-modal:not([hidden])', {timeout: 30_000});
+        const armResponse = await fetch(`${baseUrl}/arm`, {method: 'POST', body: JSON.stringify({title})});
+        assert.equal(armResponse.status, 204, 'test-only observer gate failed to pre-arm before the update trigger');
+        report.observerGatePrearmedAtIso = new Date().toISOString();
+        await persistReport();
         await page.evaluate(({dictionaryTitle, downloadUrl}) => {
             const modal = document.querySelector('#dictionary-confirm-update-modal');
             const button = document.querySelector('#dictionary-confirm-update-button');
@@ -573,13 +594,12 @@ async function main() {
         }, {dictionaryTitle: title, downloadUrl: `${baseUrl}/new.zip`});
         const killDeadline = Date.now() + timeoutMs;
         let killBoundary = null;
-        let armedSessionId = null;
         let journalParseRetryCount = 0;
         let lastJournalParseError = null;
         while (Date.now() < killDeadline) {
             ++interruptionObservation.polls;
             const [label, journalText] = await Promise.all([
-                page.evaluate(() => document.querySelector('#dictionaries-modal .dictionary-import-progress .progress-info')?.textContent?.trim() || ''),
+                withTimeout(page.evaluate(() => document.querySelector('#dictionaries-modal .dictionary-import-progress .progress-info')?.textContent?.trim() || ''), 10_000, 'import progress label read'),
                 readImportJournal(page),
             ]);
             interruptionObservation.lastProgressLabel = label;
@@ -608,13 +628,7 @@ async function main() {
                         assert.ok(observed, `journal pre-import checkpoint references a missing pre-import shard: ${priorShard.fileName}`);
                         assert.equal(priorShard.fileLength, observed.size, `journal checkpoint length differs for ${priorShard.fileName}`);
                     }
-                    if (armedSessionId === null) {
-                        armedSessionId = journal.sessionId;
-                        const armResponse = await fetch(`${baseUrl}/arm`, {method: 'POST', body: JSON.stringify({sessionId: armedSessionId, title})});
-                        assert.equal(armResponse.status, 204, 'test-only observer gate failed to arm for the active update session');
-                    }
-                    assert.equal(journal.sessionId, armedSessionId, 'active update session changed while observer gate was armed');
-                    const observedWrites = observerEvents.filter(({fileName, dictionaryName, bytes, sessionId, held}) => sessionId === armedSessionId && fileName.endsWith('.mbtr') && (dictionaryName === title || (dictionaryName?.startsWith(`${title} [update-staging `) && dictionaryName.endsWith(']'))) && Number.isSafeInteger(bytes) && bytes > 4096 && held === true);
+                    const observedWrites = observerEvents.filter(({fileName, dictionaryName, bytes, sessionId, held}) => sessionId === journal.sessionId && fileName.endsWith('.mbtr') && (dictionaryName === title || (dictionaryName?.startsWith(`${title} [update-staging `) && dictionaryName.endsWith(']'))) && Number.isSafeInteger(bytes) && bytes > 4096 && held === true);
                     const observedWrite = observedWrites[observedWrites.length - 1];
                     if (observedWrite) {
                         const checkpointEntry = journal.recordCheckpoint.shards.find(({fileName}) => fileName === observedWrite.fileName) ?? null;
@@ -630,6 +644,7 @@ async function main() {
                             lastJournalParseError,
                             observerMechanism: `controlled test-only pause: instrumented extracted package awaits a held loopback response after FileSystemWritableFileStream.write(chunk); the packaged store decoder reports the dictionary name, and active session journal plus new staging shard are validated before release and SIGKILL; UI phase was ${label}`,
                         };
+                        await persistReport();
                         break;
                     }
                 }
@@ -641,10 +656,13 @@ async function main() {
         }
         assert.ok(killBoundary, `did not observe a held test-only post-write response plus the matching active journal and new staging shard; journal parse retries=${journalParseRetryCount}, last parse error=${String(lastJournalParseError)}`);
         report.phases.push({name: 'controlled test-only post-write interruption boundary', status: 'observed', ...killBoundary});
+        await persistReport();
         const updateKillProcesses = captureBrowserProcessTree(profilePath, chromium.executablePath());
         report.phases.push({name: 'captured owned Chromium process tree before SIGKILL', status: 'observed', processes: updateKillProcesses});
+        await persistReport();
         const updateKill = await killBrowserProcessTree(updateKillProcesses);
         report.phases.push({name: 'SIGKILL active Chromium process tree after successful term-record write before publication (test-only gate)', status: 'passed', ...updateKill});
+        await persistReport();
         disarmObserver();
         releaseHeldObserver();
         const killedClose = await closeContext(context, true);
@@ -656,6 +674,7 @@ async function main() {
         page = context.pages()[0] ?? await context.newPage();
         const recoveredRuntime = await waitForSettings(page);
         report.launches.push({name: 'recovery', serviceWorkerExtensionId: activeExtensionId, ...recoveredRuntime});
+        await persistReport();
         const recoveredStorage = recoveredRuntime.diagnostics;
         const recovered = await inventory(page);
         assert.ok(recovered.row, `restart lost dictionary metadata: ${JSON.stringify(recovered)}`);
@@ -692,6 +711,7 @@ async function main() {
             noTransientRows: true,
             strictOpfs: recoveredStorage.usesFallbackStorage === false && recoveredStorage.openStorageDiagnostics?.mode === 'opfs-sahpool' && recoveredStorage.openStorageDiagnostics?.hasOpfsSahpoolVfs === true && recoveredStorage.openStorageDiagnostics?.opfsSahpoolInstallResult === 'installed',
         });
+        await persistReport();
 
         report.status = 'success';
     } catch (error) {
@@ -701,6 +721,8 @@ async function main() {
     } finally {
         let finalProcesses = [];
         const cleanupFailures = [];
+        disarmObserver();
+        releaseHeldObserver();
         if (context !== null) {
             try { finalProcesses = captureBrowserProcessTree(profilePath, chromium.executablePath()); } catch (error) {
                 cleanupFailures.push(error instanceof Error ? error.message : String(error));
@@ -730,8 +752,6 @@ async function main() {
         }
         if (cleanupFailures.length > 0) { report.cleanupFailure = cleanupFailures.join('\n'); }
         if (report.cleanupFailure) { report.status = 'failure'; }
-        disarmObserver();
-        releaseHeldObserver();
         if (server !== null) {
             server.closeAllConnections();
             await Promise.race([
@@ -743,7 +763,7 @@ async function main() {
         report.interruptionObservation = interruptionObservation;
         report.observerEventCount = observerEvents.length;
         if (report.status !== 'success') { report.observerEvents = observerEvents.slice(-500); }
-        await writeFile(reportPath, JSON.stringify(report, null, 2));
+        await persistReport();
         if (report.cleanupFailure) { process.exitCode = 1; }
     }
 }
