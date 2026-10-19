@@ -45,6 +45,7 @@ import {TemplateRendererProxy} from '../templates/template-renderer-proxy.js';
  * @property {import('settings').OptionsContext} optionsContext
  * @property {import('settings').DictionariesOptions} dictionaries
  * @property {string|null} template
+ * @property {Promise<string>|null} [templatePromise]
  * @property {import('settings').ProfileOptions|null} displayOptions
  * @property {Promise<Awaited<ReturnType<DisplayAnki['_getCommonNoteBuildData']>>>} [commonNoteBuildData]
  */
@@ -61,6 +62,12 @@ export class DisplayAnki {
         this._displayAudio = displayAudio;
         /** @type {?string} */
         this._ankiFieldTemplates = null;
+        /** @type {?Promise<string>} */
+        this._ankiFieldTemplatesPromise = null;
+        /** @type {?number} */
+        this._ankiFieldTemplatesOptionsGeneration = null;
+        /** @type {number} */
+        this._ankiFieldTemplatesCacheOptionsGeneration = 0;
         /** @type {?string} */
         this._ankiFieldTemplatesDefault = null;
         /** @type {AnkiNoteBuilder} */
@@ -270,7 +277,10 @@ export class DisplayAnki {
         this._forceSync = forceSync;
         this._noteDupeCheckFirst = noteDupeCheckFirst;
 
-        void this._updateAnkiFieldTemplates(options);
+        const templatePromise = this._updateAnkiFieldTemplates(options);
+        // Options refreshes may be speculative. Saves await this promise when
+        // needed, while the refresh itself must never reject unobserved.
+        void templatePromise.catch(() => {});
     }
 
     /** */
@@ -442,9 +452,18 @@ export class DisplayAnki {
      * Please note that it will call "_displayWhetherDupeOrNotAndLoading" and pass an array of type NoteDupeMappings[]
      * in order to save on memory. Please see types\ext\display-anki.d.ts if you wish to edit this.
      * @param {import('dictionary').DictionaryEntry[]} dictionaryEntries
+     * @param {import('core').TokenObject} renderToken
+     * @param {number} optionsGeneration
+     * @returns {Promise<boolean|undefined>}
      */
-    async _quickDupeCheck(dictionaryEntries) {
+    async _quickDupeCheck(dictionaryEntries, renderToken, optionsGeneration) {
+        const isCurrent = () => (
+            this._updateDictionaryEntryDetailsToken === renderToken &&
+            this._display.dictionaryEntries === dictionaryEntries &&
+            this._optionsGeneration === optionsGeneration
+        );
         const isAnkiConnected = await this._display.application.api.isAnkiConnected();
+        if (!isCurrent()) { return false; }
         let ankiError = null;
         if (!isAnkiConnected) {
             ankiError = new Error('Anki is not connected');
@@ -454,12 +473,13 @@ export class DisplayAnki {
         const empty = /** @type {import('dictionary').DictionaryEntry} */ ({});
         const context = this._noteContext;
         if (context === null) { throw new Error('Note context not initialized'); }
-        if (!this._ankiFieldTemplates) {
+        if (this._ankiFieldTemplatesCacheOptionsGeneration !== optionsGeneration || typeof this._ankiFieldTemplates !== 'string') {
             const options = this._display.getOptions();
             if (options) {
-                await this._updateAnkiFieldTemplates(options);
+                await (this._ankiFieldTemplatesPromise ?? this._updateAnkiFieldTemplates(options));
             }
         }
+        if (!isCurrent()) { return false; }
         const template = this._ankiFieldTemplates;
         if (typeof template !== 'string') { throw new Error('Invalid template'); }
         const skeletonNoteTemplates = [];
@@ -513,6 +533,7 @@ export class DisplayAnki {
                 toError(e);
             return;
         }
+        if (!isCurrent()) { return false; }
         let infos;
         try {
             infos = await this._display.application.api.getAnkiNoteInfo(notesToCheck.map((note) => note.note), this._isAdditionalInfoEnabled());
@@ -520,6 +541,7 @@ export class DisplayAnki {
             ankiError = new Error('Anki not connected');
             return;
         }
+        if (!isCurrent()) { return false; }
         /** @type {import('display-anki').NoteDupeMappings[]} */
         const results = new Array(dictionaryEntries.length).fill(null).map(() => ({noteMap: new Map()}));
         const notesLength = notesToCheck.length;
@@ -531,6 +553,7 @@ export class DisplayAnki {
         this._displayWhetherDupeOrNotAndLoading(results);
         // eslint-disable-next-line no-underscore-dangle
         this._display._hotkeyHelpController.setupNode(document.documentElement);
+        return true;
     }
 
     /**
@@ -586,11 +609,14 @@ export class DisplayAnki {
             const fetchAdditionalInfo = this._isAdditionalInfoEnabled();
             const lazyFetchDuplicateNoteIds = this._shouldFetchDuplicateNoteIdsLazily(fetchAdditionalInfo);
             if (this._checkForDuplicates === true && this._noteDupeCheckFirst === true) {
+                const optionsGeneration = this._optionsGeneration;
                 try {
-                    await this._quickDupeCheck(dictionaryEntries);
+                    const quickCheckCurrent = await this._quickDupeCheck(dictionaryEntries, token, optionsGeneration);
+                    if (quickCheckCurrent === false) { return; }
                 } catch (error) {
                     log.error(error);
                 }
+                if (this._updateDictionaryEntryDetailsToken !== token || this._display.dictionaryEntries !== dictionaryEntries || this._optionsGeneration !== optionsGeneration) { return; }
             }
             const fetchDuplicateNoteIds = !lazyFetchDuplicateNoteIds && this._isDuplicateNoteIdLookupEnabled(fetchAdditionalInfo);
             const preload = this._dictionaryEntryDetailsPreload;
@@ -891,6 +917,10 @@ export class DisplayAnki {
             const noteContext = structuredClone(this._noteContext);
             if (noteContext === null) { throw new Error('Note context not initialized'); }
             const displayOptions = structuredClone(this._display.getOptions());
+            let template = null;
+            if (this._ankiFieldTemplatesCacheOptionsGeneration === optionsGeneration) {
+                template = this._ankiFieldTemplates;
+            }
             noteBuildOptions = {
                 context: noteContext,
                 cardFormat,
@@ -906,9 +936,14 @@ export class DisplayAnki {
                 contentOrigin: structuredClone(this._display.getContentOrigin()),
                 optionsContext: structuredClone(this._display.getOptionsContext()),
                 dictionaries,
-                template: this._ankiFieldTemplates,
+                template,
+                templatePromise: this._ankiFieldTemplatesOptionsGeneration === optionsGeneration ? this._ankiFieldTemplatesPromise : null,
                 displayOptions,
             };
+            if (noteBuildOptions.template === null && noteBuildOptions.templatePromise === null && displayOptions !== null && this._ankiFieldTemplatesOptionsGeneration === optionsGeneration) {
+                noteBuildOptions.templatePromise = this._updateAnkiFieldTemplates(displayOptions);
+                void noteBuildOptions.templatePromise.catch(() => {});
+            }
             const commonNoteBuildData = this._getCommonNoteBuildData(cardFormatIndex, noteBuildOptions);
             noteBuildOptions.commonNoteBuildData = commonNoteBuildData;
             void commonNoteBuildData.catch(() => {});
@@ -1224,12 +1259,26 @@ export class DisplayAnki {
 
     /**
      * @param {import('settings').ProfileOptions} options
+     * @returns {Promise<string>}
      */
     async _updateAnkiFieldTemplates(options) {
         const generation = ++this._ankiFieldTemplatesGeneration;
-        const templates = await this._getAnkiFieldTemplates(options);
-        if (generation !== this._ankiFieldTemplatesGeneration) { return; }
-        this._ankiFieldTemplates = templates;
+        const optionsGeneration = this._optionsGeneration;
+        this._ankiFieldTemplatesOptionsGeneration = optionsGeneration;
+        const promise = this._getAnkiFieldTemplates(options).then((templates) => {
+            if (generation === this._ankiFieldTemplatesGeneration && optionsGeneration === this._optionsGeneration) {
+                this._ankiFieldTemplates = templates;
+                this._ankiFieldTemplatesCacheOptionsGeneration = optionsGeneration;
+            }
+            return templates;
+        }).catch((error) => {
+            if (this._ankiFieldTemplatesPromise === promise && this._ankiFieldTemplatesOptionsGeneration === optionsGeneration) {
+                this._ankiFieldTemplatesPromise = null;
+            }
+            throw error;
+        });
+        this._ankiFieldTemplatesPromise = promise;
+        return promise;
     }
 
     /**
@@ -1478,14 +1527,19 @@ export class DisplayAnki {
         if (typeof cardFormat === 'undefined') { throw new Error('Unsupported note type}'); }
         let template;
         if (typeof saveOptions === 'undefined') {
-            if (!this._ankiFieldTemplates) {
+            if (this._ankiFieldTemplatesCacheOptionsGeneration !== this._optionsGeneration || typeof this._ankiFieldTemplates !== 'string') {
                 const options = this._display.getOptions();
-                if (options) { await this._updateAnkiFieldTemplates(options); }
+                if (options) {
+                    const promise = this._ankiFieldTemplatesPromise ?? this._updateAnkiFieldTemplates(options);
+                    template = await promise;
+                }
             }
-            template = this._ankiFieldTemplates;
+            if (typeof template !== 'string') { template = this._ankiFieldTemplates; }
         } else {
             template = saveOptions.template;
-            if (typeof template !== 'string' && saveOptions.displayOptions) {
+            if (typeof template !== 'string' && saveOptions.templatePromise !== null && typeof saveOptions.templatePromise !== 'undefined') {
+                template = await saveOptions.templatePromise;
+            } else if (typeof template !== 'string' && saveOptions.displayOptions) {
                 template = await this._getAnkiFieldTemplates(saveOptions.displayOptions);
             }
         }
