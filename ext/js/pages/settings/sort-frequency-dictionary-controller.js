@@ -271,8 +271,8 @@ export class SortFrequencyDictionaryController {
         const lessCommonTerms = {
             ja: ['行なう', '論じる', '過す', '行方', '人口', '猫', '犬', '滝', '理', '暁'],
         };
-        let langMoreCommonTerms = moreCommonTerms[dictionaryLang];
-        let langLessCommonTerms = lessCommonTerms[dictionaryLang];
+        let langMoreCommonTerms = Object.hasOwn(moreCommonTerms, dictionaryLang) ? moreCommonTerms[dictionaryLang] : null;
+        let langLessCommonTerms = Object.hasOwn(lessCommonTerms, dictionaryLang) ? lessCommonTerms[dictionaryLang] : null;
         if (dictionaryLang === '') {
             langMoreCommonTerms = [];
             for (const key in moreCommonTerms) {
@@ -287,6 +287,8 @@ export class SortFrequencyDictionaryController {
                 }
             }
         }
+
+        if (langMoreCommonTerms === null || langLessCommonTerms === null) { return null; }
 
         const terms = [...langMoreCommonTerms, ...langLessCommonTerms];
 

@@ -150,6 +150,53 @@ describe('Firefox Android remote debugging preference helper', () => {
         expect(commands.some((command) => command.includes('pm default-state --user 0 org.mozilla.firefox'))).toBe(true);
     });
 
+
+    test('recovers an empty quiesced primary from the authoritative backup without losing preferences', async () => {
+        const fixture = await createFixture({hasBackup: true, quiescedPreference: ''});
+        runHelper(fixture);
+        for (const file of [fixture.preferencePath, fixture.backupPath]) {
+            const value = await readFile(file, 'utf8');
+            expect(value).toContain('<string name="sentinel">keep me</string>');
+            expect(value).toContain('name="pref_key_remote_debugging" value="true"');
+        }
+        expect(await readFile(fixture.packageStatePath, 'utf8')).toBe('0');
+    });
+
+    test('uses the backup that Android would restore when primary and backup disagree', async () => {
+        const fixture = await createFixture({
+            hasBackup: true,
+            initialPreference: '<map><string name="primary-only">staging</string></map>',
+            backupPreference: '<map><string name="committed">preserve</string></map>',
+        });
+        runHelper(fixture);
+        for (const file of [fixture.preferencePath, fixture.backupPath]) {
+            const value = await readFile(file, 'utf8');
+            expect(value).toContain('<string name="committed">preserve</string>');
+            expect(value).not.toContain('primary-only');
+            expect(value).toContain('name="pref_key_remote_debugging" value="true"');
+        }
+    });
+
+    test.each(['', '<map><string>', '<preferences/>'])('refuses invalid authoritative backup %j before any preference write', async (backupPreference) => {
+        const fixture = await createFixture({hasBackup: true, backupPreference});
+        const primary = await readFile(fixture.preferencePath, 'utf8');
+        expect(() => runHelper(fixture)).toThrow();
+        const commands = (await readFile(fixture.logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line));
+        expect(commands.some((args) => args[2] === 'push')).toBe(false);
+        expect(await readFile(fixture.preferencePath, 'utf8')).toBe(primary);
+        expect(await readFile(fixture.backupPath, 'utf8')).toBe(backupPreference);
+        expect(await readFile(fixture.packageStatePath, 'utf8')).toBe('0');
+    });
+
+    test('refuses an empty quiesced primary without a backup instead of restoring a stale running snapshot', async () => {
+        const fixture = await createFixture({quiescedPreference: ''});
+        expect(() => runHelper(fixture)).toThrow();
+        const commands = (await readFile(fixture.logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line));
+        expect(commands.some((args) => args[2] === 'push')).toBe(false);
+        expect(await readFile(fixture.preferencePath, 'utf8')).toBe('');
+        expect(await readFile(fixture.packageStatePath, 'utf8')).toBe('0');
+    });
+
     test('rejects a false preference after the install ACK', async () => {
         const fixture = await createFixture();
         expect(() => runHelper(fixture, '--verify-after-launch')).toThrow(/did not retain pref_key_remote_debugging=true/);
@@ -157,11 +204,11 @@ describe('Firefox Android remote debugging preference helper', () => {
 });
 
 /**
- * @param {{wrongOwner?: boolean, processStaysAlive?: boolean, hasBackup?: boolean, failCommand?: string, initialPackageState?: string, initialPreference?: string, readinessSnapshots?: string[]}} [options]
- * @returns {Promise<{directory: string, logPath: string, preferencePath: string, backupPath: string, packageStatePath: string, adbPath: string, failCommand: string | undefined, readinessSnapshots: string[] | undefined}>}
+ * @param {{wrongOwner?: boolean, processStaysAlive?: boolean, hasBackup?: boolean, failCommand?: string, initialPackageState?: string, initialPreference?: string, readinessSnapshots?: string[], quiescedPreference?: string, backupPreference?: string}} [options]
+ * @returns {Promise<{directory: string, logPath: string, preferencePath: string, backupPath: string, packageStatePath: string, adbPath: string, failCommand: string | undefined, readinessSnapshots: string[] | undefined, quiescedPreference: string | undefined}>}
  */
 async function createFixture(options = {}) {
-    const directory = await mkdtemp(path.join(os.tmpdir(), 'manabitan-fenix-helper-test-'));
+    const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), 'manabitan-fenix-helper-test-')));
     temporaryDirectories.push(directory);
     const preferencePath = path.join(directory, 'fenix_preferences.xml');
     const backupPath = path.join(directory, 'fenix_preferences.xml.bak');
@@ -170,7 +217,7 @@ async function createFixture(options = {}) {
     await writeFile(packageStatePath, options.initialPackageState ?? '0');
     await writeFile(preferencePath, options.initialPreference ?? '<?xml version="1.0" encoding="utf-8"?><map><boolean name="pref_key_remote_debugging" value="false"/></map>');
     if (options.hasBackup) {
-        await writeFile(backupPath, '<?xml version="1.0" encoding="utf-8"?><map><string name="sentinel">keep me</string><boolean name="pref_key_remote_debugging" value="false"/></map>');
+        await writeFile(backupPath, options.backupPreference ?? '<?xml version="1.0" encoding="utf-8"?><map><string name="sentinel">keep me</string><boolean name="pref_key_remote_debugging" value="false"/></map>');
     }
     const adbPath = path.join(directory, 'adb');
     const adbSource = `#!/usr/bin/env node
@@ -182,6 +229,7 @@ const packageStatePath = process.env.MOCK_ADB_PACKAGE_STATE;
 const pullCountPath = process.env.MOCK_ADB_PULL_COUNT;
 const readinessSnapshots = JSON.parse(process.env.MOCK_ADB_READINESS_SNAPSHOTS || 'null');
 const failCommand = process.env.MOCK_ADB_FAIL_COMMAND;
+const quiescedPreference = JSON.parse(process.env.MOCK_ADB_QUIESCED_PREFERENCE || 'null');
 const mapRemotePath = (value) => value === '/data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml' ? preferencePath : value === '/data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak' ? require('node:path').join(require('node:path').dirname(preferencePath), 'fenix_preferences.xml.bak') : require('node:path').join(require('node:path').dirname(preferencePath), require('node:path').basename(value));
 fs.appendFileSync(logPath, JSON.stringify(args) + '\\n');
 const shellIndex = args.indexOf('shell');
@@ -194,7 +242,7 @@ else if (command.startsWith('cmd package list packages -U')) emit('package:org.m
 else if (command.startsWith('dumpsys package ')) emit('User 0: installed=true enabled=' + fs.readFileSync(packageStatePath, 'utf8'));
 else if (command.startsWith('test -f ')) { const p = command.slice('test -f '.length); if (!fs.existsSync(mapRemotePath(p))) process.exit(1); }
 else if (command.startsWith('am force-stop ')) emit('');
-else if (command.startsWith('pm disable-user ')) { fs.writeFileSync(packageStatePath, '3'); if (failCommand === 'disable-after-state') process.exit(1); emit(''); }
+else if (command.startsWith('pm disable-user ')) { fs.writeFileSync(packageStatePath, '3'); if (typeof quiescedPreference === 'string') fs.writeFileSync(preferencePath, quiescedPreference); if (failCommand === 'disable-after-state') process.exit(1); emit(''); }
 else if (command.startsWith('pm enable ')) { if (failCommand === 'enable') process.exit(1); fs.writeFileSync(packageStatePath, '1'); emit(''); }
 else if (command.startsWith('pm default-state ')) { if (failCommand === 'default-state') process.exit(1); fs.writeFileSync(packageStatePath, '0'); emit(''); }
 else if (command.startsWith('chown ')) { if (failCommand === 'chown') process.exit(1); emit(''); }
@@ -221,7 +269,7 @@ else { process.stderr.write('Unexpected mocked adb invocation: ' + args.join(' '
     const sleepPath = path.join(directory, 'sleep');
     await writeFile(sleepPath, '#!/usr/bin/env sh\nexit 0\n');
     await chmod(sleepPath, 0o755);
-    return {directory, logPath, preferencePath, backupPath, packageStatePath, adbPath, failCommand: options.failCommand, readinessSnapshots: options.readinessSnapshots};
+    return {directory, logPath, preferencePath, backupPath, packageStatePath, adbPath, failCommand: options.failCommand, readinessSnapshots: options.readinessSnapshots, quiescedPreference: options.quiescedPreference};
 }
 
 /**
@@ -241,6 +289,7 @@ function runHelper(fixture, mode = 'configure') {
             MOCK_ADB_PULL_COUNT: path.join(fixture.directory, 'preference-pull-count'),
             MOCK_ADB_READINESS_SNAPSHOTS: JSON.stringify(fixture.readinessSnapshots ?? null),
             MOCK_ADB_FAIL_COMMAND: fixture.failCommand ?? '',
+            MOCK_ADB_QUIESCED_PREFERENCE: JSON.stringify(fixture.quiescedPreference ?? null),
             MANABITAN_ANDROID_ENABLE_FIREFOX_REMOTE_DEBUGGING: '1',
         },
         timeout: 10_000,
