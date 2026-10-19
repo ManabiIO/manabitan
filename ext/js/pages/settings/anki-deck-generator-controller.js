@@ -245,7 +245,9 @@ export class AnkiDeckGeneratorController {
 
     /** */
     async _startGenerationState() {
+        if (this._inProgress) { return; }
         this._inProgress = true;
+        this._cancel = false;
 
         this._exportButtonConfirmButton.disabled = true;
 
@@ -257,6 +259,10 @@ export class AnkiDeckGeneratorController {
     /** */
     async _endGenerationState() {
         this._inProgress = false;
+        this._exportButtonConfirmButton.disabled = false;
+        this._sendToAnkiButtonConfirmButton.disabled = false;
+        this._addMediaCheckbox.disabled = false;
+        this._disallowDuplicatesCheckbox.disabled = false;
 
         if (this._exportConfirmModal !== null) {
             this._exportConfirmModal.setVisible(false);
@@ -272,6 +278,10 @@ export class AnkiDeckGeneratorController {
     /** */
     async _endGenerationStateError() {
         this._inProgress = false;
+        this._exportButtonConfirmButton.disabled = false;
+        this._sendToAnkiButtonConfirmButton.disabled = false;
+        this._addMediaCheckbox.disabled = false;
+        this._disallowDuplicatesCheckbox.disabled = false;
     }
 
     /**
@@ -291,6 +301,7 @@ export class AnkiDeckGeneratorController {
      */
     async _onExportConfirm(e) {
         e.preventDefault();
+        if (this._inProgress) { return; }
         void this._startGenerationState();
         const terms = /** @type {HTMLTextAreaElement} */ (this._wordInputTextarea).value.split('\n');
         let ankiTSV = '#separator:tab\n#html:true\n#notetype column:1\n#deck column:2\n#tags column:3\n';
@@ -298,32 +309,43 @@ export class AnkiDeckGeneratorController {
         requestAnimationFrame(() => {
             this._updateProgressBar(true, 'Exporting to File...', 0, terms.length, true);
             setTimeout(async () => {
-                for (const value of terms) {
-                    if (!value) { continue; }
-                    if (this._cancel) {
-                        void this._endGenerationState();
-                        return;
-                    }
-                    const noteData = await this._generateNoteData(value, false);
-                    if (noteData !== null) {
-                        const fieldsTSV = this._fieldsToTSV(noteData.fields);
-                        if (fieldsTSV) {
-                            ankiTSV += this._activeNoteType + '\t';
-                            ankiTSV += this._activeAnkiDeck + '\t';
-                            ankiTSV += noteData.tags.join(' ') + '\t';
-                            ankiTSV += fieldsTSV;
-                            ankiTSV += '\n';
+                try {
+                    for (const value of terms) {
+                        if (!value) { continue; }
+                        if (this._cancel) {
+                            void this._endGenerationState();
+                            return;
                         }
+                        const noteData = await this._generateNoteData(value, false);
+                        if (this._cancel) {
+                            void this._endGenerationState();
+                            return;
+                        }
+                        if (noteData !== null) {
+                            const fieldsTSV = this._fieldsToTSV(noteData.fields);
+                            if (fieldsTSV) {
+                                ankiTSV += this._activeNoteType + '\t';
+                                ankiTSV += this._activeAnkiDeck + '\t';
+                                ankiTSV += noteData.tags.join(' ') + '\t';
+                                ankiTSV += fieldsTSV;
+                                ankiTSV += '\n';
+                            }
+                        }
+                        index++;
+                        this._updateProgressBar(false, '', index, terms.length, true);
                     }
-                    index++;
-                    this._updateProgressBar(false, '', index, terms.length, true);
-                }
-                const today = new Date();
-                const fileName = 'anki-deck-' + today.toISOString().split('.')[0].replaceAll(/(T|:)/g, '-') + '.txt';
-                const blob = new Blob([ankiTSV], {type: 'application/octet-stream'});
-                this._saveBlob(blob, fileName);
+                    const today = new Date();
+                    const fileName = 'anki-deck-' + today.toISOString().split('.')[0].replaceAll(/(T|:)/g, '-') + '.txt';
+                    const blob = new Blob([ankiTSV], {type: 'application/octet-stream'});
+                    this._saveBlob(blob, fileName);
 
-                void this._endGenerationState();
+                    void this._endGenerationState();
+                } catch (error) {
+                    const message = toError(error).message;
+                    log.error(error);
+                    this._updateProgressBarError(`Failed to export Anki deck: ${message}`);
+                    void this._endGenerationStateError();
+                }
             }, 1);
         });
     }
@@ -345,6 +367,7 @@ export class AnkiDeckGeneratorController {
      */
     async _onSendToAnkiConfirm(e) {
         e.preventDefault();
+        if (this._inProgress) { return; }
         void this._startGenerationState();
         const terms = /** @type {HTMLTextAreaElement} */ (this._wordInputTextarea).value.split('\n');
         const addMedia = this._addMediaCheckbox.checked;
@@ -355,36 +378,51 @@ export class AnkiDeckGeneratorController {
         requestAnimationFrame(() => {
             this._updateProgressBar(true, 'Sending to Anki...', 0, terms.length, true);
             setTimeout(async () => {
-                for (const value of terms) {
-                    if (!value) { continue; }
-                    if (this._cancel) {
-                        void this._endGenerationState();
-                        return;
+                try {
+                    for (const value of terms) {
+                        if (!value) { continue; }
+                        if (this._cancel) {
+                            void this._endGenerationState();
+                            return;
+                        }
+                        const noteData = await this._generateNoteData(value, addMedia);
+                        if (this._cancel) {
+                            void this._endGenerationState();
+                            return;
+                        }
+                        if (noteData) {
+                            notes.push(noteData);
+                        }
+                        if (notes.length >= 100) {
+                            const sendNotesResult = await this._sendNotes(notes, disallowDuplicates);
+                            if (sendNotesResult === false) {
+                                void this._endGenerationStateError();
+                                return;
+                            }
+                            notes = [];
+                            if (this._cancel) {
+                                void this._endGenerationState();
+                                return;
+                            }
+                        }
+                        index++;
+                        this._updateProgressBar(false, '', index, terms.length, true);
                     }
-                    const noteData = await this._generateNoteData(value, addMedia);
-                    if (noteData) {
-                        notes.push(noteData);
-                    }
-                    if (notes.length >= 100) {
+                    if (notes.length > 0) {
                         const sendNotesResult = await this._sendNotes(notes, disallowDuplicates);
                         if (sendNotesResult === false) {
                             void this._endGenerationStateError();
                             return;
                         }
-                        notes = [];
                     }
-                    index++;
-                    this._updateProgressBar(false, '', index, terms.length, true);
-                }
-                if (notes.length > 0) {
-                    const sendNotesResult = await this._sendNotes(notes, disallowDuplicates);
-                    if (sendNotesResult === false) {
-                        void this._endGenerationStateError();
-                        return;
-                    }
-                }
 
-                void this._endGenerationState();
+                    void this._endGenerationState();
+                } catch (error) {
+                    const message = toError(error).message;
+                    log.error(error);
+                    this._updateProgressBarError(`Failed to send Anki notes: ${message}`);
+                    void this._endGenerationStateError();
+                }
             }, 1);
         });
     }
@@ -396,21 +434,21 @@ export class AnkiDeckGeneratorController {
      */
     async _sendNotes(notes, disallowDuplicates) {
         try {
+            if (this._cancel) { return true; }
             if (disallowDuplicates) {
                 const duplicateNotes = await this._ankiController.canAddNotes(notes.map((note) => ({...note, options: {...note.options, allowDuplicate: false}})));
                 notes = notes.filter((_, i) => duplicateNotes[i]);
             }
+            if (this._cancel) { return true; }
             const addNotesResult = await this._ankiController.addNotes(notes);
             if (addNotesResult === null || addNotesResult.includes(null)) {
                 this._updateProgressBarError('Ankiconnect error: Failed to add cards');
                 return false;
             }
         } catch (error) {
-            if (error instanceof Error) {
-                this._updateProgressBarError('Ankiconnect error: ' + error.message + '');
-                log.error(error);
-                return false;
-            }
+            this._updateProgressBarError(`Ankiconnect error: ${toError(error).message}`);
+            log.error(error);
+            return false;
         }
         return true;
     }
@@ -586,7 +624,9 @@ export class AnkiDeckGeneratorController {
             dictionaryEntriesTermKanji = dictionaryEntries;
         }
         if (type === 'kanji') {
-            dictionaryEntriesTermKanji = await this._settingsController.application.api.kanjiFind(text[0], optionsContext);
+            const [firstCharacter] = text;
+            if (typeof firstCharacter === 'undefined') { return null; }
+            dictionaryEntriesTermKanji = await this._settingsController.application.api.kanjiFind(firstCharacter, optionsContext);
         }
 
         if (!dictionaryEntriesTermKanji || dictionaryEntriesTermKanji.length === 0) { return null; }
