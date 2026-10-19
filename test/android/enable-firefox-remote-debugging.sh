@@ -75,16 +75,36 @@ if [[ -z "${app_uid}" ]]; then
     exit 1
 fi
 
+local_dir="$(mktemp -d "${TMPDIR:-/tmp}/manabitan-fenix-prefs.XXXXXX")"
+local_xml="${local_dir}/fenix_preferences.xml"
 ready=0
+readiness_error="no preference snapshot was read"
 for attempt in $(seq 1 30); do
-    if adb -s "${device}" shell test -f "${preferences}"; then
+    if adb -s "${device}" pull "${preferences}" "${local_xml}" >/dev/null 2>&1; then
+        if readiness_error="$(python3 - "${local_xml}" <<'PY' 2>&1
+import sys
+import xml.etree.ElementTree as ET
+
+try:
+    root = ET.parse(sys.argv[1]).getroot()
+except (ET.ParseError, OSError) as error:
+    raise SystemExit(f"invalid XML: {error}")
+if root.tag != "map":
+    raise SystemExit(f"unexpected XML root {root.tag!r}; expected 'map'")
+PY
+)"; then
         ready=1
         break
+        fi
+    else
+        readiness_error="adb could not pull ${preferences}"
     fi
-    sleep 1
+    if [[ "${attempt}" != "30" ]]; then
+        sleep 1
+    fi
 done
 if [[ "${ready}" != "1" ]]; then
-    echo "Fenix did not create ${preferences} within 30 seconds after launch." >&2
+    echo "Fenix did not produce a valid map in ${preferences} within 30 seconds after launch; last snapshot: ${readiness_error}." >&2
     exit 1
 fi
 
@@ -151,7 +171,6 @@ if [[ -z "${file_context}" ]]; then
     exit 1
 fi
 
-local_dir="$(mktemp -d "${TMPDIR:-/tmp}/manabitan-fenix-prefs.XXXXXX")"
 write_preference_file() {
     local remote_path="$1"
     local local_path="$2"
