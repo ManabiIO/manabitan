@@ -27,6 +27,23 @@ export const dedupeCardFormatName = 'Primary';
 export const dedupeCardFormatIcon = 'big-circle';
 
 /**
+ * @param {'addNote'|'updateNoteFields'|'none'} expectedAction
+ * @param {Array<{action: string, error: string|null, result: unknown}>} attempts
+ * @returns {boolean}
+ */
+export function isExpectedWriteResult(expectedAction, attempts) {
+    if (expectedAction === 'none') {
+        return attempts.length === 0;
+    }
+    const expectedName = expectedAction;
+    if (attempts.length !== 1 || attempts[0].action !== expectedName || attempts[0].error !== null) {
+        return false;
+    }
+    const {result} = attempts[0];
+    return expectedAction === 'addNote' ? typeof result === 'number' && Number.isSafeInteger(result) && result > 0 : result === null;
+}
+
+/**
  * @typedef {{
  *   checkForDuplicates: boolean,
  *   duplicateBehavior: 'prevent'|'new'|'overwrite',
