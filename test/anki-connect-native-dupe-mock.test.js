@@ -134,3 +134,27 @@ test('native duplicate fixture decodes entities once in one bounded pass', async
     const response = state.handleRequestBody({action: 'findNotes', params: {query: `dupe:${modelIds.Basic},&lt;`}});
     expect(response.result).toEqual([]);
 });
+
+test('native duplicate mock extracts fragment text without changing literal field values', async () => {
+    const {client, state} = await setup([
+        {noteId: 81, cardId: 91, modelName: 'Basic', deckName: 'Japanese', fields: {Front: 'MiXeD'}},
+        {noteId: 82, cardId: 92, modelName: 'Basic', deckName: 'Japanese', fields: {Front: '<b>word</b>'}},
+        {noteId: 83, cardId: 93, modelName: 'Basic', deckName: 'Japanese', fields: {Front: '<span><i>nested</i></span>'}},
+        {noteId: 84, cardId: 94, modelName: 'Basic', deckName: 'Japanese', fields: {Front: '<b title=">">fragment</b>'}},
+        {noteId: 85, cardId: 95, modelName: 'Basic', deckName: 'Japanese', fields: {Front: 'say "hi" \\ path'}},
+        {noteId: 86, cardId: 96, modelName: 'Basic', deckName: 'Japanese', fields: {Front: '<i>&lt;b&gt;literal&lt;/b&gt;</i>'}},
+    ]);
+    const modelIds = /** @type {Record<string, number>} */ (state.handleRequestBody({action: 'modelNamesAndIds', params: {}}).result);
+    /**
+     * @param {string} value
+     * @returns {unknown}
+     */
+    const query = (value) => state.handleRequestBody({action: 'findNotes', params: {query: `dupe:${modelIds.Basic},${value}`}}).result;
+    expect(query('MiXeD')).toEqual([81]);
+    expect(query('mixed')).toEqual([]);
+    expect(query('word')).toEqual([82]);
+    expect(query('nested')).toEqual([83]);
+    expect(query('fragment')).toEqual([84]);
+    expect(await client.findNoteIds([note('Basic', {Expression: 'say "hi" \\ path'})])).toEqual([[85]]);
+    expect(query('&lt;b&gt;literal&lt;/b&gt;')).toEqual([86]);
+});

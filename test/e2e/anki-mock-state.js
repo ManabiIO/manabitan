@@ -16,6 +16,7 @@
  */
 
 import {INVALID_NOTE_ID} from '../../ext/js/data/anki-util.js';
+import {parseFragment} from 'parse5';
 
 export const ankiDuplicateErrorText = 'cannot create note because it is a duplicate';
 
@@ -210,23 +211,30 @@ function splitFindNotesQueryGroups(query) {
 }
 
 /**
- * Bounded stand-in for native dupe comparison: strip simple HTML tags and decode
- * common fixture entities. It does not model Anki's full HTML/media normalizer.
+ * Bounded stand-in for native dupe comparison: extract text from an inert HTML
+ * fragment. It does not model Anki's full HTML/media normalizer; native Anki
+ * remains authoritative for media semantics.
  * @param {string} value
  * @returns {string}
  */
 function normalizeNativeDuplicateValue(value) {
-    return value
-        .replace(/<br\s*\/?\s*>/gi, '')
-        .replace(/<[^>]*>/g, '')
-        .replace(/&(?:nbsp|amp|lt|gt|quot|#39);/gi, (entity) => ({
-            '&nbsp;': ' ',
-            '&amp;': '&',
-            '&lt;': '<',
-            '&gt;': '>',
-            '&quot;': '"',
-            '&#39;': "'",
-        })[entity.toLowerCase()] || entity);
+    const fragment = parseFragment(value);
+    /**
+     * @param {import('parse5').DefaultTreeAdapterMap['childNode'][]} nodes
+     * @returns {string}
+     */
+    function getText(nodes) {
+        let text = '';
+        for (const node of nodes) {
+            if (node.nodeName === '#text') {
+                text += /** @type {import('parse5').DefaultTreeAdapterMap['textNode']} */ (node).value;
+            } else if (node.nodeName !== 'script' && node.nodeName !== 'style' && 'childNodes' in node) {
+                text += getText(node.childNodes);
+            }
+        }
+        return text;
+    }
+    return getText(fragment.childNodes);
 }
 
 /**
