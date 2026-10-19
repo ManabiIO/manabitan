@@ -29,6 +29,7 @@ import {bindDictionaryRowOwnership, createDictionaryRowOwnership, getDictionaryR
 
 const ajvSchemas = /** @type {import('dictionary-importer').CompiledSchemaValidators} */ (/** @type {unknown} */ (ajvSchemas0));
 const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
+const DICTIONARY_UPDATE_CHECK_TIMEOUT_MS = 15_000;
 /** @type {WeakMap<HTMLElement, number>} */
 const dictionaryModalGenerationByNode = new WeakMap();
 let nextDictionaryModalGeneration = 0;
@@ -60,6 +61,18 @@ function profileReferencesDictionary(profileOptions, dictionaryTitle) {
         general.mainDictionary === dictionaryTitle ||
         general.sortFrequencyDictionary === dictionaryTitle
     );
+}
+
+/**
+ * @param {Response | undefined} response
+ */
+function cancelResponseBody(response) {
+    try {
+        const cancellation = response?.body?.cancel();
+        if (typeof cancellation !== 'undefined') { void cancellation.catch(() => {}); }
+    } catch {
+        // A response body can already be locked by response.json().
+    }
 }
 
 class DictionaryEntry {
@@ -116,6 +129,10 @@ class DictionaryEntry {
         this._versionNode = querySelectorNotNull(fragment, '.dictionary-revision');
         /** @type {HTMLElement} */
         this._titleContainer = querySelectorNotNull(fragment, '.dictionary-item-title-container');
+        /** @type {number} */
+        this._updateCheckGeneration = 0;
+        /** @type {AbortController | null} */
+        this._updateCheckAbortController = null;
     }
 
     /** @type {string} */
@@ -172,6 +189,7 @@ class DictionaryEntry {
 
     /** */
     cleanup() {
+        this._cancelUpdateCheck();
         this._eventListeners.removeAllEventListeners();
         for (const node of this._nodes) {
             if (node.parentNode !== null) {
@@ -239,31 +257,86 @@ class DictionaryEntry {
      * @returns {Promise<boolean>}
      */
     async checkForUpdate() {
+        this._cancelUpdateCheck();
+        const generation = this._updateCheckGeneration;
+        const abortController = new AbortController();
+        this._updateCheckAbortController = abortController;
         this.hideUpdatesAvailableButton();
         this._updateDownloadUrl = null;
         const {isUpdatable, indexUrl, revision: currentRevision, downloadUrl: currentDownloadUrl} = this._dictionaryInfo;
-        if (!isUpdatable || !indexUrl || !currentDownloadUrl) { return false; }
-        const response = await fetch(indexUrl);
-
-        /** @type {unknown} */
-        const index = await readResponseJson(response);
-
-        if (!ajvSchemas.dictionaryIndex(index)) {
-            throw new Error('Invalid dictionary index');
-        }
-
-        const validIndex = /** @type {import('dictionary-data').Index} */ (index);
-        const {revision: latestRevision, downloadUrl: latestDownloadUrl} = validIndex;
-
-        if (!compareRevisions(currentRevision, latestRevision)) {
+        if (!isUpdatable || !indexUrl || !currentDownloadUrl) {
+            this._updateCheckAbortController = null;
             return false;
         }
 
-        const downloadUrl = latestDownloadUrl ?? currentDownloadUrl;
+        /** @type {Response | undefined} */
+        let response;
+        /** @type {ReturnType<typeof setTimeout> | undefined} */
+        let timeout;
+        /** @type {() => void} */
+        let rejectDeadline = () => {};
+        const deadline = new Promise((_, reject) => {
+            rejectDeadline = () => reject(new Error(`Dictionary update check timed out after ${DICTIONARY_UPDATE_CHECK_TIMEOUT_MS}ms`));
+            timeout = setTimeout(() => {
+                if (this._updateCheckGeneration === generation) {
+                    this._updateCheckGeneration++;
+                    this._updateCheckAbortController = null;
+                }
+                abortController.abort();
+                cancelResponseBody(response);
+                rejectDeadline();
+            }, DICTIONARY_UPDATE_CHECK_TIMEOUT_MS);
+        });
 
-        this._updateDownloadUrl = downloadUrl;
-        this.showUpdatesAvailableButton();
-        return true;
+        const check = async () => {
+            response = await fetch(indexUrl, {signal: abortController.signal});
+            if (this._updateCheckGeneration !== generation || abortController.signal.aborted) {
+                cancelResponseBody(response);
+                throw new Error('Dictionary update check was cancelled');
+            }
+            if (!response.ok) {
+                cancelResponseBody(response);
+                throw new Error(`Failed to fetch dictionary index: ${response.status}`);
+            }
+
+            /** @type {unknown} */
+            const index = await readResponseJson(response);
+            if (this._updateCheckGeneration !== generation || abortController.signal.aborted) {
+                throw new Error('Dictionary update check was cancelled');
+            }
+
+            if (!ajvSchemas.dictionaryIndex(index)) {
+                throw new Error('Invalid dictionary index');
+            }
+
+            const validIndex = /** @type {import('dictionary-data').Index} */ (index);
+            const {revision: latestRevision, downloadUrl: latestDownloadUrl} = validIndex;
+
+            if (!compareRevisions(currentRevision, latestRevision)) {
+                return false;
+            }
+
+            const downloadUrl = latestDownloadUrl ?? currentDownloadUrl;
+
+            this._updateDownloadUrl = downloadUrl;
+            this.showUpdatesAvailableButton();
+            return true;
+        };
+
+        try {
+            return await Promise.race([check(), deadline]);
+        } finally {
+            clearTimeout(timeout);
+            if (this._updateCheckGeneration === generation) { this._updateCheckAbortController = null; }
+        }
+    }
+
+    /** */
+    _cancelUpdateCheck() {
+        this._updateCheckGeneration++;
+        const abortController = this._updateCheckAbortController;
+        this._updateCheckAbortController = null;
+        if (abortController !== null && !abortController.signal.aborted) { abortController.abort(); }
     }
 
     /**
@@ -1495,13 +1568,20 @@ export class DictionaryController {
         if (this._dictionaries === null || this._checkingIntegrity || this._checkingUpdates || this._isTaskQueueRunning) { return; }
         let hasUpdates = false;
         let hadFailures = false;
+        let currentCheck = true;
+        const entries = this._dictionaryEntries;
+        const entriesUpdateToken = this._entriesUpdateToken;
         try {
             this._checkingUpdates = true;
             this._clearMutationErrors();
             this._setButtonsEnabled(false);
 
-            const updateChecks = this._dictionaryEntries.map((entry) => entry.checkForUpdate());
+            const updateChecks = entries.map((entry) => entry.checkForUpdate());
             const results = await Promise.allSettled(updateChecks);
+            if (this._dictionaryEntries !== entries || this._entriesUpdateToken !== entriesUpdateToken) {
+                currentCheck = false;
+                return;
+            }
             const updateCount = results.reduce((sum, result) => (sum + (result.status === 'fulfilled' && result.value ? 1 : 0)), 0);
             const failures = results
                 .filter((result) => result.status === 'rejected')
@@ -1524,7 +1604,7 @@ export class DictionaryController {
             }
         } finally {
             this._setButtonsEnabled(true);
-            if (this._checkUpdatesButton !== null && !hasUpdates && !hadFailures) {
+            if (currentCheck && this._checkUpdatesButton !== null && !hasUpdates && !hadFailures) {
                 this._checkUpdatesButton.disabled = true;
             }
             this._checkingUpdates = false;
