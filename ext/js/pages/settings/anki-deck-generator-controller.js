@@ -303,6 +303,7 @@ export class AnkiDeckGeneratorController {
         e.preventDefault();
         if (this._inProgress) { return; }
         void this._startGenerationState();
+        const profileOwnership = this._captureProfileOwnership();
         const terms = /** @type {HTMLTextAreaElement} */ (this._wordInputTextarea).value.split('\n');
         let ankiTSV = '#separator:tab\n#html:true\n#notetype column:1\n#deck column:2\n#tags column:3\n';
         let index = 0;
@@ -311,12 +312,14 @@ export class AnkiDeckGeneratorController {
             setTimeout(async () => {
                 try {
                     for (const value of terms) {
+                        this._assertProfileOwnershipCurrent(profileOwnership);
                         if (!value) { continue; }
                         if (this._cancel) {
                             void this._endGenerationState();
                             return;
                         }
-                        const noteData = await this._generateNoteData(value, false);
+                        const noteData = await this._generateNoteData(value, false, profileOwnership);
+                        this._assertProfileOwnershipCurrent(profileOwnership);
                         if (this._cancel) {
                             void this._endGenerationState();
                             return;
@@ -324,8 +327,8 @@ export class AnkiDeckGeneratorController {
                         if (noteData !== null) {
                             const fieldsTSV = this._fieldsToTSV(noteData.fields);
                             if (fieldsTSV) {
-                                ankiTSV += this._activeNoteType + '\t';
-                                ankiTSV += this._activeAnkiDeck + '\t';
+                                ankiTSV += noteData.modelName + '\t';
+                                ankiTSV += noteData.deckName + '\t';
                                 ankiTSV += noteData.tags.join(' ') + '\t';
                                 ankiTSV += fieldsTSV;
                                 ankiTSV += '\n';
@@ -369,6 +372,7 @@ export class AnkiDeckGeneratorController {
         e.preventDefault();
         if (this._inProgress) { return; }
         void this._startGenerationState();
+        const profileOwnership = this._captureProfileOwnership();
         const terms = /** @type {HTMLTextAreaElement} */ (this._wordInputTextarea).value.split('\n');
         const addMedia = this._addMediaCheckbox.checked;
         const disallowDuplicates = this._disallowDuplicatesCheckbox.checked;
@@ -380,12 +384,14 @@ export class AnkiDeckGeneratorController {
             setTimeout(async () => {
                 try {
                     for (const value of terms) {
+                        this._assertProfileOwnershipCurrent(profileOwnership);
                         if (!value) { continue; }
                         if (this._cancel) {
                             void this._endGenerationState();
                             return;
                         }
-                        const noteData = await this._generateNoteData(value, addMedia);
+                        const noteData = await this._generateNoteData(value, addMedia, profileOwnership);
+                        this._assertProfileOwnershipCurrent(profileOwnership);
                         if (this._cancel) {
                             void this._endGenerationState();
                             return;
@@ -394,7 +400,7 @@ export class AnkiDeckGeneratorController {
                             notes.push(noteData);
                         }
                         if (notes.length >= 100) {
-                            const sendNotesResult = await this._sendNotes(notes, disallowDuplicates);
+                            const sendNotesResult = await this._sendNotes(notes, disallowDuplicates, profileOwnership);
                             if (sendNotesResult === false) {
                                 void this._endGenerationStateError();
                                 return;
@@ -409,7 +415,7 @@ export class AnkiDeckGeneratorController {
                         this._updateProgressBar(false, '', index, terms.length, true);
                     }
                     if (notes.length > 0) {
-                        const sendNotesResult = await this._sendNotes(notes, disallowDuplicates);
+                        const sendNotesResult = await this._sendNotes(notes, disallowDuplicates, profileOwnership);
                         if (sendNotesResult === false) {
                             void this._endGenerationStateError();
                             return;
@@ -430,15 +436,18 @@ export class AnkiDeckGeneratorController {
     /**
      * @param {import("anki.js").Note[]} notes
      * @param {boolean} disallowDuplicates
+     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined)}|undefined} [profileOwnership]
      * @returns {Promise<boolean>}
      */
-    async _sendNotes(notes, disallowDuplicates) {
+    async _sendNotes(notes, disallowDuplicates, profileOwnership) {
         try {
+            if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
             if (this._cancel) { return true; }
             if (disallowDuplicates) {
                 const duplicateNotes = await this._ankiController.canAddNotes(notes.map((note) => ({...note, options: {...note.options, allowDuplicate: false}})));
                 notes = notes.filter((_, i) => duplicateNotes[i]);
             }
+            if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
             if (this._cancel) { return true; }
             const addNotesResult = await this._ankiController.addNotes(notes);
             if (addNotesResult === null || addNotesResult.includes(null)) {
@@ -543,18 +552,16 @@ export class AnkiDeckGeneratorController {
     /**
      * @param {string} word
      * @param {boolean} addMedia
+     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined)}|undefined} [batchProfileOwnership]
      * @returns {Promise<?import('anki.js').Note>}
      */
-    async _generateNoteData(word, addMedia) {
-        const optionsContext = this._settingsController.getOptionsContext();
+    async _generateNoteData(word, addMedia, batchProfileOwnership) {
+        const profileOwnership = batchProfileOwnership ?? this._captureProfileOwnership();
+        const {optionsContext} = profileOwnership;
         const activeFlashcardFormatDetails = this._flashcardFormatDetails[Number(this._activeFlashcardFormatSelect.value)];
         const activeNoteType = this._activeNoteType;
         const activeAnkiDeck = this._activeAnkiDeck;
-        const assertProfileCurrent = () => {
-            if (this._settingsController.getOptionsContext().index !== optionsContext.index) {
-                throw new Error('Profile changed while generating Anki note');
-            }
-        };
+        const assertProfileCurrent = () => this._assertProfileOwnershipCurrent(profileOwnership);
         const data = await this._getDictionaryEntry(word, optionsContext, activeFlashcardFormatDetails.type);
         assertProfileCurrent();
 
@@ -609,6 +616,32 @@ export class AnkiDeckGeneratorController {
         }));
         assertProfileCurrent();
         return note;
+    }
+
+    /**
+     * @returns {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined)}}
+     */
+    _captureProfileOwnership() {
+        const settingsController = this._settingsController;
+        return {
+            optionsContext: settingsController.getOptionsContext(),
+            profileIndexChangeGeneration: settingsController.profileIndexChangeGeneration,
+        };
+    }
+
+    /**
+     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined)}} ownership
+     * @throws {Error} If the selected profile changed while generation was pending.
+     */
+    _assertProfileOwnershipCurrent({optionsContext, profileIndexChangeGeneration}) {
+        const current = this._settingsController.getOptionsContext();
+        if (
+            current.index !== optionsContext.index ||
+            current.profileId !== optionsContext.profileId ||
+            (Number.isInteger(profileIndexChangeGeneration) && this._settingsController.profileIndexChangeGeneration !== profileIndexChangeGeneration)
+        ) {
+            throw new Error('Profile changed while generating Anki note');
+        }
     }
 
     /**
