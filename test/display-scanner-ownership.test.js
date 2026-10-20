@@ -62,7 +62,7 @@ async function setup(window, source) {
         },
         extractSentence: () => ({text: 'old', offset: 0}),
     });
-    const publication = vi.spyOn(display, 'setContent').mockResolvedValue(true);
+    const publication = vi.spyOn(display, 'setContent').mockResolvedValue('completed');
     vi.spyOn(display, '_setContentTermsOrKanji').mockResolvedValue(void 0);
     const report = vi.spyOn(log, 'error').mockImplementation(() => {});
     const scan = () => scanner._searchAt(1, 1, {

@@ -68,7 +68,7 @@ function content(query, historyMode = 'new') {
 }
 
 /**
- * @param {Promise<boolean>} promise
+ * @param {Promise<unknown>} promise
  * @returns {{done: boolean}}
  */
 function observe(promise) {
@@ -175,9 +175,9 @@ test('a render failure settles its own completion and the next request works', a
     const {display, render, report, operations} = createDisplay();
     const error = new Error('Lookup failed');
     render.mockRejectedValueOnce(error);
-    await display.setContent(content('failed'));
+    expect(await display.setContent(content('failed'))).toBe('failed');
     expect(report).toHaveBeenCalledExactlyOnceWith(error);
-    await display.setContent(content('recovered'));
+    expect(await display.setContent(content('recovered'))).toBe('completed');
     await Promise.all(operations);
     expect(render).toHaveBeenCalledTimes(2);
     expect(vi.getTimerCount()).toBe(0);
@@ -230,6 +230,7 @@ test('a failure before render setup settles its request and later rendering reco
     const state = observe(completion);
     await Promise.resolve();
     expect(state.done).toBe(true);
+    expect(await completion).toBe('failed');
     expect(report).toHaveBeenCalledExactlyOnceWith(error);
     expect(render).not.toHaveBeenCalled();
     expect(vi.getTimerCount()).toBe(0);
