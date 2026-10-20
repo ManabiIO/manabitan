@@ -58,6 +58,7 @@ function setup(initial = 'unknown') {
         _display: {
             getOptions: () => ({audio: {enabled: true}}),
             getOptionsContext: () => context,
+            getOptionsProfileId: () => 'profile-a',
             progressIndicatorVisible: {clearOverride() {}},
             application: {api: {
                 optionsGetFull() {
@@ -89,7 +90,7 @@ function setup(initial = 'unknown') {
     /** @returns {Promise<void>} */
     const finishWrites = async () => {
         for (let i = 0; i < 8; ++i) {
-            for (const {gate} of writes) { gate.resolve([]); }
+            for (const {gate, targets} of writes) { gate.resolve(targets.map(({value}) => ({result: value}))); }
             await flush();
         }
     };
@@ -103,7 +104,7 @@ for (const [stored, chosen] of /** @type {const} */ ([['accepted', 'declined'], 
         const oldRead = reads[0];
         const update = player._updateDataTransmissionConsent(chosen, chosen === 'accepted');
         await flush();
-        writes[0].gate.resolve([]);
+        writes[0].gate.resolve(writes[0].targets.map(({value}) => ({result: value})));
         await update;
         oldRead.resolve({global: {dataTransmissionConsentState: stored}});
         await refresh;
@@ -122,7 +123,7 @@ test('decline immediately retires playback even while its settings save is pendi
     const allowedWhileSaving = player._canPlayAudio();
     const retainedRequest = Reflect.get(player, '_playbackToken') === token;
     await flush();
-    writes[0].gate.resolve([]);
+    writes[0].gate.resolve(writes[0].targets.map(({value}) => ({result: value})));
     await update;
     finishReads('declined');
     await flush();
@@ -140,11 +141,11 @@ test('accept followed by decline is serialized and cannot be re-enabled by a lat
     const allowedWhileSaving = player._canPlayAudio();
     // Expose out-of-order responses on the old implementation without making
     // the corrected serial queue depend on a response it has not requested.
-    if (writes.length > 1) { writes[1].gate.resolve([]); }
-    writes[0].gate.resolve([]);
+    if (writes.length > 1) { writes[1].gate.resolve(writes[1].targets.map(({value}) => ({result: value}))); }
+    writes[0].gate.resolve(writes[0].targets.map(({value}) => ({result: value})));
     await first;
     await flush();
-    writes[1].gate.resolve([]);
+    writes[1].gate.resolve(writes[1].targets.map(({value}) => ({result: value})));
     await last;
     const allowed = player._canPlayAudio();
     finishReads('declined');
@@ -163,7 +164,7 @@ test('a failed older save does not poison the newer decision or show an obsolete
     writes[0].gate.reject(new Error('Older transport failed'));
     await first;
     await flush();
-    writes[1].gate.resolve([]);
+    writes[1].gate.resolve(writes[1].targets.map(({value}) => ({result: value})));
     await last;
     finishReads('declined');
     await flush();
@@ -180,7 +181,7 @@ test('a failed decline stays locally denied, reports the failure, and allows a l
     const allowedAfterFailure = player._canPlayAudio();
     const retry = player._updateDataTransmissionConsent('accepted', true);
     await flush();
-    writes[1].gate.resolve([]);
+    writes[1].gate.resolve(writes[1].targets.map(({value}) => ({result: value})));
     await retry;
     finishReads('accepted');
     await flush();
@@ -214,7 +215,7 @@ test('options broadcasts during a save cannot publish its earlier stored consent
     finishReads('accepted');
     await refresh;
     const allowedWhileSaving = player._canPlayAudio();
-    writes[0].gate.resolve([]);
+    writes[0].gate.resolve(writes[0].targets.map(({value}) => ({result: value})));
     await update;
     finishReads('declined');
     await flush();
@@ -227,7 +228,7 @@ test('after the final successful save, consent is reconciled with other settings
     const {player, reads, writes, finishReads} = setup();
     const update = player._updateDataTransmissionConsent('accepted', true);
     await flush();
-    writes[0].gate.resolve([]);
+    writes[0].gate.resolve(writes[0].targets.map(({value}) => ({result: value})));
     await update;
     // Another settings page revoked consent while this response was in transit.
     const refreshed = reads.length;
@@ -261,7 +262,7 @@ test('a partial settings error does not grant consent and does not block a later
     const readsAfterError = reads.length;
     const next = player._updateDataTransmissionConsent('declined', false);
     await flush();
-    writes[1].gate.resolve([]);
+    writes[1].gate.resolve(writes[1].targets.map(({value}) => ({result: value})));
     await next;
     finishReads('declined');
     await flush();

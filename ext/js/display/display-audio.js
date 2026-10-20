@@ -535,21 +535,33 @@ export class DisplayAudio {
      * @param {boolean} audioEnabled
      */
     async _updateDataTransmissionConsent(state, audioEnabled) {
-        const optionsContext = {...this._display.getOptionsContext()};
+        const optionsContext = structuredClone(this._display.getOptionsContext());
+        const profileId = this._display.getOptionsProfileId();
         /** @returns {Promise<boolean>} */
         const update = async () => {
             // Serialize persistence, but do not send superseded queued choices.
             if (this._consentUpdatePromise !== promise) { return false; }
             try {
-                const results = await this._display.application.api.modifySettings(
-                    getDataTransmissionConsentUpdateTargets(state, audioEnabled, optionsContext),
-                    'display-audio',
-                );
-                for (const {error} of results) {
-                    if (typeof error !== 'undefined') { throw toError(error); }
+                if (typeof profileId !== 'string' || profileId.length === 0) {
+                    throw new Error('Search profile identity is unavailable');
+                }
+                const targets = getDataTransmissionConsentUpdateTargets(state, audioEnabled, optionsContext);
+                targets[2].profileId = profileId;
+                const results = await this._display.application.api.modifySettings(targets, 'display-audio');
+                if (!Array.isArray(results) || results.length !== targets.length) {
+                    throw new Error('Consent update returned an incomplete response');
+                }
+                for (let i = 0; i < results.length; ++i) {
+                    const result = results[i];
+                    if (typeof result !== 'object' || result === null) {
+                        throw new Error('Consent update returned an invalid response');
+                    }
+                    if (typeof result.error !== 'undefined') { throw toError(result.error); }
+                    if (result.result !== targets[i].value) { throw new Error('Consent update was not acknowledged'); }
                 }
                 if (this._consentUpdatePromise !== promise) { return false; }
                 this._setDataTransmissionConsentState(state);
+                this._firefoxDataTransmissionModal?.setVisible(false);
                 return true;
             } catch (_) {
                 if (this._consentUpdatePromise === promise) {

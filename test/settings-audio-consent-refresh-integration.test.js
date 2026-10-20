@@ -39,16 +39,20 @@ async function runConsentSave(window, decision, failAudioWrite = false) {
         api: {
             optionsGetFull: vi.fn(async () => optionsFull()),
             optionsGet: vi.fn(async () => optionsFull().profiles[0].options),
-            modifySettings: vi.fn(async (targets) => {
+            modifySettings: vi.fn(async (/** @type {import('settings-modifications').ScopedModificationSet[]} */ targets) => {
                 // Simulate backend notification suppression for this Settings source.
                 for (const target of targets) {
-                    if (target.path === 'global.dataTransmissionConsentState') { persisted.consent = target.value; }
+                    if (target.path === 'global.dataTransmissionConsentState') {
+                        if (typeof target.value !== 'string') { throw new Error('Invalid consent test value'); }
+                        persisted.consent = target.value;
+                    }
                     if (target.path === 'audio.enabled') {
                         if (failAudioWrite) { return targets.map(() => ({error: {name: 'Error', message: 'audio write failed', stack: ''}})); }
+                        if (typeof target.value !== 'boolean') { throw new Error('Invalid audio test value'); }
                         persisted.audioEnabled = target.value;
                     }
                 }
-                return targets.map(() => ({result: null}));
+                return targets.map(({value}) => ({result: value}));
             }),
         },
     };
