@@ -277,6 +277,7 @@ test('deck parsing never combines old-profile options with a newly selected prof
     const controller = /** @type {AnkiDeckGeneratorController} */ (Object.assign(
         Object.create(AnkiDeckGeneratorController.prototype),
         {
+            _progressContainers: [],
             _parseToken: {},
             _wordInputTextarea: {value: 'one'},
             _settingsController: {
@@ -312,6 +313,7 @@ test('only the newest deck parse can publish after overlapping requests', async 
     const controller = /** @type {AnkiDeckGeneratorController} */ (Object.assign(
         Object.create(AnkiDeckGeneratorController.prototype),
         {
+            _progressContainers: [],
             _parseToken: {},
             _wordInputTextarea: textarea,
             _settingsController: {
@@ -349,7 +351,10 @@ test('note generation aborts if the selected profile changes during dictionary l
     const controller = /** @type {AnkiDeckGeneratorController} */ (Object.assign(
         Object.create(AnkiDeckGeneratorController.prototype),
         {
-            _flashcardFormatDetails: [{type: 'term-kanji', fields: {}}],
+            _progressContainers: [],
+            _flashcardFormatDetails: [{type: 'term', name: 'Format', icon: 'big-circle', model: 'Model A', deck: 'Deck A', fields: {}}],
+            _flashcardFormatDetailsOwnership: {optionsContext: {index: 0}, profileIndexChangeGeneration: undefined, optionsRevision: undefined},
+            _flashcardFormatViewToken: 0,
             _activeFlashcardFormatSelect: {value: '0'},
             _activeNoteType: 'Model A',
             _activeAnkiDeck: 'Deck A',
