@@ -102,5 +102,5 @@ test('recovery setup cannot restore a profile deleted after its snapshot', async
     const {state, sendMessage} = setup();
     state.afterRead = () => { state.options.profiles.splice(0, 1); };
     await expect(enableDictionarySettings(sendMessage, 'Fixture')).rejects.toThrow('Profile identity changed');
-    expect(state.options.profiles.map((profile) => profile.id)).toStrictEqual(['profile-b']);
+    expect(state.options.profiles.map((/** @type {{id: string}} */ profile) => profile.id)).toStrictEqual(['profile-b']);
 });
