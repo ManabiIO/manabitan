@@ -17,6 +17,7 @@
  */
 
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {toError} from '../core/to-error.js';
 
 export class DisplayResizer {
     /**
@@ -35,6 +36,8 @@ export class DisplayResizer {
         this._startSize = null;
         /** @type {?{x: number, y: number}} */
         this._startOffset = null;
+        /** @type {?{x: number, y: number}} */
+        this._latestPointerPosition = null;
         /** @type {EventListenerCollection} */
         this._eventListeners = new EventListenerCollection();
     }
@@ -85,7 +88,6 @@ export class DisplayResizer {
         if ((e.buttons & 0x1) === 0x0) {
             this._stopFrameResize();
         } else {
-            if (this._startSize === null) { return; }
             const {clientX: x, clientY: y} = e;
             void this._updateFrameSize(x, y);
         }
@@ -111,7 +113,6 @@ export class DisplayResizer {
      * @param {TouchEvent} e
      */
     _onFrameResizerTouchMove(e) {
-        if (this._startSize === null) { return; }
         const primaryTouch = this._getTouch(e.changedTouches, this._touchIdentifier);
         if (primaryTouch === null) { return; }
         const {clientX: x, clientY: y} = primaryTouch;
@@ -170,14 +171,27 @@ export class DisplayResizer {
      * @param {import('core').TokenObject} token
      */
     async _initializeFrameResize(token) {
-        const {parentPopupId} = this._display;
-        if (parentPopupId === null) { return; }
+        try {
+            const {parentPopupId} = this._display;
+            if (parentPopupId === null) {
+                if (this._token === token) { this._stopFrameResize(); }
+                return;
+            }
 
-        /** @type {import('popup').ValidSize} */
-        const size = await this._display.invokeParentFrame('popupFactoryGetFrameSize', {id: parentPopupId});
-        if (this._token !== token) { return; }
-        const {width, height} = size;
-        this._startSize = {width, height};
+            /** @type {import('popup').ValidSize} */
+            const {width, height, valid} = await this._display.invokeParentFrame('popupFactoryGetFrameSize', {id: parentPopupId});
+            if (this._token !== token) { return; }
+            if (!valid || !Number.isFinite(width) || !Number.isFinite(height)) {
+                this._stopFrameResize();
+                return;
+            }
+            this._startSize = {width, height};
+            // Movement can arrive before the cross-frame size read finishes.
+            const point = this._latestPointerPosition;
+            if (point !== null) { await this._updateFrameSize(point.x, point.y); }
+        } catch (error) {
+            this._onFrameResizeError(error, token);
+        }
     }
 
     /** */
@@ -187,6 +201,7 @@ export class DisplayResizer {
         this._eventListeners.removeAllEventListeners();
         this._startSize = null;
         this._startOffset = null;
+        this._latestPointerPosition = null;
         this._touchIdentifier = null;
         this._token = null;
 
@@ -201,16 +216,38 @@ export class DisplayResizer {
      * @param {number} y
      */
     async _updateFrameSize(x, y) {
+        const token = this._token;
+        if (token === null) { return; }
+        this._latestPointerPosition = {x, y};
         const {parentPopupId} = this._display;
         if (parentPopupId === null || this._handle === null || this._startOffset === null || this._startSize === null) { return; }
 
-        const handleSize = this._handle.getBoundingClientRect();
-        let {width, height} = this._startSize;
-        width += x - this._startOffset.x;
-        height += y - this._startOffset.y;
-        width = Math.max(Math.max(0, handleSize.width), width);
-        height = Math.max(Math.max(0, handleSize.height), height);
-        await this._display.invokeParentFrame('popupFactorySetFrameSize', {id: parentPopupId, width, height});
+        try {
+            const handleSize = this._handle.getBoundingClientRect();
+            let {width, height} = this._startSize;
+            width += x - this._startOffset.x;
+            height += y - this._startOffset.y;
+            width = Math.max(Math.max(0, handleSize.width), width);
+            height = Math.max(Math.max(0, handleSize.height), height);
+            const updated = await this._display.invokeParentFrame('popupFactorySetFrameSize', {id: parentPopupId, width, height});
+            if (!updated && this._token === token) { this._stopFrameResize(); }
+        } catch (error) {
+            this._onFrameResizeError(error, token);
+        }
+    }
+
+    /**
+     * @param {unknown} error
+     * @param {import('core').TokenObject} token
+     */
+    _onFrameResizeError(error, token) {
+        if (this._token !== token) { return; }
+        this._stopFrameResize();
+        try {
+            this._display.onError(toError(error));
+        } catch (e) {
+            // Reporting cannot reject an unawaited pointer event handler.
+        }
     }
 
     /**
