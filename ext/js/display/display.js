@@ -112,7 +112,7 @@ export class Display extends EventDispatcher {
         this._historyChangeIgnore = false;
         /** @type {boolean} */
         this._historyHasChanged = false;
-        /** @type {Array<() => void>} */
+        /** @type {Array<(result?: import('display').ContentCompletion) => void>} */
         this._stateChangeCompleteResolvers = [];
         /** @type {?Element} */
         this._aboveStickyHeader = document.querySelector('#above-sticky-header');
@@ -555,7 +555,7 @@ export class Display extends EventDispatcher {
     /**
      * Updates the content of the display.
      * @param {import('display').ContentDetails} details Information about the content to show.
-     * @returns {Promise<boolean>}
+     * @returns {Promise<import('display').ContentCompletion>}
      * @throws {Error} If request setup or history publication fails.
      */
     setContent(details) {
@@ -594,7 +594,7 @@ export class Display extends EventDispatcher {
                 this._setTheme(this._options);
             }
         } catch (e) {
-            finish();
+            finish('failed');
             throw e;
         }
         return promise;
@@ -850,16 +850,26 @@ export class Display extends EventDispatcher {
         }
         safePerformance.mark('invokeDisplaySetContent:end');
         const completion = this.setContent(details);
+        const token = this._setContentToken;
         let activePublication = null;
         if (typeof publication !== 'undefined') {
             activePublication = {publication, token: this._setContentToken};
             this._activePublication = activePublication;
         }
-        const completed = await completion;
-        if (completed === false && activePublication !== null && this._activePublication === activePublication && activePublication.token === this._setContentToken) {
-            void this._onMessageCancelPublication({publication: activePublication.publication});
-            const error = new Error('Popup content rendering timed out');
-            error.name = 'PopupContentTimeoutError';
+        const result = await completion;
+        if ((result === 'failed' || result === 'timed-out') && this._activePublication === activePublication && token === this._setContentToken) {
+            try {
+                if (activePublication !== null) {
+                    await this._onMessageCancelPublication({publication: activePublication.publication});
+                } else {
+                    this.invalidateSearchDraft();
+                }
+            } catch (error) {
+                // Cleanup must not mask the content failure as a transport error.
+            }
+            const timedOut = result === 'timed-out';
+            const error = new Error(timedOut ? 'Popup content rendering timed out' : 'Popup content rendering failed');
+            error.name = timedOut ? 'PopupContentTimeoutError' : 'PopupContentRenderError';
             throw error;
         }
     }
@@ -941,6 +951,8 @@ export class Display extends EventDispatcher {
         /** @type {?import('core').TokenObject} */
         const token = {}; // Unique identifier token
         this._setContentToken = token;
+        /** @type {import('display').ContentCompletion} */
+        let result = 'completed';
         try {
             safePerformance.mark('display:_onStateChanged:start');
             this._dictionaryAvailabilityNotification?.close(false);
@@ -992,6 +1004,7 @@ export class Display extends EventDispatcher {
             safePerformance.mark('display:_onStateChanged:setContent:end');
             safePerformance.measure('display:_onStateChanged:setContent', 'display:_onStateChanged:setContent:start', 'display:_onStateChanged:setContent:end');
         } catch (e) {
+            result = 'failed';
             try {
                 if (this._setContentToken === token) { this.onError(toError(e)); }
             } catch (error) {
@@ -1004,7 +1017,7 @@ export class Display extends EventDispatcher {
             } catch (error) {
                 // Profiling failures cannot strand completion or reject history events.
             } finally {
-                for (const finish of completions) { finish(); }
+                for (const finish of completions) { finish(result); }
             }
         }
     }
@@ -2764,18 +2777,19 @@ export class Display extends EventDispatcher {
 
     /**
      * @param {number} timeoutMs
-     * @returns {{promise: Promise<boolean>, finish: (completed?: boolean) => void}}
+     * @returns {{promise: Promise<import('display').ContentCompletion>, finish: (result?: import('display').ContentCompletion) => void}}
      */
     _createStateChangeCompletion(timeoutMs) {
         /** @type {import('core').Timeout|null} */
         let timeout = null;
-        /** @type {(value: boolean) => void} */
+        /** @type {(value: import('display').ContentCompletion) => void} */
         let resolvePromise;
-        /** @type {Promise<boolean>} */
+        /** @type {Promise<import('display').ContentCompletion>} */
         const promise = new Promise((resolve) => {
             resolvePromise = resolve;
         });
-        const finish = (completed = true) => {
+        /** @param {import('display').ContentCompletion} [result] */
+        const finish = (result = 'completed') => {
             const index = this._stateChangeCompleteResolvers.indexOf(finish);
             if (index >= 0) {
                 this._stateChangeCompleteResolvers.splice(index, 1);
@@ -2784,10 +2798,10 @@ export class Display extends EventDispatcher {
                 clearTimeout(timeout);
                 timeout = null;
             }
-            resolvePromise(completed);
+            resolvePromise(result);
         };
         this._stateChangeCompleteResolvers.push(finish);
-        timeout = setTimeout(() => finish(false), timeoutMs);
+        timeout = setTimeout(() => finish('timed-out'), timeoutMs);
         return {promise, finish};
     }
 

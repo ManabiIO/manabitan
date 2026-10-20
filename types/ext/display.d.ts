@@ -32,6 +32,9 @@ import type {
     ApiReturn as BaseApiReturn,
 } from './api-map';
 
+/** Outcome of the bounded render associated with a content request. */
+export type ContentCompletion = 'completed' | 'failed' | 'timed-out';
+
 export type HistoryMode = 'clear' | 'overwrite' | 'new';
 
 export type DisplayPageType = 'search' | 'popup';

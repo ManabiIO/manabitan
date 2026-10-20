@@ -39,14 +39,15 @@ describe('GenericSettingController', () => {
         };
 
         const {GenericSettingController} = await import('../ext/js/pages/settings/generic-setting-controller.js');
-        const settingsController = {on: vi.fn()};
+        const settingsController = {on: vi.fn(), getOptionsContext: () => ({index: 0, profileId: 'profile-a'})};
         const controller = new GenericSettingController(/** @type {any} */ (settingsController));
         controller._dataBinder = /** @type {any} */ ({
             observe: vi.fn(),
             refresh: vi.fn().mockRejectedValue(new Error('refresh failed')),
         });
 
-        controller._onOptionsChanged();
+        controller._globalDataBinder = controller._dataBinder;
+        controller._onOptionsChanged({options: /** @type {any} */ ({}), optionsContext: {index: 0, profileId: 'profile-a'}});
         await Promise.resolve();
         await Promise.resolve();
 
