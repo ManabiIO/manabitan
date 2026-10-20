@@ -19,7 +19,6 @@
 import {Frontend} from '../../app/frontend.js';
 import {ThemeController} from '../../app/theme-controller.js';
 import {createApiMap, invokeApiMapHandler} from '../../core/api-map.js';
-import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {TextSourceRange} from '../../dom/text-source-range.js';
@@ -55,12 +54,14 @@ export class PopupPreviewFrame {
         this._exampleText = querySelectorNotNull(document, '#example-text');
         /** @type {HTMLInputElement} */
         this._exampleTextInput = querySelectorNotNull(document, '#example-text-input');
-        /** @type {EventListenerCollection} */
-        this._exampleTextInputEvents = new EventListenerCollection();
+        /** @type {number} */
+        this._exampleTextGeneration = 0;
         /** @type {string} */
         this._targetOrigin = chrome.runtime.getURL('/').replace(/\/$/, '');
         /** @type {import('language').LanguageSummary[]} */
         this._languageSummaries = [];
+        /** @type {?Promise<import('language').LanguageSummary[]>} */
+        this._languageSummariesPromise = null;
         /** @type {ThemeController} */
         this._themeController = new ThemeController(document.documentElement);
 
@@ -93,14 +94,20 @@ export class PopupPreviewFrame {
         this._apiOptionsGetOld = this._application.api.optionsGet.bind(this._application.api);
         this._application.api.optionsGet = this._apiOptionsGet.bind(this);
 
-        this._languageSummaries = await this._application.api.getLanguageSummaries();
-        const options = await this._application.api.optionsGet({current: true});
-        const languageUpdate = /** @type {Promise<void>} */ (
-            this._setLanguageExampleText({language: options.general.language})
-        );
-        void languageUpdate.catch((error) => {
-            log.error(error);
-        });
+        const exampleTextGeneration = this._exampleTextGeneration;
+        this._languageSummariesPromise = this._application.api.getLanguageSummaries();
+        this._languageSummaries = await this._languageSummariesPromise;
+        // Parent language messages and edits own the example once received.
+        // An initial options read must follow the selected Settings context
+        // without overwriting newer intent while either startup request waits.
+        while (exampleTextGeneration === this._exampleTextGeneration) {
+            const optionsContext = this._optionsContext;
+            const options = await this._application.api.optionsGet(optionsContext ?? {current: true});
+            if (exampleTextGeneration !== this._exampleTextGeneration) { break; }
+            if (optionsContext !== this._optionsContext) { continue; }
+            await this._setLanguageExampleText({language: options.general.language});
+            break;
+        }
 
         // Overwrite frontend
         this._frontend = new Frontend({
@@ -204,6 +211,9 @@ export class PopupPreviewFrame {
      */
     _onExampleTextInputInput(e) {
         const element = /** @type {HTMLInputElement} */ (e.currentTarget);
+        if (element.lang === 'ja') {
+            this._searchTextKanaConversion(element, /** @type {InputEvent} */ (e));
+        }
         this._setText(element.value, false);
     }
 
@@ -217,6 +227,7 @@ export class PopupPreviewFrame {
      * @param {boolean} setInput
      */
     _setText(text, setInput) {
+        ++this._exampleTextGeneration;
         if (setInput && this._exampleTextInput !== null) {
             this._exampleTextInput.value = text;
         }
@@ -285,28 +296,20 @@ export class PopupPreviewFrame {
      * @returns {Promise<void>}
      */
     async _setLanguageExampleText({language}) {
-        const activeLanguage = /** @type {import('language').LanguageSummary} */ (this._languageSummaries.find(({iso}) => iso === language));
-
-        this._exampleTextInputEvents.removeAllEventListeners();
-        if (this._exampleTextInput !== null && language === 'ja') {
-            this._exampleTextInputEvents.addEventListener(this._exampleTextInput, 'input', this._onSearchInput.bind(this), false);
-        }
-
+        const generation = ++this._exampleTextGeneration;
+        const summaries = await (this._languageSummariesPromise ?? Promise.resolve(this._languageSummaries));
+        if (generation !== this._exampleTextGeneration) { return; }
+        // Options refreshes resend the language even for unrelated changes.
+        // Keep a custom example until the language itself changes.
+        if (this._exampleTextInput.lang === language) { return; }
+        const activeLanguage = summaries.find(({iso}) => iso === language);
         this._exampleTextInput.lang = language;
-        this._exampleTextInput.value = activeLanguage.exampleText;
+        this._exampleTextInput.value = activeLanguage?.exampleText ?? '';
         this._exampleTextInput.dispatchEvent(new Event('input'));
     }
 
     /**
-     * @param {InputEvent} e
-     */
-    _onSearchInput(e) {
-        const element = /** @type {HTMLTextAreaElement} */ (e.currentTarget);
-        this._searchTextKanaConversion(element, e);
-    }
-
-    /**
-     * @param {HTMLTextAreaElement} element
+     * @param {HTMLInputElement} element
      * @param {InputEvent} event
      */
     _searchTextKanaConversion(element, event) {
@@ -314,7 +317,7 @@ export class PopupPreviewFrame {
         const browser = document.documentElement.dataset.browser ?? 'unknown';
         if (isComposing(event, platform, browser)) { return; }
 
-        const {kanaString, newSelectionStart} = convertToKanaIME(element.value, element.selectionStart);
+        const {kanaString, newSelectionStart} = convertToKanaIME(element.value, element.selectionStart ?? element.value.length);
         element.value = kanaString;
         element.setSelectionRange(newSelectionStart, newSelectionStart);
     }
