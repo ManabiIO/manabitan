@@ -25,7 +25,7 @@ async function flush() {
 function fixture() {
     vi.stubGlobal('window', {location: {href: 'https://example.com/settings'}});
     vi.stubGlobal('document', {title: 'Settings'});
-    const state = {context: {index: 0, profileId: 'a'}, generation: 0};
+    const state = {context: {index: 0, profileId: 'a'}, generation: 0, revision: 0};
     const options = {
         general: {language: 'ja', resultOutputMode: 'group', glossaryLayoutMode: 'default', compactTags: false},
         audio: {sources: [], enableDefaultAudioSources: false},
@@ -39,11 +39,14 @@ function fixture() {
     const settings = {
         getOptionsContext: () => ({...state.context}),
         get profileIndexChangeGeneration() { return state.generation; },
+        get optionsRevision() { return state.revision; },
         getOptions: vi.fn(async () => options),
     };
     const controller = Object.assign(Object.create(AnkiDeckGeneratorController.prototype), {
         _settingsController: settings,
-        _flashcardFormatDetails: [{type: 'kanji', fields: {Front: {value: '{character}'}}}],
+        _flashcardFormatDetails: [{type: 'kanji', model: 'Original Model', deck: 'Original Deck', fields: {Front: {value: '{character}'}}}],
+        _flashcardFormatDetailsOwnership: {optionsContext: {...state.context}, profileIndexChangeGeneration: 0, optionsRevision: 0},
+        _flashcardFormatViewToken: 1,
         _activeFlashcardFormatSelect: {value: '0'},
         _activeNoteType: 'Original Model',
         _activeAnkiDeck: 'Original Deck',
