@@ -85,6 +85,12 @@ export class SearchDisplayController {
         this._introAnimationTimer = null;
         /** @type {boolean} */
         this._clipboardMonitorEnabled = false;
+        /** @type {number} */
+        this._clipboardMonitorEnableGeneration = 0;
+        /** @type {?string} */
+        this._clipboardMonitorProfileId = null;
+        /** @type {boolean} */
+        this._clipboardMonitorOptionsValue = false;
         /** @type {import('clipboard-monitor').ClipboardReaderLike} */
         this._clipboardReaderLike = {
             getText: this._display.application.api.clipboardGet.bind(this._display.application.api),
@@ -348,6 +354,13 @@ export class SearchDisplayController {
      * @param {import('display').EventArgument<'optionsUpdated'>} details
      */
     async _onDisplayOptionsUpdated({options}) {
+        const profileId = this._display.getOptionsProfileId();
+        const monitorEnabled = options.clipboard.enableSearchPageMonitor;
+        if (profileId !== this._clipboardMonitorProfileId || monitorEnabled !== this._clipboardMonitorOptionsValue) {
+            this._invalidateClipboardUpdates();
+        }
+        this._clipboardMonitorProfileId = profileId;
+        this._clipboardMonitorOptionsValue = monitorEnabled;
         this._clipboardMonitorEnabled = options.clipboard.enableSearchPageMonitor;
         this._updateClipboardMonitorEnabled();
         this._updateSearchSettings(options);
@@ -626,7 +639,9 @@ export class SearchDisplayController {
     _onClipboardMonitorEnableChange(e) {
         const element = /** @type {HTMLInputElement} */ (e.target);
         const enabled = element.checked;
-        void this._setClipboardMonitorEnabled(enabled);
+        void this._setClipboardMonitorEnabled(enabled).catch((error) => {
+            if (!this._display.application.webExtension.unloaded) { log.error(error); }
+        });
     }
 
     /**
@@ -675,6 +690,8 @@ export class SearchDisplayController {
         const node = /** @type {HTMLSelectElement} */ (event.currentTarget);
         const value = Number(node.value);
         if (!Number.isSafeInteger(value) || value < 0 || value >= this._profileSelectProfiles.length) { return; }
+        this._invalidateClipboardUpdates();
+        this._updateClipboardMonitorEnabled();
         const selectedProfile = this._profileSelectProfiles[value];
         const selectedId = selectedProfile?.id;
         const selectedSnapshot = typeof selectedProfile === 'undefined' ? null : JSON.stringify(selectedProfile);
@@ -810,26 +827,57 @@ export class SearchDisplayController {
      * @param {boolean} value
      */
     async _setClipboardMonitorEnabled(value) {
-        let modify = true;
-        if (value) {
-            value = await this._requestPermissions(['clipboardRead']);
-            modify = value;
+        const generation = this._invalidateClipboardUpdates();
+        const previousValue = this._clipboardMonitorEnabled;
+        const profileId = this._clipboardMonitorProfileId;
+        const optionsContext = this._display.getOptionsContext();
+        const targetContext = structuredClone(optionsContext);
+        const isCurrent = () => (
+            generation === this._clipboardMonitorEnableGeneration &&
+            this._display.getOptionsProfileId() === profileId &&
+            this._display.getOptionsContext() === optionsContext
+        );
+        try {
+            if (profileId === null) { throw new Error('Search profile identity is unavailable'); }
+            let modify = true;
+            if (value) {
+                value = await this._requestPermissions(['clipboardRead']);
+                modify = value;
+            }
+            if (!isCurrent()) { return; }
+
+            this._clipboardMonitorEnabled = value;
+            this._updateClipboardMonitorEnabled();
+            if (!modify) { return; }
+
+            /** @type {import('settings-modifications').ScopedModificationSet} */
+            const modification = {
+                action: 'set',
+                path: 'clipboard.enableSearchPageMonitor',
+                value,
+                scope: 'profile',
+                profileId,
+                optionsContext: targetContext,
+            };
+            const results = await this._display.application.api.modifySettings([modification], 'search');
+            if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
+                throw new Error('Clipboard monitor update returned an invalid result');
+            }
+            if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+            if (results[0].result !== value) { throw new Error('Clipboard monitor update was not acknowledged'); }
+        } catch (error) {
+            if (isCurrent()) {
+                this._clipboardMonitorEnabled = previousValue;
+                this._updateClipboardMonitorEnabled();
+            }
+            throw error;
         }
+    }
 
-        this._clipboardMonitorEnabled = value;
-        this._updateClipboardMonitorEnabled();
-
-        if (!modify) { return; }
-
-        /** @type {import('settings-modifications').ScopedModificationSet} */
-        const modification = {
-            action: 'set',
-            path: 'clipboard.enableSearchPageMonitor',
-            value,
-            scope: 'profile',
-            optionsContext: this._display.getOptionsContext(),
-        };
-        await this._display.application.api.modifySettings([modification], 'search');
+    /** @returns {number} */
+    _invalidateClipboardUpdates() {
+        ++this._clipboardUpdateSequence;
+        return ++this._clipboardMonitorEnableGeneration;
     }
 
     /** */

@@ -272,6 +272,7 @@ export class Backend {
             ['applicationReady',             this._onApiApplicationReady.bind(this)],
             ['requestBackendReadySignal',    this._onApiRequestBackendReadySignal.bind(this)],
             ['optionsGet',                   this._onApiOptionsGet.bind(this)],
+            ['optionsGetProfile',            this._onApiOptionsGetProfile.bind(this)],
             ['optionsGetFull',               this._onApiOptionsGetFull.bind(this)],
             ['kanjiFind',                    this._onApiKanjiFind.bind(this)],
             ['termsFind',                    this._onApiTermsFind.bind(this)],
@@ -1253,6 +1254,15 @@ export class Backend {
     /** @type {import('api').ApiHandler<'optionsGet'>} */
     _onApiOptionsGet({optionsContext}) {
         return this._getProfileOptions(optionsContext, false);
+    }
+
+    /** @type {import('api').ApiHandler<'optionsGetProfile'>} */
+    _onApiOptionsGetProfile({optionsContext}) {
+        const {id: profileId, options} = this._getProfile(optionsContext, false);
+        if (typeof profileId !== 'string' || profileId.length === 0) {
+            throw new Error('Search profile identity is unavailable');
+        }
+        return {profileId, options};
     }
 
     /** @type {import('api').ApiHandler<'optionsGetFull'>} */

@@ -240,6 +240,14 @@ export class API {
     }
 
     /**
+     * @param {import('api').ApiParam<'optionsGetProfile', 'optionsContext'>} optionsContext
+     * @returns {Promise<import('api').ApiReturn<'optionsGetProfile'>>}
+     */
+    optionsGetProfile(optionsContext) {
+        return this._invoke('optionsGetProfile', {optionsContext});
+    }
+
+    /**
      * @returns {Promise<import('api').ApiReturn<'optionsGetFull'>>}
      */
     optionsGetFull() {
@@ -958,6 +966,7 @@ export class API {
         }
         switch (action) {
             case 'optionsGet':
+            case 'optionsGetProfile':
             case 'optionsGetFull':
             case 'termsFind':
             case 'parseText':

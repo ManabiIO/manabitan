@@ -47,15 +47,17 @@ const b = {depth: 0, url: 'https://b.test'};
 
 /**
  * @param {'popup'|'display'} kind
- * @returns {{owner: Popup|Display, optionsGet: import('vitest').Mock, publish: import('vitest').Mock, invoke: import('vitest').Mock}}
+ * @returns {{owner: Popup|Display, optionsGet: import('vitest').Mock, optionsGetProfile: import('vitest').Mock, publish: import('vitest').Mock, invoke: import('vitest').Mock}}
  */
 function createOwner(kind) {
     const owner = kind === 'popup' ? /** @type {Popup} */ (Object.create(Popup.prototype)) : /** @type {Display} */ (Object.create(Display.prototype));
     const optionsGet = vi.fn();
+    const optionsGetProfile = vi.fn(async (/** @type {import('settings').OptionsContext} */ context) => ({options: await optionsGet(context), profileId: context.url === a.url ? 'profile-a' : 'profile-b'}));
     const publish = vi.fn();
     const invoke = vi.fn().mockResolvedValue(void 0);
     const fields = {
-        _application: {api: {optionsGet}},
+        _application: {api: {optionsGet, optionsGetProfile}},
+        _optionsProfileId: null,
         _optionsContext: null,
         _publicationGeneration: 0,
         _cancelPendingPublication: null,
@@ -78,7 +80,7 @@ function createOwner(kind) {
     };
     for (const [key, value] of Object.entries(fields)) { Reflect.set(owner, key, value); }
     vi.stubGlobal('document', {documentElement: {}});
-    return {owner, optionsGet, publish, invoke};
+    return {owner, optionsGet, optionsGetProfile, publish, invoke};
 }
 
 /**
@@ -373,4 +375,28 @@ test('nested scanner failure is reported without rejecting the successful option
     expect(report).toHaveBeenCalledExactlyOnceWith(error);
     expect(appliedWidth(owner)).toBe(700);
     expect(owner.trigger).toHaveBeenCalledExactlyOnceWith('optionsUpdated', {options: options(700)});
+});
+
+
+test('late options cannot replace the newer display profile identity', async () => {
+    const {owner, optionsGetProfile} = createOwner('display');
+    if (!(owner instanceof Display)) { throw new Error('Expected display'); }
+    const older = /** @type {PromiseWithResolvers<import('api').ApiReturn<'optionsGetProfile'>>} */ (Promise.withResolvers());
+    optionsGetProfile.mockReturnValueOnce(older.promise).mockResolvedValueOnce({profileId: 'new-profile', options: options(700)});
+    const first = owner.setOptionsContext(a);
+    await owner.setOptionsContext(b);
+    older.resolve({profileId: 'old-profile', options: options(300)});
+    await first;
+    expect(owner.getOptionsProfileId()).toBe('new-profile');
+    expect(appliedWidth(owner)).toBe(700);
+});
+
+test('missing options profile identity cannot replace the applied display snapshot', async () => {
+    const {owner, optionsGetProfile} = createOwner('display');
+    if (!(owner instanceof Display)) { throw new Error('Expected display'); }
+    optionsGetProfile.mockResolvedValueOnce({profileId: 'valid-profile', options: options(500)}).mockResolvedValueOnce({profileId: '', options: options(700)});
+    await owner.setOptionsContext(a);
+    await expect(owner.setOptionsContext(b)).rejects.toThrow('Search profile identity is unavailable');
+    expect(owner.getOptionsProfileId()).toBe('valid-profile');
+    expect(appliedWidth(owner)).toBe(500);
 });
