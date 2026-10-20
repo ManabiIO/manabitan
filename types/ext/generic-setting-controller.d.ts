@@ -26,6 +26,11 @@ export type ElementMetadata = {
     transforms: TransformData[];
     transformRaw: string | undefined;
     dictionaryRowOwnership?: DictionaryRowOwnership;
+    profileOwnership?: {
+        profileId: string | null;
+        viewGeneration: number;
+        optionsContext: import('./settings').OptionsContext2;
+    };
 };
 
 export type DictionaryRowOwnership = {
