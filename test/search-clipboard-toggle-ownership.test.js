@@ -244,3 +244,21 @@ test('the displayed profile owns a delayed grant even if the backend default cha
     expect(profiles[0].options.clipboard.enableSearchPageMonitor).toBe(true);
     expect(profiles[1].options.clipboard.enableSearchPageMonitor).toBe(false);
 });
+
+
+test('a failed profile selection restores the visible monitor state while retiring a pending grant', async ({window}) => {
+    const {controller, save} = await setup(window);
+    const permission = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
+    vi.spyOn(controller, '_requestPermissions').mockReturnValue(permission.promise);
+    controller._clipboardMonitorEnableCheckbox.checked = true;
+    controller._profileSelectProfiles = /** @type {import('settings').Profile[]} */ (/** @type {unknown} */ ([{id: 'first'}, {id: 'second'}]));
+    Reflect.set(controller._display.application.api, 'optionsGetFull', vi.fn(async () => ({profiles: controller._profileSelectProfiles})));
+    vi.spyOn(controller, '_setDefaultProfileIndex').mockRejectedValue(new Error('Profile save failed'));
+    const enabling = controller._setClipboardMonitorEnabled(true);
+    await expect(controller._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {value: '1'}})))).rejects.toThrow('Profile save failed');
+    permission.resolve(true);
+    await enabling;
+    expect(save).not.toHaveBeenCalled();
+    expect(controller._clipboardMonitorEnabled).toBe(false);
+    expect(controller._clipboardMonitorEnableCheckbox.checked).toBe(false);
+});

@@ -691,6 +691,7 @@ export class SearchDisplayController {
         const value = Number(node.value);
         if (!Number.isSafeInteger(value) || value < 0 || value >= this._profileSelectProfiles.length) { return; }
         this._invalidateClipboardUpdates();
+        this._updateClipboardMonitorEnabled();
         const selectedProfile = this._profileSelectProfiles[value];
         const selectedId = selectedProfile?.id;
         const selectedSnapshot = typeof selectedProfile === 'undefined' ? null : JSON.stringify(selectedProfile);
