@@ -133,6 +133,15 @@ type ApiSurface = {
         };
         return: Settings.ProfileOptions;
     };
+    optionsGetProfile: {
+        params: {
+            optionsContext: Settings.OptionsContext;
+        };
+        return: {
+            profileId: string;
+            options: Settings.ProfileOptions;
+        };
+    };
     optionsGetFull: {
         params: void;
         return: Settings.Options;
