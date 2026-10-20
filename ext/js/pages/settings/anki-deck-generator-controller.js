@@ -205,6 +205,11 @@ export class AnkiDeckGeneratorController {
             }
             this._wordInputTextarea.value = parsedParts.join('\n');
         } catch (error) {
+            try {
+                this._assertProfileOwnershipCurrent(ownership);
+            } catch {
+                return;
+            }
             if (this._parseToken === token && this._wordInputTextarea.value === inputText) {
                 log.error(error);
                 this._updateProgressBarError(`Failed to parse text: ${toError(error).message}`);
@@ -661,6 +666,13 @@ export class AnkiDeckGeneratorController {
             if (this._renderToken !== token || this._renderTextInput.value !== text) { return; }
             result = noteData ? this._fieldsToTSV(noteData.fields) : `No definition found for ${text}`;
         } catch (e) {
+            if (typeof ownership !== 'undefined') {
+                try {
+                    this._assertProfileOwnershipCurrent(ownership);
+                } catch {
+                    return;
+                }
+            }
             if (this._renderToken !== token || this._renderTextInput.value !== text) { return; }
             allErrors.push(toError(e));
         }

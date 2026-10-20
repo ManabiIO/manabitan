@@ -360,3 +360,40 @@ test('removed selected format requires a new choice and does not silently send t
     expect(context.generator._generationButtons.every((button) => !button.disabled)).toBe(true);
     await expect(context.generator._generateNoteData('字', false)).resolves.toMatchObject({modelName: 'First Model'});
 });
+
+
+for (const kind of ['parse', 'preview']) {
+    for (const retired of [true, false]) {
+        test('a ' + kind + ' failure is ' + (retired ? 'suppressed for a retired view' : 'reported for the current view'), async ({window}) => {
+            const context = setup(window, profileOptions());
+            await context.generator._setupModelSelection();
+            const lookup = deferred();
+            let operation;
+            if (kind === 'parse') {
+                context.application.api.parseText.mockReturnValueOnce(lookup.promise);
+                operation = context.generator._onParse();
+            } else {
+                vi.mocked(context.generator._getDictionaryEntry).mockReturnValueOnce(lookup.promise);
+                context.generator._renderResult.hidden = true;
+                operation = context.generator._testNoteData(context.generator._renderResult, true);
+            }
+            await flush();
+            if (retired) {
+                context.application.api.optionsGetFull.mockRejectedValueOnce(new Error('external refresh failed'));
+                await context.settings._onOptionsUpdatedInternal(true);
+            }
+            lookup.reject(new Error('obsolete request failed'));
+            await operation;
+            if (retired) {
+                expect(context.generator._updateProgressBarError).not.toHaveBeenCalled();
+                expect(context.generator._renderResult.hidden).toBe(true);
+                expect(context.generator._renderResult.textContent).toBe('');
+            } else if (kind === 'parse') {
+                expect(context.generator._updateProgressBarError).toHaveBeenCalledWith('Failed to parse text: obsolete request failed');
+            } else {
+                expect(context.generator._renderResult.hidden).toBe(false);
+                expect(context.generator._renderResult.textContent).toBe('obsolete request failed');
+            }
+        });
+    }
+}
