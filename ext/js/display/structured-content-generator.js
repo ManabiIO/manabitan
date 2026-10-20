@@ -85,6 +85,7 @@ export class StructuredContentGenerator {
             preferredWidth,
             preferredHeight,
             title,
+            alt,
             pixelated,
             imageRendering,
             appearance,
@@ -117,6 +118,7 @@ export class StructuredContentGenerator {
         const node = /** @type {HTMLAnchorElement} */ (this._createElement('a', 'gloss-image-link'));
         node.target = '_blank';
         node.rel = 'noreferrer noopener';
+        if (typeof alt === 'string') { node.setAttribute('aria-label', alt); }
         if (typeof elementData === 'object' && elementData !== null) {
             this._setElementDataset(node, elementData);
         }
@@ -174,6 +176,14 @@ export class StructuredContentGenerator {
             const image = this._contentManager instanceof DisplayContentManager ?
                 /** @type {HTMLCanvasElement} */ (this._createElement('canvas', 'gloss-image')) :
                 /** @type {HTMLImageElement} */ (this._createElement('img', 'gloss-image'));
+            if (typeof alt === 'string') {
+                if (this._contentManager instanceof DisplayContentManager) {
+                    image.setAttribute('role', 'img');
+                    image.setAttribute('aria-label', alt);
+                } else {
+                    image.setAttribute('alt', alt);
+                }
+            }
             let rasterWidth = usedWidth;
             if (sizeUnits === 'em' && (hasPreferredWidth || hasPreferredHeight)) {
                 const emSize = 14; // We could Number.parseFloat(getComputedStyle(document.documentElement).fontSize); here for more accuracy but it would cause a layout and be extremely slow; possible improvement would be to calculate and cache the value
@@ -261,6 +271,11 @@ export class StructuredContentGenerator {
         const node = this._createStructuredContentGenericElement(content, dictionary, language);
         if (node !== null) {
             container.appendChild(node);
+            if (content.tag === 'img' && typeof content.description === 'string') {
+                const description = this._createElement('span', 'gloss-image-description');
+                description.textContent = content.description;
+                container.appendChild(description);
+            }
         }
     }
 

@@ -227,3 +227,37 @@ describe('StructuredContentGenerator MDX rendering compatibility', () => {
         await vi.waitFor(() => { expect(display.onError).toHaveBeenCalledWith(failure); });
     });
 });
+
+
+describe('StructuredContentGenerator image text', () => {
+    test.each(['display', 'anki'])('preserves authored image text in %s mode', (mode) => {
+        const {window} = testEnv;
+        const mediaProvider = /** @type {import('../ext/js/templates/template-renderer-media-provider.js').TemplateRendererMediaProvider} */ (/** @type {unknown} */ ({getMedia: () => 'image.png'}));
+        const manager = mode === 'display' ?
+            new DisplayContentManager(/** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ ({}))) :
+            new AnkiTemplateRendererContentManager(mediaProvider, /** @type {import('anki-templates').NoteData} */ (/** @type {unknown} */ ({})));
+        const prototype = window.HTMLCanvasElement.prototype;
+        const descriptor = Object.getOwnPropertyDescriptor(prototype, 'transferControlToOffscreen');
+        Object.defineProperty(prototype, 'transferControlToOffscreen', {configurable: true, value: () => ({})});
+        try {
+            const generator = new StructuredContentGenerator(manager, window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+            const node = generator.createStructuredContent({tag: 'img', path: 'image.png', alt: 'A <red> bridge', description: 'The bridge & river\nSecond line', title: 'A bridge'}, 'Images');
+            const image = node.querySelector('.gloss-image');
+            expect(image).not.toBeNull();
+            expect(image?.getAttribute(mode === 'display' ? 'aria-label' : 'alt')).toBe('A <red> bridge');
+            expect(node.querySelector('a')?.getAttribute('aria-label')).toBe('A <red> bridge');
+            const description = node.querySelector('.gloss-image-description');
+            expect(description?.textContent).toBe('The bridge & river\nSecond line');
+            expect(description?.previousElementSibling?.classList.contains('gloss-image-link')).toBe(true);
+            expect(node.querySelectorAll('.gloss-image-description')).toHaveLength(1);
+            expect(node.querySelector('red')).toBeNull();
+            expect(node.querySelector('.gloss-image-container')?.getAttribute('title')).toBe('A bridge');
+        } finally {
+            if (typeof descriptor === 'undefined') {
+                Reflect.deleteProperty(prototype, 'transferControlToOffscreen');
+            } else {
+                Object.defineProperty(prototype, 'transferControlToOffscreen', descriptor);
+            }
+        }
+    });
+});
