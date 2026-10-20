@@ -271,11 +271,6 @@ export class StructuredContentGenerator {
         const node = this._createStructuredContentGenericElement(content, dictionary, language);
         if (node !== null) {
             container.appendChild(node);
-            if (content.tag === 'img' && typeof content.description === 'string') {
-                const description = this._createElement('span', 'gloss-image-description');
-                description.textContent = content.description;
-                container.appendChild(description);
-            }
         }
     }
 
@@ -370,8 +365,16 @@ export class StructuredContentGenerator {
             case 'details':
             case 'summary':
                 return this._createStructuredContentElement(tag, content, dictionary, language, 'simple', true, true);
-            case 'img':
-                return this.createDefinitionImage(content, dictionary);
+            case 'img': {
+                const image = this.createDefinitionImage(content, dictionary);
+                if (typeof content.description !== 'string') { return image; }
+                const container = this._createElement('span', 'gloss-sc-image');
+                container.appendChild(image);
+                const description = this._createElement('span', 'gloss-image-description');
+                description.textContent = content.description;
+                container.appendChild(description);
+                return container;
+            }
             case 'a':
                 return this._createLinkElement(content, dictionary, language);
         }

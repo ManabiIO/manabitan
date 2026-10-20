@@ -250,6 +250,7 @@ describe('StructuredContentGenerator image text', () => {
             expect(description?.textContent).toBe('The bridge & river\nSecond line');
             expect(description?.previousElementSibling?.classList.contains('gloss-image-link')).toBe(true);
             expect(node.querySelectorAll('.gloss-image-description')).toHaveLength(1);
+            expect(description?.parentElement?.classList.contains('gloss-sc-image')).toBe(true);
             expect(node.querySelector('red')).toBeNull();
             expect(node.querySelector('.gloss-image-container')?.getAttribute('title')).toBe('A bridge');
         } finally {
