@@ -79,6 +79,8 @@ export class SearchDisplayController {
         this._queryInputEventsSetup = false;
         /** @type {boolean} */
         this._wanakanaEnabled = false;
+        /** @type {Record<'enableWanakana'|'stickySearchHeader', number>} */
+        this._searchSettingUpdateGenerations = {enableWanakana: 0, stickySearchHeader: 0};
         /** @type {boolean} */
         this._introVisible = true;
         /** @type {?import('core').Timeout} */
@@ -372,6 +374,9 @@ export class SearchDisplayController {
      * @param {import('settings').ProfileOptions} options
      */
     _updateSearchSettings(options) {
+        // A refreshed options snapshot now owns both visible controls.
+        ++this._searchSettingUpdateGenerations.enableWanakana;
+        ++this._searchSettingUpdateGenerations.stickySearchHeader;
         const {language, enableWanakana, stickySearchHeader} = options.general;
         const wanakanaEnabled = language === 'ja' && enableWanakana;
         this._wanakanaEnableCheckbox.checked = wanakanaEnabled;
@@ -620,17 +625,9 @@ export class SearchDisplayController {
      */
     _onWanakanaEnableChange(e) {
         const element = /** @type {HTMLInputElement} */ (e.target);
-        const value = element.checked;
-        this._setWanakanaEnabled(value);
-        /** @type {import('settings-modifications').ScopedModificationSet} */
-        const modification = {
-            action: 'set',
-            path: 'general.enableWanakana',
-            value,
-            scope: 'profile',
-            optionsContext: this._display.getOptionsContext(),
-        };
-        void this._display.application.api.modifySettings([modification], 'search');
+        void this._setSearchSetting('enableWanakana', element.checked).catch((error) => {
+            if (!this._display.application.webExtension.unloaded) { log.error(error); }
+        });
     }
 
     /**
@@ -649,17 +646,75 @@ export class SearchDisplayController {
      */
     _onStickyHeaderEnableChange(e) {
         const element = /** @type {HTMLInputElement} */ (e.target);
-        const value = element.checked;
-        this._setStickyHeaderEnabled(value);
-        /** @type {import('settings-modifications').ScopedModificationSet} */
-        const modification = {
-            action: 'set',
-            path: 'general.stickySearchHeader',
-            value,
-            scope: 'profile',
-            optionsContext: this._display.getOptionsContext(),
-        };
-        void this._display.application.api.modifySettings([modification], 'search');
+        void this._setSearchSetting('stickySearchHeader', element.checked).catch((error) => {
+            if (!this._display.application.webExtension.unloaded) { log.error(error); }
+        });
+    }
+
+    /**
+     * @param {'enableWanakana'|'stickySearchHeader'} setting
+     * @param {boolean} value
+     */
+    async _setSearchSetting(setting, value) {
+        const generation = ++this._searchSettingUpdateGenerations[setting];
+        const profileId = this._display.getOptionsProfileId();
+        const optionsContext = this._display.getOptionsContext();
+        const isCurrent = () => (
+            generation === this._searchSettingUpdateGenerations[setting] &&
+            profileId === this._display.getOptionsProfileId() &&
+            optionsContext === this._display.getOptionsContext()
+        );
+        try {
+            if (profileId === null) { throw new Error('Search profile identity is unavailable'); }
+            this._applySearchSetting(setting, value);
+            /** @type {import('settings-modifications').ScopedModificationSet} */
+            const modification = {
+                action: 'set',
+                path: 'general.' + setting,
+                value,
+                scope: 'profile',
+                profileId,
+                optionsContext: structuredClone(optionsContext),
+            };
+            const results = await this._display.application.api.modifySettings([modification], 'search');
+            if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
+                throw new Error('Search setting update returned an invalid result');
+            }
+            if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
+            if (results[0].result !== value) { throw new Error('Search setting update was not acknowledged'); }
+        } catch (error) {
+            if (isCurrent()) {
+                let options = this._display.getOptions();
+                if (profileId !== null) {
+                    try {
+                        // The index is only a hint; stable identity owns this read.
+                        const snapshot = await this._display.application.api.optionsGetProfile({index: 0, profileId});
+                        if (snapshot.profileId === profileId) { options = snapshot.options; }
+                    } catch {
+                        // Keep the original save error and the last displayed snapshot.
+                    }
+                }
+                if (isCurrent() && options !== null) {
+                    const previousValue = setting === 'enableWanakana' ?
+                        options.general.language === 'ja' && options.general.enableWanakana :
+                        options.general.stickySearchHeader;
+                    this._applySearchSetting(setting, previousValue);
+                }
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * @param {'enableWanakana'|'stickySearchHeader'} setting
+     * @param {boolean} value
+     */
+    _applySearchSetting(setting, value) {
+        if (setting === 'enableWanakana') {
+            this._setWanakanaEnabled(value);
+        } else {
+            this._setStickyHeaderEnabled(value);
+        }
     }
 
     /**
@@ -745,6 +800,7 @@ export class SearchDisplayController {
      * @param {boolean} enabled
      */
     _setWanakanaEnabled(enabled) {
+        this._wanakanaEnableCheckbox.checked = enabled;
         if (this._queryInputEventsSetup && this._wanakanaEnabled === enabled) { return; }
 
         const input = this._queryInput;
