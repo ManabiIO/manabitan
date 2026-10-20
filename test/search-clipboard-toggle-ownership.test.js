@@ -29,7 +29,7 @@ async function setup(window) {
     };
     const save = vi.fn().mockImplementation(async (/** @type {import('settings-modifications').ScopedModificationSet[]} */ changes) => [{result: changes[0].value}]);
     const display = /** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ ({
-        application: {api: {clipboardGet: vi.fn(), modifySettings: save}, webExtension: {unloaded: false}},
+        application: {api: {clipboardGet: vi.fn(), modifySettings: save, optionsGetProfile: vi.fn(async () => ({profileId: state.profileId, options: state.options}))}, webExtension: {unloaded: false}},
         getOptions: () => state.options,
         getOptionsContext: () => state.context,
         getOptionsProfileId: () => state.profileId,
@@ -203,7 +203,8 @@ test('a user profile selection retires a permission response before its queued w
 });
 
 test('a failed disable restores the prior enabled monitor and reports failure', async ({window}) => {
-    const {controller, save} = await setup(window);
+    const {controller, state, save} = await setup(window);
+    state.options.clipboard.enableSearchPageMonitor = true;
     controller._clipboardMonitorEnabled = true;
     controller._updateClipboardMonitorEnabled();
     save.mockResolvedValueOnce([{error: ExtensionError.serialize(new Error('Cannot disable'))}]);
@@ -261,4 +262,40 @@ test('a failed profile selection restores the visible monitor state while retiri
     expect(save).not.toHaveBeenCalled();
     expect(controller._clipboardMonitorEnabled).toBe(false);
     expect(controller._clipboardMonitorEnableCheckbox.checked).toBe(false);
+});
+
+
+test('two overlapping failed clipboard saves restore the committed disabled option', async ({window}) => {
+    const {controller, save} = await setup(window);
+    vi.spyOn(controller, '_requestPermissions').mockResolvedValue(true);
+    const first = /** @type {PromiseWithResolvers<unknown>} */ (Promise.withResolvers());
+    const second = /** @type {PromiseWithResolvers<unknown>} */ (Promise.withResolvers());
+    save.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const older = controller._setClipboardMonitorEnabled(true);
+    const observedOlder = expect(older).rejects.toThrow('First failure');
+    await vi.waitFor(() => expect(save).toHaveBeenCalledOnce());
+    const newer = controller._setClipboardMonitorEnabled(false);
+    const observedNewer = expect(newer).rejects.toThrow('Second failure');
+    second.resolve([{error: ExtensionError.serialize(new Error('Second failure'))}]);
+    await observedNewer;
+    first.resolve([{error: ExtensionError.serialize(new Error('First failure'))}]);
+    await observedOlder;
+    expect(controller._clipboardMonitorEnabled).toBe(false);
+    expect(controller._clipboardMonitorEnableCheckbox.checked).toBe(false);
+});
+
+test('a delayed clipboard recovery read cannot overwrite a newer successful choice', async ({window}) => {
+    const {controller, state, save} = await setup(window);
+    const read = /** @type {PromiseWithResolvers<import('api').ApiReturn<'optionsGetProfile'>>} */ (Promise.withResolvers());
+    vi.spyOn(controller, '_requestPermissions').mockResolvedValue(true);
+    vi.spyOn(controller._display.application.api, 'optionsGetProfile').mockReturnValueOnce(read.promise);
+    save.mockResolvedValueOnce([{error: ExtensionError.serialize(new Error('Old failure'))}]);
+    const older = controller._setClipboardMonitorEnabled(true);
+    const observedOlder = expect(older).rejects.toThrow('Old failure');
+    await vi.waitFor(() => expect(controller._display.application.api.optionsGetProfile).toHaveBeenCalledOnce());
+    await controller._setClipboardMonitorEnabled(true);
+    read.resolve({profileId: state.profileId, options: state.options});
+    await observedOlder;
+    expect(controller._clipboardMonitorEnabled).toBe(true);
+    expect(controller._clipboardMonitorEnableCheckbox.checked).toBe(true);
 });
