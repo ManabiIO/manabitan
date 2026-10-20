@@ -684,16 +684,7 @@ export class SearchDisplayController {
             if (results[0].result !== value) { throw new Error('Search setting update was not acknowledged'); }
         } catch (error) {
             if (isCurrent()) {
-                let options = this._display.getOptions();
-                if (profileId !== null) {
-                    try {
-                        // The index is only a hint; stable identity owns this read.
-                        const snapshot = await this._display.application.api.optionsGetProfile({index: 0, profileId});
-                        if (snapshot.profileId === profileId) { options = snapshot.options; }
-                    } catch {
-                        // Keep the original save error and the last displayed snapshot.
-                    }
-                }
+                const options = await this._getSearchProfileOptions(profileId);
                 if (isCurrent() && options !== null) {
                     const previousValue = setting === 'enableWanakana' ?
                         options.general.language === 'ja' && options.general.enableWanakana :
@@ -703,6 +694,24 @@ export class SearchDisplayController {
             }
             throw error;
         }
+    }
+
+    /**
+     * @param {?string} profileId
+     * @returns {Promise<?import('settings').ProfileOptions>}
+     */
+    async _getSearchProfileOptions(profileId) {
+        let options = this._display.getOptions();
+        if (profileId !== null) {
+            try {
+                // The index is only a hint; stable identity owns this read.
+                const snapshot = await this._display.application.api.optionsGetProfile({index: 0, profileId});
+                if (snapshot.profileId === profileId) { options = snapshot.options; }
+            } catch {
+                // Preserve the original save error and last displayed snapshot.
+            }
+        }
+        return options;
     }
 
     /**
@@ -884,7 +893,6 @@ export class SearchDisplayController {
      */
     async _setClipboardMonitorEnabled(value) {
         const generation = this._invalidateClipboardUpdates();
-        const previousValue = this._clipboardMonitorEnabled;
         const profileId = this._clipboardMonitorProfileId;
         const optionsContext = this._display.getOptionsContext();
         const targetContext = structuredClone(optionsContext);
@@ -923,8 +931,11 @@ export class SearchDisplayController {
             if (results[0].result !== value) { throw new Error('Clipboard monitor update was not acknowledged'); }
         } catch (error) {
             if (isCurrent()) {
-                this._clipboardMonitorEnabled = previousValue;
-                this._updateClipboardMonitorEnabled();
+                const options = await this._getSearchProfileOptions(profileId);
+                if (isCurrent() && options !== null) {
+                    this._clipboardMonitorEnabled = options.clipboard.enableSearchPageMonitor;
+                    this._updateClipboardMonitorEnabled();
+                }
             }
             throw error;
         }
