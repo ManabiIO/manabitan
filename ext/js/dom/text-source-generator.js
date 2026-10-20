@@ -110,7 +110,7 @@ export class TextSourceGenerator {
                         if (typeof quoteInfo === 'undefined') { break; }
                     }
                     break;
-                } else if (quoteStack[0] === c) {
+                } else if (quoteStack.at(-1) === c) {
                     quoteStack.pop();
                     continue;
                 }
@@ -118,7 +118,7 @@ export class TextSourceGenerator {
 
             quoteInfo = backwardQuoteMap.get(c);
             if (typeof quoteInfo !== 'undefined') {
-                quoteStack.unshift(quoteInfo[0]);
+                quoteStack.push(quoteInfo[0]);
             }
         }
 
@@ -152,11 +152,11 @@ export class TextSourceGenerator {
                         ++cursorEnd;
                         if (cursorEnd === textLength) { break; }
                         c = text[cursorEnd];
-                        quoteInfo = forwardQuoteMap.get(c);
+                        quoteInfo = backwardQuoteMap.get(c);
                         if (typeof quoteInfo === 'undefined') { break; }
                     }
                     break;
-                } else if (quoteStack[0] === c) {
+                } else if (quoteStack.at(-1) === c) {
                     quoteStack.pop();
                     continue;
                 }
@@ -164,7 +164,7 @@ export class TextSourceGenerator {
 
             quoteInfo = forwardQuoteMap.get(c);
             if (typeof quoteInfo !== 'undefined') {
-                quoteStack.unshift(quoteInfo[0]);
+                quoteStack.push(quoteInfo[0]);
             }
         }
 
