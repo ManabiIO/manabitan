@@ -22,6 +22,7 @@ import {promisify} from 'node:util';
 import {chromium} from '@playwright/test';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
 import {parseProcessRows, selectOwnedProcessTree} from './restart-interruption-process-tree.js';
+import {enableDictionarySettings} from './restart-interruption-settings.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const extensionPackagePath = path.join(root, 'builds', 'manabitan-chrome-playwright.zip');
@@ -287,33 +288,7 @@ async function waitForImport(page, expectedRevision, previousGenerationId = null
 }
 
 async function setDictionaryEnabled(page) {
-    const result = await page.evaluate(async (dictionaryTitle) => {
-        const sendMessage = (action, params) => new Promise((resolve, reject) => {
-            chrome.runtime.sendMessage({action, params}, (response) => {
-                if (chrome.runtime.lastError) {
-                    reject(new Error(chrome.runtime.lastError.message));
-                    return;
-                }
-                if (response && typeof response === 'object' && 'error' in response) {
-                    reject(new Error(JSON.stringify(response.error)));
-                    return;
-                }
-                resolve(response?.result ?? response);
-            });
-        });
-        const full = await sendMessage('optionsGetFull');
-        const next = structuredClone(full);
-        const dictionaries = next.profiles?.[0]?.options?.dictionaries;
-        if (!Array.isArray(dictionaries)) { throw new Error('profile dictionary options are unavailable'); }
-        let item = dictionaries.find((entry) => entry?.name === dictionaryTitle);
-        if (!item) {
-            item = {name: dictionaryTitle, enabled: true};
-            dictionaries.push(item);
-        }
-        item.enabled = true;
-        await sendMessage('setAllSettings', {value: next, source: 'restart-interruption-campaign'});
-        return {enabled: item.enabled, name: item.name};
-    }, title);
+    const result = await enableDictionarySettings((action, params) => send(page, action, params), title);
     assert.deepEqual(result, {enabled: true, name: title});
 }
 
