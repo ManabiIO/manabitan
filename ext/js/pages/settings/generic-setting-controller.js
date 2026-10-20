@@ -32,14 +32,15 @@ export class GenericSettingController {
         this._settingsController = settingsController;
         /** @type {import('settings-modifications').OptionsScopeType} */
         this._defaultScope = 'profile';
+        const optionsContext = settingsController.getOptionsContext();
+        /** @type {import('settings').OptionsContext2} */
+        this._readyOptionsContext = {...optionsContext, profileId: optionsContext.profileId ?? null};
+        /** @type {number} */
+        this._viewGeneration = 0;
         /** @type {DOMDataBinder<import('generic-setting-controller').ElementMetadata>} */
-        this._dataBinder = new DOMDataBinder(
-            ['[data-setting]', '[data-permissions-setting]'],
-            this._createElementMetadata.bind(this),
-            this._compareElementMetadata.bind(this),
-            this._getValues.bind(this),
-            this._setValues.bind(this),
-        );
+        this._dataBinder = this._createDataBinder(false);
+        /** @type {DOMDataBinder<import('generic-setting-controller').ElementMetadata>} */
+        this._globalDataBinder = this._createDataBinder(true);
         /** @type {Map<import('generic-setting-controller').TransformType, import('generic-setting-controller').TransformFunction>} */
         this._transforms = new Map(/** @type {[key: import('generic-setting-controller').TransformType, value: import('generic-setting-controller').TransformFunction][]} */ ([
             ['setAttribute', this._setAttribute.bind(this)],
@@ -56,21 +57,50 @@ export class GenericSettingController {
     /** */
     async prepare() {
         this._dataBinder.observe(document.body);
+        this._globalDataBinder.observe(document.body);
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
     }
 
     /** */
     async refresh() {
-        await this._dataBinder.refresh();
+        await Promise.all([this._dataBinder.refresh(), this._globalDataBinder.refresh()]);
     }
 
     // Private
 
-    /** */
-    _onOptionsChanged() {
+    /**
+     * @param {import('settings-controller').Events['optionsChanged']} event
+     */
+    _onOptionsChanged({optionsContext}) {
+        const readyOptionsContext = /** @type {import('settings').OptionsContext2} */ (optionsContext);
+        const previousProfileId = this._readyOptionsContext.profileId;
+        this._readyOptionsContext = {...readyOptionsContext, profileId: readyOptionsContext.profileId ?? null};
+        void this._globalDataBinder.refresh().catch((error) => { log.error(error); });
+        if (previousProfileId !== this._readyOptionsContext.profileId) {
+            ++this._viewGeneration;
+            this._dataBinder.disconnect();
+            this._dataBinder = this._createDataBinder(false);
+            this._dataBinder.observe(document.body);
+            return;
+        }
         void this._dataBinder.refresh().catch((error) => {
             log.error(error);
         });
+    }
+
+    /**
+     * @param {boolean} globalScope
+     * @returns {DOMDataBinder<import('generic-setting-controller').ElementMetadata>}
+     */
+    _createDataBinder(globalScope) {
+        const scope = globalScope ? '[data-scope="global"]' : ':not([data-scope="global"])';
+        return new DOMDataBinder(
+            [`[data-setting]${scope}`, `[data-permissions-setting]${scope}`],
+            this._createElementMetadata.bind(this),
+            this._compareElementMetadata.bind(this),
+            this._getValues.bind(this),
+            this._setValues.bind(this),
+        );
     }
 
     /**
@@ -84,12 +114,19 @@ export class GenericSettingController {
         if (typeof path !== 'string') { return void 0; }
         const scope2 = this._normalizeScope(scope);
         const dictionaryRowOwnership = getDictionaryRowOwnership(element);
+        const effectiveScope = scope2 !== null ? scope2 : this._defaultScope;
+        const profileOwnership = (
+            effectiveScope === 'profile' ?
+                {profileId: this._readyOptionsContext.profileId ?? null, viewGeneration: this._viewGeneration, optionsContext: {...this._readyOptionsContext}} :
+                void 0
+        );
         return {
             path,
-            scope: scope2 !== null ? scope2 : this._defaultScope,
+            scope: effectiveScope,
             transforms: this._getTransformDataArray(transformRaw),
             transformRaw,
             dictionaryRowOwnership,
+            profileOwnership,
         };
     }
 
@@ -104,7 +141,9 @@ export class GenericSettingController {
             metadata1.scope === metadata2.scope &&
             metadata1.transformRaw === metadata2.transformRaw &&
             metadata1.dictionaryRowOwnership?.id === metadata2.dictionaryRowOwnership?.id &&
-            metadata1.dictionaryRowOwnership?.profileId === metadata2.dictionaryRowOwnership?.profileId
+            metadata1.dictionaryRowOwnership?.profileId === metadata2.dictionaryRowOwnership?.profileId &&
+            metadata1.profileOwnership?.profileId === metadata2.profileOwnership?.profileId &&
+            metadata1.profileOwnership?.viewGeneration === metadata2.profileOwnership?.viewGeneration
         );
     }
 
@@ -120,7 +159,7 @@ export class GenericSettingController {
         /** @type {(import('dom-data-binder').TaskResult | null)[]} */
         const localValues = [];
         for (let i = 0; i < targets.length; ++i) {
-            const {metadata: {path, scope, dictionaryRowOwnership}} = targets[i];
+            const {metadata: {path, scope, dictionaryRowOwnership, profileOwnership}} = targets[i];
             const dictionaryMatch = /^dictionaries\[(\d+)\]\.([A-Za-z]+)$/u.exec(path);
             if (dictionaryMatch !== null && dictionaryRowOwnership === void 0) {
                 responseIndexes.push(-1);
@@ -150,13 +189,22 @@ export class GenericSettingController {
             const target = {
                 path,
                 scope: typeof scope === 'string' ? scope : defaultScope,
-                optionsContext: null,
+                optionsContext: profileOwnership?.optionsContext ?? null,
+                ...(scope === 'profile' ? {profileId: profileOwnership?.profileId ?? ''} : {}),
             };
             settingsTargets.push(target);
             responseIndexes.push(settingsTargets.length - 1);
             localValues.push(null);
         }
         const values = await this._settingsController.getSettings(settingsTargets);
+        for (let i = 0; i < targets.length; ++i) {
+            const ownership = targets[i].metadata.profileOwnership;
+            const responseIndex = responseIndexes[i];
+            if (!this._isProfileOwnershipCurrent(ownership) && responseIndex >= 0) {
+                localValues[i] = {error: new ExtensionError('Profile changed; discard stale setting read')};
+                responseIndexes[i] = -1;
+            }
+        }
         for (const {metadata: {dictionaryRowOwnership}} of targets) {
             if (dictionaryRowOwnership !== void 0 && this._settingsController.getOptionsContext().profileId !== dictionaryRowOwnership.profileId) {
                 return targets.map(() => ({error: new ExtensionError('Profile changed; reload the dictionary settings row')}));
@@ -174,8 +222,8 @@ export class GenericSettingController {
         const defaultScope = this._defaultScope;
         /** @type {import('settings-modifications').ScopedModification[]} */
         const settingsTargets = [];
-        for (const {metadata: {path, scope, transforms}, value, element} of targets) {
-            const transformedValue = this._applyTransforms(value, transforms, 'pre', element);
+        for (const {metadata: {path, scope, transforms, profileOwnership}, value, element} of targets) {
+            const transformedValue = this._applyTransforms(value, transforms, 'pre', element, this._isProfileOwnershipCurrent(profileOwnership));
             /** @type {import('settings-modifications').ScopedModification} */
             let target;
             const dictionaryMatch = /^dictionaries\[(\d+)\]\.([A-Za-z]+)$/u.exec(path);
@@ -211,7 +259,8 @@ export class GenericSettingController {
                     scope: typeof scope === 'string' ? scope : defaultScope,
                     action: 'set',
                     value: transformedValue,
-                    optionsContext: null,
+                    optionsContext: profileOwnership?.optionsContext ?? null,
+                    ...(scope === 'profile' ? {profileId: profileOwnership?.profileId ?? ''} : {}),
                 };
             }
             settingsTargets.push(target);
@@ -245,7 +294,24 @@ export class GenericSettingController {
                 log.error(error);
             });
         }
-        return this._transformResults(results, targets);
+        return results.map((result, i) => {
+            const ownership = targets[i].metadata.profileOwnership;
+            if (!this._isProfileOwnershipCurrent(ownership)) {
+                return {error: new ExtensionError('Profile changed; discard stale setting write response')};
+            }
+            return this._transformResults([result], [targets[i]])[0];
+        });
+    }
+
+    /**
+     * @param {import('generic-setting-controller').ElementMetadata['profileOwnership']} ownership
+     * @returns {boolean}
+     */
+    _isProfileOwnershipCurrent(ownership) {
+        return typeof ownership === 'undefined' || (
+            ownership.viewGeneration === this._viewGeneration &&
+            ownership.profileId === this._settingsController.getOptionsContext().profileId
+        );
     }
 
     /**
@@ -268,10 +334,12 @@ export class GenericSettingController {
      * @param {import('generic-setting-controller').TransformData[]} transforms
      * @param {import('generic-setting-controller').TransformStep} step
      * @param {Element} element
+     * @param {boolean} [allowDomMutation]
      * @returns {unknown}
      */
-    _applyTransforms(value, transforms, step, element) {
+    _applyTransforms(value, transforms, step, element, allowDomMutation = true) {
         for (const transform of transforms) {
+            if (!allowDomMutation && (transform.type === 'setAttribute' || transform.type === 'setVisibility')) { continue; }
             const transformStep = transform.step;
             if (typeof transformStep !== 'undefined' && transformStep !== step) { continue; }
 

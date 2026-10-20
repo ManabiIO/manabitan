@@ -285,11 +285,11 @@ describe('popup publication cancellation', () => {
         expect(g.unsubscribe).toHaveBeenCalledOnce();
     });
 
-    test('window publication timeout survives serialization and rejects without retry, releasing its subscription', async () => {
-        const timeout = new Error('Popup content rendering timed out');
-        timeout.name = 'PopupContentTimeoutError';
+    test.each(['PopupContentTimeoutError', 'PopupContentRenderError'])('window publication failure %s survives serialization and rejects without retry, releasing its subscription', async (name) => {
+        const timeout = new Error('Popup content rendering failed');
+        timeout.name = name;
         const receivedError = ExtensionError.deserialize(ExtensionError.serialize(timeout));
-        expect(receivedError.name).toBe('PopupContentTimeoutError');
+        expect(receivedError.name).toBe(name);
         const invokeTab = vi.fn().mockRejectedValue(receivedError);
         const getOrCreateSearchPopup = vi.fn().mockResolvedValue({tabId: 20});
         const p = new PopupWindow(fakeApplication({
