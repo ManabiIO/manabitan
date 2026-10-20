@@ -99,6 +99,8 @@ export class AnkiController {
         this._cardFormatRemoveModal = null;
         /** @type {?import('./modal.js').Modal} */
         this._cardFormatMaximumModal = null;
+        /** @type {?{owner: {optionsContext: import('settings').OptionsContext2, optionsRevision: (number|undefined), profileIndexChangeGeneration: (number|undefined)}, cardFormats: import('settings').AnkiCardFormat[], index: number}} */
+        this._cardFormatDeleteSnapshot = null;
         /** @type {HTMLElement} */
         this._cardFormatRemoveName = querySelectorNotNull(document, '#anki-card-format-remove-name');
         /** @type {HTMLButtonElement} */
@@ -143,6 +145,7 @@ export class AnkiController {
 
         await this._updateOptions();
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
+        this._settingsController.on('optionsContextChanged', this._onOptionsContextChanged.bind(this));
 
         const onAnkiSettingChanged = () => { void this._updateOptions(); };
         const nodes = [ankiApiKeyInput, ...document.querySelectorAll('[data-setting="anki.enable"]')];
@@ -220,15 +223,67 @@ export class AnkiController {
     /** */
     async _updateOptions() {
         const optionsContext = this._settingsController.getOptionsContext();
+        const owner = this._captureOwner(optionsContext);
         const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        if (!this._isOwnerCurrent(owner)) { return; }
         this._onOptionsChanged({options, optionsContext});
+    }
+
+    /** @returns {Promise<void>} */
+    async refreshOptions() {
+        await this._updateOptions();
+    }
+
+    /**
+     * @param {import('settings').OptionsContext2} [optionsContext]
+     * @returns {{optionsContext: import('settings').OptionsContext2, optionsRevision: (number|undefined), profileIndexChangeGeneration: (number|undefined)}}
+     */
+    _captureOwner(optionsContext = this._settingsController.getOptionsContext()) {
+        return {
+            optionsContext: {...optionsContext},
+            optionsRevision: Reflect.get(this._settingsController, 'optionsRevision'),
+            profileIndexChangeGeneration: this._settingsController.profileIndexChangeGeneration,
+        };
+    }
+
+    /**
+     * @param {{optionsContext: import('settings').OptionsContext2, optionsRevision: (number|undefined), profileIndexChangeGeneration: (number|undefined)}|null} owner
+     * @returns {boolean}
+     */
+    _isOwnerCurrent(owner) {
+        if (owner === null) { return false; }
+        const context = this._settingsController.getOptionsContext();
+        return (
+            context.index === owner.optionsContext.index &&
+            context.profileId === owner.optionsContext.profileId &&
+            (typeof owner.optionsRevision !== 'number' || Reflect.get(this._settingsController, 'optionsRevision') === owner.optionsRevision) &&
+            (typeof owner.profileIndexChangeGeneration !== 'number' || this._settingsController.profileIndexChangeGeneration === owner.profileIndexChangeGeneration)
+        );
+    }
+
+    /** */
+    _onOptionsContextChanged() {
+        if (this._cardFormatDeleteSnapshot === null) { return; }
+        if (!this._isOwnerCurrent(this._cardFormatDeleteSnapshot.owner)) {
+            this._invalidateDeleteCardFormatModal();
+        }
+    }
+
+    /** */
+    _invalidateDeleteCardFormatModal() {
+        this._cardFormatDeleteSnapshot = null;
+        const modal = this._cardFormatRemoveModal;
+        if (modal !== null) {
+            delete modal.node.dataset.cardFormatIndex;
+            modal.setVisible(false);
+        }
     }
 
     /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
     _onOptionsChanged({options: {anki, dictionaries, general: {language}}}) {
+        this._invalidateDeleteCardFormatModal();
         /** @type {?string} */
         let apiKey = anki.apiKey;
         if (apiKey === '') { apiKey = null; }
@@ -337,6 +392,9 @@ export class AnkiController {
      * @throws {Error}
      */
     _setCardFormatIndex(cardFormatIndex, ankiCardMenu) {
+        if (this._cardFormatDeleteSnapshot !== null && this._cardFormatDeleteSnapshot.index !== cardFormatIndex) {
+            this._invalidateDeleteCardFormatModal();
+        }
         this._cardFormatIndex = cardFormatIndex;
         if (this._ankiCardPrimary === null) {
             throw new Error('Anki card primary element not found');
@@ -693,16 +751,17 @@ export class AnkiController {
      */
     _onNewFormatButtonClick(e) {
         e.preventDefault();
-        void this._addNewFormat();
+        void this._addNewFormat().catch((error) => { log.error(error); });
     }
 
     /** */
     async _addNewFormat() {
-        const optionsContext = this._settingsController.getOptionsContext();
+        const owner = this._captureOwner();
         const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+        if (!this._isOwnerCurrent(owner)) { return; }
         const ankiOptions = options.anki;
-        const index = ankiOptions.cardFormats.length;
+        const cardFormats = ankiOptions.cardFormats;
+        const index = cardFormats.length;
 
         if (index >= 5) {
             this._cardFormatMaximumModal?.setVisible(true);
@@ -719,15 +778,17 @@ export class AnkiController {
             icon: 'big-circle',
         };
 
-        await this._settingsController.modifyProfileSettings([{
-            action: 'splice',
+        const results = await this._settingsController.modifySettings([{
+            action: 'set',
+            scope: 'profile',
+            optionsContext: owner.optionsContext,
+            profileId: owner.optionsContext.profileId,
             path: 'anki.cardFormats',
-            start: index,
-            deleteCount: 0,
-            items: [newCardFormat],
+            expectedValue: cardFormats,
+            value: [...cardFormats, newCardFormat],
         }]);
-
-        await this._updateOptions();
+        this._throwModificationErrors(results);
+        if (this._isOwnerCurrent(owner)) { await this._updateOptions(); }
     }
 
     /**
@@ -744,8 +805,14 @@ export class AnkiController {
      */
     openDeleteCardFormatModal(cardFormatIndex) {
         const cardFormat = this._getCardFormat(cardFormatIndex);
-        if (cardFormat === null) { return; }
+        const cardFormats = this._ankiOptions?.cardFormats;
+        if (cardFormat === null || typeof cardFormats === 'undefined' || cardFormats.length <= 1) { return; }
 
+        this._cardFormatDeleteSnapshot = {
+            owner: this._captureOwner(),
+            cardFormats: structuredClone(cardFormats),
+            index: cardFormatIndex,
+        };
         /** @type {HTMLElement} */ (this._cardFormatRemoveName).textContent = cardFormat.name;
         /** @type {import('./modal.js').Modal} */ (this._cardFormatRemoveModal).node.dataset.cardFormatIndex = `${cardFormatIndex}`;
         /** @type {import('./modal.js').Modal} */ (this._cardFormatRemoveModal).setVisible(true);
@@ -755,14 +822,13 @@ export class AnkiController {
     _onCardFormatRemoveConfirm() {
         const modal = /** @type {import('./modal.js').Modal} */ (this._cardFormatRemoveModal);
         modal.setVisible(false);
-        const {node} = modal;
-        const cardFormatIndex = node.dataset.cardFormatIndex;
-        delete node.dataset.cardFormatIndex;
-
-        const validCardFormatIndex = this._tryGetValidCardFormatIndex(cardFormatIndex);
-        if (validCardFormatIndex === null) { return; }
-
-        void this.deleteCardFormat(validCardFormatIndex);
+        delete modal.node.dataset.cardFormatIndex;
+        const snapshot = this._cardFormatDeleteSnapshot;
+        this._cardFormatDeleteSnapshot = null;
+        if (snapshot === null || !this._isOwnerCurrent(snapshot.owner) || this._cardFormatIndex !== snapshot.index) { return; }
+        const currentFormats = this._ankiOptions?.cardFormats;
+        if (!Array.isArray(currentFormats) || currentFormats.length <= 1 || !this._sameValue(currentFormats, snapshot.cardFormats)) { return; }
+        void this.deleteCardFormat(snapshot.index, snapshot).catch((error) => { log.error(error); });
     }
 
     /**
@@ -775,20 +841,22 @@ export class AnkiController {
     }
 
     /**
-     * @param {string|undefined} stringValue
-     * @returns {?number}
+     * @param {unknown} value
+     * @param {unknown} expected
+     * @returns {boolean}
      */
-    _tryGetValidCardFormatIndex(stringValue) {
-        if (typeof stringValue !== 'string') { return null; }
-        const intValue = Number.parseInt(stringValue, 10);
-        if (this._ankiOptions === null) { return null; }
-        return (
-            Number.isFinite(intValue) &&
-            intValue >= 0 &&
-            intValue < this._ankiOptions.cardFormats.length ?
-            intValue :
-            null
-        );
+    _sameValue(value, expected) {
+        return JSON.stringify(value) === JSON.stringify(expected);
+    }
+
+    /**
+     * @param {import('settings-controller').ModifyResult[]} results
+     * @throws {Error}
+     */
+    _throwModificationErrors(results) {
+        for (const result of results) {
+            if (typeof result.error !== 'undefined') { throw ExtensionError.deserialize(result.error); }
+        }
     }
 
     /**
@@ -798,26 +866,36 @@ export class AnkiController {
     _getCardFormat(cardFormatIndex) {
         if (this._ankiOptions === null) { return null; }
         if (cardFormatIndex < 0 || cardFormatIndex >= this._ankiOptions.cardFormats.length) { return null; }
-        return this._ankiOptions.cardFormats[cardFormatIndex];
+        return this._ankiOptions.cardFormats[cardFormatIndex] ?? null;
     }
 
     /**
      * @param {number} cardFormatIndex
+     * @param {{owner: {optionsContext: import('settings').OptionsContext2, optionsRevision: (number|undefined), profileIndexChangeGeneration: (number|undefined)}, cardFormats: import('settings').AnkiCardFormat[], index: number}|null} [snapshot]
+     * @throws {Error}
      */
-    async deleteCardFormat(cardFormatIndex) {
-        if (this._ankiOptions === null) { return; }
-        const cardFormats = this._ankiOptions.cardFormats;
-        if (cardFormatIndex < 0 || cardFormatIndex >= cardFormats.length) { return; }
-
-        await this._settingsController.modifyProfileSettings([{
-            action: 'splice',
+    async deleteCardFormat(cardFormatIndex, snapshot = null) {
+        const owner = snapshot?.owner ?? this._captureOwner();
+        const cardFormats = snapshot?.cardFormats ?? this._ankiOptions?.cardFormats;
+        if (!Array.isArray(cardFormats) || cardFormats.length <= 1 || cardFormatIndex < 0 || cardFormatIndex >= cardFormats.length) { return; }
+        if (
+            !this._isOwnerCurrent(owner) ||
+            (snapshot !== null && this._cardFormatIndex !== snapshot.index) ||
+            !this._sameValue(this._ankiOptions?.cardFormats, cardFormats)
+        ) { return; }
+        const newCardFormats = cardFormats.filter((_format, index) => index !== cardFormatIndex);
+        const results = await this._settingsController.modifySettings([{
+            action: 'set',
+            scope: 'profile',
+            optionsContext: owner.optionsContext,
+            profileId: owner.optionsContext.profileId,
             path: 'anki.cardFormats',
-            start: cardFormatIndex,
-            deleteCount: 1,
-            items: [],
+            expectedValue: cardFormats,
+            value: newCardFormats,
         }]);
-
-        this._cardFormatIndex = cardFormatIndex - 1;
+        this._throwModificationErrors(results);
+        if (!this._isOwnerCurrent(owner)) { return; }
+        this._cardFormatIndex = Math.max(0, cardFormatIndex - 1);
         await this._updateOptions();
     }
 }
@@ -831,6 +909,8 @@ class AnkiCardController {
     constructor(settingsController, ankiController, node) {
         /** @type {import('./settings-controller.js').SettingsController} */
         this._settingsController = settingsController;
+        /** @type {ReturnType<AnkiCardController['_captureCardFormatOwner']>} */
+        this._viewOwner = this._captureCardFormatOwner();
         /** @type {AnkiController} */
         this._ankiController = ankiController;
         /** @type {HTMLElement} */
@@ -851,8 +931,12 @@ class AnkiCardController {
         this._fieldEventListeners = new EventListenerCollection();
         /** @type {import('settings').AnkiFields} */
         this._fields = {};
-        /** @type {?string} */
-        this._modelChangingTo = null;
+        /** @type {Promise<void>} */
+        this._cardFormatMutationTail = Promise.resolve();
+        /** @type {number} */
+        this._modelChangeRequest = 0;
+        /** @type {number} */
+        this._deckChangeRequest = 0;
         /** @type {?Element} */
         this._AnkiFieldsContainer = null;
         /** @type {boolean} */
@@ -869,11 +953,11 @@ class AnkiCardController {
     async prepare() {
         const options = await this._settingsController.getOptions();
         const ankiOptions = options.anki;
-        if (this._cleaned) { return; }
+        if (this._cleaned || !this._isOwnerCurrent(this._viewOwner)) { return; }
 
         const cardFormat = this._getCardFormat(ankiOptions, this._cardFormatIndex);
         if (cardFormat === null) { return; }
-        this._cardFormat = cardFormat;
+        this._cardFormat = structuredClone(cardFormat);
 
         const {deck, model, fields} = this._cardFormat;
         /** @type {HTMLSelectElement} */
@@ -887,6 +971,7 @@ class AnkiCardController {
         this._AnkiFieldsContainer = this._node.querySelector('.anki-card-fields');
         this._setupFields();
 
+        this._eventListeners.addEventListener(document, 'settingChanged', this._onCardSettingChanged.bind(this), true);
         this._eventListeners.addEventListener(this._deckController.select, 'change', this._onCardDeckChange.bind(this), false);
         this._eventListeners.addEventListener(this._modelController.select, 'change', this._onCardModelChange.bind(this), false);
         this._eventListeners.on(this._settingsController, 'permissionsChanged', this._onPermissionsChanged.bind(this));
@@ -940,6 +1025,33 @@ class AnkiCardController {
         void this._setModel(node.value).catch((error) => {
             log.error(error);
         });
+    }
+
+    /**
+     * Keep the row expectation aligned with values published into this view.
+     * A fresh options RPC alone cannot authorize a replacement row.
+     * @param {Event} event
+     */
+    _onCardSettingChanged(event) {
+        if (this._cardFormat === null || !this._isOwnerCurrent(this._viewOwner)) { return; }
+        const element = event.target;
+        if (!(element instanceof HTMLElement)) { return; }
+        const path = element.dataset.setting;
+        if (typeof path !== 'string') { return; }
+        const parts = ObjectPropertyAccessor.getPathArray(path);
+        if (parts[0] !== 'anki' || parts[1] !== 'cardFormats' || parts[2] !== this._cardFormatIndex || parts.length < 4) { return; }
+        const {value} = /** @type {import('dom-data-binder').SettingChangedEvent} */ (event).detail;
+        new ObjectPropertyAccessor(this._cardFormat).set(parts.slice(3), value);
+    }
+
+    /**
+     * @param {import('settings').AnkiCardFormat} cardFormat
+     * @returns {boolean}
+     */
+    _matchesRenderedCardFormat(cardFormat) {
+        if (JSON.stringify(cardFormat) === JSON.stringify(this._cardFormat)) { return true; }
+        void this._ankiController.refreshOptions().catch((error) => log.error(error));
+        return false;
     }
 
     /**
@@ -1039,15 +1151,10 @@ class AnkiCardController {
     /**
      * @param {import('settings').AnkiOptions} ankiOptions
      * @param {number} cardFormatIndex
-     * @returns {import('settings').AnkiCardFormat}
-     * @throws {Error}
+     * @returns {?import('settings').AnkiCardFormat}
      */
     _getCardFormat(ankiOptions, cardFormatIndex) {
-        const cardFormat = ankiOptions.cardFormats[cardFormatIndex];
-        if (typeof cardFormat === 'undefined') {
-            throw new Error('Invalid card format index');
-        }
-        return cardFormat;
+        return ankiOptions.cardFormats[cardFormatIndex] ?? null;
     }
 
     /** */
@@ -1149,19 +1256,34 @@ class AnkiCardController {
      * @param {string} value
      */
     async _setDeck(value) {
-        if (this._deckController.value === value) { return; }
-        const previousValue = this._deckController.value;
-        this._deckController.value = value;
-
+        const request = ++this._deckChangeRequest;
+        const owner = this._viewOwner;
         try {
-            await this._settingsController.modifyProfileSettings([{
-                action: 'set',
-                path: ObjectPropertyAccessor.getPathString(['anki', 'cardFormats', this._cardFormatIndex, 'deck']),
-                value,
-            }]);
-        } catch (error) {
-            this._deckController.value = previousValue;
-            throw error;
+            await this._enqueueCardFormatMutation(async () => {
+                if (!this._isCardFormatRequestCurrent(owner, 'deck', request)) { return; }
+                let options;
+                try {
+                    options = await this._settingsController.getOptions();
+                } catch (error) {
+                    await this._reconcileCardFormat(owner, request, 'deck');
+                    throw error;
+                }
+                if (!this._isCardFormatRequestCurrent(owner, 'deck', request)) { return; }
+                const cardFormat = this._getCardFormat(options.anki, this._cardFormatIndex);
+                if (cardFormat === null || !this._matchesRenderedCardFormat(cardFormat) || cardFormat.deck === value) { return; }
+                const nextCardFormat = {...cardFormat, deck: value};
+                try {
+                    await this._writeCardFormat(owner, cardFormat, nextCardFormat);
+                    this._cardFormat = structuredClone(nextCardFormat);
+                    if (!this._isCardFormatRequestCurrent(owner, 'deck', request)) { return; }
+                    this._deckController.value = value;
+                } catch (error) {
+                    await this._reconcileCardFormat(owner, request, 'deck');
+                    throw error;
+                }
+            });
+        } finally {
+            this._restoreAcknowledgedSelect('deck', request);
         }
     }
 
@@ -1169,108 +1291,190 @@ class AnkiCardController {
      * @param {string} value
      */
     async _setModel(value) {
-        const select = this._modelController.select;
-        const optionsContext = this._settingsController.getOptionsContext();
-        if (this._modelChangingTo !== null) {
-            // Revert
-            select.value = this._modelChangingTo;
-            return;
-        }
-        if (this._modelController.value === value) { return; }
-        const previousModel = this._modelController.value;
-        const previousFields = this._fields;
-
-        let fieldNames;
-        let options;
-        /** @type {import('dictionary-importer').Summary[]} */
-        let dictionaryInfo = [];
+        const request = ++this._modelChangeRequest;
+        const owner = this._viewOwner;
         try {
-            this._modelChangingTo = value;
-            [fieldNames, options] = await Promise.all([
-                this._ankiController.getModelFieldNames(value),
-                this._ankiController.settingsController.getOptions(),
-            ]);
-        } catch (e) {
-            // Revert
-            select.value = this._modelController.value;
-            return;
+            await this._enqueueCardFormatMutation(async () => {
+                if (!this._isCardFormatRequestCurrent(owner, 'model', request)) { return; }
+                let options;
+                try {
+                    options = await this._settingsController.getOptions();
+                } catch (error) {
+                    await this._reconcileCardFormat(owner, request, 'model');
+                    throw error;
+                }
+                if (!this._isCardFormatRequestCurrent(owner, 'model', request)) { return; }
+                const cardFormat = this._getCardFormat(options.anki, this._cardFormatIndex);
+                if (cardFormat === null || !this._matchesRenderedCardFormat(cardFormat) || cardFormat.model === value) { return; }
+
+                let fieldNames;
+                try {
+                    fieldNames = await this._ankiController.getModelFieldNames(value);
+                } catch (error) {
+                    await this._reconcileCardFormat(owner, request, 'model');
+                    throw error;
+                }
+                if (!this._isCardFormatRequestCurrent(owner, 'model', request)) { return; }
+
+                /** @type {import('dictionary-importer').Summary[]} */
+                let dictionaryInfo = [];
+                if (cardFormat.type === 'term') {
+                    try {
+                        dictionaryInfo = await this._settingsController.getDictionaryInfo();
+                    } catch (e) {
+                        // Presets can still be applied without a primary dictionary marker.
+                    }
+                    if (!this._isCardFormatRequestCurrent(owner, 'model', request)) { return; }
+                }
+
+                const fields = buildAnkiFieldsForModel({
+                    modelName: value,
+                    fieldNames,
+                    dictionaryEntryType: cardFormat.type,
+                    oldFields: cardFormat.fields,
+                    dynamicFieldMarkers: (
+                        cardFormat.type === 'term' ?
+                        getDynamicFieldMarkers(options.dictionaries, dictionaryInfo) :
+                        []
+                    ),
+                });
+                const nextCardFormat = {...cardFormat, model: value, fields};
+                try {
+                    await this._writeCardFormat(owner, cardFormat, nextCardFormat);
+                    this._cardFormat = structuredClone(nextCardFormat);
+                    if (!this._isCardFormatRequestCurrent(owner, 'model', request)) { return; }
+                    this._modelController.value = value;
+                    this._fields = this._cardFormat.fields;
+                    this._setupFields();
+                } catch (error) {
+                    await this._reconcileCardFormat(owner, request, 'model');
+                    throw error;
+                }
+            });
         } finally {
-            this._modelChangingTo = null;
+            this._restoreAcknowledgedSelect('model', request);
         }
+    }
 
-        if (
-            this._cleaned ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index
-        ) {
-            select.value = this._modelController.value;
-            return;
+    /**
+     * A cancelled request still owns the native select's attempted value until
+     * this controller is cleaned up or a newer choice supersedes it.
+     * @param {'deck'|'model'} kind
+     * @param {number} request
+     */
+    _restoreAcknowledgedSelect(kind, request) {
+        if (this._cleaned || (kind === 'deck' ? this._deckChangeRequest : this._modelChangeRequest) !== request) { return; }
+        const controller = kind === 'deck' ? this._deckController : this._modelController;
+        controller.value = this._cardFormat?.[kind] ?? controller.value;
+        if (kind === 'model' && this._cardFormat !== null && this._fields !== this._cardFormat.fields) {
+            this._fields = this._cardFormat.fields;
+            this._setupFields();
         }
+    }
 
-        const cardFormat = this._getCardFormat(options.anki, this._cardFormatIndex);
-        if (cardFormat === null) {
-            select.value = this._modelController.value;
-            return;
+    /**
+     * @returns {{optionsContext: import('settings').OptionsContext2, optionsRevision: (number|undefined), profileIndexChangeGeneration: (number|undefined)}}
+     */
+    _captureCardFormatOwner() {
+        const optionsContext = this._settingsController.getOptionsContext();
+        return {
+            optionsContext: {...optionsContext},
+            optionsRevision: Reflect.get(this._settingsController, 'optionsRevision'),
+            profileIndexChangeGeneration: this._settingsController.profileIndexChangeGeneration,
+        };
+    }
+
+    /**
+     * @param {{optionsContext: import('settings').OptionsContext2, optionsRevision: (number|undefined), profileIndexChangeGeneration: (number|undefined)}} owner
+     * @returns {boolean}
+     */
+    _isOwnerCurrent(owner) {
+        const context = this._settingsController.getOptionsContext();
+        return (
+            context.index === owner.optionsContext.index &&
+            context.profileId === owner.optionsContext.profileId &&
+            (typeof owner.optionsRevision !== 'number' || Reflect.get(this._settingsController, 'optionsRevision') === owner.optionsRevision) &&
+            (typeof owner.profileIndexChangeGeneration !== 'number' || this._settingsController.profileIndexChangeGeneration === owner.profileIndexChangeGeneration)
+        );
+    }
+
+    /**
+     * @param {{optionsContext: import('settings').OptionsContext2, optionsRevision: (number|undefined), profileIndexChangeGeneration: (number|undefined)}} owner
+     * @param {'deck'|'model'} kind
+     * @param {number} request
+     * @returns {boolean}
+     */
+    _isCardFormatRequestCurrent(owner, kind, request) {
+        const context = this._settingsController.getOptionsContext();
+        return (
+            !this._cleaned &&
+            context.index === owner.optionsContext.index &&
+            context.profileId === owner.optionsContext.profileId &&
+            (typeof owner.optionsRevision !== 'number' || Reflect.get(this._settingsController, 'optionsRevision') === owner.optionsRevision) &&
+            (typeof owner.profileIndexChangeGeneration !== 'number' || this._settingsController.profileIndexChangeGeneration === owner.profileIndexChangeGeneration) &&
+            (kind === 'deck' ? this._deckChangeRequest === request : this._modelChangeRequest === request)
+        );
+    }
+
+    /**
+     * @param {() => Promise<void>} operation
+     * @returns {Promise<void>}
+     */
+    _enqueueCardFormatMutation(operation) {
+        const result = this._cardFormatMutationTail.then(operation);
+        this._cardFormatMutationTail = result.catch(() => {});
+        return result;
+    }
+
+    /**
+     * @param {{optionsContext: import('settings').OptionsContext2, optionsRevision: (number|undefined), profileIndexChangeGeneration: (number|undefined)}} owner
+     * @param {import('settings').AnkiCardFormat} expected
+     * @param {import('settings').AnkiCardFormat} value
+     */
+    async _writeCardFormat(owner, expected, value) {
+        if (!this._isOwnerCurrent(owner)) { throw new Error('Card format settings changed before update'); }
+        const path = ObjectPropertyAccessor.getPathString(['anki', 'cardFormats', this._cardFormatIndex]);
+        const results = await this._settingsController.modifySettings([{
+            action: 'set',
+            scope: 'profile',
+            optionsContext: owner.optionsContext,
+            profileId: owner.optionsContext.profileId,
+            path,
+            expectedValue: expected,
+            value,
+        }]);
+        if (results.length !== 1) { throw new Error('Incomplete card format update response'); }
+        for (const result of results) {
+            if (typeof result.error !== 'undefined') { throw ExtensionError.deserialize(result.error); }
         }
-        const oldFields = cardFormat.fields;
-        if (cardFormat.type === 'term') {
-            try {
-                dictionaryInfo = await this._ankiController.settingsController.getDictionaryInfo();
-            } catch (e) {
-                // If dictionary info is unavailable, presets can still be applied without a primary dictionary marker.
-            }
-            if (
-                this._cleaned ||
-                this._settingsController.getOptionsContext().index !== optionsContext.index
-            ) {
-                select.value = this._modelController.value;
-                return;
-            }
-        }
-        const fields = buildAnkiFieldsForModel({
-            modelName: value,
-            fieldNames,
-            dictionaryEntryType: cardFormat.type,
-            oldFields,
-            dynamicFieldMarkers: (
-                cardFormat.type === 'term' ?
-                getDynamicFieldMarkers(options.dictionaries, dictionaryInfo) :
-                []
-            ),
-        });
+        if (!this._isOwnerCurrent(owner)) { throw new Error('Card format settings owner changed during update'); }
+    }
 
-        /** @type {import('settings-modifications').Modification[]} */
-        const targets = [
-            {
-                action: 'set',
-                path: ObjectPropertyAccessor.getPathString(['anki', 'cardFormats', this._cardFormatIndex, 'model']),
-                value,
-            },
-            {
-                action: 'set',
-                path: ObjectPropertyAccessor.getPathString(['anki', 'cardFormats', this._cardFormatIndex, 'fields']),
-                value: fields,
-            },
-        ];
-
-        if (
-            this._cleaned ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index
-        ) {
-            select.value = this._modelController.value;
-            return;
-        }
-
-        this._modelController.value = value;
-        this._fields = fields;
-
+    /**
+     * @param {{optionsContext: import('settings').OptionsContext2, optionsRevision: (number|undefined), profileIndexChangeGeneration: (number|undefined)}} owner
+     * @param {number} request
+     * @param {'deck'|'model'} kind
+     */
+    async _reconcileCardFormat(owner, request, kind) {
+        if (!this._isCardFormatRequestCurrent(owner, kind, request)) { return; }
+        let options;
         try {
-            await this._settingsController.modifyProfileSettings(targets);
-        } catch (error) {
-            this._modelController.value = previousModel;
-            this._fields = previousFields;
-            throw error;
+            options = await this._settingsController.getOptions();
+        } catch (e) {
+            if (this._isCardFormatRequestCurrent(owner, kind, request)) {
+                const selectController = kind === 'deck' ? this._deckController : this._modelController;
+                const acknowledgedValue = selectController.value;
+                selectController.value = acknowledgedValue;
+            }
+            return;
         }
-
+        if (!this._isCardFormatRequestCurrent(owner, kind, request)) { return; }
+        const cardFormat = this._getCardFormat(options.anki, this._cardFormatIndex);
+        if (cardFormat === null) { return; }
+        this._cardFormat = cardFormat;
+        this._deckController.value = cardFormat.deck;
+        this._modelController.value = cardFormat.model;
+        this._fields = this._cardFormat.fields;
         this._setupFields();
     }
 
@@ -1424,10 +1628,10 @@ class AnkiCardSelectController {
 
         if (this._selectNeedsUpdate || hasExtraOption !== this._hasExtraOption) {
             this._setSelectOptions(select, optionValues);
-            select.value = value;
             this._hasExtraOption = hasExtraOption;
             this._selectNeedsUpdate = false;
         }
+        select.value = value;
 
         if (hasOptionValues) {
             select.dataset.invalid = `${hasExtraOption}`;

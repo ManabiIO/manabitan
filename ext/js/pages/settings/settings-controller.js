@@ -42,6 +42,8 @@ export class SettingsController extends EventDispatcher {
         this._profileId = null;
         /** @type {number} */
         this._profileIndexChangeGeneration = 0;
+        /** @type {number} */
+        this._optionsRevision = 0;
         /** @type {string} */
         this._source = generateId(16);
         /** @type {Set<import('settings-controller').PageExitPrevention>} */
@@ -79,6 +81,16 @@ export class SettingsController extends EventDispatcher {
     /** @type {number} */
     get profileIndexChangeGeneration() {
         return this._profileIndexChangeGeneration;
+    }
+
+    /**
+     * Invalidates settings-page work as soon as an authoritative refresh starts,
+     * including external replacement which keeps the same profile ID/index.
+     * This is a local invalidation counter, not a persisted options version.
+     * @type {number}
+     */
+    get optionsRevision() {
+        return this._optionsRevision ?? 0;
     }
 
     /** */
@@ -143,6 +155,7 @@ export class SettingsController extends EventDispatcher {
      * @param {import('settings').Options} value
      */
     async setAllSettings(value) {
+        this._optionsRevision = this.optionsRevision + 1;
         const profileIndex = value.profileCurrent;
         await this._application.api.setAllSettings(value, this._source);
         this._preparedOptionsFull = value;
@@ -371,6 +384,7 @@ export class SettingsController extends EventDispatcher {
      * @param {boolean} canUpdateProfileIndex
      */
     async _onOptionsUpdatedInternal(canUpdateProfileIndex) {
+        this._optionsRevision = this.optionsRevision + 1;
         /** @type {import('core').TokenObject} */
         const token = {};
         this._optionsUpdateToken = token;
