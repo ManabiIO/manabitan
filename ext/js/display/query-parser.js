@@ -59,6 +59,8 @@ export class QueryParser extends EventDispatcher {
         this._useAllFrequencyDictionaries = false;
         /** @type {import('api').ParseTextResultItem[]} */
         this._parseResults = [];
+        /** @type {WeakMap<Node, {offset: number, leadingNewlinesRemoved: number}>} */
+        this._textSourceOffsets = new WeakMap();
         /** @type {HTMLElement} */
         this._queryParser = querySelectorNotNull(document, '#query-parser-content');
         /** @type {HTMLElement} */
@@ -388,14 +390,16 @@ export class QueryParser extends EventDispatcher {
             termNode.dataset.offset = `${offset}`;
             for (const {text, reading} of term) {
                 // trimEnd only for final text
-                const trimmedText = i === data.length - 1 ? text.trimEnd() : trimTrailingWhitespacePlusSpace(text);
+                const isLastTerm = i === data.length - 1;
+                const trimmedText = isLastTerm ? text.trimEnd() : trimTrailingWhitespacePlusSpace(text);
+                const leadingNewlinesRemoved = isLastTerm ? 0 : Math.max(0, (text.match(/^\n+/)?.[0].length ?? 0) - 1);
                 if (reading.length === 0) {
-                    termNode.appendChild(document.createTextNode(trimmedText));
+                    termNode.appendChild(this._createTextNode(trimmedText, offset, leadingNewlinesRemoved));
                 } else {
                     const reading2 = this._convertReading(trimmedText, reading);
-                    termNode.appendChild(this._createSegment(trimmedText, reading2, offset));
+                    termNode.appendChild(this._createSegment(trimmedText, reading2, offset, leadingNewlinesRemoved));
                 }
-                offset += trimmedText.length;
+                offset += text.length;
             }
             fragment.appendChild(termNode);
         }
@@ -406,9 +410,10 @@ export class QueryParser extends EventDispatcher {
      * @param {string} text
      * @param {string} reading
      * @param {number} offset
+     * @param {number} leadingNewlinesRemoved
      * @returns {HTMLElement}
      */
-    _createSegment(text, reading, offset) {
+    _createSegment(text, reading, offset, leadingNewlinesRemoved) {
         const segmentNode = document.createElement('ruby');
         segmentNode.className = 'query-parser-segment';
 
@@ -422,10 +427,22 @@ export class QueryParser extends EventDispatcher {
         segmentNode.appendChild(textNode);
         segmentNode.appendChild(readingNode);
 
-        textNode.textContent = text;
+        textNode.appendChild(this._createTextNode(text, offset, leadingNewlinesRemoved));
         readingNode.textContent = reading;
 
         return segmentNode;
+    }
+
+    /**
+     * @param {string} text
+     * @param {number} offset
+     * @param {number} leadingNewlinesRemoved
+     * @returns {Text}
+     */
+    _createTextNode(text, offset, leadingNewlinesRemoved) {
+        const node = document.createTextNode(text);
+        this._textSourceOffsets.set(node, {offset, leadingNewlinesRemoved});
+        return node;
     }
 
     /**
@@ -463,6 +480,12 @@ export class QueryParser extends EventDispatcher {
     _getSentenceOffset(textSource) {
         if (textSource.type === 'range') {
             const {range} = textSource;
+            const sourceOffset = this._textSourceOffsets.get(range.startContainer);
+            if (typeof sourceOffset !== 'undefined') {
+                const {offset, leadingNewlinesRemoved} = sourceOffset;
+                // Whitespace is condensed for display, while navigation uses the original full query.
+                return offset + range.startOffset + (range.startOffset > 0 ? leadingNewlinesRemoved : 0);
+            }
             const node = this._getParentElement(range.startContainer);
             if (node !== null && node instanceof HTMLElement) {
                 const {offset} = node.dataset;
