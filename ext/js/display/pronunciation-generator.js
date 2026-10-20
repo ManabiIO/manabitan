@@ -343,8 +343,11 @@ export class PronunciationGenerator {
                 // Atamadaka
                 return `H${'L'.repeat(numberOfMora)}`;
             } else if (pitchValue >= 2) {
-                const stepdown = pitchValue - 2;
-                return `LH${'H'.repeat(stepdown)}${'L'.repeat(numberOfMora - pitchValue + 1)}`;
+                // Only the morae and one suffix position are rendered. Bound the
+                // pattern before repeating strings, even for accepted oversized values.
+                const downstepPosition = Math.min(pitchValue, numberOfMora + 1);
+                const stepdown = downstepPosition - 2;
+                return `LH${'H'.repeat(stepdown)}${'L'.repeat(numberOfMora - downstepPosition + 1)}`;
             }
         }
         return '';
@@ -389,7 +392,8 @@ export class PronunciationGenerator {
      * @returns {void}
      */
     _textJJ(x, mora, svgns, svg) {
-        if (mora.length === 1) {
+        const characters = [...mora];
+        if (characters.length <= 1) {
             const path = this._document.createElementNS(svgns, 'text');
             path.setAttribute('x', `${x}`);
             path.setAttribute('y', '67.5');
@@ -401,7 +405,7 @@ export class PronunciationGenerator {
             path1.setAttribute('x', `${x - 5}`);
             path1.setAttribute('y', '67.5');
             path1.setAttribute('style', 'font-size:20px;font-family:sans-serif;fill:currentColor;');
-            path1.textContent = mora[0];
+            path1.textContent = characters[0];
             svg.appendChild(path1);
 
 
@@ -409,7 +413,7 @@ export class PronunciationGenerator {
             path2.setAttribute('x', `${x + 12}`);
             path2.setAttribute('y', '67.5');
             path2.setAttribute('style', 'font-size:14px;font-family:sans-serif;fill:currentColor;');
-            path2.textContent = mora[1];
+            path2.textContent = characters.slice(1).join('');
             svg.appendChild(path2);
         }
     }
