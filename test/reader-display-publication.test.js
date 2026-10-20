@@ -17,6 +17,8 @@
 
 import {JSDOM} from 'jsdom';
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
+import {Frontend} from '../ext/js/app/frontend.js';
+import {log} from '../ext/js/core/log.js';
 import {Display} from '../ext/js/display/display.js';
 import {DisplayHistory} from '../ext/js/display/display-history.js';
 
@@ -118,12 +120,12 @@ test('late content cannot replace a newer publication and state grows per owner'
 
 /**
  * Production message, history, and state-change handlers; only rendering dependencies are replaced.
- * @returns {{display: Display, renders: {finish: () => void, token: object}[], handlers: Promise<void>[], render: () => Promise<void>}}
+ * @returns {{display: Display, renders: {finish: () => void, fail: (error: Error) => void, token: object}[], handlers: Promise<void>[], render: () => Promise<void>}}
  */
 function createRenderingDisplay() {
     const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
     const history = new DisplayHistory(true, false);
-    /** @type {{finish: () => void, token: object}[]} */
+    /** @type {{finish: () => void, fail: (error: Error) => void, token: object}[]} */
     const renders = [];
     /** @type {Promise<void>[]} */
     const handlers = [];
@@ -163,8 +165,8 @@ function createRenderingDisplay() {
      * @returns {Promise<void>}
      */
     function renderTerms(_type, _params, token) {
-        return new Promise((resolve) => {
-            renders.push({token, finish: () => resolve(void 0)});
+        return new Promise((resolve, reject) => {
+            renders.push({token, finish: () => resolve(void 0), fail: reject});
         });
     }
     Reflect.set(display, '_setContentTermsOrKanji', renderTerms);
@@ -188,6 +190,7 @@ describe('per-render publication completion ownership', () => {
     afterEach(() => {
         vi.useRealTimers();
         vi.unstubAllGlobals();
+        vi.restoreAllMocks();
     });
 
     test.each(['older-first', 'newer-first'])('overlapping renders settle only their own publication: %s', async (order) => {
@@ -324,12 +327,86 @@ describe('per-render publication completion ownership', () => {
         expect(vi.getTimerCount()).toBe(0);
     });
 
+
+    test.each([true, false])('render failure rejects its current RPC and permits a later generation (publication: %s)', async (withPublication) => {
+        const {display, renders, handlers} = createRenderingDisplay();
+        const completion = show(display, withPublication ? {source: 'reader', generation: 1} : void 0);
+        const failure = expect(completion).rejects.toMatchObject({name: 'PopupContentRenderError', message: 'Popup content rendering failed'});
+        const token = renders[0].token;
+        renders[0].fail(new Error('Lookup failed'));
+        await failure;
+        expect(Reflect.get(display, '_setContentToken')).not.toBe(token);
+        expect(Reflect.get(display, '_activePublication')).toBeNull();
+        const recovered = show(display, {source: 'reader', generation: 2});
+        renders[1].finish();
+        await Promise.all([recovered, ...handlers]);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test.each([1, 2])('a stale render failure cannot reject or cancel the current publication, generation: %s', async (generation) => {
+        const {display, renders, handlers} = createRenderingDisplay();
+        const older = show(display, {source: 'reader', generation: 1});
+        const done = vi.fn();
+        const current = show(display, {source: 'reader', generation}).then(done);
+        renders[0].fail(new Error('Obsolete lookup failed'));
+        await older;
+        expect(done).not.toHaveBeenCalled();
+        expect(Reflect.get(display, '_setContentToken')).toBe(renders[1].token);
+        expect(Reflect.get(display, '_publicationGenerations').get('reader')?.cancelled).toBe(false);
+        renders[1].finish();
+        await Promise.all([current, ...handlers]);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+
+    test('a failed display render reaches the frontend retry hook and the next hover can complete', async () => {
+        const {display, renders, handlers} = createRenderingDisplay();
+        const frontend = /** @type {Frontend} */ (Object.create(Frontend.prototype));
+        const selected = /** @type {import('text-source').TextSource} */ (/** @type {unknown} */ ({
+            getRects: () => [],
+            getWritingMode: () => 'horizontal-tb',
+        }));
+        const retry = vi.fn();
+        let generation = 0;
+        for (const [key, value] of Object.entries({
+            _popup: {showContent: () => show(display, {source: 'hover', generation: ++generation})},
+            _textScanner: {allowCurrentTextSourceRetry: retry},
+            _application: {webExtension: {unloaded: false}},
+            _updatePageDebugState: vi.fn(),
+        })) { Reflect.set(frontend, key, value); }
+        const report = vi.spyOn(log, 'error').mockImplementation(() => {});
+        const details = {focus: false, params: {}, state: null, content: null, historyMode: /** @type {const} */ ('clear')};
+        const first = frontend._showPopupContent(selected, null, details);
+        const failure = expect(first).rejects.toMatchObject({name: 'PopupContentRenderError'});
+        renders[0].fail(new Error('Lookup failed'));
+        await failure;
+        expect(retry).toHaveBeenCalledExactlyOnceWith(selected);
+        expect(report).toHaveBeenCalledOnce();
+        const next = frontend._showPopupContent(selected, null, details);
+        renders[1].finish();
+        await Promise.all([next, ...handlers]);
+        expect(retry).toHaveBeenCalledOnce();
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('cleanup failure cannot mask a render failure as a transport error', async () => {
+        const {display, renders, handlers} = createRenderingDisplay();
+        const completion = show(display, {source: 'reader', generation: 1});
+        const failure = expect(completion).rejects.toMatchObject({name: 'PopupContentRenderError'});
+        vi.spyOn(display, '_closePopups').mockImplementationOnce(() => { throw new Error('Cleanup failed'); });
+        renders[0].fail(new Error('Lookup failed'));
+        await failure;
+        await Promise.all(handlers);
+        expect(Reflect.get(display, '_activePublication')).toBeNull();
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
     test('ordinary popup timeout still resolves without invalidating its render', async () => {
         const {display, renders, handlers} = createRenderingDisplay();
         const completion = display.setContent({focus: false, params: {type: 'terms'}, state: {}, content: {}, historyMode: 'clear'});
         const token = renders[0].token;
         await vi.advanceTimersByTimeAsync(5000);
-        expect(await completion).toBe(false);
+        expect(await completion).toBe('timed-out');
         expect(Reflect.get(display, '_setContentToken')).toBe(token);
         renders[0].finish();
         await Promise.all(handlers);

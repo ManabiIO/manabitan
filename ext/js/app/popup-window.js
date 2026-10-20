@@ -350,7 +350,7 @@ export class PopupWindow extends EventDispatcher {
                     message,
                 ));
             } catch (e) {
-                if (e instanceof Error && e.name === 'PopupContentTimeoutError') { throw e; }
+                if (e instanceof Error && (e.name === 'PopupContentTimeoutError' || e.name === 'PopupContentRenderError')) { throw e; }
                 if (!this._isInvocationActive(isCurrent)) { return void 0; }
                 if (this._popupTab === popupTab) { this._popupTab = null; }
             }
@@ -372,7 +372,7 @@ export class PopupWindow extends EventDispatcher {
                 message,
             ));
         } catch (e) {
-            if (e instanceof Error && e.name === 'PopupContentTimeoutError') { throw e; }
+            if (e instanceof Error && (e.name === 'PopupContentTimeoutError' || e.name === 'PopupContentRenderError')) { throw e; }
             if (!this._isInvocationActive(isCurrent)) { return void 0; }
             if (this._popupTab === popupTab) { this._popupTab = null; }
             throw e;
