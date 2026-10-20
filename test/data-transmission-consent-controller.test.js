@@ -87,7 +87,7 @@ describe('DataTransmissionConsentController', () => {
         const modal = {setVisible: vi.fn()};
         const settingsController = {
             modifySettings: vi.fn()
-                .mockResolvedValueOnce([{result: null}, {result: null}])
+                .mockResolvedValueOnce([{result: 'accepted'}, {result: true}])
                 .mockResolvedValueOnce([{error: {name: 'Error', message: 'audio update denied', stack: ''}}]),
             getOptionsContext: vi.fn(() => ({})),
         };
@@ -115,11 +115,11 @@ describe('DataTransmissionConsentController', () => {
             <p id="data-transmission-consent-save-error" hidden></p>
         `;
         const {DataTransmissionConsentController} = await import('../ext/js/pages/settings/data-transmission-consent-controller.js');
-        const pending = /** @type {PromiseWithResolvers<Array<{result: null}>>} */ (Promise.withResolvers());
+        const pending = /** @type {PromiseWithResolvers<Array<{result: boolean}>>} */ (Promise.withResolvers());
         const settingsController = {
             modifySettings: vi.fn()
                 .mockReturnValueOnce(pending.promise)
-                .mockResolvedValueOnce([{result: null}, {result: null}]),
+                .mockResolvedValueOnce([{result: 'declined'}, {result: true}]),
             refresh: vi.fn(),
             getOptionsContext: vi.fn(() => ({})),
         };
@@ -139,7 +139,7 @@ describe('DataTransmissionConsentController', () => {
         await controller._onAccept();
         expect(settingsController.modifySettings).toHaveBeenCalledOnce();
 
-        pending.resolve([{result: null}]);
+        pending.resolve([{result: false}]);
         await save;
         expect(settingsController.modifySettings).toHaveBeenCalledTimes(2);
         expect(modal.setVisible).toHaveBeenCalledOnce();
@@ -184,8 +184,8 @@ describe('DataTransmissionConsentController', () => {
         const modal = {setVisible: vi.fn()};
         const settingsController = {
             modifySettings: vi.fn()
-                .mockResolvedValueOnce([{result: null}, {result: null}])
-                .mockResolvedValueOnce([{result: null}]),
+                .mockResolvedValueOnce([{result: 'accepted'}, {result: true}])
+                .mockResolvedValueOnce([{result: true}]),
             refresh: vi.fn().mockRejectedValue(new Error('options refresh failed')),
             getOptionsContext: vi.fn(() => ({})),
         };
@@ -202,3 +202,26 @@ describe('DataTransmissionConsentController', () => {
         expect(logError).toHaveBeenCalledWith(expect.objectContaining({message: 'options refresh failed'}));
     });
 });
+
+
+for (const [globalReply, audioReply] of [
+    [[{}, {}], [{result: true}]],
+    [[{result: 'declined'}, {result: true}], [{result: true}]],
+    [[{result: 'accepted'}, {result: false}], [{result: true}]],
+    [[{result: 'accepted'}, {result: true}], [{}]],
+    [[{result: 'accepted'}, {result: true}], [{result: false}]],
+]) {
+    test('consent modal requires exact acknowledgments: ' + JSON.stringify([globalReply, audioReply]), async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = '<button id="accept-data-transmission"></button><button id="decline-data-transmission"></button><p id="data-transmission-consent-save-error" hidden></p>';
+        const {DataTransmissionConsentController} = await import('../ext/js/pages/settings/data-transmission-consent-controller.js');
+        const modal = {setVisible: vi.fn()};
+        const settings = {modifySettings: vi.fn().mockResolvedValueOnce(globalReply).mockResolvedValueOnce(audioReply), getOptionsContext: () => ({index: 0, profileId: 'profile-a'}), refresh: vi.fn()};
+        const controller = new DataTransmissionConsentController(/** @type {any} */ (settings), /** @type {any} */ ({getModal: () => modal}));
+        await controller.prepare();
+        await expect(controller._onAccept()).rejects.toThrow('not acknowledged');
+        expect(modal.setVisible).not.toHaveBeenCalled();
+        expect(/** @type {HTMLElement} */ (window.document.querySelector('#data-transmission-consent-save-error')).hidden).toBe(false);
+    });
+}

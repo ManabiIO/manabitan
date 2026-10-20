@@ -81,13 +81,13 @@ vi.mock('../ext/js/pages/settings/settings-controller.js', () => ({SettingsContr
         state.writes.push(targets);
         if (state.failNextWrite) {
             state.failNextWrite = false;
-            return targets.map((_, index) => {
+            return targets.map((target, index) => {
                 if (index === 0) { return {error: {name: 'Error', message: 'synthetic save failure', stack: ''}}; }
-                return {result: null};
+                return {result: target.value};
             });
         }
         for (const target of targets) { state.values[target.path] = target.value; }
-        return targets.map(() => ({result: null}));
+        return targets.map(({value}) => ({result: value}));
     }
 }}));
 vi.mock('../ext/js/pages/settings/settings-display-controller.js', () => ({SettingsDisplayController: class extends StubController {}}));

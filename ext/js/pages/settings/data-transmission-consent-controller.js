@@ -108,11 +108,13 @@ export class DataTransmissionConsentController {
                 if (!Array.isArray(results) || results.length !== batch.length) {
                     throw new Error('Consent update returned an incomplete response');
                 }
-                for (const result of results) {
+                for (let i = 0; i < results.length; ++i) {
+                    const result = results[i];
                     if (typeof result !== 'object' || result === null) {
                         throw new Error('Consent update returned an invalid response');
                     }
                     if (result.error) { throw ExtensionError.deserialize(result.error); }
+                    if (result.result !== batch[i].value) { throw new Error('Consent update was not acknowledged'); }
                 }
             }
             try {
