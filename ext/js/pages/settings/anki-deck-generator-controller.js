@@ -59,6 +59,14 @@ export class AnkiDeckGeneratorController {
         this._activeFlashcardFormatSelect = querySelectorNotNull(document, '#generate-anki-flashcard-format');
         /** @type {import('settings').AnkiCardFormat[]} */
         this._flashcardFormatDetails = [];
+        /** @type {?{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined), optionsRevision: (number|undefined)}} */
+        this._flashcardFormatDetailsOwnership = null;
+        /** @type {?{optionsContext: import('settings').OptionsContext2, cardFormats: import('settings').AnkiCardFormat[], index: number}} */
+        this._formatSelectionSnapshot = null;
+        /** @type {number} */
+        this._flashcardFormatViewToken = 0;
+        /** @type {HTMLButtonElement[]} */
+        this._generationButtons = [];
         /** @type {HTMLInputElement} */
         this._addMediaCheckbox = querySelectorNotNull(document, '#generate-anki-notes-add-media');
         /** @type {HTMLInputElement} */
@@ -91,6 +99,8 @@ export class AnkiDeckGeneratorController {
         this._modelSelectionToken = {};
         /** @type {import('core').TokenObject} */
         this._exampleTextToken = {};
+        /** @type {import('core').TokenObject} */
+        this._renderToken = {};
         /** @type {AnkiNoteBuilder} */
         this._ankiNoteBuilder = new AnkiNoteBuilder(settingsController.application.api, new TemplateRendererProxy());
     }
@@ -119,6 +129,8 @@ export class AnkiDeckGeneratorController {
         this._sendToAnkiConfirmModal = this._modalController.getModal('generate-anki-notes-send-to-anki');
         this._exportConfirmModal = this._modalController.getModal('generate-anki-notes-export');
 
+        this._generationButtons = [testRenderButton, sendToAnkiButton, exportButton, generateButton, this._sendToAnkiButtonConfirmButton, this._exportButtonConfirmButton];
+
         parseWordsButton.addEventListener('click', this._onParse.bind(this), false);
         dedupeWordsButton.addEventListener('click', this._onDedupe.bind(this), false);
         testRenderButton.addEventListener('click', this._onRender.bind(this), false);
@@ -130,13 +142,30 @@ export class AnkiDeckGeneratorController {
         exportCancelButton.addEventListener('click', (() => { this._cancel = true; }).bind(this), false);
         generateButton.addEventListener('click', this._onExport.bind(this), false);
 
+        this._subscribeToSettingsChanges();
         void this._updateExampleText();
         this._mainSettingsEntry.addEventListener('click', this._updateExampleText.bind(this), false);
 
         void this._setupModelSelection();
         this._mainSettingsEntry.addEventListener('click', this._setupModelSelection.bind(this), false);
 
-        this._activeFlashcardFormatSelect.addEventListener('change', this._updateActiveModel.bind(this), false);
+        this._activeFlashcardFormatSelect.addEventListener('change', this._onFlashcardFormatChange.bind(this), false);
+        this._updateGenerationControls();
+    }
+
+    /** */
+    _subscribeToSettingsChanges() {
+        this._settingsController.on('optionsContextChanged', () => {
+            this._formatSelectionSnapshot = null;
+            this._invalidateFormatView();
+            this._parseToken = {};
+            this._exampleTextToken = {};
+            this._renderToken = {};
+        });
+        this._settingsController.on('optionsChanged', () => {
+            void this._setupModelSelection().catch((error) => log.error(error));
+            void this._updateExampleText().catch((error) => log.error(error));
+        });
     }
 
     // Private
@@ -146,38 +175,41 @@ export class AnkiDeckGeneratorController {
         /** @type {import('core').TokenObject} */
         const token = {};
         this._parseToken = token;
-        const optionsContext = this._settingsController.getOptionsContext();
+        let ownership;
+        try {
+            ownership = this._captureProfileOwnership();
+        } catch (error) {
+            log.error(error);
+            this._updateProgressBarError(`Failed to parse text: ${toError(error).message}`);
+            return;
+        }
+        const {optionsContext} = ownership;
         const inputText = this._wordInputTextarea.value;
-        const options = await this._settingsController.getOptions();
-        if (
-            this._parseToken !== token ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index ||
-            this._wordInputTextarea.value !== inputText
-        ) {
-            return;
-        }
-        const parserResult = await this._application.api.parseText(inputText, optionsContext, options.scanning.length, !options.parsing.enableMecabParser, options.parsing.enableMecabParser, options.parsing.useAllFrequencyDictionaries);
-        if (
-            this._parseToken !== token ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index ||
-            this._wordInputTextarea.value !== inputText
-        ) {
-            return;
-        }
-        const parsedText = parserResult[0].content;
+        try {
+            const options = await this._settingsController.getOptions();
+            this._assertProfileOwnershipCurrent(ownership);
+            if (this._parseToken !== token || this._wordInputTextarea.value !== inputText) { return; }
+            const parserResult = await this._application.api.parseText(inputText, optionsContext, options.scanning.length, !options.parsing.enableMecabParser, options.parsing.enableMecabParser, options.parsing.useAllFrequencyDictionaries);
+            this._assertProfileOwnershipCurrent(ownership);
+            if (this._parseToken !== token || this._wordInputTextarea.value !== inputText) { return; }
+            const parsedText = parserResult[0].content;
 
-        const parsedParts = [];
-        for (const parsedTextLine of parsedText) {
-            let combinedSegments = '';
-            for (const parsedTextSegment of parsedTextLine) {
-                combinedSegments += parsedTextSegment.text;
+            const parsedParts = [];
+            for (const parsedTextLine of parsedText) {
+                let combinedSegments = '';
+                for (const parsedTextSegment of parsedTextLine) {
+                    combinedSegments += parsedTextSegment.text;
+                }
+                combinedSegments = combinedSegments.trim();
+                if (combinedSegments.length > 0) { parsedParts.push(combinedSegments); }
             }
-            combinedSegments = combinedSegments.trim();
-            if (combinedSegments.length > 0) {
-                parsedParts.push(combinedSegments);
+            this._wordInputTextarea.value = parsedParts.join('\n');
+        } catch (error) {
+            if (this._parseToken === token && this._wordInputTextarea.value === inputText) {
+                log.error(error);
+                this._updateProgressBarError(`Failed to parse text: ${toError(error).message}`);
             }
         }
-        this._wordInputTextarea.value = parsedParts.join('\n');
     }
 
     /** */
@@ -186,32 +218,77 @@ export class AnkiDeckGeneratorController {
     }
 
     /** */
+    _onFlashcardFormatChange() {
+        this._rememberFormatSelection();
+        this._renderToken = {};
+        void this._updateActiveModel();
+    }
+
+    /** */
     async _setupModelSelection() {
         /** @type {import('core').TokenObject} */
         const token = {};
         this._modelSelectionToken = token;
-        const optionsContext = this._settingsController.getOptionsContext();
-        const options = await this._settingsController.getOptions();
-        if (
-            this._modelSelectionToken !== token ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index
-        ) {
-            return;
-        }
-
         const activeFlashcardFormat = /** @type {HTMLSelectElement} */ (this._activeFlashcardFormatSelect);
-        this._flashcardFormatDetails = options.anki.cardFormats;
+        this._rememberFormatSelection();
+        const selection = this._formatSelectionSnapshot;
+        this._invalidateFormatView();
+        try {
+            const ownership = this._captureProfileOwnership();
+            const options = await this._settingsController.getOptions();
+            this._assertProfileOwnershipCurrent(ownership);
+            if (this._modelSelectionToken !== token) { return; }
 
-        activeFlashcardFormat.innerHTML = '';
-
-        for (let i = 0; i < options.anki.cardFormats.length; i++) {
-            const option = document.createElement('option');
-            option.value = i.toString();
-            option.text = options.anki.cardFormats[i].name;
-            activeFlashcardFormat.add(option);
+            const cardFormats = Array.isArray(options.anki.cardFormats) ? options.anki.cardFormats : [];
+            activeFlashcardFormat.innerHTML = '';
+            this._flashcardFormatDetails = cardFormats;
+            this._flashcardFormatDetailsOwnership = ownership;
+            this._flashcardFormatViewToken++;
+            for (let i = 0; i < cardFormats.length; i++) {
+                const option = document.createElement('option');
+                option.value = i.toString();
+                option.text = cardFormats[i].name;
+                activeFlashcardFormat.add(option);
+            }
+            if (selection && selection.cardFormats.length > 0 && selection.optionsContext.profileId === ownership.optionsContext.profileId && selection.optionsContext.index === ownership.optionsContext.index) {
+                let selectedIndex = -1;
+                if (JSON.stringify(selection.cardFormats) === JSON.stringify(cardFormats)) {
+                    selectedIndex = selection.index;
+                } else if (selection.index >= 0) {
+                    const selectedFormat = JSON.stringify(selection.cardFormats[selection.index]);
+                    const matches = cardFormats.flatMap((format, index) => (JSON.stringify(format) === selectedFormat ? [index] : []));
+                    if (matches.length === 1) { selectedIndex = matches[0]; }
+                }
+                if (selectedIndex >= 0 && selectedIndex < cardFormats.length) {
+                    activeFlashcardFormat.value = selectedIndex.toString();
+                } else if (cardFormats.length > 0) {
+                    const placeholder = document.createElement('option');
+                    placeholder.value = '';
+                    placeholder.text = 'Select a card format';
+                    placeholder.disabled = true;
+                    activeFlashcardFormat.prepend(placeholder);
+                    activeFlashcardFormat.value = '';
+                }
+            }
+            this._rememberFormatSelection();
+            await this._updateActiveModel();
+        } catch (error) {
+            if (this._modelSelectionToken === token) {
+                this._invalidateFormatView();
+                log.error(error);
+            }
         }
+    }
 
-        void this._updateActiveModel();
+    /** */
+    _rememberFormatSelection() {
+        const ownership = this._flashcardFormatDetailsOwnership;
+        if (ownership === null) { return; }
+        this._formatSelectionSnapshot = {
+            optionsContext: {...ownership.optionsContext},
+            cardFormats: structuredClone(this._flashcardFormatDetails),
+            index: Number.parseInt(this._activeFlashcardFormatSelect.value, 10),
+        };
     }
 
     /** */
@@ -220,13 +297,61 @@ export class AnkiDeckGeneratorController {
         const activeDeckText = /** @type {HTMLElement} */ (this._activeDeckText);
         const activeDeckTextConfirm = querySelectorNotNull(document, '#generate-anki-notes-active-deck-confirm');
 
-        const index = Number(this._activeFlashcardFormatSelect.value);
-
-        this._activeNoteType = this._flashcardFormatDetails[index].model;
-        this._activeAnkiDeck = this._flashcardFormatDetails[index].deck;
+        let selectedFormat;
+        try {
+            this._assertFormatViewCurrent();
+            selectedFormat = this._flashcardFormatDetails[Number.parseInt(this._activeFlashcardFormatSelect.value, 10)];
+        } catch {
+            selectedFormat = null;
+        }
+        if (typeof selectedFormat === 'undefined' || selectedFormat === null) {
+            this._activeNoteType = '';
+            this._activeAnkiDeck = '';
+            activeModelText.textContent = '';
+            activeDeckText.textContent = '';
+            activeDeckTextConfirm.textContent = '';
+            this._updateGenerationControls();
+            return;
+        }
+        this._activeNoteType = selectedFormat.model;
+        this._activeAnkiDeck = selectedFormat.deck;
         activeModelText.textContent = this._activeNoteType;
         activeDeckText.textContent = this._activeAnkiDeck;
         activeDeckTextConfirm.textContent = this._activeAnkiDeck;
+        this._updateGenerationControls();
+    }
+
+    /** */
+    _invalidateFormatView() {
+        this._renderToken = {};
+        this._renderResult.hidden = true;
+        this._renderResult.textContent = '';
+        this._flashcardFormatViewToken++;
+        this._flashcardFormatDetails = [];
+        this._flashcardFormatDetailsOwnership = null;
+        this._activeFlashcardFormatSelect.innerHTML = '';
+        this._activeNoteType = '';
+        this._activeAnkiDeck = '';
+        this._activeModelText.textContent = '';
+        this._activeDeckText.textContent = '';
+        const activeDeckTextConfirm = document.querySelector('#generate-anki-notes-active-deck-confirm');
+        if (activeDeckTextConfirm) { activeDeckTextConfirm.textContent = ''; }
+        this._updateGenerationControls();
+    }
+
+    /** */
+    _updateGenerationControls() {
+        const selectedIndex = Number.parseInt(this._activeFlashcardFormatSelect.value, 10);
+        const hasReadyFormat = Number.isInteger(selectedIndex) && selectedIndex >= 0 && selectedIndex < this._flashcardFormatDetails.length;
+        let ownershipCurrent = false;
+        if (this._flashcardFormatDetailsOwnership !== null && this._flashcardFormatDetails.length > 0) {
+            try {
+                this._assertFormatViewCurrent();
+                ownershipCurrent = true;
+            } catch { /* The view has expired. */ }
+        }
+        this._activeFlashcardFormatSelect.disabled = !ownershipCurrent || this._inProgress;
+        for (const button of this._generationButtons) { button.disabled = !ownershipCurrent || !hasReadyFormat || this._inProgress; }
     }
 
     /** */
@@ -234,10 +359,9 @@ export class AnkiDeckGeneratorController {
         this._updateProgressBar(true, '', 0, 1, false);
         this._cancel = false;
 
-        this._exportButtonConfirmButton.disabled = false;
+        this._updateGenerationControls();
         this._exportWordcount.textContent = /** @type {HTMLTextAreaElement} */ (this._wordInputTextarea).value.split('\n').filter(Boolean).length.toString();
 
-        this._sendToAnkiButtonConfirmButton.disabled = false;
         this._addMediaCheckbox.disabled = false;
         this._disallowDuplicatesCheckbox.disabled = false;
         this._sendWordcount.textContent = /** @type {HTMLTextAreaElement} */ (this._wordInputTextarea).value.split('\n').filter(Boolean).length.toString();
@@ -248,10 +372,7 @@ export class AnkiDeckGeneratorController {
         if (this._inProgress) { return; }
         this._inProgress = true;
         this._cancel = false;
-
-        this._exportButtonConfirmButton.disabled = true;
-
-        this._sendToAnkiButtonConfirmButton.disabled = true;
+        this._updateGenerationControls();
         this._addMediaCheckbox.disabled = true;
         this._disallowDuplicatesCheckbox.disabled = true;
     }
@@ -259,8 +380,7 @@ export class AnkiDeckGeneratorController {
     /** */
     async _endGenerationState() {
         this._inProgress = false;
-        this._exportButtonConfirmButton.disabled = false;
-        this._sendToAnkiButtonConfirmButton.disabled = false;
+        this._updateGenerationControls();
         this._addMediaCheckbox.disabled = false;
         this._disallowDuplicatesCheckbox.disabled = false;
 
@@ -278,8 +398,7 @@ export class AnkiDeckGeneratorController {
     /** */
     async _endGenerationStateError() {
         this._inProgress = false;
-        this._exportButtonConfirmButton.disabled = false;
-        this._sendToAnkiButtonConfirmButton.disabled = false;
+        this._updateGenerationControls();
         this._addMediaCheckbox.disabled = false;
         this._disallowDuplicatesCheckbox.disabled = false;
     }
@@ -303,7 +422,15 @@ export class AnkiDeckGeneratorController {
         e.preventDefault();
         if (this._inProgress) { return; }
         void this._startGenerationState();
-        const profileOwnership = this._captureProfileOwnership();
+        let profileOwnership;
+        try {
+            profileOwnership = this._captureViewSnapshot();
+        } catch (error) {
+            log.error(error);
+            this._updateProgressBarError(`Failed to export Anki deck: ${toError(error).message}`);
+            void this._endGenerationStateError();
+            return;
+        }
         const terms = /** @type {HTMLTextAreaElement} */ (this._wordInputTextarea).value.split('\n');
         let ankiTSV = '#separator:tab\n#html:true\n#notetype column:1\n#deck column:2\n#tags column:3\n';
         let index = 0;
@@ -372,7 +499,15 @@ export class AnkiDeckGeneratorController {
         e.preventDefault();
         if (this._inProgress) { return; }
         void this._startGenerationState();
-        const profileOwnership = this._captureProfileOwnership();
+        let profileOwnership;
+        try {
+            profileOwnership = this._captureViewSnapshot();
+        } catch (error) {
+            log.error(error);
+            this._updateProgressBarError(`Failed to send Anki notes: ${toError(error).message}`);
+            void this._endGenerationStateError();
+            return;
+        }
         const terms = /** @type {HTMLTextAreaElement} */ (this._wordInputTextarea).value.split('\n');
         const addMedia = this._addMediaCheckbox.checked;
         const disallowDuplicates = this._disallowDuplicatesCheckbox.checked;
@@ -436,7 +571,7 @@ export class AnkiDeckGeneratorController {
     /**
      * @param {import("anki.js").Note[]} notes
      * @param {boolean} disallowDuplicates
-     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined)}|undefined} [profileOwnership]
+     * @param {ReturnType<AnkiDeckGeneratorController['_captureViewSnapshot']>|undefined} [profileOwnership]
      * @returns {Promise<boolean>}
      */
     async _sendNotes(notes, disallowDuplicates, profileOwnership) {
@@ -515,12 +650,21 @@ export class AnkiDeckGeneratorController {
         const allErrors = [];
         const text = /** @type {HTMLInputElement} */ (this._renderTextInput).value;
         let result;
+        /** @type {import('core').TokenObject} */
+        const token = {};
+        this._renderToken = token;
+        let ownership;
         try {
-            const noteData = await this._generateNoteData(text, false);
+            ownership = this._captureViewSnapshot();
+            const noteData = await this._generateNoteData(text, false, ownership);
+            this._assertProfileOwnershipCurrent(ownership);
+            if (this._renderToken !== token || this._renderTextInput.value !== text) { return; }
             result = noteData ? this._fieldsToTSV(noteData.fields) : `No definition found for ${text}`;
         } catch (e) {
+            if (this._renderToken !== token || this._renderTextInput.value !== text) { return; }
             allErrors.push(toError(e));
         }
+        if (this._renderToken !== token || this._renderTextInput.value !== text) { return; }
 
         /**
          * @param {Error} e
@@ -552,15 +696,16 @@ export class AnkiDeckGeneratorController {
     /**
      * @param {string} word
      * @param {boolean} addMedia
-     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined)}|undefined} [batchProfileOwnership]
+     * @param {ReturnType<AnkiDeckGeneratorController['_captureViewSnapshot']>|undefined} [batchProfileOwnership]
      * @returns {Promise<?import('anki.js').Note>}
      */
     async _generateNoteData(word, addMedia, batchProfileOwnership) {
-        const profileOwnership = batchProfileOwnership ?? this._captureProfileOwnership();
+        const profileOwnership = batchProfileOwnership ?? this._captureViewSnapshot();
         const {optionsContext} = profileOwnership;
-        const activeFlashcardFormatDetails = this._flashcardFormatDetails[Number(this._activeFlashcardFormatSelect.value)];
-        const activeNoteType = this._activeNoteType;
-        const activeAnkiDeck = this._activeAnkiDeck;
+        this._assertProfileOwnershipCurrent(profileOwnership);
+        const activeFlashcardFormatDetails = profileOwnership.flashcardFormatDetails;
+        const activeNoteType = profileOwnership.activeNoteType;
+        const activeAnkiDeck = profileOwnership.activeAnkiDeck;
         const assertProfileCurrent = () => this._assertProfileOwnershipCurrent(profileOwnership);
         const data = await this._getDictionaryEntry(word, optionsContext, activeFlashcardFormatDetails.type);
         assertProfileCurrent();
@@ -619,29 +764,78 @@ export class AnkiDeckGeneratorController {
     }
 
     /**
-     * @returns {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined)}}
+     * @returns {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined), optionsRevision: (number|undefined)}}
      */
     _captureProfileOwnership() {
         const settingsController = this._settingsController;
         return {
             optionsContext: settingsController.getOptionsContext(),
             profileIndexChangeGeneration: settingsController.profileIndexChangeGeneration,
+            optionsRevision: settingsController.optionsRevision,
         };
     }
 
     /**
-     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined)}} ownership
+     * @returns {ReturnType<AnkiDeckGeneratorController['_captureProfileOwnership']> & {flashcardFormatDetails: import('settings').AnkiCardFormat, flashcardFormatIndex: number, activeNoteType: string, activeAnkiDeck: string, viewToken: number}}
+     * @throws {Error} If the selected format view is unavailable or stale.
+     */
+    _captureViewSnapshot() {
+        this._assertFormatViewCurrent();
+        const index = Number.parseInt(this._activeFlashcardFormatSelect.value, 10);
+        const flashcardFormatDetails = this._flashcardFormatDetails[index];
+        if (!flashcardFormatDetails) { throw new Error('Select a valid Anki card format before generating notes'); }
+        return {
+            ...this._captureProfileOwnership(),
+            flashcardFormatDetails,
+            flashcardFormatIndex: index,
+            activeNoteType: flashcardFormatDetails.model,
+            activeAnkiDeck: flashcardFormatDetails.deck,
+            viewToken: this._flashcardFormatViewToken,
+        };
+    }
+
+    /**
+     * @throws {Error} If no current card format view exists.
+     */
+    _assertFormatViewCurrent() {
+        const ownership = this._flashcardFormatDetailsOwnership;
+        if (ownership === null || this._flashcardFormatDetails.length === 0) {
+            throw new Error('Select a valid Anki card format before generating notes');
+        }
+        this._assertProfileOwnershipCurrent(ownership);
+    }
+
+    /**
+     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined), optionsRevision?: number, viewToken?: number}} ownership
      * @throws {Error} If the selected profile changed while generation was pending.
      */
-    _assertProfileOwnershipCurrent({optionsContext, profileIndexChangeGeneration}) {
+    _assertProfileOwnershipCurrent({optionsContext, profileIndexChangeGeneration, optionsRevision, viewToken}) {
         const current = this._settingsController.getOptionsContext();
         if (
             current.index !== optionsContext.index ||
             current.profileId !== optionsContext.profileId ||
-            (Number.isInteger(profileIndexChangeGeneration) && this._settingsController.profileIndexChangeGeneration !== profileIndexChangeGeneration)
+            (Number.isInteger(profileIndexChangeGeneration) && this._settingsController.profileIndexChangeGeneration !== profileIndexChangeGeneration) ||
+            (Number.isInteger(optionsRevision) && this._settingsController.optionsRevision !== optionsRevision) ||
+            (Number.isInteger(viewToken) && (
+                this._flashcardFormatViewToken !== viewToken ||
+                this._flashcardFormatDetailsOwnership === null ||
+                !this._areProfileOwnershipsEqual(this._flashcardFormatDetailsOwnership, {optionsContext, profileIndexChangeGeneration, optionsRevision})
+            ))
         ) {
             throw new Error('Profile changed while generating Anki note');
         }
+    }
+
+    /**
+     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined), optionsRevision: (number|undefined)}} first
+     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined), optionsRevision: (number|undefined)}} second
+     * @returns {boolean}
+     */
+    _areProfileOwnershipsEqual(first, second) {
+        return first.optionsContext.index === second.optionsContext.index &&
+        first.optionsContext.profileId === second.optionsContext.profileId &&
+        first.profileIndexChangeGeneration === second.profileIndexChangeGeneration &&
+        first.optionsRevision === second.optionsRevision;
     }
 
     /**
@@ -690,7 +884,12 @@ export class AnkiDeckGeneratorController {
 
         const infoNode = /** @type {HTMLElement} */ (this._renderResult);
         infoNode.hidden = true;
-        void this._testNoteData(infoNode, true);
+        void this._testNoteData(infoNode, true).catch((error) => {
+            log.error(error);
+            infoNode.hidden = false;
+            infoNode.textContent = toError(error).message;
+            infoNode.classList.add('text-danger');
+        });
     }
 
     /** */
@@ -698,20 +897,26 @@ export class AnkiDeckGeneratorController {
         /** @type {import('core').TokenObject} */
         const token = {};
         this._exampleTextToken = token;
-        const optionsContext = this._settingsController.getOptionsContext();
-        const languageSummaries = await this._application.api.getLanguageSummaries();
-        const options = await this._settingsController.getOptions();
-        if (
-            this._exampleTextToken !== token ||
-            this._settingsController.getOptionsContext().index !== optionsContext.index
-        ) {
-            return;
+        const inputText = this._renderTextInput.value;
+        const inputLanguage = this._renderTextInput.lang;
+        try {
+            const ownership = this._captureProfileOwnership();
+            const languageSummaries = await this._application.api.getLanguageSummaries();
+            this._assertProfileOwnershipCurrent(ownership);
+            const options = await this._settingsController.getOptions();
+            this._assertProfileOwnershipCurrent(ownership);
+            if (this._exampleTextToken !== token) { return; }
+            const activeLanguage = languageSummaries.find(({iso}) => iso === options.general.language);
+            if (typeof activeLanguage === 'undefined') { return; }
+            this._renderTextInput.lang = options.general.language;
+            if (
+                this._renderTextInput.value === inputText &&
+                (inputLanguage !== options.general.language || inputText.length === 0)
+            ) { this._renderTextInput.value = activeLanguage.exampleText; }
+            this._renderResult.lang = options.general.language;
+        } catch (error) {
+            if (this._exampleTextToken === token) { log.error(error); }
         }
-        const activeLanguage = languageSummaries.find(({iso}) => iso === options.general.language);
-        if (typeof activeLanguage === 'undefined') { return; }
-        this._renderTextInput.lang = options.general.language;
-        this._renderTextInput.value = activeLanguage.exampleText;
-        this._renderResult.lang = options.general.language;
     }
 
     /**

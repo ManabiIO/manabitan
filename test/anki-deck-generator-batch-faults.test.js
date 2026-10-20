@@ -75,11 +75,17 @@ function createController(words) {
             _progressContainers: [],
             _activeNoteType: 'Basic',
             _activeAnkiDeck: 'Japanese',
+            _activeFlashcardFormatSelect: {value: '0'},
+            _flashcardFormatDetails: [{type: 'term', name: 'Basic', model: 'Basic', deck: 'Japanese', fields: {Front: {value: '{expression}'}}}],
+            _flashcardFormatDetailsOwnership: {optionsContext: {index: 0, profileId: 'profile-a'}, profileIndexChangeGeneration: 0, optionsRevision: 0},
+            _flashcardFormatViewToken: 1,
+            _generationButtons: [],
             _saveBlob: saveBlob,
             _sendNotes: sendNotes,
             _generateNoteData: generateNoteData,
             _settingsController: {
                 profileIndexChangeGeneration: 0,
+                optionsRevision: 0,
                 getOptionsContext: () => ({index: 0, profileId: 'profile-a'}),
             },
             _fieldsToTSV: () => 'field',
@@ -288,10 +294,11 @@ for (const method of ['_onExportConfirm', '_onSendToAnkiConfirm']) {
         for (const replacement of ['different ID', 'same-ID settings import']) {
             test(method + ' stops ' + replacement + ' at the same index during ' + boundary, async () => {
                 const {controller, timers, generateNoteData, saveBlob, sendNotes, error} = createController('one');
-                const state = {context: {index: 0, profileId: 'a'}, generation: 0};
+                const state = {context: {index: 0, profileId: 'profile-a'}, generation: 0};
                 Reflect.set(controller, '_settingsController', {
                     getOptionsContext: () => ({...state.context}),
                     get profileIndexChangeGeneration() { return state.generation; },
+                    get optionsRevision() { return state.generation; },
                 });
                 /** @type {ReturnType<typeof deferred<any>>} */
                 const pending = deferred();
@@ -320,10 +327,11 @@ for (const method of ['_onExportConfirm', '_onSendToAnkiConfirm']) {
 for (const replacement of ['different ID', 'same-ID settings import']) {
     test(replacement + ' during duplicate detection prevents actual addNotes dispatch', async () => {
         const {controller, timers} = createController('one');
-        const state = {context: {index: 0, profileId: 'a'}, generation: 0};
+        const state = {context: {index: 0, profileId: 'profile-a'}, generation: 0};
         Reflect.set(controller, '_settingsController', {
             getOptionsContext: () => ({...state.context}),
             get profileIndexChangeGeneration() { return state.generation; },
+            get optionsRevision() { return state.generation; },
         });
         /** @type {ReturnType<typeof deferred<boolean[]>>} */
         const pending = deferred();
