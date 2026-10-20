@@ -645,27 +645,25 @@ export class AnkiNoteBuilder {
                 }
             }
         }
-        let textFuriganaPromise = null;
-        if (textFuriganaDetails.length > 0) {
-            const textParsingOptions = mediaOptions.textParsing;
-            if (typeof textParsingOptions === 'object' && textParsingOptions !== null) {
-                const {optionsContext, scanLength} = textParsingOptions;
-                textFuriganaPromise = this._getTextFurigana(textFuriganaDetails, optionsContext, scanLength, dictionaryEntryDetails);
-            }
-        }
-
         // Inject media
         const popupSelectionText = injectPopupSelectionText ? this._getPopupSelectionText() : null;
-        const injectedMedia = await this._api.injectAnkiNoteMedia(
-            timestamp,
-            dictionaryEntryDetails,
-            audioDetails,
-            screenshotDetails,
-            clipboardDetails,
-            dictionaryMediaDetails,
-        );
+        const textParsingOptions = mediaOptions.textParsing;
+        const [injectedMedia, textFurigana] = await Promise.all([
+            Promise.resolve().then(() => this._api.injectAnkiNoteMedia(
+                timestamp,
+                dictionaryEntryDetails,
+                audioDetails,
+                screenshotDetails,
+                clipboardDetails,
+                dictionaryMediaDetails,
+            )),
+            Promise.resolve().then(() => {
+                if (textFuriganaDetails.length === 0 || typeof textParsingOptions !== 'object' || textParsingOptions === null) { return []; }
+                const {optionsContext, scanLength} = textParsingOptions;
+                return this._getTextFurigana(textFuriganaDetails, optionsContext, scanLength, dictionaryEntryDetails);
+            }),
+        ]);
         const {audioFileName, screenshotFileName, clipboardImageFileName, clipboardText, dictionaryMedia: dictionaryMediaArray, errors} = injectedMedia;
-        const textFurigana = textFuriganaPromise !== null ? await textFuriganaPromise : [];
 
         // Format results
         /** @type {import('anki-templates').DictionaryMedia} */

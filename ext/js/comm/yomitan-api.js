@@ -422,9 +422,13 @@ export class YomitanApi {
                         continue;
                     }
                     if (!Object.hasOwn(dictionaryMedia, dictionaryEntryMedia.dictionary)) {
-                        dictionaryMedia[dictionaryEntryMedia.dictionary] = {};
+                        Object.defineProperty(dictionaryMedia, dictionaryEntryMedia.dictionary, {
+                            value: {}, enumerable: true, configurable: true, writable: true,
+                        });
                     }
-                    dictionaryMedia[dictionaryEntryMedia.dictionary][dictionaryEntryMedia.path] = {value: mediaFile.ankiFilename};
+                    Object.defineProperty(dictionaryMedia[dictionaryEntryMedia.dictionary], dictionaryEntryMedia.path, {
+                        value: {value: mediaFile.ankiFilename}, enumerable: true, configurable: true, writable: true,
+                    });
                 }
             }
 
