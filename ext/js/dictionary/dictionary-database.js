@@ -6827,8 +6827,8 @@ null;
      * Reserves collision-free metadata slots and computes content signatures
      * while block compression is running. Pending slots participate in probe
      * chains but are never returned to readers before their offsets exist.
-     * @param {number[]} pendingContentHash1s
-     * @param {number[]} pendingContentHash2s
+     * @param {number[]|Uint32Array} pendingContentHash1s
+     * @param {number[]|Uint32Array} pendingContentHash2s
      * @param {Uint8Array[]} pendingContentBytes
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
      * @returns {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}}
@@ -8123,7 +8123,7 @@ this._readTermContentSignature(
      * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
      * @param {ArtifactTermContentChunk} chunk
      * @param {boolean} [reserveMetadata]
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
      */
     async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false) {
         const count = chunk.rowCount;
@@ -8395,6 +8395,11 @@ null :
             }
             const firstUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowStart);
             const lastUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowEnd);
+            const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
+            // These hash words already have Uint32 semantics. Allocate only
+            // for a pending row, without growing numeric JavaScript arrays.
+            let pendingCanonicalHash1s = new Uint32Array(0);
+            let pendingCanonicalHash2s = new Uint32Array(0);
             const pendingSpanOffsets = getOrCreateTermContentPlanScratch(
                 contentDedupPlan,
                 'pendingSpanOffsetsScratch',
@@ -8410,7 +8415,6 @@ null :
             let dedupCapacityMs = 0;
             if (reserveMetadata) {
                 const capacityStart = safePerformance.now();
-                const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
                 this._ensureTermEntryContentMetaHashPairCapacity(
                     this._getArtifactTermContentMetaCapacityHint(chunk, maximumPendingContentCount),
                 );
@@ -8439,10 +8443,14 @@ null :
                 if (contentOffset > 0xffffffff) {
                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
                 }
+                if (pendingContentCount === 0) {
+                    pendingCanonicalHash1s = new Uint32Array(maximumPendingContentCount);
+                    pendingCanonicalHash2s = new Uint32Array(maximumPendingContentCount);
+                }
                 pendingSpanOffsets[pendingContentCount] = contentOffset;
                 pendingSpanLengths[pendingContentCount] = contentLength;
-                pendingContentHash1s.push(hash1);
-                pendingContentHash2s.push(hash2);
+                pendingCanonicalHash1s[pendingContentCount] = hash1;
+                pendingCanonicalHash2s[pendingContentCount] = hash2;
                 if (stagedIndexes !== null) {
                     const signatureOffset = uniqueIndex * 3;
                     stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
@@ -8596,8 +8604,8 @@ null :
                 contentLengths,
                 resolvedContentDictNames,
                 pendingContentBytes,
-                pendingContentHash1s,
-                pendingContentHash2s,
+                pendingContentHash1s: pendingCanonicalHash1s.subarray(0, pendingContentCount),
+                pendingContentHash2s: pendingCanonicalHash2s.subarray(0, pendingContentCount),
                 pendingContentDictNames,
                 pendingRowToUniqueIndex: null,
                 pendingContentCount,
@@ -8997,7 +9005,7 @@ null :
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */

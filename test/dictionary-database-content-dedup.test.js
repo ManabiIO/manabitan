@@ -1802,6 +1802,60 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(result.pendingContentCount).toBe(0);
     });
 
+    test.each([false, true])('keeps unsigned pending hashes bounded and owned with allResolved=%s', async (allResolved) => {
+        const database = new DictionaryDatabase();
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const plan = {
+            uniqueCount: 3,
+            sourceRowCount: 3,
+            uniqueRowIndexes: new Uint32Array([0, 1, 2]),
+            resolvedFlags: new Uint8Array([1, allResolved ? 1 : 0, 1]),
+            resolvedOffsets: new Float64Array([100, 200, 300]),
+            resolvedLengths: new Uint32Array([1, 1, 1]),
+            resolvedDictNames: ['raw-v6', 'raw-v6', 'raw-v6'],
+            pendingEpochs: new Uint32Array(3),
+            pendingIndexes: new Uint32Array(3),
+            nextEpoch: 1,
+            persistedLookupRequired: true,
+        };
+        const contentMetaList = new Uint32Array([0, 1, 1, 2, 1, 1, 0x80000000, 0xffffffff, 2, 1, 3, 4]);
+        const chunk = {
+            rowCount: 3,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: new Uint8Array([9, 8, 7]),
+            contentBytesBaseOffset: 0,
+            contentMetaList,
+            contentUniqueIndexList: new Uint32Array([0, 1, 2]),
+            contentDedupPlan: plan,
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        };
+        const result = await resolve(chunk, true);
+        const {pendingContentHash1s: first, pendingContentHash2s: second} = result;
+        if (!(first instanceof Uint32Array) || !(second instanceof Uint32Array)) {
+            throw new Error('Expected bounded canonical hash buffers');
+        }
+        expect([...first]).toEqual(allResolved ? [] : [0x80000000]);
+        expect([...second]).toEqual(allResolved ? [] : [0xffffffff]);
+        expect(result.pendingContentCount).toBe(allResolved ? 0 : 1);
+        expect(first.buffer.byteLength).toBe(allResolved ? 0 : 12);
+        expect(second.buffer.byteLength).toBe(allResolved ? 0 : 12);
+        if (!allResolved) {
+            if (typeof result.stagedContentMetadata === 'undefined') { throw new Error('Expected staged metadata ownership'); }
+            Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, result.stagedContentMetadata);
+            contentMetaList[6] = 0xffffffff;
+            contentMetaList[7] = 0;
+            const next = await resolve(chunk, true);
+            expect([...next.pendingContentHash1s]).toEqual([0xffffffff]);
+            expect([...next.pendingContentHash2s]).toEqual([0]);
+            expect([...first]).toEqual([0x80000000]);
+            expect([...second]).toEqual([0xffffffff]);
+        }
+    });
+
     test('preserves unique-content mapping when an exact candidate is a hash collision', async () => {
         const database = new DictionaryDatabase();
         const persisted = new Uint8Array([1, 2, 3]);
@@ -1847,8 +1901,8 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         if (pendingContentSpans === null) { throw new Error('Expected pending content spans'); }
         expect([...pendingContentSpans.offsets]).toEqual([3, 0]);
         expect([...pendingContentSpans.lengths]).toEqual([3, 3]);
-        expect(result.pendingContentHash1s).toEqual([30, 10]);
-        expect(result.pendingContentHash2s).toEqual([40, 20]);
+        expect([...result.pendingContentHash1s]).toEqual([30, 10]);
+        expect([...result.pendingContentHash2s]).toEqual([40, 20]);
     });
 
     test('settles every concurrent exact comparison before reporting a failure', async () => {
