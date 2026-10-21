@@ -2,6 +2,12 @@ name: Benchmarks (Manual)
 
 on:
   workflow_dispatch:
+    inputs:
+      baseline_sha:
+        description: 'Full same-repository commit SHA for matched browser comparisons'
+        required: true
+        default: 'a2ef0f168c26553cba01cf363faf319eabdbeb05'
+        type: string
 
 permissions:
   contents: read
@@ -20,3 +26,113 @@ jobs:
         with:
           token: ${{ secrets.CODSPEED_TOKEN }}
           run: MANABITAN_CODSPEED=1 npm run bench
+
+  browser-comparison:
+    name: Browser comparison (${{ matrix.boundary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - boundary: import-jmdict
+            dictionary: jmdict
+          - boundary: import-jitendex
+            dictionary: jitendex
+          - boundary: lookup-lifecycle
+            dictionary: ''
+    env:
+      PERF_BASELINE_SHA: ${{ inputs.baseline_sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_BOUNDARY: ${{ matrix.boundary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Prepare both source revisions before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$PERF_BASELINE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git cat-file -e "${PERF_BASELINE_SHA}^{commit}"
+          comparison_root=$(mktemp -d "$RUNNER_TEMP/browser-comparison.XXXXXX")
+          baseline="$comparison_root/baseline"
+          evidence="$comparison_root/evidence"
+          mkdir -p "$evidence"
+          git worktree add --detach "$baseline" "$PERF_BASELINE_SHA"
+          cmp package-lock.json "$baseline/package-lock.json"
+          cmp test/perf/dictionaries.lock.json "$baseline/test/perf/dictionaries.lock.json"
+          # Both arms use the candidate measurement harness. Product source is
+          # untouched in the baseline; this deliberate test overlay is recorded.
+          cp test/chromium/extension-two-dictionary-import.e2e.js "$baseline/test/chromium/extension-two-dictionary-import.e2e.js"
+          node ./dev/perf/prepare-dictionaries.js
+          mkdir -p "$baseline/builds/e2e-dictionary-cache"
+          cp builds/e2e-dictionary-cache/*.zip "$baseline/builds/e2e-dictionary-cache/"
+          (
+            cd "$baseline"
+            npm ci
+            npm run build:libs
+            npm run build -- --target chrome-dev
+          )
+          npm run build -- --target chrome-dev
+          printf 'PERF_BASELINE_ROOT=%s\nPERF_EVIDENCE_ROOT=%s\n' "$baseline" "$evidence" >> "$GITHUB_ENV"
+          git rev-parse HEAD > "$evidence/candidate-sha.txt"
+          printf '%s\n' "$PERF_BASELINE_SHA" > "$evidence/baseline-sha.txt"
+          sha256sum test/chromium/extension-two-dictionary-import.e2e.js "$baseline/test/chromium/extension-two-dictionary-import.e2e.js" > "$evidence/shared-harness-sha256.txt"
+          sha256sum builds/manabitan-chrome-dev.zip "$baseline/builds/manabitan-chrome-dev.zip" > "$evidence/package-sha256.txt"
+          sha256sum ext/js/core/safe-performance.js "$baseline/ext/js/core/safe-performance.js" > "$evidence/instrumentation-source-sha256.txt"
+          git status --porcelain > "$evidence/candidate-status.txt"
+          git -C "$baseline" status --porcelain > "$evidence/baseline-status-with-harness-overlay.txt"
+
+      - name: Run adjacent A1 B1 B2 A2 observations
+        shell: bash
+        env:
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+        run: |
+          set -euo pipefail
+          candidate="$GITHUB_WORKSPACE"
+          for observation in A1 B1 B2 A2; do
+            source_root="$candidate"
+            if [[ "$observation" == A* ]]; then source_root="$PERF_BASELINE_ROOT"; fi
+            output="$PERF_EVIDENCE_ROOT/$observation"
+            mkdir -p "$output"
+            node "$candidate/dev/perf/host-environment.js" > "$output/host-before.json"
+            uptime > "$output/uptime-before.txt"
+            (
+              cd "$source_root"
+              if [[ -n "$PERF_DICTIONARY" ]]; then
+                node ./dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --output "$output"
+              else
+                MANABITAN_CHROMIUM_E2E_REPORT="$output/lookup-lifecycle.html" node ./test/chromium/extension-two-dictionary-import.e2e.js
+              fi
+            ) 2>&1 | tee "$output/run.log"
+            node "$candidate/dev/perf/host-environment.js" > "$output/host-after.json"
+            uptime > "$output/uptime-after.txt"
+          done
+
+      - name: Preserve comparison evidence including failed observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-comparison-${{ matrix.boundary }}
+          path: ${{ env.PERF_EVIDENCE_ROOT }}
+          if-no-files-found: error
+          retention-days: 14

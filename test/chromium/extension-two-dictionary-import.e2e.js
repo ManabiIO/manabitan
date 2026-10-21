@@ -3741,7 +3741,8 @@ async function main() {
         report.browserVersion = context.browser()?.version() ?? '';
         appendLog(report, 'info', `${browserFlavor} launch mode: ${launchModeLabel}`);
         let extensionBaseUrl = `chrome-extension://${extensionId}`;
-        await context.addInitScript(({flagsFromRunner, useProductionDefaults}) => {
+        await context.addInitScript(({flagsFromRunner, useProductionDefaults, instrumentationEnabled}) => {
+            Reflect.set(globalThis, 'manabitanPerformanceInstrumentationEnabled', instrumentationEnabled);
             Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
             if (useProductionDefaults) {
                 delete globalThis.manabitanImportUseSession;
@@ -3756,7 +3757,7 @@ async function main() {
                 globalThis.manabitanDisableIntegrityCounts = true;
                 globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
             }
-        }, {flagsFromRunner: e2eImportFlags, useProductionDefaults: useProductionImportDefaults});
+        }, {flagsFromRunner: e2eImportFlags, useProductionDefaults: useProductionImportDefaults, instrumentationEnabled: capturePhaseProfiles});
         page = context.pages()[0] ?? await context.newPage();
         /** @type {import('@playwright/test').Page|null} */
         let concurrentSearchPage = null;
