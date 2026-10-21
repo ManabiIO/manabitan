@@ -165,10 +165,11 @@ function database() {
  * @param {ArrayBuffer} bytes
  * @param {ReturnType<typeof database>} db
  * @param {Partial<import('dictionary-importer').ImportDetails>} [options]
+ * @param {((data: import('dictionary-importer').ProgressData) => void)|undefined} [onProgress]
  * @returns {Promise<import('dictionary-importer').ImportResult>}
  */
-async function run(bytes, db, options = {}) {
-    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), void 0, () => state.cancelled);
+async function run(bytes, db, options = {}, onProgress = void 0) {
+    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), onProgress, () => state.cancelled);
     return await importer.importDictionary(
         /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
         bytes,
@@ -350,6 +351,83 @@ describe('bounded referenced-media prefetch', () => {
         const result = await run(await archive(), database());
         expect(result.errors).toEqual([]);
         expect(state.events.indexOf('read:image0.png')).toBeGreaterThan(state.events.lastIndexOf('terms:1'));
+    });
+
+    test('bounds a large deferred image corpus and preserves every payload', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        Reflect.set(importer, '_skipImageMetadata', true);
+        const entry = {dictionary: 'Media test', expression: 'term', reading: '', definitionTags: '', rules: '', score: 0, glossary: []};
+        /** @type {import('dictionary-importer').ImportRequirement[]} */
+        const requirements = [];
+        /** @type {import('dictionary-importer').ArchiveFileMap} */
+        const files = new Map();
+        for (let i = 0; i < 600; ++i) {
+            const path = `image${i}.png`;
+            files.set(path, {filename: path, bytes: Uint8Array.of(i >>> 8, i & 255), uncompressedSize: 2});
+            requirements.push({type: 'image', source: {type: 'image', path}, target: {type: 'image', path: ''}, entry});
+        }
+        /** @type {number[]} */
+        const batches = [];
+        /** @type {import('dictionary-database').MediaDataArrayBufferContent[]} */
+        const persisted = [];
+        const count = await importer._importDeferredMediaRequirements(requirements, [], files, async (media, processed, total) => {
+            batches.push(media.length);
+            persisted.push(...media);
+            expect(processed).toBe(persisted.length);
+            expect(total).toBe(600);
+        });
+        expect(batches).toEqual([256, 256, 88]);
+        expect(count).toBe(600);
+        expect(persisted.map(({path}) => path)).toEqual(requirements.map(({source}) => Reflect.get(source, 'path')));
+        for (let i = 0; i < persisted.length; ++i) {
+            expect(new Uint8Array(persisted[i].content)).toEqual(Uint8Array.of(i >>> 8, i & 255));
+        }
+    });
+
+    test('advances progress after each persisted deferred-media batch', async () => {
+        const db = database();
+        state.sizeOverride = 9 * 1024 * 1024;
+        const bytes = await archive({imageCount: 3});
+        const progressAfterWrites = new Map();
+        let now = Date.now();
+        const clock = vi.spyOn(Date, 'now').mockImplementation(() => {
+            now += 1000;
+            return now;
+        });
+        try {
+            const result = await run(bytes, db, {}, (data) => {
+                const writeCount = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').length;
+                if (!data.nextStep && data.count === 7000 && writeCount > 0) { progressAfterWrites.set(writeCount, data.index); }
+            });
+            expect(result.errors).toEqual([]);
+            expect(result.result?.counts?.media.total).toBe(3);
+            const batches = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').map(([, entries]) => entries);
+            expect(batches.map((entries) => entries.length)).toEqual([1, 1, 1]);
+            expect(new Set(batches.flatMap((entries) => entries.map((entry) => Reflect.get(/** @type {object} */ (entry), 'path')))).size).toBe(3);
+            expect(progressAfterWrites.size).toBe(3);
+            const indexes = [...progressAfterWrites.values()];
+            expect(indexes[1]).toBeGreaterThan(indexes[0]);
+            expect(indexes[2]).toBeGreaterThan(indexes[1]);
+        } finally {
+            clock.mockRestore();
+        }
+    });
+
+    test('bounds deferred image bytes and stops before later reads on a batch write failure', async () => {
+        state.sizeOverride = 3 * 1024 * 1024;
+        const db = database();
+        const failure = new Error('media batch write failed');
+        db.bulkAdd.mockImplementation(async (store) => {
+            if (store === 'media') { throw failure; }
+        });
+        const result = await run(await archive({imageCount: 8}), db);
+        expect(result.result).toBeNull();
+        expect(result.errors).toContain(failure);
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        const batches = db.bulkAdd.mock.calls.filter(([store]) => store === 'media');
+        expect(batches).toHaveLength(1);
+        expect(state.events).not.toContain('read:image7.png');
     });
 
     test('deduplicates referenced paths across term banks', async () => {

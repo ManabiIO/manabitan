@@ -2835,6 +2835,49 @@ describe('term-bank WASM parser', () => {
         expect(profile?.nativeStringPlanFallbackChunkCount).toBe(0);
     });
 
+    maybeTest.each([false, true])('projects media once per exact content across chunks without dropping term rows (dedupe=%s)', async (dedupe) => {
+        const imageA = [{type: 'image', path: 'a.png'}];
+        const imageB = [{type: 'image', path: 'b.png'}];
+        const rows = [
+            ['first', '', '', '', 1, imageA, 1, ''],
+            ['second', '', '', '', 2, imageA, 2, ''],
+            ['third', '', '', '', 3, imageB, 3, ''],
+            ['fourth', '', '', 'v1', 4, imageA, 4, ''],
+            ['plain', '', '', '', 5, ['plain'], 5, ''],
+            ['sixth', '', '', '', 6, imageB, 6, ''],
+        ];
+        /** @type {string[]} */
+        const projected = [];
+        /** @type {number[]} */
+        const scores = [];
+        /** @type {string[]} */
+        const content = [];
+        await parseTermBankWithWasmColumnChunks(textEncoder.encode(JSON.stringify(rows)), 3, (chunk) => {
+            scores.push(...chunk.scoreList);
+            const metas = chunk.contentMetaList;
+            const bytes = chunk.contentBytesBuffer;
+            if (!(metas instanceof Uint32Array) || !(bytes instanceof Uint8Array)) { throw new Error('Expected content slab'); }
+            for (let i = 0; i < chunk.rowCount; ++i) {
+                const offset = (chunk.contentBytesBaseOffset ?? 0) + metas[i * 4];
+                content.push(getContentString({termEntryContentBytes: bytes.subarray(offset, offset + metas[i * 4 + 1])}));
+            }
+            for (const {row} of chunk.mediaRows) { projected.push(getContentString(row)); }
+        }, 2, {
+            emitContentSlab: true,
+            emitTokenBinaryContent: dedupe,
+            emitTermByteLists: false,
+            mediaHintFastScan: true,
+        });
+        expect(scores).toEqual([1, 2, 3, 4, 5, 6]);
+        expect(content).toHaveLength(6);
+        expect(content[0]).toBe(content[1]);
+        expect(content[2]).toBe(content[5]);
+        expect(content[3]).not.toBe(content[0]);
+        expect(projected).toHaveLength(dedupe ? 3 : 5);
+        expect(projected.filter((value) => value.includes('a.png'))).toHaveLength(dedupe ? 2 : 3);
+        expect(projected.filter((value) => value.includes('b.png'))).toHaveLength(dedupe ? 1 : 2);
+    });
+
     maybeTest('treats an empty reading as the expression in minimal and columnar paths', async () => {
         const source = textEncoder.encode(JSON.stringify([
             ['expression', '', '', '', 4, ['definition'], 12, ''],

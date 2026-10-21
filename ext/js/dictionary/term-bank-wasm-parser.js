@@ -1933,6 +1933,12 @@ null :
             persistedLookupRequired: null,
         } :
         null;
+    // Exact canonical-content IDs already include glossary, rules and tags.
+    // A media requirement needs one representative of that content, while all
+    // term rows and their individual expression/reading/score remain intact.
+    const seenMediaContent = mediaHintFastScan && contentDedupPlan !== null ?
+        new Uint8Array(contentDedupPlan.uniqueCount) :
+        null;
     let rowDecodeMs = 0;
     let nativeStringPlanMs = 0;
     let nativeStringPlanChunkCount = 0;
@@ -2099,10 +2105,14 @@ null :
                 contentHash2List[i] = contentMetas[c + 3] >>> 0;
             }
             if (mediaHintFastScan && metas[o + 14] === 1) {
-                mediaRows.push({
-                    index: i,
-                    row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, sourceIndex, false, true, true, true, true),
-                });
+                const uniqueIndex = contentUniqueIndexes[sourceIndex];
+                if (seenMediaContent === null || uniqueIndex >= seenMediaContent.length || seenMediaContent[uniqueIndex] === 0) {
+                    if (seenMediaContent !== null && uniqueIndex < seenMediaContent.length) { seenMediaContent[uniqueIndex] = 1; }
+                    mediaRows.push({
+                        index: i,
+                        row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, sourceIndex, false, true, true, true, true),
+                    });
+                }
             }
         }
         if (needsRowProjection) {

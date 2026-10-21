@@ -1392,7 +1392,9 @@ export class DictionaryImporter {
 
         // Term files are doubled due to media importing.
         // This transition enters "Importing data".
-        this._progressNextStep((activeTermFiles.length * 2 + termMetaFiles.length + kanjiFiles.length + kanjiMetaFiles.length + tagFiles.length + (indexTags.length > 0 ? 1 : 0)) * bulkAddProgressAllowance);
+        // Reserve a real work range for deferred media, separate from term rows.
+        const deferredMediaProgressAllowance = this._skipMediaImport ? 0 : bulkAddProgressAllowance;
+        this._progressNextStep(deferredMediaProgressAllowance + (activeTermFiles.length * 2 + termMetaFiles.length + kanjiFiles.length + kanjiMetaFiles.length + tagFiles.length + (indexTags.length > 0 ? 1 : 0)) * bulkAddProgressAllowance);
         const previousProgressInterval = this._progressMinIntervalMs;
         this._setProgressInterval(IMPORT_DATA_PROGRESS_MIN_INTERVAL_MS);
 
@@ -2355,27 +2357,35 @@ export class DictionaryImporter {
 
             await dictionaryDatabase.queuePendingTermContentImportWrites();
 
+            const mediaProgressStartIndex = this._progressData.index;
             if (deferredNoMetadataMediaRequirements.length > 0 || mediaPrefetchRemainingEntries < 256) {
                 const tMediaResolveStart = Date.now();
                 await mediaPrefetch;
                 if (mediaPrefetchFailure !== null) { throw toError(mediaPrefetchFailure); }
-                const {media} = await this._resolveAsyncRequirements(deferredNoMetadataMediaRequirements, fileMap);
-                media.unshift(...prefetchedNoMetadataMedia);
-                prefetchedNoMetadataMedia.length = 0;
-                const tMediaResolved = Date.now();
-                step4TimingBreakdown.mediaResolveMs += Math.max(0, tMediaResolved - tMediaResolveStart);
-                const tMediaWriteStart = Date.now();
-                await bulkAdd('media', media, {trackProgress: false});
-                const tMediaWriteEnd = Date.now();
-                step4TimingBreakdown.mediaWriteMs += Math.max(0, tMediaWriteEnd - tMediaWriteStart);
-                counts.media.total += media.length;
-                this._logImport(
-                    `deferred no-metadata media: requirements=${deferredNoMetadataMediaRequirements.length} ` +
-                    `rows=${media.length} resolve=${tMediaResolved - tMediaResolveStart}ms ` +
-                    `write=${tMediaWriteEnd - tMediaWriteStart}ms`,
+                let mediaWriteMs = 0;
+                const mediaCount = await this._importDeferredMediaRequirements(
+                    deferredNoMetadataMediaRequirements,
+                    prefetchedNoMetadataMedia,
+                    fileMap,
+                    async (media, processed, total) => {
+                        const tMediaWriteStart = Date.now();
+                        await bulkAdd('media', media, {trackProgress: false});
+                        const writeMs = Math.max(0, Date.now() - tMediaWriteStart);
+                        mediaWriteMs += writeMs;
+                        counts.media.total += media.length;
+                        this._progressData.index = mediaProgressStartIndex + deferredMediaProgressAllowance * processed / total;
+                        this._progress();
+                        this._logImport(`deferred media batch: processed=${processed}/${total} rows=${media.length} write=${writeMs}ms`);
+                    },
                 );
+                const mediaTotalMs = Math.max(0, Date.now() - tMediaResolveStart);
+                step4TimingBreakdown.mediaResolveMs += Math.max(0, mediaTotalMs - mediaWriteMs);
+                step4TimingBreakdown.mediaWriteMs += mediaWriteMs;
+                this._logImport(`deferred no-metadata media: rows=${mediaCount} total=${mediaTotalMs}ms write=${mediaWriteMs}ms`);
                 deferredNoMetadataMediaRequirements.length = 0;
             }
+            this._progressData.index = mediaProgressStartIndex + deferredMediaProgressAllowance;
+            this._progress();
 
             if (!this._skipMediaImport) {
                 const tMediaResolveStart = Date.now();
@@ -3337,6 +3347,53 @@ export class DictionaryImporter {
         return {
             media: [...media.values()],
         };
+    }
+
+    /**
+     * Drain media before reading the next bounded batch. In particular, do not
+     * retain the entire image corpus until one final database bulkAdd.
+     * @param {import('dictionary-importer').ImportRequirement[]} requirements
+     * @param {import('dictionary-database').MediaDataArrayBufferContent[]} prefetched
+     * @param {import('dictionary-importer').ArchiveFileMap} fileMap
+     * @param {(media: import('dictionary-database').MediaDataArrayBufferContent[], processed: number, total: number) => Promise<void>} writeMedia
+     * @returns {Promise<number>}
+     */
+    async _importDeferredMediaRequirements(requirements, prefetched, fileMap, writeMedia) {
+        const maxBatchEntries = 256;
+        const maxBatchBytes = 4 * 1024 * 1024;
+        const total = requirements.length + prefetched.length;
+        let processed = 0;
+        let mediaCount = 0;
+        for (let start = 0; start < prefetched.length; start += maxBatchEntries) {
+            this._throwIfCancelled();
+            const media = prefetched.slice(start, start + maxBatchEntries);
+            processed += media.length;
+            await writeMedia(media, processed, total);
+            mediaCount += media.length;
+        }
+        prefetched.length = 0;
+        for (let start = 0; start < requirements.length;) {
+            this._throwIfCancelled();
+            let end = start;
+            let batchBytes = 0;
+            while (end < requirements.length && end - start < maxBatchEntries) {
+                const requirement = requirements[end];
+                const path = requirement.type === 'structured-content-media-link' ? requirement.source.href : requirement.source.path;
+                const file = fileMap.get(path);
+                const size = /** @type {unknown} */ (typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize'));
+                const bytes = typeof size === 'number' && Number.isSafeInteger(size) && size >= 0 ? size : maxBatchBytes;
+                if (end > start && batchBytes + bytes > maxBatchBytes) { break; }
+                batchBytes += bytes;
+                ++end;
+            }
+            const {media} = await this._resolveAsyncRequirements(requirements.slice(start, end), fileMap);
+            this._throwIfCancelled();
+            processed += end - start;
+            await writeMedia(media, processed, total);
+            mediaCount += media.length;
+            start = end;
+        }
+        return mediaCount;
     }
 
     /**

@@ -502,8 +502,7 @@ describe('TermRecordOpfsStore', () => {
             labels,
         );
 
-        expect([writer.getById(1)?.entryContentDictName, writer.getById(2)?.entryContentDictName])
-            .toStrictEqual(labels);
+        expect(Reflect.get(writer, '_recordsById').size).toBe(0);
 
         await writer.endImportSession();
 
@@ -514,6 +513,102 @@ describe('TermRecordOpfsStore', () => {
 
         expect([...records.values()].map(({entryContentDictName}) => entryContentDictName))
             .toStrictEqual(labels);
+    });
+
+    test.each(['deduped', 'resolved', 'spans', 'sql', 'records'])(
+        'keeps %s row import batches out of the cache and queries persisted results after restart',
+        async (mode) => {
+            const dictionary = 'Media row import';
+            const fileBytesByName = new Map();
+            const directory = createFakeDirectoryHandle(fileBytesByName);
+            const writer = new TermRecordOpfsStore();
+            Reflect.set(writer, '_recordsDirectoryHandle', directory);
+            const labels = [RAW_TERM_CONTENT_DICT_NAME, RAW_TERM_CONTENT_TOKEN_DICT_NAME, RAW_TERM_CONTENT_DICT_NAME];
+            const expressions = ['暗記', '暗記する', '暗記'];
+            const readings = ['あんき', 'あんきする', 'くらき'];
+            const rows = expressions.map((expression, index) => ({
+                dictionary,
+                expression,
+                reading: readings[index],
+                score: index + 0.5,
+                sequence: 2 ** 40 + index,
+                expressionReverse: null,
+                readingReverse: null,
+                entryContentOffset: index * 64,
+                entryContentLength: 32,
+                entryContentDictName: labels[index],
+            }));
+            await writer.beginImportSession();
+            // Separate source batches must not retain their row objects or
+            // accidentally mark a partially materialized dictionary as loaded.
+            for (let i = 0; i < rows.length; ++i) {
+                const row = rows[i];
+                switch (mode) {
+                    case 'deduped':
+                        await writer.appendBatchFromResolvedImportTermEntries([row], 0, 1, [row.entryContentOffset], [32], [labels[i]]);
+                        break;
+                    case 'resolved':
+                        await writer.appendBatchFromImportTermEntriesResolvedContent([row], 0, 1, [row.entryContentOffset], [32], labels[i]);
+                        break;
+                    case 'spans':
+                        await writer.appendBatchFromImportTermEntries([row], 0, 1, [{offset: row.entryContentOffset, length: 32}]);
+                        break;
+                    case 'sql':
+                        await writer.appendBatchFromTermRows([
+                            [dictionary, row.expression, row.reading, null, null, null, row.entryContentOffset, 32, labels[i], null, null, null, row.score, null, row.sequence],
+                        ], 0, 1);
+                        break;
+                    default:
+                        await writer.appendBatch([row]);
+                        break;
+                }
+                expect(Reflect.get(writer, '_recordsById').size).toBe(0);
+                expect(Reflect.get(writer, '_loadedDictionaryNames').has(dictionary)).toBe(false);
+            }
+            await writer.endImportSession();
+            for (const store of [writer, new TermRecordOpfsStore()]) {
+                Reflect.set(store, '_recordsDirectoryHandle', directory);
+                if (store !== writer) { await store._loadShardFiles(false); }
+                await store.ensureDictionariesLoaded([dictionary]);
+                expect(store.size).toBe(3);
+                expect(store.findTermIds(dictionary, '暗記', 'expression')).toEqual([1, 3]);
+                expect(store.findTermIds(dictionary, 'くらき', 'reading')).toEqual([3]);
+                expect(store.findTermPrefixIdMatches(dictionary, '暗記', 'expression').map(({id}) => id).sort()).toEqual([1, 2, 3]);
+                expect(store.findTermIdsBySequence(dictionary, 2 ** 40 + 1)).toEqual([2]);
+                const records = await store.getByIdsAsync([1, 2, 3]);
+                expect([...records.values()].map(({expression, reading, score, entryContentDictName}) => ({expression, reading, score, entryContentDictName})))
+                    .toEqual(rows.map(({expression, reading, score, entryContentDictName}) => ({
+                        expression, reading, score, entryContentDictName: mode === 'spans' ? 'raw' : entryContentDictName,
+                    })));
+            }
+        },
+    );
+
+    test('does not mark a mixed row and column import as fully materialized', async () => {
+        const store = new TermRecordOpfsStore();
+        const dictionary = 'Mixed import';
+        Reflect.set(store, '_recordsDirectoryHandle', createFakeDirectoryHandle(new Map()));
+        await store.beginImportSession();
+        await store.appendBatchFromResolvedImportTermEntries([
+            {dictionary, expression: 'first', reading: 'first', score: 0},
+        ], 0, 1, [0], [8], ['raw']);
+        const bytes = new TextEncoder().encode('second');
+        await store.appendBatchFromArtifactChunkResolvedContent({
+            dictionary,
+            dictionaryTotalRows: 2,
+            rowCount: 1,
+            expressionBytesList: [bytes],
+            readingBytesList: [bytes],
+            readingEqualsExpressionList: new Uint8Array([1]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([-1]),
+        }, [8], [8], 'raw');
+        expect(Reflect.get(store, '_recordsById').size).toBe(0);
+        expect(Reflect.get(store, '_loadedDictionaryNames').has(dictionary)).toBe(false);
+        await store.endImportSession();
+        await store.ensureDictionariesLoaded([dictionary]);
+        expect(store.findTermIds(dictionary, 'first', 'expression')).toEqual([1]);
+        expect(store.findTermIds(dictionary, 'second', 'expression')).toEqual([2]);
     });
 
     test('round-trips wide sequences through persisted lookup indexes', async () => {
@@ -5273,7 +5368,7 @@ describe('TermRecordOpfsStore', () => {
         expect(store.getDictionaryHealth(fromName).status).toBe('reimportRequired');
     });
 
-    test('retains live imported strings through the owned preinterned buffer', async () => {
+    test('persists imported strings before releasing the owned preinterned buffer', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'JMdict';
         const expressionBytes = textEncoder.encode('暗記');
@@ -5306,10 +5401,12 @@ describe('TermRecordOpfsStore', () => {
         );
         expressionBytes.fill(0);
         readingBytes.fill(0);
+        expect(Reflect.get(store, '_recordsById').size).toBe(0);
         await store.endImportSession();
+        await store.ensureDictionariesLoaded([dictionaryName]);
 
-        const index = store.getDictionaryIndex(dictionaryName);
-        const record = store.getById(index.expression.get('暗記')?.[0] ?? -1);
+        const id = store.findTermIds(dictionaryName, '暗記', 'expression')[0] ?? -1;
+        const record = (await store.getByIdsAsync([id])).get(id);
         expect(record).toMatchObject({expression: '暗記', reading: 'あんき'});
     });
 
