@@ -344,3 +344,74 @@ describe('DictionaryWorker reusable request serialization', () => {
         client.destroy();
     });
 });
+
+
+describe('DictionaryWorker cleanup fault containment', () => {
+    test.each([false, true])('registration failure retires the failed worker and permits retry (reuse=%s)', async (reuseWorker) => {
+        const workers = installWorkerMock();
+        const originalAdd = MockWorker.prototype.addEventListener;
+        let failRegistration = true;
+        const add = vi.spyOn(MockWorker.prototype, 'addEventListener').mockImplementation((type, listener) => {
+            if (type === 'error' && failRegistration) {
+                failRegistration = false;
+                throw new Error('Listener registration failed');
+            }
+            originalAdd.call(workers[0], type, listener);
+        });
+        vi.spyOn(log, 'error').mockImplementation(() => {});
+        const client = new DictionaryWorker({reuseWorker});
+        await expect(client.getMdxVersion()).rejects.toThrow('Listener registration failed');
+        expect(Reflect.get(client, '_activeInvocations').size).toBe(0);
+        expect(workers[0].terminate).toHaveBeenCalledOnce();
+        add.mockRestore();
+        const retry = client.getMdxVersion();
+        expect(workers).toHaveLength(2);
+        workers[1].emitMessage({action: 'complete', params: {result: 2}});
+        await expect(retry).resolves.toBe(2);
+        client.destroy();
+    });
+
+    test.each([false, true])('completion cleanup failure cannot strand a published result (reuse=%s)', async (reuseWorker) => {
+        const workers = installWorkerMock();
+        const client = new DictionaryWorker({reuseWorker});
+        const completed = vi.fn();
+        const rejected = vi.fn();
+        const pending = client.getMdxVersion().then(completed, rejected);
+        const originalRemove = workers[0].removeEventListener;
+        const removal = vi.spyOn(workers[0], 'removeEventListener').mockImplementation((type, listener) => {
+            if (type === 'message') { throw new Error('Dead event target'); }
+            originalRemove.call(workers[0], type, listener);
+        });
+        const report = vi.spyOn(log, 'error').mockImplementation(() => { throw new Error('Logger unavailable'); });
+        expect(() => workers[0].emitMessage({action: 'complete', params: {result: 7}})).not.toThrow();
+        await Promise.resolve();
+        expect(completed).toHaveBeenCalledExactlyOnceWith(7);
+        expect(rejected).not.toHaveBeenCalled();
+        expect(removal.mock.calls.map(([type]) => type)).toEqual(['message', 'error', 'messageerror']);
+        expect(workers[0].terminate).toHaveBeenCalledOnce();
+        expect(report).toHaveBeenCalled();
+        await pending;
+        const retry = client.getMdxVersion();
+        expect(workers).toHaveLength(2);
+        workers[1].emitMessage({action: 'complete', params: {result: 9}});
+        await expect(retry).resolves.toBe(9);
+        client.destroy();
+    });
+
+    test('destroy settles every invocation even when cleanup of an earlier worker fails', async () => {
+        const workers = installWorkerMock();
+        const client = new DictionaryWorker();
+        const rejected = vi.fn();
+        const pending = [client.getMdxVersion().catch(rejected), client.getMdxVersion().catch(rejected)];
+        vi.spyOn(workers[0], 'removeEventListener').mockImplementation(() => { throw new Error('Removal failed'); });
+        workers[0].terminate.mockImplementation(() => { throw new Error('Termination failed'); });
+        vi.spyOn(log, 'error').mockImplementation(() => {});
+        expect(() => client.destroy()).not.toThrow();
+        await Promise.resolve();
+        expect(rejected).toHaveBeenCalledTimes(2);
+        for (const [error] of rejected.mock.calls) { expect(error.message).toBe('Dictionary worker destroyed'); }
+        expect(workers[1].terminate).toHaveBeenCalledOnce();
+        expect(Reflect.get(client, '_activeInvocations').size).toBe(0);
+        await Promise.all(pending);
+    });
+});
