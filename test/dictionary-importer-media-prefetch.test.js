@@ -162,7 +162,7 @@ function database() {
 }
 
 /**
- * @param {ArrayBuffer} bytes
+ * @param {ArrayBuffer|Blob} bytes
  * @param {ReturnType<typeof database>} db
  * @param {Partial<import('dictionary-importer').ImportDetails>} [options]
  * @param {((data: import('dictionary-importer').ProgressData) => void)|undefined} [onProgress]
@@ -172,7 +172,7 @@ async function run(bytes, db, options = {}, onProgress = void 0) {
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), onProgress, () => state.cancelled);
     return await importer.importDictionary(
         /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
-        bytes,
+        bytes instanceof Blob ? bytes : new Blob([bytes]),
         /** @type {import('dictionary-importer').ImportDetails} */ ({
             skipImageMetadata: true,
             zipUseWebWorkers: false,
@@ -327,6 +327,28 @@ describe('bounded referenced-media prefetch', () => {
         expect(result.errors).toEqual([]);
         expect(result.result?.counts?.media.total).toBe(0);
         expect(state.events.some((event) => event.startsWith('read:'))).toBe(false);
+    });
+
+    test('does not initialize the raw cache for an uncached small Blob on the ordinary source path', async () => {
+        let wholeArchiveReads = 0;
+        class UncachedArchiveBlob extends Blob {
+            /**
+             * @override
+             * @returns {Promise<ArrayBuffer>}
+             */
+            async arrayBuffer() {
+                ++wholeArchiveReads;
+                throw new Error('Media must not initialize the raw archive cache');
+            }
+        }
+        const db = database();
+        const result = await run(new UncachedArchiveBlob([await archive()]), db);
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(2);
+        expect(wholeArchiveReads).toBe(0);
+        expect(state.events.indexOf('read:image0.png')).toBeGreaterThanOrEqual(0);
+        expect(state.events.indexOf('read:image0.png')).toBeLessThan(state.events.lastIndexOf('terms:1'));
+        expect(state.events.indexOf('media:2')).toBeLessThan(state.events.indexOf('commit'));
     });
 
     test('reads referenced media before all terms finish and writes it before commit', async () => {

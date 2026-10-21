@@ -1894,8 +1894,20 @@ export class DictionaryImporter {
                             }
                             /** @type {import('dictionary-importer').ImportRequirement[]} */
                             const prefetchRequirements = [];
+                            // Source reads have now populated any reusable archive cache.
+                            // Drain its media after term sinks release borrowed WASM views.
+                            const deferCachedArchiveImages = rawZipPayloadReader?.supportsCachedBatchReads() === true;
                             for (const requirement of notAddedRequirements) {
                                 const file = requirement.type === 'structured-content-media-link' ? void 0 : fileMap.get(requirement.source.path);
+                                if (
+                                    deferCachedArchiveImages &&
+                                    (requirement.type === 'image' || requirement.type === 'structured-content-image') &&
+                                    typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
+                                    getImageMediaTypeFromFileName(requirement.source.path) !== null
+                                ) {
+                                    deferredNoMetadataMediaRequirements.push(requirement);
+                                    continue;
+                                }
                                 const size = /** @type {unknown} */ (typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize'));
                                 if (
                                     typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 ||
