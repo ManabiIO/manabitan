@@ -2513,6 +2513,36 @@ describe('term-bank WASM parser', () => {
         expect(rows[0].score).toBe(score);
     });
 
+    maybeTest.each([
+        ['int32 endpoints', '-2147483648', '2147483647', -2147483648, 2147483647, 0],
+        ['score overflow', '2147483648', '1', 2147483648, 1, 1],
+        ['sequence overflow', '1', '2147483648', 1, 2147483648, 1],
+        ['negative zero score', '-0', '0', -0, 0, 1],
+        ['negative zero sequence', '0', '-0', 0, 0, 0],
+        ['null sequence', '0', 'null', 0, -1, 0],
+        ['missing sequence', '0', null, 0, -1, 0],
+        ['decimal and exponent', '1.0', '1e0', 1, 1, 1],
+    ])('preserves numeric semantics through an attempted fused parse: %s', async (_name, scoreToken, sequenceToken, score, sequence, fallbacks) => {
+        const sequenceField = sequenceToken === null ? '' : ',' + sequenceToken + ',""';
+        const source = '[["numeric","","","",' + scoreToken + ',["definition"]' + sequenceField + ']]';
+        let rows = 0;
+        await parseTermBankWithWasmColumnChunks(textEncoder.encode(source), 3, (chunk) => {
+            rows += chunk.rowCount;
+            expect([...chunk.scoreList]).toStrictEqual([score]);
+            expect([...chunk.sequenceList]).toStrictEqual([sequence]);
+        }, 64, {
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            computeContentHashes: true,
+            prepareLookupIndexes: true,
+            experimentalFusedSingleBank: true,
+        });
+        expect(rows).toBe(1);
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(profile?.fusedParseAttempts).toBe(1);
+        expect(profile?.fusedParseFallbacks).toBe(fallbacks);
+    });
+
     maybeTest('bounds and serializes pipelined chunk dispatch', async () => {
         /** @type {number[]} */
         const calls = [];
