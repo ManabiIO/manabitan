@@ -10,7 +10,7 @@ A Node 22.22.0 retention check ran 2,000 pairs of marks plus one measure: baseli
 
 - Compare the candidate with `a2ef0f168c26553cba01cf363faf319eabdbeb05`, which includes the independently qualified runtime fixes.
 - Target eliminated work: persistent User Timing allocation on scanner/translator/render paths. No import flags, dedupe, caches, worker counts or buffers change.
-- Build both arms before timing. Use the same candidate measurement harness, pinned source ZIPs and Playwright browser, fresh profiles, OPFS, production import settings, and disabled profiling/screenshots/process sampling.
+- Build both arms before timing. Use the same candidate measurement harness and import tools, `chrome` release packages, pinned source ZIPs and Playwright browser, fresh profiles, OPFS, production import settings, and disabled profiling/screenshots/process sampling.
 - Run A1 B1 B2 A2 on a separate runner for each of JMdict import, Jitendex import and full lookup lifecycle. Preserve host snapshots before/after, package/harness identities, all raw results and failures.
 - Import acceptance: exact title/revision/term count, twelve first/middle/last content probes, no fallback/errors/skips, durable post-UI completion. Existing full functional browser checks cover additional content/lifecycle semantics; sampled probes do not establish exhaustive content equality.
 - Lookup guardrails: strict full lifecycle, request-fresh visible results, first and repeated hover samples and their scanner/popup timings. Lifecycle first hover follows production prewarm readiness; automation totals include pointer motion and setup and are not pure intent-to-visible latency.

@@ -262,6 +262,7 @@ export async function getSourceProvenance(root) {
         'test/e2e/import-timing.js',
         'ext/js/pages/settings/dictionary-import-controller.js',
         'builds/manabitan-chrome-dev.zip',
+        'builds/manabitan-chrome.zip',
     ]) {
         try {
             sha256[file] = createHash('sha256').update(await readFile(path.join(root, file))).digest('hex');
