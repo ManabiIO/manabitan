@@ -88,11 +88,14 @@ export class TemplateRendererProxy {
             this._frameNeedsLoad = false;
             this._frameLoading = true;
             this._frameLoadPromise = this._loadFrame(this._frame, this._frameUrl)
-                .catch((error) => {
-                    this._frameNeedsLoad = true;
-                    throw error;
-                })
-                .finally(() => { this._frameLoading = false; });
+                .then(
+                    () => { this._frameLoading = false; },
+                    (error) => {
+                        this._frameNeedsLoad = true;
+                        this._frameLoading = false;
+                        throw error;
+                    },
+                );
         }
         await this._frameLoadPromise;
     }

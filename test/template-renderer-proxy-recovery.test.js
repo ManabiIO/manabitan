@@ -35,4 +35,44 @@ describe('TemplateRendererProxy frame-load recovery', () => {
         await expect(proxy.renderMulti([])).resolves.toEqual(result);
         expect(loadFrame).toHaveBeenCalledTimes(2);
     });
+    test('an old failed load cannot clear a retry started in the next microtask', async () => {
+        /** @type {(reason: unknown) => void} */
+        let rejectFirst = () => {};
+        /** @type {() => void} */
+        let resolveSecond = () => {};
+        const firstLoad = new Promise((_resolve, reject) => { rejectFirst = reject; });
+        const secondLoad = new Promise((resolve) => { resolveSecond = () => resolve(void 0); });
+        const loadFrame = vi.fn().mockReturnValueOnce(firstLoad).mockReturnValueOnce(secondLoad);
+        const invoke = vi.fn().mockResolvedValue([]);
+        const proxy = /** @type {TemplateRendererProxy} */ (Object.assign(Object.create(TemplateRendererProxy.prototype), {
+            _frame: {},
+            _frameNeedsLoad: true,
+            _frameLoading: false,
+            _frameLoadPromise: null,
+            _frameUrl: 'test-frame',
+            _invocations: new Set(),
+            _loadFrame: loadFrame,
+            _invoke: invoke,
+        }));
+        /** @type {Promise<unknown>|null} */
+        let retry = null;
+        void firstLoad.catch(() => {
+            queueMicrotask(() => {
+                retry = proxy.renderMulti([]);
+                void retry.catch(() => {});
+            });
+        });
+        const initial = proxy.renderMulti([]);
+        rejectFirst(new Error('first frame failed'));
+        try {
+            await Promise.allSettled([initial]);
+            expect(loadFrame).toHaveBeenCalledTimes(2);
+            expect(Reflect.get(proxy, '_frameLoading')).toBe(true);
+            proxy._onFrameLoad();
+            expect(Reflect.get(proxy, '_frameNeedsLoad')).toBe(false);
+        } finally {
+            resolveSecond();
+            if (retry !== null) { await retry; }
+        }
+    });
 });
