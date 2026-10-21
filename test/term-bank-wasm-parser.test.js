@@ -187,7 +187,7 @@ function createCompressedTermBankSource(json, compressionMethod) {
 /**
  * @param {Uint8Array[]} sources
  * @param {Awaited<ReturnType<typeof inflateCompressedTermBankSourcesWasm>>|null} preloadedSource
- * @returns {Promise<object|null>}
+ * @returns {Promise<{rowCount: number, expressions: string[], readings: string[], readingEqualsExpression: number[], scores: number[], sequences: number[], content: number[][], contentHash1: number[], contentHash2: number[], contentUniqueIndexes: number[]|null}|null>}
  */
 async function parseColumnSnapshot(sources, preloadedSource = null) {
     /** @type {TermBankColumnChunk[]} */
@@ -2196,6 +2196,60 @@ describe('term-bank WASM parser', () => {
 
         const content = JSON.parse(getContentString(row));
         expect(content.glossary).toStrictEqual(glossary);
+    });
+
+    maybeTest('keeps string boundaries exact across short lengths and SIMD marker offsets', async () => {
+        const boundaryPositions = [7, 8, 9, 15, 16, 17, 31, 32, 33, 47, 48, 49];
+        const glossary = [
+            ...Array.from({length: 65}, (_, length) => 's'.repeat(length)),
+            ...boundaryPositions.flatMap((length) => [
+                `${'x'.repeat(length)}終`,
+                `${'x'.repeat(length)}\\`,
+                `${'x'.repeat(length)}"`,
+            ]),
+        ];
+        const rowSource = JSON.stringify([['boundaries', '', '', '', 0, glossary, 1, '']]);
+        const [row] = await parseRowsJson(rowSource);
+        expect(JSON.parse(getContentString(row)).glossary).toStrictEqual(glossary);
+
+        const unicodeRows = boundaryPositions.map((length, index) => (
+            `["unicode-${index}","","","",0,["${'x'.repeat(length)}\\u65e5"],${index + 1},""]`
+        ));
+        const unicodeParsed = await parseRowsJson(`[${unicodeRows.join(',')}]`);
+        expect(unicodeParsed.map((value) => JSON.parse(getContentString(value)).glossary[0])).toStrictEqual(
+            boundaryPositions.map((length) => `${'x'.repeat(length)}日`),
+        );
+
+        const column = await parseColumnSnapshot([textEncoder.encode(rowSource)]);
+        expect(column?.rowCount).toBe(1);
+        expect(column?.expressions).toStrictEqual(['boundaries']);
+    });
+
+    maybeTest.each([7, 8, 9, 15, 16, 17, 31, 32, 33, 47, 48, 49])('rejects raw controls and truncated escapes at offset %i', async (offset) => {
+        const prefix = 'x'.repeat(offset);
+        const invalidControl = `[["entry","","","",0,["${prefix}\u0001"],1,""]]`;
+        await expect(parseRowsJson(invalidControl)).rejects.toThrow(/term-bank parser failed/);
+
+        const invalidUnicode = `[["entry","","","",0,["${prefix}\\u12xz"],1,""]]`;
+        await expect(parseRowsJson(invalidUnicode)).rejects.toThrow(/term-bank parser failed/);
+
+        for (const suffix of ['\\', '\\u', '\\u0', '\\u00', '\\u000']) {
+            const truncatedEscape = `[["entry","","","",0,["${prefix}${suffix}`;
+            await expect(parseRowsJson(truncatedEscape)).rejects.toThrow(/term-bank parser failed/);
+        }
+    });
+
+    maybeTest('keeps string endings exact when another physical source bank follows', async () => {
+        const sources = [
+            textEncoder.encode(JSON.stringify([
+                ['long', '', '', '', 0, ['x'.repeat(79) + '終\\"'], 1, ''],
+            ])),
+            textEncoder.encode('[["valid","","","",0,["definition"],1,""]]'),
+        ];
+        const snapshot = await parseColumnSnapshot(sources);
+        expect(snapshot?.rowCount).toBe(2);
+        expect(snapshot?.expressions).toStrictEqual(['long', 'valid']);
+        expect(snapshot?.sequences).toStrictEqual([1, 1]);
     });
 
     maybeTest('rejects an unterminated string ending at a word boundary', async () => {

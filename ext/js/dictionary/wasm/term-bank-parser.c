@@ -26,6 +26,8 @@
 #define EXPERIMENT_VALIDATED_GLOSSARY_REUSE 4u
 #define EXPERIMENT_GLOBAL_EXACT_CONTENT_REUSE 8u
 #define EXPERIMENT_FAST_GLOSSARY_NORMALIZATION 16u
+#define VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET 4u
+#define VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES 4u
 /* Key lengths use every uint16 value; the null sentinel applies to IDs only. */
 #define MAX_INTERNED_KEY_BYTES 0xffffu
 #ifndef RECENT_CONTENT_DEDUP_WINDOW
@@ -2686,6 +2688,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t strings_cursor = 0u;
     uint32_t row_count = 0u;
     uint32_t recent_content_hits = 0u;
+    const int validated_glossary_reuse_enabled = (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u;
+    uint32_t glossary_reuse_probe_budget = 0u;
+    uint32_t recent_content_match_streak = 0u;
 #if RECENT_CONTENT_DEDUP_WINDOW > 0
     uint32_t recent_content_signatures[RECENT_CONTENT_DEDUP_WINDOW];
 #endif
@@ -2706,10 +2711,17 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         uint32_t row_end = 0u;
         uint32_t glossary_witness = 0xffffffffu;
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u ? &glossary_witness : 0)) {
+                rows, row_count, validated_glossary_reuse_enabled && glossary_reuse_probe_budget > 0u ? &glossary_witness : 0)) {
             return -1;
         }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
+        if (validated_glossary_reuse_enabled && row_count > 0u) {
+            if (glossary_witness != 0xffffffffu) {
+                glossary_reuse_probe_budget = VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET;
+            } else if (glossary_reuse_probe_budget > 0u) {
+                --glossary_reuse_probe_budget;
+            }
+        }
 
         const TermRowMeta* parsed_row = &rows[row_count];
         const uint32_t token_starts[2] = {
@@ -2880,6 +2892,14 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
 #endif
         }
         if (recent_match != 0xffffffffu) {
+            // Admit probing only after the existing exact-content deduper
+            // demonstrates a dense duplicate run. All reuse still requires
+            // full glossary equality; this signal only budgets comparisons.
+            if (validated_glossary_reuse_enabled &&
+                (recent_content_match_streak >= VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES ||
+                    ++recent_content_match_streak >= VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES)) {
+                glossary_reuse_probe_budget = VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET;
+            }
             const uint32_t canonical_offset = recent_match * 4u;
             row_meta[row_offset] = row_meta[canonical_offset];
             row_meta[row_offset + 1u] = row_meta[canonical_offset + 1u];
@@ -2888,6 +2908,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             unique_indexes[row_count] = unique_indexes[recent_match];
             ++recent_content_hits;
         } else {
+            recent_content_match_streak = 0u;
             const uint32_t start = cursor;
             uint32_t hash1 = 0u;
             uint32_t hash2 = 0u;

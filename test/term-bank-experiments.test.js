@@ -163,16 +163,17 @@ beforeAll(() => {
 })
 afterAll(() => { vi.unstubAllGlobals() })
 
-describe('default-off term-bank experiments', () => {
+describe('term-bank experiment defaults', () => {
     test('snapshots exact booleans and freezes them without mutating the caller', () => {
         const input = {experimentalTermBankSpans: true}
         const snap = snapshotTermBankExperiments(input)
         input.experimentalTermBankSpans = false
-        expect(snap).toEqual(flags(1))
+        expect(snap).toEqual(flags(5))
         expect(Object.isFrozen(snap)).toBe(true)
-        expect(snapshotTermBankExperiments()).toEqual(flags(0))
+        expect(snapshotTermBankExperiments()).toEqual(flags(4))
+        expect(snapshotTermBankExperiments({experimentalValidatedGlossaryReuse: false}).experimentalValidatedGlossaryReuse).toBe(false)
         expect(getTermBankExperimentMask(flags(63))).toBe(31)
-        expect(snapshotTermBankExperiments(/** @type {Experiments} */ (/** @type {unknown} */ ({experimentalTermBankSpans: 'true'})))).toEqual(flags(0))
+        expect(snapshotTermBankExperiments(/** @type {Experiments} */ (/** @type {unknown} */ ({experimentalTermBankSpans: 'true'})))).toEqual(flags(4))
     })
 
     const glossary = [{type: 'structured-content', content: [{tag: 'span', content: '日本語'}, {tag: 'ruby', content: '読み'}]}]
@@ -214,7 +215,7 @@ describe('default-off term-bank experiments', () => {
         expect(candidate.profile.fusedParseAttempts).toBe(1)
         expect(candidate.profile.fusedSingleBankGroups).toBe(1)
         const again = await parse(sources)
-        expect(again.profile.experiments).toEqual(flags(0))
+        expect(again.profile.experiments).toEqual(flags(4))
         expect(again.profile.fusedParseAttempts).toBe(0)
         expect(again.rows).toEqual(baseline.rows)
     })
@@ -367,32 +368,84 @@ describe('span boundaries and validated glossary witnesses', () => {
         }
     })
 
-    test.each(['[1,]', '{"a":}', '["\\q"]', '["\\u12xz"]', '["unterminated]', '{"a":[1,2]', '[01]'])('rejects malformed glossaries with reuse enabled: %s', async (bad) => {
-        const valid = JSON.stringify([row('first', [{a: [1, 2]}])])
-        await expect(parse([valid, `[["next","","","",0,${bad},1,""]]`], flags(15), true)).rejects.toThrow()
+    test.each(['[1,]', '{"a":}', '["\\q"]', '["\\u12xz"]', '["unterminated]', '{"a":[1,2]', '[01]'])('rejects malformed glossaries after active admission: %s', async (bad) => {
+        const repeated = JSON.stringify(Array.from({length: 6}, (_, i) => row(`same-${i}`, [{a: [1, 2]}])))
+        const candidate = parse([repeated, `[["next","","","",0,${bad},1,""]]`, JSON.stringify([row('readable-next-bank')])], flags(15), true)
+        await expect(candidate).rejects.toThrow()
     })
 
-    test('does not reuse after a same-length mutation outside sampled positions', async () => {
+    test('admits only after dense exact duplicates and rejects an unsampled same-length near miss', async () => {
         const text = 'x'.repeat(300)
         const altered = text.slice(0, 40) + 'y' + text.slice(41)
-        const sources = [JSON.stringify([row('a', [text]), row('b', [altered])]), JSON.stringify([row('c', [text])])]
+        const sources = [JSON.stringify([
+            ...Array.from({length: 6}, (_, i) => row(`duplicate-${i}`, [text])),
+            row('near-miss', [altered]),
+        ])]
         const base = await parse(sources)
         const result = await parse(sources, flags(15), true)
         expect(result.rows).toEqual(base.rows)
-        expect(result.rows[0].content).not.toEqual(result.rows[1].content)
-        expect(result.profile.validatedGlossaryReuseCount).toBe(1)
+        expect(result.rows[0].content).not.toEqual(result.rows.at(-1)?.content)
+        expect(result.profile.validatedGlossaryReuseCount).toBeGreaterThan(0)
+        expect(result.profile.validatedGlossaryReuseCount).toBeLessThan(6)
     })
 
-    test('glossary equality does not imply rules/tag equality', async () => {
-        const a = row('a')
-        const b = row('b')
+    test('active glossary reuse does not collapse rule or tag differences', async () => {
+        const glossary = [{type: 'structured-content', content: [{tag: 'span', content: 'shared'}]}]
+        const prelude = Array.from({length: 6}, (_, i) => row(`same-${i}`, glossary))
+        const a = row('a', glossary)
+        const b = row('b', glossary)
         b[2] = 'other-tag'
         b[3] = 'v5'
-        const sources = [JSON.stringify([a]), JSON.stringify([b])]
+        b[7] = 'different-term-tag'
+        const sources = [JSON.stringify([...prelude, a, b])]
         const result = await parse(sources, flags(15), true)
         expect(result.rows).toEqual((await parse(sources)).rows)
-        expect(result.rows[0].content).not.toEqual(result.rows[1].content)
-        expect(result.profile.validatedGlossaryReuseCount).toBe(1)
+        expect(result.rows.at(-2)?.content).not.toEqual(result.rows.at(-1)?.content)
+        expect(result.profile.validatedGlossaryReuseCount).toBeGreaterThan(0)
+    })
+
+    test('bounds failed probes and admits again after a later dense duplicate run', async () => {
+        /**
+         * @param {string} prefix
+         * @param {unknown} glossary
+         * @param {number} count
+         * @returns {unknown[]}
+         */
+        const repeated = (prefix, glossary, count) => Array.from({length: count}, (_, i) => row(`${prefix}-${i}`, glossary))
+        const rows = [
+            ...repeated('initial', ['base'], 6),
+            ...Array.from({length: 4}, (_, i) => row(`miss-${i}`, [`miss-${i}`])),
+            ...repeated('late', ['late'], 6),
+        ]
+        const sources = [JSON.stringify(rows)]
+        const baseline = await parse(sources, {experimentalValidatedGlossaryReuse: false}, true)
+        const candidate = await parse(sources, flags(15), true)
+        expect(candidate.rows).toEqual(baseline.rows)
+        // Each six-row duplicate run admits only its final row.
+        expect(candidate.profile.validatedGlossaryReuseCount).toBe(2)
+        expect(candidate.profile.fusedParseFallbacks).toBe(0)
+    })
+
+    test.each([
+        [{type: 'image', path: 'test.png'}],
+        [{type: 'text', text: '  line one\n line two  '}],
+    ])('preserves active media and text glossary hints for %j', async (hint) => {
+        const sources = [JSON.stringify(Array.from({length: 8}, (_, i) => row(`hint-${i}`, [hint])))]
+        const baseline = await parse(sources, {experimentalValidatedGlossaryReuse: false}, true)
+        const candidate = await parse(sources, flags(15), true)
+        expect(candidate.rows).toEqual(baseline.rows)
+        expect(candidate.rows.some((row) => row.media.length > 0)).toBe(hint.type === 'image')
+        expect(candidate.profile.validatedGlossaryReuseCount).toBeGreaterThan(0)
+        expect(candidate.profile.fusedParseFallbacks).toBe(0)
+    })
+
+    test('resets heap state after an admitted parse failure', async () => {
+        const repeated = JSON.stringify(Array.from({length: 6}, (_, i) => row(`same-${i}`, [{a: [1, 2]}])))
+        await expect(parse([repeated, '[["broken","","","",0,{"a":},1,""]]'], flags(15), true)).rejects.toThrow()
+        const afterFailure = await parse([repeated], flags(15), true)
+        const baseline = await parse([repeated], {experimentalValidatedGlossaryReuse: false}, true)
+        expect(afterFailure.rows).toEqual(baseline.rows)
+        expect(afterFailure.profile.validatedGlossaryReuseCount).toBeGreaterThan(0)
     })
 
     test.each([0, 8])('span source preparation keeps CRC, size, trailing-data and truncation validation: %i', async (method) => {

@@ -19,8 +19,9 @@
 
 /**
  * Per-import implementation switches. Qualified native lookup construction
- * and generic shared-span compression default on; other experiments remain off. Snapshot before
- * asynchronous work and copy effective values into each worker request.
+ * and generic shared-span compression default on, along with bounded validated
+ * glossary reuse. Snapshot before asynchronous work and copy effective values
+ * into each worker request.
  * Explicit false opts out for diagnostics; no toggle survives an import.
  * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Readonly<Required<import('dictionary-importer').ImportExperiments>>}
@@ -37,7 +38,7 @@ export function snapshotTermBankExperiments(options = {}) {
         experimentalSinglePassLookupCompaction: options.experimentalSinglePassLookupCompaction === true,
         experimentalTermBankSpans: options.experimentalTermBankSpans === true,
         experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true,
-        experimentalValidatedGlossaryReuse: options.experimentalValidatedGlossaryReuse === true,
+        experimentalValidatedGlossaryReuse: typeof options.experimentalValidatedGlossaryReuse === 'undefined' || options.experimentalValidatedGlossaryReuse === true,
         experimentalFusedSingleBank: options.experimentalFusedSingleBank === true,
         experimentalGlobalExactContentReuse: options.experimentalGlobalExactContentReuse === true,
         experimentalFastGlossaryNormalization: options.experimentalFastGlossaryNormalization === true,
