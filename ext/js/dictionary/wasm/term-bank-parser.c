@@ -229,6 +229,60 @@ int32_t inflate_and_join_term_banks(
     return (int32_t)cursor;
 }
 
+__attribute__((visibility("default")))
+int32_t inflate_zip_media_batch(
+    uint32_t input_ptr,
+    uint32_t input_length,
+    uint32_t input_offsets_ptr,
+    uint32_t compressed_lengths_ptr,
+    uint32_t uncompressed_lengths_ptr,
+    uint32_t compression_methods_ptr,
+    uint32_t signatures_ptr,
+    uint32_t source_count,
+    uint32_t output_ptr,
+    uint32_t output_capacity,
+    uint32_t output_offsets_ptr
+) {
+    if (source_count == 0u) { return -1; }
+    const uint8_t* input = (const uint8_t*)(uintptr_t)input_ptr;
+    const uint32_t* input_offsets = (const uint32_t*)(uintptr_t)input_offsets_ptr;
+    const uint32_t* compressed_lengths = (const uint32_t*)(uintptr_t)compressed_lengths_ptr;
+    const uint32_t* uncompressed_lengths = (const uint32_t*)(uintptr_t)uncompressed_lengths_ptr;
+    const uint32_t* compression_methods = (const uint32_t*)(uintptr_t)compression_methods_ptr;
+    const uint32_t* signatures = (const uint32_t*)(uintptr_t)signatures_ptr;
+    uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
+    uint32_t* output_offsets = (uint32_t*)(uintptr_t)output_offsets_ptr;
+    uint32_t cursor = 0u;
+
+    for (uint32_t i = 0u; i < source_count; ++i) {
+        const uint32_t input_offset = input_offsets[i];
+        const uint32_t compressed_length = compressed_lengths[i];
+        const uint32_t uncompressed_length = uncompressed_lengths[i];
+        if (
+            input_offset > input_length ||
+            compressed_length > input_length - input_offset ||
+            cursor > output_capacity ||
+            uncompressed_length > output_capacity - cursor
+        ) {
+            return -1;
+        }
+        output_offsets[i] = cursor;
+        uint8_t* inflated = output + cursor;
+        if (compression_methods[i] == 0u) {
+            if (compressed_length != uncompressed_length) { return -3; }
+            memcpy(inflated, input + input_offset, uncompressed_length);
+        } else if (compression_methods[i] == 8u) {
+            const int32_t status = term_bank_inflate(input + input_offset, compressed_length, inflated, uncompressed_length);
+            if (status != 0) { return status; }
+        } else {
+            return -1;
+        }
+        if (crc32_bytes(inflated, uncompressed_length) != signatures[i]) { return -4; }
+        cursor += uncompressed_length;
+    }
+    return (int32_t)cursor;
+}
+
 typedef struct {
     uint32_t expression_start;
     uint32_t expression_length;

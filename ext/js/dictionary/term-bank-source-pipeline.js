@@ -26,6 +26,10 @@ const SOURCE_TERM_BANK_UNKNOWN_SIZE_PREFETCH_MAX_FILES = 8;
 const ZIP_LOCAL_FILE_HEADER_LENGTH = 30;
 const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
 const RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES = 128 * 1024 * 1024;
+const RAW_ZIP_BATCH_MAX_RANGE_BYTES = 16 * 1024 * 1024;
+const RAW_ZIP_BATCH_MAX_GAP_BYTES = 256 * 1024;
+const RAW_ZIP_BATCH_MAX_FILES = 256;
+const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
 
 /** @typedef {import('@zip.js/zip.js').Entry|{filename: string}} TermBankSourceFile */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}} CompressedTermBankSource */
@@ -51,6 +55,11 @@ export class RawZipPayloadReader {
         const size = archiveContent instanceof Blob ? archiveContent.size : archiveContent.byteLength;
         return Number.isSafeInteger(size) && size >= ZIP_LOCAL_FILE_HEADER_LENGTH &&
         (archiveContent instanceof Blob || size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES);
+    }
+
+    /** @returns {boolean} */
+    supportsBatchReads() {
+        return this._archiveContent instanceof Blob && this._archiveContent.size > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
     }
 
     /**
@@ -114,6 +123,138 @@ export class RawZipPayloadReader {
         return ranged ?
             await this._readBlobRange(dataOffset, compressedSize, signal) :
             Uint8Array.from(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
+    }
+
+    /**
+     * Reads nearby ZIP entries through a bounded number of coalesced archive
+     * ranges. The returned byte arrays own their storage and preserve the
+     * source metadata needed by the native inflater.
+     * @param {TermBankSourceFile[]} files
+     * @param {AbortSignal} [signal]
+     * @param {() => boolean} [isCancelled]
+     * @returns {Promise<{sources: Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>, rangeReadCount: number, rangeReadBytes: number}|null>}
+     */
+    async readBatch(files, signal = new AbortController().signal, isCancelled = () => false) {
+        if (!Array.isArray(files) || files.length === 0) { return {sources: [], rangeReadCount: 0, rangeReadBytes: 0}; }
+        if (files.length > RAW_ZIP_BATCH_MAX_FILES) { return null; }
+        const archiveSize = this._archiveContent instanceof Blob ? this._archiveContent.size : this._archiveContent.byteLength;
+        /** @type {Array<{file: TermBankSourceFile, offset: number, rawFilename: Uint8Array, compressedSize: number, uncompressedSize: number, compressionMethod: 0|8, signature: number, filename: string}>} */
+        const entries = [];
+        let compressedBytes = 0;
+        let uncompressedBytes = 0;
+        for (const file of files) {
+            const offset = /** @type {unknown} */ (Reflect.get(file, 'offset'));
+            const compressedSize = /** @type {unknown} */ (Reflect.get(file, 'compressedSize'));
+            const uncompressedSize = /** @type {unknown} */ (Reflect.get(file, 'uncompressedSize'));
+            const compressionMethod = /** @type {unknown} */ (Reflect.get(file, 'compressionMethod'));
+            const signature = /** @type {unknown} */ (Reflect.get(file, 'signature'));
+            const rawFilename = /** @type {unknown} */ (Reflect.get(file, 'rawFilename'));
+            if (
+                typeof offset !== 'number' || !Number.isSafeInteger(offset) || offset < 0 ||
+                typeof compressedSize !== 'number' || !Number.isSafeInteger(compressedSize) || compressedSize < 0 ||
+                typeof uncompressedSize !== 'number' || !Number.isSafeInteger(uncompressedSize) || uncompressedSize < 0 ||
+                (compressionMethod !== 0 && compressionMethod !== 8) ||
+                typeof signature !== 'number' || !Number.isInteger(signature) || signature < 0 || signature > 0xffffffff ||
+                !(rawFilename instanceof Uint8Array) || rawFilename.byteLength === 0 || rawFilename.byteLength > 0xffff ||
+                typeof file.filename !== 'string' || offset > archiveSize - ZIP_LOCAL_FILE_HEADER_LENGTH
+            ) {
+                return null;
+            }
+            compressedBytes += compressedSize;
+            uncompressedBytes += uncompressedSize;
+            if (compressedBytes > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES || uncompressedBytes > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES) { return null; }
+            entries.push({file, offset, rawFilename, compressedSize, uncompressedSize, compressionMethod, signature, filename: file.filename});
+        }
+
+        entries.sort((a, b) => a.offset - b.offset);
+        /** @type {Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>} */
+        const result = [];
+        let rangeReadCount = 0;
+        let rangeReadBytes = 0;
+        for (let startIndex = 0; startIndex < entries.length;) {
+            signal.throwIfAborted();
+            if (isCancelled()) { throw new Error('Dictionary import was cancelled'); }
+            const first = entries[startIndex];
+            const firstOffset = first.offset;
+            let endIndex = startIndex;
+            let rangeEnd = firstOffset;
+            while (endIndex < entries.length) {
+                const entry = entries[endIndex];
+                // The local name must match the known central name. Only the
+                // extra field needs its maximum legal size in this read bound.
+                const entryUpperLength = ZIP_LOCAL_FILE_HEADER_LENGTH + entry.rawFilename.byteLength + 0xffff + entry.compressedSize;
+                const entryUpperEnd = entry.offset + Math.min(archiveSize - entry.offset, entryUpperLength);
+                const rangeLength = Math.min(archiveSize, entryUpperEnd) - firstOffset;
+                const gap = endIndex === startIndex ? 0 : entry.offset - rangeEnd;
+                if (
+                    endIndex > startIndex &&
+                    (gap > RAW_ZIP_BATCH_MAX_GAP_BYTES || rangeLength > RAW_ZIP_BATCH_MAX_RANGE_BYTES)
+                ) {
+                    break;
+                }
+                if (rangeLength > RAW_ZIP_BATCH_MAX_RANGE_BYTES) {
+                    // Decline rather than allocate beyond the range budget.
+                    return null;
+                }
+                rangeEnd = Math.max(rangeEnd, entryUpperEnd);
+                ++endIndex;
+            }
+            const boundedEnd = Math.min(archiveSize, rangeEnd);
+            const rangeLength = boundedEnd - firstOffset;
+            const bytes = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES ?
+                await this._readBlobRange(firstOffset, rangeLength, signal) :
+                (await this._getArchiveBytes()).subarray(firstOffset, boundedEnd);
+            signal.throwIfAborted();
+            ++rangeReadCount;
+            rangeReadBytes += rangeLength;
+            if (isCancelled()) { throw new Error('Dictionary import was cancelled'); }
+            const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+            for (let i = startIndex; i < endIndex; ++i) {
+                const entry = entries[i];
+                const headerOffset = entry.offset - firstOffset;
+                if (headerOffset < 0 || headerOffset > bytes.byteLength - ZIP_LOCAL_FILE_HEADER_LENGTH || view.getUint32(headerOffset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
+                    throw new Error(`Raw ZIP local header is invalid for '${entry.filename}'`);
+                }
+                const localFlags = view.getUint16(headerOffset + 6, true);
+                const localCompressionMethod = view.getUint16(headerOffset + 8, true);
+                if ((localFlags & 0x1) !== 0 || localCompressionMethod !== entry.compressionMethod) {
+                    throw new Error(`Raw ZIP local header disagrees with central metadata for '${entry.filename}'`);
+                }
+                const filenameLength = view.getUint16(headerOffset + 26, true);
+                const extraFieldLength = view.getUint16(headerOffset + 28, true);
+                const {rawFilename} = entry;
+                if (filenameLength !== rawFilename.byteLength) {
+                    throw new Error(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
+                }
+                const localFilenameOffset = headerOffset + ZIP_LOCAL_FILE_HEADER_LENGTH;
+                const dataOffset = localFilenameOffset + filenameLength + extraFieldLength;
+                const payloadEnd = dataOffset + entry.compressedSize;
+                const absoluteDataOffset = entry.offset + ZIP_LOCAL_FILE_HEADER_LENGTH + filenameLength + extraFieldLength;
+                if (
+                    !Number.isSafeInteger(payloadEnd) || payloadEnd > bytes.byteLength ||
+                    !Number.isSafeInteger(absoluteDataOffset) || absoluteDataOffset > archiveSize ||
+                    entry.compressedSize > archiveSize - absoluteDataOffset
+                ) {
+                    throw new Error(`Raw ZIP payload is out of bounds for '${entry.filename}'`);
+                }
+                for (let j = 0; j < filenameLength; ++j) {
+                    if (bytes[localFilenameOffset + j] !== rawFilename[j]) {
+                        throw new Error(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
+                    }
+                }
+                result.push({
+                    file: entry.file,
+                    bytes: Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
+                    compressionMethod: entry.compressionMethod,
+                    compressedSize: entry.compressedSize,
+                    uncompressedSize: entry.uncompressedSize,
+                    signature: entry.signature,
+                    filename: entry.filename,
+                });
+            }
+            startIndex = endIndex;
+        }
+        return {sources: result, rangeReadCount, rangeReadBytes};
     }
 
     /**

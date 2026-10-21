@@ -211,6 +211,7 @@ export type StructuredContentMediaLinkImportRequirement = {
 export type ImportRequirementContext = {
     fileMap: ArchiveFileMap;
     media: Map<string, DictionaryDatabase.MediaDataArrayBufferContent>;
+    rawMediaBytesByPath?: Map<string, Uint8Array>;
 };
 
 export type MemoryImportFile = {

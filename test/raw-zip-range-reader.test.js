@@ -68,6 +68,42 @@ class TrackedBlob extends Blob {
 }
 
 /**
+ * @param {BlobPart[]} parts
+ * @returns {{archive: TrackedBlob, started: Promise<void>, release: () => void}}
+ */
+function delayedArchive(parts) {
+    /** @type {() => void} */
+    let release = () => {};
+    const gate = new Promise((resolve) => { release = () => resolve(void 0); });
+    /** @type {() => void} */
+    let entered = () => {};
+    const started = new Promise((resolve) => { entered = () => resolve(void 0); });
+    class DelayedRange extends Blob {
+        /**
+         * @override
+         * @returns {Promise<ArrayBuffer>}
+         */
+        async arrayBuffer() {
+            const bytes = await super.arrayBuffer();
+            entered();
+            await gate;
+            return bytes;
+        }
+    }
+    class DelayedArchive extends TrackedBlob {
+        /**
+         * @override
+         * @param {number} [start]
+         * @param {number} [end]
+         * @param {string} [type]
+         * @returns {Blob}
+         */
+        slice(start, end, type) { return new DelayedRange([super.slice(start, end, type)]); }
+    }
+    return {archive: new DelayedArchive(parts), started, release};
+}
+
+/**
  * @param {number} method
  * @param {number} [extraLength]
  * @returns {{header: Uint8Array, payload: Uint8Array, file: {filename: string, rawFilename: Uint8Array, offset: number, compressionMethod: number, compressedSize: number, uncompressedSize: number, signature: number, getData: () => void}}}
@@ -100,6 +136,107 @@ function entry(method, extraLength = 0) {
 function signal() { return new AbortController().signal; }
 
 describe('bounded large ZIP entry reads', () => {
+    test('coalesces nearby payloads and validates every local entry header', async () => {
+        const first = entry(8, 4);
+        const second = entry(0, 2);
+        second.file.filename = 'term_bank_2.json';
+        second.file.rawFilename = encoder.encode(second.file.filename);
+        const secondHeader = Uint8Array.from(second.header);
+        secondHeader.set(second.file.rawFilename, 30);
+        second.file.offset = first.header.length + first.payload.length;
+        const archive = new TrackedBlob([first.header, first.payload, secondHeader, second.payload, padding]);
+        const reader = new RawZipPayloadReader(archive);
+
+        const batch = await reader.readBatch([second.file, first.file], signal());
+
+        expect(batch?.rangeReadCount).toBe(1);
+        expect(batch?.rangeReadBytes).toBe(archive.ranges[0][1] - archive.ranges[0][0]);
+        expect(archive.ranges).toHaveLength(1);
+        expect(batch?.sources.map(({filename}) => filename)).toEqual(['term_bank_1.json', 'term_bank_2.json']);
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual([first.payload, second.payload]);
+    });
+
+    test('validates each batched filename against its ZIP central metadata', async () => {
+        const first = entry(8);
+        const second = entry(8);
+        const wrongLocalName = encoder.encode('term_bank_2.json');
+        const wrongHeader = Uint8Array.from(second.header);
+        wrongHeader.set(wrongLocalName, 30);
+        second.file.filename = 'term_bank_2.json';
+        second.file.rawFilename = encoder.encode('term_bank_1.json');
+        second.file.offset = first.header.length + first.payload.length;
+        const archive = new TrackedBlob([first.header, first.payload, wrongHeader, second.payload, padding]);
+
+        await expect(new RawZipPayloadReader(archive).readBatch([first.file, second.file], signal())).rejects.toThrow('local filename disagrees');
+    });
+
+    test.each(['signature', 'encrypted', 'method'])('rejects a malformed second batch header: %s', async (kind) => {
+        const first = entry(8);
+        const second = entry(8);
+        second.file.filename = 'term_bank_2.json';
+        second.file.rawFilename = encoder.encode(second.file.filename);
+        second.header.set(second.file.rawFilename, 30);
+        second.file.offset = first.header.length + first.payload.length;
+        const view = new DataView(second.header.buffer);
+        if (kind === 'signature') { view.setUint32(0, 0, true); }
+        if (kind === 'encrypted') { view.setUint16(6, 1, true); }
+        if (kind === 'method') { view.setUint16(8, 0, true); }
+        const archive = new TrackedBlob([first.header, first.payload, second.header, second.payload, padding]);
+
+        await expect(new RawZipPayloadReader(archive).readBatch([first.file, second.file], signal())).rejects.toThrow('Raw ZIP local header');
+        expect(archive.ranges).toHaveLength(1);
+    });
+
+    test.each(['raw-filename', 'compressed-budget', 'uncompressed-budget', 'source-count', 'unsafe-offset'])('declines ineligible batches before I/O: %s', async (kind) => {
+        const first = entry(8);
+        const second = entry(8);
+        let files = [first.file, second.file];
+        if (kind === 'raw-filename') { Reflect.deleteProperty(second.file, 'rawFilename'); }
+        if (kind === 'compressed-budget') {
+            first.file.compressedSize = 3 * 1024 * 1024;
+            second.file.compressedSize = 3 * 1024 * 1024;
+        }
+        if (kind === 'uncompressed-budget') {
+            first.file.uncompressedSize = 3 * 1024 * 1024;
+            second.file.uncompressedSize = 3 * 1024 * 1024;
+        }
+        if (kind === 'source-count') { files = Array.from({length: 257}, () => first.file); }
+        if (kind === 'unsafe-offset') { second.file.offset = Number.MAX_SAFE_INTEGER; }
+        const archive = new TrackedBlob([first.header, first.payload, padding]);
+
+        expect(await new RawZipPayloadReader(archive).readBatch(files, signal())).toBeNull();
+        expect(archive.ranges).toEqual([]);
+    });
+
+    test('supports the maximum local extra field without reading an unknown filename allowance', async () => {
+        const {header, payload, file} = entry(8, 65535);
+        const archive = new TrackedBlob([header, payload, padding]);
+        const batch = await new RawZipPayloadReader(archive).readBatch([file], signal());
+        expect(batch?.sources[0].bytes).toEqual(payload);
+        expect(archive.ranges).toEqual([[0, header.byteLength + payload.byteLength]]);
+    });
+
+    test('joins a cancelled batch Blob read before exposing bytes', async () => {
+        const {header, payload, file} = entry(8);
+        const {archive, started, release} = delayedArchive([header, payload, padding]);
+        const controller = new AbortController();
+        const pending = new RawZipPayloadReader(archive).readBatch([file], controller.signal);
+        let settled = false;
+        const markSettled = () => { settled = true; };
+        void pending.then(markSettled, markSettled);
+        await started;
+        const rejected = expect(pending).rejects.toMatchObject({name: 'AbortError'});
+        try {
+            controller.abort();
+            await Promise.resolve();
+            expect(settled).toBe(false);
+        } finally {
+            release();
+        }
+        await rejected;
+        expect(archive.ranges).toHaveLength(1);
+    });
+
     test.each([0, 8])('reads an exact owned payload with method %i and skips unrelated bytes', async (method) => {
         const {header, payload, file} = entry(method, 65535);
         const archive = new TrackedBlob([header, payload, padding]);
@@ -149,36 +286,8 @@ describe('bounded large ZIP entry reads', () => {
         expect(archive.ranges).toEqual([]);
     });
     test('joins an in-flight real Blob read on disposal without starting its payload', async () => {
-        /** @type {() => void} */
-        let release = () => {};
-        const gate = new Promise((resolve) => { release = () => resolve(void 0); });
-        /** @type {() => void} */
-        let entered = () => {};
-        const started = new Promise((resolve) => { entered = () => resolve(void 0); });
-        class DelayedRange extends Blob {
-            /**
-             * @override
-             * @returns {Promise<ArrayBuffer>}
-             */
-            async arrayBuffer() {
-                const bytes = await super.arrayBuffer();
-                entered();
-                await gate;
-                return bytes;
-            }
-        }
-        class DelayedArchive extends TrackedBlob {
-            /**
-             * @override
-             * @param {number} [start]
-             * @param {number} [end]
-             * @param {string} [type]
-             * @returns {Blob}
-             */
-            slice(start, end, type) { return new DelayedRange([super.slice(start, end, type)]); }
-        }
         const {header, payload, file} = entry(8);
-        const archive = new DelayedArchive([header, payload, padding]);
+        const {archive, started, release} = delayedArchive([header, payload, padding]);
         const reader = new RawZipPayloadReader(archive);
         const pool = new AbortableZipReadPool(async (value, abortSignal) => await reader.read(value, abortSignal));
         const pending = pool.read(file);
