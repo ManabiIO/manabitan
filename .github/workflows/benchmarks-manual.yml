@@ -8,6 +8,16 @@ on:
         required: true
         default: 'a2ef0f168c26553cba01cf363faf319eabdbeb05'
         type: string
+      workload:
+        description: 'Comparison boundaries to run'
+        type: choice
+        default: all
+        options: [all, imports]
+      run_order:
+        description: 'Counterbalance the observation order'
+        type: choice
+        default: ABBA
+        options: [ABBA, BAAB]
 
 permissions:
   contents: read
@@ -15,6 +25,7 @@ permissions:
 jobs:
   bench:
     name: Benchmarks
+    if: inputs.workload != 'imports'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -34,17 +45,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - boundary: import-jmdict
-            dictionary: jmdict
-          - boundary: import-jitendex
-            dictionary: jitendex
-          - boundary: lookup-lifecycle
-            dictionary: ''
+        include: ${{ fromJSON(inputs.workload == 'imports' && '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"}]' || '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"},{"boundary":"lookup-lifecycle","dictionary":""}]') }}
     env:
       PERF_BASELINE_SHA: ${{ inputs.baseline_sha }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_BOUNDARY: ${{ matrix.boundary }}
+      PERF_RUN_ORDER: ${{ inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -95,10 +101,22 @@ jobs:
           sha256sum builds/manabitan-chrome.zip "$baseline/builds/manabitan-chrome.zip" > "$evidence/package-sha256.txt"
           sha256sum ext/js/core/safe-performance.js "$baseline/ext/js/core/safe-performance.js" > "$evidence/instrumentation-source-sha256.txt"
           sha256sum dev/perf/import-benchmark.js "$baseline/dev/perf/import-benchmark.js" dev/perf/benchmark-support.js "$baseline/dev/perf/benchmark-support.js" > "$evidence/shared-import-tools-sha256.txt"
+          python3 - "$GITHUB_WORKSPACE" "$baseline" <<'PYTHON'
+          import hashlib, json, sys, zipfile
+          for label, root in zip(('candidate', 'baseline'), sys.argv[1:]):
+              with zipfile.ZipFile(root + '/builds/manabitan-chrome.zip') as archive:
+                  hashes = {entry.filename: hashlib.sha256(archive.read(entry)).hexdigest()
+                            for entry in archive.infolist() if not entry.is_dir()}
+              with open(root + '/builds/package-entry-sha256.json', 'w') as output:
+                  json.dump(hashes, output, sort_keys=True, indent=2)
+          PYTHON
+          cp builds/package-entry-sha256.json "$evidence/candidate-package-entry-sha256.json"
+          cp "$baseline/builds/package-entry-sha256.json" "$evidence/baseline-package-entry-sha256.json"
+          printf '%s\n' "$PERF_RUN_ORDER" > "$evidence/observation-order.txt"
           git status --porcelain > "$evidence/candidate-status.txt"
           git -C "$baseline" status --porcelain > "$evidence/baseline-status-with-harness-overlay.txt"
 
-      - name: Run adjacent A1 B1 B2 A2 observations
+      - name: Run counterbalanced adjacent observations
         shell: bash
         env:
           MANABITAN_E2E_STRICT_RUNTIME: '1'
@@ -113,7 +131,8 @@ jobs:
         run: |
           set -euo pipefail
           candidate="$GITHUB_WORKSPACE"
-          for observation in A1 B1 B2 A2; do
+          read -r -a observations <<< "$PERF_RUN_ORDER"
+          for observation in "${observations[@]}"; do
             source_root="$candidate"
             if [[ "$observation" == A* ]]; then source_root="$PERF_BASELINE_ROOT"; fi
             output="$PERF_EVIDENCE_ROOT/$observation"
