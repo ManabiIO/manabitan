@@ -61,6 +61,7 @@ int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length,
 int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length, uint8_t* output, uint32_t output_length);
 static uint32_t crc32_table[16][256];
 static uint32_t crc32_table_initialized = 0u;
+#define CRC32_FOUR_SPAN_THRESHOLD 131072u
 
 static uint32_t crc32_read_u32_le(const uint8_t* data) {
     return
@@ -68,6 +69,100 @@ static uint32_t crc32_read_u32_le(const uint8_t* data) {
         ((uint32_t)data[1] << 8u) |
         ((uint32_t)data[2] << 16u) |
         ((uint32_t)data[3] << 24u);
+}
+
+static __attribute__((always_inline)) inline uint32_t crc32_step16(const uint8_t* data, uint32_t crc) {
+    const uint32_t first = crc32_read_u32_le(data);
+    const uint32_t second = crc32_read_u32_le(data + 4u);
+    const uint32_t third = crc32_read_u32_le(data + 8u);
+    const uint32_t fourth = crc32_read_u32_le(data + 12u);
+    crc ^= first;
+    return
+        crc32_table[15][crc & 0xffu] ^
+        crc32_table[14][(crc >> 8u) & 0xffu] ^
+        crc32_table[13][(crc >> 16u) & 0xffu] ^
+        crc32_table[12][crc >> 24u] ^
+        crc32_table[11][second & 0xffu] ^
+        crc32_table[10][(second >> 8u) & 0xffu] ^
+        crc32_table[9][(second >> 16u) & 0xffu] ^
+        crc32_table[8][second >> 24u] ^
+        crc32_table[7][third & 0xffu] ^
+        crc32_table[6][(third >> 8u) & 0xffu] ^
+        crc32_table[5][(third >> 16u) & 0xffu] ^
+        crc32_table[4][third >> 24u] ^
+        crc32_table[3][fourth & 0xffu] ^
+        crc32_table[2][(fourth >> 8u) & 0xffu] ^
+        crc32_table[1][(fourth >> 16u) & 0xffu] ^
+        crc32_table[0][fourth >> 24u];
+}
+
+static uint32_t crc32_bytes_serial(const uint8_t* data, uint32_t length) {
+    uint32_t crc = 0xffffffffu;
+    uint32_t offset = 0u;
+    while (length - offset >= 16u) {
+        crc = crc32_step16(data + offset, crc);
+        offset += 16u;
+    }
+    while (offset < length) {
+        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];
+    }
+    return ~crc;
+}
+
+static uint32_t crc32_matrix_times(const uint32_t* matrix, uint32_t vector) {
+    uint32_t sum = 0u;
+    uint32_t index = 0u;
+    while (vector != 0u) {
+        if ((vector & 1u) != 0u) { sum ^= matrix[index]; }
+        vector >>= 1u;
+        ++index;
+    }
+    return sum;
+}
+
+static void crc32_matrix_square(uint32_t* square, const uint32_t* matrix) {
+    for (uint32_t i = 0u; i < 32u; ++i) {
+        square[i] = crc32_matrix_times(matrix, matrix[i]);
+    }
+}
+
+/* Build the GF(2) reflected IEEE polynomial shift operator for a finalized CRC. */
+static void crc32_make_shift_operator(uint32_t* result, uint32_t length) {
+    uint32_t odd[32];
+    uint32_t even[32];
+    uint32_t power[32];
+    uint32_t row = 1u;
+    odd[0] = 0xedb88320u;
+    for (uint32_t i = 1u; i < 32u; ++i) {
+        odd[i] = row;
+        row <<= 1u;
+    }
+
+    /* Square the one-bit polynomial operator to produce the byte-shift operator. */
+    crc32_matrix_square(even, odd);
+    crc32_matrix_square(odd, even);
+    crc32_matrix_square(power, odd);
+    for (uint32_t i = 0u; i < 32u; ++i) { result[i] = 1u << i; }
+
+    while (length != 0u) {
+        if ((length & 1u) != 0u) {
+            for (uint32_t i = 0u; i < 32u; ++i) {
+                result[i] = crc32_matrix_times(power, result[i]);
+            }
+        }
+        length >>= 1u;
+        if (length != 0u) {
+            crc32_matrix_square(even, power);
+            for (uint32_t i = 0u; i < 32u; ++i) { power[i] = even[i]; }
+        }
+    }
+}
+
+static uint32_t crc32_combine(uint32_t first, uint32_t second, uint32_t second_length) {
+    uint32_t shift[32];
+    if (second_length == 0u) { return first; }
+    crc32_make_shift_operator(shift, second_length);
+    return crc32_matrix_times(shift, first) ^ second;
 }
 
 static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
@@ -88,38 +183,59 @@ static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
         crc32_table_initialized = 1u;
     }
 
-    uint32_t crc = 0xffffffffu;
-    uint32_t offset = 0u;
-    while (length - offset >= 16u) {
-        const uint32_t first = crc32_read_u32_le(data + offset);
-        const uint32_t second = crc32_read_u32_le(data + offset + 4u);
-        const uint32_t third = crc32_read_u32_le(data + offset + 8u);
-        const uint32_t fourth = crc32_read_u32_le(data + offset + 12u);
-        crc ^= first;
-        crc =
-            crc32_table[15][crc & 0xffu] ^
-            crc32_table[14][(crc >> 8u) & 0xffu] ^
-            crc32_table[13][(crc >> 16u) & 0xffu] ^
-            crc32_table[12][crc >> 24u] ^
-            crc32_table[11][second & 0xffu] ^
-            crc32_table[10][(second >> 8u) & 0xffu] ^
-            crc32_table[9][(second >> 16u) & 0xffu] ^
-            crc32_table[8][second >> 24u] ^
-            crc32_table[7][third & 0xffu] ^
-            crc32_table[6][(third >> 8u) & 0xffu] ^
-            crc32_table[5][(third >> 16u) & 0xffu] ^
-            crc32_table[4][third >> 24u] ^
-            crc32_table[3][fourth & 0xffu] ^
-            crc32_table[2][(fourth >> 8u) & 0xffu] ^
-            crc32_table[1][(fourth >> 16u) & 0xffu] ^
-            crc32_table[0][fourth >> 24u];
-        offset += 16u;
+    if (length < CRC32_FOUR_SPAN_THRESHOLD) {
+        return crc32_bytes_serial(data, length);
     }
-    while (offset < length) {
-        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];
+
+    const uint32_t span_length = (length / 64u) * 16u;
+    const uint32_t second_span_offset = span_length * 2u;
+    const uint32_t tail_offset = span_length * 4u;
+    uint32_t first_crc = 0xffffffffu;
+    uint32_t second_crc = 0xffffffffu;
+    uint32_t third_crc = 0xffffffffu;
+    uint32_t fourth_crc = 0xffffffffu;
+    for (uint32_t offset = 0u; offset < span_length; offset += 16u) {
+        first_crc = crc32_step16(data + offset, first_crc);
+        second_crc = crc32_step16(data + span_length + offset, second_crc);
+        third_crc = crc32_step16(data + second_span_offset + offset, third_crc);
+        fourth_crc = crc32_step16(data + second_span_offset + span_length + offset, fourth_crc);
+    }
+    first_crc = ~first_crc;
+    second_crc = ~second_crc;
+    third_crc = ~third_crc;
+    fourth_crc = ~fourth_crc;
+    uint32_t one_span_shift[32];
+    uint32_t two_span_shift[32];
+    crc32_make_shift_operator(one_span_shift, span_length);
+    crc32_matrix_square(two_span_shift, one_span_shift);
+
+    const uint32_t first_pair = crc32_matrix_times(one_span_shift, first_crc) ^ second_crc;
+    const uint32_t second_pair = crc32_matrix_times(one_span_shift, third_crc) ^ fourth_crc;
+    uint32_t crc = ~(crc32_matrix_times(two_span_shift, first_pair) ^ second_pair);
+    for (uint32_t offset = tail_offset; offset < length; ++offset) {
+        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset]) & 0xffu];
     }
     return ~crc;
 }
+
+#if defined(TERM_BANK_CRC_TEST)
+__attribute__((visibility("default")))
+uint32_t term_bank_crc32_test(uint32_t data_ptr, uint32_t length) {
+    return crc32_bytes((const uint8_t*)(uintptr_t)data_ptr, length);
+}
+
+__attribute__((visibility("default")))
+uint32_t term_bank_crc32_combine_test(uint32_t first, uint32_t second, uint32_t second_length) {
+    return crc32_combine(first, second, second_length);
+}
+
+__attribute__((visibility("default")))
+uint32_t term_bank_crc32_shift_test(uint32_t crc, uint32_t length) {
+    uint32_t shift[32];
+    crc32_make_shift_operator(shift, length);
+    return crc32_matrix_times(shift, crc);
+}
+#endif
 
 static int is_json_whitespace(uint8_t value) {
     return value == 0x20u || value == 0x09u || value == 0x0au || value == 0x0du;
