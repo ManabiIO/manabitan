@@ -1469,8 +1469,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: row.sequence,
             };
-            this._storeRecord(record);
-            this._loadedDictionaryNames.add(record.dictionary);
+            this._cacheAppendedRecord(record);
             this._setDictionaryHealth(record.dictionary, 'available');
             const shardFileName = this._getShardFileName(record.dictionary, record.entryContentDictName);
             const shardRecords = recordsByShard.get(shardFileName);
@@ -1543,8 +1542,7 @@ export class TermRecordOpfsStore {
                 score: row[12],
                 sequence: row[14],
             };
-            this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
+            this._cacheAppendedRecord(record);
             if (i === start) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1654,8 +1652,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
+            this._cacheAppendedRecord(record);
             if (i === start) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1764,8 +1761,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
+            this._cacheAppendedRecord(record);
             if (i === 0) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1877,7 +1873,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._storeRecord(record);
+            this._cacheAppendedRecord(record);
             if (i === 0) {
                 firstDictionaryName = dictionary;
                 firstContentDictName = entryContentDictName;
@@ -1929,7 +1925,6 @@ export class TermRecordOpfsStore {
             getTermRecordPreinternedPlan(rows) :
             null;
         if (recordsByShard === null) {
-            this._loadedDictionaryNames.add(firstDictionaryName);
             const state = await this._getOrCreateShardState(firstDictionaryName, firstContentDictName);
             if (state !== null) {
                 const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
@@ -1940,7 +1935,6 @@ export class TermRecordOpfsStore {
         }
         for (const {records: dictionaryRecords, indexes} of recordsByShard.values()) {
             const firstRecord = dictionaryRecords[0];
-            this._loadedDictionaryNames.add(firstRecord.dictionary);
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
             const metrics = await this._encodeAndAppendChunkRunsForState(
@@ -2062,8 +2056,7 @@ export class TermRecordOpfsStore {
                     score: chunk.scoreList[i] ?? 0,
                     sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
                 };
-                this._storeRecord(record);
-                this._loadedDictionaryNames.add(chunk.dictionary);
+                this._cacheAppendedRecord(record);
                 if (typeof existingIndex !== 'undefined') {
                     this._addRecordToDictionaryIndex(existingIndex, record);
                 }
@@ -2187,7 +2180,7 @@ export class TermRecordOpfsStore {
             state,
             records[0]?.id ?? 0,
             records.length,
-            null,
+            records[0]?.entryContentDictName ?? 'raw',
             contentOffsetBase,
             lookupIndexBytes,
             recordFields,
@@ -2987,6 +2980,24 @@ export class TermRecordOpfsStore {
      */
     getAllIds() {
         return [...this._recordsById.keys()].sort((a, b) => a - b);
+    }
+
+    /**
+     * Keep import batches bounded: authoritative records and lookup keys are
+     * already encoded into OPFS by the append owner. Retaining each record here
+     * pins parser buffers and millions of row objects until publication.
+     * Non-import appends and in-memory test stores retain their existing cache.
+     * @param {TermRecord} record
+     */
+    _cacheAppendedRecord(record) {
+        if (this._importSessionActive && this._recordsDirectoryHandle !== null) {
+            this._reloadFromShardsAfterImport = true;
+            this._loadedDictionaryNames.delete(record.dictionary);
+            this._allShardContentsLoaded = false;
+            return;
+        }
+        this._storeRecord(record);
+        this._loadedDictionaryNames.add(record.dictionary);
     }
 
     /**
