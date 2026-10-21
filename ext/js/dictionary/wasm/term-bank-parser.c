@@ -61,7 +61,7 @@ int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length,
 int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length, uint8_t* output, uint32_t output_length);
 static uint32_t crc32_table[16][256];
 static uint32_t crc32_table_initialized = 0u;
-#define CRC32_FOUR_SPAN_THRESHOLD 131072u
+#define CRC32_FOUR_SPAN_THRESHOLD 262144u
 
 static uint32_t crc32_read_u32_le(const uint8_t* data) {
     return
@@ -96,7 +96,7 @@ static __attribute__((always_inline)) inline uint32_t crc32_step16(const uint8_t
         crc32_table[0][fourth >> 24u];
 }
 
-static uint32_t crc32_bytes_serial(const uint8_t* data, uint32_t length) {
+static __attribute__((always_inline)) inline uint32_t crc32_bytes_serial(const uint8_t* data, uint32_t length) {
     uint32_t crc = 0xffffffffu;
     uint32_t offset = 0u;
     while (length - offset >= 16u) {

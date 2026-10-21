@@ -178,7 +178,7 @@ describe('term bank CRC32', () => {
             const bytes = randomBytes(length, 0x4d595df4 ^ length)
             expect(candidateCrc(bytes)).toBe(crc32(bytes) >>> 0)
         }
-        for (const length of [63, 64, 65, 127, 128, 129, 65535, 65536, 65537, 131071, 131072, 131073, 1048576]) {
+        for (const length of [63, 64, 65, 127, 128, 129, 65535, 65536, 65537, 131071, 131072, 131073, 262143, 262144, 262145, 1048576]) {
             const bytes = randomBytes(length, 0x9e3779b9 ^ length)
             const expected = crc32(bytes) >>> 0
             for (let alignment = 0; alignment < 16; ++alignment) {
@@ -249,7 +249,7 @@ describe('term bank CRC32', () => {
         {
             label: 'large four-span',
             bytes: (() => {
-                const bytes = new Uint8Array(131072).fill(0x20)
+                const bytes = new Uint8Array(262144).fill(0x20)
                 bytes[0] = 0x5b
                 bytes[bytes.length - 1] = 0x5d
                 return bytes
