@@ -164,7 +164,7 @@ export class AnkiTemplateRenderer {
      * @returns {string}
      */
     _escapeExpression(text) {
-        return text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     }
 
     // Template helpers
@@ -835,7 +835,7 @@ export class AnkiTemplateRenderer {
             case 'structured-content': {
                 const glossaryStrings = this._extractGlossaryData(content, structuredContentGenerator);
                 if (glossaryStrings.length > 0) {
-                    return glossaryStrings.join('<br>\n');
+                    return this._safeString(glossaryStrings.join('<br>\n'));
                 } else {
                     const node = structuredContentGenerator.createStructuredContent(content.content, dictionary);
                     return node !== null ? this._getStructuredContentText(node) : '';
@@ -882,7 +882,7 @@ export class AnkiTemplateRenderer {
         for (let i = 0; i < content.length; i++) {
             const structuredGloss = content[i];
             if (typeof structuredGloss === 'string') {
-                rawGlossaryContent.push(structuredGloss);
+                rawGlossaryContent.push(this._escapeExpression(structuredGloss));
             } else if (Array.isArray(structuredGloss)) {
                 rawGlossaryContent.push(...this._convertGlossaryStructuredContentRecursive(structuredGloss, structuredContentGenerator));
             } else if (typeof structuredGloss === 'object' && structuredGloss.content) {
