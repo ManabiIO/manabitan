@@ -39,3 +39,5 @@ The experimental Python helper remains outside the extension runtime. Uploads mu
 Conversion resolves redirect chains before publishing entries, preserves resource bytes, and scopes reference HTML/CSS to the converted entry. Local CSS fragments and query-only references remain local; relative assets in external stylesheets resolve against their source directory. Declared stylesheet encodings are decoded conservatively; unsupported or mismatched declarations fail rather than silently damaging text. These rules do not promise full browser CSS compatibility.
 
 Run the helper behavior suite with `python3 -m unittest discover -s dev/native/mdx-import -p 'test_native_helper.py'`. Its in-memory reader fixtures do not qualify real PyGlossary MDX/MDD parsing, framed native pipes, or generated ZIP import/media rendering. Those require separate real-parser and browser verification.
+
+Conversion progress callbacks are advisory: exceptions are logged while conversion continues. Call `Mdx.disconnect()` to cancel explicitly. Completion and cancellation retire conversion ownership before worker teardown, so a teardown failure cannot leave the public request pending.
