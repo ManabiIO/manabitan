@@ -52,6 +52,7 @@ import {
     consumeLastParallelParserSkipReason,
     consumeLastTermBankWasmParseProfile,
     disposeParallelTermBankParser,
+    inflateCompressedZipMediaBatchWasm,
     parseTermBankWithWasmChunks,
     parseTermBankWithWasmColumnChunks,
     parseTermBankWithWasmColumnChunksOverlapped,
@@ -908,7 +909,7 @@ export class DictionaryImporter {
         const tImportStart = Date.now();
         /** @type {Array<{phase: string, elapsedMs: number, startEpochMs: number, endEpochMs: number, details?: Record<string, unknown>}>} */
         const phaseTimings = [];
-        /** @type {{termArchiveReadMs: number, termParseMs: number, termSerializationMs: number, bulkAddTermsMs: number, bulkAddTagsMetaMs: number, mediaResolveMs: number, mediaWriteMs: number, termFileNonParseWriteMs: number, termMetaReadMs: number, kanjiReadMs: number, kanjiMetaReadMs: number, tagReadMs: number}} */
+        /** @type {{termArchiveReadMs: number, termParseMs: number, termSerializationMs: number, bulkAddTermsMs: number, bulkAddTagsMetaMs: number, mediaResolveMs: number, mediaWriteMs: number, mediaZipBatchReadMs: number, mediaZipBatchInflateMs: number, mediaZipBatchCount: number, mediaZipBatchEntryCount: number, mediaZipBatchRangeBytes: number, mediaZipBatchCompressedBytes: number, mediaZipBatchUncompressedBytes: number, termFileNonParseWriteMs: number, termMetaReadMs: number, kanjiReadMs: number, kanjiMetaReadMs: number, tagReadMs: number}} */
         const step4TimingBreakdown = {
             termArchiveReadMs: 0,
             termParseMs: 0,
@@ -917,6 +918,13 @@ export class DictionaryImporter {
             bulkAddTagsMetaMs: 0,
             mediaResolveMs: 0,
             mediaWriteMs: 0,
+            mediaZipBatchReadMs: 0,
+            mediaZipBatchInflateMs: 0,
+            mediaZipBatchCount: 0,
+            mediaZipBatchEntryCount: 0,
+            mediaZipBatchRangeBytes: 0,
+            mediaZipBatchCompressedBytes: 0,
+            mediaZipBatchUncompressedBytes: 0,
             termFileNonParseWriteMs: 0,
             termMetaReadMs: 0,
             kanjiReadMs: 0,
@@ -2377,6 +2385,8 @@ export class DictionaryImporter {
                         this._progress();
                         this._logImport(`deferred media batch: processed=${processed}/${total} rows=${media.length} write=${writeMs}ms`);
                     },
+                    rawZipPayloadReader,
+                    step4TimingBreakdown,
                 );
                 const mediaTotalMs = Math.max(0, Date.now() - tMediaResolveStart);
                 step4TimingBreakdown.mediaResolveMs += Math.max(0, mediaTotalMs - mediaWriteMs);
@@ -2514,6 +2524,13 @@ export class DictionaryImporter {
                 step4BulkAddTagsMetaMs: Math.max(0, step4TimingBreakdown.bulkAddTagsMetaMs),
                 step4MediaResolveMs: Math.max(0, step4TimingBreakdown.mediaResolveMs),
                 step4MediaWriteMs: Math.max(0, step4TimingBreakdown.mediaWriteMs),
+                step4MediaZipBatchReadMs: Math.max(0, step4TimingBreakdown.mediaZipBatchReadMs),
+                step4MediaZipBatchInflateMs: Math.max(0, step4TimingBreakdown.mediaZipBatchInflateMs),
+                step4MediaZipBatchCount: step4TimingBreakdown.mediaZipBatchCount,
+                step4MediaZipBatchEntryCount: step4TimingBreakdown.mediaZipBatchEntryCount,
+                step4MediaZipBatchRangeBytes: step4TimingBreakdown.mediaZipBatchRangeBytes,
+                step4MediaZipBatchCompressedBytes: step4TimingBreakdown.mediaZipBatchCompressedBytes,
+                step4MediaZipBatchUncompressedBytes: step4TimingBreakdown.mediaZipBatchUncompressedBytes,
                 step4TermFileNonParseWriteMs: Math.max(0, step4TimingBreakdown.termFileNonParseWriteMs),
                 step4ArtifactPreloadMs: Math.max(0, step4ArtifactPreloadMs),
                 step4ArtifactReadBytesMs: Math.max(0, step4ArtifactReadBytesMs),
@@ -3332,13 +3349,14 @@ export class DictionaryImporter {
     /**
      * @param {import('dictionary-importer').ImportRequirement[]} requirements
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
+     * @param {Map<string, Uint8Array>} [rawMediaBytesByPath]
      * @returns {Promise<{media: import('dictionary-database').MediaDataArrayBufferContent[]}>}
      */
-    async _resolveAsyncRequirements(requirements, fileMap) {
+    async _resolveAsyncRequirements(requirements, fileMap, rawMediaBytesByPath = void 0) {
         /** @type {Map<string, import('dictionary-database').MediaDataArrayBufferContent>} */
         const media = new Map();
         /** @type {import('dictionary-importer').ImportRequirementContext} */
-        const context = {fileMap, media};
+        const context = {fileMap, media, ...(typeof rawMediaBytesByPath === 'undefined' ? {} : {rawMediaBytesByPath})};
 
         await this._runWithConcurrencyLimit(requirements, this._mediaResolutionConcurrency, async (requirement) => {
             await this._resolveAsyncRequirement(context, requirement);
@@ -3356,9 +3374,11 @@ export class DictionaryImporter {
      * @param {import('dictionary-database').MediaDataArrayBufferContent[]} prefetched
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
      * @param {(media: import('dictionary-database').MediaDataArrayBufferContent[], processed: number, total: number) => Promise<void>} writeMedia
+     * @param {RawZipPayloadReader|null} [rawZipPayloadReader]
+     * @param {{mediaZipBatchReadMs: number, mediaZipBatchInflateMs: number, mediaZipBatchCount: number, mediaZipBatchEntryCount: number, mediaZipBatchRangeBytes: number, mediaZipBatchCompressedBytes: number, mediaZipBatchUncompressedBytes: number}|null} [mediaMetrics]
      * @returns {Promise<number>}
      */
-    async _importDeferredMediaRequirements(requirements, prefetched, fileMap, writeMedia) {
+    async _importDeferredMediaRequirements(requirements, prefetched, fileMap, writeMedia, rawZipPayloadReader = null, mediaMetrics = null) {
         const maxBatchEntries = 256;
         const maxBatchBytes = 4 * 1024 * 1024;
         const total = requirements.length + prefetched.length;
@@ -3386,7 +3406,74 @@ export class DictionaryImporter {
                 batchBytes += bytes;
                 ++end;
             }
-            const {media} = await this._resolveAsyncRequirements(requirements.slice(start, end), fileMap);
+            const batchRequirements = requirements.slice(start, end);
+            let rawMediaBytesByPath;
+            if (rawZipPayloadReader !== null && rawZipPayloadReader.supportsBatchReads() && batchBytes <= maxBatchBytes) {
+                /** @type {Map<string, import('dictionary-importer').ImportFileEntry>} */
+                const filesByPath = new Map();
+                /** @type {Map<import('@zip.js/zip.js').Entry, string>} */
+                const pathByFile = new Map();
+                for (const requirement of batchRequirements) {
+                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image') { continue; }
+                    const path = requirement.source.path;
+                    if (
+                        filesByPath.has(path) ||
+                        this._imageMetadataByPath.has(path) ||
+                        this._pendingImageMediaByPath.has(path) ||
+                        getImageMediaTypeFromFileName(path) === null
+                    ) {
+                        continue;
+                    }
+                    const file = fileMap.get(path);
+                    if (typeof file === 'undefined' || Reflect.has(file, 'bytes')) { continue; }
+                    filesByPath.set(path, file);
+                    pathByFile.set(/** @type {import('@zip.js/zip.js').Entry} */ (file), path);
+                }
+                const files = [...filesByPath.values()];
+                let compressedBudget = 0;
+                for (const file of files) {
+                    const size = /** @type {unknown} */ (Reflect.get(file, 'compressedSize'));
+                    if (typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0) {
+                        compressedBudget = maxBatchBytes + 1;
+                        break;
+                    }
+                    compressedBudget += size;
+                    if (compressedBudget > maxBatchBytes) { break; }
+                }
+                if (files.length > 0 && compressedBudget <= maxBatchBytes) {
+                    this._throwIfCancelled();
+                    const readStart = Date.now();
+                    const rawBatch = await rawZipPayloadReader.readBatch(
+                        /** @type {import('@zip.js/zip.js').Entry[]} */ (files),
+                        void 0,
+                        () => !this._ignoreCancellation && this._isCancelled(),
+                    );
+                    if (rawBatch !== null && rawBatch.sources.length === files.length) {
+                        this._throwIfCancelled();
+                        if (mediaMetrics !== null) {
+                            mediaMetrics.mediaZipBatchReadMs += Math.max(0, Date.now() - readStart);
+                            mediaMetrics.mediaZipBatchCount += rawBatch.rangeReadCount;
+                            mediaMetrics.mediaZipBatchEntryCount += rawBatch.sources.length;
+                            mediaMetrics.mediaZipBatchRangeBytes += rawBatch.rangeReadBytes;
+                        }
+                        const inflateStart = Date.now();
+                        const inflated = await inflateCompressedZipMediaBatchWasm(rawBatch.sources);
+                        this._throwIfCancelled();
+                        rawMediaBytesByPath = new Map();
+                        for (let i = 0; i < rawBatch.sources.length; ++i) {
+                            const source = rawBatch.sources[i];
+                            const path = pathByFile.get(/** @type {import('@zip.js/zip.js').Entry} */ (source.file));
+                            if (typeof path !== 'undefined') { rawMediaBytesByPath.set(path, inflated.sources[i]); }
+                        }
+                        if (mediaMetrics !== null) {
+                            mediaMetrics.mediaZipBatchInflateMs += Math.max(0, Date.now() - inflateStart);
+                            mediaMetrics.mediaZipBatchCompressedBytes += inflated.compressedBytes;
+                            mediaMetrics.mediaZipBatchUncompressedBytes += inflated.uncompressedBytes;
+                        }
+                    }
+                }
+            }
+            const {media} = await this._resolveAsyncRequirements(batchRequirements, fileMap, rawMediaBytesByPath);
             this._throwIfCancelled();
             processed += end - start;
             await writeMedia(media, processed, total);
@@ -3658,7 +3745,10 @@ export class DictionaryImporter {
             }
 
             // Load file content without staging through Blob.
-            const bytes = await this._getData(file, new Uint8ArrayWriter());
+            const rawBytes = context.rawMediaBytesByPath?.get(path);
+            const bytes = typeof rawBytes === 'undefined' ?
+                await this._getData(file, new Uint8ArrayWriter()) :
+                rawBytes;
             let content = (
                 bytes.byteOffset === 0 &&
                 bytes.byteLength === bytes.buffer.byteLength

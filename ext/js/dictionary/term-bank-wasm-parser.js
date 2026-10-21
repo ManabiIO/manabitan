@@ -50,6 +50,8 @@ const PARALLEL_WORKER_PARSE_TIMEOUT_MS = 300_000;
 const PARALLEL_WORKER_CANCELLATION_POLL_MS = 25;
 const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
+const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
+const MAX_WASM_MEDIA_BATCH_SOURCES = 256;
 const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
@@ -59,7 +61,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
 /** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
@@ -132,6 +134,7 @@ async function getWasm() {
             typeof exports.wasm_get_last_parse_capacity !== 'function' ||
             typeof exports.wasm_get_last_content_capacity !== 'function' ||
             typeof exports.inflate_and_join_term_banks !== 'function' ||
+            typeof exports.inflate_zip_media_batch !== 'function' ||
             typeof exports.parse_term_bank !== 'function' ||
             typeof exports.parse_term_bank_with_media_hints !== 'function' ||
             typeof exports.parse_and_encode_term_bank_token_binary_dedup !== 'function' ||
@@ -151,6 +154,7 @@ async function getWasm() {
             wasm_get_last_parse_capacity: exports.wasm_get_last_parse_capacity,
             wasm_get_last_content_capacity: exports.wasm_get_last_content_capacity,
             inflate_and_join_term_banks: exports.inflate_and_join_term_banks,
+            inflate_zip_media_batch: exports.inflate_zip_media_batch,
             parse_term_bank: exports.parse_term_bank,
             parse_term_bank_with_media_hints: exports.parse_term_bank_with_media_hints,
             parse_and_encode_term_bank_token_binary_dedup: exports.parse_and_encode_term_bank_token_binary_dedup,
@@ -273,6 +277,95 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
         compressedBytes,
         uncompressedBytes,
     };
+}
+
+/**
+ * Inflates a bounded ZIP media batch into independent, exact-length byte arrays.
+ * @param {CompressedTermBankSource[]} sources
+ * @returns {Promise<{sources: Uint8Array[], inflateMs: number, compressedBytes: number, uncompressedBytes: number}>}
+ */
+export async function inflateCompressedZipMediaBatchWasm(sources) {
+    if (!Array.isArray(sources) || sources.length === 0) {
+        throw new TypeError('Compressed ZIP media sources are empty');
+    }
+    if (sources.length > MAX_WASM_MEDIA_BATCH_SOURCES) {
+        throw new TermBankWasmResourceError('Compressed ZIP media batch exceeds its source count budget');
+    }
+    let compressedBytes = 0;
+    let uncompressedBytes = 0;
+    for (const [index, source] of sources.entries()) {
+        if (!isCompressedTermBankSource(source)) {
+            throw new TypeError(`Compressed ZIP media source ${index + 1} metadata is invalid`);
+        }
+        compressedBytes += source.compressedSize;
+        uncompressedBytes += source.uncompressedSize;
+    }
+    if (
+        !Number.isSafeInteger(compressedBytes) || compressedBytes > MAX_WASM_MEDIA_BATCH_BYTES ||
+        !Number.isSafeInteger(uncompressedBytes) || uncompressedBytes > MAX_WASM_MEDIA_BATCH_BYTES
+    ) {
+        throw new TermBankWasmResourceError('Compressed ZIP media batch exceeds its memory budget');
+    }
+
+    const wasm = await getWasm();
+    wasm.wasm_reset_heap();
+    const inputPtr = allocateWasmBuffer(wasm, compressedBytes, 'ZIP media input');
+    const inputOffsetsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media input offset');
+    const compressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media compressed length');
+    const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media uncompressed length');
+    const compressionMethodsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media compression method');
+    const signaturesPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media CRC');
+    const outputOffsetsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media output offset');
+    const outputPtr = allocateWasmBuffer(wasm, uncompressedBytes, 'ZIP media output');
+    const input = new Uint8Array(wasm.memory.buffer);
+    const inputOffsets = new Uint32Array(wasm.memory.buffer, inputOffsetsPtr, sources.length);
+    const compressedLengths = new Uint32Array(wasm.memory.buffer, compressedLengthsPtr, sources.length);
+    const uncompressedLengths = new Uint32Array(wasm.memory.buffer, uncompressedLengthsPtr, sources.length);
+    const compressionMethods = new Uint32Array(wasm.memory.buffer, compressionMethodsPtr, sources.length);
+    const signatures = new Uint32Array(wasm.memory.buffer, signaturesPtr, sources.length);
+    const outputOffsets = new Uint32Array(wasm.memory.buffer, outputOffsetsPtr, sources.length);
+    let inputOffset = 0;
+    for (let i = 0; i < sources.length; ++i) {
+        const source = sources[i];
+        input.set(source.bytes, inputPtr + inputOffset);
+        inputOffsets[i] = inputOffset;
+        compressedLengths[i] = source.compressedSize;
+        uncompressedLengths[i] = source.uncompressedSize;
+        compressionMethods[i] = source.compressionMethod;
+        signatures[i] = source.signature >>> 0;
+        inputOffset += source.compressedSize;
+    }
+    const startedAt = safePerformance.now();
+    const outputLength = wasm.inflate_zip_media_batch(
+        inputPtr,
+        compressedBytes,
+        inputOffsetsPtr,
+        compressedLengthsPtr,
+        uncompressedLengthsPtr,
+        compressionMethodsPtr,
+        signaturesPtr,
+        sources.length,
+        outputPtr,
+        uncompressedBytes,
+        outputOffsetsPtr,
+    );
+    const inflateMs = Math.max(0, safePerformance.now() - startedAt);
+    if (outputLength < 0) {
+        const messages = new Map([
+            [-1, 'metadata or output bounds are invalid'],
+            [-2, 'raw DEFLATE decoding failed'],
+            [-3, 'inflated size does not match ZIP metadata'],
+            [-4, 'inflated bytes do not match the ZIP CRC32'],
+            [-6, 'raw DEFLATE payload has trailing bytes'],
+        ]);
+        throw new Error(`Compressed ZIP media source failed validation: ${messages.get(outputLength) ?? `code ${outputLength}`}`);
+    }
+    if (outputLength !== uncompressedBytes) {
+        throw new Error('Compressed ZIP media batch returned an invalid byte length');
+    }
+    const output = new Uint8Array(wasm.memory.buffer, outputPtr, outputLength);
+    const decoded = sources.map((source, index) => output.slice(outputOffsets[index], outputOffsets[index] + source.uncompressedSize));
+    return {sources: decoded, inflateMs, compressedBytes, uncompressedBytes};
 }
 
 /** @returns {Promise<void>} */

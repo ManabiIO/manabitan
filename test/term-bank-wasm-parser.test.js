@@ -19,7 +19,7 @@ import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {crc32, deflateRawSync} from 'node:zlib';
+import {crc32, deflateRawSync, inflateRawSync} from 'node:zlib';
 import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
@@ -32,6 +32,7 @@ import {
     copyWasmBackedColumnChunk,
     disposeParallelTermBankParser,
     getParallelTermBankParserWorkerCount,
+    inflateCompressedZipMediaBatchWasm,
     inflateCompressedTermBankSourcesWasm,
     parseTermBankWithWasmChunks,
     parseTermBankWithWasmColumnChunks,
@@ -248,6 +249,77 @@ describe('term-bank WASM parser', () => {
             ['a', '', '', '', 1, ['one'], 10, ''],
             ['b', 'び', 'tag', 'v1', -2, [{type: 'text', text: 'two'}], 11, 'common'],
         ]);
+    });
+
+    maybeTest('inflates binary ZIP media with exact lengths and CRCs', async () => {
+        const media = [
+            createCompressedTermBankSource('PNG\u0000image bytes', 8),
+            createCompressedTermBankSource('stored media payload', 0),
+        ];
+        const expected = media.map((source) => {
+            return source.compressionMethod === 8 ?
+                Uint8Array.from(inflateRawSync(source.bytes)) :
+                source.bytes;
+        });
+
+        const result = await inflateCompressedZipMediaBatchWasm(media);
+
+        expect(result.sources).toEqual(expected);
+        expect(result.compressedBytes).toBe(media.reduce((sum, source) => sum + source.compressedSize, 0));
+        expect(result.uncompressedBytes).toBe(expected.reduce((sum, bytes) => sum + bytes.byteLength, 0));
+        result.sources[0].fill(0);
+        expect(result.sources[1]).toEqual(expected[1]);
+    });
+
+    maybeTest('keeps empty and nonempty media bytes owned across later WASM calls', async () => {
+        const sources = [
+            createCompressedTermBankSource('', 0),
+            createCompressedTermBankSource('', 8),
+            createCompressedTermBankSource('first image bytes', 8),
+        ];
+        const first = await inflateCompressedZipMediaBatchWasm(sources);
+        await inflateCompressedZipMediaBatchWasm([createCompressedTermBankSource('replacement bytes', 8)]);
+        expect(first.sources.map((bytes) => textDecoder.decode(bytes))).toEqual(['', '', 'first image bytes']);
+        for (const bytes of first.sources) {
+            expect(bytes.buffer).toBeInstanceOf(ArrayBuffer);
+            expect(bytes.buffer.byteLength).toBe(bytes.byteLength);
+        }
+    });
+
+    maybeTest('bounds metadata allocation even when every media entry is empty', async () => {
+        const empty = createCompressedTermBankSource('', 0);
+        await expect(inflateCompressedZipMediaBatchWasm(Array.from({length: 257}, () => empty))).rejects.toThrow('source count budget');
+    });
+
+    maybeTest.each([
+        {
+            name: 'CRC mismatch',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, signature: (source.signature + 1) >>> 0}),
+            message: 'CRC32',
+        },
+        {
+            name: 'uncompressed-size mismatch',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, uncompressedSize: source.uncompressedSize + 1}),
+            message: 'size does not match',
+        },
+        {
+            name: 'truncated DEFLATE stream',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, bytes: source.bytes.slice(0, -2), compressedSize: source.compressedSize - 2}),
+            message: 'DEFLATE decoding failed',
+        },
+        {
+            name: 'trailing DEFLATE bytes',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => {
+                const bytes = new Uint8Array(source.bytes.byteLength + 1);
+                bytes.set(source.bytes);
+                bytes[bytes.length - 1] = 0xaa;
+                return {...source, bytes, compressedSize: bytes.byteLength};
+            },
+            message: 'trailing bytes',
+        },
+    ])('rejects batched media with $name', async ({mutate, message}) => {
+        const source = createCompressedTermBankSource('binary image payload', 8);
+        await expect(inflateCompressedZipMediaBatchWasm([mutate(source)])).rejects.toThrow(message);
     });
 
     maybeTest('matches ordinary inflated parsing across every emitted column', async () => {
