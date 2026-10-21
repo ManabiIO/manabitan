@@ -259,6 +259,39 @@ describe('DictionaryWorkerClient', () => {
         );
     });
 
+    test.each(['message', 'messageerror', 'error'])('cleans up initial worker setup when %s registration throws', (failedType) => {
+        const originalAdd = FakeWorker.prototype.addEventListener;
+        vi.spyOn(FakeWorker.prototype, 'addEventListener').mockImplementation((type, listener) => {
+            if (type === failedType) { throw new Error('Listener registration failed'); }
+            originalAdd.call(FakeWorker.instances[0], type, listener);
+        });
+        expect(() => new DictionaryWorkerClient('/dictionary-worker.js')).toThrow('Listener registration failed');
+        expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
+    });
+
+    test('failed listener setup during restart does not publish a poisoned replacement', async () => {
+        vi.useFakeTimers();
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const failedLookup = client.invoke('findTermsOffscreen', {text: '日本'});
+        const originalAdd = FakeWorker.prototype.addEventListener;
+        const add = vi.spyOn(FakeWorker.prototype, 'addEventListener').mockImplementation((type, listener) => {
+            if (type === 'messageerror') { throw new Error('Listener registration failed'); }
+            originalAdd.call(FakeWorker.instances[1], type, listener);
+        });
+        FakeWorker.instances[0].emit('error', {message: 'crashed'});
+        await expect(failedLookup).rejects.toThrow('could not be restarted');
+        expect(FakeWorker.instances[1].terminate).toHaveBeenCalledOnce();
+        expect(Reflect.get(client, '_worker')).toBe(FakeWorker.instances[0]);
+        expect(Reflect.get(client, '_fatalError')).not.toBeNull();
+        add.mockRestore();
+        const recovered = client.invoke('findTermsOffscreen', {text: '日本'});
+        const observed = recovered.catch(() => null);
+        expect(FakeWorker.instances).toHaveLength(3);
+        FakeWorker.instances[2].emit('message', {data: {id: 2, result: {ok: true}}});
+        await expect(recovered).resolves.toEqual({ok: true});
+        await observed;
+    });
+
     test('can recover on a later request after worker recreation throws', async () => {
         const client = new DictionaryWorkerClient('/dictionary-worker.js');
         const failedLookup = client.invoke('findTermsOffscreen', {text: '日本'});
