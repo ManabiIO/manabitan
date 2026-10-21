@@ -1842,6 +1842,10 @@ async function searchTermAndGetDictionaryHitCounts(driver, term, expectedDiction
             });
         `, term, expectedDictionaryNames);
         if (typeof backendCounts === 'object' && backendCounts !== null && !Array.isArray(backendCounts)) {
+            const backendError = '__error' in backendCounts && typeof backendCounts.__error === 'string' ? backendCounts.__error : '';
+            if (backendError.length > 0) {
+                throw new Error(`Backend termsFind failed during search fallback: ${backendError}`);
+            }
             const normalizedCounts = /** @type {Record<string, number>} */ ({});
             for (const [key, value] of Object.entries(/** @type {Record<string, unknown>} */ (backendCounts))) {
                 if (key === '__error') { continue; }
@@ -1852,8 +1856,11 @@ async function searchTermAndGetDictionaryHitCounts(driver, term, expectedDiction
                 return projectedCounts;
             }
         }
-    } catch (_) {
-        // Fall back to the last DOM-derived counts below.
+    } catch (error) {
+        throw new Error(
+            `Backend termsFind diagnostic failed after DOM search returned ${JSON.stringify(lastCounts)}: ${error instanceof Error ? error.message : String(error)}`,
+            {cause: error},
+        );
     }
 
     return lastCounts;
