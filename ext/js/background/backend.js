@@ -2243,21 +2243,14 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         }
 
         const disconnect = !this._yomitanApi.isConnected();
-        try {
-            const version = await this._yomitanApi.getRemoteVersion(url);
-            if (version === null) {
-                throw new Error('Could not connect to native Manabitan API component');
-            }
+        const version = await this._yomitanApi.getRemoteVersion(url, disconnect);
+        if (version === null) {
+            throw new Error('Could not connect to native Manabitan API component');
+        }
 
-            const localVersion = this._yomitanApi.getLocalVersion();
-            if (version !== localVersion) {
-                throw new Error(`Manabitan API component version not supported: ${version}`);
-            }
-        } finally {
-            // Disconnect if the connection was previously disconnected
-            if (disconnect && this._yomitanApi.isEnabled()) {
-                this._yomitanApi.disconnect();
-            }
+        const localVersion = this._yomitanApi.getLocalVersion();
+        if (version !== localVersion) {
+            throw new Error(`Manabitan API component version not supported: ${version}`);
         }
 
         return true;

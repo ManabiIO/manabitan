@@ -16,6 +16,7 @@
  */
 /* eslint @stylistic/semi: ["error", "never"] */
 
+import {deepStrictEqual} from 'node:assert/strict'
 import {readFile} from 'node:fs/promises'
 import {crc32, deflateRawSync} from 'node:zlib'
 import {beforeAll, describe, expect, test} from 'vitest'
@@ -387,7 +388,8 @@ describe('term-bank join integrity', () => {
         const result = inflateAndJoin(sources)
         const expected = referenceJoin(sources.map(({source}) => source))
         expect(result.status).toBe(expected.length)
-        expect(result.output).toEqual(expected)
+        // Compare every byte and metadata field without expanding typed arrays into entries.
+        deepStrictEqual(result.output, expected)
     })
 
     test('preserves the conservative capacity boundary', () => {
