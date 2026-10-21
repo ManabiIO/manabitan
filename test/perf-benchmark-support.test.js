@@ -230,6 +230,13 @@ describe('missing diagnostic metrics', () => {
 });
 
 
+describe('benchmark package selection', () => {
+    test.each(['', 'firefox-dev', '--trace'])('rejects unsupported build target %j before starting a browser', async (target) => {
+        await expect(execFileAsync(process.execPath, ['dev/perf/import-benchmark.js', 'jmdict', '--build-target', target]))
+            .rejects.toMatchObject({stderr: expect.stringContaining('--build-target must be chrome or chrome-dev')});
+    });
+});
+
 describe('atomic pinned fixture installation', () => {
     /** @type {string[]} */
     const temporaryDirectories = [];

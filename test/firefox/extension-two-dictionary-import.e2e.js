@@ -319,6 +319,7 @@ async function getFirefoxProcessId(driver) {
  */
 async function ensurePageProfiler(driver) {
     await driver.executeScript(`
+        globalThis.manabitanPerformanceInstrumentationEnabled = true;
         if (!globalThis.__manabitanE2EPageProfiler) {
             const state = {
                 longTasks: [],

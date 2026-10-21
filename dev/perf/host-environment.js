@@ -73,6 +73,9 @@ export function getHostEnvironment() {
     const cpus = os.cpus();
     const cgroupCpuMax = readCgroupFile('cpu.max');
     return {
+        capturedAtIso: new Date().toISOString(),
+        loadAverage: os.loadavg(),
+        freeMemoryBytes: os.freemem(),
         nodeVersion: process.version,
         v8Version: process.versions.v8,
         platform: process.platform,
