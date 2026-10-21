@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {log} from '../core/log.js';
+
 const UNSUPPORTED_VARIANT_ERROR_MESSAGE = 'This MDX file uses an unsupported compression, encryption, or format variant. Convert it externally first or try a different MDX source.';
 const CONVERSION_TIMEOUT_MS = 180_000;
 
@@ -225,16 +227,21 @@ export class Mdx {
                     clearTimeout(timeout);
                     timeout = null;
                 }
-                if (worker !== null) {
-                    worker.terminate();
-                    worker = null;
-                }
+                const ownedWorker = worker;
+                worker = null;
                 // Late file completions and queued messages from an old request
                 // must not reset the worker or timeout of a newer request.
                 if (this._activeReject === fail) {
                     this._activeReject = null;
                     this._active = false;
                     this._worker = null;
+                }
+                if (ownedWorker !== null) {
+                    try {
+                        ownedWorker.terminate();
+                    } catch (error) {
+                        try { log.error(error); } catch (_) { /* NOP */ }
+                    }
                 }
             };
             /** @param {Error} error */
@@ -254,7 +261,13 @@ export class Mdx {
             /** @param {MdxProgressDetails} progress */
             const reportProgress = (progress) => {
                 if (!settled && typeof onProgress === 'function') {
-                    onProgress(progress);
+                    try {
+                        onProgress(progress);
+                    } catch (error) {
+                        // Observation of conversion progress cannot own or
+                        // abort the conversion itself.
+                        try { log.error(error); } catch (_) { /* NOP */ }
+                    }
                 }
             };
             /**
