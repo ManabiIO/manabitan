@@ -17,8 +17,8 @@
 
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {openAsBlob} from 'node:fs';
-import {mkdtemp, open, rm} from 'node:fs/promises';
-import {tmpdir} from 'node:os';
+import {mkdir, mkdtemp, open, rename} from 'node:fs/promises';
+import {homedir, tmpdir} from 'node:os';
 import path from 'node:path';
 import {deflateRawSync, inflateRawSync} from 'node:zlib';
 import {AbortableZipReadPool, RawZipPayloadReader, TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
@@ -43,7 +43,12 @@ beforeAll(async () => {
     }
     padding = await openAsBlob(filename);
 });
-afterAll(async () => { await rm(directory, {recursive: true, force: true}); });
+afterAll(async () => {
+    const trash = path.join(homedir(), '.Trash');
+    await mkdir(trash, {recursive: true});
+    const destination = await mkdtemp(path.join(trash, 'manabitan-zip-ranges-'));
+    await rename(directory, path.join(destination, 'fixture'));
+});
 
 /** Real Blob I/O with byte-range accounting; no replacement ZIP/parser. */
 class TrackedBlob extends Blob {
@@ -136,6 +141,36 @@ function entry(method, extraLength = 0) {
 function signal() { return new AbortController().signal; }
 
 describe('bounded large ZIP entry reads', () => {
+    test('batches owned or already cached bytes while retaining large-Blob ranged policy', async () => {
+        const source = entry(8);
+        let wholeArchiveReads = 0;
+        class TrackedSmallBlob extends Blob {
+            /** @returns {Promise<ArrayBuffer>} */
+            async arrayBuffer() {
+                ++wholeArchiveReads;
+                return await super.arrayBuffer();
+            }
+        }
+        const smallBlob = new TrackedSmallBlob([source.header, source.payload]);
+        const smallReader = new RawZipPayloadReader(smallBlob);
+        expect(smallReader.supportsBatchReads()).toBe(false);
+        expect(smallReader.supportsCachedBatchReads()).toBe(false);
+        expect(wholeArchiveReads).toBe(0);
+        await smallReader.read(source.file, signal());
+        expect(smallReader.supportsBatchReads()).toBe(true);
+        expect(smallReader.supportsCachedBatchReads()).toBe(true);
+        expect(wholeArchiveReads).toBe(1);
+
+        const smallBuffer = new ArrayBuffer(64);
+        const bufferReader = new RawZipPayloadReader(smallBuffer);
+        expect(bufferReader.supportsBatchReads()).toBe(true);
+        expect(bufferReader.supportsCachedBatchReads()).toBe(true);
+
+        const largeReader = new RawZipPayloadReader(padding);
+        expect(largeReader.supportsBatchReads()).toBe(true);
+        expect(largeReader.supportsCachedBatchReads()).toBe(false);
+    });
+
     test('coalesces nearby payloads and validates every local entry header', async () => {
         const first = entry(8, 4);
         const second = entry(0, 2);

@@ -13,7 +13,7 @@ import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipelin
 // Native WASM initialization is intentionally isolated from media-prefetch
 // fixtures, which exercise the fallback importer with a minimal database.
 describe('bounded media ZIP batching', () => {
-    test('resolves a large-Blob image through a CRC-checked coalesced WASM batch', async () => {
+    test.each(['ranged-blob', 'owned-buffer', 'cached-blob'])('resolves a %s image through a CRC-checked coalesced WASM batch', async (storage) => {
         const filename = new TextEncoder().encode('image0.png');
         const expected = Uint8Array.of(2, 9, 255);
         const compressed = Uint8Array.from(deflateRawSync(expected));
@@ -41,7 +41,10 @@ describe('bounded media ZIP batching', () => {
                 return backing.slice(start, Math.min(end, backing.size), type);
             }
         }
-        const archiveContent = new LargeBlob();
+        /** @type {ArrayBuffer|Blob} */
+        let archiveContent = backing;
+        if (storage === 'ranged-blob') { archiveContent = new LargeBlob(); }
+        if (storage === 'owned-buffer') { archiveContent = await backing.arrayBuffer(); }
         const originalFetch = globalThis.fetch;
         vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
             const url = resource instanceof URL ? resource : new URL(String(resource));
@@ -57,6 +60,13 @@ describe('bounded media ZIP batching', () => {
             signature: crc32(expected) >>> 0,
             getData() { throw new Error('zip.js fallback should not run for an eligible batch entry'); },
         };
+        const rawReader = new RawZipPayloadReader(archiveContent);
+        if (storage === 'cached-blob') {
+            expect(rawReader.supportsBatchReads()).toBe(false);
+            await rawReader.read(file, new AbortController().signal);
+        }
+        expect(rawReader.supportsBatchReads()).toBe(true);
+        expect(rawReader.supportsCachedBatchReads()).toBe(storage !== 'ranged-blob');
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         Reflect.set(importer, '_skipImageMetadata', true);
         const entry = {dictionary: 'Media test', expression: 'term', reading: '', definitionTags: '', rules: '', score: 0, glossary: []};
@@ -80,7 +90,7 @@ describe('bounded media ZIP batching', () => {
                 [],
                 fileMap,
                 async (media) => { written.push(media); },
-                new RawZipPayloadReader(archiveContent),
+                rawReader,
                 metrics,
             );
             expect(count).toBe(1);

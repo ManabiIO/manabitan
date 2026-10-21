@@ -59,7 +59,21 @@ export class RawZipPayloadReader {
 
     /** @returns {boolean} */
     supportsBatchReads() {
-        return this._archiveContent instanceof Blob && this._archiveContent.size > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
+        return this.supportsCachedBatchReads() || (
+            this._archiveContent instanceof Blob &&
+            this._archiveContent.size > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES
+        );
+    }
+
+    /**
+     * Automatic media batching must not materialize a previously unread Blob.
+     * Owned buffers and the small archive cache populated by term reads are free
+     * to reuse; large Blobs retain their existing ranged-read/prefetch policy.
+     * @returns {boolean}
+     */
+    supportsCachedBatchReads() {
+        if (!(this._archiveContent instanceof Blob)) { return true; }
+        return this._archiveContent.size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES && this._archiveBytesPromise !== null;
     }
 
     /**
