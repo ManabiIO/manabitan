@@ -155,7 +155,7 @@ const timestamp = new Date().toISOString().replaceAll(':', '')
 const outputDir = path.resolve(root, options.outputDir ?? path.join('builds', 'perf', `${timestamp}-${options.dictionaryId}${options.trace ? '-trace' : ''}`));
 await mkdir(outputDir, {recursive: true});
 await rm(path.join(outputDir, 'summary.json'), {force: true});
-/** @type {Array<{index: number, reportPath: string, reportJsonPath: string, tracePath: string|null, browserVersion: unknown, totalImportMs: number, automationObservedImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: unknown}>} */
+/** @type {Array<{index: number, reportPath: string, reportJsonPath: string, tracePath: string|null, browserVersion: unknown, packageSha256: string, totalImportMs: number, automationObservedImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: unknown}>} */
 const runs = [];
 for (let index = 1; index <= runCount; ++index) {
     const reportPath = path.join(outputDir, `run-${String(index)}.html`);
