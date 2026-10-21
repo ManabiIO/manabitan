@@ -118,7 +118,7 @@ const unknownActionPolicy = Object.freeze({
  * @returns {Readonly<DictionaryRuntimeActionPolicy>}
  */
 export function getDictionaryRuntimeActionPolicy(action) {
-    return dictionaryRuntimeActionPolicies[action] ?? unknownActionPolicy;
+    return Object.hasOwn(dictionaryRuntimeActionPolicies, action) ? dictionaryRuntimeActionPolicies[action] : unknownActionPolicy;
 }
 
 /**
