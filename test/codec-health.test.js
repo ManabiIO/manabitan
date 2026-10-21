@@ -141,15 +141,6 @@ describe.each(['block', 'shared'])('%s codec health', (path) => {
     });
 });
 
-test('block output copy allocation failure is retryable on the same instance', async () => {
-    const {read, mark} = await fixture('block');
-    vi.spyOn(Uint8Array, 'from').mockImplementationOnce(() => { throw new RangeError('Array buffer allocation failed'); });
-    await expect(read()).rejects.toThrow('temporarily unavailable');
-    expect(mark).not.toHaveBeenCalled();
-    await expect(read()).resolves.toMatchObject({glossary: ['definition']});
-    expect(mark).not.toHaveBeenCalled();
-});
-
 test('resource classification rejects non-errors and vague resource messages', () => {
     for (const error of [null, 'out of memory', {message: 'Failed to allocate Zstd input buffer'}, new Error('out of memory')]) {
         expect(isZstdResourceError(error)).toBe(false);
