@@ -8427,11 +8427,15 @@ null :
             /** @type {Array<PendingContentDescriptor & {existingMeta: TermContentMeta}>} */
             const exactCandidates = [];
             /**
-             * @param {PendingContentDescriptor} descriptor
+             * @param {number} uniqueIndex
+             * @param {number} rowIndex
+             * @param {number} contentOffset
+             * @param {number} contentLength
+             * @param {number} hash1
+             * @param {number} hash2
              * @throws {RangeError} If an offset exceeds the persisted Uint32 representation.
              */
-            const appendPendingContent = (descriptor) => {
-                const {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2} = descriptor;
+            const appendPendingContent = (uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2) => {
                 if (contentOffset > 0xffffffff) {
                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
                 }
@@ -8485,7 +8489,14 @@ null :
                     if (exactFallback) { ++exactFallbackCount; }
                     if (recentSourceHit === true) { ++recentSourceHitCount; }
                     if (typeof existingMeta === 'undefined') {
-                        appendPendingContent(descriptor);
+                        appendPendingContent(
+                            descriptor.uniqueIndex,
+                            descriptor.rowIndex,
+                            descriptor.contentOffset,
+                            descriptor.contentLength,
+                            descriptor.hash1,
+                            descriptor.hash2,
+                        );
                         continue;
                     }
                     const {uniqueIndex} = descriptor;
@@ -8525,7 +8536,6 @@ null :
                     ) {
                         throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
                     }
-                    const descriptor = {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2};
                     const existingIndex = persistedLookupRequired ?
                         this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
                         -1;
@@ -8533,10 +8543,10 @@ null :
                         void 0 :
                         this._readTermEntryContentMetaHashPairIndex(existingIndex);
                     if (typeof existingMeta === 'undefined') {
-                        appendPendingContent(descriptor);
+                        appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2);
                         continue;
                     }
-                    exactCandidates.push({...descriptor, existingMeta});
+                    exactCandidates.push({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, existingMeta});
                     if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
                         await resolveExactCandidates();
                     }
