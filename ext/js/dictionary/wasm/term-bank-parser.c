@@ -681,6 +681,30 @@ static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, ui
 
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
 
+/* These complete ASCII literals are already valid JSON strings. Matching
+ * their closing quote avoids repeated span/media/type tests for common
+ * structured-content keys; escaped and other keys use the full parser. */
+static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+    if (start >= len) { return 0; }
+    if (len - start >= 9u) {
+        uint64_t word;
+        __builtin_memcpy(&word, src + start, sizeof(word));
+        if (word == UINT64_C(0x746e65746e6f6322) && src[start + 8u] == '"') {
+            *out_end = start + 9u;
+            return 1;
+        }
+    }
+    if (len - start >= 5u) {
+        uint32_t word;
+        __builtin_memcpy(&word, src + start, sizeof(word));
+        if (word == UINT32_C(0x67617422) && src[start + 4u] == '"') {
+            *out_end = start + 5u;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static int parse_composite_span_impl(
     const uint8_t* src,
     uint32_t len,
@@ -712,13 +736,18 @@ static int parse_composite_span_impl(
             continue;
         }
         if (c == '"') {
-            if (media_hint != 0 && *media_hint == 0u && is_media_marker_at(src, len, i)) {
-                *media_hint = 1u;
-            }
             uint32_t s_end = 0u;
-            if (!parse_string_span(src, len, i, &s_end)) { return 0; }
-            if (state == OBJECT_FIRST || state == OBJECT_KEY) {
+            const int object_key = state == OBJECT_FIRST || state == OBJECT_KEY;
+            const int common_key = object_key && parse_common_structured_key_span(src, len, i, &s_end);
+            if (!common_key) {
+                if (media_hint != 0 && *media_hint == 0u && is_media_marker_at(src, len, i)) {
+                    *media_hint = 1u;
+                }
+                if (!parse_string_span(src, len, i, &s_end)) { return 0; }
+            }
+            if (object_key) {
                 if (
+                    !common_key &&
                     (
                         (normalization_hint != 0 && *normalization_hint == 0u) ||
                         (text_normalization_hint != 0 && *text_normalization_hint == 0u)

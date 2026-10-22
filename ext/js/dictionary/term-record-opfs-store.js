@@ -5166,7 +5166,7 @@ export class TermRecordOpfsStore {
         const scoreKeys = new Uint16Array(count);
         /** @type {number[]} */
         const scores = [];
-        const useFloat64Scores = chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
+        const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
         /** @type {Map<number, number>} */
         const scoreIndexes = new Map();
         if (useFloat64Scores) {
@@ -5290,7 +5290,7 @@ export class TermRecordOpfsStore {
             contentLengths,
             contentOffsetBase,
         );
-        const recordFieldsFormat = chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0)) ?
+        const recordFieldsFormat = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0)) ?
             LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE :
             (recordFields.byteLength === chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES ?
                 LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY :
