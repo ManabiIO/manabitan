@@ -69,6 +69,20 @@ for (const marker of ['', 'i', 'im', 'imag', 'imagex', 'imgx', 'image ', 'imagin
     })
 }
 
+test('preserves media and text normalization with exact and escaped common keys', async () => {
+    for (const mask of [0, 1, 127]) {
+        const contentKey = quoted('content', mask)
+        const tagKey = quoted('tag', mask & 7)
+        const glossary = `[{"type":"structured-content",${contentKey}:{${tagKey}:"img","path":"picture.png"}}]`
+        const image = await parse(glossary)
+        expect(image.media).toBe(true)
+        expect(image.content).toEqual({rules: '', definitionTags: '', termTags: '', glossary: JSON.parse(glossary)})
+        const text = await parse(`[{${contentKey}:"content",${tagKey}:"tag"},{"type":"text","text":"payload"}]`)
+        expect(text.media).toBe(false)
+        expect(text.content).toEqual({rules: '', definitionTags: '', termTags: '', glossary: [{content: 'content', tag: 'tag'}, 'payload']})
+    }
+})
+
 test('does not normalize near-match type/text keys', async () => {
     for (const object of [{typex: 'text', text: 'payload'}, {type: 'textx', text: 'payload'}, {type: 'text', textx: 'payload'}]) {
         const result = await parse(JSON.stringify([object]))

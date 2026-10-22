@@ -230,6 +230,35 @@ describe('term-bank string scanning', () => {
         }
     })
 
+    test('preserves exact, escaped, and near-match structured keys at every alignment', () => {
+        const glossaries = [
+            '[{"content":"tag","tag":"content"}]',
+            '[{"contentx":"content","tagged":"tag"}]',
+            '[{"con\\u0074ent":{"ta\\u0067":"img","path":"picture.png"}}]',
+            '[{"content":{"tag":"img","path":"picture.png"},"type":"structured-content"}]',
+            '[{"content":{"type":"text","text":"payload"},"tag":"span"}]',
+        ]
+        for (const alignment of differentialAlignments) {
+            for (const glossary of glossaries) {
+                expectMatchesJson(`${' '.repeat(alignment)}[["head","","","",0,${glossary},1,""]]`)
+            }
+        }
+    })
+
+    test('rejects truncated structured keys at their logical input end', () => {
+        for (const alignment of differentialAlignments) {
+            const prefix = `${' '.repeat(alignment)}[["head","","","",0,[{`
+            for (const key of ['"content"', '"tag"']) {
+                for (let length = 0; length <= key.length; ++length) {
+                    expectMatchesJson(prefix + key.slice(0, length))
+                }
+                for (const tail of ['"value"', 'true', ':', ':"unterminated']) {
+                    expectMatchesJson(prefix + key + tail)
+                }
+            }
+        }
+    })
+
     test('stops at the real first special when byte-mask borrows mark later bytes', () => {
         for (const alignment of differentialAlignments) {
             for (const position of specialPositions) {
