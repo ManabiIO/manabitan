@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {createDictionaryImportBusyError} from '../core/dictionary-import-busy-error.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {arrayBufferToBase64} from '../data/array-buffer-util.js';
@@ -131,7 +132,7 @@ export class OffscreenDictionaryWorkerHandler {
             const id = event.data.id;
             self.postMessage({
                 id,
-                error: ExtensionError.serialize(new Error(`Cannot execute ${action}: dictionary import is in progress`)),
+                error: ExtensionError.serialize(createDictionaryImportBusyError(action)),
             });
             return;
         }
@@ -141,7 +142,7 @@ export class OffscreenDictionaryWorkerHandler {
         ) {
             self.postMessage({
                 id: event.data.id,
-                error: ExtensionError.serialize(new Error(`Cannot execute ${action}: dictionary import is in progress`)),
+                error: ExtensionError.serialize(createDictionaryImportBusyError(action)),
             });
             return;
         }
