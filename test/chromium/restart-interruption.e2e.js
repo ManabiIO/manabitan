@@ -23,6 +23,7 @@ import {chromium} from '@playwright/test';
 import {createDictionaryArchiveData} from '../../dev/dictionary-archive-util.js';
 import {parseProcessRows, selectOwnedProcessTree} from './restart-interruption-process-tree.js';
 import {enableDictionarySettings} from './restart-interruption-settings.js';
+import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const extensionPackagePath = path.join(root, 'builds', 'manabitan-chrome-playwright.zip');
@@ -505,15 +506,14 @@ async function main() {
         ({server, baseUrl, observerEvents, disarmObserver, releaseHeldObserver} = await startServer(oldArchive, newArchive));
         report.testOnlyPackageObserver = await instrumentPackageForTestObserver(`${baseUrl}/observer`);
         await persistReport();
-        const launch = async () => await chromium.launchPersistentContext(profilePath, {
+        const launch = async () => await chromium.launchPersistentContext(profilePath, getChromiumLaunchOptions({
             channel: 'chromium',
             headless: true,
             args: [
                 `--disable-extensions-except=${extensionPath}`,
                 `--load-extension=${extensionPath}`,
-                ...(process.platform === 'darwin' ? ['--disable-features=MacAppCodeSignClone'] : []),
             ],
-        });
+        }));
         context = await launch();
         activeExtensionId = await discoverExtensionId(context);
         report.runtimeExtensionId = activeExtensionId;
