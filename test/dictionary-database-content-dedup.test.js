@@ -843,6 +843,55 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
     });
 
+    test('retains colliding published keys through free-ID reuse and pending rehash rollback', () => {
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_getTermEntryContentMetaHashPairSlot', () => 0);
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const ensureCapacity = Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').bind(database);
+        const bytes = new Uint8Array([1, 2, 3]);
+        for (const key of [10, 20, 30]) { cacheMeta(database, null, key * 100, 3, 'raw', key, key + 1); }
+        const abandoned = stage([40, 50], [41, 51], [bytes, bytes], null);
+        rollback(abandoned);
+        const staged = stage([60], [61], [bytes], null);
+        expect([...abandoned.indexes]).toContain(staged.indexes[0]);
+
+        ensureCapacity(128);
+        for (const key of [10, 20, 30]) {
+            expect(getMeta(database, key, key + 1)).toMatchObject({offset: key * 100, length: 3});
+        }
+        for (const key of [40, 50, 60]) { expect(getMeta(database, key, key + 1)).toBeUndefined(); }
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+        rollback(staged);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        for (const key of [10, 20, 30]) {
+            expect(getMeta(database, key, key + 1)).toMatchObject({offset: key * 100, length: 3});
+        }
+        publishSlabMeta(database, bytes, 0, 3, 60, 61);
+        ensureCapacity(128);
+        expect(getMeta(database, 60, 61)).toMatchObject({offset: 1060, length: 3});
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(4);
+    });
+
+    test('rehashes a sparse arena after a large reservation is rolled back', () => {
+        const database = new DictionaryDatabase();
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const ensureCapacity = Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').bind(database);
+        const bytes = new Uint8Array([1, 2, 3]);
+        const hashes = Array.from({length: 200}, (_, i) => i + 1);
+        const abandoned = stage(hashes, hashes, hashes.map(() => bytes), null);
+        rollback(abandoned);
+        const slots = Reflect.get(database, '_termEntryContentMetaHashPairTable');
+        expect(Reflect.get(database, '_termEntryContentMetaDenseCount')).toBeGreaterThan(slots.length);
+        publishSlabMeta(database, bytes, 0, 3, 1001, 1002);
+        ensureCapacity(128);
+        expect(getMeta(database, 1001, 1002)).toMatchObject({offset: 2001, length: 3});
+        for (const hash of hashes) { expect(getMeta(database, hash, hash)).toBeUndefined(); }
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
+    });
+
     test('keeps staged dense indexes stable across hash-table rehashes', () => {
         const database = new DictionaryDatabase();
         const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
