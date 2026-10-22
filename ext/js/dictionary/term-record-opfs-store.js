@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -641,7 +642,7 @@ class DenseIdRecordStore {
  * @property {number} pendingLookupIndexBytes
  * @property {number} pendingLookupIndexRecordCount
  * @property {FileSystemFileHandle|null} lookupIndexFileHandle
- * @property {FileSystemWritableFileStream|null} lookupIndexWritable
+ * @property {FileSystemWritableFileStream|SyncImportIndexWriter|null} lookupIndexWritable
  * @property {number} lookupIndexChunkCount
  * @property {number} lookupIndexRecordCount
  * @property {number} lookupIndexQueuedBytes
@@ -5621,11 +5622,11 @@ export class TermRecordOpfsStore {
                     if (state.lookupIndexFileHandle === null) {
                         throw new Error('Term-record lookup index directory became unavailable during import');
                     }
-                    state.lookupIndexWritable = await state.lookupIndexFileHandle.createWritable();
+                    state.lookupIndexWritable = await this._createLookupIndexWritable(state);
                     await state.lookupIndexWritable.truncate(0);
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
-                await state.lookupIndexWritable.write(new Blob(chunks));
+                await (state.lookupIndexWritable instanceof SyncImportIndexWriter ? state.lookupIndexWritable.writeChunks(chunks) : state.lookupIndexWritable.write(new Blob(chunks)));
                 ++this._lookupIndexWriteMetrics.writeCallCount;
                 this._lookupIndexWriteMetrics.writeBytes += byteLength;
                 state.lookupIndexChunkCount += chunks.length;
@@ -5643,6 +5644,20 @@ export class TermRecordOpfsStore {
         if (waitForCompletion || state.lookupIndexQueuedBytes >= this._queuedWriteBudgetBytes) {
             await this._awaitLookupIndexWritesForShard(state);
         }
+    }
+
+    /**
+     * @param {TermRecordShardState} state
+     * @returns {Promise<FileSystemWritableFileStream|SyncImportIndexWriter>}
+     */
+    async _createLookupIndexWritable(state) {
+        const fileHandle = state.lookupIndexFileHandle;
+        if (fileHandle === null) { throw new Error('Term-record lookup index file handle is unavailable'); }
+        if (this._importSessionActive && state.initialFileLength === 0) {
+            const writer = await openSyncImportIndexWriter(/** @type {Parameters<typeof openSyncImportIndexWriter>[0]} */ (/** @type {unknown} */ (fileHandle)));
+            if (writer !== null) { return writer; }
+        }
+        return await fileHandle.createWritable();
     }
 
     /**
