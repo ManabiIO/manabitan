@@ -58,8 +58,14 @@ export function hashTermKeyBytes(bytes) {
  * @returns {number}
  */
 export function hashTermKeyByteRange(bytes, start, end) {
-    let offset = start;
     const length = end - start;
+    if (
+        length >= 1024 && start >= 0 && end <= bytes.byteLength &&
+        Number.isInteger(start) && Number.isInteger(end)
+    ) {
+        return hashLargeTermKeyByteRange(bytes, start, end);
+    }
+    let offset = start;
     let hash;
     if (length >= 16) {
         const limit = end - 16;
@@ -106,4 +112,45 @@ function readUint32(bytes, offset) {
         (bytes[offset + 2] << 16) |
         (bytes[offset + 3] << 24)
     ) >>> 0;
+}
+
+/**
+ * Read whole words for large integrity payloads. Small lookup keys keep their
+ * allocation-free byte reader; persisted hashes and little-endian order match.
+ * @param {Uint8Array} bytes
+ * @param {number} start
+ * @param {number} end
+ * @returns {number}
+ */
+function hashLargeTermKeyByteRange(bytes, start, end) {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const length = end - start;
+    const limit = end - 16;
+    let offset = start;
+    let v1 = (HASH_SEED + PRIME1 + PRIME2) >>> 0;
+    let v2 = (HASH_SEED + PRIME2) >>> 0;
+    let v3 = HASH_SEED;
+    let v4 = (HASH_SEED - PRIME1) >>> 0;
+    do {
+        v1 = round(v1, view.getUint32(offset, true)); offset += 4;
+        v2 = round(v2, view.getUint32(offset, true)); offset += 4;
+        v3 = round(v3, view.getUint32(offset, true)); offset += 4;
+        v4 = round(v4, view.getUint32(offset, true)); offset += 4;
+    } while (offset <= limit);
+    let hash = (rotateLeft(v1, 1) + rotateLeft(v2, 7) + rotateLeft(v3, 12) + rotateLeft(v4, 18)) >>> 0;
+    hash = (hash + length) >>> 0;
+    while (offset + 4 <= end) {
+        hash = Math.imul(rotateLeft((hash + Math.imul(view.getUint32(offset, true), PRIME3)) >>> 0, 17), PRIME4) >>> 0;
+        offset += 4;
+    }
+    while (offset < end) {
+        hash = Math.imul(rotateLeft((hash + Math.imul(bytes[offset], PRIME5)) >>> 0, 11), PRIME1) >>> 0;
+        ++offset;
+    }
+    hash ^= hash >>> 15;
+    hash = Math.imul(hash, PRIME2) >>> 0;
+    hash ^= hash >>> 13;
+    hash = Math.imul(hash, PRIME3) >>> 0;
+    hash ^= hash >>> 16;
+    return hash >>> 0;
 }
