@@ -5290,7 +5290,10 @@ export class TermRecordOpfsStore {
             contentLengths,
             contentOffsetBase,
         );
-        const recordFieldsFormat = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0)) ?
+        // Compact fields are strictly smaller than legacy fields; float64 fields
+        // have their own fixed width. Infer the format from the emitted bytes
+        // so the encoder remains the only owner of score representation.
+        const recordFieldsFormat = recordFields.byteLength === chunk.rowCount * FLOAT64_SCORE_RECORD_FIELDS_BYTES ?
             LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE :
             (recordFields.byteLength === chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES ?
                 LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY :
