@@ -236,6 +236,44 @@ afterAll(() => {
 });
 
 describe('term-bank WASM parser', () => {
+    maybeTest('preserves canonical source rows across duplicate distributions and chunk boundaries', async () => {
+        for (const uniqueCount of [1, 7, 101]) {
+            const rows = Array.from({length: 101}, (_, i) => [
+                'entry-' + i,
+                '',
+                '',
+                '',
+                i,
+                ['definition-' + (i % uniqueCount)],
+                i,
+                '',
+            ]);
+            for (const skipFused of [false, true]) {
+                let seen = 0;
+                await parseTermBankWithWasmColumnChunks([
+                    textEncoder.encode(JSON.stringify(rows.slice(0, 50))),
+                    textEncoder.encode(JSON.stringify(rows.slice(50))),
+                ], 3, (chunk) => {
+                    if (chunk.contentDedupPlan === null || chunk.contentUniqueIndexList === null) {
+                        throw new Error('Expected native dedupe projection');
+                    }
+                    expect([...chunk.contentDedupPlan.uniqueRowIndexes]).toEqual(
+                        Array.from({length: uniqueCount}, (_, i) => i),
+                    );
+                    expect([...chunk.contentUniqueIndexList]).toEqual(
+                        Array.from({length: chunk.rowCount}, (_, i) => (seen + i) % uniqueCount),
+                    );
+                    seen += chunk.rowCount;
+                }, 13, {
+                    emitContentSlab: true,
+                    emitTokenBinaryContent: true,
+                    experimentalSkipFusedParse: skipFused,
+                });
+                expect(seen).toBe(rows.length);
+            }
+        }
+    });
+
     maybeTest('inflates, validates, and joins mixed raw ZIP term-bank payloads', async () => {
         const sources = [
             createCompressedTermBankSource(' \n [["a","", "", "", 1, ["one"], 10, ""]] \r', 8),

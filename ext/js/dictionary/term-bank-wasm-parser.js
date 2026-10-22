@@ -397,17 +397,15 @@ export function consumeLastParallelParserSkipReason() {
  */
 function buildContentUniqueRowIndexes(rowToUniqueIndex, uniqueCount) {
     const uniqueRowIndexes = new Uint32Array(uniqueCount);
-    uniqueRowIndexes.fill(0xffffffff);
     let nextUniqueIndex = 0;
     for (let rowIndex = 0; rowIndex < rowToUniqueIndex.length; ++rowIndex) {
         const uniqueIndex = rowToUniqueIndex[rowIndex];
-        if (uniqueIndex >= uniqueCount) {
-            throw new RangeError(`Native term content unique index is invalid at row ${rowIndex}`);
-        }
-        if (uniqueIndex === nextUniqueIndex) {
-            uniqueRowIndexes[uniqueIndex] = rowIndex;
-            ++nextUniqueIndex;
-        } else if (uniqueRowIndexes[uniqueIndex] === 0xffffffff) {
+        if (uniqueIndex === nextUniqueIndex && uniqueIndex < uniqueCount) {
+            uniqueRowIndexes[nextUniqueIndex++] = rowIndex;
+        } else if (uniqueIndex >= nextUniqueIndex) {
+            if (uniqueIndex >= uniqueCount) {
+                throw new RangeError(`Native term content unique index is invalid at row ${rowIndex}`);
+            }
             throw new Error(`Native term content unique index ${uniqueIndex} is out of order`);
         }
     }
