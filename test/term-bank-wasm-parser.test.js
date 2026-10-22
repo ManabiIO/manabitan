@@ -3230,6 +3230,39 @@ describe('term-bank WASM parser', () => {
         expect(chunk.useResolvedContentReferences).toBe(false);
     });
 
+    maybeTest('keeps content hash pairs exact at SIMD dispatch and vector tail boundaries', async () => {
+        const lengths = [17, 31, 32, 33, 63, 64, 65, 127, 128, 129, 255, 256, 257, 383, 384, 385, 511, 512, 513, 1023, 1024, 1025, 4095, 4096, 4097];
+        const source = textEncoder.encode(JSON.stringify(lengths.map((length, index) => (
+            ['hash-boundary-' + String(index), '', '', '', 0, ['x'.repeat(length - 17)], index, '']
+        ))));
+        /** @type {TermBankColumnChunk[]} */
+        const chunks = [];
+        await parseTermBankWithWasmColumnChunks(
+            source,
+            3,
+            (chunk) => { chunks.push(chunk); },
+            64,
+            {emitContentSlab: true, emitTokenBinaryContent: true},
+        );
+        expect(chunks).toHaveLength(1);
+        const [chunk] = chunks;
+        if (typeof chunk.contentBytesBaseOffset !== 'number' || !(chunk.contentMetaList instanceof Uint32Array) || !(chunk.contentBytesBuffer instanceof Uint8Array)) {
+            throw new Error('Expected token-binary hash metadata');
+        }
+        const {contentBytesBaseOffset, contentMetaList, contentBytesBuffer} = chunk;
+        for (let index = 0; index < lengths.length; ++index) {
+            const metaOffset = index * 4;
+            const start = contentBytesBaseOffset + contentMetaList[metaOffset];
+            const length = contentMetaList[metaOffset + 1];
+            expect(length).toBe(lengths[index]);
+            const bytes = contentBytesBuffer.subarray(start, start + length);
+            expect(hashTermEntryContentBytesPair(bytes)).toEqual([
+                contentMetaList[metaOffset + 2],
+                contentMetaList[metaOffset + 3],
+            ]);
+        }
+    });
+
     maybeTest('emits compact token-binary content with strict round-trip decoding', async () => {
         const source = textEncoder.encode(JSON.stringify([
             ['first', '', 'tag\\value', 'rule\\value', 1, ['same', {type: 'text', text: 'wrapped'}], 1, 'term-tag'],

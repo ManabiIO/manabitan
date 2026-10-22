@@ -16,6 +16,9 @@
  */
 
 #include <stdint.h>
+#if defined(__wasm_simd128__)
+#include <wasm_simd128.h>
+#endif
 
 #define WASM_PAGE_SIZE 65536u
 #define FNV1A_OFFSET 0x811c9dc5u
@@ -1162,6 +1165,30 @@ static void hash_content_xxh32_pair(const uint8_t* src, uint32_t length, uint32_
     const uint8_t* const end = src + length;
     uint32_t h1;
     uint32_t h2;
+#if defined(__wasm_simd128__)
+    // Keep persisted hashes identical. Larger SIMD inputs regress on Chromium.
+    if (length >= 64u && length <= 512u) {
+        const uint8_t* const limit = end - 16u;
+        const v128_t prime1 = wasm_i32x4_splat((int32_t)2654435761u);
+        const v128_t prime2 = wasm_i32x4_splat((int32_t)2246822519u);
+        v128_t first = wasm_u32x4_make(seed1 + 2654435761u + 2246822519u, seed1 + 2246822519u, seed1, seed1 - 2654435761u);
+        v128_t second = wasm_u32x4_make(seed2 + 2654435761u + 2246822519u, seed2 + 2246822519u, seed2, seed2 - 2654435761u);
+        do {
+            const v128_t input = wasm_i32x4_mul(wasm_v128_load(p), prime2);
+            first = wasm_i32x4_add(first, input);
+            second = wasm_i32x4_add(second, input);
+            first = wasm_v128_or(wasm_i32x4_shl(first, 13), wasm_u32x4_shr(first, 19));
+            second = wasm_v128_or(wasm_i32x4_shl(second, 13), wasm_u32x4_shr(second, 19));
+            first = wasm_i32x4_mul(first, prime1);
+            second = wasm_i32x4_mul(second, prime1);
+            p += 16u;
+        } while (p <= limit);
+        h1 = rotl32(wasm_u32x4_extract_lane(first, 0), 1u) + rotl32(wasm_u32x4_extract_lane(first, 1), 7u) +
+            rotl32(wasm_u32x4_extract_lane(first, 2), 12u) + rotl32(wasm_u32x4_extract_lane(first, 3), 18u);
+        h2 = rotl32(wasm_u32x4_extract_lane(second, 0), 1u) + rotl32(wasm_u32x4_extract_lane(second, 1), 7u) +
+            rotl32(wasm_u32x4_extract_lane(second, 2), 12u) + rotl32(wasm_u32x4_extract_lane(second, 3), 18u);
+    } else
+#endif
     if (length >= 16u) {
         const uint8_t* const limit = end - 16u;
         uint32_t a1 = seed1 + 2654435761u + 2246822519u;
