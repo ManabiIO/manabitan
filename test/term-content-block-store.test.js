@@ -282,6 +282,54 @@ describe('TermContentBlockStore', () => {
         await expect(operation.storage).rejects.toThrow('safe integer range');
     });
 
+    test.each([
+        {bases: [0, 2 ** 32 + 7, Number.MAX_SAFE_INTEGER], expected: [0, 20, 2 ** 32 + 7, 2 ** 32 + 27, Number.MAX_SAFE_INTEGER]},
+        {bases: [Number.MAX_SAFE_INTEGER - 20], expected: [Number.MAX_SAFE_INTEGER - 20, Number.MAX_SAFE_INTEGER]},
+    ])('maps reserved reference slabs without narrowing or crossing their boundaries ($bases)', async ({bases, expected}) => {
+        const count = expected.length;
+        const derivedLengths = bases.map((_, index) => Math.min(2, count - index * 2) * 20);
+        const reserved = {derivedOffsets: bases, derivedLengths};
+        const contentStore = new TermContentOpfsStore();
+        vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockReturnValue({
+            reserved: Promise.resolve(reserved),
+            completion: Promise.resolve({...reserved, primaryOffsets: [0], primaryLengths: [count + 12]}),
+        });
+        const blockStore = new TermContentBlockStore(contentStore, {referencePackTargetBytes: 40});
+        const begin = Reflect.get(blockStore, '_beginAppendSharedSpans').bind(blockStore);
+        const operation = /** @type {TermContentBlockAppendOperation} */ (begin(
+            new Uint8Array(count),
+            Uint32Array.from({length: count}, (_, index) => index),
+            new Uint32Array(count).fill(1),
+            'jmdict',
+            count,
+            false,
+        ));
+        const storage = await operation.storage;
+        await operation.completion;
+        expect(storage.contentOffsets).toStrictEqual(new Float64Array(expected));
+    });
+
+    test.each([-1, 0.5, Number.NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])('rejects an invalid later reserved slab base (%s)', async (base) => {
+        const reserved = {derivedOffsets: [0, base], derivedLengths: [40, 20]};
+        const contentStore = new TermContentOpfsStore();
+        vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockReturnValue({
+            reserved: Promise.resolve(reserved),
+            completion: Promise.resolve({...reserved, primaryOffsets: [0], primaryLengths: [15]}),
+        });
+        const blockStore = new TermContentBlockStore(contentStore, {referencePackTargetBytes: 40});
+        const begin = Reflect.get(blockStore, '_beginAppendSharedSpans').bind(blockStore);
+        const operation = /** @type {TermContentBlockAppendOperation} */ (begin(
+            Uint8Array.of(1, 2, 3),
+            Uint32Array.of(0, 1, 2),
+            Uint32Array.of(1, 1, 1),
+            'jmdict',
+            3,
+            false,
+        ));
+        await expect(operation.storage).rejects.toThrow('slab offset');
+        await expect(operation.completion).rejects.toThrow('slab offset');
+    });
+
     test('atomically appends blocks and reads each logical entry', async () => {
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore, {
