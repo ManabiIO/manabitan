@@ -3644,7 +3644,7 @@ function isCompressedTermBankSource(value) {
  */
 export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
-    const contentMetaList = Uint32Array.from(sourceContentMetaList);
+    const contentMetaList = new Uint32Array(sourceContentMetaList);
     let contentBytesLength = 0;
     for (let i = 0; i < contentMetaList.length; i += CONTENT_META_U32_FIELDS) {
         contentBytesLength = Math.max(contentBytesLength, contentMetaList[i] + contentMetaList[i + 1]);
@@ -3678,27 +3678,27 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
         index,
         row: {
             ...row,
-            expressionBytes: row.expressionBytes instanceof Uint8Array ? Uint8Array.from(row.expressionBytes) : void 0,
-            readingBytes: row.readingBytes instanceof Uint8Array ? Uint8Array.from(row.readingBytes) : void 0,
-            glossaryJsonBytes: row.glossaryJsonBytes instanceof Uint8Array ? Uint8Array.from(row.glossaryJsonBytes) : void 0,
-            termEntryContentBytes: Uint8Array.from(row.termEntryContentBytes),
+            expressionBytes: row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0,
+            readingBytes: row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0,
+            glossaryJsonBytes: row.glossaryJsonBytes instanceof Uint8Array ? new Uint8Array(row.glossaryJsonBytes) : void 0,
+            termEntryContentBytes: new Uint8Array(row.termEntryContentBytes),
         },
     }));
     const stablePlan = {
-        stringLengths: Uint16Array.from(plan.stringLengths),
+        stringLengths: new Uint16Array(plan.stringLengths),
         stringOffsets: chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
-            Uint32Array.from(stringOffsets),
+            new Uint32Array(stringOffsets),
         stringHashes: chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
             (
                 plan.stringHashes instanceof Uint32Array ?
-                    Uint32Array.from(plan.stringHashes) :
+                    new Uint32Array(plan.stringHashes) :
                     void 0
             ),
-        stringsBuffer: Uint8Array.from(plan.stringsBuffer),
-        expressionIndexes: Uint32Array.from(plan.expressionIndexes),
-        readingIndexes: Uint32Array.from(plan.readingIndexes),
+        stringsBuffer: new Uint8Array(plan.stringsBuffer),
+        expressionIndexes: new Uint32Array(plan.expressionIndexes),
+        readingIndexes: new Uint32Array(plan.readingIndexes),
     };
     /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|undefined} */
     let preparedLookupIndexes;
@@ -3707,7 +3707,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
         for (const [key, prepared] of chunk.preparedLookupIndexes) {
             preparedLookupIndexes.set(key, {
                 bytes: prepared.bytes.buffer === plan.stringsBuffer.buffer ?
-                    Uint8Array.from(prepared.bytes) :
+                    new Uint8Array(prepared.bytes) :
                     prepared.bytes,
                 preinternedPlan: prepared.preinternedPlan === plan ? stablePlan : prepared.preinternedPlan,
             });
@@ -3715,24 +3715,24 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
     }
     return {
         ...chunk,
-        expressionBytesList: chunk.expressionBytesList.map((bytes) => Uint8Array.from(bytes)),
-        readingBytesList: chunk.readingBytesList.map((bytes) => Uint8Array.from(bytes)),
-        readingEqualsExpressionList: Uint8Array.from(chunk.readingEqualsExpressionList),
+        expressionBytesList: chunk.expressionBytesList.map((bytes) => new Uint8Array(bytes)),
+        readingBytesList: chunk.readingBytesList.map((bytes) => new Uint8Array(bytes)),
+        readingEqualsExpressionList: new Uint8Array(chunk.readingEqualsExpressionList),
         scoreList: chunk.scoreList instanceof Float64Array ?
-            Float64Array.from(chunk.scoreList) :
-            Int32Array.from(chunk.scoreList),
+            new Float64Array(chunk.scoreList) :
+            new Int32Array(chunk.scoreList),
         sequenceList: chunk.sequenceList instanceof Float64Array ?
-            Float64Array.from(chunk.sequenceList) :
-            Int32Array.from(chunk.sequenceList),
-        contentBytesList: chunk.contentBytesList.map((bytes) => Uint8Array.from(bytes)),
-        contentHash1List: Uint32Array.from(chunk.contentHash1List),
-        contentHash2List: Uint32Array.from(chunk.contentHash2List),
+            new Float64Array(chunk.sequenceList) :
+            new Int32Array(chunk.sequenceList),
+        contentBytesList: chunk.contentBytesList.map((bytes) => new Uint8Array(bytes)),
+        contentHash1List: new Uint32Array(chunk.contentHash1List),
+        contentHash2List: new Uint32Array(chunk.contentHash2List),
         contentBytesBuffer,
         contentBytesBaseOffset: 0,
         contentMetaList,
         contentUniqueIndexList: chunk.contentUniqueIndexList === null ?
             null :
-            Uint32Array.from(chunk.contentUniqueIndexList),
+            new Uint32Array(chunk.contentUniqueIndexList),
         mediaRows,
         termRecordPreinternedPlan: stablePlan,
         ...(typeof preparedLookupIndexes === 'undefined' ? {} : {preparedLookupIndexes}),
