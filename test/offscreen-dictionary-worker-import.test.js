@@ -220,6 +220,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
 
         /** @type {[string, Record<string, unknown>][]} */
         const importTimeActions = [
+            ['getDictionaryInfoOffscreen', {}],
             ['databasePrepareOffscreen', {}],
             ['clearDatabaseCachesOffscreen', {}],
             ['databasePurgeOffscreen', {}],
@@ -232,6 +233,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
         for (const [action, params] of importTimeActions) {
             const rejected = client.invoke(action, params);
             await expect(rejected).rejects.toThrow(`Cannot execute ${action}: dictionary import is in progress`);
+            await expect(rejected).rejects.toMatchObject({data: {code: 'DICTIONARY_IMPORT_IN_PROGRESS', action}});
             expect(worker.terminate).not.toHaveBeenCalled();
         }
 

@@ -16,6 +16,8 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
+import {createDictionaryImportBusyError} from '../ext/js/core/dictionary-import-busy-error.js';
+import {ExtensionError} from '../ext/js/core/extension-error.js';
 import {Display} from '../ext/js/display/display.js';
 
 describe('Display dictionary update handling', () => {
@@ -296,5 +298,110 @@ describe('Display dictionary update handling', () => {
 
         expect(updateOptions).not.toHaveBeenCalled();
         expect(searchLast).not.toHaveBeenCalled();
+    });
+});
+
+/**
+ * @param {ReturnType<typeof vi.fn>} getDictionaryInfo
+ * @returns {{display: Display, listeners: Map<string, (details: unknown) => void>}}
+ */
+function createPreparingDisplay(getDictionaryInfo) {
+    const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
+    /** @type {Map<string, (details: unknown) => void>} */
+    const listeners = new Map();
+    vi.stubGlobal('document', {documentElement: {dataset: {}, addEventListener: vi.fn()}, addEventListener: vi.fn()});
+    vi.stubGlobal('window', {addEventListener: vi.fn()});
+    Object.assign(display, {
+        _themeController: {prepare: vi.fn()},
+        _hotkeyHelpController: {prepare: vi.fn().mockResolvedValue(void 0)},
+        _displayGenerator: {prepare: vi.fn().mockResolvedValue(void 0)},
+        _queryParser: {prepare: vi.fn(), on: vi.fn()},
+        _history: {prepare: vi.fn(), on: vi.fn()},
+        _optionToggleHotkeyHandler: {prepare: vi.fn()},
+        _progressIndicatorVisible: {on: vi.fn()},
+        _contentScrollElement: null,
+        _closeButton: null,
+        _navigationPreviousButton: null,
+        _navigationNextButton: null,
+        _pageType: 'popup',
+        _contentType: 'clear',
+        _dictionaryInfo: [],
+        _dictionaryInfoRefreshGeneration: 0,
+        _options: null,
+        _application: {
+            api: {
+                getEnvironmentInfo: vi.fn().mockResolvedValue({browser: 'chrome', platform: {os: 'mac'}}),
+                getLanguageSummaries: vi.fn().mockResolvedValue([]),
+                getDictionaryInfo,
+            },
+            on: vi.fn((name, listener) => { listeners.set(name, listener); }),
+            crossFrame: {registerHandlers: vi.fn()},
+            webExtension: {unloaded: false},
+        },
+    });
+    return {display, listeners};
+}
+
+describe('Display preparation during dictionary import', () => {
+    test('initializes on a transported import-busy response and refreshes after publication', async () => {
+        const busy = ExtensionError.deserialize(ExtensionError.serialize(createDictionaryImportBusyError('getDictionaryInfoOffscreen')));
+        const getDictionaryInfo = vi.fn().mockRejectedValueOnce(busy).mockResolvedValue([{title: 'JMdict'}]);
+        const {display, listeners} = createPreparingDisplay(getDictionaryInfo);
+        try {
+            await display.prepare();
+            expect(display._dictionaryInfo).toEqual([]);
+            expect(display._dictionaryInfoRefreshPending).toBe(true);
+            expect(listeners.has('databaseUpdated')).toBe(true);
+            listeners.get('databaseUpdated')?.({type: 'dictionary', cause: 'import'});
+            await vi.waitFor(() => expect(display._dictionaryInfo).toEqual([{title: 'JMdict'}]));
+            expect(display._dictionaryInfoRefreshPending).toBe(false);
+        } finally {
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test('loads publication that occurs during earlier startup work', async () => {
+        const languages = /** @type {PromiseWithResolvers<import('language').LanguageSummary[]>} */ (Promise.withResolvers());
+        const getDictionaryInfo = vi.fn().mockResolvedValue([{title: 'Published during startup'}]);
+        const {display, listeners} = createPreparingDisplay(getDictionaryInfo);
+        const getLanguageSummaries = vi.fn().mockReturnValue(languages.promise);
+        display._application.api.getLanguageSummaries = getLanguageSummaries;
+        try {
+            const preparation = display.prepare();
+            await vi.waitFor(() => expect(getLanguageSummaries).toHaveBeenCalledOnce());
+            listeners.get('databaseUpdated')?.({type: 'dictionary', cause: 'import'});
+            languages.resolve([]);
+            await preparation;
+            expect(display._dictionaryInfo).toEqual([{title: 'Published during startup'}]);
+        } finally {
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test('does not miss publication while initial metadata is still pending', async () => {
+        const initial = Promise.withResolvers();
+        const getDictionaryInfo = vi.fn().mockReturnValueOnce(initial.promise).mockResolvedValue([{title: 'New'}]);
+        const {display, listeners} = createPreparingDisplay(getDictionaryInfo);
+        try {
+            const preparation = display.prepare();
+            await vi.waitFor(() => expect(getDictionaryInfo).toHaveBeenCalledOnce());
+            expect(listeners.has('databaseUpdated')).toBe(true);
+            listeners.get('databaseUpdated')?.({type: 'dictionary', cause: 'import'});
+            await vi.waitFor(() => expect(display._dictionaryInfo).toEqual([{title: 'New'}]));
+            initial.resolve([{title: 'Old'}]);
+            await preparation;
+            expect(display._dictionaryInfo).toEqual([{title: 'New'}]);
+        } finally {
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test.each([new Error('Corrupt dictionary metadata'), new Error('Cannot execute getDictionaryInfoOffscreen: dictionary import is in progress')])('propagates unclassified metadata errors: %s', async (error) => {
+        const {display} = createPreparingDisplay(vi.fn().mockRejectedValue(error));
+        try {
+            await expect(display.prepare()).rejects.toBe(error);
+        } finally {
+            vi.unstubAllGlobals();
+        }
     });
 });
