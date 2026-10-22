@@ -3299,10 +3299,12 @@ async function main() {
                     report,
                     driver,
                     'Focused profile-cycle verification complete',
-                    'Verified Jitendex + JMnedict lookups survive delete and reinstall in the persisted Firefox profile.',
+                    'Reimported Jitendex after deletion and verified its lookup in the persisted Firefox profile.',
                     postCycleKuuSearchEnd,
                     postCycleKuuSearchEnd,
                 );
+                report.status = 'success';
+                console.log('[firefox-e2e] PASS: Focused dictionary delete + reimport completed.');
                 return;
             }
             await addReportPhase(
@@ -3505,6 +3507,24 @@ async function main() {
             }
             if (profileCycle) {
                 await driver.switchTo().window(settingsWindowHandle);
+                const preUninstallStorageDiagnostics = await getBackendStorageDiagnostics(driver);
+                const preUninstallStorageTime = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Capture storage state before extension removal',
+                    `Storage before add-on removal: ${summarizeBackendStorageDiagnostics(preUninstallStorageDiagnostics)}`,
+                    preUninstallStorageTime,
+                    preUninstallStorageTime,
+                );
+                const preUninstallWindowHandles = new Set((await driver.getAllWindowHandles()).map(String));
+                await driver.executeScript('window.open("about:blank", "_blank");');
+                const uninstallWindowHandle = await driver.wait(async () => {
+                    const windowHandles = (await driver.getAllWindowHandles()).map(String);
+                    return windowHandles.find((windowHandle) => !preUninstallWindowHandles.has(windowHandle)) ?? false;
+                }, 30_000, 'Expected a normal blank tab to remain available after extension removal');
+                await driver.switchTo().window(String(uninstallWindowHandle));
+                await driver.get('about:blank');
                 const uninstallExtensionStart = safePerformance.now();
                 await driver.uninstallAddon(installedAddonId);
                 const uninstallExtensionEnd = safePerformance.now();
@@ -3514,15 +3534,6 @@ async function main() {
                     'Remove extension before reinstalling',
                     'Uninstalled the Firefox add-on from the active profile before loading a fresh copy.',
                     uninstallExtensionStart,
-                    uninstallExtensionEnd,
-                );
-                const uninstallStorageDiagnostics = await getBackendStorageDiagnostics(driver);
-                await addReportPhase(
-                    report,
-                    driver,
-                    'Capture storage state after extension removal',
-                    `Storage after add-on removal: ${summarizeBackendStorageDiagnostics(uninstallStorageDiagnostics)}`,
-                    uninstallExtensionEnd,
                     uninstallExtensionEnd,
                 );
                 await driver.sleep(1_000);
@@ -3696,10 +3707,12 @@ async function main() {
                     report,
                     driver,
                     'Focused extension-cycle verification complete',
-                    'Verified Jitendex + JMnedict lookups survive extension removal and reinstall in the active Firefox session.',
+                    'Reimported Jitendex + JMnedict after extension removal and reinstall, then verified lookups in the active Firefox session.',
                     postCycleKuuSearchEnd,
                     postCycleKuuSearchEnd,
                 );
+                report.status = 'success';
+                console.log('[firefox-e2e] PASS: Focused extension reinstall + reimport completed.');
                 return;
             }
             await driver.switchTo().window(settingsWindowHandle);
