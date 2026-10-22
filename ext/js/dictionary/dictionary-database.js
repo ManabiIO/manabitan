@@ -6773,7 +6773,13 @@ null;
         const oldSlotTable = this._termEntryContentMetaHashPairTable;
         const slotTable = new Uint32Array(tableSize);
         const mask = tableSize - 1;
-        for (const encodedIndex of oldSlotTable) {
+        // Scan stable dense IDs when shorter. Rollback can leave many free
+        // IDs, so retain the bucket scan for a sparse metadata arena.
+        const denseCount = this._termEntryContentMetaDenseCount;
+        const useDense = denseCount <= oldSlotTable.length;
+        const scanLength = useDense ? denseCount : oldSlotTable.length;
+        for (let i = 0; i < scanLength; ++i) {
+            const encodedIndex = useDense ? i + 1 : oldSlotTable[i];
             if (encodedIndex === 0) { continue; }
             const index = encodedIndex - 1;
             if (this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
