@@ -1299,24 +1299,26 @@ function createTermContentReferenceSlabs(
 /**
  * @param {number} entryCount
  * @param {number[]} slabOffsets
- * @param {number} entriesPerSlab
+ * @param {number} entriesPerSlab Positive integral capacity from the reference layout.
  * @returns {Float64Array}
  * @throws {RangeError} If a reserved slab offset is invalid.
  */
 function createTermContentReferenceOffsets(entryCount, slabOffsets, entriesPerSlab) {
     const contentOffsets = new Float64Array(entryCount);
-    for (let i = 0; i < entryCount; ++i) {
-        const slabIndex = Math.floor(i / entriesPerSlab);
+    for (let startIndex = 0, slabIndex = 0; startIndex < entryCount; startIndex += entriesPerSlab, ++slabIndex) {
         const slabOffset = slabOffsets[slabIndex];
         if (!Number.isSafeInteger(slabOffset) || slabOffset < 0) {
             throw new RangeError(`Invalid term content reference slab offset: ${slabOffset}`);
         }
-        const contentOffset = slabOffset +
-        (i % entriesPerSlab) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
-        if (!Number.isSafeInteger(contentOffset)) {
-            throw new RangeError(`Term content reference offset exceeds the safe integer range: ${contentOffset}`);
+        const count = Math.min(entriesPerSlab, entryCount - startIndex);
+        // A safe largest offset also proves every earlier integer-stride offset.
+        const maximumOffset = slabOffset + (count - 1) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+        if (!Number.isSafeInteger(maximumOffset)) {
+            throw new RangeError(`Term content reference offset exceeds the safe integer range: ${maximumOffset}`);
         }
-        contentOffsets[i] = contentOffset;
+        for (let localIndex = 0; localIndex < count; ++localIndex) {
+            contentOffsets[startIndex + localIndex] = slabOffset + localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+        }
     }
     return contentOffsets;
 }
