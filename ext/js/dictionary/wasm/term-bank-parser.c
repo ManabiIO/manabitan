@@ -757,6 +757,13 @@ static int parse_composite_span_impl(
                     if (normalization_hint != 0) { *normalization_hint = 1u; }
                     if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
                 }
+                // A complete literal key and adjacent colon also validate
+                // the next grammar state without redispatching the colon.
+                if (common_key && s_end < len && src[s_end] == ':') {
+                    state = OBJECT_VALUE;
+                    i = s_end + 1u;
+                    continue;
+                }
                 state = OBJECT_COLON;
             } else if (state == OBJECT_VALUE) {
                 state = OBJECT_AFTER_VALUE;
