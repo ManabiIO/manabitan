@@ -88,7 +88,9 @@ function createFakeDirectoryHandle(
                 return false;
             },
             async createSyncAccessHandle() {
-                throw new Error('SyncAccessHandle not implemented in test double');
+                const error = new Error('SyncAccessHandle not implemented in test double');
+                error.name = 'NotSupportedError';
+                throw error;
             },
             async getFile() {
                 onGetFile(name);

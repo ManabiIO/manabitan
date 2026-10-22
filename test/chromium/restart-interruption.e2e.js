@@ -171,7 +171,8 @@ async function instrumentPackageForTestObserver(observerUrl) {
     assert.equal(await realpath(storePath), storePath, 'test observer target must be addressed through its resolved real path');
     const source = await readFile(storePath, 'utf8');
     const originalHash = createHash('sha256').update(source).digest('hex');
-    const target = 'await state.lookupIndexWritable.write(new Blob(chunks));';
+    // This counter follows the awaited payload write on both writer paths.
+    const target = 'this._lookupIndexWriteMetrics.writeBytes += byteLength;';
     const replacement = `${target}\n                let sessionId = null;\n                for (let attempt = 0; attempt < 8 && sessionId === null; ++attempt) {\n                    try {\n                        const opfsRoot = await navigator.storage.getDirectory();\n                        const journalHandle = await opfsRoot.getFileHandle('manabitan-dictionary-import-journal.json', {create: false});\n                        const journal = JSON.parse(await (await journalHandle.getFile()).text());\n                        sessionId = typeof journal.sessionId === 'string' ? journal.sessionId : null;\n                    } catch {}\n                    if (sessionId === null) { await new Promise((resolve) => setTimeout(resolve, 10)); }\n                }\n                if (sessionId === null) { throw new Error('Test-only authoritative term container observer could not read the active persisted import journal session ID'); }\n                const descriptorFileName = state.fileName;\n                const fileName = state.fileName + LOOKUP_INDEX_FILE_SUFFIX;\n                const dictionaryName = this._decodeShardInfoFromShardFileName(state.fileName)?.dictionaryName ?? null;\n                const observerResponse = await fetch('${observerUrl}', {method: 'POST', mode: 'cors', body: JSON.stringify({fileName, descriptorFileName, dictionaryName, sessionId, bytes: byteLength, recordCount})});\n                if (!observerResponse.ok) { throw new Error('Test-only authoritative term container observer rejected the completed write'); }`;
     const occurrences = source.split(target).length - 1;
     assert.equal(occurrences, 1, `test observer instrumentation expected one authoritative term-container write, found ${occurrences}`);
@@ -203,7 +204,7 @@ async function instrumentPackageForTestObserver(observerUrl) {
         originalPackageZipSha256: createHash('sha256').update(await readFile(extensionPackagePath)).digest('hex'),
         instrumentedExtractedPackageTreeSha256: packageTreeHash.digest('hex'),
         replacements: occurrences,
-        hook: 'await loopback observer POST after the awaited authoritative lookupIndexWritable write of chunks to the .mbtr.mbti term container, with descriptor and physical file names, decoded dictionary name, current persisted import-journal session ID, bytes, and record count',
+        hook: 'await loopback observer POST after the awaited authoritative lookup-index payload write (sync or async) to the .mbtr.mbti term container, with descriptor and physical file names, decoded dictionary name, current persisted import-journal session ID, bytes, and record count',
     };
 }
 
@@ -619,7 +620,7 @@ async function main() {
                             observerEventCount: observedWrites.length,
                             journalParseRetryCount,
                             lastJournalParseError,
-                            observerMechanism: `controlled test-only pause: instrumented extracted package awaits a held loopback response after the authoritative state.lookupIndexWritable.write(new Blob(chunks)) to the .mbtr.mbti term container; the packaged store decoder reports the dictionary name, and active session journal plus new staging container and descriptor are validated; Chromium is SIGKILLed while held and the response is released only after all captured process identities exit; UI phase was ${label}`,
+                            observerMechanism: `controlled test-only pause: instrumented extracted package awaits a held loopback response after the awaited authoritative lookup-index payload write (sync or async) to the .mbtr.mbti term container; the packaged store decoder reports the dictionary name, and active session journal plus new staging container and descriptor are validated; Chromium is SIGKILLed while held and the response is released only after all captured process identities exit; UI phase was ${label}`,
                         };
                         await persistReport();
                         break;
