@@ -39,6 +39,7 @@ import {armBrowserImportTiming} from '../e2e/import-timing.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {runWithReaderFinalization} from '../e2e/reader-finalization.js';
+import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -3472,9 +3473,6 @@ async function main() {
                 `--disable-extensions-except=${extensionDir}`,
                 `--load-extension=${extensionDir}`,
             ];
-            if (process.platform === 'darwin') {
-                launchArgs.push('--disable-features=MacAppCodeSignClone');
-            }
             if (!headless && hideWindowForHeaded) {
                 launchArgs.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
             }
@@ -3486,9 +3484,7 @@ async function main() {
             if (browserChannel !== null) {
                 launchOptions.channel = browserChannel;
             }
-            return await chromium.launchPersistentContext(userDataDir, {
-                ...launchOptions,
-            });
+            return await chromium.launchPersistentContext(userDataDir, getChromiumLaunchOptions(launchOptions));
         };
         /**
          * @param {import('@playwright/test').Page} targetPage

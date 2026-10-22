@@ -43,6 +43,7 @@ import {
     shouldTraverseDirectory,
     writeJsonFileAtomic,
 } from './freemdict-import-soak-util.js';
+import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -123,15 +124,14 @@ async function launchExtensionContext() {
         '--disable-crash-reporter',
         '--disable-crashpad',
     ];
-    if (process.platform === 'darwin') { args.push('--disable-features=MacAppCodeSignClone'); }
     if (!headless && shouldHideWindow()) {
         args.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
     }
 
-    const context = await chromium.launchPersistentContext('', {
+    const context = await chromium.launchPersistentContext('', getChromiumLaunchOptions({
         headless,
         args,
-    });
+    }));
 
     return {
         context,

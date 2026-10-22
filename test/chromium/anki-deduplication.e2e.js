@@ -32,6 +32,7 @@ import {applyAnkiDedupeOptions, dedupeDictionaryTitle, dedupeSearchTerm, getAnki
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
+import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -188,17 +189,13 @@ async function launchExtensionContext(extensionPath, userDataDir) {
         `--disable-extensions-except=${extensionPath}`,
         `--load-extension=${extensionPath}`,
     ];
-    if (process.platform === 'darwin') { args.push('--disable-features=MacAppCodeSignClone'); }
     if (!headless && shouldHideWindow()) {
         args.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
     }
 
-    const context = await chromium.launchPersistentContext(userDataDir, {
-        channel: 'chromium',
-        headless,
-        args,
-    });
-    return {context, headless, args};
+    const launchOptions = getChromiumLaunchOptions({channel: 'chromium', headless, args});
+    const context = await chromium.launchPersistentContext(userDataDir, launchOptions);
+    return {context, headless, args: launchOptions.args};
 }
 
 /**
