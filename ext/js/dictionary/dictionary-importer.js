@@ -78,6 +78,7 @@ const Uint8ArrayWriter = /** @type {typeof import('@zip.js/zip.js').Uint8ArrayWr
 const ZipReader = /** @type {typeof import('@zip.js/zip.js').ZipReader} */ (/** @type {unknown} */ (ZipReader0));
 
 const INDEX_FILE_NAME = 'index.json';
+const INLINE_TEXT_ENTRY_MAX_BYTES = 64 * 1024;
 const SUPPORTED_INDEX_VERSIONS = new Set([1, 3]);
 const JSON_QUOTED_STRING_CACHE_MAX_ENTRIES = 8192;
 const TERM_BANK_WASM_ROW_CHUNK_SIZE = 12000;
@@ -6111,8 +6112,26 @@ null;
             throw new Error(`Cannot read ${entry.filename}`);
         }
         const getData = /** @type {(writer: import('@zip.js/zip.js').Writer<T>|import('@zip.js/zip.js').WritableWriter, options?: import('@zip.js/zip.js').EntryGetDataOptions) => Promise<T>} */ (entryGetData);
+        // Small text entries otherwise pay worker startup for a few bytes.
+        // Apply the bound to every text read, so a later tag bank cannot just
+        // defer the startup avoided for index.json. Binary/media reads retain
+        // their existing worker policy.
+        let useWebWorkers = this._zipUseWebWorkers;
+        if (useWebWorkers && writer instanceof TextWriter) {
+            const entryMetadata = /** @type {{uncompressedSize?: unknown, compressedSize?: unknown}} */ (/** @type {unknown} */ (entry));
+            const uncompressedSize = entryMetadata.uncompressedSize;
+            const compressedSize = entryMetadata.compressedSize;
+            if (
+                typeof uncompressedSize === 'number' && Number.isSafeInteger(uncompressedSize) &&
+                uncompressedSize >= 0 && uncompressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
+                typeof compressedSize === 'number' && Number.isSafeInteger(compressedSize) &&
+                compressedSize >= 0 && compressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES
+            ) {
+                useWebWorkers = false;
+            }
+        }
         return await getData.call(entry, writer, {
-            useWebWorkers: this._zipUseWebWorkers,
+            useWebWorkers,
             ...(typeof signal === 'undefined' ? {} : {signal}),
         });
     }
