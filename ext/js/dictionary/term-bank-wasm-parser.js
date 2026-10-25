@@ -659,31 +659,15 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
     if (preloadedSource !== null && sourceCount > 1 && preloadedSource.bankSpanCount !== sourceCount) {
         throw new Error('Preloaded multi-bank source is missing independent bank spans');
     }
-    /** @type {Array<{bytes: Uint8Array, start: number, end: number}>} */
-    const sourceSpans = [];
-    let jsonLength = preloadedSource?.jsonLength ?? (!useBankSpans && sourceArrays.length > 1 ? 2 : 0);
-    for (const bytes of preloadedSource === null ? sourceArrays : []) {
-        if (useBankSpans) {
+    let jsonLength = preloadedSource?.jsonLength ?? 0;
+    if (preloadedSource === null) {
+        for (const bytes of sourceArrays) {
             if (sourceArrays.length > 1 && getJsonArrayContentSpan(bytes) === null) {
                 throw new Error('Expected a JSON array in term-bank source fragment');
             }
-            sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
             jsonLength += bytes.byteLength;
-            continue;
-        }
-        if (sourceArrays.length === 1) {
-            sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
-            jsonLength = bytes.byteLength;
-            continue;
-        }
-        const span = getJsonArrayContentSpan(bytes);
-        if (span === null) { throw new Error('Expected a JSON array in term-bank source fragment'); }
-        if (span.end > span.start) {
-            sourceSpans.push({bytes, ...span});
-            jsonLength += span.end - span.start;
         }
     }
-    if (!useBankSpans && preloadedSource === null && sourceArrays.length > 1) { jsonLength += Math.max(0, sourceSpans.length - 1); }
     if (!Number.isSafeInteger(jsonLength) || jsonLength > MAX_WASM32_BUFFER_BYTES) {
         throw new TermBankWasmResourceError('Term-bank source exceeds the 32-bit WASM parser limit');
     }
@@ -748,23 +732,13 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             }
         } else if (sourceArrays.length === 1) {
             inputHeap.set(sourceArrays[0], jsonPtr);
-        } else {
-            let cursor = jsonPtr;
-            inputHeap[cursor++] = U8_ARRAY_OPEN;
-            for (let i = 0; i < sourceSpans.length; ++i) {
-                if (i > 0) { inputHeap[cursor++] = U8_COMMA; }
-                const {bytes, start, end} = sourceSpans[i];
-                inputHeap.set(bytes.subarray(start, end), cursor);
-                cursor += end - start;
-            }
-            inputHeap[cursor] = U8_ARRAY_CLOSE;
         }
         copyJsonMs += Math.max(0, Date.now() - tStart);
     }
 
     const initialMetaCapacity = Math.min(
         MAX_META_ROW_CAPACITY,
-        Math.max(8192, (preloadedSource?.sourceCount ?? sourceSpans.length) * INITIAL_META_ROWS_PER_SOURCE),
+        Math.max(8192, sourceCount * INITIAL_META_ROWS_PER_SOURCE),
     );
     const useFusedParse = (
         allowFusedParse &&
