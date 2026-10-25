@@ -2001,7 +2001,7 @@ static uint32_t raw_term_content_hash(
     return hash == 0u ? 1u : hash;
 }
 
-static int json_string_token_needs_decode(
+static int json_string_token_has_escape(
     const uint8_t* src,
     uint32_t start,
     uint32_t length
@@ -2010,25 +2010,33 @@ static int json_string_token_needs_decode(
         return 1;
     }
     const uint32_t end = start + length - 1u;
-    for (uint32_t i = start + 1u; i < end;) {
-        const uint8_t first = src[i++];
-        if (first == '\\') { return 1; }
+    for (uint32_t i = start + 1u; i < end; ++i) {
+        if (src[i] == '\\') { return 1; }
+    }
+    return 0;
+}
+
+static int copy_valid_utf8(uint8_t* output, const uint8_t* bytes, uint32_t length) {
+    for (uint32_t i = 0u; i < length;) {
+        const uint8_t first = bytes[i++];
+        output[i - 1u] = first;
         if (first < 0x80u) { continue; }
         uint32_t width;
         if (first >= 0xc2u && first <= 0xdfu) { width = 2u; }
         else if (first >= 0xe0u && first <= 0xefu) { width = 3u; }
         else if (first >= 0xf0u && first <= 0xf4u) { width = 4u; }
-        else { return 1; }
-        if (width - 1u > end - i) { return 1; }
-        const uint8_t second = src[i];
+        else { return 0; }
+        if (width - 1u > length - i) { return 0; }
+        const uint8_t second = bytes[i];
         if ((first == 0xe0u && second < 0xa0u) || (first == 0xedu && second > 0x9fu) ||
-            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 1; }
+            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
         for (uint32_t j = 0u; j < width - 1u; ++j) {
-            if ((src[i + j] & 0xc0u) != 0x80u) { return 1; }
+            if ((bytes[i + j] & 0xc0u) != 0x80u) { return 0; }
         }
+        for (uint32_t j = 0u; j < width - 1u; ++j) { output[i + j] = bytes[i + j]; }
         i += width - 1u;
     }
-    return 0;
+    return 1;
 }
 
 
@@ -2207,7 +2215,7 @@ int32_t build_term_string_plan(
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
-            if (json_string_token_needs_decode(src, token_start, token_length)) {
+            if (json_string_token_has_escape(src, token_start, token_length)) {
                 // Decode into the unused arena tail. A failed attempt is never
                 // published; retain the JavaScript fallback for unusual keys.
                 const int32_t decoded_length = decode_escaped_key(
@@ -2255,9 +2263,10 @@ int32_t build_term_string_plan(
                 return -2;
             }
             if (value_source != strings) {
-                for (uint32_t i = 0u; i < value_length; ++i) {
-                    strings[strings_cursor + i] = value_source[value_start + i];
-                }
+                // Validate a new literal as it enters the arena. A failed
+                // partial copy remains unpublished because the cursor and
+                // interner metadata are unchanged.
+                if (!copy_valid_utf8(strings + strings_cursor, value_source + value_start, value_length)) { return -4; }
             }
             string_lengths[unique_count] = (uint16_t)value_length;
             string_offsets[unique_count] = strings_cursor;
@@ -2839,7 +2848,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
-            if (json_string_token_needs_decode(src, token_start, token_length)) {
+            if (json_string_token_has_escape(src, token_start, token_length)) {
                 if ((experiment_mask & EXPERIMENT_NATIVE_ESCAPED_KEYS) == 0u) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
                 const int32_t decoded_length = decode_escaped_key(
                     src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
@@ -2887,7 +2896,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5;
             }
             if (value_source != strings) {
-                __builtin_memcpy(strings + strings_cursor, value_source + value_start, value_length);
+                // Validate a new literal in the same pass that copies it into
+                // the arena; repeated keys use the already-validated entry.
+                if (!copy_valid_utf8(strings + strings_cursor, value_source + value_start, value_length)) {
+                    *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5;
+                }
             }
             string_lengths[string_unique_count] = (uint16_t)value_length;
             string_offsets[string_unique_count] = strings_cursor;

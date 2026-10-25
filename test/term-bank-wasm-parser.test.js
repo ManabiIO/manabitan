@@ -3165,6 +3165,8 @@ describe('term-bank WASM parser', () => {
 
     maybeTest('normalizes malformed unescaped expression and reading keys before indexing', async () => {
         const rawKeys = [
+            {expression: [0x64, 0x75, 0x70], reading: [0x72, 0x65, 0x61, 0x64]},
+            {expression: [0x64, 0x75, 0x70], reading: [0x72, 0x65, 0x61, 0x64]},
             {expression: [0x65, 0xff, 0x78], reading: [0x72, 0xe2, 0x82]},
             {expression: [0x80], reading: [0xc0, 0xaf]},
             {expression: [0xf0, 0x28, 0x8c, 0x28], reading: [0xed, 0xa0, 0x80]},
@@ -3239,10 +3241,10 @@ describe('term-bank WASM parser', () => {
             }
             expect(chunk.expressionBytesList).toStrictEqual(expectedExpressions);
             expect(chunk.readingBytesList).toStrictEqual(expectedReadings);
-            expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([0, 0, 0, 1]));
-            expect(chunk.termRecordPreinternedPlan.expressionIndexes[0]).toBe(
-                chunk.termRecordPreinternedPlan.expressionIndexes[3],
-            );
+            expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([0, 0, 0, 0, 0, 1]));
+            expect(chunk.termRecordPreinternedPlan.expressionIndexes[0]).toBe(chunk.termRecordPreinternedPlan.expressionIndexes[1]);
+            expect(chunk.termRecordPreinternedPlan.readingIndexes[0]).toBe(chunk.termRecordPreinternedPlan.readingIndexes[1]);
+            expect(chunk.termRecordPreinternedPlan.expressionIndexes[2]).toBe(chunk.termRecordPreinternedPlan.expressionIndexes[5]);
             const indexBytes = encodePersistedTermLookupIndexFromPreinternedPlan(
                 chunk.termRecordPreinternedPlan,
                 chunk.readingEqualsExpressionList,
@@ -3255,7 +3257,7 @@ describe('term-bank WASM parser', () => {
                 expect(indexBytes).toStrictEqual(expectedLookupIndexBytes);
             }
             const index = parsePersistedTermLookupIndex(indexBytes);
-            expect(findExactRows(index, /** @type {Uint8Array} */ (expectedExpressions[0]), 'expression')).toStrictEqual([0, 3]);
+            expect(findExactRows(index, /** @type {Uint8Array} */ (expectedExpressions[2]), 'expression')).toStrictEqual([2, 5]);
             for (let i = 0; i < rawKeys.length; ++i) {
                 expect(findExactRows(index, /** @type {Uint8Array} */ (expectedExpressions[i]), 'expression')).toContain(i);
                 if (expectedReadings[i]?.byteLength) {
