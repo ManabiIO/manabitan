@@ -490,7 +490,47 @@ function getUnescapedJsonStringTokenBytes(source, start, length) {
     const valueStart = start + 1;
     const valueEnd = start + length - 1;
     const valueBytes = source.subarray(valueStart, valueEnd);
-    return valueBytes.includes(U8_BACKSLASH) ? null : valueBytes;
+    return isValidUnescapedUtf8(valueBytes) ? valueBytes : null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+function isValidUnescapedUtf8(bytes) {
+    for (let i = 0; i < bytes.length;) {
+        const first = /** @type {number} */ (bytes[i]);
+        ++i;
+        if (first === U8_BACKSLASH) { return false; }
+        if (first < 0x80) { continue; }
+        let width;
+        switch (true) {
+            case first >= 0xc2 && first <= 0xdf:
+                width = 2;
+                break;
+            case first >= 0xe0 && first <= 0xef:
+                width = 3;
+                break;
+            case first >= 0xf0 && first <= 0xf4:
+                width = 4;
+                break;
+            default:
+                return false;
+        }
+        if (width - 1 > bytes.length - i) { return false; }
+        const second = /** @type {number} */ (bytes[i]);
+        if (
+            (first === 0xe0 && second < 0xa0) ||
+            (first === 0xed && second > 0x9f) ||
+            (first === 0xf0 && second < 0x90) ||
+            (first === 0xf4 && second > 0x8f)
+        ) { return false; }
+        for (let j = 0; j < width - 1; ++j) {
+            if (((/** @type {number} */ (bytes[i + j])) & 0xc0) !== 0x80) { return false; }
+        }
+        i += width - 1;
+    }
+    return true;
 }
 
 /**

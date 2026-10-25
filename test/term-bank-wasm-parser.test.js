@@ -25,7 +25,7 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
-import {encodePersistedTermLookupIndexFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index.js';
+import {encodePersistedTermLookupIndexFromPreinternedPlan, findExactRows, parsePersistedTermLookupIndex} from '../ext/js/dictionary/term-lookup-index.js';
 import {decodeRawTermContentTokenBinary} from '../ext/js/dictionary/raw-term-content.js';
 import {
     consumeLastTermBankWasmParseProfile,
@@ -3160,6 +3160,108 @@ describe('term-bank WASM parser', () => {
             const index = nativePlan.strings.indexOf(value);
             expect(index).toBeGreaterThanOrEqual(0);
             expect(nativePlan.stringHashes[index]).toBe(hashBytes(textEncoder.encode(value)));
+        }
+    });
+
+    maybeTest('normalizes malformed unescaped expression and reading keys before indexing', async () => {
+        const rawKeys = [
+            {expression: [0x65, 0xff, 0x78], reading: [0x72, 0xe2, 0x82]},
+            {expression: [0x80], reading: [0xc0, 0xaf]},
+            {expression: [0xf0, 0x28, 0x8c, 0x28], reading: [0xed, 0xa0, 0x80]},
+            {expression: [0x65, 0xef, 0xbf, 0xbd, 0x78], reading: []},
+        ];
+        /**
+         * @param {string} value
+         * @returns {Uint8Array}
+         */
+        const ascii = (value) => textEncoder.encode(value);
+        const sourceParts = [ascii('[')];
+        for (let i = 0; i < rawKeys.length; ++i) {
+            const {expression, reading} = /** @type {typeof rawKeys[number]} */ (rawKeys[i]);
+            if (i > 0) { sourceParts.push(ascii(',')); }
+            sourceParts.push(
+                ascii('["'),
+                Uint8Array.from(expression),
+                ascii('","'),
+                Uint8Array.from(reading),
+                ascii('","","",0,["row"],'),
+                ascii(String(i + 1)),
+                ascii(',""]'),
+            );
+        }
+        sourceParts.push(ascii(']'));
+        const source = new Uint8Array(sourceParts.reduce((total, part) => total + part.byteLength, 0));
+        let sourceOffset = 0;
+        for (const part of sourceParts) {
+            source.set(part, sourceOffset);
+            sourceOffset += part.byteLength;
+        }
+        const expectedExpressions = rawKeys.map(({expression}) => textEncoder.encode(textDecoder.decode(Uint8Array.from(expression))));
+        const expectedReadings = rawKeys.map(({reading}) => textEncoder.encode(textDecoder.decode(Uint8Array.from(reading))));
+
+        /**
+         * @param {boolean} useNativeStringPlan
+         * @param {boolean} fused
+         * @returns {Promise<ReturnType<typeof copyWasmBackedColumnChunk>>}
+         */
+        const parsePlan = async (useNativeStringPlan, fused) => {
+            let result = null;
+            await parseTermBankWithWasmColumnChunks(
+                source,
+                3,
+                (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
+                8,
+                {
+                    emitContentSlab: true,
+                    emitTokenBinaryContent: true,
+                    emitTermByteLists: true,
+                    prepareLookupIndexes: true,
+                    singleChunk: true,
+                    useNativeStringPlan,
+                    ...(fused ? {experimentalFusedSingleBank: true} : {}),
+                },
+            );
+            return /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));
+        };
+
+        /** @type {Uint8Array|null} */
+        let expectedLookupIndexBytes = null;
+        for (const [native, fused] of [[true, false], [false, false], [true, true]]) {
+            const chunk = await parsePlan(native, fused);
+            const profile = consumeLastTermBankWasmParseProfile();
+            if (fused) {
+                expect(profile?.fusedParseAttempts).toBe(1);
+                expect(profile?.fusedParseFallbacks).toBe(1);
+            } else if (native) {
+                expect(profile?.nativeStringPlanFallbackChunkCount).toBe(1);
+            } else {
+                expect(profile?.nativeStringPlanChunkCount).toBe(0);
+            }
+            expect(chunk.expressionBytesList).toStrictEqual(expectedExpressions);
+            expect(chunk.readingBytesList).toStrictEqual(expectedReadings);
+            expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([0, 0, 0, 1]));
+            expect(chunk.termRecordPreinternedPlan.expressionIndexes[0]).toBe(
+                chunk.termRecordPreinternedPlan.expressionIndexes[3],
+            );
+            const indexBytes = encodePersistedTermLookupIndexFromPreinternedPlan(
+                chunk.termRecordPreinternedPlan,
+                chunk.readingEqualsExpressionList,
+                chunk.sequenceList,
+                chunk.rowCount,
+            );
+            if (expectedLookupIndexBytes === null) {
+                expectedLookupIndexBytes = indexBytes;
+            } else {
+                expect(indexBytes).toStrictEqual(expectedLookupIndexBytes);
+            }
+            const index = parsePersistedTermLookupIndex(indexBytes);
+            expect(findExactRows(index, /** @type {Uint8Array} */ (expectedExpressions[0]), 'expression')).toStrictEqual([0, 3]);
+            for (let i = 0; i < rawKeys.length; ++i) {
+                expect(findExactRows(index, /** @type {Uint8Array} */ (expectedExpressions[i]), 'expression')).toContain(i);
+                if (expectedReadings[i]?.byteLength) {
+                    expect(findExactRows(index, /** @type {Uint8Array} */ (expectedReadings[i]), 'reading')).toContain(i);
+                }
+            }
         }
     });
 

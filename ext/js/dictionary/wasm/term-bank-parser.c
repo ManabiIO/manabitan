@@ -2001,7 +2001,7 @@ static uint32_t raw_term_content_hash(
     return hash == 0u ? 1u : hash;
 }
 
-static int json_string_token_has_escape(
+static int json_string_token_needs_decode(
     const uint8_t* src,
     uint32_t start,
     uint32_t length
@@ -2010,8 +2010,23 @@ static int json_string_token_has_escape(
         return 1;
     }
     const uint32_t end = start + length - 1u;
-    for (uint32_t i = start + 1u; i < end; ++i) {
-        if (src[i] == '\\') { return 1; }
+    for (uint32_t i = start + 1u; i < end;) {
+        const uint8_t first = src[i++];
+        if (first == '\\') { return 1; }
+        if (first < 0x80u) { continue; }
+        uint32_t width;
+        if (first >= 0xc2u && first <= 0xdfu) { width = 2u; }
+        else if (first >= 0xe0u && first <= 0xefu) { width = 3u; }
+        else if (first >= 0xf0u && first <= 0xf4u) { width = 4u; }
+        else { return 1; }
+        if (width - 1u > end - i) { return 1; }
+        const uint8_t second = src[i];
+        if ((first == 0xe0u && second < 0xa0u) || (first == 0xedu && second > 0x9fu) ||
+            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 1; }
+        for (uint32_t j = 0u; j < width - 1u; ++j) {
+            if ((src[i + j] & 0xc0u) != 0x80u) { return 1; }
+        }
+        i += width - 1u;
     }
     return 0;
 }
@@ -2192,7 +2207,7 @@ int32_t build_term_string_plan(
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
-            if (json_string_token_has_escape(src, token_start, token_length)) {
+            if (json_string_token_needs_decode(src, token_start, token_length)) {
                 // Decode into the unused arena tail. A failed attempt is never
                 // published; retain the JavaScript fallback for unusual keys.
                 const int32_t decoded_length = decode_escaped_key(
@@ -2824,7 +2839,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
-            if (json_string_token_has_escape(src, token_start, token_length)) {
+            if (json_string_token_needs_decode(src, token_start, token_length)) {
                 if ((experiment_mask & EXPERIMENT_NATIVE_ESCAPED_KEYS) == 0u) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
                 const int32_t decoded_length = decode_escaped_key(
                     src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
