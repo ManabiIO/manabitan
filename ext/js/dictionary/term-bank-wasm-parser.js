@@ -214,7 +214,10 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'uncompressed term-bank length');
     const compressionMethodsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank compression method');
     const signaturesPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank CRC');
-    const bankSpansPtr = experiments.experimentalTermBankSpans ?
+    // Multiple source banks are independent JSON documents. Keep their bounds
+    // through inflation so the native cursor validates each bank separately.
+    const preserveBankBoundaries = sources.length > 1 || experiments.experimentalTermBankSpans;
+    const bankSpansPtr = preserveBankBoundaries ?
         allocateWasmBuffer(wasm, sources.length * 8, 'term-bank spans') :
 0;
     const outputCapacity = uncompressedBytes + 2;
@@ -648,11 +651,14 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
  * @throws {Error}
  */
 async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}) {
-    const useBankSpans = experiments.experimentalTermBankSpans === true;
-    if (!useBankSpans && (preloadedSource?.bankSpanCount ?? 0) > 0) {
-        throw new Error('Preloaded bank spans require the span experiment');
-    }
     const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
+    // Every multi-bank route must retain source boundaries until the native
+    // term-bank cursor has validated each source as a complete JSON array.
+    const sourceCount = preloadedSource?.sourceCount ?? sourceArrays.length;
+    const useBankSpans = sourceCount > 1 || experiments.experimentalTermBankSpans === true || (preloadedSource?.bankSpanCount ?? 0) > 0;
+    if (preloadedSource !== null && sourceCount > 1 && preloadedSource.bankSpanCount !== sourceCount) {
+        throw new Error('Preloaded multi-bank source is missing independent bank spans');
+    }
     /** @type {Array<{bytes: Uint8Array, start: number, end: number}>} */
     const sourceSpans = [];
     let jsonLength = preloadedSource?.jsonLength ?? (!useBankSpans && sourceArrays.length > 1 ? 2 : 0);
@@ -809,7 +815,12 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         );
         // Content remains the final bump allocation so native growth can extend
         // it in place. Escaped keys use unused interner storage, not new scratch.
-        const experimentMask = getTermBankExperimentMask(experiments);
+        const experimentMask = getTermBankExperimentMask({
+            ...experiments,
+            // Native fused parsing uses this bit to admit the span cursor. For
+            // multi-bank imports the cursor is a correctness invariant.
+            experimentalTermBankSpans: experiments.experimentalTermBankSpans || bankSpanCount > 0,
+        });
         const experimentStatsPtr = experimentMask !== 0 ? allocateWasmBuffer(wasm, 20, 'experiment stats') : 0;
         const contentOutPtr = wasm.wasm_alloc(contentOutCapacity);
         allocationMs += Math.max(0, Date.now() - tStart);

@@ -274,18 +274,25 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest('inflates, validates, and joins mixed raw ZIP term-bank payloads', async () => {
-        const sources = [
-            createCompressedTermBankSource(' \n [["a","", "", "", 1, ["one"], 10, ""]] \r', 8),
-            createCompressedTermBankSource('\t[]\n', 0),
-            createCompressedTermBankSource('[["b","び", "tag", "v1", -2, [{"type":"text","text":"two"}], 11, "common"]]', 8),
+    maybeTest('inflates and preserves mixed raw ZIP term-bank boundaries with exact sizes', async () => {
+        const texts = [
+            ' \n [["a","", "", "", 1, ["one"], 10, ""]] \r',
+            '\t[]\n',
+            '[["b","び", "tag", "v1", -2, [{"type":"text","text":"two"}], 11, "common"]]',
         ];
+        const sources = texts.map((text, i) => createCompressedTermBankSource(text, i === 1 ? 0 : 8));
         const preloaded = await inflateCompressedTermBankSourcesWasm(sources);
         const joined = new Uint8Array(preloaded.wasm.memory.buffer, preloaded.jsonPtr, preloaded.jsonLength);
 
-        expect(JSON.parse(textDecoder.decode(joined))).toEqual([
-            ['a', '', '', '', 1, ['one'], 10, ''],
-            ['b', 'び', 'tag', 'v1', -2, [{type: 'text', text: 'two'}], 11, 'common'],
+        expect(textDecoder.decode(joined)).toBe(texts.join(''));
+        expect(preloaded.bankSpanCount).toBe(sources.length);
+        expect([...new Uint32Array(preloaded.wasm.memory.buffer, preloaded.bankSpansPtr, sources.length * 2)]).toEqual([
+            0,
+            textEncoder.encode(texts[0]).length,
+            textEncoder.encode(texts[0]).length,
+            textEncoder.encode(texts[1]).length,
+            textEncoder.encode(texts.slice(0, 2).join('')).length,
+            textEncoder.encode(texts[2]).length,
         ]);
     });
 
