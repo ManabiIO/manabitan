@@ -380,9 +380,10 @@ describe('span boundaries and validated glossary witnesses', () => {
     test.each([
         [1, '[ ["old', 'name","","noun","",0,"gloss"] ]'],
         [3, '[ ["abc]', '[def","","","",0,[],1,""]]'],
-    ])('keeps the bank boundary for dictionary format %i', async (version, banks) => {
+    ])('keeps the bank boundary for dictionary format %i', async (version, firstBank, secondBank) => {
+        const banks = [firstBank, secondBank]
         for (const preload of [false, true]) {
-            await expect(parse(banks, {experimentalTermBankSpans: false}, preload, true, version)).rejects.toThrow()
+            await expect(parse(banks, {experimentalTermBankSpans: false}, preload, true, version)).rejects.toThrow(/(?:term-bank|JSON array|source failed validation)/i)
         }
     })
 
@@ -393,9 +394,10 @@ describe('span boundaries and validated glossary witnesses', () => {
         ['["x",]', '[]'],
         ['["\\q"]', '[]'],
         ['["x"]junk', '[]'],
-    ])('rejects malformed logical banks independently: %j', async (banks) => {
+    ])('rejects malformed logical banks independently: %j', async (firstBank, secondBank) => {
+        const banks = [firstBank, secondBank]
         for (const preload of [false, true]) {
-            await expect(parse(banks, {experimentalTermBankSpans: false}, preload)).rejects.toThrow()
+            await expect(parse(banks, {experimentalTermBankSpans: false}, preload)).rejects.toThrow(/(?:term-bank|JSON array|source failed validation)/i)
         }
     })
 
