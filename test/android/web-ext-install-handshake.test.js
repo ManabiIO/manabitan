@@ -88,8 +88,22 @@ describe.skipIf(process.platform === 'win32')('Firefox Android web-ext install h
     });
 
     test('rejects a runner that exits after printing its install acknowledgement', async () => {
-        await expect(runScript("console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); process.exit(23);"))
+        // Cleanup must not replace this fixture's intentional exit status if
+        // the parent observes its marker before the child reaches process.exit.
+        await expect(runScript("process.on('SIGTERM', () => {}); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); process.exit(23);"))
             .rejects.toThrow('web-ext exited after reporting installation (code=23');
+    });
+
+    test('rejects a nonzero exit reported during acknowledged runner cleanup', async () => {
+        // The marker follows handler installation, and only our cleanup signal
+        // makes this runner exit. No delay has to win against process scheduling.
+        await expect(runScript("process.on('SIGTERM', () => { process.exit(23); }); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);"))
+            .rejects.toThrow('web-ext exited after reporting installation (code=23');
+    });
+
+    test('accepts an acknowledged runner that exits cleanly in response to cleanup', async () => {
+        const output = await runScript("process.on('SIGTERM', () => { process.exit(0); }); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);");
+        expect(output).toContain('Installed /data/local/tmp/extension.xpi as a temporary add-on');
     });
 
     test.skipIf(process.platform === 'win32')('times out a hanging handshake and cleans up the whole process group', async () => {

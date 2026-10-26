@@ -214,7 +214,10 @@ export async function runWebExtInstallHandshake({device, packageName, sourceDir,
     if (handshakeFailure !== undefined) { throw handshakeFailure; }
     if (cleanupFailure !== undefined) { throw cleanupFailure; }
     if (processError) { throw processError; }
-    if (runnerExitedBeforeCleanup) {
+    // The exit event can arrive only while cleanup joins the child. A marker
+    // and a successful callback cannot turn that runner failure into a pass.
+    const runnerFailedDuringCleanup = typeof exitState.value?.code === 'number' && exitState.value.code !== 0;
+    if (runnerExitedBeforeCleanup || runnerFailedDuringCleanup) {
         throw new Error(`web-ext exited after reporting installation (code=${String(exitState.value?.code)} signal=${String(exitState.value?.signal)}).`);
     }
     if (!installAcknowledged) {
