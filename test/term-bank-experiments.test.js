@@ -111,9 +111,10 @@ function snapshotChunk(chunk) {
  * @param {Experiments} [experiments]
  * @param {boolean} [preload]
  * @param {boolean} [singleChunk]
+ * @param {number} [version]
  * @returns {Promise<{rows: SnapshotRow[], profile: NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>}>}
  */
-async function parse(banks, experiments = {}, preload = false, singleChunk = true) {
+async function parse(banks, experiments = {}, preload = false, singleChunk = true, version = 3) {
     const preloadedSource = preload ?
 await inflateCompressedTermBankSourcesWasm(banks.map((bank, i) => compressed(bank, i % 2 === 0 ? 8 : 0)), experiments) :
 undefined
@@ -121,7 +122,7 @@ undefined
     const rows = []
     await parseTermBankWithWasmColumnChunks(
         preloadedSource ? new Uint8Array(0) : banks.map((bank) => (typeof bank === 'string' ? encoder.encode(bank) : bank)),
-        3,
+        version,
         (chunk) => { rows.push(...snapshotChunk(chunk)) },
         7,
         {...experiments,
@@ -190,7 +191,7 @@ describe('term-bank experiment defaults', () => {
             const result = await parse(banks, flags(mask), preload)
             expect(result.rows).toEqual(baseline.rows)
             expect(result.profile.experiments).toEqual(flags(mask))
-            expect(result.profile.bankSpanCount).toBe((mask & 1) !== 0 ? banks.length : 0)
+            expect(result.profile.bankSpanCount).toBe(banks.length)
             expect(result.profile.fusedParseAttempts).toBe(1)
             expect(result.profile.fusedParseFallbacks).toBe(0)
             expect(result.profile.maxWasmHeapBytes).toBeGreaterThan(0)
@@ -358,6 +359,58 @@ describe('native exceptional keys', () => {
 })
 
 describe('span boundaries and validated glossary witnesses', () => {
+    test('rejects the production-default cross-bank row splice for direct and preloaded sources', async () => {
+        const banks = ['[["abc]', '[def","","","",0,[],1,""]]']
+        expect(() => JSON.parse(banks[0])).toThrow()
+        expect(() => JSON.parse(banks[1])).toThrow()
+        expect(JSON.parse(`[${banks.map((s) => s.slice(1, -1)).join(',')}]`)).toEqual([['abc,def', '', '', '', 0, [], 1, '']])
+        const configurations = [
+            {},
+            {experimentalTermBankSpans: false},
+            {experimentalSkipFusedParse: true},
+            {experimentalNativeEscapedKeys: true},
+        ]
+        for (const experiments of configurations) {
+            for (const preload of [false, true]) {
+                await expect(parse(banks, experiments, preload)).rejects.toThrow()
+            }
+        }
+    })
+
+    test.each([
+        [1, '[ ["old', 'name","","noun","",0,"gloss"] ]'],
+        [3, '[ ["abc]', '[def","","","",0,[],1,""]]'],
+    ])('keeps the bank boundary for dictionary format %i', async (version, firstBank, secondBank) => {
+        const banks = [firstBank, secondBank]
+        for (const preload of [false, true]) {
+            await expect(parse(banks, {experimentalTermBankSpans: false}, preload, true, version)).rejects.toThrow(/(?:term-bank|JSON array|source failed validation)/i)
+        }
+    })
+
+    test.each([
+        ['["open', 'tail"]'],
+        ['["bad\\', '[u0061","","","",0,[],1,""]]'],
+        ['[["nested","","","",0,[]', ',1,""]]'],
+        ['["x",]', '[]'],
+        ['["\\q"]', '[]'],
+        ['["x"]junk', '[]'],
+    ])('rejects malformed logical banks independently: %j', async (firstBank, secondBank) => {
+        const banks = [firstBank, secondBank]
+        for (const preload of [false, true]) {
+            await expect(parse(banks, {experimentalTermBankSpans: false}, preload)).rejects.toThrow(/(?:term-bank|JSON array|source failed validation)/i)
+        }
+    })
+
+    test('accepts empty banks around healthy rows with identical row identity and content', async () => {
+        const banks = ['[]', '[ ]', JSON.stringify([row('kept', ['definition', {type: 'image', path: 'asset.png'}])]), '[]']
+        const direct = await parse(banks, {experimentalTermBankSpans: false})
+        const preloaded = await parse(banks, {experimentalTermBankSpans: false}, true)
+        expect(preloaded.rows).toEqual(direct.rows)
+        expect(direct.rows).toHaveLength(1)
+        expect(direct.rows[0]).toMatchObject({expression: [...encoder.encode('kept')], sequence: 7})
+        expect(direct.rows[0].media).toHaveLength(1)
+    })
+
     test.each([false, true])('never splices a malformed row across banks, including fallback: %s', async (escaped) => {
         const key = escaped ? String.raw`"\u0078"` : '"x"'
         // Removing wrappers and inserting a comma manufactures a valid row.

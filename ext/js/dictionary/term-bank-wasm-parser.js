@@ -170,9 +170,9 @@ async function getWasm() {
 }
 
 /**
- * Inflates complete raw ZIP payloads into parser-owned storage, joined by
- * default or kept as independent banks by the span experiment. The allocation
- * stays valid only until the next parser WASM operation.
+ * Inflates complete raw ZIP payloads into parser-owned storage with independent
+ * bank boundaries. The allocation stays valid only until the next parser WASM
+ * operation.
  * @param {CompressedTermBankSource[]} sources
  * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Promise<PreloadedTermBankSource>}
@@ -214,7 +214,10 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'uncompressed term-bank length');
     const compressionMethodsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank compression method');
     const signaturesPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank CRC');
-    const bankSpansPtr = experiments.experimentalTermBankSpans ?
+    // Multiple source banks are independent JSON documents. Keep their bounds
+    // through inflation so the native cursor validates each bank separately.
+    const preserveBankBoundaries = sources.length > 1 || experiments.experimentalTermBankSpans;
+    const bankSpansPtr = preserveBankBoundaries ?
         allocateWasmBuffer(wasm, sources.length * 8, 'term-bank spans') :
 0;
     const outputCapacity = uncompressedBytes + 2;
@@ -490,7 +493,47 @@ function getUnescapedJsonStringTokenBytes(source, start, length) {
     const valueStart = start + 1;
     const valueEnd = start + length - 1;
     const valueBytes = source.subarray(valueStart, valueEnd);
-    return valueBytes.includes(U8_BACKSLASH) ? null : valueBytes;
+    return isValidUnescapedUtf8(valueBytes) ? valueBytes : null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+function isValidUnescapedUtf8(bytes) {
+    for (let i = 0; i < bytes.length;) {
+        const first = /** @type {number} */ (bytes[i]);
+        ++i;
+        if (first === U8_BACKSLASH) { return false; }
+        if (first < 0x80) { continue; }
+        let width;
+        switch (true) {
+            case first >= 0xc2 && first <= 0xdf:
+                width = 2;
+                break;
+            case first >= 0xe0 && first <= 0xef:
+                width = 3;
+                break;
+            case first >= 0xf0 && first <= 0xf4:
+                width = 4;
+                break;
+            default:
+                return false;
+        }
+        if (width - 1 > bytes.length - i) { return false; }
+        const second = /** @type {number} */ (bytes[i]);
+        if (
+            (first === 0xe0 && second < 0xa0) ||
+            (first === 0xed && second > 0x9f) ||
+            (first === 0xf0 && second < 0x90) ||
+            (first === 0xf4 && second > 0x8f)
+        ) { return false; }
+        for (let j = 0; j < width - 1; ++j) {
+            if (((/** @type {number} */ (bytes[i + j])) & 0xc0) !== 0x80) { return false; }
+        }
+        i += width - 1;
+    }
+    return true;
 }
 
 /**
@@ -608,36 +651,23 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
  * @throws {Error}
  */
 async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}) {
-    const useBankSpans = experiments.experimentalTermBankSpans === true;
-    if (!useBankSpans && (preloadedSource?.bankSpanCount ?? 0) > 0) {
-        throw new Error('Preloaded bank spans require the span experiment');
-    }
     const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
-    /** @type {Array<{bytes: Uint8Array, start: number, end: number}>} */
-    const sourceSpans = [];
-    let jsonLength = preloadedSource?.jsonLength ?? (!useBankSpans && sourceArrays.length > 1 ? 2 : 0);
-    for (const bytes of preloadedSource === null ? sourceArrays : []) {
-        if (useBankSpans) {
+    // Every multi-bank route must retain source boundaries until the native
+    // term-bank cursor has validated each source as a complete JSON array.
+    const sourceCount = preloadedSource?.sourceCount ?? sourceArrays.length;
+    const useBankSpans = sourceCount > 1 || experiments.experimentalTermBankSpans === true || (preloadedSource?.bankSpanCount ?? 0) > 0;
+    if (preloadedSource !== null && sourceCount > 1 && preloadedSource.bankSpanCount !== sourceCount) {
+        throw new Error('Preloaded multi-bank source is missing independent bank spans');
+    }
+    let jsonLength = preloadedSource?.jsonLength ?? 0;
+    if (preloadedSource === null) {
+        for (const bytes of sourceArrays) {
             if (sourceArrays.length > 1 && getJsonArrayContentSpan(bytes) === null) {
                 throw new Error('Expected a JSON array in term-bank source fragment');
             }
-            sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
             jsonLength += bytes.byteLength;
-            continue;
-        }
-        if (sourceArrays.length === 1) {
-            sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
-            jsonLength = bytes.byteLength;
-            continue;
-        }
-        const span = getJsonArrayContentSpan(bytes);
-        if (span === null) { throw new Error('Expected a JSON array in term-bank source fragment'); }
-        if (span.end > span.start) {
-            sourceSpans.push({bytes, ...span});
-            jsonLength += span.end - span.start;
         }
     }
-    if (!useBankSpans && preloadedSource === null && sourceArrays.length > 1) { jsonLength += Math.max(0, sourceSpans.length - 1); }
     if (!Number.isSafeInteger(jsonLength) || jsonLength > MAX_WASM32_BUFFER_BYTES) {
         throw new TermBankWasmResourceError('Term-bank source exceeds the 32-bit WASM parser limit');
     }
@@ -702,23 +732,13 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             }
         } else if (sourceArrays.length === 1) {
             inputHeap.set(sourceArrays[0], jsonPtr);
-        } else {
-            let cursor = jsonPtr;
-            inputHeap[cursor++] = U8_ARRAY_OPEN;
-            for (let i = 0; i < sourceSpans.length; ++i) {
-                if (i > 0) { inputHeap[cursor++] = U8_COMMA; }
-                const {bytes, start, end} = sourceSpans[i];
-                inputHeap.set(bytes.subarray(start, end), cursor);
-                cursor += end - start;
-            }
-            inputHeap[cursor] = U8_ARRAY_CLOSE;
         }
         copyJsonMs += Math.max(0, Date.now() - tStart);
     }
 
     const initialMetaCapacity = Math.min(
         MAX_META_ROW_CAPACITY,
-        Math.max(8192, (preloadedSource?.sourceCount ?? sourceSpans.length) * INITIAL_META_ROWS_PER_SOURCE),
+        Math.max(8192, sourceCount * INITIAL_META_ROWS_PER_SOURCE),
     );
     const useFusedParse = (
         allowFusedParse &&
@@ -769,7 +789,12 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         );
         // Content remains the final bump allocation so native growth can extend
         // it in place. Escaped keys use unused interner storage, not new scratch.
-        const experimentMask = getTermBankExperimentMask(experiments);
+        const experimentMask = getTermBankExperimentMask({
+            ...experiments,
+            // Native fused parsing uses this bit to admit the span cursor. For
+            // multi-bank imports the cursor is a correctness invariant.
+            experimentalTermBankSpans: experiments.experimentalTermBankSpans || bankSpanCount > 0,
+        });
         const experimentStatsPtr = experimentMask !== 0 ? allocateWasmBuffer(wasm, 20, 'experiment stats') : 0;
         const contentOutPtr = wasm.wasm_alloc(contentOutCapacity);
         allocationMs += Math.max(0, Date.now() - tStart);
@@ -2474,7 +2499,7 @@ class ParallelTermBankParserPool {
             const abortController = new AbortController();
             this._workerCreationAbortController = abortController;
             this._workerCount = workerCount;
-            this._workersPromise = createParallelParserWorkers(abortController.signal, workerCount);
+            this._workersPromise = createParallelParserWorkers(abortController, workerCount);
         } else if (this._workerCount !== workerCount) {
             throw new Error('Parallel term-bank parser worker capability changed while its pool was warm');
         }
@@ -3151,17 +3176,19 @@ function canUseParallelParserForSourceSize(totalBytes) {
 }
 
 /**
- * @param {AbortSignal} signal
+ * @param {AbortController} abortController
  * @param {number} workerCount
  * @returns {Promise<{workers: Worker[]}>}
  */
-async function createParallelParserWorkers(signal, workerCount) {
+async function createParallelParserWorkers(abortController, workerCount) {
+    const {signal} = abortController;
     const module = await compileTermBankWasmModule();
     if (signal.aborted) { throw createParallelParserCancellationError(); }
     /** @type {Worker[]} */
     const workers = [];
+    /** @type {Promise<void>[]} */
+    const ready = [];
     try {
-        const ready = [];
         for (let i = 0; i < workerCount; ++i) {
             const worker = new Worker(
                 new URL('term-bank-wasm-parser-worker.js', import.meta.url),
@@ -3173,7 +3200,11 @@ async function createParallelParserWorkers(signal, workerCount) {
         await Promise.all(ready);
         return {workers};
     } catch (error) {
+        // Termination does not settle readiness listeners or their timeout.
+        // Retire every peer waiter before releasing this startup generation.
+        abortController.abort();
         for (const worker of workers) { worker.terminate(); }
+        await Promise.allSettled(ready);
         throw error;
     }
 }

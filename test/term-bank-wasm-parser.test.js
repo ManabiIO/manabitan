@@ -25,7 +25,7 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
-import {encodePersistedTermLookupIndexFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index.js';
+import {encodePersistedTermLookupIndexFromPreinternedPlan, findExactRows, parsePersistedTermLookupIndex} from '../ext/js/dictionary/term-lookup-index.js';
 import {decodeRawTermContentTokenBinary} from '../ext/js/dictionary/raw-term-content.js';
 import {
     consumeLastTermBankWasmParseProfile,
@@ -274,18 +274,25 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest('inflates, validates, and joins mixed raw ZIP term-bank payloads', async () => {
-        const sources = [
-            createCompressedTermBankSource(' \n [["a","", "", "", 1, ["one"], 10, ""]] \r', 8),
-            createCompressedTermBankSource('\t[]\n', 0),
-            createCompressedTermBankSource('[["b","び", "tag", "v1", -2, [{"type":"text","text":"two"}], 11, "common"]]', 8),
+    maybeTest('inflates and preserves mixed raw ZIP term-bank boundaries with exact sizes', async () => {
+        const texts = [
+            ' \n [["a","", "", "", 1, ["one"], 10, ""]] \r',
+            '\t[]\n',
+            '[["b","び", "tag", "v1", -2, [{"type":"text","text":"two"}], 11, "common"]]',
         ];
+        const sources = texts.map((text, i) => createCompressedTermBankSource(text, i === 1 ? 0 : 8));
         const preloaded = await inflateCompressedTermBankSourcesWasm(sources);
         const joined = new Uint8Array(preloaded.wasm.memory.buffer, preloaded.jsonPtr, preloaded.jsonLength);
 
-        expect(JSON.parse(textDecoder.decode(joined))).toEqual([
-            ['a', '', '', '', 1, ['one'], 10, ''],
-            ['b', 'び', 'tag', 'v1', -2, [{type: 'text', text: 'two'}], 11, 'common'],
+        expect(textDecoder.decode(joined)).toBe(texts.join(''));
+        expect(preloaded.bankSpanCount).toBe(sources.length);
+        expect([...new Uint32Array(preloaded.wasm.memory.buffer, preloaded.bankSpansPtr, sources.length * 2)]).toEqual([
+            0,
+            textEncoder.encode(texts[0]).length,
+            textEncoder.encode(texts[0]).length,
+            textEncoder.encode(texts[1]).length,
+            textEncoder.encode(texts.slice(0, 2).join('')).length,
+            textEncoder.encode(texts[2]).length,
         ]);
     });
 
@@ -2097,6 +2104,82 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    maybeTest.each(['constructor', 'post-message', 'initialization-error', 'messageerror', 'worker-error'])(
+        'settles every startup waiter when one parser worker fails: %s',
+        async (failure) => {
+            /** @type {StartupWorker[]} */
+            const instances = [];
+            let constructionCount = 0;
+            let failStartup = true;
+            /** @implements {WorkerMock} */
+            class StartupWorker {
+                constructor() {
+                    ++constructionCount;
+                    if (failStartup && failure === 'constructor' && constructionCount === 2) {
+                        throw new Error('Worker constructor failed');
+                    }
+                    /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                    this.listeners = new Map();
+                    this.terminated = false;
+                    instances.push(this);
+                }
+
+                addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    addWorkerListener(this.listeners, type, listener);
+                }
+
+                removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    this.listeners.get(type)?.delete(listener);
+                }
+
+                postMessage(/** @type {WorkerMessage} */ message) {
+                    if (message.type !== 'initialize') { return; }
+                    if (!failStartup) {
+                        queueMicrotask(() => emitWorkerMessage(this.listeners, {type: 'ready'}));
+                        return;
+                    }
+                    // One failure must settle peers that never acknowledge readiness.
+                    if (instances.length !== 1) { return; }
+                    if (failure === 'post-message') { throw new Error('Initialize dispatch failed'); }
+                    queueMicrotask(() => {
+                        if (failure === 'initialization-error') {
+                            emitWorkerMessage(this.listeners, {type: 'initialization-error', error: {message: 'Initialization failed'}});
+                        } else if (failure === 'messageerror' || failure === 'worker-error') {
+                            for (const listener of this.listeners.get(failure === 'worker-error' ? 'error' : failure) ?? []) {
+                                listener(/** @type {MessageEvent<unknown>} */ (/** @type {unknown} */ ({message: 'Initialization failed'})));
+                            }
+                        }
+                    });
+                }
+
+                terminate() { this.terminated = true; }
+            }
+
+            vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout']});
+            vi.stubGlobal('Worker', StartupWorker);
+            try {
+                await expect(prewarmParallelTermBankParser()).resolves.toBe(false);
+                expect(instances.length).toBeGreaterThan(0);
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+                for (const worker of instances) {
+                    expect([...worker.listeners.values()].every((listeners) => listeners.size === 0)).toBe(true);
+                }
+                // The failed generation cannot interfere with the next import.
+                failStartup = false;
+                await expect(prewarmParallelTermBankParser()).resolves.toBe(true);
+                await disposeParallelTermBankParser();
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+            } finally {
+                await disposeParallelTermBankParser();
+                vi.clearAllTimers();
+                vi.useRealTimers();
+                vi.stubGlobal('Worker', void 0);
+            }
+        },
+    );
+
     maybeTest('aborts a hung parser prewarm during import cleanup', async () => {
         let terminateCount = 0;
         /** @implements {WorkerMock} */
@@ -3160,6 +3243,110 @@ describe('term-bank WASM parser', () => {
             const index = nativePlan.strings.indexOf(value);
             expect(index).toBeGreaterThanOrEqual(0);
             expect(nativePlan.stringHashes[index]).toBe(hashBytes(textEncoder.encode(value)));
+        }
+    });
+
+    maybeTest('normalizes malformed unescaped expression and reading keys before indexing', async () => {
+        const rawKeys = [
+            {expression: [0x64, 0x75, 0x70], reading: [0x72, 0x65, 0x61, 0x64]},
+            {expression: [0x64, 0x75, 0x70], reading: [0x72, 0x65, 0x61, 0x64]},
+            {expression: [0x65, 0xff, 0x78], reading: [0x72, 0xe2, 0x82]},
+            {expression: [0x80], reading: [0xc0, 0xaf]},
+            {expression: [0xf0, 0x28, 0x8c, 0x28], reading: [0xed, 0xa0, 0x80]},
+            {expression: [0x65, 0xef, 0xbf, 0xbd, 0x78], reading: []},
+        ];
+        /**
+         * @param {string} value
+         * @returns {Uint8Array}
+         */
+        const ascii = (value) => textEncoder.encode(value);
+        const sourceParts = [ascii('[')];
+        for (let i = 0; i < rawKeys.length; ++i) {
+            const {expression, reading} = /** @type {typeof rawKeys[number]} */ (rawKeys[i]);
+            if (i > 0) { sourceParts.push(ascii(',')); }
+            sourceParts.push(
+                ascii('["'),
+                Uint8Array.from(expression),
+                ascii('","'),
+                Uint8Array.from(reading),
+                ascii('","","",0,["row"],'),
+                ascii(String(i + 1)),
+                ascii(',""]'),
+            );
+        }
+        sourceParts.push(ascii(']'));
+        const source = new Uint8Array(sourceParts.reduce((total, part) => total + part.byteLength, 0));
+        let sourceOffset = 0;
+        for (const part of sourceParts) {
+            source.set(part, sourceOffset);
+            sourceOffset += part.byteLength;
+        }
+        const expectedExpressions = rawKeys.map(({expression}) => textEncoder.encode(textDecoder.decode(Uint8Array.from(expression))));
+        const expectedReadings = rawKeys.map(({reading}) => textEncoder.encode(textDecoder.decode(Uint8Array.from(reading))));
+
+        /**
+         * @param {boolean} useNativeStringPlan
+         * @param {boolean} fused
+         * @returns {Promise<ReturnType<typeof copyWasmBackedColumnChunk>>}
+         */
+        const parsePlan = async (useNativeStringPlan, fused) => {
+            let result = null;
+            await parseTermBankWithWasmColumnChunks(
+                source,
+                3,
+                (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
+                8,
+                {
+                    emitContentSlab: true,
+                    emitTokenBinaryContent: true,
+                    emitTermByteLists: true,
+                    prepareLookupIndexes: true,
+                    singleChunk: true,
+                    useNativeStringPlan,
+                    ...(fused ? {experimentalFusedSingleBank: true} : {}),
+                },
+            );
+            return /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));
+        };
+
+        /** @type {Uint8Array|null} */
+        let expectedLookupIndexBytes = null;
+        for (const [native, fused] of [[true, false], [false, false], [true, true]]) {
+            const chunk = await parsePlan(native, fused);
+            const profile = consumeLastTermBankWasmParseProfile();
+            if (fused) {
+                expect(profile?.fusedParseAttempts).toBe(1);
+                expect(profile?.fusedParseFallbacks).toBe(1);
+            } else if (native) {
+                expect(profile?.nativeStringPlanFallbackChunkCount).toBe(1);
+            } else {
+                expect(profile?.nativeStringPlanChunkCount).toBe(0);
+            }
+            expect(chunk.expressionBytesList).toStrictEqual(expectedExpressions);
+            expect(chunk.readingBytesList).toStrictEqual(expectedReadings);
+            expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([0, 0, 0, 0, 0, 1]));
+            expect(chunk.termRecordPreinternedPlan.expressionIndexes[0]).toBe(chunk.termRecordPreinternedPlan.expressionIndexes[1]);
+            expect(chunk.termRecordPreinternedPlan.readingIndexes[0]).toBe(chunk.termRecordPreinternedPlan.readingIndexes[1]);
+            expect(chunk.termRecordPreinternedPlan.expressionIndexes[2]).toBe(chunk.termRecordPreinternedPlan.expressionIndexes[5]);
+            const indexBytes = encodePersistedTermLookupIndexFromPreinternedPlan(
+                chunk.termRecordPreinternedPlan,
+                chunk.readingEqualsExpressionList,
+                chunk.sequenceList,
+                chunk.rowCount,
+            );
+            if (expectedLookupIndexBytes === null) {
+                expectedLookupIndexBytes = indexBytes;
+            } else {
+                expect(indexBytes).toStrictEqual(expectedLookupIndexBytes);
+            }
+            const index = parsePersistedTermLookupIndex(indexBytes);
+            expect(findExactRows(index, /** @type {Uint8Array} */ (expectedExpressions[2]), 'expression')).toStrictEqual([2, 5]);
+            for (let i = 0; i < rawKeys.length; ++i) {
+                expect(findExactRows(index, /** @type {Uint8Array} */ (expectedExpressions[i]), 'expression')).toContain(i);
+                if (expectedReadings[i]?.byteLength) {
+                    expect(findExactRows(index, /** @type {Uint8Array} */ (expectedReadings[i]), 'reading')).toContain(i);
+                }
+            }
         }
     });
 

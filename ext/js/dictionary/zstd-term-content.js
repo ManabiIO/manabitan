@@ -620,23 +620,29 @@ async function initializeCompressionPool() {
         return null;
     }
     compressionPoolPromise = (async () => {
+        const abortController = new AbortController();
         /** @type {Worker[]} */
         const workers = [];
+        /** @type {Promise<void>[]} */
+        const readyPromises = [];
         try {
-            const readyPromises = [];
             for (let i = 0; i < COMPRESSION_WORKER_COUNT; ++i) {
                 const worker = new Worker(
                     new URL('zstd-term-content-compression-worker.js', import.meta.url),
                     {type: 'module'},
                 );
                 workers.push(worker);
-                readyPromises.push(waitForCompressionWorkerReady(worker));
+                readyPromises.push(waitForCompressionWorkerReady(worker, abortController.signal));
             }
             await Promise.all(readyPromises);
             compressionPool = new TermContentCompressionPool(workers);
             return compressionPool;
         } catch (error) {
+            // Terminating a worker does not settle its readiness wait. Join
+            // every peer before fallback or a new pool can take ownership.
+            abortController.abort();
             for (const worker of workers) { worker.terminate(); }
+            await Promise.allSettled(readyPromises);
             log.warn(new Error(`Term content compression workers unavailable: ${error}`));
             return null;
         }
@@ -650,9 +656,10 @@ async function initializeCompressionPool() {
 
 /**
  * @param {Worker} worker
+ * @param {AbortSignal} signal
  * @returns {Promise<void>}
  */
-function waitForCompressionWorkerReady(worker) {
+function waitForCompressionWorkerReady(worker, signal) {
     return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
             cleanup();
@@ -679,15 +686,22 @@ function waitForCompressionWorkerReady(worker) {
             cleanup();
             reject(new Error('Compression worker initialization returned an invalid message'));
         };
+        const onAbort = () => {
+            cleanup();
+            reject(new Error('Compression worker initialization was cancelled'));
+        };
         const cleanup = () => {
             clearTimeout(timeoutId);
             worker.removeEventListener('message', onMessage);
             worker.removeEventListener('error', onError);
             worker.removeEventListener('messageerror', onMessageError);
+            signal.removeEventListener('abort', onAbort);
         };
         worker.addEventListener('message', onMessage);
         worker.addEventListener('error', onError);
         worker.addEventListener('messageerror', onMessageError);
+        signal.addEventListener('abort', onAbort, {once: true});
+        if (signal.aborted) { onAbort(); }
     });
 }
 

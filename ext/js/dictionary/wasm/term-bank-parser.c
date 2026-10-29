@@ -2016,6 +2016,29 @@ static int json_string_token_has_escape(
     return 0;
 }
 
+static int copy_valid_utf8(uint8_t* output, const uint8_t* bytes, uint32_t length) {
+    for (uint32_t i = 0u; i < length;) {
+        const uint8_t first = bytes[i++];
+        output[i - 1u] = first;
+        if (first < 0x80u) { continue; }
+        uint32_t width;
+        if (first >= 0xc2u && first <= 0xdfu) { width = 2u; }
+        else if (first >= 0xe0u && first <= 0xefu) { width = 3u; }
+        else if (first >= 0xf0u && first <= 0xf4u) { width = 4u; }
+        else { return 0; }
+        if (width - 1u > length - i) { return 0; }
+        const uint8_t second = bytes[i];
+        if ((first == 0xe0u && second < 0xa0u) || (first == 0xedu && second > 0x9fu) ||
+            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
+        for (uint32_t j = 0u; j < width - 1u; ++j) {
+            if ((bytes[i + j] & 0xc0u) != 0x80u) { return 0; }
+        }
+        for (uint32_t j = 0u; j < width - 1u; ++j) { output[i + j] = bytes[i + j]; }
+        i += width - 1u;
+    }
+    return 1;
+}
+
 
 static uint32_t key_hex4(const uint8_t* p) {
     uint32_t value = 0u;
@@ -2240,9 +2263,10 @@ int32_t build_term_string_plan(
                 return -2;
             }
             if (value_source != strings) {
-                for (uint32_t i = 0u; i < value_length; ++i) {
-                    strings[strings_cursor + i] = value_source[value_start + i];
-                }
+                // Validate a new literal as it enters the arena. A failed
+                // partial copy remains unpublished because the cursor and
+                // interner metadata are unchanged.
+                if (!copy_valid_utf8(strings + strings_cursor, value_source + value_start, value_length)) { return -4; }
             }
             string_lengths[unique_count] = (uint16_t)value_length;
             string_offsets[unique_count] = strings_cursor;
@@ -2872,7 +2896,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5;
             }
             if (value_source != strings) {
-                __builtin_memcpy(strings + strings_cursor, value_source + value_start, value_length);
+                // Validate a new literal in the same pass that copies it into
+                // the arena; repeated keys use the already-validated entry.
+                if (!copy_valid_utf8(strings + strings_cursor, value_source + value_start, value_length)) {
+                    *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5;
+                }
             }
             string_lengths[string_unique_count] = (uint16_t)value_length;
             string_offsets[string_unique_count] = strings_cursor;
