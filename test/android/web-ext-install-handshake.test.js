@@ -109,8 +109,9 @@ describe.skipIf(process.platform === 'win32')('Firefox Android web-ext install h
     test.each(['SIGHUP', 'SIGKILL'])('rejects an unexpected %s during acknowledged runner cleanup', async (signal) => {
         // Handler installation precedes the marker. Cleanup causes this exit,
         // but never sends the signal that actually terminates the runner.
-        const script = `process.on('SIGTERM', () => { process.kill(process.pid, ${JSON.stringify(signal)}); }); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);`;
-        await expect(runScript(script)).rejects.toThrow(`web-ext exited after reporting installation (code=null signal=${signal})`);
+        const script = "process.on('SIGTERM', () => { process.kill(process.pid, process.argv[1]); }); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); setInterval(() => {}, 1000);";
+        await expect(runScript(script, {commandArgs: ['-e', script, signal]}))
+            .rejects.toThrow(`web-ext exited after reporting installation (code=null signal=${signal})`);
     });
 
     test('accepts a forced runner shutdown only after cleanup escalates to SIGKILL', async () => {
@@ -127,9 +128,10 @@ describe.skipIf(process.platform === 'win32')('Firefox Android web-ext install h
         // Inherited stderr keeps close pending after the runner's exit event.
         // The grandchild is ready before the marker and ignores the first TERM.
         const grandchildScript = "process.on('SIGTERM', () => {}); console.log('grandchild-ready'); setInterval(() => {}, 1000);";
-        const script = `const {spawn}=require('node:child_process'); process.on('SIGTERM', () => { process.kill(process.pid, 'SIGKILL'); }); const child=spawn(process.execPath,['-e',${JSON.stringify(grandchildScript)}],{stdio:['ignore','pipe','inherit']}); let readiness=''; child.stdout.on('data',(chunk)=>{readiness+=chunk.toString(); if(readiness.includes('grandchild-ready\\n')) { console.log('child-pid='+child.pid); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); }}); setInterval(()=>{},1000);`;
+        const script = "const {spawn}=require('node:child_process'); process.on('SIGTERM', () => { process.kill(process.pid, 'SIGKILL'); }); const child=spawn(process.execPath,['-e',process.argv[1]],{stdio:['ignore','pipe','inherit']}); let readiness=''; child.stdout.on('data',(chunk)=>{readiness+=chunk.toString(); if(readiness.includes('grandchild-ready\\n')) { console.log('child-pid='+child.pid); console.log('Installed /data/local/tmp/extension.xpi as a temporary add-on'); }}); setInterval(()=>{},1000);";
         let childPid = 0;
         await expect(runScript(script, {
+            commandArgs: ['-e', script, grandchildScript],
             onOutput: (line) => { if (line.startsWith('child-pid=')) { childPid = Number(line.slice('child-pid='.length)); } },
         })).rejects.toThrow('web-ext exited after reporting installation (code=null signal=SIGKILL)');
         expect(childPid).toBeGreaterThan(0);
