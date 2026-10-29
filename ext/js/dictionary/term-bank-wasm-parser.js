@@ -170,9 +170,9 @@ async function getWasm() {
 }
 
 /**
- * Inflates complete raw ZIP payloads into parser-owned storage, joined by
- * default or kept as independent banks by the span experiment. The allocation
- * stays valid only until the next parser WASM operation.
+ * Inflates complete raw ZIP payloads into parser-owned storage with independent
+ * bank boundaries. The allocation stays valid only until the next parser WASM
+ * operation.
  * @param {CompressedTermBankSource[]} sources
  * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Promise<PreloadedTermBankSource>}
@@ -2499,7 +2499,7 @@ class ParallelTermBankParserPool {
             const abortController = new AbortController();
             this._workerCreationAbortController = abortController;
             this._workerCount = workerCount;
-            this._workersPromise = createParallelParserWorkers(abortController.signal, workerCount);
+            this._workersPromise = createParallelParserWorkers(abortController, workerCount);
         } else if (this._workerCount !== workerCount) {
             throw new Error('Parallel term-bank parser worker capability changed while its pool was warm');
         }
@@ -3176,17 +3176,19 @@ function canUseParallelParserForSourceSize(totalBytes) {
 }
 
 /**
- * @param {AbortSignal} signal
+ * @param {AbortController} abortController
  * @param {number} workerCount
  * @returns {Promise<{workers: Worker[]}>}
  */
-async function createParallelParserWorkers(signal, workerCount) {
+async function createParallelParserWorkers(abortController, workerCount) {
+    const {signal} = abortController;
     const module = await compileTermBankWasmModule();
     if (signal.aborted) { throw createParallelParserCancellationError(); }
     /** @type {Worker[]} */
     const workers = [];
+    /** @type {Promise<void>[]} */
+    const ready = [];
     try {
-        const ready = [];
         for (let i = 0; i < workerCount; ++i) {
             const worker = new Worker(
                 new URL('term-bank-wasm-parser-worker.js', import.meta.url),
@@ -3198,7 +3200,11 @@ async function createParallelParserWorkers(signal, workerCount) {
         await Promise.all(ready);
         return {workers};
     } catch (error) {
+        // Termination does not settle readiness listeners or their timeout.
+        // Retire every peer waiter before releasing this startup generation.
+        abortController.abort();
         for (const worker of workers) { worker.terminate(); }
+        await Promise.allSettled(ready);
         throw error;
     }
 }

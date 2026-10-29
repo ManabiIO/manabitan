@@ -2104,6 +2104,82 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    maybeTest.each(['constructor', 'post-message', 'initialization-error', 'messageerror', 'worker-error'])(
+        'settles every startup waiter when one parser worker fails: %s',
+        async (failure) => {
+            /** @type {StartupWorker[]} */
+            const instances = [];
+            let constructionCount = 0;
+            let failStartup = true;
+            /** @implements {WorkerMock} */
+            class StartupWorker {
+                constructor() {
+                    ++constructionCount;
+                    if (failStartup && failure === 'constructor' && constructionCount === 2) {
+                        throw new Error('Worker constructor failed');
+                    }
+                    /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                    this.listeners = new Map();
+                    this.terminated = false;
+                    instances.push(this);
+                }
+
+                addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    addWorkerListener(this.listeners, type, listener);
+                }
+
+                removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    this.listeners.get(type)?.delete(listener);
+                }
+
+                postMessage(/** @type {WorkerMessage} */ message) {
+                    if (message.type !== 'initialize') { return; }
+                    if (!failStartup) {
+                        queueMicrotask(() => emitWorkerMessage(this.listeners, {type: 'ready'}));
+                        return;
+                    }
+                    // One failure must settle peers that never acknowledge readiness.
+                    if (instances.length !== 1) { return; }
+                    if (failure === 'post-message') { throw new Error('Initialize dispatch failed'); }
+                    queueMicrotask(() => {
+                        if (failure === 'initialization-error') {
+                            emitWorkerMessage(this.listeners, {type: 'initialization-error', error: {message: 'Initialization failed'}});
+                        } else if (failure === 'messageerror' || failure === 'worker-error') {
+                            for (const listener of this.listeners.get(failure === 'worker-error' ? 'error' : failure) ?? []) {
+                                listener(/** @type {MessageEvent<unknown>} */ (/** @type {unknown} */ ({message: 'Initialization failed'})));
+                            }
+                        }
+                    });
+                }
+
+                terminate() { this.terminated = true; }
+            }
+
+            vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout']});
+            vi.stubGlobal('Worker', StartupWorker);
+            try {
+                await expect(prewarmParallelTermBankParser()).resolves.toBe(false);
+                expect(instances.length).toBeGreaterThan(0);
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+                for (const worker of instances) {
+                    expect([...worker.listeners.values()].every((listeners) => listeners.size === 0)).toBe(true);
+                }
+                // The failed generation cannot interfere with the next import.
+                failStartup = false;
+                await expect(prewarmParallelTermBankParser()).resolves.toBe(true);
+                await disposeParallelTermBankParser();
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+            } finally {
+                await disposeParallelTermBankParser();
+                vi.clearAllTimers();
+                vi.useRealTimers();
+                vi.stubGlobal('Worker', void 0);
+            }
+        },
+    );
+
     maybeTest('aborts a hung parser prewarm during import cleanup', async () => {
         let terminateCount = 0;
         /** @implements {WorkerMock} */
