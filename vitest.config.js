@@ -16,11 +16,17 @@
  */
 
 import codspeedPlugin from '@codspeed/vitest-plugin';
+import {createHash} from 'node:crypto';
+import {realpathSync} from 'node:fs';
 import os from 'node:os';
+import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {configDefaults, defineConfig} from 'vitest/config';
 
 const enableCodSpeed = process.env.MANABITAN_CODSPEED === '1';
+const worktreeCacheId = createHash('sha256')
+    .update(realpathSync(fileURLToPath(new URL('.', import.meta.url))))
+    .digest('hex');
 
 const sharedExclude = [
     ...configDefaults.exclude,
@@ -35,7 +41,7 @@ const sharedExclude = [
 
 export default defineConfig({
     // Keep generated test caches outside read-only linked dependency trees.
-    cacheDir: path.join(os.tmpdir(), 'manabitan-vitest-cache'),
+    cacheDir: path.join(os.tmpdir(), 'manabitan-vitest-cache', worktreeCacheId),
     plugins: enableCodSpeed ? [codspeedPlugin()] : [],
     test: {
         setupFiles: [
