@@ -212,6 +212,30 @@ describe('term bank CRC32', () => {
         }
     })
 
+    // Independent zlib crc32_combine64(crc, 0, length) vectors cover every length bit.
+    test.each([
+        [0x00000001, 0x01000000, 0x66bc001e],
+        [0x00000001, 0x7fffffff, 0x00000010],
+        [0x00000001, 0x80000000, 0x1db71064],
+        [0x00000001, 0xffffffff, 0x00000001],
+        [0x80000000, 0x01000000, 0xa8a472c0],
+        [0x80000000, 0x7fffffff, 0x6d3d2d4d],
+        [0x80000000, 0x80000000, 0x08000000],
+        [0x80000000, 0xffffffff, 0x80000000],
+        [0x12345678, 0x01000000, 0x340b491f],
+        [0x12345678, 0x7fffffff, 0xf83461c1],
+        [0x12345678, 0x80000000, 0xec9bc647],
+        [0x12345678, 0xffffffff, 0x12345678],
+        [0xdeadbeef, 0x01000000, 0xe402b3c2],
+        [0xdeadbeef, 0x7fffffff, 0x87b1d07a],
+        [0xdeadbeef, 0x80000000, 0xb05729f2],
+        [0xdeadbeef, 0xffffffff, 0xdeadbeef],
+    ])('shifts CRC %s through large unsigned length %s', (crc, length, expected) => {
+        expect(wasm.term_bank_crc32_shift_test(crc, length) >>> 0).toBe(expected)
+        wasm.wasm_reset_heap()
+        expect(wasm.term_bank_crc32_shift_test(crc, length) >>> 0).toBe(expected)
+    })
+
     /**
      * @param {Uint8Array} bytes
      */

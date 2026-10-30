@@ -121,43 +121,48 @@ static void crc32_matrix_square(uint32_t* square, const uint32_t* matrix) {
     }
 }
 
-/* Build the GF(2) reflected IEEE polynomial shift operator for a finalized CRC. */
-static void crc32_make_shift_operator(uint32_t* result, uint32_t length) {
-    uint32_t odd[32];
-    uint32_t even[32];
-    uint32_t power[32];
+/* Each parser instance owns its memory and synchronous CRC calls. Retain the
+ * IEEE byte-shift powers across heap resets, as for the slicing tables above. */
+static uint32_t crc32_shift_powers[32][32];
+static uint32_t crc32_shift_powers_initialized = 0u;
+
+static void crc32_initialize_shift_powers(void) {
+    if (crc32_shift_powers_initialized != 0u) { return; }
+    uint32_t one_bit[32];
+    uint32_t two_bits[32];
+    uint32_t four_bits[32];
     uint32_t row = 1u;
-    odd[0] = 0xedb88320u;
+    one_bit[0] = 0xedb88320u;
     for (uint32_t i = 1u; i < 32u; ++i) {
-        odd[i] = row;
+        one_bit[i] = row;
         row <<= 1u;
     }
+    crc32_matrix_square(two_bits, one_bit);
+    crc32_matrix_square(four_bits, two_bits);
+    crc32_matrix_square(crc32_shift_powers[0], four_bits);
+    for (uint32_t i = 1u; i < 32u; ++i) {
+        crc32_matrix_square(crc32_shift_powers[i], crc32_shift_powers[i - 1u]);
+    }
+    crc32_shift_powers_initialized = 1u;
+}
 
-    /* Square the one-bit polynomial operator to produce the byte-shift operator. */
-    crc32_matrix_square(even, odd);
-    crc32_matrix_square(odd, even);
-    crc32_matrix_square(power, odd);
-    for (uint32_t i = 0u; i < 32u; ++i) { result[i] = 1u << i; }
-
+static uint32_t crc32_shift_finalized(uint32_t crc, uint32_t length) {
+    if (length == 0u) { return crc; }
+    crc32_initialize_shift_powers();
+    uint32_t power = 0u;
     while (length != 0u) {
         if ((length & 1u) != 0u) {
-            for (uint32_t i = 0u; i < 32u; ++i) {
-                result[i] = crc32_matrix_times(power, result[i]);
-            }
+            crc = crc32_matrix_times(crc32_shift_powers[power], crc);
         }
         length >>= 1u;
-        if (length != 0u) {
-            crc32_matrix_square(even, power);
-            for (uint32_t i = 0u; i < 32u; ++i) { power[i] = even[i]; }
-        }
+        ++power;
     }
+    return crc;
 }
 
 static uint32_t crc32_combine(uint32_t first, uint32_t second, uint32_t second_length) {
-    uint32_t shift[32];
     if (second_length == 0u) { return first; }
-    crc32_make_shift_operator(shift, second_length);
-    return crc32_matrix_times(shift, first) ^ second;
+    return crc32_shift_finalized(first, second_length) ^ second;
 }
 
 static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
@@ -199,14 +204,9 @@ static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
     second_crc = ~second_crc;
     third_crc = ~third_crc;
     fourth_crc = ~fourth_crc;
-    uint32_t one_span_shift[32];
-    uint32_t two_span_shift[32];
-    crc32_make_shift_operator(one_span_shift, span_length);
-    crc32_matrix_square(two_span_shift, one_span_shift);
-
-    const uint32_t first_pair = crc32_matrix_times(one_span_shift, first_crc) ^ second_crc;
-    const uint32_t second_pair = crc32_matrix_times(one_span_shift, third_crc) ^ fourth_crc;
-    uint32_t crc = ~(crc32_matrix_times(two_span_shift, first_pair) ^ second_pair);
+    const uint32_t first_pair = crc32_combine(first_crc, second_crc, span_length);
+    const uint32_t second_pair = crc32_combine(third_crc, fourth_crc, span_length);
+    uint32_t crc = ~crc32_combine(first_pair, second_pair, span_length * 2u);
     for (uint32_t offset = tail_offset; offset < length; ++offset) {
         crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset]) & 0xffu];
     }
@@ -226,9 +226,7 @@ uint32_t term_bank_crc32_combine_test(uint32_t first, uint32_t second, uint32_t 
 
 __attribute__((visibility("default")))
 uint32_t term_bank_crc32_shift_test(uint32_t crc, uint32_t length) {
-    uint32_t shift[32];
-    crc32_make_shift_operator(shift, length);
-    return crc32_matrix_times(shift, crc);
+    return crc32_shift_finalized(crc, length);
 }
 #endif
 
