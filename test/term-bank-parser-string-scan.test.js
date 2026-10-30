@@ -234,6 +234,10 @@ describe('term-bank string scanning', () => {
         const glossaries = [
             '[{"content":"tag","tag":"content"}]',
             '[{"contentx":"content","tagged":"tag"}]',
+            '[{"data":{"type":"text","text":"payload"},"style":{"tag":"img","path":"p.png"}}]',
+            '[{"lang":"image","class":"img","title":"text","href":"x","code":"y"}]',
+            '[{"database":1,"styles":2,"language":3,"classes":4,"titles":5,"hrefs":6,"codec":7}]',
+            '[{"d\\u0061ta":1,"s\\u0074yle":2,"la\\u006eg":3,"cl\\u0061ss":4,"ti\\u0074le":5,"hr\\u0065f":6,"co\\u0064e":7}]',
             '[{"con\\u0074ent":{"ta\\u0067":"img","path":"picture.png"}}]',
             '[{"content":{"tag":"img","path":"picture.png"},"type":"structured-content"}]',
             '[{"content":{"type":"text","text":"payload"},"tag":"span"}]',
@@ -248,7 +252,7 @@ describe('term-bank string scanning', () => {
     test('rejects truncated structured keys at their logical input end', () => {
         for (const alignment of differentialAlignments) {
             const prefix = `${' '.repeat(alignment)}[["head","","","",0,[{`
-            for (const key of ['"content"', '"tag"']) {
+            for (const key of ['"content"', '"tag"', '"data"', '"style"', '"lang"', '"class"', '"title"', '"href"', '"code"']) {
                 for (let length = 0; length <= key.length; ++length) {
                     expectMatchesJson(prefix + key.slice(0, length))
                 }

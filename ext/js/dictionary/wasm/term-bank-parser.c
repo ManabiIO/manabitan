@@ -701,6 +701,54 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
             *out_end = start + 5u;
             return 1;
         }
+        // These ordinary keys need no media or text-object hint checks.
+        // Type remains on the generic path because its value can normalize
+        // a glossary text object, including escaped spellings.
+        switch (word) {
+            case UINT32_C(0x74616422): // "data"
+                if (len - start >= 6u && src[start + 4u] == 'a' && src[start + 5u] == '"') {
+                    *out_end = start + 6u;
+                    return 1;
+                }
+                break;
+            case UINT32_C(0x79747322): // "style"
+                if (len - start >= 7u && src[start + 4u] == 'l' && src[start + 5u] == 'e' && src[start + 6u] == '"') {
+                    *out_end = start + 7u;
+                    return 1;
+                }
+                break;
+            case UINT32_C(0x6e616c22): // "lang"
+                if (len - start >= 6u && src[start + 4u] == 'g' && src[start + 5u] == '"') {
+                    *out_end = start + 6u;
+                    return 1;
+                }
+                break;
+            case UINT32_C(0x616c6322): // "class"
+                if (len - start >= 7u && src[start + 4u] == 's' && src[start + 5u] == 's' && src[start + 6u] == '"') {
+                    *out_end = start + 7u;
+                    return 1;
+                }
+                break;
+            case UINT32_C(0x74697422): // "title"
+                if (len - start >= 7u && src[start + 4u] == 'l' && src[start + 5u] == 'e' && src[start + 6u] == '"') {
+                    *out_end = start + 7u;
+                    return 1;
+                }
+                break;
+            case UINT32_C(0x65726822): // "href"
+                if (len - start >= 6u && src[start + 4u] == 'f' && src[start + 5u] == '"') {
+                    *out_end = start + 6u;
+                    return 1;
+                }
+                break;
+            case UINT32_C(0x646f6322): // "code"
+                if (len - start >= 6u && src[start + 4u] == 'e' && src[start + 5u] == '"') {
+                    *out_end = start + 6u;
+                    return 1;
+                }
+                break;
+            default: break;
+        }
     }
     return 0;
 }
