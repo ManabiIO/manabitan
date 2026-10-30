@@ -775,6 +775,10 @@ export class TermContentBlockStore {
         const planStart = safePerformance.now();
         const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
         let packMs = safePerformance.now() - planStart;
+        const referenceLayout = createTermContentReferenceLayout(
+            sourceLengths.length,
+            this._referencePackTargetBytes,
+        );
         /** @type {(value?: void|PromiseLike<void>) => void} */
         let resolveSourceConsumed = () => {};
         /** @type {(reason?: unknown) => void} */
@@ -852,28 +856,37 @@ export class TermContentBlockStore {
         })();
         void compression.catch((error) => { rejectSourceConsumed(error); });
 
-        const referenceLayout = createTermContentReferenceLayout(
-            sourceLengths.length,
-            this._referencePackTargetBytes,
-        );
         let referenceMs = 0;
-        const append = this._contentStore.beginAppendBatchWithDerivedPrefix(
-            compression.then(({chunks}) => chunks),
-            referenceLayout.slabLengths,
-            (blockOffsets, blockLengths) => {
-                const referenceStart = safePerformance.now();
-                const references = createTermContentReferenceSlabs(
-                    packed,
-                    packed.packedChunkLengths,
-                    sourceLengths,
-                    blockOffsets,
-                    blockLengths,
-                    referenceLayout.entriesPerSlab,
-                );
-                referenceMs += safePerformance.now() - referenceStart;
-                return references;
-            },
-        );
+        const primaryChunks = compression.then(({chunks}) => chunks);
+        /** @type {ReturnType<import('./term-content-opfs-store.js').TermContentOpfsStore['beginAppendBatchWithDerivedPrefix']>} */
+        let append;
+        try {
+            append = this._contentStore.beginAppendBatchWithDerivedPrefix(
+                primaryChunks,
+                referenceLayout.slabLengths,
+                (blockOffsets, blockLengths) => {
+                    const referenceStart = safePerformance.now();
+                    const references = createTermContentReferenceSlabs(
+                        packed,
+                        packed.packedChunkLengths,
+                        sourceLengths,
+                        blockOffsets,
+                        blockLengths,
+                        referenceLayout.entriesPerSlab,
+                    );
+                    referenceMs += safePerformance.now() - referenceStart;
+                    return references;
+                },
+            );
+        } catch (error) {
+            // Reservation setup may fail before it takes ownership of this
+            // promise. Keep the operation's terminal drain responsible for the
+            // compressor and prevent its unconsumed derived promise escaping.
+            void primaryChunks.catch(() => {});
+            const failed = Promise.reject(error);
+            void failed.catch(() => {});
+            append = {reserved: failed, completion: failed};
+        }
         const storage = append.reserved.then(({derivedOffsets}) => ({
             contentOffsets: createTermContentReferenceOffsets(
                 sourceLengths.length,
