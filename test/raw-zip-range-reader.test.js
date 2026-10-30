@@ -17,11 +17,12 @@
 
 import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 import {openAsBlob} from 'node:fs';
-import {mkdir, mkdtemp, open, rename} from 'node:fs/promises';
+import {mkdir, mkdtemp, open} from 'node:fs/promises';
 import {homedir, tmpdir} from 'node:os';
 import path from 'node:path';
 import {deflateRawSync, inflateRawSync} from 'node:zlib';
 import {AbortableZipReadPool, RawZipPayloadReader, TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
+import {moveFixtureToTrash} from './util/move-fixture-to-trash.js';
 
 const limit = 128 * 1024 * 1024;
 const encoder = new TextEncoder();
@@ -47,7 +48,7 @@ afterAll(async () => {
     const trash = path.join(homedir(), '.Trash');
     await mkdir(trash, {recursive: true});
     const destination = await mkdtemp(path.join(trash, 'manabitan-zip-ranges-'));
-    await rename(directory, path.join(destination, 'fixture'));
+    moveFixtureToTrash(directory, path.join(destination, 'fixture'));
 });
 
 /** Real Blob I/O with byte-range accounting; no replacement ZIP/parser. */

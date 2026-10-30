@@ -17,11 +17,12 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 
 import {execFileSync} from 'node:child_process'
-import {existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, writeFileSync} from 'node:fs'
+import {existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import path from 'node:path'
 import {crc32, deflateRawSync} from 'node:zlib'
 import {afterAll, beforeAll, describe, expect, test} from 'vitest'
+import {moveFixtureToTrash} from './util/move-fixture-to-trash.js'
 
 /** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number, term_bank_crc32_combine_test: (first: number, second: number, length: number) => number, term_bank_crc32_shift_test: (crc: number, length: number) => number}} Exports */
 /** @type {Exports} */
@@ -107,7 +108,7 @@ afterAll(() => {
     mkdirSync(trashDirectory, {recursive: true})
     let destination = path.join(trashDirectory, `manabitan-term-bank-crc-${Date.now()}-${process.pid}`)
     while (existsSync(destination)) { destination += '-1' }
-    renameSync(outputDirectory, destination)
+    moveFixtureToTrash(outputDirectory, destination)
 })
 
 /**
