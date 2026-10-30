@@ -44,24 +44,14 @@ static uint32_t last_parse_capacity = 0u;
 static uint32_t last_content_capacity = 0u;
 
 void* memset(void* dest, int value, unsigned long count) {
-    unsigned char* bytes = (unsigned char*)dest;
-    for (unsigned long i = 0u; i < count; ++i) {
-        bytes[i] = (unsigned char)value;
-    }
+    __builtin_memset(dest, value, count);
     return dest;
 }
 
 void* memcpy(void* dest, const void* source, unsigned long count) {
-    unsigned char* output = (unsigned char*)dest;
-    const unsigned char* input = (const unsigned char*)source;
-    for (unsigned long i = 0u; i < count; ++i) {
-        output[i] = input[i];
-    }
+    __builtin_memcpy(dest, source, count);
     return dest;
 }
-
-int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length,
-                          uint8_t* output, uint32_t output_length);
 
 int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length, uint8_t* output, uint32_t output_length);
 static uint32_t crc32_table[16][256];
