@@ -14,10 +14,10 @@ on:
         default: all
         options: [all, imports]
       run_order:
-        description: 'Counterbalance the observation order'
+        description: 'Counterbalance observations; CROSSOVER runs both orders on one host'
         type: choice
         default: ABBA
-        options: [ABBA, BAAB]
+        options: [ABBA, BAAB, CROSSOVER]
 
 permissions:
   contents: read
@@ -50,7 +50,7 @@ jobs:
       PERF_BASELINE_SHA: ${{ inputs.baseline_sha }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_BOUNDARY: ${{ matrix.boundary }}
-      PERF_RUN_ORDER: ${{ inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
+      PERF_RUN_ORDER: ${{ inputs.run_order == 'CROSSOVER' && 'A1 B1 B2 A2 B3 A3 A4 B4' || inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
