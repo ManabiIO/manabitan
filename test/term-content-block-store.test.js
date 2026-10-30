@@ -550,7 +550,12 @@ describe('TermContentBlockStore', () => {
         }
     });
 
-    test.each([false, true])('drains borrowed compression before reservation failure completes (compression fails: %s)', async (compressionFails) => {
+    test.each([
+        {compressionFails: false, setupFails: false},
+        {compressionFails: true, setupFails: false},
+        {compressionFails: false, setupFails: true},
+        {compressionFails: true, setupFails: true},
+    ])('drains borrowed compression before reservation failure completes ($compressionFails, setup: $setupFails)', async ({compressionFails, setupFails}) => {
         /** @type {() => void} */
         let consumeSource = () => {};
         /** @type {() => void} */
@@ -572,7 +577,11 @@ describe('TermContentBlockStore', () => {
         });
         const contentStore = new TermContentOpfsStore();
         const writeError = new Error('injected earlier OPFS write failure');
-        Reflect.set(contentStore, '_queuedWriteError', writeError);
+        if (setupFails) {
+            vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockImplementationOnce(() => { throw writeError; });
+        } else {
+            Reflect.set(contentStore, '_queuedWriteError', writeError);
+        }
         const blockStore = new TermContentBlockStore(contentStore, {
             blockTargetBytes: 3,
             referencePackTargetBytes: 56,
@@ -606,7 +615,7 @@ describe('TermContentBlockStore', () => {
         expect(await blockStore.read(stored.contentOffsets[0], stored.contentLengths[0], stored.contentDictName)).toStrictEqual(source);
     });
 
-    test('retains the database borrowed-source lease until failed reservation compression drains', async () => {
+    test.each([false, true])('retains the database borrowed-source lease until failed reservation compression drains (setup: %s)', async (setupFails) => {
         /** @type {() => void} */
         let consumeSource = () => {};
         /** @type {() => void} */
@@ -629,7 +638,11 @@ describe('TermContentBlockStore', () => {
         Reflect.set(database, '_termContentZstdInitialized', true);
         const contentStore = new TermContentOpfsStore();
         const writeError = new Error('injected retained write failure');
-        Reflect.set(contentStore, '_queuedWriteError', writeError);
+        if (setupFails) {
+            vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockImplementationOnce(() => { throw writeError; });
+        } else {
+            Reflect.set(contentStore, '_queuedWriteError', writeError);
+        }
         const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 3, minInputBytes: 0});
         Reflect.set(database, '_termContentBlockImportSession', {
             /**
