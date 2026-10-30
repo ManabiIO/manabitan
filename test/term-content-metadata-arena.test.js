@@ -29,6 +29,7 @@ function getArena(database) {
 describe('term content metadata arena ownership', () => {
     test('uses disjoint aligned columns in one fixed-capacity memory', () => {
         const arena = new TermContentMetadataArena(17, 64);
+        expect(arena.slots.byteOffset).toBe(8 * 1024 * 1024);
         const columns = [arena.slots, arena.hash1, arena.hash2, arena.state, arena.length, arena.signaturePresent, arena.signature1, arena.signature2, arena.signature3];
         for (let i = 0; i < columns.length; ++i) {
             const column = columns[i];

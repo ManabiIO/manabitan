@@ -17,8 +17,9 @@
  */
 
 const WASM_PAGE_BYTES = 65536;
-// Leave the first two pages available for a native module's stack and data.
-const TABLE_START = 2 * WASM_PAGE_BYTES;
+// Fixed scratch reservation shared by the JS control and native experiment.
+// Each replacement memory remains fixed; retained views never detach.
+const TABLE_START = 128 * WASM_PAGE_BYTES;
 
 /**
  * A database owns one authoritative set of hot metadata columns. Capacity

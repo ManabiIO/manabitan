@@ -8141,9 +8141,10 @@ this._readTermContentSignature(
      * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
      * @param {ArtifactTermContentChunk} chunk
      * @param {boolean} [reserveMetadata]
+     * @param {((context: object) => Promise<number|null>)|null} [canonicalScanner] Isolated correctness/performance screen adapter.
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
      */
-    async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false) {
+    async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false, canonicalScanner = null) {
         const count = chunk.rowCount;
         const contentBytesBuffer = chunk.contentBytesBuffer instanceof Uint8Array ? chunk.contentBytesBuffer : null;
         const contentMetaList = contentBytesBuffer !== null && chunk.contentMetaList instanceof Uint32Array ? chunk.contentMetaList : null;
@@ -8455,9 +8456,10 @@ null :
              * @param {number} contentLength
              * @param {number} hash1
              * @param {number} hash2
+             * @param {number} [nativeStagedIndex]
              * @throws {RangeError} If an offset exceeds the persisted Uint32 representation.
              */
-            const appendPendingContent = (uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2) => {
+            const appendPendingContent = (uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, nativeStagedIndex) => {
                 if (contentOffset > 0xffffffff) {
                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
                 }
@@ -8470,23 +8472,27 @@ null :
                 pendingCanonicalHash1s[pendingContentCount] = hash1;
                 pendingCanonicalHash2s[pendingContentCount] = hash2;
                 if (stagedIndexes !== null) {
-                    const signatureOffset = uniqueIndex * 3;
-                    stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
-                        this._reserveArtifactTermContentMetadata(
-                            hash1,
-                            hash2,
-                            contentBytesBuffer,
-                            contentOffset,
-                            contentLength,
-                        ) :
-                        this._reservePreparedArtifactTermContentMetadata(
-                            hash1,
-                            hash2,
-                            contentLength,
-                            uniqueSignatures[signatureOffset],
-                            uniqueSignatures[signatureOffset + 1],
-                            uniqueSignatures[signatureOffset + 2],
-                        );
+                    if (typeof nativeStagedIndex === 'number') {
+                        stagedIndexes[pendingContentCount] = nativeStagedIndex;
+                    } else {
+                        const signatureOffset = uniqueIndex * 3;
+                        stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
+                            this._reserveArtifactTermContentMetadata(
+                                hash1,
+                                hash2,
+                                contentBytesBuffer,
+                                contentOffset,
+                                contentLength,
+                            ) :
+                            this._reservePreparedArtifactTermContentMetadata(
+                                hash1,
+                                hash2,
+                                contentLength,
+                                uniqueSignatures[signatureOffset],
+                                uniqueSignatures[signatureOffset + 1],
+                                uniqueSignatures[signatureOffset + 2],
+                            );
+                    }
                 }
                 if (pendingContentDictNames !== null) {
                     pendingContentDictNames.push(
@@ -8537,45 +8543,65 @@ null :
             };
             const canonicalScanStart = safePerformance.now();
             try {
-                for (let uniqueIndex = firstUniqueIndex; uniqueIndex < lastUniqueIndex; ++uniqueIndex) {
-                    const globalRowIndex = uniqueRowIndexes[uniqueIndex];
-                    const rowIndex = globalRowIndex - contentRowStart;
-                    if (
-                        rowIndex < 0 ||
-                        rowIndex >= count ||
-                        uniqueIndexList[rowIndex] !== uniqueIndex
-                    ) {
-                        throw new Error(`Artifact term content canonical row is invalid for unique index ${uniqueIndex}`);
+                const nativeResolvedCount = canonicalScanner === null ?
+                    null :
+                    await canonicalScanner({
+                        chunk,
+                        contentDedupPlan,
+                        uniqueIndexList,
+                        uniqueRowIndexes,
+                        uniqueSignatures,
+                        firstUniqueIndex,
+                        lastUniqueIndex,
+                        persistedLookupRequired,
+                        reserveMetadata,
+                        appendPendingContent,
+                        exactCandidates,
+                        resolveExactCandidates,
+                    });
+                if (nativeResolvedCount === null) {
+                    for (let uniqueIndex = firstUniqueIndex; uniqueIndex < lastUniqueIndex; ++uniqueIndex) {
+                        const globalRowIndex = uniqueRowIndexes[uniqueIndex];
+                        const rowIndex = globalRowIndex - contentRowStart;
+                        if (
+                            rowIndex < 0 ||
+                            rowIndex >= count ||
+                            uniqueIndexList[rowIndex] !== uniqueIndex
+                        ) {
+                            throw new Error(`Artifact term content canonical row is invalid for unique index ${uniqueIndex}`);
+                        }
+                        if (contentDedupPlan.resolvedFlags[uniqueIndex] === 1) {
+                            ++alreadyResolvedUniqueCount;
+                            continue;
+                        }
+                        const contentMetaOffset = rowIndex * 4;
+                        const contentOffset = contentBytesBaseOffset + contentMetaList[contentMetaOffset];
+                        const contentLength = contentMetaList[contentMetaOffset + 1];
+                        const hash1 = contentMetaList[contentMetaOffset + 2] >>> 0;
+                        const hash2 = contentMetaList[contentMetaOffset + 3] >>> 0;
+                        if (
+                            contentOffset < contentBytesBaseOffset ||
+                            contentOffset + contentLength > contentBytesBuffer.byteLength
+                        ) {
+                            throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
+                        }
+                        const existingIndex = persistedLookupRequired ?
+                            this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
+                            -1;
+                        const existingMeta = existingIndex < 0 ?
+                            void 0 :
+                            this._readTermEntryContentMetaHashPairIndex(existingIndex);
+                        if (typeof existingMeta === 'undefined') {
+                            appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2);
+                            continue;
+                        }
+                        exactCandidates.push({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, existingMeta});
+                        if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
+                            await resolveExactCandidates();
+                        }
                     }
-                    if (contentDedupPlan.resolvedFlags[uniqueIndex] === 1) {
-                        ++alreadyResolvedUniqueCount;
-                        continue;
-                    }
-                    const contentMetaOffset = rowIndex * 4;
-                    const contentOffset = contentBytesBaseOffset + contentMetaList[contentMetaOffset];
-                    const contentLength = contentMetaList[contentMetaOffset + 1];
-                    const hash1 = contentMetaList[contentMetaOffset + 2] >>> 0;
-                    const hash2 = contentMetaList[contentMetaOffset + 3] >>> 0;
-                    if (
-                        contentOffset < contentBytesBaseOffset ||
-                        contentOffset + contentLength > contentBytesBuffer.byteLength
-                    ) {
-                        throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
-                    }
-                    const existingIndex = persistedLookupRequired ?
-                        this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
-                        -1;
-                    const existingMeta = existingIndex < 0 ?
-                        void 0 :
-                        this._readTermEntryContentMetaHashPairIndex(existingIndex);
-                    if (typeof existingMeta === 'undefined') {
-                        appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2);
-                        continue;
-                    }
-                    exactCandidates.push({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, existingMeta});
-                    if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
-                        await resolveExactCandidates();
-                    }
+                } else {
+                    alreadyResolvedUniqueCount = nativeResolvedCount;
                 }
                 await resolveExactCandidates();
             } catch (error) {
