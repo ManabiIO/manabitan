@@ -16,10 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {TERM_CONTENT_METADATA_PREFIX_BYTES} from './term-content-canonical-layout.js';
+
 const WASM_PAGE_BYTES = 65536;
-// Fixed scratch reservation shared by the JS control and native experiment.
+// Fixed scratch reservation shared with the native canonical scanner.
 // Each replacement memory remains fixed; retained views never detach.
-const TABLE_START = 128 * WASM_PAGE_BYTES;
+const TABLE_START = TERM_CONTENT_METADATA_PREFIX_BYTES;
 
 /**
  * A database owns one authoritative set of hot metadata columns. Capacity

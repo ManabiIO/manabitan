@@ -31,6 +31,33 @@ import {getAllFiles} from '../util.js';
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
+ * Generated libraries may live in a task-owned external cache. Archive their
+ * files rather than omitting the directory link or storing a symbolic link.
+ * Other links remain excluded by the ordinary source traversal.
+ * @param {string} directory
+ * @returns {boolean}
+ */
+function hasLinkedLibraries(directory) {
+    const libraryDirectory = path.join(directory, 'lib');
+    return fs.existsSync(libraryDirectory) && fs.lstatSync(libraryDirectory).isSymbolicLink();
+}
+
+/**
+ * @param {string} directory
+ * @returns {string[]}
+ */
+function getPackageFiles(directory) {
+    const files = getAllFiles(directory);
+    if (hasLinkedLibraries(directory)) {
+        const libraryDirectory = fs.realpathSync(path.join(directory, 'lib'));
+        for (const fileName of getAllFiles(libraryDirectory)) {
+            files.push(path.join('lib', fileName));
+        }
+    }
+    return files;
+}
+
+/**
  * @param {string} directory
  * @param {string[]} excludeFiles
  * @param {string} outputFileName
@@ -45,7 +72,7 @@ async function createZip(directory, excludeFiles, outputFileName, sevenZipExes, 
         // NOP
     }
 
-    if (!dryRun) {
+    if (!dryRun && !hasLinkedLibraries(directory)) {
         for (const exe of sevenZipExes) {
             try {
                 const excludeArguments = excludeFiles.map((excludeFilePath) => `-x!${excludeFilePath}`);
@@ -78,7 +105,7 @@ async function createZip(directory, excludeFiles, outputFileName, sevenZipExes, 
  * @param {boolean} dryRun
  */
 async function createJSZip(directory, excludeFiles, outputFileName, onUpdate, dryRun) {
-    const files = getAllFiles(directory);
+    const files = getPackageFiles(directory);
     removeItemsFromArray(files, excludeFiles);
     const zip = new JSZip();
     for (const fileName of files) {

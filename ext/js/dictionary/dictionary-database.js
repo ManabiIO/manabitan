@@ -20,6 +20,7 @@
 // @ts-nocheck
 
 import {DictionaryMediaRenderer} from './dictionary-media-renderer.js';
+import {NativeCanonicalScanner} from './term-content-canonical-scan.js';
 import {TermContentMetadataArena} from './term-content-metadata-arena.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
@@ -595,6 +596,8 @@ export class DictionaryDatabase {
         this._termEntryContentMetaByHash = new Map();
         /** @type {TermContentMetadataArena|null} */
         this._termContentMetadataArena = null;
+        /** @type {NativeCanonicalScanner} */
+        this._nativeCanonicalScanner = new NativeCanonicalScanner();
         /** @type {Uint32Array} Sparse hash slots containing dense metadata indexes plus one. */
         this._termEntryContentMetaHashPairTable = new Uint32Array(0);
         /** @type {Uint32Array} */
@@ -4763,7 +4766,7 @@ null;
     }
 
     /**
-     * @returns {{contentAppendMs: number, dedupScanMs?: number, contentStoreMs?: number, contentMetadataMs?: number, termRecordBuildMs: number, termRecordEncodeMs: number, termRecordWriteMs: number, termsVtabInsertMs: number, termRecordInternMs?: number, termRecordPackLengthsMs?: number, termRecordHeapCopyMs?: number, termRecordFieldEncodeMs?: number, termRecordValidationMs?: number, termLookupIndexEncodeMs?: number}|null}
+     * @returns {Record<string, number>|null}
      */
     getLastBulkAddTermsMetrics() {
         return this._lastBulkAddTermsMetrics;
@@ -7850,6 +7853,7 @@ this._readTermContentSignature(
             );
             stagedContentMetadata = resolvedStagedContentMetadata ?? null;
             let {resolvedContentDictNames} = dedup;
+            Object.assign(importMetrics, dedup.nativeScanMetrics ?? {});
             importMetrics.dedupPendingHitCount += pendingHitCount;
             importMetrics.dedupPersistedHitCount += persistedHitCount;
             importMetrics.dedupUniqueCount += pendingContentCount;
@@ -8141,10 +8145,9 @@ this._readTermContentSignature(
      * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
      * @param {ArtifactTermContentChunk} chunk
      * @param {boolean} [reserveMetadata]
-     * @param {((context: object) => Promise<number|null>)|null} [canonicalScanner] Isolated correctness/performance screen adapter.
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[]|Uint32Array, pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[]|Uint32Array, pendingPlanUniqueStart: number|null, nativeScanMetrics?: Record<string, number>, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
      */
-    async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false, canonicalScanner = null) {
+    async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false) {
         const count = chunk.rowCount;
         const contentBytesBuffer = chunk.contentBytesBuffer instanceof Uint8Array ? chunk.contentBytesBuffer : null;
         const contentMetaList = contentBytesBuffer !== null && chunk.contentMetaList instanceof Uint32Array ? chunk.contentMetaList : null;
@@ -8415,8 +8418,7 @@ null :
             const firstUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowStart);
             const lastUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowEnd);
             const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
-            // Only the optional native adapter adopts typed unique IDs. The JS
-            // control retains its original append representation and algorithm.
+            // The native helper adopts owned typed columns; fallback appends normally.
             /** @type {number[]|Uint32Array} */
             let pendingCanonicalUniqueIndexes = pendingPlanUniqueIndexes;
             // These hash words already have Uint32 semantics. Allocate only
@@ -8512,7 +8514,7 @@ null :
             /**
              * Atomically adopts one native segment's owned columns. Only the
              * newly appended tail is touched; accepted segments remain owned by
-             * the ordinary outer rollback. The adapter restores plan snapshots
+             * the ordinary outer rollback. The helper restores plan snapshots
              * and its insertion journal if any synchronous step throws.
              * @param {{columns: Uint32Array[], planStart: number, epochs: Uint32Array, indexes: Uint32Array}} batch
              * @param {() => void} complete Build bounded exact descriptors before committing the segment.
@@ -8589,25 +8591,24 @@ null :
                 exactCandidates.length = 0;
                 dedupExactCompareMs += safePerformance.now() - exactCompareStart;
             };
+            const nativeScanMetrics = {};
             const canonicalScanStart = safePerformance.now();
             try {
-                const nativeResolvedCount = canonicalScanner === null ?
-                    null :
-                    await canonicalScanner({
-                        chunk,
-                        contentDedupPlan,
-                        uniqueIndexList,
-                        uniqueRowIndexes,
-                        uniqueSignatures,
-                        firstUniqueIndex,
-                        lastUniqueIndex,
-                        persistedLookupRequired,
-                        reserveMetadata,
-                        adoptPendingColumns,
-                        getPendingState: () => ({pendingBase: pendingContentCount, pendingEpoch: pendingPlanEpoch}),
-                        exactCandidates,
-                        resolveExactCandidates,
-                    });
+                const nativeResolvedCount = await this._nativeCanonicalScanner.scan(this, {
+                    chunk,
+                    contentDedupPlan,
+                    uniqueIndexList,
+                    uniqueRowIndexes,
+                    uniqueSignatures,
+                    firstUniqueIndex,
+                    lastUniqueIndex,
+                    persistedLookupRequired,
+                    reserveMetadata,
+                    adoptPendingColumns,
+                    getPendingState: () => ({pendingBase: pendingContentCount, pendingEpoch: pendingPlanEpoch}),
+                    exactCandidates,
+                    resolveExactCandidates,
+                }, nativeScanMetrics);
                 if (nativeResolvedCount === null) {
                     for (let uniqueIndex = firstUniqueIndex; uniqueIndex < lastUniqueIndex; ++uniqueIndex) {
                         const globalRowIndex = uniqueRowIndexes[uniqueIndex];
@@ -8715,6 +8716,7 @@ null :
                 dedupCapacityMs,
                 dedupCanonicalScanMs,
                 dedupExactCompareMs,
+                nativeScanMetrics,
                 contentDedupPlan,
                 pendingPlanUniqueIndexes: pendingCanonicalUniqueIndexes instanceof Uint32Array ?
                     pendingCanonicalUniqueIndexes.subarray(0, pendingContentCount) :

@@ -16,6 +16,8 @@
  */
 
 import codspeedPlugin from '@codspeed/vitest-plugin';
+import os from 'node:os';
+import path from 'node:path';
 import {configDefaults, defineConfig} from 'vitest/config';
 
 const enableCodSpeed = process.env.MANABITAN_CODSPEED === '1';
@@ -32,6 +34,8 @@ const sharedExclude = [
 ];
 
 export default defineConfig({
+    // Keep generated test caches outside read-only linked dependency trees.
+    cacheDir: path.join(os.tmpdir(), 'manabitan-vitest-cache'),
     plugins: enableCodSpeed ? [codspeedPlugin()] : [],
     test: {
         setupFiles: [

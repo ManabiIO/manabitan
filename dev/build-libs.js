@@ -212,6 +212,20 @@ async function buildDictionaryWasm(out) {
 
     const compiler = getWasmCapableCompiler();
 
+    // This kernel imports the ordinary fixed metadata arena. It deliberately
+    // has no shared-memory, atomics, SIMD, inflater, or parser requirements.
+    execFileSync(compiler.command, [...(compiler.args ?? []),
+        '--target=wasm32',
+        '-O3',
+        '-nostdlib',
+        '-Wl,--no-entry',
+        '-Wl,--import-memory',
+        '-Wl,-z,stack-size=65536',
+        '-Wl,--strip-all',
+        '-o',
+        path.join(out, 'term-content-canonical-scan-v1.wasm'),
+        path.join(extDir, 'js', 'dictionary', 'wasm', 'term-content-canonical-scan-v1.c')], {stdio: 'inherit'});
+
     for (const target of wasmSources) {
         const args = [
             `--target=${dictionaryWasmTarget}`,
