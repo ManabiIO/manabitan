@@ -5126,7 +5126,12 @@ export class DictionaryImporter {
             };
             const parserOptions = {
                 ...this._termBankExperiments,
-                copyContentBytes: this._wasmPassThroughTermContent && !streamToChunkHandler,
+                // Baseline storage may retain small definitions in its write
+                // queue after the callback returns. Own those bytes before the
+                // next parser call resets and reuses the WASM heap.
+                copyContentBytes: this._wasmPassThroughTermContent && (
+                    !streamToChunkHandler || termContentStorageMode === 'baseline'
+                ),
                 includeContentMetadata,
                 initialContentBytesPerRow: wasmInitialContentBytesPerRow,
                 minimalDecode,
