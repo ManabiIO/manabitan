@@ -885,11 +885,18 @@ export class TermContentBlockStore {
         }));
         void storage.catch(() => {});
         const completion = (async () => {
-            const [, compressionResult, storageResult] = await Promise.all([
-                append.completion,
-                compression,
-                storage,
-            ]);
+            const pending = /** @type {const} */ ([append.completion, compression, storage]);
+            let results;
+            try {
+                results = await Promise.all(pending);
+            } catch (error) {
+                // Storage can fail before it awaits compression. The caller
+                // may release borrowed parser memory only after this terminal
+                // promise has drained every owner of that source.
+                await Promise.allSettled(pending);
+                throw error;
+            }
+            const [, compressionResult, storageResult] = results;
             const opfsAppendMs = Math.max(
                 0,
                 safePerformance.now() - compressionResult.completedAt - referenceMs,
