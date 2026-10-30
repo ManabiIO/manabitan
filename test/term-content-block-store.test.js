@@ -16,6 +16,7 @@ import {encodeRawTermContentBlockReference} from '../ext/js/dictionary/raw-term-
 import {beginCompressWrappedTermContentZstdSpansBatch, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from '../ext/js/dictionary/zstd-term-content.js';
 
 vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
+    resolveTermContentZstdDictName: () => 'jmdict',
     compressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes),
     compressWrappedTermContentZstdBatch: vi.fn(async (/** @type {Uint8Array[]} */ chunks) => ({
         chunks: chunks.map((bytes) => Uint8Array.from(bytes)),
@@ -547,6 +548,156 @@ describe('TermContentBlockStore', () => {
                 storage.contentDictName,
             )).toStrictEqual(source.slice(offsets[i], offsets[i] + lengths[i]));
         }
+    });
+
+    test.each([false, true])('drains borrowed compression before reservation failure completes (compression fails: %s)', async (compressionFails) => {
+        /** @type {() => void} */
+        let consumeSource = () => {};
+        /** @type {() => void} */
+        let finishCompression = () => {};
+        vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
+            /** @type {Promise<void>} */
+            const sourceConsumed = new Promise((resolve) => { consumeSource = resolve; });
+            /** @type {ReturnType<typeof beginCompressWrappedTermContentZstdSpansBatch>['completion']} */
+            const completion = new Promise((resolve, reject) => {
+                finishCompression = () => {
+                    if (compressionFails) {
+                        reject(new Error('injected later compression failure'));
+                        return;
+                    }
+                    resolve({chunks: [wrapCompressedTermContentBlock(new Uint8Array([1, 2, 3]))], envelopeMs: 0, wrapped: true});
+                };
+            });
+            return {sourceConsumed, completion};
+        });
+        const contentStore = new TermContentOpfsStore();
+        const writeError = new Error('injected earlier OPFS write failure');
+        Reflect.set(contentStore, '_queuedWriteError', writeError);
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 3,
+            referencePackTargetBytes: 56,
+            minInputBytes: 0,
+        });
+        const source = new Uint8Array(new SharedArrayBuffer(3));
+        source.set([1, 2, 3]);
+        const operation = blockStore.tryBeginAppendSpans(source, new Uint32Array([0]), new Uint32Array([3]), 'jmdict', true);
+        if (operation === null) { throw new Error('Expected an early block append operation'); }
+        let terminal = false;
+        const observedCompletion = operation.completion.finally(() => { terminal = true; });
+        void observedCompletion.catch(() => {});
+        try {
+            await expect(operation.storage).rejects.toBe(writeError);
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+            expect(terminal).toBe(false);
+            consumeSource();
+            await operation.sourceConsumed;
+            await Promise.resolve();
+            expect(terminal).toBe(false);
+        } finally {
+            consumeSource();
+            finishCompression();
+            await expect(observedCompletion).rejects.toBe(writeError);
+        }
+        expect(terminal).toBe(true);
+        Reflect.set(contentStore, '_queuedWriteError', null);
+        const retry = blockStore.tryBeginAppendSpans(source, new Uint32Array([0]), new Uint32Array([3]), 'jmdict', true);
+        if (retry === null) { throw new Error('Expected a healthy retry'); }
+        const stored = await retry.completion;
+        expect(await blockStore.read(stored.contentOffsets[0], stored.contentLengths[0], stored.contentDictName)).toStrictEqual(source);
+    });
+
+    test('retains the database borrowed-source lease until failed reservation compression drains', async () => {
+        /** @type {() => void} */
+        let consumeSource = () => {};
+        /** @type {() => void} */
+        let finishCompression = () => {};
+        const compress = vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
+            /** @type {Promise<void>} */
+            const sourceConsumed = new Promise((resolve) => { consumeSource = resolve; });
+            /** @type {ReturnType<typeof beginCompressWrappedTermContentZstdSpansBatch>['completion']} */
+            const completion = new Promise((resolve) => {
+                finishCompression = () => {
+                    resolve({chunks: [wrapCompressedTermContentBlock(new Uint8Array([1, 2, 3]))], envelopeMs: 0, wrapped: true});
+                };
+            });
+            return {sourceConsumed, completion};
+        });
+        compress.mockClear();
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_bulkImportTransactionOpen', true);
+        Reflect.set(database, '_deferTermsVirtualTableSync', true);
+        Reflect.set(database, '_termContentZstdInitialized', true);
+        const contentStore = new TermContentOpfsStore();
+        const writeError = new Error('injected retained write failure');
+        Reflect.set(contentStore, '_queuedWriteError', writeError);
+        const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 3, minInputBytes: 0});
+        Reflect.set(database, '_termContentBlockImportSession', {
+            /**
+             * @param {string} _dictionary
+             * @param {Uint8Array} source
+             * @param {Uint32Array} offsets
+             * @param {Uint32Array} lengths
+             * @returns {ReturnType<TermContentBlockStore['tryBeginAppendSpans']>}
+             */
+            tryBeginAppendSpans(_dictionary, source, offsets, lengths) {
+                return blockStore.tryBeginAppendSpans(source, offsets, lengths, 'jmdict', true);
+            },
+        });
+        const appendRecords = vi.fn();
+        Reflect.set(database, '_termRecordStore', {prepareArtifactChunkLookupIndexes: () => null, appendBatch: appendRecords});
+        const releaseBorrowedContent = vi.fn();
+        const source = new Uint8Array(new SharedArrayBuffer(3));
+        source.set([1, 2, 3]);
+        /** @type {Parameters<DictionaryDatabase['_bulkAddArtifactTermsChunkWithContentDedup']>[0]} */
+        const chunk = {
+            dictionary: 'JMdict',
+            rowCount: 1,
+            expressionBytesList: [new TextEncoder().encode('test')],
+            readingBytesList: [new Uint8Array(0)],
+            readingEqualsExpressionList: new Uint8Array([1]),
+            scoreList: new Int32Array(1),
+            sequenceList: new Int32Array([-1]),
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([0, 3, 10, 20]),
+            contentDictNameList: null,
+            uniformContentDictName: 'raw',
+            releaseBorrowedContent,
+            contentUniqueIndexList: new Uint32Array([0]),
+            contentDedupPlan: {
+                uniqueCount: 1,
+                sourceRowCount: 1,
+                resolvedFlags: new Uint8Array(1),
+                resolvedOffsets: new Float64Array(1),
+                resolvedLengths: new Uint32Array(1),
+                resolvedDictNames: null,
+                pendingEpochs: new Uint32Array(1),
+                pendingIndexes: new Uint32Array(1),
+                nextEpoch: 1,
+                nextUnresolvedUniqueIndex: 0,
+                persistedLookupRequired: false,
+            },
+        };
+        const importing = Reflect.get(database, '_bulkAddArtifactTermsChunkWithContentDedup').call(database, chunk);
+        void importing.catch(() => {});
+        try {
+            await vi.waitFor(() => expect(compress).toHaveBeenCalledOnce());
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+            expect(releaseBorrowedContent).not.toHaveBeenCalled();
+            expect(appendRecords).not.toHaveBeenCalled();
+            consumeSource();
+            await Promise.resolve();
+            expect(releaseBorrowedContent).not.toHaveBeenCalled();
+        } finally {
+            consumeSource();
+            finishCompression();
+            await expect(importing).rejects.toBe(writeError);
+        }
+        expect(releaseBorrowedContent).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
     });
 
     test('uses the reserved block plan after parallel shared compression fails', async () => {
