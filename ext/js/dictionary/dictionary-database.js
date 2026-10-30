@@ -7128,7 +7128,7 @@ this._readTermContentSignature(
     /**
      * Restores parser-owned dedupe plan slots when a chunk fails after the
      * resolver advanced its contiguous cursor or published reserved offsets.
-     * @param {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[], count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} state
+     * @param {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} state
      */
     _rollbackArtifactTermContentDedupPlan(state) {
         if (state === null) { return; }
@@ -7811,7 +7811,7 @@ this._readTermContentSignature(
         const importMetrics = createTermImportMetrics();
         /** @type {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null} */
         let stagedContentMetadata = null;
-        /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[], count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
+        /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
         let dedupPlanRollbackState = null;
 
         if (useLocalTransaction) {
@@ -8142,7 +8142,7 @@ this._readTermContentSignature(
      * @param {ArtifactTermContentChunk} chunk
      * @param {boolean} [reserveMetadata]
      * @param {((context: object) => Promise<number|null>)|null} [canonicalScanner] Isolated correctness/performance screen adapter.
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[]|Uint32Array, pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
      */
     async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false, canonicalScanner = null) {
         const count = chunk.rowCount;
@@ -8415,6 +8415,10 @@ null :
             const firstUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowStart);
             const lastUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowEnd);
             const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
+            // Only the optional native adapter adopts typed unique IDs. The JS
+            // control retains its original append representation and algorithm.
+            /** @type {number[]|Uint32Array} */
+            let pendingCanonicalUniqueIndexes = pendingPlanUniqueIndexes;
             // These hash words already have Uint32 semantics. Allocate only
             // for a pending row, without growing numeric JavaScript arrays.
             let pendingCanonicalHash1s = new Uint32Array(0);
@@ -8456,10 +8460,9 @@ null :
              * @param {number} contentLength
              * @param {number} hash1
              * @param {number} hash2
-             * @param {number} [nativeStagedIndex]
              * @throws {RangeError} If an offset exceeds the persisted Uint32 representation.
              */
-            const appendPendingContent = (uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, nativeStagedIndex) => {
+            const appendPendingContent = (uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2) => {
                 if (contentOffset > 0xffffffff) {
                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
                 }
@@ -8472,27 +8475,23 @@ null :
                 pendingCanonicalHash1s[pendingContentCount] = hash1;
                 pendingCanonicalHash2s[pendingContentCount] = hash2;
                 if (stagedIndexes !== null) {
-                    if (typeof nativeStagedIndex === 'number') {
-                        stagedIndexes[pendingContentCount] = nativeStagedIndex;
-                    } else {
-                        const signatureOffset = uniqueIndex * 3;
-                        stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
-                            this._reserveArtifactTermContentMetadata(
-                                hash1,
-                                hash2,
-                                contentBytesBuffer,
-                                contentOffset,
-                                contentLength,
-                            ) :
-                            this._reservePreparedArtifactTermContentMetadata(
-                                hash1,
-                                hash2,
-                                contentLength,
-                                uniqueSignatures[signatureOffset],
-                                uniqueSignatures[signatureOffset + 1],
-                                uniqueSignatures[signatureOffset + 2],
-                            );
-                    }
+                    const signatureOffset = uniqueIndex * 3;
+                    stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
+                        this._reserveArtifactTermContentMetadata(
+                            hash1,
+                            hash2,
+                            contentBytesBuffer,
+                            contentOffset,
+                            contentLength,
+                        ) :
+                        this._reservePreparedArtifactTermContentMetadata(
+                            hash1,
+                            hash2,
+                            contentLength,
+                            uniqueSignatures[signatureOffset],
+                            uniqueSignatures[signatureOffset + 1],
+                            uniqueSignatures[signatureOffset + 2],
+                        );
                 }
                 if (pendingContentDictNames !== null) {
                     pendingContentDictNames.push(
@@ -8503,8 +8502,57 @@ null :
                 }
                 contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
                 contentDedupPlan.pendingIndexes[uniqueIndex] = pendingContentCount;
-                pendingPlanUniqueIndexes.push(uniqueIndex);
+                if (Array.isArray(pendingCanonicalUniqueIndexes)) {
+                    pendingCanonicalUniqueIndexes.push(uniqueIndex);
+                } else {
+                    pendingCanonicalUniqueIndexes[pendingContentCount] = uniqueIndex;
+                }
                 ++pendingContentCount;
+            };
+            /**
+             * Atomically adopts one native segment's owned columns. Only the
+             * newly appended tail is touched; accepted segments remain owned by
+             * the ordinary outer rollback. The adapter restores plan snapshots
+             * and its insertion journal if any synchronous step throws.
+             * @param {{columns: Uint32Array[], planStart: number, epochs: Uint32Array, indexes: Uint32Array}} batch
+             * @param {() => void} complete Build bounded exact descriptors before committing the segment.
+             * @throws {RangeError} If the native batch cannot fit the canonical pending owner.
+             */
+            const adoptPendingColumns = (batch, complete) => {
+                const {columns, planStart, epochs, indexes} = batch;
+                const size = columns[0].length;
+                const base = pendingContentCount;
+                if (pendingContentDictNames !== null || base + size > maximumPendingContentCount) {
+                    throw new RangeError('Native canonical pending columns are incompatible');
+                }
+                if (size > 0 && base === 0) {
+                    pendingCanonicalHash1s = new Uint32Array(maximumPendingContentCount);
+                    pendingCanonicalHash2s = new Uint32Array(maximumPendingContentCount);
+                }
+                if (Array.isArray(pendingCanonicalUniqueIndexes)) {
+                    const uniqueIndexes = new Uint32Array(maximumPendingContentCount);
+                    uniqueIndexes.set(pendingCanonicalUniqueIndexes);
+                    pendingCanonicalUniqueIndexes = uniqueIndexes;
+                }
+                try {
+                    pendingSpanOffsets.set(columns[0], base);
+                    pendingSpanLengths.set(columns[1], base);
+                    pendingCanonicalHash1s.set(columns[2], base);
+                    pendingCanonicalHash2s.set(columns[3], base);
+                    // The native path never materializes per-pending JS arrays.
+                    if (pendingCanonicalUniqueIndexes instanceof Uint32Array) {
+                        pendingCanonicalUniqueIndexes.set(columns[4], base);
+                    }
+                    if (stagedIndexes !== null) { stagedIndexes.set(columns[5], base); }
+                    contentDedupPlan.pendingEpochs.set(epochs, planStart);
+                    contentDedupPlan.pendingIndexes.set(indexes, planStart);
+                    complete();
+                    pendingContentCount = base + size;
+                } catch (error) {
+                    // Do not hand rolled-back native IDs to the outer owner.
+                    if (stagedIndexes !== null) { stagedIndexes.fill(-1, base, base + size); }
+                    throw error;
+                }
             };
             const resolveExactCandidates = async () => {
                 if (exactCandidates.length === 0) { return; }
@@ -8555,7 +8603,8 @@ null :
                         lastUniqueIndex,
                         persistedLookupRequired,
                         reserveMetadata,
-                        appendPendingContent,
+                        adoptPendingColumns,
+                        getPendingState: () => ({pendingBase: pendingContentCount, pendingEpoch: pendingPlanEpoch}),
                         exactCandidates,
                         resolveExactCandidates,
                     });
@@ -8667,7 +8716,9 @@ null :
                 dedupCanonicalScanMs,
                 dedupExactCompareMs,
                 contentDedupPlan,
-                pendingPlanUniqueIndexes,
+                pendingPlanUniqueIndexes: pendingCanonicalUniqueIndexes instanceof Uint32Array ?
+                    pendingCanonicalUniqueIndexes.subarray(0, pendingContentCount) :
+                    pendingCanonicalUniqueIndexes,
                 pendingPlanUniqueStart: null,
                 stagedContentMetadata: stagedIndexes === null ?
                     void 0 :
