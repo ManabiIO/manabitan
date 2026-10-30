@@ -20,6 +20,7 @@
 // @ts-nocheck
 
 import {DictionaryMediaRenderer} from './dictionary-media-renderer.js';
+import {TermContentMetadataArena} from './term-content-metadata-arena.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {ExtensionError} from '../core/extension-error.js';
@@ -592,6 +593,8 @@ export class DictionaryDatabase {
         this._termEntryContentIdByHash = new Map();
         /** @type {Map<string, {id: number, offset: number, length: number, dictName: string}>} */
         this._termEntryContentMetaByHash = new Map();
+        /** @type {TermContentMetadataArena|null} */
+        this._termContentMetadataArena = null;
         /** @type {Uint32Array} Sparse hash slots containing dense metadata indexes plus one. */
         this._termEntryContentMetaHashPairTable = new Uint32Array(0);
         /** @type {Uint32Array} */
@@ -5835,6 +5838,7 @@ null;
 
     /** */
     _clearTermEntryContentMetaCaches() {
+        this._termContentMetadataArena = null;
         this._termEntryContentMetaByHash.clear();
         this._termContentBlockStore.clearCache();
         this._termEntryContentMetaHashPairTable = new Uint32Array(0);
@@ -6686,53 +6690,73 @@ null;
     }
 
     /**
-     * Grows only the cache-local metadata vectors. Hash-table growth reuses
-     * these stable indexes and therefore never copies metadata during rehash.
      * @param {number} requiredCount
      */
     _ensureTermEntryContentMetaDenseCapacity(requiredCount) {
+        this._resizeTermContentMetadataArena(requiredCount, this._termEntryContentMetaHashPairTable.length);
+    }
+
+    /**
+     * Build all replacement columns before publishing any of them. Keeping a
+     * fixed memory per generation prevents detached views across async reads.
+     * @param {number} requiredCount
+     * @param {number} slotCapacity
+     * @param {boolean} [forceRehash]
+     */
+    _resizeTermContentMetadataArena(requiredCount, slotCapacity, forceRehash = false) {
         const oldCapacity = this._termEntryContentMetaStateTable.length;
-        if (oldCapacity >= requiredCount) { return; }
+        const oldSlotTable = this._termEntryContentMetaHashPairTable;
+        if (!forceRehash && oldCapacity >= requiredCount && oldSlotTable.length === slotCapacity) { return; }
         let capacity = Math.max(16, oldCapacity);
         while (capacity < requiredCount) { capacity *= 2; }
-        const hash1Table = new Uint32Array(capacity);
-        hash1Table.set(this._termEntryContentMetaHash1Table);
-        this._termEntryContentMetaHash1Table = hash1Table;
-        const hash2Table = new Uint32Array(capacity);
-        hash2Table.set(this._termEntryContentMetaHash2Table);
-        this._termEntryContentMetaHash2Table = hash2Table;
-        const stateTable = new Uint8Array(capacity);
-        stateTable.set(this._termEntryContentMetaStateTable);
-        this._termEntryContentMetaStateTable = stateTable;
-        const idTable = new Float64Array(capacity);
-        idTable.set(this._termEntryContentMetaIdTable);
+        const arena = new TermContentMetadataArena(capacity, slotCapacity);
+        if (this._termContentMetadataArena !== null) {
+            arena.copyFrom(this._termContentMetadataArena);
+        }
+        const growDense = capacity !== oldCapacity;
+        const idTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaIdTable;
+        const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;
+        const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;
+        const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;
+        const recentSourceOffsetTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceOffsetTable;
+        if (growDense) {
+            idTable.set(this._termEntryContentMetaIdTable);
+            offsetTable.set(this._termEntryContentMetaOffsetTable);
+            dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
+            recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
+            recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
+        }
+        if (forceRehash || oldSlotTable.length !== slotCapacity) {
+            arena.slots.fill(0);
+            const mask = slotCapacity - 1;
+            const denseCount = this._termEntryContentMetaDenseCount;
+            const useDense = denseCount <= oldSlotTable.length;
+            const scanLength = useDense ? denseCount : oldSlotTable.length;
+            for (let i = 0; i < scanLength; ++i) {
+                const encodedIndex = useDense ? i + 1 : oldSlotTable[i];
+                if (encodedIndex === 0) { continue; }
+                const index = encodedIndex - 1;
+                if (arena.state[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
+                let slot = this._getTermEntryContentMetaHashPairSlot(arena.hash1[index], arena.hash2[index], mask);
+                while (arena.slots[slot] !== 0) { slot = (slot + 1) & mask; }
+                arena.slots[slot] = encodedIndex;
+            }
+        }
+        this._termContentMetadataArena = arena;
+        this._termEntryContentMetaHashPairTable = arena.slots;
+        this._termEntryContentMetaHash1Table = arena.hash1;
+        this._termEntryContentMetaHash2Table = arena.hash2;
+        this._termEntryContentMetaStateTable = arena.state;
+        this._termEntryContentMetaLengthTable = arena.length;
+        this._termEntryContentMetaSignaturePresentTable = arena.signaturePresent;
+        this._termEntryContentMetaSignature1Table = arena.signature1;
+        this._termEntryContentMetaSignature2Table = arena.signature2;
+        this._termEntryContentMetaSignature3Table = arena.signature3;
+        this._termEntryContentMetaHashPairMask = slotCapacity > 0 ? slotCapacity - 1 : 0;
         this._termEntryContentMetaIdTable = idTable;
-        const offsetTable = new Float64Array(capacity);
-        offsetTable.set(this._termEntryContentMetaOffsetTable);
         this._termEntryContentMetaOffsetTable = offsetTable;
-        const lengthTable = new Uint32Array(capacity);
-        lengthTable.set(this._termEntryContentMetaLengthTable);
-        this._termEntryContentMetaLengthTable = lengthTable;
-        const dictNameIdTable = new Uint32Array(capacity);
-        dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
         this._termEntryContentMetaDictNameIdTable = dictNameIdTable;
-        const signaturePresentTable = new Uint8Array(capacity);
-        signaturePresentTable.set(this._termEntryContentMetaSignaturePresentTable);
-        this._termEntryContentMetaSignaturePresentTable = signaturePresentTable;
-        const signature1Table = new Uint32Array(capacity);
-        signature1Table.set(this._termEntryContentMetaSignature1Table);
-        this._termEntryContentMetaSignature1Table = signature1Table;
-        const signature2Table = new Uint32Array(capacity);
-        signature2Table.set(this._termEntryContentMetaSignature2Table);
-        this._termEntryContentMetaSignature2Table = signature2Table;
-        const signature3Table = new Uint32Array(capacity);
-        signature3Table.set(this._termEntryContentMetaSignature3Table);
-        this._termEntryContentMetaSignature3Table = signature3Table;
-        const recentSourceBatchIdTable = new Uint32Array(capacity);
-        recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
         this._termEntryContentMetaRecentSourceBatchIdTable = recentSourceBatchIdTable;
-        const recentSourceOffsetTable = new Uint32Array(capacity);
-        recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
         this._termEntryContentMetaRecentSourceOffsetTable = recentSourceOffsetTable;
     }
 
@@ -6763,39 +6787,16 @@ null;
             this._termEntryContentMetaHashPairPendingCount +
             additionalPublishedCount
         );
-        this._ensureTermEntryContentMetaDenseCapacity(
+        let tableSize = this._termEntryContentMetaHashPairTable.length;
+        if (forceRehash || tableSize < effectiveRequiredCount * 2) {
+            tableSize = 16;
+            while (tableSize < effectiveRequiredCount * 2) { tableSize *= 2; }
+        }
+        this._resizeTermContentMetadataArena(
             this._termEntryContentMetaDenseCount + additionalPublishedCount,
+            tableSize,
+            forceRehash,
         );
-        if (!forceRehash && this._termEntryContentMetaHashPairTable.length >= effectiveRequiredCount * 2) {
-            return;
-        }
-        let tableSize = 16;
-        while (tableSize < effectiveRequiredCount * 2) {
-            tableSize *= 2;
-        }
-        const oldSlotTable = this._termEntryContentMetaHashPairTable;
-        const slotTable = new Uint32Array(tableSize);
-        const mask = tableSize - 1;
-        // Scan stable dense IDs when shorter. Rollback can leave many free
-        // IDs, so retain the bucket scan for a sparse metadata arena.
-        const denseCount = this._termEntryContentMetaDenseCount;
-        const useDense = denseCount <= oldSlotTable.length;
-        const scanLength = useDense ? denseCount : oldSlotTable.length;
-        for (let i = 0; i < scanLength; ++i) {
-            const encodedIndex = useDense ? i + 1 : oldSlotTable[i];
-            if (encodedIndex === 0) { continue; }
-            const index = encodedIndex - 1;
-            if (this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
-            const hash1 = this._termEntryContentMetaHash1Table[index];
-            const hash2 = this._termEntryContentMetaHash2Table[index];
-            let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
-            while (slotTable[slot] !== 0) {
-                slot = (slot + 1) & mask;
-            }
-            slotTable[slot] = encodedIndex;
-        }
-        this._termEntryContentMetaHashPairTable = slotTable;
-        this._termEntryContentMetaHashPairMask = mask;
     }
 
     /**
