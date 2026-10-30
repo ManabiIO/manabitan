@@ -6665,10 +6665,13 @@ null;
         ) {
             throw new RangeError(`Invalid term content metadata length: ${meta.length}`);
         }
+        // Interning can allocate and fail; retain an existing entry unchanged
+        // until its replacement is ready to write.
+        const dictNameId = this._internTermEntryContentMetaDictName(meta.dictName);
         this._termEntryContentMetaIdTable[index] = meta.id;
         this._termEntryContentMetaOffsetTable[index] = meta.offset;
         this._termEntryContentMetaLengthTable[index] = meta.length < 0 ? TERM_CONTENT_META_U32_NULL : meta.length;
-        this._termEntryContentMetaDictNameIdTable[index] = this._internTermEntryContentMetaDictName(meta.dictName);
+        this._termEntryContentMetaDictNameIdTable[index] = dictNameId;
         const hasSignatures = (
             typeof meta.signature1 === 'number' &&
             typeof meta.signature2 === 'number' &&
@@ -7200,6 +7203,7 @@ this._readTermContentSignature(
      * @param {number} hash1
      * @param {number} hash2
      * @param {{id: number, offset: number, length: number, dictName: string, hash2?: number}} meta
+     * @throws {Error} If metadata validation or dictionary-name interning fails.
      */
     _setTermEntryContentMetaByHashPair(hash1, hash2, meta) {
         hash1 >>>= 0;
@@ -7215,11 +7219,18 @@ this._readTermContentSignature(
             const encodedIndex = slotTable[slot];
             if (encodedIndex === 0) {
                 const index = this._allocateTermEntryContentMetaIndex();
+                try {
+                    this._writeTermEntryContentMetaHashPairIndex(index, meta);
+                } catch (error) {
+                    // Failed entries remain invisible and their dense index
+                    // must be available to the next insertion.
+                    this._termEntryContentMetaFreeIndexes.push(index);
+                    throw error;
+                }
                 hash1Table[index] = hash1;
                 hash2Table[index] = hash2;
                 stateTable[index] = TERM_CONTENT_META_SLOT_PUBLISHED;
                 slotTable[slot] = index + 1;
-                this._writeTermEntryContentMetaHashPairIndex(index, meta);
                 ++this._termEntryContentMetaHashPairCount;
                 return;
             }
