@@ -705,15 +705,16 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
     return 0;
 }
 
-/* Separators already establish the following grammar state. Consume their
- * whitespace here while retaining the same normalization hint as the outer
- * composite loop. This also preserves tabs/newlines and logical-bank bounds. */
-static inline uint32_t skip_composite_separator_ws(
+/* Consume the common ASCII-space separator run without re-entering the
+ * composite state machine. Other JSON whitespace remains in the existing
+ * outer loop, preserving its validation and normalization behavior. */
+static inline uint32_t skip_composite_separator_spaces(
     const uint8_t* src, uint32_t len, uint32_t start, uint32_t* normalization_hint
 ) {
-    const uint32_t end = skip_ws(src, len, start);
-    if (end != start && normalization_hint != 0) { *normalization_hint = 1u; }
-    return end;
+    if (start >= len || src[start] != ' ') { return start; }
+    if (normalization_hint != 0) { *normalization_hint = 1u; }
+    do { ++start; } while (start < len && src[start] == ' ');
+    return start;
 }
 
 static int parse_composite_span_impl(
@@ -772,7 +773,7 @@ static int parse_composite_span_impl(
                 // the next grammar state without redispatching the colon.
                 if (common_key && s_end < len && src[s_end] == ':') {
                     state = OBJECT_VALUE;
-                    i = skip_composite_separator_ws(src, len, s_end + 1u, normalization_hint);
+                    i = skip_composite_separator_spaces(src, len, s_end + 1u, normalization_hint);
                     continue;
                 }
                 state = OBJECT_COLON;
@@ -804,13 +805,13 @@ static int parse_composite_span_impl(
             if (state == ARRAY_AFTER_VALUE) { state = ARRAY_VALUE; }
             else if (state == OBJECT_AFTER_VALUE) { state = OBJECT_KEY; }
             else { return 0; }
-            i = skip_composite_separator_ws(src, len, i + 1u, normalization_hint);
+            i = skip_composite_separator_spaces(src, len, i + 1u, normalization_hint);
             continue;
         }
         if (c == ':') {
             if (state != OBJECT_COLON) { return 0; }
             state = OBJECT_VALUE;
-            i = skip_composite_separator_ws(src, len, i + 1u, normalization_hint);
+            i = skip_composite_separator_spaces(src, len, i + 1u, normalization_hint);
             continue;
         }
         uint8_t next_state;
