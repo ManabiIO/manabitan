@@ -64,6 +64,35 @@ function addUnusedEmptyString(chunk) {
 }
 
 describe('parser-prepared term lookup indexes', () => {
+    test('revalidates omitted-offset plans after lengths change between admissions', async () => {
+        const chunk = createChunk(2);
+        const prepared = prepareTermLookupIndexesFromPreinternedPlan(chunk);
+        const plan = prepared?.indexes.get('0:2')?.preinternedPlan;
+        if (typeof plan === 'undefined') { throw new Error('Expected prepared plan'); }
+        delete plan.stringOffsets;
+        expect(hasCompletePreparedTermLookupIndexes(prepared?.indexes, 2)).toBe(true);
+
+        await Promise.resolve();
+        plan.stringLengths[1] += 1;
+        expect(hasCompletePreparedTermLookupIndexes(prepared?.indexes, 2)).toBe(false);
+        plan.stringLengths[1] -= 1;
+        expect(hasCompletePreparedTermLookupIndexes(prepared?.indexes, 2)).toBe(true);
+    });
+
+    test('retains the empty-string fallback while rejecting oversized whole-plan shortcuts', () => {
+        const plan = {
+            stringLengths: Uint16Array.of(1, 0),
+            stringsBuffer: Uint8Array.of(65),
+            expressionIndexes: new Uint32Array(MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1),
+            readingIndexes: new Uint32Array(MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1),
+        };
+        const prepared = {bytes: Uint8Array.of(1), preinternedPlan: plan};
+        expect(hasCompletePreparedTermLookupIndexes(new Map([['0:1', prepared]]), 1)).toBe(true);
+        expect(hasCompletePreparedTermLookupIndexes(new Map([
+            [`0:${MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1}`, prepared],
+        ]), MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1)).toBe(false);
+    });
+
     test('reuses complete whole-chunk plans beyond the conservative split size', () => {
         const rowCount = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS + 1;
         const chunk = createChunk(rowCount);
