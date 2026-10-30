@@ -248,8 +248,7 @@ int32_t inflate_and_join_term_banks(
     uint32_t source_count,
     uint32_t output_ptr,
     uint32_t output_capacity,
-    uint32_t bank_spans_ptr,
-    uint32_t use_libdeflate
+    uint32_t bank_spans_ptr
 ) {
     if (source_count == 0u || output_capacity < 2u) {
         return -1;
@@ -283,9 +282,6 @@ int32_t inflate_and_join_term_banks(
                 return -3;
             }
             memcpy(inflated, input + input_offset, uncompressed_length);
-        } else if (compression_methods[i] == 8u && use_libdeflate == 1u) {
-            const int32_t status = term_bank_inflate(input + input_offset, compressed_length, inflated, uncompressed_length);
-            if (status != 0) { return status; }
         } else if (compression_methods[i] == 8u) {
             const int32_t status = term_bank_inflate(
                 input + input_offset, compressed_length, inflated, uncompressed_length

@@ -60,7 +60,6 @@ export type ImportPhaseTiming = {
 /** Experimental parser paths; absent and non-true runtime values remain off. */
 export type ImportExperiments = {
     experimentalParserWorkers3?: boolean;
-    experimentalLibdeflate?: boolean;
     experimentalGenericSpanCompression?: boolean;
     experimentalSkipFusedParse?: boolean;
     /** Qualified production default: true. Explicit false retains the allocation oracle. */
