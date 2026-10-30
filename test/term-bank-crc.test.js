@@ -237,7 +237,6 @@ describe('term bank CRC32', () => {
             output,
             bytes.length,
             spans,
-            0,
         )
         expect(decode()).toBe(bytes.length)
         values[4] = expectedCrc ^ 1
