@@ -56,6 +56,38 @@ function nested(depth) {
 }
 
 describe('composite parser state transitions', () => {
+    test.each(['\v', '\f', '\u00a0'])('rejects non-JSON separator whitespace: %j', (whitespace) => {
+        for (const glossary of [`[1,${whitespace}2]`, `[{"tag":${whitespace}"img"}]`, `[{"generic":${whitespace}true}]`]) {
+            expect(() => JSON.parse(glossary)).toThrow()
+            expect(parseGlossary(glossary).count).toBeLessThan(0)
+            expect(parseGlossary(glossary, false).count).toBeLessThan(0)
+        }
+    })
+
+    test.each([' ', '\t', '\r', '\n', ' \t\r\n '])('preserves separator whitespace validity and hints: %j', (whitespace) => {
+        const cases = [
+            {json: `[{"tag":${whitespace}"img","content":${whitespace}[1,${whitespace}2]}]`, flags: [1, 1, 0]},
+            {json: `[{"type":${whitespace}"text","text":${whitespace}"value"}]`, flags: [0, 1, 1]},
+            {json: `[{"tag":${whitespace}"span","data":${whitespace}{"key":${whitespace}true}}]`, flags: [0, 1, 0]},
+        ]
+        for (const {json, flags} of cases) {
+            expect(() => JSON.parse(json)).not.toThrow()
+            const parsed = parseGlossary(json)
+            expect(parsed.count).toBe(1)
+            expect(parsed.metadata.slice(14)).toEqual(flags)
+            expect(parseGlossary(json, false).count).toBe(1)
+            for (const invalid of [json.replace(/true/, 'tru'), json.replace(/,/, ',,'), json.replace(/:/, '::')]) {
+                let accepted = true
+                try {
+                    JSON.parse(invalid)
+                } catch {
+                    accepted = false
+                }
+                expect(parseGlossary(invalid).count > 0).toBe(accepted)
+            }
+        }
+    })
+
     test.each([
         '[]',
         '{}',
