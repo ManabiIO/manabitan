@@ -1,9 +1,10 @@
 import {afterEach, describe, expect, test} from 'vitest';
-import {chmod, mkdir, mkdtemp, readFile, realpath, rename, writeFile} from 'node:fs/promises';
+import {chmod, mkdir, mkdtemp, readFile, realpath, writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {moveFixtureToTrash} from '../util/move-fixture-to-trash.js';
 
 const helperPath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'enable-firefox-remote-debugging.sh');
 /** @type {string[]} */
@@ -13,7 +14,9 @@ afterEach(async () => {
     const trashPath = path.join(os.homedir(), '.Trash');
     await mkdir(trashPath, {recursive: true});
     const trashDirectory = await realpath(trashPath);
-    await Promise.all(temporaryDirectories.splice(0).map(async (directory) => await rename(directory, path.join(trashDirectory, path.basename(directory)))));
+    for (const directory of temporaryDirectories.splice(0)) {
+        moveFixtureToTrash(directory, path.join(trashDirectory, path.basename(directory)));
+    }
 });
 
 describe('Firefox Android remote debugging preference helper', () => {

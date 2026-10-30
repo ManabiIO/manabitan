@@ -23,7 +23,7 @@ import {createHash} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import os from 'node:os';
-import {access, mkdir, mkdtemp, readFile, realpath, rename, writeFile} from 'node:fs/promises';
+import {access, mkdir, mkdtemp, readFile, realpath, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
@@ -33,6 +33,7 @@ import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
 import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
+import {moveFixtureToTrash} from '../util/move-fixture-to-trash.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
@@ -305,7 +306,7 @@ async function moveOwnedPathToTrash(ownedPath, expectedPrefix) {
     await mkdir(trashDir, {recursive: true});
     const resolvedTrashDir = await realpath(trashDir);
     const destination = path.join(resolvedTrashDir, `${path.basename(resolvedPath)}-${Date.now()}-${process.pid}`);
-    await rename(resolvedPath, destination);
+    moveFixtureToTrash(resolvedPath, destination);
     return destination;
 }
 
