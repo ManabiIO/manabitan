@@ -14,8 +14,8 @@ const evidence = await realpath(process.env.MIDCORE_EVIDENCE);
 const adapter = await realpath(process.env.MIDCORE_ADAPTER);
 const cohort = process.env.MIDCORE_COHORT ?? 'pilot';
 assert.ok(['pilot', 'confirmation'].includes(cohort));
-const contract = JSON.parse(await readFile(new URL(cohort === 'confirmation' ? 'confirmation-contract.json' : 'pilot-contract.json', import.meta.url), 'utf8'));
-if (cohort === 'confirmation') { assert.equal(browser, 'chromium', 'This confirmation contract currently covers Chromium only'); }
+const contractFile = cohort === 'confirmation' ? (browser === 'firefox' ? 'confirmation-firefox-contract.json' : 'confirmation-contract.json') : 'pilot-contract.json';
+const contract = JSON.parse(await readFile(new URL(contractFile, import.meta.url), 'utf8'));
 assert.ok(['chromium', 'firefox'].includes(browser));
 assert.ok(['jmdict', 'jitendex'].includes(dictionary));
 assert.ok(['timing', 'memory'].includes(mode));

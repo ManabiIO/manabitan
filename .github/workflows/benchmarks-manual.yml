@@ -12,7 +12,7 @@ on:
         type: choice
         options: [pilot, confirmation]
       browser:
-        description: 'Browser family; confirmation currently Chromium only'
+        description: 'Browser family; confirmation uses its pre-registered contract'
         required: true
         default: all
         type: choice
