@@ -817,9 +817,18 @@ export class DictionaryDatabase {
                 this._termContentZstdInitialized = true;
                 await this._deleteLegacyIndexedDb();
                 this._refreshTermRecordStorageNameMappings();
-                await this._cleanupIncompleteImports();
-                this._refreshTermRecordStorageNameMappings();
-                await this._cleanupMissingTermRecordShards();
+                if (this._hasUnresolvedImportJournal()) {
+                    // A recovered rollback can remain journal-owned when removing
+                    // its journal fails. Cleanup must not remove checkpoint files
+                    // which the next startup still has to validate and restore.
+                    this._startupCleanupIncompleteImportsSummary = null;
+                    this._startupCleanupMissingTermRecordShardsSummary = null;
+                    reportDiagnostics('dictionary-startup-cleanup-skipped', {reason: 'import-journal-recovery-pending'});
+                } else {
+                    await this._cleanupIncompleteImports();
+                    this._refreshTermRecordStorageNameMappings();
+                    await this._cleanupMissingTermRecordShards();
+                }
 
                 // keep existing draw worker split behaviour.
                 const isWorker = self.constructor.name !== 'Window';
@@ -1029,6 +1038,22 @@ export class DictionaryDatabase {
      */
     _isBulkImportInProgress() {
         return this._bulkImportState === BULK_IMPORT_STATE_ACTIVE || this._bulkImportState === BULK_IMPORT_STATE_FINALIZING;
+    }
+
+    /** @returns {boolean} */
+    _hasUnresolvedImportJournal() {
+        return this._bulkImportJournalRecord !== null || this._importJournalRecoveryPending;
+    }
+
+    /**
+     * Destructive mutations cannot invalidate a retained rollback checkpoint.
+     * Do not attempt recovery here: an active import may still own its writes.
+     * @throws {Error} If import recovery metadata still owns persisted files.
+     */
+    _assertImportJournalReleasedForMutation() {
+        if (this._hasUnresolvedImportJournal()) {
+            throw new Error('Cannot modify dictionary storage until interrupted-import recovery metadata is cleared');
+        }
     }
 
     /**
@@ -1949,6 +1974,7 @@ export class DictionaryDatabase {
      * @param {import('dictionary-database').DeleteDictionaryProgressCallback} onProgress
      */
     async deleteDictionary(dictionaryName, progressRate, onProgress) {
+        this._assertImportJournalReleasedForMutation();
         const db = this._requireDb();
 
         /** @type {[table: string, keyColumn: string][]} */
@@ -2084,6 +2110,7 @@ export class DictionaryDatabase {
      * @returns {Promise<void>}
      */
     async replaceDictionaryTitle(fromDictionaryTitle, toDictionaryTitle, summaryOverride = null, replacedDictionaryTitle = null) {
+        this._assertImportJournalReleasedForMutation();
         const fromTitle = `${fromDictionaryTitle}`;
         const toTitle = `${toDictionaryTitle}`;
         const replacedTitle = typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle : null;
@@ -4308,6 +4335,7 @@ null;
      * }>}
      */
     async _cleanupIncompleteImports() {
+        this._assertImportJournalReleasedForMutation();
         const db = this._requireDb();
         const rows = db.selectObjects('SELECT id, title, summaryJson FROM dictionaries ORDER BY id ASC');
         if (rows.length === 0) {
@@ -4513,6 +4541,7 @@ null;
      * }>}
      */
     async _cleanupMissingTermRecordShards() {
+        this._assertImportJournalReleasedForMutation();
         const db = this._requireDb();
         const rows = db.selectObjects('SELECT title, summaryJson FROM dictionaries ORDER BY id ASC');
         /** @type {string[]} */
@@ -5316,8 +5345,7 @@ null;
         if (!Number.isSafeInteger(primaryKey) || primaryKey < 0) { return; }
         if (
             this._isOpening || this._closingPromise !== null || this._purgingPromise !== null ||
-            this._isBulkImportInProgress() || this._bulkImportJournalRecord !== null ||
-            this._importJournalRecoveryPending
+            this._isBulkImportInProgress() || this._hasUnresolvedImportJournal()
         ) {
             throw new Error('Cannot clean up an import placeholder while storage lifecycle or recovery is active');
         }

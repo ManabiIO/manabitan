@@ -14,6 +14,12 @@ publish after commit; old physical storage cleanup is best effort. Existing reco
 formats do not change. Legacy unbound health can apply only to legacy summaries,
 not summaries with a new publication identity.
 
+A recovered rollback whose journal cannot yet be removed remains a mutation
+barrier. Reads stay available, but dictionary deletion, title replacement and
+destructive startup cleanup wait until recovery releases that journal. Otherwise
+a later recovery could try to restore checkpoint files removed by those actions.
+Purge retains its explicit full-reset behavior.
+
 Completed updates retain their explicit `updateSessionToken` completion receipt
 without `transientUpdateStage`. Startup restoration clears the interrupted
 operation's token instead of reporting it as a successfully completed update.
