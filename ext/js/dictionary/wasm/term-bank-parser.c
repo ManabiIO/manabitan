@@ -691,7 +691,7 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
     return 0;
 }
 
-static int parse_composite_span_impl(
+static __attribute__((always_inline)) inline int parse_composite_span_body(
     const uint8_t* src,
     uint32_t len,
     uint32_t start,
@@ -808,8 +808,33 @@ static int parse_composite_span_impl(
     return 0;
 }
 
+/* Bound specialization to these three out-of-line bodies. All modes use the
+ * same grammar implementation and preserve its immediate hint writes. */
+static __attribute__((noinline)) int parse_composite_span_no_hints(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end
+) {
+    return parse_composite_span_body(src, len, start, out_end, 0, 0, 0);
+}
+
+static __attribute__((noinline)) int parse_composite_span_normalization(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end,
+    TermRowMeta* row
+) {
+    return parse_composite_span_body(src, len, start, out_end, 0,
+        &row->glossary_requires_normalization, &row->glossary_requires_text_normalization);
+}
+
+static __attribute__((noinline)) int parse_composite_span_all_hints(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end,
+    TermRowMeta* row
+) {
+    return parse_composite_span_body(src, len, start, out_end,
+        &row->glossary_may_contain_media,
+        &row->glossary_requires_normalization, &row->glossary_requires_text_normalization);
+}
+
 static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
-    return parse_composite_span_impl(src, len, start, out_end, 0, 0, 0);
+    return parse_composite_span_no_hints(src, len, start, out_end);
 }
 
 static int token_equals_bytes(const uint8_t* src, uint32_t start, uint32_t end, const char* expected, uint32_t expected_length) {
@@ -875,14 +900,15 @@ static int parse_value_span_with_glossary_hints(
     uint32_t len,
     uint32_t start,
     uint32_t* out_end,
-    uint32_t* media_hint,
-    uint32_t* normalization_hint,
-    uint32_t* text_normalization_hint
+    TermRowMeta* row,
+    int media_hints
 ) {
     if (start >= len) { return 0; }
     uint8_t c = src[start];
     if (c == '[' || c == '{') {
-        return parse_composite_span_impl(src, len, start, out_end, media_hint, normalization_hint, text_normalization_hint);
+        return media_hints ?
+            parse_composite_span_all_hints(src, len, start, out_end, row) :
+            parse_composite_span_normalization(src, len, start, out_end, row);
     }
     return parse_value_span(src, len, start, out_end);
 }
@@ -1074,7 +1100,6 @@ static int parse_row_single_pass(
         if (field_index == 4u || field_index == 6u) {
             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
         } else if (field_index == 5u) {
-            uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
             if (
                 !(glossary_witness != 0 && reuse_validated_glossary(
                     src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_witness
@@ -1084,9 +1109,8 @@ static int parse_row_single_pass(
                     len,
                     i,
                     &value_end,
-                    media_hint,
-                    &out_meta->glossary_requires_normalization,
-                    &out_meta->glossary_requires_text_normalization
+                    out_meta,
+                    media_hints
                 )) { return 0; }
         } else if (!parse_value_span(src, len, i, &value_end)) {
             return 0;
