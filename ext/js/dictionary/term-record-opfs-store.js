@@ -1376,6 +1376,13 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async reset() {
+        // A reset must join cancelled repair writers before removing their
+        // containers, including a close or abort which is still settling.
+        await this._runExclusiveStorageMutation(async () => await this._reset(), true);
+    }
+
+    /** @returns {Promise<void>} */
+    async _reset() {
         await this._closeAllWritables();
         /** @type {Error[]} */
         const resetErrors = [];
