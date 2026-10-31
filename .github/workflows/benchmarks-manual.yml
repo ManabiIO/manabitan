@@ -52,11 +52,12 @@ jobs:
       matrix:
         include: ${{ fromJSON(inputs.workload == 'imports' && '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"}]' || '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"},{"boundary":"lookup-lifecycle","dictionary":""}]') }}
     env:
+      MANABITAN_CLANG: /usr/bin/clang-18
       PERF_BASELINE_SHA: ${{ inputs.baseline_sha }}
       PERF_REPETITIONS: ${{ inputs.repetitions || '1' }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_BOUNDARY: ${{ matrix.boundary }}
-      PERF_RUN_ORDER: ${{ inputs.run_order == 'CROSSOVER' && 'A1 B1 B2 A2 B3 A3 A4 B4' || inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
+      PERF_RUN_ORDER: ${{ inputs.run_order == 'CROSSOVER' && 'A1 B1 B2 A2 A3 A4 B3 A5 A6 B4 A7 A8' || inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -103,6 +104,9 @@ jobs:
           printf 'PERF_BASELINE_ROOT=%s\nPERF_EVIDENCE_ROOT=%s\n' "$baseline" "$evidence" >> "$GITHUB_ENV"
           git rev-parse HEAD > "$evidence/candidate-sha.txt"
           printf '%s\n' "$PERF_BASELINE_SHA" > "$evidence/baseline-sha.txt"
+          "$MANABITAN_CLANG" --version > "$evidence/compiler-version.txt"
+          cp ext/lib/term-bank-parser.wasm "$evidence/candidate-term-bank-parser.wasm"
+          cp "$baseline/ext/lib/term-bank-parser.wasm" "$evidence/baseline-term-bank-parser.wasm"
           sha256sum test/chromium/extension-two-dictionary-import.e2e.js "$baseline/test/chromium/extension-two-dictionary-import.e2e.js" > "$evidence/shared-harness-sha256.txt"
           sha256sum builds/manabitan-chrome.zip "$baseline/builds/manabitan-chrome.zip" > "$evidence/package-sha256.txt"
           sha256sum ext/js/core/safe-performance.js "$baseline/ext/js/core/safe-performance.js" > "$evidence/instrumentation-source-sha256.txt"
@@ -123,7 +127,7 @@ jobs:
           stride=0
           for observation in "${schedule[@]}"; do
             suffix="${observation:1}"
-            [[ "$suffix" =~ ^[1-4]$ ]]
+            [[ "$suffix" =~ ^[1-8]$ ]]
             if (( suffix > stride )); then stride="$suffix"; fi
           done
           expanded=()
