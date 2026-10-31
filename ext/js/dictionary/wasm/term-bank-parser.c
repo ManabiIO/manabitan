@@ -698,7 +698,8 @@ static int parse_composite_span_impl(
     uint32_t* out_end,
     uint32_t* media_hint,
     uint32_t* normalization_hint,
-    uint32_t* text_normalization_hint
+    uint32_t* text_normalization_hint,
+    int validate_glossary_types
 ) {
     enum {
         ARRAY_FIRST, ARRAY_AFTER_VALUE, ARRAY_VALUE,
@@ -711,6 +712,12 @@ static int parse_composite_span_impl(
     uint8_t parents[MAX_JSON_NESTING];
     uint32_t depth = 1u;
     uint8_t state = src[start] == '[' ? ARRAY_FIRST : OBJECT_FIRST;
+    // Ordinary imports validate only objects directly in the glossary array.
+    // Nested structured content has its own vocabulary. Generic parser callers
+    // keep their existing permissive behavior unless explicitly requested.
+    const int validate_top_level_objects = validate_glossary_types && src[start] == '[';
+    int glossary_key_is_type = 0;
+    int glossary_object_type_valid = 0;
     uint32_t i = start + 1u;
     while (i < len) {
         const uint8_t c = src[i];
@@ -732,6 +739,9 @@ static int parse_composite_span_impl(
                 if (!parse_string_span(src, len, i, &s_end)) { return 0; }
             }
             if (object_key) {
+                if (validate_top_level_objects && depth == 2u) {
+                    glossary_key_is_type = json_string_matches_ascii(src, i, s_end, "type", 4u);
+                }
                 if (
                     !common_key &&
                     (
@@ -752,6 +762,14 @@ static int parse_composite_span_impl(
                 }
                 state = OBJECT_COLON;
             } else if (state == OBJECT_VALUE) {
+                if (validate_top_level_objects && depth == 2u && glossary_key_is_type) {
+                    // JSON.parse retains the last occurrence of a property,
+                    // including escaped keys and later invalid values.
+                    glossary_object_type_valid =
+                        json_string_matches_ascii(src, i, s_end, "text", 4u) ||
+                        json_string_matches_ascii(src, i, s_end, "image", 5u) ||
+                        json_string_matches_ascii(src, i, s_end, "structured-content", 18u);
+                }
                 state = OBJECT_AFTER_VALUE;
             } else if (state == ARRAY_FIRST || state == ARRAY_VALUE) {
                 state = ARRAY_AFTER_VALUE;
@@ -766,6 +784,7 @@ static int parse_composite_span_impl(
                 if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }
             } else {
                 if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { return 0; }
+                if (validate_top_level_objects && depth == 2u && !glossary_object_type_valid) { return 0; }
             }
             ++i;
             if (--depth == 0u) {
@@ -792,8 +811,15 @@ static int parse_composite_span_impl(
         if (state == ARRAY_FIRST || state == ARRAY_VALUE) { next_state = ARRAY_AFTER_VALUE; }
         else if (state == OBJECT_VALUE) { next_state = OBJECT_AFTER_VALUE; }
         else { return 0; }
+        if (validate_top_level_objects && depth == 2u && state == OBJECT_VALUE && glossary_key_is_type) {
+            glossary_object_type_valid = 0;
+        }
         if (c == '[' || c == '{') {
             if (depth >= MAX_JSON_NESTING) { return 0; }
+            if (validate_top_level_objects && depth == 1u && c == '{') {
+                glossary_object_type_valid = 0;
+                glossary_key_is_type = 0;
+            }
             parents[depth - 1u] = next_state;
             ++depth;
             state = c == '[' ? ARRAY_FIRST : OBJECT_FIRST;
@@ -809,7 +835,7 @@ static int parse_composite_span_impl(
 }
 
 static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
-    return parse_composite_span_impl(src, len, start, out_end, 0, 0, 0);
+    return parse_composite_span_impl(src, len, start, out_end, 0, 0, 0, 0);
 }
 
 static int token_equals_bytes(const uint8_t* src, uint32_t start, uint32_t end, const char* expected, uint32_t expected_length) {
@@ -877,12 +903,13 @@ static int parse_value_span_with_glossary_hints(
     uint32_t* out_end,
     uint32_t* media_hint,
     uint32_t* normalization_hint,
-    uint32_t* text_normalization_hint
+    uint32_t* text_normalization_hint,
+    int validate_glossary_types
 ) {
     if (start >= len) { return 0; }
     uint8_t c = src[start];
     if (c == '[' || c == '{') {
-        return parse_composite_span_impl(src, len, start, out_end, media_hint, normalization_hint, text_normalization_hint);
+        return parse_composite_span_impl(src, len, start, out_end, media_hint, normalization_hint, text_normalization_hint, validate_glossary_types);
     }
     return parse_value_span(src, len, start, out_end);
 }
@@ -1056,7 +1083,8 @@ static int parse_row_single_pass(
     uint32_t* out_next,
     const TermRowMeta* prior_rows,
     uint32_t prior_count,
-    uint32_t* glossary_witness
+    uint32_t* glossary_witness,
+    int validate_glossary_types
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     clear_term_row_meta(out_meta);
@@ -1086,7 +1114,8 @@ static int parse_row_single_pass(
                     &value_end,
                     media_hint,
                     &out_meta->glossary_requires_normalization,
-                    &out_meta->glossary_requires_text_normalization
+                    &out_meta->glossary_requires_text_normalization,
+                    validate_glossary_types
                 )) { return 0; }
         } else if (!parse_value_span(src, len, i, &value_end)) {
             return 0;
@@ -1667,7 +1696,7 @@ static int encode_term_content_token_binary_row(
 
 /* Keep the ordinary contiguous fallback on its established tight loop. Span
  * traversal is selected once per call, not charged per row when disabled. */
-static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, int media_hints) {
+static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, int media_hints, int validate_glossary_types) {
     if (json_ptr == 0u || json_len == 0u || out_ptr == 0u || out_capacity == 0u) {
         return -1;
     }
@@ -1691,7 +1720,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, validate_glossary_types)) {
             return -1;
         }
         ++row_count;
@@ -1711,11 +1740,11 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
 
 static int32_t parse_term_bank_impl(
     uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity,
-    int media_hints, uint32_t bank_spans_ptr, uint32_t bank_count
+    int media_hints, uint32_t bank_spans_ptr, uint32_t bank_count, int validate_glossary_types
 ) {
     if (bank_spans_ptr == 0u) {
         if (bank_count != 0u) { return -1; }
-        return parse_contiguous_term_bank(json_ptr, json_len, out_ptr, out_capacity, media_hints);
+        return parse_contiguous_term_bank(json_ptr, json_len, out_ptr, out_capacity, media_hints, validate_glossary_types);
     }
     if (json_ptr == 0u || json_len == 0u || out_ptr == 0u || out_capacity == 0u ||
         ((bank_spans_ptr == 0u) != (bank_count == 0u))) { return -1; }
@@ -1729,7 +1758,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, validate_glossary_types)) {
             return -1;
         }
         ++row_count;
@@ -1739,13 +1768,13 @@ static int32_t parse_term_bank_impl(
 }
 
 __attribute__((visibility("default")))
-int32_t parse_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, uint32_t bank_spans_ptr, uint32_t bank_count) {
-    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 0, bank_spans_ptr, bank_count);
+int32_t parse_term_bank(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, uint32_t bank_spans_ptr, uint32_t bank_count, uint32_t validate_glossary_types) {
+    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 0, bank_spans_ptr, bank_count, validate_glossary_types != 0u);
 }
 
 __attribute__((visibility("default")))
-int32_t parse_term_bank_with_media_hints(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, uint32_t bank_spans_ptr, uint32_t bank_count) {
-    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 1, bank_spans_ptr, bank_count);
+int32_t parse_term_bank_with_media_hints(uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity, uint32_t bank_spans_ptr, uint32_t bank_count, uint32_t validate_glossary_types) {
+    return parse_term_bank_impl(json_ptr, json_len, out_ptr, out_capacity, 1, bank_spans_ptr, bank_count, validate_glossary_types != 0u);
 }
 
 __attribute__((visibility("default")))
@@ -2690,7 +2719,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t experiment_stats_ptr,
     uint32_t raw_content_hash_table_ptr,
     uint32_t raw_content_hash_table_size,
-    uint32_t raw_content_hashes_ptr
+    uint32_t raw_content_hashes_ptr,
+    uint32_t validate_glossary_types
 ) {
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
@@ -2766,7 +2796,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         uint32_t row_end = 0u;
         uint32_t glossary_witness = 0xffffffffu;
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, validated_glossary_reuse_enabled && glossary_reuse_probe_budget > 0u ? &glossary_witness : 0)) {
+                rows, row_count, validated_glossary_reuse_enabled && glossary_reuse_probe_budget > 0u ? &glossary_witness : 0, validate_glossary_types != 0u)) {
             return -1;
         }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
