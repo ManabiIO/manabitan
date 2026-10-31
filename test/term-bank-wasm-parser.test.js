@@ -1872,6 +1872,103 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    maybeTest.each(['cancel', 'shared-prewarm', 'callback-error', 'ready-race'])(
+        'settles cancellation during parser worker startup: %s',
+        async (mode) => {
+            /** @type {StartupWorker[]} */
+            const instances = [];
+            let initialized = () => {};
+            const initializationStarted = new Promise((resolve) => { initialized = () => resolve(void 0); });
+            let ready = false;
+            let cancelled = false;
+            let sourceLoads = 0;
+            let sinkCalls = 0;
+            let settled = false;
+            /** @type {unknown} */
+            let failure = null;
+            const callbackError = new Error('Cancellation callback failed');
+            /** @implements {WorkerMock} */
+            class StartupWorker {
+                constructor() {
+                    /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                    this.listeners = new Map();
+                    this.terminated = false;
+                    instances.push(this);
+                }
+
+                addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    addWorkerListener(this.listeners, type, listener);
+                }
+
+                removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    this.listeners.get(type)?.delete(listener);
+                }
+
+                postMessage(/** @type {WorkerMessage} */ message) {
+                    if (message.type !== 'initialize') { throw new Error('Dispatched parse before startup finished'); }
+                    initialized();
+                    if (ready || mode === 'ready-race') {
+                        queueMicrotask(() => {
+                            emitWorkerMessage(this.listeners, {type: 'ready'});
+                            if (mode === 'ready-race') { cancelled = true; }
+                        });
+                    }
+                }
+
+                terminate() { this.terminated = true; }
+            }
+
+            vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval']});
+            vi.stubGlobal('Worker', StartupWorker);
+            const prewarm = mode === 'shared-prewarm' ? prewarmParallelTermBankParser() : null;
+            const parse = parseTermBankWithWasmColumnChunksParallelLazy(
+                Array.from({length: 4}, () => async () => { ++sourceLoads; return textEncoder.encode('[]'); }),
+                [2, 2, 2, 2],
+                3,
+                () => { ++sinkCalls; },
+                {emitContentSlab: true},
+                () => {
+                    if (cancelled && mode === 'callback-error') { throw callbackError; }
+                    return cancelled;
+                },
+            ).then(() => { settled = true; }, (error) => {
+                settled = true;
+                failure = error;
+            });
+            try {
+                await initializationStarted;
+                cancelled = true;
+                await vi.advanceTimersByTimeAsync(250);
+                expect(settled).toBe(true);
+                expect(failure).toMatchObject(mode === 'callback-error' ? {message: callbackError.message} : {name: 'AbortError'});
+                await parse;
+                if (prewarm !== null) { await expect(prewarm).resolves.toBe(false); }
+                expect(sourceLoads).toBe(0);
+                expect(sinkCalls).toBe(0);
+                expect(instances.length).toBeGreaterThanOrEqual(2);
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(instances.every((worker) => [...worker.listeners.values()].every((listeners) => listeners.size === 0))).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+                ready = true;
+                await expect(prewarmParallelTermBankParser()).resolves.toBe(true);
+                await disposeParallelTermBankParser();
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+            } finally {
+                // Release the original implementation too, so a red test leaves no startup timers.
+                for (const worker of instances) {
+                    emitWorkerMessage(worker.listeners, {type: 'initialization-error', error: {message: 'Test cleanup'}});
+                }
+                await parse;
+                if (prewarm !== null) { await prewarm; }
+                await disposeParallelTermBankParser();
+                vi.clearAllTimers();
+                vi.useRealTimers();
+                vi.stubGlobal('Worker', void 0);
+            }
+        },
+    );
+
     maybeTest('cancels while deferred ZIP sources are unresolved', async () => {
         let terminateCount = 0;
         /** @implements {WorkerMock} */
