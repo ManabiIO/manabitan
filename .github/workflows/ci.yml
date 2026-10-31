@@ -133,6 +133,16 @@ jobs:
           process.exit(1);
           NODE
 
+      # Keep the machine-readable verdict without the duplicated HTML payload.
+      - name: Upload Firefox extension E2E JSON
+        if: success() && github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: firefox-extension-e2e-report
+          path: builds/firefox-e2e-import-report.json
+          retention-days: 7
+          if-no-files-found: error
+
       - name: Upload Firefox extension E2E report
         if: failure() || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -267,6 +277,16 @@ jobs:
           ];
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);
           NODE
+
+      # Keep the machine-readable verdict without the duplicated HTML payload.
+      - name: Upload Chromium extension E2E JSON
+        if: success() && github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: chromium-extension-e2e-report
+          path: builds/chromium-e2e-import-report.json
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Upload Chromium extension E2E report
         if: failure() || github.event_name == 'workflow_dispatch'
@@ -472,6 +492,16 @@ jobs:
           ];
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);
           NODE
+
+      # Keep the machine-readable verdict without the duplicated HTML payload.
+      - name: Upload Edge extension E2E JSON
+        if: success() && github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: edge-extension-e2e-report
+          path: builds/edge-e2e-import-report.json
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Upload Edge extension E2E report
         if: failure() || github.event_name == 'workflow_dispatch'
