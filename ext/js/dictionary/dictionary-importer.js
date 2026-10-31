@@ -2159,7 +2159,7 @@ export class DictionaryImporter {
                         let sourceTermFileBatch = importRunPlan?.files ?? (termBankSourcePipeline.canPrefetch(termFile) ? termBankSourcePipeline.getBatch(termFileIndex) : []);
                         let tSourceArchiveReadStart = Date.now();
                         let preloadedTermFileBytes = importRunPlan === null ?
-                            (termBankSourcePipeline.canPrefetch(termFile) ? await termBankSourcePipeline.readBatch(sourceTermFileBatch) : null) :
+                            (termBankSourcePipeline.canPrefetch(termFile) ? await termBankSourcePipeline.readBatch(sourceTermFileBatch, () => this._throwIfCancelled()) : null) :
                             {
                                 loaders: importRunPlan.loaders,
                                 estimatedByteLengths: importRunPlan.estimatedByteLengths,
@@ -2169,7 +2169,7 @@ export class DictionaryImporter {
                         if (preloadedTermFileBytes === null) {
                             sourceTermFileBatch = [termFile];
                             tSourceArchiveReadStart = Date.now();
-                            preloadedTermFileBytes = termBankSourcePipeline.canPrefetch(termFile) ? await termBankSourcePipeline.read(termFile) : null;
+                            preloadedTermFileBytes = termBankSourcePipeline.canPrefetch(termFile) ? await termBankSourcePipeline.read(termFile, () => this._throwIfCancelled()) : null;
                             sourceArchiveReadMs += Math.max(0, Date.now() - tSourceArchiveReadStart);
                         }
                         const sourceTermFileBatchCount = Math.max(1, sourceTermFileBatch.length);
