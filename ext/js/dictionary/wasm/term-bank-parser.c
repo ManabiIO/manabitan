@@ -712,12 +712,17 @@ static int parse_composite_span_impl(
     uint8_t parents[MAX_JSON_NESTING];
     uint32_t depth = 1u;
     uint8_t state = src[start] == '[' ? ARRAY_FIRST : OBJECT_FIRST;
-    // Ordinary imports validate only objects directly in the glossary array.
-    // Nested structured content has its own vocabulary. Generic parser callers
-    // keep their existing permissive behavior unless explicitly requested.
+    // Each supported type selects the bit of its required field. Track all
+    // fields until object close because duplicate keys and type keep the last
+    // value, and nested structured content has a separate vocabulary.
+    enum {
+        GLOSSARY_TEXT_FIELD = 1u, GLOSSARY_PATH_FIELD = 2u,
+        GLOSSARY_CONTENT_FIELD = 4u, GLOSSARY_TYPE_FIELD = 8u
+    };
     const int validate_top_level_objects = validate_glossary_types && src[start] == '[';
-    int glossary_key_is_type = 0;
-    int glossary_object_type_valid = 0;
+    uint32_t glossary_key = 0u;
+    uint32_t glossary_object_type = 0u;
+    uint32_t glossary_valid_fields = 0u;
     uint32_t i = start + 1u;
     while (i < len) {
         const uint8_t c = src[i];
@@ -740,7 +745,11 @@ static int parse_composite_span_impl(
             }
             if (object_key) {
                 if (validate_top_level_objects && depth == 2u) {
-                    glossary_key_is_type = json_string_matches_ascii(src, i, s_end, "type", 4u);
+                    glossary_key =
+                        json_string_matches_ascii(src, i, s_end, "type", 4u) ? GLOSSARY_TYPE_FIELD :
+                        json_string_matches_ascii(src, i, s_end, "text", 4u) ? GLOSSARY_TEXT_FIELD :
+                        json_string_matches_ascii(src, i, s_end, "path", 4u) ? GLOSSARY_PATH_FIELD :
+                        json_string_matches_ascii(src, i, s_end, "content", 7u) ? GLOSSARY_CONTENT_FIELD : 0u;
                 }
                 if (
                     !common_key &&
@@ -762,13 +771,16 @@ static int parse_composite_span_impl(
                 }
                 state = OBJECT_COLON;
             } else if (state == OBJECT_VALUE) {
-                if (validate_top_level_objects && depth == 2u && glossary_key_is_type) {
-                    // JSON.parse retains the last occurrence of a property,
-                    // including escaped keys and later invalid values.
-                    glossary_object_type_valid =
-                        json_string_matches_ascii(src, i, s_end, "text", 4u) ||
-                        json_string_matches_ascii(src, i, s_end, "image", 5u) ||
-                        json_string_matches_ascii(src, i, s_end, "structured-content", 18u);
+                if (validate_top_level_objects && depth == 2u) {
+                    if (glossary_key == GLOSSARY_TYPE_FIELD) {
+                        glossary_object_type =
+                            json_string_matches_ascii(src, i, s_end, "text", 4u) ? GLOSSARY_TEXT_FIELD :
+                            json_string_matches_ascii(src, i, s_end, "image", 5u) ? GLOSSARY_PATH_FIELD :
+                            json_string_matches_ascii(src, i, s_end, "structured-content", 18u) ? GLOSSARY_CONTENT_FIELD : 0u;
+                    } else {
+                        // Strings satisfy all three required field kinds.
+                        glossary_valid_fields |= glossary_key;
+                    }
                 }
                 state = OBJECT_AFTER_VALUE;
             } else if (state == ARRAY_FIRST || state == ARRAY_VALUE) {
@@ -784,7 +796,7 @@ static int parse_composite_span_impl(
                 if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }
             } else {
                 if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { return 0; }
-                if (validate_top_level_objects && depth == 2u && !glossary_object_type_valid) { return 0; }
+                if (validate_top_level_objects && depth == 2u && (glossary_valid_fields & glossary_object_type) == 0u) { return 0; }
             }
             ++i;
             if (--depth == 0u) {
@@ -811,14 +823,23 @@ static int parse_composite_span_impl(
         if (state == ARRAY_FIRST || state == ARRAY_VALUE) { next_state = ARRAY_AFTER_VALUE; }
         else if (state == OBJECT_VALUE) { next_state = OBJECT_AFTER_VALUE; }
         else { return 0; }
-        if (validate_top_level_objects && depth == 2u && state == OBJECT_VALUE && glossary_key_is_type) {
-            glossary_object_type_valid = 0;
+        if (validate_top_level_objects && depth == 2u && state == OBJECT_VALUE) {
+            if (glossary_key == GLOSSARY_TYPE_FIELD) {
+                glossary_object_type = 0u;
+            } else if (glossary_key == GLOSSARY_CONTENT_FIELD && (c == '[' || c == '{')) {
+                glossary_valid_fields |= GLOSSARY_CONTENT_FIELD;
+            } else {
+                // A later nonstring value invalidates earlier text/path values;
+                // null and scalar values also invalidate structured content.
+                glossary_valid_fields &= ~glossary_key;
+            }
         }
         if (c == '[' || c == '{') {
             if (depth >= MAX_JSON_NESTING) { return 0; }
             if (validate_top_level_objects && depth == 1u && c == '{') {
-                glossary_object_type_valid = 0;
-                glossary_key_is_type = 0;
+                glossary_object_type = 0u;
+                glossary_valid_fields = 0u;
+                glossary_key = 0u;
             }
             parents[depth - 1u] = next_state;
             ++depth;
