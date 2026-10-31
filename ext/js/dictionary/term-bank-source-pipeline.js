@@ -23,6 +23,7 @@ const SOURCE_TERM_BANK_LOW_MEMORY_BATCH_MAX_BYTES = 64 * 1024 * 1024;
 const SOURCE_TERM_BANK_PREFETCH_MAX_BYTES = 96 * 1024 * 1024;
 const SOURCE_TERM_BANK_LOW_MEMORY_PREFETCH_MAX_BYTES = 24 * 1024 * 1024;
 const SOURCE_TERM_BANK_UNKNOWN_SIZE_PREFETCH_MAX_FILES = 8;
+const SOURCE_READ_CANCELLATION_POLL_MS = 25;
 const ZIP_LOCAL_FILE_HEADER_LENGTH = 30;
 const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
 const RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES = 128 * 1024 * 1024;
@@ -33,6 +34,8 @@ const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
 
 /** @typedef {import('@zip.js/zip.js').Entry|{filename: string}} TermBankSourceFile */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}} CompressedTermBankSource */
+
+/** @typedef {{promises: Promise<Uint8Array>[], estimatedByteLengths: number[], readAll: () => Promise<Uint8Array[]>}} DeferredTermBankSourceBatch */
 
 /** Reads validated raw payloads directly from the already-owned source ZIP. */
 export class RawZipPayloadReader {
@@ -495,30 +498,81 @@ export class TermBankSourcePipeline {
 
     /**
      * @param {TermBankSourceFile[]} batch
-     * @returns {Promise<Uint8Array|Uint8Array[]|{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|null>}
+     * @param {() => void} [checkCancellation]
+     * @returns {Promise<Uint8Array|Uint8Array[]|DeferredTermBankSourceBatch|null>}
      */
-    async readBatch(batch) {
+    async readBatch(batch, checkCancellation) {
         if (batch.length <= 1) {
-            return batch.length === 1 && this.canPrefetch(batch[0]) ? await this._readPool.read(batch[0]) : null;
+            return batch.length === 1 && this.canPrefetch(batch[0]) ? await this.read(batch[0], checkCancellation) : null;
         }
         const promises = batch.map((candidate) => this._readPool.read(candidate));
         const estimatedByteLengths = batch.map((candidate) => {
             const uncompressedSize = /** @type {unknown} */ (Reflect.get(candidate, 'uncompressedSize'));
             return typeof uncompressedSize === 'number' && Number.isSafeInteger(uncompressedSize) && uncompressedSize > 0 ? uncompressedSize : 0;
         });
+        // Parallel parsing owns cancellation after accepting the deferred plan.
+        // Its fallback must take ownership only if that parser declines the job.
+        const readAll = () => {
+            const reads = Promise.all(promises);
+            return typeof checkCancellation === 'function' ? this._awaitRead(reads, checkCancellation) : reads;
+        };
         if (batch.length >= 4 && estimatedByteLengths.every((length) => length > 0)) {
-            return {promises, estimatedByteLengths};
+            return {promises, estimatedByteLengths, readAll};
         }
-        const byteArrays = await Promise.all(promises);
+        const byteArrays = await readAll();
         return byteArrays.every((bytes) => this._getJsonArrayContentSpan(bytes) !== null) ? byteArrays : null;
     }
 
     /**
      * @param {TermBankSourceFile} file
+     * @param {() => void} [checkCancellation]
      * @returns {Promise<Uint8Array>}
      */
-    read(file) {
-        return this._readPool.read(file);
+    read(file, checkCancellation) {
+        const promise = this._readPool.read(file);
+        return typeof checkCancellation === 'function' ? this._awaitRead(promise, checkCancellation) : promise;
+    }
+
+    /**
+     * Serial source reads have no parser job polling cancellation yet. Abort
+     * their owned reads and join decoder cleanup before returning the failure.
+     * Deferred parallel plans retain their existing parser cancellation owner.
+     * @template T
+     * @param {Promise<T>} promise
+     * @param {() => void} checkCancellation
+     * @returns {Promise<T>}
+     */
+    async _awaitRead(promise, checkCancellation) {
+        const cancellation = {
+            active: false,
+            error: /** @type {unknown} */ (void 0),
+            join: /** @type {Promise<void>|null} */ (null),
+        };
+        const poll = () => {
+            if (cancellation.active) { return; }
+            try {
+                checkCancellation();
+            } catch (error) {
+                cancellation.active = true;
+                cancellation.error = error;
+                cancellation.join = this.abortAndJoin();
+                void cancellation.join.catch(() => {});
+            }
+        };
+        const timer = setInterval(poll, SOURCE_READ_CANCELLATION_POLL_MS);
+        try {
+            poll();
+            const result = await promise;
+            poll();
+            if (cancellation.active) { throw cancellation.error; }
+            return result;
+        } catch (error) {
+            if (!cancellation.active) { throw error; }
+            if (cancellation.join !== null) { await cancellation.join; }
+            throw cancellation.error;
+        } finally {
+            clearInterval(timer);
+        }
     }
 
     /**
