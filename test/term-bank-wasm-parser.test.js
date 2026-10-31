@@ -2942,6 +2942,51 @@ describe('term-bank WASM parser', () => {
         expect(version1Chunks[0].sequenceList).toStrictEqual(new Int32Array([-1, -1, -1]));
     });
 
+    maybeTest.each([false, true])('keeps mixed key escapes independent across rows and banks (native escapes: %s)', async (nativeEscapes) => {
+        const bankJson = [
+            String.raw`[["plain-first","","","",0,["first"],1,""]]`,
+            String.raw`[["slash\\key","read\ning","","",0,["escaped"],2,""],["plain-after","","","",0,["plain"],3,""],["\u65e5","日","","",0,["unicode"],4,""],["last","last","","",0,["last"],5,""]]`,
+        ];
+        let result = null;
+        await parseTermBankWithWasmColumnChunks(
+            bankJson.map((value) => textEncoder.encode(value)),
+            3,
+            (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
+            8,
+            {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                emitTermByteLists: false,
+                prepareLookupIndexes: true,
+                singleChunk: true,
+                experimentalNativeEscapedKeys: nativeEscapes,
+            },
+        );
+        const chunk = /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));
+        const plan = chunk.termRecordPreinternedPlan;
+        /** @type {number[]} */
+        const offsets = [];
+        let cursor = 0;
+        for (const length of plan.stringLengths) {
+            offsets.push(cursor);
+            cursor += length;
+        }
+        const readKey = (/** @type {number} */ index) => textDecoder.decode(
+            plan.stringsBuffer.subarray(offsets[index], offsets[index] + plan.stringLengths[index]),
+        );
+        const expected = /** @type {string[][]} */ (bankJson.flatMap((value) => JSON.parse(value)));
+        expect(chunk.rowCount).toBe(expected.length);
+        for (let i = 0; i < expected.length; ++i) {
+            expect(readKey(plan.expressionIndexes[i])).toBe(expected[i][0]);
+            expect(readKey(plan.readingIndexes[i])).toBe(expected[i][1] || expected[i][0]);
+        }
+        const bytes = encodePersistedTermLookupIndexFromPreinternedPlan(plan, chunk.readingEqualsExpressionList, chunk.sequenceList, chunk.rowCount);
+        expect(chunk.preparedLookupIndexes?.get(`0:${chunk.rowCount}`)?.bytes).toStrictEqual(bytes);
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(profile?.fusedParseAttempts).toBe(1);
+        expect(profile?.fusedParseFallbacks).toBe(nativeEscapes ? 0 : 1);
+    });
+
     maybeTest('encodes parser-owned lookup sidecars byte-identically in WASM', async () => {
         const sources = [
             textEncoder.encode(JSON.stringify([
