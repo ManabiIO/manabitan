@@ -3925,16 +3925,20 @@ export class DictionaryImporter {
         ) {
             throw new TypeError('Invalid version 3 term-bank entry');
         }
-        // This is source validation, independent of image detection and media
-        // formatting. Native imports perform the same shallow check while
-        // scanning JSON; nested structured-content vocabulary stays separate.
+        // Source validation is independent of media detection and formatting.
+        // Native imports check the same required field kinds while scanning;
+        // nested structured-content vocabulary stays separate.
         for (const value of entry[5]) {
-            if (
-                typeof value === 'object' && value !== null && !Array.isArray(value) &&
-                value.type !== 'text' && value.type !== 'image' && value.type !== 'structured-content'
-            ) {
-                throw new TypeError('Invalid version 3 term glossary object type');
+            if (typeof value !== 'object' || value === null || Array.isArray(value)) { continue; }
+            let valid = false;
+            switch (value.type) {
+                case 'text': valid = typeof value.text === 'string'; break;
+                case 'image': valid = typeof value.path === 'string'; break;
+                case 'structured-content':
+                    valid = typeof value.content === 'string' || (typeof value.content === 'object' && value.content !== null);
+                    break;
             }
+            if (!valid) { throw new TypeError('Invalid version 3 term glossary object'); }
         }
         let [expression, reading, definitionTags, rules, score, glossary, sequence, termTags] = entry;
         reading = reading.length > 0 ? reading : expression;
