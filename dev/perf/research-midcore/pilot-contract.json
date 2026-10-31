@@ -1,0 +1,86 @@
+{
+  "objective": "Qualify existing experimentalParserWorkers3 on actual 4-7 logical CPU machines; no default change or Hoshi acceptance from this experiment.",
+  "base": "4505cff924f8bb8d8422e718c645fbf555dcea19",
+  "semantics": "Ordinary pinned source ZIP, automatic dedupe, CRC and source glossary validation, normalization, complete media, OPFS atomic publication; same package in both arms.",
+  "arms": {
+    "A": {
+      "experimentalParserWorkers3": false
+    },
+    "B": {
+      "experimentalParserWorkers3": true
+    }
+  },
+  "routeAssertions": {
+    "realHostLogicalCPUs": 4,
+    "browserHardwareConcurrencyRange": [
+      4,
+      7
+    ],
+    "deviceMemory": "greater than 4 GiB or unavailable",
+    "AWorkers": 2,
+    "BWorkers": 3,
+    "JMdictGroups": [
+      8,
+      12
+    ],
+    "JitendexGroups": [
+      22,
+      22
+    ],
+    "fusedFallbacks": 0,
+    "storage": "opfs-sahpool",
+    "fallbackStorage": false
+  },
+  "pilot": {
+    "purpose": "Characterize timing, route and whole-browser memory; retain every observation. Does not qualify production change.",
+    "timing": {
+      "warmup": [
+        "A",
+        "B"
+      ],
+      "schedule": [
+        "A",
+        "B",
+        "B",
+        "A",
+        "A",
+        "A",
+        "B",
+        "A",
+        "A",
+        "B",
+        "A",
+        "A"
+      ],
+      "pairs": [
+        "AB",
+        "BA",
+        "AA",
+        "BA",
+        "AB",
+        "AA"
+      ],
+      "profiler": false,
+      "screenshots": false,
+      "processSampling": false
+    },
+    "memory": {
+      "warmup": [],
+      "schedule": [
+        "A",
+        "B",
+        "B",
+        "A"
+      ],
+      "sampling": "Owned root and descendants identified by PID + process start time; sampled aggregate RSS and PSS, interval 100 ms. Import and post-completion windows kept distinct. Timing nonauthoritative."
+    }
+  },
+  "correctness": "Exact source/package/module hashes, current-operation completion event, worker receipts/counts, complete dictionary table counts, unique-content counts, source byte counts, published generation, at least 12 readable source-derived probes. Complete all-row logical parity and lifecycle qualification still required before a product default change.",
+  "nextDecision": "Set explicit confirmatory memory ceiling from retained pilot before any acceptance cohort. Reject worker policy if visible timing neutral/opposite-signed or memory/responsiveness cost is unacceptable. No navigator overrides or deleted samples.",
+  "limits": [
+    "Focused import lanes are not full lifecycle gates.",
+    "Linux hosted evidence does not by itself qualify ARM/mobile.",
+    "RSS sum duplicates shared pages; sampled peak is not an exact physical-memory maximum."
+  ],
+  "cleanup": "No cleanup performed; no rm calls; task-owned generated resources retained."
+}
