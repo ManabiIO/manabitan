@@ -57,11 +57,11 @@ describe('DictionaryImporter index runtime validation', () => {
             getData,
         }));
         await importer._readAndValidateIndex(new Map([['index.json', entry]]));
-        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: expectedWorkers});
+        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: expectedWorkers, checkSignature: true});
 
         // Media and binary bank reads keep the existing worker policy.
         await importer._getData(entry, createUint8ArrayWriter());
-        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: true});
+        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: true, checkSignature: true});
     });
 
     test('does not inspect sizes for binary reads or disabled workers', async () => {
@@ -74,11 +74,11 @@ describe('DictionaryImporter index runtime validation', () => {
             getData,
         }));
         await importer._getData(entry, createUint8ArrayWriter());
-        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: true});
+        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: true, checkSignature: true});
 
         importer._zipUseWebWorkers = false;
         await importer._getData(entry, createTextWriter());
-        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: false});
+        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: false, checkSignature: true});
     });
 
     test('keeps bounded tag reads inline without changing configured worker policy', async () => {
@@ -91,12 +91,12 @@ describe('DictionaryImporter index runtime validation', () => {
             getData,
         }));
         await importer._getData(entry, createTextWriter());
-        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: false});
+        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: false, checkSignature: true});
         expect(importer._zipUseWebWorkers).toBe(true);
 
         importer._zipUseWebWorkers = false;
         await importer._getData(entry, createUint8ArrayWriter());
-        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: false});
+        expect(getData).toHaveBeenLastCalledWith(expect.anything(), {useWebWorkers: false, checkSignature: true});
     });
 
     test.each([64 * 1024 + 1, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, undefined])(
@@ -111,7 +111,7 @@ describe('DictionaryImporter index runtime validation', () => {
                 getData,
             }));
             await importer._readAndValidateIndex(new Map([['index.json', entry]]));
-            expect(getData).toHaveBeenCalledWith(expect.anything(), {useWebWorkers: true});
+            expect(getData).toHaveBeenCalledWith(expect.anything(), {useWebWorkers: true, checkSignature: true});
         },
     );
 

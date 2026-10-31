@@ -168,11 +168,11 @@ describe('direct dictionary ZIP read cancellation', () => {
         const scope = new DictionaryZipReadScope(check);
         try {
             await importer._getData(entry, writer);
-            expect(getData).toHaveBeenLastCalledWith(writer, {useWebWorkers: true});
+            expect(getData).toHaveBeenLastCalledWith(writer, {useWebWorkers: true, checkSignature: true});
             Reflect.set(importer, '_directZipReads', scope);
             const controller = new AbortController();
             await importer._getData(entry, writer, controller.signal);
-            expect(getData).toHaveBeenLastCalledWith(writer, {useWebWorkers: true, signal: controller.signal});
+            expect(getData).toHaveBeenLastCalledWith(writer, {useWebWorkers: true, checkSignature: true, signal: controller.signal});
             expect(check).not.toHaveBeenCalled();
         } finally {
             Reflect.set(importer, '_directZipReads', null);
