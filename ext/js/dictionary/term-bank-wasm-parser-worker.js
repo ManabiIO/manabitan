@@ -27,7 +27,7 @@ import {safePerformance} from '../core/safe-performance.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
 
-/** @typedef {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} ParserOptions */
+/** @typedef {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean}} ParserOptions */
 /** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
 /** @typedef {{type: 'initialize', module: unknown}} InitializeRequest */
 /** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceMetadata?: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */

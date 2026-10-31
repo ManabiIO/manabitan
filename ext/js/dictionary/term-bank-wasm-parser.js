@@ -646,10 +646,11 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
  * @param {boolean} [allowFusedParse]
  * @param {PreloadedTermBankSource|null} [preloadedSource]
  * @param {import('dictionary-importer').ImportExperiments} [experiments]
+ * @param {boolean} [validateGlossaryTypes]
  * @returns {Promise<ParsedTermBankWasmBuffers>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}) {
+async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false) {
     const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
     // Every multi-bank route must retain source boundaries until the native
     // term-bank cursor has validated each source as a complete JSON array.
@@ -857,6 +858,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             rawContentHashTablePtr,
             rawContentHashTablePtr === 0 ? 0 : contentHashTableSize,
             rawContentHashesPtr,
+            validateGlossaryTypes ? 1 : 0,
         );
         parseBankMs += Math.max(0, Date.now() - tStart);
         const experimentStats = experimentStatsPtr === 0 ?
@@ -891,6 +893,7 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
                 false,
                 null,
                 experiments,
+                validateGlossaryTypes,
             );
             fallback.allocationMs += allocationMs;
             fallback.copyJsonMs += copyJsonMs;
@@ -985,8 +988,8 @@ void 0,
     }
     tStart = Date.now();
     const rowCount = mediaHintFastScan ?
-        wasm.parse_term_bank_with_media_hints(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount) :
-        wasm.parse_term_bank(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount);
+        wasm.parse_term_bank_with_media_hints(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount, validateGlossaryTypes ? 1 : 0) :
+        wasm.parse_term_bank(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount, validateGlossaryTypes ? 1 : 0);
     parseBankMs += Math.max(0, Date.now() - tStart);
     if (rowCount < 0) {
         if (rowCount === -2) {
@@ -1672,7 +1675,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
  * @param {number} version
  * @param {(rows: {expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[], progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, preallocateChunkRows?: boolean, computeContentHashes?: boolean, maxPendingChunks?: number}} [options]
+ * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, preallocateChunkRows?: boolean, computeContentHashes?: boolean, maxPendingChunks?: number}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
@@ -1711,6 +1714,10 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
         computeContentHashes,
         false,
         false,
+        true,
+        null,
+        {},
+        options.validateGlossaryTypes === true && version >= 3,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     if (rowCount === 0) {
@@ -1865,7 +1872,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
  * @param {number} version
  * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean, preloadedSource?: PreloadedTermBankSource}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean, preloadedSource?: PreloadedTermBankSource}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmColumnChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
@@ -1891,6 +1898,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         true,
         options.preloadedSource ?? null,
         experiments,
+        options.validateGlossaryTypes === true && version >= 3,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     const {contentOutPtr, contentUniqueCount, rowCount, metaCapacity, contentCapacity} = parsed;
@@ -2918,7 +2926,7 @@ export async function disposeParallelTermBankParser() {
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2938,7 +2946,7 @@ export async function parseTermBankWithWasmColumnChunksParallel(contentBytes, ve
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2962,7 +2970,7 @@ export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentB
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2987,7 +2995,7 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -3008,7 +3016,7 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} options
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} options
  * @param {() => boolean} shouldCancel
  * @param {boolean} [lazy=false]
  * @returns {Promise<boolean>}
@@ -3553,7 +3561,7 @@ function createParallelParserError(value) {
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
  * @returns {Promise<boolean>}
  */
 export async function parseTermBankWithWasmColumnChunksOverlapped(contentBytes, version, onChunk, options = {}) {
