@@ -300,15 +300,15 @@ export class RawZipPayloadReader {
 }
 
 /** Owns entry-identity-keyed, independently abortable ZIP reads. */
-/** @template T */
+/** @template T @template [File=TermBankSourceFile] */
 export class AbortableZipReadPool {
     /**
-     * @param {(file: TermBankSourceFile, signal: AbortSignal) => Promise<T>} read
+     * @param {(file: File, signal: AbortSignal) => Promise<T>} read
      */
     constructor(read) {
-        /** @type {(file: TermBankSourceFile, signal: AbortSignal) => Promise<T>} */
+        /** @type {(file: File, signal: AbortSignal) => Promise<T>} */
         this._read = read;
-        /** @type {Map<TermBankSourceFile, {promise: Promise<T>, abortController: AbortController}>} */
+        /** @type {Map<File, {promise: Promise<T>, abortController: AbortController}>} */
         this._reads = new Map();
         // Cache eviction does not end a read's lifetime. In particular, a
         // released Blob read can still be running when disposal begins.
@@ -323,7 +323,7 @@ export class AbortableZipReadPool {
     }
 
     /**
-     * @param {TermBankSourceFile} file
+     * @param {File} file
      * @returns {Promise<T>}
      * @throws {Error} If the pool has been disposed.
      */
@@ -353,7 +353,7 @@ export class AbortableZipReadPool {
     }
 
     /**
-     * @param {TermBankSourceFile} file
+     * @param {File} file
      */
     release(file) {
         this._reads.delete(file);
