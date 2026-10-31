@@ -1,6 +1,9 @@
 /* Copyright (C) 2026 Manabitan authors
  * SPDX-License-Identifier: GPL-3.0-or-later */
 import {describe, expect, test, vi} from 'vitest';
+import {createDictionaryImportBusyError} from '../ext/js/core/dictionary-import-busy-error.js';
+import {ExtensionError} from '../ext/js/core/extension-error.js';
+import {log} from '../ext/js/core/log.js';
 import {deferPromise} from '../ext/js/core/utilities.js';
 import {DictionaryController} from '../ext/js/pages/settings/dictionary-controller.js';
 /**
@@ -275,6 +278,79 @@ describe('DictionaryController database refresh ordering', () => {
 
         expect(createEntry).toHaveBeenCalledOnce();
         expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', {name: 'Dictionary', alias: 'New'}, {title: 'Dictionary'}, null, null);
+    });
+
+    test('metadata fetched after an options refresh renders the new dictionary with current options', async () => {
+        const metadata = /** @type {import('core').DeferredPromiseDetails<import('dictionary-importer').Summary[]>} */ (deferPromise());
+        const oldOptions = /** @type {import('core').DeferredPromiseDetails<import('settings').ProfileOptions>} */ (deferPromise());
+        const currentOptions = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [{name: 'New dictionary', alias: 'Latest'}]}));
+        const getOptions = vi.fn().mockReturnValueOnce(oldOptions.promise).mockResolvedValue(currentOptions);
+        const controller = createRefreshController();
+        Reflect.set(controller, '_settingsController', {
+            ...Reflect.get(controller, '_settingsController'),
+            getDictionaryInfo: vi.fn().mockReturnValue(metadata.promise),
+            getOptions,
+        });
+        const createEntry = vi.fn();
+        Reflect.set(controller, '_createDictionaryEntry', createEntry);
+
+        const refresh = controller._onDatabaseUpdated();
+        const optionsRefresh = controller._refreshEntriesAfterOptionsChanged();
+        await vi.waitFor(() => { expect(getOptions).toHaveBeenCalledOnce(); });
+        metadata.resolve(/** @type {import('dictionary-importer').Summary[]} */ (/** @type {unknown} */ ([{title: 'New dictionary'}])));
+        await refresh;
+        oldOptions.resolve(/** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [{name: 'Dictionary', alias: 'Stale'}]})));
+        await optionsRefresh;
+
+        expect(createEntry).toHaveBeenCalledOnce();
+        expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', currentOptions.dictionaries[0], {title: 'New dictionary'}, null, null);
+        expect(getOptions).toHaveBeenCalledTimes(2);
+    });
+
+    test('busy metadata preserves cached dictionaries and entries and recovers on publication', async () => {
+        const controller = createRefreshController();
+        const dictionaries = Reflect.get(controller, '_dictionaries');
+        const entries = [{cleanup: vi.fn()}];
+        Reflect.set(controller, '_dictionaryEntries', entries);
+        const busy = ExtensionError.deserialize(JSON.parse(JSON.stringify(ExtensionError.serialize(createDictionaryImportBusyError('getDictionaryInfoOffscreen')))));
+        const getDictionaryInfo = vi.fn().mockRejectedValueOnce(busy).mockResolvedValueOnce([{title: 'New dictionary'}]);
+        const updateEntries = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_settingsController', {...Reflect.get(controller, '_settingsController'), getDictionaryInfo});
+        Reflect.set(controller, '_updateEntries', updateEntries);
+        const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
+        try {
+            controller._onDatabaseUpdatedEvent({type: 'dictionary', cause: 'import'});
+            await vi.waitFor(() => { expect(getDictionaryInfo).toHaveBeenCalledOnce(); });
+            const busyGeneration = Reflect.get(controller, '_databaseStateToken');
+            expect(busyGeneration).not.toBeNull();
+            expect(Reflect.get(controller, '_entriesUpdateToken')).toBe(busyGeneration);
+            expect(Reflect.get(controller, '_dictionaries')).toBe(dictionaries);
+            expect(Reflect.get(controller, '_dictionaryEntries')).toBe(entries);
+            expect(entries[0].cleanup).not.toHaveBeenCalled();
+            expect(updateEntries).not.toHaveBeenCalled();
+            expect(logError).not.toHaveBeenCalled();
+            controller._onDatabaseUpdatedEvent({type: 'dictionary', cause: 'import'});
+            await vi.waitFor(() => { expect(updateEntries).toHaveBeenCalledOnce(); });
+            expect(Reflect.get(controller, '_dictionaries')).toStrictEqual([{title: 'New dictionary'}]);
+            expect(Reflect.get(controller, '_databaseStateToken')).not.toBe(busyGeneration);
+        } finally {
+            logError.mockRestore();
+        }
+    });
+
+    test.each(['plain-message', 'unknown-code'])('reports %s metadata failure instead of treating it as busy', async (kind) => {
+        const controller = createRefreshController();
+        const failure = kind === 'plain-message' ? new Error(createDictionaryImportBusyError('getDictionaryInfoOffscreen').message) : new ExtensionError('Corrupt metadata');
+        if (failure instanceof ExtensionError) { failure.data = {code: 'CORRUPT_METADATA'}; }
+        Reflect.set(controller, '_settingsController', {...Reflect.get(controller, '_settingsController'), getDictionaryInfo: vi.fn().mockRejectedValueOnce(failure)});
+        const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
+        try {
+            await controller._onDatabaseUpdated();
+            expect(logError).toHaveBeenCalledExactlyOnceWith(failure);
+            expect(Reflect.get(controller, '_dictionaries')).toBeNull();
+        } finally {
+            logError.mockRestore();
+        }
     });
 
     test('reordering replaces the entry array after cleaning each existing entry once', () => {
