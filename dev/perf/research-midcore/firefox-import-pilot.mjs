@@ -50,6 +50,13 @@ export function transformHarness(text, source, resolvePackage) {
         `export async function createAdapterFirefoxOptions() {\nconst configuredFirefoxProfileDir = '';\n${setup}\nreturn {firefoxOptions, headless, selectedFirefoxBinary};\n}\n`;
 }
 
+export function firefoxTimingScript(armBrowserImportTiming) {
+    // Marionette evaluates WebDriver scripts in a sandbox whose global object
+    // can inherit from the page Window. Keep state and event opt-in on the
+    // actual Window so subsequent scripts and application code see it.
+    return '(' + armBrowserImportTiming.toString().replaceAll(/\bglobalThis\b/g, 'window') + ')();';
+}
+
 export async function loadHarness(source) {
     const require = createRequire(path.join(source, 'package.json'));
     const filename = path.join(source, 'test/firefox/extension-two-dictionary-import.e2e.js');
@@ -168,7 +175,7 @@ export function validateRoute(debug, fixture, workers3, expectedWorkers) {
 async function backend(driver, action, params) {
     const result = await driver.executeAsyncScript(function(action, params) {
         const done = arguments[arguments.length - 1];
-        const runtime = globalThis.chrome?.runtime ?? globalThis.browser?.runtime;
+        const runtime = window.chrome?.runtime ?? window.browser?.runtime;
         runtime.sendMessage({action, params}, (response) => {
             if (runtime.lastError) { done({adapterError: runtime.lastError.message}); return; }
             if (response?.error) { done({adapterError: JSON.stringify(response.error)}); return; }
@@ -227,9 +234,14 @@ export async function runBrowser(config, fixture, packageIdentity, harness, repo
         assert.equal(addonId, packageIdentity.manifest.browser_specific_settings.gecko.id);
         const baseUrl = await h.waitForExtensionBaseUrl(driver, addonId);
         await h.navigateToExtensionPage(driver, `${baseUrl}/settings.html`, h.By.css('#dictionary-import-file-input'));
+        await driver.wait(async () => await driver.executeScript(() => {
+            const data = document.documentElement.dataset;
+            if (data.loadError === 'true' || data.loadingError === 'true') { throw new Error('Settings startup failed'); }
+            return data.loaded === 'true';
+        }), 30000, 'Settings controllers did not become ready', 100);
         const before = await backend(driver, 'getDictionaryInfo');
         assert.deepEqual(before, [], 'Fresh WebDriver profile must have empty dictionary storage');
-        report.runtime = await driver.executeScript('return {userAgent:navigator.userAgent,hardwareConcurrency:navigator.hardwareConcurrency,deviceMemory:navigator.deviceMemory??null,hasStorageGetDirectory:typeof navigator.storage?.getDirectory==="function",crossOriginIsolated:globalThis.crossOriginIsolated,hasSharedArrayBuffer:typeof SharedArrayBuffer==="function",hasAtomics:typeof Atomics==="object"};');
+        report.runtime = await driver.executeScript('return {userAgent:navigator.userAgent,hardwareConcurrency:navigator.hardwareConcurrency,deviceMemory:navigator.deviceMemory??null,hasStorageGetDirectory:typeof navigator.storage?.getDirectory==="function",crossOriginIsolated:window.crossOriginIsolated,hasSharedArrayBuffer:typeof SharedArrayBuffer==="function",hasAtomics:typeof Atomics==="object"};');
         const storage = await backend(driver, 'debugDictionaryStorageState');
         report.storageBefore = storage;
         assert.equal(storage.usesFallbackStorage, false);
@@ -243,20 +255,23 @@ export async function runBrowser(config, fixture, packageIdentity, harness, repo
         report.requestedFlags = {experimentalParserWorkers3: config.workers3};
         const flagsError = await driver.executeAsyncScript(function(flags) {
             const done = arguments[arguments.length - 1];
-            globalThis.manabitanImportPerformanceFlags = flags;
-            globalThis.__manabitanLastImportDebug = null;
-            globalThis.__manabitanImportDebugHistory = [];
+            window.manabitanImportPerformanceFlags = flags;
+            window.__manabitanLastImportDebug = null;
+            window.__manabitanImportDebugHistory = [];
             chrome.storage.local.set({manabitanDiagnosticsEnabled: false, manabitanDiagnosticsVerbosity: 'off'}, () => done(chrome.runtime.lastError?.message ?? null));
         }, report.requestedFlags);
         assert.equal(flagsError, null, 'Failed to configure matched diagnostics');
         // Arm the upstream self-contained function before the actual sendKeys.
-        await driver.executeScript(armBrowserImportTiming);
+        report.webdriverRealm = await driver.executeScript(() => ({globalIsWindow: globalThis === window,
+            timingFlagOnWindow: Object.hasOwn(window, '__manabitanImportCompletionSignalEnabled')}));
+        await driver.executeScript(firefoxTimingScript(armBrowserImportTiming));
+        assert.equal(await driver.executeScript('return window.__manabitanImportCompletionSignalEnabled;'), true);
         if (config.mode === 'memory') {
             memorySampler = createProcessTreeSampler({intervalMs: 100, includePss: true});
             await memorySampler.start(browserRootPid);
         }
         await h.importDictionariesViaFileInput(driver, [fixture.path]);
-        await driver.wait(async () => await driver.executeScript('return Number.isFinite(globalThis.__manabitanBrowserImportTiming?.completedAtMs);'), config.timeoutMs, 'No current import completion event', 100);
+        await driver.wait(async () => await driver.executeScript('return Number.isFinite(window.__manabitanBrowserImportTiming?.completedAtMs);'), config.timeoutMs, 'No current import completion event', 100);
         if (memorySampler !== null) {
             const result = await memorySampler.stop();
             memoryStopped = true;
@@ -270,7 +285,7 @@ export async function runBrowser(config, fixture, packageIdentity, harness, repo
             report.memory = {window: 'before file dispatch through Selenium observing current-operation completion; polling interval 100 ms, observation lag included', result,
                 postCompletion: {windowMs: 2000, result: postResult}};
         }
-        const snapshot = await driver.executeScript('return {timing:globalThis.__manabitanBrowserImportTiming,debug:globalThis.__manabitanLastImportDebug,steps:globalThis.__manabitanImportStepTimingHistory??null,error:document.querySelector("#dictionary-error")?.textContent??""};');
+        const snapshot = await driver.executeScript('return {timing:window.__manabitanBrowserImportTiming,debug:window.__manabitanLastImportDebug,steps:window.__manabitanImportStepTimingHistory??null,error:document.querySelector("#dictionary-error")?.textContent??""};');
         report.import = snapshot;
         const timing = snapshot.timing;
         assert.equal(timing.trigger, 'file-input-change');
@@ -304,6 +319,18 @@ export async function runBrowser(config, fixture, packageIdentity, harness, repo
         report.correctness = {dictionaryInfo: info, counts, recordProbe: probe, readableRows, lookupDiagnostics: readable, probeResults};
     } catch (error) {
         runError = error;
+        if (report.runtime && driver !== null) {
+            try {
+                report.failureState = await driver.executeScript(() => ({
+                    settings: {...document.documentElement.dataset},
+                    timing: window.__manabitanBrowserImportTiming ?? null,
+                    completion: window.__manabitanLastImportCompletion ?? null,
+                    importDebug: window.__manabitanLastImportDebug ?? null,
+                    error: document.querySelector('#dictionary-error')?.textContent ?? '',
+                    progress: document.querySelector('#dictionary-import-progress')?.textContent ?? '',
+                }));
+            } catch (diagnosticError) { report.failureStateError = diagnosticError.message; }
+        }
         throw error;
     } finally {
         try {

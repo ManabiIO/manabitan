@@ -1,0 +1,132 @@
+{
+  "objective": "Confirm current-source Chromium two-versus-three worker measurements on fresh real four-CPU hosts; a product-default change still needs lifecycle/lookup qualification.",
+  "base": "4505cff924f8bb8d8422e718c645fbf555dcea19",
+  "semantics": "Ordinary pinned source ZIP, automatic dedupe, CRC and source glossary validation, normalization, complete media, OPFS atomic publication; same package in both arms.",
+  "arms": {
+    "A": {
+      "experimentalParserWorkers3": false
+    },
+    "B": {
+      "experimentalParserWorkers3": true
+    }
+  },
+  "routeAssertions": {
+    "realHostLogicalCPUs": 4,
+    "browserHardwareConcurrencyRange": [
+      4,
+      7
+    ],
+    "deviceMemory": "greater than 4 GiB or unavailable",
+    "AWorkers": 2,
+    "BWorkers": 3,
+    "JMdictGroups": [
+      8,
+      12
+    ],
+    "JitendexGroups": [
+      22,
+      22
+    ],
+    "fusedFallbacks": 0,
+    "storage": "opfs-sahpool",
+    "fallbackStorage": false
+  },
+  "pilot": {
+    "purpose": "Characterize timing, route and whole-browser memory; retain every observation. Does not qualify production change.",
+    "timing": {
+      "warmup": [
+        "B",
+        "A"
+      ],
+      "schedule": [
+        "B",
+        "A",
+        "A",
+        "B",
+        "A",
+        "A",
+        "A",
+        "A",
+        "A",
+        "B",
+        "B",
+        "A",
+        "A",
+        "A",
+        "A",
+        "A"
+      ],
+      "pairs": [
+        "BA",
+        "AB",
+        "AA",
+        "AA",
+        "AB",
+        "BA",
+        "AA",
+        "AA"
+      ],
+      "profiler": false,
+      "screenshots": false,
+      "processSampling": false
+    },
+    "memory": {
+      "warmup": [],
+      "schedule": [
+        "B",
+        "A",
+        "A",
+        "B",
+        "A",
+        "A",
+        "A",
+        "B",
+        "B",
+        "A",
+        "A",
+        "A"
+      ],
+      "sampling": "Owned root and descendants identified by PID + process start time; sampled aggregate RSS and PSS, interval 100 ms. Import and post-completion windows kept distinct. Timing nonauthoritative.",
+      "purpose": "Four candidate memory pairs and two A/A controls with unchanged sampler/options; import and post-completion windows independently evaluated."
+    }
+  },
+  "correctness": "Exact source/package/module hashes, current-operation completion event, worker receipts/counts, complete dictionary table counts, unique-content counts, source byte counts, published generation, at least 12 readable source-derived probes. Complete all-row logical parity and lifecycle qualification still required before a product default change.",
+  "nextDecision": "Set explicit confirmatory memory ceiling from retained pilot before any acceptance cohort. Reject worker policy if visible timing neutral/opposite-signed or memory/responsiveness cost is unacceptable. No navigator overrides or deleted samples.",
+  "limits": [
+    "Focused import lanes are not full lifecycle gates.",
+    "Linux hosted evidence does not by itself qualify ARM/mobile.",
+    "RSS sum duplicates shared pages; sampled peak is not an exact physical-memory maximum."
+  ],
+  "cleanup": "No cleanup performed; no rm calls; task-owned generated resources retained.",
+  "registeredAtUtc": "2026-10-31T11:44:26.314757+00:00",
+  "pilotEvidence": "pilot run41197630710, all Chromium timing/memory lanes successful; Firefox still pending and excluded from this confirmation contract.",
+  "confirmationGates": {
+    "memory": {
+      "requiredBrowsers": [
+        "chromium"
+      ],
+      "scope": "Every candidate pair, both dictionaries, import and two-second post-completion windows; based on sampled complete process-tree aggregates. No exact continuously-observed peak claim.",
+      "maxPssIncreaseBytes": 134217728,
+      "maxPssIncreasePercent": 15,
+      "maxRssIncreaseBytes": 201326592,
+      "maxRssIncreasePercent": 15,
+      "minimumCompleteSamplesPerWindow": 2,
+      "rootExitAllowed": false,
+      "samplerErrorsAllowed": 0,
+      "rationale": "Pilot worst candidate deltas: PSS74.91MiB/7.75%, RSS75.34MiB/4.59%; permits one measured parser heap plus bounded sampling/process variability while preventing a large retained-memory increase. Gate set before confirmation, not retroactively applied to qualify pilot."
+    },
+    "timing": {
+      "minimumFasterPairs": 3,
+      "candidatePairs": 4,
+      "minimumMedianVisibleReductionPercent": 3,
+      "effectMustExceedMedianAbsoluteAAControl": true,
+      "interpretation": "Replicated paired source-import evidence per dictionary, retain every opposite-signed pair. Any failure or large control instability with effect inside its range remains inconclusive.",
+      "effectMustExceedMaxAbsoluteAAControl": true
+    },
+    "remainingProductGates": [
+      "Exact final policy build full correctness/lifecycle tests",
+      "Cold/repeated lookup and first-hover guardrails",
+      "Firefox qualification or explicit restriction to eligible measured memory-hint policy; no unmeasured broader default claim"
+    ]
+  }
+}

@@ -4,7 +4,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import {test} from 'node:test';
 import {fileURLToPath} from 'node:url';
-import {findReadableRows, fixtureOracle, loadHarness, parseArgs, runBrowser, transformHarness, validateRoute} from './firefox-import-pilot.mjs';
+import {firefoxTimingScript, findReadableRows, fixtureOracle, loadHarness, parseArgs, runBrowser, transformHarness, validateRoute} from './firefox-import-pilot.mjs';
 
 assert(process.env.MANABITAN_ADMISSION_HELD, 'Run tests through run.py --test');
 const source = process.env.MANABITAN_SOURCE ?? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../parser-screen-baseline');
@@ -89,4 +89,31 @@ test('canonical fixture preflight decodes the exact pinned source ZIPs outside t
         t.diagnostic(JSON.stringify(oracle));
         assert.equal(oracle.counts.terms, dataset === 'jmdict' ? 526_942 : 435_448);
     }
+});
+
+
+test('Firefox timing state is attached to the page Window instead of the WebDriver sandbox', async () => {
+    const {armBrowserImportTiming} = await loadHarness(source);
+    const window = {__manabitanImportCompletionSequence: 7};
+    const sandbox = vm.createContext({window, EventTarget, Event, CustomEvent, performance});
+    vm.runInContext(`
+        const listeners = {};
+        globalThis.document = {addEventListener:(type,f)=>listeners[type]=f,removeEventListener:()=>{}};
+        const bus = new EventTarget();
+        window.addEventListener = bus.addEventListener.bind(bus);
+        window.removeEventListener = bus.removeEventListener.bind(bus);
+        window.dispatchEvent = bus.dispatchEvent.bind(bus);
+        globalThis.Element = class extends Event { matches(x) {return x === '#dictionary-import-file-input';} closest() {return null;} };
+        globalThis.requestAnimationFrame = (f) => { f(); return 1; };
+        globalThis.cancelAnimationFrame = () => {};
+    `, sandbox);
+    vm.runInContext(firefoxTimingScript(armBrowserImportTiming), sandbox);
+    assert.equal(window.__manabitanImportCompletionSignalEnabled, true);
+    assert.equal(sandbox.__manabitanImportCompletionSignalEnabled, undefined);
+    vm.runInContext(`
+        listeners.change({type:'change',target:new Element('change')});
+        window.dispatchEvent(new CustomEvent('manabitan:dictionary-import-complete', {detail:{sequence:8,importRunCurrent:true,completedAtMonotonicMs:performance.now(),errorCount:0}}));
+    `, sandbox);
+    assert.equal(window.__manabitanBrowserImportTiming.sequence, 8);
+    assert(window.__manabitanBrowserImportTiming.completedAtMs >= window.__manabitanBrowserImportTiming.startedAtMs);
 });

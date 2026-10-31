@@ -12,7 +12,10 @@ const dictionary = process.env.MIDCORE_DICTIONARY;
 const mode = process.env.MIDCORE_MODE;
 const evidence = await realpath(process.env.MIDCORE_EVIDENCE);
 const adapter = await realpath(process.env.MIDCORE_ADAPTER);
-const contract = JSON.parse(await readFile(new URL('pilot-contract.json', import.meta.url), 'utf8'));
+const cohort = process.env.MIDCORE_COHORT ?? 'pilot';
+assert.ok(['pilot', 'confirmation'].includes(cohort));
+const contract = JSON.parse(await readFile(new URL(cohort === 'confirmation' ? 'confirmation-contract.json' : 'pilot-contract.json', import.meta.url), 'utf8'));
+if (cohort === 'confirmation') { assert.equal(browser, 'chromium', 'This confirmation contract currently covers Chromium only'); }
 assert.ok(['chromium', 'firefox'].includes(browser));
 assert.ok(['jmdict', 'jitendex'].includes(dictionary));
 assert.ok(['timing', 'memory'].includes(mode));
@@ -32,7 +35,7 @@ const schedule = [...warmup, ...contract.pilot[mode].schedule];
 const observations = [];
 let identity = null;
 let complete = false;
-await writeFile(path.join(evidence, 'contract.json'), JSON.stringify({contract, browser, dictionary, mode, host, adapterSha, samplerSha, schedule, sourceRoot: root}, null, 2) + '\n', {flag: 'wx'});
+await writeFile(path.join(evidence, 'contract.json'), JSON.stringify({contract, cohort, browser, dictionary, mode, host, adapterSha, samplerSha, schedule, sourceRoot: root}, null, 2) + '\n', {flag: 'wx'});
 try {
     for (const [index, arm] of schedule.entries()) {
         const label = `${String(index).padStart(2, '0')}-${arm}`;
@@ -98,6 +101,53 @@ try {
     }
     assert.equal(sha(await readFile(adapter)), adapterSha);
     assert.equal(sha(await readFile(samplerPath)), samplerSha);
+    if (cohort === 'confirmation') {
+        const retained = observations.filter((row) => !row.excluded);
+        const pairs = [];
+        for (let index = 0; index < retained.length; index += 2) {
+            const [first, second] = retained.slice(index, index + 2);
+            assert.ok(first && second);
+            const control = first.arm === second.arm;
+            const a = control || first.arm === 'A' ? first : second;
+            const b = a === first ? second : first;
+            pairs.push({control, a, b});
+        }
+        const candidates = pairs.filter((pair) => !pair.control);
+        const controls = pairs.filter((pair) => pair.control);
+        const gates = [];
+        if (mode === 'memory') {
+            const ceiling = contract.confirmationGates.memory;
+            for (const [index, pair] of candidates.entries()) {
+                for (const window of ['result', 'postCompletion']) {
+                    const summary = (row) => window === 'result' ? row.memory.result.summary : row.memory.postCompletion.result.summary;
+                    for (const [metric, absolute, percent] of [
+                        ['peakSampledAggregatePssBytes', 'maxPssIncreaseBytes', 'maxPssIncreasePercent'],
+                        ['peakSampledAggregateRssBytes', 'maxRssIncreaseBytes', 'maxRssIncreasePercent'],
+                    ]) {
+                        const a = summary(pair.a)[metric];
+                        const b = summary(pair.b)[metric];
+                        const deltaBytes = b - a;
+                        const deltaPercent = 100 * (b / a - 1);
+                        gates.push({pair: index, window, metric, deltaBytes, deltaPercent,
+                            passed: deltaBytes <= ceiling[absolute] && deltaPercent <= ceiling[percent]});
+                    }
+                }
+            }
+        } else {
+            const deltas = candidates.map(({a, b}) => 100 * (b.totalImportMs / a.totalImportMs - 1)).sort((a, b) => a - b);
+            assert.equal(deltas.length, 4);
+            const median = (deltas[1] + deltas[2]) / 2;
+            const controlsAbsolute = controls.map(({a, b}) => Math.abs(100 * (b.totalImportMs / a.totalImportMs - 1)));
+            const maximumControl = Math.max(...controlsAbsolute);
+            const ceiling = contract.confirmationGates.timing;
+            gates.push({metric: 'visible import', pairedDeltas: deltas, medianPercent: median, controlsAbsolute, maximumControl,
+                fasterPairs: deltas.filter((delta) => delta < 0).length,
+                passed: deltas.filter((delta) => delta < 0).length >= ceiling.minimumFasterPairs &&
+                    median <= -ceiling.minimumMedianVisibleReductionPercent && -median > maximumControl});
+        }
+        await writeFile(path.join(evidence, 'confirmation-gates.json'), JSON.stringify({passed: gates.every((gate) => gate.passed), gates,
+            interpretation: 'Qualification for the next product correctness/lifecycle stage only; no default change or Hoshi target claim.'}, null, 2) + '\n', {flag: 'wx'});
+    }
     complete = true;
 } finally {
     await writeFile(path.join(evidence, 'cohort-exit.json'), JSON.stringify({complete, observationCount: observations.length, schedule, identity}, null, 2) + '\n', {flag: 'wx'});

@@ -10,7 +10,13 @@ on:
         required: true
         default: pilot
         type: choice
-        options: [pilot]
+        options: [pilot, confirmation]
+      browser:
+        description: 'Browser family; confirmation currently Chromium only'
+        required: true
+        default: all
+        type: choice
+        options: [all, chromium, firefox]
 
 permissions:
   contents: read
@@ -23,11 +29,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox]
+        browser: ${{ fromJSON(inputs.browser == 'chromium' && '["chromium"]' || inputs.browser == 'firefox' && '["firefox"]' || '["chromium","firefox"]') }}
         dictionary: [jmdict, jitendex]
         mode: [timing, memory]
     env:
       MANABITAN_CLANG: /usr/bin/clang-18
+      MIDCORE_COHORT: ${{ inputs.scope }}
       MIDCORE_BROWSER: ${{ matrix.browser }}
       MIDCORE_DICTIONARY: ${{ matrix.dictionary }}
       MIDCORE_MODE: ${{ matrix.mode }}
