@@ -182,8 +182,7 @@ export type SummaryMetaCount = {
 
 export type ImportRequirement = (
     ImageImportRequirement |
-    StructuredContentImageImportRequirement |
-    StructuredContentMediaLinkImportRequirement
+    StructuredContentImageImportRequirement
 );
 
 export type ImageImportRequirement = {
@@ -197,13 +196,6 @@ export type StructuredContentImageImportRequirement = {
     type: 'structured-content-image';
     target: StructuredContent.ImageElement;
     source: StructuredContent.ImageElement;
-    entry: DictionaryDatabase.DatabaseTermEntry;
-};
-
-export type StructuredContentMediaLinkImportRequirement = {
-    type: 'structured-content-media-link';
-    target: StructuredContent.LinkElement;
-    source: StructuredContent.LinkElement;
     entry: DictionaryDatabase.DatabaseTermEntry;
 };
 

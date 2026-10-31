@@ -1883,11 +1883,7 @@ export class DictionaryImporter {
                     /** @type {import('dictionary-importer').ImportRequirement[]} */
                     const notAddedRequirements = [];
                     for (const requirement of requirements) {
-                        const mediaPath = (
-                            requirement.type === 'structured-content-media-link' ?
-                                requirement.source.href :
-                                requirement.source.path
-                        );
+                        const mediaPath = requirement.source.path;
                         if (uniqueMediaPaths.has(mediaPath)) {
                             alreadyAddedRequirements.push(requirement);
                             continue;
@@ -1930,7 +1926,7 @@ export class DictionaryImporter {
                             // Drain its media after term sinks release borrowed WASM views.
                             const deferCachedArchiveImages = rawZipPayloadReader?.supportsCachedBatchReads() === true;
                             for (const requirement of notAddedRequirements) {
-                                const file = requirement.type === 'structured-content-media-link' ? void 0 : fileMap.get(requirement.source.path);
+                                const file = fileMap.get(requirement.source.path);
                                 if (
                                     deferCachedArchiveImages &&
                                     (requirement.type === 'image' || requirement.type === 'structured-content-image') &&
@@ -3448,7 +3444,7 @@ export class DictionaryImporter {
             let batchBytes = 0;
             while (end < requirements.length && end - start < maxBatchEntries) {
                 const requirement = requirements[end];
-                const path = requirement.type === 'structured-content-media-link' ? requirement.source.href : requirement.source.path;
+                const path = requirement.source.path;
                 const file = fileMap.get(path);
                 const size = /** @type {unknown} */ (typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize'));
                 const bytes = typeof size === 'number' && Number.isSafeInteger(size) && size >= 0 ? size : maxBatchBytes;
@@ -3616,11 +3612,7 @@ export class DictionaryImporter {
      * @returns {boolean}
      */
     _tryResolveRequirementFromCachedImageMetadata(requirement) {
-        const sourcePath = (
-            requirement.type === 'structured-content-media-link' ?
-                requirement.source.href :
-                requirement.source.path
-        );
+        const sourcePath = requirement.source.path;
         const cachedMetadata = this._imageMetadataByPath.get(sourcePath);
         if (typeof cachedMetadata === 'undefined') {
             return false;
