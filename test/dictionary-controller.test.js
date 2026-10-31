@@ -280,6 +280,33 @@ describe('DictionaryController database refresh ordering', () => {
         expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', {name: 'Dictionary', alias: 'New'}, {title: 'Dictionary'}, null, null);
     });
 
+    test('metadata fetched after an options refresh renders the new dictionary with current options', async () => {
+        const metadata = /** @type {import('core').DeferredPromiseDetails<import('dictionary-importer').Summary[]>} */ (deferPromise());
+        const oldOptions = /** @type {import('core').DeferredPromiseDetails<import('settings').ProfileOptions>} */ (deferPromise());
+        const currentOptions = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [{name: 'New dictionary', alias: 'Latest'}]}));
+        const getOptions = vi.fn().mockReturnValueOnce(oldOptions.promise).mockResolvedValue(currentOptions);
+        const controller = createRefreshController();
+        Reflect.set(controller, '_settingsController', {
+            ...Reflect.get(controller, '_settingsController'),
+            getDictionaryInfo: vi.fn().mockReturnValue(metadata.promise),
+            getOptions,
+        });
+        const createEntry = vi.fn();
+        Reflect.set(controller, '_createDictionaryEntry', createEntry);
+
+        const refresh = controller._onDatabaseUpdated();
+        const optionsRefresh = controller._refreshEntriesAfterOptionsChanged();
+        await vi.waitFor(() => { expect(getOptions).toHaveBeenCalledOnce(); });
+        metadata.resolve(/** @type {import('dictionary-importer').Summary[]} */ (/** @type {unknown} */ ([{title: 'New dictionary'}])));
+        await refresh;
+        oldOptions.resolve(/** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [{name: 'Dictionary', alias: 'Stale'}]})));
+        await optionsRefresh;
+
+        expect(createEntry).toHaveBeenCalledOnce();
+        expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', currentOptions.dictionaries[0], {title: 'New dictionary'}, null, null);
+        expect(getOptions).toHaveBeenCalledTimes(2);
+    });
+
     test('busy metadata preserves cached dictionaries and entries and recovers on publication', async () => {
         const controller = createRefreshController();
         const dictionaries = Reflect.get(controller, '_dictionaries');

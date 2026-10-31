@@ -1236,6 +1236,9 @@ export class DictionaryController {
             }
             if (this._databaseStateToken !== token) { return; }
             this._dictionaries = dictionaries;
+            // Options renders started during the metadata read used the old list.
+            // Publish these rows with a fresh options read; later events still win.
+            this._entriesUpdateToken = token;
 
             await this._updateEntries(token);
             if (this._databaseStateToken !== token || !this._isEntriesUpdateCurrent(token)) { return; }
