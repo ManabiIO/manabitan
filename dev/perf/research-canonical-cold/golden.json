@@ -1,0 +1,48 @@
+{
+  "jmdict": {
+    "archiveSha": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+    "oracle": {
+      "rows": 526942,
+      "unique": 360859,
+      "storedBytes": 19482745,
+      "storageDigest": "70b48ec17416d60004be599df5fc21e2cc6fba7f75779bcbaac19458d4ec817b",
+      "referenceDigest": "cde2439cb451b5b30f09b7c43508eff2d12c0cc19f4d89eab781efcb9d91b4dd",
+      "recordPackets": 12,
+      "recordFieldBytes": 4229084,
+      "lookupIndexBytes": 19463772,
+      "recordDigest": "bbefa96a06c37c8febe8d3fbb5923a37bdd2ea94fa596b00649eafe6a646df65"
+    },
+    "logical": {
+      "recordFields": {
+        "rows": 526942,
+        "preparedIndexes": 12
+      },
+      "rowDigest": "65a3109b65c2590353171fa9687d596b937abbe298a7e659e8c27c6a8345e253",
+      "mediaUnique": 0,
+      "mediaDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "jitendex": {
+    "archiveSha": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
+    "oracle": {
+      "rows": 435448,
+      "unique": 362154,
+      "storedBytes": 38215079,
+      "storageDigest": "52fecadef5b69b7d0fc33f2c05e956db3e05fee9eaaa07659decef8de94be4bc",
+      "referenceDigest": "1a3c685be4b1af0109688001bdb5f8a934e1330f72d52485ba900e6313e633af",
+      "recordPackets": 22,
+      "recordFieldBytes": 3488944,
+      "lookupIndexBytes": 20036560,
+      "recordDigest": "2f06a72a3baa0f0ae919636a5a590ec8db31b7a645fe75b1ee60a2c688d7393f"
+    },
+    "logical": {
+      "recordFields": {
+        "rows": 435448,
+        "preparedIndexes": 22
+      },
+      "rowDigest": "103ad5589e7e92dafe827c5cc7fe402702cf03b9b551cfb1c22282443ec329c3",
+      "mediaUnique": 339,
+      "mediaDigest": "1ba86646f877c4619ebed35c04ab99c2f1e78a00f161792f9a13b6dafd753950"
+    }
+  }
+}

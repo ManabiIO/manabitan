@@ -1,0 +1,71 @@
+{
+  "base": "4a694f5d339afe9b69a27a8206ec2cfd7dba97a2",
+  "candidate": "cc88e5f40de572c3cce2c5ab4f55e6b5b8bb49e3",
+  "classification": "Independent actual4CPU cold-native-module complete-owner component qualification; no browser or full-import acceptance",
+  "preregisteredQuestion": "Does the current3parser composition retain an attributable native canonical-owner gain when every observation uses a fresh Node22 process on an actual4CPU Linux host, including first native module fetch/compile/instance work in owner wall? Localwarm modeled4CPU/actual10CPU screen failed its gate; it is retained and never pooled into this cohort.",
+  "scope": "Real pinned sourceZIP parser/CRC/normalization/typechecks,exactdedup,compression,metadata,realrecordencoding; contentmemorybacked,shardadmissionandpacketappendsstubbed. Parser+compression pools prewarmed equally before owner; nativecanonicalmodule musthave0fetchbeforeowner and1fetchduringcandidateowner. Each child exits and joinsallworkers before next. Full all-row logical/content/media/record fields/preparedlookup/storedbytes/references per observation afterowner timer.",
+  "order": [
+    [
+      "candidate",
+      [
+        "A",
+        "B"
+      ]
+    ],
+    [
+      "control",
+      [
+        "A",
+        "A"
+      ]
+    ],
+    [
+      "candidate",
+      [
+        "B",
+        "A"
+      ]
+    ],
+    [
+      "control",
+      [
+        "A",
+        "A"
+      ]
+    ],
+    [
+      "candidate",
+      [
+        "A",
+        "B"
+      ]
+    ],
+    [
+      "control",
+      [
+        "A",
+        "A"
+      ]
+    ],
+    [
+      "candidate",
+      [
+        "B",
+        "A"
+      ]
+    ],
+    [
+      "control",
+      [
+        "A",
+        "A"
+      ]
+    ]
+  ],
+  "gate": "Fourcandidatepairs andfourAAcontrols per dictionary; no retries/trimming/pooledoldobservations. Alloracles andfullnative/0fallback. Require4/4ownerwall fastereachdictionary,medianimprovement>=5% andgreaterthanmaxabsoluteAA, plusmedianCPUimprovement>maxabsoluteAA CPU. maxRSS componentguard candidateuplift<=128MiB AND15%everypair. A failedcohortdoesnotjustifybrowserexpansion orintegration.",
+  "memoryBoundary": "Node process lifetime maxRSS includes post-owner full oracles; componentguard only, not whole-browser memory proof.",
+  "coldBoundary": "Freshprocess meansnewmodule caches; Node parser/worker startup and archivecatalog read excludedequally. First nativecanonicalfetch/compile counted in owning operation. OSfilecachemaybewarm andisnotclaimedcold disk.",
+  "buildIdentity": "Node22.22.0,explicitClang18onUbuntu24.04; buildbothfrozencommitsbeforetiming; assertcommonruntime/WASMbytesidentical exceptDB/metrics/newkernel. Independentlyrehash fixturefilesandbankdigest.",
+  "researchSafety": "Do not merge researchbranch into develop. FrozenPR643 andlocalcandidatebranchpreserved. No storage/dedupe/validation/media/publicationsemantics changes.",
+  "observerAudit": "Observerauditbeforehostedobservations: remove diagnostic wrappers aroundmetadata capacity, rawcache and read/block methods. Baselinecapacityhelpercanrunperrow while nativebatchcallsitless; thatwrapcouldinflate apparentgain. Retainonlyper-group/parserIPC/compressionjob routecounts andproductionmetrics. Fullroworaclesrunafterowner. Earlierlocalwarmgatefailedandremainsrejected; itsCPUeffect isnotacceptance."
+}

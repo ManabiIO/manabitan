@@ -1,188 +1,77 @@
+# Research only. Never merge this branch into develop.
 name: Benchmarks (Manual)
 
 on:
   workflow_dispatch:
-    inputs:
-      baseline_sha:
-        description: 'Full same-repository commit SHA for matched browser comparisons'
-        required: true
-        default: 'a2ef0f168c26553cba01cf363faf319eabdbeb05'
-        type: string
-      workload:
-        description: 'Comparison boundaries to run'
-        type: choice
-        default: all
-        options: [all, imports]
-      run_order:
-        description: 'Counterbalance observations; CROSSOVER runs both orders on one host'
-        type: choice
-        default: ABBA
-        options: [ABBA, BAAB, CROSSOVER]
-      repetitions:
-        description: 'Repeat the chosen schedule on this host with fresh observations'
-        type: choice
-        default: '1'
-        options: ['1', '2', '3']
 
 permissions:
   contents: read
 
 jobs:
-  bench:
-    name: Benchmarks
-    if: inputs.workload != 'imports'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - uses: ./.github/actions/setup
-
-      - name: Run Benchmarks
-        continue-on-error: true
-        uses: CodSpeedHQ/action@63ae6025a0ffee97d7736a37c9192dbd6ed4e75f # v3.2
-        with:
-          token: ${{ secrets.CODSPEED_TOKEN }}
-          run: MANABITAN_CODSPEED=1 npm run bench
-
-  browser-comparison:
-    name: Browser comparison (${{ matrix.boundary }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
+  canonical-cold-owner:
+    name: Cold canonical owner (${{ matrix.dictionary }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(inputs.workload == 'imports' && '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"}]' || '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"},{"boundary":"lookup-lifecycle","dictionary":""}]') }}
+        dictionary: [jmdict, jitendex]
     env:
-      PERF_BASELINE_SHA: ${{ inputs.baseline_sha }}
-      PERF_REPETITIONS: ${{ inputs.repetitions || '1' }}
-      PERF_DICTIONARY: ${{ matrix.dictionary }}
-      PERF_BOUNDARY: ${{ matrix.boundary }}
-      PERF_RUN_ORDER: ${{ inputs.run_order == 'CROSSOVER' && 'A1 B1 B2 A2 B3 A3 A4 B4' || inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
+      MANABITAN_CLANG: /usr/bin/clang-18
+      COLD_OWNER_DICTIONARY: ${{ matrix.dictionary }}
+      COLD_OWNER_EVIDENCE: ${{ github.workspace }}/builds/canonical-cold-owner
+      COLD_OWNER_CACHE: ${{ github.workspace }}/builds/e2e-dictionary-cache
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup
-
-      - name: Install matching Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: Restore pinned source archives
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Initialize retained evidence and require actual four-CPU host
+        run: |
+          set -euo pipefail
+          mkdir -p "$COLD_OWNER_EVIDENCE" "$COLD_OWNER_CACHE"
+          test -x "$MANABITAN_CLANG"
+          "$MANABITAN_CLANG" --version > "$COLD_OWNER_EVIDENCE/compiler-version.txt"
+          git rev-parse HEAD > "$COLD_OWNER_EVIDENCE/research-head.txt"
+          node --input-type=module - <<'NODE'
+          import assert from 'node:assert/strict';
+          import os from 'node:os';
+          import fs from 'node:fs';
+          assert.equal(process.platform, 'linux');
+          assert.equal(os.cpus().length, 4);
+          assert.equal(process.version, 'v22.22.0');
+          fs.writeFileSync(process.env.COLD_OWNER_EVIDENCE + '/host.json', JSON.stringify({node:process.version,cpus:os.cpus(),availableParallelism:os.availableParallelism(),memoryBytes:os.totalmem(),load:os.loadavg()},null,2));
+          NODE
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: builds/e2e-dictionary-cache
-          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
-
-      - name: Prepare both source revisions before timing
-        shell: bash
+          key: canonical-cold-owner-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}-${{ matrix.dictionary }}-v1
+          restore-keys: |
+            midcore-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify helpers and execute the registered cold-process owner cohort
         run: |
           set -euo pipefail
-          [[ "$PERF_BASELINE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          git cat-file -e "${PERF_BASELINE_SHA}^{commit}"
-          comparison_root=$(mktemp -d "$RUNNER_TEMP/browser-comparison.XXXXXX")
-          baseline="$comparison_root/baseline"
-          evidence="$comparison_root/evidence"
-          mkdir -p "$evidence"
-          git worktree add --detach "$baseline" "$PERF_BASELINE_SHA"
-          cmp package-lock.json "$baseline/package-lock.json"
-          cmp test/perf/dictionaries.lock.json "$baseline/test/perf/dictionaries.lock.json"
-          # Both arms use the candidate measurement harness. Product source is
-          # untouched in the baseline; this deliberate test overlay is recorded.
-          cp test/chromium/extension-two-dictionary-import.e2e.js "$baseline/test/chromium/extension-two-dictionary-import.e2e.js"
-          cp dev/perf/import-benchmark.js "$baseline/dev/perf/import-benchmark.js"
-          cp dev/perf/benchmark-support.js "$baseline/dev/perf/benchmark-support.js"
-          node ./dev/perf/prepare-dictionaries.js
-          mkdir -p "$baseline/builds/e2e-dictionary-cache"
-          cp builds/e2e-dictionary-cache/*.zip "$baseline/builds/e2e-dictionary-cache/"
-          (
-            cd "$baseline"
-            npm ci
-            npm run build:libs
-            npm run build -- --target chrome
-          )
-          npm run build -- --target chrome
-          printf 'PERF_BASELINE_ROOT=%s\nPERF_EVIDENCE_ROOT=%s\n' "$baseline" "$evidence" >> "$GITHUB_ENV"
-          git rev-parse HEAD > "$evidence/candidate-sha.txt"
-          printf '%s\n' "$PERF_BASELINE_SHA" > "$evidence/baseline-sha.txt"
-          sha256sum test/chromium/extension-two-dictionary-import.e2e.js "$baseline/test/chromium/extension-two-dictionary-import.e2e.js" > "$evidence/shared-harness-sha256.txt"
-          sha256sum builds/manabitan-chrome.zip "$baseline/builds/manabitan-chrome.zip" > "$evidence/package-sha256.txt"
-          sha256sum ext/js/core/safe-performance.js "$baseline/ext/js/core/safe-performance.js" > "$evidence/instrumentation-source-sha256.txt"
-          sha256sum dev/perf/import-benchmark.js "$baseline/dev/perf/import-benchmark.js" dev/perf/benchmark-support.js "$baseline/dev/perf/benchmark-support.js" > "$evidence/shared-import-tools-sha256.txt"
-          python3 - "$GITHUB_WORKSPACE" "$baseline" <<'PYTHON'
-          import hashlib, json, sys, zipfile
-          for label, root in zip(('candidate', 'baseline'), sys.argv[1:]):
-              with zipfile.ZipFile(root + '/builds/manabitan-chrome.zip') as archive:
-                  hashes = {entry.filename: hashlib.sha256(archive.read(entry)).hexdigest()
-                            for entry in archive.infolist() if not entry.is_dir()}
-              with open(root + '/builds/package-entry-sha256.json', 'w') as output:
-                  json.dump(hashes, output, sort_keys=True, indent=2)
-          PYTHON
-          cp builds/package-entry-sha256.json "$evidence/candidate-package-entry-sha256.json"
-          cp "$baseline/builds/package-entry-sha256.json" "$evidence/baseline-package-entry-sha256.json"
-          case "$PERF_REPETITIONS" in 1|2|3) ;; *) echo 'Invalid repetition count' >&2; exit 1 ;; esac
-          read -r -a schedule <<< "$PERF_RUN_ORDER"
-          stride=0
-          for observation in "${schedule[@]}"; do
-            suffix="${observation:1}"
-            [[ "$suffix" =~ ^[1-4]$ ]]
-            if (( suffix > stride )); then stride="$suffix"; fi
-          done
-          expanded=()
-          for ((repetition=0; repetition<PERF_REPETITIONS; ++repetition)); do
-            for observation in "${schedule[@]}"; do
-              expanded+=("${observation:0:1}$(( ${observation:1} + repetition * stride ))")
-            done
-          done
-          printf '%s\n' "${expanded[*]}" > "$evidence/observation-order.txt"
-          git status --porcelain > "$evidence/candidate-status.txt"
-          git -C "$baseline" status --porcelain > "$evidence/baseline-status-with-harness-overlay.txt"
-
-      - name: Run counterbalanced adjacent observations
-        shell: bash
-        env:
-          MANABITAN_E2E_STRICT_RUNTIME: '1'
-          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
-          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
-          MANABITAN_E2E_PHASE_PROFILING: '0'
-          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
-          MANABITAN_E2E_PROCESS_SAMPLING: '0'
-          MANABITAN_CHROMIUM_HEADLESS: '1'
-          MANABITAN_CHROMIUM_BUILD_TARGET: 'chrome'
-          MANABITAN_E2E_SKIP_BUILD: '1'
-        run: |
+          flock -x "$RUNNER_TEMP/manabitan-cold-owner.lock" bash <<'BASH'
           set -euo pipefail
-          candidate="$GITHUB_WORKSPACE"
-          read -r -a observations < "$PERF_EVIDENCE_ROOT/observation-order.txt"
-          for observation in "${observations[@]}"; do
-            source_root="$candidate"
-            if [[ "$observation" == A* ]]; then source_root="$PERF_BASELINE_ROOT"; fi
-            output="$PERF_EVIDENCE_ROOT/$observation"
-            mkdir -p "$output"
-            node "$candidate/dev/perf/host-environment.js" > "$output/host-before.json"
-            uptime > "$output/uptime-before.txt"
-            (
-              cd "$source_root"
-              if [[ -n "$PERF_DICTIONARY" ]]; then
-                node ./dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --output "$output"
-              else
-                MANABITAN_CHROMIUM_E2E_REPORT="$output/lookup-lifecycle.html" node ./test/chromium/extension-two-dictionary-import.e2e.js
-              fi
-            ) 2>&1 | tee "$output/run.log"
-            node "$candidate/dev/perf/host-environment.js" > "$output/host-after.json"
-            uptime > "$output/uptime-after.txt"
-          done
-
-      - name: Capture separate candidate import trace after timing
-        if: matrix.dictionary != ''
-        run: >-
-          node ./dev/perf/import-benchmark.js "$PERF_DICTIONARY"
-          --runs 1 --no-build --build-target chrome --trace
-          --output "$PERF_EVIDENCE_ROOT/candidate-trace"
-
-      - name: Preserve comparison evidence including failed observations
+          npm ci
+          node --test dev/perf/research-canonical-cold/analysis.test.mjs
+          node dev/perf/research-canonical-cold/cohort.mjs
+          BASH
+      - name: Summarize measured boundary and decision
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        run: |
+          node --input-type=module - <<'NODE' >> "$GITHUB_STEP_SUMMARY"
+          import fs from 'node:fs';
+          const p=process.env.COLD_OWNER_EVIDENCE+'/cohort.json';
+          console.log('Component only: fresh processes on actual four-CPU Linux; no browser/full-import acceptance.');
+          if(fs.existsSync(p)){const r=JSON.parse(fs.readFileSync(p,'utf8'));console.log(JSON.stringify({status:r.status,completed:r.completed,observations:r.observations.length,analysis:r.analysis,error:r.error},null,2));}
+          NODE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
         with:
-          name: browser-comparison-${{ matrix.boundary }}
-          path: ${{ env.PERF_EVIDENCE_ROOT }}
+          name: canonical-cold-owner-${{ matrix.dictionary }}
+          path: builds/canonical-cold-owner
           if-no-files-found: error
-          retention-days: 14
