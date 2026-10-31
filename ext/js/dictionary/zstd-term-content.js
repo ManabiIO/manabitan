@@ -447,16 +447,16 @@ export async function compressTermContentZstdBatch(contents, dictName) {
     if (contents.length < 2) {
         return contents.map((content) => Uint8Array.from(compressTermContentZstd(content, dictName)));
     }
+    /** @type {TermContentCompressionPool|null} */
+    let pool = null;
     try {
-        const pool = await initializeCompressionPool();
+        pool = await initializeCompressionPool();
         if (pool !== null && !pool.failed) {
             return await pool.compress(contents, dictName);
         }
     } catch (error) {
         log.warn(new Error(`Parallel term content compression failed; using synchronous compression: ${error}`));
-        compressionPool?.close();
-        compressionPool = null;
-        compressionPoolPromise = null;
+        discardCompressionPool(pool);
         if (contents.some((content) => content.byteLength === 0)) {
             throw error;
         }
@@ -482,8 +482,10 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName, op
         });
         return {chunks, envelopeMs, wrapped: true};
     }
+    /** @type {TermContentCompressionPool|null} */
+    let pool = null;
     try {
-        const pool = await initializeCompressionPool();
+        pool = await initializeCompressionPool();
         if (pool !== null && !pool.failed) {
             return await pool.compressWrapped(contents, dictName, options);
         }
@@ -494,9 +496,7 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName, op
                 `Parallel wrapped term content compression failed after input transfer; caller repack required: ${error}` :
                 `Parallel wrapped term content compression failed; using synchronous compression: ${error}`,
         ));
-        compressionPool?.close();
-        compressionPool = null;
-        compressionPoolPromise = null;
+        discardCompressionPool(pool);
         // A successful postMessage transfer detaches the sender's packed slab.
         // The block-store owner can reconstruct those slabs from stable source
         // bytes; attempting the local fallback here would only fail or encode an
@@ -582,8 +582,10 @@ export function beginCompressWrappedTermContentZstdSpansBatch(
         void sourceConsumed.catch(() => {});
         return {sourceConsumed, completion};
     }
+    /** @type {TermContentCompressionPool|null} */
+    let pool = null;
     const operation = (async () => {
-        const pool = await initializeCompressionPool();
+        pool = await initializeCompressionPool();
         if (pool === null || pool.failed) {
             throw new Error('Parallel span compression is unavailable');
         }
@@ -599,14 +601,24 @@ export function beginCompressWrappedTermContentZstdSpansBatch(
     })();
     const sourceConsumed = operation.then(({sourceConsumed: value}) => value);
     const completion = operation.then(({completion: value}) => value).catch((error) => {
-        compressionPool?.close();
-        compressionPool = null;
-        compressionPoolPromise = null;
+        discardCompressionPool(pool);
         throw error;
     });
     void sourceConsumed.catch(() => {});
     void completion.catch(() => {});
     return {sourceConsumed, completion};
+}
+
+/**
+ * A failed batch owns only the pool which accepted its jobs. Other batches
+ * may already be starting a replacement; its startup promise belongs to the
+ * initializer and must remain shared until all readiness waits settle.
+ * @param {TermContentCompressionPool|null} pool
+ */
+function discardCompressionPool(pool) {
+    if (pool === null) { return; }
+    pool.close();
+    if (compressionPool === pool) { compressionPool = null; }
 }
 
 /** @returns {Promise<TermContentCompressionPool|null>} */
