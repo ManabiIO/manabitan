@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {isDictionaryImportBusyError} from '../../core/dictionary-import-busy-error.js';
 import {ExtensionError} from '../../core/extension-error.js';
 import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
@@ -57,28 +58,37 @@ export class SortFrequencyDictionaryController {
 
     /** */
     async prepare() {
-        await this._onDatabaseUpdated();
-
-        this._settingsController.application.on('databaseUpdated', this._onDatabaseUpdated.bind(this));
+        this._settingsController.application.on('databaseUpdated', () => this._onDatabaseUpdated().catch((error) => { log.error(error); }));
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
         this._sortFrequencyDictionarySelect.addEventListener('change', this._onSortFrequencyDictionarySelectChange.bind(this));
         this._sortFrequencyDictionaryOrderSelect.addEventListener('change', this._onSortFrequencyDictionaryOrderSelectChange.bind(this));
         this._sortFrequencyDictionaryOrderAutoButton.addEventListener('click', this._onSortFrequencyDictionaryOrderAutoButtonClick.bind(this));
+
+        await this._onDatabaseUpdated();
     }
 
     // Private
 
     /** */
     async _onDatabaseUpdated() {
-        /** @type {?import('core').TokenObject} */
+        /** @type {import('core').TokenObject} */
         const token = {};
         this._getDictionaryInfoToken = token;
         try {
-            const dictionaries = await this._settingsController.getDictionaryInfo();
+            let dictionaries;
+            try {
+                dictionaries = await this._settingsController.getDictionaryInfo();
+            } catch (error) {
+                // Mutation owns metadata until its databaseUpdated publication.
+                // Keep the last usable controls and wait for that event.
+                if (isDictionaryImportBusyError(error)) { return; }
+                throw error;
+            }
             if (this._getDictionaryInfoToken !== token) { return; }
 
+            // Metadata is global. Publish it before reading profile options so
+            // a newer options event can render against the same dictionary list.
             this._updateDictionaryOptions(dictionaries);
-
             const request = ++this._optionsRenderRequest;
             const optionsContext = this._settingsController.getOptionsContext();
             const options = await this._settingsController.getOptions();

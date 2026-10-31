@@ -1,6 +1,9 @@
 /* Copyright (C) 2026 Manabitan authors
  * SPDX-License-Identifier: GPL-3.0-or-later */
 import {describe, expect, test, vi} from 'vitest';
+import {createDictionaryImportBusyError} from '../ext/js/core/dictionary-import-busy-error.js';
+import {ExtensionError} from '../ext/js/core/extension-error.js';
+import {log} from '../ext/js/core/log.js';
 import {deferPromise} from '../ext/js/core/utilities.js';
 import {DictionaryController} from '../ext/js/pages/settings/dictionary-controller.js';
 /**
@@ -275,6 +278,52 @@ describe('DictionaryController database refresh ordering', () => {
 
         expect(createEntry).toHaveBeenCalledOnce();
         expect(createEntry).toHaveBeenCalledWith(0, 'profile-a', {name: 'Dictionary', alias: 'New'}, {title: 'Dictionary'}, null, null);
+    });
+
+    test('busy metadata preserves cached dictionaries and entries and recovers on publication', async () => {
+        const controller = createRefreshController();
+        const dictionaries = Reflect.get(controller, '_dictionaries');
+        const entries = [{cleanup: vi.fn()}];
+        Reflect.set(controller, '_dictionaryEntries', entries);
+        const busy = ExtensionError.deserialize(JSON.parse(JSON.stringify(ExtensionError.serialize(createDictionaryImportBusyError('getDictionaryInfoOffscreen')))));
+        const getDictionaryInfo = vi.fn().mockRejectedValueOnce(busy).mockResolvedValueOnce([{title: 'New dictionary'}]);
+        const updateEntries = vi.fn().mockResolvedValue(void 0);
+        Reflect.set(controller, '_settingsController', {...Reflect.get(controller, '_settingsController'), getDictionaryInfo});
+        Reflect.set(controller, '_updateEntries', updateEntries);
+        const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
+        try {
+            controller._onDatabaseUpdatedEvent({type: 'dictionary', cause: 'import'});
+            await vi.waitFor(() => { expect(getDictionaryInfo).toHaveBeenCalledOnce(); });
+            const busyGeneration = Reflect.get(controller, '_databaseStateToken');
+            expect(busyGeneration).not.toBeNull();
+            expect(Reflect.get(controller, '_entriesUpdateToken')).toBe(busyGeneration);
+            expect(Reflect.get(controller, '_dictionaries')).toBe(dictionaries);
+            expect(Reflect.get(controller, '_dictionaryEntries')).toBe(entries);
+            expect(entries[0].cleanup).not.toHaveBeenCalled();
+            expect(updateEntries).not.toHaveBeenCalled();
+            expect(logError).not.toHaveBeenCalled();
+            controller._onDatabaseUpdatedEvent({type: 'dictionary', cause: 'import'});
+            await vi.waitFor(() => { expect(updateEntries).toHaveBeenCalledOnce(); });
+            expect(Reflect.get(controller, '_dictionaries')).toStrictEqual([{title: 'New dictionary'}]);
+            expect(Reflect.get(controller, '_databaseStateToken')).not.toBe(busyGeneration);
+        } finally {
+            logError.mockRestore();
+        }
+    });
+
+    test.each(['plain-message', 'unknown-code'])('reports %s metadata failure instead of treating it as busy', async (kind) => {
+        const controller = createRefreshController();
+        const failure = kind === 'plain-message' ? new Error(createDictionaryImportBusyError('getDictionaryInfoOffscreen').message) : new ExtensionError('Corrupt metadata');
+        if (failure instanceof ExtensionError) { failure.data = {code: 'CORRUPT_METADATA'}; }
+        Reflect.set(controller, '_settingsController', {...Reflect.get(controller, '_settingsController'), getDictionaryInfo: vi.fn().mockRejectedValueOnce(failure)});
+        const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
+        try {
+            await controller._onDatabaseUpdated();
+            expect(logError).toHaveBeenCalledExactlyOnceWith(failure);
+            expect(Reflect.get(controller, '_dictionaries')).toBeNull();
+        } finally {
+            logError.mockRestore();
+        }
     });
 
     test('reordering replaces the entry array after cleaning each existing entry once', () => {

@@ -17,6 +17,7 @@
  */
 
 import * as ajvSchemas0 from '../../../lib/validate-schemas.js';
+import {isDictionaryImportBusyError} from '../../core/dictionary-import-busy-error.js';
 import {reportDiagnostics} from '../../core/diagnostics-reporter.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {ExtensionError} from '../../core/extension-error.js';
@@ -1224,9 +1225,15 @@ export class DictionaryController {
         const token = {};
         this._databaseStateToken = token;
         this._entriesUpdateToken = token;
-        this._dictionaries = null;
         try {
-            const dictionaries = await this._settingsController.getDictionaryInfo();
+            let dictionaries;
+            try {
+                dictionaries = await this._settingsController.getDictionaryInfo();
+            } catch (error) {
+                // Keep the last usable list until mutation publishes metadata.
+                if (isDictionaryImportBusyError(error)) { return; }
+                throw error;
+            }
             if (this._databaseStateToken !== token) { return; }
             this._dictionaries = dictionaries;
 
