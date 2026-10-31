@@ -66,6 +66,33 @@ function requireCompressedBytes(value) {
     return value;
 }
 
+/**
+ * @param {Uint32Array} sourceOffsets
+ * @param {Uint32Array} sourceLengths
+ * @param {Uint32Array} blockStartIndexes
+ * @param {Uint32Array} blockLengths
+ * @throws {RangeError} If the blocks do not partition the source spans.
+ */
+function validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, blockStartIndexes, blockLengths) {
+    const blockCount = blockLengths.length;
+    if (
+        blockCount === 0 ||
+        sourceOffsets.length !== sourceLengths.length ||
+        blockStartIndexes.length !== blockCount + 1 ||
+        blockStartIndexes[0] !== 0 ||
+        blockStartIndexes[blockCount] !== sourceOffsets.length
+    ) {
+        throw new RangeError('Term content compression block plan is invalid');
+    }
+    for (let blockIndex = 0; blockIndex < blockCount; ++blockIndex) {
+        const start = blockStartIndexes[blockIndex];
+        const end = blockStartIndexes[blockIndex + 1];
+        if (end < start || end > sourceOffsets.length) {
+            throw new RangeError('Term content compression block span is invalid');
+        }
+    }
+}
+
 export class TermContentCompressionPool {
     /** @param {Worker[]} workers */
     constructor(workers) {
@@ -151,23 +178,7 @@ export class TermContentCompressionPool {
      */
     beginCompressWrappedSpans(source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, dictName, options = {}) {
         if (this._failed) { throw new Error('Term content compression pool is unavailable'); }
-        const blockCount = blockLengths.length;
-        if (
-            blockCount === 0 ||
-            sourceOffsets.length !== sourceLengths.length ||
-            blockStartIndexes.length !== blockCount + 1 ||
-            blockStartIndexes[0] !== 0 ||
-            blockStartIndexes[blockCount] !== sourceOffsets.length
-        ) {
-            throw new RangeError('Term content compression block plan is invalid');
-        }
-        for (let blockIndex = 0; blockIndex < blockCount; ++blockIndex) {
-            const start = blockStartIndexes[blockIndex];
-            const end = blockStartIndexes[blockIndex + 1];
-            if (end < start || end > sourceOffsets.length) {
-                throw new RangeError('Term content compression block span is invalid');
-            }
-        }
+        validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, blockStartIndexes, blockLengths);
         const compressionExperiments = snapshotTermBankExperiments(options);
         const envelopeMsByWorker = new Float64Array(this._workers.length);
         const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
@@ -566,6 +577,7 @@ export function beginCompressWrappedTermContentZstdSpansBatch(
     options = snapshotTermBankExperiments(options);
     if (blockLengths.length === 1) {
         const completion = Promise.resolve().then(() => {
+            validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, blockStartIndexes, blockLengths);
             const result = compressWrappedTermContentZstdSpans(
                 source,
                 sourceOffsets,

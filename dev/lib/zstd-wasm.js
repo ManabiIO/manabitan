@@ -164,8 +164,8 @@ export function compress(content, level = 3) {
     try {
         const destination = module._malloc(bound);
         if (destination === 0) { throw new Error('Failed to allocate Zstd destination buffer'); }
-        module.HEAPU8.set(content, source);
         try {
+            module.HEAPU8.set(content, source);
             const size = module._ZSTD_compress(destination, bound, source, content.byteLength, level);
             checkResult(size);
             return module.HEAPU8.slice(destination, destination + size);
