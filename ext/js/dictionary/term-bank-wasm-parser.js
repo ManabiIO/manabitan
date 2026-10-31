@@ -2621,7 +2621,8 @@ class ParallelTermBankPipelineRun {
     /** @returns {Promise<boolean>} */
     async run() {
         try {
-            const {workers} = await this._poolLease.getWorkers();
+            const [{workers}] = await waitForParallelWork([this._poolLease.getWorkers()], this._shouldCancel);
+            this._throwIfStopped();
             await this._runPipeline(workers);
             this._keepWorkers = true;
             return true;
@@ -2742,7 +2743,7 @@ class ParallelTermBankPipelineRun {
                 if (this._pipelineShouldCancel()) { throw createParallelParserCancellationError(); }
                 await this._waitForLead(groupIndex);
                 const sourceGroup = this._groups[groupIndex];
-                const group = await waitForParallelSources(
+                const group = await waitForParallelWork(
                     sourceGroup.map((source) => loadParallelTermBankSource(source)),
                     () => this._pipelineShouldCancel(),
                 );
@@ -3181,7 +3182,7 @@ function canUseParallelParserForSourceSize(totalBytes) {
  */
 async function createParallelParserWorkers(abortController, workerCount) {
     const {signal} = abortController;
-    const module = await compileTermBankWasmModule();
+    const module = await waitForParallelParserModule(signal);
     if (signal.aborted) { throw createParallelParserCancellationError(); }
     /** @type {Worker[]} */
     const workers = [];
@@ -3206,6 +3207,31 @@ async function createParallelParserWorkers(abortController, workerCount) {
         await Promise.allSettled(ready);
         throw error;
     }
+}
+
+/**
+ * A cancelled startup stops waiting without cancelling the shared module task.
+ * Its late result remains observed and can still serve the next import.
+ * @param {AbortSignal} signal
+ * @returns {Promise<WebAssembly.Module>}
+ */
+function waitForParallelParserModule(signal) {
+    return new Promise((resolve, reject) => {
+        const cleanup = () => { signal.removeEventListener('abort', onAbort); };
+        const onAbort = () => {
+            cleanup();
+            reject(createParallelParserCancellationError());
+        };
+        signal.addEventListener('abort', onAbort, {once: true});
+        void compileTermBankWasmModule().then((module) => {
+            cleanup();
+            resolve(module);
+        }, (error) => {
+            cleanup();
+            reject(error);
+        });
+        if (signal.aborted) { onAbort(); }
+    });
 }
 
 /**
@@ -3437,18 +3463,19 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
 }
 
 /**
- * Keeps cancellation responsive while source ZIP workers are still inflating.
- * The source promises remain observed after cancellation so late rejections do
- * not become unhandled; their owning importer may abort the underlying reads.
- * @param {Promise<ParallelTermBankSourceValue>[]} promises
+ * Keeps cancellation responsive during worker startup and source ZIP reads.
+ * Pending promises remain observed after cancellation. The run's pool lease
+ * retires its startup workers; the importer owns cancellation of ZIP reads.
+ * @template T
+ * @param {Promise<T>[]} promises
  * @param {() => boolean} shouldCancel
- * @returns {Promise<ParallelTermBankSourceValue[]>}
+ * @returns {Promise<T[]>}
  */
-function waitForParallelSources(promises, shouldCancel) {
+function waitForParallelWork(promises, shouldCancel) {
     return new Promise((resolve, reject) => {
         let settled = false;
         const cleanup = () => { clearInterval(cancellationIntervalId); };
-        /** @param {ParallelTermBankSourceValue[]} value */
+        /** @param {T[]} value */
         const settleResolve = (value) => {
             if (settled) { return; }
             settled = true;
