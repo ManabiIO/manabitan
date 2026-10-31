@@ -67,6 +67,7 @@ import {hashPairToHex, hashTermEntryContentBytesPair} from './term-entry-content
 import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} from './term-import-metrics.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
+import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 
@@ -723,6 +724,8 @@ export class DictionaryImporter {
         this._isCancelled = typeof isCancelled === 'function' ? isCancelled : () => false;
         /** @type {boolean} */
         this._ignoreCancellation = false;
+        /** @type {DictionaryZipReadScope|null} */
+        this._directZipReads = null;
         /** @type {import('dictionary-importer').ProgressData} */
         this._progressData = this._createProgressData();
         /** @type {number} */
@@ -808,8 +811,16 @@ export class DictionaryImporter {
      */
     async importDictionary(dictionaryDatabase, archiveContent, details) {
         const archiveOwnership = new DictionaryArchiveOwnership();
+        const directZipReads = new DictionaryZipReadScope(() => { this._throwIfCancelled(); });
+        this._directZipReads = directZipReads;
         try {
-            const result = await this._importDictionary(dictionaryDatabase, archiveContent, details, archiveOwnership);
+            let result;
+            try {
+                result = await this._importDictionary(dictionaryDatabase, archiveContent, details, archiveOwnership);
+            } finally {
+                await directZipReads.dispose();
+                this._directZipReads = null;
+            }
             result.outcome ??= {status: result.result === null ? 'aborted' : 'published'};
             const closeError = await archiveOwnership.closeIfOwned();
             if (closeError !== null) {
@@ -2665,6 +2676,9 @@ export class DictionaryImporter {
             });
         } finally {
             acceptMediaPrefetch = false;
+            // A failed sink can leave media decoders pending. Abort and join
+            // direct reads before waiting for prefetch or closing the archive.
+            await this._directZipReads?.dispose();
             await mediaPrefetch;
             prefetchedNoMetadataMedia.length = 0;
             eventLoopYielder.close();
@@ -6135,10 +6149,15 @@ null;
                 useWebWorkers = false;
             }
         }
-        return await getData.call(entry, writer, {
+        const read = (/** @type {AbortSignal|undefined} */ readSignal) => getData.call(entry, writer, {
             useWebWorkers,
-            ...(typeof signal === 'undefined' ? {} : {signal}),
+            ...(typeof readSignal === 'undefined' ? {} : {signal: readSignal}),
         });
+        // Explicit signals belong to the source pipeline. Reads outside an
+        // import retain their existing no-signal behavior.
+        return await (typeof signal === 'undefined' && this._directZipReads !== null ?
+            this._directZipReads.read(read) :
+            read(signal));
     }
 
     /**

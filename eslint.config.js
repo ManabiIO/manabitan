@@ -45,6 +45,7 @@ const compat = new FlatCompat({
 header.rules.header.meta.schema = false;
 
 const manabitanHeaderFiles = [
+    'ext/js/dictionary/dictionary-zip-read-scope.js',
     'ext/js/app/reader-lookup-bridge.js',
     'ext/js/app/reader-lookup-integration.js',
     'dev/lib/zstd-simd-module.d.ts',
