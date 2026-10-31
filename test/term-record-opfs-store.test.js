@@ -5184,6 +5184,101 @@ describe('TermRecordOpfsStore', () => {
         }
     });
 
+    test.each(/** @type {const} */ (['close', 'abort']))('reset joins a derived repair through late %s settlement before removing storage', async (phase) => {
+        const dictionaryName = `Reset during repair ${phase}`;
+        const fileBytesByName = new Map();
+        const entered = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const resume = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const abortEntered = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        const abortResume = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        let enabled = false;
+        let paused = false;
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName, {
+            beforeWrite: async (name) => {
+                if (!enabled || paused || phase !== 'abort' || !name.endsWith('.mbti')) { return; }
+                paused = true;
+                entered.resolve();
+                await resume.promise;
+            },
+            beforeClose: async (name) => {
+                if (!enabled || paused || phase !== 'close' || !name.endsWith('.mbti')) { return; }
+                paused = true;
+                entered.resolve();
+                await resume.promise;
+            },
+            onAbort: async () => {
+                if (!enabled || phase !== 'abort') { return; }
+                abortEntered.resolve();
+                await abortResume.promise;
+            },
+        });
+        const writerStore = new TermRecordOpfsStore();
+        Reflect.set(writerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        const encoder = new TextEncoder();
+        await writerStore.appendBatchFromArtifactChunkResolvedContent({
+            dictionary: dictionaryName,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: 1,
+            expressionBytesList: [encoder.encode('世代')],
+            readingBytesList: [encoder.encode('せだい')],
+            readingEqualsExpressionList: new Uint8Array([0]),
+            scoreList: new Int32Array([1]),
+            sequenceList: new Int32Array([1]),
+        }, [0], [8], 'raw');
+        await writerStore._closeAllWritables();
+        const indexFileName = [...fileBytesByName.keys()].find((name) => name.endsWith('.mbti'));
+        if (typeof indexFileName !== 'string') { throw new Error('Expected authoritative container'); }
+        const indexBytes = fileBytesByName.get(indexFileName);
+        if (typeof indexBytes === 'undefined') { throw new Error('Expected authoritative bytes'); }
+        const indexView = new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength);
+        const derivedOffset = 40 + 40 + 16 + indexView.getUint32(40 + 20, true);
+        indexBytes[derivedOffset + 8] ^= 0xff;
+
+        const readerStore = new TermRecordOpfsStore();
+        Reflect.set(readerStore, '_recordsDirectoryHandle', recordsDirectoryHandle);
+        await readerStore._loadShardFiles(false);
+        const remove = vi.spyOn(readerStore, '_removeStorageFileOrTruncate');
+        enabled = true;
+        const repair = readerStore._tryRepairPersistentDictionaryIndex(dictionaryName);
+        await entered.promise;
+        let resetSettled = false;
+        const reset = readerStore.reset();
+        const resetObserved = reset.then(
+            () => { resetSettled = true; },
+            () => { resetSettled = true; },
+        );
+        let settledWhileOwned = false;
+        let removalsWhileOwned = 0;
+        try {
+            // The fixed owner cancels immediately and joins the repair. The old
+            // reset instead finishes deletion while that writer is still alive.
+            await vi.waitFor(() => {
+                const control = Reflect.get(readerStore, '_persistentIndexRepairControlByDictionary').get(dictionaryName);
+                expect(resetSettled || control?.cancelled === true).toBe(true);
+            });
+            if (phase === 'abort') {
+                resume.resolve();
+                await abortEntered.promise;
+            }
+            settledWhileOwned = resetSettled;
+            removalsWhileOwned = remove.mock.calls.length;
+        } finally {
+            resume.resolve();
+            abortResume.resolve();
+            await Promise.allSettled([repair, reset, resetObserved]);
+        }
+
+        await expect(reset).resolves.toBeUndefined();
+        await expect(repair).resolves.toBe(false);
+        expect(settledWhileOwned).toBe(false);
+        expect(removalsWhileOwned).toBe(0);
+        expect(fileBytesByName.size).toBe(0);
+        expect(readerStore.getShardFileNames()).toEqual([]);
+        expect(Reflect.get(readerStore, '_persistentIndexRepairPromiseByDictionary').size).toBe(0);
+        expect(Reflect.get(readerStore, '_persistentIndexRepairControlByDictionary').size).toBe(0);
+        expect(readerStore.size).toBe(0);
+    });
+
     test('requires reimport when the authoritative container is missing', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Missing authoritative container';
