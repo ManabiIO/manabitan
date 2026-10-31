@@ -820,12 +820,13 @@ describe('DictionaryImporter ZIP read cancellation', () => {
         await getData.call(importer, {filename: 'term_bank_1.json', getData: entryGetData}, writer, abortController.signal);
         expect(entryGetData).toHaveBeenLastCalledWith(writer, {
             useWebWorkers: true,
+            checkSignature: true,
             signal: abortController.signal,
         });
 
         Reflect.set(importer, '_zipUseWebWorkers', false);
         await getData.call(importer, {filename: 'term_bank_2.json', getData: entryGetData}, writer);
-        expect(entryGetData).toHaveBeenLastCalledWith(writer, {useWebWorkers: false});
+        expect(entryGetData).toHaveBeenLastCalledWith(writer, {useWebWorkers: false, checkSignature: true});
     });
 
     test('uses native ZIP inflation only when the entire source import fits one batch', () => {

@@ -6151,6 +6151,9 @@ null;
         }
         const read = (/** @type {AbortSignal|undefined} */ readSignal) => getData.call(entry, writer, {
             useWebWorkers,
+            // zip.js leaves CRC verification disabled unless explicitly requested.
+            // Decoded fallbacks must enforce the raw parser's integrity contract.
+            checkSignature: true,
             ...(typeof readSignal === 'undefined' ? {} : {signal: readSignal}),
         });
         // Explicit signals belong to the source pipeline. Reads outside an
