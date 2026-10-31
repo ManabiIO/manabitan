@@ -41,6 +41,8 @@ const OVERLAPPED_SOURCE_GROUP_COUNT = 1;
 const DEFAULT_PARALLEL_SOURCE_WORKER_COUNT = 2;
 const HIGH_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT = 5;
 const HIGH_CAPABILITY_MIN_HARDWARE_CONCURRENCY = 8;
+const MID_CAPABILITY_MIN_HARDWARE_CONCURRENCY = 4;
+const MID_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT = 3;
 const LOW_MEMORY_DEVICE_GIB = 4;
 const PLAIN_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 4;
 const MEDIA_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 3;
@@ -3183,8 +3185,9 @@ export function getParallelTermBankParserWorkerCount(options = {}) {
     if (hasConstrainedMemory || typeof rawHardwareConcurrency !== 'number' || !Number.isFinite(rawHardwareConcurrency)) {
         return baseline;
     }
-    if (options.experimentalParserWorkers3 !== true || rawHardwareConcurrency < 4) { return baseline; }
-    return Math.max(baseline, 3);
+    const useMidCapabilityPolicy = typeof options.experimentalParserWorkers3 === 'undefined' || options.experimentalParserWorkers3 === true;
+    if (!useMidCapabilityPolicy || rawHardwareConcurrency < MID_CAPABILITY_MIN_HARDWARE_CONCURRENCY) { return baseline; }
+    return Math.max(baseline, MID_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT);
 }
 
 /**

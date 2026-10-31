@@ -736,7 +736,7 @@ describe('term-bank WASM parser', () => {
     test.each([
         [{hardwareConcurrency: 12, deviceMemory: 8}, 5],
         [{hardwareConcurrency: 12, deviceMemory: 4}, 2],
-        [{hardwareConcurrency: 4, deviceMemory: 8}, 2],
+        [{hardwareConcurrency: 4, deviceMemory: 8}, 3],
         [{}, 2],
     ])('selects parser worker count from browser capability: %j', (navigatorValue, expected) => {
         const originalNavigator = globalThis.navigator;

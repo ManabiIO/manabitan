@@ -57,8 +57,9 @@ export type ImportPhaseTiming = {
     details?: Record<string, unknown>;
 };
 
-/** Experimental parser paths; absent and non-true runtime values remain off. */
+/** Internal implementation controls; qualified defaults are documented per field. */
 export type ImportExperiments = {
+    /** Qualified automatic middle-CPU policy: true. Explicit false retains two workers for diagnostics. */
     experimentalParserWorkers3?: boolean;
     experimentalGenericSpanCompression?: boolean;
     experimentalSkipFusedParse?: boolean;
