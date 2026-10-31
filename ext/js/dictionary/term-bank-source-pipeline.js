@@ -35,6 +35,8 @@ const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
 /** @typedef {import('@zip.js/zip.js').Entry|{filename: string}} TermBankSourceFile */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}} CompressedTermBankSource */
 
+/** @typedef {{promises: Promise<Uint8Array>[], estimatedByteLengths: number[], readAll: () => Promise<Uint8Array[]>}} DeferredTermBankSourceBatch */
+
 /** Reads validated raw payloads directly from the already-owned source ZIP. */
 export class RawZipPayloadReader {
     /** @param {ArrayBuffer|Blob} archiveContent */
@@ -497,7 +499,7 @@ export class TermBankSourcePipeline {
     /**
      * @param {TermBankSourceFile[]} batch
      * @param {() => void} [checkCancellation]
-     * @returns {Promise<Uint8Array|Uint8Array[]|{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|null>}
+     * @returns {Promise<Uint8Array|Uint8Array[]|DeferredTermBankSourceBatch|null>}
      */
     async readBatch(batch, checkCancellation) {
         if (batch.length <= 1) {
@@ -508,13 +510,16 @@ export class TermBankSourcePipeline {
             const uncompressedSize = /** @type {unknown} */ (Reflect.get(candidate, 'uncompressedSize'));
             return typeof uncompressedSize === 'number' && Number.isSafeInteger(uncompressedSize) && uncompressedSize > 0 ? uncompressedSize : 0;
         });
+        // Parallel parsing owns cancellation after accepting the deferred plan.
+        // Its fallback must take ownership only if that parser declines the job.
+        const readAll = () => {
+            const reads = Promise.all(promises);
+            return typeof checkCancellation === 'function' ? this._awaitRead(reads, checkCancellation) : reads;
+        };
         if (batch.length >= 4 && estimatedByteLengths.every((length) => length > 0)) {
-            return {promises, estimatedByteLengths};
+            return {promises, estimatedByteLengths, readAll};
         }
-        const reads = Promise.all(promises);
-        const byteArrays = typeof checkCancellation === 'function' ?
-            await this._awaitRead(reads, checkCancellation) :
-            await reads;
+        const byteArrays = await readAll();
         return byteArrays.every((bytes) => this._getJsonArrayContentSpan(bytes) !== null) ? byteArrays : null;
     }
 

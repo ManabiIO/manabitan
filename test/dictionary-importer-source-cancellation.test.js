@@ -48,6 +48,8 @@ describe('ordinary term-bank ZIP cancellation', () => {
         {banks: 2, delayedAbort: false},
         {banks: 3, delayedAbort: false},
         {banks: 2, delayedAbort: true},
+        {banks: 4, delayedAbort: false},
+        {banks: 4, delayedAbort: true},
     ])('aborts and joins $banks pending reads before rollback (delayed abort: $delayedAbort)', async ({banks, delayedAbort}) => {
         const bytes = await archive(banks);
         const admitted = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
@@ -69,6 +71,8 @@ describe('ordinary term-bank ZIP cancellation', () => {
                 const entries = /** @type {import('@zip.js/zip.js').Entry[]} */ (await Reflect.apply(getEntries, this, args));
                 for (const entry of entries) {
                     if (!/^term_bank_\d+\.json$/.test(entry.filename)) { continue; }
+                    // Missing raw payload metadata selects ordinary decoded reads.
+                    if (banks >= 4) { Reflect.deleteProperty(entry, 'offset'); }
                     Reflect.set(entry, 'getData', (/** @type {unknown} */ _writer, /** @type {{signal?: AbortSignal}} */ options) => {
                         const signal = options.signal;
                         if (!(signal instanceof AbortSignal)) { throw new Error('Expected owned ZIP read signal'); }
@@ -117,6 +121,7 @@ describe('ordinary term-bank ZIP cancellation', () => {
         let cancelled = false;
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), void 0, () => cancelled);
         vi.useFakeTimers({toFake: ['setInterval', 'clearInterval']});
+        vi.stubGlobal('Worker', void 0);
         let settled = false;
         const pending = importer.importDictionary(
             /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
@@ -164,6 +169,7 @@ describe('ordinary term-bank ZIP cancellation', () => {
             vi.clearAllTimers();
             vi.useRealTimers();
             vi.restoreAllMocks();
+            vi.unstubAllGlobals();
         }
     });
 });
@@ -230,6 +236,11 @@ test('deferred parallel source plans retain their parser cancellation owner', as
         const batch = await pipeline.readBatch(files, checkCancellation);
         expect(batch).toMatchObject({promises: expect.any(Array), estimatedByteLengths: [2, 2, 2, 2]});
         expect(checkCancellation).not.toHaveBeenCalled();
+        expect(vi.getTimerCount()).toBe(0);
+        if (batch === null || batch instanceof Uint8Array || Array.isArray(batch)) {
+            throw new Error('Expected deferred source batch');
+        }
+        expect(await batch.readAll()).toEqual(files.map(() => new TextEncoder().encode('[]')));
         expect(vi.getTimerCount()).toBe(0);
     } finally {
         await pipeline.dispose();
