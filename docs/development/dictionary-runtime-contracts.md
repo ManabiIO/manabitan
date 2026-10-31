@@ -24,6 +24,15 @@ Completed updates retain their explicit `updateSessionToken` completion receipt
 without `transientUpdateStage`. Startup restoration clears the interrupted
 operation's token instead of reporting it as a successfully completed update.
 
+## Archive Filename Identity
+
+Raw UTF-8 filename aliases preserve legacy media references. They cannot rename
+root dictionary data files: index, numbered banks and built-in import artifacts
+must each have one filename identity. Conflicting decoded and raw names are
+rejected before creating a summary or starting storage work, so one physical ZIP
+entry cannot supply two numbered banks or different data-file roles. Archive
+admission and bank discovery share the same bank patterns.
+
 ## Request Ownership and Outcomes
 
 Settings sessions have owner IDs; each import has a separate operation ID.

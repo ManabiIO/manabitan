@@ -15,8 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {crc32} from 'node:zlib';
 import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js';
-import {describe, expect, test} from 'vitest';
+import {describe, expect, test, vi} from 'vitest';
+import {Uint8ArrayReader as BundledUint8ArrayReader, ZipReader} from '../ext/lib/zip.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {TermBankWasmResourceError} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
@@ -44,7 +46,92 @@ async function createLegacyFilenameArchive() {
     return new Uint8Array(bytes).buffer;
 }
 
+/**
+ * One physical bank has a valid Unicode Path name that differs from its raw
+ * ASCII name. Both filename and payload CRCs remain valid.
+ * @returns {Promise<ArrayBuffer>}
+ */
+async function createUnicodeBankAliasArchive() {
+    const rawName = 'term_bank_1.json';
+    const unicodeName = 'term_bank_2.json';
+    const encoder = new TextEncoder();
+    const unicodeBytes = encoder.encode(unicodeName);
+    const extra = new Uint8Array(5 + unicodeBytes.length);
+    extra[0] = 1;
+    new DataView(extra.buffer).setUint32(1, crc32(encoder.encode(rawName)), true);
+    extra.set(unicodeBytes, 5);
+    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0, extendedTimestamp: false});
+    const options = {useWebWorkers: false};
+    await writer.add('index.json', new TextReader(JSON.stringify({title: 'Unicode bank alias', revision: '1', format: 3})), options);
+    await writer.add(rawName, new TextReader(JSON.stringify([['語', 'ご', '', '', 0, ['word'], 1, '']])), {
+        ...options,
+        extraField: new Map([[0x7075, extra]]),
+    });
+    const bytes = Uint8Array.from(await writer.close());
+    const view = new DataView(bytes.buffer);
+    const end = bytes.byteLength - 22;
+    expect(view.getUint32(end, true)).toBe(0x06054b50);
+    let central = view.getUint32(end + 16, true);
+    let changed = false;
+    for (let i = 0; i < view.getUint16(end + 10, true); ++i) {
+        expect(view.getUint32(central, true)).toBe(0x02014b50);
+        const nameLength = view.getUint16(central + 28, true);
+        const name = new TextDecoder().decode(bytes.subarray(central + 46, central + 46 + nameLength));
+        if (name === rawName) {
+            const local = view.getUint32(central + 42, true);
+            expect(view.getUint32(local, true)).toBe(0x04034b50);
+            // Write the 16-bit custom field ID explicitly; the fixture writer
+            // truncates custom IDs while copying its Uint16Array to byte storage.
+            view.setUint16(local + 30 + view.getUint16(local + 26, true), 0x7075, true);
+            view.setUint16(central + 46 + nameLength, 0x7075, true);
+            for (const offset of [local + 6, central + 8]) {
+                view.setUint16(offset, view.getUint16(offset, true) & ~0x0800, true);
+            }
+            changed = true;
+        }
+        central += 46 + nameLength + view.getUint16(central + 30, true) + view.getUint16(central + 32, true);
+    }
+    expect(changed).toBe(true);
+    return bytes.buffer;
+}
+
 describe('DictionaryImporter ZIP filename aliases', () => {
+    test('rejects conflicting bank aliases before storage ownership', async () => {
+        const archiveContent = await createUnicodeBankAliasArchive();
+        // Verify the real bundled reader honors the valid Unicode Path field.
+        const reader = new ZipReader(new BundledUint8ArrayReader(new Uint8Array(archiveContent)));
+        try {
+            const entries = /** @type {import('@zip.js/zip.js').Entry[]} */ (await reader.getEntries());
+            expect(entries).toHaveLength(2);
+            const bank = entries.find((entry) => entry.filename === 'term_bank_2.json');
+            if (typeof bank?.getData !== 'function') { throw new Error('Unicode bank fixture was not decoded'); }
+            expect(new TextDecoder().decode(bank.rawFilename)).toBe('term_bank_1.json');
+            const content = await bank.getData(new Uint8ArrayWriter(), {checkSignature: true, useWebWorkers: false});
+            expect(JSON.parse(new TextDecoder().decode(content))).toHaveLength(1);
+        } finally {
+            await reader.close();
+        }
+        const addWithResult = vi.fn(async () => 1);
+        const startBulkImport = vi.fn(async () => 'alias-session');
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const database = /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ ({
+            isPrepared: () => true,
+            setImportOptimizationFlags() {},
+            setImportDebugLogging() {},
+            setTermEntryContentDedupEnabled() {},
+            dictionaryExists: async () => false,
+            addWithResult,
+            startBulkImport,
+            abortBulkImport: async () => {},
+            deleteDictionaryImportPlaceholder: async () => {},
+        }));
+        const result = await importer.importDictionary(database, archiveContent, {zipUseWebWorkers: false});
+        expect(result.result).toBeNull();
+        expect(result.errors.map(({message}) => message)).toContain("Ambiguous archive filename: 'term_bank_1.json'");
+        expect(addWithResult).not.toHaveBeenCalled();
+        expect(startBulkImport).not.toHaveBeenCalled();
+    });
+
     test('indexes UTF-8 raw filenames alongside mojibake decoded ZIP names', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const archiveContent = await createLegacyFilenameArchive();
@@ -181,6 +268,30 @@ describe('DictionaryImporter archive bank discovery', () => {
 });
 
 describe('DictionaryImporter archive filename validation', () => {
+    test.each([
+        ['term_bank_1.json', 'term_bank_2.json'],
+        ['term_bank_1.json', 'kanji_bank_1.json'],
+        ['term_meta_bank_1.json', 'assets/frequency.json'],
+        ['kanji_meta_bank_1.json', 'assets/frequency.json'],
+        ['tag_bank_1.json', 'assets/tags.json'],
+        ['term_bank_1.mbtb', 'term_bank_2.mbtb'],
+        ['index.json', 'metadata.json'],
+        ['manabitan-import-artifact.json', 'manifest.json'],
+        ['manabitan-term-banks-packed.bin', 'terms.bin'],
+        ['manabitan-media-packed.bin', 'media.bin'],
+        ['manabitan-term-glossary-shared.bin', 'glossary.bin'],
+    ])('rejects conflicting data-file identities %s and %s in either direction', (first, second) => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const createArchiveFileMap = /** @type {(zipEntries: {filename: string, rawFilename: Uint8Array}[]) => Map<string, unknown>} */ (
+            Reflect.get(importer, '_createArchiveFileMap')
+        );
+        for (const [filename, rawName] of [[first, second], [second, first]]) {
+            expect(() => createArchiveFileMap.call(importer, [{filename, rawFilename: new TextEncoder().encode(rawName)}]))
+                .toThrow(`Ambiguous archive filename: '${rawName}'`);
+        }
+    });
+
+
     test('rejects duplicate ZIP entry filenames', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         const createArchiveFileMap = /** @type {(zipEntries: {filename: string}[]) => Map<string, unknown>} */ (

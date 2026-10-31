@@ -109,6 +109,22 @@ const TERM_BANK_ARTIFACT_MANIFEST_FILE = 'manabitan-import-artifact.json';
 const TERM_BANK_PACKED_ARTIFACT_FILE = 'manabitan-term-banks-packed.bin';
 const TERM_BANK_PACKED_MEDIA_ARTIFACT_FILE = 'manabitan-media-packed.bin';
 const TERM_BANK_SHARED_GLOSSARY_ARTIFACT_FILE = 'manabitan-term-glossary-shared.bin';
+const ROOT_DICTIONARY_DATA_FILENAMES = new Set([
+    INDEX_FILE_NAME,
+    TERM_BANK_ARTIFACT_MANIFEST_FILE,
+    TERM_BANK_PACKED_ARTIFACT_FILE,
+    TERM_BANK_PACKED_MEDIA_ARTIFACT_FILE,
+    TERM_BANK_SHARED_GLOSSARY_ARTIFACT_FILE,
+]);
+/** @type {import('dictionary-importer').QueryDetails} */
+const ARCHIVE_BANK_QUERY_DETAILS = [
+    ['termFiles', /^term_bank_(\d+)\.json$/],
+    ['termArtifactFiles', /^term_bank_(\d+)\.mbtb$/],
+    ['termMetaFiles', /^term_meta_bank_(\d+)\.json$/],
+    ['kanjiFiles', /^kanji_bank_(\d+)\.json$/],
+    ['kanjiMetaFiles', /^kanji_meta_bank_(\d+)\.json$/],
+    ['tagFiles', /^tag_bank_(\d+)\.json$/],
+];
 const TERM_ARTIFACT_PRELOAD_CONCURRENCY = 4;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const ZIP_COMPRESSION_METHOD_DEFLATE = 8;
@@ -497,6 +513,19 @@ function getArchiveEntryUtf8Alias(entry) {
         return null;
     }
     return decoded;
+}
+
+/**
+ * Root dictionary data files have one import identity. Raw-name aliases exist
+ * for legacy media references, not alternate bank numbers or data-file roles.
+ * @param {string} filename
+ * @returns {boolean}
+ */
+function isDictionaryArchiveDataFilename(filename) {
+    return (
+        ROOT_DICTIONARY_DATA_FILENAMES.has(filename) ||
+        ARCHIVE_BANK_QUERY_DETAILS.some(([, pattern]) => pattern.test(filename))
+    );
 }
 
 /**
@@ -1098,18 +1127,9 @@ export class DictionaryImporter {
 
         // Files
         /** @type {import('dictionary-importer').QueryDetails} */
-        const queryDetails = [
-            ['termFiles', /^term_bank_(\d+)\.json$/],
-            ['termArtifactFiles', /^term_bank_(\d+)\.mbtb$/],
-        ];
-        if (!usePrunedArtifactAuxFastPath) {
-            queryDetails.push(
-                ['termMetaFiles', /^term_meta_bank_(\d+)\.json$/],
-                ['kanjiFiles', /^kanji_bank_(\d+)\.json$/],
-                ['kanjiMetaFiles', /^kanji_meta_bank_(\d+)\.json$/],
-                ['tagFiles', /^tag_bank_(\d+)\.json$/],
-            );
-        }
+        const queryDetails = usePrunedArtifactAuxFastPath ?
+            ARCHIVE_BANK_QUERY_DETAILS.slice(0, 2) :
+            ARCHIVE_BANK_QUERY_DETAILS;
         const archiveFiles = Object.fromEntries(this._getArchiveFiles(fileMap, queryDetails));
         const termFiles = archiveFiles.termFiles ?? [];
         const termArtifactFiles = incompleteTermArtifactManifest ? [] : archiveFiles.termArtifactFiles ?? [];
@@ -2831,6 +2851,9 @@ export class DictionaryImporter {
             fileMap.set(entry.filename, entry);
             const utf8Alias = getArchiveEntryUtf8Alias(entry);
             if (typeof utf8Alias === 'string') {
+                if (isDictionaryArchiveDataFilename(entry.filename) || isDictionaryArchiveDataFilename(utf8Alias)) {
+                    throw new Error(`Ambiguous archive filename: '${utf8Alias}'`);
+                }
                 if (fileMap.has(utf8Alias)) {
                     throw new Error(`Ambiguous archive filename: '${utf8Alias}'`);
                 }
