@@ -113,6 +113,7 @@ describe('dictionary runtime action policies', () => {
         ].sort());
         expect(lookupActions.sort()).toEqual([
             ...retryableActions,
+            'getDictionaryInfoOffscreen',
             'warmTermLookupCachesOffscreen',
         ].sort());
     });
