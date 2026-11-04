@@ -3620,6 +3620,52 @@ describe('TermRecordOpfsStore', () => {
         expect(records.map(({entryContentOffset}) => entryContentOffset)).toStrictEqual(offsets);
     });
 
+    test.each(['compact', 'legacy', 'float64'])('preserves independent fixed lengths across content modes (%s)', async (format) => {
+        const count = 16;
+        const length = format === 'legacy' ? 70000 : 7;
+        const offsets = Array.from({length: count}, (_, index) => 16 + index * 32);
+        const encoder = new TextEncoder();
+        for (const mode of ['arrays', 'resolved', 'fixed', 'fixed-length', 'invalid-fixed-base']) {
+            const files = new Map();
+            const directory = createFakeDirectoryHandle(files);
+            const writer = new TermRecordOpfsStore();
+            Reflect.set(writer, '_recordsDirectoryHandle', directory);
+            const fixedLength = mode === 'fixed' || mode === 'fixed-length' || mode === 'invalid-fixed-base';
+            const resolved = mode === 'resolved' || mode === 'invalid-fixed-base';
+            const expectedOffsets = mode === 'fixed' ? offsets.map((_, i) => 1024 + i * length) : offsets;
+            await writer.appendBatchFromArtifactChunkResolvedContent({
+                dictionary: mode,
+                rowCount: count,
+                expressionBytesList: offsets.map((_, index) => encoder.encode(`word-${index}`)),
+                readingBytesList: [],
+                readingEqualsExpressionList: new Uint8Array(count).fill(1),
+                scoreList: format === 'float64' ?
+                    new Float64Array(count).fill(1.25) :
+                    new Int32Array(count).fill(1),
+                sequenceList: new Int32Array(count).fill(-1),
+                fixedContentOffsetBase: mode === 'fixed' ?
+                    1024 :
+                    (mode === 'invalid-fixed-base' ? -1 : void 0),
+                fixedContentLength: fixedLength ? length : void 0,
+                resolvedContentReferences: resolved ?
+{
+    uniqueIndexList: Uint32Array.from({length: count}, (_, index) => index),
+    offsets: Float64Array.from(offsets),
+    lengths: new Uint32Array(count).fill(fixedLength ? 123 : length),
+} :
+void 0,
+            }, offsets, new Uint32Array(count).fill(fixedLength ? 456 : length), 'raw');
+            await writer._closeAllWritables();
+            const reader = new TermRecordOpfsStore();
+            Reflect.set(reader, '_recordsDirectoryHandle', directory);
+            await reader._loadShardFiles(true);
+            const records = [...Reflect.get(reader, '_recordsById').values()];
+            expect(records.map(({entryContentOffset}) => entryContentOffset)).toStrictEqual(expectedOffsets);
+            expect(records.map(({entryContentLength}) => entryContentLength)).toStrictEqual(new Array(count).fill(length));
+            expect(records.map(({score}) => score)).toStrictEqual(new Array(count).fill(format === 'float64' ? 1.25 : 1));
+        }
+    });
+
     test('encodes duplicate rows directly from resolved unique content references', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Resolved unique content references';

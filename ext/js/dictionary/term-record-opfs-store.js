@@ -263,11 +263,12 @@ function hasFixedContentSpan(chunk, count) {
  * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number[]|Uint32Array|Float64Array} contentOffsets
  * @param {number} index
+ * @param {boolean} [useFixedContentSpan] Selected within the current synchronous batch.
  * @returns {number}
  * @throws {RangeError}
  */
-function getArtifactContentOffset(chunk, contentOffsets, index) {
-    if (hasFixedContentSpan(chunk, index + 1)) {
+function getArtifactContentOffset(chunk, contentOffsets, index, useFixedContentSpan = hasFixedContentSpan(chunk, index + 1)) {
+    if (useFixedContentSpan) {
         return /** @type {number} */ (chunk.fixedContentOffsetBase) + (index * /** @type {number} */ (chunk.fixedContentLength));
     }
     const references = chunk.resolvedContentReferences;
@@ -2266,7 +2267,10 @@ export class TermRecordOpfsStore {
         );
         const runRowLimit = hasWholeChunkPreparedIndex ? count : MAX_COMPACT_LOOKUP_INDEX_ROWS;
         for (let runStart = 0; runStart < count;) {
+            // Recompute after every awaited append; no validity is cached
+            // across runs. The row loop itself is synchronous.
             const tValidationStart = safePerformance.now();
+            const useFixedContentSpan = hasFixedContentSpan(chunk, count);
             let runEnd = runStart;
             let minContentOffset = Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
@@ -2274,7 +2278,7 @@ export class TermRecordOpfsStore {
                 if ((runEnd - runStart) >= runRowLimit) {
                     break;
                 }
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd);
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
                 const contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
                 validateContentOffset(contentOffset);
                 validateContentLength(contentLength);
@@ -5169,6 +5173,7 @@ export class TermRecordOpfsStore {
      */
     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
         const count = chunk.rowCount;
+        const useFixedContentSpan = hasFixedContentSpan(chunk, count);
         const offsets = new Uint32Array(count);
         const lengths = new Uint16Array(count);
         const scoreKeys = new Uint16Array(count);
@@ -5182,7 +5187,7 @@ export class TermRecordOpfsStore {
             const view = new DataView(output.buffer);
             for (let i = 0; i < count; ++i) {
                 const fieldOffset = i * FLOAT64_SCORE_RECORD_FIELDS_BYTES;
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
                 const contentLength = getArtifactContentLength(chunk, contentLengths, i);
                 view.setUint32(fieldOffset, contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase, true);
                 view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true);
@@ -5192,7 +5197,7 @@ export class TermRecordOpfsStore {
         }
         let compact = true;
         for (let i = 0; i < count; ++i) {
-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
             const contentLength = getArtifactContentLength(chunk, contentLengths, i);
             if (contentLength >= U16_NULL) {
                 compact = false;
@@ -5226,7 +5231,7 @@ export class TermRecordOpfsStore {
             const legacyI32 = new Int32Array(legacy.buffer);
             for (let i = 0; i < count; ++i) {
                 const fieldOffset = i * 3;
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
                 const contentLength = getArtifactContentLength(chunk, contentLengths, i);
                 legacyU32[fieldOffset] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
                 legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
