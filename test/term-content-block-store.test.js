@@ -365,6 +365,18 @@ describe('TermContentBlockStore', () => {
         ], null, true)).resolves.not.toBeNull();
     });
 
+    test.each([5, 6])('rejects an invalid later entry offset in a cached block (%s)', async (entryOffset) => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore);
+        const append = vi.spyOn(contentStore, '_appendBatchInternal');
+        await expect(blockStore._tryAppendPacked(() => ({
+            packedChunks: [Uint8Array.of(1, 2, 3, 4, 5)],
+            sourceChunkIndices: Uint32Array.of(0, 0),
+            sourceChunkLocalOffsets: Uint32Array.of(0, entryOffset),
+        }), Uint32Array.of(3, 2), null, true)).rejects.toThrow(RangeError);
+        expect(append).not.toHaveBeenCalled();
+    });
+
     test.each([-1, 0.5, Number.NaN, Number.MAX_SAFE_INTEGER - 2])('rejects an invalid later block prefix (%s)', async (laterOffset) => {
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 1, minInputBytes: 0});
