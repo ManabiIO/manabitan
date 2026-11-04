@@ -1,0 +1,216 @@
+{
+  "registeredAt": "2026-11-04T20:01:01.444482+00:00",
+  "scope": "Independent Linux4CPU Firefox event-aligned backend/cumulative and settled-RPC guard for unary radix shortcut. Not visible-hover performance or import gain. Same pinnedZIPs and untouchedobserver as completed localfollowup. This is a distinct prospectivelyregistered study; priorlocal136+50samples andunmetboundsremainretained.",
+  "baseline": "4a694f5d339afe9b69a27a8206ec2cfd7dba97a2",
+  "candidate": "fc66604d3bd375207cc197580723587d68db2d4b",
+  "budget": "Eachdataset16balancedAB+8AApairs+2excludedwarmups=50freshFirefoxprofiles. Twoindependent actual4CPU hosts,100profiles total, nooptionalstopping/trimming/outcome-drivenreruns.",
+  "caseBlocks": [
+    {
+      "kind": "ab",
+      "pair": 7,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 3,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 9,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 13,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 8,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "aa",
+      "pair": 5,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "aa",
+      "pair": 3,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 4,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 6,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 14,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 1,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 10,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 0,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "aa",
+      "pair": 7,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 11,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "aa",
+      "pair": 0,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 12,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 2,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "aa",
+      "pair": 1,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "aa",
+      "pair": 6,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 5,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "ab",
+      "pair": 15,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "aa",
+      "pair": 4,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "aa",
+      "pair": 2,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    }
+  ],
+  "practicalGuard": "For eachfirst/cumulative/settledmetric paired excess B-A-max(10ms,0.2*A) one-sided95%bootstrapupper<=0.20000resamples seed20261123. Mustpassallrequiredendpointsperdataset forNI; failuresprecisioninconclusiveunlessclearpositiveexcesslowerbound.",
+  "requiredEndpoints": [
+    "cumulative.firstExact",
+    "cumulative.exactFour",
+    "cumulative.prefixFour",
+    "cumulative.suffixFour",
+    "settled.exact.meanMs",
+    "settled.prefix.meanMs",
+    "settled.suffix.meanMs"
+  ],
+  "controls": "AAreview if paired95%deltaCIexcludeszero andpoint absolute>biggerof10ms/20%meanbaseline. Retain rawcontrol and orderstrata, no automatic rejection or trimming.",
+  "state": "First exact armed before productionimport-completionnotification. Immediate sequentialfourRPCspermode, thenfixed2second quiet period and12settledRPCspermode. Neverconditionon timing/outcome.",
+  "route": "TruefourCPU production3parserworkers, OPFS/nativeordinarysourceZIP/defaultdedupe/CRC/236Jitmedia,zerofallback,12readableprobes,exactsource/package/lookup/nativeSHAchecks. AllRPCpayloadoraclesidenticalmatchedpair.",
+  "artifact": "Retain exact measuredbothZIPs, modulesources/registeredtoolhashes,contract,completeJSONreports/queries/observations/logs/ledger; exclude browserprofiles anddependencycaches.",
+  "limits": "Different OS/browser/compiler/actualgeometryfromlocalMac. Independent portability/latency evidence, notproof ofeverydevice. No memoryeffectclaim; original exactbuffer/RSSguards retained."
+}
