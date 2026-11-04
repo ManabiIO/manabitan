@@ -63,6 +63,40 @@ function decode(compressed, expected, options = {}) {
 
 const sizes = [0, 1, 2, 3, 7, 8, 15, 16, 17, 31, 32, 255, 256, 257, 258, 259, 4095, 4096, 32767, 32768, 65535, 65536, 131073]
 
+describe('wide-word overlap and output-memory boundary controls', () => {
+    test.each([1, 2, 3, 4, 5, 6, 7, 8, 9])('decodes repeated period %i across word-copy boundaries', (period) => {
+        const pattern = 'abcdefghi'.slice(0, period)
+        for (const length of [7, 8, 15, 16, 278, 279, 280, 298, 299, 300, 4096, 32768]) {
+            const bytes = encoder.encode(JSON.stringify([pattern.repeat(Math.ceil(length / period)).slice(0, length)]))
+            for (const strategy of [constants.Z_DEFAULT_STRATEGY, constants.Z_FIXED]) {
+                const compressed = new Uint8Array(deflateRawSync(bytes, {level: 9, strategy}))
+                expect(Buffer.compare(inflateRawSync(compressed), bytes)).toBe(0)
+                for (const alignment of [0, 1, 4, 7, 8, 15]) {
+                    expect(Buffer.compare(decode(compressed, bytes, {alignment}).bytes, bytes)).toBe(0)
+                }
+                expect(Buffer.compare(decode(compressed, bytes, {physicalEnd: true}).bytes, bytes)).toBe(0)
+
+                // End the output at the actual WASM memory boundary. The
+                // input stays disjoint and the prefix canary remains visible.
+                wasm.wasm_reset_heap()
+                const meta = wasm.wasm_alloc(20)
+                const spans = wasm.wasm_alloc(8)
+                const input = wasm.wasm_alloc(compressed.byteLength + 65536)
+                const heap = new Uint8Array(wasm.memory.buffer)
+                const output = heap.byteLength - bytes.byteLength
+                expect(input + compressed.byteLength).toBeLessThan(output - 16)
+                heap.set(compressed, input)
+                heap.fill(0xa5, output - 16)
+                new Uint32Array(wasm.memory.buffer, meta, 5).set([0, compressed.length, bytes.length, 8, crc32(bytes)])
+                const status = wasm.inflate_and_join_term_banks(input, compressed.length, meta, meta + 4, meta + 8, meta + 12, meta + 16, 1, output, bytes.length, spans)
+                expect(status).toBe(bytes.byteLength)
+                expect([...heap.subarray(output - 16, output)]).toEqual(new Array(16).fill(0xa5))
+                expect(Buffer.compare(heap.subarray(output), bytes)).toBe(0)
+            }
+        }
+    })
+})
+
 describe('full-buffer DEFLATE import backend', () => {
     test.each(sizes)('matches zlib across block types and alignments at length %i', (length) => {
         const bytes = encoder.encode(JSON.stringify(['日🙂', 'abc0123456789'.repeat(Math.ceil(length / 13)).slice(0, length)]))
