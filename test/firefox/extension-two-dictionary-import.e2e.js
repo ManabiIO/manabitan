@@ -30,6 +30,7 @@ import * as firefox from 'selenium-webdriver/firefox.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
+import {waitForExtensionBaseUrl} from '../e2e/firefox-extension-base-url.js';
 import {getUnsupportedRuntimeSkipReason} from './unsupported-runtime-classifier.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -1399,42 +1400,6 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
     }
     await driver.switchTo().window(settingsWindowHandle);
     return {phaseState, iterations};
-}
-
-/**
- * @param {import('selenium-webdriver').ThenableWebDriver} driver
- * @param {string} [installedAddonId]
- * @returns {Promise<string>}
- * @throws {Error}
- */
-async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
-    const normalizedAddonId = String(installedAddonId || '').trim();
-    const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
-    const deadline = Date.now() + 30_000;
-    let fallbackBaseUrl = '';
-    while (Date.now() < deadline) {
-        const handlesUnknown = /** @type {unknown} */ (await driver.getAllWindowHandles());
-        const handles = Array.isArray(handlesUnknown) ? handlesUnknown.map(String) : [];
-        for (const handle of handles) {
-            await driver.switchTo().window(handle);
-            const url = String(await driver.getCurrentUrl());
-            const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/.exec(url);
-            if (match !== null) {
-                fallbackBaseUrl = match[1];
-                if (expectedBaseUrl.length === 0 || expectedBaseUrl === match[1]) {
-                    return match[1];
-                }
-            }
-        }
-        await driver.sleep(500);
-    }
-    if (fallbackBaseUrl.length > 0) {
-        return fallbackBaseUrl;
-    }
-    if (expectedBaseUrl.length > 0) {
-        return expectedBaseUrl;
-    }
-    fail('Failed to discover moz-extension base URL from open tabs.');
 }
 
 /**
