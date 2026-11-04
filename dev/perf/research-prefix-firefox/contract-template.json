@@ -213,5 +213,11 @@
   "route": "TruefourCPU production3parserworkers, OPFS/nativeordinarysourceZIP/defaultdedupe/CRC/236Jitmedia,zerofallback,12readableprobes,exactsource/package/lookup/nativeSHAchecks. AllRPCpayloadoraclesidenticalmatchedpair.",
   "artifact": "Retain exact measuredbothZIPs, modulesources/registeredtoolhashes,contract,completeJSONreports/queries/observations/logs/ledger; exclude browserprofiles anddependencycaches.",
   "limits": "Different OS/browser/compiler/actualgeometryfromlocalMac. Independent portability/latency evidence, notproof ofeverydevice. No memoryeffectclaim; original exactbuffer/RSSguards retained.",
-  "causalDifferenceFromPriorStudy": "Both arms include PR668 metadata read admission. The timing observer, query order, NI margins and bootstrap analysis remain the prior registered design."
+  "causalDifferenceFromPriorStudy": "Both arms include PR668 metadata read admission. The timing observer, query order, NI margins and bootstrap analysis remain the prior registered design.",
+  "preflightCorrection": {
+    "failedResearchHead": "1db667d71f79e2d08e616c40eff29286e292f118",
+    "failedRun": 41917531185,
+    "outcome": "Both jobs stopped in source harness transformation before launching Firefox or collecting any excluded warmup/registered observation. Retained under E/prefix-post-admission-preflight-failure-cfl2d5wk.",
+    "correction": "Use the pinned current Firefox harness native runtime-UUID helper import; do not try to remove its already-deleted legacy discovery function. No product, variants, timing observer, sample order, sample budget or numerical gates changed."
+  }
 }

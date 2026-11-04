@@ -36,13 +36,10 @@ export function transformHarness(text, source, resolvePackage) {
     // Reuse upstream declarations in memory. Do not keep a 4,500-line fork or
     // execute upstream main, its samplers, screenshots, or forced exit.
     let helpers = uniqueSlice(text, '/*\n * Copyright', 'async function main() {');
-    const oldStart = helpers.indexOf('async function waitForExtensionBaseUrl(');
-    const oldEnd = helpers.indexOf('\nasync function clickWithScroll(', oldStart);
-    assert(oldStart >= 0 && oldEnd > oldStart);
-    // Only replace extension discovery. Timed import, readiness and all native
-    // route/correctness assertions remain the registered original adapter.
-    helpers = helpers.slice(0, oldStart) + helpers.slice(oldEnd);
-    helpers = 'import {waitForExtensionBaseUrl} from '+JSON.stringify(new URL('./firefox-extension-base-url.mjs', import.meta.url).href)+';\n'+helpers;
+    // This pinned source already imports the corrected runtime-UUID helper.
+    // Resolve that real source import below; no legacy replacement is needed.
+    const discoveryImport = "import {waitForExtensionBaseUrl} from '../e2e/firefox-extension-base-url.js';";
+    assert.equal(helpers.split(discoveryImport).length, 2, 'Pinned current discovery import changed');
 
     helpers = helpers.replace(/^import (.+?) from '([^']+)';$/gm, (line, bindings, specifier) => {
         const target = specifier.startsWith('node:') ? specifier : specifier.startsWith('.') ?
@@ -403,4 +400,4 @@ async function main() {
  if(failure)throw failure;
  console.log(JSON.stringify({status:report.status,visibleImportMs:report.visibleImportMs,output:config.output}));
 }
-await main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) { await main(); }
