@@ -3172,6 +3172,58 @@ describe('term-bank WASM parser', () => {
         expect(fused.termRecordPreinternedPlan.readingIndexes).toStrictEqual(established.termRecordPreinternedPlan.readingIndexes);
     });
 
+    maybeTest.each([[false, false], [true, false], [false, true], [true, true]])('preserves term fields when projecting only media hints (hints=%s, escaped=%s)', async (mediaHintFastScan, escapedReading) => {
+        const sources = [
+            textEncoder.encode(escapedReading ?
+                '[["plain","\\u0070lain","","",1,["definition"],10,""]]' :
+                '[["plain","plain","","",1,["definition"],10,""]]'),
+            textEncoder.encode(JSON.stringify([
+                ['image', '', '', '', -2, [{type: 'image', path: 'test.png'}], -1, ''],
+                ['other', 'reading', '', 'v1', 3, ['other definition'], 12, ''],
+                ['image copy', 'different', '', '', 4, [{type: 'image', path: 'test.png'}], 13, ''],
+            ])),
+        ];
+        /**
+         * @param {boolean} emitTermByteLists
+         * @returns {Promise<ReturnType<typeof copyWasmBackedColumnChunk>>}
+         */
+        const parseStableChunk = async (emitTermByteLists) => {
+            let result = null;
+            await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
+                result = copyWasmBackedColumnChunk(chunk);
+            }, 8, {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                emitTermByteLists,
+                mediaHintFastScan,
+                prepareLookupIndexes: true,
+                singleChunk: true,
+            });
+            expect(consumeLastTermBankWasmParseProfile()?.fusedParseFallbacks ?? 0).toBe(escapedReading ? 1 : 0);
+            return /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));
+        };
+        const projected = await parseStableChunk(true);
+        const mediaOnly = await parseStableChunk(false);
+        for (const key of /** @type {const} */ ([
+            'rowCount',
+            'readingEqualsExpressionList',
+            'scoreList',
+            'sequenceList',
+            'contentBytesBuffer',
+            'contentMetaList',
+            'contentUniqueIndexList',
+            'termRecordPreinternedPlan',
+            'mediaRows',
+        ])) {
+            expect(mediaOnly[key]).toStrictEqual(projected[key]);
+        }
+        expect(mediaOnly.preparedLookupIndexes?.get('0:4')?.bytes).toStrictEqual(
+            projected.preparedLookupIndexes?.get('0:4')?.bytes,
+        );
+        expect(mediaOnly.readingEqualsExpressionList).toStrictEqual(new Uint8Array([escapedReading ? 0 : 1, 1, 0, 0]));
+        expect(mediaOnly.mediaRows).toHaveLength(mediaHintFastScan ? 1 : 0);
+    });
+
     maybeTest('preserves media hints in the fused multi-bank path', async () => {
         const sources = [
             textEncoder.encode(JSON.stringify([
