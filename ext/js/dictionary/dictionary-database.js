@@ -8522,8 +8522,8 @@ null :
                             uniformContentDictName,
                     );
                 }
-                contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
-                contentDedupPlan.pendingIndexes[uniqueIndex] = pendingContentCount;
+                // Canonical rows are visited once. Epoch scratch is needed only
+                // by the generic row scan; this journal owns publication/rollback.
                 pendingPlanUniqueIndexes.push(uniqueIndex);
                 ++pendingContentCount;
             };
@@ -9142,12 +9142,6 @@ null :
             const dictNameId = uniformPendingDictNameId >= 0 ?
                 uniformPendingDictNameId :
                 this._internTermEntryContentMetaDictName(dictName);
-            const contentBytes = pendingContentSpans === null ?
-                pendingContentBytes[i] :
-                pendingContentSpans.buffer;
-            const contentByteOffset = pendingContentSpans === null ?
-                0 :
-                pendingContentSpans.offsets[i];
             const reservedIndex = stagedContentMetadata?.indexes[i] ?? -1;
             const stagedIndex = stagedContentMetadata === null ?
                 -1 :
@@ -9157,10 +9151,7 @@ null :
                     pendingContentHash1s[i],
                     pendingContentHash2s[i],
                 );
-            if (
-                stagedIndex >= 0 &&
-                this._termEntryContentMetaStateTable[stagedIndex] === TERM_CONTENT_META_SLOT_PENDING
-            ) {
+            if (stagedIndex >= 0) {
                 const offset = pendingOffsets[i];
                 const length = pendingLengths[i];
                 if (!metadataValidated && (!Number.isSafeInteger(offset) || offset < 0)) {
@@ -9184,6 +9175,12 @@ null :
                 ++this._termEntryContentMetaHashPairCount;
                 continue;
             }
+            const contentBytes = pendingContentSpans === null ?
+                pendingContentBytes[i] :
+                pendingContentSpans.buffer;
+            const contentByteOffset = pendingContentSpans === null ?
+                0 :
+                pendingContentSpans.offsets[i];
             if (stagedContentMetadata !== null && reservedIndex < 0) {
                 const collisionEntry = this._appendStagedTermEntryContentMetaCollision(
                     pendingContentHash1s[i],
