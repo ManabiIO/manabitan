@@ -414,6 +414,77 @@ describe('persisted term lookup index', () => {
         expect(findPrefixRowMatches(index, new Uint8Array())).toEqual({expression: [], reading: []});
     });
 
+    test('keeps complete prefix and suffix order through long shared byte runs', () => {
+        const values = ['共通😀', '終端😺', '\0', 'é', 'é', '𠮷'];
+        for (let i = 63; i >= 0; --i) {
+            values.push(
+                `共通😀${i.toString(16).padStart(2, '0')}終端😺`,
+                `共通😀${i.toString(16).padStart(2, '0')}`,
+                `${i.toString(16).padStart(2, '0')}終端😺`,
+            );
+        }
+        const rows = values.flatMap((expression, i) => [
+            {expression, reading: values[(i + 7) % values.length]},
+            {expression, reading: i % 2 === 0 ? expression : null},
+        ]);
+        const index = createIndex(rows);
+        /**
+         * @param {string} a
+         * @param {string} b
+         * @param {boolean} reverse
+         * @returns {number}
+         */
+        const compare = (a, b, reverse) => {
+            const aa = [...bytes(a)];
+            const bb = [...bytes(b)];
+            if (reverse) {
+                aa.reverse();
+                bb.reverse();
+            }
+            for (let i = 0; i < Math.min(aa.length, bb.length); ++i) {
+                if (aa[i] !== bb[i]) { return aa[i] - bb[i]; }
+            }
+            return aa.length - bb.length;
+        };
+        for (const reverse of [false, true]) {
+            const queries = new Set(['', '不存在', ...values]);
+            for (const value of values) {
+                const points = [...value];
+                for (let i = 1; i < points.length; ++i) {
+                    queries.add((reverse ? points.slice(-i) : points.slice(0, i)).join(''));
+                }
+            }
+            for (const query of queries) {
+                for (const field of /** @type {const} */ (['expression', 'reading'])) {
+                    const expected = rows.map((row, id) => ({id, value: row[field]}))
+                        .filter(({value}) => query.length > 0 && value !== null && (reverse ? value.endsWith(query) : value.startsWith(query)))
+                        .sort((a, b) => compare(a.value ?? '', b.value ?? '', reverse) || a.id - b.id)
+                        .map(({id, value}) => ({row: id, exact: value === query}));
+                    expect(findPrefixRows(index, bytes(query), field, reverse)).toEqual(expected);
+                }
+            }
+            const actual = reverse ? index.keyReverseOrder : index.keyOrder;
+            const expected = Array.from({length: index.keyOffsets.length - 1}, (_, key) => key)
+                .sort((a, b) => compare(
+                    decoder.decode(index.keyBytes.subarray(index.keyOffsets[a], index.keyOffsets[a + 1])),
+                    decoder.decode(index.keyBytes.subarray(index.keyOffsets[b], index.keyOffsets[b + 1])),
+                    reverse,
+                ));
+            expect(actual).toEqual(Uint16Array.from(expected));
+        }
+        expect(() => createIndex([{expression: ''}])).toThrow('Invalid term lookup index string length');
+    });
+
+    test('sorts shared ranges at the small-group threshold', () => {
+        for (const size of [1, 16, 17, 32]) {
+            const values = Array.from({length: size}, (_, i) => `共通${String.fromCharCode(33 + size - i)}終端`);
+            const index = createIndex(values.map((expression) => ({expression})));
+            const expected = values.map((_, row) => ({row, exact: false})).reverse();
+            expect(findPrefixRows(index, bytes('共通'), 'expression')).toEqual(expected);
+            expect(findPrefixRows(index, bytes('終端'), 'expression', true)).toEqual(expected);
+        }
+    });
+
     test('rejects truncated and malformed payloads', () => {
         const encoded = encodePersistedTermLookupIndex([
             {expressionBytes: bytes('食べる'), readingBytes: bytes('たべる'), sequence: 1},

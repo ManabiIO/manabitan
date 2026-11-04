@@ -1821,6 +1821,17 @@ function radixSortKeysInto(sorted, scratch, bytes, offsets, reverse) {
                 1 + bytes[reverse ? offsets[key + 1] - 1 - depth : offsets[key] + depth];
             ++counts[value];
         }
+        // A shared byte leaves this range in the same stable order. Advance
+        // without scattering it into scratch and copying it straight back.
+        const firstKey = sorted[start];
+        const firstLength = offsets[firstKey + 1] - offsets[firstKey];
+        const firstValue = depth >= firstLength ?
+            0 :
+            1 + bytes[reverse ? offsets[firstKey + 1] - 1 - depth : offsets[firstKey] + depth];
+        if (counts[firstValue] === (end - start)) {
+            if (firstValue !== 0) { pending.push({start, end, depth: depth + 1}); }
+            continue;
+        }
         let position = start;
         for (let value = 0; value < counts.length; ++value) {
             positions[value] = position;
