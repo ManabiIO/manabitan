@@ -25,6 +25,7 @@ import {
     compactTermRecordPreinternedPlanRuns,
     getOwnedCompactionScratch,
     hasCompleteTermRecordPreinternedPlan,
+    hasCompletePreparedTermRecordPreinternedPlan,
 } from './term-record-preinterned-plan.js';
 
 export const MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS = 30000;
@@ -199,34 +200,12 @@ function validateReusableWholePlan(plan, rowCount, scratch, readingEqualsExpress
 }
 
 /**
- * Prepared indexes cross the worker boundary and can bypass lookup-index
- * reconstruction. Validate every supplied string boundary before accepting
- * their companion preinterned plan.
- * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan} plan
- * @returns {boolean}
- */
-function hasValidPreparedStringOffsets(plan) {
-    const {stringLengths, stringOffsets, stringsBuffer} = plan;
-    if (!(stringOffsets instanceof Uint32Array)) { return true; }
-    let expectedOffset = 0;
-    for (let i = 0; i < stringLengths.length; ++i) {
-        if (
-            stringOffsets[i] !== expectedOffset ||
-            expectedOffset > stringsBuffer.byteLength - stringLengths[i]
-        ) {
-            return false;
-        }
-        expectedOffset += stringLengths[i];
-    }
-    return expectedOffset === stringsBuffer.byteLength;
-}
-
-/**
  * @param {unknown} value
  * @param {number} rowCount
+ * @param {boolean} [requireNonemptyStrings=false]
  * @returns {value is PreparedTermLookupIndex}
  */
-function isCompletePreparedTermLookupIndex(value, rowCount) {
+function isCompletePreparedTermLookupIndex(value, rowCount, requireNonemptyStrings = false) {
     if (typeof value !== 'object' || value === null) { return false; }
     const bytes = /** @type {unknown} */ (Reflect.get(value, 'bytes'));
     const planValue = /** @type {unknown} */ (Reflect.get(value, 'preinternedPlan'));
@@ -236,8 +215,7 @@ function isCompletePreparedTermLookupIndex(value, rowCount) {
     return (
         bytes instanceof Uint8Array &&
         bytes.byteLength > 0 &&
-        hasCompleteTermRecordPreinternedPlan(plan, rowCount) &&
-        hasValidPreparedStringOffsets(plan)
+        hasCompletePreparedTermRecordPreinternedPlan(plan, rowCount, requireNonemptyStrings)
     );
 }
 
@@ -254,9 +232,8 @@ export function hasCompletePreparedTermLookupIndexes(value, rowCount) {
     if (
         value.size === 1 &&
         rowCount <= MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS &&
-        isCompletePreparedTermLookupIndex(wholeChunk, rowCount) &&
-        wholeChunk.preinternedPlan.stringLengths.length <= MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS &&
-        wholeChunk.preinternedPlan.stringLengths.every((length) => length > 0)
+        isCompletePreparedTermLookupIndex(wholeChunk, rowCount, true) &&
+        wholeChunk.preinternedPlan.stringLengths.length <= MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS
     ) {
         return true;
     }

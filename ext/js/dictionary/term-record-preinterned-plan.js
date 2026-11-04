@@ -520,7 +520,7 @@ function compactValidatedTermRecordPlan(plan, start, count, remapScratch, readin
  * @param {number} count
  * @returns {plan is PreinternedTermRecordPlan}
  */
-export function hasCompleteTermRecordPreinternedPlan(plan, count) {
+function hasTermRecordPreinternedPlanShape(plan, count) {
     if (plan === null || !Number.isSafeInteger(count) || count < 0) { return false; }
     const {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes} = plan;
     if (
@@ -534,6 +534,17 @@ export function hasCompleteTermRecordPreinternedPlan(plan, count) {
     ) {
         return false;
     }
+    return true;
+}
+
+/**
+ * @param {PreinternedTermRecordPlan|null} plan
+ * @param {number} count
+ * @returns {plan is PreinternedTermRecordPlan}
+ */
+export function hasCompleteTermRecordPreinternedPlan(plan, count) {
+    if (!hasTermRecordPreinternedPlanShape(plan, count)) { return false; }
+    const {stringLengths, stringOffsets, stringsBuffer} = plan;
     if (stringLengths.length === 0) {
         return count === 0 && stringsBuffer.byteLength === 0;
     }
@@ -544,4 +555,35 @@ export function hasCompleteTermRecordPreinternedPlan(plan, count) {
     let expectedBytes = 0;
     for (let i = 0; i < stringLengths.length; ++i) { expectedBytes += stringLengths[i]; }
     return expectedBytes === stringsBuffer.byteLength;
+}
+
+/**
+ * Prepared indexes bypass reconstruction after a worker transfer. Validate
+ * their string boundaries and optional nonempty-key requirement in one pass.
+ * Revalidate on each admission; callers may mutate plans between awaits.
+ * @param {PreinternedTermRecordPlan|null} plan
+ * @param {number} count
+ * @param {boolean} [requireNonemptyStrings=false]
+ * @returns {plan is PreinternedTermRecordPlan}
+ */
+export function hasCompletePreparedTermRecordPreinternedPlan(plan, count, requireNonemptyStrings = false) {
+    if (!hasTermRecordPreinternedPlanShape(plan, count)) { return false; }
+    const {stringLengths, stringOffsets, stringsBuffer} = plan;
+    if (stringLengths.length === 0) {
+        return count === 0 && stringsBuffer.byteLength === 0;
+    }
+    const hasOffsets = stringOffsets instanceof Uint32Array;
+    let expectedOffset = 0;
+    for (let i = 0; i < stringLengths.length; ++i) {
+        const length = stringLengths[i];
+        if (
+            (requireNonemptyStrings && length === 0) ||
+            (hasOffsets && stringOffsets[i] !== expectedOffset) ||
+            expectedOffset > stringsBuffer.byteLength - length
+        ) {
+            return false;
+        }
+        expectedOffset += length;
+    }
+    return expectedOffset === stringsBuffer.byteLength;
 }
