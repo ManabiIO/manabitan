@@ -21,4 +21,6 @@ Review the upstream constructor, decoder state after failure, internal structure
 
 Run `test/term-bank-inflater.test.js`, the existing parser/worker/import suites, and the native sanitizer companion `test/native/term-bank-inflater-sanitizer.c`. The latter covers the portable decoder with the native host ABI; it is not a substitute for the production wasm32 tests. Requalify complete checksum-pinned dictionary imports, stored content, memory and package costs. A faster isolated decoder is not sufficient evidence of a faster complete import.
 
-All seven upstream files are byte-identical to the verified v1.26 archive.
+Six upstream files are byte-identical to the verified v1.26 archive. `common_defs.h` contains one local adaptation: on wasm32, `machine_word_t` is `uint64_t`. WebAssembly supplies 64-bit integer operations while addresses, `size_t`, lengths, and the public wrapper ABI remain 32-bit. Native host builds retain the upstream type. Preserve or deliberately requalify this adaptation when updating the dependency.
+
+Qualify a contained decoder CPU improvement with realistic phase measurements plus bounded adjacent-parser, cold-start, memory, and browser import non-regression checks. Report a phase gain separately from any demonstrated whole-import improvement.
