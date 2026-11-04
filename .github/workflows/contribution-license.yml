@@ -1,0 +1,32 @@
+name: Contribution license acknowledgement
+
+# Runs from the trusted base branch. This workflow never checks out or executes
+# pull-request code, so the PR cannot weaken its own acknowledgement gate.
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  acknowledgement:
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]' && github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require GPL and BSD contribution grant
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          node <<'NODE'
+          const body = process.env.PR_BODY ?? ''
+          const acknowledgement =
+            'I agree that the copyrightable portions of this contribution that I own are licensed separately under GPL-3.0-or-later and BSD-3-Clause, at the recipient's option, as described in CONTRIBUTING.md.'
+          const checked = body
+            .split(/\r?\n/)
+            .some((line) => /^\s*-\s*\[[xX]\]\s*/.test(line) && line.includes(acknowledgement))
+          if (!checked) {
+            console.error('Check the dual-license contribution acknowledgement in the pull request body.')
+            process.exit(1)
+          }
+          NODE
