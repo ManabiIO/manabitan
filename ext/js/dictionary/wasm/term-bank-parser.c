@@ -787,6 +787,12 @@ static int parse_composite_span_impl(
                 return 0;
             }
             i = s_end;
+            // A validated string value also establishes its comma transition.
+            // Keys still require a colon; whitespace retains normal hint handling.
+            if (!object_key && i < len && src[i] == ',') {
+                state = state == OBJECT_AFTER_VALUE ? OBJECT_KEY : ARRAY_VALUE;
+                ++i;
+            }
             continue;
         }
         if (c == ']' || c == '}') {
