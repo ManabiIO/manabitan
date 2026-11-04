@@ -12,6 +12,7 @@ import {
     compactTermRecordPreinternedPlan,
     createTermRecordPreinternedPlanBuilder,
     getTermRecordPreinternedPlan,
+    hasCompletePreparedTermRecordPreinternedPlan,
     hasCompleteTermRecordPreinternedPlan,
     selectTermRecordPreinternedPlan,
     sliceTermRecordPreinternedPlan,
@@ -203,4 +204,69 @@ describe('term record preinterned plan helpers', () => {
         )).toBe(false);
         expect(hasCompleteTermRecordPreinternedPlan(null, 0)).toBe(false);
     });
+});
+
+
+describe('prepared term record plan admission', () => {
+    test('checks every explicit boundary without changing generic completeness', () => {
+        const plan = {...createPlan(), stringOffsets: Uint32Array.of(0, 2, 3)};
+        // Generic completeness remains a shape/endpoints check. Worker-prepared
+        // indexes bypass reconstruction and must reject this interior gap.
+        expect(hasCompleteTermRecordPreinternedPlan(plan, 3)).toBe(true);
+        expect(hasCompletePreparedTermRecordPreinternedPlan(plan, 3)).toBe(false);
+        plan.stringOffsets[1] = 1;
+        expect(hasCompletePreparedTermRecordPreinternedPlan(plan, 3)).toBe(true);
+        plan.stringOffsets[1] = 0xffffffff;
+        expect(hasCompletePreparedTermRecordPreinternedPlan(plan, 3)).toBe(false);
+    });
+
+    test('permits empty sentinel strings only when the caller permits them', () => {
+        const plan = {
+            stringLengths: Uint16Array.of(1, 0, 1),
+            stringsBuffer: Uint8Array.of(65, 66),
+            expressionIndexes: Uint32Array.of(0),
+            readingIndexes: Uint32Array.of(2),
+        };
+        expect(hasCompletePreparedTermRecordPreinternedPlan(plan, 1)).toBe(true);
+        expect(hasCompletePreparedTermRecordPreinternedPlan(plan, 1, true)).toBe(false);
+        const withOffsets = {...plan, stringOffsets: Uint32Array.of(0, 1, 1)};
+        expect(hasCompletePreparedTermRecordPreinternedPlan(withOffsets, 1)).toBe(true);
+        expect(hasCompletePreparedTermRecordPreinternedPlan(withOffsets, 1, true)).toBe(false);
+    });
+
+    test('requires exact storage consumption with and without explicit offsets', () => {
+        const plan = createPlan();
+        for (const stringOffsets of [undefined, Uint32Array.of(0, 1, 3)]) {
+            expect(hasCompletePreparedTermRecordPreinternedPlan({...plan, stringOffsets}, 3)).toBe(true);
+            expect(hasCompletePreparedTermRecordPreinternedPlan({...plan, stringOffsets, stringsBuffer: new Uint8Array(3)}, 3)).toBe(false);
+            expect(hasCompletePreparedTermRecordPreinternedPlan({...plan, stringOffsets, stringsBuffer: new Uint8Array(5)}, 3)).toBe(false);
+        }
+    });
+
+    test('accepts empty storage only for zero requested rows', () => {
+        const plan = {
+            stringLengths: new Uint16Array(0),
+            stringOffsets: new Uint32Array(0),
+            stringsBuffer: new Uint8Array(0),
+            expressionIndexes: new Uint32Array(1),
+            readingIndexes: new Uint32Array(1),
+        };
+        expect(hasCompletePreparedTermRecordPreinternedPlan(plan, 0, true)).toBe(true);
+        expect(hasCompletePreparedTermRecordPreinternedPlan(plan, 1)).toBe(false);
+        expect(hasCompletePreparedTermRecordPreinternedPlan({...plan, stringsBuffer: Uint8Array.of(65)}, 0)).toBe(false);
+        for (const count of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+            expect(hasCompletePreparedTermRecordPreinternedPlan(plan, count)).toBe(false);
+        }
+    });
+
+    test.each(['stringLengths', 'stringOffsets', 'stringHashes', 'stringsBuffer', 'expressionIndexes', 'readingIndexes'])(
+        'rejects a transferred and detached %s before accepting worker-prepared storage',
+        (field) => {
+            const plan = {...createPlan(), stringOffsets: Uint32Array.of(0, 1, 3)};
+            expect(hasCompletePreparedTermRecordPreinternedPlan(plan, 3)).toBe(true);
+            const bytes = /** @type {Uint8Array|Uint16Array|Uint32Array} */ (Reflect.get(plan, field));
+            structuredClone(bytes, {transfer: [bytes.buffer]});
+            expect(hasCompletePreparedTermRecordPreinternedPlan(plan, 3)).toBe(false);
+        },
+    );
 });
