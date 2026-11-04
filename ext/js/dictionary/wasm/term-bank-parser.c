@@ -413,13 +413,15 @@ static uint32_t align8(uint32_t value) {
 }
 
 static int ensure_memory(uint32_t required_bytes) {
-    uint32_t current_pages = __builtin_wasm_memory_size(0);
-    uint32_t current_bytes = current_pages * WASM_PAGE_SIZE;
-    if (required_bytes <= current_bytes) {
+    const uint32_t current_pages = __builtin_wasm_memory_size(0);
+    // A full wasm32 heap has 65536 pages; its byte size exceeds uint32_t.
+    // Round the request in page units without overflowing at UINT32_MAX.
+    const uint32_t required_pages = required_bytes / WASM_PAGE_SIZE +
+        (required_bytes % WASM_PAGE_SIZE != 0u);
+    if (required_pages <= current_pages) {
         return 1;
     }
-    uint32_t missing = required_bytes - current_bytes;
-    uint32_t grow_pages = (missing + (WASM_PAGE_SIZE - 1u)) / WASM_PAGE_SIZE;
+    const uint32_t grow_pages = required_pages - current_pages;
     int32_t rc = __builtin_wasm_memory_grow(0, grow_pages);
     return rc >= 0;
 }
