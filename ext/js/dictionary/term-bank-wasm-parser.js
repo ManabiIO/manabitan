@@ -2170,10 +2170,14 @@ null :
             /** @type {Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>} */
             const mediaRows = [];
 
-            const needsRowProjection = fusedStringPlan === null || emitTermByteLists || !emitContentSlab || mediaHintFastScan;
+            const projectMediaHintsOnly = fusedStringPlan !== null && !emitTermByteLists && emitContentSlab;
+            const needsRowProjection = !projectMediaHintsOnly || mediaHintFastScan;
             const tRowDecodeStart = needsRowProjection ? Date.now() : 0;
             for (let sourceIndex = start, i = 0; needsRowProjection && sourceIndex < end; ++sourceIndex, ++i) {
                 const o = sourceIndex * META_U32_FIELDS;
+                // Fused columns already contain the final term fields. Only
+                // hinted media rows need JavaScript projection in this mode.
+                if (projectMediaHintsOnly && metas[o + 14] !== 1) { continue; }
                 const c = sourceIndex * CONTENT_META_U32_FIELDS;
                 if (nativeStringPlan === null) {
                     if (planBuilder === null) {
