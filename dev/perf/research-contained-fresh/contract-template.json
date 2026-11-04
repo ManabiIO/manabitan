@@ -1,0 +1,332 @@
+{
+  "createdAt": "2026-11-04T12:49:38.285662+00:00",
+  "riskClass": "contained native instruction/validation changes, each qualified independently",
+  "variants": [
+    "wide",
+    "crc",
+    "colon"
+  ],
+  "datasets": [
+    "jmdict",
+    "jitendex"
+  ],
+  "observationsPerCohort": 72,
+  "blocks": [
+    {
+      "kind": "AB",
+      "pair": 15,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 11,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 22,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 16,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 2,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 3,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 3,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 10,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 0,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 5,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 8,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 1,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 5,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 12,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 20,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 10,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 11,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 19,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 0,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 6,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 9,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 21,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 13,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 4,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 17,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 7,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 14,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 1,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 23,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 18,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 9,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 7,
+      "arms": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 8,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 4,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AB",
+      "pair": 6,
+      "arms": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "kind": "AA",
+      "pair": 2,
+      "arms": [
+        "baseline",
+        "baseline"
+      ]
+    }
+  ],
+  "warmupCorpusPassesPerArm": 2,
+  "inflaterCorpusPassesPerObservation": 16,
+  "parserCorpusPassesPerObservation": 8,
+  "owningPhase": {
+    "wide": "inflate",
+    "crc": "inflate",
+    "colon": "parse"
+  },
+  "primary": "paired log-ratio geometric mean CPU time; all observations retained",
+  "confidence": "two-sided 98.333333% percentile paired bootstrap, 100000 fixed-seed resamples (three-candidate family), paired unit is an entire adjacent block",
+  "gainGate": "owning-phase CPU upper CI < 0%; point improvement >=1%",
+  "controls": "AA CPU CI inside +/-1.5%; failure means inconclusive, not candidate regression",
+  "adjacentGuard": "unchanged adjacent phase CPU upper CI <= +2%; owning-phase wall upper CI <= +2%",
+  "footprint": "same maximum wasm heap; module growth <=16KiB; process RSS diagnostic only",
+  "startup": "fresh-process compile/instantiate measured separately, 20 pairs; absolute upper CI <=5ms or relative <=20%",
+  "browserRequired": "Chromium and Firefox realistic phase/whole-import non-regression with predeclared bounds before browser observations. No source integration from Node alone.",
+  "browserGuardProposal": "upper one-sided95% paired whole-visible-import relative delta <=+3%; cold import, native OPFS, fixed corpus identities; lookup/memory/lifecycle hard guards. Insufficient precision is inconclusive.",
+  "oracles": "Independent inflateRawSync CRC/size/full SHA256; all rows and full content/meta/key/media/prepared-index parity; malformed/trailing/boundary/reuse controls",
+  "timing": "Batch contains no full SHA/JSON oracle allocations between timed groups. Native CRC/size/status and parser row/fallback checks remain pergroup. Full corpus content/meta/key/media/prepared-index oracles execute before and immediately after each timed batch, outside clock; gc before next observation.",
+  "excluded": "archive extraction and oracle work outside owner; compression, real storage/publication, browser not inferred from Node",
+  "noOptionalStopping": true,
+  "reason": "All44functionindices and43bodies (allparserfunctions) identical, sameheapstart. Reused-process benchmark always initializes baseline JS/WASM before candidate, while AA reuses same baselineinstance, leaving instance-placement bias uncontrolled. Fresh process per observation loads one plain current JSmodule and one selectedWASM; AA now mirrors full setup.",
+  "cases": [],
+  "initialization": "For parse, execute one real compressed group before equal2corpus warmups, matching decoder-before-parser activity. All compile/init/setup outside steady-state phase timer; cold separately measured.",
+  "sampleBudget": "24candidatepairs+12AAcontrols perphase; all retained; original standalone/precision samples immutable; no retries/trimming",
+  "scope": "Research-only actual Linux x64 fresh-process native phase qualification. Product ext tree must match current4a694 source; no browser/whole-import acceptance from Node. Never merge this research workflow into develop.",
+  "repetitions": "24candidatepairs+12AAcontrols perphase; same complete fixed schedule for each case; two corpus warmups,16inflate/8parserpasses per observation, fresh process per arm; full setup AA controls.",
+  "goldens": "Baseline generated outside timed observations with independent inflateRawSync/CRC/SHA and exact prepared-index oracle; all-row content/metadata/key/media digests after every timed batch."
+}

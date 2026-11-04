@@ -1,0 +1,17 @@
+diff --git a/term-bank-parser.c b/term-bank-parser.c
+index c3f2994..9cdac50 100644
+--- a/term-bank-parser.c
++++ b/term-bank-parser.c
+@@ -762,9 +762,9 @@ static int parse_composite_span_impl(
+                     if (normalization_hint != 0) { *normalization_hint = 1u; }
+                     if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
+                 }
+-                // A complete literal key and adjacent colon also validate
+-                // the next grammar state without redispatching the colon.
+-                if (common_key && s_end < len && src[s_end] == ':') {
++                // The key was already validated; consume an adjacent colon
++                // without redispatching it through the object state machine.
++                if (s_end < len && src[s_end] == ':') {
+                     state = OBJECT_VALUE;
+                     i = s_end + 1u;
+                     continue;
