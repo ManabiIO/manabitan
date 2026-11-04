@@ -68,7 +68,13 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     databaseSetSuspendedOffscreen: Object.freeze({
         concurrency: 'exclusive', timeoutClass: 'maintenance', retryable: false, requiresDatabase: false, rejectDuringImport: true,
     }),
-    getDictionaryInfoOffscreen: standardReadPolicy,
+    // Summary/health snapshots only read the owning connection and in-memory
+    // state. An exclusive metadata read would wait for active cache warming,
+    // then make later foreground lookups wait behind that best-effort warm.
+    // Keep mutation ordering and import rejection through the read scheduler.
+    getDictionaryInfoOffscreen: Object.freeze({
+        concurrency: 'lookup', timeoutClass: 'standard', retryable: false, requiresDatabase: true, rejectDuringImport: true,
+    }),
     deleteDictionaryOffscreen: maintenancePolicy,
     replaceDictionaryTitleOffscreen: maintenancePolicy,
     getDictionaryCountsOffscreen: standardReadPolicy,
