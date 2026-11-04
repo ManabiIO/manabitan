@@ -8522,8 +8522,8 @@ null :
                             uniformContentDictName,
                     );
                 }
-                contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
-                contentDedupPlan.pendingIndexes[uniqueIndex] = pendingContentCount;
+                // Canonical rows are visited once. Epoch scratch is needed only
+                // by the generic row scan; this journal owns publication/rollback.
                 pendingPlanUniqueIndexes.push(uniqueIndex);
                 ++pendingContentCount;
             };
