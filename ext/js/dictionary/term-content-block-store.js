@@ -1283,6 +1283,7 @@ function createTermContentReferenceLayout(entryCount, targetBytes) {
  * @param {number[]} blockLengths
  * @param {number} entriesPerSlab
  * @returns {Uint8Array[]}
+ * @throws {RangeError} If a block field or entry offset cannot be encoded.
  */
 function createTermContentReferenceSlabs(
     packed,
@@ -1294,6 +1295,12 @@ function createTermContentReferenceSlabs(
 ) {
     const slabCount = Math.ceil(sourceLengths.length / entriesPerSlab);
     const referenceSlabs = new Array(slabCount);
+    let previousBlockIndex = -1;
+    const blockPrefix = new DataView(new ArrayBuffer(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES));
+    let blockOffsetLow = 0;
+    let blockOffsetHigh = 0;
+    let blockStoredLength = 0;
+    let blockUncompressedLength = 0;
     for (let slabIndex = 0; slabIndex < slabCount; ++slabIndex) {
         const startIndex = slabIndex * entriesPerSlab;
         const entryCount = Math.min(entriesPerSlab, sourceLengths.length - startIndex);
@@ -1302,14 +1309,35 @@ function createTermContentReferenceSlabs(
         for (let localIndex = 0; localIndex < entryCount; ++localIndex) {
             const contentIndex = startIndex + localIndex;
             const blockIndex = packed.sourceChunkIndices[contentIndex];
-            writeRawTermContentCompactBlockReference(
-                view,
-                localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,
-                blockOffsets[blockIndex],
-                blockLengths[blockIndex],
-                packedChunkLengths[blockIndex],
-                packed.sourceChunkLocalOffsets[contentIndex],
-            );
+            if (blockIndex !== previousBlockIndex) {
+                blockUncompressedLength = packedChunkLengths[blockIndex];
+                // The checked scalar encoder validates the invariant block
+                // fields once. Cache its fixed words for each entry in the block.
+                writeRawTermContentCompactBlockReference(
+                    blockPrefix,
+                    0,
+                    blockOffsets[blockIndex],
+                    blockLengths[blockIndex],
+                    blockUncompressedLength,
+                    0,
+                );
+                blockOffsetLow = blockPrefix.getUint32(0, true);
+                blockOffsetHigh = blockPrefix.getUint32(4, true);
+                blockStoredLength = blockPrefix.getUint32(8, true);
+                previousBlockIndex = blockIndex;
+            }
+            const entryOffset = packed.sourceChunkLocalOffsets[contentIndex];
+            // Packed offsets are Uint32, and the newly allocated slab bounds
+            // every fixed-stride destination; only the entry bound varies.
+            if (!Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength) {
+                throw new RangeError('Invalid compact term-content block reference');
+            }
+            const offset = localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+            view.setUint32(offset, blockOffsetLow, true);
+            view.setUint32(offset + 4, blockOffsetHigh, true);
+            view.setUint32(offset + 8, blockStoredLength, true);
+            view.setUint32(offset + 12, blockUncompressedLength, true);
+            view.setUint32(offset + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES - 4, entryOffset, true);
         }
         referenceSlabs[slabIndex] = slab;
     }

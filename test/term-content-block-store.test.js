@@ -12,7 +12,7 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {ByteBoundedLruCache, TermContentBlockImportSession, TermContentBlockStore, wrapCompressedTermContentBlock} from '../ext/js/dictionary/term-content-block-store.js';
 import {TERM_CONTENT_BLOCK_ENVELOPE_BYTES, writeCompressedTermContentBlockEnvelope} from '../ext/js/dictionary/term-content-block-envelope.js';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
-import {encodeRawTermContentBlockReference} from '../ext/js/dictionary/raw-term-content.js';
+import {encodeRawTermContentBlockReference, encodeRawTermContentCompactBlockReference} from '../ext/js/dictionary/raw-term-content.js';
 import {beginCompressWrappedTermContentZstdSpansBatch, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from '../ext/js/dictionary/zstd-term-content.js';
 
 vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
@@ -329,6 +329,50 @@ describe('TermContentBlockStore', () => {
         ));
         await expect(operation.storage).rejects.toThrow('slab offset');
         await expect(operation.completion).rejects.toThrow('slab offset');
+    });
+
+    test.each([
+        [0, 2 ** 32 + 7],
+        [Number.MAX_SAFE_INTEGER - 17, Number.MAX_SAFE_INTEGER - 33],
+    ])('writes scalar-identical reference prefixes across block and slab boundaries (%s, %s)', async (firstBlockOffset, secondBlockOffset) => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 5,
+            referencePackTargetBytes: 60,
+            minInputBytes: 0,
+        });
+        const blockOffsets = [firstBlockOffset, secondBlockOffset];
+        vi.spyOn(contentStore, 'appendBatchWithDerivedChunks').mockImplementation(async (chunks, createDerived) => {
+            const blockLengths = chunks.map((chunk) => chunk.length);
+            const slabs = createDerived(blockOffsets, blockLengths);
+            const expected = [
+                encodeRawTermContentCompactBlockReference(blockOffsets[0], blockLengths[0], 5, 0),
+                encodeRawTermContentCompactBlockReference(blockOffsets[0], blockLengths[0], 5, 3),
+                encodeRawTermContentCompactBlockReference(blockOffsets[1], blockLengths[1], 5, 0),
+                encodeRawTermContentCompactBlockReference(blockOffsets[1], blockLengths[1], 5, 4),
+            ];
+            expect(slabs.map((slab) => [...slab])).toStrictEqual([
+                [...expected[0], ...expected[1], ...expected[2]],
+                [...expected[3]],
+            ]);
+            return {primaryOffsets: blockOffsets, primaryLengths: blockLengths, derivedOffsets: [100, 200], derivedLengths: [60, 20]};
+        });
+        await expect(blockStore.tryAppend([
+            Uint8Array.of(1, 2, 3),
+            Uint8Array.of(4, 5),
+            Uint8Array.of(6, 7, 8, 9),
+            Uint8Array.of(10),
+        ], null, true)).resolves.not.toBeNull();
+    });
+
+    test.each([-1, 0.5, Number.NaN, Number.MAX_SAFE_INTEGER - 2])('rejects an invalid later block prefix (%s)', async (laterOffset) => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 1, minInputBytes: 0});
+        vi.spyOn(contentStore, 'appendBatchWithDerivedChunks').mockImplementation(async (chunks, createDerived) => {
+            createDerived([0, laterOffset], chunks.map((chunk) => chunk.length));
+            throw new Error('Invalid block fields were accepted');
+        });
+        await expect(blockStore.tryAppend([Uint8Array.of(1), Uint8Array.of(2)], null, true)).rejects.toThrow(RangeError);
     });
 
     test('atomically appends blocks and reads each logical entry', async () => {
