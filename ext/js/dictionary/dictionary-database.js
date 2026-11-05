@@ -6892,10 +6892,10 @@ null;
             for (let i = 0; i < count; ++i) {
                 const hash1 = pendingContentHash1s[i] >>> 0;
                 const hash2 = pendingContentHash2s[i] >>> 0;
-                const contentBytes = pendingContentSpans === null ?
+                let contentBytes = pendingContentSpans === null ?
                     pendingContentBytes[i] :
                     pendingContentSpans.buffer;
-                const contentByteOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
+                let contentByteOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
                 const contentLength = pendingContentSpans === null ? contentBytes.byteLength : pendingContentSpans.lengths[i];
                 if (
                     !(contentBytes instanceof Uint8Array) ||
@@ -6919,6 +6919,11 @@ null;
                     slot = (slot + 1) & mask;
                 }
                 if (slot < 0) { continue; }
+                // Short signatures pad the logical span, not adjacent slab bytes.
+                if (contentLength < 4) {
+                    contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + contentLength);
+                    contentByteOffset = 0;
+                }
                 const index = freeIndexes.length === 0 ?
                     this._termEntryContentMetaDenseCount++ :
                     /** @type {number} */ (freeIndexes.pop());
@@ -6997,6 +7002,10 @@ null;
             typeof signature2 === 'number' &&
             typeof signature3 === 'number'
         );
+        if (!hasPreparedSignatures && contentLength < 4) {
+            contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + contentLength);
+            contentByteOffset = 0;
+        }
         return this._reservePreparedArtifactTermContentMetadata(
             hash1,
             hash2,
@@ -7319,6 +7328,10 @@ this._readTermContentSignature(
             length > contentBytes.byteLength - contentByteOffset
         ) {
             throw new RangeError(`Invalid term content metadata source span: ${contentByteOffset}+${length}`);
+        }
+        if (length < 4) {
+            contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + length);
+            contentByteOffset = 0;
         }
         const lastOffset = Math.max(0, length - 4);
         const index = this._allocateTermEntryContentMetaIndex();

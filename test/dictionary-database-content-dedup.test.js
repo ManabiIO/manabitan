@@ -21,7 +21,7 @@ import {
     encodeRawTermContentSharedGlossaryBinary,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
 } from '../ext/js/dictionary/raw-term-content.js';
-import {hashTermEntryContentBytes} from '../ext/js/dictionary/term-entry-content-hash.js';
+import {hashTermEntryContentBytes, hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 
 /**
@@ -74,9 +74,10 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
  * @param {number} length
  * @param {number} hash1
  * @param {number} hash2
+ * @param {{indexes: Int32Array, active: boolean}|null} [stagedMetadata]
  * @returns {{staged: {indexes: Int32Array, active: boolean}, meta: TermContentMeta}}
  */
-function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2) {
+function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2, stagedMetadata = null) {
     const spans = {
         buffer: source,
         offsets: new Uint32Array([sourceOffset]),
@@ -84,7 +85,7 @@ function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2) {
     };
     const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
     const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
-    const staged = stage([hash1], [hash2], [], spans);
+    const staged = stagedMetadata ?? stage([hash1], [hash2], [], spans);
     publish({
         count: 1,
         contentOffsets: new Float64Array(1),
@@ -286,6 +287,54 @@ describe('DictionaryDatabase term content hash validation', () => {
 });
 
 describe('DictionaryDatabase term content dedup metadata cache', () => {
+    test.each(['stage', 'reserve', 'fast'].flatMap((writer) => (
+        Array.from({length: 5}, (_, length) => ({writer, length}))
+    )))('bounds $writer signatures to a logical slab span of length $length', async ({writer, length}) => {
+        const database = new DictionaryDatabase();
+        const contentBytes = Uint8Array.from({length}, (_, i) => i + 1);
+        const source = Uint8Array.of(90, ...contentBytes, 91, 92, 93, 94);
+        const [hash1, hash2] = hashTermEntryContentBytesPair(contentBytes);
+        const spans = {buffer: source, offsets: Uint32Array.of(1), lengths: Uint32Array.of(length)};
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const reserve = Reflect.get(database, '_reserveArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').call(database, 1);
+        if (writer === 'fast') {
+            const dictNameId = Reflect.get(database, '_internTermEntryContentMetaDictName').call(database, 'raw');
+            Reflect.get(database, '_insertTermEntryContentMetaByHashPairFast').call(database, hash1, hash2, 1000, length, 'raw', dictNameId, source, 1);
+        } else {
+            const reserveMetadata = () => (writer === 'stage' ?
+                stage([hash1], [hash2], [], spans) :
+                {indexes: Int32Array.of(reserve(hash1, hash2, source, 1, length)), active: true});
+            const staged = reserveMetadata();
+            expect(getMeta(database, hash1, hash2)).toBeUndefined();
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+            rollback(staged);
+            expect(getMeta(database, hash1, hash2)).toBeUndefined();
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+            const retried = reserveMetadata();
+            expect(retried.indexes[0]).toBe(staged.indexes[0]);
+            publishSlabMeta(database, source, 1, length, hash1, hash2, retried);
+        }
+        const meta = getMeta(database, hash1, hash2);
+        if (typeof meta === 'undefined') { throw new Error('Expected published term content metadata'); }
+        const expectedSignature = contentBytes.reduce((value, byte, i) => value | (byte << (i * 8)), 0) >>> 0;
+        expect(meta).toMatchObject({
+            length,
+            signature1: expectedSignature,
+            signature2: expectedSignature,
+            signature3: expectedSignature,
+        });
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
+        const readStorage = vi.fn(async () => [{status: 'ok', bytes: Uint8Array.from(contentBytes)}]);
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+        const [result] = await findBatch([{hash1, hash2, contentBytes, primary: meta}]);
+        expect(result.existingMeta).toEqual(meta);
+        expect(result.exactFallback).toBe(true);
+    });
+
     test('owns recent published source bytes across borrowed slab reuse', async () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array([90, 1, 2, 3, 4, 91]);
