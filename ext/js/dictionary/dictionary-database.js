@@ -6725,42 +6725,44 @@ null;
         while (capacity < requiredCount) { capacity *= 2; }
         const hash1Table = new Uint32Array(capacity);
         hash1Table.set(this._termEntryContentMetaHash1Table);
-        this._termEntryContentMetaHash1Table = hash1Table;
         const hash2Table = new Uint32Array(capacity);
         hash2Table.set(this._termEntryContentMetaHash2Table);
-        this._termEntryContentMetaHash2Table = hash2Table;
         const stateTable = new Uint8Array(capacity);
         stateTable.set(this._termEntryContentMetaStateTable);
-        this._termEntryContentMetaStateTable = stateTable;
         const idTable = new Float64Array(capacity);
         idTable.set(this._termEntryContentMetaIdTable);
-        this._termEntryContentMetaIdTable = idTable;
         const offsetTable = new Float64Array(capacity);
         offsetTable.set(this._termEntryContentMetaOffsetTable);
-        this._termEntryContentMetaOffsetTable = offsetTable;
         const lengthTable = new Uint32Array(capacity);
         lengthTable.set(this._termEntryContentMetaLengthTable);
-        this._termEntryContentMetaLengthTable = lengthTable;
         const dictNameIdTable = new Uint32Array(capacity);
         dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
-        this._termEntryContentMetaDictNameIdTable = dictNameIdTable;
         const signaturePresentTable = new Uint8Array(capacity);
         signaturePresentTable.set(this._termEntryContentMetaSignaturePresentTable);
-        this._termEntryContentMetaSignaturePresentTable = signaturePresentTable;
         const signature1Table = new Uint32Array(capacity);
         signature1Table.set(this._termEntryContentMetaSignature1Table);
-        this._termEntryContentMetaSignature1Table = signature1Table;
         const signature2Table = new Uint32Array(capacity);
         signature2Table.set(this._termEntryContentMetaSignature2Table);
-        this._termEntryContentMetaSignature2Table = signature2Table;
         const signature3Table = new Uint32Array(capacity);
         signature3Table.set(this._termEntryContentMetaSignature3Table);
-        this._termEntryContentMetaSignature3Table = signature3Table;
         const recentSourceBatchIdTable = new Uint32Array(capacity);
         recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
-        this._termEntryContentMetaRecentSourceBatchIdTable = recentSourceBatchIdTable;
         const recentSourceOffsetTable = new Uint32Array(capacity);
         recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
+        // Publish the complete set only after every allocation and copy succeeds.
+        // The state vector advertises capacity to later allocations and retries.
+        this._termEntryContentMetaHash1Table = hash1Table;
+        this._termEntryContentMetaHash2Table = hash2Table;
+        this._termEntryContentMetaStateTable = stateTable;
+        this._termEntryContentMetaIdTable = idTable;
+        this._termEntryContentMetaOffsetTable = offsetTable;
+        this._termEntryContentMetaLengthTable = lengthTable;
+        this._termEntryContentMetaDictNameIdTable = dictNameIdTable;
+        this._termEntryContentMetaSignaturePresentTable = signaturePresentTable;
+        this._termEntryContentMetaSignature1Table = signature1Table;
+        this._termEntryContentMetaSignature2Table = signature2Table;
+        this._termEntryContentMetaSignature3Table = signature3Table;
+        this._termEntryContentMetaRecentSourceBatchIdTable = recentSourceBatchIdTable;
         this._termEntryContentMetaRecentSourceOffsetTable = recentSourceOffsetTable;
     }
 
