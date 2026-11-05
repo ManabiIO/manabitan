@@ -586,10 +586,6 @@ export class DictionaryDatabase {
         this._deferTermsVirtualTableSync = false;
         /** @type {boolean} */
         this._termsVirtualTableDirty = false;
-        /** @type {Map<string, number>} */
-        this._termEntryContentIdByKey = new Map();
-        /** @type {Map<string, number>} */
-        this._termEntryContentIdByHash = new Map();
         /** @type {Map<string, {id: number, offset: number, length: number, dictName: string}>} */
         this._termEntryContentMetaByHash = new Map();
         /** @type {Uint32Array} Sparse hash slots containing dense metadata indexes plus one. */
@@ -644,8 +640,6 @@ export class DictionaryDatabase {
         this._recentTermContentSourceBatchBytes = 0;
         /** @type {number} */
         this._nextRecentTermContentSourceBatchId = 1;
-        /** @type {boolean} */
-        this._termEntryContentHasExistingRows = true;
         /** @type {boolean} */
         this._enableTermEntryContentDedup = true;
         /** @type {Array<{hash1Table: Uint32Array, hash2Table: Uint32Array, indexTable: Uint32Array}>} */
@@ -1155,8 +1149,6 @@ export class DictionaryDatabase {
 
     /** Clears lookup state that may reference rolled-back import rows. */
     _clearBulkImportRuntimeCaches() {
-        this._termEntryContentIdByKey.clear();
-        this._termEntryContentIdByHash.clear();
         this._clearTermEntryContentMetaCaches();
         this._termEntryContentCache.clear();
         this._invalidateTermLookupCaches();
@@ -1403,12 +1395,9 @@ export class DictionaryDatabase {
                 this._applyImportPragmas();
                 this._deferTermsVirtualTableSync = true;
                 this._termsVirtualTableDirty = false;
-                this._termEntryContentHasExistingRows = this._asNumber(db.selectValue('SELECT 1 FROM termEntryContent LIMIT 1'), 0) === 1;
                 for (const dropIndexSql of this._createDropIndexesSql()) {
                     db.exec(dropIndexSql);
                 }
-                this._termEntryContentIdByKey.clear();
-                this._termEntryContentIdByHash.clear();
                 this._clearTermEntryContentMetaCaches();
                 this._termContentBlockImportSession?.close();
                 this._termContentBlockImportSession = this._termContentBlockStore.beginImportSession();
@@ -2452,7 +2441,6 @@ null;
         this._statementCache.clear();
         this._termEntryContentCache.clear();
         this._termRowCache.clear();
-        this._termEntryContentIdByHash.clear();
         this._clearTermEntryContentMetaCaches();
         this._invalidateTermLookupCaches();
     }
@@ -4723,8 +4711,6 @@ null;
             this._lastBulkAddTermsMetrics = null;
             this._termEntryContentCache.clear();
             if (!this._bulkImportTransactionOpen) {
-                this._termEntryContentIdByHash.clear();
-                this._termEntryContentIdByKey.clear();
                 this._clearTermEntryContentMetaCaches();
             }
             this._invalidateTermLookupCaches();
@@ -4762,8 +4748,6 @@ null;
         this._lastBulkAddTermsMetrics = null;
         this._termEntryContentCache.clear();
         if (!this._bulkImportTransactionOpen) {
-            this._termEntryContentIdByHash.clear();
-            this._termEntryContentIdByKey.clear();
             this._clearTermEntryContentMetaCaches();
         }
         this._invalidateTermLookupCaches();
@@ -6908,10 +6892,10 @@ null;
             for (let i = 0; i < count; ++i) {
                 const hash1 = pendingContentHash1s[i] >>> 0;
                 const hash2 = pendingContentHash2s[i] >>> 0;
-                const contentBytes = pendingContentSpans === null ?
+                let contentBytes = pendingContentSpans === null ?
                     pendingContentBytes[i] :
                     pendingContentSpans.buffer;
-                const contentByteOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
+                let contentByteOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
                 const contentLength = pendingContentSpans === null ? contentBytes.byteLength : pendingContentSpans.lengths[i];
                 if (
                     !(contentBytes instanceof Uint8Array) ||
@@ -6935,6 +6919,11 @@ null;
                     slot = (slot + 1) & mask;
                 }
                 if (slot < 0) { continue; }
+                // Short signatures pad the logical span, not adjacent slab bytes.
+                if (contentLength < 4) {
+                    contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + contentLength);
+                    contentByteOffset = 0;
+                }
                 const index = freeIndexes.length === 0 ?
                     this._termEntryContentMetaDenseCount++ :
                     /** @type {number} */ (freeIndexes.pop());
@@ -7013,6 +7002,10 @@ null;
             typeof signature2 === 'number' &&
             typeof signature3 === 'number'
         );
+        if (!hasPreparedSignatures && contentLength < 4) {
+            contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + contentLength);
+            contentByteOffset = 0;
+        }
         return this._reservePreparedArtifactTermContentMetadata(
             hash1,
             hash2,
@@ -7335,6 +7328,10 @@ this._readTermContentSignature(
             length > contentBytes.byteLength - contentByteOffset
         ) {
             throw new RangeError(`Invalid term content metadata source span: ${contentByteOffset}+${length}`);
+        }
+        if (length < 4) {
+            contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + length);
+            contentByteOffset = 0;
         }
         const lastOffset = Math.max(0, length - 4);
         const index = this._allocateTermEntryContentMetaIndex();
