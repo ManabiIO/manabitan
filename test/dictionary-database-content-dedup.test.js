@@ -354,6 +354,78 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(readStorage).not.toHaveBeenCalled();
     });
 
+    test.each(Array.from({length: 13}, (_, i) => i + 1))(
+        'retains coherent metadata when dense allocation %i fails and permits retry',
+        async (failureIndex) => {
+            const database = new DictionaryDatabase();
+            const source = new Uint8Array([1, 2, 3, 4]);
+            const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
+            const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+            const pending = stage([30], [40], [source], null);
+            const tableNames = [
+                '_termEntryContentMetaHash1Table',
+                '_termEntryContentMetaHash2Table',
+                '_termEntryContentMetaStateTable',
+                '_termEntryContentMetaIdTable',
+                '_termEntryContentMetaOffsetTable',
+                '_termEntryContentMetaLengthTable',
+                '_termEntryContentMetaDictNameIdTable',
+                '_termEntryContentMetaSignaturePresentTable',
+                '_termEntryContentMetaSignature1Table',
+                '_termEntryContentMetaSignature2Table',
+                '_termEntryContentMetaSignature3Table',
+                '_termEntryContentMetaRecentSourceBatchIdTable',
+                '_termEntryContentMetaRecentSourceOffsetTable',
+            ];
+            const originalTables = tableNames.map((name) => Reflect.get(database, name));
+            const originalValues = originalTables.map((table) => [...table]);
+            const grow = Reflect.get(database, '_ensureTermEntryContentMetaDenseCapacity').bind(database);
+            const failure = new RangeError('injected metadata allocation failure');
+            let allocationCount = 0;
+            for (const name of /** @type {const} */ (['Uint8Array', 'Uint32Array', 'Float64Array'])) {
+                vi.stubGlobal(name, new Proxy(globalThis[name], {
+                    construct(target, args, newTarget) {
+                        if (++allocationCount === failureIndex) { throw failure; }
+                        return Reflect.construct(target, args, newTarget);
+                    },
+                }));
+            }
+            try {
+                expect(() => grow(4096)).toThrow(failure);
+            } finally {
+                vi.unstubAllGlobals();
+            }
+            for (let i = 0; i < tableNames.length; ++i) {
+                expect(Reflect.get(database, tableNames[i])).toBe(originalTables[i]);
+                expect([...originalTables[i]]).toEqual(originalValues[i]);
+            }
+            expect(getMeta(database, 10, 20)).toEqual(meta);
+            expect(getMeta(database, 30, 40)).toBeUndefined();
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+
+            // The failed grow must not suppress a retry because one published
+            // vector already advertises the new capacity.
+            grow(4096);
+            for (let i = 0; i < tableNames.length; ++i) {
+                const table = Reflect.get(database, tableNames[i]);
+                expect(table.length).toBe(4096);
+                expect([...table.subarray(0, originalTables[i].length)]).toEqual(originalValues[i]);
+            }
+            const readStorage = vi.fn();
+            Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+            const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+            const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: source, primary: meta}]);
+            expect(result.recentSourceHit).toBe(true);
+            expect(readStorage).not.toHaveBeenCalled();
+            Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, pending);
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+            expect(getMeta(database, 10, 20)).toEqual(meta);
+            expect(getMeta(database, 30, 40)).toBeUndefined();
+            const retried = stage([30], [40], [source], null);
+            expect(retried.indexes[0]).toBe(pending.indexes[0]);
+        },
+    );
+
     test('reports recent source hits from canonical plan deduplication', async () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array([1, 2, 3, 4]);
