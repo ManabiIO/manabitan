@@ -667,17 +667,22 @@ static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, ui
 
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
 
+enum {
+    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG
+};
+
 /* These complete ASCII literals are already valid JSON strings. Matching
  * their closing quote avoids repeated span/media/type tests for common
- * structured-content keys; escaped and other keys use the full parser. */
+ * structured-content keys. Return their kind for required-field validation;
+ * escaped and other keys use the full parser. */
 static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
-    if (start >= len) { return 0; }
+    if (start >= len) { return COMMON_STRUCTURED_KEY_NONE; }
     if (len - start >= 9u) {
         uint64_t word;
         __builtin_memcpy(&word, src + start, sizeof(word));
         if (word == UINT64_C(0x746e65746e6f6322) && src[start + 8u] == '"') {
             *out_end = start + 9u;
-            return 1;
+            return COMMON_STRUCTURED_KEY_CONTENT;
         }
     }
     if (len - start >= 5u) {
@@ -685,10 +690,10 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
         __builtin_memcpy(&word, src + start, sizeof(word));
         if (word == UINT32_C(0x67617422) && src[start + 4u] == '"') {
             *out_end = start + 5u;
-            return 1;
+            return COMMON_STRUCTURED_KEY_TAG;
         }
     }
-    return 0;
+    return COMMON_STRUCTURED_KEY_NONE;
 }
 
 static int parse_composite_span_impl(
@@ -736,8 +741,9 @@ static int parse_composite_span_impl(
         if (c == '"') {
             uint32_t s_end = 0u;
             const int object_key = state == OBJECT_FIRST || state == OBJECT_KEY;
-            const int common_key = object_key && parse_common_structured_key_span(src, len, i, &s_end);
-            if (!common_key) {
+            const int common_key_kind = object_key ?
+                parse_common_structured_key_span(src, len, i, &s_end) : COMMON_STRUCTURED_KEY_NONE;
+            if (common_key_kind == COMMON_STRUCTURED_KEY_NONE) {
                 if (media_hint != 0 && *media_hint == 0u && is_media_marker_at(src, len, i)) {
                     *media_hint = 1u;
                 }
@@ -745,14 +751,15 @@ static int parse_composite_span_impl(
             }
             if (object_key) {
                 if (validate_top_level_objects && depth == 2u) {
-                    glossary_key =
+                    glossary_key = common_key_kind != COMMON_STRUCTURED_KEY_NONE ?
+                        (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT ? GLOSSARY_CONTENT_FIELD : 0u) :
                         json_string_matches_ascii(src, i, s_end, "type", 4u) ? GLOSSARY_TYPE_FIELD :
                         json_string_matches_ascii(src, i, s_end, "text", 4u) ? GLOSSARY_TEXT_FIELD :
                         json_string_matches_ascii(src, i, s_end, "path", 4u) ? GLOSSARY_PATH_FIELD :
                         json_string_matches_ascii(src, i, s_end, "content", 7u) ? GLOSSARY_CONTENT_FIELD : 0u;
                 }
                 if (
-                    !common_key &&
+                    common_key_kind == COMMON_STRUCTURED_KEY_NONE &&
                     (
                         (normalization_hint != 0 && *normalization_hint == 0u) ||
                         (text_normalization_hint != 0 && *text_normalization_hint == 0u)
