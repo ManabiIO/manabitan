@@ -19,7 +19,7 @@
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {deferPromise} from '../ext/js/core/utilities.js';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
-import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
+import {TermContentIntegrityError, TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 
 /** @typedef {FileSystemDirectoryHandle & {entries: () => AsyncIterableIterator<[string, FileSystemFileHandle]>}} MutableDirectory */
 
@@ -1216,6 +1216,111 @@ describe('TermContentOpfsStore', () => {
         }
         expect(Reflect.get(database, '_termRowCache').size).toBe(0);
         expect(Reflect.get(store, '_readPageOperations').size).toBe(0);
+    });
+
+    test.each(['prepare', 'prefetch'])('obsolete %s integrity failures cannot clear current-generation content caches', async (phase) => {
+        const database = new DictionaryDatabase();
+        const store = /** @type {TermContentOpfsStore} */ (Reflect.get(database, '_termContentStore'));
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        const blocks = Reflect.get(database, '_termContentBlockStore');
+        const clearBlocks = vi.spyOn(blocks, 'clearCache');
+        const mark = vi.spyOn(recordStore, 'markDictionaryReimportRequired');
+        const entered = deferPromise();
+        const release = deferPromise();
+        const failure = async () => {
+            entered.resolve(void 0);
+            await release.promise;
+            throw new TermContentIntegrityError('old generation segment shrink');
+        };
+        vi.spyOn(store, 'ensureLoadedForRead').mockResolvedValue(void 0);
+        vi.spyOn(recordStore, 'getByIdsAsync').mockResolvedValue(new Map([[1, {
+            id: 1,
+            dictionary: 'old',
+            expression: '語',
+            reading: 'ご',
+            score: 0,
+            sequence: 1,
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: 10,
+            entryContentDictName: 'raw',
+        }]]));
+        if (phase === 'prepare') {
+            vi.spyOn(store, 'ensureLoadedForRead').mockImplementationOnce(failure);
+        } else {
+            vi.spyOn(store, 'warmSlices').mockImplementationOnce(failure);
+        }
+        const pending = database._fetchTermRowsByIds([1]);
+        await entered.promise;
+        Reflect.set(database, '_directTermIndexGeneration', Reflect.get(database, '_directTermIndexGeneration') + 1);
+        const current = {id: 99, dictionary: 'new', expression: '新', reading: 'しん', definitionTags: null, rules: '', score: 0, glossary: ['new definition']};
+        Reflect.get(database, '_termRowCache').set(99, current);
+        const content = {definitionTags: null, termTags: '', rules: '', glossary: ['new definition']};
+        Reflect.get(database, '_termEntryContentCache').set('current', content);
+        release.resolve(void 0);
+        await expect(pending).rejects.toThrow('Dictionary content is temporarily unavailable because lookup state changed');
+        expect(Reflect.get(database, '_termRowCache').get(99)).toBe(current);
+        expect(Reflect.get(database, '_termEntryContentCache').get('current')).toBe(content);
+        expect(clearBlocks).not.toHaveBeenCalled();
+        expect(mark).not.toHaveBeenCalled();
+    });
+
+    test('prefetch cannot hide proven snapshot damage behind an existing decoded definition', async () => {
+        const database = new DictionaryDatabase();
+        const store = /** @type {TermContentOpfsStore} */ (Reflect.get(database, '_termContentStore'));
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        const bytes = new TextEncoder().encode(JSON.stringify({
+            definitionTags: '', termTags: '', rules: '', glossary: ['readable definition'],
+        }));
+        let currentFile = createReadableFile(bytes);
+        const fileHandle = {getFile: vi.fn(async () => currentFile)};
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_length', bytes.byteLength);
+        Reflect.set(store, '_loadedForRead', true);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: bytes.byteLength,
+            startOffset: 0,
+            readFile: currentFile,
+        }]);
+        const records = new Map([[1, {
+            id: 1,
+            dictionary: 'test',
+            expression: '語',
+            reading: 'ご',
+            score: 0,
+            sequence: 1,
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: bytes.byteLength,
+            entryContentDictName: 'raw',
+        }]]);
+        const lookup = vi.spyOn(recordStore, 'getByIdsAsync').mockResolvedValue(records);
+        expect((await database._fetchTermRowsByIds([1])).get(1)?.glossary).toEqual(['readable definition']);
+        // Row eviction leaves the shared decoded definition in its own cache.
+        Reflect.get(database, '_termRowCache').clear();
+        expect(Reflect.get(database, '_termEntryContentCache').size).toBe(1);
+        const entered = deferPromise();
+        const release = deferPromise();
+        lookup.mockImplementationOnce(async () => {
+            entered.resolve(void 0);
+            await release.promise;
+            return records;
+        });
+        const mark = vi.spyOn(recordStore, 'markDictionaryReimportRequired');
+        const pending = database._fetchTermRowsByIds([1]);
+        await entered.promise;
+        currentFile = createReadableFile(bytes.slice(0, -1));
+        Reflect.get(store, '_invalidateReadState').call(store);
+        release.resolve(void 0);
+        await expect(pending).rejects.toThrow('Dictionary content is damaged and must be re-imported');
+        expect(mark).toHaveBeenCalledExactlyOnceWith('test', expect.any(String));
+        expect(Reflect.get(database, '_termRowCache').size).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentCache').size).toBe(0);
     });
 
     test.each(['NotReadableError', 'unknown', 'undefined'])('prefetch joins active pages before settling %s failure', async (kind) => {

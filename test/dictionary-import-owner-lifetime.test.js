@@ -512,3 +512,96 @@ test.each([false, true])('an unknown durable outcome never retires its operation
         await backend._setDictionaryImportMode(false, 'page-A');
     }
 });
+
+
+test.each(['offscreen', 'local'])('lost %s handoff acknowledgement cannot discard a later publication after page loss', async (runtime) => {
+    const {backend, client, cancel, notifications} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    /** @type {PromiseWithResolvers<void>} */
+    const entered = Promise.withResolvers();
+    /** @type {PromiseWithResolvers<void>} */
+    const acknowledge = Promise.withResolvers();
+    /** @type {MessagePort|null} */
+    let workerPort = null;
+    const sendMessageViaPort = vi.fn(async (/** @type {unknown} */ _message, /** @type {MessagePort[]} */ ports) => {
+        workerPort = structuredClone(ports[0], {transfer: [ports[0]]});
+        entered.resolve();
+        await acknowledge.promise;
+    });
+    const messenger = {prepare: vi.fn(async () => {}), sendMessageViaPort, sendMessagePromise: cancel};
+    Reflect.set(backend, runtime === 'offscreen' ? '_offscreen' : '_localDictionaryRuntime', messenger);
+    if (runtime === 'local') { Reflect.set(backend, '_offscreen', null); }
+    cancel.mockResolvedValue(/** @type {never} */ ({operationId: 'operation-A', workerGeneration: 'worker-A', state: 'running'}));
+    const observer = new MessageChannel();
+    try {
+        const forwarded = backend._onPmImportDictionaryOffscreen({operationId: 'operation-A', ownerId: 'page-A', archiveContent: new Blob(['fixture']), details: {}}, [observer.port2]);
+        await entered.promise;
+        api.shutdownRuntimeConnections();
+        const error = new Error('lost handoff acknowledgement');
+        error.name = 'OffscreenControlTransportError';
+        acknowledge.reject(error);
+        await forwarded;
+        expect(backend._ownedDictionaryImports.size).toBe(1);
+        expect(backend._dictionaryImportOwners.has('page-A')).toBe(true);
+        /** @type {MessagePort|null} */ (workerPort)?.postMessage({type: 'complete', result: {result: {title: 'Fixture'}, errors: [], outcome: {status: 'published'}}});
+        await expect.poll(() => backend._dictionaryImportOwners.size).toBe(0);
+        expect(backend._ownedDictionaryImports.size).toBe(0);
+        expect(notifications).toHaveBeenCalledExactlyOnceWith('dictionary', 'import');
+        expect(sendMessageViaPort).toHaveBeenCalledOnce();
+        expect(cancel).toHaveBeenCalledExactlyOnceWith({action: 'cancelDictionaryImportOffscreen', params: {operationId: 'operation-A', workerGeneration: void 0, lookupOnly: true}});
+    } finally {
+        /** @type {MessagePort|null} */ (workerPort)?.close();
+        observer.port1.close();
+        observer.port2.close();
+        await backend._setDictionaryImportMode(false, 'page-A');
+    }
+});
+
+
+test.each(['publication', 'explicit-release'])('a failed relay message preserves worker observation until %s', async (ending) => {
+    const {backend, client, cancel, notifications} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    const operation = backend._ownedDictionaryImports.get('operation-A');
+    if (operation) { operation.runtimeAdmissionAttempted = true; }
+    backend._settleDictionaryImportOwnership('operation-A', 'page-A');
+    /** @type {MessagePort[]} */
+    const receivers = [];
+    const NativeMessageChannel = MessageChannel;
+    vi.stubGlobal('MessageChannel', class extends NativeMessageChannel {
+        constructor() {
+            super();
+            receivers.push(this.port1);
+        }
+    });
+    const observer = new MessageChannel();
+    const received = new Promise((resolve) => {
+        observer.port1.onmessage = (event) => { resolve(event.data); };
+    });
+    const relay = backend._superviseOwnedDictionaryImport('operation-A', observer.port2);
+    cancel.mockResolvedValue(/** @type {never} */ ({operationId: 'operation-A', state: 'running'}));
+    try {
+        api.shutdownRuntimeConnections();
+        receivers[1].onmessageerror?.(new MessageEvent('messageerror'));
+        expect(await received).toMatchObject({type: 'error', error: {name: 'DictionaryImportTransportError'}});
+        expect(backend._dictionaryImportOwners.has('page-A')).toBe(true);
+        if (ending === 'publication') {
+            relay.port.postMessage({type: 'complete', result: {result: {title: 'Fixture'}, errors: [], outcome: {status: 'published'}}});
+            await expect.poll(() => backend._dictionaryImportOwners.size).toBe(0);
+            expect(notifications).toHaveBeenCalledExactlyOnceWith('dictionary', 'import');
+        } else {
+            await backend._setDictionaryImportMode(false, 'page-A');
+            expect(notifications).not.toHaveBeenCalled();
+        }
+        expect(backend._ownedDictionaryImports.size).toBe(0);
+        expect(receivers[1].onmessage).toBeNull();
+        expect(receivers[1].onmessageerror).toBeNull();
+    } finally {
+        relay.close();
+        observer.port1.close();
+        observer.port2.close();
+        await backend._setDictionaryImportMode(false, 'page-A');
+    }
+});
