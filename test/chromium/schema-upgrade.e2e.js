@@ -82,9 +82,14 @@ async function launch(name, expectedVersion) {
     await page.waitForFunction(() => document.documentElement.dataset.loaded === 'true', null, {timeout: 60000});
     assert.equal(await page.evaluate(() => chrome.runtime.getManifest().version), expectedVersion);
     const diagnostics = await send(page, 'debugDictionaryStorageState');
-    assert.equal(diagnostics.usesFallbackStorage, false);
-    assert.equal(diagnostics.openStorageDiagnostics?.mode, 'opfs-sahpool');
-    report.stages.push({name, version: expectedVersion, extensionId: id, opfs: true, browserVersion: context.browser()?.version() ?? null});
+    const legacy = expectedVersion === '26.3.31.46';
+    if (!legacy) {
+        assert.equal(diagnostics.usesFallbackStorage, false);
+        assert.equal(diagnostics.openStorageDiagnostics?.mode, 'opfs-sahpool');
+    }
+    // The published build's storage-state RPC predates these fields. Its
+    // authoritative import-worker snapshot is checked after import below.
+    report.stages.push({name, version: expectedVersion, extensionId: id, opfs: legacy ? null : true, browserVersion: context.browser()?.version() ?? null});
     await persist();
     return page;
 }
@@ -140,6 +145,16 @@ try {
     let page = await launch('published-release-initial', report.oldPackage.manifest.version);
     await page.setInputFiles('#dictionary-import-file-input', fixturePath);
     await published(page, false);
+    await page.waitForFunction((title) => {
+        const debug = Reflect.get(globalThis, '__manabitanLastImportDebug');
+        return debug?.hasResult === true && debug.resultTitle === title;
+    }, title, {timeout: 30000});
+    const legacyImport = await page.evaluate(() => Reflect.get(globalThis, '__manabitanLastImportDebug'));
+    assert.equal(legacyImport.errorCount, 0);
+    assert.equal(legacyImport.addSettingsErrorCount, 0);
+    assert.equal(legacyImport.usesFallbackStorage, false);
+    assert.equal(legacyImport.openStorageDiagnostics?.mode, 'opfs-sahpool');
+    report.oldImportStorage = {usesFallbackStorage: false, mode: legacyImport.openStorageDiagnostics.mode, evidence: 'published import-worker completion snapshot'};
     let options = await send(page, 'optionsGetFull');
     const dictionaryIndex = options.profiles[0].options.dictionaries.findIndex((row) => row.name === title);
     assert.ok(dictionaryIndex >= 0);

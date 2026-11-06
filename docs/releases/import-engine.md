@@ -15,6 +15,8 @@ Your ordinary extension and Anki settings are retained. If a local dictionary ha
 
 ## Installation and updates
 
+See the [installation instructions](../../README.md#installation) for the available browser packages.
+
 The ZIP packages attached by the tag workflow are unsigned prerelease builds. A passing build or provenance attestation does not establish browser-store signing, normal end-user installation, or automatic updates. Those distribution paths require separate qualification.
 
 Firefox for Android remains experimental. Automated checks exercise import, lookup, replacement, visible search, and mining in an actual Firefox Android runtime using temporary add-on installation. Signed distribution and ordinary installation/update delivery remain unqualified.
