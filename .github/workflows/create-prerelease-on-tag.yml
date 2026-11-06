@@ -65,12 +65,17 @@ jobs:
                       package.write(path, path.relative_to(source).as_posix())
           PYTHON
 
+      - name: Audit every release package before publication
+        env:
+          RELEASE_VERSION: ${{ steps.releaseVersion.outputs.version }}
+        run: node dev/bin/audit-release-packages.js "$RELEASE_VERSION" builds/*.zip > builds/release-packages.json
+
       - name: Generate hashes
         id: hash
         shell: bash
         run: |
           cd builds
-          hashes="$(sha256sum -- *.zip | base64 -w0)"
+          hashes="$(sha256sum -- *.zip release-packages.json | base64 -w0)"
           echo "hashes=${hashes}" >> "$GITHUB_OUTPUT"
 
       - name: Release
@@ -89,7 +94,9 @@ jobs:
 
             Generated release notes follow this qualification notice.
           prerelease: true
-          files: builds/*.zip
+          files: |
+            builds/*.zip
+            builds/release-packages.json
           fail_on_unmatched_files: true
 
       - name: Dispatch publish-chrome-development
