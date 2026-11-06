@@ -75,7 +75,6 @@ import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './te
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const DICTIONARY_STORAGE_UPGRADE_REASON = 'Dictionary storage was upgraded. Download or import this dictionary again.';
-const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
 const TERM_ENTRY_CONTENT_CACHE_MAX_BYTES = 32 * 1024 * 1024;
 const TERM_ROW_CACHE_MAX_ENTRIES = 8192;
@@ -4386,7 +4385,7 @@ null;
                 summary :
                 null;
             const validSummary = summaryObject !== null && Reflect.get(summaryObject, 'importSuccess') !== false;
-            if (title.length > 0 && !TRANSIENT_UPDATE_TITLE_PATTERN.test(title) && validSummary) {
+            if (title.length > 0 && !isRecognizedTransientUpdateTitle(title, summary) && validSummary) {
                 installedTitles.add(title);
             }
             if (title.length > 0 && isRecognizedTransientUpdateTitle(title, summary)) {

@@ -378,6 +378,10 @@ export class Backend {
         this._pendingDatabaseUpdatedNotifications = [];
         /** @type {number} */
         this._databaseUpdatedNotificationGeneration = 0;
+        /** @type {number} */
+        this._dictionaryCacheInvalidationGeneration = 0;
+        /** @type {number} */
+        this._dictionaryCacheInvalidationCompletedGeneration = 0;
         /** @type {Promise<void>|null} */
         this._setDictionaryImportModePromise = null;
         /** @type {Set<string>} */
@@ -4691,37 +4695,53 @@ null;
      * @param {import('backend').DatabaseUpdateCause} cause
      */
     async _triggerDatabaseUpdated(type, cause) {
-        // The dictionary worker clears translator caches before acknowledging a
-        // successful import. Avoid queueing a redundant request behind that
-        // import; all other update paths still invalidate explicitly here.
-        if (type !== 'dictionary' || cause !== 'import') {
+        if (type !== 'dictionary') {
             await Promise.resolve(this._translator.clearDatabaseCaches());
+            this._sendApplicationDatabaseUpdated(type, cause);
+            return;
         }
-        if (type === 'dictionary') {
+        try {
+            // Imports already invalidate in their worker. Other mutations own a
+            // separate obligation which survives notification coalescing and a
+            // failed control RPC, even if a later update is an import.
+            if (cause !== 'import') {
+                this._dictionaryCacheInvalidationGeneration = (this._dictionaryCacheInvalidationGeneration ?? 0) + 1;
+            }
+            if ((this._dictionaryCacheInvalidationGeneration ?? 0) > (this._dictionaryCacheInvalidationCompletedGeneration ?? 0)) {
+                await this._flushDictionaryCacheInvalidation();
+            }
             if (this._dictionaryImportModeActive) {
                 this._deferredDictionaryRefreshDuringImport = true;
                 this._queueDeferredDatabaseUpdatedNotification(type, cause);
                 reportDiagnostics('dictionary-refresh-deferred-during-import', {cause});
                 return;
-            } else {
-                try {
-                    await this._refreshDictionaryDatabaseAfterUpdate({
-                        reuseActiveImportConnection: cause === 'import',
-                    });
-                } catch (error) {
-                    this._deferredDictionaryRefreshDuringImport = true;
-                    this._queueDeferredDatabaseUpdatedNotification(type, cause);
-                    this._scheduleDictionaryRefreshRetry('database-update-refresh-failed');
-                    reportDiagnostics('dictionary-refresh-after-update-failed', {
-                        cause,
-                        pendingNotificationCount: this._pendingDatabaseUpdatedNotifications.length,
-                        error: `${error}`,
-                    });
-                    throw error;
-                }
             }
+            await this._refreshDictionaryDatabaseAfterUpdate({
+                reuseActiveImportConnection: cause === 'import',
+            });
+        } catch (error) {
+            this._deferredDictionaryRefreshDuringImport = true;
+            this._queueDeferredDatabaseUpdatedNotification(type, cause);
+            this._scheduleDictionaryRefreshRetry('database-update-refresh-failed');
+            reportDiagnostics('dictionary-refresh-after-update-failed', {
+                cause,
+                pendingNotificationCount: this._pendingDatabaseUpdatedNotifications.length,
+                error: `${error}`,
+            });
+            throw error;
         }
         this._sendApplicationDatabaseUpdated(type, cause);
+    }
+
+    /** @returns {Promise<void>} */
+    async _flushDictionaryCacheInvalidation() {
+        const generation = this._dictionaryCacheInvalidationGeneration ?? 0;
+        await Promise.resolve(this._translator.clearDatabaseCaches());
+        // An older successful RPC cannot acknowledge a newer failed one.
+        this._dictionaryCacheInvalidationCompletedGeneration = Math.max(
+            this._dictionaryCacheInvalidationCompletedGeneration ?? 0,
+            generation,
+        );
     }
 
     /**
@@ -6070,6 +6090,9 @@ null;
                     pendingNotifications.every(({type, cause}) => type === 'dictionary' && cause === 'import')
                 );
                 notificationGeneration = this._databaseUpdatedNotificationGeneration ?? 0;
+                if ((this._dictionaryCacheInvalidationGeneration ?? 0) > (this._dictionaryCacheInvalidationCompletedGeneration ?? 0)) {
+                    await this._flushDictionaryCacheInvalidation();
+                }
                 await this._refreshDictionaryDatabaseAfterUpdate({
                     reuseActiveImportConnection: canReuseActiveImportConnection,
                 });

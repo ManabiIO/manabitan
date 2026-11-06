@@ -389,6 +389,8 @@ export class Offscreen {
         const responsePort = ports[0];
         const workerChannel = new MessageChannel();
         let settled = false;
+        let workerInvocationSettled = false;
+        let responseDeliveryFailed = false;
         const closePorts = () => {
             try { workerChannel.port1.close(); } catch (_) { /* NOP */ }
             try { workerChannel.port2.close(); } catch (_) { /* NOP */ }
@@ -426,19 +428,26 @@ export class Offscreen {
             }
             postResponse(message, type === 'complete' || type === 'error');
         };
-        workerChannel.port1.onmessageerror = () => {
+        const postResponseChannelFailure = () => {
             const error = new Error('Dictionary worker import response channel failed');
             error.name = 'DictionaryImportTransportError';
-            postResponse({
-                type: 'error',
-                error: ExtensionError.serialize(error),
-            }, true);
+            postResponse({type: 'error', error: ExtensionError.serialize(error)}, true);
+        };
+        workerChannel.port1.onmessageerror = () => {
+            // A failed packet does not end mutation ownership. Keep observing
+            // later terminal messages; only report transport failure once the
+            // worker action has ended and its receipt can settle the outcome.
+            responseDeliveryFailed = true;
+            if (workerInvocationSettled) { postResponseChannelFailure(); }
         };
         void this._invokeDictionaryWorker(
             'importDictionaryOffscreen',
             {archiveContent, details, operationId},
             [workerChannel.port2],
-        ).catch((error) => {
+        ).then(() => {
+            workerInvocationSettled = true;
+            if (responseDeliveryFailed) { postResponseChannelFailure(); }
+        }).catch((error) => {
             if (error instanceof Error && error.name === 'DictionaryWorkerTransportError') {
                 const transportError = new Error(error.message);
                 transportError.name = 'DictionaryImportTransportError';
