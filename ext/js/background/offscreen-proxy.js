@@ -685,7 +685,10 @@ export class DictionaryDatabaseProxy {
      */
     async purge() {
         const result = await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen'});
-        await this._refreshRuntimeState();
+        // Purge reopens the database before resolving, even when no files were
+        // deleted. Do not let a later state RPC hide a completed destructive
+        // operation or prevent its database-updated notification.
+        this._isPrepared = true;
         return result === true;
     }
 

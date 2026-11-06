@@ -371,7 +371,7 @@ export class Backend {
         this._orphanedDictionaryImportOwners = new Set();
         /** @type {Set<string>} */
         this._dictionaryImportOwnerPublications = new Set();
-        /** @type {Map<string, {ownerId: string, cancelled: boolean, settled: boolean, completed: boolean, runtimeAdmissionAttempted?: boolean, downloadAbortController?: AbortController, responseCleanup?: () => void}>} */
+        /** @type {Map<string, {ownerId: string, cancelled: boolean, settled: boolean, completed: boolean, runtimeAdmissionAttempted?: boolean, reconciliationPending?: boolean, downloadAbortController?: AbortController, responseCleanup?: () => void, responseReconcile?: (status: import('offscreen').ImportOperationStatus) => void}>} */
         this._ownedDictionaryImports = new Map();
         /** @type {Record<string, unknown>|null} */
         this._lastDictionaryUrlImportDebug = null;
@@ -474,8 +474,12 @@ export class Backend {
             if (this._dictionaryImportOwnerConnections.get(ownerId) !== port) { return; }
             this._dictionaryImportOwnerConnections.delete(ownerId);
             this._orphanedDictionaryImportOwners.add(ownerId);
-            for (const operation of this._ownedDictionaryImports.values()) {
-                if (operation.ownerId !== ownerId || operation.runtimeAdmissionAttempted) { continue; }
+            for (const [operationId, operation] of this._ownedDictionaryImports) {
+                if (operation.ownerId !== ownerId) { continue; }
+                if (operation.runtimeAdmissionAttempted) {
+                    if (!operation.responseCleanup) { this._reconcileOwnedDictionaryImport(operationId); }
+                    continue;
+                }
                 operation.cancelled = true;
                 operation.downloadAbortController?.abort();
             }
@@ -744,6 +748,7 @@ export class Backend {
                 if (relay) {
                     postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
                     relay.close();
+                    this._reconcileOwnedDictionaryImport(operationId);
                 }
                 throw error;
             }
@@ -758,6 +763,7 @@ export class Backend {
                 if (relay) {
                     postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
                     relay.close();
+                    this._reconcileOwnedDictionaryImport(operationId);
                 }
                 throw error;
             }
@@ -787,9 +793,25 @@ export class Backend {
             closeDictionaryImportResponsePort(channel.port1);
             closeDictionaryImportResponsePort(channel.port2);
             closeDictionaryImportResponsePort(responsePort);
-            if (operation?.responseCleanup === close) { delete operation.responseCleanup; }
+            if (operation?.responseCleanup === close) {
+                delete operation.responseCleanup;
+                delete operation.responseReconcile;
+            }
         };
-        if (operation) { operation.responseCleanup = close; }
+        /** @param {import('offscreen').ImportOperationStatus} status */
+        const reconcile = (status) => {
+            if (closed) { return; }
+            // A status lookup may beat the original terminal message. Preserve
+            // the still-connected observer before retiring its response relay.
+            postDictionaryImportResponseMessage(responsePort, status.state === 'completed' ?
+                {type: 'complete', result: status.result} :
+                {type: 'error', error: status.error ?? ExtensionError.serialize(new Error(`Dictionary import ${status.state}`))});
+            close();
+        };
+        if (operation) {
+            operation.responseCleanup = close;
+            operation.responseReconcile = reconcile;
+        }
         channel.port1.onmessage = (event) => {
             if (closed) { return; }
             /** @type {unknown} */
@@ -814,6 +836,7 @@ export class Backend {
             postDictionaryImportResponseMessage(responsePort, message);
             if (terminal) {
                 close();
+                if (uncertain) { this._reconcileOwnedDictionaryImport(operationId); }
             }
         };
         channel.port1.onmessageerror = () => {
@@ -822,6 +845,7 @@ export class Backend {
             error.name = 'DictionaryImportTransportError';
             postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
             close();
+            this._reconcileOwnedDictionaryImport(operationId);
         };
         return {port: channel.port2, close};
     }
@@ -2164,17 +2188,66 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         await this._setDictionaryImportMode(active, ownerId);
     }
 
+    /**
+     * A failed response is not proof of rollback. Query once after losing the
+     * relay; unresolved work remains fenced until authoritative reconciliation
+     * or explicit session release. Never replay the mutation to obtain a result.
+     * @param {string} operationId
+     */
+    _reconcileOwnedDictionaryImport(operationId) {
+        const operation = this._ownedDictionaryImports?.get(operationId);
+        if (!operation || operation.completed || operation.cancelled || operation.reconciliationPending) { return; }
+        operation.reconciliationPending = true;
+        void Promise.resolve(this._onApiGetDictionaryImportOperationStatus({operationId}, {})).catch((error) => {
+            reportDiagnostics('dictionary-import-owner-reconciliation-failed', {operationId, error: toError(error).message});
+        }).finally(() => { operation.reconciliationPending = false; });
+    }
+
     /** @type {import('api').ApiHandler<'getDictionaryImportOperationStatus'>} */
     async _onApiGetDictionaryImportOperationStatus({operationId, workerGeneration}) {
+        const operation = this._ownedDictionaryImports?.get(operationId);
         /** @type {import('offscreen').ApiMessage<'cancelDictionaryImportOffscreen'>} */
         const message = {action: 'cancelDictionaryImportOffscreen', params: {operationId, workerGeneration, lookupOnly: true}};
+        /** @type {import('offscreen').ImportOperationStatus} */
+        let status;
         if (this._offscreen !== null) {
-            return /** @type {import('offscreen').ImportOperationStatus} */ (await this._offscreen.sendMessagePromise(/** @type {import('offscreen').ApiMessage<'cancelDictionaryImportOffscreen'>} */ (message)));
+            status = /** @type {import('offscreen').ImportOperationStatus} */ (await this._offscreen.sendMessagePromise(message));
+        } else if (this._localDictionaryRuntime !== null) {
+            status = await this._localDictionaryRuntime.sendMessagePromise(message);
+        } else {
+            return {operationId, workerGeneration: '', state: 'unknown'};
         }
-        if (this._localDictionaryRuntime !== null) {
-            return await this._localDictionaryRuntime.sendMessagePromise(message);
+        if (
+            operation && !operation.completed && this._ownedDictionaryImports.get(operationId) === operation &&
+            status?.operationId === operationId && ['completed', 'failed', 'cancelled'].includes(status.state) &&
+            status.outcome?.status !== 'unknown'
+        ) {
+            operation.completed = true;
+            if (status.published === true || status.outcome?.status === 'published') {
+                if (this._dictionaryImportOwners.has(operation.ownerId)) {
+                    this._dictionaryImportOwnerPublications ??= new Set();
+                    this._dictionaryImportOwnerPublications.add(operation.ownerId);
+                } else {
+                    // Explicit release removes the owner before awaiting worker
+                    // cancellation. A receipt racing that await still owns an
+                    // update notification; it cannot wait for another release.
+                    try {
+                        await this._triggerDatabaseUpdated('dictionary', 'import');
+                    } catch (error) {
+                        // The update path retains its notification and retry.
+                        // A refresh failure must not hide an authoritative receipt.
+                        reportDiagnostics('dictionary-import-owner-notification-deferred', {operationId, error: toError(error).message});
+                    }
+                }
+            }
+            if (this._ownedDictionaryImports.get(operationId) !== operation) { return status; }
+            operation.responseReconcile?.(status);
+            if (operation.settled) {
+                this._ownedDictionaryImports.delete(operationId);
+                this._releaseOrphanedDictionaryImportOwner(operation.ownerId);
+            }
         }
-        return {operationId, workerGeneration: '', state: 'unknown'};
+        return status;
     }
 
     /** @type {import('api').ApiHandler<'purgeDatabase'>} */

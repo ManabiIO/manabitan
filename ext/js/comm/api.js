@@ -97,6 +97,10 @@ function createDictionaryRuntimeImportRejectionState(shutdownRejectors, response
  */
 function configureDictionaryRuntimeImportResponse(shutdownRejectors, responsePort, resolve, reject, onProgress, label) {
     const {state, shutdownReject} = createDictionaryRuntimeImportRejectionState(shutdownRejectors, responsePort, (error) => {
+        if (error instanceof Error && error.name === 'DictionaryImportSessionError') {
+            reject(error);
+            return;
+        }
         const transportError = new Error(error instanceof Error ? error.message : 'Dictionary runtime import transport failed');
         transportError.name = 'DictionaryImportTransportError';
         transportError.cause = error;
@@ -194,6 +198,8 @@ export class API {
         this._shutdownRejectors = new Set();
         /** @type {DictionaryImportOwnerClient} */
         this._dictionaryImportOwnerClient = new DictionaryImportOwnerClient();
+        /** @type {Map<string, {active: boolean}>} */
+        this._dictionaryImportOwnerSessions = new Map();
         this._setBackendPort(backendPort);
     }
 
@@ -224,6 +230,7 @@ export class API {
      */
     shutdownRuntimeConnections() {
         this._runtimeConnectionsShutdown = true;
+        this._dictionaryImportOwnerSessions.clear();
         this._dictionaryImportOwnerClient.closeAll();
         const error = new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
         for (const reject of this._shutdownRejectors) {
@@ -528,14 +535,52 @@ export class API {
     async setDictionaryImportMode(active, ownerId) {
         if (active && typeof ownerId === 'string') {
             if (this._runtimeConnectionsShutdown) { throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.'); }
-            await this._dictionaryImportOwnerClient.open(ownerId);
+            let session = this._dictionaryImportOwnerSessions.get(ownerId);
+            if (session && !session.active) { throw new Error('Dictionary import session is retiring'); }
+            if (!session) {
+                session = {active: true};
+                this._dictionaryImportOwnerSessions.set(ownerId, session);
+            }
+            try {
+                await this._prepareDictionaryImportDispatch(ownerId);
+            } catch (error) {
+                if (session.active && this._dictionaryImportOwnerSessions.get(ownerId) === session) { this._dictionaryImportOwnerSessions.delete(ownerId); }
+                throw error;
+            }
             return;
         }
+        const session = typeof ownerId === 'string' ? this._dictionaryImportOwnerSessions.get(ownerId) : void 0;
+        if (session) { session.active = false; }
         try {
             await this._invoke('setDictionaryImportMode', {active, ownerId});
         } finally {
-            if (typeof ownerId === 'string') { this._dictionaryImportOwnerClient.close(ownerId); }
+            if (typeof ownerId === 'string' && this._dictionaryImportOwnerSessions.get(ownerId) === session) {
+                this._dictionaryImportOwnerClient.close(ownerId);
+                this._dictionaryImportOwnerSessions.delete(ownerId);
+            }
         }
+    }
+
+    /**
+     * Reconnect only before admitting a new mutation. The session token prevents
+     * a pending reconnect or message transport from reviving a retired batch.
+     * @param {string} ownerId
+     * @returns {Promise<() => void>}
+     */
+    async _prepareDictionaryImportDispatch(ownerId) {
+        const session = this._dictionaryImportOwnerSessions.get(ownerId);
+        const assertActive = () => {
+            if (this._runtimeConnectionsShutdown) { throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.'); }
+            if (!session?.active || this._dictionaryImportOwnerSessions.get(ownerId) !== session) {
+                const error = new Error('Dictionary import session is inactive or retired');
+                error.name = 'DictionaryImportSessionError';
+                throw error;
+            }
+        };
+        assertActive();
+        await this._dictionaryImportOwnerClient.open(ownerId);
+        assertActive();
+        return assertActive;
     }
 
     /**
@@ -749,16 +794,17 @@ export class API {
      * @param {string|undefined} [ownerId]
      * @returns {Promise<unknown>}
      */
-    importDictionaryOffscreen(archiveContent, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
+    async importDictionaryOffscreen(archiveContent, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
         const pmTransportError = this._getPmTransportError();
         if (pmTransportError !== null && (this._runtimeConnectionsShutdown || !this._canReconnectBackendPort())) {
-            return Promise.reject(pmTransportError);
+            throw pmTransportError;
         }
+        const assertOwnerActive = typeof ownerId === 'string' ? await this._prepareDictionaryImportDispatch(ownerId) : void 0;
         const channel = new MessageChannel();
         return this._reconcileDictionaryImport(new Promise((resolve, reject) => {
             const shutdownReject = configureDictionaryRuntimeImportResponse(this._shutdownRejectors, channel.port1, resolve, reject, onProgress, 'Dictionary runtime import');
             try {
-                void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details, operationId, ownerId}, [channel.port2]).catch((error) => {
+                void this._pmInvoke('importDictionaryOffscreen', {archiveContent, details, operationId, ownerId}, [channel.port2], assertOwnerActive).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {
@@ -775,16 +821,17 @@ export class API {
      * @param {string|undefined} [ownerId]
      * @returns {Promise<unknown>}
      */
-    importDictionaryUrlOffscreen(url, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
+    async importDictionaryUrlOffscreen(url, details, onProgress, operationId = `${Date.now()}:${crypto.randomUUID()}`, ownerId) {
         const pmTransportError = this._getPmTransportError();
         if (pmTransportError !== null && (this._runtimeConnectionsShutdown || !this._canReconnectBackendPort())) {
-            return Promise.reject(pmTransportError);
+            throw pmTransportError;
         }
+        const assertOwnerActive = typeof ownerId === 'string' ? await this._prepareDictionaryImportDispatch(ownerId) : void 0;
         const channel = new MessageChannel();
         return this._reconcileDictionaryImport(new Promise((resolve, reject) => {
             const shutdownReject = configureDictionaryRuntimeImportResponse(this._shutdownRejectors, channel.port1, resolve, reject, onProgress, 'Dictionary runtime URL import');
             try {
-                void this._pmInvoke('importDictionaryUrlOffscreen', {url, details, operationId, ownerId}, [channel.port2]).catch((error) => {
+                void this._pmInvoke('importDictionaryUrlOffscreen', {url, details, operationId, ownerId}, [channel.port2], assertOwnerActive).catch((error) => {
                     shutdownReject(error instanceof Error ? error : new Error(String(error)));
                 });
             } catch (error) {
@@ -1007,8 +1054,9 @@ export class API {
      * @param {TAction} action
      * @param {TParams} params
      * @param {Transferable[]} transferables
+     * @param {() => void} [assertBeforeDispatch]
      */
-    async _pmInvoke(action, params, transferables) {
+    async _pmInvoke(action, params, transferables, assertBeforeDispatch) {
         // on firefox, there is no service worker, so we instead use a MessageChannel which is established
         // via a handshake via a SharedWorker
         if (!('serviceWorker' in navigator)) {
@@ -1026,6 +1074,7 @@ export class API {
             if (backendPort === null) {
                 throw new Error('Backend message port is not available. You may need to refresh the page.');
             }
+            assertBeforeDispatch?.();
             try {
                 backendPort.postMessage({action, params}, transferables);
             } catch (error) {
@@ -1034,6 +1083,7 @@ export class API {
                 if (this._backendPort === null) {
                     throw new Error('Backend message port is not available. You may need to refresh the page.');
                 }
+                assertBeforeDispatch?.();
                 try {
                     this._backendPort.postMessage({action, params}, transferables);
                 } catch (retryError) {
@@ -1076,6 +1126,7 @@ export class API {
                     if (serviceWorkerRegistration.active === null) {
                         throw new Error(`[${self.constructor.name}] no active service worker`);
                     }
+                    assertBeforeDispatch?.();
                     try {
                         serviceWorkerRegistration.active.postMessage({action, params}, transferables);
                         return;
