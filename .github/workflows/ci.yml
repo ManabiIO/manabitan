@@ -615,7 +615,25 @@ jobs:
           node-version: '22'
 
       - name: Build Firefox Android package
-        run: npm run build -- --target firefox-android
+        run: |
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            npm run build -- --target firefox-android --version "$MANABITAN_RELEASE_VERSION"
+            (cd builds/manabitan-firefox-android && zip -qr ../manabitan-firefox-android.zip .)
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" builds/manabitan-firefox-android.zip > builds/release-package.json
+          else
+            npm run build -- --target firefox-android
+          fi
+
+      - name: Retain tested Firefox Android release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-firefox-android-smoke
+          path: |
+            builds/manabitan-firefox-android.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Enable Android emulator KVM
         run: |
@@ -729,7 +747,25 @@ jobs:
           node-version: '22'
 
       - name: Build Firefox Android package
-        run: npm run build -- --target firefox-android
+        run: |
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            npm run build -- --target firefox-android --version "$MANABITAN_RELEASE_VERSION"
+            (cd builds/manabitan-firefox-android && zip -qr ../manabitan-firefox-android.zip .)
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" builds/manabitan-firefox-android.zip > builds/release-package.json
+          else
+            npm run build -- --target firefox-android
+          fi
+
+      - name: Retain tested Firefox Android release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-firefox-android-runtime
+          path: |
+            builds/manabitan-firefox-android.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Enable Android emulator KVM
         run: |
