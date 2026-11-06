@@ -51,6 +51,7 @@ const manabitanHeaderFiles = [
     'ext/js/app/reader-lookup-integration.js',
     'dev/lib/zstd-simd-module.d.ts',
     'ext/js/data/data-transmission-consent-util.js',
+    'ext/js/data/dictionary-replacement.js',
     'ext/js/dictionary/term-entry-content-hash.js',
     'ext/js/dictionary/term-key-hash.js',
     'types/ext/dictionary-import-journal.d.ts',

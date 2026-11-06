@@ -24,6 +24,7 @@ import {ExtensionError} from '../../core/extension-error.js';
 import {parseJson, readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {deferPromise, promiseTimeout} from '../../core/utilities.js';
+import {getCompletedDictionaryReplacements} from '../../data/dictionary-replacement.js';
 import {compareRevisions} from '../../dictionary/dictionary-data-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {bindDictionaryRowOwnership, createDictionaryRowOwnership, getDictionaryRowOwnership} from './dictionary-row-ownership.js';
@@ -1149,16 +1150,38 @@ export class DictionaryController {
         const targets = [];
         const {profiles} = optionsFull;
         const installedDictionaryNames = new Set(dictionaries.map(({title}) => title));
+        const replacements = getCompletedDictionaryReplacements(dictionaries);
         for (let i = 0, ii = profiles.length; i < ii; ++i) {
             const existingDictionaryNames = new Set();
             const dictionaryOptionsArray = profiles[i].options.dictionaries;
             const profileId = profiles[i].id;
+            for (const [sourceName, candidates] of replacements) {
+                if (candidates.length !== 1) { continue; }
+                const replacement = candidates[0];
+                const replacementGuard = {
+                    sourceName,
+                    generationId: replacement.storageGenerationId ?? '',
+                    updateSessionToken: replacement.updateSessionToken ?? '',
+                };
+                // Complete the same identity-bound settings migration as the
+                // importing page before considering source rows orphaned.
+                targets.push({action: 'replaceDictionaryName', profileId, sourceName, name: replacement.title, styles: replacement.styles, replacementGuard});
+                for (const selector of /** @type {const} */ (['mainDictionary', 'sortFrequencyDictionary'])) {
+                    targets.push({action: 'setDictionarySelector', profileId, selector, expectedValue: sourceName, value: replacement.title, requireDictionaryUninstalled: sourceName, replacementGuard});
+                }
+            }
             for (let j = dictionaryOptionsArray.length - 1; j >= 0; --j) {
                 const {name} = dictionaryOptionsArray[j];
                 if (installedDictionaryNames.has(name)) {
                     // Preserve distinct aliases and enablement flags for the
                     // same installed dictionary, including disabled entries.
                     existingDictionaryNames.add(name);
+                } else if (replacements.has(name)) {
+                    // Preserve ambiguous receipts rather than choosing a target.
+                    // Also retain the backup-import snapshot until its later live
+                    // reconciliation can use the queued mutation contract.
+                    const candidates = replacements.get(name);
+                    if (candidates?.length === 1) { existingDictionaryNames.add(candidates[0].title); }
                 } else {
                     dictionaryOptionsArray.splice(j, 1);
                     // Never write a stale whole-array snapshot: a concurrent
