@@ -82,18 +82,15 @@ async function launch(name, expectedVersion) {
     if (name === 'upgrade') {
         // Replacing an unpacked directory does not notify Chrome's persisted
         // service worker. Perform the extension reload lifecycle explicitly.
-        const replacementWorker = context.waitForEvent('serviceworker', {
-            predicate: (next) => next !== worker && next.url().startsWith(`chrome-extension://${id}/`),
-            timeout: 30000,
-        });
-        const reload = page.evaluate(() => chrome.runtime.reload()).catch((error) => {
+        await page.evaluate(() => chrome.runtime.reload()).catch((error) => {
             if (!/Execution context was destroyed|Target.*closed/i.test(String(error))) { throw error; }
         });
-        await Promise.all([reload, replacementWorker]);
         if (!page.isClosed()) { await page.close(); }
+        // A service worker may stay dormant until a page wakes it. Verify the
+        // candidate's production RPC below instead of waiting for a worker
+        // object event before creating that page.
         page = await context.newPage();
         await page.goto(`chrome-extension://${id}/settings.html?popup-preview=false`);
-        report.candidateReloadLifecycleObserved = true;
     }
     await page.waitForFunction(() => document.documentElement.dataset.loaded === 'true', null, {timeout: 60000});
     assert.equal(await page.evaluate(() => chrome.runtime.getManifest().version), expectedVersion);
@@ -103,6 +100,7 @@ async function launch(name, expectedVersion) {
     if (!legacy) {
         assert.equal(diagnostics.usesFallbackStorage, false);
         assert.equal(diagnostics.openStorageDiagnostics?.mode, 'opfs-sahpool');
+        if (name === 'upgrade') { report.candidateReloadLifecycleObserved = true; }
     }
     // The published build's storage-state RPC predates these fields. Its
     // authoritative import-worker snapshot is checked after import below.
