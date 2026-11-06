@@ -517,7 +517,7 @@ export class DictionaryImportController {
         document.addEventListener('click', this._onDocumentClickCaptureBind, true);
         globalThis.addEventListener('manabitan:modal-visibility-changed', this._onModalVisibilityChangedEventBind, false);
         this._recommendedDictionariesModal?.on('visibilityChanged', this._onRecommendedDictionariesModalVisibilityChangedBind);
-        globalThis.addEventListener('beforeunload', this._onBeforeUnload.bind(this), {once: true});
+        globalThis.addEventListener('pagehide', this._onPageHide.bind(this));
         reportDiagnostics('dictionary-import-controller-prepare-complete', {
             hasRecommendedModal: this._recommendedDictionariesModal !== null,
             href: globalThis.location?.href ?? null,
@@ -559,8 +559,17 @@ export class DictionaryImportController {
         );
     }
 
-    /** */
-    _onBeforeUnload() {
+    /** @param {PageTransitionEvent} event */
+    _onPageHide(event) {
+        // beforeunload only requests a confirmation: choosing Stay must not
+        // cancel an import or consume its eventual page-departure cleanup.
+        if (event.persisted && this._modifying) {
+            // A cached page can run its old continuations after restoration.
+            // Retire that batch and reset its UI before releasing its owner.
+            this._forceRecoverHungImportSession(new Error('Dictionary import was interrupted by page navigation.'), 'pagehide');
+        } else {
+            this._activeImportRunGeneration += 1;
+        }
         const ownerId = this._activeImportOwnerId;
         if (typeof ownerId === 'string') {
             this._activeImportOwnerId = void 0;
@@ -568,6 +577,7 @@ export class DictionaryImportController {
         }
         this._activeMdx?.disconnect();
         this._activeMdx = null;
+        if (event.persisted) { return; }
         document.removeEventListener('click', this._onDocumentClickCaptureBind, true);
         globalThis.removeEventListener('manabitan:modal-visibility-changed', this._onModalVisibilityChangedEventBind, false);
         this._recommendedDictionariesModal?.off('visibilityChanged', this._onRecommendedDictionariesModalVisibilityChangedBind);
@@ -3139,7 +3149,11 @@ export class DictionaryImportController {
             settingsErrorCount: errors2.length,
             skipped: !shouldAddDictionarySettings,
         });
-        if (replacementDictionaryTitle !== null && shouldAddDictionarySettings) {
+        const staleBeforeCleanupResult = getStaleImportResult('before-remove-replaced-dictionary-settings');
+        if (staleBeforeCleanupResult !== null) { return staleBeforeCleanupResult; }
+        if (replacementDictionaryTitle !== null && shouldAddDictionarySettings && errors2.length === 0) {
+            // A failed migration still owns the old preference rows. Never
+            // turn a recoverable settings error into their explicit deletion.
             const removeOldSettingsStartTime = safePerformance.now();
             const cleanupErrors = await this._removeDictionarySettingsByName(replacementDictionaryTitle);
             if (Array.isArray(cleanupErrors)) { errors2.push(...cleanupErrors); }
@@ -3489,16 +3503,21 @@ export class DictionaryImportController {
         const optionsFull = await this._settingsController.getOptionsFull();
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
-        const profileCount = optionsFull.profiles.length;
-        for (let i = 0; i < profileCount; ++i) {
-            const path1 = `profiles[${i}].options.dictionaries`;
-            targets.push({action: 'set', path: path1, value: []});
-            const path2 = `profiles[${i}].options.general.mainDictionary`;
-            targets.push({action: 'set', path: path2, value: ''});
-            const path3 = `profiles[${i}].options.general.sortFrequencyDictionary`;
-            targets.push({action: 'set', path: path3, value: null});
+        for (const {id: profileId, options: {dictionaries, general}} of optionsFull.profiles) {
+            // Resolve profile identity and installed state inside the options
+            // queue. A purge snapshot must not erase a later import or a new
+            // profile which now occupies the same array index.
+            for (const dictionaryName of new Set(dictionaries.map(({name}) => name))) {
+                targets.push({action: 'removeDictionaryByName', profileId, name: dictionaryName});
+            }
+            if (general.mainDictionary !== '') {
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: general.mainDictionary, value: '', requireDictionaryUninstalled: general.mainDictionary});
+            }
+            if (typeof general.sortFrequencyDictionary === 'string') {
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: general.sortFrequencyDictionary, value: null, requireDictionaryUninstalled: general.sortFrequencyDictionary});
+            }
         }
-        return await this._modifyGlobalSettings(targets);
+        return targets.length > 0 ? await this._modifyGlobalSettings(targets) : [];
     }
 
     /**

@@ -3898,12 +3898,74 @@ export class TermRecordOpfsStore {
             this._recordPersistentIndexFailure(dictionaryName, 'transient', 'Lookup index generation changed while loading');
             return false;
         }
+        if (!this._validatePersistentRecordIdOwnership(dictionaryName, recordChunks)) { return false; }
         this._indexByDictionary.delete(dictionaryName);
         this._persistentRecordChunksByDictionary.set(dictionaryName, recordChunks);
         this._persistentIndexLoadedDictionaryNames.add(dictionaryName);
         this._persistentIndexFailureByDictionary.delete(dictionaryName);
         this._setDictionaryHealth(dictionaryName, 'available');
         return true;
+    }
+
+    /**
+     * IDs are extension-wide identities used by record hydration and row caches.
+     * Two independently valid containers cannot own the same ID. Neither owner
+     * is authoritative enough to choose a winner, so quarantine both rather
+     * than returning one dictionary's content for the other's lookup match.
+     * @param {string} dictionaryName
+     * @param {PersistentRecordChunk[]} recordChunks Sorted, nonoverlapping ranges.
+     * @returns {boolean}
+     */
+    _validatePersistentRecordIdOwnership(dictionaryName, recordChunks) {
+        /** @type {Set<string>} */
+        const conflicts = new Set();
+        for (const [otherName, otherChunks] of this._persistentRecordChunksByDictionary) {
+            if (otherName === dictionaryName) { continue; }
+            let left = 0;
+            let right = 0;
+            while (left < recordChunks.length && right < otherChunks.length) {
+                const current = recordChunks[left];
+                const other = otherChunks[right];
+                if (current.firstId + current.count <= other.firstId) {
+                    ++left;
+                } else if (other.firstId + other.count <= current.firstId) {
+                    ++right;
+                } else {
+                    conflicts.add(otherName);
+                    break;
+                }
+            }
+        }
+        // Append/materialized paths can retain records after their persistent
+        // lookup view is invalidated. Those IDs still own their cached rows.
+        // Already-validated persistent owners are covered by the interval walk.
+        for (const [otherName, ids] of this._recordIdsByDictionary) {
+            if (otherName === dictionaryName || this._persistentRecordChunksByDictionary.has(otherName) || conflicts.has(otherName)) { continue; }
+            for (const id of ids) {
+                if (this._recordsById.get(id)?.dictionary !== otherName) { continue; }
+                let low = 0;
+                let high = recordChunks.length - 1;
+                while (low <= high) {
+                    const middle = (low + high) >>> 1;
+                    const chunk = recordChunks[middle];
+                    if (id < chunk.firstId) {
+                        high = middle - 1;
+                    } else if (id >= chunk.firstId + chunk.count) {
+                        low = middle + 1;
+                    } else {
+                        conflicts.add(otherName);
+                        break;
+                    }
+                }
+                if (conflicts.has(otherName)) { break; }
+            }
+        }
+        if (conflicts.size === 0) { return true; }
+        conflicts.add(dictionaryName);
+        for (const name of conflicts) {
+            this.markDictionaryReimportRequired(name, 'Dictionary record IDs overlap another dictionary');
+        }
+        return false;
     }
 
     /**

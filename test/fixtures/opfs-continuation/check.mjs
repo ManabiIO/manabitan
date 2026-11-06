@@ -10,7 +10,7 @@ import {createNodeOpfs} from './node-opfs-adapter.mjs'
 const root = path.resolve(process.argv[2] ?? new URL('../before', import.meta.url).pathname)
 const source = path.join(root, 'ext/js/dictionary/term-content-opfs-store.js')
 // eslint-disable-next-line no-unsanitized/method -- The test runner intentionally imports production source from the supplied checkout path.
-const {TermContentOpfsStore} = await import(pathToFileURL(source).href)
+const {TermContentIntegrityError, TermContentOpfsStore} = await import(pathToFileURL(source).href)
 const output = process.argv[3]
 const previousNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator')
 const tests = []
@@ -238,7 +238,7 @@ for (const changed of ['shorter-tail', 'changed-prefix', 'missing-tail']) {
             await env.root.removeEntry(fileName(1))
         }
         const disk = await snapshot(env)
-        assert.equal(await store.readSlice(99, 1), null)
+        await assert.rejects(store.readSlice(99, 1), TermContentIntegrityError)
         assert.deepEqual(store._segmentStates.map((x) => [x.index, x.fileLength, x.startOffset]), [[0, 2, 0], [1, 2, 2]])
         assert.deepEqual(await snapshot(env), disk)
     })

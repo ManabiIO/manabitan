@@ -294,3 +294,49 @@ test('startup cleanup remains allowed in the journal-free purge lifecycle', asyn
     await expect(database._cleanupMissingTermRecordShards()).resolves.toMatchObject({failedCount: 0});
     expect(database._bulkImportState).toBe('finalizing');
 });
+
+
+test('an upgrade reconciles an interrupted import before resetting checkpoint files', async () => {
+    const {database, connection, opfs} = await fixture(['Existing']);
+    connection.exec('PRAGMA user_version = 9');
+    opfs.failures.clearJournal = false;
+    await database._runSchemaMigrations();
+    await expect(database._recoverInterruptedImportSession()).resolves.toBeUndefined();
+    expect(connection.selectValue('PRAGMA user_version')).toBe(10);
+    expect(opfs.files.has('manabitan-dictionary-import-journal.json')).toBe(false);
+    database._restoreTermRecordDictionaryHealth();
+    await expect(database.getDictionaryInfo()).resolves.toMatchObject([
+        {title: 'Existing', storageHealth: 'reimportRequired', storageHealthReason: expect.stringContaining('storage was upgraded')},
+    ]);
+});
+
+test('an upgrade leaves checkpoint files intact while journal cleanup fails', async () => {
+    const {database, connection, opfs} = await fixture(['Existing']);
+    connection.exec('PRAGMA user_version = 9');
+    const files = structuredClone(opfs.files);
+    const contentReset = vi.spyOn(database._termContentStore, 'reset');
+    const recordReset = vi.spyOn(database._termRecordStore, 'reset');
+    await expect(database._runSchemaMigrations()).rejects.toThrow('recovery metadata is cleared');
+    expect(contentReset).not.toHaveBeenCalled();
+    expect(recordReset).not.toHaveBeenCalled();
+    expect(opfs.files).toEqual(files);
+    expect(connection.selectValue('PRAGMA user_version')).toBe(9);
+    await expectLookup(database, 'Existing');
+    opfs.failures.clearJournal = false;
+    await expect(database._runSchemaMigrations()).resolves.toBeUndefined();
+    expect(connection.selectValue('PRAGMA user_version')).toBe(10);
+});
+
+test('an invalid import journal stops an upgrade before any persistent reset', async () => {
+    const {database, connection, opfs} = await fixture(['Existing']);
+    connection.exec('PRAGMA user_version = 9');
+    opfs.files.set('manabitan-dictionary-import-journal.json', new TextEncoder().encode('{'));
+    const files = structuredClone(opfs.files);
+    const contentReset = vi.spyOn(database._termContentStore, 'reset');
+    const recordReset = vi.spyOn(database._termRecordStore, 'reset');
+    await expect(database._runSchemaMigrations()).rejects.toThrow('Cannot safely recover invalid dictionary import journal');
+    expect(contentReset).not.toHaveBeenCalled();
+    expect(recordReset).not.toHaveBeenCalled();
+    expect(opfs.files).toEqual(files);
+    expect(connection.selectValue('PRAGMA user_version')).toBe(9);
+});

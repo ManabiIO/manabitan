@@ -18,7 +18,7 @@
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {API} from '../ext/js/comm/api.js';
 import {Backend} from '../ext/js/background/backend.js';
-import {OffscreenProxy} from '../ext/js/background/offscreen-proxy.js';
+import {DictionaryRuntimeWorkerProxy, OffscreenProxy} from '../ext/js/background/offscreen-proxy.js';
 
 const control = vi.hoisted(() => ({
     gate: /** @type {Promise<void>|null} */ (null),
@@ -148,6 +148,74 @@ describe('dictionary import operation ownership', () => {
         expect(await query(b)).toMatchObject({state: 'cancelled'});
     });
 
+    test('cancellation delivered before import admission fences only that operation', async () => {
+        const {submit, query, drain} = await harness();
+        const cancelled = operationId('cancelled-before-control-delivery');
+        await query(cancelled, false);
+        const cancelledPort = submit(cancelled);
+        const livePort = submit(operationId('independent'));
+        await drain();
+        expect(cancelledPort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'}));
+        expect(cancelledPort.postMessage).not.toHaveBeenCalledWith(expect.objectContaining({type: 'complete'}));
+        expect(livePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'}));
+        expect(control.calls).toBe(1);
+    });
+
+    test('pre-admission cancellation does not fabricate rollback of a published operation after restart', async () => {
+        const id = operationId('published-before-worker-restart');
+        control.publishedReceipt = /** @type {import('dictionary-importer').ImportResult} */ (/** @type {unknown} */ ({
+            result: {title: 'Fixture', importSuccess: true, storageImportOperationId: id, storageGenerationId: 'durable-generation'},
+            errors: [],
+            outcome: {status: 'published', generationId: 'durable-generation'},
+        }));
+        const {query} = await harness();
+        await query(id, false);
+        expect(await query(id)).toMatchObject({state: 'completed', published: true, result: control.publishedReceipt});
+    });
+
+    test('lookup-only status cannot create an admission cancellation fence', async () => {
+        const {submit, query, drain} = await harness();
+        const id = operationId('status-before-admission');
+        expect(await query(id)).toMatchObject({state: 'unknown'});
+        const port = submit(id);
+        await drain();
+        expect(port.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'}));
+        expect(control.calls).toBe(1);
+    });
+
+    test('pre-admission cancellation fences stay bounded and eviction cannot re-admit a cancelled ID', async () => {
+        const {worker, submit, query, drain} = await harness();
+        const now = Date.now();
+        const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+        const first = operationId('first-cancel');
+        await query(first, false);
+        for (let i = 1; i < 129; ++i) {
+            clock.mockReturnValue(now + i);
+            await query(operationId(`cancel-${i}`), false);
+        }
+        expect(Reflect.get(worker, '_pendingImportCancellations').size).toBe(128);
+        const rejected = submit(first);
+        expect(rejected.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'}));
+        clock.mockReturnValue(now + 129);
+        const live = submit(operationId('live-after-fences'));
+        await drain();
+        expect(live.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'}));
+        expect(control.calls).toBe(1);
+        clock.mockReturnValue(now + 600130);
+        await query(operationId('prune-only'));
+        expect(Reflect.get(worker, '_pendingImportCancellations').size).toBe(0);
+    });
+
+    test('invalid cancellation IDs cannot allocate admission fences', async () => {
+        const {worker, query} = await harness();
+        const now = Date.now();
+        vi.spyOn(Date, 'now').mockReturnValue(now);
+        for (const id of [void 0, '', 'invalid', `${now + 1}:future`, `${now - 600001}:expired`]) {
+            await query(id, false);
+        }
+        expect(Reflect.get(worker, '_pendingImportCancellations').size).toBe(0);
+    });
+
     test('cancelling active A or stale A never cancels subsequent B', async () => {
         const {submit, query, drain} = await harness();
         let release = () => {};
@@ -244,6 +312,8 @@ describe('dictionary import operation ownership', () => {
         const id = operationId('A');
         Reflect.set(api, '_shutdownRejectors', new Set());
         Reflect.set(api, '_getPmTransportError', vi.fn(() => null));
+        Reflect.set(api, '_dictionaryImportOwnerSessions', new Map([['page-A', {active: true}]]));
+        Reflect.set(api, '_dictionaryImportOwnerClient', {open: vi.fn(async () => {})});
         const statusLookup = vi.fn(() => query(id));
         Reflect.set(api, 'getDictionaryImportOperationStatus', statusLookup);
         const invoke = vi.fn((action, params, transfers) => {
@@ -432,6 +502,95 @@ describe('dictionary import operation ownership', () => {
         expect(Reflect.get(proxy, '_pendingImportOperations').size).toBe(0);
     });
 
+    test.each(['cancelled-setup', 'failed-setup', 'failed-transfer', 'failed-send', 'full-registry', 'local-post'])('backend retires a definitely untransferred %s import without a fabricated worker receipt', async (failure) => {
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        const proxy = /** @type {OffscreenProxy} */ (Object.create(OffscreenProxy.prototype));
+        const local = /** @type {DictionaryRuntimeWorkerProxy} */ (Object.create(DictionaryRuntimeWorkerProxy.prototype));
+        /** @type {PromiseWithResolvers<void>} */
+        const setup = Promise.withResolvers();
+        /** @type {PromiseWithResolvers<void>} */
+        const entered = Promise.withResolvers();
+        const sendsToPort = failure === 'failed-transfer' || failure === 'failed-send';
+        const send = vi.fn(sendsToPort ? proxy._sendOffscreenControlMessage.bind(proxy) : async () => {});
+        const clearControlPort = vi.fn();
+        Reflect.set(proxy, '_clearCurrentOffscreenPort', clearControlPort);
+        Reflect.set(proxy, '_offscreenControlResponseHandlers', new Map());
+        Reflect.set(proxy, '_offscreenControlRequestId', 0);
+        Reflect.set(proxy, 'prepare', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(proxy, '_ensureOffscreenPort', vi.fn(async () => {
+            entered.resolve();
+            await setup.promise;
+        }));
+        Reflect.set(proxy, '_ensureOffscreenDocument', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(proxy, '_webExtension', {sendMessagePromise: vi.fn().mockResolvedValue({result: {state: 'unknown'}})});
+        const controlPort = {postMessage() {
+            if (failure === 'failed-send') { throw new Error('Port send failed'); }
+            throw new DOMException('Cannot clone import payload', 'DataCloneError');
+        }};
+        Reflect.set(proxy, '_currentOffscreenPort', failure === 'failed-setup' ? null : controlPort);
+        Reflect.set(proxy, '_sendOffscreenControlMessage', send);
+        if (failure === 'full-registry') {
+            Reflect.set(proxy, '_pendingImportOperations', new Map(Array.from({length: 128}, (_, i) => [String(i), {cancelled: false}])));
+        }
+        Reflect.set(local, '_client', {post: vi.fn(() => { throw new Error('Worker construction failed'); })});
+        Object.assign(backend, {
+            _dictionaryImportOwners: new Set(['page-A', 'page-B']),
+            _ownedDictionaryImports: new Map(),
+            _setDictionaryImportModePromise: null,
+            _offscreen: failure === 'local-post' ? null : proxy,
+            _localDictionaryRuntime: failure === 'local-post' ? local : null,
+        });
+        const channel = new MessageChannel();
+        const close = vi.spyOn(channel.port2, 'close');
+        const id = operationId('untransferred');
+        const pending = backend._onPmImportDictionaryOffscreen({operationId: id, ownerId: 'page-A', archiveContent: new Blob([]), details: /** @type {import('dictionary-importer').ImportDetails} */ ({})}, [channel.port2]);
+        try {
+            if (failure !== 'local-post' && failure !== 'full-registry') {
+                await entered.promise;
+                if (failure === 'cancelled-setup') { await backend._setDictionaryImportMode(false, 'page-A'); }
+                setup.resolve();
+            }
+            await pending;
+            expect(send).toHaveBeenCalledTimes(sendsToPort ? 1 : 0);
+            expect(clearControlPort).toHaveBeenCalledTimes(failure === 'failed-send' ? 1 : 0);
+            expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(0);
+            expect(close).toHaveBeenCalled();
+        } finally {
+            setup.resolve();
+            await pending;
+            for (const operation of Reflect.get(backend, '_ownedDictionaryImports').values()) { operation.responseCleanup?.(); }
+            channel.port1.close();
+            channel.port2.close();
+        }
+    });
+
+    test('a full handoff registry does not leak a new backend operation or discard existing handoffs', async () => {
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        const proxy = /** @type {OffscreenProxy} */ (Object.create(OffscreenProxy.prototype));
+        const handoffs = new Map(Array.from({length: 128}, (_, i) => [operationId(`pending-${i}`), {cancelled: false}]));
+        Reflect.set(proxy, '_pendingImportOperations', handoffs);
+        Reflect.set(proxy, 'prepare', vi.fn().mockResolvedValue(void 0));
+        const reconcile = vi.fn().mockResolvedValue({state: 'unknown'});
+        Reflect.set(proxy, 'sendMessagePromise', reconcile);
+        Object.assign(backend, {
+            _dictionaryImportOwners: new Set(['page-A']),
+            _ownedDictionaryImports: new Map(),
+            _offscreen: proxy,
+            _localDictionaryRuntime: null,
+        });
+        const channel = new MessageChannel();
+        try {
+            await backend._onPmImportDictionaryOffscreen({operationId: operationId('capacity-rejection'), ownerId: 'page-A', archiveContent: new Blob([]), details: /** @type {import('dictionary-importer').ImportDetails} */ ({})}, [channel.port2]);
+            expect(backend._ownedDictionaryImports.size).toBe(0);
+            expect(handoffs.size).toBe(128);
+            expect(reconcile).not.toHaveBeenCalled();
+        } finally {
+            for (const operation of backend._ownedDictionaryImports.values()) { operation.responseCleanup?.(); }
+            channel.port1.close();
+            channel.port2.close();
+        }
+    });
+
     test('status queries while handoff is pending are lookup-only and do not cancel', async () => {
         const proxy = /** @type {OffscreenProxy} */ (Object.create(OffscreenProxy.prototype));
         const id = operationId('A');
@@ -478,7 +637,12 @@ describe('dictionary import operation ownership', () => {
         await backend._onPmImportDictionaryOffscreen({operationId: id, ownerId: 'page-A', archiveContent: new Blob([]), details: /** @type {import('dictionary-importer').ImportDetails} */ ({})}, [port]);
         expect(Reflect.get(backend, '_ownedDictionaryImports').get(id)).toMatchObject({settled: true, completed: false});
         await backend._setDictionaryImportMode(false, 'page-A');
-        expect(cancel).toHaveBeenCalledExactlyOnceWith({action: 'cancelDictionaryImportOffscreen', params: {operationId: id}});
+        expect(cancel).toHaveBeenCalledTimes(2);
+        expect(cancel).toHaveBeenNthCalledWith(1, {action: 'cancelDictionaryImportOffscreen', params: {operationId: id, workerGeneration: void 0, lookupOnly: true}});
+        expect(cancel).toHaveBeenNthCalledWith(2, {action: 'cancelDictionaryImportOffscreen', params: {operationId: id}});
+        expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(1);
+        cancel.mockResolvedValueOnce({operationId: id, state: 'cancelled'});
+        await backend._onApiGetDictionaryImportOperationStatus({operationId: id}, {});
         expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(0);
     });
 
@@ -512,7 +676,7 @@ describe('dictionary import operation ownership', () => {
         channel.port1.close();
     });
 
-    test('owner release closes only its abandoned relay and client response ports once', async () => {
+    test('owner release detaches its client and waits for worker cancellation before closing the relay once', async () => {
         const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
         const a = operationId('A');
         const b = operationId('B');
@@ -560,6 +724,10 @@ describe('dictionary import operation ownership', () => {
         expect(cleanupA).toEqual(expect.any(Function));
         await backend._setDictionaryImportMode(false, 'page-A');
         await backend._setDictionaryImportMode(false, 'page-A');
+        expect(relays[0].port1.close).not.toHaveBeenCalled();
+        expect(closeClientA).toHaveBeenCalledOnce();
+        transferredPorts[0].postMessage({type: 'error', error: {name: 'Error', message: 'Import cancelled'}});
+        await expect.poll(() => Reflect.get(backend, '_ownedDictionaryImports').has(a)).toBe(false);
         cleanupA?.();
         expect(relays[0].port1.close).toHaveBeenCalledOnce();
         expect(relays[0].port2.close).toHaveBeenCalledOnce();
