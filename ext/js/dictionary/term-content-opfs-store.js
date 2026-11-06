@@ -62,6 +62,18 @@ function addSafeByteLength(offset, length) {
     return offset + length;
 }
 
+/** Confirmed structural loss of a previously observed content byte range. */
+export class TermContentIntegrityError extends Error {
+    /** @param {string} message */
+    constructor(message) {
+        super(message);
+        /**
+         *
+         */
+        this.name = 'TermContentIntegrityError';
+    }
+}
+
 export class TermContentOpfsStore {
     constructor() {
         /** @type {FileSystemFileHandle|null} */
@@ -1517,7 +1529,8 @@ export class TermContentOpfsStore {
                 if (!await this._reloadSegmentHandlesIfAvailable()) { return false; }
                 await this._ensureLoadedForRead();
                 return true;
-            } catch (_) {
+            } catch (error) {
+                if (error instanceof TermContentIntegrityError) { throw error; }
                 return false;
             }
         });
@@ -1605,6 +1618,11 @@ export class TermContentOpfsStore {
                 if (unavailable) { return null; }
                 return outputOffset === length ? output : null;
             } catch (error) {
+                if (generation !== this._readStateGeneration) {
+                    if (attempt > 0) { return null; }
+                    if (!this._loadedForRead) { await this.ensureLoadedForRead(); }
+                    continue;
+                }
                 if (attempt > 0 || !this._isNotReadableFileError(error)) {
                     throw error;
                 }
@@ -1853,7 +1871,8 @@ export class TermContentOpfsStore {
                     this._segmentStates = states;
                     this._syncActiveSegmentState();
                 }
-            } catch (_) {
+            } catch (error) {
+                if (error instanceof TermContentIntegrityError) { throw error; }
                 return false;
             }
         }
@@ -1879,7 +1898,8 @@ export class TermContentOpfsStore {
             this._readPageCache.clear();
             this._loadedForRead = true;
             return true;
-        } catch (_) {
+        } catch (error) {
+            if (error instanceof TermContentIntegrityError) { throw error; }
             return false;
         }
     }
@@ -1926,7 +1946,7 @@ export class TermContentOpfsStore {
                 next.fileName !== previous.fileName || next.fileLength < previous.fileLength ||
                 (i + 1 < this._segmentStates.length && next.fileLength !== previous.fileLength)
             ) {
-                throw new Error(`Term-content segment changed during read: ${previous.fileName}`);
+                throw new TermContentIntegrityError(`Term-content segment changed during read: ${previous.fileName}`);
             }
         }
     }
@@ -2119,7 +2139,7 @@ export class TermContentOpfsStore {
             const rangeStart = Math.max(localOffset, pageStartOffset);
             const rangeEnd = Math.min(localOffset + length, pageStartOffset + pageSize);
             if (rangeEnd > pageStartOffset + page.byteLength) {
-                throw new Error('Truncated term-content page');
+                throw new TermContentIntegrityError('Truncated term-content page');
             }
             const copyLength = rangeEnd - rangeStart;
             if (copyLength <= 0) { continue; }

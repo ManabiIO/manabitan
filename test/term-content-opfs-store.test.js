@@ -204,6 +204,43 @@ describe('TermContentOpfsStore', () => {
         expect(Reflect.get(store, '_loadedForRead')).toBe(true);
     });
 
+    test('retries a short old page after its content generation was replaced', async () => {
+        const store = new TermContentOpfsStore();
+        const started = deferPromise();
+        const release = deferPromise();
+        const bytes = new Uint8Array([7, 8, 9]);
+        const freshFile = createReadableFile(bytes);
+        const oldFile = {
+            size: bytes.byteLength,
+            slice: () => ({arrayBuffer: async () => {
+                started.resolve(void 0);
+                await release.promise;
+                return new Uint8Array([1, 2]).buffer;
+            }}),
+        };
+        const fileHandle = {getFile: vi.fn(async () => freshFile)};
+        const oldState = {
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: bytes.byteLength,
+            startOffset: 0,
+            readFile: oldFile,
+        };
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_segmentStates', [oldState]);
+        Reflect.set(store, '_length', bytes.byteLength);
+        Reflect.set(store, '_loadedForRead', true);
+        const pending = store.readSlice(0, bytes.byteLength);
+        await started.promise;
+        Reflect.get(store, '_invalidateReadState').call(store);
+        Reflect.set(store, '_segmentStates', [{...oldState, readFile: freshFile}]);
+        Reflect.set(store, '_loadedForRead', true);
+        release.resolve(void 0);
+        await expect(pending).resolves.toEqual(bytes);
+        expect(Reflect.get(store, '_readPageOperations').size).toBe(0);
+    });
+
     test('coalesces concurrent reads from the same cold file page', async () => {
         const bytes = new Uint8Array([1, 2, 3, 4, 5, 6]);
         /** @type {() => void} */
@@ -1119,6 +1156,65 @@ describe('TermContentOpfsStore', () => {
         }
         expect(arrayBuffer).toHaveBeenCalledTimes(2);
         if (outcome !== 'corrupt') { expect(mark).not.toHaveBeenCalled(); }
+        expect(Reflect.get(store, '_readPageOperations').size).toBe(0);
+    });
+
+    test.each(['snapshot-shrink', 'cached-snapshot-shrink', 'stale-snapshot-shrink', 'short-page', 'io-error'])('lookup classifies concrete content loss separately from I/O failure (%s)', async (fault) => {
+        const database = new DictionaryDatabase();
+        const store = /** @type {TermContentOpfsStore} */ (Reflect.get(database, '_termContentStore'));
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        const bytes = new TextEncoder().encode(JSON.stringify({
+            definitionTags: '', termTags: '', rules: '', glossary: ['readable definition'],
+        }));
+        const shortened = createReadableFile(bytes.slice(0, -1));
+        const readFile = {
+            size: bytes.byteLength,
+            slice: () => ({arrayBuffer: async () => {
+                if (fault === 'stale-snapshot-shrink') { throw createNotReadableError('stale File snapshot'); }
+                if (fault === 'io-error') { throw new Error('temporary I/O failure'); }
+                return (fault === 'short-page' ? bytes.slice(0, -1) : bytes).buffer;
+            }}),
+        };
+        const fileHandle = {getFile: vi.fn(async () => shortened)};
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_length', bytes.byteLength);
+        Reflect.set(store, '_loadedForRead', fault !== 'snapshot-shrink');
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: bytes.byteLength,
+            startOffset: 0,
+            readFile: fault === 'snapshot-shrink' ? null : readFile,
+        }]);
+        vi.spyOn(recordStore, 'getByIdsAsync').mockResolvedValue(new Map([[1, {
+            id: 1,
+            dictionary: 'test',
+            expression: '語',
+            reading: 'ご',
+            score: 0,
+            sequence: 1,
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: bytes.byteLength,
+            entryContentDictName: 'raw',
+        }]]));
+        const mark = vi.spyOn(recordStore, 'markDictionaryReimportRequired');
+        if (fault === 'cached-snapshot-shrink') {
+            expect((await database._fetchTermRowsByIds([1])).get(1)?.glossary).toEqual(['readable definition']);
+            expect(Reflect.get(database, '_termRowCache').size).toBe(1);
+            Reflect.get(store, '_invalidateReadState').call(store);
+        }
+        const pending = database._fetchTermRowsByIds([1]);
+        if (fault === 'io-error') {
+            await expect(pending).rejects.toThrow('temporary I/O failure');
+            expect(mark).not.toHaveBeenCalled();
+        } else {
+            await expect(pending).rejects.toThrow('Dictionary content is damaged and must be re-imported');
+            expect(mark).toHaveBeenCalledExactlyOnceWith('test', expect.any(String));
+        }
+        expect(Reflect.get(database, '_termRowCache').size).toBe(0);
         expect(Reflect.get(store, '_readPageOperations').size).toBe(0);
     });
 

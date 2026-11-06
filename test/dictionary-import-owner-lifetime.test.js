@@ -450,3 +450,65 @@ test.each(['offscreen', 'local'])('lost %s handoff acknowledgement reconciles af
         observer.port2.close();
     }
 });
+
+
+test('transient preparation failure on owner release retains and retries a publication notification', async () => {
+    vi.useFakeTimers();
+    const {backend, client, refresh, notifications} = fixture();
+    Reflect.set(backend, '_dictionaryRefreshRetryTimer', null);
+    Reflect.set(backend, '_dictionaryRefreshRetryAttempt', 0);
+    Reflect.set(backend, '_clearDictionaryRefreshRetry', Backend.prototype._clearDictionaryRefreshRetry);
+    const prepare = vi.fn().mockRejectedValueOnce(new Error('temporary database open failure')).mockResolvedValue(void 0);
+    Reflect.set(backend, '_ensureDictionaryDatabaseReady', prepare);
+    const api = client();
+    try {
+        await api.setDictionaryImportMode(true, 'page-A');
+        Reflect.set(backend, '_dictionaryImportOwnerPublications', new Set(['page-A']));
+        await expect(api.setDictionaryImportMode(false, 'page-A')).rejects.toThrow('temporary database open failure');
+        expect(notifications).not.toHaveBeenCalled();
+        expect(backend._pendingDatabaseUpdatedNotifications).toEqual([{type: 'dictionary', cause: 'import'}]);
+        expect(vi.getTimerCount()).toBe(1);
+        await vi.advanceTimersByTimeAsync(250);
+        expect(prepare).toHaveBeenCalledTimes(2);
+        expect(refresh).toHaveBeenCalledOnce();
+        expect(notifications).toHaveBeenCalledExactlyOnceWith('dictionary', 'import');
+        expect(backend._pendingDatabaseUpdatedNotifications).toHaveLength(0);
+        expect(Reflect.get(backend, '_dictionaryRefreshRetryTimer')).toBeNull();
+        expect(vi.getTimerCount()).toBe(0);
+    } finally {
+        vi.clearAllTimers();
+        vi.useRealTimers();
+    }
+});
+
+
+test.each([false, true])('an unknown durable outcome never retires its operation as completed (departed=%s)', async (departed) => {
+    const {backend, client, cancel, notifications} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    const operation = backend._ownedDictionaryImports.get('operation-A');
+    if (operation) { operation.runtimeAdmissionAttempted = true; }
+    backend._settleDictionaryImportOwnership('operation-A', 'page-A');
+    const observer = new MessageChannel();
+    const received = new Promise((resolve) => {
+        observer.port1.onmessage = (event) => { resolve(event.data); };
+    });
+    const relay = backend._superviseOwnedDictionaryImport('operation-A', observer.port2);
+    const completion = {result: null, errors: [], outcome: {status: 'unknown', warnings: ['Rollback could not be confirmed']}};
+    cancel.mockResolvedValue(/** @type {never} */ ({operationId: 'operation-A', state: 'unknown', outcome: completion.outcome}));
+    try {
+        if (departed) { api.shutdownRuntimeConnections(); }
+        relay.port.postMessage({type: 'complete', result: completion});
+        expect(await received).toEqual({type: 'complete', result: completion});
+        expect(operation?.completed).toBe(false);
+        expect(backend._ownedDictionaryImports.get('operation-A')).toBe(operation);
+        expect(backend._dictionaryImportOwners.has('page-A')).toBe(true);
+        expect(notifications).not.toHaveBeenCalled();
+    } finally {
+        relay.close();
+        observer.port1.close();
+        observer.port2.close();
+        await backend._setDictionaryImportMode(false, 'page-A');
+    }
+});

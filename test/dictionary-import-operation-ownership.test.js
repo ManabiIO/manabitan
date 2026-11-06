@@ -148,6 +148,74 @@ describe('dictionary import operation ownership', () => {
         expect(await query(b)).toMatchObject({state: 'cancelled'});
     });
 
+    test('cancellation delivered before import admission fences only that operation', async () => {
+        const {submit, query, drain} = await harness();
+        const cancelled = operationId('cancelled-before-control-delivery');
+        await query(cancelled, false);
+        const cancelledPort = submit(cancelled);
+        const livePort = submit(operationId('independent'));
+        await drain();
+        expect(cancelledPort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'}));
+        expect(cancelledPort.postMessage).not.toHaveBeenCalledWith(expect.objectContaining({type: 'complete'}));
+        expect(livePort.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'}));
+        expect(control.calls).toBe(1);
+    });
+
+    test('pre-admission cancellation does not fabricate rollback of a published operation after restart', async () => {
+        const id = operationId('published-before-worker-restart');
+        control.publishedReceipt = /** @type {import('dictionary-importer').ImportResult} */ (/** @type {unknown} */ ({
+            result: {title: 'Fixture', importSuccess: true, storageImportOperationId: id, storageGenerationId: 'durable-generation'},
+            errors: [],
+            outcome: {status: 'published', generationId: 'durable-generation'},
+        }));
+        const {query} = await harness();
+        await query(id, false);
+        expect(await query(id)).toMatchObject({state: 'completed', published: true, result: control.publishedReceipt});
+    });
+
+    test('lookup-only status cannot create an admission cancellation fence', async () => {
+        const {submit, query, drain} = await harness();
+        const id = operationId('status-before-admission');
+        expect(await query(id)).toMatchObject({state: 'unknown'});
+        const port = submit(id);
+        await drain();
+        expect(port.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'}));
+        expect(control.calls).toBe(1);
+    });
+
+    test('pre-admission cancellation fences stay bounded and eviction cannot re-admit a cancelled ID', async () => {
+        const {worker, submit, query, drain} = await harness();
+        const now = Date.now();
+        const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+        const first = operationId('first-cancel');
+        await query(first, false);
+        for (let i = 1; i < 129; ++i) {
+            clock.mockReturnValue(now + i);
+            await query(operationId(`cancel-${i}`), false);
+        }
+        expect(Reflect.get(worker, '_pendingImportCancellations').size).toBe(128);
+        const rejected = submit(first);
+        expect(rejected.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'error'}));
+        clock.mockReturnValue(now + 129);
+        const live = submit(operationId('live-after-fences'));
+        await drain();
+        expect(live.postMessage).toHaveBeenCalledWith(expect.objectContaining({type: 'complete'}));
+        expect(control.calls).toBe(1);
+        clock.mockReturnValue(now + 600130);
+        await query(operationId('prune-only'));
+        expect(Reflect.get(worker, '_pendingImportCancellations').size).toBe(0);
+    });
+
+    test('invalid cancellation IDs cannot allocate admission fences', async () => {
+        const {worker, query} = await harness();
+        const now = Date.now();
+        vi.spyOn(Date, 'now').mockReturnValue(now);
+        for (const id of [void 0, '', 'invalid', `${now + 1}:future`, `${now - 600001}:expired`]) {
+            await query(id, false);
+        }
+        expect(Reflect.get(worker, '_pendingImportCancellations').size).toBe(0);
+    });
+
     test('cancelling active A or stale A never cancels subsequent B', async () => {
         const {submit, query, drain} = await harness();
         let release = () => {};

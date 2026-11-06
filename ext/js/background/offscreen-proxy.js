@@ -414,7 +414,10 @@ null,
             } catch (error) {
                 this._offscreenControlResponseHandlers.delete(id);
                 clearTimers();
-                reject(new OffscreenControlTransportError('Failed to send offscreen control message', {cause: error}));
+                // Structured-clone rejection happens before delivery and says
+                // nothing about the shared port or other admitted requests.
+                const cloneFailure = typeof error === 'object' && error !== null && 'name' in error && error.name === 'DataCloneError';
+                reject(cloneFailure ? error : new OffscreenControlTransportError('Failed to send offscreen control message', {cause: error}));
             }
         });
     }
