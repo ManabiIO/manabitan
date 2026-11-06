@@ -56,3 +56,42 @@ describe('DictionaryDatabase compressed shared-glossary bounds', () => {
         expect(readDetailed).toHaveBeenCalledExactlyOnceWith(11, 3, 'raw');
     });
 });
+
+
+describe('DictionaryDatabase shared-glossary byte ranges', () => {
+    test.each([
+        [0.5, 3],
+        [Number.MAX_SAFE_INTEGER + 1, 3],
+        [Number.MAX_SAFE_INTEGER, 1],
+        [Number.NaN, 3],
+        [Number.POSITIVE_INFINITY, 3],
+        [-1, 3],
+        [0, 1.5],
+        [0, Number.NaN],
+        [0, Number.POSITIVE_INFINITY],
+        [0, 0],
+        [0, -1],
+    ])('rejects invalid byte range offset=%s length=%s before OPFS access', async (contentOffset, contentLength) => {
+        const database = new DictionaryDatabase();
+        const readDetailed = vi.fn();
+        Reflect.set(database, '_termContentBlockStore', {readDetailed});
+        Reflect.get(database, '_sharedGlossaryArtifactMetaByDictionary').set('Test', {
+            contentOffset, contentLength, contentDictName: 'raw-v3', uncompressedLength: 0,
+        });
+        await expect(Reflect.get(database, '_inflateSharedGlossaryArtifact').call(database, 'Test'))
+            .rejects.toMatchObject({status: 'corrupt', message: expect.stringContaining('byte range')});
+        expect(readDetailed).not.toHaveBeenCalled();
+    });
+
+    test('preserves valid offsets above the unsigned 32-bit range', async () => {
+        const database = new DictionaryDatabase();
+        const bytes = new Uint8Array([1, 2, 3]);
+        const readDetailed = vi.fn(async () => ({status: 'ok', bytes}));
+        Reflect.set(database, '_termContentBlockStore', {readDetailed});
+        Reflect.get(database, '_sharedGlossaryArtifactMetaByDictionary').set('Test', {
+            contentOffset: 2 ** 32 + 11, contentLength: 3, contentDictName: 'raw-v3', uncompressedLength: 0,
+        });
+        await expect(Reflect.get(database, '_inflateSharedGlossaryArtifact').call(database, 'Test')).resolves.toBe(bytes);
+        expect(readDetailed).toHaveBeenCalledExactlyOnceWith(2 ** 32 + 11, 3, 'raw');
+    });
+});

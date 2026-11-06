@@ -4965,8 +4965,13 @@ null;
      */
     async _inflateSharedGlossaryArtifact(dictionary) {
         const meta = this._getSharedGlossaryArtifactMeta(dictionary);
-        if (meta === null || meta.contentOffset < 0 || meta.contentLength <= 0) {
-            return new Uint8Array(0);
+        if (meta === null) { return new Uint8Array(0); }
+        if (
+            !Number.isSafeInteger(meta.contentOffset) || meta.contentOffset < 0 ||
+            !Number.isSafeInteger(meta.contentLength) || meta.contentLength <= 0 ||
+            !Number.isSafeInteger(meta.contentOffset + meta.contentLength)
+        ) {
+            throw new TermContentLookupReadError('corrupt', 'Shared glossary byte range is invalid');
         }
         if (
             meta.contentDictName === RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME &&
@@ -9370,6 +9375,9 @@ null :
         }
         this._usesFallbackStorage = didLastOpenUseFallbackStorage();
         this._openStorageDiagnostics = getLastOpenStorageDiagnostics();
+        // A downgraded build must not initialize old tables or inspect newer
+        // OPFS formats before it rejects an unsupported database version.
+        this._getSupportedInstalledSchemaVersion();
         await this._termContentStore.prepare();
         await this._termRecordStore.prepare();
         this._termContentBlockStore.clearCache();
@@ -9627,17 +9635,35 @@ null :
         }
     }
 
-    /** */
-    async _runSchemaMigrations() {
-        const db = this._requireDb();
-        const installedSchemaVersion = Math.max(0, this._asNumber(db.selectValue('PRAGMA user_version'), 0));
+    /**
+     * @returns {number}
+     * @throws {Error} If installed storage is invalid or belongs to a newer build.
+     */
+    _getSupportedInstalledSchemaVersion() {
+        const installedSchemaVersion = this._asNumber(this._requireDb().selectValue('PRAGMA user_version'), -1);
+        if (!Number.isSafeInteger(installedSchemaVersion) || installedSchemaVersion < 0) {
+            throw new Error('Dictionary storage schema version is invalid');
+        }
         if (installedSchemaVersion > CURRENT_DICTIONARY_SCHEMA_VERSION) {
             reportDiagnostics('dictionary-schema-migration-skipped', {
                 reason: 'newer-installed-version',
                 installedSchemaVersion,
                 currentSchemaVersion: CURRENT_DICTIONARY_SCHEMA_VERSION,
             });
-            return;
+            throw new Error(`Dictionary storage schema ${installedSchemaVersion} is newer than this build supports (${CURRENT_DICTIONARY_SCHEMA_VERSION}). Update Manabitan before opening these dictionaries.`);
+        }
+        return installedSchemaVersion;
+    }
+
+    /** */
+    async _runSchemaMigrations() {
+        const db = this._requireDb();
+        const installedSchemaVersion = this._getSupportedInstalledSchemaVersion();
+        if (installedSchemaVersion < CURRENT_DICTIONARY_SCHEMA_VERSION) {
+            // Migration resets invalidate rollback checkpoints. Reconcile and
+            // durably release their ownership before removing any payload files.
+            await this._recoverInterruptedImportSession();
+            this._assertImportJournalReleasedForMutation();
         }
         let currentSchemaVersion = installedSchemaVersion;
         let migrationCount = 0;

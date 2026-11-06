@@ -88,3 +88,15 @@ describe('offscreen dictionary mutation cache coherence', () => {
         expect(translator.clearDatabaseCaches).toHaveBeenCalledOnce();
     });
 });
+
+
+test('explicit purge can reset a database whose ordinary prepare fails', async () => {
+    const {worker, database, translator} = await createHarness();
+    database.isPrepared.mockReturnValue(false);
+    database.prepare.mockReset().mockRejectedValue(new Error('Invalid dictionary import journal'));
+    Reflect.set(worker, '_databaseReady', false);
+    await expect(worker._invokeAction('databasePurgeOffscreen', {}, [])).resolves.toBe(true);
+    expect(database.prepare).not.toHaveBeenCalled();
+    expect(database.purge).toHaveBeenCalledOnce();
+    expect(translator.clearDatabaseCaches).toHaveBeenCalledOnce();
+});

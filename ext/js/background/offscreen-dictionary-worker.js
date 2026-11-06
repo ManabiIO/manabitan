@@ -610,7 +610,11 @@ export class OffscreenDictionaryWorkerHandler {
                     /** @type {string[]} */ (params.dictionaryNames ?? []),
                 );
             case 'databasePurgeOffscreen':
-                await this._ensureDatabasePrepared();
+                // Join an existing open attempt, but do not require a damaged
+                // database to open successfully before the user can reset it.
+                if (this._prepareDatabasePromise !== null) {
+                    try { await this._prepareDatabasePromise; } catch (_) { /* Explicit reset recovers failed opens. */ }
+                }
                 this._databaseReady = false;
                 try {
                     return await this._dictionaryDatabase.purge();

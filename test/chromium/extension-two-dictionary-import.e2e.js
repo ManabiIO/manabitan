@@ -41,6 +41,86 @@ import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {runWithReaderFinalization} from '../e2e/reader-finalization.js';
 import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
 
+/**
+ * Exercise real browser confirmation dialogs with the production controller
+ * registration and settings exit-prevention code. The import transport is a
+ * bounded fixture; the ordinary full imports below still exercise real workers.
+ * @param {import('@playwright/test').BrowserContext} context
+ * @param {string} extensionBaseUrl
+ * @returns {Promise<{cancelledNavigations: number, ownerPreserved: boolean, teardownCount: number}>}
+ */
+async function verifyCancelledImportNavigation(context, extensionBaseUrl) {
+    const testPage = await context.newPage();
+    try {
+        await testPage.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+        await waitForSettingsPageReady(testPage);
+        await testPage.evaluate(async () => {
+            const {DictionaryImportController} = await import('/js/pages/settings/dictionary-import-controller.js');
+            const {SettingsController} = await import('/js/pages/settings/settings-controller.js');
+            const {EventListenerCollection} = await import('/js/core/event-listener-collection.js');
+            const settings = Object.create(SettingsController.prototype);
+            settings._pageExitPreventions = new Set();
+            settings._pageExitPreventionEventListeners = new EventListenerCollection();
+            const prevention = settings.preventPageExit();
+            const state = {teardown: [], mdxDisconnects: 0};
+            const controller = Object.create(DictionaryImportController.prototype);
+            Object.assign(controller, {
+                _modalController: {getModal: () => null},
+                _settingsController: {on() {}, application: {api: {async setDictionaryImportMode(active, ownerId) { state.teardown.push({active, ownerId}); }}}},
+                _activeImportOwnerId: 'navigation-fixture-owner',
+                _activeMdx: {disconnect() { ++state.mdxDisconnects; }},
+                _onDocumentClickCaptureBind() {},
+                _onModalVisibilityChangedEventBind() {},
+                _onRecommendedDictionariesModalVisibilityChangedBind() {},
+            });
+            for (const key of ['_purgeButton', '_purgeConfirmButton', '_importButton', '_importConfirmButton', '_importURLButton', '_importFileInput', '_importFileDrop']) {
+                controller[key] = new EventTarget();
+            }
+            controller.prepare();
+            const gesture = document.createElement('button');
+            gesture.id = 'navigation-fixture-gesture';
+            gesture.textContent = 'Activate navigation fixture';
+            gesture.style.cssText = 'position:fixed;top:0;left:0;z-index:2147483647';
+            document.body.append(gesture);
+            Reflect.set(globalThis, '__manabitanNavigationFixture', {controller, state, prevention});
+        });
+        await testPage.locator('#navigation-fixture-gesture').click();
+        for (let attempt = 0; attempt < 2; ++attempt) {
+            const dialog = testPage.waitForEvent('dialog', {timeout: 10000});
+            const navigation = testPage.reload({timeout: 15000}).then(
+                () => { throw new Error('Navigation unexpectedly completed after choosing Stay'); },
+                (error) => { assert.match(String(error), /ERR_ABORTED|aborted|cancelled/i); },
+            );
+            void navigation.catch(() => {});
+            const confirmation = await dialog;
+            assert.equal(confirmation.type(), 'beforeunload');
+            await confirmation.dismiss();
+            await navigation;
+            const state = await testPage.evaluate(() => {
+                const fixture = Reflect.get(globalThis, '__manabitanNavigationFixture');
+                return {ownerId: fixture.controller._activeImportOwnerId, ...fixture.state};
+            });
+            assert.equal(state.ownerId, 'navigation-fixture-owner');
+            assert.equal(state.mdxDisconnects, 0);
+            assert.deepEqual(state.teardown, []);
+        }
+        const cleanup = await testPage.evaluate(() => {
+            const fixture = Reflect.get(globalThis, '__manabitanNavigationFixture');
+            fixture.prevention.end();
+            globalThis.dispatchEvent(new PageTransitionEvent('pagehide'));
+            return fixture.state;
+        });
+        assert.deepEqual(cleanup.teardown, [{active: false, ownerId: 'navigation-fixture-owner'}]);
+        assert.equal(cleanup.mdxDisconnects, 1);
+        return {cancelledNavigations: 2, ownerPreserved: true, teardownCount: cleanup.teardown.length};
+    } finally {
+        if (!testPage.isClosed()) {
+            await testPage.evaluate(() => Reflect.get(globalThis, '__manabitanNavigationFixture')?.prevention.end()).catch(() => {});
+            await testPage.close();
+        }
+    }
+}
+
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
 const dictionaryCacheDir = path.join(root, 'builds', 'e2e-dictionary-cache');
@@ -3780,6 +3860,10 @@ async function main() {
         await waitForSettingsPageReady(page);
         const settingsOpenEnd = safePerformance.now();
         await addReportPhase(report, page, 'Open settings page', 'Settings loaded and dictionary import controls visible', settingsOpenStart, settingsOpenEnd, null, processSampler);
+
+        const navigationStart = safePerformance.now();
+        const navigationWitness = await verifyCancelledImportNavigation(context, extensionBaseUrl);
+        await addReportPhase(report, page, 'Cancelled navigation preserves import controller', JSON.stringify(navigationWitness), navigationStart, safePerformance.now(), null, processSampler);
 
         const runtimeDiagnosticsStart = safePerformance.now();
         const runtimeProfile = await runPhaseProfile(cdpSession, async () => {
