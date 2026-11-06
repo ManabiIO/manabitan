@@ -819,11 +819,15 @@ export class Backend {
             const details = isObjectNotArray(message) ? message : null;
             const terminal = details?.type === 'complete' || details?.type === 'error';
             const errorName = isObjectNotArray(details?.error) && typeof details.error.name === 'string' ? details.error.name : '';
-            const uncertain = details?.type === 'error' && ['DictionaryImportTransportError', 'DictionaryWorkerTransportError', 'OffscreenControlTransportError'].includes(errorName);
+            const completion = isObjectNotArray(details?.result) ? details.result : null;
+            const outcome = isObjectNotArray(completion?.outcome) ? completion.outcome : null;
+            // Completion of response delivery does not settle a mutation whose
+            // owner could not confirm publication or rollback.
+            const uncertain = outcome?.status === 'unknown' || (
+                details?.type === 'error' && ['DictionaryImportTransportError', 'DictionaryWorkerTransportError', 'OffscreenControlTransportError'].includes(errorName)
+            );
             if (terminal && !uncertain && operation && this._ownedDictionaryImports.get(operationId) === operation) {
                 operation.completed = true;
-                const completion = isObjectNotArray(details?.result) ? details.result : null;
-                const outcome = isObjectNotArray(completion?.outcome) ? completion.outcome : null;
                 if (details?.type === 'complete' && isObjectNotArray(completion?.result) && (!outcome || outcome.status === 'published')) {
                     this._dictionaryImportOwnerPublications ??= new Set();
                     this._dictionaryImportOwnerPublications.add(operation.ownerId);
@@ -5954,12 +5958,14 @@ null;
             }
 
             this._dictionaryImportModeActive = false;
-            await this._ensureDictionaryDatabaseReady();
-            reportDiagnostics('dictionary-import-mode-changed', {active: false});
             const hadDeferredRefresh = this._deferredDictionaryRefreshDuringImport || this._pendingDatabaseUpdatedNotifications.length > 0;
-            this._deferredDictionaryRefreshDuringImport = false;
-            reportDiagnostics('dictionary-refresh-on-import-mode-exit', {hadDeferredRefresh});
             try {
+                // Reopening is part of refresh recovery too. A transient open
+                // failure must retain and retry the publication notification.
+                await this._ensureDictionaryDatabaseReady();
+                reportDiagnostics('dictionary-import-mode-changed', {active: false});
+                this._deferredDictionaryRefreshDuringImport = false;
+                reportDiagnostics('dictionary-refresh-on-import-mode-exit', {hadDeferredRefresh});
                 const pendingNotifications = this._pendingDatabaseUpdatedNotifications;
                 const canReuseActiveImportConnection = (
                     pendingNotifications.length > 0 &&

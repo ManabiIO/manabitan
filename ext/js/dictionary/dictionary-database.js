@@ -56,7 +56,7 @@ import {
 } from './raw-term-content.js';
 import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
-import {TermContentOpfsStore} from './term-content-opfs-store.js';
+import {TermContentIntegrityError, TermContentOpfsStore} from './term-content-opfs-store.js';
 import {TermContentBlockStore} from './term-content-block-store.js';
 import {createTermImportMetrics} from './term-import-metrics.js';
 import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictionary-import-journal.js';
@@ -10442,7 +10442,17 @@ null :
      */
     async _fetchTermRowsByIds(ids) {
         const generation = this._directTermIndexGeneration;
-        await this._termContentStore.ensureLoadedForRead();
+        try {
+            await this._termContentStore.ensureLoadedForRead();
+        } catch (error) {
+            // Required reads below attach confirmed content damage to its owning
+            // dictionary. A speculative preparation failure has no row identity.
+            if (!(error instanceof TermContentIntegrityError)) { throw error; }
+            // Cached definitions must not conceal newly proven storage damage.
+            this._termRowCache.clear();
+            this._termEntryContentCache.clear();
+            this._termContentBlockStore.clearCache();
+        }
         this._assertTermLookupGeneration(generation);
         /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
         const rowsById = new Map();
@@ -10466,10 +10476,14 @@ null :
         this._assertTermLookupGeneration(generation);
         const warmSlices = /** @type {unknown} */ (Reflect.get(this._termContentStore, 'warmSlices'));
         if (typeof warmSlices === 'function') {
-            await /** @type {(spans: Iterable<{offset: number, length: number}>) => Promise<void>} */ (warmSlices).call(
-                this._termContentStore,
-                this._iterateTermRecordContentSpans(recordsById.values()),
-            );
+            try {
+                await /** @type {(spans: Iterable<{offset: number, length: number}>) => Promise<void>} */ (warmSlices).call(
+                    this._termContentStore,
+                    this._iterateTermRecordContentSpans(recordsById.values()),
+                );
+            } catch (error) {
+                if (!(error instanceof TermContentIntegrityError)) { throw error; }
+            }
             this._assertTermLookupGeneration(generation);
         }
         const entryGroups = this._groupTermRecordEntriesByContentCacheKey(recordsById);

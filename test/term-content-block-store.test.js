@@ -11,7 +11,7 @@ import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {ByteBoundedLruCache, TermContentBlockImportSession, TermContentBlockStore, wrapCompressedTermContentBlock} from '../ext/js/dictionary/term-content-block-store.js';
 import {TERM_CONTENT_BLOCK_ENVELOPE_BYTES, writeCompressedTermContentBlockEnvelope} from '../ext/js/dictionary/term-content-block-envelope.js';
-import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
+import {TermContentIntegrityError, TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 import {encodeRawTermContentBlockReference, encodeRawTermContentCompactBlockReference} from '../ext/js/dictionary/raw-term-content.js';
 import {beginCompressWrappedTermContentZstdSpansBatch, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from '../ext/js/dictionary/zstd-term-content.js';
 
@@ -1039,6 +1039,18 @@ describe('TermContentBlockStore', () => {
             result.contentLengths[1],
             result.contentDictName,
         )).toStrictEqual(content[1]);
+    });
+
+    test('does not publish a corruption verdict from an invalidated content generation', async () => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore);
+        /** @type {PromiseWithResolvers<Uint8Array|null>} */
+        const deferred = Promise.withResolvers();
+        vi.spyOn(contentStore, 'readSlice').mockReturnValueOnce(deferred.promise);
+        const pending = blockStore.readDetailed(0, 1, 'raw');
+        blockStore.clearCache();
+        deferred.reject(new TermContentIntegrityError('old content snapshot shrank'));
+        await expect(pending).resolves.toEqual({status: 'temporarilyUnavailable', reason: 'Term content changed during read'});
     });
 
     test('coalesces concurrent reads of entries in the same block', async () => {

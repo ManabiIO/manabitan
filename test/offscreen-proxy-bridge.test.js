@@ -253,6 +253,37 @@ describe('OffscreenProxy bridge reliability', () => {
         expect(Reflect.get(proxy, '_currentOffscreenPort')).toBe(port);
     });
 
+    test('a local clone failure cannot rotate a healthy port or reject another admitted request', async () => {
+        const port = createPort((message) => { structuredClone(message); });
+        const webExtension = {sendMessagePromise: vi.fn(async () => ({result: null}))};
+        const proxy = new OffscreenProxy(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ (/** @type {unknown} */ (webExtension)));
+        await proxy.registerOffscreenPort(port);
+        const channel = new MessageChannel();
+        const pending = proxy.sendMessageViaPort({action: 'connectToDatabaseWorker'}, [channel.port2]);
+        // Observe a baseline rejection immediately without leaving its promise unhandled.
+        const outcome = pending.then(() => 'acknowledged', (error) => error);
+        try {
+            await vi.waitFor(() => expect(port.postMessage).toHaveBeenCalledOnce());
+            const options = createPartialFindTermsOptions();
+            Reflect.set(options, 'uncloneable', () => {});
+            await expect(proxy.sendMessageViaPort({
+                action: 'findTermsStructuredOffscreen',
+                params: {mode: 'group', text: '日本', options},
+            }, [])).rejects.toMatchObject({name: 'DataCloneError'});
+            expect(port.close).not.toHaveBeenCalled();
+            expect(Reflect.get(proxy, '_currentOffscreenPort')).toBe(port);
+            respond(port, {id: 1, result: undefined});
+            expect(await outcome).toBe('acknowledged');
+            expect(port.postMessage).toHaveBeenCalledTimes(2);
+            expect(webExtension.sendMessagePromise).not.toHaveBeenCalled();
+            expect(Reflect.get(proxy, '_offscreenControlResponseHandlers').size).toBe(0);
+        } finally {
+            Reflect.get(proxy, '_clearCurrentOffscreenPort').call(proxy, port);
+            channel.port1.close();
+            channel.port2.close();
+        }
+    });
+
     test('rejects pending acknowledgements when the control port is replaced', async () => {
         const firstPort = createPort();
         const secondPort = createPort();
