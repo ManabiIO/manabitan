@@ -12,14 +12,19 @@ on:
         default: false
 permissions:
   contents: read
+concurrency:
+  group: prerelease-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      actions: write
       contents: write
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
+      version: ${{ steps.releaseVersion.outputs.version }}
+      upload_url: ${{ steps.release.outputs.upload_url }}
+      release_id: ${{ steps.release.outputs.id }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
@@ -39,6 +44,39 @@ jobs:
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
+      - name: Refuse to replace an already public release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ steps.releaseVersion.outputs.version }}
+        run: |
+          node --input-type=module <<'JAVASCRIPT'
+          const {GITHUB_API_URL, GITHUB_REPOSITORY, GH_TOKEN, RELEASE_VERSION, GITHUB_SHA, GITHUB_REF_TYPE} = process.env;
+          if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(RELEASE_VERSION) ||
+              RELEASE_VERSION.split('.').some((part) => Number(part) > 65535) || RELEASE_VERSION === '0.0.0.0') {
+            throw new Error('Expected a nonzero four-part browser version');
+          }
+          const base = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}`;
+          const headers = {Authorization: `Bearer ${GH_TOKEN}`, Accept: 'application/vnd.github+json'};
+          const response = await fetch(`${base}/releases/tags/${encodeURIComponent(RELEASE_VERSION)}`, {headers});
+          if (response.status !== 404) {
+            if (!response.ok) { throw new Error(`Release preflight failed: HTTP ${response.status}`); }
+            const release = await response.json();
+            if (release.draft !== true) { throw new Error('Public release assets are immutable; use a new version'); }
+          }
+          const tag = await fetch(`${base}/commits/refs/tags/${encodeURIComponent(RELEASE_VERSION)}`, {headers});
+          if (tag.status === 404 && GITHUB_REF_TYPE !== 'tag') {
+            // A draft does not create its tag until publication. Pin manual-dispatch tags now.
+            const created = await fetch(`${base}/git/refs`, {
+              method: 'POST', headers: {...headers, 'Content-Type': 'application/json'},
+              body: JSON.stringify({ref: `refs/tags/${RELEASE_VERSION}`, sha: GITHUB_SHA}),
+            });
+            if (!created.ok) { throw new Error(`Release tag creation failed: HTTP ${created.status}`); }
+          } else {
+            if (!tag.ok) { throw new Error(`Release tag lookup failed: HTTP ${tag.status}`); }
+            if ((await tag.json()).sha !== GITHUB_SHA) { throw new Error('Release tag points at a different source commit'); }
+          }
+          JAVASCRIPT
+
       # intentially do not use cache to keep the build more comprehensible and sandboxed
       - name: Install dependencies
         run: npm ci
@@ -47,7 +85,9 @@ jobs:
         run: npm run license-report:html
 
       - name: Build
-        run: npm run-script build -- --all --version ${{ steps.releaseVersion.outputs.version }}
+        env:
+          RELEASE_VERSION: ${{ steps.releaseVersion.outputs.version }}
+        run: npm run-script build -- --all --version "$RELEASE_VERSION"
         shell: bash
 
       - name: Archive Firefox Android package
@@ -94,30 +134,11 @@ jobs:
 
             Generated release notes follow this qualification notice.
           prerelease: true
+          draft: true
           files: |
             builds/*.zip
             builds/release-packages.json
           fail_on_unmatched_files: true
-
-      - name: Dispatch publish-chrome-development
-        if: github.event_name == 'workflow_dispatch' && inputs.dispatch_development_publishers == true && vars.MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS == 'true'
-        uses: aurelien-baudet/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # pin@v2
-        with:
-          workflow: publish-chrome-development
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ steps.releaseVersion.outputs.version }}
-          wait-for-completion: false
-          inputs: '{ "upload_url": "${{ steps.release.outputs.upload_url }}", "tag": "${{ steps.releaseVersion.outputs.version }}" }'
-
-      - name: Dispatch publish-firefox-development
-        if: github.event_name == 'workflow_dispatch' && inputs.dispatch_development_publishers == true && vars.MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS == 'true'
-        uses: aurelien-baudet/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # pin@v2
-        with:
-          workflow: publish-firefox-development
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ steps.releaseVersion.outputs.version }}
-          wait-for-completion: false
-          inputs: '{ "upload_url": "${{ steps.release.outputs.upload_url }}", "tag": "${{ steps.releaseVersion.outputs.version }}" }'
 
   provenance:
     needs: [build]
@@ -130,3 +151,53 @@ jobs:
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
       upload-assets: true
+      upload-tag-name: ${{ needs.build.outputs.version }}
+      draft-release: "true"
+
+  publish:
+    needs: [build, provenance]
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_VERSION: ${{ needs.build.outputs.version }}
+      RELEASE_ID: ${{ needs.build.outputs.release_id }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.22.0"
+
+      - name: Verify the complete staged release before publication
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" > release.json
+          mkdir staged-assets
+          gh release download "$RELEASE_VERSION" --dir staged-assets
+          tag_commit="$(gh api "repos/${GITHUB_REPOSITORY}/commits/refs/tags/${RELEASE_VERSION}" --jq .sha)"
+          node dev/bin/verify-staged-release.js "$RELEASE_VERSION" "$GITHUB_SHA" release.json staged-assets "$tag_commit"
+
+      - name: Publish the verified prerelease
+        run: gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" -F draft=false -F prerelease=true --silent
+
+      - name: Dispatch publish-chrome-development
+        if: github.event_name == 'workflow_dispatch' && inputs.dispatch_development_publishers == true && vars.MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS == 'true'
+        uses: aurelien-baudet/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # pin@v2
+        with:
+          workflow: publish-chrome-development
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ needs.build.outputs.version }}
+          wait-for-completion: false
+          inputs: '{ "upload_url": "${{ needs.build.outputs.upload_url }}", "tag": "${{ needs.build.outputs.version }}" }'
+
+      - name: Dispatch publish-firefox-development
+        if: github.event_name == 'workflow_dispatch' && inputs.dispatch_development_publishers == true && vars.MANABITAN_ENABLE_DEVELOPMENT_PUBLISHERS == 'true'
+        uses: aurelien-baudet/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # pin@v2
+        with:
+          workflow: publish-firefox-development
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ needs.build.outputs.version }}
+          wait-for-completion: false
+          inputs: '{ "upload_url": "${{ needs.build.outputs.upload_url }}", "tag": "${{ needs.build.outputs.version }}" }'
