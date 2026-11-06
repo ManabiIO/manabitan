@@ -551,6 +551,9 @@ describe('dictionary import operation ownership', () => {
         expect(cancel).toHaveBeenCalledTimes(2);
         expect(cancel).toHaveBeenNthCalledWith(1, {action: 'cancelDictionaryImportOffscreen', params: {operationId: id, workerGeneration: void 0, lookupOnly: true}});
         expect(cancel).toHaveBeenNthCalledWith(2, {action: 'cancelDictionaryImportOffscreen', params: {operationId: id}});
+        expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(1);
+        cancel.mockResolvedValueOnce({operationId: id, state: 'cancelled'});
+        await backend._onApiGetDictionaryImportOperationStatus({operationId: id}, {});
         expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(0);
     });
 
@@ -584,7 +587,7 @@ describe('dictionary import operation ownership', () => {
         channel.port1.close();
     });
 
-    test('owner release closes only its abandoned relay and client response ports once', async () => {
+    test('owner release detaches its client and waits for worker cancellation before closing the relay once', async () => {
         const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
         const a = operationId('A');
         const b = operationId('B');
@@ -632,6 +635,10 @@ describe('dictionary import operation ownership', () => {
         expect(cleanupA).toEqual(expect.any(Function));
         await backend._setDictionaryImportMode(false, 'page-A');
         await backend._setDictionaryImportMode(false, 'page-A');
+        expect(relays[0].port1.close).not.toHaveBeenCalled();
+        expect(closeClientA).toHaveBeenCalledOnce();
+        transferredPorts[0].postMessage({type: 'error', error: {name: 'Error', message: 'Import cancelled'}});
+        await expect.poll(() => Reflect.get(backend, '_ownedDictionaryImports').has(a)).toBe(false);
         cleanupA?.();
         expect(relays[0].port1.close).toHaveBeenCalledOnce();
         expect(relays[0].port2.close).toHaveBeenCalledOnce();

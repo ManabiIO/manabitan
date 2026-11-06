@@ -55,6 +55,20 @@ const STARTUP_DIAGNOSTICS_STORAGE_KEY = 'manabitanStartupDiagnostics';
 const DICTIONARY_REFRESH_RETRY_DELAYS_MS = [250, 1000, 3000, 10000];
 
 /**
+ * @typedef {object} OwnedDictionaryImportOperation
+ * @property {string} ownerId
+ * @property {boolean} cancelled Cancellation was requested, not confirmed.
+ * @property {boolean} settled The dispatch/forwarding function has returned.
+ * @property {boolean} completed An authoritative terminal outcome was observed.
+ * @property {boolean} [runtimeAdmissionAttempted]
+ * @property {boolean} [reconciliationPending]
+ * @property {AbortController} [downloadAbortController]
+ * @property {() => void} [responseCleanup]
+ * @property {() => void} [responseDetachObserver]
+ * @property {(status: import('offscreen').ImportOperationStatus) => void} [responseReconcile]
+ */
+
+/**
  * @param {string} url
  * @param {string} contentDisposition
  * @returns {string}
@@ -361,6 +375,8 @@ export class Backend {
         this._deferredDictionaryRefreshDuringImport = false;
         /** @type {{type: import('backend').DatabaseUpdateType, cause: import('backend').DatabaseUpdateCause}[]} */
         this._pendingDatabaseUpdatedNotifications = [];
+        /** @type {number} */
+        this._databaseUpdatedNotificationGeneration = 0;
         /** @type {Promise<void>|null} */
         this._setDictionaryImportModePromise = null;
         /** @type {Set<string>} */
@@ -371,7 +387,7 @@ export class Backend {
         this._orphanedDictionaryImportOwners = new Set();
         /** @type {Set<string>} */
         this._dictionaryImportOwnerPublications = new Set();
-        /** @type {Map<string, {ownerId: string, cancelled: boolean, settled: boolean, completed: boolean, runtimeAdmissionAttempted?: boolean, reconciliationPending?: boolean, downloadAbortController?: AbortController, responseCleanup?: () => void, responseReconcile?: (status: import('offscreen').ImportOperationStatus) => void}>} */
+        /** @type {Map<string, OwnedDictionaryImportOperation>} */
         this._ownedDictionaryImports = new Map();
         /** @type {Record<string, unknown>|null} */
         this._lastDictionaryUrlImportDebug = null;
@@ -809,6 +825,7 @@ export class Backend {
             detachObserver();
             if (operation?.responseCleanup === close) {
                 delete operation.responseCleanup;
+                delete operation.responseDetachObserver;
                 delete operation.responseReconcile;
             }
         };
@@ -824,6 +841,7 @@ export class Backend {
         };
         if (operation) {
             operation.responseCleanup = close;
+            operation.responseDetachObserver = detachObserver;
             operation.responseReconcile = reconcile;
         }
         channel.port1.onmessage = (event) => {
@@ -841,15 +859,10 @@ export class Backend {
                 details?.type === 'error' && ['DictionaryImportTransportError', 'DictionaryWorkerTransportError', 'OffscreenControlTransportError'].includes(errorName)
             );
             if (terminal && !uncertain && operation && this._ownedDictionaryImports.get(operationId) === operation) {
-                operation.completed = true;
-                if (details?.type === 'complete' && isObjectNotArray(completion?.result) && (!outcome || outcome.status === 'published')) {
-                    this._dictionaryImportOwnerPublications ??= new Set();
-                    this._dictionaryImportOwnerPublications.add(operation.ownerId);
-                }
-                if (operation.settled) {
-                    this._ownedDictionaryImports.delete(operationId);
-                    this._releaseOrphanedDictionaryImportOwner(operation.ownerId);
-                }
+                const published = details?.type === 'complete' && isObjectNotArray(completion?.result) && (!outcome || outcome.status === 'published');
+                void this._completeOwnedDictionaryImport(operationId, operation, published).catch((error) => {
+                    reportDiagnostics('dictionary-import-owner-completion-failed', {operationId, error: toError(error).message});
+                });
             }
             forward(message);
             if (terminal) {
@@ -895,10 +908,48 @@ export class Backend {
         operation.settled = true;
         // Once dispatch is attempted, a failed acknowledgement does not prove non-admission.
         if (failed && !operation.runtimeAdmissionAttempted) { operation.completed = true; }
-        if (operation.cancelled || operation.completed) {
+        this._retireOwnedDictionaryImport(operationId, operation);
+    }
+
+    /**
+     * Dispatch settlement, cancellation intent, and mutation completion are
+     * separate lifetimes. Keep a live relay or receipt query after cancellation
+     * so a publication which already won the race is still announced.
+     * @param {string} operationId
+     * @param {OwnedDictionaryImportOperation} operation
+     */
+    _retireOwnedDictionaryImport(operationId, operation) {
+        if (this._ownedDictionaryImports.get(operationId) !== operation || !operation.settled) { return; }
+        if (operation.completed || (operation.cancelled && !operation.responseCleanup && !operation.reconciliationPending)) {
             this._ownedDictionaryImports.delete(operationId);
             this._releaseOrphanedDictionaryImportOwner(operation.ownerId);
         }
+    }
+
+    /**
+     * @param {string} operationId
+     * @param {OwnedDictionaryImportOperation} operation
+     * @param {boolean} published
+     * @returns {Promise<void>}
+     */
+    async _completeOwnedDictionaryImport(operationId, operation, published) {
+        if (operation.completed || this._ownedDictionaryImports.get(operationId) !== operation) { return; }
+        operation.completed = true;
+        if (published) {
+            if (this._dictionaryImportOwners.has(operation.ownerId)) {
+                this._dictionaryImportOwnerPublications ??= new Set();
+                this._dictionaryImportOwnerPublications.add(operation.ownerId);
+            } else {
+                try {
+                    await this._triggerDatabaseUpdated('dictionary', 'import');
+                } catch (error) {
+                    // The update path retains its notification and retry; do not
+                    // hide an authoritative publication behind refresh failure.
+                    reportDiagnostics('dictionary-import-owner-notification-deferred', {operationId, error: toError(error).message});
+                }
+            }
+        }
+        this._retireOwnedDictionaryImport(operationId, operation);
     }
 
     /**
@@ -2216,11 +2267,14 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      */
     _reconcileOwnedDictionaryImport(operationId) {
         const operation = this._ownedDictionaryImports?.get(operationId);
-        if (!operation || operation.completed || operation.cancelled || operation.reconciliationPending) { return; }
+        if (!operation || operation.completed || operation.reconciliationPending) { return; }
         operation.reconciliationPending = true;
         void Promise.resolve(this._onApiGetDictionaryImportOperationStatus({operationId}, {})).catch((error) => {
             reportDiagnostics('dictionary-import-owner-reconciliation-failed', {operationId, error: toError(error).message});
-        }).finally(() => { operation.reconciliationPending = false; });
+        }).finally(() => {
+            operation.reconciliationPending = false;
+            this._retireOwnedDictionaryImport(operationId, operation);
+        });
     }
 
     /** @type {import('api').ApiHandler<'getDictionaryImportOperationStatus'>} */
@@ -2242,30 +2296,8 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             status?.operationId === operationId && ['completed', 'failed', 'cancelled'].includes(status.state) &&
             status.outcome?.status !== 'unknown'
         ) {
-            operation.completed = true;
-            if (status.published === true || status.outcome?.status === 'published') {
-                if (this._dictionaryImportOwners.has(operation.ownerId)) {
-                    this._dictionaryImportOwnerPublications ??= new Set();
-                    this._dictionaryImportOwnerPublications.add(operation.ownerId);
-                } else {
-                    // Explicit release removes the owner before awaiting worker
-                    // cancellation. A receipt racing that await still owns an
-                    // update notification; it cannot wait for another release.
-                    try {
-                        await this._triggerDatabaseUpdated('dictionary', 'import');
-                    } catch (error) {
-                        // The update path retains its notification and retry.
-                        // A refresh failure must not hide an authoritative receipt.
-                        reportDiagnostics('dictionary-import-owner-notification-deferred', {operationId, error: toError(error).message});
-                    }
-                }
-            }
-            if (this._ownedDictionaryImports.get(operationId) !== operation) { return status; }
             operation.responseReconcile?.(status);
-            if (operation.settled) {
-                this._ownedDictionaryImports.delete(operationId);
-                this._releaseOrphanedDictionaryImportOwner(operation.ownerId);
-            }
+            await this._completeOwnedDictionaryImport(operationId, operation, status.published === true || status.outcome?.status === 'published');
         }
         return status;
     }
@@ -4663,6 +4695,7 @@ null;
      * @returns {void}
      */
     _queueDeferredDatabaseUpdatedNotification(type, cause) {
+        this._databaseUpdatedNotificationGeneration = (this._databaseUpdatedNotificationGeneration ?? 0) + 1;
         const pendingNotifications = this._pendingDatabaseUpdatedNotifications;
         for (let i = pendingNotifications.length - 1; i >= 0; --i) {
             const pendingNotification = pendingNotifications[i];
@@ -5933,7 +5966,11 @@ null;
                     for (const [, operation] of ownedOperations) {
                         operation.cancelled = true;
                         operation.downloadAbortController?.abort();
-                        operation.responseCleanup?.();
+                        if (operation.responseDetachObserver) {
+                            operation.responseDetachObserver();
+                        } else {
+                            operation.responseCleanup?.();
+                        }
                     }
                     for (const [operationId, operation] of ownedOperations) {
                         try {
@@ -5945,7 +5982,7 @@ null;
                         } catch (error) {
                             reportDiagnostics('dictionary-import-cancel-failed', {operationId, error: toError(error).message});
                         }
-                        if (operation.settled) { this._ownedDictionaryImports.delete(operationId); }
+                        this._retireOwnedDictionaryImport(operationId, operation);
                     }
                     if (this._dictionaryImportOwners.size > 0) { return; }
                 }
@@ -5975,6 +6012,7 @@ null;
 
             this._dictionaryImportModeActive = false;
             const hadDeferredRefresh = this._deferredDictionaryRefreshDuringImport || this._pendingDatabaseUpdatedNotifications.length > 0;
+            let notificationGeneration = 0;
             try {
                 // Reopening is part of refresh recovery too. A transient open
                 // failure must retain and retry the publication notification.
@@ -5987,11 +6025,12 @@ null;
                     pendingNotifications.length > 0 &&
                     pendingNotifications.every(({type, cause}) => type === 'dictionary' && cause === 'import')
                 );
+                notificationGeneration = this._databaseUpdatedNotificationGeneration ?? 0;
                 await this._refreshDictionaryDatabaseAfterUpdate({
                     reuseActiveImportConnection: canReuseActiveImportConnection,
                 });
             } catch (error) {
-                if (hadDeferredRefresh) {
+                if (hadDeferredRefresh || this._pendingDatabaseUpdatedNotifications.length > 0) {
                     this._deferredDictionaryRefreshDuringImport = true;
                 }
                 reportDiagnostics('dictionary-refresh-on-import-mode-exit-failed', {
@@ -6002,13 +6041,17 @@ null;
                 this._scheduleDictionaryRefreshRetry('import-mode-exit-refresh-failed');
                 throw error;
             }
-            if (hadDeferredRefresh) {
-                const pendingNotifications = this._pendingDatabaseUpdatedNotifications.splice(0, this._pendingDatabaseUpdatedNotifications.length);
-                for (const {type, cause} of pendingNotifications) {
-                    this._sendApplicationDatabaseUpdated(type, cause);
-                }
-            } else {
-                this._pendingDatabaseUpdatedNotifications.length = 0;
+            if ((this._databaseUpdatedNotificationGeneration ?? 0) !== notificationGeneration) {
+                // This refresh started before a newer update failed to refresh.
+                // Keep its notification and retry; an older success cannot clear
+                // a newer generation's recovery obligation.
+                this._deferredDictionaryRefreshDuringImport = true;
+                this._scheduleDictionaryRefreshRetry('database-update-arrived-during-refresh');
+                return;
+            }
+            const pendingNotifications = this._pendingDatabaseUpdatedNotifications.splice(0, this._pendingDatabaseUpdatedNotifications.length);
+            for (const {type, cause} of pendingNotifications) {
+                this._sendApplicationDatabaseUpdated(type, cause);
             }
             this._clearDictionaryRefreshRetry();
         })();
