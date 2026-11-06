@@ -1454,6 +1454,62 @@ describe('TermRecordOpfsStore', () => {
         });
     });
 
+    test.each([1, 2])('keeps %i compact header read failures transient and recovers without repair', async (failureCount) => {
+        const dictionary = 'Transient compact header';
+        const files = new Map();
+        const directory = createFakeDirectoryHandle(files);
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', directory);
+        const expressions = Array.from({length: 8}, (_, i) => new TextEncoder().encode(`term-${i}`));
+        await writer.beginImportSession();
+        await writer.appendBatchFromArtifactChunkResolvedContent({
+            dictionary,
+            rowCount: expressions.length,
+            expressionBytesList: expressions,
+            readingBytesList: expressions,
+            readingEqualsExpressionList: new Uint8Array(8).fill(1),
+            scoreList: new Int32Array(8),
+            sequenceList: new Int32Array(8),
+        }, new Uint32Array(8), new Uint32Array(8).fill(1), 'raw');
+        await writer.endImportSession();
+        const index = [...files.entries()].find(([name]) => name.endsWith('.mbti'));
+        if (typeof index === 'undefined') { throw new Error('Missing compact record container'); }
+        const [indexName, bytes] = index;
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        expect(view.getUint32(40 + 36, true)).toBe(2);
+        const fieldsStart = 40 + 40 + view.getUint32(40 + 16, true);
+        const reader = new TermRecordOpfsStore();
+        Reflect.set(reader, '_recordsDirectoryHandle', directory);
+        await reader._loadShardFiles(false);
+        const readRange = reader._readFileRange.bind(reader);
+        let failedReads = 0;
+        vi.spyOn(reader, '_readFileRange').mockImplementation(async (file, start, end) => {
+            if (file.name === indexName && start === fieldsStart && end === fieldsStart + 16 && failedReads < failureCount) {
+                ++failedReads;
+                throw new DOMException('Injected temporary compact header read failure', 'NotReadableError');
+            }
+            return await readRange(file, start, end);
+        });
+        const repair = vi.spyOn(reader, '_tryRepairPersistentDictionaryIndex');
+        const materialize = vi.spyOn(reader, '_loadShardStateContents');
+        const originalFiles = new Map([...files].map(([name, value]) => [name, new Uint8Array(value)]));
+        await reader.ensureDictionariesLoaded([dictionary]);
+        expect(failedReads).toBe(failureCount);
+        expect(repair).not.toHaveBeenCalled();
+        expect(materialize).not.toHaveBeenCalled();
+        if (failureCount === 2) {
+            expect(reader.getDictionaryHealth(dictionary)).toMatchObject({status: 'temporarilyUnavailable'});
+            expect(Reflect.get(reader, '_persistentIndexFailureByDictionary').get(dictionary)).toMatchObject({kind: 'transient'});
+            expect(Reflect.get(reader, '_loadedDictionaryNames').has(dictionary)).toBe(false);
+            await reader.ensureDictionariesLoaded([dictionary]);
+        }
+        expect(reader.getDictionaryHealth(dictionary).status).toBe('available');
+        expect(reader.findTermIds(dictionary, 'term-0', 'expression')).toEqual([1]);
+        expect((await reader.getByIdsAsync([1])).get(1)).toMatchObject({expression: 'term-0', score: 0});
+        expect(repair).not.toHaveBeenCalled();
+        expect(files).toEqual(originalFiles);
+    });
+
     test('requires reimport when both descriptor and authoritative container disappear', async () => {
         const store = new TermRecordOpfsStore();
         const dictionaryName = 'Missing authoritative shard';
