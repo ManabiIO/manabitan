@@ -226,7 +226,7 @@ try {
     await page.waitForFunction(({sequenceBefore, title}) => {
         const completion = Reflect.get(globalThis, '__manabitanLastImportCompletion');
         return completion?.importRunCurrent === true && completion.sequence > sequenceBefore &&
-            completion.importedTitles?.some((name) => name === title || name.startsWith(title + ' [update-staging '));
+        completion.importedTitles?.some((name) => name === title || name.startsWith(title + ' [update-staging '));
     }, {sequenceBefore, title}, {timeout: 120000});
     const completion = await page.evaluate(() => Reflect.get(globalThis, '__manabitanLastImportCompletion'));
     assert.equal(completion.errorCount, 0);
