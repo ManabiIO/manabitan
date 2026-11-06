@@ -17,6 +17,7 @@
  */
 
 import * as ajvSchemas0 from '../../../lib/validate-schemas.js';
+import {isDictionaryImportBusyError} from '../../core/dictionary-import-busy-error.js';
 import {reportDiagnostics} from '../../core/diagnostics-reporter.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {ExtensionError} from '../../core/extension-error.js';
@@ -473,6 +474,10 @@ class DictionaryEntry {
         versionElement.textContent = `rev.${revision}`;
         outdateElement.hidden = (version >= 3);
         storageErrorElement.hidden = storageHealth !== 'reimportRequired';
+        querySelectorNotNull(storageErrorElement, '.settings-item-children').textContent = (
+            this._dictionaryInfo.storageHealthReason?.trim() ||
+            "This dictionary's stored data cannot be used. Re-import it to restore lookups."
+        );
         reimportButton.hidden = storageHealth !== 'reimportRequired';
         reimportButton.onclick = null;
         if (storageHealth === 'reimportRequired') {
@@ -1224,11 +1229,20 @@ export class DictionaryController {
         const token = {};
         this._databaseStateToken = token;
         this._entriesUpdateToken = token;
-        this._dictionaries = null;
         try {
-            const dictionaries = await this._settingsController.getDictionaryInfo();
+            let dictionaries;
+            try {
+                dictionaries = await this._settingsController.getDictionaryInfo();
+            } catch (error) {
+                // Keep the last usable list until mutation publishes metadata.
+                if (isDictionaryImportBusyError(error)) { return; }
+                throw error;
+            }
             if (this._databaseStateToken !== token) { return; }
             this._dictionaries = dictionaries;
+            // Options renders started during the metadata read used the old list.
+            // Publish these rows with a fresh options read; later events still win.
+            this._entriesUpdateToken = token;
 
             await this._updateEntries(token);
             if (this._databaseStateToken !== token || !this._isEntriesUpdateCurrent(token)) { return; }

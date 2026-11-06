@@ -16,6 +16,7 @@
  */
 /* eslint @stylistic/semi: ["error", "never"] */
 
+import {deepStrictEqual} from 'node:assert/strict'
 import {readFile} from 'node:fs/promises'
 import {beforeAll, describe, expect, test} from 'vitest'
 import {
@@ -176,7 +177,8 @@ describe('escaped keys in the non-fused native interner', () => {
         const source = JSON.stringify(Array.from({length: 25000}, (_, i) => [`${i === 1 ? 'quo"te' : 'term'}${i}`, '', '', '', 0, ['definition'], i, '']))
         const oracle = await project(source, false, 25000)
         const result = await project(source, true, 25000)
-        expect(snapshot(result.chunks)).toStrictEqual(snapshot(oracle.chunks))
+        // Compare every byte and metadata field without expanding typed arrays into entries.
+        deepStrictEqual(snapshot(result.chunks), snapshot(oracle.chunks))
         expect(result.profile?.nativeStringPlanChunkCount).toBe(1)
         expect(result.profile?.nativeStringPlanFallbackChunkCount).toBe(0)
     })

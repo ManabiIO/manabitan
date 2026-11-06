@@ -23,12 +23,19 @@ const SOURCE_TERM_BANK_LOW_MEMORY_BATCH_MAX_BYTES = 64 * 1024 * 1024;
 const SOURCE_TERM_BANK_PREFETCH_MAX_BYTES = 96 * 1024 * 1024;
 const SOURCE_TERM_BANK_LOW_MEMORY_PREFETCH_MAX_BYTES = 24 * 1024 * 1024;
 const SOURCE_TERM_BANK_UNKNOWN_SIZE_PREFETCH_MAX_FILES = 8;
+const SOURCE_READ_CANCELLATION_POLL_MS = 25;
 const ZIP_LOCAL_FILE_HEADER_LENGTH = 30;
 const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
 const RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES = 128 * 1024 * 1024;
+const RAW_ZIP_BATCH_MAX_RANGE_BYTES = 16 * 1024 * 1024;
+const RAW_ZIP_BATCH_MAX_GAP_BYTES = 256 * 1024;
+const RAW_ZIP_BATCH_MAX_FILES = 256;
+const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
 
 /** @typedef {import('@zip.js/zip.js').Entry|{filename: string}} TermBankSourceFile */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}} CompressedTermBankSource */
+
+/** @typedef {{promises: Promise<Uint8Array>[], estimatedByteLengths: number[], readAll: () => Promise<Uint8Array[]>}} DeferredTermBankSourceBatch */
 
 /** Reads validated raw payloads directly from the already-owned source ZIP. */
 export class RawZipPayloadReader {
@@ -51,6 +58,25 @@ export class RawZipPayloadReader {
         const size = archiveContent instanceof Blob ? archiveContent.size : archiveContent.byteLength;
         return Number.isSafeInteger(size) && size >= ZIP_LOCAL_FILE_HEADER_LENGTH &&
         (archiveContent instanceof Blob || size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES);
+    }
+
+    /** @returns {boolean} */
+    supportsBatchReads() {
+        return this.supportsCachedBatchReads() || (
+            this._archiveContent instanceof Blob &&
+            this._archiveContent.size > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES
+        );
+    }
+
+    /**
+     * Automatic media batching must not materialize a previously unread Blob.
+     * Owned buffers and the small archive cache populated by term reads are free
+     * to reuse; large Blobs retain their existing ranged-read/prefetch policy.
+     * @returns {boolean}
+     */
+    supportsCachedBatchReads() {
+        if (!(this._archiveContent instanceof Blob)) { return true; }
+        return this._archiveContent.size <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES && this._archiveBytesPromise !== null;
     }
 
     /**
@@ -117,6 +143,138 @@ export class RawZipPayloadReader {
     }
 
     /**
+     * Reads nearby ZIP entries through a bounded number of coalesced archive
+     * ranges. The returned byte arrays own their storage and preserve the
+     * source metadata needed by the native inflater.
+     * @param {TermBankSourceFile[]} files
+     * @param {AbortSignal} [signal]
+     * @param {() => boolean} [isCancelled]
+     * @returns {Promise<{sources: Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>, rangeReadCount: number, rangeReadBytes: number}|null>}
+     */
+    async readBatch(files, signal = new AbortController().signal, isCancelled = () => false) {
+        if (!Array.isArray(files) || files.length === 0) { return {sources: [], rangeReadCount: 0, rangeReadBytes: 0}; }
+        if (files.length > RAW_ZIP_BATCH_MAX_FILES) { return null; }
+        const archiveSize = this._archiveContent instanceof Blob ? this._archiveContent.size : this._archiveContent.byteLength;
+        /** @type {Array<{file: TermBankSourceFile, offset: number, rawFilename: Uint8Array, compressedSize: number, uncompressedSize: number, compressionMethod: 0|8, signature: number, filename: string}>} */
+        const entries = [];
+        let compressedBytes = 0;
+        let uncompressedBytes = 0;
+        for (const file of files) {
+            const offset = /** @type {unknown} */ (Reflect.get(file, 'offset'));
+            const compressedSize = /** @type {unknown} */ (Reflect.get(file, 'compressedSize'));
+            const uncompressedSize = /** @type {unknown} */ (Reflect.get(file, 'uncompressedSize'));
+            const compressionMethod = /** @type {unknown} */ (Reflect.get(file, 'compressionMethod'));
+            const signature = /** @type {unknown} */ (Reflect.get(file, 'signature'));
+            const rawFilename = /** @type {unknown} */ (Reflect.get(file, 'rawFilename'));
+            if (
+                typeof offset !== 'number' || !Number.isSafeInteger(offset) || offset < 0 ||
+                typeof compressedSize !== 'number' || !Number.isSafeInteger(compressedSize) || compressedSize < 0 ||
+                typeof uncompressedSize !== 'number' || !Number.isSafeInteger(uncompressedSize) || uncompressedSize < 0 ||
+                (compressionMethod !== 0 && compressionMethod !== 8) ||
+                typeof signature !== 'number' || !Number.isInteger(signature) || signature < 0 || signature > 0xffffffff ||
+                !(rawFilename instanceof Uint8Array) || rawFilename.byteLength === 0 || rawFilename.byteLength > 0xffff ||
+                typeof file.filename !== 'string' || offset > archiveSize - ZIP_LOCAL_FILE_HEADER_LENGTH
+            ) {
+                return null;
+            }
+            compressedBytes += compressedSize;
+            uncompressedBytes += uncompressedSize;
+            if (compressedBytes > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES || uncompressedBytes > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES) { return null; }
+            entries.push({file, offset, rawFilename, compressedSize, uncompressedSize, compressionMethod, signature, filename: file.filename});
+        }
+
+        entries.sort((a, b) => a.offset - b.offset);
+        /** @type {Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>} */
+        const result = [];
+        let rangeReadCount = 0;
+        let rangeReadBytes = 0;
+        for (let startIndex = 0; startIndex < entries.length;) {
+            signal.throwIfAborted();
+            if (isCancelled()) { throw new Error('Dictionary import was cancelled'); }
+            const first = entries[startIndex];
+            const firstOffset = first.offset;
+            let endIndex = startIndex;
+            let rangeEnd = firstOffset;
+            while (endIndex < entries.length) {
+                const entry = entries[endIndex];
+                // The local name must match the known central name. Only the
+                // extra field needs its maximum legal size in this read bound.
+                const entryUpperLength = ZIP_LOCAL_FILE_HEADER_LENGTH + entry.rawFilename.byteLength + 0xffff + entry.compressedSize;
+                const entryUpperEnd = entry.offset + Math.min(archiveSize - entry.offset, entryUpperLength);
+                const rangeLength = Math.min(archiveSize, entryUpperEnd) - firstOffset;
+                const gap = endIndex === startIndex ? 0 : entry.offset - rangeEnd;
+                if (
+                    endIndex > startIndex &&
+                    (gap > RAW_ZIP_BATCH_MAX_GAP_BYTES || rangeLength > RAW_ZIP_BATCH_MAX_RANGE_BYTES)
+                ) {
+                    break;
+                }
+                if (rangeLength > RAW_ZIP_BATCH_MAX_RANGE_BYTES) {
+                    // Decline rather than allocate beyond the range budget.
+                    return null;
+                }
+                rangeEnd = Math.max(rangeEnd, entryUpperEnd);
+                ++endIndex;
+            }
+            const boundedEnd = Math.min(archiveSize, rangeEnd);
+            const rangeLength = boundedEnd - firstOffset;
+            const bytes = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES ?
+                await this._readBlobRange(firstOffset, rangeLength, signal) :
+                (await this._getArchiveBytes()).subarray(firstOffset, boundedEnd);
+            signal.throwIfAborted();
+            ++rangeReadCount;
+            rangeReadBytes += rangeLength;
+            if (isCancelled()) { throw new Error('Dictionary import was cancelled'); }
+            const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+            for (let i = startIndex; i < endIndex; ++i) {
+                const entry = entries[i];
+                const headerOffset = entry.offset - firstOffset;
+                if (headerOffset < 0 || headerOffset > bytes.byteLength - ZIP_LOCAL_FILE_HEADER_LENGTH || view.getUint32(headerOffset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
+                    throw new Error(`Raw ZIP local header is invalid for '${entry.filename}'`);
+                }
+                const localFlags = view.getUint16(headerOffset + 6, true);
+                const localCompressionMethod = view.getUint16(headerOffset + 8, true);
+                if ((localFlags & 0x1) !== 0 || localCompressionMethod !== entry.compressionMethod) {
+                    throw new Error(`Raw ZIP local header disagrees with central metadata for '${entry.filename}'`);
+                }
+                const filenameLength = view.getUint16(headerOffset + 26, true);
+                const extraFieldLength = view.getUint16(headerOffset + 28, true);
+                const {rawFilename} = entry;
+                if (filenameLength !== rawFilename.byteLength) {
+                    throw new Error(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
+                }
+                const localFilenameOffset = headerOffset + ZIP_LOCAL_FILE_HEADER_LENGTH;
+                const dataOffset = localFilenameOffset + filenameLength + extraFieldLength;
+                const payloadEnd = dataOffset + entry.compressedSize;
+                const absoluteDataOffset = entry.offset + ZIP_LOCAL_FILE_HEADER_LENGTH + filenameLength + extraFieldLength;
+                if (
+                    !Number.isSafeInteger(payloadEnd) || payloadEnd > bytes.byteLength ||
+                    !Number.isSafeInteger(absoluteDataOffset) || absoluteDataOffset > archiveSize ||
+                    entry.compressedSize > archiveSize - absoluteDataOffset
+                ) {
+                    throw new Error(`Raw ZIP payload is out of bounds for '${entry.filename}'`);
+                }
+                for (let j = 0; j < filenameLength; ++j) {
+                    if (bytes[localFilenameOffset + j] !== rawFilename[j]) {
+                        throw new Error(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
+                    }
+                }
+                result.push({
+                    file: entry.file,
+                    bytes: Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
+                    compressionMethod: entry.compressionMethod,
+                    compressedSize: entry.compressedSize,
+                    uncompressedSize: entry.uncompressedSize,
+                    signature: entry.signature,
+                    filename: entry.filename,
+                });
+            }
+            startIndex = endIndex;
+        }
+        return {sources: result, rangeReadCount, rangeReadBytes};
+    }
+
+    /**
      * Blob.arrayBuffer cannot be interrupted. Join its completion and check
      * cancellation before exposing bytes or starting the next bounded read.
      * @param {number} offset
@@ -142,15 +300,15 @@ export class RawZipPayloadReader {
 }
 
 /** Owns entry-identity-keyed, independently abortable ZIP reads. */
-/** @template T */
+/** @template T @template [File=TermBankSourceFile] */
 export class AbortableZipReadPool {
     /**
-     * @param {(file: TermBankSourceFile, signal: AbortSignal) => Promise<T>} read
+     * @param {(file: File, signal: AbortSignal) => Promise<T>} read
      */
     constructor(read) {
-        /** @type {(file: TermBankSourceFile, signal: AbortSignal) => Promise<T>} */
+        /** @type {(file: File, signal: AbortSignal) => Promise<T>} */
         this._read = read;
-        /** @type {Map<TermBankSourceFile, {promise: Promise<T>, abortController: AbortController}>} */
+        /** @type {Map<File, {promise: Promise<T>, abortController: AbortController}>} */
         this._reads = new Map();
         // Cache eviction does not end a read's lifetime. In particular, a
         // released Blob read can still be running when disposal begins.
@@ -165,7 +323,7 @@ export class AbortableZipReadPool {
     }
 
     /**
-     * @param {TermBankSourceFile} file
+     * @param {File} file
      * @returns {Promise<T>}
      * @throws {Error} If the pool has been disposed.
      */
@@ -195,7 +353,7 @@ export class AbortableZipReadPool {
     }
 
     /**
-     * @param {TermBankSourceFile} file
+     * @param {File} file
      */
     release(file) {
         this._reads.delete(file);
@@ -340,30 +498,81 @@ export class TermBankSourcePipeline {
 
     /**
      * @param {TermBankSourceFile[]} batch
-     * @returns {Promise<Uint8Array|Uint8Array[]|{promises: Promise<Uint8Array>[], estimatedByteLengths: number[]}|null>}
+     * @param {() => void} [checkCancellation]
+     * @returns {Promise<Uint8Array|Uint8Array[]|DeferredTermBankSourceBatch|null>}
      */
-    async readBatch(batch) {
+    async readBatch(batch, checkCancellation) {
         if (batch.length <= 1) {
-            return batch.length === 1 && this.canPrefetch(batch[0]) ? await this._readPool.read(batch[0]) : null;
+            return batch.length === 1 && this.canPrefetch(batch[0]) ? await this.read(batch[0], checkCancellation) : null;
         }
         const promises = batch.map((candidate) => this._readPool.read(candidate));
         const estimatedByteLengths = batch.map((candidate) => {
             const uncompressedSize = /** @type {unknown} */ (Reflect.get(candidate, 'uncompressedSize'));
             return typeof uncompressedSize === 'number' && Number.isSafeInteger(uncompressedSize) && uncompressedSize > 0 ? uncompressedSize : 0;
         });
+        // Parallel parsing owns cancellation after accepting the deferred plan.
+        // Its fallback must take ownership only if that parser declines the job.
+        const readAll = () => {
+            const reads = Promise.all(promises);
+            return typeof checkCancellation === 'function' ? this._awaitRead(reads, checkCancellation) : reads;
+        };
         if (batch.length >= 4 && estimatedByteLengths.every((length) => length > 0)) {
-            return {promises, estimatedByteLengths};
+            return {promises, estimatedByteLengths, readAll};
         }
-        const byteArrays = await Promise.all(promises);
+        const byteArrays = await readAll();
         return byteArrays.every((bytes) => this._getJsonArrayContentSpan(bytes) !== null) ? byteArrays : null;
     }
 
     /**
      * @param {TermBankSourceFile} file
+     * @param {() => void} [checkCancellation]
      * @returns {Promise<Uint8Array>}
      */
-    read(file) {
-        return this._readPool.read(file);
+    read(file, checkCancellation) {
+        const promise = this._readPool.read(file);
+        return typeof checkCancellation === 'function' ? this._awaitRead(promise, checkCancellation) : promise;
+    }
+
+    /**
+     * Serial source reads have no parser job polling cancellation yet. Abort
+     * their owned reads and join decoder cleanup before returning the failure.
+     * Deferred parallel plans retain their existing parser cancellation owner.
+     * @template T
+     * @param {Promise<T>} promise
+     * @param {() => void} checkCancellation
+     * @returns {Promise<T>}
+     */
+    async _awaitRead(promise, checkCancellation) {
+        const cancellation = {
+            active: false,
+            error: /** @type {unknown} */ (void 0),
+            join: /** @type {Promise<void>|null} */ (null),
+        };
+        const poll = () => {
+            if (cancellation.active) { return; }
+            try {
+                checkCancellation();
+            } catch (error) {
+                cancellation.active = true;
+                cancellation.error = error;
+                cancellation.join = this.abortAndJoin();
+                void cancellation.join.catch(() => {});
+            }
+        };
+        const timer = setInterval(poll, SOURCE_READ_CANCELLATION_POLL_MS);
+        try {
+            poll();
+            const result = await promise;
+            poll();
+            if (cancellation.active) { throw cancellation.error; }
+            return result;
+        } catch (error) {
+            if (!cancellation.active) { throw error; }
+            if (cancellation.join !== null) { await cancellation.join; }
+            throw cancellation.error;
+        } finally {
+            clearInterval(timer);
+        }
     }
 
     /**

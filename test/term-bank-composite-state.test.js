@@ -132,6 +132,41 @@ describe('composite parser state transitions', () => {
         }
     })
 
+    test.each([
+        {json: '["first","image","last"]', flags: [1, 0, 0]},
+        {json: '["first", "image",\n"last"]', flags: [1, 1, 0]},
+        {json: '{"a":"first","b":"image","c":"last"}', flags: [1, 0, 0]},
+        {json: '{"a":"first" , "b":"image" ,\t"c":"last"}', flags: [1, 1, 0]},
+        {json: '[{"type":"text","text":"first","content":["a","b"]},"last"]', flags: [0, 1, 1]},
+        {json: '["comma,inside","quote\\"","image",{"image":"value","x":"last"}]', flags: [1, 0, 0]},
+        {json: '["\\u0069mage","last",["a","b"],{"a":"x","b":"y"}]', flags: [1, 0, 0]},
+    ])('preserves string-value comma transitions and hints: $json', ({json, flags}) => {
+        const result = parseGlossary(json)
+        expect(result.count).toBe(1)
+        expect(result.metadata.slice(14)).toEqual(flags)
+        const withoutMediaHints = parseGlossary(json, false)
+        expect(withoutMediaHints.count).toBe(1)
+        expect(withoutMediaHints.metadata.slice(14)).toEqual([0, ...flags.slice(1)])
+    })
+
+    test.each([
+        '["image",]',
+        '["image",,"last"]',
+        '["image",:"last"]',
+        '["image","last" "extra"]',
+        '{"a":"image",}',
+        '{"a":"image",,"b":"last"}',
+        '{"a":"image",:"b"}',
+        '{"a","image"}',
+        '{"image","a":"last"}',
+        '{"a":"image","b","last"}',
+        '["image", {"a","last"}]',
+        '["image",\n]',
+    ])('rejects malformed delimiters after strings: %s', (json) => {
+        expect(parseGlossary(json).count).toBeLessThan(0)
+        expect(parseGlossary(json, false).count).toBeLessThan(0)
+    })
+
     test('matches JSON validity for deterministic mutations of nested values', () => {
         let seed = 0x315ca7e1
         const random = () => {

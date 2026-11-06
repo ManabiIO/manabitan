@@ -24,6 +24,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parseArgs} from 'node:util';
 import {chromium} from 'playwright';
+import {getChromiumLaunchOptions} from '../../test/e2e/chromium-launch-options.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const {values} = parseArgs({options: {
@@ -55,7 +56,7 @@ const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const styles = ['material.css', 'display.css', 'display-pronunciation.css', 'structured-content.css'];
 const styleHashes = {};
 for (const name of styles) { Reflect.set(styleHashes, name, hash(await readFile(path.join(root, 'ext/css', name)))); }
-const browser = await chromium.launch({headless: true, args: process.platform === 'darwin' ? ['--disable-features=MacAppCodeSignClone'] : []});
+const browser = await chromium.launch(getChromiumLaunchOptions({headless: true}));
 const results = [];
 let context;
 try {

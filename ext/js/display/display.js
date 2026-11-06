@@ -20,6 +20,7 @@ import {findJapaneseSearch} from '../search/japanese-search.js';
 import {ThemeController} from '../app/theme-controller.js';
 import {FrameEndpoint} from '../comm/frame-endpoint.js';
 import {extendApiMap, invokeApiMapHandler} from '../core/api-map.js';
+import {isDictionaryImportBusyError} from '../core/dictionary-import-busy-error.js';
 import {DynamicProperty} from '../core/dynamic-property.js';
 import {EventDispatcher} from '../core/event-dispatcher.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
@@ -232,6 +233,8 @@ export class Display extends EventDispatcher {
         this._dictionaryInfo = [];
         /** @type {number} */
         this._dictionaryInfoRefreshGeneration = 0;
+        /** @type {boolean} */
+        this._dictionaryInfoRefreshPending = false;
 
         /* eslint-disable @stylistic/no-multi-spaces */
         this._hotkeyHandler.registerActions([
@@ -361,8 +364,6 @@ export class Display extends EventDispatcher {
 
         this._languageSummaries = await this._application.api.getLanguageSummaries();
 
-        await this._refreshDictionaryInfo();
-
         // Prepare
         await this._hotkeyHelpController.prepare(this._application.api);
         await this._displayGenerator.prepare();
@@ -402,6 +403,15 @@ export class Display extends EventDispatcher {
         }
         if (this._navigationNextButton !== null) {
             this._navigationNextButton.addEventListener('click', this._onNextTermView.bind(this), false);
+        }
+
+        // Install refresh listeners before the first metadata read so an import
+        // completing during preparation cannot leave this display stale.
+        try {
+            await this._refreshDictionaryInfo();
+        } catch (error) {
+            if (!isDictionaryImportBusyError(error)) { throw error; }
+            // Metadata is temporarily unavailable; databaseUpdated will retry.
         }
     }
 
@@ -1711,6 +1721,17 @@ export class Display extends EventDispatcher {
             this._replaceHistoryStateNoNavigate(state, content);
         }
 
+        // A failed/cancelled import may publish no update event. Recover only
+        // deferred metadata for actual results; ordinary misses stay cheap.
+        if (this._dictionaryInfoRefreshPending && dictionaryEntries.length > 0) {
+            try {
+                await this._refreshDictionaryInfo();
+            } catch (error) {
+                if (!isDictionaryImportBusyError(error)) { throw error; }
+            }
+            if (this._setContentToken !== token) { return; }
+        }
+
         this._dictionaryEntries = dictionaryEntries;
 
         safePerformance.mark('display:updateNavigationAuto:start');
@@ -2607,9 +2628,18 @@ export class Display extends EventDispatcher {
      */
     async _refreshDictionaryInfo() {
         const refreshGeneration = ++this._dictionaryInfoRefreshGeneration;
-        const dictionaryInfo = await this._application.api.getDictionaryInfo();
+        let dictionaryInfo;
+        try {
+            dictionaryInfo = await this._application.api.getDictionaryInfo();
+        } catch (error) {
+            if (refreshGeneration === this._dictionaryInfoRefreshGeneration && isDictionaryImportBusyError(error)) {
+                this._dictionaryInfoRefreshPending = true;
+            }
+            throw error;
+        }
         if (refreshGeneration !== this._dictionaryInfoRefreshGeneration) { return; }
         this._dictionaryInfo = dictionaryInfo;
+        this._dictionaryInfoRefreshPending = false;
     }
 
     /**

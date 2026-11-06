@@ -77,17 +77,27 @@ export class DictionaryWorkerClient {
         this._createWorker();
     }
 
-    /** @returns {void} */
+    /**
+     * @returns {void}
+     * @throws {unknown} If worker construction or listener setup fails.
+     */
     _createWorker() {
         const worker = new Worker(this._workerPath, {type: 'module'});
+        try {
+            /** @type {(event: MessageEvent<{id?: number, result?: unknown, error?: import('core').SerializedError}>) => void} */
+            const onMessage = (event) => { this._onMessage(worker, event); };
+            worker.addEventListener('message', onMessage);
+            worker.addEventListener('messageerror', (event) => { this._onMessageError(worker, event); });
+            worker.addEventListener('error', (event) => { this._onError(worker, event); });
+        } catch (error) {
+            try { worker.terminate(); } catch (_) { /* Preserve the setup failure. */ }
+            throw error;
+        }
+        // Publish only a fully configured owner. Failed recreation must leave
+        // the prior fatal state intact so the next independent request retries.
         this._worker = worker;
         this._fatalError = null;
         ++this._generation;
-        /** @type {(event: MessageEvent<{id?: number, result?: unknown, error?: import('core').SerializedError}>) => void} */
-        const onMessage = (event) => { this._onMessage(worker, event); };
-        worker.addEventListener('message', onMessage);
-        worker.addEventListener('messageerror', (event) => { this._onMessageError(worker, event); });
-        worker.addEventListener('error', (event) => { this._onError(worker, event); });
     }
 
     /**

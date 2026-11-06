@@ -992,7 +992,7 @@ export function getDictionaryEntryMedia(dictionaryEntry) {
     const media = [];
     const definitions = dictionaryEntry.definitions;
     for (const definition of definitions) {
-        const paths = [...new Set(findAllPaths(definition))];
+        const paths = [...new Set(findImagePaths(definition.entries))];
         for (const path of paths) {
             media.push({dictionary: definition.dictionary, path: path, type: 'dictionaryMedia'});
         }
@@ -1001,14 +1001,34 @@ export function getDictionaryEntryMedia(dictionaryEntry) {
 }
 
 /**
- * Extracts all values of json keys named `path` which contain a string value.
- * Example json snippet containing a path:
- * ...","path":"example-dictionary/svg/example-media.svg","...
- * The path can be found in many different positions in the structure of the definition json.
- * It is most reliable to flatten it to a string and use regex.
- * @param {object} obj
- * @returns {Array<string>}
+ * Collect image paths from supported glossary nodes without JSON escaping or
+ * interpreting unrelated data attributes as media requirements.
+ * @param {import('dictionary-data').TermGlossaryContent[]} glossary
+ * @returns {string[]}
  */
-function findAllPaths(obj) {
-    return JSON.stringify(obj).match(/(?<="path":").*?(?=")/g) ?? [];
+function findImagePaths(glossary) {
+    /** @type {string[]} */
+    const paths = [];
+    for (const entry of glossary) {
+        if (typeof entry !== 'object' || entry === null) { continue; }
+        if (entry.type === 'image') {
+            paths.push(entry.path);
+            continue;
+        }
+        if (entry.type !== 'structured-content') { continue; }
+        /** @type {import('structured-content').Content[]} */
+        const pending = [entry.content];
+        while (pending.length > 0) {
+            const content = pending.pop();
+            if (typeof content !== 'object' || content === null) { continue; }
+            if (Array.isArray(content)) {
+                for (let i = content.length - 1; i >= 0; --i) { pending.push(content[i]); }
+            } else if (content.tag === 'img') {
+                paths.push(content.path);
+            } else if (typeof content.content !== 'undefined') {
+                pending.push(content.content);
+            }
+        }
+    }
+    return paths;
 }

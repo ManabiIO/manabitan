@@ -21,7 +21,7 @@ import {
     encodeRawTermContentSharedGlossaryBinary,
     RAW_TERM_CONTENT_SHARED_GLOSSARY_DICT_NAME,
 } from '../ext/js/dictionary/raw-term-content.js';
-import {hashTermEntryContentBytes} from '../ext/js/dictionary/term-entry-content-hash.js';
+import {hashTermEntryContentBytes, hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 
 /**
@@ -74,9 +74,10 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
  * @param {number} length
  * @param {number} hash1
  * @param {number} hash2
+ * @param {{indexes: Int32Array, active: boolean}|null} [stagedMetadata]
  * @returns {{staged: {indexes: Int32Array, active: boolean}, meta: TermContentMeta}}
  */
-function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2) {
+function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2, stagedMetadata = null) {
     const spans = {
         buffer: source,
         offsets: new Uint32Array([sourceOffset]),
@@ -84,7 +85,7 @@ function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2) {
     };
     const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
     const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
-    const staged = stage([hash1], [hash2], [], spans);
+    const staged = stagedMetadata ?? stage([hash1], [hash2], [], spans);
     publish({
         count: 1,
         contentOffsets: new Float64Array(1),
@@ -286,6 +287,54 @@ describe('DictionaryDatabase term content hash validation', () => {
 });
 
 describe('DictionaryDatabase term content dedup metadata cache', () => {
+    test.each(['stage', 'reserve', 'fast'].flatMap((writer) => (
+        Array.from({length: 5}, (_, length) => ({writer, length}))
+    )))('bounds $writer signatures to a logical slab span of length $length', async ({writer, length}) => {
+        const database = new DictionaryDatabase();
+        const contentBytes = Uint8Array.from({length}, (_, i) => i + 1);
+        const source = Uint8Array.of(90, ...contentBytes, 91, 92, 93, 94);
+        const [hash1, hash2] = hashTermEntryContentBytesPair(contentBytes);
+        const spans = {buffer: source, offsets: Uint32Array.of(1), lengths: Uint32Array.of(length)};
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const reserve = Reflect.get(database, '_reserveArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').call(database, 1);
+        if (writer === 'fast') {
+            const dictNameId = Reflect.get(database, '_internTermEntryContentMetaDictName').call(database, 'raw');
+            Reflect.get(database, '_insertTermEntryContentMetaByHashPairFast').call(database, hash1, hash2, 1000, length, 'raw', dictNameId, source, 1);
+        } else {
+            const reserveMetadata = () => (writer === 'stage' ?
+                stage([hash1], [hash2], [], spans) :
+                {indexes: Int32Array.of(reserve(hash1, hash2, source, 1, length)), active: true});
+            const staged = reserveMetadata();
+            expect(getMeta(database, hash1, hash2)).toBeUndefined();
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+            rollback(staged);
+            expect(getMeta(database, hash1, hash2)).toBeUndefined();
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+            const retried = reserveMetadata();
+            expect(retried.indexes[0]).toBe(staged.indexes[0]);
+            publishSlabMeta(database, source, 1, length, hash1, hash2, retried);
+        }
+        const meta = getMeta(database, hash1, hash2);
+        if (typeof meta === 'undefined') { throw new Error('Expected published term content metadata'); }
+        const expectedSignature = contentBytes.reduce((value, byte, i) => value | (byte << (i * 8)), 0) >>> 0;
+        expect(meta).toMatchObject({
+            length,
+            signature1: expectedSignature,
+            signature2: expectedSignature,
+            signature3: expectedSignature,
+        });
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
+        const readStorage = vi.fn(async () => [{status: 'ok', bytes: Uint8Array.from(contentBytes)}]);
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+        const [result] = await findBatch([{hash1, hash2, contentBytes, primary: meta}]);
+        expect(result.existingMeta).toEqual(meta);
+        expect(result.exactFallback).toBe(true);
+    });
+
     test('owns recent published source bytes across borrowed slab reuse', async () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array([90, 1, 2, 3, 4, 91]);
@@ -353,6 +402,78 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(result.recentSourceHit).toBe(true);
         expect(readStorage).not.toHaveBeenCalled();
     });
+
+    test.each(Array.from({length: 13}, (_, i) => i + 1))(
+        'retains coherent metadata when dense allocation %i fails and permits retry',
+        async (failureIndex) => {
+            const database = new DictionaryDatabase();
+            const source = new Uint8Array([1, 2, 3, 4]);
+            const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
+            const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+            const pending = stage([30], [40], [source], null);
+            const tableNames = [
+                '_termEntryContentMetaHash1Table',
+                '_termEntryContentMetaHash2Table',
+                '_termEntryContentMetaStateTable',
+                '_termEntryContentMetaIdTable',
+                '_termEntryContentMetaOffsetTable',
+                '_termEntryContentMetaLengthTable',
+                '_termEntryContentMetaDictNameIdTable',
+                '_termEntryContentMetaSignaturePresentTable',
+                '_termEntryContentMetaSignature1Table',
+                '_termEntryContentMetaSignature2Table',
+                '_termEntryContentMetaSignature3Table',
+                '_termEntryContentMetaRecentSourceBatchIdTable',
+                '_termEntryContentMetaRecentSourceOffsetTable',
+            ];
+            const originalTables = tableNames.map((name) => Reflect.get(database, name));
+            const originalValues = originalTables.map((table) => [...table]);
+            const grow = Reflect.get(database, '_ensureTermEntryContentMetaDenseCapacity').bind(database);
+            const failure = new RangeError('injected metadata allocation failure');
+            let allocationCount = 0;
+            for (const name of /** @type {const} */ (['Uint8Array', 'Uint32Array', 'Float64Array'])) {
+                vi.stubGlobal(name, new Proxy(globalThis[name], {
+                    construct(target, args, newTarget) {
+                        if (++allocationCount === failureIndex) { throw failure; }
+                        return Reflect.construct(target, args, newTarget);
+                    },
+                }));
+            }
+            try {
+                expect(() => grow(4096)).toThrow(failure);
+            } finally {
+                vi.unstubAllGlobals();
+            }
+            for (let i = 0; i < tableNames.length; ++i) {
+                expect(Reflect.get(database, tableNames[i])).toBe(originalTables[i]);
+                expect([...originalTables[i]]).toEqual(originalValues[i]);
+            }
+            expect(getMeta(database, 10, 20)).toEqual(meta);
+            expect(getMeta(database, 30, 40)).toBeUndefined();
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+
+            // The failed grow must not suppress a retry because one published
+            // vector already advertises the new capacity.
+            grow(4096);
+            for (let i = 0; i < tableNames.length; ++i) {
+                const table = Reflect.get(database, tableNames[i]);
+                expect(table.length).toBe(4096);
+                expect([...table.subarray(0, originalTables[i].length)]).toEqual(originalValues[i]);
+            }
+            const readStorage = vi.fn();
+            Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+            const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+            const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: source, primary: meta}]);
+            expect(result.recentSourceHit).toBe(true);
+            expect(readStorage).not.toHaveBeenCalled();
+            Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, pending);
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+            expect(getMeta(database, 10, 20)).toEqual(meta);
+            expect(getMeta(database, 30, 40)).toBeUndefined();
+            const retried = stage([30], [40], [source], null);
+            expect(retried.indexes[0]).toBe(pending.indexes[0]);
+        },
+    );
 
     test('reports recent source hits from canonical plan deduplication', async () => {
         const database = new DictionaryDatabase();
@@ -839,6 +960,55 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             length: contentBytes.byteLength,
             dictName: 'raw',
         });
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
+    });
+
+    test('retains colliding published keys through free-ID reuse and pending rehash rollback', () => {
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_getTermEntryContentMetaHashPairSlot', () => 0);
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const ensureCapacity = Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').bind(database);
+        const bytes = new Uint8Array([1, 2, 3]);
+        for (const key of [10, 20, 30]) { cacheMeta(database, null, key * 100, 3, 'raw', key, key + 1); }
+        const abandoned = stage([40, 50], [41, 51], [bytes, bytes], null);
+        rollback(abandoned);
+        const staged = stage([60], [61], [bytes], null);
+        expect([...abandoned.indexes]).toContain(staged.indexes[0]);
+
+        ensureCapacity(128);
+        for (const key of [10, 20, 30]) {
+            expect(getMeta(database, key, key + 1)).toMatchObject({offset: key * 100, length: 3});
+        }
+        for (const key of [40, 50, 60]) { expect(getMeta(database, key, key + 1)).toBeUndefined(); }
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+        rollback(staged);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        for (const key of [10, 20, 30]) {
+            expect(getMeta(database, key, key + 1)).toMatchObject({offset: key * 100, length: 3});
+        }
+        publishSlabMeta(database, bytes, 0, 3, 60, 61);
+        ensureCapacity(128);
+        expect(getMeta(database, 60, 61)).toMatchObject({offset: 1060, length: 3});
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(4);
+    });
+
+    test('rehashes a sparse arena after a large reservation is rolled back', () => {
+        const database = new DictionaryDatabase();
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const ensureCapacity = Reflect.get(database, '_ensureTermEntryContentMetaHashPairCapacity').bind(database);
+        const bytes = new Uint8Array([1, 2, 3]);
+        const hashes = Array.from({length: 200}, (_, i) => i + 1);
+        const abandoned = stage(hashes, hashes, hashes.map(() => bytes), null);
+        rollback(abandoned);
+        const slots = Reflect.get(database, '_termEntryContentMetaHashPairTable');
+        expect(Reflect.get(database, '_termEntryContentMetaDenseCount')).toBeGreaterThan(slots.length);
+        publishSlabMeta(database, bytes, 0, 3, 1001, 1002);
+        ensureCapacity(128);
+        expect(getMeta(database, 1001, 1002)).toMatchObject({offset: 2001, length: 3});
+        for (const hash of hashes) { expect(getMeta(database, hash, hash)).toBeUndefined(); }
         expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
         expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
     });
@@ -1802,6 +1972,60 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(result.pendingContentCount).toBe(0);
     });
 
+    test.each([false, true])('keeps unsigned pending hashes bounded and owned with allResolved=%s', async (allResolved) => {
+        const database = new DictionaryDatabase();
+        const resolve = Reflect.get(database, '_resolveArtifactTermContentDedup').bind(database);
+        const plan = {
+            uniqueCount: 3,
+            sourceRowCount: 3,
+            uniqueRowIndexes: new Uint32Array([0, 1, 2]),
+            resolvedFlags: new Uint8Array([1, allResolved ? 1 : 0, 1]),
+            resolvedOffsets: new Float64Array([100, 200, 300]),
+            resolvedLengths: new Uint32Array([1, 1, 1]),
+            resolvedDictNames: ['raw-v6', 'raw-v6', 'raw-v6'],
+            pendingEpochs: new Uint32Array(3),
+            pendingIndexes: new Uint32Array(3),
+            nextEpoch: 1,
+            persistedLookupRequired: true,
+        };
+        const contentMetaList = new Uint32Array([0, 1, 1, 2, 1, 1, 0x80000000, 0xffffffff, 2, 1, 3, 4]);
+        const chunk = {
+            rowCount: 3,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: new Uint8Array([9, 8, 7]),
+            contentBytesBaseOffset: 0,
+            contentMetaList,
+            contentUniqueIndexList: new Uint32Array([0, 1, 2]),
+            contentDedupPlan: plan,
+            contentDictNameList: null,
+            uniformContentDictName: 'raw-v6',
+        };
+        const result = await resolve(chunk, true);
+        const {pendingContentHash1s: first, pendingContentHash2s: second} = result;
+        if (!(first instanceof Uint32Array) || !(second instanceof Uint32Array)) {
+            throw new Error('Expected bounded canonical hash buffers');
+        }
+        expect([...first]).toEqual(allResolved ? [] : [0x80000000]);
+        expect([...second]).toEqual(allResolved ? [] : [0xffffffff]);
+        expect(result.pendingContentCount).toBe(allResolved ? 0 : 1);
+        expect(first.buffer.byteLength).toBe(allResolved ? 0 : 12);
+        expect(second.buffer.byteLength).toBe(allResolved ? 0 : 12);
+        if (!allResolved) {
+            if (typeof result.stagedContentMetadata === 'undefined') { throw new Error('Expected staged metadata ownership'); }
+            Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, result.stagedContentMetadata);
+            contentMetaList[6] = 0xffffffff;
+            contentMetaList[7] = 0;
+            const next = await resolve(chunk, true);
+            expect([...next.pendingContentHash1s]).toEqual([0xffffffff]);
+            expect([...next.pendingContentHash2s]).toEqual([0]);
+            expect([...first]).toEqual([0x80000000]);
+            expect([...second]).toEqual([0xffffffff]);
+        }
+    });
+
     test('preserves unique-content mapping when an exact candidate is a hash collision', async () => {
         const database = new DictionaryDatabase();
         const persisted = new Uint8Array([1, 2, 3]);
@@ -1847,8 +2071,8 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         if (pendingContentSpans === null) { throw new Error('Expected pending content spans'); }
         expect([...pendingContentSpans.offsets]).toEqual([3, 0]);
         expect([...pendingContentSpans.lengths]).toEqual([3, 3]);
-        expect(result.pendingContentHash1s).toEqual([30, 10]);
-        expect(result.pendingContentHash2s).toEqual([40, 20]);
+        expect([...result.pendingContentHash1s]).toEqual([30, 10]);
+        expect([...result.pendingContentHash2s]).toEqual([40, 20]);
     });
 
     test('settles every concurrent exact comparison before reporting a failure', async () => {

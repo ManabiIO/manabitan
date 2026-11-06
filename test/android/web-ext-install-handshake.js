@@ -16,23 +16,26 @@ function delay(milliseconds) {
 /**
  * @param {import('node:child_process').ChildProcess} child
  * @param {NodeJS.Signals} signal
+ * @returns {boolean}
  */
 function signalProcessTree(child, signal) {
-    if (typeof child.pid !== 'number') { return; }
+    if (typeof child.pid !== 'number') { return false; }
     try {
         // `detached` gives the runner and any descendants a private process group.
         process.kill(-child.pid, signal);
+        return true;
     } catch (error) {
         if (/** @type {NodeJS.ErrnoException} */ (error).code !== 'ESRCH') {
-            try { child.kill(signal); } catch { /* The child may already have exited. */ }
+            try { return child.kill(signal); } catch { /* The child may already have exited. */ }
         }
+        return false;
     }
 }
 
 /**
  * @param {import('node:child_process').ChildProcess} child
  * @param {Promise<void>} closePromise
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} Whether cleanup requested SIGKILL before the runner exited.
  */
 async function stopProcessTree(child, closePromise) {
     signalProcessTree(child, 'SIGTERM');
@@ -44,10 +47,13 @@ async function stopProcessTree(child, closePromise) {
         // The group leader can exit while a descendant ignores SIGTERM and
         // keeps running. Reap any such runner descendants before returning.
         signalProcessTree(child, 'SIGKILL');
-        return;
+        return false;
     }
 
-    signalProcessTree(child, 'SIGKILL');
+    // Descendants can keep stdio open after the leader exits. Killing those
+    // descendants must not excuse an earlier, unexpected SIGKILL of the runner.
+    const runnerKillRequested = child.exitCode === null && child.signalCode === null;
+    const killSent = signalProcessTree(child, 'SIGKILL');
     const closedAfterKill = await Promise.race([
         closePromise.then(() => true),
         delay(3_000).then(() => false),
@@ -55,6 +61,7 @@ async function stopProcessTree(child, closePromise) {
     if (!closedAfterKill) {
         throw new Error('web-ext process tree did not shut down after SIGTERM and SIGKILL.');
     }
+    return runnerKillRequested && killSent;
 }
 
 /**
@@ -154,6 +161,7 @@ export async function runWebExtInstallHandshake({device, packageName, sourceDir,
 
     const deadline = Date.now() + timeoutMs;
     let runnerExitedBeforeCleanup = false;
+    let runnerKillRequested = false;
     /** @type {unknown} */
     let handshakeFailure;
     /** @type {unknown} */
@@ -206,7 +214,7 @@ export async function runWebExtInstallHandshake({device, packageName, sourceDir,
         // for stdio to close so a PASS cannot leave a runner holding the job open.
         runnerExitedBeforeCleanup = Boolean(exitState.value);
         try {
-            await stopProcessTree(child, closePromise);
+            runnerKillRequested = await stopProcessTree(child, closePromise);
         } catch (cleanupError) {
             cleanupFailure = cleanupError;
         }
@@ -214,7 +222,12 @@ export async function runWebExtInstallHandshake({device, packageName, sourceDir,
     if (handshakeFailure !== undefined) { throw handshakeFailure; }
     if (cleanupFailure !== undefined) { throw cleanupFailure; }
     if (processError) { throw processError; }
-    if (runnerExitedBeforeCleanup) {
+    // The exit event can arrive only while cleanup joins the child. A marker
+    // and a successful callback cannot turn that runner failure into a pass.
+    const exitSignal = exitState.value?.signal;
+    const runnerFailedDuringCleanup = (typeof exitState.value?.code === 'number' && exitState.value.code !== 0) ||
+    (typeof exitSignal === 'string' && exitSignal !== 'SIGTERM' && (exitSignal !== 'SIGKILL' || !runnerKillRequested));
+    if (runnerExitedBeforeCleanup || runnerFailedDuringCleanup) {
         throw new Error(`web-ext exited after reporting installation (code=${String(exitState.value?.code)} signal=${String(exitState.value?.signal)}).`);
     }
     if (!installAcknowledged) {

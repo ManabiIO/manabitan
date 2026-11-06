@@ -41,6 +41,8 @@ const OVERLAPPED_SOURCE_GROUP_COUNT = 1;
 const DEFAULT_PARALLEL_SOURCE_WORKER_COUNT = 2;
 const HIGH_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT = 5;
 const HIGH_CAPABILITY_MIN_HARDWARE_CONCURRENCY = 8;
+const MID_CAPABILITY_MIN_HARDWARE_CONCURRENCY = 4;
+const MID_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT = 3;
 const LOW_MEMORY_DEVICE_GIB = 4;
 const PLAIN_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 4;
 const MEDIA_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 3;
@@ -50,6 +52,8 @@ const PARALLEL_WORKER_PARSE_TIMEOUT_MS = 300_000;
 const PARALLEL_WORKER_CANCELLATION_POLL_MS = 25;
 const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
+const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
+const MAX_WASM_MEDIA_BATCH_SOURCES = 256;
 const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
@@ -59,7 +63,24 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/**
+ * Options shared by column parsing and its worker transport. Keep per-call
+ * preloaded WASM memory separate from the transferable worker options.
+ * @typedef {import('dictionary-importer').ImportExperiments & {
+ * initialContentBytesPerRow?: number,
+ * mediaHintFastScan?: boolean,
+ * validateGlossaryTypes?: boolean,
+ * maxPendingChunks?: number,
+ * computeContentHashes?: boolean,
+ * emitContentSlab?: boolean,
+ * emitTokenBinaryContent?: boolean,
+ * useNativeStringPlan?: boolean,
+ * emitTermByteLists?: boolean,
+ * singleChunk?: boolean,
+ * prepareLookupIndexes?: boolean,
+ * }} TermBankColumnParserOptions
+ */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
 /** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
@@ -132,6 +153,7 @@ async function getWasm() {
             typeof exports.wasm_get_last_parse_capacity !== 'function' ||
             typeof exports.wasm_get_last_content_capacity !== 'function' ||
             typeof exports.inflate_and_join_term_banks !== 'function' ||
+            typeof exports.inflate_zip_media_batch !== 'function' ||
             typeof exports.parse_term_bank !== 'function' ||
             typeof exports.parse_term_bank_with_media_hints !== 'function' ||
             typeof exports.parse_and_encode_term_bank_token_binary_dedup !== 'function' ||
@@ -151,6 +173,7 @@ async function getWasm() {
             wasm_get_last_parse_capacity: exports.wasm_get_last_parse_capacity,
             wasm_get_last_content_capacity: exports.wasm_get_last_content_capacity,
             inflate_and_join_term_banks: exports.inflate_and_join_term_banks,
+            inflate_zip_media_batch: exports.inflate_zip_media_batch,
             parse_term_bank: exports.parse_term_bank,
             parse_term_bank_with_media_hints: exports.parse_term_bank_with_media_hints,
             parse_and_encode_term_bank_token_binary_dedup: exports.parse_and_encode_term_bank_token_binary_dedup,
@@ -166,9 +189,9 @@ async function getWasm() {
 }
 
 /**
- * Inflates complete raw ZIP payloads into parser-owned storage, joined by
- * default or kept as independent banks by the span experiment. The allocation
- * stays valid only until the next parser WASM operation.
+ * Inflates complete raw ZIP payloads into parser-owned storage with independent
+ * bank boundaries. The allocation stays valid only until the next parser WASM
+ * operation.
  * @param {CompressedTermBankSource[]} sources
  * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Promise<PreloadedTermBankSource>}
@@ -210,7 +233,10 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'uncompressed term-bank length');
     const compressionMethodsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank compression method');
     const signaturesPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank CRC');
-    const bankSpansPtr = experiments.experimentalTermBankSpans ?
+    // Multiple source banks are independent JSON documents. Keep their bounds
+    // through inflation so the native cursor validates each bank separately.
+    const preserveBankBoundaries = sources.length > 1 || experiments.experimentalTermBankSpans;
+    const bankSpansPtr = preserveBankBoundaries ?
         allocateWasmBuffer(wasm, sources.length * 8, 'term-bank spans') :
 0;
     const outputCapacity = uncompressedBytes + 2;
@@ -245,7 +271,6 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
         outputPtr,
         outputCapacity,
         bankSpansPtr,
-        experiments.experimentalLibdeflate ? 1 : 0,
     );
     const inflateMs = Math.max(0, safePerformance.now() - startedAt);
     if (jsonLength < 0) {
@@ -273,6 +298,95 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
         compressedBytes,
         uncompressedBytes,
     };
+}
+
+/**
+ * Inflates a bounded ZIP media batch into independent, exact-length byte arrays.
+ * @param {CompressedTermBankSource[]} sources
+ * @returns {Promise<{sources: Uint8Array[], inflateMs: number, compressedBytes: number, uncompressedBytes: number}>}
+ */
+export async function inflateCompressedZipMediaBatchWasm(sources) {
+    if (!Array.isArray(sources) || sources.length === 0) {
+        throw new TypeError('Compressed ZIP media sources are empty');
+    }
+    if (sources.length > MAX_WASM_MEDIA_BATCH_SOURCES) {
+        throw new TermBankWasmResourceError('Compressed ZIP media batch exceeds its source count budget');
+    }
+    let compressedBytes = 0;
+    let uncompressedBytes = 0;
+    for (const [index, source] of sources.entries()) {
+        if (!isCompressedTermBankSource(source)) {
+            throw new TypeError(`Compressed ZIP media source ${index + 1} metadata is invalid`);
+        }
+        compressedBytes += source.compressedSize;
+        uncompressedBytes += source.uncompressedSize;
+    }
+    if (
+        !Number.isSafeInteger(compressedBytes) || compressedBytes > MAX_WASM_MEDIA_BATCH_BYTES ||
+        !Number.isSafeInteger(uncompressedBytes) || uncompressedBytes > MAX_WASM_MEDIA_BATCH_BYTES
+    ) {
+        throw new TermBankWasmResourceError('Compressed ZIP media batch exceeds its memory budget');
+    }
+
+    const wasm = await getWasm();
+    wasm.wasm_reset_heap();
+    const inputPtr = allocateWasmBuffer(wasm, compressedBytes, 'ZIP media input');
+    const inputOffsetsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media input offset');
+    const compressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media compressed length');
+    const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media uncompressed length');
+    const compressionMethodsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media compression method');
+    const signaturesPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media CRC');
+    const outputOffsetsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media output offset');
+    const outputPtr = allocateWasmBuffer(wasm, uncompressedBytes, 'ZIP media output');
+    const input = new Uint8Array(wasm.memory.buffer);
+    const inputOffsets = new Uint32Array(wasm.memory.buffer, inputOffsetsPtr, sources.length);
+    const compressedLengths = new Uint32Array(wasm.memory.buffer, compressedLengthsPtr, sources.length);
+    const uncompressedLengths = new Uint32Array(wasm.memory.buffer, uncompressedLengthsPtr, sources.length);
+    const compressionMethods = new Uint32Array(wasm.memory.buffer, compressionMethodsPtr, sources.length);
+    const signatures = new Uint32Array(wasm.memory.buffer, signaturesPtr, sources.length);
+    const outputOffsets = new Uint32Array(wasm.memory.buffer, outputOffsetsPtr, sources.length);
+    let inputOffset = 0;
+    for (let i = 0; i < sources.length; ++i) {
+        const source = sources[i];
+        input.set(source.bytes, inputPtr + inputOffset);
+        inputOffsets[i] = inputOffset;
+        compressedLengths[i] = source.compressedSize;
+        uncompressedLengths[i] = source.uncompressedSize;
+        compressionMethods[i] = source.compressionMethod;
+        signatures[i] = source.signature >>> 0;
+        inputOffset += source.compressedSize;
+    }
+    const startedAt = safePerformance.now();
+    const outputLength = wasm.inflate_zip_media_batch(
+        inputPtr,
+        compressedBytes,
+        inputOffsetsPtr,
+        compressedLengthsPtr,
+        uncompressedLengthsPtr,
+        compressionMethodsPtr,
+        signaturesPtr,
+        sources.length,
+        outputPtr,
+        uncompressedBytes,
+        outputOffsetsPtr,
+    );
+    const inflateMs = Math.max(0, safePerformance.now() - startedAt);
+    if (outputLength < 0) {
+        const messages = new Map([
+            [-1, 'metadata or output bounds are invalid'],
+            [-2, 'raw DEFLATE decoding failed'],
+            [-3, 'inflated size does not match ZIP metadata'],
+            [-4, 'inflated bytes do not match the ZIP CRC32'],
+            [-6, 'raw DEFLATE payload has trailing bytes'],
+        ]);
+        throw new Error(`Compressed ZIP media source failed validation: ${messages.get(outputLength) ?? `code ${outputLength}`}`);
+    }
+    if (outputLength !== uncompressedBytes) {
+        throw new Error('Compressed ZIP media batch returned an invalid byte length');
+    }
+    const output = new Uint8Array(wasm.memory.buffer, outputPtr, outputLength);
+    const decoded = sources.map((source, index) => output.slice(outputOffsets[index], outputOffsets[index] + source.uncompressedSize));
+    return {sources: decoded, inflateMs, compressedBytes, uncompressedBytes};
 }
 
 /** @returns {Promise<void>} */
@@ -304,17 +418,15 @@ export function consumeLastParallelParserSkipReason() {
  */
 function buildContentUniqueRowIndexes(rowToUniqueIndex, uniqueCount) {
     const uniqueRowIndexes = new Uint32Array(uniqueCount);
-    uniqueRowIndexes.fill(0xffffffff);
     let nextUniqueIndex = 0;
     for (let rowIndex = 0; rowIndex < rowToUniqueIndex.length; ++rowIndex) {
         const uniqueIndex = rowToUniqueIndex[rowIndex];
-        if (uniqueIndex >= uniqueCount) {
-            throw new RangeError(`Native term content unique index is invalid at row ${rowIndex}`);
-        }
-        if (uniqueIndex === nextUniqueIndex) {
-            uniqueRowIndexes[uniqueIndex] = rowIndex;
-            ++nextUniqueIndex;
-        } else if (uniqueRowIndexes[uniqueIndex] === 0xffffffff) {
+        if (uniqueIndex === nextUniqueIndex && uniqueIndex < uniqueCount) {
+            uniqueRowIndexes[nextUniqueIndex++] = rowIndex;
+        } else if (uniqueIndex >= nextUniqueIndex) {
+            if (uniqueIndex >= uniqueCount) {
+                throw new RangeError(`Native term content unique index is invalid at row ${rowIndex}`);
+            }
             throw new Error(`Native term content unique index ${uniqueIndex} is out of order`);
         }
     }
@@ -399,7 +511,47 @@ function getUnescapedJsonStringTokenBytes(source, start, length) {
     const valueStart = start + 1;
     const valueEnd = start + length - 1;
     const valueBytes = source.subarray(valueStart, valueEnd);
-    return valueBytes.includes(U8_BACKSLASH) ? null : valueBytes;
+    return isValidUnescapedUtf8(valueBytes) ? valueBytes : null;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+function isValidUnescapedUtf8(bytes) {
+    for (let i = 0; i < bytes.length;) {
+        const first = /** @type {number} */ (bytes[i]);
+        ++i;
+        if (first === U8_BACKSLASH) { return false; }
+        if (first < 0x80) { continue; }
+        let width;
+        switch (true) {
+            case first >= 0xc2 && first <= 0xdf:
+                width = 2;
+                break;
+            case first >= 0xe0 && first <= 0xef:
+                width = 3;
+                break;
+            case first >= 0xf0 && first <= 0xf4:
+                width = 4;
+                break;
+            default:
+                return false;
+        }
+        if (width - 1 > bytes.length - i) { return false; }
+        const second = /** @type {number} */ (bytes[i]);
+        if (
+            (first === 0xe0 && second < 0xa0) ||
+            (first === 0xed && second > 0x9f) ||
+            (first === 0xf0 && second < 0x90) ||
+            (first === 0xf4 && second > 0x8f)
+        ) { return false; }
+        for (let j = 0; j < width - 1; ++j) {
+            if (((/** @type {number} */ (bytes[i + j])) & 0xc0) !== 0x80) { return false; }
+        }
+        i += width - 1;
+    }
+    return true;
 }
 
 /**
@@ -513,40 +665,28 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
  * @param {boolean} [allowFusedParse]
  * @param {PreloadedTermBankSource|null} [preloadedSource]
  * @param {import('dictionary-importer').ImportExperiments} [experiments]
+ * @param {boolean} [validateGlossaryTypes]
  * @returns {Promise<ParsedTermBankWasmBuffers>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}) {
-    const useBankSpans = experiments.experimentalTermBankSpans === true;
-    if (!useBankSpans && (preloadedSource?.bankSpanCount ?? 0) > 0) {
-        throw new Error('Preloaded bank spans require the span experiment');
-    }
+async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false) {
     const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
-    /** @type {Array<{bytes: Uint8Array, start: number, end: number}>} */
-    const sourceSpans = [];
-    let jsonLength = preloadedSource?.jsonLength ?? (!useBankSpans && sourceArrays.length > 1 ? 2 : 0);
-    for (const bytes of preloadedSource === null ? sourceArrays : []) {
-        if (useBankSpans) {
+    // Every multi-bank route must retain source boundaries until the native
+    // term-bank cursor has validated each source as a complete JSON array.
+    const sourceCount = preloadedSource?.sourceCount ?? sourceArrays.length;
+    const useBankSpans = sourceCount > 1 || experiments.experimentalTermBankSpans === true || (preloadedSource?.bankSpanCount ?? 0) > 0;
+    if (preloadedSource !== null && sourceCount > 1 && preloadedSource.bankSpanCount !== sourceCount) {
+        throw new Error('Preloaded multi-bank source is missing independent bank spans');
+    }
+    let jsonLength = preloadedSource?.jsonLength ?? 0;
+    if (preloadedSource === null) {
+        for (const bytes of sourceArrays) {
             if (sourceArrays.length > 1 && getJsonArrayContentSpan(bytes) === null) {
                 throw new Error('Expected a JSON array in term-bank source fragment');
             }
-            sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
             jsonLength += bytes.byteLength;
-            continue;
-        }
-        if (sourceArrays.length === 1) {
-            sourceSpans.push({bytes, start: 0, end: bytes.byteLength});
-            jsonLength = bytes.byteLength;
-            continue;
-        }
-        const span = getJsonArrayContentSpan(bytes);
-        if (span === null) { throw new Error('Expected a JSON array in term-bank source fragment'); }
-        if (span.end > span.start) {
-            sourceSpans.push({bytes, ...span});
-            jsonLength += span.end - span.start;
         }
     }
-    if (!useBankSpans && preloadedSource === null && sourceArrays.length > 1) { jsonLength += Math.max(0, sourceSpans.length - 1); }
     if (!Number.isSafeInteger(jsonLength) || jsonLength > MAX_WASM32_BUFFER_BYTES) {
         throw new TermBankWasmResourceError('Term-bank source exceeds the 32-bit WASM parser limit');
     }
@@ -611,23 +751,13 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             }
         } else if (sourceArrays.length === 1) {
             inputHeap.set(sourceArrays[0], jsonPtr);
-        } else {
-            let cursor = jsonPtr;
-            inputHeap[cursor++] = U8_ARRAY_OPEN;
-            for (let i = 0; i < sourceSpans.length; ++i) {
-                if (i > 0) { inputHeap[cursor++] = U8_COMMA; }
-                const {bytes, start, end} = sourceSpans[i];
-                inputHeap.set(bytes.subarray(start, end), cursor);
-                cursor += end - start;
-            }
-            inputHeap[cursor] = U8_ARRAY_CLOSE;
         }
         copyJsonMs += Math.max(0, Date.now() - tStart);
     }
 
     const initialMetaCapacity = Math.min(
         MAX_META_ROW_CAPACITY,
-        Math.max(8192, (preloadedSource?.sourceCount ?? sourceSpans.length) * INITIAL_META_ROWS_PER_SOURCE),
+        Math.max(8192, sourceCount * INITIAL_META_ROWS_PER_SOURCE),
     );
     const useFusedParse = (
         allowFusedParse &&
@@ -678,7 +808,12 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         );
         // Content remains the final bump allocation so native growth can extend
         // it in place. Escaped keys use unused interner storage, not new scratch.
-        const experimentMask = getTermBankExperimentMask(experiments);
+        const experimentMask = getTermBankExperimentMask({
+            ...experiments,
+            // Native fused parsing uses this bit to admit the span cursor. For
+            // multi-bank imports the cursor is a correctness invariant.
+            experimentalTermBankSpans: experiments.experimentalTermBankSpans || bankSpanCount > 0,
+        });
         const experimentStatsPtr = experimentMask !== 0 ? allocateWasmBuffer(wasm, 20, 'experiment stats') : 0;
         const contentOutPtr = wasm.wasm_alloc(contentOutCapacity);
         allocationMs += Math.max(0, Date.now() - tStart);
@@ -742,6 +877,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             rawContentHashTablePtr,
             rawContentHashTablePtr === 0 ? 0 : contentHashTableSize,
             rawContentHashesPtr,
+            validateGlossaryTypes ? 1 : 0,
         );
         parseBankMs += Math.max(0, Date.now() - tStart);
         const experimentStats = experimentStatsPtr === 0 ?
@@ -776,6 +912,7 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
                 false,
                 null,
                 experiments,
+                validateGlossaryTypes,
             );
             fallback.allocationMs += allocationMs;
             fallback.copyJsonMs += copyJsonMs;
@@ -870,8 +1007,8 @@ void 0,
     }
     tStart = Date.now();
     const rowCount = mediaHintFastScan ?
-        wasm.parse_term_bank_with_media_hints(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount) :
-        wasm.parse_term_bank(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount);
+        wasm.parse_term_bank_with_media_hints(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount, validateGlossaryTypes ? 1 : 0) :
+        wasm.parse_term_bank(jsonPtr, jsonLength, outPtr, initialMetaCapacity, bankSpansPtr, bankSpanCount, validateGlossaryTypes ? 1 : 0);
     parseBankMs += Math.max(0, Date.now() - tStart);
     if (rowCount < 0) {
         if (rowCount === -2) {
@@ -1557,7 +1694,7 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
  * @param {number} version
  * @param {(rows: {expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}[], progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, preallocateChunkRows?: boolean, computeContentHashes?: boolean, maxPendingChunks?: number}} [options]
+ * @param {{copyContentBytes?: boolean, includeContentMetadata?: boolean, initialContentBytesPerRow?: number, minimalDecode?: boolean, reuseExpressionForReadingDecode?: boolean, skipTagRuleDecode?: boolean, lazyGlossaryDecode?: boolean, mediaHintFastScan?: boolean, validateGlossaryTypes?: boolean, preallocateChunkRows?: boolean, computeContentHashes?: boolean, maxPendingChunks?: number}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
@@ -1596,6 +1733,10 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
         computeContentHashes,
         false,
         false,
+        true,
+        null,
+        {},
+        options.validateGlossaryTypes === true && version >= 3,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     if (rowCount === 0) {
@@ -1643,6 +1784,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
     const pendingDispatches = [];
     /** @type {Promise<void>} */
     let dispatchTail = Promise.resolve();
+    let dispatchStopped = false;
     /**
      * @param {ParsedTermBankRow[]} chunk
      * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} progress
@@ -1650,6 +1792,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
      */
     const enqueueChunk = (chunk, progress) => {
         const invoke = async () => {
+            if (dispatchStopped) { return; }
             const tDispatchStart = Date.now();
             await onChunk(chunk, progress);
             chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
@@ -1662,49 +1805,58 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
         pendingDispatches.push(promise);
         return pendingDispatches.length >= maxPendingChunks ? /** @type {Promise<void>} */ (pendingDispatches.shift()) : null;
     };
-    let tChunkDecodeStart = Date.now();
-    for (let i = 0; i < rowCount; ++i) {
-        const row = minimalDecode ?
-            decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, lazyGlossaryDecode, mediaHintFastScan) :
-            decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan);
-        if (preallocateChunkRows) {
-            rows[rowsIndex] = row;
-            ++rowsIndex;
-        } else {
-            rows.push(row);
-            rowsIndex = rows.length;
+    try {
+        let tChunkDecodeStart = Date.now();
+        for (let i = 0; i < rowCount; ++i) {
+            const row = minimalDecode ?
+                decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, lazyGlossaryDecode, mediaHintFastScan) :
+                decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan);
+            if (preallocateChunkRows) {
+                rows[rowsIndex] = row;
+                ++rowsIndex;
+            } else {
+                rows.push(row);
+                rowsIndex = rows.length;
+            }
+            if (rowsIndex >= normalizedChunkSize) {
+                rowDecodeMs += Math.max(0, Date.now() - tChunkDecodeStart);
+                const chunk = rows;
+                rows = preallocateChunkRows ? createRowBuffer(Math.min(normalizedChunkSize, rowCount - (i + 1))) : [];
+                rowsIndex = 0;
+                ++chunkIndex;
+                const backpressure = enqueueChunk(chunk, {
+                    processedRows: i + 1,
+                    totalRows: rowCount,
+                    chunkIndex,
+                    chunkCount,
+                });
+                if (backpressure !== null) { await backpressure; }
+                tChunkDecodeStart = Date.now();
+            }
         }
-        if (rowsIndex >= normalizedChunkSize) {
+        if (rowsIndex > 0) {
             rowDecodeMs += Math.max(0, Date.now() - tChunkDecodeStart);
-            const chunk = rows;
-            rows = preallocateChunkRows ? createRowBuffer(Math.min(normalizedChunkSize, rowCount - (i + 1))) : [];
-            rowsIndex = 0;
+            if (preallocateChunkRows) {
+                rows.length = rowsIndex;
+            }
             ++chunkIndex;
-            const backpressure = enqueueChunk(chunk, {
-                processedRows: i + 1,
+            const backpressure = enqueueChunk(rows, {
+                processedRows: rowCount,
                 totalRows: rowCount,
                 chunkIndex,
                 chunkCount,
             });
             if (backpressure !== null) { await backpressure; }
-            tChunkDecodeStart = Date.now();
         }
+        await Promise.all(pendingDispatches);
+    } catch (error) {
+        // A later row can fail materialization while an earlier sink still owns
+        // parser bytes. Stop queued callbacks and join that owner before callers
+        // can abort storage or reset the heap, preserving the producer's error.
+        dispatchStopped = true;
+        await dispatchTail.catch(() => {});
+        throw error;
     }
-    if (rowsIndex > 0) {
-        rowDecodeMs += Math.max(0, Date.now() - tChunkDecodeStart);
-        if (preallocateChunkRows) {
-            rows.length = rowsIndex;
-        }
-        ++chunkIndex;
-        const backpressure = enqueueChunk(rows, {
-            processedRows: rowCount,
-            totalRows: rowCount,
-            chunkIndex,
-            chunkCount,
-        });
-        if (backpressure !== null) { await backpressure; }
-    }
-    await Promise.all(pendingDispatches);
     lastTermBankWasmParseProfile = {
         bufferSetupMs,
         allocationMs,
@@ -1739,7 +1891,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
  * @param {number} version
  * @param {(chunk: {rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean, prepareLookupIndexes?: boolean, preloadedSource?: PreloadedTermBankSource}} [options]
+ * @param {TermBankColumnParserOptions & {preloadedSource?: PreloadedTermBankSource}} [options]
  * @returns {Promise<void>}
  */
 export async function parseTermBankWithWasmColumnChunks(contentBytes, version, onChunk, chunkSize = DEFAULT_ROW_CHUNK_SIZE, options = {}) {
@@ -1765,6 +1917,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         true,
         options.preloadedSource ?? null,
         experiments,
+        options.validateGlossaryTypes === true && version >= 3,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     const {contentOutPtr, contentUniqueCount, rowCount, metaCapacity, contentCapacity} = parsed;
@@ -1933,6 +2086,12 @@ null :
             persistedLookupRequired: null,
         } :
         null;
+    // Exact canonical-content IDs already include glossary, rules and tags.
+    // A media requirement needs one representative of that content, while all
+    // term rows and their individual expression/reading/score remain intact.
+    const seenMediaContent = mediaHintFastScan && contentDedupPlan !== null ?
+        new Uint8Array(contentDedupPlan.uniqueCount) :
+        null;
     let rowDecodeMs = 0;
     let nativeStringPlanMs = 0;
     let nativeStringPlanChunkCount = 0;
@@ -1944,276 +2103,295 @@ null :
     /** @type {Promise<void>[]} */
     const pendingDispatches = [];
     let dispatchTail = Promise.resolve();
+    let dispatchStopped = false;
 
-    for (let start = 0, chunkIndex = 0; start < rowCount; start += normalizedChunkSize) {
-        const end = Math.min(rowCount, start + normalizedChunkSize);
-        const count = end - start;
-        /** @type {Uint8Array[]} */
-        const expressionBytesList = emitTermByteLists ? new Array(count) : [];
-        /** @type {Uint8Array[]} */
-        const readingBytesList = emitTermByteLists ? new Array(count) : [];
-        const readingEqualsExpressionList = fusedStringPlan === null ?
-            new Uint8Array(count) :
-            /** @type {Uint8Array} */ (fusedStringPlan.readingEqualsExpressionList).subarray(start, end);
-        const scoreList = fusedStringPlan === null ?
-            new Float64Array(count) :
-            /** @type {Int32Array} */ (fusedStringPlan.scoreList).subarray(start, end);
-        /** @type {Int32Array|Float64Array} */
-        let sequenceList = fusedStringPlan === null && version >= 3 ?
-            new Float64Array(count) :
-            (fusedStringPlan === null ?
-                new Int32Array(count) :
-                /** @type {Int32Array} */ (fusedStringPlan.sequenceList).subarray(start, end));
-        if (fusedStringPlan !== null && version < 3) { sequenceList.fill(-1); }
-        /** @type {Uint8Array[]} */
-        const contentBytesList = emitContentSlab ? [] : new Array(count);
-        const contentHash1List = emitContentSlab ? new Uint32Array(0) : new Uint32Array(count);
-        const contentHash2List = emitContentSlab ? new Uint32Array(0) : new Uint32Array(count);
-        const contentMetaList = emitContentSlab ?
-            contentMetas.subarray(start * CONTENT_META_U32_FIELDS, end * CONTENT_META_U32_FIELDS) :
-            new Uint32Array(0);
-        const tNativeStringPlanStart = Date.now();
-        const nativeStringPlan = fusedStringPlan === null ?
-            (
-                nativeStringPlanScratches.length === 0 || parsed.wasm === null ?
-                    null :
-                    buildNativeTermStringPlan(
-                        parsed.wasm,
-                        parsed.jsonPtr,
-                        parsed.metasPtr,
-                        start,
-                        count,
-                        nativeStringPlanScratches[chunkIndex % nativeStringPlanScratches.length],
-                    )
-            ) :
-            {
-                stringLengths: fusedStringPlan.stringLengths,
-                stringOffsets: fusedStringPlan.stringOffsets,
-                stringHashes: fusedStringPlan.stringHashes,
-                stringsBuffer: fusedStringPlan.stringsBuffer,
-                expressionIndexes: fusedStringPlan.expressionIndexes.subarray(start, end),
-                readingIndexes: fusedStringPlan.readingIndexes.subarray(start, end),
-            };
-        if (fusedStringPlan === null) {
-            nativeStringPlanMs += Math.max(0, Date.now() - tNativeStringPlanStart);
-        }
-        if (nativeStringPlan === null) {
-            if (nativeStringPlanScratches.length > 0) { ++nativeStringPlanFallbackChunkCount; }
-        } else {
-            ++nativeStringPlanChunkCount;
-        }
-        const expressionIndexes = nativeStringPlan?.expressionIndexes ?? new Uint32Array(count);
-        const readingIndexes = nativeStringPlan?.readingIndexes ?? new Uint32Array(count);
-        /** @type {ReturnType<typeof createTermRecordPreinternedPlanBuilder>|null} */
-        const planBuilder = nativeStringPlan === null ? createTermRecordPreinternedPlanBuilder(count * 2) : null;
-        /** @type {Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>} */
-        const mediaRows = [];
-
-        const needsRowProjection = fusedStringPlan === null || emitTermByteLists || !emitContentSlab || mediaHintFastScan;
-        const tRowDecodeStart = needsRowProjection ? Date.now() : 0;
-        for (let sourceIndex = start, i = 0; needsRowProjection && sourceIndex < end; ++sourceIndex, ++i) {
-            const o = sourceIndex * META_U32_FIELDS;
-            const c = sourceIndex * CONTENT_META_U32_FIELDS;
-            if (nativeStringPlan === null) {
-                if (planBuilder === null) {
-                    throw new Error('JavaScript term string plan builder is unavailable');
-                }
-                const expressionStart = metas[o + 0];
-                const expressionLength = metas[o + 1];
-                const readingStart = metas[o + 2];
-                const readingLength = metas[o + 3];
-                const expressionTokenBytes = getUnescapedJsonStringTokenBytes(source, expressionStart, expressionLength);
-                const expressionBytes = (
-                    expressionTokenBytes ??
-                    textEncoder.encode(decodeJsonStringToken(source, expressionStart, expressionLength))
-                );
-                const readingEqualsExpression = (
-                    isEmptyJsonStringToken(source, readingStart, readingLength) ||
-                    tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
-                );
-                const readingTokenBytes = readingEqualsExpression ?
-                    EMPTY_UINT8_ARRAY :
-                    getUnescapedJsonStringTokenBytes(source, readingStart, readingLength);
-                const readingBytes = readingEqualsExpression ?
-                    EMPTY_UINT8_ARRAY :
-                    (readingTokenBytes ?? textEncoder.encode(decodeJsonStringToken(source, readingStart, readingLength)));
-                if (emitTermByteLists) {
-                    expressionBytesList[i] = expressionBytes;
-                    readingBytesList[i] = readingBytes;
-                }
-                readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
-                expressionIndexes[i] = planBuilder.internStringBytes(expressionBytes);
-                readingIndexes[i] = readingEqualsExpression ?
-                    expressionIndexes[i] :
-                    planBuilder.internStringBytes(readingBytes);
-            } else {
-                const expressionIndex = expressionIndexes[i];
-                const readingIndex = readingIndexes[i];
-                // Escaped and literal tokens can intern to the same UTF-8 key
-                // without being the same raw reading token. Preserve the fused
-                // parser's flag, matching the established JavaScript fallback.
-                const readingEqualsExpression = fusedStringPlan === null ?
-                    (
-                        readingIndex === expressionIndex &&
-                        (
-                            isEmptyJsonStringToken(source, metas[o + 2], metas[o + 3]) ||
-                            tokenBytesEqual(source, metas[o], metas[o + 1], metas[o + 2], metas[o + 3])
+    try {
+        for (let start = 0, chunkIndex = 0; start < rowCount; start += normalizedChunkSize) {
+            const end = Math.min(rowCount, start + normalizedChunkSize);
+            const count = end - start;
+            /** @type {Uint8Array[]} */
+            const expressionBytesList = emitTermByteLists ? new Array(count) : [];
+            /** @type {Uint8Array[]} */
+            const readingBytesList = emitTermByteLists ? new Array(count) : [];
+            const readingEqualsExpressionList = fusedStringPlan === null ?
+                new Uint8Array(count) :
+                /** @type {Uint8Array} */ (fusedStringPlan.readingEqualsExpressionList).subarray(start, end);
+            const scoreList = fusedStringPlan === null ?
+                new Float64Array(count) :
+                /** @type {Int32Array} */ (fusedStringPlan.scoreList).subarray(start, end);
+            /** @type {Int32Array|Float64Array} */
+            let sequenceList = fusedStringPlan === null && version >= 3 ?
+                new Float64Array(count) :
+                (fusedStringPlan === null ?
+                    new Int32Array(count) :
+                    /** @type {Int32Array} */ (fusedStringPlan.sequenceList).subarray(start, end));
+            if (fusedStringPlan !== null && version < 3) { sequenceList.fill(-1); }
+            /** @type {Uint8Array[]} */
+            const contentBytesList = emitContentSlab ? [] : new Array(count);
+            const contentHash1List = emitContentSlab ? new Uint32Array(0) : new Uint32Array(count);
+            const contentHash2List = emitContentSlab ? new Uint32Array(0) : new Uint32Array(count);
+            const contentMetaList = emitContentSlab ?
+                contentMetas.subarray(start * CONTENT_META_U32_FIELDS, end * CONTENT_META_U32_FIELDS) :
+                new Uint32Array(0);
+            const tNativeStringPlanStart = Date.now();
+            const nativeStringPlan = fusedStringPlan === null ?
+                (
+                    nativeStringPlanScratches.length === 0 || parsed.wasm === null ?
+                        null :
+                        buildNativeTermStringPlan(
+                            parsed.wasm,
+                            parsed.jsonPtr,
+                            parsed.metasPtr,
+                            start,
+                            count,
+                            nativeStringPlanScratches[chunkIndex % nativeStringPlanScratches.length],
                         )
-                    ) :
-                    readingEqualsExpressionList[i] === 1;
-                readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
-                if (emitTermByteLists) {
-                    const expressionOffset = nativeStringPlan.stringOffsets[expressionIndex];
-                    const expressionLength = nativeStringPlan.stringLengths[expressionIndex];
-                    expressionBytesList[i] = nativeStringPlan.stringsBuffer.subarray(
-                        expressionOffset,
-                        expressionOffset + expressionLength,
+                ) :
+                {
+                    stringLengths: fusedStringPlan.stringLengths,
+                    stringOffsets: fusedStringPlan.stringOffsets,
+                    stringHashes: fusedStringPlan.stringHashes,
+                    stringsBuffer: fusedStringPlan.stringsBuffer,
+                    expressionIndexes: fusedStringPlan.expressionIndexes.subarray(start, end),
+                    readingIndexes: fusedStringPlan.readingIndexes.subarray(start, end),
+                };
+            if (fusedStringPlan === null) {
+                nativeStringPlanMs += Math.max(0, Date.now() - tNativeStringPlanStart);
+            }
+            if (nativeStringPlan === null) {
+                if (nativeStringPlanScratches.length > 0) { ++nativeStringPlanFallbackChunkCount; }
+            } else {
+                ++nativeStringPlanChunkCount;
+            }
+            const expressionIndexes = nativeStringPlan?.expressionIndexes ?? new Uint32Array(count);
+            const readingIndexes = nativeStringPlan?.readingIndexes ?? new Uint32Array(count);
+            /** @type {ReturnType<typeof createTermRecordPreinternedPlanBuilder>|null} */
+            const planBuilder = nativeStringPlan === null ? createTermRecordPreinternedPlanBuilder(count * 2) : null;
+            /** @type {Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>} */
+            const mediaRows = [];
+
+            const projectMediaHintsOnly = fusedStringPlan !== null && !emitTermByteLists && emitContentSlab;
+            const needsRowProjection = !projectMediaHintsOnly || mediaHintFastScan;
+            const tRowDecodeStart = needsRowProjection ? Date.now() : 0;
+            for (let sourceIndex = start, i = 0; needsRowProjection && sourceIndex < end; ++sourceIndex, ++i) {
+                const o = sourceIndex * META_U32_FIELDS;
+                // Fused columns already contain the final term fields. Only
+                // hinted media rows need JavaScript projection in this mode.
+                if (projectMediaHintsOnly && metas[o + 14] !== 1) { continue; }
+                const c = sourceIndex * CONTENT_META_U32_FIELDS;
+                if (nativeStringPlan === null) {
+                    if (planBuilder === null) {
+                        throw new Error('JavaScript term string plan builder is unavailable');
+                    }
+                    const expressionStart = metas[o + 0];
+                    const expressionLength = metas[o + 1];
+                    const readingStart = metas[o + 2];
+                    const readingLength = metas[o + 3];
+                    const expressionTokenBytes = getUnescapedJsonStringTokenBytes(source, expressionStart, expressionLength);
+                    const expressionBytes = (
+                        expressionTokenBytes ??
+                        textEncoder.encode(decodeJsonStringToken(source, expressionStart, expressionLength))
                     );
-                    if (readingEqualsExpression) {
-                        readingBytesList[i] = EMPTY_UINT8_ARRAY;
-                    } else {
-                        const readingOffset = nativeStringPlan.stringOffsets[readingIndex];
-                        const readingLength = nativeStringPlan.stringLengths[readingIndex];
-                        readingBytesList[i] = nativeStringPlan.stringsBuffer.subarray(
-                            readingOffset,
-                            readingOffset + readingLength,
+                    const readingEqualsExpression = (
+                        isEmptyJsonStringToken(source, readingStart, readingLength) ||
+                        tokenBytesEqual(source, expressionStart, expressionLength, readingStart, readingLength)
+                    );
+                    const readingTokenBytes = readingEqualsExpression ?
+                        EMPTY_UINT8_ARRAY :
+                        getUnescapedJsonStringTokenBytes(source, readingStart, readingLength);
+                    const readingBytes = readingEqualsExpression ?
+                        EMPTY_UINT8_ARRAY :
+                        (readingTokenBytes ?? textEncoder.encode(decodeJsonStringToken(source, readingStart, readingLength)));
+                    if (emitTermByteLists) {
+                        expressionBytesList[i] = expressionBytes;
+                        readingBytesList[i] = readingBytes;
+                    }
+                    readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
+                    expressionIndexes[i] = planBuilder.internStringBytes(expressionBytes);
+                    readingIndexes[i] = readingEqualsExpression ?
+                        expressionIndexes[i] :
+                        planBuilder.internStringBytes(readingBytes);
+                } else {
+                    const expressionIndex = expressionIndexes[i];
+                    const readingIndex = readingIndexes[i];
+                    // Escaped and literal tokens can intern to the same UTF-8 key
+                    // without being the same raw reading token. Preserve the fused
+                    // parser's flag, matching the established JavaScript fallback.
+                    const readingEqualsExpression = fusedStringPlan === null ?
+                        (
+                            readingIndex === expressionIndex &&
+                            (
+                                isEmptyJsonStringToken(source, metas[o + 2], metas[o + 3]) ||
+                                tokenBytesEqual(source, metas[o], metas[o + 1], metas[o + 2], metas[o + 3])
+                            )
+                        ) :
+                        readingEqualsExpressionList[i] === 1;
+                    readingEqualsExpressionList[i] = readingEqualsExpression ? 1 : 0;
+                    if (emitTermByteLists) {
+                        const expressionOffset = nativeStringPlan.stringOffsets[expressionIndex];
+                        const expressionLength = nativeStringPlan.stringLengths[expressionIndex];
+                        expressionBytesList[i] = nativeStringPlan.stringsBuffer.subarray(
+                            expressionOffset,
+                            expressionOffset + expressionLength,
                         );
+                        if (readingEqualsExpression) {
+                            readingBytesList[i] = EMPTY_UINT8_ARRAY;
+                        } else {
+                            const readingOffset = nativeStringPlan.stringOffsets[readingIndex];
+                            const readingLength = nativeStringPlan.stringLengths[readingIndex];
+                            readingBytesList[i] = nativeStringPlan.stringsBuffer.subarray(
+                                readingOffset,
+                                readingOffset + readingLength,
+                            );
+                        }
+                    }
+                }
+                if (fusedStringPlan === null) {
+                    scoreList[i] = decodeJsonNumberToken(source, metas[o + 8]);
+                    if (version >= 3) {
+                        const sequenceStart = metas[o + 11];
+                        const sequence = sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart);
+                        sequenceList[i] = sequence < 0 ? -1 : sequence;
+                    } else {
+                        sequenceList[i] = -1;
+                    }
+                }
+                if (!emitContentSlab) {
+                    const contentOffset = contentMetas[c + 0];
+                    const contentLength = contentMetas[c + 1];
+                    contentBytesList[i] = heap.subarray(contentOutPtr + contentOffset, contentOutPtr + contentOffset + contentLength);
+                    contentHash1List[i] = contentMetas[c + 2] >>> 0;
+                    contentHash2List[i] = contentMetas[c + 3] >>> 0;
+                }
+                if (mediaHintFastScan && metas[o + 14] === 1) {
+                    const uniqueIndex = contentUniqueIndexes[sourceIndex];
+                    if (seenMediaContent === null || uniqueIndex >= seenMediaContent.length || seenMediaContent[uniqueIndex] === 0) {
+                        if (seenMediaContent !== null && uniqueIndex < seenMediaContent.length) { seenMediaContent[uniqueIndex] = 1; }
+                        mediaRows.push({
+                            index: i,
+                            row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, sourceIndex, false, true, true, true, true),
+                        });
                     }
                 }
             }
-            if (fusedStringPlan === null) {
-                scoreList[i] = decodeJsonNumberToken(source, metas[o + 8]);
-                if (version >= 3) {
-                    const sequenceStart = metas[o + 11];
-                    const sequence = sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart);
-                    sequenceList[i] = sequence < 0 ? -1 : sequence;
-                } else {
-                    sequenceList[i] = -1;
+            if (needsRowProjection) {
+                rowDecodeMs += Math.max(0, Date.now() - tRowDecodeStart);
+            }
+            if (sequenceList instanceof Float64Array) {
+                let requiresWideSequence = false;
+                for (let i = 0; i < sequenceList.length; ++i) {
+                    if (sequenceList[i] > 0x7fffffff) {
+                        requiresWideSequence = true;
+                        break;
+                    }
+                }
+                if (!requiresWideSequence) {
+                    sequenceList = Int32Array.from(sequenceList);
                 }
             }
-            if (!emitContentSlab) {
-                const contentOffset = contentMetas[c + 0];
-                const contentLength = contentMetas[c + 1];
-                contentBytesList[i] = heap.subarray(contentOutPtr + contentOffset, contentOutPtr + contentOffset + contentLength);
-                contentHash1List[i] = contentMetas[c + 2] >>> 0;
-                contentHash2List[i] = contentMetas[c + 3] >>> 0;
-            }
-            if (mediaHintFastScan && metas[o + 14] === 1) {
-                mediaRows.push({
-                    index: i,
-                    row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, sourceIndex, false, true, true, true, true),
-                });
-            }
-        }
-        if (needsRowProjection) {
-            rowDecodeMs += Math.max(0, Date.now() - tRowDecodeStart);
-        }
-        if (sequenceList instanceof Float64Array) {
-            let requiresWideSequence = false;
-            for (let i = 0; i < sequenceList.length; ++i) {
-                if (sequenceList[i] > 0x7fffffff) {
-                    requiresWideSequence = true;
-                    break;
+            let termRecordPreinternedPlan;
+            if (nativeStringPlan === null) {
+                if (planBuilder === null) {
+                    throw new Error('Term string plan builder is unavailable');
                 }
+                termRecordPreinternedPlan = planBuilder.buildPlan(expressionIndexes, readingIndexes, count);
+            } else {
+                termRecordPreinternedPlan = nativeStringPlan;
             }
-            if (!requiresWideSequence) {
-                sequenceList = Int32Array.from(sequenceList);
+            /** @type {TermBankColumnChunk} */
+            const chunk = {
+                rowCount: count,
+                contentRowStart: start,
+                expressionBytesList,
+                readingBytesList,
+                readingEqualsExpressionList,
+                scoreList,
+                sequenceList,
+                contentBytesList,
+                contentHash1List,
+                contentHash2List,
+                contentBytesBuffer: emitContentSlab ? heap : void 0,
+                contentBytesBaseOffset: emitContentSlab ? contentOutPtr : void 0,
+                contentMetaList,
+                contentUniqueIndexList: contentDedupPlan === null ? null : contentUniqueIndexes.subarray(start, end),
+                contentDedupPlan,
+                useResolvedContentReferences: contentDedupPlan !== null,
+                termRecordPreinternedPlan,
+                mediaRows,
+            };
+            if (
+                nativeLookupIndexScratch !== null &&
+                parsed.wasm !== null &&
+                nativeStringPlan !== null &&
+                (fusedStringPlan === null || (start === 0 && end === rowCount))
+            ) {
+                const tLookupIndexStart = safePerformance.now();
+                const segments = nativeCompactionScratch === null ?
+    null :
+    encodeNativeTermLookupSegments(
+        parsed.wasm,
+        nativeStringPlan,
+        readingEqualsExpressionList,
+        sequenceList,
+        count,
+        nativeLookupIndexScratch,
+        nativeCompactionScratch,
+    );
+                const bytes = nativeCompactionScratch === null ?
+    encodeNativeTermLookupIndex(
+        parsed.wasm,
+        nativeStringPlan,
+        readingEqualsExpressionList,
+        sequenceList,
+        count,
+        nativeLookupIndexScratch,
+    ) :
+    null;
+                const elapsedMs = Math.max(0, safePerformance.now() - tLookupIndexStart);
+                if (segments !== null) {
+                    chunk.preparedLookupIndexes = segments;
+                    chunk.preparedLookupIndexEncodeMs = elapsedMs;
+                    nativeSegmentedLookupSegments += segments.size;
+                } else if (bytes !== null) {
+                    chunk.preparedLookupIndexes = new Map([
+                        [`0:${count}`, {bytes, preinternedPlan: termRecordPreinternedPlan}],
+                    ]);
+                    chunk.preparedLookupIndexEncodeMs = elapsedMs;
+                } else if (nativeCompactionScratch !== null) {
+                    ++nativeSegmentedLookupFallbacks;
+                }
+                if (nativeLookupScratchReusedBytes > 0 && (segments !== null || bytes !== null)) {
+                    ++nativeLookupScratchReuseGroups;
+                }
+                // Count failed native work too; worker fallback adds its own time.
+                nativeLookupIndexEncodeMs += elapsedMs;
+            }
+            ++chunkIndex;
+            const progress = {processedRows: end, totalRows: rowCount, chunkIndex, chunkCount};
+            const invokeColumnChunk = async () => {
+                if (dispatchStopped) { return; }
+                const tDispatchStart = Date.now();
+                const result = onChunk(chunk, progress);
+                await result;
+                chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
+            };
+            const promise = pendingDispatches.length === 0 ? invokeColumnChunk() : dispatchTail.then(invokeColumnChunk);
+            void promise.catch(() => {});
+            dispatchTail = promise;
+            pendingDispatches.push(promise);
+            if (pendingDispatches.length >= maxPendingChunks) {
+                await /** @type {Promise<void>} */ (pendingDispatches.shift());
             }
         }
-        let termRecordPreinternedPlan;
-        if (nativeStringPlan === null) {
-            if (planBuilder === null) {
-                throw new Error('Term string plan builder is unavailable');
-            }
-            termRecordPreinternedPlan = planBuilder.buildPlan(expressionIndexes, readingIndexes, count);
-        } else {
-            termRecordPreinternedPlan = nativeStringPlan;
-        }
-        /** @type {TermBankColumnChunk} */
-        const chunk = {
-            rowCount: count,
-            contentRowStart: start,
-            expressionBytesList,
-            readingBytesList,
-            readingEqualsExpressionList,
-            scoreList,
-            sequenceList,
-            contentBytesList,
-            contentHash1List,
-            contentHash2List,
-            contentBytesBuffer: emitContentSlab ? heap : void 0,
-            contentBytesBaseOffset: emitContentSlab ? contentOutPtr : void 0,
-            contentMetaList,
-            contentUniqueIndexList: contentDedupPlan === null ? null : contentUniqueIndexes.subarray(start, end),
-            contentDedupPlan,
-            useResolvedContentReferences: contentDedupPlan !== null,
-            termRecordPreinternedPlan,
-            mediaRows,
-        };
-        if (
-            nativeLookupIndexScratch !== null &&
-            parsed.wasm !== null &&
-            nativeStringPlan !== null &&
-            (fusedStringPlan === null || (start === 0 && end === rowCount))
-        ) {
-            const tLookupIndexStart = safePerformance.now();
-            const segments = nativeCompactionScratch === null ?
-null :
-encodeNativeTermLookupSegments(
-    parsed.wasm,
-    nativeStringPlan,
-    readingEqualsExpressionList,
-    sequenceList,
-    count,
-    nativeLookupIndexScratch,
-    nativeCompactionScratch,
-);
-            const bytes = nativeCompactionScratch === null ?
-encodeNativeTermLookupIndex(
-    parsed.wasm,
-    nativeStringPlan,
-    readingEqualsExpressionList,
-    sequenceList,
-    count,
-    nativeLookupIndexScratch,
-) :
-null;
-            const elapsedMs = Math.max(0, safePerformance.now() - tLookupIndexStart);
-            if (segments !== null) {
-                chunk.preparedLookupIndexes = segments;
-                chunk.preparedLookupIndexEncodeMs = elapsedMs;
-                nativeSegmentedLookupSegments += segments.size;
-            } else if (bytes !== null) {
-                chunk.preparedLookupIndexes = new Map([
-                    [`0:${count}`, {bytes, preinternedPlan: termRecordPreinternedPlan}],
-                ]);
-                chunk.preparedLookupIndexEncodeMs = elapsedMs;
-            } else if (nativeCompactionScratch !== null) {
-                ++nativeSegmentedLookupFallbacks;
-            }
-            if (nativeLookupScratchReusedBytes > 0 && (segments !== null || bytes !== null)) {
-                ++nativeLookupScratchReuseGroups;
-            }
-            // Count failed native work too; worker fallback adds its own time.
-            nativeLookupIndexEncodeMs += elapsedMs;
-        }
-        ++chunkIndex;
-        const progress = {processedRows: end, totalRows: rowCount, chunkIndex, chunkCount};
-        const invokeColumnChunk = async () => {
-            const tDispatchStart = Date.now();
-            const result = onChunk(chunk, progress);
-            await result;
-            chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
-        };
-        const promise = pendingDispatches.length === 0 ? invokeColumnChunk() : dispatchTail.then(invokeColumnChunk);
-        void promise.catch(() => {});
-        dispatchTail = promise;
-        pendingDispatches.push(promise);
-        if (pendingDispatches.length >= maxPendingChunks) {
-            await /** @type {Promise<void>} */ (pendingDispatches.shift());
-        }
+        await Promise.all(pendingDispatches);
+    } catch (error) {
+        // String-plan or column projection failure must retain ownership until
+        // every already-started sink settles. The tail includes callbacks which
+        // backpressure removed from pendingDispatches as well as queued work.
+        dispatchStopped = true;
+        await dispatchTail.catch(() => {});
+        throw error;
     }
-    await Promise.all(pendingDispatches);
     lastTermBankWasmParseProfile = {
         experiments,
         fusedParseAttempts: parsed.fusedParseAttempts ?? 0,
@@ -2373,7 +2551,7 @@ class ParallelTermBankParserPool {
             const abortController = new AbortController();
             this._workerCreationAbortController = abortController;
             this._workerCount = workerCount;
-            this._workersPromise = createParallelParserWorkers(abortController.signal, workerCount);
+            this._workersPromise = createParallelParserWorkers(abortController, workerCount);
         } else if (this._workerCount !== workerCount) {
             throw new Error('Parallel term-bank parser worker capability changed while its pool was warm');
         }
@@ -2496,7 +2674,8 @@ class ParallelTermBankPipelineRun {
     /** @returns {Promise<boolean>} */
     async run() {
         try {
-            const {workers} = await this._poolLease.getWorkers();
+            const [{workers}] = await waitForParallelWork([this._poolLease.getWorkers()], this._shouldCancel);
+            this._throwIfStopped();
             await this._runPipeline(workers);
             this._keepWorkers = true;
             return true;
@@ -2617,7 +2796,7 @@ class ParallelTermBankPipelineRun {
                 if (this._pipelineShouldCancel()) { throw createParallelParserCancellationError(); }
                 await this._waitForLead(groupIndex);
                 const sourceGroup = this._groups[groupIndex];
-                const group = await waitForParallelSources(
+                const group = await waitForParallelWork(
                     sourceGroup.map((source) => loadParallelTermBankSource(source)),
                     () => this._pipelineShouldCancel(),
                 );
@@ -2770,7 +2949,7 @@ export async function disposeParallelTermBankParser() {
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2790,7 +2969,7 @@ export async function parseTermBankWithWasmColumnChunksParallel(contentBytes, ve
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2814,7 +2993,7 @@ export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentB
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2839,7 +3018,7 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {TermBankColumnParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -2860,7 +3039,7 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} options
+ * @param {TermBankColumnParserOptions} options
  * @param {() => boolean} shouldCancel
  * @param {boolean} [lazy=false]
  * @returns {Promise<boolean>}
@@ -3010,8 +3189,9 @@ export function getParallelTermBankParserWorkerCount(options = {}) {
     if (hasConstrainedMemory || typeof rawHardwareConcurrency !== 'number' || !Number.isFinite(rawHardwareConcurrency)) {
         return baseline;
     }
-    if (options.experimentalParserWorkers3 !== true || rawHardwareConcurrency < 4) { return baseline; }
-    return Math.max(baseline, 3);
+    const useMidCapabilityPolicy = typeof options.experimentalParserWorkers3 === 'undefined' || options.experimentalParserWorkers3 === true;
+    if (!useMidCapabilityPolicy || rawHardwareConcurrency < MID_CAPABILITY_MIN_HARDWARE_CONCURRENCY) { return baseline; }
+    return Math.max(baseline, MID_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT);
 }
 
 /**
@@ -3050,17 +3230,19 @@ function canUseParallelParserForSourceSize(totalBytes) {
 }
 
 /**
- * @param {AbortSignal} signal
+ * @param {AbortController} abortController
  * @param {number} workerCount
  * @returns {Promise<{workers: Worker[]}>}
  */
-async function createParallelParserWorkers(signal, workerCount) {
-    const module = await compileTermBankWasmModule();
+async function createParallelParserWorkers(abortController, workerCount) {
+    const {signal} = abortController;
+    const module = await waitForParallelParserModule(signal);
     if (signal.aborted) { throw createParallelParserCancellationError(); }
     /** @type {Worker[]} */
     const workers = [];
+    /** @type {Promise<void>[]} */
+    const ready = [];
     try {
-        const ready = [];
         for (let i = 0; i < workerCount; ++i) {
             const worker = new Worker(
                 new URL('term-bank-wasm-parser-worker.js', import.meta.url),
@@ -3072,9 +3254,38 @@ async function createParallelParserWorkers(signal, workerCount) {
         await Promise.all(ready);
         return {workers};
     } catch (error) {
+        // Termination does not settle readiness listeners or their timeout.
+        // Retire every peer waiter before releasing this startup generation.
+        abortController.abort();
         for (const worker of workers) { worker.terminate(); }
+        await Promise.allSettled(ready);
         throw error;
     }
+}
+
+/**
+ * A cancelled startup stops waiting without cancelling the shared module task.
+ * Its late result remains observed and can still serve the next import.
+ * @param {AbortSignal} signal
+ * @returns {Promise<WebAssembly.Module>}
+ */
+function waitForParallelParserModule(signal) {
+    return new Promise((resolve, reject) => {
+        const cleanup = () => { signal.removeEventListener('abort', onAbort); };
+        const onAbort = () => {
+            cleanup();
+            reject(createParallelParserCancellationError());
+        };
+        signal.addEventListener('abort', onAbort, {once: true});
+        void compileTermBankWasmModule().then((module) => {
+            cleanup();
+            resolve(module);
+        }, (error) => {
+            cleanup();
+            reject(error);
+        });
+        if (signal.aborted) { onAbort(); }
+    });
 }
 
 /**
@@ -3306,18 +3517,19 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
 }
 
 /**
- * Keeps cancellation responsive while source ZIP workers are still inflating.
- * The source promises remain observed after cancellation so late rejections do
- * not become unhandled; their owning importer may abort the underlying reads.
- * @param {Promise<ParallelTermBankSourceValue>[]} promises
+ * Keeps cancellation responsive during worker startup and source ZIP reads.
+ * Pending promises remain observed after cancellation. The run's pool lease
+ * retires its startup workers; the importer owns cancellation of ZIP reads.
+ * @template T
+ * @param {Promise<T>[]} promises
  * @param {() => boolean} shouldCancel
- * @returns {Promise<ParallelTermBankSourceValue[]>}
+ * @returns {Promise<T[]>}
  */
-function waitForParallelSources(promises, shouldCancel) {
+function waitForParallelWork(promises, shouldCancel) {
     return new Promise((resolve, reject) => {
         let settled = false;
         const cleanup = () => { clearInterval(cancellationIntervalId); };
-        /** @param {ParallelTermBankSourceValue[]} value */
+        /** @param {T[]} value */
         const settleResolve = (value) => {
             if (settled) { return; }
             settled = true;
@@ -3373,7 +3585,7 @@ function createParallelParserError(value) {
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {import('dictionary-importer').ImportExperiments & {initialContentBytesPerRow?: number, mediaHintFastScan?: boolean, maxPendingChunks?: number, computeContentHashes?: boolean, emitContentSlab?: boolean, emitTokenBinaryContent?: boolean, useNativeStringPlan?: boolean, emitTermByteLists?: boolean, singleChunk?: boolean}} [options]
+ * @param {TermBankColumnParserOptions} [options]
  * @returns {Promise<boolean>}
  */
 export async function parseTermBankWithWasmColumnChunksOverlapped(contentBytes, version, onChunk, options = {}) {
@@ -3543,7 +3755,7 @@ function isCompressedTermBankSource(value) {
  */
 export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
-    const contentMetaList = Uint32Array.from(sourceContentMetaList);
+    const contentMetaList = new Uint32Array(sourceContentMetaList);
     let contentBytesLength = 0;
     for (let i = 0; i < contentMetaList.length; i += CONTENT_META_U32_FIELDS) {
         contentBytesLength = Math.max(contentBytesLength, contentMetaList[i] + contentMetaList[i + 1]);
@@ -3577,27 +3789,27 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
         index,
         row: {
             ...row,
-            expressionBytes: row.expressionBytes instanceof Uint8Array ? Uint8Array.from(row.expressionBytes) : void 0,
-            readingBytes: row.readingBytes instanceof Uint8Array ? Uint8Array.from(row.readingBytes) : void 0,
-            glossaryJsonBytes: row.glossaryJsonBytes instanceof Uint8Array ? Uint8Array.from(row.glossaryJsonBytes) : void 0,
-            termEntryContentBytes: Uint8Array.from(row.termEntryContentBytes),
+            expressionBytes: row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0,
+            readingBytes: row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0,
+            glossaryJsonBytes: row.glossaryJsonBytes instanceof Uint8Array ? new Uint8Array(row.glossaryJsonBytes) : void 0,
+            termEntryContentBytes: new Uint8Array(row.termEntryContentBytes),
         },
     }));
     const stablePlan = {
-        stringLengths: Uint16Array.from(plan.stringLengths),
+        stringLengths: new Uint16Array(plan.stringLengths),
         stringOffsets: chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
-            Uint32Array.from(stringOffsets),
+            new Uint32Array(stringOffsets),
         stringHashes: chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
             (
                 plan.stringHashes instanceof Uint32Array ?
-                    Uint32Array.from(plan.stringHashes) :
+                    new Uint32Array(plan.stringHashes) :
                     void 0
             ),
-        stringsBuffer: Uint8Array.from(plan.stringsBuffer),
-        expressionIndexes: Uint32Array.from(plan.expressionIndexes),
-        readingIndexes: Uint32Array.from(plan.readingIndexes),
+        stringsBuffer: new Uint8Array(plan.stringsBuffer),
+        expressionIndexes: new Uint32Array(plan.expressionIndexes),
+        readingIndexes: new Uint32Array(plan.readingIndexes),
     };
     /** @type {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|undefined} */
     let preparedLookupIndexes;
@@ -3606,7 +3818,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
         for (const [key, prepared] of chunk.preparedLookupIndexes) {
             preparedLookupIndexes.set(key, {
                 bytes: prepared.bytes.buffer === plan.stringsBuffer.buffer ?
-                    Uint8Array.from(prepared.bytes) :
+                    new Uint8Array(prepared.bytes) :
                     prepared.bytes,
                 preinternedPlan: prepared.preinternedPlan === plan ? stablePlan : prepared.preinternedPlan,
             });
@@ -3614,24 +3826,24 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
     }
     return {
         ...chunk,
-        expressionBytesList: chunk.expressionBytesList.map((bytes) => Uint8Array.from(bytes)),
-        readingBytesList: chunk.readingBytesList.map((bytes) => Uint8Array.from(bytes)),
-        readingEqualsExpressionList: Uint8Array.from(chunk.readingEqualsExpressionList),
+        expressionBytesList: chunk.expressionBytesList.map((bytes) => new Uint8Array(bytes)),
+        readingBytesList: chunk.readingBytesList.map((bytes) => new Uint8Array(bytes)),
+        readingEqualsExpressionList: new Uint8Array(chunk.readingEqualsExpressionList),
         scoreList: chunk.scoreList instanceof Float64Array ?
-            Float64Array.from(chunk.scoreList) :
-            Int32Array.from(chunk.scoreList),
+            new Float64Array(chunk.scoreList) :
+            new Int32Array(chunk.scoreList),
         sequenceList: chunk.sequenceList instanceof Float64Array ?
-            Float64Array.from(chunk.sequenceList) :
-            Int32Array.from(chunk.sequenceList),
-        contentBytesList: chunk.contentBytesList.map((bytes) => Uint8Array.from(bytes)),
-        contentHash1List: Uint32Array.from(chunk.contentHash1List),
-        contentHash2List: Uint32Array.from(chunk.contentHash2List),
+            new Float64Array(chunk.sequenceList) :
+            new Int32Array(chunk.sequenceList),
+        contentBytesList: chunk.contentBytesList.map((bytes) => new Uint8Array(bytes)),
+        contentHash1List: new Uint32Array(chunk.contentHash1List),
+        contentHash2List: new Uint32Array(chunk.contentHash2List),
         contentBytesBuffer,
         contentBytesBaseOffset: 0,
         contentMetaList,
         contentUniqueIndexList: chunk.contentUniqueIndexList === null ?
             null :
-            Uint32Array.from(chunk.contentUniqueIndexList),
+            new Uint32Array(chunk.contentUniqueIndexList),
         mediaRows,
         termRecordPreinternedPlan: stablePlan,
         ...(typeof preparedLookupIndexes === 'undefined' ? {} : {preparedLookupIndexes}),

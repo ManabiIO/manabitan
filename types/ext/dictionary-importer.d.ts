@@ -57,10 +57,10 @@ export type ImportPhaseTiming = {
     details?: Record<string, unknown>;
 };
 
-/** Experimental parser paths; absent and non-true runtime values remain off. */
+/** Internal implementation controls; qualified defaults are documented per field. */
 export type ImportExperiments = {
+    /** Qualified automatic middle-CPU policy: true. Explicit false retains two workers for diagnostics. */
     experimentalParserWorkers3?: boolean;
-    experimentalLibdeflate?: boolean;
     experimentalGenericSpanCompression?: boolean;
     experimentalSkipFusedParse?: boolean;
     /** Qualified production default: true. Explicit false retains the allocation oracle. */
@@ -183,8 +183,7 @@ export type SummaryMetaCount = {
 
 export type ImportRequirement = (
     ImageImportRequirement |
-    StructuredContentImageImportRequirement |
-    StructuredContentMediaLinkImportRequirement
+    StructuredContentImageImportRequirement
 );
 
 export type ImageImportRequirement = {
@@ -201,16 +200,10 @@ export type StructuredContentImageImportRequirement = {
     entry: DictionaryDatabase.DatabaseTermEntry;
 };
 
-export type StructuredContentMediaLinkImportRequirement = {
-    type: 'structured-content-media-link';
-    target: StructuredContent.LinkElement;
-    source: StructuredContent.LinkElement;
-    entry: DictionaryDatabase.DatabaseTermEntry;
-};
-
 export type ImportRequirementContext = {
     fileMap: ArchiveFileMap;
     media: Map<string, DictionaryDatabase.MediaDataArrayBufferContent>;
+    rawMediaBytesByPath?: Map<string, Uint8Array>;
 };
 
 export type MemoryImportFile = {

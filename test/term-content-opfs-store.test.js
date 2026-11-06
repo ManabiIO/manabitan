@@ -17,6 +17,8 @@
  */
 
 import {afterEach, describe, expect, test, vi} from 'vitest';
+import {deferPromise} from '../ext/js/core/utilities.js';
+import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
 
 /** @typedef {FileSystemDirectoryHandle & {entries: () => AsyncIterableIterator<[string, FileSystemFileHandle]>}} MutableDirectory */
@@ -1054,5 +1056,157 @@ describe('TermContentOpfsStore', () => {
 
         expect(result).toBeNull();
         expect(fileHandle.getFile).toHaveBeenCalledTimes(2);
+    });
+
+    test.each(['recovered', 'unavailable', 'corrupt'])('lookup prefetch preserves stale snapshot recovery (%s)', async (outcome) => {
+        const persistent = outcome === 'unavailable';
+        const database = new DictionaryDatabase();
+        const store = /** @type {TermContentOpfsStore} */ (Reflect.get(database, '_termContentStore'));
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        const bytes = new TextEncoder().encode(JSON.stringify({
+            definitionTags: '', termTags: '', rules: '', glossary: ['readable definition'],
+        }));
+        const unreadable = createNotReadableError('stale File snapshot');
+        const arrayBuffer = vi.fn(async () => { throw unreadable; });
+        const staleFile = {size: bytes.byteLength, slice: () => ({arrayBuffer})};
+        const fileHandle = {
+            getFile: vi.fn(async () => {
+                if (persistent) { throw unreadable; }
+                const freshBytes = Uint8Array.from(bytes);
+                if (outcome === 'corrupt') { freshBytes[0] = 0x5d; }
+                return createReadableFile(freshBytes);
+            }),
+        };
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_length', bytes.byteLength);
+        Reflect.set(store, '_loadedForRead', true);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: bytes.byteLength,
+            startOffset: 0,
+            readFile: staleFile,
+        }]);
+        vi.spyOn(recordStore, 'getByIdsAsync').mockResolvedValue(new Map([[1, {
+            id: 1,
+            dictionary: 'test',
+            expression: '語',
+            reading: 'ご',
+            score: 0,
+            sequence: 1,
+            expressionReverse: null,
+            readingReverse: null,
+            entryContentOffset: 0,
+            entryContentLength: bytes.byteLength,
+            entryContentDictName: 'raw',
+        }]]));
+        const mark = vi.spyOn(recordStore, 'markDictionaryReimportRequired');
+        const request = database._fetchTermRowsByIds([1]);
+        if (persistent) {
+            await expect(request).rejects.toThrow('Dictionary content is temporarily unavailable');
+            expect(fileHandle.getFile).toHaveBeenCalledTimes(2);
+            expect(Reflect.get(database, '_termRowCache').size).toBe(0);
+        } else if (outcome === 'corrupt') {
+            await expect(request).rejects.toThrow('Dictionary term content is malformed');
+            expect(fileHandle.getFile).toHaveBeenCalledOnce();
+            expect(mark).toHaveBeenCalledOnce();
+            expect(Reflect.get(database, '_termRowCache').size).toBe(0);
+        } else {
+            const rows = await request;
+            expect(rows.get(1)?.glossary).toEqual(['readable definition']);
+            expect(fileHandle.getFile).toHaveBeenCalledOnce();
+        }
+        expect(arrayBuffer).toHaveBeenCalledTimes(2);
+        if (outcome !== 'corrupt') { expect(mark).not.toHaveBeenCalled(); }
+        expect(Reflect.get(store, '_readPageOperations').size).toBe(0);
+    });
+
+    test.each(['NotReadableError', 'unknown', 'undefined'])('prefetch joins active pages before settling %s failure', async (kind) => {
+        const store = new TermContentOpfsStore();
+        const peerStarted = deferPromise();
+        const releasePeer = deferPromise();
+        const failed = deferPromise();
+        const pageSize = 64 * 1024;
+        const fileLength = pageSize * 10;
+        const error = kind === 'NotReadableError' ?
+            createNotReadableError() :
+            (kind === 'unknown' ? new Error('unclassified page read error') : void 0);
+        /**
+         * @param {number} offset
+         * @param {number} end
+         * @returns {Promise<ArrayBuffer>}
+         */
+        const readPage = async (offset, end) => {
+            if (offset === 0) {
+                await failed.promise;
+                throw error;
+            }
+            peerStarted.resolve(void 0);
+            await releasePeer.promise;
+            return new ArrayBuffer(end - offset);
+        };
+        const reads = vi.fn(readPage);
+        const file = {size: fileLength, slice: (/** @type {number} */ start, /** @type {number} */ end) => ({arrayBuffer: () => reads(start, end)})};
+        const fileHandle = {getFile: vi.fn(async () => file)};
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_loadedForRead', true);
+        Reflect.set(store, '_length', fileLength);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength,
+            startOffset: 0,
+            readFile: file,
+        }]);
+        let settled = false;
+        const operation = store.warmSlices([{offset: 0, length: fileLength}]).then(
+            () => { settled = true; return {ok: true, error: null}; },
+            (error) => { settled = true; return {ok: false, error}; },
+        );
+        try {
+            await peerStarted.promise;
+            failed.resolve(void 0);
+            await new Promise((resolve) => { setImmediate(resolve); });
+            const settledBeforePeers = settled;
+            releasePeer.resolve(void 0);
+            const result = await operation;
+            expect(settledBeforePeers).toBe(false);
+            expect(result.ok).toBe(kind === 'NotReadableError');
+            if (kind !== 'NotReadableError') { expect(result.error).toBe(error); }
+            expect(reads).toHaveBeenCalledTimes(8);
+            expect(Reflect.get(store, '_readPageOperations').size).toBe(0);
+        } finally {
+            failed.resolve(void 0);
+            releasePeer.resolve(void 0);
+            await operation;
+        }
+    });
+
+    test('prefetch does not hide an unclassified peer failure behind a stale snapshot', async () => {
+        const store = new TermContentOpfsStore();
+        const unexpected = new Error('unclassified peer failure');
+        const pageSize = 64 * 1024;
+        const file = {
+            size: pageSize * 2,
+            slice(/** @type {number} */ start) {
+                return {async arrayBuffer() { throw start === 0 ? createNotReadableError() : unexpected; }};
+            },
+        };
+        const fileHandle = {};
+        Reflect.set(store, '_fileHandle', fileHandle);
+        Reflect.set(store, '_loadedForRead', true);
+        Reflect.set(store, '_length', file.size);
+        Reflect.set(store, '_segmentStates', [{
+            index: 0,
+            fileName: 'manabitan-term-content.bin',
+            fileHandle,
+            fileLength: file.size,
+            startOffset: 0,
+            readFile: file,
+        }]);
+        await expect(store.warmSlices([{offset: 0, length: file.size}])).rejects.toBe(unexpected);
+        expect(Reflect.get(store, '_readPageOperations').size).toBe(0);
     });
 });

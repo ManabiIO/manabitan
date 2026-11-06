@@ -26,7 +26,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version-file: "package.json"
+          node-version: "22.22.0"
 
       - name: Resolve release version and tag
         id: releaseVersion
@@ -83,7 +83,9 @@ jobs:
           body: |
             These attached packages are unsigned release builds. A successful build and provenance attestation do not establish store signing, ordinary end-user installation, or automatic updates.
 
-            The Firefox for Android package is experimental and unqualified. Current CI coverage is limited to temporary add-on installation and post-install debugging smoke; dictionary import, lookup, mining, and updating remain unverified.
+            Upgrading from older dictionary storage formats requires dictionary reimports. Open Settings > Dictionaries and use each affected dictionary's Download again or Choose file action. Dictionary-specific preferences and source information are retained for this recovery.
+
+            The experimental Firefox for Android build has automated runtime coverage for import, lookup, updating, and mining through a temporary add-on installation. Signed distribution, ordinary end-user installation, and automatic updates remain unqualified.
 
             Generated release notes follow this qualification notice.
           prerelease: true

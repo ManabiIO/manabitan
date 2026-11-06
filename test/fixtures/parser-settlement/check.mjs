@@ -4,12 +4,17 @@
  */
 /* eslint @stylistic/semi: ["error", "never"] */
 import assert from 'node:assert/strict'
-import {readFile, writeFile} from 'node:fs/promises'
+import {readFile, realpath, writeFile} from 'node:fs/promises'
+import {dirname, resolve} from 'node:path'
 import {Worker as ThreadWorker} from 'node:worker_threads'
 import {crc32, deflateRawSync} from 'node:zlib'
 import {setImmediate as turn} from 'node:timers/promises'
 import {runSettlementCases} from './cases.mjs'
 import * as parser from '../../../ext/js/dictionary/term-bank-wasm-parser.js'
+
+assert.ok(process.argv[2], 'A fresh output file path is required')
+const output = resolve(process.argv[2])
+assert.equal(await realpath(dirname(output)), dirname(output), 'Output parent must be resolved')
 
 const terminations = []
 let intercept = (data, deliver) => deliver(data)
@@ -47,6 +52,7 @@ function sources(banks, mode) {
 }
 const result = await runSettlementCases(parser, {
     assert,
+    experiments: process.env.MANABITAN_SETTLEMENT_REFERENCE === '1' ? {experimentalParserWorkers3: false} : {},
     makeSources: sources,
     setIntercept: (fn) => { intercept = fn },
     turn,
@@ -57,6 +63,6 @@ const result = await runSettlementCases(parser, {
 })
 await turn()
 const report = {node: process.version, ...result, workerCount, unhandled}
-await writeFile(process.argv[2] ?? '/tmp/parser-settlement.json', `${JSON.stringify(report, null, 2)}\n`)
+await writeFile(output, `${JSON.stringify(report, null, 2)}\n`, {flag: 'wx'})
 console.log(JSON.stringify({passed: report.passed, failed: report.failed, unhandled}, null, 2))
 if (report.failed > 0 || unhandled.length > 0) { process.exitCode = 1 }

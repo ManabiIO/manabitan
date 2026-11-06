@@ -45,6 +45,7 @@ const compat = new FlatCompat({
 header.rules.header.meta.schema = false;
 
 const manabitanHeaderFiles = [
+    'ext/js/dictionary/dictionary-zip-read-scope.js',
     'ext/js/app/reader-lookup-bridge.js',
     'ext/js/app/reader-lookup-integration.js',
     'dev/lib/zstd-simd-module.d.ts',
@@ -56,6 +57,7 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/raw-term-content.js',
     'dev/bin/run-playwright.js',
     'dev/bin/build-zstd-wasm.js',
+    'dev/bin/audit-release-packages.js',
     'dev/perf/**/*.js',
     'dev/lib/zstd-wasm.js',
     'ext/js/dictionary/zstd-term-content.js',
@@ -64,6 +66,7 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/dictionary-import-journal.js',
     'ext/js/dictionary/term-content-opfs-store.js',
     'ext/js/dictionary/term-record-opfs-store.js',
+    'ext/js/dictionary/term-record-import-index-writer.js',
     'ext/js/dictionary/term-lookup-index.js',
     'ext/js/dictionary/term-lookup-index-preparation.js',
     'ext/js/dictionary/term-bank-wasm-parser.js',

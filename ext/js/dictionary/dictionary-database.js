@@ -72,6 +72,7 @@ import {
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
+const DICTIONARY_STORAGE_UPGRADE_REASON = 'Dictionary storage was upgraded. Download or import this dictionary again.';
 const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
 const TERM_ENTRY_CONTENT_CACHE_MAX_BYTES = 32 * 1024 * 1024;
@@ -586,10 +587,6 @@ export class DictionaryDatabase {
         this._deferTermsVirtualTableSync = false;
         /** @type {boolean} */
         this._termsVirtualTableDirty = false;
-        /** @type {Map<string, number>} */
-        this._termEntryContentIdByKey = new Map();
-        /** @type {Map<string, number>} */
-        this._termEntryContentIdByHash = new Map();
         /** @type {Map<string, {id: number, offset: number, length: number, dictName: string}>} */
         this._termEntryContentMetaByHash = new Map();
         /** @type {Uint32Array} Sparse hash slots containing dense metadata indexes plus one. */
@@ -644,8 +641,6 @@ export class DictionaryDatabase {
         this._recentTermContentSourceBatchBytes = 0;
         /** @type {number} */
         this._nextRecentTermContentSourceBatchId = 1;
-        /** @type {boolean} */
-        this._termEntryContentHasExistingRows = true;
         /** @type {boolean} */
         this._enableTermEntryContentDedup = true;
         /** @type {Array<{hash1Table: Uint32Array, hash2Table: Uint32Array, indexTable: Uint32Array}>} */
@@ -817,9 +812,18 @@ export class DictionaryDatabase {
                 this._termContentZstdInitialized = true;
                 await this._deleteLegacyIndexedDb();
                 this._refreshTermRecordStorageNameMappings();
-                await this._cleanupIncompleteImports();
-                this._refreshTermRecordStorageNameMappings();
-                await this._cleanupMissingTermRecordShards();
+                if (this._hasUnresolvedImportJournal()) {
+                    // A recovered rollback can remain journal-owned when removing
+                    // its journal fails. Cleanup must not remove checkpoint files
+                    // which the next startup still has to validate and restore.
+                    this._startupCleanupIncompleteImportsSummary = null;
+                    this._startupCleanupMissingTermRecordShardsSummary = null;
+                    reportDiagnostics('dictionary-startup-cleanup-skipped', {reason: 'import-journal-recovery-pending'});
+                } else {
+                    await this._cleanupIncompleteImports();
+                    this._refreshTermRecordStorageNameMappings();
+                    await this._cleanupMissingTermRecordShards();
+                }
 
                 // keep existing draw worker split behaviour.
                 const isWorker = self.constructor.name !== 'Window';
@@ -1031,6 +1035,22 @@ export class DictionaryDatabase {
         return this._bulkImportState === BULK_IMPORT_STATE_ACTIVE || this._bulkImportState === BULK_IMPORT_STATE_FINALIZING;
     }
 
+    /** @returns {boolean} */
+    _hasUnresolvedImportJournal() {
+        return this._bulkImportJournalRecord !== null || this._importJournalRecoveryPending;
+    }
+
+    /**
+     * Destructive mutations cannot invalidate a retained rollback checkpoint.
+     * Do not attempt recovery here: an active import may still own its writes.
+     * @throws {Error} If import recovery metadata still owns persisted files.
+     */
+    _assertImportJournalReleasedForMutation() {
+        if (this._hasUnresolvedImportJournal()) {
+            throw new Error('Cannot modify dictionary storage until interrupted-import recovery metadata is cleared');
+        }
+    }
+
     /**
      * @param {import('@sqlite.org/sqlite-wasm').Database} db
      * @param {Error[]} errors
@@ -1130,8 +1150,6 @@ export class DictionaryDatabase {
 
     /** Clears lookup state that may reference rolled-back import rows. */
     _clearBulkImportRuntimeCaches() {
-        this._termEntryContentIdByKey.clear();
-        this._termEntryContentIdByHash.clear();
         this._clearTermEntryContentMetaCaches();
         this._termEntryContentCache.clear();
         this._invalidateTermLookupCaches();
@@ -1378,12 +1396,9 @@ export class DictionaryDatabase {
                 this._applyImportPragmas();
                 this._deferTermsVirtualTableSync = true;
                 this._termsVirtualTableDirty = false;
-                this._termEntryContentHasExistingRows = this._asNumber(db.selectValue('SELECT 1 FROM termEntryContent LIMIT 1'), 0) === 1;
                 for (const dropIndexSql of this._createDropIndexesSql()) {
                     db.exec(dropIndexSql);
                 }
-                this._termEntryContentIdByKey.clear();
-                this._termEntryContentIdByHash.clear();
                 this._clearTermEntryContentMetaCaches();
                 this._termContentBlockImportSession?.close();
                 this._termContentBlockImportSession = this._termContentBlockStore.beginImportSession();
@@ -1949,6 +1964,7 @@ export class DictionaryDatabase {
      * @param {import('dictionary-database').DeleteDictionaryProgressCallback} onProgress
      */
     async deleteDictionary(dictionaryName, progressRate, onProgress) {
+        this._assertImportJournalReleasedForMutation();
         const db = this._requireDb();
 
         /** @type {[table: string, keyColumn: string][]} */
@@ -2084,6 +2100,7 @@ export class DictionaryDatabase {
      * @returns {Promise<void>}
      */
     async replaceDictionaryTitle(fromDictionaryTitle, toDictionaryTitle, summaryOverride = null, replacedDictionaryTitle = null) {
+        this._assertImportJournalReleasedForMutation();
         const fromTitle = `${fromDictionaryTitle}`;
         const toTitle = `${toDictionaryTitle}`;
         const replacedTitle = typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle : null;
@@ -2425,7 +2442,6 @@ null;
         this._statementCache.clear();
         this._termEntryContentCache.clear();
         this._termRowCache.clear();
-        this._termEntryContentIdByHash.clear();
         this._clearTermEntryContentMetaCaches();
         this._invalidateTermLookupCaches();
     }
@@ -4208,6 +4224,9 @@ null;
 
     /** Restores terminal dictionary health before startup cleanup and prewarm. */
     _restoreTermRecordDictionaryHealth() {
+        // Health callbacks persist by logical title and generation. Establish
+        // those owners before restoring a physical storage failure on reopen.
+        this._refreshTermRecordStorageNameMappings();
         const db = this._requireDb();
         const rows = db.selectObjects(`
             SELECT h.title, h.reason, h.generationId, d.summaryJson
@@ -4308,6 +4327,7 @@ null;
      * }>}
      */
     async _cleanupIncompleteImports() {
+        this._assertImportJournalReleasedForMutation();
         const db = this._requireDb();
         const rows = db.selectObjects('SELECT id, title, summaryJson FROM dictionaries ORDER BY id ASC');
         if (rows.length === 0) {
@@ -4513,6 +4533,7 @@ null;
      * }>}
      */
     async _cleanupMissingTermRecordShards() {
+        this._assertImportJournalReleasedForMutation();
         const db = this._requireDb();
         const rows = db.selectObjects('SELECT title, summaryJson FROM dictionaries ORDER BY id ASC');
         /** @type {string[]} */
@@ -4551,10 +4572,11 @@ null;
         const markedReimportRequiredTitles = [];
         for (let i = 0; i < missingShardDictionaryNames.length; ++i) {
             const title = missingShardDictionaryNames[i];
-            this._termRecordStore.markDictionaryReimportRequired(
-                missingShardStorageNames[i],
-                'Dictionary record data is missing',
-            );
+            const storageName = missingShardStorageNames[i];
+            const health = this._termRecordStore.getDictionaryHealth?.(storageName);
+            if (health?.status !== 'reimportRequired') {
+                this._termRecordStore.markDictionaryReimportRequired(storageName, 'Dictionary record data is missing');
+            }
             markedReimportRequiredTitles.push(title);
         }
 
@@ -4694,8 +4716,6 @@ null;
             this._lastBulkAddTermsMetrics = null;
             this._termEntryContentCache.clear();
             if (!this._bulkImportTransactionOpen) {
-                this._termEntryContentIdByHash.clear();
-                this._termEntryContentIdByKey.clear();
                 this._clearTermEntryContentMetaCaches();
             }
             this._invalidateTermLookupCaches();
@@ -4733,8 +4753,6 @@ null;
         this._lastBulkAddTermsMetrics = null;
         this._termEntryContentCache.clear();
         if (!this._bulkImportTransactionOpen) {
-            this._termEntryContentIdByHash.clear();
-            this._termEntryContentIdByKey.clear();
             this._clearTermEntryContentMetaCaches();
         }
         this._invalidateTermLookupCaches();
@@ -4816,17 +4834,28 @@ null;
     /**
      * @param {string} dictionary
      * @returns {{contentOffset: number, contentLength: number, contentDictName: string, uncompressedLength: number}|null}
+     * @throws {TermContentLookupReadError} When metadata cannot be read.
      */
     _getSharedGlossaryArtifactMeta(dictionary) {
         const cached = this._sharedGlossaryArtifactMetaByDictionary.get(dictionary);
         if (typeof cached !== 'undefined') {
             return cached;
         }
-        const db = this._requireDb();
-        const row = db.selectObject(
-            'SELECT contentOffset, contentLength, contentDictName, uncompressedLength FROM sharedGlossaryArtifacts WHERE dictionary = $dictionary LIMIT 1',
-            {$dictionary: dictionary},
-        );
+        let row;
+        try {
+            const db = this._requireDb();
+            row = db.selectObject(
+                'SELECT contentOffset, contentLength, contentDictName, uncompressedLength FROM sharedGlossaryArtifacts WHERE dictionary = $dictionary LIMIT 1',
+                {$dictionary: dictionary},
+            );
+        } catch (error) {
+            // A failed metadata read does not establish corrupt dictionary data.
+            throw new TermContentLookupReadError(
+                'temporarilyUnavailable',
+                'Shared glossary metadata is temporarily unavailable',
+                {cause: error},
+            );
+        }
         if (typeof row === 'undefined') {
             return null;
         }
@@ -4911,15 +4940,15 @@ null;
      */
     async _warmSharedGlossaryArtifacts(dictionaries) {
         for (const dictionary of dictionaries) {
-            const meta = this._getSharedGlossaryArtifactMeta(dictionary);
-            if (
-                meta === null ||
-                meta.contentDictName !== RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME ||
-                this._sharedGlossaryArtifactInflatedByDictionary.has(dictionary)
-            ) {
-                continue;
-            }
             try {
+                const meta = this._getSharedGlossaryArtifactMeta(dictionary);
+                if (
+                    meta === null ||
+                    meta.contentDictName !== RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME ||
+                    this._sharedGlossaryArtifactInflatedByDictionary.has(dictionary)
+                ) {
+                    continue;
+                }
                 await this._readCompressedSharedGlossarySlice(dictionary, 0, 0);
             } catch (error) {
                 reportDiagnostics('dictionary-shared-glossary-warm-error', {
@@ -5316,8 +5345,7 @@ null;
         if (!Number.isSafeInteger(primaryKey) || primaryKey < 0) { return; }
         if (
             this._isOpening || this._closingPromise !== null || this._purgingPromise !== null ||
-            this._isBulkImportInProgress() || this._bulkImportJournalRecord !== null ||
-            this._importJournalRecoveryPending
+            this._isBulkImportInProgress() || this._hasUnresolvedImportJournal()
         ) {
             throw new Error('Cannot clean up an import placeholder while storage lifecycle or recovery is active');
         }
@@ -6665,10 +6693,13 @@ null;
         ) {
             throw new RangeError(`Invalid term content metadata length: ${meta.length}`);
         }
+        // Interning can allocate and fail; retain an existing entry unchanged
+        // until its replacement is ready to write.
+        const dictNameId = this._internTermEntryContentMetaDictName(meta.dictName);
         this._termEntryContentMetaIdTable[index] = meta.id;
         this._termEntryContentMetaOffsetTable[index] = meta.offset;
         this._termEntryContentMetaLengthTable[index] = meta.length < 0 ? TERM_CONTENT_META_U32_NULL : meta.length;
-        this._termEntryContentMetaDictNameIdTable[index] = this._internTermEntryContentMetaDictName(meta.dictName);
+        this._termEntryContentMetaDictNameIdTable[index] = dictNameId;
         const hasSignatures = (
             typeof meta.signature1 === 'number' &&
             typeof meta.signature2 === 'number' &&
@@ -6694,42 +6725,44 @@ null;
         while (capacity < requiredCount) { capacity *= 2; }
         const hash1Table = new Uint32Array(capacity);
         hash1Table.set(this._termEntryContentMetaHash1Table);
-        this._termEntryContentMetaHash1Table = hash1Table;
         const hash2Table = new Uint32Array(capacity);
         hash2Table.set(this._termEntryContentMetaHash2Table);
-        this._termEntryContentMetaHash2Table = hash2Table;
         const stateTable = new Uint8Array(capacity);
         stateTable.set(this._termEntryContentMetaStateTable);
-        this._termEntryContentMetaStateTable = stateTable;
         const idTable = new Float64Array(capacity);
         idTable.set(this._termEntryContentMetaIdTable);
-        this._termEntryContentMetaIdTable = idTable;
         const offsetTable = new Float64Array(capacity);
         offsetTable.set(this._termEntryContentMetaOffsetTable);
-        this._termEntryContentMetaOffsetTable = offsetTable;
         const lengthTable = new Uint32Array(capacity);
         lengthTable.set(this._termEntryContentMetaLengthTable);
-        this._termEntryContentMetaLengthTable = lengthTable;
         const dictNameIdTable = new Uint32Array(capacity);
         dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
-        this._termEntryContentMetaDictNameIdTable = dictNameIdTable;
         const signaturePresentTable = new Uint8Array(capacity);
         signaturePresentTable.set(this._termEntryContentMetaSignaturePresentTable);
-        this._termEntryContentMetaSignaturePresentTable = signaturePresentTable;
         const signature1Table = new Uint32Array(capacity);
         signature1Table.set(this._termEntryContentMetaSignature1Table);
-        this._termEntryContentMetaSignature1Table = signature1Table;
         const signature2Table = new Uint32Array(capacity);
         signature2Table.set(this._termEntryContentMetaSignature2Table);
-        this._termEntryContentMetaSignature2Table = signature2Table;
         const signature3Table = new Uint32Array(capacity);
         signature3Table.set(this._termEntryContentMetaSignature3Table);
-        this._termEntryContentMetaSignature3Table = signature3Table;
         const recentSourceBatchIdTable = new Uint32Array(capacity);
         recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
-        this._termEntryContentMetaRecentSourceBatchIdTable = recentSourceBatchIdTable;
         const recentSourceOffsetTable = new Uint32Array(capacity);
         recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
+        // Publish the complete set only after every allocation and copy succeeds.
+        // The state vector advertises capacity to later allocations and retries.
+        this._termEntryContentMetaHash1Table = hash1Table;
+        this._termEntryContentMetaHash2Table = hash2Table;
+        this._termEntryContentMetaStateTable = stateTable;
+        this._termEntryContentMetaIdTable = idTable;
+        this._termEntryContentMetaOffsetTable = offsetTable;
+        this._termEntryContentMetaLengthTable = lengthTable;
+        this._termEntryContentMetaDictNameIdTable = dictNameIdTable;
+        this._termEntryContentMetaSignaturePresentTable = signaturePresentTable;
+        this._termEntryContentMetaSignature1Table = signature1Table;
+        this._termEntryContentMetaSignature2Table = signature2Table;
+        this._termEntryContentMetaSignature3Table = signature3Table;
+        this._termEntryContentMetaRecentSourceBatchIdTable = recentSourceBatchIdTable;
         this._termEntryContentMetaRecentSourceOffsetTable = recentSourceOffsetTable;
     }
 
@@ -6773,7 +6806,13 @@ null;
         const oldSlotTable = this._termEntryContentMetaHashPairTable;
         const slotTable = new Uint32Array(tableSize);
         const mask = tableSize - 1;
-        for (const encodedIndex of oldSlotTable) {
+        // Scan stable dense IDs when shorter. Rollback can leave many free
+        // IDs, so retain the bucket scan for a sparse metadata arena.
+        const denseCount = this._termEntryContentMetaDenseCount;
+        const useDense = denseCount <= oldSlotTable.length;
+        const scanLength = useDense ? denseCount : oldSlotTable.length;
+        for (let i = 0; i < scanLength; ++i) {
+            const encodedIndex = useDense ? i + 1 : oldSlotTable[i];
             if (encodedIndex === 0) { continue; }
             const index = encodedIndex - 1;
             if (this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
@@ -6827,8 +6866,8 @@ null;
      * Reserves collision-free metadata slots and computes content signatures
      * while block compression is running. Pending slots participate in probe
      * chains but are never returned to readers before their offsets exist.
-     * @param {number[]} pendingContentHash1s
-     * @param {number[]} pendingContentHash2s
+     * @param {number[]|Uint32Array} pendingContentHash1s
+     * @param {number[]|Uint32Array} pendingContentHash2s
      * @param {Uint8Array[]} pendingContentBytes
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
      * @returns {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}}
@@ -6869,10 +6908,10 @@ null;
             for (let i = 0; i < count; ++i) {
                 const hash1 = pendingContentHash1s[i] >>> 0;
                 const hash2 = pendingContentHash2s[i] >>> 0;
-                const contentBytes = pendingContentSpans === null ?
+                let contentBytes = pendingContentSpans === null ?
                     pendingContentBytes[i] :
                     pendingContentSpans.buffer;
-                const contentByteOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
+                let contentByteOffset = pendingContentSpans === null ? 0 : pendingContentSpans.offsets[i];
                 const contentLength = pendingContentSpans === null ? contentBytes.byteLength : pendingContentSpans.lengths[i];
                 if (
                     !(contentBytes instanceof Uint8Array) ||
@@ -6896,6 +6935,11 @@ null;
                     slot = (slot + 1) & mask;
                 }
                 if (slot < 0) { continue; }
+                // Short signatures pad the logical span, not adjacent slab bytes.
+                if (contentLength < 4) {
+                    contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + contentLength);
+                    contentByteOffset = 0;
+                }
                 const index = freeIndexes.length === 0 ?
                     this._termEntryContentMetaDenseCount++ :
                     /** @type {number} */ (freeIndexes.pop());
@@ -6974,6 +7018,10 @@ null;
             typeof signature2 === 'number' &&
             typeof signature3 === 'number'
         );
+        if (!hasPreparedSignatures && contentLength < 4) {
+            contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + contentLength);
+            contentByteOffset = 0;
+        }
         return this._reservePreparedArtifactTermContentMetadata(
             hash1,
             hash2,
@@ -7194,6 +7242,7 @@ this._readTermContentSignature(
      * @param {number} hash1
      * @param {number} hash2
      * @param {{id: number, offset: number, length: number, dictName: string, hash2?: number}} meta
+     * @throws {Error} If metadata validation or dictionary-name interning fails.
      */
     _setTermEntryContentMetaByHashPair(hash1, hash2, meta) {
         hash1 >>>= 0;
@@ -7209,11 +7258,18 @@ this._readTermContentSignature(
             const encodedIndex = slotTable[slot];
             if (encodedIndex === 0) {
                 const index = this._allocateTermEntryContentMetaIndex();
+                try {
+                    this._writeTermEntryContentMetaHashPairIndex(index, meta);
+                } catch (error) {
+                    // Failed entries remain invisible and their dense index
+                    // must be available to the next insertion.
+                    this._termEntryContentMetaFreeIndexes.push(index);
+                    throw error;
+                }
                 hash1Table[index] = hash1;
                 hash2Table[index] = hash2;
                 stateTable[index] = TERM_CONTENT_META_SLOT_PUBLISHED;
                 slotTable[slot] = index + 1;
-                this._writeTermEntryContentMetaHashPairIndex(index, meta);
                 ++this._termEntryContentMetaHashPairCount;
                 return;
             }
@@ -7288,6 +7344,10 @@ this._readTermContentSignature(
             length > contentBytes.byteLength - contentByteOffset
         ) {
             throw new RangeError(`Invalid term content metadata source span: ${contentByteOffset}+${length}`);
+        }
+        if (length < 4) {
+            contentBytes = contentBytes.subarray(contentByteOffset, contentByteOffset + length);
+            contentByteOffset = 0;
         }
         const lastOffset = Math.max(0, length - 4);
         const index = this._allocateTermEntryContentMetaIndex();
@@ -8123,7 +8183,7 @@ this._readTermContentSignature(
      * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
      * @param {ArtifactTermContentChunk} chunk
      * @param {boolean} [reserveMetadata]
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
      */
     async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false) {
         const count = chunk.rowCount;
@@ -8395,6 +8455,11 @@ null :
             }
             const firstUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowStart);
             const lastUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowEnd);
+            const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
+            // These hash words already have Uint32 semantics. Allocate only
+            // for a pending row, without growing numeric JavaScript arrays.
+            let pendingCanonicalHash1s = new Uint32Array(0);
+            let pendingCanonicalHash2s = new Uint32Array(0);
             const pendingSpanOffsets = getOrCreateTermContentPlanScratch(
                 contentDedupPlan,
                 'pendingSpanOffsetsScratch',
@@ -8410,7 +8475,6 @@ null :
             let dedupCapacityMs = 0;
             if (reserveMetadata) {
                 const capacityStart = safePerformance.now();
-                const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
                 this._ensureTermEntryContentMetaHashPairCapacity(
                     this._getArtifactTermContentMetaCapacityHint(chunk, maximumPendingContentCount),
                 );
@@ -8427,18 +8491,26 @@ null :
             /** @type {Array<PendingContentDescriptor & {existingMeta: TermContentMeta}>} */
             const exactCandidates = [];
             /**
-             * @param {PendingContentDescriptor} descriptor
+             * @param {number} uniqueIndex
+             * @param {number} rowIndex
+             * @param {number} contentOffset
+             * @param {number} contentLength
+             * @param {number} hash1
+             * @param {number} hash2
              * @throws {RangeError} If an offset exceeds the persisted Uint32 representation.
              */
-            const appendPendingContent = (descriptor) => {
-                const {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2} = descriptor;
+            const appendPendingContent = (uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2) => {
                 if (contentOffset > 0xffffffff) {
                     throw new RangeError(`Artifact term content offset exceeds Uint32 at row ${rowIndex}`);
                 }
+                if (pendingContentCount === 0) {
+                    pendingCanonicalHash1s = new Uint32Array(maximumPendingContentCount);
+                    pendingCanonicalHash2s = new Uint32Array(maximumPendingContentCount);
+                }
                 pendingSpanOffsets[pendingContentCount] = contentOffset;
                 pendingSpanLengths[pendingContentCount] = contentLength;
-                pendingContentHash1s.push(hash1);
-                pendingContentHash2s.push(hash2);
+                pendingCanonicalHash1s[pendingContentCount] = hash1;
+                pendingCanonicalHash2s[pendingContentCount] = hash2;
                 if (stagedIndexes !== null) {
                     const signatureOffset = uniqueIndex * 3;
                     stagedIndexes[pendingContentCount] = uniqueSignatures === null ?
@@ -8465,8 +8537,8 @@ null :
                             uniformContentDictName,
                     );
                 }
-                contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
-                contentDedupPlan.pendingIndexes[uniqueIndex] = pendingContentCount;
+                // Canonical rows are visited once. Epoch scratch is needed only
+                // by the generic row scan; this journal owns publication/rollback.
                 pendingPlanUniqueIndexes.push(uniqueIndex);
                 ++pendingContentCount;
             };
@@ -8485,7 +8557,14 @@ null :
                     if (exactFallback) { ++exactFallbackCount; }
                     if (recentSourceHit === true) { ++recentSourceHitCount; }
                     if (typeof existingMeta === 'undefined') {
-                        appendPendingContent(descriptor);
+                        appendPendingContent(
+                            descriptor.uniqueIndex,
+                            descriptor.rowIndex,
+                            descriptor.contentOffset,
+                            descriptor.contentLength,
+                            descriptor.hash1,
+                            descriptor.hash2,
+                        );
                         continue;
                     }
                     const {uniqueIndex} = descriptor;
@@ -8525,7 +8604,6 @@ null :
                     ) {
                         throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
                     }
-                    const descriptor = {uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2};
                     const existingIndex = persistedLookupRequired ?
                         this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
                         -1;
@@ -8533,10 +8611,10 @@ null :
                         void 0 :
                         this._readTermEntryContentMetaHashPairIndex(existingIndex);
                     if (typeof existingMeta === 'undefined') {
-                        appendPendingContent(descriptor);
+                        appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2);
                         continue;
                     }
-                    exactCandidates.push({...descriptor, existingMeta});
+                    exactCandidates.push({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, existingMeta});
                     if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
                         await resolveExactCandidates();
                     }
@@ -8586,8 +8664,8 @@ null :
                 contentLengths,
                 resolvedContentDictNames,
                 pendingContentBytes,
-                pendingContentHash1s,
-                pendingContentHash2s,
+                pendingContentHash1s: pendingCanonicalHash1s.subarray(0, pendingContentCount),
+                pendingContentHash2s: pendingCanonicalHash2s.subarray(0, pendingContentCount),
                 pendingContentDictNames,
                 pendingRowToUniqueIndex: null,
                 pendingContentCount,
@@ -8987,7 +9065,7 @@ null :
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[], pendingContentHash2s: number[], pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */
@@ -9079,12 +9157,6 @@ null :
             const dictNameId = uniformPendingDictNameId >= 0 ?
                 uniformPendingDictNameId :
                 this._internTermEntryContentMetaDictName(dictName);
-            const contentBytes = pendingContentSpans === null ?
-                pendingContentBytes[i] :
-                pendingContentSpans.buffer;
-            const contentByteOffset = pendingContentSpans === null ?
-                0 :
-                pendingContentSpans.offsets[i];
             const reservedIndex = stagedContentMetadata?.indexes[i] ?? -1;
             const stagedIndex = stagedContentMetadata === null ?
                 -1 :
@@ -9094,10 +9166,7 @@ null :
                     pendingContentHash1s[i],
                     pendingContentHash2s[i],
                 );
-            if (
-                stagedIndex >= 0 &&
-                this._termEntryContentMetaStateTable[stagedIndex] === TERM_CONTENT_META_SLOT_PENDING
-            ) {
+            if (stagedIndex >= 0) {
                 const offset = pendingOffsets[i];
                 const length = pendingLengths[i];
                 if (!metadataValidated && (!Number.isSafeInteger(offset) || offset < 0)) {
@@ -9121,6 +9190,12 @@ null :
                 ++this._termEntryContentMetaHashPairCount;
                 continue;
             }
+            const contentBytes = pendingContentSpans === null ?
+                pendingContentBytes[i] :
+                pendingContentSpans.buffer;
+            const contentByteOffset = pendingContentSpans === null ?
+                0 :
+                pendingContentSpans.offsets[i];
             if (stagedContentMetadata !== null && reservedIndex < 0) {
                 const collisionEntry = this._appendStagedTermEntryContentMetaCollision(
                     pendingContentHash1s[i],
@@ -9635,6 +9710,27 @@ null :
         const sharedGlossaryArtifactsBefore = this._asNumber(db.selectValue('SELECT COUNT(*) FROM sharedGlossaryArtifacts'), 0);
         const termRecordsBefore = this._termRecordStore.size;
 
+        // Preserve the installed inventory so the existing reimport controls
+        // and per-profile dictionary preferences survive a storage reset. Never
+        // retain incomplete, malformed, or owned transient update summaries.
+        const retainedDictionaries = [];
+        for (const row of db.selectObjects('SELECT id, title, version, summaryJson FROM dictionaries ORDER BY id ASC')) {
+            const title = this._asString(row.title);
+            const summary = this._safeParseJson(this._asString(row.summaryJson), null);
+            const version = this._asNumber(row.version, 0);
+            if (
+                title.length === 0 || summary === null || typeof summary !== 'object' || Array.isArray(summary) ||
+                summary.title !== title || summary.importSuccess !== true ||
+                (version !== 1 && version !== 3) || summary.version !== version ||
+                isRecognizedTransientUpdateTitle(title, summary)
+            ) { continue; }
+            // Retained metadata describes unavailable old content, not a new
+            // durable import publication that a reconnected client may accept.
+            delete summary.storageImportOperationId;
+            retainedDictionaries.push({id: row.id, title, version, summary});
+        }
+        // Read and validate the inventory before destructive storage I/O. A
+        // metadata read failure must leave the old files available for retry.
         const resetErrors = await this._collectPersistentStoreResetErrors(false);
         if (resetErrors.length === 1) {
             throw resetErrors[0];
@@ -9656,6 +9752,16 @@ null :
             db.exec('DELETE FROM termGlossarySearchTerms');
             db.exec('DELETE FROM dictionaryGlossarySearchIndex');
             db.exec('DELETE FROM dictionaries');
+            for (const {id, title, version, summary} of retainedDictionaries) {
+                db.exec({
+                    sql: 'INSERT INTO dictionaries (id, title, version, summaryJson) VALUES (?, ?, ?, ?)',
+                    bind: [id, title, version, JSON.stringify(summary)],
+                });
+                db.exec({
+                    sql: 'INSERT INTO dictionaryStorageHealth (title, generationId, reason) VALUES (?, ?, ?)',
+                    bind: [title, this._getSummaryStorageGenerationId(summary, title), DICTIONARY_STORAGE_UPGRADE_REASON],
+                });
+            }
             db.exec('COMMIT');
         } catch (e) {
             try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
@@ -9678,6 +9784,7 @@ null :
             tagMetaBefore,
             mediaBefore,
             sharedGlossaryArtifactsBefore,
+            retainedDictionaryCount: retainedDictionaries.length,
         };
     }
 
@@ -10577,9 +10684,19 @@ null :
                                 // extracted entry is the original raw payload and must not be
                                 // decompressed a second time.
                                 const isBlockContent = typeof getRawTermContentBlockCompressionDictName(contentDictName) !== 'undefined';
-                                const contentJson = (contentDictName === 'raw' || isBlockContent) ?
-                                    this._textDecoder.decode(contentBytes) :
-                                    this._textDecoder.decode(decompressTermContentZstd(contentBytes, contentDictName.length > 0 ? contentDictName : null));
+                                let decodedContentBytes = contentBytes;
+                                if (contentDictName !== 'raw' && !isBlockContent) {
+                                    try {
+                                        decodedContentBytes = decompressTermContentZstd(contentBytes, contentDictName.length > 0 ? contentDictName : null);
+                                    } catch (error) {
+                                        throw new TermContentLookupReadError(
+                                            isZstdResourceError(error) ? 'temporarilyUnavailable' : 'corrupt',
+                                            'Term content decompression failed',
+                                            {cause: error},
+                                        );
+                                    }
+                                }
+                                const contentJson = this._textDecoder.decode(decodedContentBytes);
                                 const parsedHeader = this._parseSerializedTermEntryContentHeader(contentJson);
                                 if (parsedHeader !== null) {
                                     definitionTags = parsedHeader.definitionTags;
@@ -10629,7 +10746,7 @@ null :
                                 contentOffset,
                                 contentLength,
                                 contentDictName,
-                                phase: 'shared-glossary',
+                                phase: 'content-decode',
                             });
                             if (e.status === 'corrupt' && dictionaryName.length > 0) {
                                 this._termRecordStore.markDictionaryReimportRequired(

@@ -21,6 +21,7 @@ import fs from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
 import {ManifestUtil} from '../../dev/manifest-util.js';
+import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -73,16 +74,13 @@ const fixtures = {
             '--disable-crash-reporter',
             '--disable-crashpad',
         ];
-        if (process.platform === 'darwin') {
-            launchArgs.push('--disable-features=MacAppCodeSignClone');
-        }
         if (!runHeadless && hideWindow) {
             launchArgs.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
         }
-        const context = await chromium.launchPersistentContext('', {
+        const context = await chromium.launchPersistentContext('', getChromiumLaunchOptions({
             headless: runHeadless,
             args: launchArgs,
-        });
+        }));
         try {
             await use(context);
         } finally {

@@ -16,6 +16,7 @@
  */
 
 import {describe, expect, vi} from 'vitest';
+import {createDictionaryImportBusyError} from '../ext/js/core/dictionary-import-busy-error.js';
 import {Display} from '../ext/js/display/display.js';
 import {DisplayNotification} from '../ext/js/display/display-notification.js';
 import {QueryParser} from '../ext/js/display/query-parser.js';
@@ -60,6 +61,8 @@ function createDisplay(document) {
         _dictionaryEntryNodes: [],
         _windowScroll: {x: 0, y: 0},
         _dictionaryInfo: [],
+        _dictionaryInfoRefreshGeneration: 0,
+        _dictionaryInfoRefreshPending: false,
         _contentManager: {executeMediaRequests: async () => {}, unloadAll() {}},
         _elementOverflowController: {addElements() {}, clearElements() {}},
         _displayGenerator: {createTermEntry},
@@ -293,5 +296,61 @@ describe('popup and in-display scanner forwarding', () => {
             pageTheme: 'light',
         });
         expect(setContent.mock.calls[0][0].content.dictionaryAvailability).toBe(degraded);
+    });
+});
+
+describe('Display metadata deferred by import', () => {
+    test('recovers before rendering results after import failure without an update event', async ({window}) => {
+        const {display, createTermEntry} = createDisplay(window.document);
+        const getDictionaryInfo = vi.fn().mockResolvedValue([{title: 'Healthy'}]);
+        display._application.api.getDictionaryInfo = getDictionaryInfo;
+        display._dictionaryInfoRefreshPending = true;
+        await showSuppliedContent(display, {dictionaryEntries: [healthyEntry]});
+        expect(createTermEntry).toHaveBeenLastCalledWith(healthyEntry, [{title: 'Healthy'}]);
+        expect(display._dictionaryInfoRefreshPending).toBe(false);
+        await showSuppliedContent(display, {dictionaryEntries: [healthyEntry]});
+        expect(getDictionaryInfo).toHaveBeenCalledOnce();
+    });
+
+    test('does not retry metadata for ordinary empty results', async ({window}) => {
+        const {display} = createDisplay(window.document);
+        const getDictionaryInfo = vi.fn();
+        display._application.api.getDictionaryInfo = getDictionaryInfo;
+        display._dictionaryInfoRefreshPending = true;
+        await showSuppliedContent(display, {dictionaryEntries: []});
+        expect(getDictionaryInfo).not.toHaveBeenCalled();
+        expect(display._dictionaryInfoRefreshPending).toBe(true);
+    });
+
+    test('keeps supplied results available if an import still owns metadata', async ({window}) => {
+        const {display, createTermEntry} = createDisplay(window.document);
+        display._application.api.getDictionaryInfo = vi.fn().mockRejectedValue(createDictionaryImportBusyError('getDictionaryInfoOffscreen'));
+        display._dictionaryInfoRefreshPending = true;
+        await showSuppliedContent(display, {dictionaryEntries: [healthyEntry]});
+        expect(createTermEntry).toHaveBeenCalledOnce();
+        expect(display._dictionaryInfoRefreshPending).toBe(true);
+    });
+
+    test('propagates actual metadata failures instead of fabricating empty metadata', async ({window}) => {
+        const {display, createTermEntry} = createDisplay(window.document);
+        const error = new Error('Corrupt dictionary metadata');
+        display._application.api.getDictionaryInfo = vi.fn().mockRejectedValue(error);
+        display._dictionaryInfoRefreshPending = true;
+        await expect(showSuppliedContent(display, {dictionaryEntries: [healthyEntry]})).rejects.toBe(error);
+        expect(createTermEntry).not.toHaveBeenCalled();
+    });
+
+    test('does not render stale results after a deferred metadata read', async ({window}) => {
+        const {display, createTermEntry} = createDisplay(window.document);
+        const metadata = Promise.withResolvers();
+        const getDictionaryInfo = vi.fn().mockReturnValue(metadata.promise);
+        display._application.api.getDictionaryInfo = getDictionaryInfo;
+        display._dictionaryInfoRefreshPending = true;
+        const rendering = showSuppliedContent(display, {dictionaryEntries: [healthyEntry]});
+        await vi.waitFor(() => expect(getDictionaryInfo).toHaveBeenCalledOnce());
+        display._setContentToken = {};
+        metadata.resolve([{title: 'Healthy'}]);
+        await rendering;
+        expect(createTermEntry).not.toHaveBeenCalled();
     });
 });
