@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {parseJson} from '../core/json.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -282,7 +283,10 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
             [-5, 'inflated term bank is not a JSON array'],
             [-6, 'raw DEFLATE payload has trailing bytes'],
         ]);
-        throw new Error(`Compressed term-bank source failed validation: ${messages.get(jsonLength) ?? `code ${jsonLength}`}`);
+        // Array recognition is parser admission, not archive integrity: a
+        // BOM-prefixed document can still be read by the decoded fallback.
+        const ErrorClass = [-2, -3, -4, -6].includes(jsonLength) ? DictionarySourceIntegrityError : Error;
+        throw new ErrorClass(`Compressed term-bank source failed validation: ${messages.get(jsonLength) ?? `code ${jsonLength}`}`);
     }
     if (jsonLength < 2 || jsonLength > outputCapacity) {
         throw new Error('Compressed term-bank source returned an invalid JSON length');
@@ -379,7 +383,8 @@ export async function inflateCompressedZipMediaBatchWasm(sources) {
             [-4, 'inflated bytes do not match the ZIP CRC32'],
             [-6, 'raw DEFLATE payload has trailing bytes'],
         ]);
-        throw new Error(`Compressed ZIP media source failed validation: ${messages.get(outputLength) ?? `code ${outputLength}`}`);
+        const ErrorClass = [-2, -3, -4, -6].includes(outputLength) ? DictionarySourceIntegrityError : Error;
+        throw new ErrorClass(`Compressed ZIP media source failed validation: ${messages.get(outputLength) ?? `code ${outputLength}`}`);
     }
     if (outputLength !== uncompressedBytes) {
         throw new Error('Compressed ZIP media batch returned an invalid byte length');
@@ -3572,7 +3577,12 @@ function createParallelParserError(value) {
         typeof value === 'object' ? value : null
     );
     const message = typeof data?.message === 'string' ? data.message : `${value}`;
-    const error = data?.name === 'TermBankWasmResourceError' ? new TermBankWasmResourceError(message) : new Error(message);
+    let error;
+    switch (data?.name) {
+        case 'TermBankWasmResourceError': error = new TermBankWasmResourceError(message); break;
+        case 'DictionarySourceIntegrityError': error = new DictionarySourceIntegrityError(message); break;
+        default: error = new Error(message); break;
+    }
     if (typeof data?.name === 'string' && data.name.length > 0) { error.name = data.name; }
     if (typeof data?.stack === 'string') { error.stack = data.stack; }
     return error;

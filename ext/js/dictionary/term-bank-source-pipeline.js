@@ -16,6 +16,7 @@
  */
 
 import {deferPromise} from '../core/utilities.js';
+import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 
 const SOURCE_TERM_BANK_BATCH_MAX_FILES = 80;
 const SOURCE_TERM_BANK_BATCH_MAX_BYTES = 192 * 1024 * 1024;
@@ -97,7 +98,7 @@ export class RawZipPayloadReader {
             (compressionMethod !== 0 && compressionMethod !== 8) ||
             offset > archiveSize - ZIP_LOCAL_FILE_HEADER_LENGTH
         ) {
-            throw new Error(`Raw ZIP metadata is invalid for '${file.filename}'`);
+            throw new DictionarySourceIntegrityError(`Raw ZIP metadata is invalid for '${file.filename}'`);
         }
         // Keep the existing small-archive path. Large Files/Blobs read only
         // validated entry ranges; an already-owned ArrayBuffer needs no copy.
@@ -109,23 +110,23 @@ export class RawZipPayloadReader {
         const headerOffset = ranged ? 0 : offset;
         const view = new DataView(archiveBytes.buffer, archiveBytes.byteOffset, archiveBytes.byteLength);
         if (view.getUint32(headerOffset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
-            throw new Error(`Raw ZIP local header is invalid for '${file.filename}'`);
+            throw new DictionarySourceIntegrityError(`Raw ZIP local header is invalid for '${file.filename}'`);
         }
         const localFlags = view.getUint16(headerOffset + 6, true);
         const localCompressionMethod = view.getUint16(headerOffset + 8, true);
         if ((localFlags & 0x1) !== 0 || localCompressionMethod !== compressionMethod) {
-            throw new Error(`Raw ZIP local header disagrees with central metadata for '${file.filename}'`);
+            throw new DictionarySourceIntegrityError(`Raw ZIP local header disagrees with central metadata for '${file.filename}'`);
         }
         const filenameLength = view.getUint16(headerOffset + 26, true);
         const extraFieldLength = view.getUint16(headerOffset + 28, true);
         const dataOffset = offset + ZIP_LOCAL_FILE_HEADER_LENGTH + filenameLength + extraFieldLength;
         if (!Number.isSafeInteger(dataOffset) || dataOffset > archiveSize || compressedSize > archiveSize - dataOffset) {
-            throw new Error(`Raw ZIP payload is out of bounds for '${file.filename}'`);
+            throw new DictionarySourceIntegrityError(`Raw ZIP payload is out of bounds for '${file.filename}'`);
         }
         const rawFilename = /** @type {unknown} */ (Reflect.get(file, 'rawFilename'));
         if (rawFilename instanceof Uint8Array) {
             if (filenameLength !== rawFilename.byteLength) {
-                throw new Error(`Raw ZIP local filename disagrees with central metadata for '${file.filename}'`);
+                throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${file.filename}'`);
             }
             const localFilenameOffset = offset + ZIP_LOCAL_FILE_HEADER_LENGTH;
             const localFilename = ranged ?
@@ -133,7 +134,7 @@ export class RawZipPayloadReader {
                 archiveBytes.subarray(localFilenameOffset, localFilenameOffset + filenameLength);
             for (let i = 0; i < filenameLength; ++i) {
                 if (localFilename[i] !== rawFilename[i]) {
-                    throw new Error(`Raw ZIP local filename disagrees with central metadata for '${file.filename}'`);
+                    throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${file.filename}'`);
                 }
             }
         }
@@ -230,18 +231,18 @@ export class RawZipPayloadReader {
                 const entry = entries[i];
                 const headerOffset = entry.offset - firstOffset;
                 if (headerOffset < 0 || headerOffset > bytes.byteLength - ZIP_LOCAL_FILE_HEADER_LENGTH || view.getUint32(headerOffset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
-                    throw new Error(`Raw ZIP local header is invalid for '${entry.filename}'`);
+                    throw new DictionarySourceIntegrityError(`Raw ZIP local header is invalid for '${entry.filename}'`);
                 }
                 const localFlags = view.getUint16(headerOffset + 6, true);
                 const localCompressionMethod = view.getUint16(headerOffset + 8, true);
                 if ((localFlags & 0x1) !== 0 || localCompressionMethod !== entry.compressionMethod) {
-                    throw new Error(`Raw ZIP local header disagrees with central metadata for '${entry.filename}'`);
+                    throw new DictionarySourceIntegrityError(`Raw ZIP local header disagrees with central metadata for '${entry.filename}'`);
                 }
                 const filenameLength = view.getUint16(headerOffset + 26, true);
                 const extraFieldLength = view.getUint16(headerOffset + 28, true);
                 const {rawFilename} = entry;
                 if (filenameLength !== rawFilename.byteLength) {
-                    throw new Error(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
+                    throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
                 }
                 const localFilenameOffset = headerOffset + ZIP_LOCAL_FILE_HEADER_LENGTH;
                 const dataOffset = localFilenameOffset + filenameLength + extraFieldLength;
@@ -252,11 +253,11 @@ export class RawZipPayloadReader {
                     !Number.isSafeInteger(absoluteDataOffset) || absoluteDataOffset > archiveSize ||
                     entry.compressedSize > archiveSize - absoluteDataOffset
                 ) {
-                    throw new Error(`Raw ZIP payload is out of bounds for '${entry.filename}'`);
+                    throw new DictionarySourceIntegrityError(`Raw ZIP payload is out of bounds for '${entry.filename}'`);
                 }
                 for (let j = 0; j < filenameLength; ++j) {
                     if (bytes[localFilenameOffset + j] !== rawFilename[j]) {
-                        throw new Error(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
+                        throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
                     }
                 }
                 result.push({
@@ -286,7 +287,7 @@ export class RawZipPayloadReader {
         signal.throwIfAborted();
         const bytes = new Uint8Array(await /** @type {Blob} */ (this._archiveContent).slice(offset, offset + length).arrayBuffer());
         signal.throwIfAborted();
-        if (bytes.byteLength !== length) { throw new Error('Raw ZIP range read is incomplete'); }
+        if (bytes.byteLength !== length) { throw new DictionarySourceIntegrityError('Raw ZIP range read is incomplete'); }
         return bytes;
     }
 
@@ -677,7 +678,7 @@ export class TermBankSourcePipeline {
             const bytes = await /** @type {AbortableZipReadPool<Uint8Array>} */ (this._compressedReadPool).read(file);
             const sourceMetadata = metadata[index];
             if (!(bytes instanceof Uint8Array) || bytes.byteLength !== sourceMetadata.compressedSize) {
-                throw new Error(`Compressed term-bank ZIP size mismatch in '${file.filename}'`);
+                throw new DictionarySourceIntegrityError(`Compressed term-bank ZIP size mismatch in '${file.filename}'`);
             }
             return {bytes, ...sourceMetadata, filename: file.filename};
         });

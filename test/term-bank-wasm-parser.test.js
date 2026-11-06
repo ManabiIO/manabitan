@@ -23,6 +23,7 @@ import {crc32, deflateRawSync, inflateRawSync} from 'node:zlib';
 import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {DictionarySourceIntegrityError} from '../ext/js/dictionary/dictionary-source-integrity-error.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
 import {encodePersistedTermLookupIndexFromPreinternedPlan, findExactRows, parsePersistedTermLookupIndex} from '../ext/js/dictionary/term-lookup-index.js';
@@ -364,7 +365,9 @@ describe('term-bank WASM parser', () => {
         },
     ])('rejects batched media with $name', async ({mutate, message}) => {
         const source = createCompressedTermBankSource('binary image payload', 8);
-        await expect(inflateCompressedZipMediaBatchWasm([mutate(source)])).rejects.toThrow(message);
+        await expect(inflateCompressedZipMediaBatchWasm([mutate(source)])).rejects.toMatchObject({
+            name: 'DictionarySourceIntegrityError', message: expect.stringContaining(message),
+        });
     });
 
     maybeTest('matches ordinary inflated parsing across every emitted column', async () => {
@@ -426,7 +429,9 @@ describe('term-bank WASM parser', () => {
         },
     ])('rejects a $name', async ({mutate, message}) => {
         const source = createCompressedTermBankSource('[["a","","","",0,["x"],1,""]]', 8);
-        await expect(inflateCompressedTermBankSourcesWasm([mutate(source)])).rejects.toThrow(message);
+        await expect(inflateCompressedTermBankSourcesWasm([mutate(source)])).rejects.toMatchObject({
+            name: 'DictionarySourceIntegrityError', message: expect.stringContaining(message),
+        });
     });
 
     maybeTest('rejects inflated JSON which is not an array', async () => {
@@ -859,9 +864,9 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest('allows serial fallback after parallel parser resource pressure', async () => {
+    maybeTest.each(['TermBankWasmResourceError', 'DictionarySourceIntegrityError'])('preserves the parallel parser failure policy for %s', async (errorName) => {
         /** @implements {WorkerMock} */
-        class ResourceFailingWorker {
+        class FailingWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
@@ -889,7 +894,7 @@ describe('term-bank WASM parser', () => {
                         this.emit('message', {
                             type: 'parse-error',
                             id: message.id,
-                            error: {name: 'TermBankWasmResourceError', message: 'mock allocation failure'},
+                            error: {name: errorName, message: 'mock worker failure'},
                         });
                     }
                 });
@@ -905,7 +910,7 @@ describe('term-bank WASM parser', () => {
             }
         }
 
-        vi.stubGlobal('Worker', ResourceFailingWorker);
+        vi.stubGlobal('Worker', FailingWorker);
         try {
             const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'));
             let sinkCalls = 0;
@@ -916,9 +921,11 @@ describe('term-bank WASM parser', () => {
                 {emitContentSlab: true},
             );
             await expect(result).rejects.toSatisfy((error) => (
-                error instanceof Error &&
-                !(error instanceof TermBankWasmResourceError) &&
-                /Parallel term-bank parser exceeded its resource budget/.test(error.message)
+                errorName === 'DictionarySourceIntegrityError' ?
+                    error instanceof DictionarySourceIntegrityError && error.message === 'mock worker failure' :
+                    error instanceof Error &&
+                    !(error instanceof TermBankWasmResourceError) &&
+                    /Parallel term-bank parser exceeded its resource budget/.test(error.message)
             ));
             expect(sinkCalls).toBe(0);
         } finally {
