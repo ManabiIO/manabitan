@@ -517,7 +517,7 @@ export class DictionaryImportController {
         document.addEventListener('click', this._onDocumentClickCaptureBind, true);
         globalThis.addEventListener('manabitan:modal-visibility-changed', this._onModalVisibilityChangedEventBind, false);
         this._recommendedDictionariesModal?.on('visibilityChanged', this._onRecommendedDictionariesModalVisibilityChangedBind);
-        globalThis.addEventListener('beforeunload', this._onBeforeUnload.bind(this), {once: true});
+        globalThis.addEventListener('pagehide', this._onPageHide.bind(this));
         reportDiagnostics('dictionary-import-controller-prepare-complete', {
             hasRecommendedModal: this._recommendedDictionariesModal !== null,
             href: globalThis.location?.href ?? null,
@@ -559,8 +559,17 @@ export class DictionaryImportController {
         );
     }
 
-    /** */
-    _onBeforeUnload() {
+    /** @param {PageTransitionEvent} event */
+    _onPageHide(event) {
+        // beforeunload only requests a confirmation: choosing Stay must not
+        // cancel an import or consume its eventual page-departure cleanup.
+        if (event.persisted && this._modifying) {
+            // A cached page can run its old continuations after restoration.
+            // Retire that batch and reset its UI before releasing its owner.
+            this._forceRecoverHungImportSession(new Error('Dictionary import was interrupted by page navigation.'), 'pagehide');
+        } else {
+            this._activeImportRunGeneration += 1;
+        }
         const ownerId = this._activeImportOwnerId;
         if (typeof ownerId === 'string') {
             this._activeImportOwnerId = void 0;
@@ -568,6 +577,7 @@ export class DictionaryImportController {
         }
         this._activeMdx?.disconnect();
         this._activeMdx = null;
+        if (event.persisted) { return; }
         document.removeEventListener('click', this._onDocumentClickCaptureBind, true);
         globalThis.removeEventListener('manabitan:modal-visibility-changed', this._onModalVisibilityChangedEventBind, false);
         this._recommendedDictionariesModal?.off('visibilityChanged', this._onRecommendedDictionariesModalVisibilityChangedBind);

@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {DictionaryImportOwnerClient} from './dictionary-import-owner-client.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {createFirefoxBackendPort} from './firefox-backend-port.js';
 
@@ -191,6 +192,8 @@ export class API {
         this._runtimeConnectionsShutdown = false;
         /** @type {Set<(error: Error) => void>} */
         this._shutdownRejectors = new Set();
+        /** @type {DictionaryImportOwnerClient} */
+        this._dictionaryImportOwnerClient = new DictionaryImportOwnerClient();
         this._setBackendPort(backendPort);
     }
 
@@ -221,6 +224,7 @@ export class API {
      */
     shutdownRuntimeConnections() {
         this._runtimeConnectionsShutdown = true;
+        this._dictionaryImportOwnerClient.closeAll();
         const error = new Error('Runtime connections have been shut down. Refresh the page to reconnect.');
         for (const reject of this._shutdownRejectors) {
             reject(error);
@@ -521,8 +525,17 @@ export class API {
      * @param {string|undefined} [ownerId]
      * @returns {Promise<import('api').ApiReturn<'setDictionaryImportMode'>>}
      */
-    setDictionaryImportMode(active, ownerId) {
-        return this._invoke('setDictionaryImportMode', {active, ownerId});
+    async setDictionaryImportMode(active, ownerId) {
+        if (active && typeof ownerId === 'string') {
+            if (this._runtimeConnectionsShutdown) { throw new Error('Runtime connections have been shut down. Refresh the page to reconnect.'); }
+            await this._dictionaryImportOwnerClient.open(ownerId);
+            return;
+        }
+        try {
+            await this._invoke('setDictionaryImportMode', {active, ownerId});
+        } finally {
+            if (typeof ownerId === 'string') { this._dictionaryImportOwnerClient.close(ownerId); }
+        }
     }
 
     /**
