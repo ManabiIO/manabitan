@@ -8,6 +8,7 @@
  */
 
 import {describe, expect, test, vi} from 'vitest';
+import {Uint8ArrayWriter} from '../ext/lib/zip.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionaryImportSession} from '../ext/js/dictionary/dictionary-import-session.js';
 import {RawZipPayloadReader, TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
@@ -814,7 +815,7 @@ describe('DictionaryImporter ZIP read cancellation', () => {
             Reflect.get(importer, '_getData')
         );
         const entryGetData = vi.fn(async () => new Uint8Array([0x5b, 0x5d]));
-        const writer = {};
+        const writer = new Uint8ArrayWriter();
         const abortController = new AbortController();
 
         await getData.call(importer, {filename: 'term_bank_1.json', getData: entryGetData}, writer, abortController.signal);

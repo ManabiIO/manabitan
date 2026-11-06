@@ -68,6 +68,7 @@ import {addTermImportMetrics, copyTermImportMetrics, createTermImportMetrics} fr
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
 import {DictionaryImportSession} from './dictionary-import-session.js';
 import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
+import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 
@@ -2250,7 +2251,7 @@ export class DictionaryImporter {
                         importWideSourceRunEnabled = false;
                         await termBankSourcePipeline.abortAndJoin();
                         this._throwIfCancelled();
-                        if (e instanceof TermBankWasmResourceError) { throw e; }
+                        if (e instanceof TermBankWasmResourceError || e instanceof DictionarySourceIntegrityError) { throw e; }
                         // Parallel workers transfer source buffers. Re-inflate
                         // clean buffers if the fast path needs to fall back.
                         if (streamedFastPathChunkCount > 0) {
@@ -4771,7 +4772,7 @@ export class DictionaryImporter {
                     termContentStorageMode,
                 );
             } catch (e) {
-                if (e instanceof TermBankWasmResourceError) { throw e; }
+                if (e instanceof TermBankWasmResourceError || e instanceof DictionarySourceIntegrityError) { throw e; }
                 this._logImport(`term file ${termFile.filename}: wasm parse fallback (${/** @type {Error} */ (toError(e)).message})`);
             }
         } else if (this._disableTermBankWasmFastPath) {
@@ -6183,13 +6184,30 @@ null;
                 useWebWorkers = false;
             }
         }
-        const read = (/** @type {AbortSignal|undefined} */ readSignal) => getData.call(entry, writer, {
-            useWebWorkers,
-            // zip.js leaves CRC verification disabled unless explicitly requested.
-            // Decoded fallbacks must enforce the raw parser's integrity contract.
-            checkSignature: true,
-            ...(typeof readSignal === 'undefined' ? {} : {signal: readSignal}),
-        });
+        const read = async (/** @type {AbortSignal|undefined} */ readSignal) => {
+            const result = await getData.call(entry, writer, {
+                useWebWorkers,
+                // zip.js leaves CRC verification disabled unless explicitly requested.
+                // Decoded fallbacks must enforce the raw parser's integrity contract.
+                checkSignature: true,
+                ...(typeof readSignal === 'undefined' ? {} : {signal: readSignal}),
+            });
+            // zip.js counts bytes actually decoded on the destination stream.
+            // A Uint8ArrayWriter may preallocate or pad its returned array, and
+            // text decoding can replace invalid UTF-8, so neither result length
+            // nor reencoding the result establishes the original ZIP byte size.
+            const decodedSize = /** @type {unknown} */ (Reflect.get(writer.writable, 'size'));
+            if (typeof decodedSize !== 'undefined') {
+                const expectedSize = /** @type {unknown} */ (Reflect.get(entry, 'uncompressedSize'));
+                if (typeof expectedSize !== 'undefined' && (
+                    typeof expectedSize !== 'number' || !Number.isSafeInteger(expectedSize) || expectedSize < 0 ||
+                    typeof decodedSize !== 'number' || !Number.isSafeInteger(decodedSize) || decodedSize !== expectedSize
+                )) {
+                    throw new DictionarySourceIntegrityError(`ZIP decoded size mismatch in '${entry.filename}'`);
+                }
+            }
+            return result;
+        };
         // Explicit signals belong to the source pipeline. Reads outside an
         // import retain their existing no-signal behavior.
         return await (typeof signal === 'undefined' && this._directZipReads !== null ?
