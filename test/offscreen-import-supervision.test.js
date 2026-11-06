@@ -27,6 +27,7 @@ function nextMessage(port, timeoutMs = 250) {
 
 afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
 });
 
 describe('Offscreen import supervision', () => {
@@ -89,4 +90,106 @@ describe('Offscreen import supervision', () => {
         caller.port1.close();
         workerPort.close();
     });
+});
+
+
+function createSupervisedImportFixture() {
+    const offscreen = /** @type {Offscreen} */ (Object.create(Offscreen.prototype));
+    const caller = new MessageChannel();
+    const NativeMessageChannel = MessageChannel;
+    /** @type {MessageChannel[]} */
+    const channels = [];
+    vi.stubGlobal('MessageChannel', class extends NativeMessageChannel {
+        constructor() {
+            super();
+            channels.push(this);
+            vi.spyOn(this.port1, 'close');
+        }
+    });
+    /** @type {PromiseWithResolvers<unknown>} */
+    const finished = Promise.withResolvers();
+    /** @type {MessagePort|null} */
+    let workerPort = null;
+    Reflect.set(offscreen, '_invokeDictionaryWorker', vi.fn((_action, _params, transferables) => {
+        workerPort = structuredClone(transferables[0], {transfer: transferables});
+        return finished.promise;
+    }));
+    /** @type {unknown[]} */
+    const received = [];
+    caller.port1.onmessage = (event) => { received.push(event.data); };
+    offscreen._importDictionaryOffscreenHandler({operationId: `${Date.now()}:supervision`, archiveContent: new Blob([]), details: /** @type {import('dictionary-importer').ImportDetails} */ ({})}, [caller.port2]);
+    if (!workerPort) { throw new Error('Worker response port was not transferred'); }
+    const channel = channels[0];
+    return {
+        channel,
+        workerPort: /** @type {MessagePort} */ (workerPort),
+        finished,
+        received,
+        failPacket() { channel.port1.dispatchEvent(new MessageEvent('messageerror')); },
+        close() {
+            finished.resolve(void 0);
+            for (const value of channels) {
+                value.port1.close();
+                value.port2.close();
+            }
+            if (workerPort) { /** @type {MessagePort} */ (workerPort).close(); }
+            caller.port1.close();
+            caller.port2.close();
+        },
+    };
+}
+
+test('offscreen response messageerror preserves a still-running worker relay and later completion', async () => {
+    const fixture = createSupervisedImportFixture();
+    try {
+        fixture.failPacket();
+        expect(fixture.channel.port1.close).not.toHaveBeenCalled();
+        expect(fixture.received).toEqual([]);
+        const completion = {type: 'complete', result: {result: {title: 'Published'}, errors: [], outcome: {status: 'published'}}};
+        fixture.workerPort.postMessage(completion);
+        await vi.waitFor(() => expect(fixture.received).toEqual([completion]));
+        fixture.finished.resolve(void 0);
+        await fixture.finished.promise;
+        expect(fixture.channel.port1.close).toHaveBeenCalledOnce();
+    } finally {
+        fixture.close();
+    }
+});
+
+test.each(['before', 'after'])('a lost offscreen terminal packet reports transport failure only after worker settlement (%s acknowledgement)', async (acknowledgement) => {
+    const fixture = createSupervisedImportFixture();
+    try {
+        if (acknowledgement === 'before') {
+            fixture.finished.resolve(void 0);
+            await fixture.finished.promise;
+            await Promise.resolve();
+        }
+        fixture.failPacket();
+        if (acknowledgement === 'after') {
+            expect(fixture.received).toEqual([]);
+            fixture.finished.resolve(void 0);
+            await fixture.finished.promise;
+        }
+        await vi.waitFor(() => expect(fixture.received).toHaveLength(1));
+        expect(fixture.received[0]).toMatchObject({type: 'error', error: {name: 'DictionaryImportTransportError'}});
+        fixture.failPacket();
+        await Promise.resolve();
+        expect(fixture.received).toHaveLength(1);
+    } finally {
+        fixture.close();
+    }
+});
+
+test('worker invocation failure after a response packet failure still reports an uncertain terminal outcome', async () => {
+    const fixture = createSupervisedImportFixture();
+    try {
+        fixture.failPacket();
+        const failure = new Error('Worker crashed');
+        failure.name = 'DictionaryWorkerTransportError';
+        fixture.finished.reject(failure);
+        await vi.waitFor(() => expect(fixture.received).toHaveLength(1));
+        expect(fixture.received[0]).toMatchObject({type: 'error', error: {name: 'DictionaryImportTransportError', message: 'Worker crashed'}});
+    } finally {
+        fixture.close();
+    }
 });

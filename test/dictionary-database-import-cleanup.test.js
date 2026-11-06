@@ -1482,6 +1482,28 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(remove).toHaveBeenCalledExactlyOnceWith(replacedTitle, 1000, expect.any(Function));
     });
 
+    test.each(['JMdict [replaced literal]', 'JMdict [update-staging literal]', 'JMdict [cutover literal] extra'])('preserves a healthy literal update-like title during backup cleanup: %s', async (originalTitle) => {
+        const database = new DictionaryDatabase();
+        const replacedTitle = `${originalTitle} [replaced update-token]`;
+        const remove = vi.spyOn(database, 'deleteDictionary').mockResolvedValue();
+        const restore = vi.spyOn(database, 'replaceDictionaryTitle').mockResolvedValue();
+        Reflect.set(database, '_db', {
+            selectObjects: vi.fn(() => [
+                {id: 1, title: originalTitle, summaryJson: JSON.stringify({title: originalTitle, importSuccess: true})},
+                {id: 2,
+                    title: replacedTitle,
+                    summaryJson: JSON.stringify({
+                        title: replacedTitle, importSuccess: true, transientUpdateStage: 'replaced', updateSessionToken: 'update-token',
+                    })},
+            ]),
+            exec: vi.fn(),
+        });
+        const summary = await database._cleanupIncompleteImports();
+        expect(restore).not.toHaveBeenCalled();
+        expect(remove).toHaveBeenCalledExactlyOnceWith(replacedTitle, 1000, expect.any(Function));
+        expect(summary.restoredTitles).toEqual([]);
+    });
+
     test('does not restore an incomplete replaced copy', async () => {
         const database = new DictionaryDatabase();
         const title = 'JMdict [replaced update-token]';
