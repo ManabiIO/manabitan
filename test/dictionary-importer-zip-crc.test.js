@@ -20,14 +20,15 @@ afterEach(() => { vi.restoreAllMocks(); });
 /**
  * @param {0|6} level
  * @param {number} [banks]
+ * @param {boolean} [bom]
  * @returns {Promise<Uint8Array>}
  */
-async function archive(level, banks = 1) {
+async function archive(level, banks = 1, bom = false) {
     const writer = new ZipWriter(new Uint8ArrayWriter(), {level});
     const options = {useWebWorkers: false};
     await writer.add('index.json', new TextReader(JSON.stringify({title: 'CRC fixture', revision: '1', format: 3})), options);
     for (let bank = 1; bank <= banks; ++bank) {
-        await writer.add(`term_bank_${bank}.json`, new TextReader(JSON.stringify([
+        await writer.add(`term_bank_${bank}.json`, new TextReader((bom ? '\ufeff' : '') + JSON.stringify([
             [`term-${bank}`, '', '', '', 1, ['definition', {type: 'image', path: 'image.png'}], bank, ''],
         ])), options);
     }
@@ -167,6 +168,40 @@ describe('decoded ZIP entry CRC verification', () => {
         }
     }
 
+    test.each([0, 6])('preserves decoded fallback for BOM-prefixed banks (level %s)', async (level) => {
+        const bytes = await archive(/** @type {0|6} */ (level), 4, true);
+        const termEntries = (await entries(bytes)).filter((entry) => /^term_bank_\d+\.json$/.test(entry.filename));
+        const rawReader = new RawZipPayloadReader(new Blob([bytes]));
+        const sources = await Promise.all(termEntries.map(async (entry) => ({
+            bytes: await rawReader.read(entry, new AbortController().signal),
+            compressionMethod: /** @type {0|8} */ (entry.compressionMethod),
+            compressedSize: entry.compressedSize,
+            uncompressedSize: entry.uncompressedSize,
+            signature: entry.signature,
+            filename: entry.filename,
+        })));
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        let rawAdmissionFailed = false;
+        vi.spyOn(importer, '_readTermBankFileFast').mockImplementationOnce(async () => {
+            try {
+                await inflateCompressedTermBankSourcesWasm(sources);
+            } catch (error) {
+                expect(error).toMatchObject({name: 'Error', message: expect.stringContaining('not a JSON array')});
+                rawAdmissionFailed = true;
+                throw error;
+            }
+            throw new Error('Expected native array recognition to decline the BOM');
+        });
+        const db = database();
+        const result = await run(importer, db, bytes);
+        expect(rawAdmissionFailed).toBe(true);
+        expect(result.errors).toEqual([]);
+        expect(result.result).not.toBeNull();
+        expect(db.pending).toEqual({terms: 4, media: 1});
+        expect(db.finishBulkImport).toHaveBeenCalledOnce();
+        expect(db.abortBulkImport).not.toHaveBeenCalled();
+    });
+
     test.each([false, true])('decoded fallback preserves raw CRC validation (corrupt source: %s)', async (damaged) => {
         const healthy = await archive(0, 4);
         const bytes = damaged ? await corrupt(healthy, 'term_bank_1.json', 0) : healthy;
@@ -197,8 +232,8 @@ describe('decoded ZIP entry CRC verification', () => {
             throw new Error('Worker admission declined after source validation');
         });
         const result = await run(importer, db, bytes);
-        expect(fast.mock.calls.length).toBeGreaterThan(1);
         if (damaged) {
+            expect(fast).toHaveBeenCalledOnce();
             expect(rawFailure).toBeInstanceOf(Error);
             expect(/** @type {Error} */ (rawFailure).message).toContain('ZIP CRC32');
             expect(result.result).toBeNull();
@@ -206,6 +241,7 @@ describe('decoded ZIP entry CRC verification', () => {
             expect(db.abortBulkImport).toHaveBeenCalledOnce();
             expect(db.pending).toEqual({terms: 0, media: 0});
         } else {
+            expect(fast.mock.calls.length).toBeGreaterThan(1);
             expect(rawFailure).toBeNull();
             expect(result.result).not.toBeNull();
             expect(result.errors).toEqual([]);

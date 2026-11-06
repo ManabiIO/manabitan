@@ -30,6 +30,9 @@ vi.mock('../ext/lib/zip.js', async (importOriginal) => {
                 if (state.sizeOverride !== null) { Reflect.set(observed, 'uncompressedSize', state.sizeOverride); }
                 Reflect.set(observed, 'getData', async (/** @type {unknown[]} */ ...args) => {
                     state.events.push(`read:${entry.filename}`);
+                    // The override exercises admission estimates only. Restore
+                    // the real archive size before decoding/integrity checks.
+                    Reflect.set(observed, 'uncompressedSize', entry.uncompressedSize);
                     try {
                         await state.readGate?.(entry.filename);
                         return await Reflect.apply(getData, entry, args);
