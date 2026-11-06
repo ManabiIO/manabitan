@@ -14,6 +14,9 @@ on:
         required: true
 permissions:
   contents: read
+concurrency:
+  group: firefox-development-delivery
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,6 +26,14 @@ jobs:
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
     steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: release-source
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.22.0"
+
       - uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # pin@v1.13
         with:
           tag: ${{ inputs.tag }}
@@ -31,13 +42,40 @@ jobs:
 
       - name: Check Firefox signing configuration
         id: signingConfig
+        env:
+          FF_JWT_ISSUER: ${{ secrets.FF_JWT_ISSUER }}
+          FF_JWT_SECRET: ${{ secrets.FF_JWT_SECRET }}
+          FF_OFFLINE_EXT_ID: ${{ secrets.FF_OFFLINE_EXT_ID }}
         run: |
-          if [[ -n "${{ secrets.FF_JWT_ISSUER }}" && -n "${{ secrets.FF_JWT_SECRET }}" && -n "${{ secrets.FF_OFFLINE_EXT_ID }}" ]]; then
+          if [[ -n "$FF_JWT_ISSUER" && -n "$FF_JWT_SECRET" && -n "$FF_OFFLINE_EXT_ID" ]]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
             echo "Firefox signing secrets are not configured; skipping signing and metadata update."
           fi
+
+      - name: Verify the selected release upload destination
+        if: steps.signingConfig.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_UPLOAD_URL: ${{ inputs.upload_url }}
+        run: |
+          node --input-type=module <<'JAVASCRIPT'
+          const {GITHUB_API_URL, GITHUB_REPOSITORY, GH_TOKEN, RELEASE_TAG, RELEASE_UPLOAD_URL} = process.env;
+          if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(RELEASE_TAG) ||
+              RELEASE_TAG === '0.0.0.0' || RELEASE_TAG.split('.').some((part) => Number(part) > 65535)) {
+            throw new Error('Expected a nonzero four-part release version');
+          }
+          const response = await fetch(`${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/tags/${encodeURIComponent(RELEASE_TAG)}`, {
+            headers: {Authorization: `Bearer ${GH_TOKEN}`, Accept: 'application/vnd.github+json'},
+          });
+          if (!response.ok) { throw new Error(`Release lookup failed: HTTP ${response.status}`); }
+          const release = await response.json();
+          if (release.tag_name !== RELEASE_TAG || release.draft !== false || release.upload_url !== RELEASE_UPLOAD_URL) {
+            throw new Error('Upload destination does not match the selected published release');
+          }
+          JAVASCRIPT
 
       - name: Verify Firefox package identity before signing
         if: steps.signingConfig.outputs.enabled == 'true'
@@ -73,9 +111,10 @@ jobs:
       - name: Abort on sign error
         if: |
           steps.signingConfig.outputs.enabled == 'true' &&
-          steps.ffSignXpi.outcome == 'failure' &&
-          steps.ffSignXpi.outputs.sameVersionAlreadyUploadedError != 'true'
-        run: exit 1
+          steps.ffSignXpi.outcome == 'failure'
+        run: |
+          echo 'Signing did not produce a verified XPI. An existing AMO version does not prove release-asset or update-feed publication.' >&2
+          exit 1
 
       - name: Verify the signed package before upload and update-feed publication
         id: signedPackage
@@ -120,51 +159,37 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         id: checkoutMetadata
         if: steps.ffSignXpi.outcome == 'success'
-        continue-on-error: true
         with:
           ref: metadata
-
-      - name: Initialize metadata branch
-        if: |
-          steps.ffSignXpi.outcome == 'success' &&
-          steps.checkoutMetadata.outcome != 'success'
-        run: |
-          git checkout --orphan metadata
-          git rm -rf . || true
+          path: metadata
 
       - name: Recreate updates.json
         if: steps.ffSignXpi.outcome == 'success'
+        working-directory: metadata
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          SIGNED_URL: ${{ steps.uploadReleaseAsset.outputs.browser_download_url }}
+          SIGNED_HASH: ${{ steps.signedPackage.outputs.hash }}
         run: |
-          cat > updates.json << EOF
-          {
-              "addons": {
-                  "{accbebce-862b-48a9-bb9a-1da9ad1f8702}": {
-                      "updates": [
-                          {
-                              "version": "${{ inputs.tag }}",
-                              "update_link": "${{ steps.uploadReleaseAsset.outputs.browser_download_url }}",
-                              "update_hash": "${{ steps.signedPackage.outputs.hash }}"
-                          }
-                      ]
-                  }
-              }
-          }
-          EOF
+          node "$GITHUB_WORKSPACE/release-source/dev/bin/update-firefox-development-feed.js" updates.json "$RELEASE_TAG" "$SIGNED_URL" "$SIGNED_HASH"
 
       - name: Commit files
         if: steps.ffSignXpi.outcome == 'success'
-        continue-on-error: true
+        working-directory: metadata
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add updates.json
-          git commit -m "${{ inputs.tag }}"
+          if ! git diff --cached --quiet; then
+            git commit -m "$RELEASE_TAG"
+          fi
 
       - name: Push changes
         if: steps.ffSignXpi.outcome == 'success'
-        uses: ad-m/github-push-action@d91a481090679876dfc4178fef17f286781251df # pin@master
-        with:
-          branch: metadata
+        working-directory: metadata
+        run: git push origin HEAD:metadata
 
   provenance:
     needs: [build]
@@ -178,3 +203,4 @@ jobs:
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
       upload-assets: true
+      upload-tag-name: ${{ inputs.tag }}

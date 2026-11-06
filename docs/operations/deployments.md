@@ -37,6 +37,8 @@ The workflow stages all packages and provenance in a draft. It verifies the comp
 
 The build-only `0.0.0.0` version is for qualification. Assign a real release version through the tag process before publication.
 
+Firefox offline publication requires the existing `metadata` branch and validates the supplied upload URL against the selected published release before signing. Runs share one concurrency group. The feed updater preserves unrelated entries, rejects older versions and conflicting same-version assets, and treats an identical feed as a no-op. Metadata checkout, commit and push failures fail publication. A signing response that the version already exists also fails: it does not establish that the signed XPI and update feed were published. Investigate any earlier partially completed publication before retrying. Signed-XPI provenance is attached to the selected release even when the workflow was dispatched from a branch.
+
 ## Promote a stable release
 
 1. Confirm the selected prerelease's packages and source are qualified. Create the Manabitan-owned store listings and configure Chrome, Firefox and Edge publication credentials before promoting it. For Firefox, `FF_EXTENSION_ID` must match the stable Gecko ID in [manifest variants](../../dev/data/manifest-variants.json). Existing Yomitan installs do not automatically migrate to Manabitan's distinct add-on identity.
