@@ -29,6 +29,7 @@ import {logErrorLevelToNumber} from '../core/log-utilities.js';
 import {log} from '../core/log.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
 import {replaceDictionaryNameFieldMarkers} from '../data/anki-template-util.js';
+import {getCompletedDictionaryReplacements} from '../data/dictionary-replacement.js';
 import {reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -1944,7 +1945,7 @@ export class Backend {
         await this._runDictionaryMutation(async () => {
             await this._ensureDictionaryDatabaseReady();
             await this._dictionaryDatabase.deleteDictionary(dictionaryTitle, 1000, () => {});
-            await this._refreshDictionaryDatabaseAfterUpdate();
+            await this._refreshDictionaryDatabaseAfterCommittedMutation('delete');
         });
     }
 
@@ -1960,8 +1961,33 @@ export class Backend {
                 (typeof summary === 'object' && summary !== null && !Array.isArray(summary)) ? summary : null,
                 typeof replacedDictionaryTitle === 'string' ? replacedDictionaryTitle : null,
             );
-            await this._refreshDictionaryDatabaseAfterUpdate();
+            await this._refreshDictionaryDatabaseAfterCommittedMutation('edit');
         });
+    }
+
+    /**
+     * The mutation has already committed. Retain refresh/invalidation recovery
+     * even if the caller never reaches its page-side database-updated request.
+     * Retrying this recovery must not repeat deletion or title replacement.
+     * @param {'delete'|'edit'} cause
+     * @returns {Promise<void>}
+     */
+    async _refreshDictionaryDatabaseAfterCommittedMutation(cause) {
+        try {
+            await this._refreshDictionaryDatabaseAfterUpdate();
+        } catch (error) {
+            this._dictionaryCacheInvalidationGeneration = (this._dictionaryCacheInvalidationGeneration ?? 0) + 1;
+            this._deferredDictionaryRefreshDuringImport = true;
+            this._queueDeferredDatabaseUpdatedNotification('dictionary', cause);
+            this._scheduleDictionaryRefreshRetry('committed-mutation-refresh-failed');
+            reportDiagnostics('dictionary-committed-mutation-refresh-failed', {
+                cause,
+                pendingNotificationCount: this._pendingDatabaseUpdatedNotifications.length,
+                error: toError(error).message,
+            });
+            // Preserve the committed mutation's acknowledgement so the caller
+            // can finish settings migration instead of retrying the mutation.
+        }
     }
 
     /** @type {import('api').ApiHandler<'getDictionaryCounts'>} */
@@ -2781,11 +2807,12 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
      */
     async _modifySettings(targets, source) {
-        if (targets.some(({action}) => (
-            action === 'removeDictionary' ||
-            action === 'removeDictionaryByName' ||
-            action === 'ensureDictionary' ||
-            action === 'setDictionarySelector'
+        if (targets.some((target) => (
+            target.action === 'removeDictionary' ||
+            target.action === 'removeDictionaryByName' ||
+            target.action === 'ensureDictionary' ||
+            target.action === 'setDictionarySelector' ||
+            (target.action === 'replaceDictionaryName' && typeof target.replacementGuard !== 'undefined')
         ))) {
             // Read installed state after earlier options writes commit. The
             // database proxy serializes this read with import publication.
@@ -2793,8 +2820,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             // settings for a title deleted before this queued operation.
             return await this._modifySettingsQueued(targets, source, async () => {
                 await this._ensureDictionaryDatabaseReady();
-                const dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
-                return new Set(dictionaryInfo.map(({title}) => title));
+                return await this._dictionaryDatabase.getDictionaryInfo();
             });
         }
         return await this._modifySettingsQueued(targets, source);
@@ -2803,17 +2829,17 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
     /**
      * @param {import('settings-modifications').ScopedModification[]} targets
      * @param {string} source
-     * @param {null|(() => Promise<Set<string>>)} [getInstalledDictionaryNames]
+     * @param {null|(() => Promise<import('dictionary-importer').Summary[]>)} [getDictionaryInfo]
      * @returns {Promise<import('core').Response<import('settings-modifications').ModificationResult>[]>}
      */
-    async _modifySettingsQueued(targets, source, getInstalledDictionaryNames = null) {
+    async _modifySettingsQueued(targets, source, getDictionaryInfo = null) {
         return await this._runOptionsMutation(async () => {
             // This runs inside the options queue and before staging or writing.
             // Do not acquire the dictionary mutation queue here: imports can
             // themselves need to commit settings after publishing.
-            const installedDictionaryNames = getInstalledDictionaryNames !== null ?
-                await getInstalledDictionaryNames() :
-                null;
+            const dictionaryInfo = getDictionaryInfo !== null ? await getDictionaryInfo() : null;
+            const installedDictionaryNames = dictionaryInfo !== null ? new Set(dictionaryInfo.map(({title}) => title)) : null;
+            const completedReplacements = dictionaryInfo !== null ? getCompletedDictionaryReplacements(dictionaryInfo) : null;
             // Stage synchronous mutations on an isolated copy. Read APIs
             // continue to observe the last committed options while storage is
             // pending, including when a write eventually fails.
@@ -2841,6 +2867,24 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             try {
                 for (const target of targets) {
                     try {
+                        if ((target.action === 'replaceDictionaryName' || target.action === 'setDictionarySelector') && target.replacementGuard) {
+                            const guard = target.replacementGuard;
+                            const candidates = completedReplacements?.get(guard.sourceName);
+                            const replacement = candidates?.length === 1 ? candidates[0] : null;
+                            const targetName = target.action === 'replaceDictionaryName' ? target.name : target.value;
+                            if (
+                                !replacement || replacement.title !== targetName ||
+                                (target.action === 'replaceDictionaryName' ? target.sourceName : target.expectedValue) !== guard.sourceName ||
+                                replacement.storageGenerationId !== guard.generationId ||
+                                replacement.updateSessionToken !== guard.updateSessionToken
+                            ) {
+                                // A stale page cannot recover preferences into
+                                // a deleted/replaced target or away from a source
+                                // which has since been installed again.
+                                results.push({result: false});
+                                continue;
+                            }
+                        }
                         if (target.action === 'removeDictionary' && installedDictionaryNames?.has(target.name)) {
                             this._getDictionarySettingsRemovalArray(target);
                             results.push({result: []});
@@ -5269,6 +5313,16 @@ null;
             }
         }
 
+        // Storage cutover can outlive the settings page which migrates its
+        // preferences. Recover only an unambiguous, completed update receipt;
+        // never infer replacement from similar display titles.
+        const replacements = getCompletedDictionaryReplacements(dictionaryInfo);
+        // Conflicting receipts do not authorize choosing a dictionary or
+        // deleting the source preferences. Leave them for explicit resolution.
+        const ambiguousReplacementNames = new Set([...replacements].filter(([, candidates]) => candidates.length !== 1).map(([name]) => name));
+        const retainDictionaryName = (/** @type {string} */ name) => installedDictionaryNames.has(name) || ambiguousReplacementNames.has(name);
+        let recoveredSettings = false;
+
         /** @type {string[]} */
         const removedDictionaryNames = [];
         /** @type {number} */
@@ -5278,22 +5332,49 @@ null;
         /** @type {number} */
         let sortFrequencyDictionaryResets = 0;
         for (const profile of options.profiles) {
-            const dictionaries = profile.options.dictionaries;
-            const nextDictionaries = dictionaries.filter((dictionary) => installedDictionaryNames.has(dictionary.name));
             let profileChanged = false;
+            for (const [sourceName, candidates] of replacements) {
+                if (candidates.length !== 1) { continue; }
+                const replacement = candidates[0];
+                // Reuse normal replacement semantics for aliases, occurrence
+                // order, newer target preferences, and generated Anki markers.
+                profileChanged = this._modifySetting({
+                    action: 'replaceDictionaryName',
+                    scope: 'global',
+                    optionsContext: null,
+                    profileId: profile.id,
+                    sourceName,
+                    name: replacement.title,
+                    styles: replacement.styles,
+                }, installedDictionaryNames) === true || profileChanged;
+                for (const selector of /** @type {const} */ (['mainDictionary', 'sortFrequencyDictionary'])) {
+                    profileChanged = this._modifySetting({
+                        action: 'setDictionarySelector',
+                        scope: 'global',
+                        optionsContext: null,
+                        profileId: profile.id,
+                        selector,
+                        expectedValue: sourceName,
+                        value: replacement.title,
+                    }, installedDictionaryNames) === true || profileChanged;
+                }
+            }
+            recoveredSettings ||= profileChanged;
+            const dictionaries = profile.options.dictionaries;
+            const nextDictionaries = dictionaries.filter((dictionary) => retainDictionaryName(dictionary.name));
             if (nextDictionaries.length !== dictionaries.length) {
                 profile.options.dictionaries = nextDictionaries;
                 profileChanged = true;
             }
             for (const dictionary of dictionaries) {
-                if (!installedDictionaryNames.has(dictionary.name)) {
+                if (!retainDictionaryName(dictionary.name)) {
                     removedDictionaryNames.push(dictionary.name);
                 }
             }
 
             if (typeof profile.options.general.mainDictionary === 'string' && profile.options.general.mainDictionary.length > 0) {
                 const mainDictionary = profile.options.general.mainDictionary;
-                if (!installedDictionaryNames.has(mainDictionary)) {
+                if (!retainDictionaryName(mainDictionary)) {
                     profile.options.general.mainDictionary = '';
                     mainDictionaryResets += 1;
                     profileChanged = true;
@@ -5302,7 +5383,7 @@ null;
 
             if (typeof profile.options.general.sortFrequencyDictionary === 'string' && profile.options.general.sortFrequencyDictionary.length > 0) {
                 const sortFrequencyDictionary = profile.options.general.sortFrequencyDictionary;
-                if (!installedDictionaryNames.has(sortFrequencyDictionary)) {
+                if (!retainDictionaryName(sortFrequencyDictionary)) {
                     profile.options.general.sortFrequencyDictionary = null;
                     sortFrequencyDictionaryResets += 1;
                     profileChanged = true;
@@ -5326,7 +5407,7 @@ null;
             sortFrequencyDictionaryResets,
         };
 
-        if (removedDictionaryNames.length === 0 && mainDictionaryResets === 0 && sortFrequencyDictionaryResets === 0) {
+        if (!recoveredSettings && removedDictionaryNames.length === 0 && mainDictionaryResets === 0 && sortFrequencyDictionaryResets === 0) {
             reportDiagnostics('dictionary-options-prune-startup-summary', summary);
             return summary;
         }

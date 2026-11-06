@@ -26,6 +26,11 @@ version.split('.').some((part) => Number(part) > 65535) || version === '0.0.0.0'
     throw new Error('Expected a valid nonzero four-part browser version and package ZIP paths');
 }
 const hash = (/** @type {Uint8Array|string} */ bytes) => createHash('sha256').update(bytes).digest('hex');
+const requiredNativeAssets = new Set([
+    'lib/term-bank-parser.wasm',
+    'lib/zstd.wasm',
+    'lib/term-content-canonical-scan-v1.wasm',
+]);
 const packages = [];
 for (const path of paths) {
     const bytes = await readFile(path);
@@ -40,12 +45,12 @@ for (const path of paths) {
         const content = await file.async('uint8array');
         const digest = hash(content);
         tree.update(`${file.name}\0${digest}\n`);
-        if (file.name === 'lib/term-bank-parser.wasm' || file.name === 'lib/zstd.wasm') {
+        if (requiredNativeAssets.has(file.name)) {
             if (!WebAssembly.validate(content)) { throw new Error(`Invalid native asset: ${path}:${file.name}`); }
             nativeAssets[file.name] = digest;
         }
     }
-    if (Object.keys(nativeAssets).length !== 2) { throw new Error(`Package is missing a required native asset: ${path}`); }
+    if (Object.keys(nativeAssets).length !== requiredNativeAssets.size) { throw new Error(`Package is missing a required native asset: ${path}`); }
     packages.push({path, version, manifestVersion: 'manifest_version' in manifest ? manifest.manifest_version : null, sha256: hash(bytes), treeSha256: tree.digest('hex'), fileCount: files.length, nativeAssets});
 }
 process.stdout.write(JSON.stringify({version, sourceCommit: process.env.GITHUB_SHA ?? null, unsigned: true, packages}, null, 2) + '\n');

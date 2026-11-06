@@ -2,6 +2,8 @@
 
 This release improves dictionary import, lookup responsiveness, and recovery after interrupted imports. It also fixes legacy format-1 dictionary glossaries, malformed source-bank validation, and temporary storage or decompression failures that could incorrectly require a reimport.
 
+Cancelled imports and disconnected settings pages retain observation of any import that already published. Failed cache refreshes are retried without repeating imports, deletes, or purges. Startup cleanup distinguishes real update recovery records from ordinary dictionary titles.
+
 ## Upgrading an existing installation
 
 Older dictionary storage formats need to be rebuilt. Keep your original dictionary ZIP files available before upgrading. Imported dictionary data is reset; dictionary names, available download sources, and dictionary-specific profile settings are retained so you can restore your setup.

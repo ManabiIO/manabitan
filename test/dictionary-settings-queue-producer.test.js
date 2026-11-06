@@ -642,4 +642,243 @@ describe('dictionary settings producers through the real options queue', () => {
         expect({saveCount, importErrors}).toEqual({saveCount: 1, importErrors: []});
         expect(result.profiles[0].options.dictionaries.filter(({name}) => name === 'Imported')).toHaveLength(1);
     });
+
+    test('purge cleanup preserves a fresh import and selectors committed after its options snapshot', async () => {
+        const {backend, settingsController, installed} = await createHarness();
+        const initial = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        initial.profiles[0].options.dictionaries = [DictionaryController.createDefaultDictionarySettings('Old', true, '')];
+        initial.profiles[0].options.general.sortFrequencyDictionary = 'Old';
+        const stale = await settingsController.getOptionsFull();
+        installed.push('Fresh');
+        await settingsController.modifyGlobalSettings([
+            {action: 'ensureDictionary', profileId: 'profile-a', item: {...DictionaryController.createDefaultDictionarySettings('Fresh', true, ''), alias: 'Keep my preferences'}},
+            {action: 'setDictionarySelector', profileId: 'profile-a', selector: 'mainDictionary', expectedValue: 'Old', value: 'Fresh'},
+            {action: 'setDictionarySelector', profileId: 'profile-a', selector: 'sortFrequencyDictionary', expectedValue: 'Old', value: 'Fresh'},
+        ]);
+        vi.spyOn(settingsController, 'getOptionsFull').mockResolvedValue(stale);
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+        await expect(importer._clearDictionarySettings()).resolves.toEqual([]);
+        const current = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options;
+        expect(current.dictionaries).toEqual([{...DictionaryController.createDefaultDictionarySettings('Fresh', true, ''), alias: 'Keep my preferences'}]);
+        expect(current.general.mainDictionary).toBe('Fresh');
+        expect(current.general.sortFrequencyDictionary).toBe('Fresh');
+    });
+
+    test('purge cleanup cannot wipe a replacement profile occupying an obsolete index', async () => {
+        const {backend, settingsController, installed} = await createHarness();
+        const initial = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        initial.profiles[0].options.dictionaries = [DictionaryController.createDefaultDictionarySettings('Old', true, '')];
+        const stale = await settingsController.getOptionsFull();
+        const replacement = {...structuredClone(initial.profiles[0]), id: 'new-profile'};
+        replacement.options.dictionaries = [DictionaryController.createDefaultDictionarySettings('Fresh', true, '')];
+        replacement.options.general.mainDictionary = 'Fresh';
+        installed.push('Fresh');
+        initial.profiles[0] = replacement;
+        vi.spyOn(settingsController, 'getOptionsFull').mockResolvedValue(stale);
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+        const errors = await importer._clearDictionarySettings();
+        expect(errors.map(({message}) => message).join('; ')).toContain('Profile identity changed');
+        const current = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0];
+        expect(current).toEqual(replacement);
+    });
+
+    test('purge cleanup removes uninstalled aliases and selector-only references in every profile', async () => {
+        const {backend, settingsController} = await createHarness();
+        const initial = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        initial.profiles[0].options.dictionaries = [
+            DictionaryController.createDefaultDictionarySettings('Old', true, ''),
+            {...DictionaryController.createDefaultDictionarySettings('Old', false, ''), alias: 'Second alias'},
+        ];
+        initial.profiles[1].options.general.sortFrequencyDictionary = 'Selector only';
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+        await expect(importer._clearDictionarySettings()).resolves.toEqual([]);
+        const current = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        expect(current.profiles.map(({options}) => options.dictionaries)).toEqual([[], []]);
+        expect(current.profiles.map(({options}) => options.general.mainDictionary)).toEqual(['', '']);
+        expect(current.profiles.map(({options}) => options.general.sortFrequencyDictionary)).toEqual([null, null]);
+    });
+
+    test('purge cleanup fails closed when the current installed generation cannot be read', async () => {
+        const {backend, settingsController, dictionaryDatabase} = await createHarness();
+        const initial = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        initial.profiles[0].options.dictionaries = [DictionaryController.createDefaultDictionarySettings('Old', true, '')];
+        const before = structuredClone(initial);
+        dictionaryDatabase.getDictionaryInfo.mockRejectedValue(new Error('Current dictionary state unavailable'));
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+        await expect(importer._clearDictionarySettings()).rejects.toThrow('Current dictionary state unavailable');
+        expect(Reflect.get(backend, '_options')).toEqual(before);
+    });
+
+
+    test.each(['failed', 'stale'])('a %s replacement preference migration cannot clean away old preferences', async (outcome) => {
+        const {backend, settingsController, installed} = await createHarness();
+        installed.push('Fresh title');
+        const initial = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        const previousSettings = {...DictionaryController.createDefaultDictionarySettings('Old title', true, ''), alias: 'My custom alias', definitionsCollapsible: /** @type {const} */ ('expanded')};
+        initial.profiles[0].options.dictionaries = [previousSettings];
+        initial.profiles[0].options.general.mainDictionary = 'Old title';
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+        Reflect.set(importer, '_activeImportRunGeneration', 1);
+        Reflect.set(importer, '_addDictionarySettings', vi.fn(async () => {
+            if (outcome === 'stale') {
+                Reflect.set(importer, '_activeImportRunGeneration', 2);
+                return [];
+            }
+            return [new Error('Preference migration rejected')];
+        }));
+        Reflect.set(importer, '_verifyImportedDictionaryVisible', vi.fn(async () => {}));
+        Reflect.set(importer, '_recordImportDebugSnapshot', vi.fn());
+        const cleanup = vi.spyOn(importer, '_removeDictionarySettingsByName');
+        const application = Reflect.get(settingsController, '_application');
+        Reflect.set(application.api, 'triggerDatabaseUpdated', vi.fn(async () => {}));
+        Reflect.set(settingsController, 'refresh', vi.fn(async () => {}));
+        /** @type {{errors: Error[], importedTitle: string|null}} */
+        const result = await Reflect.get(importer, '_finalizeImportedDictionaryResult').call(importer, {
+            dictionaryTitle: 'Fresh title.zip',
+            importStartTime: performance.now(),
+            importDetails: {replacementDictionaryTitle: 'Old title'},
+            importResult: {result: {...importSummary('Fresh title'), sourceTitle: 'Fresh title'}, errors: []},
+            workerImportStartTime: performance.now(),
+            workerImportEndTime: performance.now(),
+            useImportSession: false,
+            finalizeImportSession: false,
+            importRunGeneration: 1,
+            profilesDictionarySettings: {'profile-a': [{...previousSettings, index: 0}]},
+            localPhaseTimings: [],
+            showErrors: false,
+        });
+        expect(result.errors.map(({message}) => message).join('; ')).toContain(outcome === 'stale' ? 'Ignored stale import completion' : 'Preference migration rejected');
+        expect(cleanup).not.toHaveBeenCalled();
+        const current = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options;
+        expect(current.dictionaries).toEqual([previousSettings]);
+        expect(current.general.mainDictionary).toBe('Old title');
+    });
+
+    test('live dictionary reconciliation recovers committed update preferences before orphan pruning', async () => {
+        const {backend, settingsController, installed, dictionaryDatabase} = await createHarness();
+        installed.push('Fresh title');
+        const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        const sourceRows = [
+            {...DictionaryController.createDefaultDictionarySettings('Old title', false, ''), alias: 'My custom alias', definitionsCollapsible: /** @type {const} */ ('expanded')},
+            {...DictionaryController.createDefaultDictionarySettings('Old title', true, ''), alias: 'Second alias'},
+        ];
+        options.profiles[0].options.dictionaries = structuredClone(sourceRows);
+        options.profiles[0].options.general.mainDictionary = 'Old title';
+        options.profiles[0].options.general.sortFrequencyDictionary = 'Old title';
+        options.profiles[0].options.anki = /** @type {import('settings').AnkiOptions} */ (/** @type {unknown} */ ({cardFormats: [{fields: {Glossary: {value: '{single-glossary-old-title} literal Old title'}}}]}));
+        const replacement = {...importSummary('Fresh title'),
+            sourceTitle: 'Fresh title',
+            replacedDictionaryTitle: 'Old title',
+            importSuccess: true,
+            updateSessionToken: 'committed-token',
+            storageGenerationId: 'committed-generation',
+            styles: 'new styles'};
+        dictionaryDatabase.getDictionaryInfo.mockResolvedValue([replacement]);
+        await DictionaryController.ensureDictionarySettings(settingsController, [replacement], void 0, true, false);
+        const current = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options;
+        expect(current.dictionaries).toEqual(sourceRows.map((row) => ({...row, name: 'Fresh title', styles: 'new styles'})));
+        expect(current.general.mainDictionary).toBe('Fresh title');
+        expect(current.general.sortFrequencyDictionary).toBe('Fresh title');
+        expect(current.anki.cardFormats[0].fields.Glossary.value).toBe('{single-glossary-fresh-title} literal Old title');
+        await DictionaryController.ensureDictionarySettings(settingsController, [replacement], void 0, true, false);
+        expect(/** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options.dictionaries).toEqual(current.dictionaries);
+    });
+
+    test('live recovery preserves newer target settings when migration was partially applied', async () => {
+        const {backend, settingsController, installed, dictionaryDatabase} = await createHarness();
+        installed.push('Fresh title');
+        const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        const newer = {...DictionaryController.createDefaultDictionarySettings('Fresh title', true, 'user styles'), alias: 'Shared alias'};
+        options.profiles[0].options.dictionaries = [
+            {...DictionaryController.createDefaultDictionarySettings('Old title', false, ''), alias: 'Shared alias'},
+            newer,
+        ];
+        const replacement = {...importSummary('Fresh title'),
+            sourceTitle: 'Fresh title',
+            replacedDictionaryTitle: 'Old title',
+            importSuccess: true,
+            updateSessionToken: 'committed-token',
+            storageGenerationId: 'committed-generation'};
+        dictionaryDatabase.getDictionaryInfo.mockResolvedValue([replacement]);
+        await DictionaryController.ensureDictionarySettings(settingsController, [replacement], void 0, true, false);
+        expect(/** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options.dictionaries).toEqual([newer]);
+    });
+
+    test('ambiguous committed replacements preserve live source preferences and selectors', async () => {
+        const {backend, settingsController, installed} = await createHarness();
+        installed.push('Fresh title', 'Another title');
+        const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        const old = {...DictionaryController.createDefaultDictionarySettings('Old title', false, ''), alias: 'Unresolved preference'};
+        options.profiles[0].options.dictionaries = [old];
+        options.profiles[0].options.general.mainDictionary = 'Old title';
+        const replacements = installed.map((title) => ({...importSummary(title),
+            sourceTitle: title,
+            replacedDictionaryTitle: 'Old title',
+            importSuccess: true,
+            updateSessionToken: 'committed-token',
+            storageGenerationId: title + '-generation'}));
+        await DictionaryController.ensureDictionarySettings(settingsController, replacements, void 0, true, false);
+        const current = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options;
+        expect(current.dictionaries).toContainEqual(old);
+        expect(current.general.mainDictionary).toBe('Old title');
+    });
+
+    test('backup reconciliation keeps recoverable source preferences without making live mutations or inserting a competing default', async () => {
+        const {backend, settingsController, installed} = await createHarness();
+        installed.push('Fresh title');
+        const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        const old = {...DictionaryController.createDefaultDictionarySettings('Old title', true, ''), alias: 'Preserve from backup'};
+        options.profiles[0].options.dictionaries = [old];
+        const snapshot = structuredClone(options);
+        const modify = vi.spyOn(settingsController, 'modifyGlobalSettings');
+        const replacement = {...importSummary('Fresh title'),
+            sourceTitle: 'Fresh title',
+            replacedDictionaryTitle: 'Old title',
+            importSuccess: true,
+            updateSessionToken: 'committed-token',
+            storageGenerationId: 'committed-generation'};
+        await DictionaryController.ensureDictionarySettings(settingsController, [replacement], snapshot, false, false);
+        expect(snapshot.profiles[0].options.dictionaries).toEqual([old]);
+        expect(modify).not.toHaveBeenCalled();
+        expect(options.profiles[0].options.dictionaries).toEqual([old]);
+    });
+
+    test.each(['source-reinstalled', 'target-deleted', 'target-reimported', 'target-replaced'])('a stale live replacement receipt cannot migrate preferences after %s', async (change) => {
+        const {backend, settingsController, installed, dictionaryDatabase} = await createHarness();
+        installed.push('Fresh title');
+        const options = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        const old = {...DictionaryController.createDefaultDictionarySettings('Old title', false, ''), alias: 'Preserve the live identity'};
+        options.profiles[0].options.dictionaries = [old];
+        options.profiles[0].options.general.mainDictionary = 'Old title';
+        const replacement = {...importSummary('Fresh title'),
+            sourceTitle: 'Fresh title',
+            replacedDictionaryTitle: 'Old title',
+            importSuccess: true,
+            updateSessionToken: 'committed-token',
+            storageGenerationId: 'committed-generation'};
+        switch (change) {
+            case 'source-reinstalled':
+                installed.push('Old title');
+                dictionaryDatabase.getDictionaryInfo.mockResolvedValue([replacement, importSummary('Old title')]);
+                break;
+            case 'target-deleted':
+                installed.splice(0);
+                break;
+            case 'target-replaced':
+                dictionaryDatabase.getDictionaryInfo.mockResolvedValue([{...replacement, storageGenerationId: 'newer-generation', updateSessionToken: 'newer-token'}]);
+                break;
+            default:
+                dictionaryDatabase.getDictionaryInfo.mockResolvedValue([importSummary('Fresh title')]);
+                break;
+        }
+        await DictionaryController.ensureDictionarySettings(settingsController, [replacement], void 0, true, false);
+        const current = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options;
+        expect(current.dictionaries).toContainEqual(old);
+        expect(current.general.mainDictionary).toBe('Old title');
+    });
 });

@@ -3149,7 +3149,11 @@ export class DictionaryImportController {
             settingsErrorCount: errors2.length,
             skipped: !shouldAddDictionarySettings,
         });
-        if (replacementDictionaryTitle !== null && shouldAddDictionarySettings) {
+        const staleBeforeCleanupResult = getStaleImportResult('before-remove-replaced-dictionary-settings');
+        if (staleBeforeCleanupResult !== null) { return staleBeforeCleanupResult; }
+        if (replacementDictionaryTitle !== null && shouldAddDictionarySettings && errors2.length === 0) {
+            // A failed migration still owns the old preference rows. Never
+            // turn a recoverable settings error into their explicit deletion.
             const removeOldSettingsStartTime = safePerformance.now();
             const cleanupErrors = await this._removeDictionarySettingsByName(replacementDictionaryTitle);
             if (Array.isArray(cleanupErrors)) { errors2.push(...cleanupErrors); }
@@ -3499,16 +3503,21 @@ export class DictionaryImportController {
         const optionsFull = await this._settingsController.getOptionsFull();
         /** @type {import('settings-modifications').Modification[]} */
         const targets = [];
-        const profileCount = optionsFull.profiles.length;
-        for (let i = 0; i < profileCount; ++i) {
-            const path1 = `profiles[${i}].options.dictionaries`;
-            targets.push({action: 'set', path: path1, value: []});
-            const path2 = `profiles[${i}].options.general.mainDictionary`;
-            targets.push({action: 'set', path: path2, value: ''});
-            const path3 = `profiles[${i}].options.general.sortFrequencyDictionary`;
-            targets.push({action: 'set', path: path3, value: null});
+        for (const {id: profileId, options: {dictionaries, general}} of optionsFull.profiles) {
+            // Resolve profile identity and installed state inside the options
+            // queue. A purge snapshot must not erase a later import or a new
+            // profile which now occupies the same array index.
+            for (const dictionaryName of new Set(dictionaries.map(({name}) => name))) {
+                targets.push({action: 'removeDictionaryByName', profileId, name: dictionaryName});
+            }
+            if (general.mainDictionary !== '') {
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: general.mainDictionary, value: '', requireDictionaryUninstalled: general.mainDictionary});
+            }
+            if (typeof general.sortFrequencyDictionary === 'string') {
+                targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: general.sortFrequencyDictionary, value: null, requireDictionaryUninstalled: general.sortFrequencyDictionary});
+            }
         }
-        return await this._modifyGlobalSettings(targets);
+        return targets.length > 0 ? await this._modifyGlobalSettings(targets) : [];
     }
 
     /**
