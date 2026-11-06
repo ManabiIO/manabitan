@@ -283,7 +283,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
             }
             const exact = f.db._findMatchingPersistedTermEntryContentMetaBatch.bind(f.db);
             f.db._findMatchingPersistedTermEntryContentMetaBatch = async (descriptors) => {
-                trace.push([descriptors.length, f.plan.pendingEpochs[n - 1] === 1]);
+                trace.push([descriptors.length, f.db._termEntryContentMetaDenseCount]);
                 if (descriptors.length === 4096) {
                     assert.equal(f.plan.pendingEpochs[n - 1], 87);
                 }
@@ -701,8 +701,8 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
             for (let i = 0; i < br.pendingContentCount; i++) {
                 const u = br.pendingPlanUniqueIndexes[i];
                 assert.ok(u >= 11 && u < 28);
-                assert.equal(b.plan.pendingIndexes[u], i);
-                assert.equal(b.plan.pendingEpochs[u], 1);
+                assert.equal(b.plan.pendingIndexes[u], 91);
+                assert.equal(b.plan.pendingEpochs[u], 87);
                 assert.equal(br.pendingContentSpans.offsets[i], 19 + u * 4);
             }
             collect(c);
@@ -728,8 +728,8 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         assert.equal(c.stats.copiedGlossaryBytes, 0);
         for (let i = 0; i < layout.MAX; ++i) {
             assert.equal(r.pendingPlanUniqueIndexes[i], i);
-            assert.equal(f.plan.pendingIndexes[i], i);
-            assert.equal(f.plan.pendingEpochs[i], 1);
+            assert.equal(f.plan.pendingIndexes[i], 91);
+            assert.equal(f.plan.pendingEpochs[i], 87);
             assert.equal(r.pendingContentSpans.offsets[i], i * 4);
             assert.equal(r.stagedContentMetadata.indexes[i], i);
         }
@@ -739,14 +739,14 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         );
     }
     // Actual partial typed-set failures: a prefix has already been modified when
-    // the throw occurs. Test pending output, staged IDs, and each JS plan column.
+    // the throw occurs. Test pending offsets/hashes, staged IDs and descriptor publication.
     for (const fault of [
         'copy-first',
         'copy-second',
         'column-partial',
         'staged-partial',
-        'epoch-partial',
-        'index-partial',
+        'hash1-partial',
+        'hash2-partial',
         'after-plan',
         'exact-descriptor',
     ]) {
@@ -773,12 +773,10 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
                 }
             },
             beforeAdopt({columns}) {
-                if (fault === 'column-partial' || fault === 'epoch-partial' || fault === 'index-partial') {
+                if (fault === 'column-partial' || fault === 'hash1-partial' || fault === 'hash2-partial') {
                     Uint32Array.prototype.set = function injectedUint32Set(source, offset = 0) {
-                        const target =
-                            fault === 'column-partial' ?
-                                source === columns[1] :
-                                this === (fault === 'epoch-partial' ? f.plan.pendingEpochs : f.plan.pendingIndexes);
+                        const targetColumn = fault === 'column-partial' ? 1 : (fault === 'hash1-partial' ? 2 : 3);
+                        const target = source === columns[targetColumn];
                         if (target) {
                             Uint32Array.prototype.set = uSet;
                             uSet.call(this, source.subarray(0, Math.max(1, source.length >>> 1)), offset);
@@ -911,8 +909,8 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         assert.equal(wave, 1);
         assert.equal(f.plan.resolvedFlags[4096], 1);
         assert.equal(f.plan.resolvedFlags[4098], 0);
-        assert.equal(f.plan.pendingEpochs[0], 1);
-        assert.equal(f.plan.pendingIndexes[0], 0);
+        assert.equal(f.plan.pendingEpochs[0], 87);
+        assert.equal(f.plan.pendingIndexes[0], 91);
         assert.equal(f.plan.pendingEpochs[4097], 87);
         assert.equal(f.plan.pendingIndexes[4097], 91);
         assert.equal(f.db._termEntryContentMetaDenseCount, dense + 1);

@@ -8546,7 +8546,7 @@ null :
              * @throws {RangeError} If the native batch cannot fit the canonical pending owner.
              */
             const adoptPendingColumns = (batch, complete) => {
-                const {columns, planStart, epochs, indexes} = batch;
+                const {columns} = batch;
                 const size = columns[0].length;
                 const base = pendingContentCount;
                 if (pendingContentDictNames !== null || base + size > maximumPendingContentCount) {
@@ -8571,8 +8571,8 @@ null :
                         pendingCanonicalUniqueIndexes.set(columns[4], base);
                     }
                     if (stagedIndexes !== null) { stagedIndexes.set(columns[5], base); }
-                    contentDedupPlan.pendingEpochs.set(epochs, planStart);
-                    contentDedupPlan.pendingIndexes.set(indexes, planStart);
+                    // Canonical publication uses the owned unique-index journal.
+                    // Generic epoch scratch stays untouched, as in the JS route.
                     complete();
                     pendingContentCount = base + size;
                 } catch (error) {
