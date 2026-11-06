@@ -33,11 +33,17 @@ export class YomitanApiController {
         this._urlInput = querySelectorNotNull(document, '#test-yomitan-url-input');
         /** @type {boolean} */
         this._testActive = false;
+        /** @type {number} */
+        this._urlGeneration = 0;
+        /** @type {string} */
+        this._observedUrl = this._urlInput.value;
     }
 
     /** */
     prepare() {
         this._testButton.addEventListener('click', this._onTestButtonClick.bind(this), false);
+        this._urlInput.addEventListener('input', this._onUrlChanged.bind(this), false);
+        this._urlInput.addEventListener('settingChanged', this._onUrlChanged.bind(this), false);
     }
 
     // Private
@@ -50,20 +56,33 @@ export class YomitanApiController {
         void this._testYomitanApi();
     }
 
+    /** @param {Event} event */
+    _onUrlChanged(event) {
+        const url = this._urlInput.value;
+        if (event.type === 'settingChanged' && url === this._observedUrl) { return; }
+        this._observedUrl = url;
+        ++this._urlGeneration;
+        this._resultsContainer.textContent = '';
+        this._resultsContainer.hidden = true;
+    }
+
     /** */
     async _testYomitanApi() {
         if (this._testActive) { return; }
 
+        const url = this._urlInput.value;
+        const generation = this._urlGeneration;
+        const isCurrent = () => generation === this._urlGeneration && url === this._urlInput.value;
         try {
             this._testActive = true;
             const resultsContainer = /** @type {HTMLElement} */ (this._resultsContainer);
             /** @type {HTMLButtonElement} */ (this._testButton).disabled = true;
             resultsContainer.textContent = '';
             resultsContainer.hidden = true;
-            await this._api.testYomitanApi(this._urlInput.value);
-            this._setStatus('Connection was successful', false);
+            await this._api.testYomitanApi(url);
+            if (isCurrent()) { this._setStatus('Connection was successful', false); }
         } catch (e) {
-            this._setStatus(toError(e).message, true);
+            if (isCurrent()) { this._setStatus(toError(e).message, true); }
         } finally {
             this._testActive = false;
             /** @type {HTMLButtonElement} */ (this._testButton).disabled = false;

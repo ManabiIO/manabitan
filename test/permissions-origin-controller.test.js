@@ -237,3 +237,133 @@ describe('PermissionsOriginController', () => {
         expect(logError).toHaveBeenCalledOnce();
     });
 });
+
+/** @returns {{promise: Promise<any>, resolve: (value: any) => void, reject: (error: Error) => void}} */
+function deferredOrigin() {
+    /** @type {(value: any) => void} */
+    let resolve = (_value) => {};
+    /** @type {(error: Error) => void} */
+    let reject = (_error) => {};
+    const promise = new Promise((resolve2, reject2) => {
+        resolve = resolve2;
+        reject = reject2;
+    });
+    return {promise, resolve, reject};
+}
+
+/**
+ * @param {import('jsdom').DOMWindow} window
+ * @param {boolean} [prepare]
+ * @returns {Promise<{controller: import('../ext/js/pages/settings/permissions-origin-controller.js').PermissionsOriginController, input: HTMLInputElement, toggle: HTMLInputElement, error: HTMLElement}>}
+ */
+async function originHarness(window, prepare = true) {
+    vi.resetModules();
+    vi.resetAllMocks();
+    window.document.body.innerHTML = `
+        <div id="permissions-origin-list"></div><div id="permissions-origin-list-empty"></div>
+        <input id="permissions-origin-new-input"><div id="permissions-origin-list-error" hidden></div>
+        <button id="permissions-origin-add"></button>
+        <input class="permissions-origin-toggle" data-origin="<all_urls>" type="checkbox">
+    `;
+    getAllPermissions.mockResolvedValue({origins: [], permissions: []});
+    const {PermissionsOriginController} = await import('../ext/js/pages/settings/permissions-origin-controller.js');
+    const controller = new PermissionsOriginController(/** @type {any} */ ({on: vi.fn()}));
+    if (prepare) { await controller.prepare(); }
+    return {controller, input: /** @type {HTMLInputElement} */ (window.document.querySelector('#permissions-origin-new-input')), toggle: /** @type {HTMLInputElement} */ (window.document.querySelector('.permissions-origin-toggle')), error: /** @type {HTMLElement} */ (window.document.querySelector('#permissions-origin-list-error'))};
+}
+
+test('a permission event supersedes a pending origin snapshot', async ({window}) => {
+    const h = await originHarness(window);
+    const pending = deferredOrigin();
+    getAllPermissions.mockReturnValueOnce(pending.promise);
+    const refresh = h.controller._updatePermissions();
+    h.controller._onPermissionsChanged({permissions: {origins: ['<all_urls>'], permissions: []}});
+    pending.resolve({origins: [], permissions: []});
+    await refresh;
+    expect(h.toggle.checked).toBe(true);
+});
+
+test('a newer origin refresh wins out of order responses', async ({window}) => {
+    const h = await originHarness(window);
+    const pending = deferredOrigin();
+    getAllPermissions.mockReturnValueOnce(pending.promise).mockResolvedValueOnce({origins: ['<all_urls>'], permissions: []});
+    const oldRefresh = h.controller._updatePermissions();
+    await h.controller._updatePermissions();
+    pending.resolve({origins: [], permissions: []});
+    await oldRefresh;
+    expect(h.toggle.checked).toBe(true);
+});
+
+test('an origin draft edited during approval survives successful approval', async ({window}) => {
+    const h = await originHarness(window);
+    const pending = deferredOrigin();
+    setPermissionsGranted.mockReturnValueOnce(pending.promise);
+    h.input.value = 'https://first.example/*';
+    const adding = h.controller._addOrigin();
+    expect(setPermissionsGranted).toHaveBeenCalledWith({origins: ['https://first.example/*']}, true);
+    h.input.value = 'https://next.example/*';
+    h.input.dispatchEvent(new window.Event('input'));
+    pending.resolve(true);
+    await adding;
+    expect(h.input.value).toBe('https://next.example/*');
+});
+
+test('an old origin failure cannot replace a newer successful permission result', async ({window}) => {
+    const h = await originHarness(window);
+    const pending = deferredOrigin();
+    setPermissionsGranted.mockReturnValueOnce(pending.promise).mockResolvedValueOnce(true);
+    const first = h.controller._setOriginPermissionEnabled('https://first.example/*', true);
+    await h.controller._setOriginPermissionEnabled('<all_urls>', true);
+    pending.reject(new Error('old request failed'));
+    await first;
+    expect(h.error.hidden).toBe(true);
+});
+
+test('current permission snapshot failures are visible and stale failures are discarded', async ({window}) => {
+    const h = await originHarness(window);
+    getAllPermissions.mockRejectedValueOnce(new Error('current read failed'));
+    await expect(h.controller._updatePermissions()).rejects.toThrow('current read failed');
+    expect(h.error.textContent).toBe('current read failed');
+    expect(h.error.hidden).toBe(false);
+    const pending = deferredOrigin();
+    getAllPermissions.mockReturnValueOnce(pending.promise);
+    const oldRefresh = h.controller._updatePermissions();
+    h.controller._onPermissionsChanged({permissions: {origins: [], permissions: []}});
+    pending.reject(new Error('old read failed'));
+    await oldRefresh;
+    expect(h.error.hidden).toBe(true);
+});
+
+test('a permission event also supersedes the initial origin read', async ({window}) => {
+    const h = await originHarness(window, false);
+    const pending = deferredOrigin();
+    getAllPermissions.mockReturnValueOnce(pending.promise);
+    const preparing = h.controller.prepare();
+    h.controller._onPermissionsChanged({permissions: {origins: ['<all_urls>'], permissions: []}});
+    pending.resolve({origins: [], permissions: []});
+    await preparing;
+    expect(h.toggle.checked).toBe(true);
+});
+
+test('initial origin read failures show their error', async ({window}) => {
+    const h = await originHarness(window, false);
+    getAllPermissions.mockRejectedValueOnce(new Error('initial read failed'));
+    await expect(h.controller.prepare()).rejects.toThrow('initial read failed');
+    expect(h.error.hidden).toBe(false);
+    expect(h.error.textContent).toBe('initial read failed');
+});
+
+test('editing a pending origin draft away and back preserves the draft', async ({window}) => {
+    const h = await originHarness(window);
+    const pending = deferredOrigin();
+    setPermissionsGranted.mockReturnValueOnce(pending.promise);
+    h.input.value = 'https://first.example/*';
+    const adding = h.controller._addOrigin();
+    h.input.value = 'https://next.example/*';
+    h.input.dispatchEvent(new window.Event('input'));
+    h.input.value = 'https://first.example/*';
+    h.input.dispatchEvent(new window.Event('input'));
+    pending.resolve(true);
+    await adding;
+    expect(h.input.value).toBe('https://first.example/*');
+});
