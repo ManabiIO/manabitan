@@ -1130,12 +1130,16 @@ static int parse_row_single_pass(
         if (i >= len) { return 0; }
         if (src[i] == ']') {
             *out_next = i + 1u;
-            return out_meta->expression_length > 0u;
+            return out_meta->expression_length > 0u && (!validate_glossary_types || field_index == 8u);
         }
+        // Source validation is format 3-specific. Generic parser callers can
+        // retain their existing permissive row/glossary contract.
+        if (validate_glossary_types && field_index >= 8u) { return 0; }
         uint32_t value_end = 0u;
         if (field_index == 4u || field_index == 6u) {
             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
         } else if (field_index == 5u) {
+            if (validate_glossary_types && src[i] != '[') { return 0; }
             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
             if (
                 !(glossary_witness != 0 && reuse_validated_glossary(
@@ -1162,7 +1166,7 @@ static int parse_row_single_pass(
         if (i >= len) { return 0; }
         if (src[i] == ']') {
             *out_next = i + 1u;
-            return out_meta->expression_length > 0u;
+            return out_meta->expression_length > 0u && (!validate_glossary_types || field_index == 8u);
         }
         if (src[i] != ',') { return 0; }
         i = skip_ws(src, len, i + 1u);

@@ -3785,18 +3785,19 @@ export class TermRecordOpfsStore {
                     ) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk metadata is invalid for ${state.fileName}`);
                     }
+                    let recordFieldsHeader = EMPTY_BYTES;
+                    if (formatFlags === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) {
+                        const compactHeaderEnd = recordFieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES;
+                        if (!Number.isSafeInteger(compactHeaderEnd) || compactHeaderEnd > indexFile.size) {
+                            throw new PersistentLookupIndexError('invalid', `Compact term-record fields header is truncated for ${state.fileName}`);
+                        }
+                        // Keep I/O outside the format-validation catch. A failed
+                        // snapshot read is retryable, not evidence for repair.
+                        recordFieldsHeader = await this._readFileRange(indexFile, recordFieldsStart, compactHeaderEnd);
+                    }
                     let recordFieldsLength;
                     try {
-                        if (formatFlags === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) {
-                            const compactHeaderEnd = recordFieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES;
-                            if (!Number.isSafeInteger(compactHeaderEnd) || compactHeaderEnd > indexFile.size) {
-                                throw new Error('Compact term-record fields header is truncated');
-                            }
-                            const compactHeader = await this._readFileRange(indexFile, recordFieldsStart, compactHeaderEnd);
-                            recordFieldsLength = getRecordFieldsByteLength(compactHeader, 0, count, formatFlags);
-                        } else {
-                            recordFieldsLength = getRecordFieldsByteLength(EMPTY_BYTES, 0, count, formatFlags);
-                        }
+                        recordFieldsLength = getRecordFieldsByteLength(recordFieldsHeader, 0, count, formatFlags);
                     } catch (error) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index record fields are invalid for ${state.fileName}`, error);
                     }
