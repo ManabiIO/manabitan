@@ -60,7 +60,7 @@ afterEach(() => {
 async function fixture(/** @type {string} */ path) {
     const content = new TermContentOpfsStore();
     const encoder = new TextEncoder();
-    const payload = encoder.encode(path === 'block' ?
+    const payload = encoder.encode(path !== 'shared' ?
         JSON.stringify({glossary: ['definition'], rules: '', definitionTags: '', termTags: ''}) :
         JSON.stringify(['definition']));
     // A valid single-segment Zstd frame with a raw block, inside a valid envelope.
@@ -80,6 +80,9 @@ async function fixture(/** @type {string} */ path) {
         await content.appendBatch([block]);
         entry = encodeRawTermContentBlockReference(0, block.byteLength, payload.length, 0, payload.length);
         contentDictName = 'raw-block-v1';
+    } else if (path === 'direct') {
+        entry = frame;
+        contentDictName = 'jmdict';
     } else {
         const [span] = await content.appendBatch([frame]);
         Reflect.get(database, '_sharedGlossaryArtifactMetaByDictionary').set('Healthy', {
@@ -103,12 +106,12 @@ async function fixture(/** @type {string} */ path) {
         entryContentDictName: contentDictName,
     };
     const read = () => Reflect.get(database, '_deserializeTermRow').call(database, row);
-    const decoder = path === 'block' ? decode : sharedDecode;
+    const decoder = path !== 'shared' ? decode : sharedDecode;
     decoder.mockReturnValue(payload);
     return {database, mark, read, decoder, payload};
 }
 
-describe.each(['block', 'shared'])('%s codec health', (path) => {
+describe.each(['block', 'shared', 'direct'])('%s codec health', (path) => {
     test('healthy content does not quarantine', async () => {
         const {read, mark} = await fixture(path);
         await expect(read()).resolves.toMatchObject({glossary: ['definition']});
@@ -129,14 +132,14 @@ describe.each(['block', 'shared'])('%s codec health', (path) => {
     test.each(decoderErrors)('quarantines decoder corruption, not transient: %s', async (error) => {
         const {read, mark, decoder} = await fixture(path);
         decoder.mockImplementationOnce(() => { throw error; });
-        await expect(read()).rejects.toThrow('must be re-imported');
+        await expect(read()).rejects.toThrow(/must be re-imported|term content is malformed/);
         expect(mark).toHaveBeenCalledOnce();
     });
 
-    test('quarantines decoded length mismatch', async () => {
+    test('quarantines decoded length mismatch or malformed content', async () => {
         const {read, mark, decoder} = await fixture(path);
         decoder.mockReturnValue(new Uint8Array(1));
-        await expect(read()).rejects.toThrow('must be re-imported');
+        await expect(read()).rejects.toThrow(/must be re-imported|term content is malformed/);
         expect(mark).toHaveBeenCalledOnce();
     });
 });
@@ -145,4 +148,56 @@ test('resource classification rejects non-errors and vague resource messages', (
     for (const error of [null, 'out of memory', {message: 'Failed to allocate Zstd input buffer'}, new Error('out of memory')]) {
         expect(isZstdResourceError(error)).toBe(false);
     }
+});
+
+describe('cold shared-glossary metadata health', () => {
+    async function coldFixture() {
+        const result = await fixture('shared');
+        const metadata = Reflect.get(result.database, '_sharedGlossaryArtifactMetaByDictionary');
+        const row = metadata.get('Healthy');
+        metadata.clear();
+        const selectObject = vi.fn().mockReturnValue(row);
+        Reflect.set(result.database, '_db', {selectObject});
+        return {...result, metadata, selectObject};
+    }
+
+    test.each(['SQLITE_BUSY: database is locked', 'SQLITE_LOCKED', 'SQLITE_IOERR: disk I/O error'])(
+        'retries metadata read failure without quarantine: %s',
+        async (message) => {
+            const {database, read, mark, decoder, metadata, selectObject} = await coldFixture();
+            selectObject.mockImplementationOnce(() => { throw new Error(message); });
+            await expect(read()).rejects.toThrow('temporarily unavailable');
+            expect(mark).not.toHaveBeenCalled();
+            expect(metadata.size).toBe(0);
+            expect(Reflect.get(database, '_sharedGlossaryArtifactInflatePromiseByDictionary').size).toBe(0);
+            expect(Reflect.get(database, '_termEntryContentCache').size).toBe(0);
+            expect(decoder).not.toHaveBeenCalled();
+
+            await expect(read()).resolves.toMatchObject({glossary: ['definition']});
+            expect(selectObject).toHaveBeenCalledTimes(2);
+            expect(decoder).toHaveBeenCalledOnce();
+            expect(mark).not.toHaveBeenCalled();
+        },
+    );
+
+    test.each([void 0, {contentOffset: -1}, {uncompressedLength: 0}])(
+        'still quarantines missing or malformed metadata: %s',
+        async (override) => {
+            const {read, mark, selectObject} = await coldFixture();
+            const row = selectObject();
+            selectObject.mockReturnValue(typeof override === 'undefined' ? void 0 : {...row, ...override});
+            await expect(read()).rejects.toThrow(/must be re-imported|term content is malformed/);
+            expect(mark).toHaveBeenCalledOnce();
+        },
+    );
+
+    test('one metadata failure does not stop warming another dictionary', async () => {
+        const {database, metadata, selectObject, decoder, mark} = await coldFixture();
+        selectObject.mockImplementationOnce(() => { throw new Error('SQLITE_BUSY: database is locked'); });
+        await expect(Reflect.get(database, '_warmSharedGlossaryArtifacts').call(database, ['Unavailable', 'Healthy'])).resolves.toBeUndefined();
+        expect(metadata.has('Unavailable')).toBe(false);
+        expect(metadata.has('Healthy')).toBe(true);
+        expect(decoder).toHaveBeenCalledOnce();
+        expect(mark).not.toHaveBeenCalled();
+    });
 });
