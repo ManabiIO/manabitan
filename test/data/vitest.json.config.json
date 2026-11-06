@@ -1,5 +1,6 @@
 {
     "test": {
+        "cache": false,
         "include": [
             "test/json.test.js"
         ]
