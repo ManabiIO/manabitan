@@ -20,6 +20,8 @@
 // @ts-nocheck
 
 import {DictionaryMediaRenderer} from './dictionary-media-renderer.js';
+import {NativeCanonicalScanner} from './term-content-canonical-scan.js';
+import {TermContentMetadataArena} from './term-content-metadata-arena.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {ExtensionError} from '../core/extension-error.js';
@@ -589,6 +591,10 @@ export class DictionaryDatabase {
         this._termsVirtualTableDirty = false;
         /** @type {Map<string, {id: number, offset: number, length: number, dictName: string}>} */
         this._termEntryContentMetaByHash = new Map();
+        /** @type {TermContentMetadataArena|null} */
+        this._termContentMetadataArena = null;
+        /** @type {NativeCanonicalScanner} */
+        this._nativeCanonicalScanner = new NativeCanonicalScanner();
         /** @type {Uint32Array} Sparse hash slots containing dense metadata indexes plus one. */
         this._termEntryContentMetaHashPairTable = new Uint32Array(0);
         /** @type {Uint32Array} */
@@ -4778,7 +4784,7 @@ null;
     }
 
     /**
-     * @returns {{contentAppendMs: number, dedupScanMs?: number, contentStoreMs?: number, contentMetadataMs?: number, termRecordBuildMs: number, termRecordEncodeMs: number, termRecordWriteMs: number, termsVtabInsertMs: number, termRecordInternMs?: number, termRecordPackLengthsMs?: number, termRecordHeapCopyMs?: number, termRecordFieldEncodeMs?: number, termRecordValidationMs?: number, termLookupIndexEncodeMs?: number}|null}
+     * @returns {Record<string, number>|null}
      */
     getLastBulkAddTermsMetrics() {
         return this._lastBulkAddTermsMetrics;
@@ -5868,6 +5874,7 @@ null;
 
     /** */
     _clearTermEntryContentMetaCaches() {
+        this._termContentMetadataArena = null;
         this._termEntryContentMetaByHash.clear();
         this._termContentBlockStore.clearCache();
         this._termEntryContentMetaHashPairTable = new Uint32Array(0);
@@ -6719,54 +6726,72 @@ null;
     }
 
     /**
-     * Grows only the cache-local metadata vectors. Hash-table growth reuses
-     * these stable indexes and therefore never copies metadata during rehash.
      * @param {number} requiredCount
      */
     _ensureTermEntryContentMetaDenseCapacity(requiredCount) {
+        this._resizeTermContentMetadataArena(requiredCount, this._termEntryContentMetaHashPairTable.length);
+    }
+
+    /**
+     * Build all replacement columns before publishing any of them. Keeping a
+     * fixed memory per generation prevents detached views across async reads.
+     * @param {number} requiredCount
+     * @param {number} slotCapacity
+     * @param {boolean} [forceRehash]
+     */
+    _resizeTermContentMetadataArena(requiredCount, slotCapacity, forceRehash = false) {
         const oldCapacity = this._termEntryContentMetaStateTable.length;
-        if (oldCapacity >= requiredCount) { return; }
+        const oldSlotTable = this._termEntryContentMetaHashPairTable;
+        if (!forceRehash && oldCapacity >= requiredCount && oldSlotTable.length === slotCapacity) { return; }
         let capacity = Math.max(16, oldCapacity);
         while (capacity < requiredCount) { capacity *= 2; }
-        const hash1Table = new Uint32Array(capacity);
-        hash1Table.set(this._termEntryContentMetaHash1Table);
-        const hash2Table = new Uint32Array(capacity);
-        hash2Table.set(this._termEntryContentMetaHash2Table);
-        const stateTable = new Uint8Array(capacity);
-        stateTable.set(this._termEntryContentMetaStateTable);
-        const idTable = new Float64Array(capacity);
-        idTable.set(this._termEntryContentMetaIdTable);
-        const offsetTable = new Float64Array(capacity);
-        offsetTable.set(this._termEntryContentMetaOffsetTable);
-        const lengthTable = new Uint32Array(capacity);
-        lengthTable.set(this._termEntryContentMetaLengthTable);
-        const dictNameIdTable = new Uint32Array(capacity);
-        dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
-        const signaturePresentTable = new Uint8Array(capacity);
-        signaturePresentTable.set(this._termEntryContentMetaSignaturePresentTable);
-        const signature1Table = new Uint32Array(capacity);
-        signature1Table.set(this._termEntryContentMetaSignature1Table);
-        const signature2Table = new Uint32Array(capacity);
-        signature2Table.set(this._termEntryContentMetaSignature2Table);
-        const signature3Table = new Uint32Array(capacity);
-        signature3Table.set(this._termEntryContentMetaSignature3Table);
-        const recentSourceBatchIdTable = new Uint32Array(capacity);
-        recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
-        const recentSourceOffsetTable = new Uint32Array(capacity);
-        recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
-        // Publish the complete set only after every allocation and copy succeeds.
-        // The state vector advertises capacity to later allocations and retries.
-        this._termEntryContentMetaHash1Table = hash1Table;
-        this._termEntryContentMetaHash2Table = hash2Table;
-        this._termEntryContentMetaStateTable = stateTable;
+        const arena = new TermContentMetadataArena(capacity, slotCapacity);
+        if (this._termContentMetadataArena !== null) {
+            arena.copyFrom(this._termContentMetadataArena);
+        }
+        const growDense = capacity !== oldCapacity;
+        const idTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaIdTable;
+        const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;
+        const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;
+        const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;
+        const recentSourceOffsetTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceOffsetTable;
+        if (growDense) {
+            idTable.set(this._termEntryContentMetaIdTable);
+            offsetTable.set(this._termEntryContentMetaOffsetTable);
+            dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
+            recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
+            recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
+        }
+        if (forceRehash || oldSlotTable.length !== slotCapacity) {
+            arena.slots.fill(0);
+            const mask = slotCapacity - 1;
+            const denseCount = this._termEntryContentMetaDenseCount;
+            const useDense = denseCount <= oldSlotTable.length;
+            const scanLength = useDense ? denseCount : oldSlotTable.length;
+            for (let i = 0; i < scanLength; ++i) {
+                const encodedIndex = useDense ? i + 1 : oldSlotTable[i];
+                if (encodedIndex === 0) { continue; }
+                const index = encodedIndex - 1;
+                if (arena.state[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
+                let slot = this._getTermEntryContentMetaHashPairSlot(arena.hash1[index], arena.hash2[index], mask);
+                while (arena.slots[slot] !== 0) { slot = (slot + 1) & mask; }
+                arena.slots[slot] = encodedIndex;
+            }
+        }
+        this._termContentMetadataArena = arena;
+        this._termEntryContentMetaHashPairTable = arena.slots;
+        this._termEntryContentMetaHash1Table = arena.hash1;
+        this._termEntryContentMetaHash2Table = arena.hash2;
+        this._termEntryContentMetaStateTable = arena.state;
+        this._termEntryContentMetaLengthTable = arena.length;
+        this._termEntryContentMetaSignaturePresentTable = arena.signaturePresent;
+        this._termEntryContentMetaSignature1Table = arena.signature1;
+        this._termEntryContentMetaSignature2Table = arena.signature2;
+        this._termEntryContentMetaSignature3Table = arena.signature3;
+        this._termEntryContentMetaHashPairMask = slotCapacity > 0 ? slotCapacity - 1 : 0;
         this._termEntryContentMetaIdTable = idTable;
         this._termEntryContentMetaOffsetTable = offsetTable;
-        this._termEntryContentMetaLengthTable = lengthTable;
         this._termEntryContentMetaDictNameIdTable = dictNameIdTable;
-        this._termEntryContentMetaSignaturePresentTable = signaturePresentTable;
-        this._termEntryContentMetaSignature1Table = signature1Table;
-        this._termEntryContentMetaSignature2Table = signature2Table;
-        this._termEntryContentMetaSignature3Table = signature3Table;
         this._termEntryContentMetaRecentSourceBatchIdTable = recentSourceBatchIdTable;
         this._termEntryContentMetaRecentSourceOffsetTable = recentSourceOffsetTable;
     }
@@ -6798,39 +6823,16 @@ null;
             this._termEntryContentMetaHashPairPendingCount +
             additionalPublishedCount
         );
-        this._ensureTermEntryContentMetaDenseCapacity(
+        let tableSize = this._termEntryContentMetaHashPairTable.length;
+        if (forceRehash || tableSize < effectiveRequiredCount * 2) {
+            tableSize = 16;
+            while (tableSize < effectiveRequiredCount * 2) { tableSize *= 2; }
+        }
+        this._resizeTermContentMetadataArena(
             this._termEntryContentMetaDenseCount + additionalPublishedCount,
+            tableSize,
+            forceRehash,
         );
-        if (!forceRehash && this._termEntryContentMetaHashPairTable.length >= effectiveRequiredCount * 2) {
-            return;
-        }
-        let tableSize = 16;
-        while (tableSize < effectiveRequiredCount * 2) {
-            tableSize *= 2;
-        }
-        const oldSlotTable = this._termEntryContentMetaHashPairTable;
-        const slotTable = new Uint32Array(tableSize);
-        const mask = tableSize - 1;
-        // Scan stable dense IDs when shorter. Rollback can leave many free
-        // IDs, so retain the bucket scan for a sparse metadata arena.
-        const denseCount = this._termEntryContentMetaDenseCount;
-        const useDense = denseCount <= oldSlotTable.length;
-        const scanLength = useDense ? denseCount : oldSlotTable.length;
-        for (let i = 0; i < scanLength; ++i) {
-            const encodedIndex = useDense ? i + 1 : oldSlotTable[i];
-            if (encodedIndex === 0) { continue; }
-            const index = encodedIndex - 1;
-            if (this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_EMPTY) { continue; }
-            const hash1 = this._termEntryContentMetaHash1Table[index];
-            const hash2 = this._termEntryContentMetaHash2Table[index];
-            let slot = this._getTermEntryContentMetaHashPairSlot(hash1, hash2, mask);
-            while (slotTable[slot] !== 0) {
-                slot = (slot + 1) & mask;
-            }
-            slotTable[slot] = encodedIndex;
-        }
-        this._termEntryContentMetaHashPairTable = slotTable;
-        this._termEntryContentMetaHashPairMask = mask;
     }
 
     /**
@@ -7171,7 +7173,7 @@ this._readTermContentSignature(
     /**
      * Restores parser-owned dedupe plan slots when a chunk fails after the
      * resolver advanced its contiguous cursor or published reserved offsets.
-     * @param {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[], count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} state
+     * @param {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} state
      */
     _rollbackArtifactTermContentDedupPlan(state) {
         if (state === null) { return; }
@@ -7858,7 +7860,7 @@ this._readTermContentSignature(
         const importMetrics = createTermImportMetrics();
         /** @type {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null} */
         let stagedContentMetadata = null;
-        /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[], count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
+        /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
         let dedupPlanRollbackState = null;
 
         if (useLocalTransaction) {
@@ -7897,6 +7899,7 @@ this._readTermContentSignature(
             );
             stagedContentMetadata = resolvedStagedContentMetadata ?? null;
             let {resolvedContentDictNames} = dedup;
+            Object.assign(importMetrics, dedup.nativeScanMetrics ?? {});
             importMetrics.dedupPendingHitCount += pendingHitCount;
             importMetrics.dedupPersistedHitCount += persistedHitCount;
             importMetrics.dedupUniqueCount += pendingContentCount;
@@ -8188,7 +8191,7 @@ this._readTermContentSignature(
      * Resolves intra-chunk duplicates and content already persisted by earlier chunks.
      * @param {ArtifactTermContentChunk} chunk
      * @param {boolean} [reserveMetadata]
-     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[], pendingPlanUniqueStart: number|null, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingContentDictNames: (string|null)[]|null, pendingRowToUniqueIndex: Int32Array|null, pendingContentCount: number, pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, uniformContentDictName: string|null, pendingHitCount: number, persistedHitCount: number, exactFallbackCount: number, recentSourceHitCount?: number, contentDedupPlan: ArtifactTermContentDedupPlan|null, pendingPlanUniqueIndexes: number[]|Uint32Array, pendingPlanUniqueStart: number|null, nativeScanMetrics?: Record<string, number>, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|undefined}>}
      */
     async _resolveArtifactTermContentDedup(chunk, reserveMetadata = false) {
         const count = chunk.rowCount;
@@ -8461,6 +8464,9 @@ null :
             const firstUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowStart);
             const lastUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowEnd);
             const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
+            // The native helper adopts owned typed columns; fallback appends normally.
+            /** @type {number[]|Uint32Array} */
+            let pendingCanonicalUniqueIndexes = pendingPlanUniqueIndexes;
             // These hash words already have Uint32 semantics. Allocate only
             // for a pending row, without growing numeric JavaScript arrays.
             let pendingCanonicalHash1s = new Uint32Array(0);
@@ -8542,10 +8548,59 @@ null :
                             uniformContentDictName,
                     );
                 }
-                // Canonical rows are visited once. Epoch scratch is needed only
-                // by the generic row scan; this journal owns publication/rollback.
-                pendingPlanUniqueIndexes.push(uniqueIndex);
+                // Canonical rows are visited once; retain develop's removal
+                // of generic epoch writes while supporting owned native columns.
+                if (Array.isArray(pendingCanonicalUniqueIndexes)) {
+                    pendingCanonicalUniqueIndexes.push(uniqueIndex);
+                } else {
+                    pendingCanonicalUniqueIndexes[pendingContentCount] = uniqueIndex;
+                }
                 ++pendingContentCount;
+            };
+            /**
+             * Atomically adopts one native segment's owned columns. Only the
+             * newly appended tail is touched; accepted segments remain owned by
+             * the ordinary outer rollback. The helper restores plan snapshots
+             * and its insertion journal if any synchronous step throws.
+             * @param {{columns: Uint32Array[], planStart: number, epochs: Uint32Array, indexes: Uint32Array}} batch
+             * @param {() => void} complete Build bounded exact descriptors before committing the segment.
+             * @throws {RangeError} If the native batch cannot fit the canonical pending owner.
+             */
+            const adoptPendingColumns = (batch, complete) => {
+                const {columns} = batch;
+                const size = columns[0].length;
+                const base = pendingContentCount;
+                if (pendingContentDictNames !== null || base + size > maximumPendingContentCount) {
+                    throw new RangeError('Native canonical pending columns are incompatible');
+                }
+                if (size > 0 && base === 0) {
+                    pendingCanonicalHash1s = new Uint32Array(maximumPendingContentCount);
+                    pendingCanonicalHash2s = new Uint32Array(maximumPendingContentCount);
+                }
+                if (Array.isArray(pendingCanonicalUniqueIndexes)) {
+                    const uniqueIndexes = new Uint32Array(maximumPendingContentCount);
+                    uniqueIndexes.set(pendingCanonicalUniqueIndexes);
+                    pendingCanonicalUniqueIndexes = uniqueIndexes;
+                }
+                try {
+                    pendingSpanOffsets.set(columns[0], base);
+                    pendingSpanLengths.set(columns[1], base);
+                    pendingCanonicalHash1s.set(columns[2], base);
+                    pendingCanonicalHash2s.set(columns[3], base);
+                    // The native path never materializes per-pending JS arrays.
+                    if (pendingCanonicalUniqueIndexes instanceof Uint32Array) {
+                        pendingCanonicalUniqueIndexes.set(columns[4], base);
+                    }
+                    if (stagedIndexes !== null) { stagedIndexes.set(columns[5], base); }
+                    // Canonical publication uses the owned unique-index journal.
+                    // Generic epoch scratch stays untouched, as in the JS route.
+                    complete();
+                    pendingContentCount = base + size;
+                } catch (error) {
+                    // Do not hand rolled-back native IDs to the outer owner.
+                    if (stagedIndexes !== null) { stagedIndexes.fill(-1, base, base + size); }
+                    throw error;
+                }
             };
             const resolveExactCandidates = async () => {
                 if (exactCandidates.length === 0) { return; }
@@ -8582,47 +8637,67 @@ null :
                 exactCandidates.length = 0;
                 dedupExactCompareMs += safePerformance.now() - exactCompareStart;
             };
+            const nativeScanMetrics = {};
             const canonicalScanStart = safePerformance.now();
             try {
-                for (let uniqueIndex = firstUniqueIndex; uniqueIndex < lastUniqueIndex; ++uniqueIndex) {
-                    const globalRowIndex = uniqueRowIndexes[uniqueIndex];
-                    const rowIndex = globalRowIndex - contentRowStart;
-                    if (
-                        rowIndex < 0 ||
-                        rowIndex >= count ||
-                        uniqueIndexList[rowIndex] !== uniqueIndex
-                    ) {
-                        throw new Error(`Artifact term content canonical row is invalid for unique index ${uniqueIndex}`);
+                const nativeResolvedCount = await this._nativeCanonicalScanner.scan(this, {
+                    chunk,
+                    contentDedupPlan,
+                    uniqueIndexList,
+                    uniqueRowIndexes,
+                    uniqueSignatures,
+                    firstUniqueIndex,
+                    lastUniqueIndex,
+                    persistedLookupRequired,
+                    reserveMetadata,
+                    adoptPendingColumns,
+                    getPendingState: () => ({pendingBase: pendingContentCount, pendingEpoch: pendingPlanEpoch}),
+                    exactCandidates,
+                    resolveExactCandidates,
+                }, nativeScanMetrics);
+                if (nativeResolvedCount === null) {
+                    for (let uniqueIndex = firstUniqueIndex; uniqueIndex < lastUniqueIndex; ++uniqueIndex) {
+                        const globalRowIndex = uniqueRowIndexes[uniqueIndex];
+                        const rowIndex = globalRowIndex - contentRowStart;
+                        if (
+                            rowIndex < 0 ||
+                            rowIndex >= count ||
+                            uniqueIndexList[rowIndex] !== uniqueIndex
+                        ) {
+                            throw new Error(`Artifact term content canonical row is invalid for unique index ${uniqueIndex}`);
+                        }
+                        if (contentDedupPlan.resolvedFlags[uniqueIndex] === 1) {
+                            ++alreadyResolvedUniqueCount;
+                            continue;
+                        }
+                        const contentMetaOffset = rowIndex * 4;
+                        const contentOffset = contentBytesBaseOffset + contentMetaList[contentMetaOffset];
+                        const contentLength = contentMetaList[contentMetaOffset + 1];
+                        const hash1 = contentMetaList[contentMetaOffset + 2] >>> 0;
+                        const hash2 = contentMetaList[contentMetaOffset + 3] >>> 0;
+                        if (
+                            contentOffset < contentBytesBaseOffset ||
+                            contentOffset + contentLength > contentBytesBuffer.byteLength
+                        ) {
+                            throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
+                        }
+                        const existingIndex = persistedLookupRequired ?
+                            this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
+                            -1;
+                        const existingMeta = existingIndex < 0 ?
+                            void 0 :
+                            this._readTermEntryContentMetaHashPairIndex(existingIndex);
+                        if (typeof existingMeta === 'undefined') {
+                            appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2);
+                            continue;
+                        }
+                        exactCandidates.push({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, existingMeta});
+                        if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
+                            await resolveExactCandidates();
+                        }
                     }
-                    if (contentDedupPlan.resolvedFlags[uniqueIndex] === 1) {
-                        ++alreadyResolvedUniqueCount;
-                        continue;
-                    }
-                    const contentMetaOffset = rowIndex * 4;
-                    const contentOffset = contentBytesBaseOffset + contentMetaList[contentMetaOffset];
-                    const contentLength = contentMetaList[contentMetaOffset + 1];
-                    const hash1 = contentMetaList[contentMetaOffset + 2] >>> 0;
-                    const hash2 = contentMetaList[contentMetaOffset + 3] >>> 0;
-                    if (
-                        contentOffset < contentBytesBaseOffset ||
-                        contentOffset + contentLength > contentBytesBuffer.byteLength
-                    ) {
-                        throw new TypeError(`Artifact term content bytes are invalid at row ${rowIndex}`);
-                    }
-                    const existingIndex = persistedLookupRequired ?
-                        this._findTermEntryContentMetaHashPairIndex(hash1, hash2) :
-                        -1;
-                    const existingMeta = existingIndex < 0 ?
-                        void 0 :
-                        this._readTermEntryContentMetaHashPairIndex(existingIndex);
-                    if (typeof existingMeta === 'undefined') {
-                        appendPendingContent(uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2);
-                        continue;
-                    }
-                    exactCandidates.push({uniqueIndex, rowIndex, contentOffset, contentLength, hash1, hash2, existingMeta});
-                    if (exactCandidates.length >= TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE) {
-                        await resolveExactCandidates();
-                    }
+                } else {
+                    alreadyResolvedUniqueCount = nativeResolvedCount;
                 }
                 await resolveExactCandidates();
             } catch (error) {
@@ -8687,8 +8762,11 @@ null :
                 dedupCapacityMs,
                 dedupCanonicalScanMs,
                 dedupExactCompareMs,
+                nativeScanMetrics,
                 contentDedupPlan,
-                pendingPlanUniqueIndexes,
+                pendingPlanUniqueIndexes: pendingCanonicalUniqueIndexes instanceof Uint32Array ?
+                    pendingCanonicalUniqueIndexes.subarray(0, pendingContentCount) :
+                    pendingCanonicalUniqueIndexes,
                 pendingPlanUniqueStart: null,
                 stagedContentMetadata: stagedIndexes === null ?
                     void 0 :
