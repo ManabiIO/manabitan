@@ -2035,6 +2035,7 @@ export class DictionaryImporter {
                 packedMediaArtifactBlob = null;
             }
             if (
+                version === 3 &&
                 !this._disableTermBankWasmFastPath &&
                 !useTermArtifactFiles &&
                 !usePackedTermArtifact &&
@@ -2170,7 +2171,7 @@ export class DictionaryImporter {
                         step4ArtifactMetadataAppendMs += chunkMetrics.contentAppendMs;
                     }
                     streamedImportCompleted = true;
-                } else if (!this._disableTermBankWasmFastPath) {
+                } else if (version === 3 && !this._disableTermBankWasmFastPath) {
                     try {
                         const termFileEntry = /** @type {import('@zip.js/zip.js').Entry} */ (termFile);
                         // Constrained devices use the same compressed parser, but only
@@ -4756,7 +4757,9 @@ export class DictionaryImporter {
         enableTermEntryContentDedup,
         termContentStorageMode,
     ) {
-        if (!this._disableTermBankWasmFastPath) {
+        // The native layout is format 3: legacy format 1 appends each glossary
+        // string as its own row field, rather than storing a glossary array.
+        if (version === 3 && !this._disableTermBankWasmFastPath) {
             try {
                 return await this._readTermBankFileFast(
                     termFile,
@@ -4771,7 +4774,7 @@ export class DictionaryImporter {
                 if (e instanceof TermBankWasmResourceError) { throw e; }
                 this._logImport(`term file ${termFile.filename}: wasm parse fallback (${/** @type {Error} */ (toError(e)).message})`);
             }
-        } else {
+        } else if (this._disableTermBankWasmFastPath) {
             this._logImport(`term file ${termFile.filename}: wasm parser disabled by import flag`);
         }
         const content = await this._getData(termFile, new TextWriter());
