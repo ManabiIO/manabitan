@@ -27,7 +27,7 @@ const title = 'Released Upgrade Fixture';
 const expression = '移行検証';
 const marker = 'RELEASED_SCHEMA_UPGRADE_GLOSSARY_6C21';
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
-const report = {sourceCommit: process.env.GITHUB_SHA ?? null, status: 'running', stages: []};
+const report = {sourceCommit: process.env.GITHUB_SHA ?? null, status: 'running', stages: [], storageSnapshots: []};
 let context = null;
 let extensionId = '';
 const persist = async () => await writeFile(path.join(evidence, 'upgrade-report.json'), JSON.stringify(report, null, 2));
@@ -77,11 +77,28 @@ async function launch(name, expectedVersion) {
     assert.ok(id);
     if (extensionId) { assert.equal(id, extensionId, 'Upgrade changed extension identity'); }
     extensionId = id;
-    const page = await context.newPage();
+    let page = await context.newPage();
     await page.goto(`chrome-extension://${id}/settings.html?popup-preview=false`);
+    if (name === 'upgrade') {
+        // Replacing an unpacked directory does not notify Chrome's persisted
+        // service worker. Perform the extension reload lifecycle explicitly.
+        const replacementWorker = context.waitForEvent('serviceworker', {
+            predicate: (next) => next !== worker && next.url().startsWith(`chrome-extension://${id}/`),
+            timeout: 30000,
+        });
+        const reload = page.evaluate(() => chrome.runtime.reload()).catch((error) => {
+            if (!/Execution context was destroyed|Target.*closed/i.test(String(error))) { throw error; }
+        });
+        await Promise.all([reload, replacementWorker]);
+        if (!page.isClosed()) { await page.close(); }
+        page = await context.newPage();
+        await page.goto(`chrome-extension://${id}/settings.html?popup-preview=false`);
+        report.candidateReloadLifecycleObserved = true;
+    }
     await page.waitForFunction(() => document.documentElement.dataset.loaded === 'true', null, {timeout: 60000});
     assert.equal(await page.evaluate(() => chrome.runtime.getManifest().version), expectedVersion);
     const diagnostics = await send(page, 'debugDictionaryStorageState');
+    report.storageSnapshots.push({name, diagnostics});
     const legacy = expectedVersion === '26.3.31.46';
     if (!legacy) {
         assert.equal(diagnostics.usesFallbackStorage, false);
@@ -203,6 +220,7 @@ try {
     await published(page, true);
     preserved(options, await send(page, 'optionsGetFull'));
     await lookup(page);
+    report.stages.push({name: 'restored-restart-fresh-lookup-and-preferences', passed: true});
     report.status = 'success';
 } catch (error) {
     report.status = 'failure';
@@ -210,6 +228,7 @@ try {
     throw error;
 } finally {
     await close();
+    report.finalShutdownObserved = true;
     report.finishedAt = new Date().toISOString();
     await persist();
 }

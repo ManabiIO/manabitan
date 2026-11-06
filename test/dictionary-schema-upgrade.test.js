@@ -5,6 +5,7 @@
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest';
+import {Backend} from '../ext/js/background/backend.js';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 
 /** @type {import('@sqlite.org/sqlite-wasm').Sqlite3Static} */
@@ -202,4 +203,39 @@ describe('dictionary schema upgrade inventory recovery', () => {
         expect(restarted.database.getPublishedDictionaryImport('old-operation')).toBeNull();
         expect(restarted.database.getPublishedDictionaryImport('new-operation')).toMatchObject({outcome: {status: 'published', generationId: 'new-generation'}});
     });
+});
+
+test('startup pruning preserves migrated dictionary aliases, ordering, and profile selectors', async () => {
+    const {database} = createDatabase();
+    await database._runSchemaMigrations();
+    database._restoreTermRecordDictionaryHealth();
+    const options = {
+        profiles: [
+            {options: {
+                dictionaries: [
+                    {name: 'Main', alias: 'Primary', enabled: true, styles: '.custom {color: red}', allowSecondarySearches: true},
+                    {name: 'Main', alias: 'Secondary', enabled: false, styles: '.custom {color: blue}'},
+                ],
+                general: {mainDictionary: 'Main', sortFrequencyDictionary: 'Main'},
+                anki: {tags: ['preserved']},
+            }},
+            {options: {
+                dictionaries: [{name: 'Main', alias: 'Other profile', enabled: false}],
+                general: {mainDictionary: 'Main', sortFrequencyDictionary: null},
+            }},
+        ],
+    };
+    const before = structuredClone(options);
+    const save = vi.fn();
+    const context = {
+        _options: options,
+        _dictionaryDatabase: database,
+        _ensureDictionaryDatabaseReady: vi.fn(async () => {}),
+        _optionsUtil: {save},
+        _clearProfileConditionsSchemaCache: vi.fn(),
+    };
+    const result = await Reflect.get(Backend.prototype, '_pruneStaleProfileDictionaryOptions').call(context);
+    expect(result).toMatchObject({removedEntryCount: 0, affectedProfiles: 0, mainDictionaryResets: 0, sortFrequencyDictionaryResets: 0});
+    expect(options).toStrictEqual(before);
+    expect(save).not.toHaveBeenCalled();
 });
