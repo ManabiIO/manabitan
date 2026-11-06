@@ -59,6 +59,8 @@ export class GenericSettingController {
         this._dataBinder.observe(document.body);
         this._globalDataBinder.observe(document.body);
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
+        // Permission controls own their values; only consume their published display transforms.
+        document.addEventListener('settingChanged', this._onPermissionSettingChanged.bind(this), true);
     }
 
     /** */
@@ -89,13 +91,24 @@ export class GenericSettingController {
     }
 
     /**
+     * @param {Event} event
+     */
+    _onPermissionSettingChanged(event) {
+        const element = event.target;
+        if (!(element instanceof HTMLElement) || typeof element.dataset.permissionsSetting !== 'string') { return; }
+        const {detail: {value}} = /** @type {import('dom-data-binder').SettingChangedEvent} */ (event);
+        const transforms = this._getTransformDataArray(element.dataset.transform);
+        this._applyTransforms(value, transforms, 'post', element);
+    }
+
+    /**
      * @param {boolean} globalScope
      * @returns {DOMDataBinder<import('generic-setting-controller').ElementMetadata>}
      */
     _createDataBinder(globalScope) {
         const scope = globalScope ? '[data-scope="global"]' : ':not([data-scope="global"])';
         return new DOMDataBinder(
-            [`[data-setting]${scope}`, `[data-permissions-setting]${scope}`],
+            [`[data-setting]:not([data-permissions-setting])${scope}`],
             this._createElementMetadata.bind(this),
             this._compareElementMetadata.bind(this),
             this._getValues.bind(this),
