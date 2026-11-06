@@ -50,8 +50,38 @@ describe('release workflow dispatch ref contract', () => {
         const steps = dispatchSteps('.github/workflows/create-prerelease-on-tag.yml');
         expect(steps).toHaveLength(2);
         for (const step of steps) {
-            expect(step).toContain('ref: $' + '{{ steps.releaseVersion.outputs.version }}');
+            expect(step).toContain('ref: $' + '{{ needs.build.outputs.version }}');
         }
+    });
+
+    test('branch-dispatched releases attach provenance to the resolved release tag', () => {
+        const source = readFileSync(join(repositoryRoot, '.github/workflows/create-prerelease-on-tag.yml'), 'utf8');
+        const buildOutputs = source.match(/ {4}outputs:\n((?: {6}.+\n)+)/u)?.[1];
+        expect(buildOutputs).toContain('version: $' + '{{ steps.releaseVersion.outputs.version }}');
+        const provenance = source.slice(source.indexOf('  provenance:\n'));
+        expect(provenance).toContain('upload-assets: true');
+        expect(provenance).toContain('upload-tag-name: $' + '{{ needs.build.outputs.version }}');
+    });
+
+    test('release assets stay in a draft until provenance and remote verification succeed', () => {
+        const source = readFileSync(join(repositoryRoot, '.github/workflows/create-prerelease-on-tag.yml'), 'utf8');
+        const build = source.slice(source.indexOf('  build:\n'), source.indexOf('  provenance:\n'));
+        const provenance = source.slice(source.indexOf('  provenance:\n'), source.indexOf('  publish:\n'));
+        const publish = source.slice(source.indexOf('  publish:\n'));
+        expect(build).toContain('draft: true');
+        expect(build).toContain('Refuse to replace an already public release');
+        expect(build).not.toContain('Dispatch publish-');
+        expect(provenance).toContain('draft-release: "true"');
+        expect(publish).toContain('needs: [build, provenance]');
+        expect(build).toContain('release_id: $' + '{{ steps.release.outputs.id }}');
+        expect(publish).toContain('RELEASE_ID: $' + '{{ needs.build.outputs.release_id }}');
+        expect(publish).toContain('gh api "repos/$' + '{GITHUB_REPOSITORY}/releases/$' + '{RELEASE_ID}" > release.json');
+        const verify = publish.indexOf('node dev/bin/verify-staged-release.js');
+        const makePublic = publish.indexOf('-F draft=false -F prerelease=true');
+        expect(verify).toBeGreaterThan(-1);
+        expect(makePublic).toBeGreaterThan(verify);
+        expect(publish.indexOf('Dispatch publish-chrome-development')).toBeGreaterThan(makePublic);
+        expect(publish.indexOf('Dispatch publish-firefox-development')).toBeGreaterThan(makePublic);
     });
 
     test('all store publishers select assets from the dispatched ref name', () => {
