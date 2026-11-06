@@ -133,14 +133,14 @@ async function waitForImportUiIdle(page) {
 }
 
 async function published(page, healthy) {
-    await page.waitForFunction(async ({title, healthy}) => {
+    const handle = await page.waitForFunction(async ({title, healthy}) => {
         const response = await new Promise((resolve) => { chrome.runtime.sendMessage({action: 'getDictionaryInfo', params: {}}, resolve); });
-        return !response?.error && response?.result?.some((row) => row.title === title && row.importSuccess === true &&
+        return !response?.error && response?.result?.find((row) => row.title === title && row.importSuccess === true &&
         (!healthy || (row.storageHealth === 'available' && typeof row.storageGenerationId === 'string')));
     }, {title, healthy}, {timeout: 120000});
-    const result = (await send(page, 'getDictionaryInfo')).find((row) => row.title === title);
-    assert.ok(result);
-    return result;
+    try {
+        return await handle.jsonValue();
+    } finally { await handle.dispose(); }
 }
 
 async function lookup(page) {
@@ -176,7 +176,6 @@ try {
     report.fixtureSha256 = hash(fixture);
     let page = await launch('published-release-initial', report.oldPackage.manifest.version);
     await page.setInputFiles('#dictionary-import-file-input', fixturePath);
-    await published(page, false);
     await page.waitForFunction((title) => {
         const debug = Reflect.get(globalThis, '__manabitanLastImportDebug');
         return debug?.hasResult === true && debug.resultTitle === title;
@@ -191,6 +190,7 @@ try {
     // The published UI hides progress before its backend refresh settles.
     // This idempotent transition queues behind the active legacy transition.
     await send(page, 'setDictionaryImportMode', {active: false});
+    await published(page, false);
     let options = await send(page, 'optionsGetFull');
     const dictionaryIndex = options.profiles[0].options.dictionaries.findIndex((row) => row.name === title);
     assert.ok(dictionaryIndex >= 0);
