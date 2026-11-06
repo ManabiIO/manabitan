@@ -62,4 +62,41 @@ describe('PersistentStorageController', () => {
         expect(persist).toHaveBeenCalledOnce();
         expect(logError).toHaveBeenCalled();
     });
+    test('an old startup read cannot undo a successful persistence request', async ({window}) => {
+        window.document.body.innerHTML = '<input id="storage-persistent-checkbox" type="checkbox"><div id="storage-persistent-info" hidden></div><div id="storage-persistent-fail-warning" hidden></div>';
+        const initial = Promise.withResolvers();
+        const persist = vi.fn().mockResolvedValue(true);
+        Object.defineProperty(window.navigator, 'storage', {
+            value: {persisted: () => initial.promise, persist}, configurable: true,
+        });
+        const {PersistentStorageController} = await import('../ext/js/pages/settings/persistent-storage-controller.js');
+        const controller = new PersistentStorageController(/** @type {any} */ ({triggerStorageChanged: vi.fn()}));
+        const preparing = controller.prepare();
+        await controller._attemptPersistStorage();
+        initial.resolve(false);
+        await preparing;
+        expect(/** @type {HTMLInputElement} */ (window.document.querySelector('#storage-persistent-checkbox')).checked).toBe(true);
+    });
+
+    test('repeated persistence clicks do not duplicate the pending request and recover after denial', async ({window}) => {
+        window.document.body.innerHTML = '<input id="storage-persistent-checkbox" type="checkbox"><div id="storage-persistent-info" hidden></div><div id="storage-persistent-fail-warning" hidden></div>';
+        const pending = Promise.withResolvers();
+        const persist = vi.fn().mockReturnValueOnce(pending.promise).mockResolvedValueOnce(true);
+        Object.defineProperty(window.navigator, 'storage', {
+            value: {persisted: async () => false, persist}, configurable: true,
+        });
+        const {PersistentStorageController} = await import('../ext/js/pages/settings/persistent-storage-controller.js');
+        const notify = vi.fn();
+        const controller = new PersistentStorageController(/** @type {any} */ ({triggerStorageChanged: notify}));
+        await controller.prepare();
+        const first = controller._attemptPersistStorage();
+        const second = controller._attemptPersistStorage();
+        expect(persist).toHaveBeenCalledOnce();
+        pending.resolve(false);
+        await Promise.all([first, second]);
+        expect(notify).toHaveBeenCalledOnce();
+        await controller._attemptPersistStorage();
+        expect(persist).toHaveBeenCalledTimes(2);
+        expect(/** @type {HTMLInputElement} */ (window.document.querySelector('#storage-persistent-checkbox')).checked).toBe(true);
+    });
 });

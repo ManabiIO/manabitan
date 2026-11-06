@@ -29,6 +29,10 @@ export class PersistentStorageController {
         this._application = application;
         /** @type {HTMLInputElement} */
         this._persistentStorageCheckbox = querySelectorNotNull(document, '#storage-persistent-checkbox');
+        /** @type {number} */
+        this._stateGeneration = 0;
+        /** @type {boolean} */
+        this._persistPending = false;
     }
 
     /** @type {import('../../application.js').Application} */
@@ -46,8 +50,9 @@ export class PersistentStorageController {
         const info = document.querySelector('#storage-persistent-info');
         if (info !== null) { info.hidden = false; }
 
+        const generation = this._stateGeneration;
         const isStoragePeristent = await this.isStoragePeristent();
-        this._updateCheckbox(isStoragePeristent);
+        if (generation === this._stateGeneration) { this._updateCheckbox(isStoragePeristent); }
     }
 
     /**
@@ -92,20 +97,27 @@ export class PersistentStorageController {
 
     /** */
     async _attemptPersistStorage() {
-        let isStoragePeristent = false;
+        if (this._persistPending) { return; }
+        this._persistPending = true;
+        ++this._stateGeneration;
         try {
-            isStoragePeristent = await navigator.storage.persist();
-        } catch (e) {
-            // NOP
+            let isStoragePeristent = false;
+            try {
+                isStoragePeristent = await navigator.storage.persist();
+            } catch (e) {
+                // NOP
+            }
+
+            this._updateCheckbox(isStoragePeristent);
+
+            /** @type {?HTMLElement} */
+            const node = document.querySelector('#storage-persistent-fail-warning');
+            if (node !== null) { node.hidden = isStoragePeristent; }
+
+            this._application.triggerStorageChanged();
+        } finally {
+            this._persistPending = false;
         }
-
-        this._updateCheckbox(isStoragePeristent);
-
-        /** @type {?HTMLElement} */
-        const node = document.querySelector('#storage-persistent-fail-warning');
-        if (node !== null) { node.hidden = isStoragePeristent; }
-
-        this._application.triggerStorageChanged();
     }
 
     /**

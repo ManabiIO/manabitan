@@ -43,6 +43,12 @@ export class PermissionsOriginController {
         this._originContainerChildren = [];
         /** @type {EventListenerCollection} */
         this._eventListeners = new EventListenerCollection();
+        /** @type {number} */
+        this._permissionsGeneration = 0;
+        /** @type {number} */
+        this._operationGeneration = 0;
+        /** @type {number} */
+        this._inputGeneration = 0;
     }
 
     /** */
@@ -55,6 +61,7 @@ export class PermissionsOriginController {
             node.addEventListener('change', this._onOriginToggleChangeEvent.bind(this), false);
         }
         addButton.addEventListener('click', this._onAddButtonClickEvent.bind(this), false);
+        this._addOriginInput.addEventListener('input', () => { ++this._inputGeneration; }, false);
 
         this._settingsController.on('permissionsChanged', this._onPermissionsChanged.bind(this));
         await this._updatePermissions();
@@ -66,6 +73,7 @@ export class PermissionsOriginController {
      * @param {import('settings-controller').EventArgument<'permissionsChanged'>} details
      */
     _onPermissionsChanged({permissions}) {
+        ++this._permissionsGeneration;
         this._eventListeners.removeAllEventListeners();
         for (const node of this._originContainerChildren) {
             if (node.parentNode === null) { continue; }
@@ -158,20 +166,39 @@ export class PermissionsOriginController {
     /** */
     async _addOrigin() {
         const input = /** @type {HTMLInputElement} */ (this._addOriginInput);
-        const origin = input.value.trim();
+        const inputValue = input.value;
+        const inputGeneration = this._inputGeneration;
+        const origin = inputValue.trim();
         if (origin.length === 0) {
             return;
         }
         const added = await this._setOriginPermissionEnabled(origin, true);
-        if (added) {
+        if (added && inputGeneration === this._inputGeneration && input.value === inputValue) {
             input.value = '';
         }
     }
 
     /** */
     async _updatePermissions() {
-        const permissions = await getAllPermissions();
-        this._onPermissionsChanged({permissions});
+        // A newer snapshot, permission event, or user operation owns the view.
+        const generation = ++this._permissionsGeneration;
+        try {
+            const permissions = await getAllPermissions();
+            if (generation !== this._permissionsGeneration) { return; }
+            this._onPermissionsChanged({permissions});
+        } catch (error) {
+            if (generation !== this._permissionsGeneration) { return; }
+            this._showError(error);
+            throw error;
+        }
+    }
+
+    /**
+     * @param {unknown} error
+     */
+    _showError(error) {
+        this._errorContainer.hidden = false;
+        this._errorContainer.textContent = toError(error).message;
     }
 
     /**
@@ -180,19 +207,24 @@ export class PermissionsOriginController {
      * @returns {Promise<boolean>}
      */
     async _setOriginPermissionEnabled(origin, enabled) {
+        // Do not let an older approval or error replace a newer operation's UI.
+        const operationGeneration = ++this._operationGeneration;
+        const permissionsGeneration = ++this._permissionsGeneration;
         /** @type {boolean|null} */
         let permissionGranted = null;
         try {
             permissionGranted = await setPermissionsGranted({origins: [origin]}, enabled);
         } catch (e) {
-            const errorContainer = /** @type {HTMLElement} */ (this._errorContainer);
-            errorContainer.hidden = false;
-            errorContainer.textContent = toError(e).message;
+            if (operationGeneration === this._operationGeneration && permissionsGeneration === this._permissionsGeneration) {
+                this._showError(e);
+            }
         }
         // The permissions utility returns the resulting granted state, not
         // whether a permission API call succeeded. Successful removal is false.
         if (permissionGranted !== enabled) { return false; }
-        await this._updatePermissions();
+        if (operationGeneration === this._operationGeneration) {
+            await this._updatePermissions();
+        }
         return true;
     }
 }
