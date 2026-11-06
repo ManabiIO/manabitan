@@ -39,6 +39,7 @@ function createDatabase() {
     // sorted prefix search, query reversal, and result classification unchanged.
     Reflect.set(database, '_db', {});
     Reflect.set(database, '_termRecordStore', {
+        getDictionaryHealth: () => ({status: 'available', reason: null}),
         ensureDictionariesLoaded: async () => {},
         getDictionaryIndex: () => index,
         ensureDictionaryReverseIndex: () => {},
