@@ -83,7 +83,7 @@ describe('DictionaryDatabase direct term indexes', () => {
     test('exact lookup resolves expression and reading postings with one store probe', async () => {
         const database = createDatabase({});
         const findTermIdMatches = vi.fn().mockReturnValue({expression: [7], reading: [8]});
-        Reflect.set(database, '_termRecordStore', {findTermIdMatches});
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermIdMatches});
 
         const results = await database.findTermsBulk(['食べる'], new Set(['Test']), 'exact');
 
@@ -98,7 +98,7 @@ describe('DictionaryDatabase direct term indexes', () => {
     test('queries immutable term-record storage while preserving the logical dictionary title', async () => {
         const database = createDatabase({});
         const findTermIdMatches = vi.fn().mockReturnValue({expression: [7], reading: []});
-        Reflect.set(database, '_termRecordStore', {findTermIdMatches});
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermIdMatches});
         Reflect.get(database, '_registerTermRecordStorageName').call(
             database,
             'JMdict [2026-02-26]',
@@ -125,7 +125,7 @@ describe('DictionaryDatabase direct term indexes', () => {
             {expression: [7], reading: []},
             {expression: [], reading: [8]},
         ]);
-        Reflect.set(database, '_termRecordStore', {findTermIdMatchesForDictionaries});
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermIdMatchesForDictionaries});
 
         const results = await database.findTermsBulk(['食べる'], new Set(['JMdict', 'Jitendex']), 'exact');
 
@@ -142,7 +142,7 @@ describe('DictionaryDatabase direct term indexes', () => {
         const findTermIdMatchesForDictionaries = vi.fn().mockReturnValue([
             {expression: [7], reading: [8]},
         ]);
-        Reflect.set(database, '_termRecordStore', {findTermIdMatchesForDictionaries});
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermIdMatchesForDictionaries});
 
         const first = await database.findTermsBulk(['食べる'], new Set(['Test']), 'exact');
         const second = await database.findTermsBulk(['食べる'], new Set(['Test']), 'exact');
@@ -160,7 +160,7 @@ describe('DictionaryDatabase direct term indexes', () => {
         const database = createDatabase({});
         let available = false;
         const findTermIdMatchesForDictionaries = vi.fn(() => [{expression: [7], reading: []}]);
-        Reflect.set(database, '_termRecordStore', {
+        Object.assign(Reflect.get(database, '_termRecordStore'), {
             isDictionaryAvailable: vi.fn(() => available),
             findTermIdMatchesForDictionaries,
         });
@@ -180,7 +180,7 @@ describe('DictionaryDatabase direct term indexes', () => {
         const database = new DictionaryDatabase();
         Reflect.set(database, '_db', {});
         const ensureDictionariesLoaded = vi.fn(async () => {});
-        Reflect.set(database, '_termRecordStore', {
+        Object.assign(Reflect.get(database, '_termRecordStore'), {
             ensureDictionariesLoaded,
             isDictionaryAvailable: vi.fn(() => true),
             hasPersistentTermLookupIndex: vi.fn(() => true),
@@ -264,7 +264,7 @@ describe('DictionaryDatabase direct term indexes', () => {
             expression: [{id: 7, exact: query === 'helpful'}, {id: 7, exact: query === 'helpful'}],
             reading: [{id: 7, exact: false}],
         }]);
-        Reflect.set(database, '_termRecordStore', {findTermPrefixIdMatchesForDictionaries: find});
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermPrefixIdMatchesForDictionaries: find});
 
         const results = await database.findTermsBulk([shortQuery, 'helpful', shortQuery], new Set(['Test']), matchType);
 

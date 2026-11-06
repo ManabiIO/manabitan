@@ -1414,6 +1414,7 @@ export class TermRecordOpfsStore {
         this._activeAppendShardStateByKey.clear();
         this._invalidateAllPersistentLookupState();
         this._dictionaryHealthByName.clear();
+        this._importSessionActive = false;
         this._importSessionDictionaryNames.clear();
         this._preinternedCompactionRemap = new Uint32Array(0);
         this._loadedDictionaryNames.clear();

@@ -3252,7 +3252,7 @@ null;
             }
 
             const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
-            this._assertTermLookupGeneration(generation);
+            this._assertTermLookupGeneration(generation, dictionaryNames);
             if (shouldReportDiagnostics) {
                 reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                     stage: 'findTermsBulk-exact',
@@ -3349,7 +3349,7 @@ null;
         }
 
         const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
-        this._assertTermLookupGeneration(generation);
+        this._assertTermLookupGeneration(generation, dictionaryNames);
         if (shouldReportDiagnostics) {
             reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                 stage: 'findTermsBulk-prefix',
@@ -3546,6 +3546,7 @@ null;
         const dictionaryNames = this._getDictionaryNames(dictionaries);
         await this.ensureGlossarySearchIndex(new Set(dictionaryNames), onProgress, isCancelled);
         this._assertTermLookupGeneration(generation);
+        const lookupDictionaryNames = this._getUnquarantinedTermDictionaryNames(dictionaryNames);
         if (isCancelled()) { throw new DOMException('Glossary search cancelled', 'AbortError'); }
 
         const {clause: dictionaryClause, bind: dictionaryBind} = this._buildTextInClause(dictionaryNames, 'glossaryDict');
@@ -3598,7 +3599,7 @@ null;
         }
         if (ids.length === 0) { return []; }
         const rows = await this._fetchTermRowsByIds(ids);
-        this._assertTermLookupGeneration(generation);
+        this._assertTermLookupGeneration(generation, lookupDictionaryNames);
         if (isCancelled()) { throw new DOMException('Glossary search cancelled', 'AbortError'); }
 
         const dictionaryOrder = new Map(dictionaryNames.map((name, index) => [name, index]));
@@ -3646,6 +3647,9 @@ null;
         if (typeof observedAvailability !== 'undefined') {
             observedAvailability.push(...this.getDictionaryAvailability(dictionaryNames));
         }
+        // Existing quarantine is reported in availability; only dictionaries
+        // selected for this read must remain usable through its completion.
+        const lookupDictionaryNames = this._getUnquarantinedTermDictionaryNames(dictionaryNames);
         /** @type {Map<string, {reading: string, itemIndex: number}[]>} */
         const requestsByTerm = new Map();
         for (let itemIndex = 0; itemIndex < termList.length; ++itemIndex) {
@@ -3685,7 +3689,7 @@ null;
         }
 
         const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
-        this._assertTermLookupGeneration(generation);
+        this._assertTermLookupGeneration(generation, lookupDictionaryNames);
         for (const [id, requests] of idMatches) {
             const row = rowsById.get(id);
             if (typeof row === 'undefined') { continue; }
@@ -3734,6 +3738,9 @@ null;
         if (typeof observedAvailability !== 'undefined') {
             observedAvailability.push(...this.getDictionaryAvailability(dictionaryNames));
         }
+        // Existing quarantine is reported in availability; only dictionaries
+        // selected for this read must remain usable through its completion.
+        const lookupDictionaryNames = this._getUnquarantinedTermDictionaryNames(dictionaryNames);
         const sequenceValues = [...new Set(items.map((item) => this._asNumber(item.query, -1)).filter((value) => value >= 0))];
         /** @type {Map<number, number[]>} */
         const idMatches = new Map();
@@ -3759,7 +3766,7 @@ null;
         }
 
         const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
-        this._assertTermLookupGeneration(generation);
+        this._assertTermLookupGeneration(generation, lookupDictionaryNames);
         for (const [id, itemIndexes] of idMatches) {
             const row = rowsById.get(id);
             if (typeof row === 'undefined') { continue; }
@@ -10470,15 +10477,50 @@ null :
 
     /**
      * A lookup must not publish rows, decoded content, or corruption reports
-     * after dictionary mutation invalidates the source generation.
+     * after mutation invalidates the generation or another read quarantines an owner.
      * @param {number} generation
+     * @param {string|Iterable<string>|null} [dictionaryNames=null]
      * @throws {TermContentLookupReadError}
      */
-    _assertTermLookupGeneration(generation) {
+    _assertTermLookupGeneration(generation, dictionaryNames = null) {
         if (generation !== this._directTermIndexGeneration) {
             throw new TermContentLookupReadError(
                 'temporarilyUnavailable',
                 'Dictionary content is temporarily unavailable because lookup state changed',
+            );
+        }
+        if (typeof dictionaryNames === 'string') {
+            this._assertTermDictionaryNotQuarantined(dictionaryNames);
+        } else if (dictionaryNames !== null) {
+            for (const name of dictionaryNames) { this._assertTermDictionaryNotQuarantined(name); }
+        }
+    }
+
+    /**
+     * Capture owners that can become quarantined during a lookup. Existing
+     * quarantine remains an availability warning alongside healthy results.
+     * @param {string[]} dictionaryNames
+     * @returns {string[]}
+     */
+    _getUnquarantinedTermDictionaryNames(dictionaryNames) {
+        return dictionaryNames.filter((name) => (
+            this._termRecordStore.getDictionaryHealth(this._getTermRecordStorageName(name)).status !== 'reimportRequired'
+        ));
+    }
+
+    /**
+     * Quarantine can be discovered by a concurrent read without replacing the
+     * dictionary generation. Fence cache writes and result publication as well
+     * as the initial index lookup, while healthy dictionaries remain usable.
+     * @param {string} dictionaryName
+     * @throws {TermContentLookupReadError} When authoritative storage is quarantined.
+     */
+    _assertTermDictionaryNotQuarantined(dictionaryName) {
+        const storageName = this._getTermRecordStorageName(dictionaryName);
+        if (this._termRecordStore.getDictionaryHealth(storageName).status === 'reimportRequired') {
+            throw new TermContentLookupReadError(
+                'corrupt',
+                `Dictionary content is damaged and must be re-imported: ${dictionaryName}`,
             );
         }
     }
@@ -10575,7 +10617,7 @@ null :
                             sequence: record.sequence,
                         });
                         if (failed) { return; }
-                        this._assertTermLookupGeneration(generation);
+                        this._assertTermLookupGeneration(generation, row.dictionary);
                         rowsById.set(id, row);
                         this._setCachedTermRow(id, row);
                     }
@@ -10645,6 +10687,8 @@ null :
      */
     async _deserializeTermRow(row) {
         const generation = this._directTermIndexGeneration;
+        const dictionaryName = this._asString(row.dictionary);
+        this._assertTermLookupGeneration(generation, dictionaryName);
         const entryContentId = this._asNullableNumber(row.entryContentId);
         const contentOffset = this._asNumber(row.entryContentOffset, -1);
         const contentLength = this._asNumber(row.entryContentLength, -1);
@@ -10669,10 +10713,9 @@ null :
             if (typeof cached === 'undefined') {
                 /** @type {Uint8Array|null} */
                 let contentBytes = null;
-                const dictionaryName = this._asString(row.dictionary);
                 if (hasExternalContentSpan) {
                     const readResult = await this._readTermEntryContentBytesDetailed(contentOffset, contentLength, contentDictName);
-                    this._assertTermLookupGeneration(generation);
+                    this._assertTermLookupGeneration(generation, dictionaryName);
                     if (readResult.status !== 'ok') {
                         reportDiagnostics('term-content-lookup-read-failed', {
                             dictionaryName,
@@ -10716,14 +10759,14 @@ null :
                                     rawSharedGlossaryHeader.glossaryOffset,
                                     rawSharedGlossaryHeader.glossaryLength,
                                 );
-                                this._assertTermLookupGeneration(generation);
+                                this._assertTermLookupGeneration(generation, dictionaryName);
                             } else {
                                 const glossaryReadResult = await this._readTermEntryContentBytesDetailed(
                                     rawSharedGlossaryHeader.glossaryOffset,
                                     rawSharedGlossaryHeader.glossaryLength,
                                     'raw',
                                 );
-                                this._assertTermLookupGeneration(generation);
+                                this._assertTermLookupGeneration(generation, dictionaryName);
                                 if (glossaryReadResult.status !== 'ok') {
                                     throw new TermContentLookupReadError(glossaryReadResult.status, glossaryReadResult.reason);
                                 }
@@ -10834,7 +10877,7 @@ null :
                             }
                         }
                     } catch (e) {
-                        this._assertTermLookupGeneration(generation);
+                        this._assertTermLookupGeneration(generation, dictionaryName);
                         if (e instanceof TermContentLookupReadError) {
                             reportDiagnostics('term-content-lookup-read-failed', {
                                 dictionaryName,
@@ -10888,7 +10931,7 @@ null :
                         glossary,
                     };
                 }
-                this._assertTermLookupGeneration(generation);
+                this._assertTermLookupGeneration(generation, dictionaryName);
                 this._setCachedTermEntryContent(cacheKey, cached);
             }
             definitionTags = cached.definitionTags;
@@ -11678,6 +11721,7 @@ null :
      * @returns {import('dictionary-database').TermEntry}
      */
     _createTerm(matchSource, matchType, row, index) {
+        this._assertTermDictionaryNotQuarantined(row.dictionary);
         const {sequence} = row;
         return {
             index,
