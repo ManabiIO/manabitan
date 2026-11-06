@@ -221,3 +221,232 @@ test('publication is still announced if the page dies after completion but befor
         observer.port2.close();
     }
 });
+
+
+test.each([false, true])('lost terminal delivery reconciles a published receipt without replay (page departed=%s)', async (departed) => {
+    const {backend, client, cancel, notifications} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    const operation = backend._ownedDictionaryImports.get('operation-A');
+    if (operation) { operation.runtimeAdmissionAttempted = true; }
+    backend._settleDictionaryImportOwnership('operation-A', 'page-A');
+    cancel.mockResolvedValue(/** @type {never} */ ({
+        operationId: 'operation-A',
+        workerGeneration: 'worker-A',
+        state: 'completed',
+        published: true,
+        result: {result: {title: 'Fixture'}, errors: [], outcome: {status: 'published'}},
+    }));
+    const observer = new MessageChannel();
+    const relay = backend._superviseOwnedDictionaryImport('operation-A', observer.port2);
+    try {
+        if (departed) { api.shutdownRuntimeConnections(); }
+        relay.port.postMessage({type: 'error', error: {name: 'DictionaryImportTransportError', message: 'lost completion'}});
+        await expect.poll(() => backend._ownedDictionaryImports.size).toBe(0);
+        expect(cancel).toHaveBeenCalledExactlyOnceWith({action: 'cancelDictionaryImportOffscreen', params: {operationId: 'operation-A', workerGeneration: void 0, lookupOnly: true}});
+        if (!departed) {
+            expect(backend._dictionaryImportOwners.has('page-A')).toBe(true);
+            api.shutdownRuntimeConnections();
+        }
+        await expect.poll(() => notifications.mock.calls.length).toBe(1);
+        expect(notifications).toHaveBeenCalledExactlyOnceWith('dictionary', 'import');
+        expect(backend._dictionaryImportOwners.size).toBe(0);
+    } finally {
+        relay.close();
+        observer.port1.close();
+        observer.port2.close();
+    }
+});
+
+test.each(['completed', 'failed', 'cancelled'])('authoritative status settles owned operation without a frontend terminal (%s)', async (state) => {
+    const {backend, client, cancel, notifications} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    const operation = backend._ownedDictionaryImports.get('operation-A');
+    if (operation) { operation.runtimeAdmissionAttempted = true; }
+    backend._settleDictionaryImportOwnership('operation-A', 'page-A');
+    api.shutdownRuntimeConnections();
+    cancel.mockResolvedValue(/** @type {never} */ ({operationId: 'operation-A', workerGeneration: 'worker-A', state, published: false}));
+    await backend._onApiGetDictionaryImportOperationStatus({operationId: 'operation-A'}, {});
+    await expect.poll(() => backend._dictionaryImportOwners.size).toBe(0);
+    expect(backend._ownedDictionaryImports.size).toBe(0);
+    expect(notifications).not.toHaveBeenCalled();
+});
+
+test.each(['unknown', 'queued', 'running', 'foreign-operation'])('nonterminal or mismatched receipt retains ownership (%s)', async (state) => {
+    const {backend, client, cancel} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    const operation = backend._ownedDictionaryImports.get('operation-A');
+    if (operation) { operation.runtimeAdmissionAttempted = true; }
+    backend._settleDictionaryImportOwnership('operation-A', 'page-A');
+    api.shutdownRuntimeConnections();
+    cancel.mockResolvedValue(/** @type {never} */ ({
+        operationId: state === 'foreign-operation' ? state : 'operation-A',
+        workerGeneration: 'worker-A',
+        state: state === 'foreign-operation' ? 'completed' : state,
+        published: true,
+    }));
+    await backend._onApiGetDictionaryImportOperationStatus({operationId: 'operation-A'}, {});
+    expect(backend._ownedDictionaryImports.get('operation-A')).toBe(operation);
+    expect(backend._dictionaryImportOwners.has('page-A')).toBe(true);
+    cancel.mockResolvedValue(void 0);
+    await backend._setDictionaryImportMode(false, 'page-A');
+});
+
+
+test('status reconciliation forwards terminal completion to a still-connected observer', async () => {
+    const {backend, client, cancel} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    backend._settleDictionaryImportOwnership('operation-A', 'page-A');
+    const observer = new MessageChannel();
+    const received = new Promise((resolve) => {
+        observer.port1.onmessage = (event) => { resolve(event.data); };
+    });
+    const relay = backend._superviseOwnedDictionaryImport('operation-A', observer.port2);
+    const result = {result: {title: 'Fixture'}, errors: [], outcome: {status: 'published'}};
+    cancel.mockResolvedValue(/** @type {never} */ ({operationId: 'operation-A', state: 'completed', published: true, result}));
+    try {
+        await backend._onApiGetDictionaryImportOperationStatus({operationId: 'operation-A'}, {});
+        expect(await received).toEqual({type: 'complete', result});
+        expect(backend._ownedDictionaryImports.size).toBe(0);
+        await api.setDictionaryImportMode(false, 'page-A');
+    } finally {
+        relay.close();
+        observer.port1.close();
+        observer.port2.close();
+    }
+});
+
+test('a delayed receipt cannot settle a replacement operation with the same ID', async () => {
+    const {backend, client, cancel} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    /** @type {PromiseWithResolvers<unknown>} */
+    const deferred = Promise.withResolvers();
+    cancel.mockReturnValue(/** @type {Promise<void>} */ (deferred.promise));
+    const lookup = backend._onApiGetDictionaryImportOperationStatus({operationId: 'operation-A'}, {});
+    backend._ownedDictionaryImports.delete('operation-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    const replacement = backend._ownedDictionaryImports.get('operation-A');
+    deferred.resolve({operationId: 'operation-A', state: 'completed', published: true});
+    await lookup;
+    expect(backend._ownedDictionaryImports.get('operation-A')).toBe(replacement);
+    expect(replacement?.completed).toBe(false);
+    cancel.mockResolvedValue(void 0);
+    await api.setDictionaryImportMode(false, 'page-A');
+});
+
+test.each(['cancellation', 'refresh'])('a publication receipt arriving during owner release retains its notification (%s)', async (phase) => {
+    const {backend, client, cancel, refresh, notifications} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    const operation = backend._ownedDictionaryImports.get('operation-A');
+    if (operation) { operation.runtimeAdmissionAttempted = true; }
+    // Retain the owned operation until after the delayed receipt, including
+    // the case where explicit release has already reached its final refresh.
+    /** @type {PromiseWithResolvers<unknown>} */
+    const receipt = Promise.withResolvers();
+    /** @type {PromiseWithResolvers<void>} */
+    const entered = Promise.withResolvers();
+    /** @type {PromiseWithResolvers<void>} */
+    const resume = Promise.withResolvers();
+    cancel.mockImplementation(async (/** @type {unknown[]} */ ...args) => {
+        const message = /** @type {{params: {lookupOnly?: boolean}}} */ (args[0]);
+        if (message.params.lookupOnly) { return /** @type {void} */ (await receipt.promise); }
+        if (phase === 'cancellation') {
+            entered.resolve();
+            await resume.promise;
+        }
+    });
+    if (phase === 'refresh') {
+        refresh.mockImplementation(async () => {
+            entered.resolve();
+            await resume.promise;
+        });
+    }
+    const lookup = backend._onApiGetDictionaryImportOperationStatus({operationId: 'operation-A'}, {});
+    const release = api.setDictionaryImportMode(false, 'page-A');
+    await entered.promise;
+    receipt.resolve({operationId: 'operation-A', state: 'completed', published: true, outcome: {status: 'published'}});
+    resume.resolve();
+    await Promise.all([lookup, release]);
+    backend._settleDictionaryImportOwnership('operation-A', 'page-A');
+    await expect.poll(() => notifications.mock.calls.length).toBe(1);
+    expect(notifications).toHaveBeenCalledExactlyOnceWith('dictionary', 'import');
+    expect(Reflect.get(backend, '_dictionaryImportOwnerPublications')?.size ?? 0).toBe(0);
+    expect(backend._ownedDictionaryImports.size).toBe(0);
+    expect(backend._pendingDatabaseUpdatedNotifications).toHaveLength(0);
+});
+
+
+test('a publication receipt racing explicit release is still announced', async () => {
+    const {backend, client, cancel, notifications} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    backend._settleDictionaryImportOwnership('operation-A', 'page-A');
+    /** @type {PromiseWithResolvers<void>} */
+    const cancelled = Promise.withResolvers();
+    cancel.mockReturnValueOnce(cancelled.promise).mockResolvedValue(/** @type {never} */ ({
+        operationId: 'operation-A', state: 'completed', published: true,
+    }));
+    const release = api.setDictionaryImportMode(false, 'page-A');
+    await expect.poll(() => cancel.mock.calls.length).toBe(1);
+    try {
+        await backend._onApiGetDictionaryImportOperationStatus({operationId: 'operation-A'}, {});
+    } finally {
+        cancelled.resolve();
+        await release;
+    }
+    expect(notifications).toHaveBeenCalledExactlyOnceWith('dictionary', 'import');
+    expect(Reflect.get(backend, '_dictionaryImportOwnerPublications')?.size ?? 0).toBe(0);
+});
+
+
+test.each(['offscreen', 'local'])('lost %s handoff acknowledgement reconciles after the page departed', async (runtime) => {
+    const {backend, client, cancel, notifications} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    /** @type {PromiseWithResolvers<void>} */
+    const sending = Promise.withResolvers();
+    /** @type {PromiseWithResolvers<void>} */
+    const handoff = Promise.withResolvers();
+    const sendMessageViaPort = vi.fn(async () => {
+        sending.resolve();
+        await handoff.promise;
+    });
+    const messenger = {prepare: vi.fn(async () => {}), sendMessageViaPort, sendMessagePromise: cancel};
+    if (runtime === 'offscreen') {
+        Reflect.set(backend, '_offscreen', messenger);
+    } else {
+        Reflect.set(backend, '_offscreen', null);
+        Reflect.set(backend, '_localDictionaryRuntime', messenger);
+    }
+    cancel.mockResolvedValue(/** @type {never} */ ({operationId: 'operation-A', state: 'completed', published: true}));
+    const observer = new MessageChannel();
+    try {
+        const forwarded = backend._onPmImportDictionaryOffscreen({operationId: 'operation-A', ownerId: 'page-A', archiveContent: new Blob(['fixture']), details: {}}, [observer.port2]);
+        await sending.promise;
+        api.shutdownRuntimeConnections();
+        const error = new Error('handoff acknowledgement lost');
+        error.name = 'DictionaryImportTransportError';
+        handoff.reject(error);
+        await forwarded;
+        await expect.poll(() => backend._dictionaryImportOwners.size).toBe(0);
+        expect(backend._ownedDictionaryImports.size).toBe(0);
+        expect(sendMessageViaPort).toHaveBeenCalledOnce();
+        expect(cancel).toHaveBeenCalledExactlyOnceWith({action: 'cancelDictionaryImportOffscreen', params: {operationId: 'operation-A', workerGeneration: void 0, lookupOnly: true}});
+        expect(notifications).toHaveBeenCalledExactlyOnceWith('dictionary', 'import');
+    } finally {
+        observer.port1.close();
+        observer.port2.close();
+    }
+});

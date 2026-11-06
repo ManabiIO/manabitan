@@ -36,15 +36,21 @@ export class DictionaryImportOwnerClient {
         /** @type {import('core').DeferredPromiseDetails<void>} */
         const {promise: ready, resolve, reject} = deferPromise();
         let settled = false;
+        const closeConnection = () => {
+            if (this._connections.get(ownerId)?.ready === ready) { this.close(ownerId); }
+        };
+        const removeMessageListener = () => {
+            try { port.onMessage.removeListener(onMessage); } catch (_) { /* A dead browser context may reject listener cleanup. */ }
+        };
         /** @param {Error|null} error */
         const finish = (error) => {
             if (settled) { return; }
             settled = true;
             clearTimeout(timer);
-            port.onMessage.removeListener(onMessage);
+            removeMessageListener();
             if (error) {
                 reject(error);
-                this.close(ownerId);
+                closeConnection();
             } else { resolve(); }
         };
         /** @param {unknown} message */
@@ -57,17 +63,21 @@ export class DictionaryImportOwnerClient {
             // Consume runtime.lastError on browser-rejected connections.
             const message = chrome.runtime.lastError?.message;
             finish(new Error(message || 'Dictionary import owner disconnected before readiness'));
-            this.close(ownerId);
+            closeConnection();
         };
         const timer = setTimeout(() => { finish(new Error('Dictionary import owner readiness timed out')); }, 30000);
         const stop = () => {
-            port.onDisconnect.removeListener(onDisconnect);
-            port.onMessage.removeListener(onMessage);
+            try { port.onDisconnect.removeListener(onDisconnect); } catch (_) { /* Continue settling and closing other owners. */ }
+            removeMessageListener();
             finish(new Error('Dictionary import owner disconnected before readiness'));
         };
         this._connections.set(ownerId, {port, ready, stop});
-        port.onMessage.addListener(onMessage);
-        port.onDisconnect.addListener(onDisconnect);
+        try {
+            port.onMessage.addListener(onMessage);
+            port.onDisconnect.addListener(onDisconnect);
+        } catch (error) {
+            finish(error instanceof Error ? error : new Error(String(error)));
+        }
         return ready;
     }
 

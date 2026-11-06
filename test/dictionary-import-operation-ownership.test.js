@@ -244,6 +244,8 @@ describe('dictionary import operation ownership', () => {
         const id = operationId('A');
         Reflect.set(api, '_shutdownRejectors', new Set());
         Reflect.set(api, '_getPmTransportError', vi.fn(() => null));
+        Reflect.set(api, '_dictionaryImportOwnerSessions', new Map([['page-A', {active: true}]]));
+        Reflect.set(api, '_dictionaryImportOwnerClient', {open: vi.fn(async () => {})});
         const statusLookup = vi.fn(() => query(id));
         Reflect.set(api, 'getDictionaryImportOperationStatus', statusLookup);
         const invoke = vi.fn((action, params, transfers) => {
@@ -478,7 +480,9 @@ describe('dictionary import operation ownership', () => {
         await backend._onPmImportDictionaryOffscreen({operationId: id, ownerId: 'page-A', archiveContent: new Blob([]), details: /** @type {import('dictionary-importer').ImportDetails} */ ({})}, [port]);
         expect(Reflect.get(backend, '_ownedDictionaryImports').get(id)).toMatchObject({settled: true, completed: false});
         await backend._setDictionaryImportMode(false, 'page-A');
-        expect(cancel).toHaveBeenCalledExactlyOnceWith({action: 'cancelDictionaryImportOffscreen', params: {operationId: id}});
+        expect(cancel).toHaveBeenCalledTimes(2);
+        expect(cancel).toHaveBeenNthCalledWith(1, {action: 'cancelDictionaryImportOffscreen', params: {operationId: id, workerGeneration: void 0, lookupOnly: true}});
+        expect(cancel).toHaveBeenNthCalledWith(2, {action: 'cancelDictionaryImportOffscreen', params: {operationId: id}});
         expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(0);
     });
 
