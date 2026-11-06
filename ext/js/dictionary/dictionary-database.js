@@ -3412,17 +3412,17 @@ null;
                 if (!(error instanceof DOMException) || error.name !== 'AbortError' || isCancelled()) {
                     throw error;
                 }
-                this._assertTermLookupGeneration(generation);
+                this._assertTermLookupGeneration(generation, dictionaryName);
                 return this._ensureGlossarySearchIndexForDictionary(dictionaryName, onProgress, isCancelled);
             }
-            this._assertTermLookupGeneration(generation);
+            this._assertTermLookupGeneration(generation, dictionaryName);
             if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
             return;
         }
         const build = (async () => {
             const generation = this._directTermIndexGeneration;
             await this._ensureDirectTermIndexesLoaded([dictionaryName]);
-            this._assertTermLookupGeneration(generation);
+            this._assertTermLookupGeneration(generation, dictionaryName);
             if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
             const storageName = this._getTermRecordStorageName(dictionaryName);
             const count = this._termRecordStore.getDictionaryRecordCount(storageName);
@@ -3454,7 +3454,7 @@ null;
                     throw new Error(`Cannot build glossary search index for ${dictionaryName}: term count mismatch`);
                 }
                 const rows = await this._fetchTermRowsByIds(batch);
-                this._assertTermLookupGeneration(generation);
+                this._assertTermLookupGeneration(generation, dictionaryName);
                 if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
                 db.exec('BEGIN IMMEDIATE');
                 try {
@@ -3488,11 +3488,11 @@ null;
                 const processed = start + batch.length;
                 try { onProgress({dictionary: dictionaryName, processed, total: count}); } catch (_) { /* NOP */ }
                 await new Promise((resolve) => { setTimeout(resolve, 0); });
-                this._assertTermLookupGeneration(generation);
+                this._assertTermLookupGeneration(generation, dictionaryName);
             }
 
             if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
-            this._assertTermLookupGeneration(generation);
+            this._assertTermLookupGeneration(generation, dictionaryName);
             db.exec({
                 sql: `
                     INSERT OR REPLACE INTO dictionaryGlossarySearchIndex(dictionary, version, termCount, completedAt)
@@ -3523,9 +3523,20 @@ null;
      * @returns {Promise<void>}
      */
     async ensureGlossarySearchIndex(dictionaries, onProgress = () => {}, isCancelled = () => false) {
+        const generation = this._directTermIndexGeneration;
         for (const dictionaryName of this._getDictionaryNames(dictionaries)) {
             if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
-            await this._ensureGlossarySearchIndexForDictionary(dictionaryName, onProgress, isCancelled);
+            if (this._getUnquarantinedTermDictionaryNames([dictionaryName]).length === 0) { continue; }
+            try {
+                await this._ensureGlossarySearchIndexForDictionary(dictionaryName, onProgress, isCancelled);
+            } catch (error) {
+                this._assertTermLookupGeneration(generation);
+                if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+                // Discovery can quarantine authoritative storage while building
+                // its derived index. Keep healthy owners searchable, but never
+                // hide cancellation, mutation or a failure of a usable owner.
+                if (this._getUnquarantinedTermDictionaryNames([dictionaryName]).length > 0) { throw error; }
+            }
         }
     }
 
@@ -3548,8 +3559,11 @@ null;
         this._assertTermLookupGeneration(generation);
         const lookupDictionaryNames = this._getUnquarantinedTermDictionaryNames(dictionaryNames);
         if (isCancelled()) { throw new DOMException('Glossary search cancelled', 'AbortError'); }
+        if (lookupDictionaryNames.length === 0) { return []; }
 
-        const {clause: dictionaryClause, bind: dictionaryBind} = this._buildTextInClause(dictionaryNames, 'glossaryDict');
+        // Stale postings from quarantined owners must not fill the bounded SQL
+        // candidate list before healthy matches can be hydrated.
+        const {clause: dictionaryClause, bind: dictionaryBind} = this._buildTextInClause(lookupDictionaryNames, 'glossaryDict');
         const requiredTokens = query.tokens.slice(0, -1);
         const upper = glossaryPrefixUpperBound(query.prefix);
         const bind = {
