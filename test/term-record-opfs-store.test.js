@@ -235,7 +235,18 @@ describe('TermRecordOpfsStore', () => {
         ]);
     });
 
-    test('reset truncates shard storage when unlink fails', async () => {
+    test('reset retires an active in-memory import before preparing again', async () => {
+        const store = new TermRecordOpfsStore();
+        await store.beginImportSession();
+        await store.reset();
+        expect(store.getDiagnostics().importSessionActive).toBe(false);
+        await expect(store.prepare()).resolves.toBeUndefined();
+        await store.beginImportSession();
+        await store.endImportSession();
+        await expect(store.prepare()).resolves.toBeUndefined();
+    });
+
+    test.each([false, true])('reset truncates shard storage when unlink fails (active import=%s)', async (activeImport) => {
         const store = new TermRecordOpfsStore();
         const descriptorFileName = store._getShardSegmentFileName('Reset dictionary', 'raw', 0);
         const indexFileName = `${descriptorFileName}.mbti`;
@@ -251,7 +262,10 @@ describe('TermRecordOpfsStore', () => {
         });
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
 
+        if (activeImport) { await store.beginImportSession(); }
         await expect(store.reset()).resolves.toBeUndefined();
+        expect(store.getDiagnostics().importSessionActive).toBe(false);
+        await expect(store.prepare()).resolves.toBeUndefined();
 
         expect(fileBytesByName.get(descriptorFileName)).toStrictEqual(new Uint8Array());
         expect(fileBytesByName.get(indexFileName)).toStrictEqual(new Uint8Array());
@@ -259,7 +273,7 @@ describe('TermRecordOpfsStore', () => {
         expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0);
     });
 
-    test('reset reports persistent cleanup failures after clearing runtime state and still attempts every file', async () => {
+    test.each([false, true])('reset reports cleanup failures after retiring runtime ownership (active import=%s)', async (activeImport) => {
         const store = new TermRecordOpfsStore();
         const descriptorFileName = store._getShardSegmentFileName('Reset failure', 'raw', 0);
         const indexFileName = `${descriptorFileName}.mbti`;
@@ -288,6 +302,7 @@ describe('TermRecordOpfsStore', () => {
             sequence: null,
         });
 
+        if (activeImport) { await store.beginImportSession(); }
         await expect(store.reset()).rejects.toMatchObject({
             name: 'AggregateError',
             errors: [cleanupError],
@@ -295,6 +310,8 @@ describe('TermRecordOpfsStore', () => {
 
         expect(removeOrTruncate).toHaveBeenCalledWith(descriptorFileName, false);
         expect(removeOrTruncate).toHaveBeenCalledWith(indexFileName, false);
+        expect(store.getDiagnostics().importSessionActive).toBe(false);
+        await expect(store.prepare()).resolves.toBeUndefined();
         expect(store.size).toBe(0);
         expect(Reflect.get(store, '_shardStateByFileName').size).toBe(0);
     });

@@ -716,7 +716,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             ensureLoadedForRead: vi.fn(async () => {}),
             warmSlices,
         });
-        Reflect.set(database, '_termRecordStore', {getByIds});
+        Reflect.set(database, '_termRecordStore', {getByIds, getDictionaryHealth: () => ({status: 'available', reason: null})});
         const fetchTermRowsByIds = /** @type {(this: DictionaryDatabase, ids: Iterable<number>) => Promise<Map<number, unknown>>} */ (
             Reflect.get(database, '_fetchTermRowsByIds')
         );
@@ -2807,7 +2807,7 @@ describe('DictionaryDatabase term lookup warming', () => {
         const ensureDictionariesLoaded = vi.fn(async () => {});
         const ensureDictionaryIndexes = vi.fn();
         const getDictionaryIndex = vi.fn((name) => indexes.get(name));
-        Reflect.set(database, '_termRecordStore', {ensureDictionariesLoaded, ensureDictionaryIndexes, getDictionaryIndex});
+        Reflect.set(database, '_termRecordStore', {ensureDictionariesLoaded, ensureDictionaryIndexes, getDictionaryIndex, getDictionaryHealth: () => ({status: 'available', reason: null})});
 
         const ensureDirectTermIndexesLoaded = /** @type {(this: DictionaryDatabase, dictionaryNames: Iterable<string>) => Promise<void>} */ (
             Reflect.get(database, '_ensureDirectTermIndexesLoaded')
@@ -2871,7 +2871,7 @@ describe('DictionaryDatabase term lookup warming', () => {
         const ensureDictionariesLoaded = vi.fn(async () => {});
         const ensureDictionaryIndexes = vi.fn();
         const getDictionaryIndex = vi.fn(() => index);
-        Reflect.set(database, '_termRecordStore', {ensureDictionariesLoaded, ensureDictionaryIndexes, getDictionaryIndex});
+        Reflect.set(database, '_termRecordStore', {ensureDictionariesLoaded, ensureDictionaryIndexes, getDictionaryIndex, getDictionaryHealth: () => ({status: 'available', reason: null})});
         const fetchTermRowsByIds = vi.fn(
             /**
              * @param {Iterable<number>} ids
