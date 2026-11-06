@@ -107,17 +107,17 @@ Manabitan provides powerful features not available in other browser-based dictio
 
 ## Installation
 
-Install from the latest GitHub release page:
+Download unsigned packages from GitHub Releases. Store signing, ordinary end-user installation, and automatic updates require separate qualification; see the [production release readiness runbook](docs/operations/production-release-readiness.md).
 
 ### [Download for Chrome, Firefox, Edge](https://github.com/ManabiIO/manabitan/releases)
 
 ### Qualified browser verification scope
 
-| Browser scope                       | Verification                                                                                          |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Desktop Chromium, Edge, and Firefox | Qualified automated extension E2E lanes                                                               |
-| Firefox Android                     | Temporary-installation smoke only; full dictionary import, lookup, mining, and update are unqualified |
-| Safari                              | Unqualified                                                                                           |
+| Browser scope                       | Verification                                                                                                                                                                      |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Desktop Chromium, Edge, and Firefox | Qualified automated extension E2E lanes                                                                                                                                           |
+| Firefox Android                     | Automated import, lookup, replacement, visible search, and mining through temporary add-on installation; signed distribution and ordinary installation/updates remain unqualified |
+| Safari                              | Unqualified                                                                                                                                                                       |
 
 ## Roadmap
 

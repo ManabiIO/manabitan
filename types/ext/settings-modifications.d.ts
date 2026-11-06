@@ -141,6 +141,13 @@ export type ModificationSetDictionaryEnabled = {
     value: boolean;
 };
 
+/** The exact committed cutover authorizing settings recovery. */
+export type DictionaryReplacementGuard = {
+    sourceName: string;
+    generationId: string;
+    updateSessionToken: string;
+};
+
 export type ModificationSetDictionarySelector = {
     action: 'setDictionarySelector';
     profileId: string;
@@ -148,6 +155,7 @@ export type ModificationSetDictionarySelector = {
     expectedValue: unknown;
     value: unknown;
     requireDictionaryUninstalled?: string;
+    replacementGuard?: DictionaryReplacementGuard;
 };
 
 export type ModificationRemoveDictionaryByName = {
@@ -166,6 +174,7 @@ export type ModificationReplaceDictionaryName = {
         index: number;
         item: Record<string, unknown>;
     }[];
+    replacementGuard?: DictionaryReplacementGuard;
 };
 
 export type Modification = (

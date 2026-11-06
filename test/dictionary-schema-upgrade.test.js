@@ -239,3 +239,14 @@ test('startup pruning preserves migrated dictionary aliases, ordering, and profi
     expect(options).toStrictEqual(before);
     expect(save).not.toHaveBeenCalled();
 });
+
+
+test.each([11, -1])('refuses unsupported installed schema %s without resetting dictionaries', async (version) => {
+    const {database, connection, summary, contentReset, recordReset} = createDatabase();
+    connection.exec(`PRAGMA user_version = ${version}`);
+    await expect(database._runSchemaMigrations()).rejects.toThrow(/schema.*(?:newer|invalid)/iu);
+    expect(connection.selectValue('PRAGMA user_version')).toBe(version);
+    expect(JSON.parse(String(connection.selectValue('SELECT summaryJson FROM dictionaries')))).toEqual(summary);
+    expect(contentReset).not.toHaveBeenCalled();
+    expect(recordReset).not.toHaveBeenCalled();
+});

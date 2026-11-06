@@ -34,6 +34,7 @@ import {
     TERM_CONTENT_BLOCK_ENVELOPE_MAGIC,
     wrapCompressedTermContentBlock,
 } from './term-content-block-envelope.js';
+import {TermContentIntegrityError} from './term-content-opfs-store.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
@@ -309,6 +310,7 @@ export class TermContentBlockStore {
             this._assertReadGeneration(generation);
             return result;
         } catch (error) {
+            if (generation !== this._cacheGeneration) { return this._createInvalidatedReadFailure(); }
             return this._createReadFailure(error);
         }
     }
@@ -519,6 +521,9 @@ export class TermContentBlockStore {
     _createReadFailure(error) {
         if (error instanceof TermContentReadError) {
             return {status: error.status, reason: error.message};
+        }
+        if (error instanceof TermContentIntegrityError) {
+            return {status: 'corrupt', reason: error.message};
         }
         return {
             status: 'temporarilyUnavailable',

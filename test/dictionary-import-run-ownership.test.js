@@ -251,3 +251,23 @@ test('progress finalization failure still releases import ownership and reports 
     expect(done).toHaveBeenCalledWith({ok: false, errors: [failure], importedTitles: ['Test']});
     expect(completion).toHaveBeenCalledWith(expect.objectContaining({errorCount: 1, importRunCurrent: true}));
 });
+
+
+test('returning to a cached page cannot resume a batch after its owner departed', async () => {
+    const {controller, importZip} = setup();
+    const entered = barrier();
+    const resume = barrier();
+    importZip.mockImplementationOnce(async () => {
+        entered.resolve();
+        await resume.promise;
+        return {errors: [], importedTitle: 'Test'};
+    });
+    const pending = controller._importDictionaries(files(2), null, null, new ImportProgressTracker([{label: 'Import'}, {label: 'Import'}], 2));
+    await entered.promise;
+    controller._onPageHide(/** @type {PageTransitionEvent} */ (/** @type {unknown} */ ({persisted: true})));
+    resume.resolve();
+    await pending;
+    expect(importZip).toHaveBeenCalledOnce();
+    expect(Reflect.get(controller, '_modifying')).toBe(false);
+    expect(Reflect.get(controller, '_activeImportOwnerId')).toBeUndefined();
+});

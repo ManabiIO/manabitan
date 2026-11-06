@@ -40,6 +40,16 @@ class OffscreenControlTransportError extends Error {
     }
 }
 
+/** A local failure proven to precede transfer of an import to its runtime. */
+export class DictionaryImportNotAdmittedError extends Error {
+    /** @param {unknown} cause */
+    constructor(cause) {
+        super(cause instanceof Error ? cause.message : 'Dictionary import was not admitted', {cause});
+        /** @type {string} */
+        this.name = 'DictionaryImportNotAdmittedError';
+    }
+}
+
 /**
  * This class is responsible for creating and communicating with an offscreen document.
  * This offscreen document is used to solve three issues:
@@ -302,10 +312,11 @@ export class OffscreenProxy {
         const operation = {cancelled: false};
         if (operationId !== null) {
             this._pendingImportOperations ??= new Map();
-            if (this._pendingImportOperations.has(operationId)) { throw new Error('Duplicate dictionary import operation ID'); }
-            if (this._pendingImportOperations.size >= 128) { throw new Error('Dictionary import handoff registry is full'); }
+            if (this._pendingImportOperations.has(operationId)) { throw new DictionaryImportNotAdmittedError(new Error('Duplicate dictionary import operation ID')); }
+            if (this._pendingImportOperations.size >= 128) { throw new DictionaryImportNotAdmittedError(new Error('Dictionary import handoff registry is full')); }
             this._pendingImportOperations.set(operationId, operation);
         }
+        let dispatchAttempted = false;
         try {
             const attemptCount = transfers.length === 0 ? 2 : 1;
             for (let attempt = 0; attempt < attemptCount; ++attempt) {
@@ -327,12 +338,14 @@ export class OffscreenProxy {
                         throw new OffscreenControlTransportError('Offscreen control port is unavailable');
                     }
                     if (operation.cancelled) { throw new Error('Dictionary import cancelled before runtime admission'); }
+                    dispatchAttempted = true;
                     return /** @type {import('offscreen').McApiReturn<TMessageType>} */ (
                         await this._sendOffscreenControlMessage(port, /** @type {import('offscreen').McApiMessageAny} */ (message), transfers)
                     );
                 } catch (error) {
-                    const transportError = error instanceof OffscreenControlTransportError ?
-                        error :
+                    const transportCause = error instanceof DictionaryImportNotAdmittedError ? error.cause : error;
+                    const transportError = transportCause instanceof OffscreenControlTransportError ?
+                        transportCause :
                         (port === null ? new OffscreenControlTransportError('Failed to establish offscreen control transport', {cause: error}) : null);
                     if (transportError === null) {
                         throw error;
@@ -341,10 +354,14 @@ export class OffscreenProxy {
                         this._clearCurrentOffscreenPort(port);
                     }
                     if (attempt + 1 >= attemptCount) {
+                        if (error instanceof DictionaryImportNotAdmittedError) { throw error; }
                         throw transportError;
                     }
                 }
             }
+        } catch (error) {
+            if (operationId !== null && !dispatchAttempted) { throw new DictionaryImportNotAdmittedError(error); }
+            throw error;
         } finally {
             if (operationId !== null) { this._pendingImportOperations.delete(operationId); }
         }
@@ -414,7 +431,11 @@ null,
             } catch (error) {
                 this._offscreenControlResponseHandlers.delete(id);
                 clearTimers();
-                reject(new OffscreenControlTransportError('Failed to send offscreen control message', {cause: error}));
+                // Structured-clone rejection happens before delivery and says
+                // nothing about the shared port or other admitted requests.
+                const cloneFailure = typeof error === 'object' && error !== null && 'name' in error && error.name === 'DataCloneError';
+                const sendError = cloneFailure ? error : new OffscreenControlTransportError('Failed to send offscreen control message', {cause: error});
+                reject(message.action === 'importDictionaryOffscreen' ? new DictionaryImportNotAdmittedError(sendError) : sendError);
             }
         });
     }
@@ -510,7 +531,12 @@ export class DictionaryRuntimeWorkerProxy {
         const action = payload.action ?? '';
         const params = /** @type {import('core').SerializableObject} */ (payload.params ?? {});
         if (getDictionaryRuntimeActionPolicy(action).concurrency === 'streamed-import') {
-            this._client.post(action, params, transfers);
+            try {
+                this._client.post(action, params, transfers);
+            } catch (error) {
+                // post is synchronous: a throw proves no worker owns this request.
+                throw new DictionaryImportNotAdmittedError(error);
+            }
             return /** @type {TReturn} */ (void 0);
         }
         return await this._client.invoke(action, params, transfers);
@@ -685,7 +711,10 @@ export class DictionaryDatabaseProxy {
      */
     async purge() {
         const result = await this._offscreen.sendMessagePromise({action: 'databasePurgeOffscreen'});
-        await this._refreshRuntimeState();
+        // Purge reopens the database before resolving, even when no files were
+        // deleted. Do not let a later state RPC hide a completed destructive
+        // operation or prevent its database-updated notification.
+        this._isPrepared = true;
         return result === true;
     }
 

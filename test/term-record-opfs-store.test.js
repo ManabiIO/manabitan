@@ -6286,4 +6286,67 @@ describe('TermRecordOpfsStore exact dictionary identity', () => {
         assert.equal(reader.getDictionaryHealth(' Dictionary ').status, 'reimportRequired');
         assert.equal(reader.getDictionaryHealth('Dictionary').status, 'available');
     });
+
+    test.each([[false, false], [true, false], [false, true], [true, true]])('rejects cross-dictionary authoritative record ID collisions (damaged first=%s, materialized only=%s)', async (damagedFirst, materializedOnly) => {
+        const files = new Map();
+        const directory = createFakeDirectoryHandle(files);
+        const writer = new TermRecordOpfsStore();
+        Reflect.set(writer, '_recordsDirectoryHandle', directory);
+        for (const [dictionary, expression] of [['First', '一'], ['Damaged', '二'], ['Unrelated', '三']]) {
+            await writer.appendBatch([{
+                dictionary,
+                expression,
+                reading: expression,
+                expressionReverse: null,
+                readingReverse: null,
+                entryContentOffset: 0,
+                entryContentLength: 1,
+                entryContentDictName: 'raw',
+                score: 0,
+                sequence: null,
+            }]);
+        }
+        await writer._closeAllWritables();
+        const damagedFileName = `${writer._getShardSegmentFileName('Damaged', 'raw', 0)}.mbti`;
+        const damaged = files.get(damagedFileName);
+        if (!(damaged instanceof Uint8Array)) { throw new Error('Missing authoritative container'); }
+        new DataView(damaged.buffer, damaged.byteOffset, damaged.byteLength).setUint32(40, 1, true);
+        const database = new DictionaryDatabase();
+        const reader = /** @type {TermRecordOpfsStore} */ (Reflect.get(database, '_termRecordStore'));
+        /** @type {string[]} */
+        const healthWrites = [];
+        Reflect.set(database, '_db', {exec: (/** @type {{sql: string}} */ params) => { healthWrites.push(params.sql); }});
+        Reflect.set(reader, '_recordsDirectoryHandle', directory);
+        await reader._loadShardFiles(false);
+        const initialName = damagedFirst ? 'Damaged' : 'First';
+        const laterName = damagedFirst ? 'First' : 'Damaged';
+        await reader.ensureDictionariesLoaded([initialName]);
+        const initialId = reader.findTermIds(initialName, damagedFirst ? '二' : '一', 'expression')[0];
+        expect((await reader.getByIdsAsync([initialId])).get(initialId)?.dictionary).toBe(initialName);
+        reader.getDictionaryIndex(initialName);
+        if (materializedOnly) {
+            reader._invalidatePersistentLookupState(initialName);
+            expect(reader.getByIds([initialId]).size).toBe(1);
+        }
+        const cachedRow = {id: initialId, dictionary: initialName, expression: damagedFirst ? '二' : '一', reading: '', definitionTags: null, rules: '', score: 0, glossary: []};
+        Reflect.get(database, '_termRowCache').set(initialId, cachedRow);
+        Reflect.get(database, '_directTermIndexLoadedDictionaryNames').add(initialName);
+        await reader.ensureDictionariesLoaded([laterName, 'Unrelated']);
+        expect(Reflect.get(database, '_termRowCache').size).toBe(0);
+        expect(Reflect.get(database, '_directTermIndexLoadedDictionaryNames').has(initialName)).toBe(false);
+        expect(healthWrites.filter((sql) => sql.includes('INSERT INTO dictionaryStorageHealth'))).toHaveLength(2);
+        expect(reader.getByIds([initialId]).size).toBe(0);
+        expect(reader.findTermIds(initialName, damagedFirst ? '二' : '一', 'expression')).toEqual([]);
+        const matches = reader.findTermIds('Damaged', '二', 'expression');
+        for (const record of (await reader.getByIdsAsync(matches)).values()) {
+            expect(record.dictionary).toBe('Damaged');
+            expect(record.expression).toBe('二');
+        }
+        expect(reader.isDictionaryAvailable('First')).toBe(false);
+        expect(reader.isDictionaryAvailable('Damaged')).toBe(false);
+        expect(reader.getDictionaryHealth('First').status).toBe('reimportRequired');
+        expect(reader.getDictionaryHealth('Damaged').status).toBe('reimportRequired');
+        const unrelatedId = reader.findTermIds('Unrelated', '三', 'expression')[0];
+        expect((await reader.getByIdsAsync([unrelatedId])).get(unrelatedId)?.dictionary).toBe('Unrelated');
+    });
 });

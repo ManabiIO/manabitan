@@ -55,6 +55,8 @@ export class OffscreenDictionaryWorkerHandler {
         this._queuedImportRequestCount = 0;
         /** @type {Map<string, {status: import('offscreen').ImportOperationStatus, abortController: AbortController, updatedAt: number}>} */
         this._importOperations = new Map();
+        /** @type {Map<string, number>} Cancellation can overtake admission on a different browser channel. */
+        this._pendingImportCancellations = new Map();
         /** @type {string} */
         this._importWorkerGeneration = crypto.randomUUID();
         /** @type {number} */
@@ -317,15 +319,26 @@ export class OffscreenDictionaryWorkerHandler {
     }
 
     /**
+     * @param {string} operationId
+     * @returns {number|null}
+     */
+    _getValidImportOperationIssuedAt(operationId) {
+        const issuedAt = Number(operationId.split(':', 1)[0]);
+        const now = Date.now();
+        return /^[0-9]{13}:[a-zA-Z0-9_-]{1,64}$/.test(operationId) && issuedAt <= now && issuedAt > now - 10 * 60 * 1000 ? issuedAt : null;
+    }
+
+    /**
      * @param {unknown} operationId
      * @throws {Error}
      */
     _admitImportOperation(operationId) {
-        const issuedAt = typeof operationId === 'string' ? Number(operationId.split(':', 1)[0]) : Number.NaN;
-        if (typeof operationId !== 'string' || !/^[0-9]{13}:[a-zA-Z0-9_-]{1,64}$/.test(operationId) || issuedAt > Date.now() || issuedAt <= Date.now() - 10 * 60 * 1000) {
+        const issuedAt = typeof operationId === 'string' ? this._getValidImportOperationIssuedAt(operationId) : null;
+        if (typeof operationId !== 'string' || issuedAt === null) {
             throw new Error('Invalid dictionary import operation ID');
         }
         this._pruneImportOperations();
+        if (this._pendingImportCancellations.has(operationId)) { throw new Error('Dictionary import cancelled before admission'); }
         if (this._importOperations.has(operationId)) { throw new Error('Duplicate dictionary import operation ID'); }
         if (issuedAt <= this._retiredImportIssuedAt) { throw new Error('Dictionary import operation ID was retired'); }
         if (this._importOperations.size >= 128) {
@@ -351,11 +364,39 @@ export class OffscreenDictionaryWorkerHandler {
     /** */
     _pruneImportOperations() {
         const cutoff = Date.now() - 10 * 60 * 1000;
+        for (const [id, issuedAt] of this._pendingImportCancellations) {
+            if (issuedAt <= cutoff) { this._pendingImportCancellations.delete(id); }
+        }
         for (const [id, operation] of this._importOperations) {
             if (operation.updatedAt < cutoff && !['queued', 'running'].includes(operation.status.state)) {
                 this._importOperations.delete(id);
             }
         }
+    }
+
+    /**
+     * Retain only the admission fence, not a fabricated cancelled outcome: an
+     * unknown operation may already have published in a previous worker.
+     * @param {string} operationId
+     */
+    _cancelUnadmittedImportOperation(operationId) {
+        const issuedAt = this._getValidImportOperationIssuedAt(operationId);
+        if (issuedAt === null || issuedAt <= this._retiredImportIssuedAt) { return; }
+        if (this._pendingImportCancellations.has(operationId)) { return; }
+        if (this._pendingImportCancellations.size >= 128) {
+            let oldestId = '';
+            let oldestIssuedAt = Number.POSITIVE_INFINITY;
+            for (const [id, time] of this._pendingImportCancellations) {
+                if (time >= oldestIssuedAt) { continue; }
+                oldestId = id;
+                oldestIssuedAt = time;
+            }
+            this._pendingImportCancellations.delete(oldestId);
+            // Eviction cannot make a cancelled ID admissible again. Reuse the
+            // existing conservative retirement horizon for all older IDs.
+            this._retiredImportIssuedAt = Math.max(this._retiredImportIssuedAt, oldestIssuedAt);
+        }
+        this._pendingImportCancellations.set(operationId, issuedAt);
     }
 
     /**
@@ -610,7 +651,11 @@ export class OffscreenDictionaryWorkerHandler {
                     /** @type {string[]} */ (params.dictionaryNames ?? []),
                 );
             case 'databasePurgeOffscreen':
-                await this._ensureDatabasePrepared();
+                // Join an existing open attempt, but do not require a damaged
+                // database to open successfully before the user can reset it.
+                if (this._prepareDatabasePromise !== null) {
+                    try { await this._prepareDatabasePromise; } catch (_) { /* Explicit reset recovers failed opens. */ }
+                }
                 this._databaseReady = false;
                 try {
                     return await this._dictionaryDatabase.purge();
@@ -697,7 +742,11 @@ export class OffscreenDictionaryWorkerHandler {
                     if (params.lookupOnly === true) {
                         return await this._getImportOperationStatus(operationId, params.workerGeneration);
                     }
-                    if (operation && ['queued', 'running'].includes(operation.status.state)) { operation.abortController.abort(); }
+                    if (operation && ['queued', 'running'].includes(operation.status.state)) {
+                        operation.abortController.abort();
+                    } else if (!operation) {
+                        this._cancelUnadmittedImportOperation(operationId);
+                    }
                 }
                 return;
             case 'importDictionaryOffscreen':

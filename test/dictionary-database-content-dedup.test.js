@@ -403,7 +403,7 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(readStorage).not.toHaveBeenCalled();
     });
 
-    test.each(Array.from({length: 13}, (_, i) => i + 1))(
+    test.each(Array.from({length: 14}, (_, i) => i + 1))(
         'retains coherent metadata when dense allocation %i fails and permits retry',
         async (failureIndex) => {
             const database = new DictionaryDatabase();

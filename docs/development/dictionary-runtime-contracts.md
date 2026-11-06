@@ -37,13 +37,18 @@ admission and bank discovery share the same bank patterns.
 
 Settings sessions have owner IDs; each import has a separate operation ID.
 Cancellation targets an operation, never an ambient active import or queue slot.
-Releasing one settings owner cannot cancel another owner's work. Response relays
-are closed on completion, failure, or owner release.
+Releasing one settings owner cannot cancel another owner's work. Owner release
+detaches frontend observation and requests cancellation; it does not prove that
+the worker stopped or rolled back. Keep the worker response relay until an
+authoritative terminal outcome or receipt reconciliation, so publication which
+already won the cancellation race is still announced. A failed response packet
+does not end mutation observation.
 
 Owner release also aborts that owner's pending archive downloads. Download
 cancellation listeners are detached on every terminal path. Proven failures
-before runtime dispatch release ownership immediately; once dispatch is attempted,
-an acknowledgement failure retains ownership for cancellation and reconciliation
+before runtime dispatch release ownership immediately. Transport owners identify
+locally proven untransferred failures explicitly. After a possible transfer, an
+acknowledgement failure retains ownership for cancellation and reconciliation
 because runtime admission may already have occurred.
 
 The bounded worker receipt registry supports response reconciliation without
@@ -60,6 +65,25 @@ open. A stale-worker query for an operation still queued or running in the curre
 worker stays `unknown`; it must not adopt staged metadata as a completion receipt.
 If SQLite rollback fails, the receipt fence remains held through asynchronous
 storage cleanup until the uncertain connection is released and quarantined.
+
+A successful explicit purge supersedes earlier ended operations whose storage
+outcome remained unknown. Retire only the same settled operations belonging to
+disconnected owners. Preserve connected sessions, downloads, live mutation
+relays, failed purges, and outcomes arriving after the purge started. Superseding
+ownership does not turn an unknown outcome into confirmed publication or rollback.
+
+Dictionary update notification recovery owns cache invalidation independently
+of the coalesced update cause. If invalidation or refresh fails after a committed
+mutation, retain both obligations and retry without replaying the mutation. An
+older successful invalidation or refresh cannot acknowledge a newer failed one.
+
+Completed title replacements retain generation-bound update metadata. Startup
+and live settings reconciliation use the same receipt predicate before pruning
+old-title preferences. Recover aliases, enablement, order, selectors, and generated
+Anki markers with the normal settings operations. Preserve newer target settings,
+never migrate a still-installed source, and retain ambiguous source preferences
+rather than choosing a target. Failed page-side migration cannot delete the old
+preferences.
 
 ## Lookup Availability and Repair
 
