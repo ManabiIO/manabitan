@@ -698,6 +698,10 @@ export class DictionaryImportController {
             });
             return;
         }
+        if (this._modifying && !this._recommendedDictionaryActiveImport) {
+            this._setRecommendedError('A dictionary operation is in progress. Wait for it to finish, then try again.');
+            return;
+        }
         if (this._isRecommendedImportQueuedOrActive(importUrl)) {
             button.disabled = true;
             reportDiagnostics('recommended-dictionaries-import-click-deduplicated', {
@@ -749,16 +753,25 @@ export class DictionaryImportController {
 
                 try {
                     const importProgressTracker = new ImportProgressTracker(this._getUrlImportSteps(), 1);
+                    let importSucceeded = false;
+                    /** @type {Error[]} */
+                    let importErrors = [];
                     await this._runImportWithWatchdog(
                         this._importDictionaries(
                             this._getUrlImportSources([url], importProgressTracker.onProgress.bind(importProgressTracker)),
                             null,
-                            null,
+                            ({ok, errors}) => {
+                                importSucceeded = ok;
+                                importErrors = errors;
+                            },
                             importProgressTracker,
                         ),
                         `Recommended dictionary import (${summarizeUrlForDiagnostics(url)})`,
                         importProgressTracker,
                     );
+                    if (!importSucceeded) {
+                        throw new Error(importErrors.map((error) => this._errorToString(error)).join('\n') || 'Dictionary import failed.');
+                    }
                 } catch (error) {
                     const e2 = toError(error);
                     log.error(e2);

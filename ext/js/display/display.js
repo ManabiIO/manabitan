@@ -1623,7 +1623,9 @@ export class Display extends EventDispatcher {
      * @param {import('core').TokenObject} token
      */
     async _setContentTermsOrKanji(type, urlSearchParams, token) {
-        const lookup = (urlSearchParams.get('lookup') !== 'false');
+        // Scanner results skip the initial lookup, but history eviction must
+        // make that result reproducible when the user navigates back.
+        const lookup = (urlSearchParams.get('lookup') !== 'false' || this._history.content?.dictionaryEntriesEvicted === true);
         const wildcardsEnabled = (urlSearchParams.get('wildcards') !== 'off');
         this._lookup = lookup;
         this._wildcardsEnabled = wildcardsEnabled;
