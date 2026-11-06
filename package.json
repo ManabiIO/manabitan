@@ -6,7 +6,7 @@
         "test": "test"
     },
     "engines": {
-        "node": ">=22.0.0"
+        "node": "^22.22.0 || >=24.8.0"
     },
     "type": "module",
     "scripts": {
@@ -126,7 +126,7 @@
         "fast-check": "^4.10.2",
         "globals": "^15.14.0",
         "handlebars": "^4.7.10",
-        "html-validate": "^10.5.0",
+        "html-validate": "^11.18.0",
         "husky": "^9.1.7",
         "jsdom": "^25.0.1",
         "jszip": "^3.10.1",
@@ -137,7 +137,7 @@
         "selenium-webdriver": "^4.41.0",
         "stylelint": "^17.16.0",
         "stylelint-config-recommended": "^18.0.0",
-        "ts-json-schema-generator": "^2.3.0",
+        "ts-json-schema-generator": "2.5.0",
         "typescript": "^5.7.2",
         "typescript-eslint": "^8.18.2",
         "vitest": "^4.1.12"
@@ -155,5 +155,13 @@
     },
     "lint-staged": {
         "*.md": "prettier --write"
+    },
+    "overrides": {
+        "@typescript-eslint/typescript-estree": {
+            "minimatch": "11.0.5"
+        },
+        "eslint-plugin-sonarjs": {
+            "minimatch": "11.0.5"
+        }
     }
 }
