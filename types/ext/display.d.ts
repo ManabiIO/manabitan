@@ -123,6 +123,8 @@ export type HistoryContent = {
     animate?: boolean;
     /** An array of dictionary entries to display as content. */
     dictionaryEntries?: Dictionary.DictionaryEntry[];
+    /** Cached scanner results were evicted and must be looked up again on navigation. */
+    dictionaryEntriesEvicted?: boolean;
     /** Degraded dictionaries for this lookup, including incomplete misses. */
     dictionaryAvailability?: DictionaryAvailability[];
     /** The identifying information for the frame the content originated from. */

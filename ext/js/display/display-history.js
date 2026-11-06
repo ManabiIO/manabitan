@@ -313,6 +313,7 @@ export class DisplayHistory extends EventDispatcher {
                     entry.content = {
                         ...content,
                         dictionaryEntries: void 0,
+                        dictionaryEntriesEvicted: true,
                     };
                 }
             }
