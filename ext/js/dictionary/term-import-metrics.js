@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {CANONICAL_SCAN_METRICS} from './term-content-canonical-scan.js';
+
 export const TERM_IMPORT_METRIC_KEYS = Object.freeze([
+    ...Object.values(CANONICAL_SCAN_METRICS),
     'mediaResolveMs',
     'mediaWriteMs',
     'serializationMs',
