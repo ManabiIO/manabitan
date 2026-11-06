@@ -13,6 +13,15 @@ on:
   pull_request:
   merge_group:
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Optional four-part version: qualify and retain unsigned release packages"
+        required: false
+        type: string
+        default: ""
+
+env:
+  MANABITAN_RELEASE_VERSION: ${{ inputs.release_version || '' }}
 
 jobs:
   tests:
@@ -63,7 +72,26 @@ jobs:
         run: npm run license-report:html
 
       - name: Build
-        run: npm run build
+        run: |
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            npm run build -- --all --version "$MANABITAN_RELEASE_VERSION"
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" builds/manabitan-chrome.zip builds/manabitan-firefox.zip builds/manabitan-edge.zip > builds/release-packages.json
+          else
+            npm run build
+          fi
+
+      - name: Retain versioned release packages
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unsigned-release-candidate
+          path: |
+            builds/manabitan-chrome.zip
+            builds/manabitan-firefox.zip
+            builds/manabitan-edge.zip
+            builds/release-packages.json
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Validate manifest.json of the extension
         uses: cardinalby/schema-validator-action@2166123eb256fa40baef7e22ab1379708425efc7 # v3.1.1
@@ -80,8 +108,28 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: ./.github/actions/setup
 
-      - name: Build Firefox dev package
-        run: npm run build -- --target firefox-dev
+      - name: Build Firefox test package
+        run: |
+          package_target=firefox-dev
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            package_target=firefox
+            npm run build -- --target "$package_target" --version "$MANABITAN_RELEASE_VERSION"
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" "builds/manabitan-$package_target.zip" > builds/release-package.json
+          else
+            npm run build -- --target "$package_target"
+          fi
+          echo "MANABITAN_FIREFOX_XPI=$GITHUB_WORKSPACE/builds/manabitan-$package_target.zip" >> "$GITHUB_ENV"
+
+      - name: Retain tested Firefox release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-firefox
+          path: |
+            builds/manabitan-firefox.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Install Firefox Developer Edition
         run: |
@@ -98,7 +146,6 @@ jobs:
 
       - name: Run Firefox extension E2E
         env:
-          MANABITAN_FIREFOX_XPI: ${{ github.workspace }}/builds/manabitan-firefox-dev.zip
           MANABITAN_FIREFOX_HEADLESS: '0'
           MANABITAN_E2E_STRICT_RUNTIME: '1'
         run: xvfb-run -a npm run test:e2e:firefox-extension
@@ -162,8 +209,29 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: ./.github/actions/setup
 
-      - name: Build Chromium dev package
-        run: npm run build -- --target chrome-dev
+      - name: Build Chromium test package
+        run: |
+          package_target=chrome-dev
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            package_target=chrome
+            npm run build -- --target "$package_target" --version "$MANABITAN_RELEASE_VERSION"
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" "builds/manabitan-$package_target.zip" > builds/release-package.json
+          else
+            npm run build -- --target "$package_target"
+          fi
+          echo "MANABITAN_CHROMIUM_BUILD_TARGET=$package_target" >> "$GITHUB_ENV"
+          echo "MANABITAN_E2E_SKIP_BUILD=1" >> "$GITHUB_ENV"
+
+      - name: Retain tested Chromium release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-chromium
+          path: |
+            builds/manabitan-chrome.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
@@ -375,8 +443,29 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: ./.github/actions/setup
 
-      - name: Build Chromium dev package
-        run: npm run build -- --target chrome-dev
+      - name: Build Chromium test package
+        run: |
+          package_target=chrome-dev
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            package_target=chrome
+            npm run build -- --target "$package_target" --version "$MANABITAN_RELEASE_VERSION"
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" "builds/manabitan-$package_target.zip" > builds/release-package.json
+          else
+            npm run build -- --target "$package_target"
+          fi
+          echo "MANABITAN_CHROMIUM_BUILD_TARGET=$package_target" >> "$GITHUB_ENV"
+          echo "MANABITAN_E2E_SKIP_BUILD=1" >> "$GITHUB_ENV"
+
+      - name: Retain tested Chromium release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-edge
+          path: |
+            builds/manabitan-chrome.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Install Playwright Edge
         run: npx playwright install --with-deps msedge
@@ -714,3 +803,46 @@ jobs:
             builds/firefox-android-capability-diagnostics/
             builds/firefox-android-native-readiness/
           if-no-files-found: ignore
+
+  test-schema-upgrade:
+    name: Published release upgrade and reimport
+    if: github.event_name == 'workflow_dispatch' && inputs.release_version != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+      - name: Build versioned candidate
+        run: |
+          npm run build -- --target chrome --version "$MANABITAN_RELEASE_VERSION"
+          node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" builds/manabitan-chrome.zip > builds/release-package.json
+      - name: Download actual published upgrade fixture
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir builds/released-upgrade-fixture
+          gh release download 26.3.31.46 --repo "$GITHUB_REPOSITORY" --pattern manabitan-chrome.zip --dir builds/released-upgrade-fixture
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/26.3.31.46" --jq '{tag_name,target_commitish,assets:[.assets[]|select(.name=="manabitan-chrome.zip")|{id,name,digest,size}]}' > builds/released-upgrade-fixture/identity.json
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Upgrade real storage and restore the dictionary through settings
+        env:
+          MANABITAN_UPGRADE_OLD_ZIP: ${{ github.workspace }}/builds/released-upgrade-fixture/manabitan-chrome.zip
+          MANABITAN_UPGRADE_NEW_ZIP: ${{ github.workspace }}/builds/manabitan-chrome.zip
+          MANABITAN_UPGRADE_EVIDENCE_DIR: ${{ github.workspace }}/builds/schema-upgrade-evidence
+        run: |
+          mkdir builds/schema-upgrade-evidence
+          xvfb-run -a node test/chromium/schema-upgrade.e2e.js
+      - name: Retain upgrade verdict and exact candidate package
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: published-release-upgrade
+          path: |
+            builds/schema-upgrade-evidence/upgrade-report.json
+            builds/schema-upgrade-evidence/fixture.zip
+            builds/released-upgrade-fixture/identity.json
+            builds/manabitan-chrome.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
