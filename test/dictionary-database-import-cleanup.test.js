@@ -1350,6 +1350,7 @@ describe('DictionaryDatabase import cleanup', () => {
         const beginImmediateTransaction = vi.spyOn(database, '_beginImmediateTransaction').mockResolvedValue();
         Reflect.set(database, '_db', {
             selectValue: vi.fn(() => 0),
+            selectObjects: vi.fn(() => []),
             exec: vi.fn(),
         });
         Reflect.set(database, '_termContentStore', {reset: termContentReset});
