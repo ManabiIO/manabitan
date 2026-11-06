@@ -4835,17 +4835,28 @@ null;
     /**
      * @param {string} dictionary
      * @returns {{contentOffset: number, contentLength: number, contentDictName: string, uncompressedLength: number}|null}
+     * @throws {TermContentLookupReadError} When metadata cannot be read.
      */
     _getSharedGlossaryArtifactMeta(dictionary) {
         const cached = this._sharedGlossaryArtifactMetaByDictionary.get(dictionary);
         if (typeof cached !== 'undefined') {
             return cached;
         }
-        const db = this._requireDb();
-        const row = db.selectObject(
-            'SELECT contentOffset, contentLength, contentDictName, uncompressedLength FROM sharedGlossaryArtifacts WHERE dictionary = $dictionary LIMIT 1',
-            {$dictionary: dictionary},
-        );
+        let row;
+        try {
+            const db = this._requireDb();
+            row = db.selectObject(
+                'SELECT contentOffset, contentLength, contentDictName, uncompressedLength FROM sharedGlossaryArtifacts WHERE dictionary = $dictionary LIMIT 1',
+                {$dictionary: dictionary},
+            );
+        } catch (error) {
+            // A failed metadata read does not establish corrupt dictionary data.
+            throw new TermContentLookupReadError(
+                'temporarilyUnavailable',
+                'Shared glossary metadata is temporarily unavailable',
+                {cause: error},
+            );
+        }
         if (typeof row === 'undefined') {
             return null;
         }
@@ -4930,15 +4941,15 @@ null;
      */
     async _warmSharedGlossaryArtifacts(dictionaries) {
         for (const dictionary of dictionaries) {
-            const meta = this._getSharedGlossaryArtifactMeta(dictionary);
-            if (
-                meta === null ||
-                meta.contentDictName !== RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME ||
-                this._sharedGlossaryArtifactInflatedByDictionary.has(dictionary)
-            ) {
-                continue;
-            }
             try {
+                const meta = this._getSharedGlossaryArtifactMeta(dictionary);
+                if (
+                    meta === null ||
+                    meta.contentDictName !== RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME ||
+                    this._sharedGlossaryArtifactInflatedByDictionary.has(dictionary)
+                ) {
+                    continue;
+                }
                 await this._readCompressedSharedGlossarySlice(dictionary, 0, 0);
             } catch (error) {
                 reportDiagnostics('dictionary-shared-glossary-warm-error', {
@@ -10714,9 +10725,19 @@ null :
                                 // extracted entry is the original raw payload and must not be
                                 // decompressed a second time.
                                 const isBlockContent = typeof getRawTermContentBlockCompressionDictName(contentDictName) !== 'undefined';
-                                const contentJson = (contentDictName === 'raw' || isBlockContent) ?
-                                    this._textDecoder.decode(contentBytes) :
-                                    this._textDecoder.decode(decompressTermContentZstd(contentBytes, contentDictName.length > 0 ? contentDictName : null));
+                                let decodedContentBytes = contentBytes;
+                                if (contentDictName !== 'raw' && !isBlockContent) {
+                                    try {
+                                        decodedContentBytes = decompressTermContentZstd(contentBytes, contentDictName.length > 0 ? contentDictName : null);
+                                    } catch (error) {
+                                        throw new TermContentLookupReadError(
+                                            isZstdResourceError(error) ? 'temporarilyUnavailable' : 'corrupt',
+                                            'Term content decompression failed',
+                                            {cause: error},
+                                        );
+                                    }
+                                }
+                                const contentJson = this._textDecoder.decode(decodedContentBytes);
                                 const parsedHeader = this._parseSerializedTermEntryContentHeader(contentJson);
                                 if (parsedHeader !== null) {
                                     definitionTags = parsedHeader.definitionTags;
@@ -10766,7 +10787,7 @@ null :
                                 contentOffset,
                                 contentLength,
                                 contentDictName,
-                                phase: 'shared-glossary',
+                                phase: 'content-decode',
                             });
                             if (e.status === 'corrupt' && dictionaryName.length > 0) {
                                 this._termRecordStore.markDictionaryReimportRequired(

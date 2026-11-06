@@ -1082,13 +1082,18 @@ describe('term-bank WASM parser', () => {
     maybeTest('assigns the next parser group to the first idle worker', async () => {
         const originalNavigator = globalThis.navigator;
         let workerIndex = 0;
+        let nextAssignmentWorker = -1;
+        let releaseFirstWorker = () => {};
+        let forcedRelease = false;
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        let releaseTimeout = null;
         /** @type {number[]} */
-        let parseCounts = [];
+        const parseCounts = [];
         /** @implements {WorkerMock} */
         class SkewedWorker {
             constructor() {
                 this.index = workerIndex++;
-                this.delay = this.index === 0 ? 20 : 0;
+                parseCounts[this.index] = 0;
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
@@ -1107,16 +1112,32 @@ describe('term-bank WASM parser', () => {
                     return;
                 }
                 ++parseCounts[this.index];
-                setTimeout(() => {
-                    emitSuccessfulWorkerResult(this.listeners, getWorkerMessageId(message));
-                }, this.delay);
+                const complete = () => { emitSuccessfulWorkerResult(this.listeners, getWorkerMessageId(message)); };
+                if (this.index === 0 && parseCounts[this.index] === 1) {
+                    // Hold the first worker until an idle peer receives a new
+                    // group. Timer delays do not guarantee this under CI load.
+                    releaseFirstWorker = complete;
+                    // A broken scheduler must fail without stranding the live
+                    // pool until its much longer production job timeout.
+                    releaseTimeout = setTimeout(() => {
+                        forcedRelease = true;
+                        releaseFirstWorker();
+                        releaseFirstWorker = () => {};
+                    }, 1000);
+                    return;
+                }
+                if (parseCounts[this.index] === 2 && nextAssignmentWorker === -1) {
+                    nextAssignmentWorker = this.index;
+                    releaseFirstWorker();
+                    releaseFirstWorker = () => {};
+                }
+                queueMicrotask(complete);
             }
 
             terminate() {}
         }
 
         vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
-        parseCounts = Array.from({length: getParallelTermBankParserWorkerCount()}, () => 0);
         vi.stubGlobal('Worker', SkewedWorker);
         try {
             const sourceBanks = Array.from({length: 12}, () => textEncoder.encode('[]'));
@@ -1127,10 +1148,11 @@ describe('term-bank WASM parser', () => {
                 {emitContentSlab: true},
             )).resolves.toBe(true);
             expect(parseCounts.reduce((sum, count) => sum + count, 0)).toBe(12);
-            for (let index = 1; index < parseCounts.length; ++index) {
-                expect(parseCounts[0]).toBeLessThan(parseCounts[index]);
-            }
+            expect(forcedRelease).toBe(false);
+            expect(nextAssignmentWorker).toBeGreaterThan(0);
         } finally {
+            if (releaseTimeout !== null) { clearTimeout(releaseTimeout); }
+            releaseFirstWorker();
             await disposeParallelTermBankParser();
             vi.stubGlobal('navigator', originalNavigator);
             vi.stubGlobal('Worker', void 0);
