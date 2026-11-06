@@ -82,15 +82,36 @@ async function launch(name, expectedVersion) {
     if (name === 'upgrade') {
         // Replacing an unpacked directory does not notify Chrome's persisted
         // service worker. Perform the extension reload lifecycle explicitly.
-        await page.evaluate(() => chrome.runtime.reload()).catch((error) => {
-            if (!/Execution context was destroyed|Target.*closed/i.test(String(error))) { throw error; }
+        let timer;
+        const closed = new Promise((resolve, reject) => {
+            worker.once('close', resolve);
+            timer = setTimeout(() => { reject(new Error('Published service worker did not close during reload')); }, 30000);
         });
+        try {
+            await Promise.all([closed, page.evaluate(() => chrome.runtime.reload()).catch((error) => {
+                if (!/Execution context was destroyed|Target.*closed/i.test(String(error))) { throw error; }
+            })]);
+        } finally { clearTimeout(timer); }
         if (!page.isClosed()) { await page.close(); }
         // A service worker may stay dormant until a page wakes it. Verify the
         // candidate's production RPC below instead of waiting for a worker
         // object event before creating that page.
         page = await context.newPage();
-        await page.goto(`chrome-extension://${id}/settings.html?popup-preview=false`);
+        const deadline = Date.now() + 30000;
+        let navigationRetries = 0;
+        while (true) {
+            try {
+                await page.goto(`chrome-extension://${id}/settings.html?popup-preview=false`);
+                break;
+            } catch (error) {
+                // Chrome unregisters the old worker before the reloaded
+                // extension becomes navigable. Retry only that lifecycle gap.
+                if (!String(error).includes('net::ERR_BLOCKED_BY_CLIENT') || Date.now() >= deadline) { throw error; }
+                ++navigationRetries;
+                await new Promise((resolve) => { setTimeout(resolve, 100); });
+            }
+        }
+        report.reloadNavigationRetries = navigationRetries;
     }
     await page.waitForFunction(() => document.documentElement.dataset.loaded === 'true', null, {timeout: 60000});
     assert.equal(await page.evaluate(() => chrome.runtime.getManifest().version), expectedVersion);
@@ -111,8 +132,10 @@ async function launch(name, expectedVersion) {
 
 async function close() {
     const owned = context;
-    context = null;
-    if (owned) { await owned.close(); }
+    if (owned) {
+        await owned.close();
+        context = null;
+    }
 }
 
 async function waitForImportUiIdle(page) {
@@ -180,6 +203,9 @@ try {
     assert.equal(legacyImport.openStorageDiagnostics?.mode, 'opfs-sahpool');
     report.oldImportStorage = {usesFallbackStorage: false, mode: legacyImport.openStorageDiagnostics.mode, evidence: 'published import-worker completion snapshot'};
     await waitForImportUiIdle(page);
+    // The published UI hides progress before its backend refresh settles.
+    // This idempotent transition queues behind the active legacy transition.
+    await send(page, 'setDictionaryImportMode', {active: false});
     let options = await send(page, 'optionsGetFull');
     const dictionaryIndex = options.profiles[0].options.dictionaries.findIndex((row) => row.name === title);
     assert.ok(dictionaryIndex >= 0);
@@ -233,12 +259,14 @@ try {
     report.reimportCompletion = {sequence: completion.sequence, errorCount: completion.errorCount, importedTitles: completion.importedTitles};
     await waitForImportUiIdle(page);
     await published(page, true);
+    assert.deepEqual((await send(page, 'getDictionaryInfo')).map((row) => row.title), [title], 'Replacement left transient or duplicate dictionaries');
     preserved(options, await send(page, 'optionsGetFull'));
     await lookup(page);
     report.stages.push({name: 'replacement-from-original-file-and-fresh-lookup', passed: true});
     await close();
     page = await launch('restored-restart', report.newPackage.manifest.version);
     await published(page, true);
+    assert.deepEqual((await send(page, 'getDictionaryInfo')).map((row) => row.title), [title], 'Replacement left transient or duplicate dictionaries');
     preserved(options, await send(page, 'optionsGetFull'));
     await lookup(page);
     report.stages.push({name: 'restored-restart-fresh-lookup-and-preferences', passed: true});
@@ -248,8 +276,16 @@ try {
     report.error = error instanceof Error ? error.stack : String(error);
     throw error;
 } finally {
-    await close();
-    report.finalShutdownObserved = true;
-    report.finishedAt = new Date().toISOString();
-    await persist();
+    try {
+        await close();
+        report.finalShutdownObserved = true;
+    } catch (error) {
+        report.status = 'failure';
+        report.finalShutdownObserved = false;
+        report.shutdownError = error instanceof Error ? error.stack : String(error);
+        process.exitCode = 1;
+    } finally {
+        report.finishedAt = new Date().toISOString();
+        await persist();
+    }
 }
