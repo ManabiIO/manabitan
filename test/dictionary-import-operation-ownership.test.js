@@ -18,7 +18,7 @@
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {API} from '../ext/js/comm/api.js';
 import {Backend} from '../ext/js/background/backend.js';
-import {OffscreenProxy} from '../ext/js/background/offscreen-proxy.js';
+import {DictionaryRuntimeWorkerProxy, OffscreenProxy} from '../ext/js/background/offscreen-proxy.js';
 
 const control = vi.hoisted(() => ({
     gate: /** @type {Promise<void>|null} */ (null),
@@ -500,6 +500,95 @@ describe('dictionary import operation ownership', () => {
         await failure;
         expect(send).not.toHaveBeenCalled();
         expect(Reflect.get(proxy, '_pendingImportOperations').size).toBe(0);
+    });
+
+    test.each(['cancelled-setup', 'failed-setup', 'failed-transfer', 'failed-send', 'full-registry', 'local-post'])('backend retires a definitely untransferred %s import without a fabricated worker receipt', async (failure) => {
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        const proxy = /** @type {OffscreenProxy} */ (Object.create(OffscreenProxy.prototype));
+        const local = /** @type {DictionaryRuntimeWorkerProxy} */ (Object.create(DictionaryRuntimeWorkerProxy.prototype));
+        /** @type {PromiseWithResolvers<void>} */
+        const setup = Promise.withResolvers();
+        /** @type {PromiseWithResolvers<void>} */
+        const entered = Promise.withResolvers();
+        const sendsToPort = failure === 'failed-transfer' || failure === 'failed-send';
+        const send = vi.fn(sendsToPort ? proxy._sendOffscreenControlMessage.bind(proxy) : async () => {});
+        const clearControlPort = vi.fn();
+        Reflect.set(proxy, '_clearCurrentOffscreenPort', clearControlPort);
+        Reflect.set(proxy, '_offscreenControlResponseHandlers', new Map());
+        Reflect.set(proxy, '_offscreenControlRequestId', 0);
+        Reflect.set(proxy, 'prepare', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(proxy, '_ensureOffscreenPort', vi.fn(async () => {
+            entered.resolve();
+            await setup.promise;
+        }));
+        Reflect.set(proxy, '_ensureOffscreenDocument', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(proxy, '_webExtension', {sendMessagePromise: vi.fn().mockResolvedValue({result: {state: 'unknown'}})});
+        const controlPort = {postMessage() {
+            if (failure === 'failed-send') { throw new Error('Port send failed'); }
+            throw new DOMException('Cannot clone import payload', 'DataCloneError');
+        }};
+        Reflect.set(proxy, '_currentOffscreenPort', failure === 'failed-setup' ? null : controlPort);
+        Reflect.set(proxy, '_sendOffscreenControlMessage', send);
+        if (failure === 'full-registry') {
+            Reflect.set(proxy, '_pendingImportOperations', new Map(Array.from({length: 128}, (_, i) => [String(i), {cancelled: false}])));
+        }
+        Reflect.set(local, '_client', {post: vi.fn(() => { throw new Error('Worker construction failed'); })});
+        Object.assign(backend, {
+            _dictionaryImportOwners: new Set(['page-A', 'page-B']),
+            _ownedDictionaryImports: new Map(),
+            _setDictionaryImportModePromise: null,
+            _offscreen: failure === 'local-post' ? null : proxy,
+            _localDictionaryRuntime: failure === 'local-post' ? local : null,
+        });
+        const channel = new MessageChannel();
+        const close = vi.spyOn(channel.port2, 'close');
+        const id = operationId('untransferred');
+        const pending = backend._onPmImportDictionaryOffscreen({operationId: id, ownerId: 'page-A', archiveContent: new Blob([]), details: /** @type {import('dictionary-importer').ImportDetails} */ ({})}, [channel.port2]);
+        try {
+            if (failure !== 'local-post' && failure !== 'full-registry') {
+                await entered.promise;
+                if (failure === 'cancelled-setup') { await backend._setDictionaryImportMode(false, 'page-A'); }
+                setup.resolve();
+            }
+            await pending;
+            expect(send).toHaveBeenCalledTimes(sendsToPort ? 1 : 0);
+            expect(clearControlPort).toHaveBeenCalledTimes(failure === 'failed-send' ? 1 : 0);
+            expect(Reflect.get(backend, '_ownedDictionaryImports').size).toBe(0);
+            expect(close).toHaveBeenCalled();
+        } finally {
+            setup.resolve();
+            await pending;
+            for (const operation of Reflect.get(backend, '_ownedDictionaryImports').values()) { operation.responseCleanup?.(); }
+            channel.port1.close();
+            channel.port2.close();
+        }
+    });
+
+    test('a full handoff registry does not leak a new backend operation or discard existing handoffs', async () => {
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        const proxy = /** @type {OffscreenProxy} */ (Object.create(OffscreenProxy.prototype));
+        const handoffs = new Map(Array.from({length: 128}, (_, i) => [operationId(`pending-${i}`), {cancelled: false}]));
+        Reflect.set(proxy, '_pendingImportOperations', handoffs);
+        Reflect.set(proxy, 'prepare', vi.fn().mockResolvedValue(void 0));
+        const reconcile = vi.fn().mockResolvedValue({state: 'unknown'});
+        Reflect.set(proxy, 'sendMessagePromise', reconcile);
+        Object.assign(backend, {
+            _dictionaryImportOwners: new Set(['page-A']),
+            _ownedDictionaryImports: new Map(),
+            _offscreen: proxy,
+            _localDictionaryRuntime: null,
+        });
+        const channel = new MessageChannel();
+        try {
+            await backend._onPmImportDictionaryOffscreen({operationId: operationId('capacity-rejection'), ownerId: 'page-A', archiveContent: new Blob([]), details: /** @type {import('dictionary-importer').ImportDetails} */ ({})}, [channel.port2]);
+            expect(backend._ownedDictionaryImports.size).toBe(0);
+            expect(handoffs.size).toBe(128);
+            expect(reconcile).not.toHaveBeenCalled();
+        } finally {
+            for (const operation of backend._ownedDictionaryImports.values()) { operation.responseCleanup?.(); }
+            channel.port1.close();
+            channel.port2.close();
+        }
     });
 
     test('status queries while handoff is pending are lookup-only and do not cancel', async () => {

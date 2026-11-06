@@ -46,7 +46,7 @@ import {getLanguageSummaries, isTextLookupWorthy} from '../language/languages.js
 import {Translator} from '../language/translator.js';
 import {AudioDownloader} from '../media/audio-downloader.js';
 import {getFileExtensionFromAudioMediaType, getFileExtensionFromImageMediaType} from '../media/media-util.js';
-import {ClipboardReaderProxy, DictionaryDatabaseProxy, DictionaryRuntimeWorkerProxy, OffscreenProxy, TranslatorProxy} from './offscreen-proxy.js';
+import {ClipboardReaderProxy, DictionaryDatabaseProxy, DictionaryImportNotAdmittedError, DictionaryRuntimeWorkerProxy, OffscreenProxy, TranslatorProxy} from './offscreen-proxy.js';
 import {createSchema, normalizeContext} from './profile-conditions-util.js';
 import {RequestBuilder} from './request-builder.js';
 import {injectStylesheet} from './script-manager.js';
@@ -62,6 +62,7 @@ const DICTIONARY_REFRESH_RETRY_DELAYS_MS = [250, 1000, 3000, 10000];
  * @property {boolean} completed An authoritative terminal outcome was observed.
  * @property {boolean} [runtimeAdmissionAttempted]
  * @property {boolean} [reconciliationPending]
+ * @property {boolean} [terminalOutcomeUnknown] The worker returned, but publication or rollback was unconfirmed.
  * @property {AbortController} [downloadAbortController]
  * @property {() => void} [responseCleanup]
  * @property {() => void} [responseDetachObserver]
@@ -500,7 +501,7 @@ export class Backend {
                 operation.downloadAbortController?.abort();
             }
             // Admitted work retains its mutation lifetime after page loss.
-            this._releaseOrphanedDictionaryImportOwner(ownerId);
+            void this._releaseOrphanedDictionaryImportOwner(ownerId);
         };
         port.onDisconnect.addListener(onDisconnect);
         void (async () => {
@@ -515,18 +516,21 @@ export class Backend {
                 onDisconnect();
                 port.disconnect();
             } finally {
-                if (disconnected) { this._releaseOrphanedDictionaryImportOwner(ownerId); }
+                if (disconnected) { void this._releaseOrphanedDictionaryImportOwner(ownerId); }
             }
         })();
     }
 
-    /** @param {string} ownerId */
+    /**
+     * @param {string} ownerId
+     * @returns {Promise<void>|undefined}
+     */
     _releaseOrphanedDictionaryImportOwner(ownerId) {
         if (!this._orphanedDictionaryImportOwners?.has(ownerId)) { return; }
         if (this._dictionaryImportOwnerConnections?.has(ownerId)) { return; }
         if ([...this._ownedDictionaryImports.values()].some((operation) => operation.ownerId === ownerId)) { return; }
         this._orphanedDictionaryImportOwners.delete(ownerId);
-        void this._setDictionaryImportMode(false, ownerId).catch((error) => {
+        return this._setDictionaryImportMode(false, ownerId).catch((error) => {
             reportDiagnostics('dictionary-orphaned-import-owner-release-failed', {ownerId, error: toError(error).message});
         });
     }
@@ -763,10 +767,15 @@ export class Backend {
             } catch (error) {
                 if (relay) {
                     postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
-                    // Losing acknowledgement does not revoke the transferred
-                    // worker relay. It may still deliver durable completion.
-                    relay.detachObserver();
-                    this._reconcileOwnedDictionaryImport(operationId);
+                    // Definite local send failures own no worker mutation;
+                    // an acknowledgement failure still retains the live relay.
+                    if (operation && error instanceof DictionaryImportNotAdmittedError) {
+                        operation.completed = true;
+                        relay.close();
+                    } else {
+                        relay.detachObserver();
+                        this._reconcileOwnedDictionaryImport(operationId);
+                    }
                 }
                 throw error;
             }
@@ -780,10 +789,15 @@ export class Backend {
             } catch (error) {
                 if (relay) {
                     postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
-                    // Losing acknowledgement does not revoke the transferred
-                    // worker relay. It may still deliver durable completion.
-                    relay.detachObserver();
-                    this._reconcileOwnedDictionaryImport(operationId);
+                    // Definite local send failures own no worker mutation;
+                    // an acknowledgement failure still retains the live relay.
+                    if (operation && error instanceof DictionaryImportNotAdmittedError) {
+                        operation.completed = true;
+                        relay.close();
+                    } else {
+                        relay.detachObserver();
+                        this._reconcileOwnedDictionaryImport(operationId);
+                    }
                 }
                 throw error;
             }
@@ -855,6 +869,9 @@ export class Backend {
             const outcome = isObjectNotArray(completion?.outcome) ? completion.outcome : null;
             // Completion of response delivery does not settle a mutation whose
             // owner could not confirm publication or rollback.
+            if (details?.type === 'complete' && outcome?.status === 'unknown' && operation && this._ownedDictionaryImports.get(operationId) === operation) {
+                operation.terminalOutcomeUnknown = true;
+            }
             const uncertain = outcome?.status === 'unknown' || (
                 details?.type === 'error' && ['DictionaryImportTransportError', 'DictionaryWorkerTransportError', 'OffscreenControlTransportError'].includes(errorName)
             );
@@ -922,7 +939,7 @@ export class Backend {
         if (this._ownedDictionaryImports.get(operationId) !== operation || !operation.settled) { return; }
         if (operation.completed || (operation.cancelled && !operation.responseCleanup && !operation.reconciliationPending)) {
             this._ownedDictionaryImports.delete(operationId);
-            this._releaseOrphanedDictionaryImportOwner(operation.ownerId);
+            void this._releaseOrphanedDictionaryImportOwner(operation.ownerId);
         }
     }
 
@@ -2307,9 +2324,36 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
         await this._runDictionaryMutation(async () => {
             // Explicit reset must remain available after a failed database
             // reopen. The database owner serializes and performs the purge once.
+            // Only a worker-returned unknown outcome can be superseded here.
+            // Downloads, live relays, and transport uncertainty may still own work.
+            const terminalUnknownOperations = [...(this._ownedDictionaryImports ?? [])].filter(([, operation]) => operation.terminalOutcomeUnknown);
             await this._dictionaryDatabase.purge();
+            await this._retirePurgedOrphanedDictionaryImports(terminalUnknownOperations);
             await this._triggerDatabaseUpdated('dictionary', 'purge');
         });
+    }
+
+    /**
+     * A successful explicit reset supersedes earlier terminal storage uncertainty,
+     * without inventing publication/rollback or ending a connected import session.
+     * @param {[string, OwnedDictionaryImportOperation][]} operations
+     * @returns {Promise<void>}
+     */
+    async _retirePurgedOrphanedDictionaryImports(operations) {
+        /** @type {Set<string>} */
+        const ownerIds = new Set();
+        for (const [operationId, operation] of operations) {
+            if (
+                this._ownedDictionaryImports.get(operationId) !== operation || !operation.settled ||
+                !operation.terminalOutcomeUnknown || !this._orphanedDictionaryImportOwners?.has(operation.ownerId) ||
+                this._dictionaryImportOwnerConnections?.has(operation.ownerId)
+            ) { continue; }
+            this._ownedDictionaryImports.delete(operationId);
+            ownerIds.add(operation.ownerId);
+        }
+        for (const ownerId of ownerIds) {
+            await this._releaseOrphanedDictionaryImportOwner(ownerId);
+        }
     }
 
     /** @type {import('api').ApiHandler<'getMedia'>} */
