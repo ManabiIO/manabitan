@@ -8,7 +8,7 @@ This repository still contains many historic `yomitan` names in package metadata
 
 ## Environment
 
-- Use Node.js `>=22.0.0`.
+- Use Node.js 22.22.0+ or 24.8.0+ (`^22.22.0 || >=24.8.0`); browser qualification uses Node 22.
 - Install dependencies with `npm ci`.
 - The repository uses ESM (`"type": "module"` in `package.json`).
 

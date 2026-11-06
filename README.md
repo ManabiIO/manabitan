@@ -195,12 +195,12 @@ This section documents how to build an exact copy of the distributed extension p
 ### Environment requirements
 
 - Operating system: Linux or macOS (CI uses Ubuntu).
-- Node.js: `>=22.0.0` (from `package.json` `engines.node`).
+- Node.js: `^22.22.0 || >=24.8.0` (from `package.json` `engines.node`).
 - npm: bundled with your Node.js installation.
 
 ### Tool installation
 
-1. Install Node.js 22+ from [nodejs.org](https://nodejs.org/).
+1. Install Node.js 22.22.0+ (recommended for browser qualification) or 24.8.0+ from [nodejs.org](https://nodejs.org/).
 2. Verify tool versions:
    - `node --version`
    - `npm --version`

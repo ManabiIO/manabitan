@@ -3,6 +3,12 @@
 This file documents the scripts available in the [package.json](../../package.json) file.
 Scripts can be executed by running `npm run <name>`.
 
+The toolchain requires Node 22.22.0+ or 24.8.0+; use Node 22 for browser qualification.
+`ts-json-schema-generator` is pinned to 2.5.0 because newer releases reintroduce the vulnerable `glob` dependency.
+The two scoped `minimatch` overrides cover TypeScript ESLint and SonarJS, whose current releases still request vulnerable versions.
+The overrides target only each consumer's declared minimatch 10 range so npm 10 and npm 12 agree on the lockfile and preserve ESLint's separate minimatch 3 dependency.
+Remove each override when its parent declares a fixed version; validate with `npm audit`, full lint, types, and JSON/schema tests when updating these pins.
+
 - `anki:css-json:write`
 
   Writes Anki structured content styling json for use when sending stuctured content dictionaries to Anki.
