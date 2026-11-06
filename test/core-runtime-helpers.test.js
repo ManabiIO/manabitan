@@ -162,7 +162,46 @@ describe('object-utilities', () => {
 });
 
 describe('safePerformance', () => {
+    test('ordinary lookups do not retain User Timing entries or evaluate their options', () => {
+        setGlobalValue('manabitanPerformanceInstrumentationEnabled', false);
+        const markSpy = vi.spyOn(performance, 'mark');
+        const measureSpy = vi.spyOn(performance, 'measure');
+        const nowSpy = vi.spyOn(performance, 'now').mockReturnValue(456);
+        const options = {get detail() { throw new Error('disabled options must not be read'); }};
+        for (let i = 0; i < 1000; ++i) {
+            expect(safePerformance.mark('lookup', options)).toBeUndefined();
+            expect(safePerformance.measure('lookup', 'missing:start', 'missing:end')).toBeUndefined();
+        }
+        expect(markSpy).not.toHaveBeenCalled();
+        expect(measureSpy).not.toHaveBeenCalled();
+        expect(safePerformance.now()).toBe(456);
+        expect(nowSpy).toHaveBeenCalledOnce();
+    });
+
+    test('instrumentation requires explicit boolean opt-in and can be disabled again', () => {
+        const markSpy = vi.spyOn(performance, 'mark');
+        const measureSpy = vi.spyOn(performance, 'measure');
+        for (const value of [undefined, false, 1, 'true']) {
+            setGlobalValue('manabitanPerformanceInstrumentationEnabled', value);
+            safePerformance.mark('disabled');
+            safePerformance.measure('disabled');
+        }
+        expect(markSpy).not.toHaveBeenCalled();
+        expect(measureSpy).not.toHaveBeenCalled();
+        setGlobalValue('manabitanPerformanceInstrumentationEnabled', true);
+        safePerformance.mark('enabled');
+        safePerformance.measure('enabled');
+        expect(markSpy).toHaveBeenCalledOnce();
+        expect(measureSpy).toHaveBeenCalledOnce();
+        setGlobalValue('manabitanPerformanceInstrumentationEnabled', false);
+        safePerformance.mark('disabled-again');
+        safePerformance.measure('disabled-again');
+        expect(markSpy).toHaveBeenCalledOnce();
+        expect(measureSpy).toHaveBeenCalledOnce();
+    });
+
     test('mark/measure delegate to performance methods and now returns performance.now', () => {
+        setGlobalValue('manabitanPerformanceInstrumentationEnabled', true);
         /** @type {PerformanceMark} */
         const markResult = /** @type {PerformanceMark} */ ({name: 'mark'});
         /** @type {PerformanceMeasure} */
@@ -181,6 +220,7 @@ describe('safePerformance', () => {
     });
 
     test('mark/measure return undefined and log when performance throws', () => {
+        setGlobalValue('manabitanPerformanceInstrumentationEnabled', true);
         const markError = new Error('mark failed');
         const measureError = new Error('measure failed');
         vi.spyOn(performance, 'mark').mockImplementation(() => {

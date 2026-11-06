@@ -20,6 +20,7 @@
 // @ts-nocheck
 
 import {createServer} from 'node:http';
+import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import os from 'node:os';
 import path from 'node:path';
@@ -38,10 +39,16 @@ import {armBrowserImportTiming} from '../e2e/import-timing.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {runWithReaderFinalization} from '../e2e/reader-finalization.js';
+import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
 const dictionaryCacheDir = path.join(root, 'builds', 'e2e-dictionary-cache');
+const buildTarget = process.env.MANABITAN_CHROMIUM_BUILD_TARGET ?? 'chrome-dev';
+if (buildTarget !== 'chrome' && buildTarget !== 'chrome-dev') {
+    throw new Error('MANABITAN_CHROMIUM_BUILD_TARGET must be chrome or chrome-dev');
+}
+const packageFilename = buildTarget === 'chrome' ? 'manabitan-chrome.zip' : 'manabitan-chrome-dev.zip';
 const wagahaiHtmlPath = path.join(root, 'test', 'firefox', 'data', 'wagahai-neko.html');
 const fallbackJmdictUrl = 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_english.zip';
 const execFileAsync = promisify(execFile);
@@ -289,6 +296,8 @@ function createReport() {
         status: 'running',
         failureReason: '',
         browserFlavor,
+        buildTarget,
+        packageSha256: '',
         browserVersion: '',
         launchMode: 'unknown',
         hostEnvironment: getHostEnvironment(),
@@ -318,6 +327,8 @@ function createReportJsonSummary(report) {
         status: report.status,
         failureReason: report.failureReason,
         browserFlavor: report.browserFlavor,
+        buildTarget: report.buildTarget,
+        packageSha256: report.packageSha256,
         browserVersion: report.browserVersion,
         launchMode: report.launchMode,
         hostEnvironment: report.hostEnvironment,
@@ -3348,15 +3359,15 @@ async function loadBenchmarkProbeTerms(zipPath) {
     return [...terms];
 }
 
-async function ensureFreshChromeDevBuild(zipPath) {
+async function ensureFreshChromeBuild(zipPath) {
     const skipBuild = (process.env.MANABITAN_E2E_SKIP_BUILD ?? '0').trim() === '1';
     if (skipBuild) {
         await access(zipPath);
         return;
     }
     const startedAt = safePerformance.now();
-    console.log(`${e2eLogTag} rebuilding manabitan-chrome-dev.zip before test run`);
-    await execFileAsync('node', ['./dev/bin/build.js', '--target', 'chrome-dev'], {
+    console.log(`${e2eLogTag} rebuilding ${packageFilename} before test run`);
+    await execFileAsync('node', ['./dev/bin/build.js', '--target', buildTarget], {
         cwd: root,
         maxBuffer: 20 * 1024 * 1024,
     });
@@ -3385,7 +3396,7 @@ async function stopBrowserTraceToFile(session, outputPath) {
 }
 
 async function main() {
-    const defaultZipPath = path.join(root, 'builds', 'manabitan-chrome-dev.zip');
+    const defaultZipPath = path.join(root, 'builds', packageFilename);
     const defaultReportName = browserFlavor === 'edge' ? 'edge-e2e-import-report.html' : 'chromium-e2e-import-report.html';
     const reportPath = process.env.MANABITAN_CHROMIUM_E2E_REPORT ?? path.join(root, 'builds', defaultReportName);
     const reportJsonPath = reportPath.replace(/\.html$/i, '.json');
@@ -3414,7 +3425,8 @@ async function main() {
                 );
             }
         }
-        await ensureFreshChromeDevBuild(defaultZipPath);
+        await ensureFreshChromeBuild(defaultZipPath);
+        report.packageSha256 = createHash('sha256').update(await readFile(defaultZipPath)).digest('hex');
         extensionDir = await extractExtensionZip(defaultZipPath);
         const profileIterationTag = String(process.env.MANABITAN_E2E_PROFILE_ITERATION_TAG || '').trim().replace(/[^a-z0-9_-]+/gi, '-')
             .replace(/^-+|-+$/g, '');
@@ -3461,9 +3473,6 @@ async function main() {
                 `--disable-extensions-except=${extensionDir}`,
                 `--load-extension=${extensionDir}`,
             ];
-            if (process.platform === 'darwin') {
-                launchArgs.push('--disable-features=MacAppCodeSignClone');
-            }
             if (!headless && hideWindowForHeaded) {
                 launchArgs.push('--window-position=3000,3000', '--window-size=1280,800', '--start-minimized');
             }
@@ -3475,9 +3484,7 @@ async function main() {
             if (browserChannel !== null) {
                 launchOptions.channel = browserChannel;
             }
-            return await chromium.launchPersistentContext(userDataDir, {
-                ...launchOptions,
-            });
+            return await chromium.launchPersistentContext(userDataDir, getChromiumLaunchOptions(launchOptions));
         };
         /**
          * @param {import('@playwright/test').Page} targetPage
@@ -3741,7 +3748,8 @@ async function main() {
         report.browserVersion = context.browser()?.version() ?? '';
         appendLog(report, 'info', `${browserFlavor} launch mode: ${launchModeLabel}`);
         let extensionBaseUrl = `chrome-extension://${extensionId}`;
-        await context.addInitScript(({flagsFromRunner, useProductionDefaults}) => {
+        await context.addInitScript(({flagsFromRunner, useProductionDefaults, instrumentationEnabled}) => {
+            Reflect.set(globalThis, 'manabitanPerformanceInstrumentationEnabled', instrumentationEnabled);
             Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
             if (useProductionDefaults) {
                 delete globalThis.manabitanImportUseSession;
@@ -3756,7 +3764,7 @@ async function main() {
                 globalThis.manabitanDisableIntegrityCounts = true;
                 globalThis.manabitanImportPerformanceFlags = (flagsFromRunner && typeof flagsFromRunner === 'object') ? {...flagsFromRunner} : {};
             }
-        }, {flagsFromRunner: e2eImportFlags, useProductionDefaults: useProductionImportDefaults});
+        }, {flagsFromRunner: e2eImportFlags, useProductionDefaults: useProductionImportDefaults, instrumentationEnabled: capturePhaseProfiles});
         page = context.pages()[0] ?? await context.newPage();
         /** @type {import('@playwright/test').Page|null} */
         let concurrentSearchPage = null;

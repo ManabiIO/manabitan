@@ -29,6 +29,9 @@ class SafePerformance {
      * @returns {PerformanceMark | undefined}
      */
     mark(markName, markOptions) {
+        // User Timing entries persist for the lifetime of the realm. Lookup and
+        // rendering call this per result; retain entries only while profiling.
+        if (Reflect.get(globalThis, 'manabitanPerformanceInstrumentationEnabled') !== true) { return; }
         try {
             // eslint-disable-next-line no-restricted-syntax
             return performance.mark(markName, markOptions);
@@ -45,6 +48,7 @@ class SafePerformance {
      * @returns {PerformanceMeasure | undefined}
      */
     measure(measureName, startOrMeasureOptions, endMark) {
+        if (Reflect.get(globalThis, 'manabitanPerformanceInstrumentationEnabled') !== true) { return; }
         try {
             // eslint-disable-next-line no-restricted-syntax
             return performance.measure(measureName, startOrMeasureOptions, endMark);

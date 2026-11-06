@@ -19,19 +19,20 @@ import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {crc32, deflateRawSync} from 'node:zlib';
+import {crc32, deflateRawSync, inflateRawSync} from 'node:zlib';
 import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
-import {encodePersistedTermLookupIndexFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index.js';
+import {encodePersistedTermLookupIndexFromPreinternedPlan, findExactRows, parsePersistedTermLookupIndex} from '../ext/js/dictionary/term-lookup-index.js';
 import {decodeRawTermContentTokenBinary} from '../ext/js/dictionary/raw-term-content.js';
 import {
     consumeLastTermBankWasmParseProfile,
     copyWasmBackedColumnChunk,
     disposeParallelTermBankParser,
     getParallelTermBankParserWorkerCount,
+    inflateCompressedZipMediaBatchWasm,
     inflateCompressedTermBankSourcesWasm,
     parseTermBankWithWasmChunks,
     parseTermBankWithWasmColumnChunks,
@@ -186,7 +187,7 @@ function createCompressedTermBankSource(json, compressionMethod) {
 /**
  * @param {Uint8Array[]} sources
  * @param {Awaited<ReturnType<typeof inflateCompressedTermBankSourcesWasm>>|null} preloadedSource
- * @returns {Promise<object|null>}
+ * @returns {Promise<{rowCount: number, expressions: string[], readings: string[], readingEqualsExpression: number[], scores: number[], sequences: number[], content: number[][], contentHash1: number[], contentHash2: number[], contentUniqueIndexes: number[]|null}|null>}
  */
 async function parseColumnSnapshot(sources, preloadedSource = null) {
     /** @type {TermBankColumnChunk[]} */
@@ -235,19 +236,135 @@ afterAll(() => {
 });
 
 describe('term-bank WASM parser', () => {
-    maybeTest('inflates, validates, and joins mixed raw ZIP term-bank payloads', async () => {
-        const sources = [
-            createCompressedTermBankSource(' \n [["a","", "", "", 1, ["one"], 10, ""]] \r', 8),
-            createCompressedTermBankSource('\t[]\n', 0),
-            createCompressedTermBankSource('[["b","び", "tag", "v1", -2, [{"type":"text","text":"two"}], 11, "common"]]', 8),
+    maybeTest('preserves canonical source rows across duplicate distributions and chunk boundaries', async () => {
+        for (const uniqueCount of [1, 7, 101]) {
+            const rows = Array.from({length: 101}, (_, i) => [
+                'entry-' + i,
+                '',
+                '',
+                '',
+                i,
+                ['definition-' + (i % uniqueCount)],
+                i,
+                '',
+            ]);
+            for (const skipFused of [false, true]) {
+                let seen = 0;
+                await parseTermBankWithWasmColumnChunks([
+                    textEncoder.encode(JSON.stringify(rows.slice(0, 50))),
+                    textEncoder.encode(JSON.stringify(rows.slice(50))),
+                ], 3, (chunk) => {
+                    if (chunk.contentDedupPlan === null || chunk.contentUniqueIndexList === null) {
+                        throw new Error('Expected native dedupe projection');
+                    }
+                    expect([...chunk.contentDedupPlan.uniqueRowIndexes]).toEqual(
+                        Array.from({length: uniqueCount}, (_, i) => i),
+                    );
+                    expect([...chunk.contentUniqueIndexList]).toEqual(
+                        Array.from({length: chunk.rowCount}, (_, i) => (seen + i) % uniqueCount),
+                    );
+                    seen += chunk.rowCount;
+                }, 13, {
+                    emitContentSlab: true,
+                    emitTokenBinaryContent: true,
+                    experimentalSkipFusedParse: skipFused,
+                });
+                expect(seen).toBe(rows.length);
+            }
+        }
+    });
+
+    maybeTest('inflates and preserves mixed raw ZIP term-bank boundaries with exact sizes', async () => {
+        const texts = [
+            ' \n [["a","", "", "", 1, ["one"], 10, ""]] \r',
+            '\t[]\n',
+            '[["b","び", "tag", "v1", -2, [{"type":"text","text":"two"}], 11, "common"]]',
         ];
+        const sources = texts.map((text, i) => createCompressedTermBankSource(text, i === 1 ? 0 : 8));
         const preloaded = await inflateCompressedTermBankSourcesWasm(sources);
         const joined = new Uint8Array(preloaded.wasm.memory.buffer, preloaded.jsonPtr, preloaded.jsonLength);
 
-        expect(JSON.parse(textDecoder.decode(joined))).toEqual([
-            ['a', '', '', '', 1, ['one'], 10, ''],
-            ['b', 'び', 'tag', 'v1', -2, [{type: 'text', text: 'two'}], 11, 'common'],
+        expect(textDecoder.decode(joined)).toBe(texts.join(''));
+        expect(preloaded.bankSpanCount).toBe(sources.length);
+        expect([...new Uint32Array(preloaded.wasm.memory.buffer, preloaded.bankSpansPtr, sources.length * 2)]).toEqual([
+            0,
+            textEncoder.encode(texts[0]).length,
+            textEncoder.encode(texts[0]).length,
+            textEncoder.encode(texts[1]).length,
+            textEncoder.encode(texts.slice(0, 2).join('')).length,
+            textEncoder.encode(texts[2]).length,
         ]);
+    });
+
+    maybeTest('inflates binary ZIP media with exact lengths and CRCs', async () => {
+        const media = [
+            createCompressedTermBankSource('PNG\u0000image bytes', 8),
+            createCompressedTermBankSource('stored media payload', 0),
+        ];
+        const expected = media.map((source) => {
+            return source.compressionMethod === 8 ?
+                Uint8Array.from(inflateRawSync(source.bytes)) :
+                source.bytes;
+        });
+
+        const result = await inflateCompressedZipMediaBatchWasm(media);
+
+        expect(result.sources).toEqual(expected);
+        expect(result.compressedBytes).toBe(media.reduce((sum, source) => sum + source.compressedSize, 0));
+        expect(result.uncompressedBytes).toBe(expected.reduce((sum, bytes) => sum + bytes.byteLength, 0));
+        result.sources[0].fill(0);
+        expect(result.sources[1]).toEqual(expected[1]);
+    });
+
+    maybeTest('keeps empty and nonempty media bytes owned across later WASM calls', async () => {
+        const sources = [
+            createCompressedTermBankSource('', 0),
+            createCompressedTermBankSource('', 8),
+            createCompressedTermBankSource('first image bytes', 8),
+        ];
+        const first = await inflateCompressedZipMediaBatchWasm(sources);
+        await inflateCompressedZipMediaBatchWasm([createCompressedTermBankSource('replacement bytes', 8)]);
+        expect(first.sources.map((bytes) => textDecoder.decode(bytes))).toEqual(['', '', 'first image bytes']);
+        for (const bytes of first.sources) {
+            expect(bytes.buffer).toBeInstanceOf(ArrayBuffer);
+            expect(bytes.buffer.byteLength).toBe(bytes.byteLength);
+        }
+    });
+
+    maybeTest('bounds metadata allocation even when every media entry is empty', async () => {
+        const empty = createCompressedTermBankSource('', 0);
+        await expect(inflateCompressedZipMediaBatchWasm(Array.from({length: 257}, () => empty))).rejects.toThrow('source count budget');
+    });
+
+    maybeTest.each([
+        {
+            name: 'CRC mismatch',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, signature: (source.signature + 1) >>> 0}),
+            message: 'CRC32',
+        },
+        {
+            name: 'uncompressed-size mismatch',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, uncompressedSize: source.uncompressedSize + 1}),
+            message: 'size does not match',
+        },
+        {
+            name: 'truncated DEFLATE stream',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => ({...source, bytes: source.bytes.slice(0, -2), compressedSize: source.compressedSize - 2}),
+            message: 'DEFLATE decoding failed',
+        },
+        {
+            name: 'trailing DEFLATE bytes',
+            mutate: (/** @type {ReturnType<typeof createCompressedTermBankSource>} */ source) => {
+                const bytes = new Uint8Array(source.bytes.byteLength + 1);
+                bytes.set(source.bytes);
+                bytes[bytes.length - 1] = 0xaa;
+                return {...source, bytes, compressedSize: bytes.byteLength};
+            },
+            message: 'trailing bytes',
+        },
+    ])('rejects batched media with $name', async ({mutate, message}) => {
+        const source = createCompressedTermBankSource('binary image payload', 8);
+        await expect(inflateCompressedZipMediaBatchWasm([mutate(source)])).rejects.toThrow(message);
     });
 
     maybeTest('matches ordinary inflated parsing across every emitted column', async () => {
@@ -619,7 +736,7 @@ describe('term-bank WASM parser', () => {
     test.each([
         [{hardwareConcurrency: 12, deviceMemory: 8}, 5],
         [{hardwareConcurrency: 12, deviceMemory: 4}, 2],
-        [{hardwareConcurrency: 4, deviceMemory: 8}, 2],
+        [{hardwareConcurrency: 4, deviceMemory: 8}, 3],
         [{}, 2],
     ])('selects parser worker count from browser capability: %j', (navigatorValue, expected) => {
         const originalNavigator = globalThis.navigator;
@@ -965,13 +1082,18 @@ describe('term-bank WASM parser', () => {
     maybeTest('assigns the next parser group to the first idle worker', async () => {
         const originalNavigator = globalThis.navigator;
         let workerIndex = 0;
+        let nextAssignmentWorker = -1;
+        let releaseFirstWorker = () => {};
+        let forcedRelease = false;
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        let releaseTimeout = null;
         /** @type {number[]} */
-        let parseCounts = [];
+        const parseCounts = [];
         /** @implements {WorkerMock} */
         class SkewedWorker {
             constructor() {
                 this.index = workerIndex++;
-                this.delay = this.index === 0 ? 20 : 0;
+                parseCounts[this.index] = 0;
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
             }
@@ -990,16 +1112,32 @@ describe('term-bank WASM parser', () => {
                     return;
                 }
                 ++parseCounts[this.index];
-                setTimeout(() => {
-                    emitSuccessfulWorkerResult(this.listeners, getWorkerMessageId(message));
-                }, this.delay);
+                const complete = () => { emitSuccessfulWorkerResult(this.listeners, getWorkerMessageId(message)); };
+                if (this.index === 0 && parseCounts[this.index] === 1) {
+                    // Hold the first worker until an idle peer receives a new
+                    // group. Timer delays do not guarantee this under CI load.
+                    releaseFirstWorker = complete;
+                    // A broken scheduler must fail without stranding the live
+                    // pool until its much longer production job timeout.
+                    releaseTimeout = setTimeout(() => {
+                        forcedRelease = true;
+                        releaseFirstWorker();
+                        releaseFirstWorker = () => {};
+                    }, 1000);
+                    return;
+                }
+                if (parseCounts[this.index] === 2 && nextAssignmentWorker === -1) {
+                    nextAssignmentWorker = this.index;
+                    releaseFirstWorker();
+                    releaseFirstWorker = () => {};
+                }
+                queueMicrotask(complete);
             }
 
             terminate() {}
         }
 
         vi.stubGlobal('navigator', {hardwareConcurrency: 12, deviceMemory: 8});
-        parseCounts = Array.from({length: getParallelTermBankParserWorkerCount()}, () => 0);
         vi.stubGlobal('Worker', SkewedWorker);
         try {
             const sourceBanks = Array.from({length: 12}, () => textEncoder.encode('[]'));
@@ -1010,10 +1148,11 @@ describe('term-bank WASM parser', () => {
                 {emitContentSlab: true},
             )).resolves.toBe(true);
             expect(parseCounts.reduce((sum, count) => sum + count, 0)).toBe(12);
-            for (let index = 1; index < parseCounts.length; ++index) {
-                expect(parseCounts[0]).toBeLessThan(parseCounts[index]);
-            }
+            expect(forcedRelease).toBe(false);
+            expect(nextAssignmentWorker).toBeGreaterThan(0);
         } finally {
+            if (releaseTimeout !== null) { clearTimeout(releaseTimeout); }
+            releaseFirstWorker();
             await disposeParallelTermBankParser();
             vi.stubGlobal('navigator', originalNavigator);
             vi.stubGlobal('Worker', void 0);
@@ -1755,6 +1894,103 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    maybeTest.each(['cancel', 'shared-prewarm', 'callback-error', 'ready-race'])(
+        'settles cancellation during parser worker startup: %s',
+        async (mode) => {
+            /** @type {StartupWorker[]} */
+            const instances = [];
+            let initialized = () => {};
+            const initializationStarted = new Promise((resolve) => { initialized = () => resolve(void 0); });
+            let ready = false;
+            let cancelled = false;
+            let sourceLoads = 0;
+            let sinkCalls = 0;
+            let settled = false;
+            /** @type {unknown} */
+            let failure = null;
+            const callbackError = new Error('Cancellation callback failed');
+            /** @implements {WorkerMock} */
+            class StartupWorker {
+                constructor() {
+                    /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                    this.listeners = new Map();
+                    this.terminated = false;
+                    instances.push(this);
+                }
+
+                addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    addWorkerListener(this.listeners, type, listener);
+                }
+
+                removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    this.listeners.get(type)?.delete(listener);
+                }
+
+                postMessage(/** @type {WorkerMessage} */ message) {
+                    if (message.type !== 'initialize') { throw new Error('Dispatched parse before startup finished'); }
+                    initialized();
+                    if (ready || mode === 'ready-race') {
+                        queueMicrotask(() => {
+                            emitWorkerMessage(this.listeners, {type: 'ready'});
+                            if (mode === 'ready-race') { cancelled = true; }
+                        });
+                    }
+                }
+
+                terminate() { this.terminated = true; }
+            }
+
+            vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval']});
+            vi.stubGlobal('Worker', StartupWorker);
+            const prewarm = mode === 'shared-prewarm' ? prewarmParallelTermBankParser() : null;
+            const parse = parseTermBankWithWasmColumnChunksParallelLazy(
+                Array.from({length: 4}, () => async () => { ++sourceLoads; return textEncoder.encode('[]'); }),
+                [2, 2, 2, 2],
+                3,
+                () => { ++sinkCalls; },
+                {emitContentSlab: true},
+                () => {
+                    if (cancelled && mode === 'callback-error') { throw callbackError; }
+                    return cancelled;
+                },
+            ).then(() => { settled = true; }, (error) => {
+                settled = true;
+                failure = error;
+            });
+            try {
+                await initializationStarted;
+                cancelled = true;
+                await vi.advanceTimersByTimeAsync(250);
+                expect(settled).toBe(true);
+                expect(failure).toMatchObject(mode === 'callback-error' ? {message: callbackError.message} : {name: 'AbortError'});
+                await parse;
+                if (prewarm !== null) { await expect(prewarm).resolves.toBe(false); }
+                expect(sourceLoads).toBe(0);
+                expect(sinkCalls).toBe(0);
+                expect(instances.length).toBeGreaterThanOrEqual(2);
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(instances.every((worker) => [...worker.listeners.values()].every((listeners) => listeners.size === 0))).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+                ready = true;
+                await expect(prewarmParallelTermBankParser()).resolves.toBe(true);
+                await disposeParallelTermBankParser();
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+            } finally {
+                // Release the original implementation too, so a red test leaves no startup timers.
+                for (const worker of instances) {
+                    emitWorkerMessage(worker.listeners, {type: 'initialization-error', error: {message: 'Test cleanup'}});
+                }
+                await parse;
+                if (prewarm !== null) { await prewarm; }
+                await disposeParallelTermBankParser();
+                vi.clearAllTimers();
+                vi.useRealTimers();
+                vi.stubGlobal('Worker', void 0);
+            }
+        },
+    );
+
     maybeTest('cancels while deferred ZIP sources are unresolved', async () => {
         let terminateCount = 0;
         /** @implements {WorkerMock} */
@@ -1987,6 +2223,82 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    maybeTest.each(['constructor', 'post-message', 'initialization-error', 'messageerror', 'worker-error'])(
+        'settles every startup waiter when one parser worker fails: %s',
+        async (failure) => {
+            /** @type {StartupWorker[]} */
+            const instances = [];
+            let constructionCount = 0;
+            let failStartup = true;
+            /** @implements {WorkerMock} */
+            class StartupWorker {
+                constructor() {
+                    ++constructionCount;
+                    if (failStartup && failure === 'constructor' && constructionCount === 2) {
+                        throw new Error('Worker constructor failed');
+                    }
+                    /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                    this.listeners = new Map();
+                    this.terminated = false;
+                    instances.push(this);
+                }
+
+                addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    addWorkerListener(this.listeners, type, listener);
+                }
+
+                removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                    this.listeners.get(type)?.delete(listener);
+                }
+
+                postMessage(/** @type {WorkerMessage} */ message) {
+                    if (message.type !== 'initialize') { return; }
+                    if (!failStartup) {
+                        queueMicrotask(() => emitWorkerMessage(this.listeners, {type: 'ready'}));
+                        return;
+                    }
+                    // One failure must settle peers that never acknowledge readiness.
+                    if (instances.length !== 1) { return; }
+                    if (failure === 'post-message') { throw new Error('Initialize dispatch failed'); }
+                    queueMicrotask(() => {
+                        if (failure === 'initialization-error') {
+                            emitWorkerMessage(this.listeners, {type: 'initialization-error', error: {message: 'Initialization failed'}});
+                        } else if (failure === 'messageerror' || failure === 'worker-error') {
+                            for (const listener of this.listeners.get(failure === 'worker-error' ? 'error' : failure) ?? []) {
+                                listener(/** @type {MessageEvent<unknown>} */ (/** @type {unknown} */ ({message: 'Initialization failed'})));
+                            }
+                        }
+                    });
+                }
+
+                terminate() { this.terminated = true; }
+            }
+
+            vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout']});
+            vi.stubGlobal('Worker', StartupWorker);
+            try {
+                await expect(prewarmParallelTermBankParser()).resolves.toBe(false);
+                expect(instances.length).toBeGreaterThan(0);
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+                for (const worker of instances) {
+                    expect([...worker.listeners.values()].every((listeners) => listeners.size === 0)).toBe(true);
+                }
+                // The failed generation cannot interfere with the next import.
+                failStartup = false;
+                await expect(prewarmParallelTermBankParser()).resolves.toBe(true);
+                await disposeParallelTermBankParser();
+                expect(instances.every((worker) => worker.terminated)).toBe(true);
+                expect(vi.getTimerCount()).toBe(0);
+            } finally {
+                await disposeParallelTermBankParser();
+                vi.clearAllTimers();
+                vi.useRealTimers();
+                vi.stubGlobal('Worker', void 0);
+            }
+        },
+    );
+
     maybeTest('aborts a hung parser prewarm during import cleanup', async () => {
         let terminateCount = 0;
         /** @implements {WorkerMock} */
@@ -2124,6 +2436,60 @@ describe('term-bank WASM parser', () => {
 
         const content = JSON.parse(getContentString(row));
         expect(content.glossary).toStrictEqual(glossary);
+    });
+
+    maybeTest('keeps string boundaries exact across short lengths and SIMD marker offsets', async () => {
+        const boundaryPositions = [7, 8, 9, 15, 16, 17, 31, 32, 33, 47, 48, 49];
+        const glossary = [
+            ...Array.from({length: 65}, (_, length) => 's'.repeat(length)),
+            ...boundaryPositions.flatMap((length) => [
+                `${'x'.repeat(length)}終`,
+                `${'x'.repeat(length)}\\`,
+                `${'x'.repeat(length)}"`,
+            ]),
+        ];
+        const rowSource = JSON.stringify([['boundaries', '', '', '', 0, glossary, 1, '']]);
+        const [row] = await parseRowsJson(rowSource);
+        expect(JSON.parse(getContentString(row)).glossary).toStrictEqual(glossary);
+
+        const unicodeRows = boundaryPositions.map((length, index) => (
+            `["unicode-${index}","","","",0,["${'x'.repeat(length)}\\u65e5"],${index + 1},""]`
+        ));
+        const unicodeParsed = await parseRowsJson(`[${unicodeRows.join(',')}]`);
+        expect(unicodeParsed.map((value) => JSON.parse(getContentString(value)).glossary[0])).toStrictEqual(
+            boundaryPositions.map((length) => `${'x'.repeat(length)}日`),
+        );
+
+        const column = await parseColumnSnapshot([textEncoder.encode(rowSource)]);
+        expect(column?.rowCount).toBe(1);
+        expect(column?.expressions).toStrictEqual(['boundaries']);
+    });
+
+    maybeTest.each([7, 8, 9, 15, 16, 17, 31, 32, 33, 47, 48, 49])('rejects raw controls and truncated escapes at offset %i', async (offset) => {
+        const prefix = 'x'.repeat(offset);
+        const invalidControl = `[["entry","","","",0,["${prefix}\u0001"],1,""]]`;
+        await expect(parseRowsJson(invalidControl)).rejects.toThrow(/term-bank parser failed/);
+
+        const invalidUnicode = `[["entry","","","",0,["${prefix}\\u12xz"],1,""]]`;
+        await expect(parseRowsJson(invalidUnicode)).rejects.toThrow(/term-bank parser failed/);
+
+        for (const suffix of ['\\', '\\u', '\\u0', '\\u00', '\\u000']) {
+            const truncatedEscape = `[["entry","","","",0,["${prefix}${suffix}`;
+            await expect(parseRowsJson(truncatedEscape)).rejects.toThrow(/term-bank parser failed/);
+        }
+    });
+
+    maybeTest('keeps string endings exact when another physical source bank follows', async () => {
+        const sources = [
+            textEncoder.encode(JSON.stringify([
+                ['long', '', '', '', 0, ['x'.repeat(79) + '終\\"'], 1, ''],
+            ])),
+            textEncoder.encode('[["valid","","","",0,["definition"],1,""]]'),
+        ];
+        const snapshot = await parseColumnSnapshot(sources);
+        expect(snapshot?.rowCount).toBe(2);
+        expect(snapshot?.expressions).toStrictEqual(['long', 'valid']);
+        expect(snapshot?.sequences).toStrictEqual([1, 1]);
     });
 
     maybeTest('rejects an unterminated string ending at a word boundary', async () => {
@@ -2385,6 +2751,36 @@ describe('term-bank WASM parser', () => {
         const rows = await parseRows([['wide-score', '', '', '', score, ['definition'], 1, '']]);
         expect(rows).toHaveLength(1);
         expect(rows[0].score).toBe(score);
+    });
+
+    maybeTest.each([
+        ['int32 endpoints', '-2147483648', '2147483647', -2147483648, 2147483647, 0],
+        ['score overflow', '2147483648', '1', 2147483648, 1, 1],
+        ['sequence overflow', '1', '2147483648', 1, 2147483648, 1],
+        ['negative zero score', '-0', '0', -0, 0, 1],
+        ['negative zero sequence', '0', '-0', 0, 0, 0],
+        ['null sequence', '0', 'null', 0, -1, 0],
+        ['missing sequence', '0', null, 0, -1, 0],
+        ['decimal and exponent', '1.0', '1e0', 1, 1, 1],
+    ])('preserves numeric semantics through an attempted fused parse: %s', async (_name, scoreToken, sequenceToken, score, sequence, fallbacks) => {
+        const sequenceField = sequenceToken === null ? '' : ',' + sequenceToken + ',""';
+        const source = '[["numeric","","","",' + scoreToken + ',["definition"]' + sequenceField + ']]';
+        let rows = 0;
+        await parseTermBankWithWasmColumnChunks(textEncoder.encode(source), 3, (chunk) => {
+            rows += chunk.rowCount;
+            expect([...chunk.scoreList]).toStrictEqual([score]);
+            expect([...chunk.sequenceList]).toStrictEqual([sequence]);
+        }, 64, {
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            computeContentHashes: true,
+            prepareLookupIndexes: true,
+            experimentalFusedSingleBank: true,
+        });
+        expect(rows).toBe(1);
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(profile?.fusedParseAttempts).toBe(1);
+        expect(profile?.fusedParseFallbacks).toBe(fallbacks);
     });
 
     maybeTest('bounds and serializes pipelined chunk dispatch', async () => {
@@ -2798,6 +3194,58 @@ describe('term-bank WASM parser', () => {
         expect(fused.termRecordPreinternedPlan.readingIndexes).toStrictEqual(established.termRecordPreinternedPlan.readingIndexes);
     });
 
+    maybeTest.each([[false, false], [true, false], [false, true], [true, true]])('preserves term fields when projecting only media hints (hints=%s, escaped=%s)', async (mediaHintFastScan, escapedReading) => {
+        const sources = [
+            textEncoder.encode(escapedReading ?
+                '[["plain","\\u0070lain","","",1,["definition"],10,""]]' :
+                '[["plain","plain","","",1,["definition"],10,""]]'),
+            textEncoder.encode(JSON.stringify([
+                ['image', '', '', '', -2, [{type: 'image', path: 'test.png'}], -1, ''],
+                ['other', 'reading', '', 'v1', 3, ['other definition'], 12, ''],
+                ['image copy', 'different', '', '', 4, [{type: 'image', path: 'test.png'}], 13, ''],
+            ])),
+        ];
+        /**
+         * @param {boolean} emitTermByteLists
+         * @returns {Promise<ReturnType<typeof copyWasmBackedColumnChunk>>}
+         */
+        const parseStableChunk = async (emitTermByteLists) => {
+            let result = null;
+            await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
+                result = copyWasmBackedColumnChunk(chunk);
+            }, 8, {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                emitTermByteLists,
+                mediaHintFastScan,
+                prepareLookupIndexes: true,
+                singleChunk: true,
+            });
+            expect(consumeLastTermBankWasmParseProfile()?.fusedParseFallbacks ?? 0).toBe(escapedReading ? 1 : 0);
+            return /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));
+        };
+        const projected = await parseStableChunk(true);
+        const mediaOnly = await parseStableChunk(false);
+        for (const key of /** @type {const} */ ([
+            'rowCount',
+            'readingEqualsExpressionList',
+            'scoreList',
+            'sequenceList',
+            'contentBytesBuffer',
+            'contentMetaList',
+            'contentUniqueIndexList',
+            'termRecordPreinternedPlan',
+            'mediaRows',
+        ])) {
+            expect(mediaOnly[key]).toStrictEqual(projected[key]);
+        }
+        expect(mediaOnly.preparedLookupIndexes?.get('0:4')?.bytes).toStrictEqual(
+            projected.preparedLookupIndexes?.get('0:4')?.bytes,
+        );
+        expect(mediaOnly.readingEqualsExpressionList).toStrictEqual(new Uint8Array([escapedReading ? 0 : 1, 1, 0, 0]));
+        expect(mediaOnly.mediaRows).toHaveLength(mediaHintFastScan ? 1 : 0);
+    });
+
     maybeTest('preserves media hints in the fused multi-bank path', async () => {
         const sources = [
             textEncoder.encode(JSON.stringify([
@@ -2833,6 +3281,49 @@ describe('term-bank WASM parser', () => {
         const profile = consumeLastTermBankWasmParseProfile();
         expect(profile?.nativeStringPlanMs).toBe(0);
         expect(profile?.nativeStringPlanFallbackChunkCount).toBe(0);
+    });
+
+    maybeTest.each([false, true])('projects media once per exact content across chunks without dropping term rows (dedupe=%s)', async (dedupe) => {
+        const imageA = [{type: 'image', path: 'a.png'}];
+        const imageB = [{type: 'image', path: 'b.png'}];
+        const rows = [
+            ['first', '', '', '', 1, imageA, 1, ''],
+            ['second', '', '', '', 2, imageA, 2, ''],
+            ['third', '', '', '', 3, imageB, 3, ''],
+            ['fourth', '', '', 'v1', 4, imageA, 4, ''],
+            ['plain', '', '', '', 5, ['plain'], 5, ''],
+            ['sixth', '', '', '', 6, imageB, 6, ''],
+        ];
+        /** @type {string[]} */
+        const projected = [];
+        /** @type {number[]} */
+        const scores = [];
+        /** @type {string[]} */
+        const content = [];
+        await parseTermBankWithWasmColumnChunks(textEncoder.encode(JSON.stringify(rows)), 3, (chunk) => {
+            scores.push(...chunk.scoreList);
+            const metas = chunk.contentMetaList;
+            const bytes = chunk.contentBytesBuffer;
+            if (!(metas instanceof Uint32Array) || !(bytes instanceof Uint8Array)) { throw new Error('Expected content slab'); }
+            for (let i = 0; i < chunk.rowCount; ++i) {
+                const offset = (chunk.contentBytesBaseOffset ?? 0) + metas[i * 4];
+                content.push(getContentString({termEntryContentBytes: bytes.subarray(offset, offset + metas[i * 4 + 1])}));
+            }
+            for (const {row} of chunk.mediaRows) { projected.push(getContentString(row)); }
+        }, 2, {
+            emitContentSlab: true,
+            emitTokenBinaryContent: dedupe,
+            emitTermByteLists: false,
+            mediaHintFastScan: true,
+        });
+        expect(scores).toEqual([1, 2, 3, 4, 5, 6]);
+        expect(content).toHaveLength(6);
+        expect(content[0]).toBe(content[1]);
+        expect(content[2]).toBe(content[5]);
+        expect(content[3]).not.toBe(content[0]);
+        expect(projected).toHaveLength(dedupe ? 3 : 5);
+        expect(projected.filter((value) => value.includes('a.png'))).toHaveLength(dedupe ? 2 : 3);
+        expect(projected.filter((value) => value.includes('b.png'))).toHaveLength(dedupe ? 1 : 2);
     });
 
     maybeTest('treats an empty reading as the expression in minimal and columnar paths', async () => {
@@ -2923,6 +3414,110 @@ describe('term-bank WASM parser', () => {
             const index = nativePlan.strings.indexOf(value);
             expect(index).toBeGreaterThanOrEqual(0);
             expect(nativePlan.stringHashes[index]).toBe(hashBytes(textEncoder.encode(value)));
+        }
+    });
+
+    maybeTest('normalizes malformed unescaped expression and reading keys before indexing', async () => {
+        const rawKeys = [
+            {expression: [0x64, 0x75, 0x70], reading: [0x72, 0x65, 0x61, 0x64]},
+            {expression: [0x64, 0x75, 0x70], reading: [0x72, 0x65, 0x61, 0x64]},
+            {expression: [0x65, 0xff, 0x78], reading: [0x72, 0xe2, 0x82]},
+            {expression: [0x80], reading: [0xc0, 0xaf]},
+            {expression: [0xf0, 0x28, 0x8c, 0x28], reading: [0xed, 0xa0, 0x80]},
+            {expression: [0x65, 0xef, 0xbf, 0xbd, 0x78], reading: []},
+        ];
+        /**
+         * @param {string} value
+         * @returns {Uint8Array}
+         */
+        const ascii = (value) => textEncoder.encode(value);
+        const sourceParts = [ascii('[')];
+        for (let i = 0; i < rawKeys.length; ++i) {
+            const {expression, reading} = /** @type {typeof rawKeys[number]} */ (rawKeys[i]);
+            if (i > 0) { sourceParts.push(ascii(',')); }
+            sourceParts.push(
+                ascii('["'),
+                Uint8Array.from(expression),
+                ascii('","'),
+                Uint8Array.from(reading),
+                ascii('","","",0,["row"],'),
+                ascii(String(i + 1)),
+                ascii(',""]'),
+            );
+        }
+        sourceParts.push(ascii(']'));
+        const source = new Uint8Array(sourceParts.reduce((total, part) => total + part.byteLength, 0));
+        let sourceOffset = 0;
+        for (const part of sourceParts) {
+            source.set(part, sourceOffset);
+            sourceOffset += part.byteLength;
+        }
+        const expectedExpressions = rawKeys.map(({expression}) => textEncoder.encode(textDecoder.decode(Uint8Array.from(expression))));
+        const expectedReadings = rawKeys.map(({reading}) => textEncoder.encode(textDecoder.decode(Uint8Array.from(reading))));
+
+        /**
+         * @param {boolean} useNativeStringPlan
+         * @param {boolean} fused
+         * @returns {Promise<ReturnType<typeof copyWasmBackedColumnChunk>>}
+         */
+        const parsePlan = async (useNativeStringPlan, fused) => {
+            let result = null;
+            await parseTermBankWithWasmColumnChunks(
+                source,
+                3,
+                (chunk) => { result = copyWasmBackedColumnChunk(chunk); },
+                8,
+                {
+                    emitContentSlab: true,
+                    emitTokenBinaryContent: true,
+                    emitTermByteLists: true,
+                    prepareLookupIndexes: true,
+                    singleChunk: true,
+                    useNativeStringPlan,
+                    ...(fused ? {experimentalFusedSingleBank: true} : {}),
+                },
+            );
+            return /** @type {ReturnType<typeof copyWasmBackedColumnChunk>} */ (/** @type {unknown} */ (result));
+        };
+
+        /** @type {Uint8Array|null} */
+        let expectedLookupIndexBytes = null;
+        for (const [native, fused] of [[true, false], [false, false], [true, true]]) {
+            const chunk = await parsePlan(native, fused);
+            const profile = consumeLastTermBankWasmParseProfile();
+            if (fused) {
+                expect(profile?.fusedParseAttempts).toBe(1);
+                expect(profile?.fusedParseFallbacks).toBe(1);
+            } else if (native) {
+                expect(profile?.nativeStringPlanFallbackChunkCount).toBe(1);
+            } else {
+                expect(profile?.nativeStringPlanChunkCount).toBe(0);
+            }
+            expect(chunk.expressionBytesList).toStrictEqual(expectedExpressions);
+            expect(chunk.readingBytesList).toStrictEqual(expectedReadings);
+            expect(chunk.readingEqualsExpressionList).toStrictEqual(new Uint8Array([0, 0, 0, 0, 0, 1]));
+            expect(chunk.termRecordPreinternedPlan.expressionIndexes[0]).toBe(chunk.termRecordPreinternedPlan.expressionIndexes[1]);
+            expect(chunk.termRecordPreinternedPlan.readingIndexes[0]).toBe(chunk.termRecordPreinternedPlan.readingIndexes[1]);
+            expect(chunk.termRecordPreinternedPlan.expressionIndexes[2]).toBe(chunk.termRecordPreinternedPlan.expressionIndexes[5]);
+            const indexBytes = encodePersistedTermLookupIndexFromPreinternedPlan(
+                chunk.termRecordPreinternedPlan,
+                chunk.readingEqualsExpressionList,
+                chunk.sequenceList,
+                chunk.rowCount,
+            );
+            if (expectedLookupIndexBytes === null) {
+                expectedLookupIndexBytes = indexBytes;
+            } else {
+                expect(indexBytes).toStrictEqual(expectedLookupIndexBytes);
+            }
+            const index = parsePersistedTermLookupIndex(indexBytes);
+            expect(findExactRows(index, /** @type {Uint8Array} */ (expectedExpressions[2]), 'expression')).toStrictEqual([2, 5]);
+            for (let i = 0; i < rawKeys.length; ++i) {
+                expect(findExactRows(index, /** @type {Uint8Array} */ (expectedExpressions[i]), 'expression')).toContain(i);
+                if (expectedReadings[i]?.byteLength) {
+                    expect(findExactRows(index, /** @type {Uint8Array} */ (expectedReadings[i]), 'reading')).toContain(i);
+                }
+            }
         }
     });
 
@@ -3029,6 +3624,39 @@ describe('term-bank WASM parser', () => {
         expect(chunk.contentUniqueIndexList).toBeNull();
         expect(chunk.contentDedupPlan).toBeNull();
         expect(chunk.useResolvedContentReferences).toBe(false);
+    });
+
+    maybeTest('keeps content hash pairs exact at SIMD dispatch and vector tail boundaries', async () => {
+        const lengths = [17, 31, 32, 33, 63, 64, 65, 127, 128, 129, 255, 256, 257, 383, 384, 385, 511, 512, 513, 1023, 1024, 1025, 4095, 4096, 4097];
+        const source = textEncoder.encode(JSON.stringify(lengths.map((length, index) => (
+            ['hash-boundary-' + String(index), '', '', '', 0, ['x'.repeat(length - 17)], index, '']
+        ))));
+        /** @type {TermBankColumnChunk[]} */
+        const chunks = [];
+        await parseTermBankWithWasmColumnChunks(
+            source,
+            3,
+            (chunk) => { chunks.push(chunk); },
+            64,
+            {emitContentSlab: true, emitTokenBinaryContent: true},
+        );
+        expect(chunks).toHaveLength(1);
+        const [chunk] = chunks;
+        if (typeof chunk.contentBytesBaseOffset !== 'number' || !(chunk.contentMetaList instanceof Uint32Array) || !(chunk.contentBytesBuffer instanceof Uint8Array)) {
+            throw new Error('Expected token-binary hash metadata');
+        }
+        const {contentBytesBaseOffset, contentMetaList, contentBytesBuffer} = chunk;
+        for (let index = 0; index < lengths.length; ++index) {
+            const metaOffset = index * 4;
+            const start = contentBytesBaseOffset + contentMetaList[metaOffset];
+            const length = contentMetaList[metaOffset + 1];
+            expect(length).toBe(lengths[index]);
+            const bytes = contentBytesBuffer.subarray(start, start + length);
+            expect(hashTermEntryContentBytesPair(bytes)).toEqual([
+                contentMetaList[metaOffset + 2],
+                contentMetaList[metaOffset + 3],
+            ]);
+        }
     });
 
     maybeTest('emits compact token-binary content with strict round-trip decoding', async () => {

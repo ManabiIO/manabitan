@@ -9,6 +9,7 @@ import {createServer} from 'node:http'
 import {dirname, resolve, sep} from 'node:path'
 import {fileURLToPath} from 'node:url'
 import {chromium} from 'playwright'
+import {getChromiumLaunchOptions} from '../../e2e/chromium-launch-options.js'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const server = createServer(async (request, response) => {
@@ -26,7 +27,7 @@ await new Promise((done) => { server.listen(0, '127.0.0.1', done) })
 let browser
 let context
 try {
-    browser = await chromium.launch({headless: true, args: ['--no-sandbox', ...(process.platform === 'darwin' ? ['--disable-features=MacAppCodeSignClone'] : [])]})
+    browser = await chromium.launch(getChromiumLaunchOptions({headless: true, args: ['--no-sandbox']}))
     context = await browser.newContext()
     const page = await context.newPage()
     const pageErrors = []

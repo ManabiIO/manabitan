@@ -30,6 +30,7 @@ import * as firefox from 'selenium-webdriver/firefox.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
 import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
+import {waitForExtensionBaseUrl} from '../e2e/firefox-extension-base-url.js';
 import {getUnsupportedRuntimeSkipReason} from './unsupported-runtime-classifier.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -319,6 +320,7 @@ async function getFirefoxProcessId(driver) {
  */
 async function ensurePageProfiler(driver) {
     await driver.executeScript(`
+        globalThis.manabitanPerformanceInstrumentationEnabled = true;
         if (!globalThis.__manabitanE2EPageProfiler) {
             const state = {
                 longTasks: [],
@@ -1402,42 +1404,6 @@ async function verifyLookupRemainsResponsiveDuringImportPhase(driver, settingsWi
 
 /**
  * @param {import('selenium-webdriver').ThenableWebDriver} driver
- * @param {string} [installedAddonId]
- * @returns {Promise<string>}
- * @throws {Error}
- */
-async function waitForExtensionBaseUrl(driver, installedAddonId = '') {
-    const normalizedAddonId = String(installedAddonId || '').trim();
-    const expectedBaseUrl = normalizedAddonId.length > 0 ? `moz-extension://${normalizedAddonId}` : '';
-    const deadline = Date.now() + 30_000;
-    let fallbackBaseUrl = '';
-    while (Date.now() < deadline) {
-        const handlesUnknown = /** @type {unknown} */ (await driver.getAllWindowHandles());
-        const handles = Array.isArray(handlesUnknown) ? handlesUnknown.map(String) : [];
-        for (const handle of handles) {
-            await driver.switchTo().window(handle);
-            const url = String(await driver.getCurrentUrl());
-            const match = /^(moz-extension:\/\/[^/]+)(?:\/|$)/.exec(url);
-            if (match !== null) {
-                fallbackBaseUrl = match[1];
-                if (expectedBaseUrl.length === 0 || expectedBaseUrl === match[1]) {
-                    return match[1];
-                }
-            }
-        }
-        await driver.sleep(500);
-    }
-    if (fallbackBaseUrl.length > 0) {
-        return fallbackBaseUrl;
-    }
-    if (expectedBaseUrl.length > 0) {
-        return expectedBaseUrl;
-    }
-    fail('Failed to discover moz-extension base URL from open tabs.');
-}
-
-/**
- * @param {import('selenium-webdriver').ThenableWebDriver} driver
  * @param {string} selector
  * @returns {Promise<void>}
  */
@@ -1841,6 +1807,10 @@ async function searchTermAndGetDictionaryHitCounts(driver, term, expectedDiction
             });
         `, term, expectedDictionaryNames);
         if (typeof backendCounts === 'object' && backendCounts !== null && !Array.isArray(backendCounts)) {
+            const backendError = '__error' in backendCounts && typeof backendCounts.__error === 'string' ? backendCounts.__error : '';
+            if (backendError.length > 0) {
+                throw new Error(`Backend termsFind failed during search fallback: ${backendError}`);
+            }
             const normalizedCounts = /** @type {Record<string, number>} */ ({});
             for (const [key, value] of Object.entries(/** @type {Record<string, unknown>} */ (backendCounts))) {
                 if (key === '__error') { continue; }
@@ -1851,8 +1821,11 @@ async function searchTermAndGetDictionaryHitCounts(driver, term, expectedDiction
                 return projectedCounts;
             }
         }
-    } catch (_) {
-        // Fall back to the last DOM-derived counts below.
+    } catch (error) {
+        throw new Error(
+            `Backend termsFind diagnostic failed after DOM search returned ${JSON.stringify(lastCounts)}: ${error instanceof Error ? error.message : String(error)}`,
+            {cause: error},
+        );
     }
 
     return lastCounts;
@@ -3291,10 +3264,12 @@ async function main() {
                     report,
                     driver,
                     'Focused profile-cycle verification complete',
-                    'Verified Jitendex + JMnedict lookups survive delete and reinstall in the persisted Firefox profile.',
+                    'Reimported Jitendex after deletion and verified its lookup in the persisted Firefox profile.',
                     postCycleKuuSearchEnd,
                     postCycleKuuSearchEnd,
                 );
+                report.status = 'success';
+                console.log('[firefox-e2e] PASS: Focused dictionary delete + reimport completed.');
                 return;
             }
             await addReportPhase(
@@ -3497,6 +3472,24 @@ async function main() {
             }
             if (profileCycle) {
                 await driver.switchTo().window(settingsWindowHandle);
+                const preUninstallStorageDiagnostics = await getBackendStorageDiagnostics(driver);
+                const preUninstallStorageTime = safePerformance.now();
+                await addReportPhase(
+                    report,
+                    driver,
+                    'Capture storage state before extension removal',
+                    `Storage before add-on removal: ${summarizeBackendStorageDiagnostics(preUninstallStorageDiagnostics)}`,
+                    preUninstallStorageTime,
+                    preUninstallStorageTime,
+                );
+                const preUninstallWindowHandles = new Set((await driver.getAllWindowHandles()).map(String));
+                await driver.executeScript('window.open("about:blank", "_blank");');
+                const uninstallWindowHandle = await driver.wait(async () => {
+                    const windowHandles = (await driver.getAllWindowHandles()).map(String);
+                    return windowHandles.find((windowHandle) => !preUninstallWindowHandles.has(windowHandle)) ?? false;
+                }, 30_000, 'Expected a normal blank tab to remain available after extension removal');
+                await driver.switchTo().window(String(uninstallWindowHandle));
+                await driver.get('about:blank');
                 const uninstallExtensionStart = safePerformance.now();
                 await driver.uninstallAddon(installedAddonId);
                 const uninstallExtensionEnd = safePerformance.now();
@@ -3506,15 +3499,6 @@ async function main() {
                     'Remove extension before reinstalling',
                     'Uninstalled the Firefox add-on from the active profile before loading a fresh copy.',
                     uninstallExtensionStart,
-                    uninstallExtensionEnd,
-                );
-                const uninstallStorageDiagnostics = await getBackendStorageDiagnostics(driver);
-                await addReportPhase(
-                    report,
-                    driver,
-                    'Capture storage state after extension removal',
-                    `Storage after add-on removal: ${summarizeBackendStorageDiagnostics(uninstallStorageDiagnostics)}`,
-                    uninstallExtensionEnd,
                     uninstallExtensionEnd,
                 );
                 await driver.sleep(1_000);
@@ -3688,10 +3672,12 @@ async function main() {
                     report,
                     driver,
                     'Focused extension-cycle verification complete',
-                    'Verified Jitendex + JMnedict lookups survive extension removal and reinstall in the active Firefox session.',
+                    'Reimported Jitendex + JMnedict after extension removal and reinstall, then verified lookups in the active Firefox session.',
                     postCycleKuuSearchEnd,
                     postCycleKuuSearchEnd,
                 );
+                report.status = 'success';
+                console.log('[firefox-e2e] PASS: Focused extension reinstall + reimport completed.');
                 return;
             }
             await driver.switchTo().window(settingsWindowHandle);

@@ -12,10 +12,11 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {ByteBoundedLruCache, TermContentBlockImportSession, TermContentBlockStore, wrapCompressedTermContentBlock} from '../ext/js/dictionary/term-content-block-store.js';
 import {TERM_CONTENT_BLOCK_ENVELOPE_BYTES, writeCompressedTermContentBlockEnvelope} from '../ext/js/dictionary/term-content-block-envelope.js';
 import {TermContentOpfsStore} from '../ext/js/dictionary/term-content-opfs-store.js';
-import {encodeRawTermContentBlockReference} from '../ext/js/dictionary/raw-term-content.js';
+import {encodeRawTermContentBlockReference, encodeRawTermContentCompactBlockReference} from '../ext/js/dictionary/raw-term-content.js';
 import {beginCompressWrappedTermContentZstdSpansBatch, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from '../ext/js/dictionary/zstd-term-content.js';
 
 vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
+    resolveTermContentZstdDictName: () => 'jmdict',
     compressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes),
     compressWrappedTermContentZstdBatch: vi.fn(async (/** @type {Uint8Array[]} */ chunks) => ({
         chunks: chunks.map((bytes) => Uint8Array.from(bytes)),
@@ -282,6 +283,110 @@ describe('TermContentBlockStore', () => {
         await expect(operation.storage).rejects.toThrow('safe integer range');
     });
 
+    test.each([
+        {bases: [0, 2 ** 32 + 7, Number.MAX_SAFE_INTEGER], expected: [0, 20, 2 ** 32 + 7, 2 ** 32 + 27, Number.MAX_SAFE_INTEGER]},
+        {bases: [Number.MAX_SAFE_INTEGER - 20], expected: [Number.MAX_SAFE_INTEGER - 20, Number.MAX_SAFE_INTEGER]},
+    ])('maps reserved reference slabs without narrowing or crossing their boundaries ($bases)', async ({bases, expected}) => {
+        const count = expected.length;
+        const derivedLengths = bases.map((_, index) => Math.min(2, count - index * 2) * 20);
+        const reserved = {derivedOffsets: bases, derivedLengths};
+        const contentStore = new TermContentOpfsStore();
+        vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockReturnValue({
+            reserved: Promise.resolve(reserved),
+            completion: Promise.resolve({...reserved, primaryOffsets: [0], primaryLengths: [count + 12]}),
+        });
+        const blockStore = new TermContentBlockStore(contentStore, {referencePackTargetBytes: 40});
+        const begin = Reflect.get(blockStore, '_beginAppendSharedSpans').bind(blockStore);
+        const operation = /** @type {TermContentBlockAppendOperation} */ (begin(
+            new Uint8Array(count),
+            Uint32Array.from({length: count}, (_, index) => index),
+            new Uint32Array(count).fill(1),
+            'jmdict',
+            count,
+            false,
+        ));
+        const storage = await operation.storage;
+        await operation.completion;
+        expect(storage.contentOffsets).toStrictEqual(new Float64Array(expected));
+    });
+
+    test.each([-1, 0.5, Number.NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])('rejects an invalid later reserved slab base (%s)', async (base) => {
+        const reserved = {derivedOffsets: [0, base], derivedLengths: [40, 20]};
+        const contentStore = new TermContentOpfsStore();
+        vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockReturnValue({
+            reserved: Promise.resolve(reserved),
+            completion: Promise.resolve({...reserved, primaryOffsets: [0], primaryLengths: [15]}),
+        });
+        const blockStore = new TermContentBlockStore(contentStore, {referencePackTargetBytes: 40});
+        const begin = Reflect.get(blockStore, '_beginAppendSharedSpans').bind(blockStore);
+        const operation = /** @type {TermContentBlockAppendOperation} */ (begin(
+            Uint8Array.of(1, 2, 3),
+            Uint32Array.of(0, 1, 2),
+            Uint32Array.of(1, 1, 1),
+            'jmdict',
+            3,
+            false,
+        ));
+        await expect(operation.storage).rejects.toThrow('slab offset');
+        await expect(operation.completion).rejects.toThrow('slab offset');
+    });
+
+    test.each([
+        [0, 2 ** 32 + 7],
+        [Number.MAX_SAFE_INTEGER - 17, Number.MAX_SAFE_INTEGER - 33],
+    ])('writes scalar-identical reference prefixes across block and slab boundaries (%s, %s)', async (firstBlockOffset, secondBlockOffset) => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 5,
+            referencePackTargetBytes: 60,
+            minInputBytes: 0,
+        });
+        const blockOffsets = [firstBlockOffset, secondBlockOffset];
+        vi.spyOn(contentStore, 'appendBatchWithDerivedChunks').mockImplementation(async (chunks, createDerived) => {
+            const blockLengths = chunks.map((chunk) => chunk.length);
+            const slabs = createDerived(blockOffsets, blockLengths);
+            const expected = [
+                encodeRawTermContentCompactBlockReference(blockOffsets[0], blockLengths[0], 5, 0),
+                encodeRawTermContentCompactBlockReference(blockOffsets[0], blockLengths[0], 5, 3),
+                encodeRawTermContentCompactBlockReference(blockOffsets[1], blockLengths[1], 5, 0),
+                encodeRawTermContentCompactBlockReference(blockOffsets[1], blockLengths[1], 5, 4),
+            ];
+            expect(slabs.map((slab) => [...slab])).toStrictEqual([
+                [...expected[0], ...expected[1], ...expected[2]],
+                [...expected[3]],
+            ]);
+            return {primaryOffsets: blockOffsets, primaryLengths: blockLengths, derivedOffsets: [100, 200], derivedLengths: [60, 20]};
+        });
+        await expect(blockStore.tryAppend([
+            Uint8Array.of(1, 2, 3),
+            Uint8Array.of(4, 5),
+            Uint8Array.of(6, 7, 8, 9),
+            Uint8Array.of(10),
+        ], null, true)).resolves.not.toBeNull();
+    });
+
+    test.each([5, 6])('rejects an invalid later entry offset in a cached block (%s)', async (entryOffset) => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore);
+        const append = vi.spyOn(contentStore, '_appendBatchInternal');
+        await expect(blockStore._tryAppendPacked(() => ({
+            packedChunks: [Uint8Array.of(1, 2, 3, 4, 5)],
+            sourceChunkIndices: Uint32Array.of(0, 0),
+            sourceChunkLocalOffsets: Uint32Array.of(0, entryOffset),
+        }), Uint32Array.of(3, 2), null, true)).rejects.toThrow(RangeError);
+        expect(append).not.toHaveBeenCalled();
+    });
+
+    test.each([-1, 0.5, Number.NaN, Number.MAX_SAFE_INTEGER - 2])('rejects an invalid later block prefix (%s)', async (laterOffset) => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 1, minInputBytes: 0});
+        vi.spyOn(contentStore, 'appendBatchWithDerivedChunks').mockImplementation(async (chunks, createDerived) => {
+            createDerived([0, laterOffset], chunks.map((chunk) => chunk.length));
+            throw new Error('Invalid block fields were accepted');
+        });
+        await expect(blockStore.tryAppend([Uint8Array.of(1), Uint8Array.of(2)], null, true)).rejects.toThrow(RangeError);
+    });
+
     test('atomically appends blocks and reads each logical entry', async () => {
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore, {
@@ -499,6 +604,169 @@ describe('TermContentBlockStore', () => {
                 storage.contentDictName,
             )).toStrictEqual(source.slice(offsets[i], offsets[i] + lengths[i]));
         }
+    });
+
+    test.each([
+        {compressionFails: false, setupFails: false},
+        {compressionFails: true, setupFails: false},
+        {compressionFails: false, setupFails: true},
+        {compressionFails: true, setupFails: true},
+    ])('drains borrowed compression before reservation failure completes ($compressionFails, setup: $setupFails)', async ({compressionFails, setupFails}) => {
+        /** @type {() => void} */
+        let consumeSource = () => {};
+        /** @type {() => void} */
+        let finishCompression = () => {};
+        vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
+            /** @type {Promise<void>} */
+            const sourceConsumed = new Promise((resolve) => { consumeSource = resolve; });
+            /** @type {ReturnType<typeof beginCompressWrappedTermContentZstdSpansBatch>['completion']} */
+            const completion = new Promise((resolve, reject) => {
+                finishCompression = () => {
+                    if (compressionFails) {
+                        reject(new Error('injected later compression failure'));
+                        return;
+                    }
+                    resolve({chunks: [wrapCompressedTermContentBlock(new Uint8Array([1, 2, 3]))], envelopeMs: 0, wrapped: true});
+                };
+            });
+            return {sourceConsumed, completion};
+        });
+        const contentStore = new TermContentOpfsStore();
+        const writeError = new Error('injected earlier OPFS write failure');
+        if (setupFails) {
+            vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockImplementationOnce(() => { throw writeError; });
+        } else {
+            Reflect.set(contentStore, '_queuedWriteError', writeError);
+        }
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 3,
+            referencePackTargetBytes: 56,
+            minInputBytes: 0,
+        });
+        const source = new Uint8Array(new SharedArrayBuffer(3));
+        source.set([1, 2, 3]);
+        const operation = blockStore.tryBeginAppendSpans(source, new Uint32Array([0]), new Uint32Array([3]), 'jmdict', true);
+        if (operation === null) { throw new Error('Expected an early block append operation'); }
+        let terminal = false;
+        const observedCompletion = operation.completion.finally(() => { terminal = true; });
+        void observedCompletion.catch(() => {});
+        try {
+            await expect(operation.storage).rejects.toBe(writeError);
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+            expect(terminal).toBe(false);
+            consumeSource();
+            await operation.sourceConsumed;
+            await Promise.resolve();
+            expect(terminal).toBe(false);
+        } finally {
+            consumeSource();
+            finishCompression();
+            await expect(observedCompletion).rejects.toBe(writeError);
+        }
+        expect(terminal).toBe(true);
+        Reflect.set(contentStore, '_queuedWriteError', null);
+        const retry = blockStore.tryBeginAppendSpans(source, new Uint32Array([0]), new Uint32Array([3]), 'jmdict', true);
+        if (retry === null) { throw new Error('Expected a healthy retry'); }
+        const stored = await retry.completion;
+        expect(await blockStore.read(stored.contentOffsets[0], stored.contentLengths[0], stored.contentDictName)).toStrictEqual(source);
+    });
+
+    test.each([false, true])('retains the database borrowed-source lease until failed reservation compression drains (setup: %s)', async (setupFails) => {
+        /** @type {() => void} */
+        let consumeSource = () => {};
+        /** @type {() => void} */
+        let finishCompression = () => {};
+        const compress = vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
+            /** @type {Promise<void>} */
+            const sourceConsumed = new Promise((resolve) => { consumeSource = resolve; });
+            /** @type {ReturnType<typeof beginCompressWrappedTermContentZstdSpansBatch>['completion']} */
+            const completion = new Promise((resolve) => {
+                finishCompression = () => {
+                    resolve({chunks: [wrapCompressedTermContentBlock(new Uint8Array([1, 2, 3]))], envelopeMs: 0, wrapped: true});
+                };
+            });
+            return {sourceConsumed, completion};
+        });
+        compress.mockClear();
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_bulkImportTransactionOpen', true);
+        Reflect.set(database, '_deferTermsVirtualTableSync', true);
+        Reflect.set(database, '_termContentZstdInitialized', true);
+        const contentStore = new TermContentOpfsStore();
+        const writeError = new Error('injected retained write failure');
+        if (setupFails) {
+            vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockImplementationOnce(() => { throw writeError; });
+        } else {
+            Reflect.set(contentStore, '_queuedWriteError', writeError);
+        }
+        const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 3, minInputBytes: 0});
+        Reflect.set(database, '_termContentBlockImportSession', {
+            /**
+             * @param {string} _dictionary
+             * @param {Uint8Array} source
+             * @param {Uint32Array} offsets
+             * @param {Uint32Array} lengths
+             * @returns {ReturnType<TermContentBlockStore['tryBeginAppendSpans']>}
+             */
+            tryBeginAppendSpans(_dictionary, source, offsets, lengths) {
+                return blockStore.tryBeginAppendSpans(source, offsets, lengths, 'jmdict', true);
+            },
+        });
+        const appendRecords = vi.fn();
+        Reflect.set(database, '_termRecordStore', {prepareArtifactChunkLookupIndexes: () => null, appendBatch: appendRecords});
+        const releaseBorrowedContent = vi.fn();
+        const source = new Uint8Array(new SharedArrayBuffer(3));
+        source.set([1, 2, 3]);
+        /** @type {Parameters<DictionaryDatabase['_bulkAddArtifactTermsChunkWithContentDedup']>[0]} */
+        const chunk = {
+            dictionary: 'JMdict',
+            rowCount: 1,
+            expressionBytesList: [new TextEncoder().encode('test')],
+            readingBytesList: [new Uint8Array(0)],
+            readingEqualsExpressionList: new Uint8Array([1]),
+            scoreList: new Int32Array(1),
+            sequenceList: new Int32Array([-1]),
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: source,
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array([0, 3, 10, 20]),
+            contentDictNameList: null,
+            uniformContentDictName: 'raw',
+            releaseBorrowedContent,
+            contentUniqueIndexList: new Uint32Array([0]),
+            contentDedupPlan: {
+                uniqueCount: 1,
+                sourceRowCount: 1,
+                resolvedFlags: new Uint8Array(1),
+                resolvedOffsets: new Float64Array(1),
+                resolvedLengths: new Uint32Array(1),
+                resolvedDictNames: null,
+                pendingEpochs: new Uint32Array(1),
+                pendingIndexes: new Uint32Array(1),
+                nextEpoch: 1,
+                nextUnresolvedUniqueIndex: 0,
+                persistedLookupRequired: false,
+            },
+        };
+        const importing = Reflect.get(database, '_bulkAddArtifactTermsChunkWithContentDedup').call(database, chunk);
+        void importing.catch(() => {});
+        try {
+            await vi.waitFor(() => expect(compress).toHaveBeenCalledOnce());
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+            expect(releaseBorrowedContent).not.toHaveBeenCalled();
+            expect(appendRecords).not.toHaveBeenCalled();
+            consumeSource();
+            await Promise.resolve();
+            expect(releaseBorrowedContent).not.toHaveBeenCalled();
+        } finally {
+            consumeSource();
+            finishCompression();
+            await expect(importing).rejects.toBe(writeError);
+        }
+        expect(releaseBorrowedContent).toHaveBeenCalledOnce();
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
     });
 
     test('uses the reserved block plan after parallel shared compression fails', async () => {

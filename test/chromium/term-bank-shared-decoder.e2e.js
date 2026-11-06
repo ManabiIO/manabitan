@@ -9,6 +9,7 @@ import {createServer} from 'node:http'
 import {readFile} from 'node:fs/promises'
 import path from 'node:path'
 import {chromium} from '@playwright/test'
+import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js'
 
 const root = process.cwd()
 const expectFailure = process.argv.includes('--expect-failure')
@@ -40,7 +41,7 @@ assert(address && typeof address === 'object')
 let browser
 let context
 try {
-    browser = await chromium.launch({headless: true, args: ['--no-sandbox', ...(process.platform === 'darwin' ? ['--disable-features=MacAppCodeSignClone'] : [])]})
+    browser = await chromium.launch(getChromiumLaunchOptions({headless: true, args: ['--no-sandbox']}))
     context = await browser.newContext()
     const page = await context.newPage()
     await page.goto(`http://127.0.0.1:${address.port}`)

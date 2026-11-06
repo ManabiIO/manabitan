@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -262,11 +263,12 @@ function hasFixedContentSpan(chunk, count) {
  * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number[]|Uint32Array|Float64Array} contentOffsets
  * @param {number} index
+ * @param {boolean} [useFixedContentSpan] Selected within the current synchronous batch.
  * @returns {number}
  * @throws {RangeError}
  */
-function getArtifactContentOffset(chunk, contentOffsets, index) {
-    if (hasFixedContentSpan(chunk, index + 1)) {
+function getArtifactContentOffset(chunk, contentOffsets, index, useFixedContentSpan = hasFixedContentSpan(chunk, index + 1)) {
+    if (useFixedContentSpan) {
         return /** @type {number} */ (chunk.fixedContentOffsetBase) + (index * /** @type {number} */ (chunk.fixedContentLength));
     }
     const references = chunk.resolvedContentReferences;
@@ -641,7 +643,7 @@ class DenseIdRecordStore {
  * @property {number} pendingLookupIndexBytes
  * @property {number} pendingLookupIndexRecordCount
  * @property {FileSystemFileHandle|null} lookupIndexFileHandle
- * @property {FileSystemWritableFileStream|null} lookupIndexWritable
+ * @property {FileSystemWritableFileStream|SyncImportIndexWriter|null} lookupIndexWritable
  * @property {number} lookupIndexChunkCount
  * @property {number} lookupIndexRecordCount
  * @property {number} lookupIndexQueuedBytes
@@ -1375,6 +1377,13 @@ export class TermRecordOpfsStore {
      * @returns {Promise<void>}
      */
     async reset() {
+        // A reset must join cancelled repair writers before removing their
+        // containers, including a close or abort which is still settling.
+        await this._runExclusiveStorageMutation(async () => await this._reset(), true);
+    }
+
+    /** @returns {Promise<void>} */
+    async _reset() {
         await this._closeAllWritables();
         /** @type {Error[]} */
         const resetErrors = [];
@@ -1469,8 +1478,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: row.sequence,
             };
-            this._storeRecord(record);
-            this._loadedDictionaryNames.add(record.dictionary);
+            this._cacheAppendedRecord(record);
             this._setDictionaryHealth(record.dictionary, 'available');
             const shardFileName = this._getShardFileName(record.dictionary, record.entryContentDictName);
             const shardRecords = recordsByShard.get(shardFileName);
@@ -1543,8 +1551,7 @@ export class TermRecordOpfsStore {
                 score: row[12],
                 sequence: row[14],
             };
-            this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
+            this._cacheAppendedRecord(record);
             if (i === start) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1654,8 +1661,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
+            this._cacheAppendedRecord(record);
             if (i === start) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1764,8 +1770,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._storeRecord(record);
-            this._loadedDictionaryNames.add(dictionary);
+            this._cacheAppendedRecord(record);
             if (i === 0) {
                 singleDictionaryName = dictionary;
                 singleContentDictName = record.entryContentDictName;
@@ -1877,7 +1882,7 @@ export class TermRecordOpfsStore {
                 score: row.score,
                 sequence: typeof row.sequence === 'number' ? row.sequence : null,
             };
-            this._storeRecord(record);
+            this._cacheAppendedRecord(record);
             if (i === 0) {
                 firstDictionaryName = dictionary;
                 firstContentDictName = entryContentDictName;
@@ -1929,7 +1934,6 @@ export class TermRecordOpfsStore {
             getTermRecordPreinternedPlan(rows) :
             null;
         if (recordsByShard === null) {
-            this._loadedDictionaryNames.add(firstDictionaryName);
             const state = await this._getOrCreateShardState(firstDictionaryName, firstContentDictName);
             if (state !== null) {
                 const metrics = await this._encodeAndAppendChunkRunsForState(state, singleDictionaryRecords, preinternedPlan);
@@ -1940,7 +1944,6 @@ export class TermRecordOpfsStore {
         }
         for (const {records: dictionaryRecords, indexes} of recordsByShard.values()) {
             const firstRecord = dictionaryRecords[0];
-            this._loadedDictionaryNames.add(firstRecord.dictionary);
             const state = await this._getOrCreateShardState(firstRecord.dictionary, firstRecord.entryContentDictName);
             if (state === null) { continue; }
             const metrics = await this._encodeAndAppendChunkRunsForState(
@@ -2062,8 +2065,7 @@ export class TermRecordOpfsStore {
                     score: chunk.scoreList[i] ?? 0,
                     sequence: typeof sequenceValue === 'number' && sequenceValue >= 0 ? sequenceValue : null,
                 };
-                this._storeRecord(record);
-                this._loadedDictionaryNames.add(chunk.dictionary);
+                this._cacheAppendedRecord(record);
                 if (typeof existingIndex !== 'undefined') {
                     this._addRecordToDictionaryIndex(existingIndex, record);
                 }
@@ -2187,7 +2189,7 @@ export class TermRecordOpfsStore {
             state,
             records[0]?.id ?? 0,
             records.length,
-            null,
+            records[0]?.entryContentDictName ?? 'raw',
             contentOffsetBase,
             lookupIndexBytes,
             recordFields,
@@ -2265,7 +2267,10 @@ export class TermRecordOpfsStore {
         );
         const runRowLimit = hasWholeChunkPreparedIndex ? count : MAX_COMPACT_LOOKUP_INDEX_ROWS;
         for (let runStart = 0; runStart < count;) {
+            // Recompute after every awaited append; no validity is cached
+            // across runs. The row loop itself is synchronous.
             const tValidationStart = safePerformance.now();
+            const useFixedContentSpan = hasFixedContentSpan(chunk, count);
             let runEnd = runStart;
             let minContentOffset = Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
@@ -2273,7 +2278,7 @@ export class TermRecordOpfsStore {
                 if ((runEnd - runStart) >= runRowLimit) {
                     break;
                 }
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd);
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
                 const contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
                 validateContentOffset(contentOffset);
                 validateContentLength(contentLength);
@@ -2987,6 +2992,24 @@ export class TermRecordOpfsStore {
      */
     getAllIds() {
         return [...this._recordsById.keys()].sort((a, b) => a - b);
+    }
+
+    /**
+     * Keep import batches bounded: authoritative records and lookup keys are
+     * already encoded into OPFS by the append owner. Retaining each record here
+     * pins parser buffers and millions of row objects until publication.
+     * Non-import appends and in-memory test stores retain their existing cache.
+     * @param {TermRecord} record
+     */
+    _cacheAppendedRecord(record) {
+        if (this._importSessionActive && this._recordsDirectoryHandle !== null) {
+            this._reloadFromShardsAfterImport = true;
+            this._loadedDictionaryNames.delete(record.dictionary);
+            this._allShardContentsLoaded = false;
+            return;
+        }
+        this._storeRecord(record);
+        this._loadedDictionaryNames.add(record.dictionary);
     }
 
     /**
@@ -3762,18 +3785,19 @@ export class TermRecordOpfsStore {
                     ) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk metadata is invalid for ${state.fileName}`);
                     }
+                    let recordFieldsHeader = EMPTY_BYTES;
+                    if (formatFlags === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) {
+                        const compactHeaderEnd = recordFieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES;
+                        if (!Number.isSafeInteger(compactHeaderEnd) || compactHeaderEnd > indexFile.size) {
+                            throw new PersistentLookupIndexError('invalid', `Compact term-record fields header is truncated for ${state.fileName}`);
+                        }
+                        // Keep I/O outside the format-validation catch. A failed
+                        // snapshot read is retryable, not evidence for repair.
+                        recordFieldsHeader = await this._readFileRange(indexFile, recordFieldsStart, compactHeaderEnd);
+                    }
                     let recordFieldsLength;
                     try {
-                        if (formatFlags === LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT) {
-                            const compactHeaderEnd = recordFieldsStart + COMPACT_RECORD_FIELDS_HEADER_BYTES;
-                            if (!Number.isSafeInteger(compactHeaderEnd) || compactHeaderEnd > indexFile.size) {
-                                throw new Error('Compact term-record fields header is truncated');
-                            }
-                            const compactHeader = await this._readFileRange(indexFile, recordFieldsStart, compactHeaderEnd);
-                            recordFieldsLength = getRecordFieldsByteLength(compactHeader, 0, count, formatFlags);
-                        } else {
-                            recordFieldsLength = getRecordFieldsByteLength(EMPTY_BYTES, 0, count, formatFlags);
-                        }
+                        recordFieldsLength = getRecordFieldsByteLength(recordFieldsHeader, 0, count, formatFlags);
                     } catch (error) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index record fields are invalid for ${state.fileName}`, error);
                     }
@@ -5150,12 +5174,13 @@ export class TermRecordOpfsStore {
      */
     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
         const count = chunk.rowCount;
+        const useFixedContentSpan = hasFixedContentSpan(chunk, count);
         const offsets = new Uint32Array(count);
         const lengths = new Uint16Array(count);
         const scoreKeys = new Uint16Array(count);
         /** @type {number[]} */
         const scores = [];
-        const useFloat64Scores = chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
+        const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
         /** @type {Map<number, number>} */
         const scoreIndexes = new Map();
         if (useFloat64Scores) {
@@ -5163,7 +5188,7 @@ export class TermRecordOpfsStore {
             const view = new DataView(output.buffer);
             for (let i = 0; i < count; ++i) {
                 const fieldOffset = i * FLOAT64_SCORE_RECORD_FIELDS_BYTES;
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
                 const contentLength = getArtifactContentLength(chunk, contentLengths, i);
                 view.setUint32(fieldOffset, contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase, true);
                 view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true);
@@ -5173,7 +5198,7 @@ export class TermRecordOpfsStore {
         }
         let compact = true;
         for (let i = 0; i < count; ++i) {
-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
             const contentLength = getArtifactContentLength(chunk, contentLengths, i);
             if (contentLength >= U16_NULL) {
                 compact = false;
@@ -5207,7 +5232,7 @@ export class TermRecordOpfsStore {
             const legacyI32 = new Int32Array(legacy.buffer);
             for (let i = 0; i < count; ++i) {
                 const fieldOffset = i * 3;
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i);
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
                 const contentLength = getArtifactContentLength(chunk, contentLengths, i);
                 legacyU32[fieldOffset] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
                 legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
@@ -5279,7 +5304,10 @@ export class TermRecordOpfsStore {
             contentLengths,
             contentOffsetBase,
         );
-        const recordFieldsFormat = chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0)) ?
+        // Compact fields are strictly smaller than legacy fields; float64 fields
+        // have their own fixed width. Infer the format from the emitted bytes
+        // so the encoder remains the only owner of score representation.
+        const recordFieldsFormat = recordFields.byteLength === chunk.rowCount * FLOAT64_SCORE_RECORD_FIELDS_BYTES ?
             LOOKUP_INDEX_RECORD_FIELDS_FORMAT_FLOAT64_SCORE :
             (recordFields.byteLength === chunk.rowCount * LOOKUP_INDEX_RECORD_FIELDS_BYTES ?
                 LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY :
@@ -5607,11 +5635,11 @@ export class TermRecordOpfsStore {
                     if (state.lookupIndexFileHandle === null) {
                         throw new Error('Term-record lookup index directory became unavailable during import');
                     }
-                    state.lookupIndexWritable = await state.lookupIndexFileHandle.createWritable();
+                    state.lookupIndexWritable = await this._createLookupIndexWritable(state);
                     await state.lookupIndexWritable.truncate(0);
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
-                await state.lookupIndexWritable.write(new Blob(chunks));
+                await (state.lookupIndexWritable instanceof SyncImportIndexWriter ? state.lookupIndexWritable.writeChunks(chunks) : state.lookupIndexWritable.write(new Blob(chunks)));
                 ++this._lookupIndexWriteMetrics.writeCallCount;
                 this._lookupIndexWriteMetrics.writeBytes += byteLength;
                 state.lookupIndexChunkCount += chunks.length;
@@ -5629,6 +5657,20 @@ export class TermRecordOpfsStore {
         if (waitForCompletion || state.lookupIndexQueuedBytes >= this._queuedWriteBudgetBytes) {
             await this._awaitLookupIndexWritesForShard(state);
         }
+    }
+
+    /**
+     * @param {TermRecordShardState} state
+     * @returns {Promise<FileSystemWritableFileStream|SyncImportIndexWriter>}
+     */
+    async _createLookupIndexWritable(state) {
+        const fileHandle = state.lookupIndexFileHandle;
+        if (fileHandle === null) { throw new Error('Term-record lookup index file handle is unavailable'); }
+        if (this._importSessionActive && state.initialFileLength === 0) {
+            const writer = await openSyncImportIndexWriter(/** @type {Parameters<typeof openSyncImportIndexWriter>[0]} */ (/** @type {unknown} */ (fileHandle)));
+            if (writer !== null) { return writer; }
+        }
+        return await fileHandle.createWritable();
     }
 
     /**

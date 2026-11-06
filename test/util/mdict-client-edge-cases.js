@@ -185,14 +185,21 @@ test('caller mutation cannot add resources after conversion has started', async 
     assert.equal(result.state, 'resolved');
 });
 
-test('throwing worker-progress callback rejects immediately and terminates once', async () => {
+test('throwing progress observers remain advisory and conversion completes exactly once', async () => {
     const expected = new Error('progress rendering failed');
     const {client, result, worker} = await start(createClient(), ({stage}) => {
         if (stage === 'convert') { throw expected; }
     });
     assert.doesNotThrow(() => worker.emit({action: 'progress', params: {details: {stage: 'convert', completed: 1, total: 2}}}));
     await tick();
-    assert.equal(result.error, expected);
+    assert.equal(result.state, 'pending');
+    assert.equal(result.error, null);
+    assert.equal(client.isActive(), true);
+    assert.equal(client.isConnected(), true);
+    assert.equal(worker.terminations, 0);
+    worker.complete();
+    await result.done;
+    assert.equal(result.state, 'resolved');
     assert.equal(client.isActive(), false);
     assert.equal(client.isConnected(), false);
     assert.equal(worker.terminations, 1);

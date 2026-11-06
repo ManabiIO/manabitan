@@ -633,11 +633,11 @@ export class TermContentBlockStore {
         /** @type {Uint8Array} */
         let block;
         try {
-            // zstd-wasm reuses its output heap between calls.
-            block = Uint8Array.from(decompressTermContentZstd(compressed, compressionDictName, {
+            // The decoder returns owned bytes that remain safe to cache.
+            block = decompressTermContentZstd(compressed, compressionDictName, {
                 defaultHeapSize: reference.blockUncompressedLength,
                 maxOutputSize: reference.blockUncompressedLength,
-            }));
+            });
         } catch (error) {
             this._recordError('term-content-block-decompress-error', {
                 ...context,
@@ -694,7 +694,7 @@ export class TermContentBlockStore {
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
     async tryAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
-        validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
+        const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
         if (sourceOffsets.length === 0) { return null; }
         if (
             (compressionDictName === 'jmdict' || this._compressionExperiments.experimentalGenericSpanCompression === true) &&
@@ -707,6 +707,7 @@ export class TermContentBlockStore {
                 sourceLengths,
                 compressionDictName,
                 force,
+                uncompressedBytes,
             );
         }
         return await this._tryAppendPacked(
@@ -775,6 +776,10 @@ export class TermContentBlockStore {
         const planStart = safePerformance.now();
         const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
         let packMs = safePerformance.now() - planStart;
+        const referenceLayout = createTermContentReferenceLayout(
+            sourceLengths.length,
+            this._referencePackTargetBytes,
+        );
         /** @type {(value?: void|PromiseLike<void>) => void} */
         let resolveSourceConsumed = () => {};
         /** @type {(reason?: unknown) => void} */
@@ -852,28 +857,37 @@ export class TermContentBlockStore {
         })();
         void compression.catch((error) => { rejectSourceConsumed(error); });
 
-        const referenceLayout = createTermContentReferenceLayout(
-            sourceLengths.length,
-            this._referencePackTargetBytes,
-        );
         let referenceMs = 0;
-        const append = this._contentStore.beginAppendBatchWithDerivedPrefix(
-            compression.then(({chunks}) => chunks),
-            referenceLayout.slabLengths,
-            (blockOffsets, blockLengths) => {
-                const referenceStart = safePerformance.now();
-                const references = createTermContentReferenceSlabs(
-                    packed,
-                    packed.packedChunkLengths,
-                    sourceLengths,
-                    blockOffsets,
-                    blockLengths,
-                    referenceLayout.entriesPerSlab,
-                );
-                referenceMs += safePerformance.now() - referenceStart;
-                return references;
-            },
-        );
+        const primaryChunks = compression.then(({chunks}) => chunks);
+        /** @type {ReturnType<import('./term-content-opfs-store.js').TermContentOpfsStore['beginAppendBatchWithDerivedPrefix']>} */
+        let append;
+        try {
+            append = this._contentStore.beginAppendBatchWithDerivedPrefix(
+                primaryChunks,
+                referenceLayout.slabLengths,
+                (blockOffsets, blockLengths) => {
+                    const referenceStart = safePerformance.now();
+                    const references = createTermContentReferenceSlabs(
+                        packed,
+                        packed.packedChunkLengths,
+                        sourceLengths,
+                        blockOffsets,
+                        blockLengths,
+                        referenceLayout.entriesPerSlab,
+                    );
+                    referenceMs += safePerformance.now() - referenceStart;
+                    return references;
+                },
+            );
+        } catch (error) {
+            // Reservation setup may fail before it takes ownership of this
+            // promise. Keep the operation's terminal drain responsible for the
+            // compressor and prevent its unconsumed derived promise escaping.
+            void primaryChunks.catch(() => {});
+            const failed = Promise.reject(error);
+            void failed.catch(() => {});
+            append = {reserved: failed, completion: failed};
+        }
         const storage = append.reserved.then(({derivedOffsets}) => ({
             contentOffsets: createTermContentReferenceOffsets(
                 sourceLengths.length,
@@ -885,11 +899,18 @@ export class TermContentBlockStore {
         }));
         void storage.catch(() => {});
         const completion = (async () => {
-            const [, compressionResult, storageResult] = await Promise.all([
-                append.completion,
-                compression,
-                storage,
-            ]);
+            const pending = /** @type {const} */ ([append.completion, compression, storage]);
+            let results;
+            try {
+                results = await Promise.all(pending);
+            } catch (error) {
+                // Storage can fail before it awaits compression. The caller
+                // may release borrowed parser memory only after this terminal
+                // promise has drained every owner of that source.
+                await Promise.allSettled(pending);
+                throw error;
+            }
+            const [, compressionResult, storageResult] = results;
             const opfsAppendMs = Math.max(
                 0,
                 safePerformance.now() - compressionResult.completedAt - referenceMs,
@@ -930,12 +951,11 @@ export class TermContentBlockStore {
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
      * @param {boolean} force
+     * @param {number} uncompressedBytes
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
-    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force) {
+    async _tryAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force, uncompressedBytes) {
         const compressionExperiments = this._compressionExperiments;
-        let uncompressedBytes = 0;
-        for (const length of sourceLengths) { uncompressedBytes += length; }
         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
 
         let phaseStart = safePerformance.now();
@@ -1263,6 +1283,7 @@ function createTermContentReferenceLayout(entryCount, targetBytes) {
  * @param {number[]} blockLengths
  * @param {number} entriesPerSlab
  * @returns {Uint8Array[]}
+ * @throws {RangeError} If a block field or entry offset cannot be encoded.
  */
 function createTermContentReferenceSlabs(
     packed,
@@ -1274,6 +1295,12 @@ function createTermContentReferenceSlabs(
 ) {
     const slabCount = Math.ceil(sourceLengths.length / entriesPerSlab);
     const referenceSlabs = new Array(slabCount);
+    let previousBlockIndex = -1;
+    const blockPrefix = new DataView(new ArrayBuffer(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES));
+    let blockOffsetLow = 0;
+    let blockOffsetHigh = 0;
+    let blockStoredLength = 0;
+    let blockUncompressedLength = 0;
     for (let slabIndex = 0; slabIndex < slabCount; ++slabIndex) {
         const startIndex = slabIndex * entriesPerSlab;
         const entryCount = Math.min(entriesPerSlab, sourceLengths.length - startIndex);
@@ -1282,14 +1309,35 @@ function createTermContentReferenceSlabs(
         for (let localIndex = 0; localIndex < entryCount; ++localIndex) {
             const contentIndex = startIndex + localIndex;
             const blockIndex = packed.sourceChunkIndices[contentIndex];
-            writeRawTermContentCompactBlockReference(
-                view,
-                localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES,
-                blockOffsets[blockIndex],
-                blockLengths[blockIndex],
-                packedChunkLengths[blockIndex],
-                packed.sourceChunkLocalOffsets[contentIndex],
-            );
+            if (blockIndex !== previousBlockIndex) {
+                blockUncompressedLength = packedChunkLengths[blockIndex];
+                // The checked scalar encoder validates the invariant block
+                // fields once. Cache its fixed words for each entry in the block.
+                writeRawTermContentCompactBlockReference(
+                    blockPrefix,
+                    0,
+                    blockOffsets[blockIndex],
+                    blockLengths[blockIndex],
+                    blockUncompressedLength,
+                    0,
+                );
+                blockOffsetLow = blockPrefix.getUint32(0, true);
+                blockOffsetHigh = blockPrefix.getUint32(4, true);
+                blockStoredLength = blockPrefix.getUint32(8, true);
+                previousBlockIndex = blockIndex;
+            }
+            const entryOffset = packed.sourceChunkLocalOffsets[contentIndex];
+            // Packed offsets are Uint32, and the newly allocated slab bounds
+            // every fixed-stride destination; only the entry bound varies.
+            if (!Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength) {
+                throw new RangeError('Invalid compact term-content block reference');
+            }
+            const offset = localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+            view.setUint32(offset, blockOffsetLow, true);
+            view.setUint32(offset + 4, blockOffsetHigh, true);
+            view.setUint32(offset + 8, blockStoredLength, true);
+            view.setUint32(offset + 12, blockUncompressedLength, true);
+            view.setUint32(offset + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES - 4, entryOffset, true);
         }
         referenceSlabs[slabIndex] = slab;
     }
@@ -1299,24 +1347,26 @@ function createTermContentReferenceSlabs(
 /**
  * @param {number} entryCount
  * @param {number[]} slabOffsets
- * @param {number} entriesPerSlab
+ * @param {number} entriesPerSlab Positive integral capacity from the reference layout.
  * @returns {Float64Array}
  * @throws {RangeError} If a reserved slab offset is invalid.
  */
 function createTermContentReferenceOffsets(entryCount, slabOffsets, entriesPerSlab) {
     const contentOffsets = new Float64Array(entryCount);
-    for (let i = 0; i < entryCount; ++i) {
-        const slabIndex = Math.floor(i / entriesPerSlab);
+    for (let startIndex = 0, slabIndex = 0; startIndex < entryCount; startIndex += entriesPerSlab, ++slabIndex) {
         const slabOffset = slabOffsets[slabIndex];
         if (!Number.isSafeInteger(slabOffset) || slabOffset < 0) {
             throw new RangeError(`Invalid term content reference slab offset: ${slabOffset}`);
         }
-        const contentOffset = slabOffset +
-        (i % entriesPerSlab) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
-        if (!Number.isSafeInteger(contentOffset)) {
-            throw new RangeError(`Term content reference offset exceeds the safe integer range: ${contentOffset}`);
+        const count = Math.min(entriesPerSlab, entryCount - startIndex);
+        // A safe largest offset also proves every earlier integer-stride offset.
+        const maximumOffset = slabOffset + (count - 1) * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+        if (!Number.isSafeInteger(maximumOffset)) {
+            throw new RangeError(`Term content reference offset exceeds the safe integer range: ${maximumOffset}`);
         }
-        contentOffsets[i] = contentOffset;
+        for (let localIndex = 0; localIndex < count; ++localIndex) {
+            contentOffsets[startIndex + localIndex] = slabOffset + localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+        }
     }
     return contentOffsets;
 }

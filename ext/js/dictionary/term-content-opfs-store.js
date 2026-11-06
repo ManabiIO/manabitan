@@ -1478,7 +1478,23 @@ export class TermContentOpfsStore {
         }
         const concurrency = 8;
         for (let i = 0; i < pages.length; i += concurrency) {
-            await Promise.all(pages.slice(i, i + concurrency).map(({state, pageIndex}) => this._getReadPage(state, pageIndex)));
+            const pending = pages.slice(i, i + concurrency).map(({state, pageIndex}) => this._getReadPage(state, pageIndex));
+            try {
+                await Promise.all(pending);
+            } catch (error) {
+                // Keep the lookup owned until every started read settles. A
+                // required read can refresh a stale File snapshot through its
+                // existing bounded recovery path; speculative reads must not
+                // prevent that recovery or hide an unrelated peer failure.
+                const results = await Promise.allSettled(pending);
+                if (!this._isNotReadableFileError(error)) { throw error; }
+                for (const result of results) {
+                    if (result.status === 'rejected' && !this._isNotReadableFileError(result.reason)) {
+                        throw result.reason;
+                    }
+                }
+                return;
+            }
         }
     }
 

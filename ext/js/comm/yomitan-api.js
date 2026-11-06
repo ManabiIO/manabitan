@@ -76,7 +76,7 @@ export class YomitanApi {
      */
     async setEnabled(enabled) {
         this._enabled = !!enabled;
-        if (!this._enabled && this._port !== null) {
+        if (!this._enabled) {
             this._clearPort();
         }
         if (this._enabled) {
@@ -86,9 +86,7 @@ export class YomitanApi {
 
     /** */
     disconnect() {
-        if (this._port !== null) {
-            this._clearPort();
-        }
+        this._clearPort();
     }
 
     /**
@@ -107,14 +105,26 @@ export class YomitanApi {
 
     /**
      * @param {string} url
+     * @param {boolean} [disconnectIfInitiallyDisconnected]
      * @returns {Promise<?number>}
      */
-    async getRemoteVersion(url) {
+    async getRemoteVersion(url, disconnectIfInitiallyDisconnected = false) {
+        const disconnect = disconnectIfInitiallyDisconnected && this._port === null;
+        /** @type {?Promise<void>} */
+        let setupPromise = null;
         if (this._port === null) {
-            await this.startApiServer();
+            const startPromise = this.startApiServer();
+            setupPromise = this._setupPortPromise;
+            await startPromise;
         }
-        await this._updateRemoteVersion(url);
-        return this._remoteVersion;
+        const port = disconnect && setupPromise !== null && this._setupPortPromise === setupPromise ? this._port : null;
+        try {
+            return await this._updateRemoteVersion(url);
+        } finally {
+            if (disconnect && port !== null) {
+                this._clearPort(port);
+            }
+        }
     }
 
     /**
@@ -133,21 +143,22 @@ export class YomitanApi {
     // Private
 
     /**
+     * @param {chrome.runtime.Port} port
      * @param {unknown} message
      */
-    async _onMessage(message) {
+    async _onMessage(port, message) {
         if (typeof message !== 'object' || message === null) { return; }
 
-        if (this._port !== null) {
+        if (this._port === port) {
             const {action, params, body} = /** @type {import('core').SerializableObject} */ (message);
             if (typeof action !== 'string' || typeof params !== 'object' || typeof body !== 'string') {
-                this._port.postMessage({action, params, body, data: 'null', responseStatusCode: 400});
+                this._postResponse(port, {action, params, body, data: 'null', responseStatusCode: 400});
                 return;
             }
 
-            const optionsFull = await this._invoke('optionsGetFull', void 0);
-
             try {
+                const optionsFull = await this._invoke('optionsGetFull', void 0);
+                if (this._port !== port) { return; }
                 /** @type {?object} */
                 const parsedBody = body.length > 0 ? parseJson(body) : {};
                 if (parsedBody === null) {
@@ -286,10 +297,16 @@ export class YomitanApi {
                         statusCode = 400;
                 }
 
-                this._port.postMessage({action, params, body, data: result, responseStatusCode: statusCode});
+                this._postResponse(port, {action, params, body, data: result, responseStatusCode: statusCode});
             } catch (error) {
                 log.error(error);
-                this._port.postMessage({action, params, body, data: JSON.stringify(error), responseStatusCode: 500});
+                let data;
+                try {
+                    data = JSON.stringify(error);
+                } catch (_) {
+                    data = 'null';
+                }
+                this._postResponse(port, {action, params, body, data, responseStatusCode: 500});
             }
         }
     }
@@ -422,9 +439,13 @@ export class YomitanApi {
                         continue;
                     }
                     if (!Object.hasOwn(dictionaryMedia, dictionaryEntryMedia.dictionary)) {
-                        dictionaryMedia[dictionaryEntryMedia.dictionary] = {};
+                        Object.defineProperty(dictionaryMedia, dictionaryEntryMedia.dictionary, {
+                            value: {}, enumerable: true, configurable: true, writable: true,
+                        });
                     }
-                    dictionaryMedia[dictionaryEntryMedia.dictionary][dictionaryEntryMedia.path] = {value: mediaFile.ankiFilename};
+                    Object.defineProperty(dictionaryMedia[dictionaryEntryMedia.dictionary], dictionaryEntryMedia.path, {
+                        value: {value: mediaFile.ankiFilename}, enumerable: true, configurable: true, writable: true,
+                    });
                 }
             }
 
@@ -548,6 +569,7 @@ export class YomitanApi {
 
     /**
      * @param {string} url
+     * @returns {Promise<number>}
      */
     async _updateRemoteVersion(url) {
         if (!url) {
@@ -561,6 +583,7 @@ export class YomitanApi {
             const {version} = await readResponseJson(response);
 
             this._remoteVersion = version;
+            return version;
         } catch (e) {
             log.error(e);
             throw new Error('Failed to fetch. Try again in a moment. The nativemessaging component can take a few seconds to start.');
@@ -568,14 +591,42 @@ export class YomitanApi {
     }
 
     /**
+     * Replies belong to the connection which delivered the request. A native
+     * host restart must not receive an earlier connection's result.
+     * @param {chrome.runtime.Port} port
+     * @param {{action: unknown, params: unknown, body: unknown, data: unknown, responseStatusCode: number}} response
      * @returns {void}
      */
-    _onDisconnect() {
-        if (this._port === null) { return; }
-        const e = chrome.runtime.lastError;
-        const error = new Error(e ? e.message : 'Yomitan Api disconnected');
-        log.error(error);
-        this._clearPort();
+    _postResponse(port, response) {
+        if (this._port !== port) { return; }
+        try {
+            port.postMessage(response);
+        } catch (error) {
+            log.error(error);
+            if (this._port !== port) { return; }
+            // Retry delivery of a small error response, never the action. A
+            // serialization failure need not retire a healthy native host.
+            if (response.responseStatusCode !== 500) {
+                try {
+                    port.postMessage({...response, data: 'null', responseStatusCode: 500});
+                    return;
+                } catch (deliveryError) {
+                    log.error(deliveryError);
+                }
+            }
+            this._clearPort(port);
+        }
+    }
+
+    /**
+     * @param {chrome.runtime.Port} port
+     * @returns {void}
+     */
+    _onDisconnect(port) {
+        const error = chrome.runtime.lastError;
+        if (this._port !== port) { return; }
+        log.error(new Error(error ? error.message : 'Yomitan Api disconnected'));
+        this._clearPort(port);
     }
 
     /**
@@ -586,35 +637,99 @@ export class YomitanApi {
             throw new Error('Yomitan Api not enabled');
         }
         if (this._setupPortPromise === null) {
-            this._setupPortPromise = this._setupPort();
+            // Reserve the attempt before a native API callback can reenter.
+            /** @type {Promise<void>} */
+            const setupPromise = Promise.resolve().then(() => this._setupPort(setupPromise));
+            this._setupPortPromise = setupPromise;
         }
+        const setupPromise = this._setupPortPromise;
         try {
-            await this._setupPortPromise;
-        } catch (e) {
-            throw toError(e);
+            await setupPromise;
+            if (this._setupPortPromise !== setupPromise || this._port === null || !this._enabled) {
+                throw new Error('Yomitan Api connection changed during setup');
+            }
+        } catch (error) {
+            if (this._setupPortPromise === setupPromise) { this._clearPort(); }
+            throw toError(error);
         }
     }
 
     /**
+     * @param {Promise<void>} setupPromise
      * @returns {Promise<void>}
      */
-    async _setupPort() {
+    async _setupPort(setupPromise) {
+        if (!this._enabled || this._setupPortPromise !== setupPromise) {
+            throw new Error('Yomitan Api connection setup was cancelled');
+        }
         const port = chrome.runtime.connectNative('yomitan_api');
-        this._eventListeners.addListener(port.onMessage, this._onMessage.bind(this));
-        this._eventListeners.addListener(port.onDisconnect, this._onDisconnect.bind(this));
-        this._port = port;
+        const eventListeners = new EventListenerCollection();
+        try {
+            if (!this._enabled || this._setupPortPromise !== setupPromise) {
+                throw new Error('Yomitan Api connection setup was cancelled');
+            }
+            this._port = port;
+            this._eventListeners = eventListeners;
+            eventListeners.addListener(port.onMessage, (message) => {
+                void this._onMessage(port, message).catch((error) => { log.error(error); });
+            });
+            this._assertPortSetupCurrent(port, setupPromise);
+            eventListeners.addListener(port.onDisconnect, () => { this._onDisconnect(port); });
+            this._assertPortSetupCurrent(port, setupPromise);
+        } catch (error) {
+            if (this._port === port) {
+                this._clearPort(port);
+            } else {
+                try {
+                    eventListeners.removeAllEventListeners();
+                } catch (cleanupError) {
+                    log.error(cleanupError);
+                }
+                try {
+                    port.disconnect();
+                } catch (disconnectError) {
+                    log.error(disconnectError);
+                }
+            }
+            throw error;
+        }
     }
 
     /**
+     * @param {chrome.runtime.Port} port
+     * @param {Promise<void>} setupPromise
+     * @returns {void}
+     * @throws {Error} If another connection or disable operation took ownership.
+     */
+    _assertPortSetupCurrent(port, setupPromise) {
+        if (this._port !== port || this._setupPortPromise !== setupPromise || !this._enabled) {
+            throw new Error('Yomitan Api connection changed during setup');
+        }
+    }
+
+    /**
+     * @param {chrome.runtime.Port|null} [port]
      * @returns {void}
      */
-    _clearPort() {
-        if (this._port !== null) {
-            this._port.disconnect();
-            this._port = null;
-        }
-        this._eventListeners.removeAllEventListeners();
+    _clearPort(port = this._port) {
+        if (port !== this._port) { return; }
+        const eventListeners = this._eventListeners;
+        // Retire ownership before cleanup, which can invoke browser callbacks.
+        this._port = null;
         this._setupPortPromise = null;
+        this._eventListeners = new EventListenerCollection();
+        try {
+            eventListeners.removeAllEventListeners();
+        } catch (error) {
+            log.error(error);
+        }
+        if (port !== null) {
+            try {
+                port.disconnect();
+            } catch (error) {
+                log.error(error);
+            }
+        }
     }
 
     /**

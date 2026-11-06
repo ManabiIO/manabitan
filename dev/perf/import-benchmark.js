@@ -30,7 +30,7 @@ const root = path.join(dirname, '..', '..');
 const e2eScript = path.join(root, 'test', 'chromium', 'extension-two-dictionary-import.e2e.js');
 
 /**
- * @returns {{dictionaryId: string, runs: number|null, trace: boolean, importFlagsJson: string|null, outputDir: string|null, skipBuild: boolean}}
+ * @returns {{dictionaryId: string, runs: number|null, trace: boolean, importFlagsJson: string|null, outputDir: string|null, skipBuild: boolean, buildTarget: string}}
  * @throws {Error}
  */
 function parseArgs() {
@@ -41,6 +41,7 @@ function parseArgs() {
     let importFlagsJson = null;
     let outputDir = null;
     let skipBuild = false;
+    let buildTarget = 'chrome-dev';
     for (let i = 0; i < args.length; ++i) {
         const arg = args[i];
         switch (arg) {
@@ -51,6 +52,12 @@ function parseArgs() {
             }
             case '--no-build': {
                 skipBuild = true;
+
+                break;
+            }
+            case '--build-target': {
+                buildTarget = args[++i] ?? '';
+                if (buildTarget !== 'chrome' && buildTarget !== 'chrome-dev') { throw new Error('--build-target must be chrome or chrome-dev'); }
 
                 break;
             }
@@ -79,7 +86,7 @@ function parseArgs() {
             }
         }
     }
-    return {dictionaryId: dictionaryId || 'jmdict', runs, trace, importFlagsJson, outputDir, skipBuild};
+    return {dictionaryId: dictionaryId || 'jmdict', runs, trace, importFlagsJson, outputDir, skipBuild, buildTarget};
 }
 
 /**
@@ -148,7 +155,7 @@ const timestamp = new Date().toISOString().replaceAll(':', '')
 const outputDir = path.resolve(root, options.outputDir ?? path.join('builds', 'perf', `${timestamp}-${options.dictionaryId}${options.trace ? '-trace' : ''}`));
 await mkdir(outputDir, {recursive: true});
 await rm(path.join(outputDir, 'summary.json'), {force: true});
-/** @type {Array<{index: number, reportPath: string, reportJsonPath: string, tracePath: string|null, browserVersion: unknown, totalImportMs: number, automationObservedImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: unknown}>} */
+/** @type {Array<{index: number, reportPath: string, reportJsonPath: string, tracePath: string|null, browserVersion: unknown, packageSha256: string, totalImportMs: number, automationObservedImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: unknown}>} */
 const runs = [];
 for (let index = 1; index <= runCount; ++index) {
     const reportPath = path.join(outputDir, `run-${String(index)}.html`);
@@ -157,6 +164,7 @@ for (let index = 1; index <= runCount; ++index) {
     /** @type {Record<string, string|undefined>} */
     const env = createBenchmarkEnvironment(process.env, {
         MANABITAN_CHROMIUM_HEADLESS: '1',
+        MANABITAN_CHROMIUM_BUILD_TARGET: options.buildTarget,
         MANABITAN_CHROMIUM_E2E_REPORT: reportPath,
         MANABITAN_E2E_IMPORT_BENCH_QUICK: '1',
         MANABITAN_E2E_IMPORT_BENCH_DICTIONARY: options.dictionaryId,
@@ -180,6 +188,9 @@ for (let index = 1; index <= runCount; ++index) {
     await runCommand(process.execPath, [e2eScript], env);
     if (tracePath.length > 0 && (await stat(tracePath)).size === 0) { throw new Error('Import trace is empty'); }
     const report = /** @type {Record<string, unknown>} */ (parseJson(await readFile(reportJsonPath, 'utf8')));
+    if (report.buildTarget !== options.buildTarget || typeof report.packageSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(report.packageSha256)) {
+        throw new Error('Import report package identity does not match the requested build target');
+    }
     if (report.status !== 'success') {
         throw new Error(`E2E report did not complete successfully: ${reportJsonPath} status=${String(report.status)}`);
     }
@@ -189,6 +200,7 @@ for (let index = 1; index <= runCount; ++index) {
         reportJsonPath,
         tracePath: tracePath || null,
         browserVersion: report.browserVersion ?? null,
+        packageSha256: report.packageSha256,
         ...extractImportResult(report, options.dictionaryId, fixture, options.trace, options.importFlagsJson === null ? null : parseJson(options.importFlagsJson)),
     });
 }
@@ -196,6 +208,7 @@ const source = await getSourceProvenance(root);
 const summary = {
     schemaVersion: 3,
     dictionary: options.dictionaryId,
+    buildTarget: options.buildTarget,
     fixture,
     authoritativeTiming: !options.trace,
     traceEnabled: options.trace,

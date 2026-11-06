@@ -18,9 +18,10 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 
 /**
- * Per-import implementation switches. Qualified native lookup construction
- * and generic shared-span compression default on; other experiments remain off. Snapshot before
- * asynchronous work and copy effective values into each worker request.
+ * Per-import implementation switches. Qualified native lookup construction,
+ * generic shared-span compression, bounded validated glossary reuse, and the
+ * middle-CPU parser policy default on. Snapshot before asynchronous work and
+ * copy effective values into each worker request.
  * Explicit false opts out for diagnostics; no toggle survives an import.
  * @param {import('dictionary-importer').ImportExperiments} [options]
  * @returns {Readonly<Required<import('dictionary-importer').ImportExperiments>>}
@@ -28,8 +29,7 @@
 export function snapshotTermBankExperiments(options = {}) {
     return Object.freeze({
         experimentalGenericSpanCompression: typeof options.experimentalGenericSpanCompression === 'undefined' || options.experimentalGenericSpanCompression === true,
-        experimentalParserWorkers3: options.experimentalParserWorkers3 === true,
-        experimentalLibdeflate: options.experimentalLibdeflate === true,
+        experimentalParserWorkers3: typeof options.experimentalParserWorkers3 === 'undefined' || options.experimentalParserWorkers3 === true,
         experimentalSkipFusedParse: options.experimentalSkipFusedParse === true,
         experimentalLookupScratchReuse: typeof options.experimentalLookupScratchReuse === 'undefined' || options.experimentalLookupScratchReuse === true,
         experimentalNativeSegmentedLookup: typeof options.experimentalNativeSegmentedLookup === 'undefined' || options.experimentalNativeSegmentedLookup === true,
@@ -37,7 +37,7 @@ export function snapshotTermBankExperiments(options = {}) {
         experimentalSinglePassLookupCompaction: options.experimentalSinglePassLookupCompaction === true,
         experimentalTermBankSpans: options.experimentalTermBankSpans === true,
         experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true,
-        experimentalValidatedGlossaryReuse: options.experimentalValidatedGlossaryReuse === true,
+        experimentalValidatedGlossaryReuse: typeof options.experimentalValidatedGlossaryReuse === 'undefined' || options.experimentalValidatedGlossaryReuse === true,
         experimentalFusedSingleBank: options.experimentalFusedSingleBank === true,
         experimentalGlobalExactContentReuse: options.experimentalGlobalExactContentReuse === true,
         experimentalFastGlossaryNormalization: options.experimentalFastGlossaryNormalization === true,

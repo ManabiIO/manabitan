@@ -108,6 +108,10 @@ export class Frontend {
         this._popupPrewarmPromise = null;
         /** @type {?Promise<void>} */
         this._lookupPrewarmPromise = null;
+        /** @type {{options: ?import('settings').ProfileOptions, token: ?object}|null} */
+        this._lookupPrewarmOwner = null;
+        /** @type {boolean} */
+        this._lookupPrewarmPending = false;
         /** @type {?string} */
         this._popupContentPrewarmTerm = null;
         /** @type {TextSourceGenerator} */
@@ -769,6 +773,13 @@ export class Frontend {
         const token = {};
         this._optionsUpdateToken = token;
         this._updatePopupToken = null;
+        this._popupContentPrewarmTerm = null;
+        this._updatePageDebugState({
+            lookupPrewarmReady: false,
+            lookupPrewarmSettled: false,
+            lookupPrewarmAllSettled: false,
+            popupContentPrewarmReady: false,
+        });
         try {
             const optionsContext = await this._getOptionsContext();
             if (this._optionsUpdateToken !== token) { return; }
@@ -848,11 +859,26 @@ export class Frontend {
      * @returns {void}
      */
     _startLookupPrewarmForHover() {
-        if (this._lookupPrewarmPromise !== null) { return; }
-        this._lookupPrewarmPromise = this._prewarmLookupForHover();
-        void this._lookupPrewarmPromise.finally(() => {
+        const owner = {options: this._options, token: this._optionsUpdateToken};
+        if (this._lookupPrewarmPromise !== null) {
+            if (this._lookupPrewarmOwner?.options !== owner.options || this._lookupPrewarmOwner?.token !== owner.token) {
+                this._lookupPrewarmPending = true;
+            }
+            return;
+        }
+        this._lookupPrewarmOwner = owner;
+        const promise = this._prewarmLookupForHover();
+        this._lookupPrewarmPromise = promise;
+        const finish = () => {
+            if (this._lookupPrewarmPromise !== promise) { return; }
             this._lookupPrewarmPromise = null;
-        });
+            this._lookupPrewarmOwner = null;
+            if (this._lookupPrewarmPending) {
+                this._lookupPrewarmPending = false;
+                this._startLookupPrewarmForHover();
+            }
+        };
+        void promise.then(finish, finish);
     }
 
     /**
@@ -860,6 +886,8 @@ export class Frontend {
      */
     async _prewarmLookupForHover() {
         const options = this._options;
+        const token = this._optionsUpdateToken;
+        const isCurrent = () => this._options === options && this._optionsUpdateToken === token && this._textScanner.isEnabled();
         if (
             options === null ||
             !options.general.enable ||
@@ -871,34 +899,43 @@ export class Frontend {
         const startedAt = safePerformance.now();
         this._updatePageDebugState({
             lookupPrewarmRequested: true,
+            lookupPrewarmReady: false,
+            lookupPrewarmAllSettled: false,
             lookupPrewarmSettled: false,
             lookupPrewarmLastError: null,
         });
         try {
             const optionsContext = await this._getOptionsContext();
+            if (!isCurrent()) { return; }
             const initialPrewarmTerms = this._getInitialLookupPrewarmTerms();
             let prewarmTerms = initialPrewarmTerms;
-            let {firstMatchedResultPromise, resultsPromise} = this._runLookupPrewarmTerms(initialPrewarmTerms, optionsContext);
+            let {firstMatchedResultPromise, resultsPromise} = this._runLookupPrewarmTerms(initialPrewarmTerms, optionsContext, isCurrent);
             let firstMatchedResult = await firstMatchedResultPromise;
+            if (!isCurrent()) { return; }
             if (firstMatchedResult === null) {
                 let lookupResults = await resultsPromise;
+                if (!isCurrent()) { return; }
                 const knownTerms = new Set(initialPrewarmTerms);
-                const dictionaryProbeTerms = (await this._getDictionaryLookupPrewarmTerms(options))
+                const dictionaryProbeTerms = (await this._getDictionaryLookupPrewarmTerms(options, isCurrent))
                     .filter((term) => !knownTerms.has(term));
+                if (!isCurrent()) { return; }
                 if (dictionaryProbeTerms.length > 0) {
                     prewarmTerms = [...initialPrewarmTerms, ...dictionaryProbeTerms];
-                    ({firstMatchedResultPromise, resultsPromise} = this._runLookupPrewarmTerms(dictionaryProbeTerms, optionsContext));
+                    ({firstMatchedResultPromise, resultsPromise} = this._runLookupPrewarmTerms(dictionaryProbeTerms, optionsContext, isCurrent));
                     firstMatchedResult = await firstMatchedResultPromise;
                     lookupResults = [...lookupResults, ...await resultsPromise];
                 }
                 resultsPromise = Promise.resolve(lookupResults);
             }
+            if (!isCurrent()) { return; }
             if (firstMatchedResult !== null) {
                 const popupPrewarmPromise = this._popupPrewarmPromise;
                 if (popupPrewarmPromise !== null) {
                     await popupPrewarmPromise;
                 }
+                if (!isCurrent()) { return; }
                 await this._prewarmPopupContentForHover(firstMatchedResult.term, firstMatchedResult.dictionaryEntries, optionsContext);
+                if (!isCurrent()) { return; }
                 this._updatePageDebugState({
                     lookupPrewarmReady: true,
                     lookupPrewarmResultCount: firstMatchedResult.dictionaryEntries.length,
@@ -910,6 +947,7 @@ export class Frontend {
                 });
             }
             const lookupResults = await resultsPromise;
+            if (!isCurrent()) { return; }
             let resultCount = 0;
             /** @type {string[]} */
             const matchedTerms = [];
@@ -936,6 +974,7 @@ export class Frontend {
             }
             this._updatePageDebugState(finalPrewarmState);
         } catch (e) {
+            if (!isCurrent()) { return; }
             this._updatePageDebugState({
                 lookupPrewarmReady: false,
                 lookupPrewarmSettled: true,
@@ -949,9 +988,10 @@ export class Frontend {
     /**
      * @param {string[]} terms
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {() => boolean} [isCurrent]
      * @returns {{firstMatchedResultPromise: Promise<?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>, resultsPromise: Promise<Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>>}}
      */
-    _runLookupPrewarmTerms(terms, optionsContext) {
+    _runLookupPrewarmTerms(terms, optionsContext, isCurrent = () => true) {
         /** @type {Array<{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}>} */
         const results = [];
         /** @type {(value: ?{term: string, dictionaryEntries: import('dictionary').DictionaryEntry[]}) => void} */
@@ -963,6 +1003,7 @@ export class Frontend {
         const resultsPromise = (async () => {
             let matched = false;
             for (const term of terms) {
+                if (!isCurrent()) { break; }
                 /** @type {import('dictionary').DictionaryEntry[]} */
                 let dictionaryEntries = [];
                 try {
@@ -970,6 +1011,7 @@ export class Frontend {
                 } catch (_) {
                     // Best-effort prewarm; visible lookup correctness does not depend on probes.
                 }
+                if (!isCurrent()) { break; }
                 results.push({term, dictionaryEntries});
                 if (dictionaryEntries.length > 0) {
                     matched = true;
@@ -1011,9 +1053,10 @@ export class Frontend {
 
     /**
      * @param {import('settings').ProfileOptions} options
+     * @param {() => boolean} [isCurrent]
      * @returns {Promise<string[]>}
      */
-    async _getDictionaryLookupPrewarmTerms(options) {
+    async _getDictionaryLookupPrewarmTerms(options, isCurrent = () => true) {
         /** @type {string[]} */
         const terms = [];
         const probeTimeout = 125;
@@ -1022,19 +1065,25 @@ export class Frontend {
             .filter(({name, enabled}) => enabled && name.length > 0)
             .slice(0, maxProbeDictionaries);
         for (const {name} of dictionaries) {
+            if (!isCurrent()) { break; }
+            /** @type {ReturnType<typeof setTimeout>|undefined} */
+            let timeout;
             try {
                 /** @type {Promise<import('dictionary-database').DictionaryTermProbe|null>} */
                 const probePromise = this._application.api.getDictionaryTermProbe(name);
                 /** @type {Promise<null>} */
                 const timeoutPromise = new Promise((resolve) => {
-                    setTimeout(() => { resolve(null); }, probeTimeout);
+                    timeout = setTimeout(() => { resolve(null); }, probeTimeout);
                 });
                 const probe = await Promise.race([probePromise, timeoutPromise]);
+                if (!isCurrent()) { break; }
                 if (probe !== null) {
                     terms.push(probe.expression, probe.reading);
                 }
             } catch (_) {
                 // Best-effort prewarm; visible lookup correctness does not depend on probes.
+            } finally {
+                clearTimeout(timeout);
             }
         }
         return this._normalizeLookupPrewarmTerms(terms);
@@ -1100,6 +1149,9 @@ export class Frontend {
      */
     async _prewarmPopupContentForHover(term, dictionaryEntries, optionsContext) {
         const popup = this._popup;
+        const options = this._options;
+        const token = this._optionsUpdateToken;
+        const isCurrent = () => this._popup === popup && this._options === options && this._optionsUpdateToken === token;
         if (
             this._popupContentPrewarmTerm === term ||
             popup === null ||
@@ -1139,6 +1191,7 @@ export class Frontend {
                 },
             };
             await /** @type {{prewarmContent: (details: import('display').ContentDetails) => Promise<void>}} */ (popup).prewarmContent(details);
+            if (!isCurrent()) { return; }
             this._popupContentPrewarmTerm = term;
             this._updatePageDebugState({
                 popupContentPrewarmReady: true,
@@ -1148,6 +1201,7 @@ export class Frontend {
                 popupContentPrewarmWaitMs: Math.round(safePerformance.now() - startedAt),
             });
         } catch (e) {
+            if (!isCurrent()) { return; }
             this._updatePageDebugState({
                 popupContentPrewarmReady: false,
                 popupContentPrewarmSettled: true,

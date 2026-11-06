@@ -5,10 +5,12 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 
 // The same schedules and assertions execute in Node worker threads and Chromium.
-export async function runSettlementCases(parser, {assert, makeSources, setIntercept, turn, cleanup}) {
+export async function runSettlementCases(parser, {assert, makeSources, setIntercept, turn, cleanup, experiments = {}}) {
     let onLoad = () => {}
     let estimateOverride = null
-    const opts = {emitContentSlab: true, emitTokenBinaryContent: true, prepareLookupIndexes: true}
+    const opts = {emitContentSlab: true, emitTokenBinaryContent: true, prepareLookupIndexes: true, ...experiments}
+    const sourceWindowSize = parser.getParallelTermBankParserWorkerCount(opts) * 4
+    const windowSourceCount = sourceWindowSize * 2 + 1
     const outcomes = []
     const defer = () => {
         let resolve
@@ -76,9 +78,18 @@ export async function runSettlementCases(parser, {assert, makeSources, setInterc
             const finishSink = defer()
             const calls = []
             setIntercept((data, deliver) => {
+                if (data.type === 'parse-error' && data.id === 3) {
+                    // With three workers, the failure can arrive before the
+                    // first result. Deliver it only after the sink has started
+                    // so this schedule exercises failure during an active write.
+                    void firstSink.promise.then(() => {
+                        deliver(data)
+                        failureReady.resolve()
+                    })
+                    return
+                }
                 deliver(data)
                 if (data.type === 'result' && data.id === 2) { secondReady.resolve() }
-                if (data.type === 'parse-error' && data.id === 3) { failureReady.resolve() }
             })
             const outcome = run(mode, [jsonBank(0), jsonBank(1), '[,]', jsonBank(3)], async (chunk) => {
                 calls.push(chunk.scoreList[0])
@@ -134,21 +145,21 @@ export async function runSettlementCases(parser, {assert, makeSources, setInterc
             let cancelled = false
             const loaded = []
             onLoad = (i) => loaded.push(i)
-            // Conservative estimates force 17 groups without allocating a 408 MiB fixture.
+            // Conservative estimates force a second source window without allocating its advertised payload.
             estimateOverride = 24 * 1024 * 1024
-            const error = await run(mode, Array.from({length: 17}, (_, i) => jsonBank(i)), () => {
+            const error = await run(mode, Array.from({length: windowSourceCount}, (_, i) => jsonBank(i)), () => {
                 cancelled = true
             }, () => cancelled).then(() => null, (failure) => failure)
             assert.equal(error?.name, 'AbortError')
-            assert.deepEqual(loaded, [0, 1, 2, 3, 4, 5, 6, 7])
+            assert.deepEqual(loaded, Array.from({length: sourceWindowSize}, (_, i) => i))
         })
         await test(`${mode}: healthy sink advances the bounded source window`, async () => {
             const loaded = []
             const scores = []
             onLoad = (i) => loaded.push(i)
             estimateOverride = 24 * 1024 * 1024
-            assert.equal(await run(mode, Array.from({length: 17}, (_, i) => jsonBank(i)), (chunk) => scores.push(chunk.scoreList[0])), true)
-            assert.deepEqual(loaded, Array.from({length: 17}, (_, i) => i))
+            assert.equal(await run(mode, Array.from({length: windowSourceCount}, (_, i) => jsonBank(i)), (chunk) => scores.push(chunk.scoreList[0])), true)
+            assert.deepEqual(loaded, Array.from({length: windowSourceCount}, (_, i) => i))
             assert.deepEqual(scores, loaded)
         })
     }
