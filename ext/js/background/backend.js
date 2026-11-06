@@ -747,7 +747,9 @@ export class Backend {
             } catch (error) {
                 if (relay) {
                     postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
-                    relay.close();
+                    // Losing acknowledgement does not revoke the transferred
+                    // worker relay. It may still deliver durable completion.
+                    relay.detachObserver();
                     this._reconcileOwnedDictionaryImport(operationId);
                 }
                 throw error;
@@ -762,7 +764,9 @@ export class Backend {
             } catch (error) {
                 if (relay) {
                     postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
-                    relay.close();
+                    // Losing acknowledgement does not revoke the transferred
+                    // worker relay. It may still deliver durable completion.
+                    relay.detachObserver();
                     this._reconcileOwnedDictionaryImport(operationId);
                 }
                 throw error;
@@ -775,12 +779,24 @@ export class Backend {
     /**
      * @param {string} operationId
      * @param {MessagePort} responsePort
-     * @returns {{port: MessagePort, close: () => void}}
+     * @returns {{port: MessagePort, close: () => void, detachObserver: () => void}}
      */
     _superviseOwnedDictionaryImport(operationId, responsePort) {
         const operation = this._ownedDictionaryImports.get(operationId);
         const channel = new MessageChannel();
         let closed = false;
+        let observerDetached = false;
+        const detachObserver = () => {
+            if (observerDetached) { return; }
+            observerDetached = true;
+            responsePort.onmessage = null;
+            responsePort.onmessageerror = null;
+            closeDictionaryImportResponsePort(responsePort);
+        };
+        /** @param {unknown} message */
+        const forward = (message) => {
+            if (!observerDetached && !postDictionaryImportResponseMessage(responsePort, message)) { detachObserver(); }
+        };
         const close = () => {
             if (closed) { return; }
             closed = true;
@@ -788,11 +804,9 @@ export class Backend {
             channel.port1.onmessageerror = null;
             channel.port2.onmessage = null;
             channel.port2.onmessageerror = null;
-            responsePort.onmessage = null;
-            responsePort.onmessageerror = null;
             closeDictionaryImportResponsePort(channel.port1);
             closeDictionaryImportResponsePort(channel.port2);
-            closeDictionaryImportResponsePort(responsePort);
+            detachObserver();
             if (operation?.responseCleanup === close) {
                 delete operation.responseCleanup;
                 delete operation.responseReconcile;
@@ -803,7 +817,7 @@ export class Backend {
             if (closed) { return; }
             // A status lookup may beat the original terminal message. Preserve
             // the still-connected observer before retiring its response relay.
-            postDictionaryImportResponseMessage(responsePort, status.state === 'completed' ?
+            forward(status.state === 'completed' ?
                 {type: 'complete', result: status.result} :
                 {type: 'error', error: status.error ?? ExtensionError.serialize(new Error(`Dictionary import ${status.state}`))});
             close();
@@ -837,7 +851,7 @@ export class Backend {
                     this._releaseOrphanedDictionaryImportOwner(operation.ownerId);
                 }
             }
-            postDictionaryImportResponseMessage(responsePort, message);
+            forward(message);
             if (terminal) {
                 close();
                 if (uncertain) { this._reconcileOwnedDictionaryImport(operationId); }
@@ -847,11 +861,13 @@ export class Backend {
             if (closed) { return; }
             const error = new Error('Backend dictionary import response channel failed');
             error.name = 'DictionaryImportTransportError';
-            postDictionaryImportResponseMessage(responsePort, {type: 'error', error: ExtensionError.serialize(error)});
-            close();
+            forward({type: 'error', error: ExtensionError.serialize(error)});
+            // messageerror is a failed delivery, not proof that the mutation or
+            // this relay is dead. Preserve later terminal messages from its owner.
+            detachObserver();
             this._reconcileOwnedDictionaryImport(operationId);
         };
-        return {port: channel.port2, close};
+        return {port: channel.port2, close, detachObserver};
     }
 
     /**

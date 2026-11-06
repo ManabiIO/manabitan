@@ -10515,6 +10515,18 @@ null :
     }
 
     /**
+     * Required reads must revalidate bytes after preparation or prefetch proves
+     * damage. An obsolete read cannot clear a newer generation's valid caches.
+     * @param {number} generation
+     */
+    _clearContentCachesAfterIntegrityFailure(generation) {
+        this._assertTermLookupGeneration(generation);
+        this._termRowCache.clear();
+        this._termEntryContentCache.clear();
+        this._termContentBlockStore.clearCache();
+    }
+
+    /**
      * @param {Iterable<number>} ids
      * @returns {Promise<Map<number, import('dictionary-database').DatabaseTermEntryWithId>>}
      */
@@ -10526,10 +10538,7 @@ null :
             // Required reads below attach confirmed content damage to its owning
             // dictionary. A speculative preparation failure has no row identity.
             if (!(error instanceof TermContentIntegrityError)) { throw error; }
-            // Cached definitions must not conceal newly proven storage damage.
-            this._termRowCache.clear();
-            this._termEntryContentCache.clear();
-            this._termContentBlockStore.clearCache();
+            this._clearContentCachesAfterIntegrityFailure(generation);
         }
         this._assertTermLookupGeneration(generation);
         /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
@@ -10561,6 +10570,7 @@ null :
                 );
             } catch (error) {
                 if (!(error instanceof TermContentIntegrityError)) { throw error; }
+                this._clearContentCachesAfterIntegrityFailure(generation);
             }
             this._assertTermLookupGeneration(generation);
         }
