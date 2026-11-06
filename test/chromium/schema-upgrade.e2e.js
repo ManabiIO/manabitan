@@ -69,7 +69,7 @@ async function launch(name, expectedVersion) {
     context = await chromium.launchPersistentContext(profile, getChromiumLaunchOptions({
         channel: 'chromium',
         headless: true,
-        args: [`--disable-extensions-except=${unpacked}`, `--load-extension=${unpacked}`],
+        args: ['--enable-unsafe-extension-debugging', `--disable-extensions-except=${unpacked}`, `--load-extension=${unpacked}`],
     }));
     let worker = context.serviceWorkers()[0];
     if (!worker) { worker = await context.waitForEvent('serviceworker', {timeout: 30000}); }
@@ -80,38 +80,23 @@ async function launch(name, expectedVersion) {
     let page = await context.newPage();
     await page.goto(`chrome-extension://${id}/settings.html?popup-preview=false`);
     if (name === 'upgrade') {
-        // Replacing an unpacked directory does not notify Chrome's persisted
-        // service worker. Perform the extension reload lifecycle explicitly.
-        let timer;
-        const closed = new Promise((resolve, reject) => {
-            worker.once('close', resolve);
-            timer = setTimeout(() => { reject(new Error('Published service worker did not close during reload')); }, 30000);
-        });
+        // A directory swap alone can retain Chrome's cached old worker.
+        // Ask Chrome's unpacked installer to load the candidate and wait for
+        // its acknowledgement without uninstalling or clearing this profile.
+        const session = await context.browser().newBrowserCDPSession();
         try {
-            await Promise.all([closed, page.evaluate(() => chrome.runtime.reload()).catch((error) => {
-                if (!/Execution context was destroyed|Target.*closed/i.test(String(error))) { throw error; }
-            })]);
-        } finally { clearTimeout(timer); }
+            const installed = await session.send('Extensions.loadUnpacked', {path: unpacked});
+            assert.equal(installed.id, id, 'Candidate installation changed extension identity');
+            const inventory = await session.send('Extensions.getExtensions');
+            const candidate = inventory.extensions.find((extension) => extension.id === id);
+            assert.equal(candidate?.version, expectedVersion);
+            assert.equal(candidate?.enabled, true);
+            assert.equal(candidate?.path, unpacked);
+            report.candidateInstallAcknowledgement = candidate;
+        } finally { await session.detach(); }
         if (!page.isClosed()) { await page.close(); }
-        // A service worker may stay dormant until a page wakes it. Verify the
-        // candidate's production RPC below instead of waiting for a worker
-        // object event before creating that page.
         page = await context.newPage();
-        const deadline = Date.now() + 30000;
-        let navigationRetries = 0;
-        while (true) {
-            try {
-                await page.goto(`chrome-extension://${id}/settings.html?popup-preview=false`);
-                break;
-            } catch (error) {
-                // Chrome unregisters the old worker before the reloaded
-                // extension becomes navigable. Retry only that lifecycle gap.
-                if (!String(error).includes('net::ERR_BLOCKED_BY_CLIENT') || Date.now() >= deadline) { throw error; }
-                ++navigationRetries;
-                await new Promise((resolve) => { setTimeout(resolve, 100); });
-            }
-        }
-        report.reloadNavigationRetries = navigationRetries;
+        await page.goto(`chrome-extension://${id}/settings.html?popup-preview=false`);
     }
     await page.waitForFunction(() => document.documentElement.dataset.loaded === 'true', null, {timeout: 60000});
     assert.equal(await page.evaluate(() => chrome.runtime.getManifest().version), expectedVersion);
@@ -274,6 +259,15 @@ try {
 } catch (error) {
     report.status = 'failure';
     report.error = error instanceof Error ? error.stack : String(error);
+    if (context) {
+        let session;
+        try {
+            session = await context.browser().newBrowserCDPSession();
+            report.failureExtensionInventory = await session.send('Extensions.getExtensions');
+        } catch (diagnosticError) {
+            report.failureDiagnosticError = String(diagnosticError);
+        } finally { await session?.detach(); }
+    }
     throw error;
 } finally {
     try {
