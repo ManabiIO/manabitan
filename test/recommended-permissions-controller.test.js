@@ -117,10 +117,94 @@ describe('RecommendedPermissionsController', () => {
         const toggle = /** @type {HTMLInputElement} */ (window.document.querySelector('#optional-permissions-toggle'));
         toggle.checked = true;
         controller._onOptionalPermissionsToggleChangeEvent(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: toggle})));
-        await Promise.resolve();
-        await Promise.resolve();
+        await vi.waitFor(() => { expect(logError).toHaveBeenCalled(); });
+        expect(toggle.checked).toBe(false);
+    });
+    test('origin permission failure remains visible after the request settles', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <input id="recommended-permissions-toggle" data-origin="<all_urls>" type="checkbox">
+            <input id="optional-permissions-toggle" type="checkbox">
+            <div id="recommended-permissions-error" hidden></div>
+        `;
+        getAllPermissions.mockResolvedValue({origins: [], permissions: []});
+        setPermissionsGranted.mockRejectedValue(new Error('origin request failed'));
+        const {RecommendedPermissionsController} = await import('../ext/js/pages/settings/recommended-permissions-controller.js');
+        const controller = new RecommendedPermissionsController(/** @type {any} */ ({on: vi.fn()}));
+        await controller.prepare();
+        await expect(controller._setOriginPermissionEnabled('<all_urls>', true)).resolves.toBe(false);
+        const error = /** @type {HTMLElement} */ (window.document.querySelector('#recommended-permissions-error'));
+        expect(error.hidden).toBe(false);
+        expect(error.textContent).toContain('origin request failed');
+    });
 
-        expect(logError).toHaveBeenCalled();
+    test('a permission event owns checkboxes and welcome text over an older refresh', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <input id="recommended-permissions-toggle" data-origin="<all_urls>" type="checkbox">
+            <input id="optional-permissions-toggle" type="checkbox">
+            <div id="recommended-permissions-error" hidden></div>
+            <div id="full-permissions-enabled" hidden></div>
+            <div id="recommended-permissions-enabled" hidden></div>
+            <div id="permissions-disabled" hidden></div>
+        `;
+        getAllPermissions.mockResolvedValue({origins: [], permissions: []});
+        const {RecommendedPermissionsController} = await import('../ext/js/pages/settings/recommended-permissions-controller.js');
+        const controller = new RecommendedPermissionsController(/** @type {any} */ ({on: vi.fn()}));
+        await controller.prepare();
+        const pending = Promise.withResolvers();
+        getAllPermissions.mockReturnValueOnce(pending.promise);
+        const refresh = controller._updatePermissions();
+        controller._onPermissionsChanged({permissions: {origins: ['<all_urls>'], permissions: ['clipboardRead', 'nativeMessaging']}});
+        pending.resolve({origins: [], permissions: []});
+        await refresh;
+        expect(/** @type {HTMLInputElement} */ (window.document.querySelector('#recommended-permissions-toggle')).checked).toBe(true);
+        expect(/** @type {HTMLInputElement} */ (window.document.querySelector('#optional-permissions-toggle')).checked).toBe(true);
+        expect(/** @type {HTMLElement} */ (window.document.querySelector('#full-permissions-enabled')).hidden).toBe(false);
+        expect(/** @type {HTMLElement} */ (window.document.querySelector('#permissions-disabled')).hidden).toBe(true);
+    });
+
+    test('a refresh started before an origin request cannot erase its failure', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <input id="recommended-permissions-toggle" data-origin="<all_urls>" type="checkbox">
+            <input id="optional-permissions-toggle" type="checkbox">
+            <div id="recommended-permissions-error" hidden></div>
+        `;
+        getAllPermissions.mockResolvedValue({origins: [], permissions: []});
+        setPermissionsGranted.mockRejectedValue(new Error('origin request failed'));
+        const {RecommendedPermissionsController} = await import('../ext/js/pages/settings/recommended-permissions-controller.js');
+        const controller = new RecommendedPermissionsController(/** @type {any} */ ({on: vi.fn()}));
+        await controller.prepare();
+        const pending = Promise.withResolvers();
+        getAllPermissions.mockReturnValueOnce(pending.promise);
+        const refresh = controller._updatePermissions();
+        await controller._setOriginPermissionEnabled('<all_urls>', true);
+        pending.resolve({origins: [], permissions: []});
+        await refresh;
+        const error = /** @type {HTMLElement} */ (window.document.querySelector('#recommended-permissions-error'));
+        expect(error.hidden).toBe(false);
+        expect(error.textContent).toContain('origin request failed');
+    });
+
+    test('origin toggle owns asynchronous refresh rejection', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = `
+            <input id="recommended-permissions-toggle" data-origin="<all_urls>" type="checkbox">
+            <input id="optional-permissions-toggle" type="checkbox">
+        `;
+        const {RecommendedPermissionsController} = await import('../ext/js/pages/settings/recommended-permissions-controller.js');
+        const controller = new RecommendedPermissionsController(/** @type {any} */ ({on: vi.fn()}));
+        const catchSpy = vi.fn();
+        controller._setOriginPermissionEnabled = vi.fn(() => /** @type {Promise<boolean>} */ (/** @type {unknown} */ ({catch: catchSpy})));
+        const toggle = /** @type {HTMLInputElement} */ (window.document.querySelector('#recommended-permissions-toggle'));
+        toggle.checked = true;
+        controller._onOriginToggleChangeEvent(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: toggle})));
+        expect(catchSpy).toHaveBeenCalledOnce();
         expect(toggle.checked).toBe(false);
     });
 });

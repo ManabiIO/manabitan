@@ -19,6 +19,7 @@
 import {EventDispatcher} from '../../core/event-dispatcher.js';
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {isObjectNotArray} from '../../core/object-utilities.js';
+import {log} from '../../core/log.js';
 import {deferPromise, generateId} from '../../core/utilities.js';
 import {OptionsUtil} from '../../data/options-util.js';
 import {getAllPermissions} from '../../data/permissions-util.js';
@@ -56,6 +57,8 @@ export class SettingsController extends EventDispatcher {
         this._preparedOptionsFull = null;
         /** @type {?import('core').TokenObject} */
         this._optionsUpdateToken = null;
+        /** @type {number} */
+        this._permissionsUpdateGeneration = 0;
     }
 
     /** @type {import('../../application.js').Application} */
@@ -543,7 +546,7 @@ export class SettingsController extends EventDispatcher {
 
     /** */
     _onPermissionsChanged() {
-        void this._triggerPermissionsChanged();
+        void this._triggerPermissionsChanged().catch((error) => { log.error(error); });
     }
 
     /** */
@@ -551,7 +554,9 @@ export class SettingsController extends EventDispatcher {
         const eventName = 'permissionsChanged';
         if (!this.hasListeners(eventName)) { return; }
 
+        const generation = ++this._permissionsUpdateGeneration;
         const permissions = await getAllPermissions();
+        if (generation !== this._permissionsUpdateGeneration) { return; }
         this.trigger(eventName, {permissions});
     }
 
