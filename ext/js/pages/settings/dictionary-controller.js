@@ -24,7 +24,7 @@ import {ExtensionError} from '../../core/extension-error.js';
 import {parseJson, readResponseJson} from '../../core/json.js';
 import {log} from '../../core/log.js';
 import {deferPromise, promiseTimeout} from '../../core/utilities.js';
-import {getCompletedDictionaryReplacements} from '../../data/dictionary-replacement.js';
+import {getCompletedDictionaryReplacements, isRecognizedTransientUpdateTitle} from '../../data/dictionary-replacement.js';
 import {compareRevisions} from '../../dictionary/dictionary-data-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 import {bindDictionaryRowOwnership, createDictionaryRowOwnership, getDictionaryRowOwnership} from './dictionary-row-ownership.js';
@@ -2191,8 +2191,8 @@ export class DictionaryController {
      */
     _getTransientDictionaryTitles(dictionaryInfo) {
         return dictionaryInfo
-            .map((dictionary) => dictionary.title)
-            .filter((title) => typeof title === 'string' && TRANSIENT_UPDATE_TITLE_PATTERN.test(title));
+            .filter((dictionary) => typeof dictionary.title === 'string' && isRecognizedTransientUpdateTitle(dictionary.title, dictionary))
+            .map((dictionary) => dictionary.title);
     }
 
     /**

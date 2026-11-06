@@ -26,6 +26,7 @@ import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {isDevDiagnosticsBuild, reportDiagnostics, reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {parseJson} from '../core/json.js';
+import {isRecognizedTransientUpdateTitle, parseTransientUpdateTitleInfo} from '../data/dictionary-replacement.js';
 import {log} from '../core/log.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -481,37 +482,6 @@ function packContentChunksIntoSlabs(chunks, targetBytes) {
     return {packedChunks, sourceChunkIndices, sourceChunkLocalOffsets};
 }
 
-/**
- * @param {string} title
- * @returns {{stage: string, token: string}|null}
- */
-function parseTransientUpdateTitleInfo(title) {
-    const match = `${title}`.match(/\[(update-staging|cutover|replaced) ([^\]]+)\]$/);
-    if (match === null) { return null; }
-    const [, stage, token] = match;
-    if (typeof stage !== 'string' || typeof token !== 'string' || token.length === 0) {
-        return null;
-    }
-    return {stage, token};
-}
-
-/**
- * @param {string} title
- * @param {unknown} summary
- * @returns {boolean}
- */
-function isRecognizedTransientUpdateTitle(title, summary) {
-    const transientInfo = parseTransientUpdateTitleInfo(title);
-    if (transientInfo === null) { return false; }
-    if (!(typeof summary === 'object' && summary !== null && !Array.isArray(summary))) {
-        return false;
-    }
-    const tokenValue = /** @type {unknown} */ (Reflect.get(summary, 'updateSessionToken'));
-    const summaryToken = typeof tokenValue === 'string' ? tokenValue.trim() : '';
-    const stageValue = /** @type {unknown} */ (Reflect.get(summary, 'transientUpdateStage'));
-    const summaryStage = typeof stageValue === 'string' ? stageValue.trim() : '';
-    return summaryToken === transientInfo.token && summaryStage === transientInfo.stage;
-}
 
 /**
  * @param {Uint8Array[]} chunks
