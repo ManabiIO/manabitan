@@ -115,6 +115,15 @@ async function close() {
     if (owned) { await owned.close(); }
 }
 
+async function waitForImportUiIdle(page) {
+    await page.waitForFunction(() => {
+        const progress = [...document.querySelectorAll('#dictionaries-modal .dictionary-import-progress')];
+        return progress.length > 0 && progress.every((node) => node.hidden);
+    }, null, {timeout: 120000});
+    const error = await page.evaluate(() => document.querySelector('#dictionary-error:not([hidden])')?.textContent?.trim() ?? '');
+    assert.equal(error, '', 'Import UI reported an error after publication');
+}
+
 async function published(page, healthy) {
     await page.waitForFunction(async ({title, healthy}) => {
         const response = await new Promise((resolve) => { chrome.runtime.sendMessage({action: 'getDictionaryInfo', params: {}}, resolve); });
@@ -170,6 +179,7 @@ try {
     assert.equal(legacyImport.usesFallbackStorage, false);
     assert.equal(legacyImport.openStorageDiagnostics?.mode, 'opfs-sahpool');
     report.oldImportStorage = {usesFallbackStorage: false, mode: legacyImport.openStorageDiagnostics.mode, evidence: 'published import-worker completion snapshot'};
+    await waitForImportUiIdle(page);
     let options = await send(page, 'optionsGetFull');
     const dictionaryIndex = options.profiles[0].options.dictionaries.findIndex((row) => row.name === title);
     assert.ok(dictionaryIndex >= 0);
@@ -206,9 +216,22 @@ try {
     await warning.click();
     await page.locator('#dictionary-details-modal:not([hidden])').waitFor();
     assert.match(await page.locator('#dictionary-details-modal .dictionary-storage-error-notification').textContent(), /storage was upgraded/i);
+    const sequenceBefore = await page.evaluate(() => {
+        Reflect.set(globalThis, '__manabitanImportCompletionSignalEnabled', true);
+        return Number(Reflect.get(globalThis, '__manabitanImportCompletionSequence') ?? 0);
+    });
     const chooser = page.waitForEvent('filechooser');
     await page.locator('#dictionary-details-modal .dictionary-reimport-button').click();
     await (await chooser).setFiles(fixturePath);
+    await page.waitForFunction(({sequenceBefore, title}) => {
+        const completion = Reflect.get(globalThis, '__manabitanLastImportCompletion');
+        return completion?.importRunCurrent === true && completion.sequence > sequenceBefore &&
+            completion.importedTitles?.some((name) => name === title || name.startsWith(title + ' [update-staging '));
+    }, {sequenceBefore, title}, {timeout: 120000});
+    const completion = await page.evaluate(() => Reflect.get(globalThis, '__manabitanLastImportCompletion'));
+    assert.equal(completion.errorCount, 0);
+    report.reimportCompletion = {sequence: completion.sequence, errorCount: completion.errorCount, importedTitles: completion.importedTitles};
+    await waitForImportUiIdle(page);
     await published(page, true);
     preserved(options, await send(page, 'optionsGetFull'));
     await lookup(page);
