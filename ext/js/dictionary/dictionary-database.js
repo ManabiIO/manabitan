@@ -74,6 +74,7 @@ import {
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
+const DICTIONARY_STORAGE_UPGRADE_REASON = 'Dictionary storage was upgraded. Download or import this dictionary again.';
 const TRANSIENT_UPDATE_TITLE_PATTERN = /\[(?:update-staging|cutover|replaced) [^\]]+\]/;
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
 const TERM_ENTRY_CONTENT_CACHE_MAX_BYTES = 32 * 1024 * 1024;
@@ -4229,6 +4230,9 @@ null;
 
     /** Restores terminal dictionary health before startup cleanup and prewarm. */
     _restoreTermRecordDictionaryHealth() {
+        // Health callbacks persist by logical title and generation. Establish
+        // those owners before restoring a physical storage failure on reopen.
+        this._refreshTermRecordStorageNameMappings();
         const db = this._requireDb();
         const rows = db.selectObjects(`
             SELECT h.title, h.reason, h.generationId, d.summaryJson
@@ -4574,10 +4578,11 @@ null;
         const markedReimportRequiredTitles = [];
         for (let i = 0; i < missingShardDictionaryNames.length; ++i) {
             const title = missingShardDictionaryNames[i];
-            this._termRecordStore.markDictionaryReimportRequired(
-                missingShardStorageNames[i],
-                'Dictionary record data is missing',
-            );
+            const storageName = missingShardStorageNames[i];
+            const health = this._termRecordStore.getDictionaryHealth?.(storageName);
+            if (health?.status !== 'reimportRequired') {
+                this._termRecordStore.markDictionaryReimportRequired(storageName, 'Dictionary record data is missing');
+            }
             markedReimportRequiredTitles.push(title);
         }
 
@@ -9783,6 +9788,27 @@ null :
         const sharedGlossaryArtifactsBefore = this._asNumber(db.selectValue('SELECT COUNT(*) FROM sharedGlossaryArtifacts'), 0);
         const termRecordsBefore = this._termRecordStore.size;
 
+        // Preserve the installed inventory so the existing reimport controls
+        // and per-profile dictionary preferences survive a storage reset. Never
+        // retain incomplete, malformed, or owned transient update summaries.
+        const retainedDictionaries = [];
+        for (const row of db.selectObjects('SELECT id, title, version, summaryJson FROM dictionaries ORDER BY id ASC')) {
+            const title = this._asString(row.title);
+            const summary = this._safeParseJson(this._asString(row.summaryJson), null);
+            const version = this._asNumber(row.version, 0);
+            if (
+                title.length === 0 || summary === null || typeof summary !== 'object' || Array.isArray(summary) ||
+                summary.title !== title || summary.importSuccess !== true ||
+                (version !== 1 && version !== 3) || summary.version !== version ||
+                isRecognizedTransientUpdateTitle(title, summary)
+            ) { continue; }
+            // Retained metadata describes unavailable old content, not a new
+            // durable import publication that a reconnected client may accept.
+            delete summary.storageImportOperationId;
+            retainedDictionaries.push({id: row.id, title, version, summary});
+        }
+        // Read and validate the inventory before destructive storage I/O. A
+        // metadata read failure must leave the old files available for retry.
         const resetErrors = await this._collectPersistentStoreResetErrors(false);
         if (resetErrors.length === 1) {
             throw resetErrors[0];
@@ -9804,6 +9830,16 @@ null :
             db.exec('DELETE FROM termGlossarySearchTerms');
             db.exec('DELETE FROM dictionaryGlossarySearchIndex');
             db.exec('DELETE FROM dictionaries');
+            for (const {id, title, version, summary} of retainedDictionaries) {
+                db.exec({
+                    sql: 'INSERT INTO dictionaries (id, title, version, summaryJson) VALUES (?, ?, ?, ?)',
+                    bind: [id, title, version, JSON.stringify(summary)],
+                });
+                db.exec({
+                    sql: 'INSERT INTO dictionaryStorageHealth (title, generationId, reason) VALUES (?, ?, ?)',
+                    bind: [title, this._getSummaryStorageGenerationId(summary, title), DICTIONARY_STORAGE_UPGRADE_REASON],
+                });
+            }
             db.exec('COMMIT');
         } catch (e) {
             try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
@@ -9826,6 +9862,7 @@ null :
             tagMetaBefore,
             mediaBefore,
             sharedGlossaryArtifactsBefore,
+            retainedDictionaryCount: retainedDictionaries.length,
         };
     }
 

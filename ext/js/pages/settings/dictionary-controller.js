@@ -474,6 +474,10 @@ class DictionaryEntry {
         versionElement.textContent = `rev.${revision}`;
         outdateElement.hidden = (version >= 3);
         storageErrorElement.hidden = storageHealth !== 'reimportRequired';
+        querySelectorNotNull(storageErrorElement, '.settings-item-children').textContent = (
+            this._dictionaryInfo.storageHealthReason?.trim() ||
+            "This dictionary's stored data cannot be used. Re-import it to restore lookups."
+        );
         reimportButton.hidden = storageHealth !== 'reimportRequired';
         reimportButton.onclick = null;
         if (storageHealth === 'reimportRequired') {
