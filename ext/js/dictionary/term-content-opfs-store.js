@@ -1017,6 +1017,10 @@ export class TermContentOpfsStore {
                 throw error;
             }
             const recovered = await this._recoverFromNotReadableFileError('ensure-loaded', error);
+            // Recovery invalidates this generation itself. If its bounded
+            // attempts fail, propagate the transient error instead of letting
+            // the outer generation loop restart recovery while holding admission.
+            if (!recovered) { throw error; }
             if (generation === this._readStateGeneration) {
                 this._loadedForRead = recovered;
             }
