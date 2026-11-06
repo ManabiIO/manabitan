@@ -1,0 +1,223 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import {afterEach, expect, test, vi} from 'vitest';
+import {API} from '../ext/js/comm/api.js';
+import {Backend} from '../ext/js/background/backend.js';
+
+/** @returns {{addListener: (callback: (...args: unknown[]) => void) => void, removeListener: (callback: (...args: unknown[]) => void) => void, emit: (...args: unknown[]) => void}} */
+function browserEvent() {
+    /** @type {Set<(...args: unknown[]) => void>} */
+    const listeners = new Set();
+    return {
+        addListener(callback) { listeners.add(callback); },
+        removeListener(callback) { listeners.delete(callback); },
+        emit(...args) { for (const callback of listeners) { callback(...args); } },
+    };
+}
+
+/** @type {API[]} */
+const clients = [];
+afterEach(() => {
+    for (const client of clients.splice(0)) { client.shutdownRuntimeConnections(); }
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+});
+
+function fixture() {
+    const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+    const cancel = vi.fn(async () => {});
+    const refresh = vi.fn(async () => {});
+    const notifications = vi.fn();
+    Object.assign(backend, {
+        _isPrepared: true,
+        _prepareCompletePromise: Promise.resolve(),
+        _setDictionaryImportModePromise: null,
+        _dictionaryImportModeActive: false,
+        _dictionaryImportOwners: new Set(),
+        _ownedDictionaryImports: new Map(),
+        _dictionaryImportOwnerConnections: new Map(),
+        _orphanedDictionaryImportOwners: new Set(),
+        _offscreen: {sendMessagePromise: cancel},
+        _localDictionaryRuntime: null,
+        _pendingDatabaseUpdatedNotifications: [],
+        _deferredDictionaryRefreshDuringImport: false,
+        _dictionaryDatabasePreparePromise: null,
+        _translator: {clearDatabaseCaches: vi.fn()},
+        _ensureDictionaryDatabaseReady: vi.fn(async () => {}),
+        _refreshDictionaryDatabaseAfterUpdate: refresh,
+        _clearDictionaryRefreshRetry: vi.fn(),
+        _sendApplicationDatabaseUpdated: notifications,
+    });
+    const connect = vi.fn((/** @type {{name: string}} */ {name}) => {
+        const onClientMessage = browserEvent();
+        const onServerMessage = browserEvent();
+        const onClientDisconnect = browserEvent();
+        const onServerDisconnect = browserEvent();
+        let disconnected = false;
+        const disconnectClient = () => {
+            if (disconnected) { return; }
+            disconnected = true;
+            onServerDisconnect.emit();
+        };
+        const disconnectServer = () => {
+            if (disconnected) { return; }
+            disconnected = true;
+            onClientDisconnect.emit();
+        };
+        const client = {name, onMessage: onClientMessage, onDisconnect: onClientDisconnect, disconnect: disconnectClient, postMessage: onServerMessage.emit};
+        const server = {name, onMessage: onServerMessage, onDisconnect: onServerDisconnect, disconnect: disconnectServer, postMessage: onClientMessage.emit};
+        queueMicrotask(() => { backend._onDictionaryImportOwnerConnect(/** @type {chrome.runtime.Port} */ (/** @type {unknown} */ (server))); });
+        return client;
+    });
+    vi.stubGlobal('chrome', {runtime: {connect}});
+    const client = () => {
+        const api = new API(/** @type {import('../ext/js/extension/web-extension.js').WebExtension} */ ({}));
+        vi.spyOn(api, '_invoke').mockImplementation(async (_action, params) => {
+            const data = /** @type {{active: boolean, ownerId: string}} */ (/** @type {unknown} */ (params));
+            await backend._setDictionaryImportMode(data.active, data.ownerId);
+        });
+        clients.push(api);
+        return api;
+    };
+    return {backend, client, connect, cancel, refresh, notifications};
+}
+
+test('a browser connection acknowledges ownership and ordinary release closes it', async () => {
+    const {backend, client, connect, cancel, refresh} = fixture();
+    const api = client();
+    await Promise.all([api.setDictionaryImportMode(true, 'page-A'), api.setDictionaryImportMode(true, 'page-A')]);
+    expect(connect).toHaveBeenCalledOnce();
+    expect(backend._dictionaryImportOwners.has('page-A')).toBe(true);
+    await api.setDictionaryImportMode(false, 'page-A');
+    expect(backend._dictionaryImportOwners.size).toBe(0);
+    expect(Reflect.get(backend, '_dictionaryImportOwnerConnections').size).toBe(0);
+    expect(cancel).not.toHaveBeenCalled();
+    expect(refresh).toHaveBeenCalledOnce();
+});
+
+test.each([false, true])('page loss preserves admitted work then releases only the orphaned owner (other page=%s)', async (anotherPage) => {
+    const {backend, client, cancel, notifications} = fixture();
+    const api = client();
+    const other = client();
+    await api.setDictionaryImportMode(true, 'departed-page');
+    if (anotherPage) { await other.setDictionaryImportMode(true, 'live-page'); }
+    backend._registerDictionaryImportOwner('operation-A', 'departed-page');
+    const operation = backend._ownedDictionaryImports.get('operation-A');
+    if (operation) { operation.runtimeAdmissionAttempted = true; }
+    const observer = new MessageChannel();
+    const relay = backend._superviseOwnedDictionaryImport('operation-A', observer.port2);
+    try {
+        backend._settleDictionaryImportOwnership('operation-A', 'departed-page');
+        api.shutdownRuntimeConnections();
+        expect(operation?.cancelled).toBe(false);
+        expect(backend._dictionaryImportOwners.has('departed-page')).toBe(true);
+        expect(cancel).not.toHaveBeenCalled();
+        relay.port.postMessage({type: 'complete', result: {result: {title: 'Fixture'}, errors: []}});
+        await expect.poll(() => backend._dictionaryImportOwners.has('departed-page')).toBe(false);
+        expect(backend._ownedDictionaryImports.size).toBe(0);
+        expect(cancel).not.toHaveBeenCalled();
+        if (anotherPage) {
+            expect(backend._dictionaryImportOwners.has('live-page')).toBe(true);
+            expect(notifications).not.toHaveBeenCalled();
+            await other.setDictionaryImportMode(false, 'live-page');
+        }
+        await expect.poll(() => notifications.mock.calls.length).toBe(1);
+        expect(backend._dictionaryImportModeActive).toBe(false);
+        expect(Reflect.get(backend, '_orphanedDictionaryImportOwners').size).toBe(0);
+    } finally {
+        relay.close();
+        observer.port1.close();
+        observer.port2.close();
+    }
+});
+
+test('disconnect while activation is awaiting a cache clear cannot leave a late owner active', async () => {
+    const {backend, client, cancel} = fixture();
+    /** @type {PromiseWithResolvers<void>} */
+    const entered = Promise.withResolvers();
+    /** @type {PromiseWithResolvers<void>} */
+    const release = Promise.withResolvers();
+    Reflect.set(backend, '_translator', {clearDatabaseCaches: async () => {
+        entered.resolve();
+        await release.promise;
+    }});
+    const api = client();
+    const open = api.setDictionaryImportMode(true, 'page-A');
+    const rejected = expect(open).rejects.toThrow(/disconnected/iu);
+    await entered.promise;
+    api.shutdownRuntimeConnections();
+    await rejected;
+    release.resolve();
+    await expect.poll(() => backend._dictionaryImportOwners.size).toBe(0);
+    await expect.poll(() => backend._dictionaryImportModeActive).toBe(false);
+    expect(cancel).not.toHaveBeenCalled();
+});
+
+
+test('failed activation releases its browser connection and permits an independent session', async () => {
+    const {backend, client} = fixture();
+    const clear = vi.fn().mockRejectedValueOnce(new Error('injected cache-clear failure')).mockResolvedValue(void 0);
+    Reflect.set(backend, '_translator', {clearDatabaseCaches: clear});
+    const api = client();
+    await expect(api.setDictionaryImportMode(true, 'failed-page')).rejects.toThrow('injected cache-clear failure');
+    await expect.poll(() => backend._dictionaryImportOwners.size).toBe(0);
+    expect(Reflect.get(backend, '_dictionaryImportOwnerConnections').size).toBe(0);
+    await api.setDictionaryImportMode(true, 'healthy-page');
+    expect(backend._dictionaryImportOwners.has('healthy-page')).toBe(true);
+    await api.setDictionaryImportMode(false, 'healthy-page');
+});
+
+test('page loss aborts an unadmitted download without dispatching mutation cancellation', async () => {
+    const {backend, client, cancel} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('download-A', 'page-A');
+    const operation = backend._ownedDictionaryImports.get('download-A');
+    const download = new AbortController();
+    if (operation) { operation.downloadAbortController = download; }
+    api.shutdownRuntimeConnections();
+    expect(download.signal.aborted).toBe(true);
+    expect(operation?.cancelled).toBe(true);
+    backend._settleDictionaryImportOwnership('download-A', 'page-A', true);
+    await expect.poll(() => backend._dictionaryImportOwners.size).toBe(0);
+    expect(cancel).not.toHaveBeenCalled();
+});
+
+test('a duplicate owner connection cannot disconnect the original live session', async () => {
+    const {backend, client} = fixture();
+    const original = client();
+    const duplicate = client();
+    await original.setDictionaryImportMode(true, 'same-owner');
+    await expect(duplicate.setDictionaryImportMode(true, 'same-owner')).rejects.toThrow(/disconnected/iu);
+    expect(backend._dictionaryImportOwners.has('same-owner')).toBe(true);
+    expect(Reflect.get(backend, '_dictionaryImportOwnerConnections').size).toBe(1);
+    await original.setDictionaryImportMode(false, 'same-owner');
+});
+
+
+test('publication is still announced if the page dies after completion but before UI finalization', async () => {
+    const {backend, client, notifications} = fixture();
+    const api = client();
+    await api.setDictionaryImportMode(true, 'page-A');
+    backend._registerDictionaryImportOwner('operation-A', 'page-A');
+    const operation = backend._ownedDictionaryImports.get('operation-A');
+    if (operation) { operation.runtimeAdmissionAttempted = true; }
+    backend._settleDictionaryImportOwnership('operation-A', 'page-A');
+    const observer = new MessageChannel();
+    const relay = backend._superviseOwnedDictionaryImport('operation-A', observer.port2);
+    try {
+        relay.port.postMessage({type: 'complete', result: {result: {title: 'Fixture'}, outcome: {status: 'published'}, errors: []}});
+        await expect.poll(() => backend._ownedDictionaryImports.size).toBe(0);
+        expect(notifications).not.toHaveBeenCalled();
+        api.shutdownRuntimeConnections();
+        await expect.poll(() => notifications.mock.calls.length).toBe(1);
+        expect(notifications).toHaveBeenCalledExactlyOnceWith('dictionary', 'import');
+    } finally {
+        relay.close();
+        observer.port1.close();
+        observer.port2.close();
+    }
+});
