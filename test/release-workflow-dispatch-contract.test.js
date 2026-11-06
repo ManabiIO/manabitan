@@ -75,7 +75,7 @@ describe('release workflow dispatch ref contract', () => {
         expect(publish).toContain('needs: [build, provenance]');
         expect(build).toContain('release_id: $' + '{{ steps.release.outputs.id }}');
         expect(publish).toContain('RELEASE_ID: $' + '{{ needs.build.outputs.release_id }}');
-        expect(publish).toContain('gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" > release.json');
+        expect(publish).toContain('gh api "repos/$' + '{GITHUB_REPOSITORY}/releases/$' + '{RELEASE_ID}" > release.json');
         const verify = publish.indexOf('node dev/bin/verify-staged-release.js');
         const makePublic = publish.indexOf('-F draft=false -F prerelease=true');
         expect(verify).toBeGreaterThan(-1);
