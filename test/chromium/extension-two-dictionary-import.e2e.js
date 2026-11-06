@@ -51,10 +51,11 @@ import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
  */
 async function verifyCancelledImportNavigation(context, extensionBaseUrl) {
     const testPage = await context.newPage();
+    const navigationSession = await context.newCDPSession(testPage);
     try {
         await testPage.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
         await waitForSettingsPageReady(testPage);
-        await testPage.evaluate(async () => {
+        const documentNonce = await testPage.evaluate(async () => {
             const {DictionaryImportController} = await import('/js/pages/settings/dictionary-import-controller.js');
             const {SettingsController} = await import('/js/pages/settings/settings-controller.js');
             const {EventListenerCollection} = await import('/js/core/event-listener-collection.js');
@@ -82,15 +83,16 @@ async function verifyCancelledImportNavigation(context, extensionBaseUrl) {
             gesture.textContent = 'Activate navigation fixture';
             gesture.style.cssText = 'position:fixed;top:0;left:0;z-index:2147483647';
             document.body.append(gesture);
-            Reflect.set(globalThis, '__manabitanNavigationFixture', {controller, state, prevention});
+            const documentNonce = crypto.randomUUID();
+            Reflect.set(globalThis, '__manabitanNavigationFixture', {controller, state, prevention, documentNonce});
+            return documentNonce;
         });
         await testPage.locator('#navigation-fixture-gesture').click();
         for (let attempt = 0; attempt < 2; ++attempt) {
             const dialog = testPage.waitForEvent('dialog', {timeout: 10000});
-            const navigation = testPage.reload({timeout: 15000}).then(
-                () => { throw new Error('Navigation unexpectedly completed after choosing Stay'); },
-                (error) => { assert.match(String(error), /ERR_ABORTED|aborted|cancelled/i); },
-            );
+            // Page.reload acknowledges the command without waiting for a
+            // navigation which choosing Stay intentionally prevents.
+            const navigation = navigationSession.send('Page.reload');
             void navigation.catch(() => {});
             const confirmation = await dialog;
             assert.equal(confirmation.type(), 'beforeunload');
@@ -98,8 +100,9 @@ async function verifyCancelledImportNavigation(context, extensionBaseUrl) {
             await navigation;
             const state = await testPage.evaluate(() => {
                 const fixture = Reflect.get(globalThis, '__manabitanNavigationFixture');
-                return {ownerId: fixture.controller._activeImportOwnerId, ...fixture.state};
+                return {ownerId: fixture.controller._activeImportOwnerId, documentNonce: fixture.documentNonce, ...fixture.state};
             });
+            assert.equal(state.documentNonce, documentNonce, 'Choosing Stay must retain the original document');
             assert.equal(state.ownerId, 'navigation-fixture-owner');
             assert.equal(state.mdxDisconnects, 0);
             assert.deepEqual(state.teardown, []);
@@ -114,6 +117,7 @@ async function verifyCancelledImportNavigation(context, extensionBaseUrl) {
         assert.equal(cleanup.mdxDisconnects, 1);
         return {cancelledNavigations: 2, ownerPreserved: true, teardownCount: cleanup.teardown.length};
     } finally {
+        await navigationSession.detach();
         if (!testPage.isClosed()) {
             await testPage.evaluate(() => Reflect.get(globalThis, '__manabitanNavigationFixture')?.prevention.end()).catch(() => {});
             await testPage.close();
