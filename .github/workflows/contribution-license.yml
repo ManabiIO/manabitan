@@ -21,7 +21,7 @@ jobs:
           node <<'NODE'
           const body = process.env.PR_BODY ?? ''
           const acknowledgement =
-            'I agree that the copyrightable portions of this contribution that I own are licensed separately under GPL-3.0-or-later and BSD-3-Clause, at the recipient's option, as described in CONTRIBUTING.md.'
+            "I agree that the copyrightable portions of this contribution that I own are licensed separately under GPL-3.0-or-later and BSD-3-Clause, at the recipient's option, as described in CONTRIBUTING.md."
           const checked = body
             .split(/\r?\n/)
             .some((line) => /^\s*-\s*\[[xX]\]\s*/.test(line) && line.includes(acknowledgement))
