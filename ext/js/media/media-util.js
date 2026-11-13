@@ -170,7 +170,7 @@ export function getFileExtensionFromImageMediaType(mediaType) {
  *   otherwise `null`.
  */
 export function getFileExtensionFromAudioMediaType(mediaType) {
-    switch (mediaType) {
+    switch (mediaType.split(';', 1)[0].trim().toLowerCase()) {
         case 'audio/aac':
             return '.aac';
         case 'audio/mpeg':

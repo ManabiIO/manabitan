@@ -70,11 +70,13 @@ export class OptionToggleHotkeyHandler {
      */
     async _toggleOption(path) {
         const optionsContext = this._display.getOptionsContext();
+        // Current/index contexts can resolve another profile after a settings change.
+        const profileId = this._display.getOptionsProfileId();
         // A rapid second hotkey must read the state after the first write.
         // Queue the read-modify-write cycle, not just the writes themselves.
         const operation = this._toggleTail.then(async () => {
-            if (this._display.getOptionsContext() !== optionsContext) { return; }
-            await this._toggleOptionNow(path, optionsContext);
+            if (!this._isCurrentProfile(optionsContext, profileId)) { return; }
+            await this._toggleOptionNow(path, optionsContext, profileId);
         });
         this._toggleTail = operation.then(() => {}, () => {});
         await operation;
@@ -83,15 +85,20 @@ export class OptionToggleHotkeyHandler {
     /**
      * @param {string} path
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {?string} profileId
      * @returns {Promise<void>}
      */
-    async _toggleOptionNow(path, optionsContext) {
+    async _toggleOptionNow(path, optionsContext, profileId) {
         let value;
         try {
+            if (typeof profileId !== 'string' || profileId.length === 0) {
+                throw new Error('Search profile identity is unavailable');
+            }
             const getSettingsResponse = (await this._display.application.api.getSettings([{
                 scope: 'profile',
                 path,
                 optionsContext,
+                profileId,
             }]))[0];
             const {error: getSettingsError} = getSettingsResponse;
             if (typeof getSettingsError !== 'undefined') {
@@ -105,7 +112,7 @@ export class OptionToggleHotkeyHandler {
 
             // A navigation or profile-context change makes the pending
             // action obsolete, even if the earlier read has now completed.
-            if (this._display.getOptionsContext() !== optionsContext) { return; }
+            if (!this._isCurrentProfile(optionsContext, profileId)) { return; }
             value = !value;
 
             /** @type {import('settings-modifications').ScopedModificationSet} */
@@ -115,6 +122,7 @@ export class OptionToggleHotkeyHandler {
                 path,
                 value,
                 optionsContext,
+                profileId,
             };
             const modifySettingsResponse = (await this._display.application.api.modifySettings([modification], this._source))[0];
             const {error: modifySettingsError} = modifySettingsResponse;
@@ -122,14 +130,23 @@ export class OptionToggleHotkeyHandler {
                 throw ExtensionError.deserialize(modifySettingsError);
             }
 
-            if (this._display.getOptionsContext() === optionsContext) {
+            if (this._isCurrentProfile(optionsContext, profileId)) {
                 this._showNotification(this._createSuccessMessage(path, value), true);
             }
         } catch (e) {
-            if (this._display.getOptionsContext() === optionsContext) {
+            if (this._isCurrentProfile(optionsContext, profileId)) {
                 this._showNotification(this._createErrorMessage(path, e), false);
             }
         }
+    }
+
+    /**
+     * @param {import('settings').OptionsContext} optionsContext
+     * @param {?string} profileId
+     * @returns {boolean}
+     */
+    _isCurrentProfile(optionsContext, profileId) {
+        return this._display.getOptionsContext() === optionsContext && this._display.getOptionsProfileId() === profileId;
     }
 
     /**

@@ -86,7 +86,7 @@ const LOW_MEMORY_TERM_EXACT_PRESENCE_CACHE_MAX_ENTRIES = 8000;
 const TERM_EXACT_MATCH_CACHE_MAX_ENTRIES = 4096;
 const TERM_EXACT_MATCH_CACHE_MAX_BYTES = 4 * 1024 * 1024;
 const TERM_EXACT_MATCH_CACHE_MAX_IDS_PER_TERM = 256;
-const GLOSSARY_SEARCH_INDEX_VERSION = 1;
+const GLOSSARY_SEARCH_INDEX_VERSION = 2;
 const GLOSSARY_SEARCH_BUILD_BATCH_SIZE = 192;
 const GLOSSARY_SEARCH_CANDIDATE_LIMIT = 400;
 const GLOSSARY_SEARCH_RESULT_LIMIT = 100;
@@ -1995,7 +1995,7 @@ export class DictionaryDatabase {
             }
             db.exec('COMMIT');
         } catch (e) {
-            try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+            this._rollbackDictionaryDeletion(db, e);
             throw e;
         }
 
@@ -2351,7 +2351,7 @@ null;
                 db.exec('DELETE FROM sharedGlossaryArtifacts');
                 db.exec('COMMIT');
             } catch (e) {
-                try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+                this._rollbackDictionaryDeletion(db, e);
                 throw e;
             }
             // Commit metadata removal before resetting OPFS. An interruption
@@ -2371,8 +2371,25 @@ null;
             `);
             db.exec('COMMIT');
         } catch (e) {
-            try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+            this._rollbackDictionaryDeletion(db, e);
             throw e;
+        }
+    }
+
+    /**
+     * @param {import('@sqlite.org/sqlite-wasm').Database} db
+     * @param {unknown} error
+     * @throws {AggregateError} If the failed transaction cannot be rolled back.
+     */
+    _rollbackDictionaryDeletion(db, error) {
+        try {
+            db.exec('ROLLBACK');
+        } catch (rollbackError) {
+            // A failed rollback can leave uncommitted metadata visible and keep
+            // the next mutation inside this transaction. Reopen before reuse.
+            const errors = [toError(error), toError(rollbackError)];
+            this._quarantineBulkImportConnection(errors);
+            throw new AggregateError(errors, 'Dictionary deletion and rollback failed');
         }
     }
 
@@ -3440,12 +3457,6 @@ null;
             }
 
             this._invalidateGlossarySearchIndex(dictionaryName);
-            const insertTerm = this._getCachedStatement(
-                'INSERT OR REPLACE INTO termGlossarySearchTerms(dictionary, termId, score) VALUES ($dictionary, $termId, $score)',
-            );
-            const insertToken = this._getCachedStatement(
-                'INSERT OR IGNORE INTO termGlossaryTokens(dictionary, token, termId) VALUES ($dictionary, $token, $termId)',
-            );
             for (let start = 0; start < count; start += GLOSSARY_SEARCH_BUILD_BATCH_SIZE) {
                 if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
                 const expected = Math.min(GLOSSARY_SEARCH_BUILD_BATCH_SIZE, count - start);
@@ -3456,6 +3467,15 @@ null;
                 const rows = await this._fetchTermRowsByIds(batch);
                 this._assertTermLookupGeneration(generation, dictionaryName);
                 if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+                // Other queries can evict cached statements while hydration or
+                // the previous batch yields. Acquire them only for this
+                // synchronous transaction, after the last asynchronous step.
+                const insertTerm = this._getCachedStatement(
+                    'INSERT OR REPLACE INTO termGlossarySearchTerms(dictionary, termId, score) VALUES ($dictionary, $termId, $score)',
+                );
+                const insertToken = this._getCachedStatement(
+                    'INSERT OR IGNORE INTO termGlossaryTokens(dictionary, token, termId) VALUES ($dictionary, $token, $termId)',
+                );
                 db.exec('BEGIN IMMEDIATE');
                 try {
                     for (const id of batch) {
@@ -3482,7 +3502,15 @@ null;
                     }
                     db.exec('COMMIT');
                 } catch (error) {
-                    try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+                    try {
+                        db.exec('ROLLBACK');
+                    } catch (rollbackError) {
+                        // Derived index writes must not leave a failed
+                        // transaction attached to the shared lookup connection.
+                        const errors = [toError(error), toError(rollbackError)];
+                        this._quarantineBulkImportConnection(errors);
+                        throw new AggregateError(errors, 'Glossary search indexing and rollback failed');
+                    }
                     throw error;
                 }
                 const processed = start + batch.length;
@@ -3967,6 +3995,7 @@ null;
         if (items.length === 0) {
             return [];
         }
+        const generation = this._directTermIndexGeneration;
         /** @type {import('dictionary-database').Media[]} */
         const results = [];
         /** @type {Map<string, {dictionary: string, path: string, indexes: number[]}>} */
@@ -4012,6 +4041,9 @@ null;
             }
             for (const row of rows) {
                 const converted = await this._deserializeMediaRow(row);
+                // Direct drawing ports can overlap mutations. An old media row
+                // must not label bytes read after its content offsets are reused.
+                this._assertTermLookupGeneration(generation);
                 const itemIndexes = mediaRequestIndexes.get(this._createDictionaryQueryKey(converted.dictionary, converted.path));
                 if (typeof itemIndexes === 'undefined') { continue; }
                 for (const itemIndex of itemIndexes.indexes) {
@@ -4489,7 +4521,9 @@ null;
             try {
                 db.exec('ROLLBACK');
             } catch (rollbackError) {
-                throw new AggregateError([toError(error), toError(rollbackError)], 'Failed to discard incomplete replacement metadata and roll back');
+                const errors = [toError(error), toError(rollbackError)];
+                this._quarantineBulkImportConnection(errors);
+                throw new AggregateError(errors, 'Failed to discard incomplete replacement metadata and roll back');
             }
             throw error;
         }
@@ -4734,7 +4768,15 @@ null;
             }
         } catch (e) {
             if (useLocalTransaction) {
-                try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+                try {
+                    db.exec('ROLLBACK');
+                } catch (rollbackError) {
+                    // The import summary is inserted before the bulk session
+                    // owns cleanup, so this transaction must retire itself.
+                    const errors = [toError(e), toError(rollbackError)];
+                    this._quarantineBulkImportConnection(errors);
+                    throw new AggregateError(errors, 'Dictionary data insertion and rollback failed');
+                }
             }
             throw e;
         }
@@ -5361,7 +5403,15 @@ null;
             });
             db.exec('COMMIT');
         } catch (error) {
-            try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+            try {
+                db.exec('ROLLBACK');
+            } catch (rollbackError) {
+                // Bulk import ownership has already ended before placeholder
+                // cleanup. Do not leave its failed transaction in the worker.
+                const errors = [toError(error), toError(rollbackError)];
+                this._quarantineBulkImportConnection(errors);
+                throw new AggregateError(errors, 'Incomplete dictionary summary cleanup and rollback failed');
+            }
             throw error;
         }
     }
@@ -9446,6 +9496,10 @@ null :
         // A downgraded build must not initialize old tables or inspect newer
         // OPFS formats before it rejects an unsupported database version.
         this._getSupportedInstalledSchemaVersion();
+        // An interrupted rollback can leave a sticky store error or gaps among
+        // unpublished segments. Recover the journal before ordinary preparation
+        // tries to admit that incomplete state as a readable content inventory.
+        await this._recoverInterruptedImportSession();
         await this._termContentStore.prepare();
         await this._termRecordStore.prepare();
         this._termContentBlockStore.clearCache();
@@ -9456,7 +9510,6 @@ null :
 
         await this._initializeSchema();
         await this._runSchemaMigrations();
-        await this._recoverInterruptedImportSession();
         this._restoreTermRecordDictionaryHealth();
     }
 
@@ -10821,10 +10874,13 @@ null :
                                     rawContentHeader.glossaryJsonOffset,
                                     rawContentHeader.glossaryJsonLength,
                                 );
-                                const glossaryJson = this._textDecoder.decode(rawGlossaryJsonBytes);
+                                let glossaryJson = this._textDecoder.decode(rawGlossaryJsonBytes);
                                 glossary = parseJson(glossaryJson);
                                 if (!Array.isArray(glossary)) {
                                     throw new Error('Term glossary payload is not an array');
+                                }
+                                if (isRawTermContentTokenBinary(contentBytes) && this._normalizeNativeTermGlossaryImages(glossary)) {
+                                    glossaryJson = JSON.stringify(glossary);
                                 }
                                 cached = {
                                     definitionTags,
@@ -11002,6 +11058,56 @@ null :
             });
         }
         return termEntry;
+    }
+
+    /**
+     * Native token content retains authored image dimensions. Convert those to
+     * the preferred dimensions expected by the renderer, matching the resolved
+     * importer path when intrinsic image metadata is skipped. Do this on read
+     * so dictionaries imported before this normalization also render correctly.
+     * @param {import('dictionary-data').TermGlossary[]} glossary
+     * @returns {boolean}
+     */
+    _normalizeNativeTermGlossaryImages(glossary) {
+        let changed = false;
+        /** @type {import('structured-content').Content[]} */
+        const pending = [];
+        for (const entry of glossary) {
+            if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) { continue; }
+            if (entry.type === 'image') {
+                if (this._normalizeNativeTermGlossaryImage(entry)) { changed = true; }
+            } else if (entry.type === 'structured-content') {
+                pending.push(entry.content);
+            }
+        }
+        while (pending.length > 0) {
+            const content = pending.pop();
+            if (Array.isArray(content)) {
+                for (const child of content) { pending.push(child); }
+            } else if (content !== null && typeof content === 'object') {
+                if (content.tag === 'img') {
+                    if (this._normalizeNativeTermGlossaryImage(content)) { changed = true; }
+                } else if (typeof content.content !== 'undefined') {
+                    pending.push(content.content);
+                }
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * @param {import('structured-content').ImageElementBase} image
+     * @returns {boolean}
+     */
+    _normalizeNativeTermGlossaryImage(image) {
+        const {width, height, preferredWidth, preferredHeight} = image;
+        if (typeof preferredWidth === 'number' || typeof preferredHeight === 'number') { return false; }
+        if (typeof width !== 'number' && typeof height !== 'number') { return false; }
+        if (typeof width === 'number') { image.preferredWidth = width; }
+        if (typeof height === 'number') { image.preferredHeight = height; }
+        image.width = 0;
+        image.height = 0;
+        return true;
     }
 
     /**

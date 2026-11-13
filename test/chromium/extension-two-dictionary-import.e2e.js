@@ -38,8 +38,12 @@ import {writeCombinedTabbedReport} from '../e2e/report-tabs.js';
 import {armBrowserImportTiming} from '../e2e/import-timing.js';
 import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
+import {verifyAnkiSaveDestination} from '../e2e/anki-save-destination.js';
 import {runWithReaderFinalization} from '../e2e/reader-finalization.js';
 import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
+import {verifyAnonymousRequestRuleMatching} from '../e2e/request-builder-rule-matching.js';
+import {verifyAnkiScreenshotOwnership} from '../e2e/anki-screenshot-ownership.js';
+import {verifyScannerHistoryRecovery} from '../e2e/display-history-recovery.js';
 
 /**
  * Exercise real browser confirmation dialogs with the production controller
@@ -3865,6 +3869,14 @@ async function main() {
         const settingsOpenEnd = safePerformance.now();
         await addReportPhase(report, page, 'Open settings page', 'Settings loaded and dictionary import controls visible', settingsOpenStart, settingsOpenEnd, null, processSampler);
 
+        const requestRulesStart = safePerformance.now();
+        const requestRulesWitness = await verifyAnonymousRequestRuleMatching(page);
+        await addReportPhase(report, page, 'Anonymous request rules match literal URLs', JSON.stringify(requestRulesWitness), requestRulesStart, safePerformance.now(), null, processSampler);
+
+        const screenshotStart = safePerformance.now();
+        const screenshotWitness = await verifyAnkiScreenshotOwnership(page, `${localServer.baseUrl}/wagahai-neko.html`);
+        await addReportPhase(report, page, 'Anki screenshots retain their source tab', JSON.stringify(screenshotWitness), screenshotStart, safePerformance.now(), null, processSampler);
+
         const navigationStart = safePerformance.now();
         const navigationWitness = await verifyCancelledImportNavigation(context, extensionBaseUrl);
         await addReportPhase(report, page, 'Cancelled navigation preserves import controller', JSON.stringify(navigationWitness), navigationStart, safePerformance.now(), null, processSampler);
@@ -5105,6 +5117,12 @@ async function main() {
 
             /** @type {Record<string, number>} */
             const aggregateLookupCounts = Object.fromEntries(expectedLookupDictionaries.map((name) => [name, 0]));
+            const ankiDestinationStart = safePerformance.now();
+            const ankiDestinationWitness = await verifyAnkiSaveDestination(page, extensionBaseUrl, searchVerificationTerm);
+            await addReportPhase(report, page, 'Anki saves retain their destination across changes and restart', JSON.stringify(ankiDestinationWitness), ankiDestinationStart, safePerformance.now(), null, processSampler);
+            const historyRecoveryStart = safePerformance.now();
+            const historyRecoveryWitness = await verifyScannerHistoryRecovery(context, extensionBaseUrl, searchVerificationTerm);
+            await addReportPhase(report, page, 'Restore scanner results after search reload', JSON.stringify(historyRecoveryWitness), historyRecoveryStart, safePerformance.now(), null, processSampler);
             for (const word of lookupWords) {
                 const lookupChar = String([...word][0] || '').trim();
                 if (lookupChar.length === 0) { continue; }

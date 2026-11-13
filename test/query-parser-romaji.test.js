@@ -56,6 +56,7 @@ function results(text) {
  */
 function options(readingMode) {
     return {
+        profileId: 'profile-a',
         selectedParser: 'scanner',
         termSpacing: false,
         readingMode,

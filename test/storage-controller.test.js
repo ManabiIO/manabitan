@@ -189,6 +189,61 @@ describe('StorageController runtime check', () => {
         });
     });
 
+    test.each([
+        {usage: 9000000000, quota: 10000000000, persistent: false, warning: true},
+        {usage: 7000000000, quota: 10000000000, persistent: false, warning: true},
+        {usage: 6000000000, quota: 10000000000, persistent: false, warning: false},
+        {usage: 0, quota: 2000000000, persistent: true, warning: false},
+    ])('warns about remaining storage with usage=$usage quota=$quota persistent=$persistent', async ({usage, quota, persistent, warning}) => {
+        document.body.insertAdjacentHTML('beforeend', '<div class="storage-exhaustion-alert" hidden></div>');
+        storageMock.estimate.mockResolvedValue({usage, quota});
+        const application = {
+            api: {debugDictionaryStorageState: vi.fn(async () => null)},
+            on: vi.fn(),
+        };
+        const persistentStorageController = {
+            application,
+            isStoragePeristent: vi.fn(async () => persistent),
+        };
+        controller = new StorageController(/** @type {any} */ (persistentStorageController));
+        controller.prepare();
+
+        await vi.waitFor(() => {
+            expect(document.querySelector('#storage-runtime-check')?.textContent).toContain('backend reachable=false');
+        });
+        expect((/** @type {HTMLElement} */ (document.querySelector('.storage-exhaustion-alert'))).hidden).toBe(!warning);
+    });
+
+    test('clears the low storage warning after space is freed and refreshed', async () => {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div class="storage-exhaustion-alert" hidden></div>
+            <div class="storage-usage"></div>
+        `);
+        storageMock.estimate.mockResolvedValue({usage: 9000000000, quota: 10000000000});
+        const application = {
+            api: {debugDictionaryStorageState: vi.fn(async () => null)},
+            on: vi.fn(),
+        };
+        const persistentStorageController = {
+            application,
+            isStoragePeristent: vi.fn(async () => false),
+        };
+        controller = new StorageController(/** @type {any} */ (persistentStorageController));
+        controller.prepare();
+
+        await vi.waitFor(() => {
+            expect(document.querySelector('.storage-usage')?.textContent).toBe('9.0GB');
+            expect((/** @type {HTMLElement} */ (document.querySelector('.storage-exhaustion-alert'))).hidden).toBe(false);
+        });
+
+        storageMock.estimate.mockResolvedValue({usage: 2000000000, quota: 10000000000});
+        document.querySelector('#storage-refresh')?.dispatchEvent(new MouseEvent('click'));
+        await vi.waitFor(() => {
+            expect(document.querySelector('.storage-usage')?.textContent).toBe('2.0GB');
+            expect((/** @type {HTMLElement} */ (document.querySelector('.storage-exhaustion-alert'))).hidden).toBe(true);
+        });
+    });
+
 
     test.each([
         {mode: 'unknown', usesFallbackStorage: false},

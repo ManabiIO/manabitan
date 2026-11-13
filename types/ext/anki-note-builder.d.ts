@@ -40,6 +40,8 @@ export type CreateNoteDetails = {
     compactTags: boolean;
     mediaOptions: MediaOptions | null;
     dictionaryStylesMap: Map<string, string>;
+    /** Reject template errors before returning a note; optional media errors remain in the result. */
+    throwOnRenderError?: boolean;
 };
 
 export type CreateDuplicateCheckNoteDetails = {
@@ -114,6 +116,8 @@ export type AudioMediaOptions = {
 };
 
 export type MediaOptions = {
+    ankiConnectionIdentity?: string;
+    ankiConnectionConfiguration?: Anki.ConnectionConfiguration;
     audio: AudioMediaOptions | null;
     screenshot: {
         format: Settings.AnkiScreenshotFormat;
@@ -150,6 +154,8 @@ export type MinimalApi = {
         screenshotDetails: Api.ApiParam<'injectAnkiNoteMedia', 'screenshotDetails'>,
         clipboardDetails: Api.ApiParam<'injectAnkiNoteMedia', 'clipboardDetails'>,
         dictionaryMediaDetails: Api.ApiParam<'injectAnkiNoteMedia', 'dictionaryMediaDetails'>,
+        ankiConnectionIdentity?: string,
+        ankiConnectionConfiguration?: Anki.ConnectionConfiguration,
     ): Promise<Api.ApiReturn<'injectAnkiNoteMedia'>>;
 
     parseText(

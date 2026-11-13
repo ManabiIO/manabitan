@@ -15,7 +15,7 @@ import zipfile
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, List, Tuple
 from unittest.mock import patch
-from urllib.parse import parse_qs, unquote, urlsplit
+from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 
 _MODULE_DIR = Path(__file__).resolve().parent
@@ -368,7 +368,7 @@ class MdxToYomitanTests(unittest.TestCase):
                     )
                     href = glossary["content"]["content"][0]["href"]
                     parsed = urlsplit(href)
-                    self.assertEqual(parse_qs(parsed.query), {"query": [expected]})
+                    self.assertEqual(parse_qs(parsed.query), {"query": [expected], "wildcards": ["off"]})
                     self.assertEqual(parsed.fragment, "")
 
 
@@ -424,7 +424,7 @@ class MdxToYomitanTests(unittest.TestCase):
                 self.assertEqual(archive.read("mdict-media/styles/main.css"), css)
                 row = json.loads(archive.read("term_bank_1.json"))[0]
                 href = row[5][0]["content"]["content"][0]["href"]
-                self.assertEqual(parse_qs(urlsplit(href).query), {"query": ["A&B"]})
+                self.assertEqual(parse_qs(urlsplit(href).query), {"query": ["A&B"], "wildcards": ["off"]})
 
 
     def test_inline_stylesheets_are_scoped_to_exported_definitions(self) -> None:
@@ -652,6 +652,22 @@ class MdxToYomitanTests(unittest.TestCase):
         self.assertEqual(superscript["data"]["tag"], "sup")
         self.assertEqual(superscript["style"]["verticalAlign"], "super")
 
+    def test_convert_cross_references_preserve_literal_targets(self) -> None:
+        for prefix in ("entry://", "bword://", "d:", "x:"):
+            for target in ("*", "*bher", "C*", "＊語", "語＊", "猫&犬"):
+                with self.subTest(prefix=prefix, target=target):
+                    glossary, _, _ = mdx_to_yomitan._convert_definition_to_structured_content(
+                        f'<a href="{prefix}{quote(target, safe="")}">related entry</a>',
+                        enable_audio=False,
+                        asset_prefix="mdict-media/",
+                    )
+                    link = glossary["content"]["content"][0]
+                    self.assertEqual(link["tag"], "a")
+                    self.assertEqual(parse_qs(urlsplit(link["href"]).query), {
+                        "query": [target],
+                        "wildcards": ["off"],
+                    })
+
     def test_convert_definition_to_structured_content_rewrites_inline_urls_and_embeds_data_assets(self) -> None:
         glossary, inline_stylesheets, embedded_assets = mdx_to_yomitan._convert_definition_to_structured_content(
             '<div class="hero" style="background-image: url(images/bg.png); font-family: Example Serif;">hero</div>'
@@ -764,7 +780,7 @@ class MdxToYomitanTests(unittest.TestCase):
             self.assertEqual(entry["data"]["class"], "entry main")
             jump_link = entry["content"][0]
             self.assertEqual(jump_link["tag"], "a")
-            self.assertEqual(jump_link["href"], "?query=target")
+            self.assertEqual(jump_link["href"], "?query=target&wildcards=off")
             self.assertEqual(jump_link["data"]["class"], "jump")
             image = entry["content"][1]
             self.assertEqual(image["tag"], "img")

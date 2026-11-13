@@ -122,6 +122,7 @@ export class DisplayContentManager {
      * @param {MouseEvent} e
      */
     _onLinkClick(e) {
+        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) { return; }
         const {href} = /** @type {HTMLAnchorElement} */ (e.currentTarget);
         if (typeof href !== 'string') { return; }
 

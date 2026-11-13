@@ -151,7 +151,7 @@ export type DictionaryReplacementGuard = {
 export type ModificationSetDictionarySelector = {
     action: 'setDictionarySelector';
     profileId: string;
-    selector: 'mainDictionary' | 'sortFrequencyDictionary';
+    selector: 'mainDictionary' | 'sortFrequencyDictionary' | 'popupBlurByFrequencyDictionary';
     expectedValue: unknown;
     value: unknown;
     requireDictionaryUninstalled?: string;

@@ -101,6 +101,8 @@ export type HistoryState = {
     documentTitle?: string;
     /** Computed theme of the page */
     pageTheme?: 'dark' | 'light';
+    /** Exact reader forms needed to reconstruct projected results without broadening the lookup. */
+    readerLookup?: {term: string, reading: string, surface: string};
 };
 
 /**
@@ -141,6 +143,7 @@ export type DictionarySearchResult = {
 export type GetSearchContextCallback = TextScannerTypes.GetSearchContextCallbackSync;
 
 export type QueryParserOptions = {
+    profileId: string;
     selectedParser: string | null;
     termSpacing: boolean;
     readingMode: Settings.ParsingReadingMode;
