@@ -775,7 +775,8 @@ export class SearchDisplayController {
             if (matchingIndices.length !== 1) {
                 throw new RangeError('Selected search profile is no longer available');
             }
-            await this._setDefaultProfileIndex(matchingIndices[0]);
+            const index = matchingIndices[0];
+            await this._setDefaultProfileIndex(index, profiles[index].id);
         });
         this._profileSelectWriteTail = operation.catch(() => {});
         try {
@@ -788,16 +789,22 @@ export class SearchDisplayController {
 
     /**
      * @param {number} value
+     * @param {string} [profileId]
      */
-    async _setDefaultProfileIndex(value) {
-        /** @type {import('settings-modifications').ScopedModificationSet} */
-        const modification = {
+    async _setDefaultProfileIndex(value, profileId) {
+        // Resolve stable identity again inside the backend mutation queue: a
+        // settings page can reorder or delete profiles after the options read.
+        /** @type {import('settings-modifications').ScopedModificationSet|import('settings-modifications').ScopedModificationSetDefaultProfile} */
+        let modification = {
             action: 'set',
             path: 'profileCurrent',
             value,
             scope: 'global',
             optionsContext: null,
         };
+        if (typeof profileId === 'string' && profileId.length > 0) {
+            modification = {action: 'setDefaultProfile', profileId, scope: 'global', optionsContext: null};
+        }
         const results = await this._display.application.api.modifySettings([modification], 'search');
         if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
             throw new Error('Search profile update returned an invalid result');
