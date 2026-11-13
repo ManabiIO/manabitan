@@ -23,6 +23,7 @@ const KATAKANA_SMALL_TSU_CODE_POINT = 0x30c3;
 const KATAKANA_SMALL_KA_CODE_POINT = 0x30f5;
 const KATAKANA_SMALL_KE_CODE_POINT = 0x30f6;
 const KANA_PROLONGED_SOUND_MARK_CODE_POINT = 0x30fc;
+const VARIATION_SELECTOR_PATTERN = /[\ufe00-\ufe0f\u{e0100}-\u{e01ef}]/u;
 
 /** @type {import('CJK-util').CodepointRange} */
 const HIRAGANA_RANGE = [0x3040, 0x309f];
@@ -151,6 +152,16 @@ for (let i = 0, ii = kana.length; i < ii; i += 3) {
 }
 
 /**
+ * Iteration marks repeat a kanji together with its glyph selector.
+ * @param {string} text
+ * @returns {Iterable<string>}
+ */
+function getCharactersWithVariationSelectors(text) {
+    if (!VARIATION_SELECTOR_PATTERN.test(text)) { return text; }
+    return text.match(/.[\ufe00-\ufe0f\u{e0100}-\u{e01ef}]?/gsu) ?? [];
+}
+
+/**
  * @param {string} previousCharacter
  * @returns {?string}
  */
@@ -211,7 +222,7 @@ function segmentizeFurigana(reading, readingNormalized, groups, groupsStart) {
         return null;
     } else {
         let result = null;
-        for (let i = reading.length; i >= textLength; --i) {
+        for (let i = reading.length; i >= group.minimumReadingLength; --i) {
             const segments = segmentizeFurigana(
                 reading.substring(i),
                 readingNormalized.substring(i),
@@ -370,15 +381,13 @@ export function getKanaScriptType(character) {
  */
 export function convertIterationMarksToExplicitKanji(text) {
     let result = '';
-    for (const character of text) {
-        if (character === '々') {
-            const previousCharacter = result.at(-1);
-            if (typeof previousCharacter === 'string' && isCodePointKanji(/** @type {number} */ (previousCharacter.codePointAt(0)))) {
-                result += previousCharacter;
-                continue;
-            }
+    let previousCharacter = null;
+    for (let character of getCharactersWithVariationSelectors(text)) {
+        if (character === '々' && previousCharacter !== null && isCodePointKanji(/** @type {number} */ (previousCharacter.codePointAt(0)))) {
+            character = previousCharacter;
         }
         result += character;
+        previousCharacter = character;
     }
     return result;
 }
@@ -390,7 +399,7 @@ export function convertIterationMarksToExplicitKanji(text) {
 export function convertExplicitKanjiDuplicationToIterationMarks(text) {
     let result = '';
     let previousCharacter = null;
-    for (const character of text) {
+    for (const character of getCharactersWithVariationSelectors(text)) {
         result += (
             previousCharacter !== null &&
             character === previousCharacter &&
@@ -640,63 +649,13 @@ export function getKanaDiacriticInfo(character) {
 }
 
 /**
- * @param {number} codePoint
- * @returns {boolean}
- */
-function dakutenAllowed(codePoint) {
-    // To reduce processing time some characters which shouldn't have dakuten but are highly unlikely to have a combining character attached are included
-    // かがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとはばぱひびぴふぶぷへべぺほ
-    // カガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトハバパヒビピフブプヘベペホ
-    return ((codePoint >= 0x304B && codePoint <= 0x3068) ||
-    (codePoint >= 0x306F && codePoint <= 0x307B) ||
-    (codePoint >= 0x30AB && codePoint <= 0x30C8) ||
-    (codePoint >= 0x30CF && codePoint <= 0x30DB));
-}
-
-/**
- * @param {number} codePoint
- * @returns {boolean}
- */
-function handakutenAllowed(codePoint) {
-    // To reduce processing time some characters which shouldn't have handakuten but are highly unlikely to have a combining character attached are included
-    // はばぱひびぴふぶぷへべぺほ
-    // ハバパヒビピフブプヘベペホ
-    return ((codePoint >= 0x306F && codePoint <= 0x307B) ||
-    (codePoint >= 0x30CF && codePoint <= 0x30DB));
-}
-
-/**
  * @param {string} text
  * @returns {string}
  */
 export function normalizeCombiningCharacters(text) {
-    let result = '';
-    let i = text.length - 1;
-    // Ignoring the first character is intentional, it cannot combine with anything
-    while (i > 0) {
-        if (text[i] === '\u3099') {
-            const dakutenCombinee = text[i - 1].codePointAt(0);
-            if (dakutenCombinee && dakutenAllowed(dakutenCombinee)) {
-                result = String.fromCodePoint(dakutenCombinee + 1) + result;
-                i -= 2;
-                continue;
-            }
-        } else if (text[i] === '\u309A') {
-            const handakutenCombinee = text[i - 1].codePointAt(0);
-            if (handakutenCombinee && handakutenAllowed(handakutenCombinee)) {
-                result = String.fromCodePoint(handakutenCombinee + 2) + result;
-                i -= 2;
-                continue;
-            }
-        }
-        result = text[i] + result;
-        i--;
-    }
-    // i === -1 when first two characters are combined
-    if (i === 0) {
-        result = text[0] + result;
-    }
-    return result;
+    // Normalize only kana/voicing-mark pairs. Normalizing the entire text would
+    // also fold unrelated CJK compatibility ideographs into different kanji.
+    return text.replace(/[\u3040-\u30ff][\u3099\u309a]/gu, (pair) => pair.normalize('NFC'));
 }
 
 /**
@@ -733,10 +692,14 @@ export function distributeFurigana(term, reading) {
     for (const c of term) {
         const codePoint = /** @type {number} */ (c.codePointAt(0));
         const isKana = isCodePointKana(codePoint);
+        // A supplementary kanji still needs only one reading character, and
+        // a variation selector changes its glyph without adding a reading.
+        const minimumReadingLength = VARIATION_SELECTOR_PATTERN.test(c) ? 0 : 1;
         if (isKana === isKanaPre) {
             /** @type {import('japanese-util').FuriganaGroup} */ (groupPre).text += c;
+            /** @type {import('japanese-util').FuriganaGroup} */ (groupPre).minimumReadingLength += minimumReadingLength;
         } else {
-            groupPre = {isKana, text: c, textNormalized: null};
+            groupPre = {isKana, text: c, textNormalized: null, minimumReadingLength};
             groups.push(groupPre);
             isKanaPre = isKana;
         }
