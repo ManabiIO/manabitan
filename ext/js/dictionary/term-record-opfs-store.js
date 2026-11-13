@@ -1154,7 +1154,15 @@ export class TermRecordOpfsStore {
         // Validate the complete restoration target before abandoning writes. A
         // corrupt journal must not mutate the active store before it is rejected.
         await this._abandonImportWritesForRollback();
-        if (this._recordsDirectoryHandle === null) { return; }
+        if (this._recordsDirectoryHandle === null) {
+            if (typeof navigator === 'undefined' || !('storage' in navigator) || !('getDirectory' in navigator.storage)) {
+                return;
+            }
+            // Startup recovery precedes normal preparation: an unpublished
+            // shard must not have to pass ordinary lookup loading first.
+            this._rootDirectoryHandle = await navigator.storage.getDirectory();
+            this._recordsDirectoryHandle = await this._rootDirectoryHandle.getDirectoryHandle(SHARD_DIRECTORY_NAME, {create: true});
+        }
         /** @type {Error[]} */
         const errors = [];
         // Truncation can extend a short file with zeroes. Confirm every

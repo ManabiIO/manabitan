@@ -107,6 +107,11 @@ test('failed truncation during committed deletion retains a contiguous prefix fo
 
     opfs.hooks.beforeRemove = null
     opfs.hooks.beforeTruncate = null
+    // An owner which has not refreshed yet must not append through the stale
+    // pre-reset map. Setup rejects, restores its fresh checkpoint and can retry.
+    await expect(database.startBulkImport()).rejects.toThrow()
+    const session = await database.startBulkImport()
+    await expect(database.abortBulkImport(session)).resolves.toBeUndefined()
     const reopened = new TermContentOpfsStore()
     await expect(reopened.prepare()).resolves.toBeUndefined()
     await expect(reopened.reset()).resolves.toBeUndefined()

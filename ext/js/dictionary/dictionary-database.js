@@ -9496,6 +9496,10 @@ null :
         // A downgraded build must not initialize old tables or inspect newer
         // OPFS formats before it rejects an unsupported database version.
         this._getSupportedInstalledSchemaVersion();
+        // An interrupted rollback can leave a sticky store error or gaps among
+        // unpublished segments. Recover the journal before ordinary preparation
+        // tries to admit that incomplete state as a readable content inventory.
+        await this._recoverInterruptedImportSession();
         await this._termContentStore.prepare();
         await this._termRecordStore.prepare();
         this._termContentBlockStore.clearCache();
@@ -9506,7 +9510,6 @@ null :
 
         await this._initializeSchema();
         await this._runSchemaMigrations();
-        await this._recoverInterruptedImportSession();
         this._restoreTermRecordDictionaryHealth();
     }
 
