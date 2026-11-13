@@ -1008,20 +1008,28 @@ export class DisplayAnki {
         if (noteIds === null || !Array.isArray(noteInfos)) { return null; }
         const overwriteId = noteIds.find((id) => id !== INVALID_NOTE_ID);
         if (typeof overwriteId === 'undefined') { return null; }
-        const overwriteInfo = noteInfos.find((info) => info !== null && info.noteId === overwriteId);
-        if (!overwriteInfo) { return null; }
-        const existingFields = overwriteInfo.fields;
+        if (!noteInfos.some((info) => info !== null && info.noteId === overwriteId)) { return null; }
         fieldOptions ??= this._cardFormats[cardFormatIndex].fields;
         if (!fieldOptions) { return null; }
 
+        // Keep the accepted duplicate target, but merge with its current fields.
+        // Cached fields can predate another save or an edit in Anki.
+        const currentNoteInfos = await this._display.application.api.getAnkiNotesInfo([overwriteId]);
+        const overwriteInfo = currentNoteInfos.find((info) => info !== null && info.noteId === overwriteId);
+        if (!overwriteInfo) { return null; }
+        const existingFields = overwriteInfo.fields;
         const newValues = note.fields;
 
         /** @type {import('anki').NoteFields} */
         const noteFields = {};
         for (const [field, newValue] of Object.entries(newValues)) {
             const overwriteMode = fieldOptions[field].overwriteMode;
-            const existingValue = existingFields[field].value;
-            noteFields[field] = this._getOverwrittenField(existingValue, newValue, overwriteMode);
+            if (overwriteMode === 'skip') { continue; }
+            const existingField = existingFields[field];
+            if (typeof existingField === 'undefined') {
+                throw new Error(`The Anki note no longer contains the field ${field}`);
+            }
+            noteFields[field] = this._getOverwrittenField(existingField.value, newValue, overwriteMode);
         }
         return {
             ...note,

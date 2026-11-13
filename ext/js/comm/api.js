@@ -328,6 +328,14 @@ export class API {
     }
 
     /**
+     * @param {import('api').ApiParam<'getAnkiNotesInfo', 'noteIds'>} noteIds
+     * @returns {Promise<import('api').ApiReturn<'getAnkiNotesInfo'>>}
+     */
+    getAnkiNotesInfo(noteIds) {
+        return this._invoke('getAnkiNotesInfo', {noteIds});
+    }
+
+    /**
      * @param {import('api').ApiParam<'getAnkiNoteInfo', 'notes'>} notes
      * @param {import('api').ApiParam<'getAnkiNoteInfo', 'fetchAdditionalInfo'>} fetchAdditionalInfo
      * @param {import('api').ApiParam<'getAnkiNoteInfo', 'fetchDuplicateNoteIds'>} [fetchDuplicateNoteIds=true]

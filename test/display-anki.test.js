@@ -18,8 +18,9 @@
 import {readFileSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {describe, expect, vi} from 'vitest';
+import {afterEach, describe, expect, vi} from 'vitest';
 import {AnkiConnect} from '../ext/js/comm/anki-connect.js';
+import {API} from '../ext/js/comm/api.js';
 import {AnkiNoteBuilder} from '../ext/js/data/anki-note-builder.js';
 import {createAnkiNoteData} from '../ext/js/data/anki-note-data-creator.js';
 import {Backend} from '../ext/js/background/backend.js';
@@ -219,6 +220,7 @@ function createDisplay(document, dictionaryEntries, apiOverrides = {}) {
 
     const api = {
         getAnkiNoteInfo: vi.fn(async () => []),
+        getAnkiNotesInfo: vi.fn(async (/** @type {number[]} */ noteIds) => noteIds.map((id) => createNoteInfo(id, 'current value'))),
         isAnkiConnected: vi.fn(async () => true),
         addAnkiNote: vi.fn(async () => 42),
         updateAnkiNote: vi.fn(async () => {}),
@@ -403,6 +405,7 @@ describe('DisplayAnki preload and save flow', () => {
             setupDocument(window.document);
             const {display} = createDisplay(window.document, [createTermEntry()], {
                 getAnkiNoteInfo,
+                getAnkiNotesInfo: (/** @type {number[]} */ noteIds) => backend._onApiGetAnkiNotesInfo({noteIds}),
                 updateAnkiNote,
             });
             const displayAnki = new DisplayAnki(display, createDisplayAudio());
@@ -767,7 +770,7 @@ describe('DisplayAnki preload and save flow', () => {
         expect(viewNoteButton?.dataset.noteIds).toBe('123');
     });
 
-    test('overwrite uses cached duplicate metadata without recomputing popup details', async ({window}) => {
+    test('overwrite keeps the cached target while refreshing only its current fields', async ({window}) => {
         setupDocument(window.document);
         const dictionaryEntries = [createTermEntry()];
         const {display, api} = createDisplay(window.document, dictionaryEntries);
@@ -800,10 +803,233 @@ describe('DisplayAnki preload and save flow', () => {
         await displayAnki._saveAnkiNote(0, 0);
 
         expect(getDictionaryEntryDetailsSpy).not.toHaveBeenCalled();
+        expect(api.getAnkiNotesInfo).toHaveBeenCalledExactlyOnceWith([123]);
         expect(api.updateAnkiNote).toHaveBeenCalledWith({
             ...note,
             id: 123,
         });
+    });
+});
+
+
+describe('DisplayAnki current overwrite fields', () => {
+    afterEach(() => { vi.unstubAllGlobals(); });
+
+    /**
+     * @param {Document} document
+     * @param {import('settings').AnkiNoteFieldOverwriteMode} overwriteMode
+     * @param {string} cachedValue
+     * @returns {{
+     * anki: DisplayAnki,
+     * api: any,
+     * display: any,
+     * cardFormat: import('settings').AnkiCardFormat,
+     * state: {fields: Record<string, string>, exists: boolean, readError: Error|null, beforeRead: (() => Promise<void>)|null, afterRead: (() => void)|null},
+     * requests: import('anki').MessageBody[],
+     * build: import('vitest').MockInstance<DisplayAnki['_createNote']>,
+     * showError: import('vitest').MockInstance<DisplayAnki['_showErrorNotification']>,
+     * hideError: import('vitest').MockInstance<DisplayAnki['_hideErrorNotification']>,
+     * }}
+     */
+    function setup(document, overwriteMode, cachedValue = 'cached') {
+        setupDocument(document);
+        const cardFormat = createCardFormat();
+        cardFormat.fields.Front.overwriteMode = overwriteMode;
+        /** @type {{fields: Record<string, string>, exists: boolean, readError: Error|null, beforeRead: (() => Promise<void>)|null, afterRead: (() => void)|null}} */
+        const state = {fields: {Front: cachedValue}, exists: true, readError: null, beforeRead: null, afterRead: null};
+        /** @type {import('anki').MessageBody[]} */
+        const requests = [];
+        vi.stubGlobal('fetch', vi.fn(async (_url, options) => {
+            const body = /** @type {import('anki').MessageBody} */ (JSON.parse(String(options?.body)));
+            requests.push(body);
+            let result;
+            switch (body.action) {
+                case 'version': result = 6; break;
+                case 'notesInfo':
+                    await state.beforeRead?.();
+                    if (state.readError !== null) { throw state.readError; }
+                    result = /** @type {number[]} */ (body.params.notes).map((id) => {
+                        if (!state.exists || id !== 123) { return {}; }
+                        return {
+                            noteId: id,
+                            modelName: 'Model',
+                            tags: [],
+                            cards: [1123],
+                            fields: Object.fromEntries(Object.entries(state.fields).map(([name, value], order) => [name, {value, order}])),
+                        };
+                    });
+                    state.afterRead?.();
+                    break;
+                case 'updateNoteFields': {
+                    const note = /** @type {import('anki').NoteWithId} */ (body.params.note);
+                    expect(note.id).toBe(123);
+                    Object.assign(state.fields, note.fields);
+                    result = null;
+                    break;
+                }
+                default: throw new Error(`Unexpected AnkiConnect action: ${body.action}`);
+            }
+            return new Response(JSON.stringify(result));
+        }));
+        const connection = new AnkiConnect();
+        connection.enabled = true;
+        connection.server = 'http://localhost:8765';
+        const backend = Object.assign(Object.create(Backend.prototype), {_anki: connection});
+        const clientApi = Object.assign(Object.create(API.prototype), {
+            /**
+             * @param {string} action
+             * @param {any} params
+             * @returns {Promise<unknown>}
+             */
+            _invoke(action, params) {
+                switch (action) {
+                    case 'getAnkiNotesInfo': return backend._onApiGetAnkiNotesInfo(params);
+                    case 'updateAnkiNote': return backend._onApiUpdateAnkiNote(params);
+                    default: throw new Error(`Unexpected extension API action: ${action}`);
+                }
+            },
+        });
+        const {display, api} = createDisplay(document, [createTermEntry(), createTermEntry()], {
+            getAnkiNotesInfo: vi.fn((noteIds) => clientApi.getAnkiNotesInfo(noteIds)),
+            updateAnkiNote: vi.fn((note) => clientApi.updateAnkiNote(note)),
+        });
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        anki._noteContext = /** @type {import('anki-templates-internal').Context} */ ({});
+        anki._cardFormats = [cardFormat];
+        anki._duplicateBehavior = 'overwrite';
+        /** @type {import('display-anki').DictionaryEntryDetails[]} */
+        const details = display.dictionaryEntries.map(() => ({noteMap: new Map([[0, {
+            cardFormat,
+            canAdd: true,
+            valid: true,
+            isDuplicate: true,
+            noteIds: [123],
+            noteInfos: [createNoteInfo(123, cachedValue)],
+            ankiError: null,
+        }]])}));
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const build = vi.spyOn(anki, '_createNote').mockResolvedValue({note: createCollectionNote('mined'), errors: [], requirements: []});
+        const showError = vi.spyOn(anki, '_showErrorNotification').mockImplementation(() => {});
+        const hideError = vi.spyOn(anki, '_hideErrorNotification').mockImplementation(() => {});
+        return {anki, api, display, cardFormat, state, requests, build, showError, hideError};
+    }
+
+    test.for([
+        {mode: 'append', cached: 'cached', current: 'edited', mined: '+new', expected: 'edited+new'},
+        {mode: 'prepend', cached: 'cached', current: 'edited', mined: 'new+', expected: 'new+edited'},
+        {mode: 'coalesce', cached: '', current: 'edited', mined: 'mined', expected: 'edited'},
+        {mode: 'coalesce-new', cached: 'cached', current: 'edited', mined: '', expected: 'edited'},
+        {mode: 'overwrite', cached: 'cached', current: 'edited', mined: 'mined', expected: 'mined'},
+    ])('merges current Anki fields for $mode', async ({mode, cached, current, mined, expected}, {window}) => {
+        const {anki, api, state, build, showError} = setup(window.document, /** @type {import('settings').AnkiNoteFieldOverwriteMode} */ (mode), cached);
+        state.fields.Front = current;
+        build.mockResolvedValue({note: createCollectionNote(mined), errors: [], requirements: []});
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(showError).not.toHaveBeenCalled();
+        expect(state.fields.Front).toBe(expected);
+        expect(api.getAnkiNotesInfo).toHaveBeenCalledExactlyOnceWith([123]);
+        expect(api.getAnkiNoteInfo).not.toHaveBeenCalled();
+    });
+
+    test('appending from a second popup entry retains the first saved definition', async ({window}) => {
+        const {anki, state, build, showError} = setup(window.document, 'append', 'existing');
+        build.mockResolvedValue({note: createCollectionNote('+first'), errors: [], requirements: []});
+        await anki._saveAnkiNote(0, 0);
+        build.mockResolvedValue({note: createCollectionNote('+second'), errors: [], requirements: []});
+        await anki._saveAnkiNote(1, 0);
+
+        expect(showError).not.toHaveBeenCalled();
+        expect(state.fields.Front).toBe('existing+first+second');
+    });
+
+    test('Skip omits the field even when it changes after the refresh', async ({window}) => {
+        const {anki, api, state, build, cardFormat, showError} = setup(window.document, 'skip');
+        cardFormat.fields.Back = {value: '{glossary}', overwriteMode: 'overwrite'};
+        state.fields.Back = 'old definition';
+        state.fields.Front = 'edited before refresh';
+        for (const details of anki._dictionaryEntryDetails ?? []) {
+            const info = details.noteMap.get(0)?.noteInfos?.[0];
+            if (info) { info.fields.Back = {value: 'old definition', order: 1}; }
+        }
+        state.afterRead = () => { state.fields.Front = 'edited after refresh'; };
+        build.mockResolvedValue({note: {...createCollectionNote('mined'), fields: {Front: 'mined', Back: 'new definition'}}, errors: [], requirements: []});
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(showError).not.toHaveBeenCalled();
+        expect(state.fields).toEqual({Front: 'edited after refresh', Back: 'new definition'});
+        expect(api.updateAnkiNote).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({fields: {Back: 'new definition'}}));
+    });
+
+    test.for(['deleted', 'transport failure'])('does not write or choose another note after %s', async (failure, {window}) => {
+        const {anki, api, state, requests, showError} = setup(window.document, 'append');
+        if (failure === 'deleted') {
+            state.exists = false;
+        } else {
+            state.readError = new Error('Anki connection interrupted');
+        }
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(showError).toHaveBeenCalledOnce();
+        expect(api.updateAnkiNote).not.toHaveBeenCalled();
+        expect(api.getAnkiNotesInfo).toHaveBeenCalledExactlyOnceWith([123]);
+        expect(api.getAnkiNoteInfo).not.toHaveBeenCalled();
+        expect(requests.filter(({action}) => action === 'notesInfo')).toHaveLength(1);
+        expect(state.fields.Front).toBe('cached');
+    });
+
+    test('a removed destination field aborts the update with a descriptive error', async ({window}) => {
+        const {anki, api, state, showError} = setup(window.document, 'append');
+        state.fields = {Renamed: 'current content'};
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(api.updateAnkiNote).not.toHaveBeenCalled();
+        expect(state.fields).toEqual({Renamed: 'current content'});
+        expect(showError).toHaveBeenCalledExactlyOnceWith([expect.objectContaining({message: 'The Anki note no longer contains the field Front'})]);
+    });
+
+    test('a format with only Skip fields leaves the current note untouched', async ({window}) => {
+        const {anki, api, state, showError} = setup(window.document, 'skip');
+        state.fields.Front = 'current content';
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(showError).not.toHaveBeenCalled();
+        expect(state.fields.Front).toBe('current content');
+        expect(api.updateAnkiNote).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({fields: {}}));
+    });
+
+    test('a popup and profile replacement during refresh keeps the accepted target and policy', async ({window}) => {
+        const {anki, api, display, state, showError, hideError} = setup(window.document, 'append');
+        const reading = Promise.withResolvers();
+        state.beforeRead = () => reading.promise;
+        state.fields.Front = 'current';
+        const saving = anki._saveAnkiNote(0, 0);
+        await vi.waitFor(() => expect(api.getAnkiNotesInfo).toHaveBeenCalledOnce());
+        anki._onContentClear();
+        const nextFormat = createCardFormat();
+        nextFormat.fields.Front.overwriteMode = 'skip';
+        anki._onOptionsUpdated({options: createTemplateOptions(nextFormat, 'next profile')});
+        const replacement = window.document.createElement('div');
+        replacement.innerHTML = '<div class="note-actions-container">next result</div>';
+        display.dictionaryEntries = [createTermEntry()];
+        display.dictionaryEntryNodes = [replacement];
+        window.document.body.append(replacement);
+        const replacementHtml = replacement.innerHTML;
+        hideError.mockClear();
+        reading.resolve(void 0);
+        await saving;
+
+        expect(state.fields.Front).toBe('currentmined');
+        expect(api.updateAnkiNote).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({id: 123, fields: {Front: 'currentmined'}}));
+        expect(showError).not.toHaveBeenCalled();
+        expect(hideError).not.toHaveBeenCalled();
+        expect(replacement.innerHTML).toBe(replacementHtml);
     });
 });
 

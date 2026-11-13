@@ -297,6 +297,7 @@ export class Backend {
             ['isAnkiConnected',              this._onApiIsAnkiConnected.bind(this)],
             ['addAnkiNote',                  this._onApiAddAnkiNote.bind(this)],
             ['updateAnkiNote',               this._onApiUpdateAnkiNote.bind(this)],
+            ['getAnkiNotesInfo',             this._onApiGetAnkiNotesInfo.bind(this)],
             ['getAnkiNoteInfo',              this._onApiGetAnkiNoteInfo.bind(this)],
             ['injectAnkiNoteMedia',          this._onApiInjectAnkiNoteMedia.bind(this)],
             ['viewNotes',                    this._onApiViewNotes.bind(this)],
@@ -1622,6 +1623,11 @@ export class Backend {
     /** @type {import('api').ApiHandler<'updateAnkiNote'>} */
     async _onApiUpdateAnkiNote({noteWithId}) {
         return await this._anki.updateNoteFields(noteWithId);
+    }
+
+    /** @type {import('api').ApiHandler<'getAnkiNotesInfo'>} */
+    async _onApiGetAnkiNotesInfo({noteIds}) {
+        return await this._anki.notesInfo(noteIds);
     }
 
     /**
