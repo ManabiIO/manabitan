@@ -4,6 +4,7 @@
  */
 
 import {expect, vi} from 'vitest';
+import {DOMTextScanner} from '../ext/js/dom/dom-text-scanner.js';
 import {TextSourceElement} from '../ext/js/dom/text-source-element.js';
 import {TextSourceGenerator} from '../ext/js/dom/text-source-generator.js';
 import {TextSourceRange} from '../ext/js/dom/text-source-range.js';
@@ -136,4 +137,31 @@ test.for(kinds.flatMap((kind) => [
     expect(result).toEqual(expected);
     expect([...result.text][result.offset]).toBe('猫');
     expect(source.text()).toBe('猫');
+});
+
+test.for([
+    {word: 're\u0301sume\u0301', offset: 3},
+    {word: 'nai\u0308ve', offset: 4},
+    {word: 'किताब', offset: 2},
+    {word: 'كِتاب', offset: 2},
+])('word scanning keeps combining marks with their base letters: %j', ({word, offset}, {window}) => {
+    const node = window.document.createTextNode(`first ${word} last`);
+    const scanner = new DOMTextScanner(node, 6 + offset, true, false, true).seek(-20);
+
+    expect(scanner.offset).toBe(6);
+    expect(scanner.content).toBe(word.slice(0, offset));
+});
+
+test('a word lookup after a decomposed accent searches the complete word', async ({window}) => {
+    const word = 're\u0301sume\u0301';
+    const lookup = vi.fn().mockResolvedValue(hit(word));
+    const scanner = createScanner(lookup, false);
+    scanner.language = 'fr';
+    scanner.setOptions({scanResolution: 'word'});
+    const source = createSource(window.document, 'range', `un ${word} utile`, 6);
+
+    await scanner.search(source);
+
+    expect(lookup.mock.calls[0][0]).toBe(`${word} utile`);
+    expect(scanner.getCurrentTextSource()?.text()).toBe(word);
 });

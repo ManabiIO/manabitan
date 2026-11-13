@@ -26,9 +26,10 @@ export class DOMTextScanner {
      * A regular expression used to match word delimiters.
      * \p{L} matches any kind of letter from any language
      * \p{N} matches any kind of numeric character in any script
+     * \p{M} keeps combining accents and vowel marks with their letters
      * @type {RegExp}
      */
-    static WORD_DELIMITER_REGEX = /[^\w\p{L}\p{N}]/u;
+    static WORD_DELIMITER_REGEX = /[^\w\p{L}\p{N}\p{M}]/u;
 
     /**
      * Creates a new instance of a DOMTextScanner.
