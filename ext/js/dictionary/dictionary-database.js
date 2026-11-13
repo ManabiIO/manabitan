@@ -3440,12 +3440,6 @@ null;
             }
 
             this._invalidateGlossarySearchIndex(dictionaryName);
-            const insertTerm = this._getCachedStatement(
-                'INSERT OR REPLACE INTO termGlossarySearchTerms(dictionary, termId, score) VALUES ($dictionary, $termId, $score)',
-            );
-            const insertToken = this._getCachedStatement(
-                'INSERT OR IGNORE INTO termGlossaryTokens(dictionary, token, termId) VALUES ($dictionary, $token, $termId)',
-            );
             for (let start = 0; start < count; start += GLOSSARY_SEARCH_BUILD_BATCH_SIZE) {
                 if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
                 const expected = Math.min(GLOSSARY_SEARCH_BUILD_BATCH_SIZE, count - start);
@@ -3456,6 +3450,15 @@ null;
                 const rows = await this._fetchTermRowsByIds(batch);
                 this._assertTermLookupGeneration(generation, dictionaryName);
                 if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+                // Other queries can evict cached statements while hydration or
+                // the previous batch yields. Acquire them only for this
+                // synchronous transaction, after the last asynchronous step.
+                const insertTerm = this._getCachedStatement(
+                    'INSERT OR REPLACE INTO termGlossarySearchTerms(dictionary, termId, score) VALUES ($dictionary, $termId, $score)',
+                );
+                const insertToken = this._getCachedStatement(
+                    'INSERT OR IGNORE INTO termGlossaryTokens(dictionary, token, termId) VALUES ($dictionary, $token, $termId)',
+                );
                 db.exec('BEGIN IMMEDIATE');
                 try {
                     for (const id of batch) {
