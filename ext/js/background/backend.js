@@ -448,6 +448,11 @@ export class Backend {
             chrome.commands.onCommand.addListener(onCommand);
         }
 
+        if (isObjectNotArray(chrome.contextMenus) && isObjectNotArray(chrome.contextMenus.onClicked)) {
+            const onContextMenuClicked = this._onWebExtensionEventWrapper(this._onContextMenuClicked.bind(this));
+            chrome.contextMenus.onClicked.addListener(onContextMenuClicked);
+        }
+
         if (isObjectNotArray(chrome.tabs) && isObjectNotArray(chrome.tabs.onZoomChange)) {
             const onZoomChange = this._onWebExtensionEventWrapper(this._onZoomChange.bind(this));
             chrome.tabs.onZoomChange.addListener(onZoomChange);
@@ -1249,6 +1254,17 @@ export class Backend {
      */
     _onCommand(command) {
         this._runCommand(command, void 0);
+    }
+
+    /**
+     * @param {chrome.contextMenus.OnClickData} info
+     * @param {chrome.tabs.Tab|undefined} tab
+     */
+    _onContextMenuClicked(info, tab) {
+        if (info.menuItemId !== 'yomitan_lookup' || !info.selectionText || typeof tab?.id !== 'number') { return; }
+        const options = this._getProfileOptions({current: true}, false);
+        if (!options.general.enableContextMenuScanSelected) { return; }
+        this._sendMessageTabIgnoreResponse(tab.id, {action: 'frontendScanSelectedText'}, {frameId: info.frameId ?? 0});
     }
 
     /**
@@ -3177,11 +3193,6 @@ null;
                     title: 'Lookup in Manabitan',
                     contexts: ['selection'],
                 }, () => this._checkLastError(chrome.runtime.lastError));
-                chrome.contextMenus.onClicked.addListener((info) => {
-                    if (info.selectionText) {
-                        this._sendMessageAllTabsIgnoreResponse({action: 'frontendScanSelectedText'});
-                    }
-                });
             } else {
                 chrome.contextMenus.remove('yomitan_lookup', () => this._checkLastError(chrome.runtime.lastError));
             }
