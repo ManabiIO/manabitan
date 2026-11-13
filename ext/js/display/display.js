@@ -91,6 +91,8 @@ export class Display extends EventDispatcher {
         this._styleNode = null;
         /** @type {EventListenerCollection} */
         this._eventListeners = new EventListenerCollection();
+        /** @type {EventListenerCollection} */
+        this._touchScrollEventListeners = new EventListenerCollection();
         /** @type {?import('core').TokenObject} */
         this._setContentToken = null;
         /** @type {{publication: import('popup').PublicationToken, token: import('core').TokenObject|null}|null} */
@@ -1182,20 +1184,26 @@ export class Display extends EventDispatcher {
      * @param {TouchEvent} e
      */
     _onTouchStart(e) {
-        const scanningOptions = /** @type {import('settings').ProfileOptions} */ (this._options).scanning;
-        if (!scanningOptions.reducedMotionScrolling || e.touches.length !== 1) {
+        // A cancelled swipe or an added finger must not leave a callback that
+        // interprets the next touchend as completion of the old gesture.
+        const listeners = this._touchScrollEventListeners;
+        listeners.removeAllEventListeners();
+        if (!this._options?.scanning.reducedMotionScrolling || e.touches.length !== 1) {
             return;
         }
 
-        const start = e.touches[0].clientY;
+        const {clientY: start, identifier} = e.touches[0];
         /**
          * @param {TouchEvent} endEvent
          */
         const onTouchEnd = (endEvent) => {
-            this._contentScrollElement.removeEventListener('touchend', onTouchEnd);
+            const touch = [...endEvent.changedTouches].find((item) => item.identifier === identifier);
+            if (typeof touch === 'undefined') { return; }
+            listeners.removeAllEventListeners();
+            const scanningOptions = this._options?.scanning;
+            if (!scanningOptions?.reducedMotionScrolling) { return; }
 
-            const end = endEvent.changedTouches[0].clientY;
-            const delta = start - end;
+            const delta = start - touch.clientY;
             const threshold = scanningOptions.reducedMotionScrollingSwipeThreshold;
 
             if (delta > threshold) {
@@ -1205,15 +1213,15 @@ export class Display extends EventDispatcher {
             }
         };
 
-        this._contentScrollElement.addEventListener('touchend', onTouchEnd, {passive: true});
+        listeners.addEventListener(this._contentScrollElement, 'touchend', onTouchEnd, {passive: true});
+        listeners.addEventListener(this._contentScrollElement, 'touchcancel', () => { listeners.removeAllEventListeners(); }, {passive: true});
     }
 
     /**
      * @param {TouchEvent} e
      */
     _onTouchMove = (e) => {
-        const scanningOptions = /** @type {import('settings').ProfileOptions} */ (this._options).scanning;
-        if (scanningOptions.reducedMotionScrolling && e.cancelable) {
+        if (this._options?.scanning.reducedMotionScrolling && e.touches.length === 1 && e.cancelable) {
             e.preventDefault();
         }
     };
