@@ -3614,7 +3614,7 @@ null;
                 }
                 if (action === 'setDictionarySelector') {
                     const {selector, expectedValue, value} = target;
-                    if (selector !== 'mainDictionary' && selector !== 'sortFrequencyDictionary') { throw new Error('Invalid dictionary selector'); }
+                    if (selector !== 'mainDictionary' && selector !== 'sortFrequencyDictionary' && selector !== 'popupBlurByFrequencyDictionary') { throw new Error('Invalid dictionary selector'); }
                     if (typeof target.requireDictionaryUninstalled === 'string' && installedDictionaryNames?.has(target.requireDictionaryUninstalled)) { return false; }
                     if (!isObjectNotArray(profile.options.general)) { throw new Error('Invalid profile general settings'); }
                     if (profile.options.general[selector] !== expectedValue) { return false; }
@@ -5321,7 +5321,6 @@ null;
         // deleting the source preferences. Leave them for explicit resolution.
         const ambiguousReplacementNames = new Set([...replacements].filter(([, candidates]) => candidates.length !== 1).map(([name]) => name));
         const retainDictionaryName = (/** @type {string} */ name) => installedDictionaryNames.has(name) || ambiguousReplacementNames.has(name);
-        let recoveredSettings = false;
 
         /** @type {string[]} */
         const removedDictionaryNames = [];
@@ -5347,7 +5346,7 @@ null;
                     name: replacement.title,
                     styles: replacement.styles,
                 }, installedDictionaryNames) === true || profileChanged;
-                for (const selector of /** @type {const} */ (['mainDictionary', 'sortFrequencyDictionary'])) {
+                for (const selector of /** @type {const} */ (['mainDictionary', 'sortFrequencyDictionary', 'popupBlurByFrequencyDictionary'])) {
                     profileChanged = this._modifySetting({
                         action: 'setDictionarySelector',
                         scope: 'global',
@@ -5359,7 +5358,6 @@ null;
                     }, installedDictionaryNames) === true || profileChanged;
                 }
             }
-            recoveredSettings ||= profileChanged;
             const dictionaries = profile.options.dictionaries;
             const nextDictionaries = dictionaries.filter((dictionary) => retainDictionaryName(dictionary.name));
             if (nextDictionaries.length !== dictionaries.length) {
@@ -5390,6 +5388,12 @@ null;
                 }
             }
 
+            const blurDictionary = profile.options.general.popupBlurByFrequencyDictionary;
+            if (typeof blurDictionary === 'string' && !retainDictionaryName(blurDictionary)) {
+                profile.options.general.popupBlurByFrequencyDictionary = null;
+                profileChanged = true;
+            }
+
             if (profileChanged) {
                 affectedProfiles += 1;
             }
@@ -5407,7 +5411,7 @@ null;
             sortFrequencyDictionaryResets,
         };
 
-        if (!recoveredSettings && removedDictionaryNames.length === 0 && mainDictionaryResets === 0 && sortFrequencyDictionaryResets === 0) {
+        if (affectedProfiles === 0) {
             reportDiagnostics('dictionary-options-prune-startup-summary', summary);
             return summary;
         }
