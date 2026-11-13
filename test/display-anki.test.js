@@ -514,6 +514,33 @@ describe('DisplayAnki accepted save lifecycle', () => {
         expect(api.addAnkiNote).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({fields: {Front: 'term', Back: 'valid definition'}}), 'refreshed-connection');
     });
 
+    test('a connection recovery cannot replace another result while its options refresh is pending', async ({window}) => {
+        const {anki, api, display, options, showError} = await prepareSave(window, 'new', 'valid definition');
+        const refresh = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers());
+        display.getAnkiConnectionIdentity = () => null;
+        display.updateOptions = vi.fn(async () => {
+            await refresh.promise;
+            display.getAnkiConnectionIdentity = () => 'refreshed-connection';
+            anki._onOptionsUpdated({options});
+        });
+        api.getAnkiNoteInfo.mockClear();
+        const save = anki._saveAnkiNote(0, 0);
+        await vi.waitFor(() => expect(display.updateOptions).toHaveBeenCalledOnce());
+        anki._onContentClear();
+        display.dictionaryEntries = [createTermEntry()];
+        const replacement = window.document.createElement('div');
+        replacement.innerHTML = '<div class="note-actions-container"><button>Replacement action</button></div>';
+        display.dictionaryEntryNodes = [replacement];
+        const originalControls = replacement.innerHTML;
+        refresh.resolve();
+        await save;
+
+        expect(replacement.innerHTML).toBe(originalControls);
+        expect(api.getAnkiNoteInfo).not.toHaveBeenCalled();
+        expect(api.addAnkiNote).not.toHaveBeenCalled();
+        expect(showError).not.toHaveBeenCalled();
+    });
+
     for (const change of ['server', 'restore', 'restart']) {
         test(`an accepted overwrite stops after ${change} and refreshes authoritative state for a user retry`, async ({window}) => {
             const {anki, api, display, options, showError} = await prepareSave(window, 'overwrite', '{{#if (hasMedia "audio")}}new definition{{else}}waiting{{/if}}');
