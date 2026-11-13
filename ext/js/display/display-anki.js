@@ -1619,7 +1619,10 @@ export class DisplayAnki {
         }
         if (typeof text !== 'string') {
             text = fallback;
-            offset = fallbackOffset;
+            // Search URL offsets use UTF-16, while Anki sentence offsets count
+            // complete Unicode code points.
+            const prefix = fallback.slice(0, fallbackOffset);
+            offset = [...prefix].length;
         } else {
             if (typeof offset !== 'number') { offset = 0; }
         }

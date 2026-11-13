@@ -17,6 +17,7 @@
  */
 
 import {findJapaneseSearch} from '../search/japanese-search.js';
+import {exactReaderEntries, readerEntriesWithSurface} from '../app/reader-lookup-bridge.js';
 import {ThemeController} from '../app/theme-controller.js';
 import {FrameEndpoint} from '../comm/frame-endpoint.js';
 import {extendApiMap, invokeApiMapHandler} from '../core/api-map.js';
@@ -31,6 +32,7 @@ import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 import {addScopeToCss, clone, deepEqual, promiseTimeout} from '../core/utilities.js';
 import {setProfile} from '../data/profiles-util.js';
+import {readCodePointsForward} from '../data/string-util.js';
 import {PopupMenu} from '../dom/popup-menu.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {ScrollElement} from '../dom/scroll-element.js';
@@ -91,6 +93,8 @@ export class Display extends EventDispatcher {
         this._styleNode = null;
         /** @type {EventListenerCollection} */
         this._eventListeners = new EventListenerCollection();
+        /** @type {EventListenerCollection} */
+        this._touchScrollEventListeners = new EventListenerCollection();
         /** @type {?import('core').TokenObject} */
         this._setContentToken = null;
         /** @type {{publication: import('popup').PublicationToken, token: import('core').TokenObject|null}|null} */
@@ -541,6 +545,7 @@ export class Display extends EventDispatcher {
         this._elementOverflowController.setOptions(options);
 
         this._queryParser.setOptions({
+            profileId,
             selectedParser: options.parsing.selectedParser,
             termSpacing: options.parsing.termSpacing,
             readingMode: options.parsing.readingMode,
@@ -710,7 +715,10 @@ export class Display extends EventDispatcher {
         const type = this._contentType;
         if (type === 'clear' || type === 'unloaded') { return; }
         const query = this._query;
-        const {state} = this._history;
+        const {state, content} = this._history;
+        // Supplied scanner results skip the initial lookup. Refreshes discard
+        // that cache and must query the updated profile/dictionaries again.
+        const lookup = this._lookup || Array.isArray(content?.dictionaryEntries) || content?.dictionaryEntriesEvicted === true;
         const hasState = typeof state === 'object' && state !== null;
         /** @type {import('display').HistoryState} */
         const newState = (
@@ -731,7 +739,7 @@ export class Display extends EventDispatcher {
         const details = {
             focus: false,
             historyMode: 'clear',
-            params: this._createSearchParams(type, query, this._wildcardsEnabled, this._queryOffset, this._lookup, this._primaryReading),
+            params: this._createSearchParams(type, query, this._wildcardsEnabled, this._queryOffset, lookup, this._primaryReading),
             state: newState,
             content: {
                 contentOrigin: this.getContentOrigin(),
@@ -1060,7 +1068,7 @@ export class Display extends EventDispatcher {
         const details = {
             focus: false,
             historyMode,
-            params: this._createSearchParams(type, query, false, sentenceOffset),
+            params: this._createSearchParams(type, query, false, sentenceOffset, false),
             state: {
                 sentence,
                 optionsContext,
@@ -1153,14 +1161,32 @@ export class Display extends EventDispatcher {
             if (typeof url !== 'string') { url = window.location.href; }
             if (typeof documentTitle !== 'string') { documentTitle = document.title; }
             const optionsContext = this.getOptionsContext();
-            const element = /** @type {Element} */ (e.currentTarget);
+            const element = /** @type {HTMLAnchorElement} */ (e.currentTarget);
             let query = element.textContent;
             if (query === null) { query = ''; }
+            let sentenceOffset = null;
+            const characterOffset = Number.parseInt(element.dataset.characterOffset ?? '', 10);
+            if (Number.isSafeInteger(characterOffset) && characterOffset >= 0) {
+                const fullQueryOffset = this._queryOffset + readCodePointsForward(this._fullQuery, this._queryOffset, characterOffset).length;
+                if (this._fullQuery.startsWith(query, fullQueryOffset)) {
+                    sentenceOffset = fullQueryOffset;
+                }
+                const queryPrefix = this._fullQuery.slice(0, this._queryOffset);
+                const sourceSentence = typeof sentence?.text === 'string' && typeof sentence.offset === 'number' ?
+                    sentence :
+                    {text: this._fullQuery, offset: [...queryPrefix].length};
+                const offset = sourceSentence.offset + characterOffset;
+                // Inflected and alternate headwords may differ from the source.
+                // Move the cloze only when the original character agrees.
+                if ([...sourceSentence.text][offset] === query) {
+                    sentence = {...sourceSentence, offset};
+                }
+            }
             /** @type {import('display').ContentDetails} */
             const details = {
                 focus: false,
                 historyMode: 'new',
-                params: this._createSearchParams('kanji', query, false, null),
+                params: this._createSearchParams('kanji', query, false, sentenceOffset),
                 state: {
                     focusEntry: 0,
                     optionsContext,
@@ -1182,20 +1208,28 @@ export class Display extends EventDispatcher {
      * @param {TouchEvent} e
      */
     _onTouchStart(e) {
-        const scanningOptions = /** @type {import('settings').ProfileOptions} */ (this._options).scanning;
-        if (!scanningOptions.reducedMotionScrolling || e.touches.length !== 1) {
+        // A cancelled swipe or an added finger must not leave a callback that
+        // interprets the next touchend as completion of the old gesture.
+        const listeners = this._touchScrollEventListeners;
+        listeners.removeAllEventListeners();
+        if (!this._options?.scanning.reducedMotionScrolling || e.touches.length !== 1) {
             return;
         }
 
-        const start = e.touches[0].clientY;
+        const {clientY: start, identifier} = e.touches[0];
         /**
          * @param {TouchEvent} endEvent
          */
         const onTouchEnd = (endEvent) => {
-            this._contentScrollElement.removeEventListener('touchend', onTouchEnd);
+            // Preserve support for array-like TouchLists without an iterator.
+            // eslint-disable-next-line unicorn/prefer-spread
+            const touch = Array.from(endEvent.changedTouches).find((item) => item.identifier === identifier);
+            if (typeof touch === 'undefined') { return; }
+            listeners.removeAllEventListeners();
+            const scanningOptions = this._options?.scanning;
+            if (!scanningOptions?.reducedMotionScrolling) { return; }
 
-            const end = endEvent.changedTouches[0].clientY;
-            const delta = start - end;
+            const delta = start - touch.clientY;
             const threshold = scanningOptions.reducedMotionScrollingSwipeThreshold;
 
             if (delta > threshold) {
@@ -1205,15 +1239,15 @@ export class Display extends EventDispatcher {
             }
         };
 
-        this._contentScrollElement.addEventListener('touchend', onTouchEnd, {passive: true});
+        listeners.addEventListener(this._contentScrollElement, 'touchend', onTouchEnd, {passive: true});
+        listeners.addEventListener(this._contentScrollElement, 'touchcancel', () => { listeners.removeAllEventListeners(); }, {passive: true});
     }
 
     /**
      * @param {TouchEvent} e
      */
     _onTouchMove = (e) => {
-        const scanningOptions = /** @type {import('settings').ProfileOptions} */ (this._options).scanning;
-        if (scanningOptions.reducedMotionScrolling && e.cancelable) {
+        if (this._options?.scanning.reducedMotionScrolling && e.touches.length === 1 && e.cancelable) {
             e.preventDefault();
         }
     };
@@ -1230,7 +1264,7 @@ export class Display extends EventDispatcher {
             }
         } else if (e.shiftKey) {
             this._onHistoryWheel(e);
-        } else if (scanningOptions.reducedMotionScrolling) {
+        } else if (scanningOptions.reducedMotionScrolling && e.deltaY !== 0 && !e.ctrlKey) {
             this._scrollByPopupHeight(e.deltaY > 0 ? 1 : -1, scanningOptions.reducedMotionScrollingScale);
             e.preventDefault();
         }
@@ -1540,9 +1574,19 @@ export class Display extends EventDispatcher {
      * @param {string} primaryReading
      * @param {boolean} wildcardsEnabled
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {import('display').HistoryState['readerLookup']} [readerLookup]
      * @returns {Promise<import('display').DictionarySearchResult>}
      */
-    async _findDictionaryEntries(isKanji, source, primaryReading, wildcardsEnabled, optionsContext) {
+    async _findDictionaryEntries(isKanji, source, primaryReading, wildcardsEnabled, optionsContext, readerLookup) {
+        if (!isKanji && readerLookup?.surface === source && typeof readerLookup.term === 'string' && typeof readerLookup.reading === 'string') {
+            const {dictionaryEntries, dictionaryAvailability} = await this._application.api.termsFind(readerLookup.term, {
+                matchType: 'exact', deinflect: false, primaryReading: readerLookup.reading,
+            }, optionsContext);
+            return {
+                dictionaryEntries: readerEntriesWithSurface(exactReaderEntries(dictionaryEntries, readerLookup), readerLookup),
+                ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
+            };
+        }
         const {findDetails, source: source2} = this._getFindDetails(source, primaryReading, wildcardsEnabled);
         if (isKanji) {
             const dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
@@ -1708,7 +1752,7 @@ export class Display extends EventDispatcher {
         if (!Array.isArray(dictionaryEntries)) {
             safePerformance.mark('display:findDictionaryEntries:start');
             const result = hasEnabledDictionaries && lookup && query.length > 0 ?
-                await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext) :
+                await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext, state.readerLookup) :
                 {dictionaryEntries: []};
             ({dictionaryEntries, dictionaryAvailability} = result);
             safePerformance.mark('display:findDictionaryEntries:end');
@@ -2540,6 +2584,7 @@ export class Display extends EventDispatcher {
                 type,
                 query,
                 wildcards: 'off',
+                lookup: 'false',
             },
             state: {
                 focusEntry: 0,

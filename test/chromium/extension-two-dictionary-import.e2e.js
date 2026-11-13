@@ -40,6 +40,7 @@ import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {runWithReaderFinalization} from '../e2e/reader-finalization.js';
 import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
+import {verifyScannerHistoryRecovery} from '../e2e/display-history-recovery.js';
 
 /**
  * Exercise real browser confirmation dialogs with the production controller
@@ -5105,6 +5106,9 @@ async function main() {
 
             /** @type {Record<string, number>} */
             const aggregateLookupCounts = Object.fromEntries(expectedLookupDictionaries.map((name) => [name, 0]));
+            const historyRecoveryStart = safePerformance.now();
+            const historyRecoveryWitness = await verifyScannerHistoryRecovery(context, extensionBaseUrl, searchVerificationTerm);
+            await addReportPhase(report, page, 'Restore scanner results after search reload', JSON.stringify(historyRecoveryWitness), historyRecoveryStart, safePerformance.now(), null, processSampler);
             for (const word of lookupWords) {
                 const lookupChar = String([...word][0] || '').trim();
                 if (lookupChar.length === 0) { continue; }
