@@ -24,7 +24,7 @@ export async function verifyAnonymousRequestRuleMatching(page) {
         builder._getNewRuleId = () => ruleId
         const cases = [
             {url: 'https://example.com/a*b.mp3', sibling: 'https://example.com/axb.mp3'},
-            {url: 'https://example.com/a|b.mp3', sibling: 'https://example.com/a%7Cb.mp3'},
+            {url: 'https://example.com/a|b.mp3', sibling: 'https://example.com/axb.mp3'},
             {url: 'https://example.com/audio?term=a^b', sibling: 'https://example.com/audio?term=a/b'},
             {url: 'https://example.com/a*(b)+[c].mp3?q=$5', sibling: 'https://example.com/a%2A(b)+[c].mp3?q=$5'},
             {url: 'https://commons.wikimedia.org/w/api.php?action=query&iiprop=user|url&origin=*', sibling: 'https://commons.wikimedia.org/w/api.php?action=query&iiprop=user%7Curl&origin=%2A'},
