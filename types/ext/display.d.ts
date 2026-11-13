@@ -141,6 +141,7 @@ export type DictionarySearchResult = {
 export type GetSearchContextCallback = TextScannerTypes.GetSearchContextCallbackSync;
 
 export type QueryParserOptions = {
+    profileId: string;
     selectedParser: string | null;
     termSpacing: boolean;
     readingMode: Settings.ParsingReadingMode;

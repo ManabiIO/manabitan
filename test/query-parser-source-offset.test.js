@@ -48,7 +48,7 @@ async function createParser(window, text) {
         /** @type {import('../ext/js/dom/text-source-generator.js').TextSourceGenerator} */ (/** @type {unknown} */ ({})),
         () => ({optionsContext: {depth: 0, url: 'https://example.test'}, detail: {documentTitle: 'Offset test'}}),
     );
-    parser.setOptions({selectedParser: 'scan', termSpacing: false, readingMode: 'hiragana', useInternalParser: true, useMecabParser: false, useAllFrequencyDictionaries: false, language: 'ja', scanning: /** @type {import('text-scanner').Options} */ (/** @type {unknown} */ (null))});
+    parser.setOptions({profileId: 'profile-a', selectedParser: 'scan', termSpacing: false, readingMode: 'hiragana', useInternalParser: true, useMecabParser: false, useAllFrequencyDictionaries: false, language: 'ja', scanning: /** @type {import('text-scanner').Options} */ (/** @type {unknown} */ (null))});
     await parser.setText(text);
     return parser;
 }

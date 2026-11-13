@@ -544,6 +544,7 @@ export class Display extends EventDispatcher {
         this._elementOverflowController.setOptions(options);
 
         this._queryParser.setOptions({
+            profileId,
             selectedParser: options.parsing.selectedParser,
             termSpacing: options.parsing.termSpacing,
             readingMode: options.parsing.readingMode,

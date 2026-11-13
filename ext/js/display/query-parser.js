@@ -40,6 +40,8 @@ export class QueryParser extends EventDispatcher {
         this._api = api;
         /** @type {import('display').GetSearchContextCallback} */
         this._getSearchContext = getSearchContext;
+        /** @type {?string} */
+        this._profileId = null;
         /** @type {string} */
         this._text = '';
         /** @type {?import('core').TokenObject} */
@@ -107,7 +109,9 @@ export class QueryParser extends EventDispatcher {
     /**
      * @param {import('display').QueryParserOptions} display
      */
-    setOptions({selectedParser, termSpacing, readingMode, useInternalParser, useMecabParser, useAllFrequencyDictionaries, language, scanning}) {
+    setOptions({profileId, selectedParser, termSpacing, readingMode, useInternalParser, useMecabParser, useAllFrequencyDictionaries, language, scanning}) {
+        const profileChanged = this._profileId !== profileId;
+        this._profileId = profileId;
         const previousUseInternalParser = this._useInternalParser;
         const previousUseMecabParser = this._useMecabParser;
         const previousUseAllFrequencyDictionaries = this._useAllFrequencyDictionaries;
@@ -146,6 +150,7 @@ export class QueryParser extends EventDispatcher {
 
         const parsingEnabled = this._useInternalParser || this._useMecabParser;
         const parsingChanged = (
+            profileChanged ||
             previousUseInternalParser !== this._useInternalParser ||
             previousUseMecabParser !== this._useMecabParser ||
             previousUseAllFrequencyDictionaries !== this._useAllFrequencyDictionaries ||
@@ -271,8 +276,12 @@ export class QueryParser extends EventDispatcher {
      * @param {string} value
      */
     async _setSelectedParser(value) {
+        const profileId = this._profileId;
         this._selectedParser = value;
         try {
+            if (typeof profileId !== 'string' || profileId.length === 0) {
+                throw new Error('Search profile identity is unavailable');
+            }
             const optionsContext = this._getOptionsContext();
             /** @type {import('settings-modifications').ScopedModificationSet} */
             const modification = {
@@ -281,12 +290,14 @@ export class QueryParser extends EventDispatcher {
                 value,
                 scope: 'profile',
                 optionsContext,
+                profileId,
             };
             const results = await this._api.modifySettings([modification], 'search');
             for (const {error} of results) {
                 if (typeof error !== 'undefined') { throw ExtensionError.deserialize(error); }
             }
         } catch (error) {
+            if (this._profileId !== profileId) { return; }
             try {
                 log.error(error);
             } catch (e) {
