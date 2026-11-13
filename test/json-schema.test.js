@@ -136,6 +136,10 @@ describe('JsonSchema', () => {
                     {expected: false,  value: '1'},
                     {expected: true,  value: '12'},
                     {expected: true,  value: '123'},
+                    {expected: false, value: '🔹'},
+                    {expected: true,  value: '🔹A'},
+                    {expected: true,  value: '🔹🔸'},
+                    {expected: true,  value: 'e\u0301'},
                 ],
             },
             {
@@ -148,6 +152,26 @@ describe('JsonSchema', () => {
                     {expected: true,  value: '1'},
                     {expected: true,  value: '12'},
                     {expected: false, value: '123'},
+                    {expected: true,  value: '🔹'},
+                    {expected: true,  value: '🔹A'},
+                    {expected: true,  value: '🔹🔸'},
+                    {expected: false, value: '🔹🔸A'},
+                    {expected: true,  value: 'e\u0301'},
+                ],
+            },
+            {
+                schema: {
+                    type: 'string',
+                    minLength: 1,
+                    maxLength: 1,
+                },
+                inputs: [
+                    {expected: false, value: ''},
+                    {expected: true,  value: '。'},
+                    {expected: true,  value: '🔹'},
+                    {expected: false, value: '🔹A'},
+                    {expected: false, value: '🔹🔸'},
+                    {expected: false, value: 'e\u0301'},
                 ],
             },
             {

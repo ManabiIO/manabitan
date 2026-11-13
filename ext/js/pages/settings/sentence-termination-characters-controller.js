@@ -18,6 +18,7 @@
 
 import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {log} from '../../core/log.js';
+import {readCodePointsForward} from '../../data/string-util.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
 /** @typedef {import('settings').SentenceParsingTerminationCharacterOption} TerminationCharacter */
@@ -517,7 +518,7 @@ class SentenceTerminationCharacterEntry {
     _onCharacterChange(number, event) {
         const input = /** @type {HTMLInputElement} */ (event.currentTarget);
         if (number === 2 && this._typeSelect?.value !== 'quote') { input.value = ''; }
-        void this._setCharacterValue(input, number, input.value.substring(0, 1)).catch((error) => log.error(error));
+        void this._setCharacterValue(input, number, readCodePointsForward(input.value, 0, 1)).catch((error) => log.error(error));
     }
 
     /** @param {import('popup-menu').MenuCloseEvent} event */
