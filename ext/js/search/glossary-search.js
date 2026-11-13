@@ -25,6 +25,7 @@ const MAX_INDEX_TOKEN_CODEPOINTS = 64;
 const TOKEN_PATTERN = /[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu;
 const JAPANESE_PATTERN = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
 const LATIN_PATTERN = /\p{Script=Latin}/u;
+const STRUCTURED_TEXT_BOUNDARY_TAGS = new Set(['br', 'div', 'ol', 'ul', 'li', 'details', 'summary', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'img']);
 
 /**
  * @param {string} value
@@ -45,14 +46,17 @@ export function foldGlossarySearchText(value) {
  * @returns {string}
  */
 export function glossarySearchText(glossary) {
-    /** @type {string[]} */
-    const parts = [];
+    /** @type {{parts: string[], pendingBoundary: boolean}} */
+    const main = {parts: [], pendingBoundary: false};
+    /** @type {string[][]} */
+    const annotations = [];
     let codepoints = 0;
     let nodes = 0;
     /**
      * @param {string} value
+     * @param {{parts: string[], pendingBoundary: boolean}} flow
      */
-    const append = (value) => {
+    const append = (value, flow) => {
         if (codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS) { return; }
         const available = MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS - codepoints;
         // Walk only the permitted code points. Do not materialize an array
@@ -64,14 +68,31 @@ export function glossarySearchText(glossary) {
             end += typeof point === 'number' && point > 0xffff ? 2 : 1;
             ++count;
         }
-        parts.push(value.slice(0, end));
+        if (end === 0) { return; }
+        if (flow.pendingBoundary && flow.parts.length > 0) { flow.parts.push(' '); }
+        flow.parts.push(value.slice(0, end));
+        flow.pendingBoundary = false;
         codepoints += count;
+    };
+    /**
+     * Keep tooltip/caption text searchable without inserting it into a word
+     * whose visible characters span multiple inline elements.
+     * @param {unknown} value
+     * @param {number} depth
+     */
+    const appendAnnotation = (value, depth) => {
+        if (typeof value !== 'string' || depth > 32 || ++nodes > MAX_GLOSSARY_SEARCH_NODES) { return; }
+        const flow = {parts: /** @type {string[]} */ ([]), pendingBoundary: false};
+        append(value, flow);
+        if (flow.parts.length > 0) { annotations.push(flow.parts); }
     };
     /**
      * @param {unknown} value
      * @param {number} depth
+     * @param {boolean} separateItems
+     * @param {{parts: string[], pendingBoundary: boolean}} flow
      */
-    const visit = (value, depth) => {
+    const visit = (value, depth, separateItems, flow) => {
         if (
             depth > 32 ||
             ++nodes > MAX_GLOSSARY_SEARCH_NODES ||
@@ -81,12 +102,13 @@ export function glossarySearchText(glossary) {
             return;
         }
         if (typeof value === 'string') {
-            append(value);
+            append(value, flow);
             return;
         }
         if (Array.isArray(value)) {
             for (const item of value) {
-                visit(item, depth + 1);
+                if (separateItems) { flow.pendingBoundary = true; }
+                visit(item, depth + 1, separateItems, flow);
                 if (
                     codepoints >= MAX_GLOSSARY_SEARCH_TEXT_CODEPOINTS ||
                     nodes >= MAX_GLOSSARY_SEARCH_NODES
@@ -99,17 +121,29 @@ export function glossarySearchText(glossary) {
         if (typeof value !== 'object') { return; }
         const object = /** @type {Record<string, unknown>} */ (value);
         if (object.type === 'image') {
-            visit(object.title, depth + 1);
-            visit(object.description, depth + 1);
+            flow.pendingBoundary = true;
+            appendAnnotation(object.title, depth + 1);
+            appendAnnotation(object.description, depth + 1);
             return;
         }
-        if (typeof object.text === 'string') { visit(object.text, depth + 1); }
-        if (typeof object.description === 'string') { visit(object.description, depth + 1); }
-        if (typeof object.title === 'string') { visit(object.title, depth + 1); }
-        if ('content' in object) { visit(object.content, depth + 1); }
+        // Ruby readings belong to their own text flow. They must not split
+        // the base word, even when either flow contains inline formatting.
+        if (object.tag === 'rt' || object.tag === 'rp') {
+            flow = {parts: [], pendingBoundary: false};
+            annotations.push(flow.parts);
+        }
+        const boundary = typeof object.tag === 'string' && STRUCTURED_TEXT_BOUNDARY_TAGS.has(object.tag);
+        if (boundary) { flow.pendingBoundary = true; }
+        if (typeof object.text === 'string') { visit(object.text, depth + 1, false, flow); }
+        appendAnnotation(object.description, depth + 1);
+        appendAnnotation(object.title, depth + 1);
+        if ('content' in object) { visit(object.content, depth + 1, false, flow); }
+        if (boundary) { flow.pendingBoundary = true; }
     };
-    visit(glossary, 0);
-    return parts.join(' ');
+    // Glossary entries are separate definitions. Within structured content,
+    // only semantic boundaries separate text; inline formatting adds no space.
+    visit(glossary, 0, true, main);
+    return [main.parts, ...annotations].map((parts) => parts.join('')).filter((text) => text.length > 0).join(' ');
 }
 
 /**
