@@ -2518,7 +2518,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             }
         } finally {
             // Disconnect if the connection was previously disconnected
-            if (disconnect && this._mecab.isEnabled() && this._mecab.isActive()) {
+            if (disconnect && this._mecab.isEnabled() && !this._mecab.isActive()) {
                 this._mecab.disconnect();
             }
         }
