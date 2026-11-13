@@ -19,7 +19,7 @@
 import {safePerformance} from '../core/safe-performance.js';
 import {reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {applyTextReplacement} from '../general/regex-util.js';
-import {isCodePointJapanese} from './ja/japanese.js';
+import {isCodePointJapanese, isCodePointKanji} from './ja/japanese.js';
 import {isCodePointKorean} from './ko/korean.js';
 import {LanguageTransformer} from './language-transformer.js';
 import {getAllLanguageReadingNormalizers, getAllLanguageTextProcessors} from './languages.js';
@@ -800,17 +800,26 @@ export class Translator {
      */
     _getJapaneseChineseKoreanOnlyText(text) {
         let length = 0;
+        let previousCodePoint = 0;
         for (const c of text) {
             const codePoint = /** @type {number} */ (c.codePointAt(0));
+            // A variation selector belongs to the preceding ideograph's
+            // spelling and must not terminate a CJK-only lookup.
+            const isIdeographicVariationSelector = (
+                (codePoint >= 0xfe00 && codePoint <= 0xfe0f) ||
+                (codePoint >= 0xe0100 && codePoint <= 0xe01ef)
+            ) && isCodePointKanji(previousCodePoint);
             if (
                 !isCodePointJapanese(codePoint) &&
                 !isCodePointChinese(codePoint) &&
                 !isCodePointKorean(codePoint) &&
-                !isCodePointAsciiDigit(codePoint)
+                !isCodePointAsciiDigit(codePoint) &&
+                !isIdeographicVariationSelector
             ) {
                 return text.substring(0, length);
             }
             length += c.length;
+            previousCodePoint = codePoint;
         }
         return text;
     }
