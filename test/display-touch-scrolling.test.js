@@ -26,7 +26,7 @@ function setup() {
     /**
      * @param {string} type
      * @param {TestTouch[]} touches
-     * @param {TestTouch[]} [changedTouches]
+     * @param {ArrayLike<TestTouch>} [changedTouches]
      * @returns {Event}
      */
     const send = (type, touches, changedTouches = touches) => {
@@ -66,6 +66,14 @@ test('an unrelated touch ending does not consume the active swipe', ({window: _w
     send('touchend', [{identifier: 7, clientY: 300}], [{identifier: 8, clientY: 500}]);
     expect(scroll).not.toHaveBeenCalled();
     send('touchend', [], [{identifier: 7, clientY: 100}]);
+
+    expect(scroll).toHaveBeenCalledExactlyOnceWith(1, 0.8);
+});
+
+test('array-like touch lists can complete a swipe without an iterator', ({window: _window}) => {
+    const {scroll, send} = setup();
+    send('touchstart', [{identifier: 7, clientY: 300}]);
+    send('touchend', [], {0: {identifier: 7, clientY: 100}, length: 1});
 
     expect(scroll).toHaveBeenCalledExactlyOnceWith(1, 0.8);
 });

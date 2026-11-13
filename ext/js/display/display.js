@@ -1197,7 +1197,9 @@ export class Display extends EventDispatcher {
          * @param {TouchEvent} endEvent
          */
         const onTouchEnd = (endEvent) => {
-            const touch = [...endEvent.changedTouches].find((item) => item.identifier === identifier);
+            // Preserve support for array-like TouchLists without an iterator.
+            // eslint-disable-next-line unicorn/prefer-spread
+            const touch = Array.from(endEvent.changedTouches).find((item) => item.identifier === identifier);
             if (typeof touch === 'undefined') { return; }
             listeners.removeAllEventListeners();
             const scanningOptions = this._options?.scanning;
