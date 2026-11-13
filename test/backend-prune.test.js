@@ -136,6 +136,28 @@ describe('Backend stale dictionary option pruning', () => {
         expect(clearProfileConditionsSchemaCache).toHaveBeenCalledTimes(0);
     });
 
+    test('Saves popup blur selector cleanup even when no dictionary rows or other selectors change', async () => {
+        const save = vi.fn(async () => {});
+        const context = {
+            _options: {
+                profiles: [
+                    {options: {dictionaries: [], general: {mainDictionary: '', sortFrequencyDictionary: null, popupBlurByFrequencyDictionary: 'Removed'}}},
+                    {options: {dictionaries: [], general: {mainDictionary: '', sortFrequencyDictionary: null, popupBlurByFrequencyDictionary: 'Installed'}}},
+                ],
+            },
+            _dictionaryDatabase: {getDictionaryInfo: async () => [{title: 'Installed'}]},
+            _ensureDictionaryDatabaseReady: async () => {},
+            _optionsUtil: {save},
+            _clearProfileConditionsSchemaCache: vi.fn(),
+        };
+
+        const summary = await getPruneMethod().call(context);
+
+        expect(context._options.profiles.map(({options}) => options.general.popupBlurByFrequencyDictionary)).toEqual([null, 'Installed']);
+        expect(summary).toMatchObject({removedEntryCount: 0, affectedProfiles: 1, mainDictionaryResets: 0, sortFrequencyDictionaryResets: 0});
+        expect(save).toHaveBeenCalledExactlyOnceWith(context._options);
+    });
+
     test('Returns skipped summary when dictionary info fails', async () => {
         const optionsUtilSave = vi.fn(async () => {});
         const clearProfileConditionsSchemaCache = vi.fn(() => {});

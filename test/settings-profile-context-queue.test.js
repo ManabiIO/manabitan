@@ -291,6 +291,63 @@ test('setAllSettings invalidates an in-flight options refresh even when the sele
     });
 });
 
+test('failed settings replacement keeps a profile selected while persistence was pending', async () => {
+    const {settingsController, options} = createHarness();
+    await settingsController.prepare();
+    const pending = deferred();
+    const failure = new Error('replacement storage failed');
+    vi.spyOn(settingsController.application.api, 'setAllSettings').mockImplementation(async () => {
+        await pending.promise;
+        throw failure;
+    });
+    const replaced = settingsController.setAllSettings(/** @type {import('settings').Options} */ (/** @type {unknown} */ (structuredClone(options))));
+    const rejected = expect(replaced).rejects.toBe(failure);
+    const changed = vi.fn();
+    settingsController.on('optionsChanged', changed);
+    settingsController.setProfileSelection(1, 'b');
+    await vi.waitFor(() => { expect(changed).toHaveBeenCalledOnce(); });
+    changed.mockClear();
+
+    pending.resolve();
+    await rejected;
+
+    expect(settingsController.getOptionsContext()).toEqual({index: 1, profileId: 'b'});
+    expect(changed).toHaveBeenCalledExactlyOnceWith({options: options.profiles[1].options, optionsContext: {index: 1, profileId: 'b'}});
+});
+
+test('an uncertain replacement failure reconciles the profile actually persisted by the backend', async () => {
+    const {backend, settingsController, options} = createHarness();
+    await settingsController.prepare();
+    const imported = structuredClone(options);
+    imported.profiles[0].id = 'imported';
+    imported.profiles[0].options.general.enable = false;
+    const failure = new Error('response connection closed after persistence');
+    vi.spyOn(settingsController.application.api, 'setAllSettings').mockImplementation(async (value) => {
+        Reflect.set(backend, '_options', structuredClone(value));
+        throw failure;
+    });
+    const changed = vi.fn();
+    settingsController.on('optionsChanged', changed);
+
+    await expect(settingsController.setAllSettings(/** @type {import('settings').Options} */ (/** @type {unknown} */ (imported)))).rejects.toBe(failure);
+
+    expect(settingsController.getOptionsContext()).toEqual({index: 0, profileId: 'imported'});
+    expect(changed).toHaveBeenCalledExactlyOnceWith({options: imported.profiles[0].options, optionsContext: {index: 0, profileId: 'imported'}});
+});
+
+test('failed replacement recovery preserves the original error when settings cannot be read', async () => {
+    const {settingsController, options} = createHarness();
+    await settingsController.prepare();
+    const failure = new Error('replacement storage failed');
+    vi.spyOn(settingsController.application.api, 'setAllSettings').mockRejectedValue(failure);
+    const read = vi.spyOn(settingsController.application.api, 'optionsGetFull').mockRejectedValue(new Error('recovery connection failed'));
+
+    await expect(settingsController.setAllSettings(/** @type {import('settings').Options} */ (/** @type {unknown} */ (structuredClone(options))))).rejects.toBe(failure);
+
+    expect(read).toHaveBeenCalledOnce();
+    expect(settingsController.getOptionsContext()).toEqual({index: 0, profileId: 'a'});
+});
+
 test('rapid profile selection ignores stale full-options completions', async () => {
     const {settingsController} = createHarness();
     await settingsController.prepare();

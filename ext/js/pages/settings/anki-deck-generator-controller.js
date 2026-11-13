@@ -459,9 +459,9 @@ export class AnkiDeckGeneratorController {
                         if (noteData !== null) {
                             const fieldsTSV = this._fieldsToTSV(noteData.fields);
                             if (fieldsTSV) {
-                                ankiTSV += noteData.modelName + '\t';
-                                ankiTSV += noteData.deckName + '\t';
-                                ankiTSV += noteData.tags.join(' ') + '\t';
+                                ankiTSV += this._escapeTSVField(noteData.modelName) + '\t';
+                                ankiTSV += this._escapeTSVField(noteData.deckName) + '\t';
+                                ankiTSV += this._escapeTSVField(noteData.tags.join(' ')) + '\t';
                                 ankiTSV += fieldsTSV;
                                 ankiTSV += '\n';
                             }
@@ -506,7 +506,7 @@ export class AnkiDeckGeneratorController {
         void this._startGenerationState();
         let profileOwnership;
         try {
-            profileOwnership = this._captureViewSnapshot();
+            profileOwnership = this._captureViewSnapshot(true);
         } catch (error) {
             log.error(error);
             this._updateProgressBarError(`Failed to send Anki notes: ${toError(error).message}`);
@@ -584,15 +584,69 @@ export class AnkiDeckGeneratorController {
             if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
             if (this._cancel) { return true; }
             if (disallowDuplicates) {
-                const duplicateNotes = await this._ankiController.canAddNotes(notes.map((note) => ({...note, options: {...note.options, allowDuplicate: false}})));
-                notes = notes.filter((_, i) => duplicateNotes[i]);
+                notes = notes.map((note) => ({...note, options: {...note.options, allowDuplicate: false}}));
+                const addableNotes = await this._ankiController.canAddNotes(notes);
+                if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                if (this._cancel) { return true; }
+                const rejectedNotes = notes.filter((_, i) => !addableNotes[i]);
+                if (rejectedNotes.length > 0) {
+                    // A failed preflight also covers invalid fields or note
+                    // types. Skip only candidates that allowDuplicate fixes.
+                    const checks = await this._ankiController.canAddNotes(rejectedNotes.map((note) => (
+                        {...note, options: {...note.options, allowDuplicate: true}}
+                    )));
+                    if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                    if (this._cancel) { return true; }
+                    if (checks.some((canAdd) => !canAdd)) {
+                        this._updateProgressBarError('Ankiconnect error: Some notes failed validation. Check their required fields, note type, and deck.');
+                        return false;
+                    }
+                }
+                notes = notes.filter((_, i) => addableNotes[i]);
             }
             if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
             if (this._cancel) { return true; }
-            const addNotesResult = await this._ankiController.addNotes(notes);
-            if (addNotesResult === null || addNotesResult.includes(null)) {
-                this._updateProgressBarError('Ankiconnect error: Failed to add cards');
-                return false;
+            if (notes.length === 0) { return true; }
+            // Some AnkiConnect versions roll back an entire addNotes batch on
+            // a duplicate. Protect each note independently so a repeated term
+            // cannot discard the other notes that passed preflight.
+            const batches = disallowDuplicates ? notes.map((note) => [note]) : [notes];
+            for (const batch of batches) {
+                if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                if (this._cancel) { return true; }
+                let addNotesResult;
+                try {
+                    addNotesResult = await this._ankiController.addNotes(batch);
+                } catch (error) {
+                    const data = error instanceof ExtensionError ? error.data : null;
+                    /** @type {unknown} */
+                    const apiError = typeof data === 'object' && data !== null ? Reflect.get(data, 'apiError') : null;
+                    if (!disallowDuplicates || typeof apiError !== 'string' || !apiError.includes('cannot create note because it is a duplicate')) {
+                        throw error;
+                    }
+                    addNotesResult = [null];
+                }
+                if (addNotesResult === null) {
+                    this._updateProgressBarError('Ankiconnect error: Failed to add cards');
+                    return false;
+                }
+                const rejectedNotes = batch.filter((_, i) => addNotesResult[i] === null);
+                if (rejectedNotes.length > 0) {
+                    if (disallowDuplicates) {
+                        if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                        if (this._cancel) { return true; }
+                        // An earlier note (or another client) may become a
+                        // duplicate after preflight. Confirm that disabling
+                        // duplicate prevention alone makes the note addable.
+                        const checks = await this._ankiController.canAddNotes(rejectedNotes.flatMap((note) => [
+                            note, {...note, options: {...note.options, allowDuplicate: true}},
+                        ]));
+                        if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                        if (checks.every((canAdd, i) => canAdd === (i % 2 === 1))) { continue; }
+                    }
+                    this._updateProgressBarError('Ankiconnect error: Failed to add cards');
+                    return false;
+                }
             }
         } catch (error) {
             this._updateProgressBarError(`Ankiconnect error: ${toError(error).message}`);
@@ -712,7 +766,7 @@ export class AnkiDeckGeneratorController {
      * @returns {Promise<?import('anki.js').Note>}
      */
     async _generateNoteData(word, addMedia, batchProfileOwnership) {
-        const profileOwnership = batchProfileOwnership ?? this._captureViewSnapshot();
+        const profileOwnership = batchProfileOwnership ?? this._captureViewSnapshot(addMedia);
         const {optionsContext} = profileOwnership;
         this._assertProfileOwnershipCurrent(profileOwnership);
         const activeFlashcardFormatDetails = profileOwnership.flashcardFormatDetails;
@@ -745,7 +799,13 @@ export class AnkiDeckGeneratorController {
         const idleTimeout = (Number.isFinite(options.anki.downloadTimeout) && options.anki.downloadTimeout > 0 ? options.anki.downloadTimeout : null);
         const languageSummary = getLanguageSummaries().find(({iso}) => iso === options.general.language);
         const requiredAudioSources = options.audio.enableDefaultAudioSources ? getRequiredAudioSources(options.general.language, options.audio.sources) : [];
-        const mediaOptions = addMedia ? {audio: {sources: [...options.audio.sources, ...requiredAudioSources], preferredAudioIndex: null, idleTimeout: idleTimeout, languageSummary: languageSummary}} : null;
+        if (addMedia && typeof profileOwnership.ankiConnection === 'undefined') { throw new Error('Anki media destination was not captured'); }
+        const mediaOptions = addMedia ?
+            {
+                ankiConnectionConfiguration: profileOwnership.ankiConnection?.configuration,
+                audio: {sources: [...options.audio.sources, ...requiredAudioSources], preferredAudioIndex: null, idleTimeout: idleTimeout, languageSummary: languageSummary},
+            } :
+            null;
         const requirements = addMedia ? [...getDictionaryEntryMedia(dictionaryEntry), {type: 'audio'}] : [];
         const dictionaryStylesMap = this._ankiNoteBuilder.getDictionaryStylesMap(options.dictionaries);
         const cardFormat = /** @type {import('settings').AnkiCardFormat} */ ({
@@ -770,6 +830,7 @@ export class AnkiDeckGeneratorController {
             duplicateScope: options.anki.duplicateScope,
             duplicateScopeCheckAllModels: options.anki.duplicateScopeCheckAllModels,
             dictionaryStylesMap: dictionaryStylesMap,
+            throwOnRenderError: true,
         }));
         assertProfileCurrent();
         return note;
@@ -788,10 +849,11 @@ export class AnkiDeckGeneratorController {
     }
 
     /**
-     * @returns {ReturnType<AnkiDeckGeneratorController['_captureProfileOwnership']> & {flashcardFormatDetails: import('settings').AnkiCardFormat, flashcardFormatIndex: number, activeNoteType: string, activeAnkiDeck: string, viewToken: number}}
+     * @param {boolean} [captureAnkiConnection]
+     * @returns {ReturnType<AnkiDeckGeneratorController['_captureProfileOwnership']> & {flashcardFormatDetails: import('settings').AnkiCardFormat, flashcardFormatIndex: number, activeNoteType: string, activeAnkiDeck: string, viewToken: number, ankiConnection?: import('anki').ConnectionSnapshot}}
      * @throws {Error} If the selected format view is unavailable or stale.
      */
-    _captureViewSnapshot() {
+    _captureViewSnapshot(captureAnkiConnection = false) {
         this._assertFormatViewCurrent();
         const index = Number.parseInt(this._activeFlashcardFormatSelect.value, 10);
         const flashcardFormatDetails = this._flashcardFormatDetails[index];
@@ -803,6 +865,7 @@ export class AnkiDeckGeneratorController {
             activeNoteType: flashcardFormatDetails.model,
             activeAnkiDeck: flashcardFormatDetails.deck,
             viewToken: this._flashcardFormatViewToken,
+            ...(captureAnkiConnection ? {ankiConnection: this._ankiController.captureConnection()} : {}),
         };
     }
 
@@ -818,10 +881,10 @@ export class AnkiDeckGeneratorController {
     }
 
     /**
-     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined), optionsRevision?: number, viewToken?: number}} ownership
+     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined), optionsRevision?: number, viewToken?: number, ankiConnection?: import('anki').ConnectionSnapshot}} ownership
      * @throws {Error} If the selected profile changed while generation was pending.
      */
-    _assertProfileOwnershipCurrent({optionsContext, profileIndexChangeGeneration, optionsRevision, viewToken}) {
+    _assertProfileOwnershipCurrent({optionsContext, profileIndexChangeGeneration, optionsRevision, viewToken, ankiConnection}) {
         const current = this._settingsController.getOptionsContext();
         if (
             current.index !== optionsContext.index ||
@@ -836,6 +899,7 @@ export class AnkiDeckGeneratorController {
         ) {
             throw new Error('Profile changed while generating Anki note');
         }
+        if (typeof ankiConnection !== 'undefined') { this._ankiController.assertConnectionIdentity(ankiConnection.identity); }
     }
 
     /**
@@ -939,10 +1003,22 @@ export class AnkiDeckGeneratorController {
         let tsv = '';
         for (const key in noteFields) {
             if (Object.prototype.hasOwnProperty.call(noteFields, key)) {
-                tsv += noteFields[key].replaceAll('\t', '&nbsp;&nbsp;&nbsp;').replaceAll('\n', '').replaceAll('\r', '') + '\t';
+                const value = noteFields[key].replaceAll('\t', '&nbsp;&nbsp;&nbsp;').replaceAll('\n', '').replaceAll('\r', '');
+                tsv += this._escapeTSVField(value) + '\t';
             }
         }
         return tsv;
+    }
+
+    /**
+     * Anki text imports use CSV quoting even with a tab separator. Quote fields
+     * containing delimiters or quotes, and keep a note type beginning with #
+     * from turning the exported row into a comment.
+     * @param {string} value
+     * @returns {string}
+     */
+    _escapeTSVField(value) {
+        return /^[#]|["\t\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
     }
 
     /**

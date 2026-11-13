@@ -9,6 +9,10 @@ import {log} from '../ext/js/core/log.js';
 import {Backend} from '../ext/js/background/backend.js';
 import {JsonSchema} from '../ext/js/data/json-schema.js';
 import {OptionsUtil} from '../ext/js/data/options-util.js';
+import {TextSourceElement} from '../ext/js/dom/text-source-element.js';
+import {TextSourceGenerator} from '../ext/js/dom/text-source-generator.js';
+import {TextScanner} from '../ext/js/language/text-scanner.js';
+import {BackupController} from '../ext/js/pages/settings/backup-controller.js';
 import {SentenceTerminationCharactersController} from '../ext/js/pages/settings/sentence-termination-characters-controller.js';
 import {SettingsController} from '../ext/js/pages/settings/settings-controller.js';
 import {createDomTest} from './fixtures/dom-test.js';
@@ -26,7 +30,7 @@ function deferred() {
 /**
  * @param {import('jsdom').DOMWindow} window
  * @param {boolean} [prepareController]
- * @returns {Promise<{backend: Backend, settings: SettingsController, settingsApi: {optionsGetFull: import('vitest').Mock, optionsGet: import('vitest').Mock, modifySettings: import('vitest').Mock, getSettings: import('vitest').Mock}, controller: SentenceTerminationCharactersController, saveOptions: import('vitest').Mock}>}
+ * @returns {Promise<{backend: Backend, settings: SettingsController, settingsApi: {optionsGetFull: import('vitest').Mock, optionsGet: import('vitest').Mock, modifySettings: import('vitest').Mock, getSettings: import('vitest').Mock, setAllSettings: import('vitest').Mock, getDictionaryInfo: import('vitest').Mock}, controller: SentenceTerminationCharactersController, saveOptions: import('vitest').Mock}>}
  */
 async function createHarness(window, prepareController = true) {
     const {document} = window;
@@ -71,6 +75,8 @@ async function createHarness(window, prepareController = true) {
         optionsGet: vi.fn(async (context) => structuredClone(backend._onApiOptionsGet({optionsContext: structuredClone(context)}, sender))),
         modifySettings: vi.fn(async (targets, source) => structuredClone(await backend._onApiModifySettings({targets: structuredClone(targets), source}, sender))),
         getSettings: vi.fn(async (targets) => structuredClone(backend._onApiGetSettings({targets: structuredClone(targets)}, sender))),
+        setAllSettings: vi.fn(async (value, source) => await backend._onApiSetAllSettings({value: structuredClone(value), source}, sender)),
+        getDictionaryInfo: vi.fn(async () => []),
     };
     const application = {on: vi.fn(), api: settingsApi};
     const settings = new SettingsController(/** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ (application)));
@@ -92,6 +98,113 @@ async function createHarness(window, prepareController = true) {
 function visibleCharacters(window) {
     return [...window.document.querySelectorAll('.sentence-termination-character-input1')].map((node) => /** @type {HTMLInputElement} */ (node).value);
 }
+
+/**
+ * @param {import('jsdom').DOMWindow} window
+ * @param {import('settings').Options} options
+ * @param {string} text
+ * @returns {Promise<import('text-scanner').Sentence>}
+ */
+async function extractSavedSentence(window, options, text) {
+    const optionsContext = {index: 0, profileId: options.profiles[0].id};
+    const dictionaryEntry = /** @type {import('dictionary').KanjiDictionaryEntry} */ ({});
+    const scanner = new TextScanner({
+        api: {
+            termsFind: vi.fn(),
+            kanjiFind: vi.fn(async () => [dictionaryEntry]),
+            isTextLookupWorthy: vi.fn(),
+        },
+        node: window.document.body,
+        getSearchContext: () => ({optionsContext, detail: {documentTitle: ''}}),
+        textSourceGenerator: new TextSourceGenerator(),
+        browser: null,
+    });
+    scanner.setOptions({sentenceParsingOptions: options.profiles[0].options.sentenceParsing});
+    const index = text.indexOf('猫');
+    const source = new TextSourceElement(window.document.createElement('input'), text, index, index + 1);
+    const result = await scanner._findKanjiDictionaryEntries(source, optionsContext);
+    if (result === null) { throw new Error('Kanji lookup returned no sentence'); }
+    return result.sentence;
+}
+
+describe('Unicode sentence boundary settings', () => {
+    test('the character inputs allow a complete supplementary code point', async ({window}) => {
+        await createHarness(window);
+        for (const input of window.document.querySelectorAll('.sentence-termination-character-input1, .sentence-termination-character-input2')) {
+            expect(/** @type {HTMLInputElement} */ (input).maxLength).toBe(2);
+        }
+    });
+
+    test.for(['🔹', '。'])('saving %s retains the whole boundary and applies it to sentence extraction', async (character, {window}) => {
+        const h = await createHarness(window);
+        const entry = h.controller.getEntry(0);
+        if (entry === null) { throw new Error('First row missing'); }
+        const changed = vi.spyOn(entry, '_setCharacterValue');
+        const input = /** @type {HTMLInputElement} */ (window.document.querySelector('.sentence-termination-character-input1'));
+        input.value = character === '。' ? '。次' : character;
+        input.dispatchEvent(new window.Event('change'));
+        await Promise.all(changed.mock.results.map((result) => result.value));
+        const saved = await h.settings.getOptionsFull();
+        expect(saved.profiles[0].options.sentenceParsing.terminationCharacters[0].character1).toBe(character);
+        expect(input.value).toBe(character);
+        expect(await extractSavedSentence(window, saved, `前${character}猫${character}次`)).toEqual({text: '猫', offset: 0});
+    });
+
+    test('both supplementary quote characters survive editing and delimit the saved sentence', async ({window}) => {
+        const h = await createHarness(window);
+        const entry = h.controller.getEntry(0);
+        if (entry === null) { throw new Error('First row missing'); }
+        const changed = vi.spyOn(entry, '_setCharacterValue');
+        const type = /** @type {HTMLSelectElement} */ (window.document.querySelector('.sentence-termination-character-type'));
+        type.value = 'quote';
+        type.dispatchEvent(new window.Event('change'));
+        await Promise.all(changed.mock.results.map((result) => result.value));
+        for (const [number, character] of [[1, '🔹'], [2, '🔸']]) {
+            const input = /** @type {HTMLInputElement} */ (window.document.querySelector(`.sentence-termination-character-input${number}`));
+            input.value = `${character}`;
+            input.dispatchEvent(new window.Event('change'));
+            await Promise.all(changed.mock.results.map((result) => result.value));
+            expect(input.value).toBe(character);
+        }
+        const saved = await h.settings.getOptionsFull();
+        expect(saved.profiles[0].options.sentenceParsing.terminationCharacters[0]).toMatchObject({character1: '🔹', character2: '🔸'});
+        expect(await extractSavedSentence(window, saved, '前🔹猫🔸次')).toEqual({text: '猫', offset: 0});
+    });
+
+    test('backup import keeps supplementary boundaries through normalization and persistence', async ({window}) => {
+        const h = await createHarness(window);
+        const options = await h.settings.getOptionsFull();
+        options.profiles[0].options.sentenceParsing.terminationCharacters[0].character1 = '🔹';
+        options.profiles[0].options.sentenceParsing.terminationCharacters[0].character2 = '🔸';
+        const backup = new BackupController(h.settings, null);
+        Reflect.set(backup, '_optionsUtil', Reflect.get(h.backend, '_optionsUtil'));
+        const file = new window.File([JSON.stringify({version: 0, options})], 'settings.json', {type: 'application/json'});
+        await backup._importSettingsFile(file);
+        const saved = await h.settings.getOptionsFull();
+        expect(h.settingsApi.setAllSettings).toHaveBeenCalledOnce();
+        expect(saved.profiles[0].options.sentenceParsing.terminationCharacters[0]).toMatchObject({character1: '🔹', character2: '🔸'});
+        expect(await extractSavedSentence(window, saved, '前🔹猫🔸次')).toEqual({text: '猫', offset: 0});
+    });
+
+    test('composing a boundary does not write or truncate the unfinished input', async ({window}) => {
+        const h = await createHarness(window);
+        const entry = h.controller.getEntry(0);
+        if (entry === null) { throw new Error('First row missing'); }
+        const changed = vi.spyOn(entry, '_setCharacterValue');
+        const input = /** @type {HTMLInputElement} */ (window.document.querySelector('.sentence-termination-character-input1'));
+        input.dispatchEvent(new window.CompositionEvent('compositionstart'));
+        input.value = 'かん';
+        input.dispatchEvent(new window.InputEvent('input', {isComposing: true, data: 'かん'}));
+        expect(input.value).toBe('かん');
+        expect(h.settingsApi.modifySettings).not.toHaveBeenCalled();
+        input.value = '𠮷';
+        input.dispatchEvent(new window.CompositionEvent('compositionend', {data: '𠮷'}));
+        input.dispatchEvent(new window.Event('change'));
+        await Promise.all(changed.mock.results.map((result) => result.value));
+        expect(input.value).toBe('𠮷');
+        expect((await h.settings.getOptionsFull()).profiles[0].options.sentenceParsing.terminationCharacters[0].character1).toBe('𠮷');
+    });
+});
 
 describe('sentence editor confirmed production ownership regressions', () => {
     test('a delayed initial A read cannot replace B at the same selected index', async ({window}) => {

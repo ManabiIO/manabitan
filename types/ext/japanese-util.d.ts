@@ -19,6 +19,7 @@ export type FuriganaGroup = {
     isKana: boolean;
     text: string;
     textNormalized: string | null;
+    minimumReadingLength: number;
 };
 
 export type FuriganaSegment = {

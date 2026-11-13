@@ -12,7 +12,7 @@ function fixture() {
     const profile = {id: 'profile-A',
         options: {
             dictionaries: [oldEntry],
-            general: {mainDictionary: 'Old title', sortFrequencyDictionary: 'Old title'},
+            general: {mainDictionary: 'Old title', sortFrequencyDictionary: 'Old title', popupBlurByFrequencyDictionary: 'Old title'},
             anki: {cardFormats: [{fields: {Glossary: {value: '{single-glossary-old-title} literal Old title'}}}]},
         }};
     const options = {profiles: [profile]};
@@ -39,7 +39,7 @@ test('startup recovers preferences, selectors, and Anki markers after a committe
     const {backend, profile, oldEntry, save} = fixture();
     const summary = await backend._pruneStaleProfileDictionaryOptions();
     expect(profile.options.dictionaries).toEqual([{...oldEntry, name: 'New title', styles: 'new styles'}]);
-    expect(profile.options.general).toEqual({mainDictionary: 'New title', sortFrequencyDictionary: 'New title'});
+    expect(profile.options.general).toEqual({mainDictionary: 'New title', sortFrequencyDictionary: 'New title', popupBlurByFrequencyDictionary: 'New title'});
     expect(profile.options.anki.cardFormats[0].fields.Glossary.value).toBe('{single-glossary-new-title} literal Old title');
     expect(summary.removedEntryCount).toBe(0);
     expect(save).toHaveBeenCalledOnce();
@@ -63,6 +63,7 @@ test('startup never migrates a source dictionary which is still installed', asyn
     await backend._pruneStaleProfileDictionaryOptions();
     expect(profile.options.dictionaries[0].name).toBe('Old title');
     expect(profile.options.general.mainDictionary).toBe('Old title');
+    expect(profile.options.general.popupBlurByFrequencyDictionary).toBe('Old title');
     expect(save).not.toHaveBeenCalled();
 });
 
@@ -72,6 +73,7 @@ test('ambiguous committed replacements retain source preferences instead of gues
     await backend._pruneStaleProfileDictionaryOptions();
     expect(profile.options.dictionaries[0].name).toBe('Old title');
     expect(profile.options.general.mainDictionary).toBe('Old title');
+    expect(profile.options.general.popupBlurByFrequencyDictionary).toBe('Old title');
     expect(save).not.toHaveBeenCalled();
 });
 

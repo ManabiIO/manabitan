@@ -26,15 +26,16 @@ export class DOMTextScanner {
      * A regular expression used to match word delimiters.
      * \p{L} matches any kind of letter from any language
      * \p{N} matches any kind of numeric character in any script
+     * \p{M} keeps combining accents and vowel marks with their letters
      * @type {RegExp}
      */
-    static WORD_DELIMITER_REGEX = /[^\w\p{L}\p{N}]/u;
+    static WORD_DELIMITER_REGEX = /[^\w\p{L}\p{N}\p{M}]/u;
 
     /**
      * Creates a new instance of a DOMTextScanner.
      * @param {Node} node The DOM Node to start at.
-     * @param {number} offset The character offset in to start at when node is a text node.
-     *   Use 0 for non-text nodes.
+     * @param {number} offset The character offset when node is a text node, or the
+     *   child-node boundary offset when node is an element.
      * @param {boolean} forcePreserveWhitespace Whether or not whitespace should be forced to be preserved,
      *   regardless of CSS styling.
      * @param {boolean} generateLayoutContent Whether or not newlines should be added based on CSS styling.
@@ -134,6 +135,8 @@ export class DOMTextScanner {
         seekLoop:
         while (node !== null) {
             let enterable = false;
+            /** @type {?Node} */
+            let initialChild = null;
             const nodeType = node.nodeType;
 
             if (nodeType === TEXT_NODE) {
@@ -152,6 +155,7 @@ export class DOMTextScanner {
                     break;
                 }
                 lastNode = node;
+                const initialOffset = this._offset;
                 const initialNodeAtBeginningOfNodeGoingBackwards = node === this._initialNode && this._offset === 0 && !forward;
                 const initialNodeAtEndOfNodeGoingForwards = node === this._initialNode && this._offset === node.childNodes.length && forward;
                 this._offset = 0;
@@ -163,11 +167,21 @@ export class DOMTextScanner {
                 if (initialNodeAtBeginningOfNodeGoingBackwards || initialNodeAtEndOfNodeGoingForwards) {
                     enterable = false;
                 }
+                if (isInitialNode && !resetOffset) {
+                    // Range offsets on elements identify a boundary between
+                    // children, not the beginning/end of the whole element.
+                    // Ruby redirects deliberately reset the traversal offset.
+                    if (enterable) {
+                        initialChild = node.childNodes[forward ? initialOffset : initialOffset - 1] ?? null;
+                    }
+                    enterable = false;
+                    this._offset = initialOffset;
+                }
             }
 
             /** @type {Node[]} */
             const exitedNodes = [];
-            node = DOMTextScanner.getNextNodeToProcess(node, forward, enterable, exitedNodes);
+            node = initialChild ?? DOMTextScanner.getNextNodeToProcess(node, forward, enterable, exitedNodes);
 
             for (const exitedNode of exitedNodes) {
                 if (exitedNode.nodeType !== ELEMENT_NODE) { continue; }
