@@ -152,6 +152,16 @@ for (let i = 0, ii = kana.length; i < ii; i += 3) {
 }
 
 /**
+ * Iteration marks repeat a kanji together with its glyph selector.
+ * @param {string} text
+ * @returns {Iterable<string>}
+ */
+function getCharactersWithVariationSelectors(text) {
+    if (!VARIATION_SELECTOR_PATTERN.test(text)) { return text; }
+    return text.match(/.[\ufe00-\ufe0f\u{e0100}-\u{e01ef}]?/gsu) ?? [];
+}
+
+/**
  * @param {string} previousCharacter
  * @returns {?string}
  */
@@ -372,7 +382,7 @@ export function getKanaScriptType(character) {
 export function convertIterationMarksToExplicitKanji(text) {
     let result = '';
     let previousCharacter = null;
-    for (let character of text) {
+    for (let character of getCharactersWithVariationSelectors(text)) {
         if (character === '々' && previousCharacter !== null && isCodePointKanji(/** @type {number} */ (previousCharacter.codePointAt(0)))) {
             character = previousCharacter;
         }
@@ -389,7 +399,7 @@ export function convertIterationMarksToExplicitKanji(text) {
 export function convertExplicitKanjiDuplicationToIterationMarks(text) {
     let result = '';
     let previousCharacter = null;
-    for (const character of text) {
+    for (const character of getCharactersWithVariationSelectors(text)) {
         result += (
             previousCharacter !== null &&
             character === previousCharacter &&

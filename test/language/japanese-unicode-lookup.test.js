@@ -88,3 +88,18 @@ test('iteration marks after a supplementary kanji find the explicitly repeated e
     expect(result.dictionaryEntries[0].headwords[0].term).toBe('𠮷𠮷');
     expect(result.originalTextLength).toBe('𠮷々'.length);
 });
+
+test.each([
+    ['辻\u{e0100}々', '辻\u{e0100}辻\u{e0100}', 'つじつじ'],
+    ['益\ufe00々', '益\ufe00益\ufe00', 'ますます'],
+    ['辻\u{e0100}辻\u{e0100}', '辻\u{e0100}々', 'つじつじ'],
+    ['益\ufe00益\ufe00', '益\ufe00々', 'ますます'],
+])('iteration marks preserve the preceding kanji variation in %s', async (source, term, reading) => {
+    const translator = createTranslator(term, reading);
+    const result = await translator.findTerms('simple', source, options);
+
+    expect(result.dictionaryEntries).toHaveLength(1);
+    expect(result.dictionaryEntries[0].headwords[0].term).toBe(term);
+    expect(result.dictionaryEntries[0].headwords[0].sources).toContainEqual(expect.objectContaining({originalText: source}));
+    expect(result.originalTextLength).toBe(source.length);
+});
