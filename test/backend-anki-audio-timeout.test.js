@@ -155,6 +155,25 @@ test('ordinary unavailable Anki audio remains a nonfatal missing-media result', 
     expect(storeMediaFile).not.toHaveBeenCalled();
 });
 
+test.each(['audio/wav', 'audio/wav; codecs=1', 'Audio/WAV', 'audio/x-wav ; rate=8000'])(
+    'Anki media filenames retain the audio format for Content-Type %s',
+    async (contentType) => {
+        const downloader = new AudioDownloader(/** @type {any} */ ({
+            async fetchAnonymous() { return new Response(makeWav(), {headers: {'Content-Type': contentType}}); },
+        }));
+        const storeMediaFile = vi.fn(/** @type {AnkiConnect['storeMediaFile']} */ (async (filename) => filename));
+        const filename = await createBackend(downloader)._injectAnkiNoteAudio(
+            createAnkiConnect(storeMediaFile),
+            123,
+            definitionDetails,
+            audioDetails([{type: 'custom', url: 'https://audio.example/recording', voice: ''}]),
+        );
+
+        expect(filename).toMatch(/^yomitan_audio_.+\.wav$/);
+        expect(storeMediaFile.mock.calls[0][1]).toBe(Buffer.from(makeWav()).toString('base64'));
+    },
+);
+
 /** @returns {Uint8Array} */
 function makeWav() {
     const bytes = new Uint8Array(46);
