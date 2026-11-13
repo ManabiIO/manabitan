@@ -153,11 +153,13 @@ export class DisplayGenerator {
             const definition = definitions[i];
             const {dictionary, dictionaryAlias} = definition;
 
-            if (dictionaryTag.dictionaries.includes(dictionary)) {
+            // Frequency sorting can interleave dictionaries. Only adjacent
+            // definitions share a label; a returning dictionary starts a group.
+            if (dictionaryTag.dictionaries[0] === dictionary) {
                 dictionaryTag.redundant = true;
             } else {
                 dictionaryTag.redundant = false;
-                dictionaryTag.dictionaries.push(dictionary);
+                dictionaryTag.dictionaries = [dictionary];
                 dictionaryTag.name = dictionaryAlias;
                 dictionaryTag.content = [dictionary];
 
