@@ -1609,6 +1609,9 @@ export class DisplayAnki {
             },
             requirements,
             dictionaryStylesMap,
+            // Accepted saves must not write diagnostic placeholders into Anki.
+            // Diagnostic callers still receive the rendered note and errors.
+            throwOnRenderError: typeof saveOptions !== 'undefined',
         });
         return {note, errors, requirements: outputRequirements};
     }

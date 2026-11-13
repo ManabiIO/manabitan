@@ -25,8 +25,11 @@ import {AnkiNoteBuilder} from '../ext/js/data/anki-note-builder.js';
 import {createAnkiNoteData} from '../ext/js/data/anki-note-data-creator.js';
 import {Backend} from '../ext/js/background/backend.js';
 import {DisplayAnki} from '../ext/js/display/display-anki.js';
+import {ExtensionError} from '../ext/js/core/extension-error.js';
+import {AnkiTemplateRenderer} from '../ext/js/templates/anki-template-renderer.js';
 import {TemplateRenderer} from '../ext/js/templates/template-renderer.js';
 import {createDomTest} from './fixtures/dom-test.js';
+import {fetch as fixtureFetch} from './mocks/common.js';
 
 const test = createDomTest();
 const defaultAnkiFieldTemplates = readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../ext/data/templates/default-anki-field-templates.handlebars'), 'utf8');
@@ -338,6 +341,94 @@ function createCollectionNote(front) {
         },
     };
 }
+
+describe('DisplayAnki field-render failures', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+        vi.useRealTimers();
+    });
+
+    /**
+     * @param {import('jsdom').DOMWindow} window
+     * @param {'new'|'overwrite'} behavior
+     * @param {string} backTemplate
+     * @returns {Promise<any>}
+     */
+    async function prepareSave(window, behavior, backTemplate) {
+        vi.stubGlobal('fetch', fixtureFetch);
+        vi.useFakeTimers();
+        setupDocument(window.document);
+        const existing = {...createNoteInfo(456, 'term'), fields: {Front: {value: 'term', order: 0}, Back: {value: 'valuable existing content', order: 1}}};
+        const entry = createTermEntry();
+        entry.definitions = [];
+        entry.frequencies = [];
+        entry.pronunciations = [];
+        entry.headwords[0].tags = [];
+        const {display, api} = createDisplay(window.document, [entry], {
+            getAnkiNoteInfo: vi.fn(async () => [{canAdd: true, valid: true, isDuplicate: behavior === 'overwrite', noteIds: [456], noteInfos: [existing]}]),
+            getAnkiNotesInfo: vi.fn(async () => [existing]),
+            injectAnkiNoteMedia: vi.fn(async () => ({audioFileName: 'audio.mp3', screenshotFileName: null, clipboardImageFileName: null, clipboardText: null, dictionaryMedia: [], errors: []})),
+            parseText: vi.fn(async () => []),
+        });
+        const cardFormat = createFastProbeCardFormat();
+        cardFormat.fields.Back = {value: '{back}', overwriteMode: 'overwrite'};
+        const template = `${defaultAnkiFieldTemplates}\n{{#*inline "back"}}${backTemplate}{{/inline}}`;
+        const anki = new DisplayAnki(display, createDisplayAudio());
+        const renderer = new AnkiTemplateRenderer(window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+        await renderer.prepare();
+        anki._ankiNoteBuilder = new AnkiNoteBuilder(api, renderer.templateRenderer);
+        anki._duplicateBehavior = behavior;
+        anki._checkForDuplicates = true;
+        anki._cardFormats = [cardFormat];
+        anki._noteContext = {url: 'https://example.com', sentence: {text: 'term', offset: 0}, documentTitle: 'title', query: 'term', fullQuery: 'term'};
+        anki._ankiFieldTemplates = template;
+        anki._ankiFieldTemplatesCacheOptionsGeneration = 0;
+        anki._dictionaries = [];
+        display.getOptions = () => createTemplateOptions(cardFormat, template);
+        const details = await anki._getDictionaryEntryDetails(display.dictionaryEntries, true);
+        anki._dictionaryEntryDetails = details;
+        anki._updateSaveButtons(details);
+        const button = anki._saveButtonFind(0, 0);
+        expect(button?.disabled).toBe(false);
+        expect(api.getAnkiNoteInfo.mock.calls[0][0][0].fields).toEqual({Front: 'term'});
+        const showError = vi.spyOn(anki, '_showErrorNotification').mockImplementation(() => {});
+        return {anki, api, existing, button, showError};
+    }
+
+    for (const behavior of /** @type {const} */ (['new', 'overwrite'])) {
+        for (const withMedia of [false, true]) {
+            test(`${behavior} aborts on a secondary field error ${withMedia ? 'after media injection' : 'before media injection'}`, async ({window}) => {
+                const broken = withMedia ? '{{#if (hasMedia "audio")}}{{missingHelper "value"}}{{else}}waiting{{/if}}' : '{{missingHelper "value"}}';
+                const {anki, api, existing, button, showError} = await prepareSave(window, behavior, broken);
+
+                await anki._saveAnkiNote(0, 0);
+
+                expect(api.addAnkiNote).not.toHaveBeenCalled();
+                expect(api.updateAnkiNote).not.toHaveBeenCalled();
+                expect(existing.fields.Back.value).toBe('valuable existing content');
+                expect(api.injectAnkiNoteMedia).toHaveBeenCalledTimes(withMedia ? 1 : 0);
+                expect(showError).toHaveBeenCalledWith([expect.objectContaining({message: 'Template render error for {back}'})]);
+
+                await vi.advanceTimersByTimeAsync(2500);
+                expect(button.disabled).toBe(false);
+                anki._ankiFieldTemplates = `${defaultAnkiFieldTemplates}\n{{#*inline "back"}}corrected content{{/inline}}`;
+                await anki._saveAnkiNote(0, 0);
+                const write = behavior === 'new' ? api.addAnkiNote : api.updateAnkiNote;
+                expect(write).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({fields: {Front: 'term', Back: 'corrected content'}}));
+            });
+        }
+    }
+
+    test('a missing optional audio file keeps valid rendered fields writable', async ({window}) => {
+        const {anki, api, showError} = await prepareSave(window, 'new', '{{#if (hasMedia "audio")}}{{getMedia "audio"}}{{else}}no audio{{/if}}');
+        api.injectAnkiNoteMedia.mockResolvedValue({audioFileName: null, screenshotFileName: null, clipboardImageFileName: null, clipboardText: null, dictionaryMedia: [], errors: [ExtensionError.serialize(new Error('Audio not available'))]});
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(api.addAnkiNote).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({fields: {Front: 'term', Back: 'no audio'}}));
+        expect(showError).toHaveBeenCalledWith([expect.objectContaining({message: 'Audio not available'})]);
+    });
+});
 
 describe('DisplayAnki preload and save flow', () => {
     test('native duplicate candidates drive overwrite to the true first-field match', async ({window}) => {
