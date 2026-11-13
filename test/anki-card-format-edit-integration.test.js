@@ -9,6 +9,7 @@ import {Backend} from '../ext/js/background/backend.js';
 import {log} from '../ext/js/core/log.js';
 import {HtmlTemplateCollection} from '../ext/js/dom/html-template-collection.js';
 import {AnkiController} from '../ext/js/pages/settings/anki-controller.js';
+import {BackupController} from '../ext/js/pages/settings/backup-controller.js';
 import {GenericSettingController} from '../ext/js/pages/settings/generic-setting-controller.js';
 import {SettingsController} from '../ext/js/pages/settings/settings-controller.js';
 import {createDomTest} from './fixtures/dom-test.js';
@@ -67,7 +68,7 @@ async function createHarness() {
     }));
     const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
     Reflect.set(backend, '_options', options);
-    Reflect.set(backend, '_optionsUtil', {createValidatingProxy: (/** @type {unknown} */ value) => value});
+    Reflect.set(backend, '_optionsUtil', {createValidatingProxy: (/** @type {unknown} */ value) => value, validate: vi.fn()});
     vi.spyOn(backend, '_saveOptions').mockImplementation(async (_source, value) => { Reflect.set(backend, '_options', value); });
     const api = {
         optionsGetFull: vi.fn(async () => structuredClone(Reflect.get(backend, '_options'))),
@@ -77,6 +78,7 @@ async function createHarness() {
         }),
         getSettings: vi.fn(async (targets) => structuredClone(backend._onApiGetSettings({targets}, /** @type {chrome.runtime.MessageSender} */ ({})))),
         modifySettings: vi.fn(async (targets, source) => structuredClone(await backend._modifySettings(targets, source))),
+        setAllSettings: vi.fn(async (value, source) => backend._onApiSetAllSettings({value, source}, /** @type {chrome.runtime.MessageSender} */ ({}))),
         getDictionaryInfo: vi.fn(async () => []),
     };
     const application = /** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ ({api, on: vi.fn()}));
@@ -217,6 +219,33 @@ test('an acknowledged edit still cannot authorize deleting a subsequently reorde
         await vi.waitFor(() => { expect(logError).toHaveBeenCalledOnce(); });
         expect(logError.mock.calls[0][0]).toMatchObject({message: 'Setting value changed before update'});
         expect(getCardFormats(backend)).toEqual(reordered);
+    } finally {
+        cleanup();
+    }
+});
+
+test('a failed backup replacement leaves the existing card format editable', async ({window}) => {
+    const {backend, settings, api, cleanup} = await createHarness();
+    try {
+        const original = structuredClone(await settings.getOptionsFull());
+        const imported = structuredClone(original);
+        imported.profiles[0].options.anki.cardFormats[0].deck = 'Imported deck';
+        const failure = new Error('settings storage is full');
+        vi.mocked(backend._saveOptions).mockRejectedValueOnce(failure);
+        const backup = new BackupController(settings, null);
+
+        await expect(backup._settingsImportSetOptionsFull(imported)).rejects.toBe(failure);
+        expect(await settings.getOptionsFull()).toEqual(original);
+        // Let the normal options subscribers finish rebuilding the displayed controls.
+        await new Promise((resolve) => { window.setTimeout(resolve, 0); });
+        api.modifySettings.mockClear();
+        const deck = /** @type {HTMLSelectElement} */ (document.querySelector('.anki-card-deck'));
+        deck.value = 'New Deck';
+        deck.dispatchEvent(new window.Event('change', {bubbles: true}));
+
+        await vi.waitFor(() => { expect(getCardFormats(backend)[0].deck).toBe('New Deck'); });
+        expect(api.modifySettings).toHaveBeenCalledOnce();
+        expect(settings.getOptionsContext().profileId).toBe('profile-a');
     } finally {
         cleanup();
     }
