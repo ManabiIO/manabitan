@@ -714,7 +714,10 @@ export class Display extends EventDispatcher {
         const type = this._contentType;
         if (type === 'clear' || type === 'unloaded') { return; }
         const query = this._query;
-        const {state} = this._history;
+        const {state, content} = this._history;
+        // Supplied scanner results skip the initial lookup. Refreshes discard
+        // that cache and must query the updated profile/dictionaries again.
+        const lookup = this._lookup || Array.isArray(content?.dictionaryEntries) || content?.dictionaryEntriesEvicted === true;
         const hasState = typeof state === 'object' && state !== null;
         /** @type {import('display').HistoryState} */
         const newState = (
@@ -735,7 +738,7 @@ export class Display extends EventDispatcher {
         const details = {
             focus: false,
             historyMode: 'clear',
-            params: this._createSearchParams(type, query, this._wildcardsEnabled, this._queryOffset, this._lookup, this._primaryReading),
+            params: this._createSearchParams(type, query, this._wildcardsEnabled, this._queryOffset, lookup, this._primaryReading),
             state: newState,
             content: {
                 contentOrigin: this.getContentOrigin(),

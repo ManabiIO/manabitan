@@ -35,22 +35,24 @@ const entry = {
  * Use the real history, content publication, lookup dispatch, and templates.
  * Only the browser/backend boundary is replaced.
  * @param {import('jsdom').DOMWindow} window
+ * @param {import('display').DisplayPageType} [pageType]
  * @returns {{display: Display, api: {kanjiFind: import('vitest').Mock}, render: () => Promise<void>}}
  */
-function setup(window) {
+function setup(window, pageType = 'search') {
     const optionsUtil = new OptionsUtil()
     optionsUtil._optionsSchema = new JsonSchema(JSON.parse(readFileSync('ext/data/schemas/options-schema.json', 'utf8')))
     const options = optionsUtil.getDefault().profiles[0].options
-    options.dictionaries = [(/** @type {unknown} */ ({name: 'Test', enabled: true}))]
+    options.dictionaries = [{name: 'Test', alias: 'Test', enabled: true, allowSecondarySearches: false, definitionsCollapsible: 'not-collapsible', partsOfSpeechFilter: false, useDeinflections: true}]
     const api = {
         kanjiFind: vi.fn().mockResolvedValue([entry]),
+        getDictionaryInfo: vi.fn().mockResolvedValue([]),
         drawMedia: vi.fn(),
         optionsGetProfile: async () => ({profileId: 'test-profile', options}),
     }
     const application = /** @type {import('../ext/js/application.js').Application} */ (/** @type {unknown} */ ({
         api, tabId: 1, frameId: 0, triggerClosePopups() {}, webExtension: {unloaded: false},
     }))
-    const display = new Display(application, 'search', new DocumentFocusController(), new HotkeyHandler())
+    const display = new Display(application, pageType, new DocumentFocusController(), new HotkeyHandler())
     display._options = options
     display.history.useBrowserHistory = true
     display._displayGenerator._templates.load(new window.DOMParser().parseFromString(readFileSync('ext/templates-display.html', 'utf8'), 'text/html'))
@@ -149,4 +151,44 @@ test('replacing a cached result with an explicit preview clears persisted recove
     await restored.display.initializeState()
     expect(restored.api.kanjiFind).not.toHaveBeenCalled()
     expect(restored.display.dictionaryEntries).toEqual([])
+})
+
+/**
+ * @param {Display} display
+ * @param {string} event
+ * @returns {Promise<import('display').ContentCompletion>}
+ */
+async function refresh(display, event) {
+    const setContent = vi.spyOn(display, 'setContent')
+    switch (event) {
+        case 'options': await display._refreshAfterOptionsUpdate(); break
+        case 'dictionary': await display._refreshAfterDictionaryDatabaseUpdate(); break
+        case 'profile': await display._onMessageSetOptionsContext({optionsContext: {depth: 1, url: 'https://example.test/changed'}}); break
+    }
+    expect(setContent).toHaveBeenCalledOnce()
+    return await setContent.mock.results[0].value
+}
+
+test.for(['options', 'dictionary', 'profile'].flatMap((event) => [false, true].map((empty) => ({event, empty}))))('$event refresh reconstructs supplied scanner results (empty=$empty)', async ({event, empty}, {window}) => {
+    const {display, api} = setup(window, 'popup')
+    expect(await publish(display, {dictionaryEntries: empty ? [] : [entry]})).toBe('completed')
+    expect(api.kanjiFind).not.toHaveBeenCalled()
+    // The updated profile/database can yield different entries than the
+    // scanner supplied. A refresh must run the query again.
+    const updatedEntry = {...entry, definitions: ['updated cat definition']}
+    api.kanjiFind.mockResolvedValue([updatedEntry])
+
+    expect(await refresh(display, event)).toBe('completed')
+
+    expect(api.kanjiFind).toHaveBeenCalledExactlyOnceWith('猫', display.getOptionsContext())
+    expect(display.dictionaryEntries).toEqual([updatedEntry])
+    expect(display._container.textContent).toContain('updated cat definition')
+})
+
+test.for(['options', 'dictionary', 'profile'])('%s refresh keeps an explicit no-lookup preview inert', async (event, {window}) => {
+    const {display, api} = setup(window, 'popup')
+    expect(await publish(display, null)).toBe('completed')
+    expect(await refresh(display, event)).toBe('completed')
+    expect(api.kanjiFind).not.toHaveBeenCalled()
+    expect(display.dictionaryEntries).toEqual([])
 })
