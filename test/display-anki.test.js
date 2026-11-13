@@ -357,9 +357,10 @@ describe('DisplayAnki accepted save lifecycle', () => {
      * @param {import('jsdom').DOMWindow} window
      * @param {'new'|'overwrite'|'prevent'} behavior
      * @param {string} backTemplate
+     * @param {boolean} [hasDuplicate]
      * @returns {Promise<any>}
      */
-    async function prepareSave(window, behavior, backTemplate) {
+    async function prepareSave(window, behavior, backTemplate, hasDuplicate = behavior === 'overwrite') {
         vi.stubGlobal('fetch', fixtureFetch);
         vi.useFakeTimers();
         setupDocument(window.document);
@@ -370,7 +371,7 @@ describe('DisplayAnki accepted save lifecycle', () => {
         entry.pronunciations = [];
         entry.headwords[0].tags = [];
         const {display, api} = createDisplay(window.document, [entry], {
-            getAnkiNoteInfo: vi.fn(async () => [{canAdd: true, valid: true, isDuplicate: behavior === 'overwrite', noteIds: behavior === 'overwrite' ? [456] : [], noteInfos: behavior === 'overwrite' ? [existing] : []}]),
+            getAnkiNoteInfo: vi.fn(async () => [{canAdd: true, valid: true, isDuplicate: hasDuplicate, noteIds: hasDuplicate ? [456] : [], noteInfos: hasDuplicate ? [existing] : []}]),
             getAnkiNotesInfo: vi.fn(async () => [existing]),
             injectAnkiNoteMedia: vi.fn(async () => ({audioFileName: 'audio.mp3', screenshotFileName: null, clipboardImageFileName: null, clipboardText: null, dictionaryMedia: [], errors: []})),
             parseText: vi.fn(async () => []),
@@ -492,6 +493,66 @@ describe('DisplayAnki accepted save lifecycle', () => {
         expect(api.addAnkiNote).toHaveBeenCalledOnce();
         await vi.advanceTimersByTimeAsync(2500);
         expect(button.disabled).toBe(false);
+    });
+
+    test('a newly added note remains the overwrite target for another save from the same result', async ({window}) => {
+        const {anki, api, button, showError} = await prepareSave(window, 'overwrite', 'first definition', false);
+        const save = vi.spyOn(anki, '_saveAnkiNote');
+        anki._cardFormats[0].fields.Back.overwriteMode = 'append';
+        api.getAnkiNotesInfo.mockResolvedValue([{...createNoteInfo(42, 'term'), fields: {Front: {value: 'term', order: 0}, Back: {value: 'first definition', order: 1}}}]);
+        button.click();
+        await save.mock.results[0].value;
+        await vi.advanceTimersByTimeAsync(2500);
+        expect(button.dataset.overwrite).toBe('true');
+        expect(button.disabled).toBe(false);
+        anki._ankiFieldTemplates = `${defaultAnkiFieldTemplates}\n{{#*inline "back"}}second definition{{/inline}}`;
+
+        button.click();
+        await save.mock.results[1].value;
+
+        expect(api.addAnkiNote).toHaveBeenCalledOnce();
+        expect(api.updateAnkiNote).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({id: 42, fields: {Front: 'term', Back: 'first definitionsecond definition'}}), 'test-anki-connection');
+        expect(api.getAnkiNoteInfo).toHaveBeenCalledOnce();
+        expect(showError).not.toHaveBeenCalled();
+    });
+
+    test.for(['deleted', 'unrelated'])('a newly added note is not overwritten after a fresh read returns %s data', async (outcome, {window}) => {
+        const {anki, api, showError} = await prepareSave(window, 'overwrite', 'definition', false);
+        await anki._saveAnkiNote(0, 0);
+        await vi.advanceTimersByTimeAsync(2500);
+        api.getAnkiNotesInfo.mockResolvedValue(outcome === 'deleted' ? [] : [createNoteInfo(456, 'unrelated note')]);
+
+        await anki._saveAnkiNote(0, 0);
+
+        expect(api.addAnkiNote).toHaveBeenCalledOnce();
+        expect(api.getAnkiNotesInfo).toHaveBeenCalledExactlyOnceWith([42], 'test-anki-connection');
+        expect(api.updateAnkiNote).not.toHaveBeenCalled();
+        expect(showError).toHaveBeenCalledWith([expect.objectContaining({message: 'Could not determine which duplicate note to overwrite'})]);
+    });
+
+    test('a completed add cannot attach its note ID to a replacement result', async ({window}) => {
+        const {anki, api, display} = await prepareSave(window, 'overwrite', 'definition', false);
+        const pending = Promise.withResolvers();
+        api.addAnkiNote.mockImplementationOnce(() => pending.promise);
+        const saving = anki._saveAnkiNote(0, 0);
+        await vi.waitFor(() => expect(api.addAnkiNote).toHaveBeenCalledOnce());
+        const replacementDetails = structuredClone(anki._dictionaryEntryDetails);
+        anki._onContentClear();
+        display.dictionaryEntries = [createTermEntry()];
+        const row = window.document.createElement('div');
+        row.className = 'entry';
+        row.innerHTML = '<div class="note-actions-container"></div>';
+        window.document.body.appendChild(row);
+        display.dictionaryEntryNodes = [row];
+        anki._dictionaryEntryDetails = replacementDetails;
+        anki._updateSaveButtons(replacementDetails);
+        const before = row.innerHTML;
+
+        pending.resolve(42);
+        await saving;
+
+        expect(replacementDetails[0].noteMap.get(0)).toMatchObject({isDuplicate: false, noteIds: [], noteInfos: []});
+        expect(row.innerHTML).toBe(before);
     });
 
     test('a display without a captured connection refreshes before a user can retry saving', async ({window}) => {

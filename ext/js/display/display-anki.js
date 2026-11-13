@@ -1060,16 +1060,16 @@ export class DisplayAnki {
         const relevantEntryDetails = allEntryDetails?.[dictionaryEntryIndex];
         const relevantNoteDetails = noteDetails ?? relevantEntryDetails?.noteMap.get(cardFormatIndex);
         if (typeof relevantNoteDetails === 'undefined') { return null; }
-        const {noteIds, noteInfos} = relevantNoteDetails;
-        if (noteIds === null || !Array.isArray(noteInfos)) { return null; }
+        const {noteIds} = relevantNoteDetails;
+        if (noteIds === null) { return null; }
         const overwriteId = noteIds.find((id) => id !== INVALID_NOTE_ID);
         if (typeof overwriteId === 'undefined') { return null; }
-        if (!noteInfos.some((info) => info !== null && info.noteId === overwriteId)) { return null; }
         fieldOptions ??= this._cardFormats[cardFormatIndex].fields;
         if (!fieldOptions) { return null; }
 
         // Keep the accepted duplicate target, but merge with its current fields.
-        // Cached fields can predate another save or an edit in Anki.
+        // Cached fields can predate another save or an edit in Anki. A note
+        // just added from this result may not have cached note info yet.
         const currentNoteInfos = await this._display.application.api.getAnkiNotesInfo([overwriteId], ankiConnectionIdentity);
         const overwriteInfo = currentNoteInfos.find((info) => info !== null && info.noteId === overwriteId);
         if (!overwriteInfo) { return null; }
@@ -1151,6 +1151,11 @@ export class DisplayAnki {
                 }
                 if (isCurrentSaveOwner()) {
                     const cardFormatIndex = this._getCardFormatIndex(button);
+                    const details = this._dictionaryEntryDetails?.[dictionaryEntryIndex]?.noteMap.get(cardFormatIndex);
+                    if (typeof details !== 'undefined') {
+                        details.isDuplicate = true;
+                        details.noteIds = [...new Set([...(details.noteIds ?? []).filter((id) => id !== INVALID_NOTE_ID), noteId])];
+                    }
                     this._updateSaveButtonForDuplicateBehavior(button, [noteId]);
                     this._updateViewNoteButton(dictionaryEntryIndex, cardFormatIndex, [noteId]);
                 }
