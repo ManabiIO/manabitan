@@ -22,6 +22,7 @@ import {ClipboardReader} from '../comm/clipboard-reader.js';
 import {Mecab} from '../comm/mecab.js';
 import {YomitanApi} from '../comm/yomitan-api.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
+import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {fetchText} from '../core/fetch-utilities.js';
 import {parseJson, readResponseJson} from '../core/json.js';
@@ -4431,16 +4432,45 @@ null;
     async _getScreenshot(tabId, frameId, format, quality) {
         const tab = await this._getTabById(tabId);
         const {windowId} = tab;
+        if (!tab.active) { throw new Error('The screenshot source tab is no longer active'); }
 
         let token = null;
+        let invalidated = false;
+        const eventListeners = new EventListenerCollection();
+        /** @returns {Promise<void>} */
+        const assertCurrentTab = async () => {
+            const currentTab = await this._getTabById(tabId);
+            if (invalidated || !currentTab.active || currentTab.windowId !== windowId || currentTab.url !== tab.url) {
+                throw new Error('The screenshot source tab changed during capture');
+            }
+        };
         try {
+            // captureVisibleTab selects by window, not tab. Keep observing the
+            // owner across popup hiding and capture, including away-and-back
+            // switches that a final tabs.get alone cannot detect.
+            eventListeners.addListener(chrome.tabs.onActivated, (activeInfo) => {
+                if (activeInfo.windowId === windowId && activeInfo.tabId !== tabId) { invalidated = true; }
+            });
+            eventListeners.addListener(chrome.tabs.onUpdated, (updatedTabId, changeInfo) => {
+                if (updatedTabId === tabId && (changeInfo.status === 'loading' || (typeof changeInfo.url === 'string' && changeInfo.url !== tab.url))) {
+                    invalidated = true;
+                }
+            });
+            /** @param {number} removedTabId */
+            const onOwnerRemoved = (removedTabId) => {
+                if (removedTabId === tabId) { invalidated = true; }
+            };
+            eventListeners.addListener(chrome.tabs.onRemoved, onOwnerRemoved);
+            eventListeners.addListener(chrome.tabs.onDetached, onOwnerRemoved);
             if (typeof tabId === 'number' && typeof frameId === 'number') {
                 const action = 'frontendSetAllVisibleOverride';
                 const params = {value: false, priority: 0, awaitFrame: true};
                 token = await this._sendMessageTabPromise(tabId, {action, params}, {frameId});
             }
 
-            return await new Promise((resolve, reject) => {
+            await assertCurrentTab();
+            /** @type {Promise<string>} */
+            const capture = new Promise((resolve, reject) => {
                 chrome.tabs.captureVisibleTab(windowId, {format, quality}, (result) => {
                     const e = chrome.runtime.lastError;
                     if (e) {
@@ -4450,14 +4480,21 @@ null;
                     }
                 });
             });
+            const image = await capture;
+            await assertCurrentTab();
+            return image;
         } finally {
-            if (token !== null) {
-                const action = 'frontendClearAllVisibleOverride';
-                const params = {token};
-                try {
-                    await this._sendMessageTabPromise(tabId, {action, params}, {frameId});
-                } catch (e) {
-                    // NOP
+            try {
+                eventListeners.removeAllEventListeners();
+            } finally {
+                if (token !== null) {
+                    const action = 'frontendClearAllVisibleOverride';
+                    const params = {token};
+                    try {
+                        await this._sendMessageTabPromise(tabId, {action, params}, {frameId});
+                    } catch (e) {
+                        // NOP
+                    }
                 }
             }
         }
