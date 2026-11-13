@@ -7,6 +7,7 @@ import {expect} from 'vitest';
 import {DOMTextScanner} from '../ext/js/dom/dom-text-scanner.js';
 import {TextSourceGenerator} from '../ext/js/dom/text-source-generator.js';
 import {TextSourceRange} from '../ext/js/dom/text-source-range.js';
+import {TextScanner} from '../ext/js/language/text-scanner.js';
 import {createDomTest} from './fixtures/dom-test.js';
 
 const test = createDomTest();
@@ -77,4 +78,70 @@ test('sentence extraction uses the actual selected child boundaries', ({window})
 
     expect(result).toEqual({text: 'beforetargetafter', offset: 6});
     expect(source.range.toString()).toBe('target');
+});
+
+test.for([
+    {mode: 'include', allowed: true, textBoundary: false},
+    {mode: 'include', allowed: false, textBoundary: false},
+    {mode: 'exclude', allowed: true, textBoundary: false},
+    {mode: 'exclude', allowed: false, textBoundary: false},
+    {mode: 'include', allowed: true, textBoundary: true},
+    {mode: 'include', allowed: false, textBoundary: true},
+    {mode: 'exclude', allowed: true, textBoundary: true},
+    {mode: 'exclude', allowed: false, textBoundary: true},
+])('scanning selectors inspect only children at and after the caret: %j', ({mode, allowed, textBoundary}, {window}) => {
+    const paragraph = createParagraph(window.document);
+    paragraph.children[0].classList.add('scan-disable');
+    paragraph.children[1].classList.add(allowed ? 'scan-enable' : 'scan-disable');
+    const range = window.document.createRange();
+    if (textBoundary) {
+        const precedingText = /** @type {Text} */ (paragraph.children[0].firstChild);
+        range.setStart(precedingText, precedingText.length);
+    } else {
+        range.setStart(paragraph, 1);
+    }
+    range.collapse(true);
+    const scanner = /** @type {TextScanner} */ (Object.create(TextScanner.prototype));
+    scanner.includeSelector = mode === 'include' ? '.scan-enable' : null;
+    scanner.excludeSelector = mode === 'exclude' ? '.scan-disable,.scan-disable *' : null;
+
+    expect(scanner.getTextSourceContent(TextSourceRange.create(range), 6, false, 'mouse')).toBe(allowed ? 'target' : '');
+});
+
+test('an element end boundary does not include following siblings in the source nodes', ({window}) => {
+    const paragraph = createParagraph(window.document);
+    const text = /** @type {Text} */ (paragraph.children[1].firstChild);
+    const range = window.document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(paragraph, 2);
+
+    expect(TextSourceRange.create(range).getNodesInRange()).toEqual([text]);
+});
+
+test('an excluded text node at the end boundary does not shorten the scanned content', ({window}) => {
+    const paragraph = createParagraph(window.document);
+    paragraph.children[2].classList.add('scan-disable');
+    const range = window.document.createRange();
+    range.setStart(/** @type {Text} */ (paragraph.children[1].firstChild), 0);
+    range.setEnd(/** @type {Text} */ (paragraph.children[2].firstChild), 0);
+    const source = TextSourceRange.create(range);
+    const scanner = /** @type {TextScanner} */ (Object.create(TextScanner.prototype));
+
+    scanner._constrainTextSource(source, null, '.scan-disable,.scan-disable *', false);
+
+    expect(source.text()).toBe('target');
+});
+
+test('an element end boundary includes its selected descendants', ({window}) => {
+    const paragraph = createParagraph(window.document);
+    const target = paragraph.children[1];
+    const nested = window.document.createElement('b');
+    nested.textContent = 'tar';
+    target.replaceChildren(nested, 'get');
+    const startText = /** @type {Text} */ (paragraph.children[0].firstChild);
+    const range = window.document.createRange();
+    range.setStart(startText, 0);
+    range.setEnd(target, 1);
+
+    expect(TextSourceRange.create(range).getNodesInRange()).toEqual([startText, target, nested, nested.firstChild]);
 });
