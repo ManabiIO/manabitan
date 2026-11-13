@@ -1240,7 +1240,7 @@ export class Display extends EventDispatcher {
             }
         } else if (e.shiftKey) {
             this._onHistoryWheel(e);
-        } else if (scanningOptions.reducedMotionScrolling) {
+        } else if (scanningOptions.reducedMotionScrolling && e.deltaY !== 0) {
             this._scrollByPopupHeight(e.deltaY > 0 ? 1 : -1, scanningOptions.reducedMotionScrollingScale);
             e.preventDefault();
         }
