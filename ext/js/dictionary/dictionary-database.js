@@ -3995,6 +3995,7 @@ null;
         if (items.length === 0) {
             return [];
         }
+        const generation = this._directTermIndexGeneration;
         /** @type {import('dictionary-database').Media[]} */
         const results = [];
         /** @type {Map<string, {dictionary: string, path: string, indexes: number[]}>} */
@@ -4040,6 +4041,9 @@ null;
             }
             for (const row of rows) {
                 const converted = await this._deserializeMediaRow(row);
+                // Direct drawing ports can overlap mutations. An old media row
+                // must not label bytes read after its content offsets are reused.
+                this._assertTermLookupGeneration(generation);
                 const itemIndexes = mediaRequestIndexes.get(this._createDictionaryQueryKey(converted.dictionary, converted.path));
                 if (typeof itemIndexes === 'undefined') { continue; }
                 for (const itemIndex of itemIndexes.indexes) {
