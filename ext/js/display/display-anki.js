@@ -921,10 +921,18 @@ export class DisplayAnki {
         const allErrors = [];
 
         if (snapshotErrors.length === 0) { button.disabled = true; }
-        setTimeout(() => {
-            if (snapshotErrors.length === 0 && isCurrentSaveOwner() && (duplicateBehavior !== 'prevent' || allErrors.length > 0)) {
+        // Slow media or Anki requests can outlast the cooldown. Release only
+        // after both finish, including failures that arrive after the timer.
+        let saveCompleted = false;
+        let cooldownElapsed = false;
+        const updateSaveButton = () => {
+            if (saveCompleted && cooldownElapsed && snapshotErrors.length === 0 && isCurrentSaveOwner() && (duplicateBehavior !== 'prevent' || allErrors.length > 0)) {
                 button.disabled = false;
             }
+        };
+        setTimeout(() => {
+            cooldownElapsed = true;
+            updateSaveButton();
         }, 2500);
 
         if (snapshotErrors.length === 0 && isCurrentSaveOwner()) { this._hideErrorNotification(true); }
@@ -961,6 +969,8 @@ export class DisplayAnki {
         } catch (e) {
             allErrors.push(toError(e));
         } finally {
+            saveCompleted = true;
+            updateSaveButton();
             clearProgressOverride();
         }
 

@@ -342,7 +342,7 @@ function createCollectionNote(front) {
     };
 }
 
-describe('DisplayAnki field-render failures', () => {
+describe('DisplayAnki accepted save lifecycle', () => {
     afterEach(() => {
         vi.unstubAllGlobals();
         vi.useRealTimers();
@@ -350,7 +350,7 @@ describe('DisplayAnki field-render failures', () => {
 
     /**
      * @param {import('jsdom').DOMWindow} window
-     * @param {'new'|'overwrite'} behavior
+     * @param {'new'|'overwrite'|'prevent'} behavior
      * @param {string} backTemplate
      * @returns {Promise<any>}
      */
@@ -365,7 +365,7 @@ describe('DisplayAnki field-render failures', () => {
         entry.pronunciations = [];
         entry.headwords[0].tags = [];
         const {display, api} = createDisplay(window.document, [entry], {
-            getAnkiNoteInfo: vi.fn(async () => [{canAdd: true, valid: true, isDuplicate: behavior === 'overwrite', noteIds: [456], noteInfos: [existing]}]),
+            getAnkiNoteInfo: vi.fn(async () => [{canAdd: true, valid: true, isDuplicate: behavior === 'overwrite', noteIds: behavior === 'overwrite' ? [456] : [], noteInfos: behavior === 'overwrite' ? [existing] : []}]),
             getAnkiNotesInfo: vi.fn(async () => [existing]),
             injectAnkiNoteMedia: vi.fn(async () => ({audioFileName: 'audio.mp3', screenshotFileName: null, clipboardImageFileName: null, clipboardText: null, dictionaryMedia: [], errors: []})),
             parseText: vi.fn(async () => []),
@@ -427,6 +427,58 @@ describe('DisplayAnki field-render failures', () => {
 
         expect(api.addAnkiNote).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({fields: {Front: 'term', Back: 'no audio'}}));
         expect(showError).toHaveBeenCalledWith([expect.objectContaining({message: 'Audio not available'})]);
+    });
+
+    for (const behavior of /** @type {const} */ (['new', 'overwrite'])) {
+        for (const phase of ['media', 'write']) {
+            test(`${behavior} cannot start another save after the cooldown while ${phase} is pending`, async ({window}) => {
+                const {anki, api, button, showError} = await prepareSave(window, behavior, '{{#if (hasMedia "audio")}}{{getMedia "audio"}}{{else}}no audio{{/if}}');
+                const pending = Promise.withResolvers();
+                const write = behavior === 'new' ? api.addAnkiNote : api.updateAnkiNote;
+                const delayed = phase === 'media' ? api.injectAnkiNoteMedia : write;
+                delayed.mockImplementationOnce(() => pending.promise);
+                const first = anki._saveAnkiNote(0, 0);
+                await vi.waitFor(() => expect(delayed).toHaveBeenCalledOnce());
+                await vi.advanceTimersByTimeAsync(3000);
+                const disabledWhilePending = button.disabled;
+                const second = anki._saveAnkiNote(0, 0);
+                pending.resolve(phase === 'media' ? {audioFileName: 'audio.mp3', screenshotFileName: null, clipboardImageFileName: null, clipboardText: null, dictionaryMedia: [], errors: []} : 42);
+                await Promise.all([first, second]);
+
+                expect(disabledWhilePending).toBe(true);
+                expect(write).toHaveBeenCalledOnce();
+                expect(button.disabled).toBe(false);
+                expect(showError).not.toHaveBeenCalled();
+            });
+        }
+    }
+
+    test('a failed prevent-mode save becomes retryable after its cooldown already elapsed', async ({window}) => {
+        const {anki, api, button, showError} = await prepareSave(window, 'prevent', 'valid definition');
+        const pending = Promise.withResolvers();
+        api.addAnkiNote.mockImplementationOnce(() => pending.promise);
+        const save = anki._saveAnkiNote(0, 0);
+        await vi.waitFor(() => expect(api.addAnkiNote).toHaveBeenCalledOnce());
+        await vi.advanceTimersByTimeAsync(3000);
+        pending.reject(new Error('Anki is unavailable'));
+        await save;
+
+        expect(button.disabled).toBe(false);
+        expect(showError).toHaveBeenCalledWith([expect.objectContaining({message: 'Anki is unavailable'})]);
+        await anki._saveAnkiNote(0, 0);
+        expect(api.addAnkiNote).toHaveBeenCalledTimes(2);
+        await vi.advanceTimersByTimeAsync(3000);
+        expect(button.disabled).toBe(true);
+    });
+
+    test('a fast successful save still observes the cooldown', async ({window}) => {
+        const {anki, api, button} = await prepareSave(window, 'new', 'valid definition');
+        await anki._saveAnkiNote(0, 0);
+        expect(button.disabled).toBe(true);
+        await anki._saveAnkiNote(0, 0);
+        expect(api.addAnkiNote).toHaveBeenCalledOnce();
+        await vi.advanceTimersByTimeAsync(2500);
+        expect(button.disabled).toBe(false);
     });
 });
 
