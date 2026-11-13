@@ -113,7 +113,7 @@ export class StorageController {
             if (typeof quota !== 'number') {
                 quota = 0;
             } else {
-                storageIsLow = quota <= (3 * 1000000000);
+                storageIsLow = quota - usage <= (3 * 1000000000);
             }
             const usageString = this._bytesToLabeledString(usage);
             const quotaString = this._bytesToLabeledString(quota);
