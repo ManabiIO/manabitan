@@ -4764,7 +4764,15 @@ null;
             }
         } catch (e) {
             if (useLocalTransaction) {
-                try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+                try {
+                    db.exec('ROLLBACK');
+                } catch (rollbackError) {
+                    // The import summary is inserted before the bulk session
+                    // owns cleanup, so this transaction must retire itself.
+                    const errors = [toError(e), toError(rollbackError)];
+                    this._quarantineBulkImportConnection(errors);
+                    throw new AggregateError(errors, 'Dictionary data insertion and rollback failed');
+                }
             }
             throw e;
         }
@@ -5391,7 +5399,15 @@ null;
             });
             db.exec('COMMIT');
         } catch (error) {
-            try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+            try {
+                db.exec('ROLLBACK');
+            } catch (rollbackError) {
+                // Bulk import ownership has already ended before placeholder
+                // cleanup. Do not leave its failed transaction in the worker.
+                const errors = [toError(error), toError(rollbackError)];
+                this._quarantineBulkImportConnection(errors);
+                throw new AggregateError(errors, 'Incomplete dictionary summary cleanup and rollback failed');
+            }
             throw error;
         }
     }
