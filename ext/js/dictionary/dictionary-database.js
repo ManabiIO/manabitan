@@ -4509,7 +4509,9 @@ null;
             try {
                 db.exec('ROLLBACK');
             } catch (rollbackError) {
-                throw new AggregateError([toError(error), toError(rollbackError)], 'Failed to discard incomplete replacement metadata and roll back');
+                const errors = [toError(error), toError(rollbackError)];
+                this._quarantineBulkImportConnection(errors);
+                throw new AggregateError(errors, 'Failed to discard incomplete replacement metadata and roll back');
             }
             throw error;
         }
