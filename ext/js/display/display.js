@@ -1067,7 +1067,7 @@ export class Display extends EventDispatcher {
         const details = {
             focus: false,
             historyMode,
-            params: this._createSearchParams(type, query, false, sentenceOffset),
+            params: this._createSearchParams(type, query, false, sentenceOffset, false),
             state: {
                 sentence,
                 optionsContext,
@@ -2573,6 +2573,7 @@ export class Display extends EventDispatcher {
                 type,
                 query,
                 wildcards: 'off',
+                lookup: 'false',
             },
             state: {
                 focusEntry: 0,
