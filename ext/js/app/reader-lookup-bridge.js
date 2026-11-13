@@ -89,7 +89,7 @@ export function parseReaderLookup(raw, contextRaw = null) {
  * first headwords to the popup/Anki builder. Native entry IDs remain provenance,
  * not a universal cross-dictionary sense/row mapping.
  * @param {import('dictionary').TermDictionaryEntry[]} entries
- * @param {ReaderLookup} request
+ * @param {Pick<ReaderLookup, 'term'|'reading'>} request
  * @returns {import('dictionary').TermDictionaryEntry[]}
  */
 export function exactReaderEntries(entries, request) {
@@ -151,7 +151,7 @@ export function exactReaderEntries(entries, request) {
  * Preserve the real inflected source span used by sentence/cloze templates.
  * Queries use the canonical term, but that term may have a different length.
  * @param {import('dictionary').TermDictionaryEntry[]} entries
- * @param {ReaderLookup} request
+ * @param {Pick<ReaderLookup, 'surface'>} request
  * @returns {import('dictionary').TermDictionaryEntry[]}
  */
 export function readerEntriesWithSurface(entries, request) {

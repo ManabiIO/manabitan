@@ -17,6 +17,7 @@
  */
 
 import {findJapaneseSearch} from '../search/japanese-search.js';
+import {exactReaderEntries, readerEntriesWithSurface} from '../app/reader-lookup-bridge.js';
 import {ThemeController} from '../app/theme-controller.js';
 import {FrameEndpoint} from '../comm/frame-endpoint.js';
 import {extendApiMap, invokeApiMapHandler} from '../core/api-map.js';
@@ -1573,9 +1574,19 @@ export class Display extends EventDispatcher {
      * @param {string} primaryReading
      * @param {boolean} wildcardsEnabled
      * @param {import('settings').OptionsContext} optionsContext
+     * @param {import('display').HistoryState['readerLookup']} [readerLookup]
      * @returns {Promise<import('display').DictionarySearchResult>}
      */
-    async _findDictionaryEntries(isKanji, source, primaryReading, wildcardsEnabled, optionsContext) {
+    async _findDictionaryEntries(isKanji, source, primaryReading, wildcardsEnabled, optionsContext, readerLookup) {
+        if (!isKanji && readerLookup?.surface === source && typeof readerLookup.term === 'string' && typeof readerLookup.reading === 'string') {
+            const {dictionaryEntries, dictionaryAvailability} = await this._application.api.termsFind(readerLookup.term, {
+                matchType: 'exact', deinflect: false, primaryReading: readerLookup.reading,
+            }, optionsContext);
+            return {
+                dictionaryEntries: readerEntriesWithSurface(exactReaderEntries(dictionaryEntries, readerLookup), readerLookup),
+                ...(dictionaryAvailability?.length ? {dictionaryAvailability} : {}),
+            };
+        }
         const {findDetails, source: source2} = this._getFindDetails(source, primaryReading, wildcardsEnabled);
         if (isKanji) {
             const dictionaryEntries = await this._application.api.kanjiFind(source, optionsContext);
@@ -1741,7 +1752,7 @@ export class Display extends EventDispatcher {
         if (!Array.isArray(dictionaryEntries)) {
             safePerformance.mark('display:findDictionaryEntries:start');
             const result = hasEnabledDictionaries && lookup && query.length > 0 ?
-                await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext) :
+                await this._findDictionaryEntries(type === 'kanji', query, primaryReading, wildcardsEnabled, optionsContext, state.readerLookup) :
                 {dictionaryEntries: []};
             ({dictionaryEntries, dictionaryAvailability} = result);
             safePerformance.mark('display:findDictionaryEntries:end');
