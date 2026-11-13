@@ -38,6 +38,7 @@ import {generateAnkiNoteMediaFileName, generateAnkiNoteMediaFileNameWithUniqueTi
 import {arrayBufferToBase64} from '../data/array-buffer-util.js';
 import {OptionsUtil} from '../data/options-util.js';
 import {getAllPermissions, hasPermissions, hasRequiredPermissionsForOptions} from '../data/permissions-util.js';
+import {readCodePointsForward} from '../data/string-util.js';
 import {DictionaryDatabase} from '../dictionary/dictionary-database.js';
 import {Environment} from '../extension/environment.js';
 import {CacheMap} from '../general/cache-map.js';
@@ -1162,7 +1163,7 @@ export class Backend {
         } = this._getProfileOptions({current: true}, false);
         if (!isTextLookupWorthy(text, language)) { return; }
         if (text.length > maximumSearchLength) {
-            text = text.substring(0, maximumSearchLength);
+            text = readCodePointsForward(text, 0, maximumSearchLength);
         }
         try {
             const {tab, created} = await this._getOrCreateSearchPopupWrapper();

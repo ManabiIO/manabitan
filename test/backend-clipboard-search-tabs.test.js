@@ -17,9 +17,10 @@ afterEach(() => {
 
 /**
  * @param {{id: number, url: string|null, mode: import('display').SearchMode}[]} tabs
+ * @param {number} [maximumSearchLength]
  * @returns {{backend: Backend, openPopup: import('vitest').MockInstance, focus: import('vitest').MockInstance, update: import('vitest').MockInstance}}
  */
-function setup(tabs) {
+function setup(tabs, maximumSearchLength = 100) {
     vi.useFakeTimers();
     const sendMessage = vi.fn((tabId, {action}, _options, callback) => {
         const tab = tabs.find(({id}) => id === tabId);
@@ -36,7 +37,7 @@ function setup(tabs) {
     const update = vi.spyOn(backend, '_updateSearchQuery').mockResolvedValue();
     vi.spyOn(backend, '_getProfileOptions').mockReturnValue(/** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
         general: {language: 'ja'},
-        clipboard: {maximumSearchLength: 100},
+        clipboard: {maximumSearchLength},
     })));
     return {backend, openPopup, focus, update};
 }
@@ -77,6 +78,18 @@ test('popup reuse still excludes ordinary search tabs', async () => {
     const {backend} = setup([{id: 1, url: baseUrl, mode: null}]);
 
     expect(await backend._findSearchPopupTab((url) => url?.startsWith(baseUrl) ?? false)).toBeNull();
+});
+
+test.each([
+    {text: '𠮟る', limit: 1, expected: '𠮟'},
+    {text: '日𠮟る', limit: 2, expected: '日𠮟'},
+    {text: '𠮟る人', limit: 2, expected: '𠮟る'},
+    {text: '日本語', limit: 2, expected: '日本'},
+    {text: '𠮟る', limit: 0, expected: ''},
+])('background clipboard limits count complete characters: $text / $limit', async ({text, limit, expected}) => {
+    const {backend, update} = setup([], limit);
+    await backend._onClipboardTextChange({text});
+    expect(update).toHaveBeenCalledExactlyOnceWith(7, expected, false);
 });
 
 test('popup reuse still selects a popup among ordinary search tabs', async () => {
