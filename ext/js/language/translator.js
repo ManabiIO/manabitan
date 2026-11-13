@@ -777,7 +777,7 @@ export class Translator {
      */
     _getNextSubstring(searchResolution, currentString) {
         const nextSubstringLength = searchResolution === 'word' ?
-            currentString.search(/[^\p{Letter}][\p{Letter}\p{Number}]*$/u) :
+            currentString.search(/[^\p{Letter}\p{Mark}][\p{Letter}\p{Mark}\p{Number}]*$/u) :
             currentString.length - 1;
         return currentString.substring(0, nextSubstringLength);
     }
