@@ -22,6 +22,7 @@ import {ClipboardReader} from '../comm/clipboard-reader.js';
 import {Mecab} from '../comm/mecab.js';
 import {YomitanApi} from '../comm/yomitan-api.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
+import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {fetchText} from '../core/fetch-utilities.js';
 import {parseJson, readResponseJson} from '../core/json.js';
@@ -38,6 +39,7 @@ import {generateAnkiNoteMediaFileName, generateAnkiNoteMediaFileNameWithUniqueTi
 import {arrayBufferToBase64} from '../data/array-buffer-util.js';
 import {OptionsUtil} from '../data/options-util.js';
 import {getAllPermissions, hasPermissions, hasRequiredPermissionsForOptions} from '../data/permissions-util.js';
+import {readCodePointsForward} from '../data/string-util.js';
 import {DictionaryDatabase} from '../dictionary/dictionary-database.js';
 import {Environment} from '../extension/environment.js';
 import {CacheMap} from '../general/cache-map.js';
@@ -354,8 +356,8 @@ export class Backend {
         ]);
         /* eslint-enable @stylistic/no-multi-spaces */
 
-        /** @type {Map<string, (params?: import('core').SerializableObject) => void>} */
-        this._commandHandlers = new Map(/** @type {[name: string, handler: (params?: import('core').SerializableObject) => void][]} */ ([
+        /** @type {Map<string, (params?: import('core').SerializableObject) => Promise<void>>} */
+        this._commandHandlers = new Map(/** @type {[name: string, handler: (params?: import('core').SerializableObject) => Promise<void>][]} */ ([
             ['toggleTextScanning', this._onCommandToggleTextScanning.bind(this)],
             ['openInfoPage', this._onCommandOpenInfoPage.bind(this)],
             ['openSettingsPage', this._onCommandOpenSettingsPage.bind(this)],
@@ -369,6 +371,8 @@ export class Backend {
         this._yomitanApi = new YomitanApi(this._apiMap, this._offscreen);
         /** @type {CacheMap<string, {originalTextLength: number, textSegments: import('api').ParseTextSegment[]}>} */
         this._textParseCache = new CacheMap(10000, 3600000); // 1 hour idle time, ~32MB per 1000 entries for Japanese
+        /** @type {number} */
+        this._textParseCacheGeneration = 0;
         /** @type {Record<string, unknown>|null} */
         this._startupDiagnosticsSnapshot = null;
         /** @type {boolean} */
@@ -446,6 +450,11 @@ export class Backend {
         if (isObjectNotArray(chrome.commands) && isObjectNotArray(chrome.commands.onCommand)) {
             const onCommand = this._onWebExtensionEventWrapper(this._onCommand.bind(this));
             chrome.commands.onCommand.addListener(onCommand);
+        }
+
+        if (isObjectNotArray(chrome.contextMenus) && isObjectNotArray(chrome.contextMenus.onClicked)) {
+            const onContextMenuClicked = this._onWebExtensionEventWrapper(this._onContextMenuClicked.bind(this));
+            chrome.contextMenus.onClicked.addListener(onContextMenuClicked);
         }
 
         if (isObjectNotArray(chrome.tabs) && isObjectNotArray(chrome.tabs.onZoomChange)) {
@@ -1155,7 +1164,7 @@ export class Backend {
         } = this._getProfileOptions({current: true}, false);
         if (!isTextLookupWorthy(text, language)) { return; }
         if (text.length > maximumSearchLength) {
-            text = text.substring(0, maximumSearchLength);
+            text = readCodePointsForward(text, 0, maximumSearchLength);
         }
         try {
             const {tab, created} = await this._getOrCreateSearchPopupWrapper();
@@ -1249,6 +1258,17 @@ export class Backend {
      */
     _onCommand(command) {
         this._runCommand(command, void 0);
+    }
+
+    /**
+     * @param {chrome.contextMenus.OnClickData} info
+     * @param {chrome.tabs.Tab|undefined} tab
+     */
+    _onContextMenuClicked(info, tab) {
+        if (info.menuItemId !== 'yomitan_lookup' || !info.selectionText || typeof tab?.id !== 'number') { return; }
+        const options = this._getProfileOptions({current: true}, false);
+        if (!options.general.enableContextMenuScanSelected) { return; }
+        this._sendMessageTabIgnoreResponse(tab.id, {action: 'frontendScanSelectedText'}, {frameId: info.frameId ?? 0});
     }
 
     /**
@@ -1560,6 +1580,10 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'parseText'>} */
     async _onApiParseText({text, optionsContext, scanLength, useInternalParser, useMecabParser, useAllFrequencyDictionaries}) {
+        if (useInternalParser) {
+            await this._awaitDictionaryMutationSettled();
+            await this._awaitDictionaryRefreshSettled();
+        }
         /** @type {import('api').ParseTextResultItem[]} */
         const results = [];
 
@@ -1973,6 +1997,7 @@ export class Backend {
      * @returns {Promise<void>}
      */
     async _refreshDictionaryDatabaseAfterCommittedMutation(cause) {
+        this._clearTextParseCache();
         try {
             await this._refreshDictionaryDatabaseAfterUpdate();
         } catch (error) {
@@ -2493,7 +2518,7 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
             }
         } finally {
             // Disconnect if the connection was previously disconnected
-            if (disconnect && this._mecab.isEnabled() && this._mecab.isActive()) {
+            if (disconnect && this._mecab.isEnabled() && !this._mecab.isActive()) {
                 this._mecab.disconnect();
             }
         }
@@ -2780,16 +2805,18 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<void>}
      */
     async _onCommandToggleTextScanning() {
-        const options = this._getProfileOptions({current: true}, false);
-        /** @type {import('settings-modifications').ScopedModificationSet} */
-        const modification = {
-            action: 'set',
-            path: 'general.enable',
-            value: !options.general.enable,
-            scope: 'profile',
-            optionsContext: {current: true},
-        };
-        await this._modifySettings([modification], 'backend');
+        const {id: profileId} = this._getProfile({current: true}, false);
+        if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+        await this._runOptionsMutation(async () => {
+            // Bind the command to its accepted profile, but toggle its latest
+            // committed value inside the queue so rapid commands compose.
+            const options = clone(this._getOptionsFull(false));
+            const matches = options.profiles.filter((profile) => profile.id === profileId);
+            if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+            const profile = matches[0];
+            profile.options.general.enable = !profile.options.general.enable;
+            await this._saveOptions('backend', options);
+        });
     }
 
     /**
@@ -3049,8 +3076,9 @@ null;
      */
     async _tabExists(urlParam) {
         const baseUrl = chrome.runtime.getURL(urlParam);
-        const urlPredicate = (/** @type {?string} */ url) => url !== null && url.startsWith(baseUrl);
-        return await this._findSearchPopupTab(urlPredicate) !== null;
+        /** @type {import('backend').FindTabsPredicate} */
+        const predicate = ({url}) => url !== null && url.startsWith(baseUrl);
+        return await this._findTabs(1000, false, predicate, false) !== null;
     }
 
     /**
@@ -3158,7 +3186,7 @@ null;
 
         void this._accessibilityController.update(this._getOptionsFull(false));
 
-        this._textParseCache.clear();
+        this._clearTextParseCache();
         void this._translator.clearDatabaseCaches();
 
         this._sendMessageAllTabsIgnoreResponse({action: 'applicationOptionsUpdated', params: {source}});
@@ -3177,11 +3205,6 @@ null;
                     title: 'Lookup in Manabitan',
                     contexts: ['selection'],
                 }, () => this._checkLastError(chrome.runtime.lastError));
-                chrome.contextMenus.onClicked.addListener((info) => {
-                    if (info.selectionText) {
-                        this._sendMessageAllTabsIgnoreResponse({action: 'frontendScanSelectedText'});
-                    }
-                });
             } else {
                 chrome.contextMenus.remove('yomitan_lookup', () => this._checkLastError(chrome.runtime.lastError));
             }
@@ -3329,7 +3352,7 @@ null;
         const handler = this._commandHandlers.get(command);
         if (typeof handler !== 'function') { return false; }
 
-        handler(params);
+        void handler(params).catch((error) => { log.error(error); });
         return true;
     }
 
@@ -3342,9 +3365,11 @@ null;
      */
     async _textParseScanning(text, scanLength, optionsContext, useAllFrequencyDictionaries) {
         await this._ensureDictionaryDatabaseReady();
+        const cacheGeneration = this._textParseCacheGeneration;
         /** @type {import('translator').FindTermsMode} */
         const mode = 'simple';
         const options = this._getProfileOptions(optionsContext, false);
+        const profileId = typeof optionsContext.index === 'number' ? optionsContext.profileId : void 0;
 
         /** @type {import('api').FindTermsDetails} */
         const details = {matchType: 'exact', deinflect: true};
@@ -3360,8 +3385,8 @@ null;
             const character = String.fromCodePoint(codePoint);
             const substring = text.substring(i, i + scanLength);
             const metadataMode = useAllFrequencyDictionaries === true ? 1 : 0;
-            const cacheKey = `${optionsContext.index}:${metadataMode}:${substring}`;
-            let cached = this._textParseCache.get(cacheKey);
+            const cacheKey = JSON.stringify([optionsContext.current, optionsContext.index, profileId, metadataMode, substring]);
+            let cached = this._textParseCacheGeneration === cacheGeneration ? this._textParseCache.get(cacheKey) : void 0;
             if (typeof cached === 'undefined') {
                 const {dictionaryEntries, originalTextLength} = await this._translator.findTerms(
                     mode,
@@ -3408,7 +3433,9 @@ null;
                     }
                 }
                 cached = {originalTextLength, textSegments};
-                if (typeof optionsContext.index !== 'undefined') { this._textParseCache.set(cacheKey, cached); }
+                if (typeof optionsContext.index !== 'undefined' && this._textParseCacheGeneration === cacheGeneration) {
+                    this._textParseCache.set(cacheKey, cached);
+                }
             }
             const {originalTextLength, textSegments} = cached;
             if (textSegments.length > 0) {
@@ -3426,6 +3453,12 @@ null;
             }
         }
         return results;
+    }
+
+    /** Clears parsed readings without allowing older lookups to repopulate them. */
+    _clearTextParseCache() {
+        this._textParseCache?.clear();
+        this._textParseCacheGeneration = (this._textParseCacheGeneration ?? 0) + 1;
     }
 
     /**
@@ -4401,16 +4434,45 @@ null;
     async _getScreenshot(tabId, frameId, format, quality) {
         const tab = await this._getTabById(tabId);
         const {windowId} = tab;
+        if (!tab.active) { throw new Error('The screenshot source tab is no longer active'); }
 
         let token = null;
+        let invalidated = false;
+        const eventListeners = new EventListenerCollection();
+        /** @returns {Promise<void>} */
+        const assertCurrentTab = async () => {
+            const currentTab = await this._getTabById(tabId);
+            if (invalidated || !currentTab.active || currentTab.windowId !== windowId || currentTab.url !== tab.url) {
+                throw new Error('The screenshot source tab changed during capture');
+            }
+        };
         try {
+            // captureVisibleTab selects by window, not tab. Keep observing the
+            // owner across popup hiding and capture, including away-and-back
+            // switches that a final tabs.get alone cannot detect.
+            eventListeners.addListener(chrome.tabs.onActivated, (activeInfo) => {
+                if (activeInfo.windowId === windowId && activeInfo.tabId !== tabId) { invalidated = true; }
+            });
+            eventListeners.addListener(chrome.tabs.onUpdated, (updatedTabId, changeInfo) => {
+                if (updatedTabId === tabId && (changeInfo.status === 'loading' || (typeof changeInfo.url === 'string' && changeInfo.url !== tab.url))) {
+                    invalidated = true;
+                }
+            });
+            /** @param {number} removedTabId */
+            const onOwnerRemoved = (removedTabId) => {
+                if (removedTabId === tabId) { invalidated = true; }
+            };
+            eventListeners.addListener(chrome.tabs.onRemoved, onOwnerRemoved);
+            eventListeners.addListener(chrome.tabs.onDetached, onOwnerRemoved);
             if (typeof tabId === 'number' && typeof frameId === 'number') {
                 const action = 'frontendSetAllVisibleOverride';
                 const params = {value: false, priority: 0, awaitFrame: true};
                 token = await this._sendMessageTabPromise(tabId, {action, params}, {frameId});
             }
 
-            return await new Promise((resolve, reject) => {
+            await assertCurrentTab();
+            /** @type {Promise<string>} */
+            const capture = new Promise((resolve, reject) => {
                 chrome.tabs.captureVisibleTab(windowId, {format, quality}, (result) => {
                     const e = chrome.runtime.lastError;
                     if (e) {
@@ -4420,14 +4482,21 @@ null;
                     }
                 });
             });
+            const image = await capture;
+            await assertCurrentTab();
+            return image;
         } finally {
-            if (token !== null) {
-                const action = 'frontendClearAllVisibleOverride';
-                const params = {token};
-                try {
-                    await this._sendMessageTabPromise(tabId, {action, params}, {frameId});
-                } catch (e) {
-                    // NOP
+            try {
+                eventListeners.removeAllEventListeners();
+            } finally {
+                if (token !== null) {
+                    const action = 'frontendClearAllVisibleOverride';
+                    const params = {token};
+                    try {
+                        await this._sendMessageTabPromise(tabId, {action, params}, {frameId});
+                    } catch (e) {
+                        // NOP
+                    }
                 }
             }
         }
@@ -4739,6 +4808,7 @@ null;
      * @param {import('backend').DatabaseUpdateCause} cause
      */
     async _triggerDatabaseUpdated(type, cause) {
+        this._clearTextParseCache();
         if (type !== 'dictionary') {
             await Promise.resolve(this._translator.clearDatabaseCaches());
             this._sendApplicationDatabaseUpdated(type, cause);
@@ -4906,6 +4976,7 @@ null;
         if (reuseActiveImportConnection && typeof adoptCurrentConnectionMethod === 'function') {
             try {
                 await /** @type {() => Promise<void>} */ (adoptCurrentConnectionMethod).call(dictionaryDatabase);
+                this._clearTextParseCache();
                 reportDiagnostics('dictionary-import-connection-adopted', {});
                 log.log('[ImportTiming] dictionary refresh reused active import connection');
                 this._warmEnabledDictionaryLookupCaches('dictionary-import-connection-adopted');
@@ -4964,6 +5035,7 @@ null;
                 this._dictionaryRefreshQueued = false;
             }
         } while (rerunRefresh);
+        this._clearTextParseCache();
         this._warmEnabledDictionaryLookupCaches('dictionary-refresh-after-update');
     }
 
@@ -6141,6 +6213,7 @@ null;
             if (this._dictionaryImportModeActive === active && !(active === false && hasDeferredRefresh)) {
                 return;
             }
+            this._clearTextParseCache();
             if (active) {
                 this._dictionaryImportModeActive = true;
                 if (this._dictionaryDatabasePreparePromise !== null) {

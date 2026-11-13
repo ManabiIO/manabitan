@@ -410,6 +410,24 @@ describe('Keyboard Event Handling', () => {
 
         expect(searchDisplayController._profileSelect.value).toBe('1');
     });
+    test.each([
+        {text: '𠮟る', limit: 1, expected: '𠮟'},
+        {text: '日𠮟る', limit: 2, expected: '日𠮟'},
+        {text: '𠮟る人', limit: 2, expected: '𠮟る'},
+        {text: '日本語', limit: 2, expected: '日本'},
+        {text: '𠮟る', limit: 0, expected: ''},
+    ])('clipboard search limits count complete characters: $text / $limit', async ({text, limit, expected}) => {
+        vi.spyOn(display, 'getOptions').mockReturnValue(/** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+            general: {language: 'ja'},
+            clipboard: {autoSearchContent: true, maximumSearchLength: limit},
+        })));
+        const search = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        await searchDisplayController._updateSearchFromClipboard(text, false, false);
+
+        expect(queryInput.value).toBe(expected);
+        expect(search).toHaveBeenCalledExactlyOnceWith(false, 'clear', true, ['clipboard']);
+    });
+
     test('delayed clipboard validation cannot replace a query edited by the user', async () => {
         const check = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
         vi.spyOn(display.application.api, 'isTextLookupWorthy').mockReturnValue(check.promise);

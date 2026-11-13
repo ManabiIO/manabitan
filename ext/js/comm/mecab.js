@@ -102,14 +102,11 @@ export class Mecab {
 
     /**
      * Gets the version of the MeCab component.
-     * @returns {Promise<?number>} The version of the MeCab component, or `null` if the component was not found.
+     * @returns {Promise<?number>} The version of the connected MeCab component.
+     * @throws {Error} A connection or protocol failure from the current attempt.
      */
     async getVersion() {
-        try {
-            await this._setupPortWrapper();
-        } catch (e) {
-            // NOP
-        }
+        await this._setupPortWrapper();
         return this._remoteVersion;
     }
 
@@ -346,9 +343,18 @@ export class Mecab {
         if (this._setupPortPromise === null) {
             this._setupPortPromise = this._setupPort();
         }
+        const setupPortPromise = this._setupPortPromise;
         try {
-            await this._setupPortPromise;
+            await setupPortPromise;
+            if (this._setupPortPromise !== setupPortPromise || this._port === null) {
+                throw new Error('MeCab connection changed during setup');
+            }
         } catch (e) {
+            // connectNative can fail before a port exists to run _clearPort.
+            // Retire only this attempt so a later test or parse can retry.
+            if (this._setupPortPromise === setupPortPromise) {
+                this._setupPortPromise = null;
+            }
             throw toError(e);
         }
     }
@@ -364,6 +370,7 @@ export class Mecab {
 
         try {
             const data = await this._invoke('get_version', {});
+            if (this._port !== port) { throw new Error('MeCab disconnected during setup'); }
             if (typeof data !== 'object' || data === null) {
                 throw new Error('Invalid version');
             }
@@ -390,6 +397,7 @@ export class Mecab {
     _clearPort(reason = new Error('MeCab disconnected')) {
         const port = this._port;
         this._port = null;
+        this._remoteVersion = null;
         for (const {reject, timer} of this._invocations.values()) {
             clearTimeout(timer);
             reject(reason);

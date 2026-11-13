@@ -21,6 +21,7 @@ import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
+import {readCodePointsForward} from '../data/string-util.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
 import {convertToKana, convertToKanaIME} from '../language/ja/japanese-wanakana.js';
@@ -613,7 +614,7 @@ export class SearchDisplayController {
         currentQuery !== this._queryInput.value || this._composing || (checkText && !this._clipboardMonitorEnabled)) { return; }
         const {clipboard: {autoSearchContent, maximumSearchLength}} = options;
         if (text.length > maximumSearchLength) {
-            text = text.substring(0, maximumSearchLength);
+            text = readCodePointsForward(text, 0, maximumSearchLength);
         }
         this._queryInput.value = text;
         this._updateSearchHeight(true);

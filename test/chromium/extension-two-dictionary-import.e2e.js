@@ -40,6 +40,8 @@ import {startAnkiMockHttpServer} from '../e2e/anki-mock-http-server.js';
 import {createAnkiMockState} from '../e2e/anki-mock-state.js';
 import {runWithReaderFinalization} from '../e2e/reader-finalization.js';
 import {getChromiumLaunchOptions} from '../e2e/chromium-launch-options.js';
+import {verifyAnonymousRequestRuleMatching} from '../e2e/request-builder-rule-matching.js';
+import {verifyAnkiScreenshotOwnership} from '../e2e/anki-screenshot-ownership.js';
 
 /**
  * Exercise real browser confirmation dialogs with the production controller
@@ -3864,6 +3866,14 @@ async function main() {
         await waitForSettingsPageReady(page);
         const settingsOpenEnd = safePerformance.now();
         await addReportPhase(report, page, 'Open settings page', 'Settings loaded and dictionary import controls visible', settingsOpenStart, settingsOpenEnd, null, processSampler);
+
+        const requestRulesStart = safePerformance.now();
+        const requestRulesWitness = await verifyAnonymousRequestRuleMatching(page);
+        await addReportPhase(report, page, 'Anonymous request rules match literal URLs', JSON.stringify(requestRulesWitness), requestRulesStart, safePerformance.now(), null, processSampler);
+
+        const screenshotStart = safePerformance.now();
+        const screenshotWitness = await verifyAnkiScreenshotOwnership(page, `${localServer.baseUrl}/wagahai-neko.html`);
+        await addReportPhase(report, page, 'Anki screenshots retain their source tab', JSON.stringify(screenshotWitness), screenshotStart, safePerformance.now(), null, processSampler);
 
         const navigationStart = safePerformance.now();
         const navigationWitness = await verifyCancelledImportNavigation(context, extensionBaseUrl);
