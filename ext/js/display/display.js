@@ -31,6 +31,7 @@ import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 import {addScopeToCss, clone, deepEqual, promiseTimeout} from '../core/utilities.js';
 import {setProfile} from '../data/profiles-util.js';
+import {readCodePointsForward} from '../data/string-util.js';
 import {PopupMenu} from '../dom/popup-menu.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {ScrollElement} from '../dom/scroll-element.js';
@@ -1155,14 +1156,32 @@ export class Display extends EventDispatcher {
             if (typeof url !== 'string') { url = window.location.href; }
             if (typeof documentTitle !== 'string') { documentTitle = document.title; }
             const optionsContext = this.getOptionsContext();
-            const element = /** @type {Element} */ (e.currentTarget);
+            const element = /** @type {HTMLAnchorElement} */ (e.currentTarget);
             let query = element.textContent;
             if (query === null) { query = ''; }
+            let sentenceOffset = null;
+            const characterOffset = Number.parseInt(element.dataset.characterOffset ?? '', 10);
+            if (Number.isSafeInteger(characterOffset) && characterOffset >= 0) {
+                const fullQueryOffset = this._queryOffset + readCodePointsForward(this._fullQuery, this._queryOffset, characterOffset).length;
+                if (this._fullQuery.startsWith(query, fullQueryOffset)) {
+                    sentenceOffset = fullQueryOffset;
+                }
+                const queryPrefix = this._fullQuery.slice(0, this._queryOffset);
+                const sourceSentence = typeof sentence?.text === 'string' && typeof sentence.offset === 'number' ?
+                    sentence :
+                    {text: this._fullQuery, offset: [...queryPrefix].length};
+                const offset = sourceSentence.offset + characterOffset;
+                // Inflected and alternate headwords may differ from the source.
+                // Move the cloze only when the original character agrees.
+                if ([...sourceSentence.text][offset] === query) {
+                    sentence = {...sourceSentence, offset};
+                }
+            }
             /** @type {import('display').ContentDetails} */
             const details = {
                 focus: false,
                 historyMode: 'new',
-                params: this._createSearchParams('kanji', query, false, null),
+                params: this._createSearchParams('kanji', query, false, sentenceOffset),
                 state: {
                     focusEntry: 0,
                     optionsContext,

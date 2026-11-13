@@ -497,7 +497,10 @@ export class DisplayGenerator {
         const headwordReading = this._querySelector(node, '.headword-reading');
         this._setTextContent(headwordReading, reading);
 
-        this._appendFurigana(termContainer, term, reading, this._appendKanjiLinks.bind(this));
+        let characterOffset = 0;
+        this._appendFurigana(termContainer, term, reading, (container, text) => {
+            characterOffset = this._appendKanjiLinks(container, text, characterOffset);
+        });
 
         return node;
     }
@@ -1065,8 +1068,10 @@ export class DisplayGenerator {
     /**
      * @param {HTMLElement} container
      * @param {string} text
+     * @param {number} [characterOffset]
+     * @returns {number}
      */
-    _appendKanjiLinks(container, text) {
+    _appendKanjiLinks(container, text, characterOffset = 0) {
         let part = '';
         for (const c of text) {
             if (isCodePointKanji(/** @type {number} */(c.codePointAt(0)))) {
@@ -1076,14 +1081,17 @@ export class DisplayGenerator {
                 }
 
                 const link = this._createKanjiLink(c);
+                link.dataset.characterOffset = `${characterOffset}`;
                 container.appendChild(link);
             } else {
                 part += c;
             }
+            ++characterOffset;
         }
         if (part.length > 0) {
             container.appendChild(document.createTextNode(part));
         }
+        return characterOffset;
     }
 
     /**
