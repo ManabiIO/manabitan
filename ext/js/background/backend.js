@@ -3072,8 +3072,9 @@ null;
      */
     async _tabExists(urlParam) {
         const baseUrl = chrome.runtime.getURL(urlParam);
-        const urlPredicate = (/** @type {?string} */ url) => url !== null && url.startsWith(baseUrl);
-        return await this._findSearchPopupTab(urlPredicate) !== null;
+        /** @type {import('backend').FindTabsPredicate} */
+        const predicate = ({url}) => url !== null && url.startsWith(baseUrl);
+        return await this._findTabs(1000, false, predicate, false) !== null;
     }
 
     /**
