@@ -23,6 +23,7 @@ const KATAKANA_SMALL_TSU_CODE_POINT = 0x30c3;
 const KATAKANA_SMALL_KA_CODE_POINT = 0x30f5;
 const KATAKANA_SMALL_KE_CODE_POINT = 0x30f6;
 const KANA_PROLONGED_SOUND_MARK_CODE_POINT = 0x30fc;
+const VARIATION_SELECTOR_PATTERN = /[\ufe00-\ufe0f\u{e0100}-\u{e01ef}]/u;
 
 /** @type {import('CJK-util').CodepointRange} */
 const HIRAGANA_RANGE = [0x3040, 0x309f];
@@ -211,7 +212,7 @@ function segmentizeFurigana(reading, readingNormalized, groups, groupsStart) {
         return null;
     } else {
         let result = null;
-        for (let i = reading.length; i >= textLength; --i) {
+        for (let i = reading.length; i >= group.minimumReadingLength; --i) {
             const segments = segmentizeFurigana(
                 reading.substring(i),
                 readingNormalized.substring(i),
@@ -681,10 +682,14 @@ export function distributeFurigana(term, reading) {
     for (const c of term) {
         const codePoint = /** @type {number} */ (c.codePointAt(0));
         const isKana = isCodePointKana(codePoint);
+        // A supplementary kanji still needs only one reading character, and
+        // a variation selector changes its glyph without adding a reading.
+        const minimumReadingLength = VARIATION_SELECTOR_PATTERN.test(c) ? 0 : 1;
         if (isKana === isKanaPre) {
             /** @type {import('japanese-util').FuriganaGroup} */ (groupPre).text += c;
+            /** @type {import('japanese-util').FuriganaGroup} */ (groupPre).minimumReadingLength += minimumReadingLength;
         } else {
-            groupPre = {isKana, text: c, textNormalized: null};
+            groupPre = {isKana, text: c, textNormalized: null, minimumReadingLength};
             groups.push(groupPre);
             isKanaPre = isKana;
         }
