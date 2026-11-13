@@ -3502,7 +3502,15 @@ null;
                     }
                     db.exec('COMMIT');
                 } catch (error) {
-                    try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+                    try {
+                        db.exec('ROLLBACK');
+                    } catch (rollbackError) {
+                        // Derived index writes must not leave a failed
+                        // transaction attached to the shared lookup connection.
+                        const errors = [toError(error), toError(rollbackError)];
+                        this._quarantineBulkImportConnection(errors);
+                        throw new AggregateError(errors, 'Glossary search indexing and rollback failed');
+                    }
                     throw error;
                 }
                 const processed = start + batch.length;
