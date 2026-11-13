@@ -10824,10 +10824,13 @@ null :
                                     rawContentHeader.glossaryJsonOffset,
                                     rawContentHeader.glossaryJsonLength,
                                 );
-                                const glossaryJson = this._textDecoder.decode(rawGlossaryJsonBytes);
+                                let glossaryJson = this._textDecoder.decode(rawGlossaryJsonBytes);
                                 glossary = parseJson(glossaryJson);
                                 if (!Array.isArray(glossary)) {
                                     throw new Error('Term glossary payload is not an array');
+                                }
+                                if (isRawTermContentTokenBinary(contentBytes) && this._normalizeNativeTermGlossaryImages(glossary)) {
+                                    glossaryJson = JSON.stringify(glossary);
                                 }
                                 cached = {
                                     definitionTags,
@@ -11005,6 +11008,56 @@ null :
             });
         }
         return termEntry;
+    }
+
+    /**
+     * Native token content retains authored image dimensions. Convert those to
+     * the preferred dimensions expected by the renderer, matching the resolved
+     * importer path when intrinsic image metadata is skipped. Do this on read
+     * so dictionaries imported before this normalization also render correctly.
+     * @param {import('dictionary-data').TermGlossary[]} glossary
+     * @returns {boolean}
+     */
+    _normalizeNativeTermGlossaryImages(glossary) {
+        let changed = false;
+        /** @type {import('structured-content').Content[]} */
+        const pending = [];
+        for (const entry of glossary) {
+            if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) { continue; }
+            if (entry.type === 'image') {
+                if (this._normalizeNativeTermGlossaryImage(entry)) { changed = true; }
+            } else if (entry.type === 'structured-content') {
+                pending.push(entry.content);
+            }
+        }
+        while (pending.length > 0) {
+            const content = pending.pop();
+            if (Array.isArray(content)) {
+                for (const child of content) { pending.push(child); }
+            } else if (content !== null && typeof content === 'object') {
+                if (content.tag === 'img') {
+                    if (this._normalizeNativeTermGlossaryImage(content)) { changed = true; }
+                } else if (typeof content.content !== 'undefined') {
+                    pending.push(content.content);
+                }
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * @param {import('structured-content').ImageElementBase} image
+     * @returns {boolean}
+     */
+    _normalizeNativeTermGlossaryImage(image) {
+        const {width, height, preferredWidth, preferredHeight} = image;
+        if (typeof preferredWidth === 'number' || typeof preferredHeight === 'number') { return false; }
+        if (typeof width !== 'number' && typeof height !== 'number') { return false; }
+        if (typeof width === 'number') { image.preferredWidth = width; }
+        if (typeof height === 'number') { image.preferredHeight = height; }
+        image.width = 0;
+        image.height = 0;
+        return true;
     }
 
     /**
