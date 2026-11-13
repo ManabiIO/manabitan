@@ -552,6 +552,9 @@ export class SearchDisplayController {
 
     /** */
     async _onCopy() {
+        // A copy from this page supersedes clipboard text still being validated.
+        // Retire it before reading the new baseline, which can itself be delayed.
+        ++this._clipboardUpdateSequence;
         // Ignore copy from search page; clipboard access can be denied.
         try {
             this._clipboardMonitor.setPreviousText(document.hasFocus() ? await this._clipboardReaderLike.getText(false) : '');

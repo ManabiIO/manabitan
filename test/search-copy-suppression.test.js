@@ -98,3 +98,45 @@ test.for([false, true])('a pending clipboard poll cannot undo a newer Search cop
         monitor.stop()
     }
 })
+
+test.for([false, true])('copying Search text retires an older clipboard validation (copy read pending=%s)', async (copyReadPending, {window}) => {
+    const validation = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers())
+    const copiedText = /** @type {PromiseWithResolvers<string>} */ (Promise.withResolvers())
+    let clipboard = '初期値'
+    const getText = vi.fn(async () => clipboard)
+    const {controller, publish} = setup(getText, window.document)
+    const worthy = vi.spyOn(controller._display.application.api, 'isTextLookupWorthy')
+        .mockResolvedValue(true)
+        .mockReturnValueOnce(validation.promise)
+    const monitor = controller._clipboardMonitor
+    try {
+        monitor.start()
+        await vi.advanceTimersByTimeAsync(0)
+        clipboard = '以前のクリップボード'
+        await vi.advanceTimersByTimeAsync(250)
+        expect(worthy).toHaveBeenCalledWith(clipboard, 'ja')
+
+        clipboard = '検索からコピーした語'
+        if (copyReadPending) { getText.mockReturnValueOnce(copiedText.promise) }
+        const copy = controller._onCopy()
+        if (!copyReadPending) { await copy }
+        validation.resolve(true)
+        await vi.advanceTimersByTimeAsync(0)
+
+        expect(publish).not.toHaveBeenCalled()
+        expect(controller._queryInput.value).toBe('元の検索')
+        copiedText.resolve(clipboard)
+        await copy
+        await vi.advanceTimersByTimeAsync(250)
+        expect(publish).not.toHaveBeenCalled()
+
+        clipboard = '次の外部コピー'
+        await vi.advanceTimersByTimeAsync(250)
+        expect(publish).toHaveBeenCalledOnce()
+        expect(publish.mock.calls[0][0]).toMatchObject({historyMode: 'clear', params: {query: clipboard}})
+    } finally {
+        validation.resolve(true)
+        copiedText.resolve(clipboard)
+        monitor.stop()
+    }
+})
