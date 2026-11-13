@@ -584,15 +584,53 @@ export class AnkiDeckGeneratorController {
             if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
             if (this._cancel) { return true; }
             if (disallowDuplicates) {
-                const duplicateNotes = await this._ankiController.canAddNotes(notes.map((note) => ({...note, options: {...note.options, allowDuplicate: false}})));
+                notes = notes.map((note) => ({...note, options: {...note.options, allowDuplicate: false}}));
+                const duplicateNotes = await this._ankiController.canAddNotes(notes);
                 notes = notes.filter((_, i) => duplicateNotes[i]);
             }
             if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
             if (this._cancel) { return true; }
-            const addNotesResult = await this._ankiController.addNotes(notes);
-            if (addNotesResult === null || addNotesResult.includes(null)) {
-                this._updateProgressBarError('Ankiconnect error: Failed to add cards');
-                return false;
+            if (notes.length === 0) { return true; }
+            // Some AnkiConnect versions roll back an entire addNotes batch on
+            // a duplicate. Protect each note independently so a repeated term
+            // cannot discard the other notes that passed preflight.
+            const batches = disallowDuplicates ? notes.map((note) => [note]) : [notes];
+            for (const batch of batches) {
+                if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                if (this._cancel) { return true; }
+                let addNotesResult;
+                try {
+                    addNotesResult = await this._ankiController.addNotes(batch);
+                } catch (error) {
+                    const data = error instanceof ExtensionError ? error.data : null;
+                    /** @type {unknown} */
+                    const apiError = typeof data === 'object' && data !== null ? Reflect.get(data, 'apiError') : null;
+                    if (!disallowDuplicates || typeof apiError !== 'string' || !apiError.includes('cannot create note because it is a duplicate')) {
+                        throw error;
+                    }
+                    addNotesResult = [null];
+                }
+                if (addNotesResult === null) {
+                    this._updateProgressBarError('Ankiconnect error: Failed to add cards');
+                    return false;
+                }
+                const rejectedNotes = batch.filter((_, i) => addNotesResult[i] === null);
+                if (rejectedNotes.length > 0) {
+                    if (disallowDuplicates) {
+                        if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                        if (this._cancel) { return true; }
+                        // An earlier note (or another client) may become a
+                        // duplicate after preflight. Confirm that disabling
+                        // duplicate prevention alone makes the note addable.
+                        const checks = await this._ankiController.canAddNotes(rejectedNotes.flatMap((note) => [
+                            note, {...note, options: {...note.options, allowDuplicate: true}},
+                        ]));
+                        if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                        if (checks.every((canAdd, i) => canAdd === (i % 2 === 1))) { continue; }
+                    }
+                    this._updateProgressBarError('Ankiconnect error: Failed to add cards');
+                    return false;
+                }
             }
         } catch (error) {
             this._updateProgressBarError(`Ankiconnect error: ${toError(error).message}`);

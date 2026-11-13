@@ -4,7 +4,9 @@
  */
 
 import {afterEach, expect, test, vi} from 'vitest';
+import {AnkiConnect} from '../ext/js/comm/anki-connect.js';
 import {AnkiDeckGeneratorController} from '../ext/js/pages/settings/anki-deck-generator-controller.js';
+import {createAnkiMockState} from './e2e/anki-mock-state.js';
 
 afterEach(() => { vi.unstubAllGlobals(); });
 
@@ -100,6 +102,176 @@ function createController(words) {
 function createEvent() {
     return /** @type {MouseEvent} */ (/** @type {unknown} */ ({preventDefault: vi.fn()}));
 }
+
+/**
+ * @param {string} expression
+ * @returns {import('anki').Note}
+ */
+function createNote(expression) {
+    return {
+        fields: {Front: expression, Back: 'definition'},
+        tags: [],
+        modelName: 'Basic',
+        deckName: 'Japanese',
+        options: {allowDuplicate: true, duplicateScope: 'deck', duplicateScopeOptions: {deckName: 'Japanese', checkChildren: false, checkAllModels: false}},
+    };
+}
+
+/**
+ * Exercise the real client with the shared duplicate collection model.
+ * AnkiConnect checks each bulk insertion against the collection after earlier
+ * insertions, while its canAddNotes action never inserts candidates.
+ * @param {boolean} [atomic]
+ * @param {(() => void)|undefined} [beforeAdd]
+ * @returns {{client: AnkiConnect, state: ReturnType<typeof createAnkiMockState>}}
+ */
+function createDuplicateCollection(atomic = false, beforeAdd) {
+    const state = createAnkiMockState();
+    state.beginScenario('batch-duplicate-prevention', []);
+    vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ _url, /** @type {RequestInit} */ init) => {
+        const request = JSON.parse(String(init.body));
+        let response;
+        if (request.action === 'addNotes') {
+            beforeAdd?.();
+            const previous = /** @type {{notes: unknown[]}} */ (state.getScenarioState().snapshots.at(-1));
+            response = {
+                error: null,
+                result: request.params.notes.map((/** @type {import('anki').Note} */ note) => {
+                    const check = state.handleRequestBody({action: 'canAddNotes', params: {notes: [note]}});
+                    if (!(/** @type {boolean[]} */ (check.result))[0]) { return null; }
+                    return state.handleRequestBody({action: 'addNote', params: {note}}).result;
+                }),
+            };
+            if (atomic && response.result.includes(null)) {
+                state.beginScenario('batch-duplicate-prevention', previous.notes);
+                response = {result: null, error: "['cannot create note because it is a duplicate']"};
+            }
+        } else {
+            response = state.handleRequestBody(request);
+        }
+        return new Response(JSON.stringify(response.error === null ? response.result : {error: response.error}));
+    });
+    const client = new AnkiConnect();
+    client.server = 'http://127.0.0.1:8765';
+    client.enabled = true;
+    return {client, state};
+}
+
+test.each([
+    {atomic: false, preventDuplicates: false},
+    {atomic: false, preventDuplicates: true},
+    {atomic: true, preventDuplicates: false},
+    {atomic: true, preventDuplicates: true},
+])('duplicate prevention $preventDuplicates works with atomic=$atomic insertion without mutating generated notes', async ({atomic, preventDuplicates}) => {
+    const {controller, error} = createController('');
+    const {client} = createDuplicateCollection(atomic);
+    Reflect.set(controller, '_ankiController', client);
+    const notes = [createNote('食べる'), {...createNote('食べる'), fields: {Front: '食べる', Back: 'different definition'}}];
+
+    expect(await AnkiDeckGeneratorController.prototype._sendNotes.call(controller, notes, preventDuplicates)).toBe(true);
+
+    expect(await client.findNotes('')).toHaveLength(preventDuplicates ? 1 : 2);
+    expect(notes.every(({options}) => options.allowDuplicate)).toBe(true);
+    expect(error).not.toHaveBeenCalled();
+});
+
+test.each([false, true])('duplicate prevention handles a note added after preflight with atomic=%s insertion', async (atomic) => {
+    const {controller, error} = createController('');
+    const note = createNote('猫');
+    const {client, state} = createDuplicateCollection(atomic, () => {
+        state.handleRequestBody({action: 'addNote', params: {note}});
+    });
+    Reflect.set(controller, '_ankiController', client);
+
+    expect(await AnkiDeckGeneratorController.prototype._sendNotes.call(controller, [note], true)).toBe(true);
+
+    expect(await client.findNotes('')).toHaveLength(1);
+    expect(error).not.toHaveBeenCalled();
+});
+
+test.each([
+    {atomic: false, preventDuplicates: false},
+    {atomic: false, preventDuplicates: true},
+    {atomic: true, preventDuplicates: false},
+    {atomic: true, preventDuplicates: true},
+])('101-note generation completes with duplicate prevention=$preventDuplicates and atomic=$atomic insertion', async ({atomic, preventDuplicates}) => {
+    const words = Array.from({length: 101}, (_, i) => String(i));
+    const {controller, timers, generateNoteData, error} = createController(words.join('\n'));
+    const {client} = createDuplicateCollection(atomic);
+    const addNotes = vi.spyOn(client, 'addNotes');
+    Reflect.set(controller, '_ankiController', client);
+    Reflect.set(controller, '_sendNotes', AnkiDeckGeneratorController.prototype._sendNotes);
+    controller._disallowDuplicatesCheckbox.checked = preventDuplicates;
+    generateNoteData.mockImplementation(async (word) => createNote(word === '1' ? '0' : word));
+
+    await controller._onSendToAnkiConfirm(createEvent());
+    await timers[0]();
+
+    const stored = await client.findNotes('');
+    expect(stored).toHaveLength(preventDuplicates ? 100 : 101);
+    expect(await client.findNotes('Front:"100"')).toHaveLength(1);
+    if (!preventDuplicates) {
+        expect(addNotes.mock.calls.map(([notes]) => notes.length)).toEqual([100, 1]);
+    }
+    expect(error).not.toHaveBeenCalled();
+    expect(controller._inProgress).toBe(false);
+});
+
+test.each(['cancel', 'profile-change'])('%s between individually protected notes stops later insertions', async (change) => {
+    const {controller, timers, generateNoteData, error} = createController('猫\n犬');
+    const {client} = createDuplicateCollection(true, () => {
+        if (change === 'cancel') {
+            controller._cancel = true;
+        } else {
+            const settings = Reflect.get(controller, '_settingsController');
+            Reflect.set(settings, 'profileIndexChangeGeneration', settings.profileIndexChangeGeneration + 1);
+        }
+    });
+    Reflect.set(controller, '_ankiController', client);
+    Reflect.set(controller, '_sendNotes', AnkiDeckGeneratorController.prototype._sendNotes);
+    controller._disallowDuplicatesCheckbox.checked = true;
+    generateNoteData.mockImplementation(async (word) => createNote(word));
+
+    await controller._onSendToAnkiConfirm(createEvent());
+    await timers[0]();
+
+    expect(await client.findNotes('')).toHaveLength(1);
+    expect(await client.findNotes('Front:"犬"')).toHaveLength(0);
+    expect(error).toHaveBeenCalledTimes(change === 'cancel' ? 0 : 1);
+    expect(controller._inProgress).toBe(false);
+});
+
+test('an ambiguous transport failure stops without retrying an insertion or sending later notes', async () => {
+    const {controller, error} = createController('');
+    const note = createNote('猫');
+    const {client, state} = createDuplicateCollection(true, () => {
+        state.handleRequestBody({action: 'addNote', params: {note}});
+        throw new TypeError('Network disconnected after insertion');
+    });
+    const addNotes = vi.spyOn(client, 'addNotes');
+    Reflect.set(controller, '_ankiController', client);
+
+    expect(await AnkiDeckGeneratorController.prototype._sendNotes.call(controller, [note, createNote('犬')], true)).toBe(false);
+
+    expect(addNotes).toHaveBeenCalledOnce();
+    expect(addNotes.mock.calls[0][0].map(({fields}) => fields.Front)).toEqual(['猫']);
+    expect(await client.findNotes('')).toHaveLength(1);
+    expect(error).toHaveBeenCalledWith('Ankiconnect error: Anki connection failure');
+});
+
+test.each([
+    {name: 'duplicate-only', checks: [false, true], success: true},
+    {name: 'insertion-failure', checks: [true, true], success: false},
+    {name: 'invalid-note', checks: [false, false], success: false},
+])('$name rejection is distinguished from expected duplicate skips', async ({checks, success}) => {
+    const {controller, error} = createController('');
+    const canAddNotes = vi.fn().mockResolvedValueOnce([true]).mockResolvedValueOnce(checks);
+    Reflect.set(controller, '_ankiController', {canAddNotes, addNotes: vi.fn().mockResolvedValue([null])});
+
+    expect(await AnkiDeckGeneratorController.prototype._sendNotes.call(controller, [createNote('猫')], true)).toBe(success);
+
+    expect(error).toHaveBeenCalledTimes(success ? 0 : 1);
+});
 
 test('export generation failure settles state, keeps the error visible, and permits retry', async () => {
     const {controller, timers, generateNoteData, error} = createController('one');
@@ -298,7 +470,7 @@ test('non-Error Anki failures are reported instead of treated as a successful se
     const {controller, error} = createController('one');
     Reflect.set(controller, '_ankiController', {addNotes: vi.fn().mockRejectedValue('offline')});
     Reflect.set(controller, '_sendNotes', AnkiDeckGeneratorController.prototype._sendNotes);
-    const result = await controller._sendNotes([], false);
+    const result = await controller._sendNotes([createNote('猫')], false);
     expect(result).toBe(false);
     expect(error).toHaveBeenCalledWith(expect.stringContaining('offline'));
 });
