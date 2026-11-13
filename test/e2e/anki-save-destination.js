@@ -129,6 +129,7 @@ export async function verifyAnkiSaveDestination(controlPage, extensionBaseUrl, q
         const before = /** @type {{ankiConnectionIdentity: string}} */ (await send(controlPage, 'optionsGetProfile', {optionsContext: {current: true}}))
         const session = await context.newCDPSession(page)
         try {
+            await session.send('ServiceWorker.enable')
             await session.send('ServiceWorker.stopAllWorkers')
         } finally {
             await session.detach()
