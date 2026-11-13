@@ -20,6 +20,7 @@ import {EventDispatcher} from '../core/event-dispatcher.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {trimTrailingWhitespacePlusSpace} from '../data/string-util.js';
+import {DOMTextScanner} from '../dom/dom-text-scanner.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {convertHiraganaToKatakana, convertKatakanaToHiragana, isStringEntirelyKana} from '../language/ja/japanese.js';
 import {TextScanner} from '../language/text-scanner.js';
@@ -480,19 +481,28 @@ export class QueryParser extends EventDispatcher {
     _getSentenceOffset(textSource) {
         if (textSource.type === 'range') {
             const {range} = textSource;
-            const sourceOffset = this._textSourceOffsets.get(range.startContainer);
+            let {startContainer, startOffset} = range;
+            if (startContainer.nodeType === Node.ELEMENT_NODE) {
+                // Element offsets count child nodes. Resolve the first scanned
+                // character, skipping ruby readings as the actual lookup does.
+                const scanner = new DOMTextScanner(startContainer, startOffset, true, false).seek(1);
+                if (scanner.content.length === 0) { return null; }
+                startContainer = scanner.node;
+                startOffset = scanner.offset - scanner.content.length;
+            }
+            const sourceOffset = this._textSourceOffsets.get(startContainer);
             if (typeof sourceOffset !== 'undefined') {
                 const {offset, leadingNewlinesRemoved} = sourceOffset;
                 // Whitespace is condensed for display, while navigation uses the original full query.
-                return offset + range.startOffset + (range.startOffset > 0 ? leadingNewlinesRemoved : 0);
+                return offset + startOffset + (startOffset > 0 ? leadingNewlinesRemoved : 0);
             }
-            const node = this._getParentElement(range.startContainer);
+            const node = this._getParentElement(startContainer);
             if (node !== null && node instanceof HTMLElement) {
                 const {offset} = node.dataset;
                 if (typeof offset === 'string') {
                     const value = Number.parseInt(offset, 10);
                     if (Number.isFinite(value)) {
-                        return Math.max(0, value) + range.startOffset;
+                        return Math.max(0, value) + startOffset;
                     }
                 }
             }

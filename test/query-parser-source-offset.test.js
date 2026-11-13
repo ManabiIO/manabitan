@@ -70,17 +70,58 @@ function navigate(window, parser, original, selected) {
     range.setStart(node, start);
     range.setEnd(node, start + selected.length);
     const source = TextSourceRange.create(range);
+    return navigateSource(parser, original, selected, source);
+}
+
+/**
+ * @param {QueryParser} parser
+ * @param {string} original
+ * @param {string} selected
+ * @param {TextSourceRange} source
+ * @returns {import('display').HistoryParams}
+ */
+function navigateSource(parser, original, selected, source) {
     const display = /** @type {Display} */ (Object.create(Display.prototype));
     Reflect.set(display, '_fullQuery', original);
     Reflect.set(display, '_queryParserVisibleOverride', null);
     Reflect.set(display, '_history', {state: null});
     Reflect.set(display, 'getContentOrigin', () => ({tabId: 0, frameId: 0}));
     const publish = vi.spyOn(display, 'setContent').mockResolvedValue('completed');
-    display._onQueryParserSearch({type: 'terms', dictionaryEntries: [], sentence: {text: original, offset: original.indexOf(selected)}, inputInfo: /** @type {import('text-scanner').EventArgument<'searchSuccess'>['inputInfo']} */ (/** @type {unknown} */ ({eventType: 'click'})), textSource: source, optionsContext: {depth: 0, url: 'https://example.test'}, sentenceOffset: parser._getSentenceOffset(source), textScanner: parser._textScanner, pageTheme: 'light'});
+    const onSearched = display._onQueryParserSearch.bind(display);
+    parser.on('searched', onSearched);
+    try {
+        parser._onSearchSuccess({type: 'terms', dictionaryEntries: [], sentence: {text: original, offset: original.indexOf(selected)}, inputInfo: /** @type {import('text-scanner').EventArgument<'searchSuccess'>['inputInfo']} */ (/** @type {unknown} */ ({eventType: 'click'})), textSource: source, optionsContext: {depth: 0, url: 'https://example.test'}, detail: {documentTitle: 'Offset test'}, pageTheme: 'light'});
+    } finally {
+        parser.off('searched', onSearched);
+    }
     const params = publish.mock.calls[0][0].params;
     expect(original.slice(Number(params.offset), Number(params.offset) + selected.length)).toBe(selected);
     return params;
 }
+
+test.for([
+    {text: '食べる犬', selector: '#query-parser-content', childOffset: 1, selected: '犬', expectedOffset: 3},
+    {text: '食べる犬', selector: '.query-parser-term', childOffset: 2, selected: '犬', expectedOffset: 3},
+    {text: '𠮷犬', selector: '#query-parser-content', childOffset: 0, selected: '𠮷', expectedOffset: 0},
+    {text: '𠮷犬', selector: '.query-parser-term', childOffset: 1, selected: '犬', expectedOffset: 2},
+    {text: '食べる犬', selector: 'ruby', childOffset: 0, selected: '食', expectedOffset: 0},
+    {text: '食べる犬', selector: 'ruby', childOffset: 1, selected: 'べる', expectedOffset: 1},
+    {text: '猫   犬', selector: '#query-parser-content', childOffset: 1, selected: '犬', expectedOffset: 4},
+])('element caret boundaries retain full-query source offsets: %j', async ({text, selector, childOffset, selected, expectedOffset}, {window}) => {
+    const parser = await createParser(window, text);
+    const container = parser._queryParser.matches(selector) ? parser._queryParser : parser._queryParser.querySelector(selector);
+    if (container === null) { throw new Error('Parser caret container not found'); }
+    const range = window.document.createRange();
+    range.setStart(container, childOffset);
+    range.collapse(true);
+    const source = TextSourceRange.create(range);
+
+    expect(source.setEndOffset([...selected].length, false, false)).toBe([...selected].length);
+    expect(source.text()).toBe(selected);
+    expect(navigateSource(parser, text, selected, source).offset).toBe(String(expectedOffset));
+    expect(source.range.startContainer).toBe(container);
+    expect(source.range.startOffset).toBe(childOffset);
+});
 
 test('plain kana following ruby retains its source offset in full-query navigation', async ({window}) => {
     const text = '食べる 犬';
