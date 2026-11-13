@@ -302,38 +302,7 @@ export class TermContentOpfsStore {
             }
             // Validate the complete restoration target before abandoning writes.
             // A corrupt journal must not mutate a live import before rejection.
-            this._importSessionActive = false;
-            this._clearImportReadOverlay();
-            this._pendingWriteBytes = 0;
-            this._pendingWriteChunks = [];
-            this._queuedWriteChunks = [];
-            this._queuedWriteBytes = 0;
-            const queuedWrite = this._queuedWritePromise;
-            if (queuedWrite !== null) {
-                try {
-                    await queuedWrite;
-                } catch (error) {
-                    reportDiagnostics('term-content-store-rollback-abandoned-write-error', {
-                        error: error instanceof Error ? error.message : String(error),
-                    });
-                }
-            }
-            this._queuedWritePromise = null;
-            this._queuedWriteError = null;
-            this._inFlightWriteBytes = 0;
-            const writable = this._writable;
-            this._writable = null;
-            if (writable !== null) {
-                try {
-                    const abort = /** @type {unknown} */ (Reflect.get(writable, 'abort'));
-                    const closePromise = typeof abort === 'function' ?
-                        /** @type {() => Promise<void>} */ (abort).call(writable) :
-                        writable.close();
-                    await closePromise;
-                } catch (_) {
-                    // Restoration below uses fresh handles and verifies every checkpoint file.
-                }
-            }
+            await this._abandonImportWritesForRollback();
             if (!this._hasStorageDirectoryApi()) { return; }
             const root = await navigator.storage.getDirectory();
             /** @type {Error[]} */
@@ -415,6 +384,47 @@ export class TermContentOpfsStore {
                 throw this._queuedWriteError;
             }
         });
+    }
+
+    /**
+     * Joins and retires writes whose bytes will be restored or explicitly reset.
+     * The mutation owner verifies its durable result after these writers have
+     * released their files; ordinary appends cannot discard sticky write errors.
+     * @returns {Promise<void>}
+     */
+    async _abandonImportWritesForRollback() {
+        this._importSessionActive = false;
+        this._clearImportReadOverlay();
+        this._pendingWriteBytes = 0;
+        this._pendingWriteChunks = [];
+        this._queuedWriteChunks = [];
+        this._queuedWriteBytes = 0;
+        const queuedWrite = this._queuedWritePromise;
+        if (queuedWrite !== null) {
+            try {
+                await queuedWrite;
+            } catch (error) {
+                reportDiagnostics('term-content-store-rollback-abandoned-write-error', {
+                    error: error instanceof Error ? error.message : String(error),
+                });
+            }
+        }
+        this._queuedWritePromise = null;
+        this._queuedWriteError = null;
+        this._inFlightWriteBytes = 0;
+        const writable = this._writable;
+        this._writable = null;
+        if (writable !== null) {
+            try {
+                const abort = /** @type {unknown} */ (Reflect.get(writable, 'abort'));
+                const closePromise = typeof abort === 'function' ?
+                    /** @type {() => Promise<void>} */ (abort).call(writable) :
+                    writable.close();
+                await closePromise;
+            } catch (_) {
+                // Rollback or reset below verifies its durable result independently.
+            }
+        }
     }
 
     /**
@@ -548,9 +558,8 @@ export class TermContentOpfsStore {
      */
     async reset() {
         await this._runMutationExclusive(async () => {
-            await this._awaitQueuedWrites();
-            await this._closeWritable();
-            if (this._fileHandle === null) {
+            await this._abandonImportWritesForRollback();
+            if (!this._hasStorageDirectoryApi()) {
                 this._chunks = [];
                 this._chunkOffsets = [];
                 this._length = 0;

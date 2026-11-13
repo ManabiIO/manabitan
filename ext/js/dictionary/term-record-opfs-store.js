@@ -1040,12 +1040,8 @@ export class TermRecordOpfsStore {
         this._dictionaryHealthByName.clear();
         this._preinternedCompactionRemap = new Uint32Array(0);
         this._invalidShardFileNames = [];
-        if (typeof navigator === 'undefined' || !('storage' in navigator) || !('getDirectory' in navigator.storage)) {
-            return;
-        }
-        const rootDirectoryHandle = await navigator.storage.getDirectory();
-        this._rootDirectoryHandle = rootDirectoryHandle;
-        this._recordsDirectoryHandle = await rootDirectoryHandle.getDirectoryHandle(SHARD_DIRECTORY_NAME, {create: true});
+        await this._ensureRecordsDirectoryHandle();
+        if (this._recordsDirectoryHandle === null) { return; }
 
         const shardFileCount = await this._loadShardFiles(false);
         this._nextIdMayNeedShardScan = shardFileCount > 0;
@@ -1054,6 +1050,14 @@ export class TermRecordOpfsStore {
             await this.verifyIntegrity();
             this._allShardContentsLoaded = true;
         }
+    }
+
+    /** @returns {Promise<void>} */
+    async _ensureRecordsDirectoryHandle() {
+        if (this._recordsDirectoryHandle !== null) { return; }
+        if (typeof navigator === 'undefined' || !('storage' in navigator) || !('getDirectory' in navigator.storage)) { return; }
+        this._rootDirectoryHandle = await navigator.storage.getDirectory();
+        this._recordsDirectoryHandle = await this._rootDirectoryHandle.getDirectoryHandle(SHARD_DIRECTORY_NAME, {create: true});
     }
 
     /**
@@ -1154,15 +1158,10 @@ export class TermRecordOpfsStore {
         // Validate the complete restoration target before abandoning writes. A
         // corrupt journal must not mutate the active store before it is rejected.
         await this._abandonImportWritesForRollback();
-        if (this._recordsDirectoryHandle === null) {
-            if (typeof navigator === 'undefined' || !('storage' in navigator) || !('getDirectory' in navigator.storage)) {
-                return;
-            }
-            // Startup recovery precedes normal preparation: an unpublished
-            // shard must not have to pass ordinary lookup loading first.
-            this._rootDirectoryHandle = await navigator.storage.getDirectory();
-            this._recordsDirectoryHandle = await this._rootDirectoryHandle.getDirectoryHandle(SHARD_DIRECTORY_NAME, {create: true});
-        }
+        // Startup recovery precedes normal preparation: an unpublished shard
+        // must not have to pass ordinary lookup loading first.
+        await this._ensureRecordsDirectoryHandle();
+        if (this._recordsDirectoryHandle === null) { return; }
         /** @type {Error[]} */
         const errors = [];
         // Truncation can extend a short file with zeroes. Confirm every
@@ -1227,7 +1226,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * Stops import writes without flushing data which is about to be rolled back.
+     * Stops import writes without flushing data which is about to be discarded.
      * @returns {Promise<void>}
      */
     async _abandonImportWritesForRollback() {
@@ -1392,7 +1391,8 @@ export class TermRecordOpfsStore {
 
     /** @returns {Promise<void>} */
     async _reset() {
-        await this._closeAllWritables();
+        await this._abandonImportWritesForRollback();
+        await this._ensureRecordsDirectoryHandle();
         /** @type {Error[]} */
         const resetErrors = [];
         if (this._recordsDirectoryHandle !== null) {

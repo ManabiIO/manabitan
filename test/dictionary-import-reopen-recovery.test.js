@@ -3,13 +3,15 @@
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
 import {afterEach, beforeAll, expect, test, vi} from 'vitest'
+import {deferPromise} from '../ext/js/core/utilities.js'
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js'
-import {getSqlite3, openOpfsDatabase} from '../ext/js/dictionary/sqlite-wasm.js'
+import {deleteOpfsDatabaseFiles, getSqlite3, openOpfsDatabase} from '../ext/js/dictionary/sqlite-wasm.js'
 
 vi.mock('../ext/js/dictionary/sqlite-wasm.js', async (original) => ({
     ...(await original()),
     getSqlite3: vi.fn(),
     openOpfsDatabase: vi.fn(),
+    deleteOpfsDatabaseFiles: vi.fn(),
 }))
 vi.mock('../ext/js/dictionary/zstd-term-content.js', async (original) => ({
     ...(await original()),
@@ -20,7 +22,7 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', async (original) => ({
  * @typedef {object} RecoveryTestOpfs
  * @property {FileSystemDirectoryHandle} root
  * @property {() => Promise<void>} dispose
- * @property {{beforeRemove: ((name: string) => void)|null}} hooks
+ * @property {{beforeRemove: ((name: string) => void)|null, beforeWrite: ((name: string) => void|Promise<void>)|null}} hooks
  */
 /** @type {import('@sqlite.org/sqlite-wasm').Sqlite3Static} */
 let sqlite3
@@ -63,17 +65,24 @@ async function appendTerm(database, dictionary) {
 async function fixture() {
     const adapterUrl = new URL('fixtures/import-journal-snapshot/node-opfs-adapter.mjs', import.meta.url)
     // eslint-disable-next-line no-unsanitized/method -- Fixed repository fixture URL; no external input.
-    const {createNodeOpfs} = /** @type {{createNodeOpfs: () => Promise<RecoveryTestOpfs>}} */ (await import(adapterUrl.href))
-    const opfs = await createNodeOpfs()
+    const {createNodeOpfs} = /** @type {{createNodeOpfs: (options: {terminalWriteErrors: boolean}) => Promise<RecoveryTestOpfs>}} */ (await import(adapterUrl.href))
+    const opfs = await createNodeOpfs({terminalWriteErrors: true})
     cleanup.push(opfs.dispose)
     vi.stubGlobal('navigator', {storage: {getDirectory: async () => opfs.root}})
     vi.stubGlobal('self', {constructor: {name: 'DedicatedWorkerGlobalScope'}})
-    const filename = `/dictionary-import-reopen-${++serial}.sqlite3`
+    const filename = `/dictionary-import-reopen-${++serial}`
+    let sqliteGeneration = 0
     vi.mocked(getSqlite3).mockResolvedValue(sqlite3)
     vi.mocked(openOpfsDatabase).mockImplementation(async () => {
-        const connection = new sqlite3.oo1.DB(filename, 'c')
+        const connection = new sqlite3.oo1.DB(`${filename}-${sqliteGeneration}.sqlite3`, 'c')
         connections.push(connection)
         return connection
+    })
+    // SQLite's OPFS VFS is unavailable in Node. Model its file replacement by
+    // opening a fresh real SQLite file after the actual purge coordinator runs.
+    vi.mocked(deleteOpfsDatabaseFiles).mockImplementation(async () => {
+        ++sqliteGeneration
+        return true
     })
     const database = new DictionaryDatabase()
     await database.prepare()
@@ -207,4 +216,125 @@ test('a journal without its SQLite publication table stays fail closed', async (
     expect(await recovered._importJournal.read()).toHaveProperty('sessionId', 'unowned')
     const contentHandle = await opfs.root.getFileHandle('manabitan-term-content.bin')
     expect(new Uint8Array(await (await contentHandle.getFile()).arrayBuffer())).toEqual(persistedContent)
+})
+
+test.each([false, true])('explicit purge recovers failed rollback storage; new worker=%s', async (newWorker) => {
+    const {database, opfs} = await fixture()
+    const sessionId = await database.startBulkImport()
+    for (let index = 1; index <= 3; ++index) {
+        const handle = await opfs.root.getFileHandle(`manabitan-term-content^${index}.bin`, {create: true})
+        const writable = await handle.createWritable()
+        await writable.write(new Uint8Array([index, index, index]))
+        await writable.close()
+    }
+    opfs.hooks.beforeRemove = (/** @type {string} */ name) => {
+        if (name === 'manabitan-term-content^2.bin') { throw new DOMException('Temporarily locked', 'NoModificationAllowedError') }
+    }
+    await expect(database.abortBulkImport(sessionId)).rejects.toThrow()
+    opfs.hooks.beforeRemove = null
+
+    const result = await database.purge().then((value) => ({value}), (error) => ({error}))
+    const recovered = newWorker ? new DictionaryDatabase() : database
+    if (!recovered.isPrepared()) { await expect(recovered.prepare()).resolves.toBeUndefined() }
+    expect(result).toEqual({value: true})
+    expect(await recovered.getDictionaryInfo()).toEqual([])
+    expect(await recovered._importJournal.read()).toBeNull()
+    const nextSession = await recovered.startBulkImport()
+    const bytes = new Uint8Array([7, 8, 9])
+    const [span] = await recovered._termContentStore.appendBatch([bytes])
+    expect(span).toEqual({offset: 0, length: 3})
+    await recovered.finishBulkImport(null, null, nextSession)
+    expect(await recovered._termContentStore.readSlice(0, 3)).toEqual(bytes)
+})
+
+test('explicit purge discovers cold OPFS files after a journal failure prevented store preparation', async () => {
+    const {database, opfs} = await fixture()
+    const survivorShard = database._termRecordStore._getShardFileName('Survivor', 'raw')
+    await database.close()
+    for (const [name, bytes] of [
+        ['manabitan-term-content^2.bin', 'orphan'],
+        ['manabitan-dictionary-import-journal.json', '{'],
+    ]) {
+        const handle = await opfs.root.getFileHandle(name, {create: true})
+        const writable = await handle.createWritable()
+        await writable.write(bytes)
+        await writable.close()
+    }
+    const recovered = new DictionaryDatabase()
+    await expect(recovered.prepare()).rejects.toThrow('invalid dictionary import journal')
+    expect(recovered._termContentStore._fileHandle).toBeNull()
+    await expect(recovered.purge()).resolves.toBe(true)
+    expect(await recovered.getDictionaryInfo()).toEqual([])
+    const directory = await opfs.root.getDirectoryHandle('manabitan-term-records')
+    await expect(directory.getFileHandle(survivorShard)).rejects.toHaveProperty('name', 'NotFoundError')
+    const reopened = new DictionaryDatabase()
+    await expect(reopened.prepare()).resolves.toBeUndefined()
+    expect(await reopened.getDictionaryInfo()).toEqual([])
+})
+
+test.each(['content', 'records'])('explicit purge discards failed live %s writes and opens a clean store', async (target) => {
+    const {database, opfs} = await fixture()
+    await database.startBulkImport()
+    let failedWrites = 0
+    opfs.hooks.beforeWrite = (/** @type {string} */ name) => {
+        if (target === 'content' ? name === 'manabitan-term-content.bin' : name.endsWith('.mbti')) {
+            ++failedWrites
+            throw new DOMException('Disk is full', 'QuotaExceededError')
+        }
+    }
+    if (target === 'content') {
+        await expect((async () => {
+            await database._termContentStore.appendBatch([new Uint8Array([1, 2, 3])])
+            await database._termContentStore.flushImportWrites()
+        })()).rejects.toThrow()
+    } else {
+        await appendTerm(database, 'Interrupted')
+        await expect(database._termRecordStore.endImportSession()).rejects.toThrow()
+    }
+    expect(failedWrites).toBeGreaterThan(0)
+    opfs.hooks.beforeWrite = null
+    await expect(database.purge()).resolves.toBe(true)
+    expect(await database.getDictionaryInfo()).toEqual([])
+    const nextSession = await database.startBulkImport()
+    const bytes = new Uint8Array([3, 2, 1])
+    const [span] = await database._termContentStore.appendBatch([bytes])
+    expect(span).toEqual({offset: 0, length: 3})
+    await database.finishBulkImport(null, null, nextSession)
+    expect(await database._termContentStore.readSlice(0, 3)).toEqual(bytes)
+})
+
+test('purge joins an in-flight content writer before deleting its files', async () => {
+    const {database, opfs} = await fixture()
+    const entered = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise())
+    const resume = /** @type {import('core').DeferredPromiseDetails<void>} */ (deferPromise())
+    const content = database._termContentStore
+    content.setQueueImportWritesEnabled(true)
+    await database.startBulkImport()
+    opfs.hooks.beforeWrite = async (/** @type {string} */ name) => {
+        if (name !== 'manabitan-term-content.bin') { return }
+        entered.resolve()
+        await resume.promise
+    }
+    const contentRemovals = /** @type {string[]} */ ([])
+    opfs.hooks.beforeRemove = (/** @type {string} */ name) => {
+        if (name.startsWith('manabitan-term-content')) { contentRemovals.push(name) }
+    }
+    await content.appendBatch([new Uint8Array([1, 2, 3])])
+    await content.queuePendingImportWrites()
+    await entered.promise
+    const reset = vi.spyOn(content, 'reset')
+    let settled = false
+    const purge = database.purge().finally(() => { settled = true })
+    try {
+        await vi.waitFor(() => expect(reset).toHaveBeenCalledOnce())
+        expect(settled).toBe(false)
+        expect(contentRemovals).toEqual([])
+    } finally {
+        resume.resolve()
+    }
+    await expect(purge).resolves.toBe(true)
+    expect(contentRemovals).toContain('manabitan-term-content.bin')
+    const handle = await opfs.root.getFileHandle('manabitan-term-content.bin')
+    expect((await handle.getFile()).size).toBe(0)
+    expect(await database.getDictionaryInfo()).toEqual([])
 })
