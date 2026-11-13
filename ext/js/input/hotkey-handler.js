@@ -211,6 +211,8 @@ export class HotkeyHandler extends EventDispatcher {
      * @param {KeyboardEvent} event
      */
     _onKeyDown(event) {
+        // IME boundary events can report keyCode 229 after isComposing becomes false.
+        if (event.isComposing || event.keyCode === 229) { return; }
         let hotkeyInfo = this._hotkeys.get(event.code);
         const modifierKeycodes = ['ControlLeft', 'ControlRight', 'ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'];
         if (modifierKeycodes.includes(event.code)) {
