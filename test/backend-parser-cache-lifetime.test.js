@@ -109,6 +109,32 @@ describe('Backend parsed-reading cache lifetime', () => {
         expect(findTerms).toHaveBeenCalledTimes(1);
     });
 
+    test('a stable profile ID with an outdated index cannot contaminate the new occupant', async () => {
+        const {backend} = createParserHarness();
+        const profiles = [
+            {id: 'profile-b', options: {general: {language: 'ja'}}},
+            {id: 'profile-a', options: {general: {language: 'ja'}}},
+        ];
+        Reflect.set(backend, '_getOptionsFull', () => ({profileCurrent: 0, profiles}));
+        Reflect.set(backend, '_getProfileOptions', Backend.prototype._getProfileOptions);
+        Reflect.set(backend, '_getTranslatorFindTermsOptions', (/** @type {unknown} */ _mode, /** @type {unknown} */ _details, /** @type {unknown} */ options) => options);
+        const findTerms = vi.fn(async (/** @type {unknown} */ _mode, /** @type {unknown} */ _text, /** @type {unknown} */ options) => lookupResult(options === profiles[1].options ? 'にほん' : 'にっぽん'));
+        Reflect.set(backend._translator, 'findTerms', findTerms);
+        /**
+         * @param {import('settings').OptionsContext} optionsContext
+         * @returns {Promise<import('api').ParseTextResultItem[]>}
+         */
+        const parse = async (optionsContext) => await backend._onApiParseText({
+            text: '日本', optionsContext, scanLength: 20, useInternalParser: true, useMecabParser: false, useAllFrequencyDictionaries: false,
+        }, {});
+
+        // A retained page still addresses profile A at its former index. The
+        // backend resolves the ID correctly after B moves into that slot.
+        expect(readingOf(await parse({index: 0, profileId: 'profile-a'}))).toBe('にほん');
+        expect(readingOf(await parse({index: 0, profileId: 'profile-b'}))).toBe('にっぽん');
+        expect(readingOf(await parse({index: 0}))).toBe('にっぽん');
+    });
+
     test.each(/** @type {const} */ (['import', 'edit', 'delete', 'purge']))('a dictionary %s invalidates cached readings', async (cause) => {
         const {backend, findTerms, parse} = createParserHarness();
         expect(readingOf(await parse())).toBe('にほん');

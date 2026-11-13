@@ -3365,6 +3365,7 @@ null;
         /** @type {import('translator').FindTermsMode} */
         const mode = 'simple';
         const options = this._getProfileOptions(optionsContext, false);
+        const profileId = typeof optionsContext.index === 'number' ? optionsContext.profileId : void 0;
 
         /** @type {import('api').FindTermsDetails} */
         const details = {matchType: 'exact', deinflect: true};
@@ -3380,7 +3381,7 @@ null;
             const character = String.fromCodePoint(codePoint);
             const substring = text.substring(i, i + scanLength);
             const metadataMode = useAllFrequencyDictionaries === true ? 1 : 0;
-            const cacheKey = `${optionsContext.index}:${metadataMode}:${substring}`;
+            const cacheKey = JSON.stringify([optionsContext.current, optionsContext.index, profileId, metadataMode, substring]);
             let cached = this._textParseCacheGeneration === cacheGeneration ? this._textParseCache.get(cacheKey) : void 0;
             if (typeof cached === 'undefined') {
                 const {dictionaryEntries, originalTextLength} = await this._translator.findTerms(
