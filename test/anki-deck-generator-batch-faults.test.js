@@ -148,6 +148,11 @@ function createDuplicateCollection(atomic = false, beforeAdd) {
             }
         } else {
             response = state.handleRequestBody(request);
+            if (request.action === 'canAddNotes') {
+                // Native Anki validation also rejects an empty first field,
+                // independently of the duplicate-prevention option.
+                response.result = /** @type {boolean[]} */ (response.result).map((canAdd, i) => canAdd && request.params.notes[i].fields.Front !== '');
+            }
         }
         return new Response(JSON.stringify(response.error === null ? response.result : {error: response.error}));
     });
@@ -187,6 +192,84 @@ test.each([false, true])('duplicate prevention handles a note added after prefli
 
     expect(await client.findNotes('')).toHaveLength(1);
     expect(error).not.toHaveBeenCalled();
+});
+
+test.each([false, true])('duplicate preflight reports an empty required field with a valid sibling=%s', async (includeValid) => {
+    const {controller, error} = createController('');
+    const {client} = createDuplicateCollection();
+    const addNotes = vi.spyOn(client, 'addNotes');
+    Reflect.set(controller, '_ankiController', client);
+    const notes = includeValid ? [createNote('猫'), createNote('')] : [createNote('')];
+
+    expect(await AnkiDeckGeneratorController.prototype._sendNotes.call(controller, notes, true)).toBe(false);
+
+    expect(addNotes).not.toHaveBeenCalled();
+    expect(await client.findNotes('')).toEqual([]);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('validation'));
+    expect(notes.every(({options}) => options.allowDuplicate)).toBe(true);
+});
+
+test('confirmed preflight duplicates remain skipped while fresh notes are inserted', async () => {
+    const {controller, error} = createController('');
+    const {client, state} = createDuplicateCollection();
+    state.handleRequestBody({action: 'addNote', params: {note: createNote('猫')}});
+    const canAddNotes = vi.spyOn(client, 'canAddNotes');
+    const addNotes = vi.spyOn(client, 'addNotes');
+    Reflect.set(controller, '_ankiController', client);
+
+    expect(await AnkiDeckGeneratorController.prototype._sendNotes.call(controller, [createNote('猫'), createNote('犬')], true)).toBe(true);
+
+    expect(await client.findNotes('')).toHaveLength(2);
+    expect(addNotes.mock.calls.map(([notes]) => notes.map(({fields}) => fields.Front))).toEqual([['犬']]);
+    expect(canAddNotes.mock.calls.map(([notes]) => notes.map(({options}) => options.allowDuplicate))).toEqual([[false, false], [true]]);
+    expect(error).not.toHaveBeenCalled();
+});
+
+test('a known duplicate cannot hide a separate invalid note during preflight', async () => {
+    const {controller, error} = createController('');
+    const {client, state} = createDuplicateCollection();
+    state.handleRequestBody({action: 'addNote', params: {note: createNote('猫')}});
+    const addNotes = vi.spyOn(client, 'addNotes');
+    Reflect.set(controller, '_ankiController', client);
+
+    expect(await AnkiDeckGeneratorController.prototype._sendNotes.call(controller, [createNote('猫'), createNote(''), createNote('犬')], true)).toBe(false);
+
+    expect(addNotes).not.toHaveBeenCalled();
+    expect(await client.findNotes('')).toHaveLength(1);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('validation'));
+});
+
+test.each(['cancel', 'profile-change'])('%s during preflight classification prevents all writes', async (change) => {
+    const {controller, error} = createController('');
+    const {client, state} = createDuplicateCollection();
+    state.handleRequestBody({action: 'addNote', params: {note: createNote('猫')}});
+    const canAdd = client.canAddNotes.bind(client);
+    const checking = deferred();
+    const pending = /** @type {ReturnType<typeof deferred<boolean[]>>} */ (deferred());
+    let calls = 0;
+    vi.spyOn(client, 'canAddNotes').mockImplementation((notes) => {
+        if (++calls === 2) {
+            checking.resolve(true);
+            return pending.promise;
+        }
+        return canAdd(notes);
+    });
+    const addNotes = vi.spyOn(client, 'addNotes');
+    Reflect.set(controller, '_ankiController', client);
+    const owner = controller._captureViewSnapshot();
+    const operation = AnkiDeckGeneratorController.prototype._sendNotes.call(controller, [createNote('猫'), createNote('犬')], true, owner);
+    await checking.promise;
+    if (change === 'cancel') {
+        controller._cancel = true;
+    } else {
+        const settings = Reflect.get(controller, '_settingsController');
+        Reflect.set(settings, 'profileIndexChangeGeneration', settings.profileIndexChangeGeneration + 1);
+    }
+    pending.resolve([true]);
+
+    expect(await operation).toBe(change === 'cancel');
+    expect(addNotes).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledTimes(change === 'cancel' ? 0 : 1);
 });
 
 test.each([
@@ -407,7 +490,7 @@ test('concurrent confirm clicks start only one batch', async () => {
 });
 
 
-test('cancellation during duplicate detection prevents addNotes', async () => {
+test.each([true, false])('cancellation during duplicate detection prevents further Anki requests (%s)', async (canAdd) => {
     const {controller, timers, sendNotes} = createController('one');
     /** @type {ReturnType<typeof deferred<boolean[]>>} */
     const duplicateResult = deferred();
@@ -421,9 +504,10 @@ test('cancellation during duplicate detection prevents addNotes', async () => {
     await flush();
     expect(canAddNotes).toHaveBeenCalledOnce();
     controller._cancel = true;
-    duplicateResult.resolve([true]);
+    duplicateResult.resolve([canAdd]);
     await operation;
     expect(addNotes).not.toHaveBeenCalled();
+    expect(canAddNotes).toHaveBeenCalledOnce();
     expect(sendNotes).not.toHaveBeenCalled();
     expect(controller._inProgress).toBe(false);
     expect(controller._sendToAnkiButtonConfirmButton.disabled).toBe(false);

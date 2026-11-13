@@ -585,8 +585,24 @@ export class AnkiDeckGeneratorController {
             if (this._cancel) { return true; }
             if (disallowDuplicates) {
                 notes = notes.map((note) => ({...note, options: {...note.options, allowDuplicate: false}}));
-                const duplicateNotes = await this._ankiController.canAddNotes(notes);
-                notes = notes.filter((_, i) => duplicateNotes[i]);
+                const addableNotes = await this._ankiController.canAddNotes(notes);
+                if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                if (this._cancel) { return true; }
+                const rejectedNotes = notes.filter((_, i) => !addableNotes[i]);
+                if (rejectedNotes.length > 0) {
+                    // A failed preflight also covers invalid fields or note
+                    // types. Skip only candidates that allowDuplicate fixes.
+                    const checks = await this._ankiController.canAddNotes(rejectedNotes.map((note) => (
+                        {...note, options: {...note.options, allowDuplicate: true}}
+                    )));
+                    if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
+                    if (this._cancel) { return true; }
+                    if (checks.some((canAdd) => !canAdd)) {
+                        this._updateProgressBarError('Ankiconnect error: Some notes failed validation. Check their required fields, note type, and deck.');
+                        return false;
+                    }
+                }
+                notes = notes.filter((_, i) => addableNotes[i]);
             }
             if (profileOwnership) { this._assertProfileOwnershipCurrent(profileOwnership); }
             if (this._cancel) { return true; }
