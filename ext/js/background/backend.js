@@ -297,6 +297,7 @@ export class Backend {
             ['isAnkiConnected',              this._onApiIsAnkiConnected.bind(this)],
             ['addAnkiNote',                  this._onApiAddAnkiNote.bind(this)],
             ['updateAnkiNote',               this._onApiUpdateAnkiNote.bind(this)],
+            ['getAnkiNotesInfo',             this._onApiGetAnkiNotesInfo.bind(this)],
             ['getAnkiNoteInfo',              this._onApiGetAnkiNoteInfo.bind(this)],
             ['injectAnkiNoteMedia',          this._onApiInjectAnkiNoteMedia.bind(this)],
             ['viewNotes',                    this._onApiViewNotes.bind(this)],
@@ -1461,7 +1462,7 @@ export class Backend {
         if (typeof profileId !== 'string' || profileId.length === 0) {
             throw new Error('Search profile identity is unavailable');
         }
-        return {profileId, options};
+        return {profileId, options, ankiConnectionIdentity: this._anki.connectionIdentity};
     }
 
     /** @type {import('api').ApiHandler<'optionsGetFull'>} */
@@ -1615,13 +1616,21 @@ export class Backend {
     }
 
     /** @type {import('api').ApiHandler<'addAnkiNote'>} */
-    async _onApiAddAnkiNote({note}) {
+    async _onApiAddAnkiNote({note, ankiConnectionIdentity}) {
+        this._anki.assertConnectionIdentity(ankiConnectionIdentity);
         return await this._anki.addNote(note);
     }
 
     /** @type {import('api').ApiHandler<'updateAnkiNote'>} */
-    async _onApiUpdateAnkiNote({noteWithId}) {
+    async _onApiUpdateAnkiNote({noteWithId, ankiConnectionIdentity}) {
+        this._anki.assertConnectionIdentity(ankiConnectionIdentity);
         return await this._anki.updateNoteFields(noteWithId);
+    }
+
+    /** @type {import('api').ApiHandler<'getAnkiNotesInfo'>} */
+    async _onApiGetAnkiNotesInfo({noteIds, ankiConnectionIdentity}) {
+        if (typeof ankiConnectionIdentity !== 'undefined') { this._anki.assertConnectionIdentity(ankiConnectionIdentity); }
+        return await this._anki.notesInfo(noteIds);
     }
 
     /**
@@ -1782,9 +1791,33 @@ export class Backend {
     }
 
     /** @type {import('api').ApiHandler<'injectAnkiNoteMedia'>} */
-    async _onApiInjectAnkiNoteMedia({timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails}) {
-        return await this._injectAnkNoteMedia(
-            this._anki,
+    async _onApiInjectAnkiNoteMedia({timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity, ankiConnectionConfiguration}) {
+        /** @type {AnkiConnect|null} */
+        let configuredAnki = null;
+        if (typeof ankiConnectionConfiguration !== 'undefined') {
+            if (typeof ankiConnectionIdentity !== 'undefined') { throw new Error('Anki media cannot use two destinations'); }
+            // Batch generation can edit a different profile from the default.
+            // Its media must use the same captured client configuration as its notes.
+            configuredAnki = new AnkiConnect();
+            configuredAnki.server = ankiConnectionConfiguration.server;
+            configuredAnki.enabled = ankiConnectionConfiguration.enabled;
+            configuredAnki.apiKey = ankiConnectionConfiguration.apiKey;
+        }
+        const getConnection = () => configuredAnki ?? this._anki;
+        const identity = ankiConnectionIdentity ?? getConnection().connectionIdentity;
+        getConnection().assertConnectionIdentity(identity);
+        // Media acquisition can outlive a profile change. Each delayed write
+        // must still belong to the connection that accepted this operation.
+        /** @type {Pick<AnkiConnect, 'storeMediaFile'>} */
+        const mediaClient = {
+            storeMediaFile: (fileName, content) => {
+                const connection = getConnection();
+                connection.assertConnectionIdentity(identity);
+                return connection.storeMediaFile(fileName, content);
+            },
+        };
+        const result = await this._injectAnkNoteMedia(
+            mediaClient,
             timestamp,
             definitionDetails,
             audioDetails,
@@ -1792,6 +1825,8 @@ export class Backend {
             clipboardDetails,
             dictionaryMediaDetails,
         );
+        getConnection().assertConnectionIdentity(identity);
+        return result;
     }
 
     /** @type {import('api').ApiHandler<'viewNotes'>} */
@@ -1813,8 +1848,10 @@ export class Backend {
     }
 
     /** @type {import('api').ApiHandler<'suspendAnkiCardsForNote'>} */
-    async _onApiSuspendAnkiCardsForNote({noteId}) {
+    async _onApiSuspendAnkiCardsForNote({noteId, ankiConnectionIdentity}) {
+        this._anki.assertConnectionIdentity(ankiConnectionIdentity);
         const cardIds = await this._anki.findCardsForNote(noteId);
+        this._anki.assertConnectionIdentity(ankiConnectionIdentity);
         const count = cardIds.length;
         if (count > 0) {
             const okay = await this._anki.suspendCards(cardIds);
@@ -2631,8 +2668,9 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
     }
 
     /** @type {import('api').ApiHandler<'forceSync'>} */
-    async _onApiForceSync() {
+    async _onApiForceSync({ankiConnectionIdentity}) {
         try {
+            this._anki.assertConnectionIdentity(ankiConnectionIdentity);
             await this._anki.makeAnkiSync();
         } catch (e) {
             log.error(e);
@@ -3614,7 +3652,7 @@ null;
                 }
                 if (action === 'setDictionarySelector') {
                     const {selector, expectedValue, value} = target;
-                    if (selector !== 'mainDictionary' && selector !== 'sortFrequencyDictionary') { throw new Error('Invalid dictionary selector'); }
+                    if (selector !== 'mainDictionary' && selector !== 'sortFrequencyDictionary' && selector !== 'popupBlurByFrequencyDictionary') { throw new Error('Invalid dictionary selector'); }
                     if (typeof target.requireDictionaryUninstalled === 'string' && installedDictionaryNames?.has(target.requireDictionaryUninstalled)) { return false; }
                     if (!isObjectNotArray(profile.options.general)) { throw new Error('Invalid profile general settings'); }
                     if (profile.options.general[selector] !== expectedValue) { return false; }
@@ -4434,7 +4472,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @param {import('api').InjectAnkiNoteMediaDefinitionDetails} definitionDetails
      * @param {?import('api').InjectAnkiNoteMediaAudioDetails} audioDetails
@@ -4506,7 +4544,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @param {import('api').InjectAnkiNoteMediaDefinitionDetails} definitionDetails
      * @param {import('api').InjectAnkiNoteMediaAudioDetails} details
@@ -4546,7 +4584,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @param {import('api').InjectAnkiNoteMediaScreenshotDetails} details
      * @returns {Promise<?string>}
@@ -4569,7 +4607,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @returns {Promise<?string>}
      */
@@ -4600,7 +4638,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @param {import('api').InjectAnkiNoteMediaDictionaryMediaDetails[]} dictionaryMediaDetails
      * @returns {Promise<{results: import('api').InjectAnkiNoteDictionaryMediaResult[], errors: unknown[]}>}
@@ -5321,7 +5359,6 @@ null;
         // deleting the source preferences. Leave them for explicit resolution.
         const ambiguousReplacementNames = new Set([...replacements].filter(([, candidates]) => candidates.length !== 1).map(([name]) => name));
         const retainDictionaryName = (/** @type {string} */ name) => installedDictionaryNames.has(name) || ambiguousReplacementNames.has(name);
-        let recoveredSettings = false;
 
         /** @type {string[]} */
         const removedDictionaryNames = [];
@@ -5347,7 +5384,7 @@ null;
                     name: replacement.title,
                     styles: replacement.styles,
                 }, installedDictionaryNames) === true || profileChanged;
-                for (const selector of /** @type {const} */ (['mainDictionary', 'sortFrequencyDictionary'])) {
+                for (const selector of /** @type {const} */ (['mainDictionary', 'sortFrequencyDictionary', 'popupBlurByFrequencyDictionary'])) {
                     profileChanged = this._modifySetting({
                         action: 'setDictionarySelector',
                         scope: 'global',
@@ -5359,7 +5396,6 @@ null;
                     }, installedDictionaryNames) === true || profileChanged;
                 }
             }
-            recoveredSettings ||= profileChanged;
             const dictionaries = profile.options.dictionaries;
             const nextDictionaries = dictionaries.filter((dictionary) => retainDictionaryName(dictionary.name));
             if (nextDictionaries.length !== dictionaries.length) {
@@ -5390,6 +5426,12 @@ null;
                 }
             }
 
+            const blurDictionary = profile.options.general.popupBlurByFrequencyDictionary;
+            if (typeof blurDictionary === 'string' && !retainDictionaryName(blurDictionary)) {
+                profile.options.general.popupBlurByFrequencyDictionary = null;
+                profileChanged = true;
+            }
+
             if (profileChanged) {
                 affectedProfiles += 1;
             }
@@ -5407,7 +5449,7 @@ null;
             sortFrequencyDictionaryResets,
         };
 
-        if (!recoveredSettings && removedDictionaryNames.length === 0 && mainDictionaryResets === 0 && sortFrequencyDictionaryResets === 0) {
+        if (affectedProfiles === 0) {
             reportDiagnostics('dictionary-options-prune-startup-summary', summary);
             return summary;
         }

@@ -85,6 +85,8 @@ export class Display extends EventDispatcher {
         this._options = null;
         /** @type {?string} */
         this._optionsProfileId = null;
+        /** @type {?string} */
+        this._ankiConnectionIdentity = null;
         /** @type {number} */
         this._index = 0;
         /** @type {?HTMLStyleElement} */
@@ -478,6 +480,11 @@ export class Display extends EventDispatcher {
         return this._optionsProfileId;
     }
 
+    /** @returns {?string} The Anki destination of the currently applied options. */
+    getAnkiConnectionIdentity() {
+        return this._ankiConnectionIdentity;
+    }
+
     /**
      * @returns {import('language').LanguageSummary}
      * @throws {Error}
@@ -520,13 +527,14 @@ export class Display extends EventDispatcher {
      * @param {object} request
      */
     async _updateOptionsInner(optionsContext, request) {
-        const {profileId, options} = await this._application.api.optionsGetProfile(optionsContext);
+        const {profileId, options, ankiConnectionIdentity} = await this._application.api.optionsGetProfile(optionsContext);
         if (this._optionsContextRequest !== request) { return; }
         if (typeof profileId !== 'string' || profileId.length === 0) {
             throw new Error('Search profile identity is unavailable');
         }
         const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
         this._optionsProfileId = profileId;
+        this._ankiConnectionIdentity = typeof ankiConnectionIdentity === 'string' ? ankiConnectionIdentity : null;
         this._options = options;
         this._dictionaryCssMediaResolver.prune(options.dictionaries);
 
