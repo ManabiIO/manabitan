@@ -1107,6 +1107,13 @@ export class TermRecordOpfsStore {
      */
     async createImportCheckpoint() {
         await this._closeAllWritables();
+        // Retired files cannot become part of a later import's committed
+        // checkpoint or be rediscovered under its reused dictionary title.
+        // Retry before journal ownership, when deleting orphan bytes cannot
+        // invalidate an accepted rollback target.
+        for (const dictionaryName of this._pendingDictionaryDeletionNames) {
+            await this.deleteByDictionary(dictionaryName);
+        }
         if (this._recordsDirectoryHandle === null) { return {shards: []}; }
         const shards = [];
         for (const fileName of await this._listTermRecordStorageFileNames()) {
@@ -4953,23 +4960,19 @@ export class TermRecordOpfsStore {
                 .flatMap((name) => actualFileNamesByDictionary.get(name) ?? [])
                 .sort();
             let removedOrphanShardCount = 0;
-            for (const fileName of orphanShardFileNames) {
+            for (const dictionaryName of orphanDictionaryNames) {
                 try {
-                    await this._removeStorageFileOrTruncate(fileName, true);
-                    await this._removeStorageFileOrTruncate(`${fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, true);
+                    // A failed deletion must still retire every codec shard
+                    // for this identity. A later import may use another codec.
+                    await this._deleteShardByDictionary(dictionaryName);
                 } catch (error) {
                     reportDiagnostics('term-record-orphan-shard-cleanup-failed', {
-                        fileName,
+                        dictionaryName,
                         error: error instanceof Error ? error.message : String(error),
                     });
                     continue;
                 }
-                const state = this._shardStateByFileName.get(fileName);
-                if (typeof state !== 'undefined') {
-                    this._activeAppendShardStateByKey.delete(state.logicalKey);
-                }
-                this._shardStateByFileName.delete(fileName);
-                ++removedOrphanShardCount;
+                removedOrphanShardCount += actualFileNamesByDictionary.get(dictionaryName)?.length ?? 0;
             }
             const summary = {
                 expectedShardCount: expectedNames?.size ?? 0,

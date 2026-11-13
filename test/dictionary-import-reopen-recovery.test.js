@@ -2,10 +2,14 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
+import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js'
 import {afterEach, beforeAll, expect, test, vi} from 'vitest'
 import {deferPromise} from '../ext/js/core/utilities.js'
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js'
+import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js'
+import {encodeRawTermContentBinary, RAW_TERM_CONTENT_DICT_NAME} from '../ext/js/dictionary/raw-term-content.js'
 import {deleteOpfsDatabaseFiles, getSqlite3, openOpfsDatabase} from '../ext/js/dictionary/sqlite-wasm.js'
+import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js'
 
 vi.mock('../ext/js/dictionary/sqlite-wasm.js', async (original) => ({
     ...(await original()),
@@ -22,7 +26,7 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', async (original) => ({
  * @typedef {object} RecoveryTestOpfs
  * @property {FileSystemDirectoryHandle} root
  * @property {() => Promise<void>} dispose
- * @property {{beforeRemove: ((name: string) => void)|null, beforeWrite: ((name: string) => void|Promise<void>)|null}} hooks
+ * @property {{beforeRemove: ((name: string) => void)|null, beforeWrite: ((name: string) => void|Promise<void>)|null, beforeTruncate: ((name: string) => void)|null}} hooks
  */
 /** @type {import('@sqlite.org/sqlite-wasm').Sqlite3Static} */
 let sqlite3
@@ -43,10 +47,15 @@ afterEach(async () => {
  * Persist a real term container and content payload without loading a compressor.
  * @param {DictionaryDatabase} database
  * @param {string} dictionary
+ * @param {string} [contentDictName='raw']
  * @returns {Promise<void>}
  */
-async function appendTerm(database, dictionary) {
-    const bytes = new TextEncoder().encode(JSON.stringify({rules: '', definitionTags: '', termTags: '', glossary: [`${dictionary} definition`]}))
+async function appendTerm(database, dictionary, contentDictName = 'raw') {
+    const encoder = new TextEncoder()
+    const glossary = [`${dictionary} definition`]
+    const bytes = contentDictName === RAW_TERM_CONTENT_DICT_NAME ?
+        encodeRawTermContentBinary('', '', '', encoder.encode(JSON.stringify(glossary)), encoder) :
+        encoder.encode(JSON.stringify({rules: '', definitionTags: '', termTags: '', glossary}))
     const [span] = await database._termContentStore.appendBatch([bytes])
     await database._termRecordStore.appendBatch([{
         dictionary,
@@ -56,13 +65,17 @@ async function appendTerm(database, dictionary) {
         readingReverse: null,
         entryContentOffset: span.offset,
         entryContentLength: span.length,
-        entryContentDictName: 'raw',
+        entryContentDictName: contentDictName,
         score: 0,
         sequence: 1,
     }])
 }
 
-async function fixture() {
+/**
+ * @param {string} [contentDictName='raw']
+ * @returns {Promise<{database: DictionaryDatabase, opfs: RecoveryTestOpfs, bytes: Uint8Array, persistedContent: Uint8Array}>}
+ */
+async function fixture(contentDictName = 'raw') {
     const adapterUrl = new URL('fixtures/import-journal-snapshot/node-opfs-adapter.mjs', import.meta.url)
     // eslint-disable-next-line no-unsanitized/method -- Fixed repository fixture URL; no external input.
     const {createNodeOpfs} = /** @type {{createNodeOpfs: (options: {terminalWriteErrors: boolean}) => Promise<RecoveryTestOpfs>}} */ (await import(adapterUrl.href))
@@ -101,7 +114,7 @@ async function fixture() {
         contentLength: span.length,
     }])
     await database._termRecordStore.beginImportSession()
-    await appendTerm(database, 'Survivor')
+    await appendTerm(database, 'Survivor', contentDictName)
     await database._termRecordStore.endImportSession()
     await database._termContentStore.ensureLoadedForRead()
     database._requireDb().exec("UPDATE dictionaries SET summaryJson = json_set(summaryJson, '$.counts.terms.total', 1) WHERE title = 'Survivor'")
@@ -109,6 +122,70 @@ async function fixture() {
     const persistedContent = new Uint8Array(await (await contentHandle.getFile()).arrayBuffer())
     return {database, opfs, bytes, persistedContent}
 }
+
+test.each([
+    {newWorker: false, blockedRetry: false},
+    {newWorker: true, blockedRetry: false},
+    {newWorker: false, blockedRetry: true},
+    {newWorker: true, blockedRetry: true},
+])('failed orphan cleanup cannot attach deleted terms to a new import; new worker=$newWorker, blocked retry=$blockedRetry', async ({newWorker, blockedRetry}) => {
+    // Packed-artifact imports can use raw-v2 while ordinary source ZIPs use
+    // raw JSON. Distinct codec shard names must not bypass retired ownership.
+    const {database, opfs} = await fixture(RAW_TERM_CONTENT_DICT_NAME)
+    await database.bulkAdd('dictionaries', [{title: 'Keeper', version: 3, importSuccess: true, revision: '1', sequenced: false, importDate: 1, prefixWildcardsSupported: true, styles: ''}], 0, 1)
+    await database._termRecordStore.beginImportSession()
+    await appendTerm(database, 'Keeper')
+    await database._termRecordStore.endImportSession()
+    await database._termContentStore.ensureLoadedForRead()
+    database._requireDb().exec("UPDATE dictionaries SET summaryJson = json_set(summaryJson, '$.counts.terms.total', 1) WHERE title = 'Keeper'")
+    const shard = database._termRecordStore._getShardFileName('Survivor', RAW_TERM_CONTENT_DICT_NAME)
+    const failCleanup = (/** @type {string} */ name) => {
+        if (name === shard || name === `${shard}.mbti`) { throw new DOMException('Temporarily locked', 'NoModificationAllowedError') }
+    }
+    opfs.hooks.beforeRemove = failCleanup
+    opfs.hooks.beforeTruncate = failCleanup
+    await database.deleteDictionary('Survivor', 1000, () => {})
+    await database.close()
+
+    const recovered = newWorker ? new DictionaryDatabase() : database
+    await recovered.prepare()
+    expect(await recovered.getDictionaryInfo()).toMatchObject([{title: 'Keeper'}])
+
+    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0})
+    await writer.add('index.json', new TextReader(JSON.stringify({title: 'Survivor', revision: '2', format: 3})))
+    await writer.add('term_bank_1.json', new TextReader(JSON.stringify([['Fresh', 'Fresh', '', '', 0, ['Fresh definition'], 1, '']])))
+    const archive = new Uint8Array(await writer.close()).buffer
+    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+    const details = /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false, termContentStorageMode: 'raw-bytes'})
+    const publishJournal = vi.spyOn(recovered._importJournal, 'write')
+    if (blockedRetry) {
+        const blocked = await importer.importDictionary(recovered, archive, details)
+        expect(blocked.result).toBeNull()
+        expect(blocked.errors.length).toBeGreaterThan(0)
+        // Retirement must finish before another journal can claim these files.
+        expect(publishJournal).not.toHaveBeenCalled()
+        expect(await recovered._importJournal.read()).toBeNull()
+        expect(recovered.isPrepared()).toBe(true)
+        expect(await recovered.getDictionaryInfo()).toMatchObject([{title: 'Keeper'}])
+        expect(await recovered.findTermsBulk(['Keeper'], new Set(['Keeper']), 'exact')).toMatchObject([{dictionary: 'Keeper', definitions: ['Keeper definition']}])
+    }
+    opfs.hooks.beforeRemove = null
+    opfs.hooks.beforeTruncate = null
+    const result = await importer.importDictionary(recovered, archive, details)
+    expect(result.errors).toEqual([])
+    expect(result.result).toMatchObject({title: 'Survivor', importSuccess: true, counts: {terms: {total: 1}}})
+    expect(publishJournal).toHaveBeenCalledOnce()
+    expect(publishJournal.mock.calls[0][0].recordCheckpoint.shards.some(({fileName}) => fileName === shard || fileName === `${shard}.mbti`)).toBe(false)
+    expect(await recovered.findTermsBulk(['Survivor'], new Set(['Survivor']), 'exact')).toEqual([])
+    expect(await recovered.findTermsBulk(['Fresh'], new Set(['Survivor']), 'exact')).toMatchObject([{dictionary: 'Survivor', definitions: ['Fresh definition']}])
+    expect(await recovered.findTermsBulk(['Keeper'], new Set(['Keeper']), 'exact')).toMatchObject([{dictionary: 'Keeper', definitions: ['Keeper definition']}])
+    await recovered.close()
+    const reopened = new DictionaryDatabase()
+    await reopened.prepare()
+    expect(await reopened.findTermsBulk(['Survivor'], new Set(['Survivor']), 'exact')).toEqual([])
+    expect(await reopened.findTermsBulk(['Fresh'], new Set(['Survivor']), 'exact')).toMatchObject([{dictionary: 'Survivor', definitions: ['Fresh definition']}])
+    expect(await reopened.findTermsBulk(['Keeper'], new Set(['Keeper']), 'exact')).toMatchObject([{dictionary: 'Keeper', definitions: ['Keeper definition']}])
+})
 
 test.each([false, true])('an interrupted import rollback can recover through real prepare; new worker=%s', async (newWorker) => {
     const {database, opfs, bytes} = await fixture()
