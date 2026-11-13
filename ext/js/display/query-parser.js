@@ -482,9 +482,10 @@ export class QueryParser extends EventDispatcher {
         if (textSource.type === 'range') {
             const {range} = textSource;
             let {startContainer, startOffset} = range;
-            if (startContainer.nodeType === Node.ELEMENT_NODE) {
-                // Element offsets count child nodes. Resolve the first scanned
-                // character, skipping ruby readings as the actual lookup does.
+            if (startContainer.nodeType === Node.ELEMENT_NODE || (startContainer.nodeType === Node.TEXT_NODE && startOffset === startContainer.nodeValue?.length)) {
+                // Resolve child-node and consumed-text boundaries to the next
+                // scanned character, crossing condensed source whitespace and
+                // skipping ruby readings as the actual lookup does.
                 const scanner = new DOMTextScanner(startContainer, startOffset, true, false).seek(1);
                 if (scanner.content.length === 0) { return null; }
                 startContainer = scanner.node;

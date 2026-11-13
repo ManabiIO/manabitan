@@ -123,6 +123,35 @@ test.for([
     expect(source.range.startOffset).toBe(childOffset);
 });
 
+test.for(['猫   犬', '猫\n\n\n犬', '𠮷   犬'])('text-end carets skip condensed source whitespace: %s', async (text, {window}) => {
+    const parser = await createParser(window, text);
+    const node = parser._queryParser.querySelector('.query-parser-term')?.lastChild;
+    if (!(node instanceof window.Text)) { throw new Error('Expected a plain-text parser segment'); }
+    const range = window.document.createRange();
+    range.setStart(node, node.length);
+    range.collapse(true);
+    const source = TextSourceRange.create(range);
+
+    expect(source.setEndOffset(1, false, false)).toBe(1);
+    expect(source.text()).toBe('犬');
+    expect(navigateSource(parser, text, '犬', source).offset).toBe(String(text.indexOf('犬')));
+    expect(source.range.startContainer).toBe(node);
+    expect(source.range.startOffset).toBe(node.length);
+});
+
+test('a text-end caret with no following content has no source offset', async ({window}) => {
+    const parser = await createParser(window, '猫');
+    const node = parser._queryParser.querySelector('.query-parser-term')?.lastChild;
+    if (!(node instanceof window.Text)) { throw new Error('Expected a plain-text parser segment'); }
+    const range = window.document.createRange();
+    range.setStart(node, node.length);
+    range.collapse(true);
+
+    expect(parser._getSentenceOffset(TextSourceRange.create(range))).toBeNull();
+    expect(range.startContainer).toBe(node);
+    expect(range.startOffset).toBe(node.length);
+});
+
 test('plain kana following ruby retains its source offset in full-query navigation', async ({window}) => {
     const text = '食べる 犬';
     const parser = await createParser(window, text);
