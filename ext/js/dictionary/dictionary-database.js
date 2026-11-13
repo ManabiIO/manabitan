@@ -1995,7 +1995,7 @@ export class DictionaryDatabase {
             }
             db.exec('COMMIT');
         } catch (e) {
-            try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+            this._rollbackDictionaryDeletion(db, e);
             throw e;
         }
 
@@ -2351,7 +2351,7 @@ null;
                 db.exec('DELETE FROM sharedGlossaryArtifacts');
                 db.exec('COMMIT');
             } catch (e) {
-                try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+                this._rollbackDictionaryDeletion(db, e);
                 throw e;
             }
             // Commit metadata removal before resetting OPFS. An interruption
@@ -2371,8 +2371,25 @@ null;
             `);
             db.exec('COMMIT');
         } catch (e) {
-            try { db.exec('ROLLBACK'); } catch (_) { /* NOP */ }
+            this._rollbackDictionaryDeletion(db, e);
             throw e;
+        }
+    }
+
+    /**
+     * @param {import('@sqlite.org/sqlite-wasm').Database} db
+     * @param {unknown} error
+     * @throws {AggregateError} If the failed transaction cannot be rolled back.
+     */
+    _rollbackDictionaryDeletion(db, error) {
+        try {
+            db.exec('ROLLBACK');
+        } catch (rollbackError) {
+            // A failed rollback can leave uncommitted metadata visible and keep
+            // the next mutation inside this transaction. Reopen before reuse.
+            const errors = [toError(error), toError(rollbackError)];
+            this._quarantineBulkImportConnection(errors);
+            throw new AggregateError(errors, 'Dictionary deletion and rollback failed');
         }
     }
 
