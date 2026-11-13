@@ -165,6 +165,46 @@ test('export uses generated note metadata when selection changes during generati
     await expect(blob.text()).resolves.toContain('Basic\tJapanese\t');
 });
 
+test('export escapes quoted fields and delimiter-containing metadata for Anki text import', async () => {
+    const {controller, timers, saveBlob, generateNoteData} = createController('one');
+    Reflect.set(controller, '_fieldsToTSV', AnkiDeckGeneratorController.prototype._fieldsToTSV);
+    generateNoteData.mockResolvedValueOnce({
+        modelName: '"Basic"',
+        deckName: 'Japanese\tReading',
+        tags: ['"quoted"', 'normal'],
+        fields: {
+            Front: '"quoted"',
+            Back: '<span title="reading">字</span>',
+        },
+    });
+
+    await controller._onExportConfirm(createEvent());
+    await timers[0]();
+
+    const blob = /** @type {Blob} */ (saveBlob.mock.calls[0][0]);
+    await expect(blob.text()).resolves.toBe(
+        '#separator:tab\n#html:true\n#notetype column:1\n#deck column:2\n#tags column:3\n' +
+        '"""Basic"""\t"Japanese\tReading"\t"""quoted"" normal"\t"""quoted"""\t"<span title=""reading"">字</span>"\t\n',
+    );
+});
+
+test('export escapes comment-like note type names and retains normal field whitespace handling', async () => {
+    const {controller, timers, saveBlob, generateNoteData} = createController('one');
+    Reflect.set(controller, '_fieldsToTSV', AnkiDeckGeneratorController.prototype._fieldsToTSV);
+    generateNoteData.mockResolvedValueOnce({
+        modelName: '#Basic',
+        deckName: 'Japanese',
+        tags: [],
+        fields: {Front: 'one\ttwo\r\nthree'},
+    });
+
+    await controller._onExportConfirm(createEvent());
+    await timers[0]();
+
+    const blob = /** @type {Blob} */ (saveBlob.mock.calls[0][0]);
+    await expect(blob.text()).resolves.toContain('"#Basic"\tJapanese\t\tone&nbsp;&nbsp;&nbsp;twothree\t\n');
+});
+
 
 test('send cancellation during note generation prevents any Anki request', async () => {
     const {controller, timers, sendNotes, generateNoteData} = createController('one');

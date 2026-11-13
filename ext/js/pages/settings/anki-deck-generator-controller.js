@@ -459,9 +459,9 @@ export class AnkiDeckGeneratorController {
                         if (noteData !== null) {
                             const fieldsTSV = this._fieldsToTSV(noteData.fields);
                             if (fieldsTSV) {
-                                ankiTSV += noteData.modelName + '\t';
-                                ankiTSV += noteData.deckName + '\t';
-                                ankiTSV += noteData.tags.join(' ') + '\t';
+                                ankiTSV += this._escapeTSVField(noteData.modelName) + '\t';
+                                ankiTSV += this._escapeTSVField(noteData.deckName) + '\t';
+                                ankiTSV += this._escapeTSVField(noteData.tags.join(' ')) + '\t';
                                 ankiTSV += fieldsTSV;
                                 ankiTSV += '\n';
                             }
@@ -939,10 +939,22 @@ export class AnkiDeckGeneratorController {
         let tsv = '';
         for (const key in noteFields) {
             if (Object.prototype.hasOwnProperty.call(noteFields, key)) {
-                tsv += noteFields[key].replaceAll('\t', '&nbsp;&nbsp;&nbsp;').replaceAll('\n', '').replaceAll('\r', '') + '\t';
+                const value = noteFields[key].replaceAll('\t', '&nbsp;&nbsp;&nbsp;').replaceAll('\n', '').replaceAll('\r', '');
+                tsv += this._escapeTSVField(value) + '\t';
             }
         }
         return tsv;
+    }
+
+    /**
+     * Anki text imports use CSV quoting even with a tab separator. Quote fields
+     * containing delimiters or quotes, and keep a note type beginning with #
+     * from turning the exported row into a comment.
+     * @param {string} value
+     * @returns {string}
+     */
+    _escapeTSVField(value) {
+        return /^[#]|["\t\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
     }
 
     /**
