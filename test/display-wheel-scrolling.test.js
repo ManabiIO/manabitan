@@ -15,14 +15,16 @@ test.for([
     {deltaX: 0, deltaY: 0, direction: null},
     {deltaX: 0, deltaY: 40, direction: 1},
     {deltaX: 0, deltaY: -40, direction: -1},
-])('reduced-motion wheel paging uses vertical movement: %j', ({deltaX, deltaY, direction}, {window}) => {
+    {deltaX: 0, deltaY: 40, direction: null, ctrlKey: true},
+    {deltaX: 0, deltaY: -40, direction: null, ctrlKey: true},
+])('reduced-motion wheel paging uses vertical scrolling: %j', ({deltaX, deltaY, direction, ctrlKey = false}, {window}) => {
     const scroll = vi.fn();
     const display = /** @type {Display} */ (Object.assign(Object.create(Display.prototype), {
         _options: {scanning: {reducedMotionScrolling: true, reducedMotionScrollingScale: 0.8}},
         _scrollByPopupHeight: scroll,
     }));
     window.document.body.addEventListener('wheel', (event) => display._onWheel(event));
-    const event = new window.WheelEvent('wheel', {deltaX, deltaY, cancelable: true});
+    const event = new window.WheelEvent('wheel', {deltaX, deltaY, ctrlKey, cancelable: true});
     window.document.body.dispatchEvent(event);
 
     if (direction === null) {
