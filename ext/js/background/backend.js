@@ -356,8 +356,8 @@ export class Backend {
         ]);
         /* eslint-enable @stylistic/no-multi-spaces */
 
-        /** @type {Map<string, (params?: import('core').SerializableObject) => void>} */
-        this._commandHandlers = new Map(/** @type {[name: string, handler: (params?: import('core').SerializableObject) => void][]} */ ([
+        /** @type {Map<string, (params?: import('core').SerializableObject) => Promise<void>>} */
+        this._commandHandlers = new Map(/** @type {[name: string, handler: (params?: import('core').SerializableObject) => Promise<void>][]} */ ([
             ['toggleTextScanning', this._onCommandToggleTextScanning.bind(this)],
             ['openInfoPage', this._onCommandOpenInfoPage.bind(this)],
             ['openSettingsPage', this._onCommandOpenSettingsPage.bind(this)],
@@ -2805,16 +2805,18 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
      * @returns {Promise<void>}
      */
     async _onCommandToggleTextScanning() {
-        const options = this._getProfileOptions({current: true}, false);
-        /** @type {import('settings-modifications').ScopedModificationSet} */
-        const modification = {
-            action: 'set',
-            path: 'general.enable',
-            value: !options.general.enable,
-            scope: 'profile',
-            optionsContext: {current: true},
-        };
-        await this._modifySettings([modification], 'backend');
+        const {id: profileId} = this._getProfile({current: true}, false);
+        if (typeof profileId !== 'string' || profileId.length === 0) { throw new Error('Invalid profile ID'); }
+        await this._runOptionsMutation(async () => {
+            // Bind the command to its accepted profile, but toggle its latest
+            // committed value inside the queue so rapid commands compose.
+            const options = clone(this._getOptionsFull(false));
+            const matches = options.profiles.filter((profile) => profile.id === profileId);
+            if (matches.length !== 1) { throw new Error('Profile identity changed; reload settings and try again'); }
+            const profile = matches[0];
+            profile.options.general.enable = !profile.options.general.enable;
+            await this._saveOptions('backend', options);
+        });
     }
 
     /**
@@ -3350,7 +3352,7 @@ null;
         const handler = this._commandHandlers.get(command);
         if (typeof handler !== 'function') { return false; }
 
-        handler(params);
+        void handler(params).catch((error) => { log.error(error); });
         return true;
     }
 
