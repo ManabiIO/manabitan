@@ -570,30 +570,38 @@ export class TermContentOpfsStore {
             const root = await navigator.storage.getDirectory();
             /** @type {Error[]} */
             const resetErrors = [];
-            for (const state of await this._loadSegmentStates(root, true)) {
-                try {
-                    await root.removeEntry(state.fileName);
-                    continue;
-                } catch (removeError) {
+            const states = await this._loadSegmentStates(root, true);
+            let retainPrefix = false;
+            // Remove only a suffix. Once unlink falls back to truncation, keep
+            // every earlier segment so success, failure and interruption all
+            // leave a contiguous inventory which a fresh worker can reopen.
+            for (let index = states.length - 1; index >= 0; --index) {
+                const state = states[index];
+                /** @type {Error[]} */
+                const errors = [];
+                if (!retainPrefix) {
                     try {
-                        const writable = await state.fileHandle.createWritable({keepExistingData: true});
-                        try {
-                            await writable.truncate(0);
-                        } finally {
-                            await writable.close();
-                        }
-                        if ((await state.fileHandle.getFile()).size > 0) {
-                            throw new Error(`Failed to truncate term-content reset segment ${state.fileName}`);
-                        }
-                    } catch (truncateError) {
-                        resetErrors.push(new AggregateError(
-                            [
-                                removeError instanceof Error ? removeError : new Error(String(removeError)),
-                                truncateError instanceof Error ? truncateError : new Error(String(truncateError)),
-                            ],
-                            `Failed to remove or truncate term-content reset segment ${state.fileName}`,
-                        ));
+                        await root.removeEntry(state.fileName);
+                        continue;
+                    } catch (removeError) {
+                        errors.push(removeError instanceof Error ? removeError : new Error(String(removeError)));
+                        retainPrefix = true;
                     }
+                }
+                try {
+                    const writable = await state.fileHandle.createWritable({keepExistingData: true});
+                    try {
+                        await writable.truncate(0);
+                    } finally {
+                        await writable.close();
+                    }
+                    if ((await state.fileHandle.getFile()).size > 0) {
+                        throw new Error(`Failed to truncate term-content reset segment ${state.fileName}`);
+                    }
+                } catch (truncateError) {
+                    errors.push(truncateError instanceof Error ? truncateError : new Error(String(truncateError)));
+                    resetErrors.push(new AggregateError(errors, `Failed to reset term-content segment ${state.fileName}`));
+                    break;
                 }
             }
             if (resetErrors.length > 0) {
