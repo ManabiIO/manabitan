@@ -369,6 +369,8 @@ export class Backend {
         this._yomitanApi = new YomitanApi(this._apiMap, this._offscreen);
         /** @type {CacheMap<string, {originalTextLength: number, textSegments: import('api').ParseTextSegment[]}>} */
         this._textParseCache = new CacheMap(10000, 3600000); // 1 hour idle time, ~32MB per 1000 entries for Japanese
+        /** @type {number} */
+        this._textParseCacheGeneration = 0;
         /** @type {Record<string, unknown>|null} */
         this._startupDiagnosticsSnapshot = null;
         /** @type {boolean} */
@@ -1576,6 +1578,10 @@ export class Backend {
 
     /** @type {import('api').ApiHandler<'parseText'>} */
     async _onApiParseText({text, optionsContext, scanLength, useInternalParser, useMecabParser, useAllFrequencyDictionaries}) {
+        if (useInternalParser) {
+            await this._awaitDictionaryMutationSettled();
+            await this._awaitDictionaryRefreshSettled();
+        }
         /** @type {import('api').ParseTextResultItem[]} */
         const results = [];
 
@@ -1989,6 +1995,7 @@ export class Backend {
      * @returns {Promise<void>}
      */
     async _refreshDictionaryDatabaseAfterCommittedMutation(cause) {
+        this._clearTextParseCache();
         try {
             await this._refreshDictionaryDatabaseAfterUpdate();
         } catch (error) {
@@ -3174,7 +3181,7 @@ null;
 
         void this._accessibilityController.update(this._getOptionsFull(false));
 
-        this._textParseCache.clear();
+        this._clearTextParseCache();
         void this._translator.clearDatabaseCaches();
 
         this._sendMessageAllTabsIgnoreResponse({action: 'applicationOptionsUpdated', params: {source}});
@@ -3353,6 +3360,7 @@ null;
      */
     async _textParseScanning(text, scanLength, optionsContext, useAllFrequencyDictionaries) {
         await this._ensureDictionaryDatabaseReady();
+        const cacheGeneration = this._textParseCacheGeneration;
         /** @type {import('translator').FindTermsMode} */
         const mode = 'simple';
         const options = this._getProfileOptions(optionsContext, false);
@@ -3372,7 +3380,7 @@ null;
             const substring = text.substring(i, i + scanLength);
             const metadataMode = useAllFrequencyDictionaries === true ? 1 : 0;
             const cacheKey = `${optionsContext.index}:${metadataMode}:${substring}`;
-            let cached = this._textParseCache.get(cacheKey);
+            let cached = this._textParseCacheGeneration === cacheGeneration ? this._textParseCache.get(cacheKey) : void 0;
             if (typeof cached === 'undefined') {
                 const {dictionaryEntries, originalTextLength} = await this._translator.findTerms(
                     mode,
@@ -3419,7 +3427,9 @@ null;
                     }
                 }
                 cached = {originalTextLength, textSegments};
-                if (typeof optionsContext.index !== 'undefined') { this._textParseCache.set(cacheKey, cached); }
+                if (typeof optionsContext.index !== 'undefined' && this._textParseCacheGeneration === cacheGeneration) {
+                    this._textParseCache.set(cacheKey, cached);
+                }
             }
             const {originalTextLength, textSegments} = cached;
             if (textSegments.length > 0) {
@@ -3437,6 +3447,12 @@ null;
             }
         }
         return results;
+    }
+
+    /** Clears parsed readings without allowing older lookups to repopulate them. */
+    _clearTextParseCache() {
+        this._textParseCache?.clear();
+        this._textParseCacheGeneration = (this._textParseCacheGeneration ?? 0) + 1;
     }
 
     /**
@@ -4750,6 +4766,7 @@ null;
      * @param {import('backend').DatabaseUpdateCause} cause
      */
     async _triggerDatabaseUpdated(type, cause) {
+        this._clearTextParseCache();
         if (type !== 'dictionary') {
             await Promise.resolve(this._translator.clearDatabaseCaches());
             this._sendApplicationDatabaseUpdated(type, cause);
@@ -4917,6 +4934,7 @@ null;
         if (reuseActiveImportConnection && typeof adoptCurrentConnectionMethod === 'function') {
             try {
                 await /** @type {() => Promise<void>} */ (adoptCurrentConnectionMethod).call(dictionaryDatabase);
+                this._clearTextParseCache();
                 reportDiagnostics('dictionary-import-connection-adopted', {});
                 log.log('[ImportTiming] dictionary refresh reused active import connection');
                 this._warmEnabledDictionaryLookupCaches('dictionary-import-connection-adopted');
@@ -4975,6 +4993,7 @@ null;
                 this._dictionaryRefreshQueued = false;
             }
         } while (rerunRefresh);
+        this._clearTextParseCache();
         this._warmEnabledDictionaryLookupCaches('dictionary-refresh-after-update');
     }
 
@@ -6152,6 +6171,7 @@ null;
             if (this._dictionaryImportModeActive === active && !(active === false && hasDeferredRefresh)) {
                 return;
             }
+            this._clearTextParseCache();
             if (active) {
                 this._dictionaryImportModeActive = true;
                 if (this._dictionaryDatabasePreparePromise !== null) {
