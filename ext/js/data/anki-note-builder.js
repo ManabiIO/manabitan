@@ -658,6 +658,7 @@ export class AnkiNoteBuilder {
                 screenshotDetails,
                 clipboardDetails,
                 dictionaryMediaDetails,
+                mediaOptions.ankiConnectionIdentity,
             )),
             Promise.resolve().then(() => {
                 if (textFuriganaDetails.length === 0 || typeof textParsingOptions !== 'object' || textParsingOptions === null) { return []; }

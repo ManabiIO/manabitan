@@ -1462,7 +1462,7 @@ export class Backend {
         if (typeof profileId !== 'string' || profileId.length === 0) {
             throw new Error('Search profile identity is unavailable');
         }
-        return {profileId, options};
+        return {profileId, options, ankiConnectionIdentity: this._anki.connectionIdentity};
     }
 
     /** @type {import('api').ApiHandler<'optionsGetFull'>} */
@@ -1616,17 +1616,20 @@ export class Backend {
     }
 
     /** @type {import('api').ApiHandler<'addAnkiNote'>} */
-    async _onApiAddAnkiNote({note}) {
+    async _onApiAddAnkiNote({note, ankiConnectionIdentity}) {
+        this._anki.assertConnectionIdentity(ankiConnectionIdentity);
         return await this._anki.addNote(note);
     }
 
     /** @type {import('api').ApiHandler<'updateAnkiNote'>} */
-    async _onApiUpdateAnkiNote({noteWithId}) {
+    async _onApiUpdateAnkiNote({noteWithId, ankiConnectionIdentity}) {
+        this._anki.assertConnectionIdentity(ankiConnectionIdentity);
         return await this._anki.updateNoteFields(noteWithId);
     }
 
     /** @type {import('api').ApiHandler<'getAnkiNotesInfo'>} */
-    async _onApiGetAnkiNotesInfo({noteIds}) {
+    async _onApiGetAnkiNotesInfo({noteIds, ankiConnectionIdentity}) {
+        if (typeof ankiConnectionIdentity !== 'undefined') { this._anki.assertConnectionIdentity(ankiConnectionIdentity); }
         return await this._anki.notesInfo(noteIds);
     }
 
@@ -1788,9 +1791,20 @@ export class Backend {
     }
 
     /** @type {import('api').ApiHandler<'injectAnkiNoteMedia'>} */
-    async _onApiInjectAnkiNoteMedia({timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails}) {
-        return await this._injectAnkNoteMedia(
-            this._anki,
+    async _onApiInjectAnkiNoteMedia({timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity}) {
+        const identity = ankiConnectionIdentity ?? this._anki.connectionIdentity;
+        this._anki.assertConnectionIdentity(identity);
+        // Media acquisition can outlive a profile change. Each delayed write
+        // must still belong to the connection that accepted this operation.
+        /** @type {Pick<AnkiConnect, 'storeMediaFile'>} */
+        const mediaClient = {
+            storeMediaFile: (fileName, content) => {
+                this._anki.assertConnectionIdentity(identity);
+                return this._anki.storeMediaFile(fileName, content);
+            },
+        };
+        const result = await this._injectAnkNoteMedia(
+            mediaClient,
             timestamp,
             definitionDetails,
             audioDetails,
@@ -1798,6 +1812,8 @@ export class Backend {
             clipboardDetails,
             dictionaryMediaDetails,
         );
+        this._anki.assertConnectionIdentity(identity);
+        return result;
     }
 
     /** @type {import('api').ApiHandler<'viewNotes'>} */
@@ -1819,8 +1835,10 @@ export class Backend {
     }
 
     /** @type {import('api').ApiHandler<'suspendAnkiCardsForNote'>} */
-    async _onApiSuspendAnkiCardsForNote({noteId}) {
+    async _onApiSuspendAnkiCardsForNote({noteId, ankiConnectionIdentity}) {
+        this._anki.assertConnectionIdentity(ankiConnectionIdentity);
         const cardIds = await this._anki.findCardsForNote(noteId);
+        this._anki.assertConnectionIdentity(ankiConnectionIdentity);
         const count = cardIds.length;
         if (count > 0) {
             const okay = await this._anki.suspendCards(cardIds);
@@ -2637,8 +2655,9 @@ offscreenDictionaryRowsResult.termRecordShardFileNames :
     }
 
     /** @type {import('api').ApiHandler<'forceSync'>} */
-    async _onApiForceSync() {
+    async _onApiForceSync({ankiConnectionIdentity}) {
         try {
+            this._anki.assertConnectionIdentity(ankiConnectionIdentity);
             await this._anki.makeAnkiSync();
         } catch (e) {
             log.error(e);
@@ -4440,7 +4459,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @param {import('api').InjectAnkiNoteMediaDefinitionDetails} definitionDetails
      * @param {?import('api').InjectAnkiNoteMediaAudioDetails} audioDetails
@@ -4512,7 +4531,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @param {import('api').InjectAnkiNoteMediaDefinitionDetails} definitionDetails
      * @param {import('api').InjectAnkiNoteMediaAudioDetails} details
@@ -4552,7 +4571,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @param {import('api').InjectAnkiNoteMediaScreenshotDetails} details
      * @returns {Promise<?string>}
@@ -4575,7 +4594,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @returns {Promise<?string>}
      */
@@ -4606,7 +4625,7 @@ null;
     }
 
     /**
-     * @param {AnkiConnect} ankiConnect
+     * @param {Pick<AnkiConnect, 'storeMediaFile'>} ankiConnect
      * @param {number} timestamp
      * @param {import('api').InjectAnkiNoteMediaDictionaryMediaDetails[]} dictionaryMediaDetails
      * @returns {Promise<{results: import('api').InjectAnkiNoteDictionaryMediaResult[], errors: unknown[]}>}

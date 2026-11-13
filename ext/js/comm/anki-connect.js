@@ -19,6 +19,7 @@
 import {ExtensionError} from '../core/extension-error.js';
 import {parseJson} from '../core/json.js';
 import {isObjectNotArray} from '../core/object-utilities.js';
+import {generateId} from '../core/utilities.js';
 import {createAnkiNoteNativeDuplicateSearchDetails, getAnkiNotePrimaryField, normalizeAnkiDuplicateScope} from '../data/anki-note-query-util.js';
 
 /**
@@ -41,8 +42,23 @@ export class AnkiConnect {
         this._versionCheckPromise = null;
         /** @type {number} */
         this._connectionGeneration = 0;
+        /** @type {string} */
+        this._connectionIdentity = generateId(16);
         /** @type {?string} */
         this._apiKey = null;
+    }
+
+    /** @type {string} An opaque identity for this client and its current configuration. */
+    get connectionIdentity() {
+        return this._connectionIdentity;
+    }
+
+    /**
+     * @param {unknown} identity
+     * @throws {ExtensionError} The caller's destination is no longer current.
+     */
+    assertConnectionIdentity(identity) {
+        if (identity !== this._connectionIdentity) { throw this._createConnectionChangedError(); }
     }
 
     /**
@@ -525,6 +541,7 @@ export class AnkiConnect {
     /** */
     _invalidateVersionCheck() {
         ++this._connectionGeneration;
+        this._connectionIdentity = generateId(16);
         this._remoteVersion = 0;
         this._versionCheckPromise = null;
     }
@@ -535,8 +552,15 @@ export class AnkiConnect {
      */
     _assertConnectionGeneration(generation) {
         if (generation !== this._connectionGeneration) {
-            throw new Error('Anki connection settings changed during request');
+            throw this._createConnectionChangedError();
         }
+    }
+
+    /** @returns {ExtensionError} */
+    _createConnectionChangedError() {
+        const error = new ExtensionError('Anki connection settings changed during request');
+        error.data = {code: 'ankiConnectionChanged'};
+        return error;
     }
 
     /**
