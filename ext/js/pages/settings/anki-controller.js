@@ -717,7 +717,8 @@ export class AnkiController {
 
         this._cardFormatDeleteButton.disabled = ankiOptions.cardFormats.length <= 1;
 
-        this._setCardFormatIndex(this._cardFormatIndex, 'anki-card-term-field-menu');
+        const type = ankiOptions.cardFormats[this._cardFormatIndex]?.type ?? 'term';
+        this._setCardFormatIndex(this._cardFormatIndex, `anki-card-${type}-field-menu`);
     }
 
     /**
