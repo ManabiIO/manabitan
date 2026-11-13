@@ -535,12 +535,13 @@ export class StructuredContentGenerator {
         let {href} = content;
         const media = href.startsWith(STRUCTURED_CONTENT_MEDIA_LINK_PREFIX);
         const internal = !media && href.startsWith('?');
+        const disabled = href === '#';
         if (internal) {
             href = `${location.protocol}//${location.host}/search.html${href.length > 1 ? href : ''}`;
         }
 
         const node = /** @type {HTMLAnchorElement} */ (this._createElement('a', 'gloss-link'));
-        node.dataset.external = `${!(internal || media)}`;
+        node.dataset.external = `${!(internal || media || disabled)}`;
 
         const text = this._createElement('span', 'gloss-link-text');
         node.appendChild(text);
@@ -561,6 +562,9 @@ export class StructuredContentGenerator {
         }
 
         this._appendStructuredContent(text, content.content, dictionary, language);
+
+        // MDX conversion uses # for disabled audio and unsupported links.
+        if (disabled) { return node; }
 
         if (!internal && !media) {
             const icon = this._createElement('span', 'gloss-link-external-icon icon');

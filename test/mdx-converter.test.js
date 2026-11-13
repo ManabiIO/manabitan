@@ -17,6 +17,9 @@
 
 import JSZip from 'jszip';
 import {afterEach, describe, expect, test, vi} from 'vitest';
+import {DisplayContentManager} from '../ext/js/display/display-content-manager.js';
+import {StructuredContentGenerator} from '../ext/js/display/structured-content-generator.js';
+import {setupDomTest} from './fixtures/dom-test.js';
 
 /**
  * @typedef {{header: {Title?: string, Description?: string}, entries: Array<{keyText: string, definition: string}>}} MockMdxDictionary
@@ -520,7 +523,7 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['styles/extra.css', 'images/css-bg.png']);
     });
 
-    test('does not lookup or archive sound resources when dictionary audio is disabled', async () => {
+    test('does not navigate, lookup or archive sound resources when dictionary audio is disabled', async () => {
         /** @type {string[]} */
         const lookupKeys = [];
         mockState.onLookupRecord = (_fileName, keyText) => {
@@ -530,7 +533,7 @@ describe('convertMdxToArchive', () => {
             header: {Title: 'Disabled audio fixture', Description: ''},
             entries: [{
                 keyText: 'Read',
-                definition: '<div><a href="sound://audio/read.mp3">play</a></div>',
+                definition: '<div><a href="sound://audio/read.mp3">play</a><a href="entry://related">related</a></div>',
             }],
         });
         mockState.mddFactory = () => [
@@ -557,6 +560,28 @@ describe('convertMdxToArchive', () => {
             materializedReferencedAssetCount: 0,
             missingReferencedAssetCount: 0,
         });
+
+        const testEnv = await setupDomTest();
+        try {
+            const {window} = testEnv;
+            const display = {setContent: vi.fn()};
+            const manager = new DisplayContentManager(/** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ (display)));
+            const generator = new StructuredContentGenerator(manager, window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+            const content = /** @type {import('structured-content').Content} */ (/** @type {unknown} */ (glossary.content));
+            const node = generator.createStructuredContent(content, 'Disabled audio fixture');
+            window.document.body.appendChild(node);
+            const link = /** @type {HTMLAnchorElement} */ (node.querySelector('.gloss-link'));
+            link.dispatchEvent(new window.MouseEvent('click', {bubbles: true, cancelable: true}));
+            expect(display.setContent).not.toHaveBeenCalled();
+            expect(link.hasAttribute('href')).toBe(false);
+            expect(link.querySelector('.gloss-link-external-icon')).toBeNull();
+            expect(link.textContent).toBe('play');
+            const related = /** @type {HTMLAnchorElement} */ (node.querySelectorAll('.gloss-link')[1]);
+            related.dispatchEvent(new window.MouseEvent('click', {bubbles: true, cancelable: true}));
+            expect(display.setContent).toHaveBeenCalledWith(expect.objectContaining({historyMode: 'new', params: {query: 'related'}}));
+        } finally {
+            await testEnv.teardown(global);
+        }
     });
 
     test('preserves source tag identity without requiring a class or ID', async () => {
