@@ -117,6 +117,7 @@ export type AudioMediaOptions = {
 
 export type MediaOptions = {
     ankiConnectionIdentity?: string;
+    ankiConnectionConfiguration?: Anki.ConnectionConfiguration;
     audio: AudioMediaOptions | null;
     screenshot: {
         format: Settings.AnkiScreenshotFormat;
@@ -154,6 +155,7 @@ export type MinimalApi = {
         clipboardDetails: Api.ApiParam<'injectAnkiNoteMedia', 'clipboardDetails'>,
         dictionaryMediaDetails: Api.ApiParam<'injectAnkiNoteMedia', 'dictionaryMediaDetails'>,
         ankiConnectionIdentity?: string,
+        ankiConnectionConfiguration?: Anki.ConnectionConfiguration,
     ): Promise<Api.ApiReturn<'injectAnkiNoteMedia'>>;
 
     parseText(

@@ -356,10 +356,11 @@ export class API {
      * @param {import('api').ApiParam<'injectAnkiNoteMedia', 'clipboardDetails'>} clipboardDetails
      * @param {import('api').ApiParam<'injectAnkiNoteMedia', 'dictionaryMediaDetails'>} dictionaryMediaDetails
      * @param {string} [ankiConnectionIdentity]
+     * @param {import('anki').ConnectionConfiguration} [ankiConnectionConfiguration]
      * @returns {Promise<import('api').ApiReturn<'injectAnkiNoteMedia'>>}
      */
-    injectAnkiNoteMedia(timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity) {
-        return this._invoke('injectAnkiNoteMedia', {timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity});
+    injectAnkiNoteMedia(timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity, ankiConnectionConfiguration) {
+        return this._invoke('injectAnkiNoteMedia', {timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity, ankiConnectionConfiguration});
     }
 
     /**

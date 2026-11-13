@@ -1791,16 +1791,29 @@ export class Backend {
     }
 
     /** @type {import('api').ApiHandler<'injectAnkiNoteMedia'>} */
-    async _onApiInjectAnkiNoteMedia({timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity}) {
-        const identity = ankiConnectionIdentity ?? this._anki.connectionIdentity;
-        this._anki.assertConnectionIdentity(identity);
+    async _onApiInjectAnkiNoteMedia({timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity, ankiConnectionConfiguration}) {
+        /** @type {AnkiConnect|null} */
+        let configuredAnki = null;
+        if (typeof ankiConnectionConfiguration !== 'undefined') {
+            if (typeof ankiConnectionIdentity !== 'undefined') { throw new Error('Anki media cannot use two destinations'); }
+            // Batch generation can edit a different profile from the default.
+            // Its media must use the same captured client configuration as its notes.
+            configuredAnki = new AnkiConnect();
+            configuredAnki.server = ankiConnectionConfiguration.server;
+            configuredAnki.enabled = ankiConnectionConfiguration.enabled;
+            configuredAnki.apiKey = ankiConnectionConfiguration.apiKey;
+        }
+        const getConnection = () => configuredAnki ?? this._anki;
+        const identity = ankiConnectionIdentity ?? getConnection().connectionIdentity;
+        getConnection().assertConnectionIdentity(identity);
         // Media acquisition can outlive a profile change. Each delayed write
         // must still belong to the connection that accepted this operation.
         /** @type {Pick<AnkiConnect, 'storeMediaFile'>} */
         const mediaClient = {
             storeMediaFile: (fileName, content) => {
-                this._anki.assertConnectionIdentity(identity);
-                return this._anki.storeMediaFile(fileName, content);
+                const connection = getConnection();
+                connection.assertConnectionIdentity(identity);
+                return connection.storeMediaFile(fileName, content);
             },
         };
         const result = await this._injectAnkNoteMedia(
@@ -1812,7 +1825,7 @@ export class Backend {
             clipboardDetails,
             dictionaryMediaDetails,
         );
-        this._anki.assertConnectionIdentity(identity);
+        getConnection().assertConnectionIdentity(identity);
         return result;
     }
 

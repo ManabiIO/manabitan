@@ -167,3 +167,19 @@ test('an unchanged destination can store media and suspend the new note', async 
     await expect(api.suspendAnkiCardsForNote(123, /** @type {string} */ (ankiConnectionIdentity))).resolves.toBe(1)
     expect(requests.map(({body}) => body.action)).toEqual(['version', 'storeMediaFile', 'findCards', 'suspend'])
 })
+
+test('a popup identity cannot be overridden by a separate media configuration', async () => {
+    const {api, requests} = setup()
+    const {ankiConnectionIdentity} = await api.optionsGetProfile({current: true})
+    await expect(api.injectAnkiNoteMedia(
+        1234,
+        {type: 'term', term: 'term', reading: 'term'},
+        null,
+        null,
+        null,
+        [],
+        ankiConnectionIdentity,
+        {server: 'http://localhost:8766', apiKey: null, enabled: true},
+    )).rejects.toThrow('Anki media cannot use two destinations')
+    expect(requests).toEqual([])
+})

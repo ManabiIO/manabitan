@@ -223,6 +223,7 @@ type ApiSurface = {
             clipboardDetails: InjectAnkiNoteMediaClipboardDetails | null;
             dictionaryMediaDetails: InjectAnkiNoteMediaDictionaryMediaDetails[];
             ankiConnectionIdentity?: string;
+            ankiConnectionConfiguration?: Anki.ConnectionConfiguration;
         };
         return: {
             screenshotFileName: string | null;

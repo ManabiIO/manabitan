@@ -85,6 +85,7 @@ function createController(words) {
             _saveBlob: saveBlob,
             _sendNotes: sendNotes,
             _generateNoteData: generateNoteData,
+            _ankiController: {captureConnection: () => ({identity: 'test-connection', configuration: {server: 'http://localhost:8765', enabled: true, apiKey: null}}), assertConnectionIdentity: vi.fn()},
             _settingsController: {
                 profileIndexChangeGeneration: 0,
                 optionsRevision: 0,
@@ -349,7 +350,7 @@ test.each([
 ])('$name rejection is distinguished from expected duplicate skips', async ({checks, success}) => {
     const {controller, error} = createController('');
     const canAddNotes = vi.fn().mockResolvedValueOnce([true]).mockResolvedValueOnce(checks);
-    Reflect.set(controller, '_ankiController', {canAddNotes, addNotes: vi.fn().mockResolvedValue([null])});
+    Reflect.set(controller, '_ankiController', {...controller._ankiController, canAddNotes, addNotes: vi.fn().mockResolvedValue([null])});
 
     expect(await AnkiDeckGeneratorController.prototype._sendNotes.call(controller, [createNote('猫')], true)).toBe(success);
 
@@ -496,7 +497,7 @@ test.each([true, false])('cancellation during duplicate detection prevents furth
     const duplicateResult = deferred();
     const canAddNotes = vi.fn(() => duplicateResult.promise);
     const addNotes = vi.fn(async () => [123]);
-    Reflect.set(controller, '_ankiController', {canAddNotes, addNotes});
+    Reflect.set(controller, '_ankiController', {...controller._ankiController, canAddNotes, addNotes});
     Reflect.set(controller, '_sendNotes', AnkiDeckGeneratorController.prototype._sendNotes);
     controller._disallowDuplicatesCheckbox.checked = true;
     await controller._onSendToAnkiConfirm(createEvent());
@@ -552,7 +553,7 @@ test('send and export share one batch ownership guard', async () => {
 
 test('non-Error Anki failures are reported instead of treated as a successful send', async () => {
     const {controller, error} = createController('one');
-    Reflect.set(controller, '_ankiController', {addNotes: vi.fn().mockRejectedValue('offline')});
+    Reflect.set(controller, '_ankiController', {...controller._ankiController, addNotes: vi.fn().mockRejectedValue('offline')});
     Reflect.set(controller, '_sendNotes', AnkiDeckGeneratorController.prototype._sendNotes);
     const result = await controller._sendNotes([createNote('猫')], false);
     expect(result).toBe(false);
@@ -570,7 +571,7 @@ test('cancelling an already dispatched Anki batch prevents subsequent batches', 
         dispatched.resolve();
         return pending.promise;
     });
-    Reflect.set(controller, '_ankiController', {addNotes});
+    Reflect.set(controller, '_ankiController', {...controller._ankiController, addNotes});
     Reflect.set(controller, '_sendNotes', AnkiDeckGeneratorController.prototype._sendNotes);
     await controller._onSendToAnkiConfirm(createEvent());
     const operation = timers[0]();
@@ -633,7 +634,7 @@ for (const replacement of ['different ID', 'same-ID settings import']) {
         const pending = deferred();
         const canAddNotes = vi.fn(() => pending.promise);
         const addNotes = vi.fn(async () => [123]);
-        Reflect.set(controller, '_ankiController', {canAddNotes, addNotes});
+        Reflect.set(controller, '_ankiController', {...controller._ankiController, canAddNotes, addNotes});
         Reflect.set(controller, '_sendNotes', AnkiDeckGeneratorController.prototype._sendNotes);
         controller._disallowDuplicatesCheckbox.checked = true;
         await controller._onSendToAnkiConfirm(createEvent());

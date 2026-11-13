@@ -62,6 +62,18 @@ export class AnkiConnect {
     }
 
     /**
+     * @returns {import('anki').ConnectionSnapshot}
+     * @throws {Error} The client has not been configured yet.
+     */
+    captureConnection() {
+        if (this._server === null) { throw new Error('Anki connection is not configured'); }
+        return {
+            identity: this._connectionIdentity,
+            configuration: {server: this._server, enabled: this._enabled, apiKey: this._apiKey},
+        };
+    }
+
+    /**
      * Gets the URL of the AnkiConnect server.
      * @type {?string}
      */

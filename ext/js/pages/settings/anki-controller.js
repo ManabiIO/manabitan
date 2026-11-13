@@ -714,6 +714,22 @@ export class AnkiController {
     }
 
     /**
+     * @returns {import('anki').ConnectionSnapshot}
+     * @throws {Error} Settings are still loading for another profile or revision.
+     */
+    captureConnection() {
+        if (!this._isOwnerCurrent(this._ankiOptionsOwner)) { throw new Error('Anki connection settings are still loading'); }
+        return this._ankiConnect.captureConnection();
+    }
+
+    /**
+     * @param {string} identity
+     */
+    assertConnectionIdentity(identity) {
+        this._ankiConnect.assertConnectionIdentity(identity);
+    }
+
+    /**
      * @param {import('anki').Note[]} notes
      * @returns {Promise<?((number | null)[] | null)>}
      */

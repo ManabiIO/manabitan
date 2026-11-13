@@ -506,7 +506,7 @@ export class AnkiDeckGeneratorController {
         void this._startGenerationState();
         let profileOwnership;
         try {
-            profileOwnership = this._captureViewSnapshot();
+            profileOwnership = this._captureViewSnapshot(true);
         } catch (error) {
             log.error(error);
             this._updateProgressBarError(`Failed to send Anki notes: ${toError(error).message}`);
@@ -766,7 +766,7 @@ export class AnkiDeckGeneratorController {
      * @returns {Promise<?import('anki.js').Note>}
      */
     async _generateNoteData(word, addMedia, batchProfileOwnership) {
-        const profileOwnership = batchProfileOwnership ?? this._captureViewSnapshot();
+        const profileOwnership = batchProfileOwnership ?? this._captureViewSnapshot(addMedia);
         const {optionsContext} = profileOwnership;
         this._assertProfileOwnershipCurrent(profileOwnership);
         const activeFlashcardFormatDetails = profileOwnership.flashcardFormatDetails;
@@ -799,7 +799,13 @@ export class AnkiDeckGeneratorController {
         const idleTimeout = (Number.isFinite(options.anki.downloadTimeout) && options.anki.downloadTimeout > 0 ? options.anki.downloadTimeout : null);
         const languageSummary = getLanguageSummaries().find(({iso}) => iso === options.general.language);
         const requiredAudioSources = options.audio.enableDefaultAudioSources ? getRequiredAudioSources(options.general.language, options.audio.sources) : [];
-        const mediaOptions = addMedia ? {audio: {sources: [...options.audio.sources, ...requiredAudioSources], preferredAudioIndex: null, idleTimeout: idleTimeout, languageSummary: languageSummary}} : null;
+        if (addMedia && typeof profileOwnership.ankiConnection === 'undefined') { throw new Error('Anki media destination was not captured'); }
+        const mediaOptions = addMedia ?
+            {
+                ankiConnectionConfiguration: profileOwnership.ankiConnection?.configuration,
+                audio: {sources: [...options.audio.sources, ...requiredAudioSources], preferredAudioIndex: null, idleTimeout: idleTimeout, languageSummary: languageSummary},
+            } :
+            null;
         const requirements = addMedia ? [...getDictionaryEntryMedia(dictionaryEntry), {type: 'audio'}] : [];
         const dictionaryStylesMap = this._ankiNoteBuilder.getDictionaryStylesMap(options.dictionaries);
         const cardFormat = /** @type {import('settings').AnkiCardFormat} */ ({
@@ -843,10 +849,11 @@ export class AnkiDeckGeneratorController {
     }
 
     /**
-     * @returns {ReturnType<AnkiDeckGeneratorController['_captureProfileOwnership']> & {flashcardFormatDetails: import('settings').AnkiCardFormat, flashcardFormatIndex: number, activeNoteType: string, activeAnkiDeck: string, viewToken: number}}
+     * @param {boolean} [captureAnkiConnection]
+     * @returns {ReturnType<AnkiDeckGeneratorController['_captureProfileOwnership']> & {flashcardFormatDetails: import('settings').AnkiCardFormat, flashcardFormatIndex: number, activeNoteType: string, activeAnkiDeck: string, viewToken: number, ankiConnection?: import('anki').ConnectionSnapshot}}
      * @throws {Error} If the selected format view is unavailable or stale.
      */
-    _captureViewSnapshot() {
+    _captureViewSnapshot(captureAnkiConnection = false) {
         this._assertFormatViewCurrent();
         const index = Number.parseInt(this._activeFlashcardFormatSelect.value, 10);
         const flashcardFormatDetails = this._flashcardFormatDetails[index];
@@ -858,6 +865,7 @@ export class AnkiDeckGeneratorController {
             activeNoteType: flashcardFormatDetails.model,
             activeAnkiDeck: flashcardFormatDetails.deck,
             viewToken: this._flashcardFormatViewToken,
+            ...(captureAnkiConnection ? {ankiConnection: this._ankiController.captureConnection()} : {}),
         };
     }
 
@@ -873,10 +881,10 @@ export class AnkiDeckGeneratorController {
     }
 
     /**
-     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined), optionsRevision?: number, viewToken?: number}} ownership
+     * @param {{optionsContext: import('settings').OptionsContext2, profileIndexChangeGeneration: (number|undefined), optionsRevision?: number, viewToken?: number, ankiConnection?: import('anki').ConnectionSnapshot}} ownership
      * @throws {Error} If the selected profile changed while generation was pending.
      */
-    _assertProfileOwnershipCurrent({optionsContext, profileIndexChangeGeneration, optionsRevision, viewToken}) {
+    _assertProfileOwnershipCurrent({optionsContext, profileIndexChangeGeneration, optionsRevision, viewToken, ankiConnection}) {
         const current = this._settingsController.getOptionsContext();
         if (
             current.index !== optionsContext.index ||
@@ -891,6 +899,7 @@ export class AnkiDeckGeneratorController {
         ) {
             throw new Error('Profile changed while generating Anki note');
         }
+        if (typeof ankiConnection !== 'undefined') { this._ankiController.assertConnectionIdentity(ankiConnection.identity); }
     }
 
     /**
