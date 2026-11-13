@@ -40,6 +40,8 @@ export type CreateNoteDetails = {
     compactTags: boolean;
     mediaOptions: MediaOptions | null;
     dictionaryStylesMap: Map<string, string>;
+    /** Reject template errors before returning a note; optional media errors remain in the result. */
+    throwOnRenderError?: boolean;
 };
 
 export type CreateDuplicateCheckNoteDetails = {

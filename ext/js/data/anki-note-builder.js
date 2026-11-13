@@ -82,6 +82,7 @@ export class AnkiNoteBuilder {
         compactTags = false,
         mediaOptions = null,
         dictionaryStylesMap = new Map(),
+        throwOnRenderError = false,
     }) {
         const fields = this._getCardFormatFields(cardFormat);
         /** @type {Error[]} */
@@ -111,6 +112,7 @@ export class AnkiNoteBuilder {
         for (let i = 0, ii = fields.length; i < ii; ++i) {
             const fieldName = fields[i][0];
             const {value, errors: fieldErrors, requirements: fieldRequirements} = formattedFieldValues[i];
+            if (throwOnRenderError && fieldErrors.length > 0) { throw fieldErrors[0]; }
             setOwnProperty(noteFields, fieldName, value);
             allErrors.push(...fieldErrors);
             for (const requirement of fieldRequirements) {

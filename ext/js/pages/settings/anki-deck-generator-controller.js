@@ -808,6 +808,7 @@ export class AnkiDeckGeneratorController {
             duplicateScope: options.anki.duplicateScope,
             duplicateScopeCheckAllModels: options.anki.duplicateScopeCheckAllModels,
             dictionaryStylesMap: dictionaryStylesMap,
+            throwOnRenderError: true,
         }));
         assertProfileCurrent();
         return note;
