@@ -163,6 +163,17 @@ export class ExtensionKeyboardShortcutController {
      * @param {chrome.commands.Command[]} commands
      */
     _setupCommands(commands) {
+        commands = commands.filter(({name}) => typeof name === 'string' && !name.startsWith('_'));
+        const entries = commands.map(({name}) => this._entries.find((entry) => entry.matchesCommand(name)));
+        if (commands.length === this._entries.length && entries.every((entry) => typeof entry !== 'undefined')) {
+            // Bulk operations change shortcuts, not row ownership. Keep queued
+            // edits and focused inputs alive while refreshing browser values.
+            for (let i = 0; i < commands.length; ++i) {
+                const {key, modifiers} = this._hotkeyUtil.convertCommandToInput(commands[i].shortcut);
+                entries[i]?.refreshShortcut(key, modifiers);
+            }
+            return;
+        }
         for (const entry of this._entries) {
             entry.cleanup();
         }
@@ -325,6 +336,24 @@ class ExtensionKeyboardShortcutHotkeyEntry {
         this._blurPending = false;
         /** @type {EventListenerCollection} */
         this._eventListeners = new EventListenerCollection();
+    }
+
+    /**
+     * @param {string|undefined} name
+     * @returns {boolean}
+     */
+    matchesCommand(name) {
+        return this._active && this._name === name;
+    }
+
+    /**
+     * @param {?string} key
+     * @param {import('input').Modifier[]} modifiers
+     */
+    refreshShortcut(key, modifiers) {
+        this._key = key;
+        this._modifiers = modifiers;
+        if (this._pendingMutations === 0) { this._updateInput(); }
     }
 
     /** */

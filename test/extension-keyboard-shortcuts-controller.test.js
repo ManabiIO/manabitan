@@ -176,6 +176,42 @@ test('a keyboard edit made during a row reset remains visible and persists last'
     expect(h.commands.get('openSearchPage')).toBe('Alt+C');
 });
 
+for (const operation of ['clear', 'reset', 'failed-clear']) {
+    test(`a keyboard edit during ${operation} keeps its row and persists after the bulk operation`, async ({window}) => {
+        const h = await shortcutHarness(window);
+        const gate = shortcutGate();
+        h.update.mockImplementation(async ({name, shortcut}) => {
+            if (shortcut === '' && operation === 'failed-clear' && name === 'openSearchPage') { throw new Error('clear denied'); }
+            if (shortcut === '') { await gate.promise; }
+            h.commands.set(name, shortcut);
+        });
+        h.reset.mockImplementation(async (name) => {
+            await gate.promise;
+            h.commands.set(name, 'Alt+A');
+        });
+        const entry = h.controller._entries[0];
+        const input = /** @type {HTMLInputElement} */ (entry._input);
+        const mutation = operation === 'reset' ? h.controller._resetAllCommands() : h.controller._clearAllCommands();
+        const result = mutation.then(() => null, (error) => error);
+        await vi.waitFor(() => expect(operation === 'reset' ? h.reset : h.update).toHaveBeenCalledTimes(2));
+        const change = vi.spyOn(entry, '_tryUpdateInput');
+        input.focus();
+        input.dispatchEvent(new window.KeyboardEvent('keydown', {key: 'c', code: 'KeyC', altKey: true, bubbles: true}));
+        gate.resolve();
+        const error = await result;
+        await change.mock.results[0].value;
+        if (operation === 'failed-clear') {
+            expect(error).toMatchObject({message: 'clear denied'});
+        } else {
+            expect(error).toBeNull();
+        }
+        expect(h.controller._entries[0]).toBe(entry);
+        expect(window.document.activeElement).toBe(input);
+        expect(input.value).toBe(h.controller.hotkeyUtil.getInputDisplayValue('KeyC', ['alt']));
+        expect(h.commands.get('openSearchPage')).toBe('Alt+C');
+    });
+}
+
 test('a removed row drops its queued writes and late reset publication', async ({window}) => {
     const h = await shortcutHarness(window);
     const gate = shortcutGate();
