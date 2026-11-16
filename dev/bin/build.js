@@ -65,11 +65,13 @@ function getPackageFiles(directory) {
  * @param {?import('jszip').OnUpdateCallback} onUpdate
  * @param {boolean} dryRun
  */
-async function createZip(directory, excludeFiles, outputFileName, sevenZipExes, onUpdate, dryRun) {
-    try {
-        fs.unlinkSync(outputFileName);
-    } catch (e) {
-        // NOP
+export async function createZip(directory, excludeFiles, outputFileName, sevenZipExes, onUpdate, dryRun) {
+    if (!dryRun) {
+        try {
+            fs.unlinkSync(outputFileName);
+        } catch (e) {
+            // NOP
+        }
     }
 
     if (!dryRun && !hasLinkedLibraries(directory)) {
@@ -317,4 +319,5 @@ export async function main() {
     }
 }
 
-await main();
+// Node 22.22 supports this entry-point flag; the Node type declarations predate it.
+if (/** @type {ImportMeta & {main?: boolean}} */ (import.meta).main) { await main(); }
