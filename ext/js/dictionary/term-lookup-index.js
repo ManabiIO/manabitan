@@ -857,6 +857,18 @@ export function findExactRows(index, query, field, queryHash = hashBytes(query))
 }
 
 /**
+ * Returns the chunk-local key ID for an exact byte match, or -1 on a miss.
+ * Key IDs can be compared with validated per-row expression/reading columns.
+ * @param {PersistedTermLookupIndex} index
+ * @param {Uint8Array} query
+ * @param {number} [queryHash]
+ * @returns {number}
+ */
+export function findExactKey(index, query, queryHash = hashBytes(query)) {
+    return findKey(index, query, queryHash);
+}
+
+/**
  * Appends both exact-match posting lists after a single key hash-table probe.
  * @param {PersistedTermLookupIndex} index
  * @param {Uint8Array} query
