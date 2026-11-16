@@ -3365,7 +3365,10 @@ null;
             this._termPrefixNegativeCache.clear();
         }
 
-        const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
+        /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
+        const rowsById = idMatches.size > 0 ?
+            await this._fetchTermRowsByIds(idMatches.keys()) :
+            new Map();
         this._assertTermLookupGeneration(generation, dictionaryNames);
         if (shouldReportDiagnostics) {
             reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
@@ -3738,7 +3741,10 @@ null;
             }
         }
 
-        const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
+        /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
+        const rowsById = idMatches.size > 0 ?
+            await this._fetchTermRowsByIds(idMatches.keys()) :
+            new Map();
         this._assertTermLookupGeneration(generation, lookupDictionaryNames);
         for (const [id, requests] of idMatches) {
             const row = rowsById.get(id);
@@ -3815,7 +3821,10 @@ null;
             }
         }
 
-        const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
+        /** @type {Map<number, import('dictionary-database').DatabaseTermEntryWithId>} */
+        const rowsById = idMatches.size > 0 ?
+            await this._fetchTermRowsByIds(idMatches.keys()) :
+            new Map();
         this._assertTermLookupGeneration(generation, lookupDictionaryNames);
         for (const [id, itemIndexes] of idMatches) {
             const row = rowsById.get(id);

@@ -312,3 +312,21 @@ database.findTermsBySequenceBulk([{dictionary: 'test', query: 1}]) :
         expect((await settled).error).toMatchObject({status: 'temporarilyUnavailable'});
     });
 });
+
+test('exact pair miss rejects when the selected generation changes during candidate selection', async () => {
+    const database = new DictionaryDatabase();
+    vi.spyOn(database, '_requireDb').mockReturnValue(/** @type {ReturnType<DictionaryDatabase['_requireDb']>} */ ({}));
+    vi.spyOn(database, '_ensureDirectTermIndexesLoaded').mockResolvedValue();
+    const findPairs = vi.spyOn(Reflect.get(database, '_termRecordStore'), 'findTermPairCandidates')
+        .mockImplementation(() => {
+            database._clearBulkImportRuntimeCaches();
+            return new Map();
+        });
+    const hydrateRows = vi.spyOn(database, '_fetchTermRowsByIds');
+
+    await expect(database.findTermsExactBulk([{term: 'absent', reading: 'あ'}], new Set(['test'])))
+        .rejects.toMatchObject({status: 'temporarilyUnavailable'});
+
+    expect(findPairs).toHaveBeenCalledOnce();
+    expect(hydrateRows).not.toHaveBeenCalled();
+});

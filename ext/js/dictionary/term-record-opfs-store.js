@@ -4462,8 +4462,12 @@ export class TermRecordOpfsStore {
             /** @type {Map<string, {bytes: Uint8Array, hash: number}>|null} */
             let queries = null;
             for (const chunk of chunks) {
-                const rows = findExactRows(chunk.lookupIndex, expressionBytes, 'expression', expressionHash);
-                if (rows.length === 0) { continue; }
+                const expressionKey = findExactKey(chunk.lookupIndex, expressionBytes, expressionHash);
+                if (expressionKey < 0) { continue; }
+                const {expressionPostingOffsets, expressionPostingRows} = chunk.lookupIndex;
+                const postingStart = expressionPostingOffsets[expressionKey];
+                const postingEnd = expressionPostingOffsets[expressionKey + 1];
+                if (postingStart === postingEnd) { continue; }
                 if (queries === null) {
                     queries = new Map();
                     for (const {reading} of requests) {
@@ -4474,7 +4478,6 @@ export class TermRecordOpfsStore {
                 }
                 // Key IDs belong to one chunk. Resolve only after its expression
                 // hits, so an ordinary miss never encodes or probes readings.
-                const expressionKey = chunk.lookupIndex.expressionKeys[rows[0]];
                 /** @type {Map<string, number>} */
                 const readingKeys = new Map();
                 for (const [reading, {bytes, hash}] of queries) {
@@ -4482,7 +4485,8 @@ export class TermRecordOpfsStore {
                     if (key >= 0) { readingKeys.set(reading, key); }
                 }
                 if (readingKeys.size === 0) { continue; }
-                for (const row of rows) {
+                for (let postingIndex = postingStart; postingIndex < postingEnd; ++postingIndex) {
+                    const row = expressionPostingRows[postingIndex];
                     const rowReadingKey = chunk.lookupIndex.readingKeys[row];
                     const actualReadingKey = rowReadingKey === U16_NULL ? expressionKey : rowReadingKey;
                     for (const [reading, key] of readingKeys) {
