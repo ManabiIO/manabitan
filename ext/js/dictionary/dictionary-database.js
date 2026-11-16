@@ -3122,15 +3122,7 @@ null;
         if (typeof observedAvailability !== 'undefined') {
             observedAvailability.push(...this.getDictionaryAvailability(requestedDictionaryNames));
         }
-        const isDictionaryAvailable = Reflect.get(this._termRecordStore, 'isDictionaryAvailable');
-        const dictionaryNames = typeof isDictionaryAvailable === 'function' ?
-            requestedDictionaryNames.filter(
-                (dictionaryName) => isDictionaryAvailable.call(
-                    this._termRecordStore,
-                    this._getTermRecordStorageName(dictionaryName),
-                ),
-            ) :
-            requestedDictionaryNames;
+        const dictionaryNames = this._getLookupAvailableTermDictionaryNames(requestedDictionaryNames);
         if (dictionaryNames.length === 0) {
             return [];
         }
@@ -3252,6 +3244,7 @@ null;
             }
 
             if (idMatches.size === 0) {
+                this._assertTermLookupAvailability(generation, dictionaryNames);
                 if (shouldReportDiagnostics) {
                     reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                         stage: 'findTermsBulk-exact',
@@ -3269,7 +3262,7 @@ null;
             }
 
             const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
-            this._assertTermLookupGeneration(generation, dictionaryNames);
+            this._assertTermLookupAvailability(generation, dictionaryNames);
             if (shouldReportDiagnostics) {
                 reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                     stage: 'findTermsBulk-exact',
@@ -3369,7 +3362,7 @@ null;
         const rowsById = idMatches.size > 0 ?
             await this._fetchTermRowsByIds(idMatches.keys()) :
             new Map();
-        this._assertTermLookupGeneration(generation, dictionaryNames);
+        this._assertTermLookupAvailability(generation, dictionaryNames);
         if (shouldReportDiagnostics) {
             reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                 stage: 'findTermsBulk-prefix',
@@ -3694,7 +3687,7 @@ null;
         }
         // Existing quarantine is reported in availability; only dictionaries
         // selected for this read must remain usable through its completion.
-        const lookupDictionaryNames = this._getUnquarantinedTermDictionaryNames(dictionaryNames);
+        const lookupDictionaryNames = this._getLookupAvailableTermDictionaryNames(dictionaryNames);
         /** @type {Map<string, {reading: string, itemIndex: number}[]>} */
         const requestsByTerm = new Map();
         for (let itemIndex = 0; itemIndex < termList.length; ++itemIndex) {
@@ -3745,7 +3738,7 @@ null;
         const rowsById = idMatches.size > 0 ?
             await this._fetchTermRowsByIds(idMatches.keys()) :
             new Map();
-        this._assertTermLookupGeneration(generation, lookupDictionaryNames);
+        this._assertTermLookupAvailability(generation, lookupDictionaryNames);
         for (const [id, requests] of idMatches) {
             const row = rowsById.get(id);
             if (typeof row === 'undefined') { continue; }
@@ -3771,21 +3764,34 @@ null;
         }
         /** @type {import('dictionary-database').TermEntry[]} */
         const results = [];
-        /** @type {Map<string, number[]>} */
-        const dictionarySequenceIndexes = new Map();
+        /** @type {Map<string, Map<number, number[]>>} */
+        const requestIndexesByDictionary = new Map();
+        /** @type {number[]} */
+        const sequenceOrder = [];
+        const seenSequences = new Set();
         for (let itemIndex = 0; itemIndex < items.length; ++itemIndex) {
             const item = items[itemIndex];
             const sequence = this._asNumber(item.query, -1);
             if (sequence < 0) { continue; }
-            const key = `${item.dictionary}\u001f${sequence}`;
-            const itemIndexes = dictionarySequenceIndexes.get(key);
+            let requestsBySequence = requestIndexesByDictionary.get(item.dictionary);
+            if (typeof requestsBySequence === 'undefined') {
+                requestsBySequence = new Map();
+                requestIndexesByDictionary.set(item.dictionary, requestsBySequence);
+            }
+            const itemIndexes = requestsBySequence.get(sequence);
             if (typeof itemIndexes === 'undefined') {
-                dictionarySequenceIndexes.set(key, [itemIndex]);
+                requestsBySequence.set(sequence, [itemIndex]);
             } else {
                 itemIndexes.push(itemIndex);
             }
+            // The previous global sequence list excluded NaN via `>= 0`,
+            // although NaN requests still caused owner loading/availability reporting.
+            if (sequence >= 0 && !seenSequences.has(sequence)) {
+                sequenceOrder.push(sequence);
+                seenSequences.add(sequence);
+            }
         }
-        if (dictionarySequenceIndexes.size === 0) {
+        if (requestIndexesByDictionary.size === 0) {
             return [];
         }
         const dictionaryNames = [...new Set(items.map((item) => item.dictionary))];
@@ -3796,17 +3802,18 @@ null;
         }
         // Existing quarantine is reported in availability; only dictionaries
         // selected for this read must remain usable through its completion.
-        const lookupDictionaryNames = this._getUnquarantinedTermDictionaryNames(dictionaryNames);
-        const sequenceValues = [...new Set(items.map((item) => this._asNumber(item.query, -1)).filter((value) => value >= 0))];
+        const lookupDictionaryNames = this._getLookupAvailableTermDictionaryNames(dictionaryNames);
         /** @type {Map<number, number[]>} */
         const idMatches = new Map();
-        for (const dictionaryName of dictionaryNames) {
-            for (const sequence of sequenceValues) {
+        for (const dictionaryName of lookupDictionaryNames) {
+            const requestsBySequence = requestIndexesByDictionary.get(dictionaryName);
+            if (typeof requestsBySequence === 'undefined') { continue; }
+            // Keep the original global sequence order within every dictionary.
+            for (const sequence of sequenceOrder) {
+                const itemIndexes = requestsBySequence.get(sequence);
+                if (typeof itemIndexes === 'undefined') { continue; }
                 const ids = this._findDirectTermIdsBySequence(dictionaryName, sequence);
                 if (ids.length === 0) { continue; }
-                const key = `${dictionaryName}\u001f${sequence}`;
-                const itemIndexes = dictionarySequenceIndexes.get(key);
-                if (typeof itemIndexes === 'undefined') { continue; }
                 for (const id of ids) {
                     if (id <= 0) { continue; }
                     const existingIndexes = idMatches.get(id);
@@ -3825,7 +3832,7 @@ null;
         const rowsById = idMatches.size > 0 ?
             await this._fetchTermRowsByIds(idMatches.keys()) :
             new Map();
-        this._assertTermLookupGeneration(generation, lookupDictionaryNames);
+        this._assertTermLookupAvailability(generation, lookupDictionaryNames);
         for (const [id, itemIndexes] of idMatches) {
             const row = rowsById.get(id);
             if (typeof row === 'undefined') { continue; }
@@ -10602,6 +10609,41 @@ null :
         return dictionaryNames.filter((name) => (
             this._termRecordStore.getDictionaryHealth(this._getTermRecordStorageName(name)).status !== 'reimportRequired'
         ));
+    }
+
+    /**
+     * @param {string[]} dictionaryNames
+     * @returns {string[]}
+     */
+    _getLookupAvailableTermDictionaryNames(dictionaryNames) {
+        const isDictionaryAvailable = Reflect.get(this._termRecordStore, 'isDictionaryAvailable');
+        if (typeof isDictionaryAvailable !== 'function') {
+            return this._getUnquarantinedTermDictionaryNames(dictionaryNames);
+        }
+        return dictionaryNames.filter((name) => isDictionaryAvailable.call(
+            this._termRecordStore,
+            this._getTermRecordStorageName(name),
+        ));
+    }
+
+    /**
+     * Preserve generation and quarantine errors, and reject partial results if
+     * a selected owner becomes unavailable while rows are being hydrated.
+     * @param {number} generation
+     * @param {string[]} dictionaryNames
+     * @throws {TermContentLookupReadError}
+     */
+    _assertTermLookupAvailability(generation, dictionaryNames) {
+        this._assertTermLookupGeneration(generation, dictionaryNames);
+        const isDictionaryAvailable = Reflect.get(this._termRecordStore, 'isDictionaryAvailable');
+        if (typeof isDictionaryAvailable !== 'function') { return; }
+        for (const name of dictionaryNames) {
+            if (isDictionaryAvailable.call(this._termRecordStore, this._getTermRecordStorageName(name))) { continue; }
+            throw new TermContentLookupReadError(
+                'temporarilyUnavailable',
+                `Dictionary lookup data is temporarily unavailable: ${name}`,
+            );
+        }
     }
 
     /**

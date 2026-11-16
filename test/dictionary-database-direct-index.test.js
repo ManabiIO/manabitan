@@ -94,6 +94,184 @@ describe('DictionaryDatabase direct term indexes', () => {
         expect(ensureContentLoaded).not.toHaveBeenCalled();
     });
 
+    test('sequence lookup probes only requested pairs and retains global sequence and duplicate order', async () => {
+        const database = createDatabase();
+        Reflect.set(database, '_getDictionaryNames', (/** @type {import('dictionary-database').DictionaryAndQueryRequest[]} */ items) => [...new Set(items.map(({dictionary}) => dictionary))]);
+        const idsByPair = new Map([
+            ['A:2', [20]], ['A:1', [10]], ['B:2', [40]], ['B:1', [30]],
+        ]);
+        const findSequence = vi.fn((/** @type {string} */ dictionary, /** @type {number} */ sequence) => idsByPair.get(`${dictionary}:${sequence}`) ?? []);
+        Reflect.set(database, '_findDirectTermIdsBySequence', findSequence);
+        Reflect.set(database, '_fetchTermRowsByIds', async (ids) => new Map([...ids].map((id) => [id, {id}])));
+
+        const result = await database.findTermsBySequenceBulk([
+            {dictionary: 'A', query: 2},
+            {dictionary: 'B', query: 1},
+            {dictionary: 'A', query: 1},
+            {dictionary: 'B', query: 2},
+            {dictionary: 'A', query: 2},
+            {dictionary: 'B', query: 99},
+            {dictionary: 'InvalidOnly', query: 'invalid'},
+        ]);
+
+        expect(findSequence.mock.calls).toEqual([
+            ['A', 2], ['A', 1], ['B', 2], ['B', 1], ['B', 99],
+        ]);
+        expect(result.map((entry) => [entry.id, Reflect.get(entry, 'itemIndex')])).toEqual([
+            [20, 0], [20, 4], [10, 2], [40, 3], [30, 1],
+        ]);
+    });
+
+    test('sequence lookup skips quarantined owners and keeps their availability visible', async () => {
+        const database = createDatabase();
+        Reflect.set(database, '_getDictionaryNames', (/** @type {import('dictionary-database').DictionaryAndQueryRequest[]} */ items) => [...new Set(items.map(({dictionary}) => dictionary))]);
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        recordStore.getDictionaryHealth = (/** @type {string} */ name) => ({
+            status: name === 'Broken' ? 'reimportRequired' : 'available',
+            reason: name === 'Broken' ? 'Confirmed corruption' : null,
+        });
+        const findSequence = vi.fn((dictionary, sequence) => {
+            if (dictionary === 'Broken') { throw new Error('Quarantined sequence index must not be queried'); }
+            if (dictionary !== 'Healthy') { return []; }
+            return sequence === 2 ? [22] : (sequence === 1 ? [11] : []);
+        });
+        Reflect.set(database, '_findDirectTermIdsBySequence', findSequence);
+        Reflect.set(database, '_fetchTermRowsByIds', async (ids) => new Map([...ids].map((id) => [id, {id}])));
+        const getAvailability = vi.spyOn(database, 'getDictionaryAvailability');
+        /** @type {import('dictionary-database').DictionaryAvailability[]} */
+        const observed = [];
+
+        const result = await database.findTermsBySequenceBulk([
+            {dictionary: 'Broken', query: 2},
+            {dictionary: 'Healthy', query: 1},
+            {dictionary: 'Healthy', query: 2},
+            {dictionary: 'InvalidOnly', query: 'invalid'},
+        ], observed);
+
+        expect(findSequence.mock.calls).toEqual([['Healthy', 2], ['Healthy', 1]]);
+        expect(getAvailability).toHaveBeenCalledWith(['Broken', 'Healthy', 'InvalidOnly']);
+        expect(result.map((entry) => [entry.id, Reflect.get(entry, 'itemIndex')])).toEqual([[22, 2], [11, 1]]);
+        expect(observed).toEqual([{
+            dictionary: 'Broken', generationId: 'Broken', status: 'reimportRequired', reason: 'Confirmed corruption',
+        }]);
+    });
+
+    test.each(['pair', 'sequence'])('%s lookup selects available owners and complete repairPending owners only', async (method) => {
+        const database = createDatabase();
+        const names = ['Unavailable', 'RepairPending', 'Healthy'];
+        Reflect.set(database, '_getDictionaryNames', () => names);
+        /** @type {Map<string, 'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired'>} */
+        const statuses = new Map([
+            ['Unavailable', 'repairing'], ['RepairPending', 'repairPending'], ['Healthy', 'available'],
+        ]);
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        recordStore.getDictionaryHealth = (/** @type {string} */ name) => ({status: statuses.get(name) ?? 'available', reason: null});
+        recordStore.isDictionaryAvailable = (/** @type {string} */ name) => (
+            statuses.get(name) === 'available' || (name === 'RepairPending' && statuses.get(name) === 'repairPending')
+        );
+        /** @type {string[]} */
+        const probed = [];
+        if (method === 'pair') {
+            recordStore.findTermPairCandidates = (/** @type {string} */ dictionary) => {
+                if (dictionary === 'Unavailable') { throw new Error('Unavailable pair index must not be queried'); }
+                probed.push(dictionary);
+                return new Map([['reading', [dictionary === 'RepairPending' ? 7 : 8]]]);
+            };
+            Reflect.set(database, '_fetchTermRowsByIds', async (ids) => new Map([...ids].map((id) => [id, {id, reading: 'reading'}])));
+        } else {
+            Reflect.set(database, '_findDirectTermIdsBySequence', (dictionary) => {
+                if (dictionary === 'Unavailable') { throw new Error('Unavailable sequence index must not be queried'); }
+                probed.push(dictionary);
+                return [dictionary === 'RepairPending' ? 7 : 8];
+            });
+            Reflect.set(database, '_fetchTermRowsByIds', async (ids) => new Map([...ids].map((id) => [id, {id}])));
+        }
+        /** @type {import('dictionary-database').DictionaryAvailability[]} */
+        const observed = [];
+        const result = method === 'pair' ?
+            await database.findTermsExactBulk([{term: 'term', reading: 'reading'}], new Set(names), observed) :
+            await database.findTermsBySequenceBulk(names.map((dictionary) => ({dictionary, query: 1})), observed);
+
+        expect(probed).toEqual(['RepairPending', 'Healthy']);
+        expect(result.map(({id}) => id)).toEqual([7, 8]);
+        expect(observed.map(({dictionary, status}) => [dictionary, status])).toEqual([['Unavailable', 'repairing'], ['RepairPending', 'repairPending']]);
+    });
+
+    test.each(['pair', 'sequence'])('%s lookup rejects when a selected owner becomes unavailable during hydration', async (method) => {
+        const database = createDatabase();
+        /** @type {'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired'} */
+        let status = 'available';
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        recordStore.getDictionaryHealth = () => ({status, reason: null});
+        recordStore.isDictionaryAvailable = () => status === 'available';
+        if (method === 'pair') {
+            recordStore.findTermPairCandidates = () => new Map([['reading', [7]]]);
+        } else {
+            Reflect.set(database, '_findDirectTermIdsBySequence', () => [7]);
+        }
+        const entered = Promise.withResolvers();
+        const release = Promise.withResolvers();
+        Reflect.set(database, '_fetchTermRowsByIds', async (ids) => {
+            entered.resolve(void 0);
+            await release.promise;
+            return new Map([...ids].map((id) => [id, {id, reading: 'reading'}]));
+        });
+        const generation = Reflect.get(database, '_directTermIndexGeneration');
+        const request = method === 'pair' ?
+            database.findTermsExactBulk([{term: 'term', reading: 'reading'}], new Set(['Test'])) :
+            database.findTermsBySequenceBulk([{dictionary: 'Test', query: 1}]);
+
+        await entered.promise;
+        status = 'repairing';
+        release.resolve(void 0);
+        await expect(request).rejects.toMatchObject({status: 'temporarilyUnavailable'});
+        expect(Reflect.get(database, '_directTermIndexGeneration')).toBe(generation);
+    });
+
+    test.each(['exact', 'prefix'])('bulk %s lookup rejects when a selected owner becomes unavailable during hydration', async (matchType) => {
+        const database = createDatabase();
+        /** @type {'available'|'repairPending'|'repairing'|'temporarilyUnavailable'|'reimportRequired'} */
+        let status = 'available';
+        const recordStore = Reflect.get(database, '_termRecordStore');
+        recordStore.getDictionaryHealth = () => ({status, reason: null});
+        recordStore.isDictionaryAvailable = () => status === 'available';
+        if (matchType === 'exact') {
+            recordStore.findTermIdMatchesForDictionaries = () => [{expression: [7], reading: []}];
+        } else {
+            recordStore.findTermPrefixIdMatchesForDictionaries = () => [{expression: [{id: 7, exact: true}], reading: []}];
+        }
+        const entered = Promise.withResolvers();
+        const release = Promise.withResolvers();
+        Reflect.set(database, '_fetchTermRowsByIds', async (ids) => {
+            entered.resolve(void 0);
+            await release.promise;
+            return new Map([...ids].map((id) => [id, {id}]));
+        });
+        const generation = Reflect.get(database, '_directTermIndexGeneration');
+        const request = database.findTermsBulk(['term'], new Set(['Test']), /** @type {'exact'|'prefix'} */ (matchType));
+
+        await entered.promise;
+        status = 'temporarilyUnavailable';
+        release.resolve(void 0);
+        await expect(request).rejects.toMatchObject({status: 'temporarilyUnavailable'});
+        expect(Reflect.get(database, '_directTermIndexGeneration')).toBe(generation);
+    });
+
+    test('sequence NaN retains owner availability reporting without probing a NaN index', async () => {
+        const database = createDatabase();
+        const findSequence = vi.fn(() => { throw new Error('NaN sequence must not be queried'); });
+        Reflect.set(database, '_findDirectTermIdsBySequence', findSequence);
+        const getAvailability = vi.spyOn(database, 'getDictionaryAvailability');
+        /** @type {import('dictionary-database').DictionaryAvailability[]} */
+        const observed = [];
+
+        await expect(database.findTermsBySequenceBulk([{dictionary: 'NaNOnly', query: Number.NaN}], observed)).resolves.toEqual([]);
+
+        expect(findSequence).not.toHaveBeenCalled();
+        expect(getAvailability).toHaveBeenCalledWith(['NaNOnly']);
+        expect(observed).toEqual([]);
+    });
+
     test('mixed equal-text pair requests retain existing candidate order through hydration', async () => {
         const database = createDatabase({
             expression: new Map([['a', [8, 7]]]),
