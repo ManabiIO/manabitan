@@ -138,14 +138,17 @@ export async function createZip(directory, excludeFiles, outputFileName, sevenZi
     }
     await writePackageOutput(outputFileName, false, async (stagedPath) => {
         if (!hasLinkedLibraries(directory)) {
-            for (const exe of sevenZipExes) {
+            for (const [index, exe] of sevenZipExes.entries()) {
+                // `7z a` updates an existing archive. Isolate attempts so a
+                // failed writer cannot leave entries in a successful retry.
+                const nativePath = path.join(path.dirname(stagedPath), `${index}-${path.basename(stagedPath)}`);
                 try {
                     const excludeArguments = excludeFiles.map((excludeFilePath) => `-x!${excludeFilePath}`);
                     childProcess.execFileSync(
                         exe,
                         [
                             'a',
-                            stagedPath,
+                            nativePath,
                             '.',
                             ...excludeArguments,
                         ],
@@ -153,6 +156,7 @@ export async function createZip(directory, excludeFiles, outputFileName, sevenZi
                             cwd: directory,
                         },
                     );
+                    fs.renameSync(nativePath, stagedPath);
                     return;
                 } catch (e) {
                     // NOP
