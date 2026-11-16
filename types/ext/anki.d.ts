@@ -18,6 +18,17 @@
 import type * as Core from './core';
 import type * as Settings from './settings';
 
+export type ConnectionConfiguration = {
+    server: string;
+    enabled: boolean;
+    apiKey: string | null;
+};
+
+export type ConnectionSnapshot = {
+    identity: string;
+    configuration: ConnectionConfiguration;
+};
+
 export type NoteId = number;
 
 export type CardId = number;

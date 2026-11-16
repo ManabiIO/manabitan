@@ -91,6 +91,8 @@ export class AnkiController {
         this._ankiEnableCheckbox = document.querySelector('[data-setting="anki.enable"]');
         /** @type {?import('settings').AnkiOptions} */
         this._ankiOptions = null;
+        /** @type {ReturnType<AnkiController['_captureOwner']>|null} */
+        this._ankiOptionsOwner = null;
         /** @type {number} */
         this._cardFormatIndex = 0;
         /** @type {HTMLButtonElement} */
@@ -146,6 +148,7 @@ export class AnkiController {
         await this._updateOptions();
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
         this._settingsController.on('optionsContextChanged', this._onOptionsContextChanged.bind(this));
+        document.addEventListener('settingChanged', this._onCardSettingChanged.bind(this), true);
 
         const onAnkiSettingChanged = () => { void this._updateOptions(); };
         const nodes = [ankiApiKeyInput, ...document.querySelectorAll('[data-setting="anki.enable"]')];
@@ -208,6 +211,23 @@ export class AnkiController {
         return getRequiredPermissionsForAnkiFieldValue(fieldValue);
     }
 
+    /**
+     * Publish an acknowledged row without replacing a newer rendered value.
+     * @param {number} cardFormatIndex
+     * @param {import('settings').AnkiCardFormat} expected
+     * @param {import('settings').AnkiCardFormat} value
+     */
+    updateCardFormat(cardFormatIndex, expected, value) {
+        if (!this._isOwnerCurrent(this._ankiOptionsOwner) || this._ankiOptions === null) { return; }
+        if (!this._sameValue(this._getCardFormat(cardFormatIndex), expected)) { return; }
+        const cardFormat = structuredClone(value);
+        this._ankiOptions.cardFormats[cardFormatIndex] = cardFormat;
+        this._updateCardFormatTab(cardFormatIndex, cardFormat);
+        if (this._cardFormatDeleteSnapshot !== null && !this._sameValue(this._ankiOptions.cardFormats, this._cardFormatDeleteSnapshot.cardFormats)) {
+            this._invalidateDeleteCardFormatModal();
+        }
+    }
+
     // Private
 
     /** */
@@ -215,8 +235,6 @@ export class AnkiController {
         const iconSelect = /** @type {HTMLSelectElement} */ (this._ankiCardPrimary.querySelector('.anki-card-icon'));
         const newIcon = /** @type {import('settings').AddNoteIcon} */ (iconSelect.value);
         iconSelect.dataset.icon = newIcon;
-        if (this._ankiOptions === null) { return; }
-        this._ankiOptions.cardFormats[this._cardFormatIndex].icon = newIcon;
     }
 
 
@@ -297,10 +315,31 @@ export class AnkiController {
         this._selectorObserver.observe(document.documentElement, true);
 
         this._ankiOptions = anki;
+        this._ankiOptionsOwner = this._captureOwner();
         this._updateDuplicateBehavior(anki.duplicateBehavior);
         this._setupTabs(anki);
 
         void this._setupFieldMenus(dictionaries);
+    }
+
+    /**
+     * Generic bindings publish saved values independently of optionsChanged.
+     * Keep the tabs and deletion expectation aligned with those visible edits.
+     * @param {Event} event
+     */
+    _onCardSettingChanged(event) {
+        if (!this._isOwnerCurrent(this._ankiOptionsOwner)) { return; }
+        const element = event.target;
+        if (!(element instanceof HTMLElement) || !this._ankiCardPrimary.contains(element)) { return; }
+        const path = element.dataset.setting;
+        if (typeof path !== 'string') { return; }
+        const parts = ObjectPropertyAccessor.getPathArray(path);
+        if (parts[0] !== 'anki' || parts[1] !== 'cardFormats' || parts[2] !== this._cardFormatIndex || parts.length < 4) { return; }
+        const cardFormat = this._getCardFormat(this._cardFormatIndex);
+        if (cardFormat === null) { return; }
+        const value = structuredClone(cardFormat);
+        new ObjectPropertyAccessor(value).set(parts.slice(3), /** @type {import('dom-data-binder').SettingChangedEvent} */ (event).detail.value);
+        this.updateCardFormat(this._cardFormatIndex, cardFormat, value);
     }
 
     /** */
@@ -675,6 +714,22 @@ export class AnkiController {
     }
 
     /**
+     * @returns {import('anki').ConnectionSnapshot}
+     * @throws {Error} Settings are still loading for another profile or revision.
+     */
+    captureConnection() {
+        if (!this._isOwnerCurrent(this._ankiOptionsOwner)) { throw new Error('Anki connection settings are still loading'); }
+        return this._ankiConnect.captureConnection();
+    }
+
+    /**
+     * @param {string} identity
+     */
+    assertConnectionIdentity(identity) {
+        this._ankiConnect.assertConnectionIdentity(identity);
+    }
+
+    /**
      * @param {import('anki').Note[]} notes
      * @returns {Promise<?((number | null)[] | null)>}
      */
@@ -717,7 +772,8 @@ export class AnkiController {
 
         this._cardFormatDeleteButton.disabled = ankiOptions.cardFormats.length <= 1;
 
-        this._setCardFormatIndex(this._cardFormatIndex, 'anki-card-term-field-menu');
+        const type = ankiOptions.cardFormats[this._cardFormatIndex]?.type ?? 'term';
+        this._setCardFormatIndex(this._cardFormatIndex, `anki-card-${type}-field-menu`);
     }
 
     /**
@@ -744,6 +800,26 @@ export class AnkiController {
         tabsContainer.appendChild(content);
 
         return input;
+    }
+
+    /**
+     * @param {number} cardFormatIndex
+     * @param {import('settings').AnkiCardFormat} cardFormat
+     */
+    _updateCardFormatTab(cardFormatIndex, cardFormat) {
+        const tab = this._ankiCardsTabs.querySelector(`input[data-card-format-index="${cardFormatIndex}"]`);
+        if (!(tab instanceof HTMLInputElement)) { return; }
+        const menu = `anki-card-${cardFormat.type}-field-menu`;
+        tab.value = cardFormat.type;
+        tab.dataset.value = cardFormat.type;
+        tab.dataset.ankiCardMenu = menu;
+        const label = tab.closest('.tab')?.querySelector('.tab-label');
+        if (label) { label.textContent = cardFormat.name || `Format ${cardFormatIndex + 1}`; }
+        if (cardFormatIndex === this._cardFormatIndex) {
+            this._ankiCardPrimary.dataset.ankiCardMenu = menu;
+            const iconSelect = /** @type {HTMLSelectElement} */ (this._ankiCardPrimary.querySelector('.anki-card-icon'));
+            iconSelect.dataset.icon = cardFormat.icon;
+        }
     }
 
     /**
@@ -1448,6 +1524,7 @@ class AnkiCardController {
             if (typeof result.error !== 'undefined') { throw ExtensionError.deserialize(result.error); }
         }
         if (!this._isOwnerCurrent(owner)) { throw new Error('Card format settings owner changed during update'); }
+        this._ankiController.updateCardFormat(this._cardFormatIndex, expected, value);
     }
 
     /**
@@ -1471,6 +1548,7 @@ class AnkiCardController {
         if (!this._isCardFormatRequestCurrent(owner, kind, request)) { return; }
         const cardFormat = this._getCardFormat(options.anki, this._cardFormatIndex);
         if (cardFormat === null) { return; }
+        if (this._cardFormat !== null) { this._ankiController.updateCardFormat(this._cardFormatIndex, this._cardFormat, cardFormat); }
         this._cardFormat = cardFormat;
         this._deckController.value = cardFormat.deck;
         this._modelController.value = cardFormat.model;

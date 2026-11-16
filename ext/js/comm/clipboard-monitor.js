@@ -38,6 +38,8 @@ export class ClipboardMonitor extends EventDispatcher {
         this._interval = 250;
         /** @type {?string} */
         this._previousText = null;
+        /** @type {number} */
+        this._previousTextGeneration = 0;
     }
 
     /**
@@ -58,6 +60,7 @@ export class ClipboardMonitor extends EventDispatcher {
             if (this._timerToken !== token) { return; }
             this._timerId = null;
 
+            const previousTextGeneration = this._previousTextGeneration;
             let text = null;
             try {
                 text = await this._clipboardReader.getText(false);
@@ -66,7 +69,11 @@ export class ClipboardMonitor extends EventDispatcher {
             }
             if (this._timerToken !== token) { return; }
 
-            if (typeof text === 'string') {
+            if (previousTextGeneration !== this._previousTextGeneration) {
+                // A copy in Search established a newer baseline while this
+                // read was pending. Keep polling without publishing old text.
+                canChange = true;
+            } else if (typeof text === 'string') {
                 text = text.trim();
                 if (text.length === 0) {
                     // Clearing then copying identical text is a new clipboard change.
@@ -112,6 +119,8 @@ export class ClipboardMonitor extends EventDispatcher {
      * @param {?string} text
      */
     setPreviousText(text) {
-        this._previousText = text;
+        ++this._previousTextGeneration;
+        // Explicit baselines must use the same representation as polled text.
+        this._previousText = text === null ? null : (text.trim() || null);
     }
 }

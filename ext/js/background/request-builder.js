@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {escapeRegExp} from '../core/utilities.js';
+
 // Content-Length is an untrusted allocation hint, not a body-size limit.
 const RESPONSE_PREALLOCATION_MAX_BYTES = 16 * 1024 * 1024;
 
@@ -28,8 +30,6 @@ export class RequestBuilder {
      * Creates a new instance.
      */
     constructor() {
-        /** @type {TextEncoder} */
-        this._textEncoder = new TextEncoder();
         /** @type {Set<number>} */
         this._ruleIds = new Set();
     }
@@ -67,7 +67,8 @@ export class RequestBuilder {
                 id,
                 priority: 1,
                 condition: {
-                    urlFilter: `|${this._escapeDnrUrl(url)}|`,
+                    ...this._getDnrUrlCondition(url),
+                    isUrlFilterCaseSensitive: true,
                     resourceTypes: [
                         /** @type {chrome.declarativeNetRequest.ResourceType} */ ('xmlhttprequest'),
                     ],
@@ -354,23 +355,15 @@ export class RequestBuilder {
 
     /**
      * @param {string} url
-     * @returns {string}
+     * @returns {chrome.declarativeNetRequest.RuleCondition}
      */
-    _escapeDnrUrl(url) {
-        return url.replace(/[|*^]/g, (char) => this._urlEncodeUtf8(char));
-    }
-
-    /**
-     * @param {string} text
-     * @returns {string}
-     */
-    _urlEncodeUtf8(text) {
-        const array = this._textEncoder.encode(text);
-        let result = '';
-        for (const byte of array) {
-            result += `%${byte.toString(16).toUpperCase().padStart(2, '0')}`;
+    _getDnrUrlCondition(url) {
+        // Percent-encoding filter syntax would select a different URL. Use
+        // a literal regex only when the compact URL pattern cannot express it.
+        if (/[|*^]/.test(url)) {
+            return {regexFilter: `^${escapeRegExp(url)}$`};
         }
-        return result;
+        return {urlFilter: `|${url}|`};
     }
 
     /**

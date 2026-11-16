@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {EventListenerCollection} from '../../core/event-listener-collection.js';
 import {log} from '../../core/log.js';
 import {toError} from '../../core/to-error.js';
 import {getAllPermissions, setPermissionsGranted} from '../../data/permissions-util.js';
@@ -33,8 +32,8 @@ export class RecommendedPermissionsController {
         this._originToggleNode = querySelectorNotNull(document, '#recommended-permissions-toggle');
         /** @type {HTMLInputElement} */
         this._optionalPermissionsToggleNode = querySelectorNotNull(document, '#optional-permissions-toggle');
-        /** @type {EventListenerCollection} */
-        this._eventListeners = new EventListenerCollection();
+        /** @type {number} */
+        this._permissionsGeneration = 0;
         /** @type {?HTMLElement} */
         this._errorContainer = null;
     }
@@ -55,7 +54,8 @@ export class RecommendedPermissionsController {
      * @param {import('settings-controller').EventArgument<'permissionsChanged'>} details
      */
     _onPermissionsChanged({permissions}) {
-        this._eventListeners.removeAllEventListeners();
+        ++this._permissionsGeneration;
+        this._setWelcomePageText(permissions);
         const originsSet = new Set(permissions.origins);
         const {origin} = this._originToggleNode.dataset;
         this._originToggleNode.checked = typeof origin === 'string' && originsSet.has(origin);
@@ -77,7 +77,7 @@ export class RecommendedPermissionsController {
 
         const {origin} = node.dataset;
         if (typeof origin !== 'string') { return; }
-        void this._setOriginPermissionEnabled(origin, value);
+        void this._setOriginPermissionEnabled(origin, value).catch((error) => { log.error(error); });
     }
 
     /**
@@ -95,6 +95,7 @@ export class RecommendedPermissionsController {
      * @param {Event} e
      */
     async _onOptionalPermissionsToggleChange(e) {
+        ++this._permissionsGeneration;
         const node = /** @type {HTMLInputElement} */ (e.currentTarget);
         const value = node.checked;
         node.checked = !value;
@@ -123,11 +124,10 @@ export class RecommendedPermissionsController {
 
     /** */
     async _updatePermissions() {
+        const generation = ++this._permissionsGeneration;
         const permissions = await getAllPermissions();
+        if (generation !== this._permissionsGeneration) { return; }
         this._onPermissionsChanged({permissions});
-        void this._setWelcomePageText().catch((error) => {
-            log.error(error);
-        });
     }
 
     /**
@@ -136,6 +136,7 @@ export class RecommendedPermissionsController {
      * @returns {Promise<boolean>}
      */
     async _setOriginPermissionEnabled(origin, enabled) {
+        ++this._permissionsGeneration;
         let added = false;
         try {
             added = await setPermissionsGranted({origins: [origin]}, enabled);
@@ -144,14 +145,14 @@ export class RecommendedPermissionsController {
                 this._errorContainer.hidden = false;
                 this._errorContainer.textContent = toError(e).message;
             }
+            return false;
         }
         await this._updatePermissions();
         return added;
     }
 
-    /** */
-    async _setWelcomePageText() {
-        const permissions = await getAllPermissions();
+    /** @param {chrome.permissions.Permissions} permissions */
+    _setWelcomePageText(permissions) {
         const recommendedPermissions = permissions.origins?.includes('<all_urls>');
         const optionalPermissions = permissions.permissions?.includes('clipboardRead') && permissions.permissions?.includes('nativeMessaging');
         /** @type {HTMLElement | null} */

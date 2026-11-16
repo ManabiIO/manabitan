@@ -670,11 +670,11 @@ def _convert_html_link_href(
     value = href.strip()
     lowered = value.lower()
     if lowered.startswith("entry://"):
-        return f"?query={quote(unquote(value[8:]), safe='')}"
+        return f"?query={quote(unquote(value[8:]), safe='')}&wildcards=off"
     if lowered.startswith("bword://"):
-        return f"?query={quote(unquote(value[8:]), safe='')}"
+        return f"?query={quote(unquote(value[8:]), safe='')}&wildcards=off"
     if lowered.startswith(("d:", "x:")):
-        return f"?query={quote(unquote(value[2:]), safe='')}"
+        return f"?query={quote(unquote(value[2:]), safe='')}&wildcards=off"
     if lowered.startswith("sound://"):
         sound_path = _prefix_relative_asset_path(value[8:], asset_prefix)
         if enable_audio and sound_path is not None:

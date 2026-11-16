@@ -531,7 +531,7 @@ function encodeMediaPath(value) {
  * @returns {string}
  */
 function createSearchHref(query) {
-    return `?query=${encodeURIComponent(query)}`;
+    return `?query=${encodeURIComponent(query)}&wildcards=off`;
 }
 
 /**

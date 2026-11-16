@@ -47,7 +47,7 @@ describe('PermissionsToggleController', () => {
         const settingsController = {
             getOptions: vi.fn().mockResolvedValue({anki: {enable: false}}),
             getOptionsContext: vi.fn(() => ({})),
-            setProfileSetting: vi.fn().mockRejectedValue(new Error('save failed')),
+            modifySettings: vi.fn().mockRejectedValue(new Error('save failed')),
             on: vi.fn(),
         };
         const controller = new PermissionsToggleController(/** @type {any} */ (settingsController));
@@ -79,7 +79,7 @@ describe('PermissionsToggleController', () => {
         const settingsController = {
             getOptions: vi.fn().mockResolvedValue({anki: {enable: false}}),
             getOptionsContext: vi.fn(() => ({})),
-            setProfileSetting: vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'invalid setting', stack: ''}}]),
+            modifySettings: vi.fn().mockResolvedValue([{error: {name: 'Error', message: 'invalid setting', stack: ''}}]),
             on: vi.fn(),
         };
         const controller = new PermissionsToggleController(/** @type {any} */ (settingsController));
@@ -115,5 +115,23 @@ describe('PermissionsToggleController', () => {
         await new Promise((resolve) => { window.setTimeout(resolve, 0); });
         expect(report).toHaveBeenCalledOnce();
         report.mockRestore();
+    });
+    test('an older validity read cannot undo a newer permission event', async ({window}) => {
+        vi.resetModules();
+        vi.clearAllMocks();
+        window.document.body.innerHTML = '<div class="settings-item"><input class="permissions-toggle" type="checkbox" data-required-permissions="clipboardRead"></div>';
+        getAllPermissions.mockResolvedValue({permissions: []});
+        const {PermissionsToggleController} = await import('../ext/js/pages/settings/permissions-toggle-controller.js');
+        const controller = new PermissionsToggleController(/** @type {any} */ ({
+            getOptions: async () => ({}), getOptionsContext: () => ({}), on: vi.fn(),
+        }));
+        await controller.prepare();
+        const pending = Promise.withResolvers();
+        getAllPermissions.mockReturnValueOnce(pending.promise);
+        const refresh = controller._updateValidity();
+        controller._onPermissionsChanged({permissions: {permissions: ['clipboardRead']}});
+        pending.resolve({permissions: []});
+        await refresh;
+        expect(/** @type {HTMLInputElement} */ (window.document.querySelector('.permissions-toggle')).checked).toBe(true);
     });
 });

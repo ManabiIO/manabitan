@@ -13,11 +13,12 @@ test('options and stable profile ID come from one backend profile resolution', (
     const a = {id: 'profile-a', conditionGroups: [], options: {clipboard: {enableSearchPageMonitor: false}}};
     const b = {id: 'profile-b', conditionGroups: [], options: {clipboard: {enableSearchPageMonitor: true}}};
     const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+    Reflect.set(backend, '_anki', {connectionIdentity: 'connection-a'});
     const read = vi.fn().mockReturnValueOnce({profiles: [a, b], profileCurrent: 0}).mockReturnValue({profiles: [a, b], profileCurrent: 1});
     Reflect.set(backend, '_getOptionsFull', read);
     Reflect.set(backend, '_profileConditionsSchemaCache', []);
     const result = backend._onApiOptionsGetProfile({optionsContext: {depth: 0, url: 'https://example.test'}}, {});
-    expect(result).toStrictEqual({profileId: 'profile-a', options: a.options});
+    expect(result).toStrictEqual({profileId: 'profile-a', options: a.options, ankiConnectionIdentity: 'connection-a'});
     expect(read).toHaveBeenCalledOnce();
 });
 
@@ -25,8 +26,9 @@ test('explicit profile identity remains authoritative after profiles reorder', (
     const a = {id: 'profile-a', conditionGroups: [], options: {clipboard: {enableSearchPageMonitor: false}}};
     const b = {id: 'profile-b', conditionGroups: [], options: {clipboard: {enableSearchPageMonitor: true}}};
     const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+    Reflect.set(backend, '_anki', {connectionIdentity: 'connection-a'});
     Reflect.set(backend, '_getOptionsFull', () => ({profiles: [b, a], profileCurrent: 0}));
-    expect(backend._onApiOptionsGetProfile({optionsContext: {index: 0, profileId: 'profile-a'}}, {})).toStrictEqual({profileId: 'profile-a', options: a.options});
+    expect(backend._onApiOptionsGetProfile({optionsContext: {index: 0, profileId: 'profile-a'}}, {})).toStrictEqual({profileId: 'profile-a', options: a.options, ankiConnectionIdentity: 'connection-a'});
 });
 
 test('missing profile identity fails instead of publishing an unowned options snapshot', () => {

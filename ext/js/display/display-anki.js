@@ -19,6 +19,7 @@
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
+import {isObjectNotArray} from '../core/object-utilities.js';
 import {toError} from '../core/to-error.js';
 import {deferPromise} from '../core/utilities.js';
 import {AnkiNoteBuilder} from '../data/anki-note-builder.js';
@@ -43,6 +44,7 @@ import {TemplateRendererProxy} from '../templates/template-renderer-proxy.js';
  * @property {number} scanLength
  * @property {import('extension').ContentOrigin} contentOrigin
  * @property {import('settings').OptionsContext} optionsContext
+ * @property {string} ankiConnectionIdentity
  * @property {import('settings').DictionariesOptions} dictionaries
  * @property {string|null} template
  * @property {Promise<string>|null} [templatePromise]
@@ -865,6 +867,7 @@ export class DisplayAnki {
         const snapshotErrors = [];
         try {
             const cardFormat = structuredClone(this._cardFormats[cardFormatIndex]);
+            const ankiConnectionIdentity = this._getAnkiConnectionIdentity();
             overwriteNoteDetails = structuredClone(details);
             overwriteFieldOptions = structuredClone(cardFormat.fields);
             overwrite = button.dataset.overwrite === 'true';
@@ -893,6 +896,7 @@ export class DisplayAnki {
                 scanLength: this._scanLength,
                 contentOrigin: structuredClone(this._display.getContentOrigin()),
                 optionsContext: structuredClone(this._display.getOptionsContext()),
+                ankiConnectionIdentity,
                 dictionaries,
                 template,
                 templatePromise: this._ankiFieldTemplatesOptionsGeneration === optionsGeneration ? this._ankiFieldTemplatesPromise : null,
@@ -921,10 +925,18 @@ export class DisplayAnki {
         const allErrors = [];
 
         if (snapshotErrors.length === 0) { button.disabled = true; }
-        setTimeout(() => {
-            if (snapshotErrors.length === 0 && isCurrentSaveOwner() && (duplicateBehavior !== 'prevent' || allErrors.length > 0)) {
+        // Slow media or Anki requests can outlast the cooldown. Release only
+        // after both finish, including failures that arrive after the timer.
+        let saveCompleted = false;
+        let cooldownElapsed = false;
+        const updateSaveButton = () => {
+            if (saveCompleted && cooldownElapsed && snapshotErrors.length === 0 && isCurrentSaveOwner() && (duplicateBehavior !== 'prevent' || allErrors.length > 0)) {
                 button.disabled = false;
             }
+        };
+        setTimeout(() => {
+            cooldownElapsed = true;
+            updateSaveButton();
         }, 2500);
 
         if (snapshotErrors.length === 0 && isCurrentSaveOwner()) { this._hideErrorNotification(true); }
@@ -949,18 +961,29 @@ export class DisplayAnki {
             const error = this._getAddNoteRequirementsError(requirements, outputRequirements);
             if (error !== null) { allErrors.push(error); }
             if (overwrite) {
-                const overwrittenNote = await this._getOverwrittenNote(note, dictionaryEntryIndex, cardFormatIndex, overwriteNoteDetails, overwriteFieldOptions);
+                const overwrittenNote = await this._getOverwrittenNote(note, dictionaryEntryIndex, cardFormatIndex, overwriteNoteDetails, overwriteFieldOptions, noteBuildOptions.ankiConnectionIdentity);
                 if (overwrittenNote === null) {
                     allErrors.push(new Error('Could not determine which duplicate note to overwrite'));
                 } else {
-                    await this._updateAnkiNote(overwrittenNote, allErrors);
+                    await this._updateAnkiNote(overwrittenNote, allErrors, noteBuildOptions.ankiConnectionIdentity);
                 }
             } else {
-                await this._addNewAnkiNote(note, allErrors, button, dictionaryEntryIndex, isCurrentSaveOwner, suspendNewCards, forceSync);
+                await this._addNewAnkiNote(note, allErrors, button, dictionaryEntryIndex, isCurrentSaveOwner, suspendNewCards, forceSync, noteBuildOptions.ankiConnectionIdentity);
             }
         } catch (e) {
             allErrors.push(toError(e));
         } finally {
+            if (isCurrentSaveOwner() && allErrors.some((error) => error instanceof ExtensionError && isObjectNotArray(error.data) && error.data.code === 'ankiConnectionChanged')) {
+                // Refresh only authoritative read state. The failed write may
+                // already have committed, so a retry remains a user action.
+                try {
+                    await this._recoverAnkiConnection(dictionaryEntries, dictionaryEntryIndex, entryNode, allErrors);
+                } catch (error) {
+                    allErrors.push(toError(error));
+                }
+            }
+            saveCompleted = true;
+            updateSaveButton();
             clearProgressOverride();
         }
 
@@ -970,6 +993,38 @@ export class DisplayAnki {
             } else {
                 this._hideErrorNotification(true);
             }
+        }
+    }
+
+    /**
+     * @returns {string}
+     * @throws {ExtensionError} The display has no authoritative destination yet.
+     */
+    _getAnkiConnectionIdentity() {
+        const identity = this._display.getAnkiConnectionIdentity();
+        if (typeof identity === 'string' && identity.length > 0) { return identity; }
+        const error = new ExtensionError('Anki connection identity is unavailable; refresh settings before saving');
+        error.data = {code: 'ankiConnectionChanged'};
+        throw error;
+    }
+
+    /**
+     * @param {import('dictionary').DictionaryEntry[]} entries
+     * @param {number} entryIndex
+     * @param {?HTMLElement} entryNode
+     * @param {Error[]} errors
+     */
+    async _recoverAnkiConnection(entries, entryIndex, entryNode, errors) {
+        await this._display.updateOptions();
+        if (this._display.dictionaryEntries !== entries || this._getEntry(entryIndex) !== entryNode) { return; }
+        const generation = this._optionsGeneration;
+        this._onContentClear();
+        for (const node of this._display.dictionaryEntryNodes) {
+            node.querySelector('.note-actions-container')?.replaceChildren();
+        }
+        await this._updateDictionaryEntryDetails();
+        if (this._optionsGeneration === generation && this._display.dictionaryEntries === entries && this._getEntry(entryIndex) === entryNode) {
+            this._showErrorNotification(errors);
         }
     }
 
@@ -994,9 +1049,10 @@ export class DisplayAnki {
      * @param {number} cardFormatIndex
      * @param {import('display-anki').DictionaryEntryNoteDetails} [noteDetails]
      * @param {import('settings').AnkiCardFormat['fields']} [fieldOptions]
+     * @param {string} [ankiConnectionIdentity]
      * @returns {Promise<import('anki').NoteWithId | null>}
      */
-    async _getOverwrittenNote(note, dictionaryEntryIndex, cardFormatIndex, noteDetails, fieldOptions) {
+    async _getOverwrittenNote(note, dictionaryEntryIndex, cardFormatIndex, noteDetails, fieldOptions, ankiConnectionIdentity = this._getAnkiConnectionIdentity()) {
         const allEntryDetails = this._dictionaryEntryDetails;
         if (typeof noteDetails === 'undefined' && !(allEntryDetails !== null && dictionaryEntryIndex >= 0 && dictionaryEntryIndex < allEntryDetails.length)) {
             return null;
@@ -1004,24 +1060,32 @@ export class DisplayAnki {
         const relevantEntryDetails = allEntryDetails?.[dictionaryEntryIndex];
         const relevantNoteDetails = noteDetails ?? relevantEntryDetails?.noteMap.get(cardFormatIndex);
         if (typeof relevantNoteDetails === 'undefined') { return null; }
-        const {noteIds, noteInfos} = relevantNoteDetails;
-        if (noteIds === null || !Array.isArray(noteInfos)) { return null; }
+        const {noteIds} = relevantNoteDetails;
+        if (noteIds === null) { return null; }
         const overwriteId = noteIds.find((id) => id !== INVALID_NOTE_ID);
         if (typeof overwriteId === 'undefined') { return null; }
-        const overwriteInfo = noteInfos.find((info) => info !== null && info.noteId === overwriteId);
-        if (!overwriteInfo) { return null; }
-        const existingFields = overwriteInfo.fields;
         fieldOptions ??= this._cardFormats[cardFormatIndex].fields;
         if (!fieldOptions) { return null; }
 
+        // Keep the accepted duplicate target, but merge with its current fields.
+        // Cached fields can predate another save or an edit in Anki. A note
+        // just added from this result may not have cached note info yet.
+        const currentNoteInfos = await this._display.application.api.getAnkiNotesInfo([overwriteId], ankiConnectionIdentity);
+        const overwriteInfo = currentNoteInfos.find((info) => info !== null && info.noteId === overwriteId);
+        if (!overwriteInfo) { return null; }
+        const existingFields = overwriteInfo.fields;
         const newValues = note.fields;
 
         /** @type {import('anki').NoteFields} */
         const noteFields = {};
         for (const [field, newValue] of Object.entries(newValues)) {
             const overwriteMode = fieldOptions[field].overwriteMode;
-            const existingValue = existingFields[field].value;
-            noteFields[field] = this._getOverwrittenField(existingValue, newValue, overwriteMode);
+            if (overwriteMode === 'skip') { continue; }
+            const existingField = existingFields[field];
+            if (typeof existingField === 'undefined') {
+                throw new Error(`The Anki note no longer contains the field ${field}`);
+            }
+            noteFields[field] = this._getOverwrittenField(existingField.value, newValue, overwriteMode);
         }
         return {
             ...note,
@@ -1061,12 +1125,13 @@ export class DisplayAnki {
      * @param {() => boolean} [isCurrentSaveOwner]
      * @param {boolean} [suspendNewCards]
      * @param {boolean} [forceSync]
+     * @param {string} [ankiConnectionIdentity]
      */
-    async _addNewAnkiNote(note, allErrors, button, dictionaryEntryIndex, isCurrentSaveOwner = () => true, suspendNewCards = this._suspendNewCards, forceSync = this._forceSync) {
+    async _addNewAnkiNote(note, allErrors, button, dictionaryEntryIndex, isCurrentSaveOwner = () => true, suspendNewCards = this._suspendNewCards, forceSync = this._forceSync, ankiConnectionIdentity = this._getAnkiConnectionIdentity()) {
         let noteId = null;
         let addNoteOkay = false;
         try {
-            noteId = await this._display.application.api.addAnkiNote(note);
+            noteId = await this._display.application.api.addAnkiNote(note, ankiConnectionIdentity);
             addNoteOkay = true;
         } catch (e) {
             allErrors.length = 0;
@@ -1079,20 +1144,25 @@ export class DisplayAnki {
             } else {
                 if (suspendNewCards) {
                     try {
-                        await this._display.application.api.suspendAnkiCardsForNote(noteId);
+                        await this._display.application.api.suspendAnkiCardsForNote(noteId, ankiConnectionIdentity);
                     } catch (e) {
                         allErrors.push(toError(e));
                     }
                 }
                 if (isCurrentSaveOwner()) {
                     const cardFormatIndex = this._getCardFormatIndex(button);
+                    const details = this._dictionaryEntryDetails?.[dictionaryEntryIndex]?.noteMap.get(cardFormatIndex);
+                    if (typeof details !== 'undefined') {
+                        details.isDuplicate = true;
+                        details.noteIds = [...new Set([...(details.noteIds ?? []).filter((id) => id !== INVALID_NOTE_ID), noteId])];
+                    }
                     this._updateSaveButtonForDuplicateBehavior(button, [noteId]);
                     this._updateViewNoteButton(dictionaryEntryIndex, cardFormatIndex, [noteId]);
                 }
 
                 if (forceSync) {
                     try {
-                        await this._display.application.api.forceSync();
+                        await this._display.application.api.forceSync(ankiConnectionIdentity);
                     } catch (e) {
                         allErrors.push(toError(e));
                     }
@@ -1139,12 +1209,13 @@ export class DisplayAnki {
     /**
      * @param {import('anki').NoteWithId | null} noteWithId
      * @param {Error[]} allErrors
+     * @param {string} [ankiConnectionIdentity]
      */
-    async _updateAnkiNote(noteWithId, allErrors) {
+    async _updateAnkiNote(noteWithId, allErrors, ankiConnectionIdentity = this._getAnkiConnectionIdentity()) {
         if (noteWithId === null) { return; }
 
         try {
-            await this._display.application.api.updateAnkiNote(noteWithId);
+            await this._display.application.api.updateAnkiNote(noteWithId, ankiConnectionIdentity);
         } catch (e) {
             allErrors.length = 0;
             allErrors.push(toError(e));
@@ -1588,6 +1659,7 @@ export class DisplayAnki {
             glossaryLayoutMode: saved.glossaryLayoutMode ?? this._glossaryLayoutMode,
             compactTags: saved.compactTags ?? this._compactTags,
             mediaOptions: {
+                ankiConnectionIdentity: saved.ankiConnectionIdentity,
                 audio: audioDetails,
                 screenshot: {
                     format: saved.screenshotFormat ?? this._screenshotFormat,
@@ -1601,6 +1673,9 @@ export class DisplayAnki {
             },
             requirements,
             dictionaryStylesMap,
+            // Accepted saves must not write diagnostic placeholders into Anki.
+            // Diagnostic callers still receive the rendered note and errors.
+            throwOnRenderError: typeof saveOptions !== 'undefined',
         });
         return {note, errors, requirements: outputRequirements};
     }
@@ -1619,7 +1694,10 @@ export class DisplayAnki {
         }
         if (typeof text !== 'string') {
             text = fallback;
-            offset = fallbackOffset;
+            // Search URL offsets use UTF-16, while Anki sentence offsets count
+            // complete Unicode code points.
+            const prefix = fallback.slice(0, fallbackOffset);
+            offset = [...prefix].length;
         } else {
             if (typeof offset !== 'number') { offset = 0; }
         }

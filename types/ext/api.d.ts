@@ -140,6 +140,7 @@ type ApiSurface = {
         return: {
             profileId: string;
             options: Settings.ProfileOptions;
+            ankiConnectionIdentity?: string;
         };
     };
     optionsGetFull: {
@@ -187,14 +188,23 @@ type ApiSurface = {
     addAnkiNote: {
         params: {
             note: Anki.Note;
+            ankiConnectionIdentity: string;
         };
         return: Anki.NoteId | null;
     };
     updateAnkiNote: {
         params: {
             noteWithId: Anki.NoteWithId;
+            ankiConnectionIdentity: string;
         };
         return: null;
+    };
+    getAnkiNotesInfo: {
+        params: {
+            noteIds: Anki.NoteId[];
+            ankiConnectionIdentity?: string;
+        };
+        return: (Anki.NoteInfo | null)[];
     };
     getAnkiNoteInfo: {
         params: {
@@ -212,6 +222,8 @@ type ApiSurface = {
             screenshotDetails: InjectAnkiNoteMediaScreenshotDetails | null;
             clipboardDetails: InjectAnkiNoteMediaClipboardDetails | null;
             dictionaryMediaDetails: InjectAnkiNoteMediaDictionaryMediaDetails[];
+            ankiConnectionIdentity?: string;
+            ankiConnectionConfiguration?: Anki.ConnectionConfiguration;
         };
         return: {
             screenshotFileName: string | null;
@@ -233,6 +245,7 @@ type ApiSurface = {
     suspendAnkiCardsForNote: {
         params: {
             noteId: Anki.NoteId;
+            ankiConnectionIdentity: string;
         };
         return: number;
     };
@@ -499,7 +512,7 @@ type ApiSurface = {
         return: void;
     };
     forceSync: {
-        params: void;
+        params: {ankiConnectionIdentity: string};
         return: void;
     };
     fetchLocalAudioData: {

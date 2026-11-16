@@ -248,11 +248,33 @@ export function getFullscreenElement() {
  * @returns {Node[]} The list of nodes.
  */
 export function getNodesInRange(range) {
-    const end = range.endContainer;
+    const {startContainer, startOffset, endContainer, endOffset} = range;
+    let excludedEnd = endOffset === 0 ? endContainer : null;
+    if (excludedEnd !== null) {
+        // A zero-offset end also excludes its ancestors until an earlier sibling
+        // contributes content to the range.
+        while (excludedEnd.previousSibling === null && excludedEnd.parentNode !== null) {
+            excludedEnd = excludedEnd.parentNode;
+        }
+    }
     const nodes = [];
-    for (let node = /** @type {?Node} */ (range.startContainer); node !== null; node = getNextNode(node)) {
+    /** @type {?Node} */
+    let start = startContainer;
+    switch (startContainer.nodeType) {
+        case Node.ELEMENT_NODE:
+        case Node.DOCUMENT_NODE:
+        case Node.DOCUMENT_FRAGMENT_NODE:
+            start = startContainer.childNodes[startOffset] ?? getNextNode(startContainer, true);
+            break;
+        default:
+            if (startOffset === startContainer.nodeValue?.length) {
+                start = getNextNode(startContainer, true);
+            }
+            break;
+    }
+    for (let node = start; node !== null; node = getNextNode(node)) {
+        if (node === excludedEnd || range.comparePoint(node, 0) > 0) { break; }
         nodes.push(node);
-        if (node === end) { break; }
     }
     return nodes;
 }
@@ -260,10 +282,11 @@ export function getNodesInRange(range) {
 /**
  * Gets the next node after a specified node. This traverses the DOM in its logical order.
  * @param {Node} node The node to start at.
+ * @param {boolean} [skipChildren] Whether to skip the starting node's children.
  * @returns {?Node} The next node, or `null` if there is no next node.
  */
-export function getNextNode(node) {
-    let next = /** @type {?Node} */ (node.firstChild);
+export function getNextNode(node, skipChildren = false) {
+    let next = /** @type {?Node} */ (skipChildren ? null : node.firstChild);
     if (next === null) {
         while (true) {
             next = node.nextSibling;

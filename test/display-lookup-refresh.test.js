@@ -17,6 +17,7 @@
 
 import {describe, expect, vi} from 'vitest';
 import {Display} from '../ext/js/display/display.js';
+import {DisplayHistory} from '../ext/js/display/display-history.js';
 import {createDomTest} from './fixtures/dom-test.js';
 
 const test = createDomTest();
@@ -43,15 +44,30 @@ describe('Display lookup refresh', () => {
         expect(setContent).not.toHaveBeenCalled();
     });
 
-    test('term lookup uses freshly loaded enabled dictionaries when options were initially null', async ({window}) => {
+    test.for([
+        {name: 'fresh lookup', lookup: true, evicted: false, expectedLookup: true},
+        {name: 'explicit no-lookup preview', lookup: false, evicted: false, expectedLookup: false},
+        {name: 'evicted scanner results', lookup: false, evicted: true, expectedLookup: true},
+    ])('$name respects lookup intent after loading options', async ({lookup, evicted, expectedLookup}, {window}) => {
         window.document.body.innerHTML = `
             <div id="no-results" hidden></div>
             <div id="no-dictionaries" hidden></div>
         `;
 
         const display = /** @type {Display} */ (/** @type {unknown} */ (Object.create(Display.prototype)));
+        const restoredEntry = /** @type {import('dictionary').TermDictionaryEntry} */ (/** @type {unknown} */ ({type: 'term', definitions: [{dictionary: 'Test'}]}));
         display._options = null;
         display._history = /** @type {import('../ext/js/display/display-history.js').DisplayHistory} */ (/** @type {unknown} */ ({state: {}, content: {}}));
+        if (evicted) {
+            const history = new DisplayHistory(true, false);
+            history.replaceState({}, {dictionaryEntries: [restoredEntry]}, `${window.location.href}?query=名前&lookup=false`);
+            history.pushState({}, {dictionaryEntries: []});
+            history.pushState({}, {dictionaryEntries: []});
+            history.back();
+            history.back();
+            expect(history.content?.dictionaryEntries).toBeUndefined();
+            display._history = history;
+        }
         const contentToken = /** @type {import('core').TokenObject} */ (/** @type {unknown} */ ('token'));
         display._setContentToken = contentToken;
         display._container = window.document.createElement('div');
@@ -59,14 +75,20 @@ describe('Display lookup refresh', () => {
         display._windowScroll = /** @type {import('../ext/js/dom/scroll-element.js').ScrollElement} */ (/** @type {unknown} */ ({stop() {}, to() {}}));
         display._contentManager = /** @type {import('../ext/js/display/display-content-manager.js').DisplayContentManager} */ (/** @type {unknown} */ ({executeMediaRequests: async () => {}}));
         display._elementOverflowController = /** @type {import('../ext/js/display/element-overflow-controller.js').ElementOverflowController} */ (/** @type {unknown} */ ({addElements() {}}));
-        display._displayGenerator = /** @type {import('../ext/js/display/display-generator.js').DisplayGenerator} */ (/** @type {unknown} */ ({}));
+        display._displayGenerator = /** @type {import('../ext/js/display/display-generator.js').DisplayGenerator} */ (/** @type {unknown} */ ({
+            createTermEntry: () => {
+                const entry = window.document.createElement('div');
+                entry.textContent = 'Restored definition';
+                return entry;
+            },
+        }));
         display._dictionaryInfo = [];
         display._setQuery = vi.fn();
         display._setOptionsContextIfDifferent = vi.fn().mockResolvedValue(void 0);
         display.updateOptions = vi.fn().mockImplementation(async () => {
             display._options = /** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({dictionaries: [{enabled: true}]}));
         });
-        display._findDictionaryEntries = vi.fn().mockResolvedValue({dictionaryEntries: []});
+        display._findDictionaryEntries = vi.fn().mockResolvedValue({dictionaryEntries: evicted ? [restoredEntry] : []});
         display._replaceHistoryStateNoNavigate = vi.fn();
         display.getOptionsContext = /** @type {typeof display.getOptionsContext} */ (/** @type {unknown} */ (vi.fn(() => ({depth: 0}))));
         display.getContentOrigin = vi.fn(() => ({tabId: null, frameId: null}));
@@ -79,13 +101,17 @@ describe('Display lookup refresh', () => {
         display._addEntryEventListeners = vi.fn();
         display._focusEntry = vi.fn();
 
-        const urlSearchParams = new URLSearchParams({query: '名前'});
+        const urlSearchParams = new URLSearchParams({query: '名前', lookup: String(lookup)});
         await display._setContentTermsOrKanji('terms', urlSearchParams, contentToken);
 
         expect(display.updateOptions).toHaveBeenCalledOnce();
-        expect(display._findDictionaryEntries).toHaveBeenCalledOnce();
+        expect(display._findDictionaryEntries).toHaveBeenCalledTimes(expectedLookup ? 1 : 0);
         expect(display._setNoDictionariesVisible).toHaveBeenCalledWith(false);
-        expect(display._setNoContentVisible).toHaveBeenCalledWith(true);
+        expect(display._setNoContentVisible).toHaveBeenCalledWith(expectedLookup && !evicted);
+        if (evicted) {
+            expect(display._dictionaryEntries).toEqual([restoredEntry]);
+            expect(display._container.textContent).toBe('Restored definition');
+        }
     });
 
     test('searchLast preserves disabled lookup mode across refreshes', async ({window}) => {

@@ -1,5 +1,5 @@
 * @yomidevs/yomitan-codeowners
-
+ 
 # Manabitan-specific inbound license policy
 /CONTRIBUTING.md @aehlke @yomidevs/yomitan-codeowners
 /LICENSE-BSD-3-CLAUSE @aehlke @yomidevs/yomitan-codeowners

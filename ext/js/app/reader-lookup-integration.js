@@ -59,6 +59,7 @@ export function installReaderLookupIntegration(frontend) {
                 void 0,
                 {isCurrent, subscribe},
                 dictionaryAvailability,
+                {term: request.term, reading: request.reading, surface: request.surface},
             );
             await frontend.showContentCompleted();
             if (isCurrent()) {

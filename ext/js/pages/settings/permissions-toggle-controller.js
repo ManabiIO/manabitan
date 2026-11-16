@@ -30,6 +30,16 @@ export class PermissionsToggleController {
         this._settingsController = settingsController;
         /** @type {?NodeListOf<HTMLInputElement>} */
         this._toggles = null;
+        /** @type {number} */
+        this._viewGeneration = 0;
+        /** @type {number} */
+        this._viewRevision = -1;
+        /** @type {number} */
+        this._permissionsGeneration = 0;
+        /** @type {import('settings').OptionsContext2|null} */
+        this._viewContext = null;
+        /** @type {WeakMap<HTMLInputElement, object>} */
+        this._toggleOperations = new WeakMap();
     }
 
     /** */
@@ -40,11 +50,17 @@ export class PermissionsToggleController {
             toggle.addEventListener('change', this._onPermissionsToggleChangeEvent.bind(this), false);
         }
         this._settingsController.on('optionsChanged', this._onOptionsChanged.bind(this));
+        this._settingsController.on('optionsContextChanged', () => {
+            ++this._viewGeneration;
+            this._viewContext = null;
+        });
         this._settingsController.on('permissionsChanged', this._onPermissionsChanged.bind(this));
 
         const optionsContext = this._settingsController.getOptionsContext();
+        const generation = this._viewGeneration;
+        const revision = this._settingsController.optionsRevision;
         const options = await this._settingsController.getOptions();
-        if (this._settingsController.getOptionsContext().index === optionsContext.index) {
+        if (generation === this._viewGeneration && revision === this._settingsController.optionsRevision && this._isContextCurrent(optionsContext)) {
             this._onOptionsChanged({options, optionsContext});
         }
     }
@@ -54,7 +70,12 @@ export class PermissionsToggleController {
     /**
      * @param {import('settings-controller').EventArgument<'optionsChanged'>} details
      */
-    _onOptionsChanged({options}) {
+    _onOptionsChanged({options, optionsContext}) {
+        const context = /** @type {import('settings').OptionsContext2} */ (optionsContext);
+        if (!this._isContextCurrent(context)) { return; }
+        this._viewContext = {...context};
+        this._viewRevision = this._settingsController.optionsRevision;
+        ++this._viewGeneration;
         let accessor = null;
         for (const toggle of /** @type {NodeListOf<HTMLInputElement>} */ (this._toggles)) {
             const {permissionsSetting} = toggle.dataset;
@@ -71,7 +92,7 @@ export class PermissionsToggleController {
             } catch (e) {
                 continue;
             }
-            toggle.checked = !!value;
+            this._setToggleValue(toggle, !!value);
         }
         void this._updateValidity().catch((error) => { log.error(error); });
     }
@@ -85,10 +106,22 @@ export class PermissionsToggleController {
         const valuePre = !value;
         const {permissionsSetting} = toggle.dataset;
         const hasPermissionsSetting = typeof permissionsSetting === 'string';
-        const optionsContext = hasPermissionsSetting ? this._settingsController.getOptionsContext() : null;
+        const optionsContext = hasPermissionsSetting ? this._viewContext : null;
+        if (hasPermissionsSetting && (optionsContext === null || this._viewRevision !== this._settingsController.optionsRevision || !this._isContextCurrent(optionsContext))) {
+            this._setToggleValue(toggle, valuePre);
+            return;
+        }
+        const generation = this._viewGeneration;
+        const revision = this._viewRevision;
+        const operation = {};
+        this._toggleOperations.set(toggle, operation);
+        const isCurrent = () => (
+            this._toggleOperations.get(toggle) === operation &&
+            (optionsContext === null || (generation === this._viewGeneration && revision === this._settingsController.optionsRevision && this._isContextCurrent(optionsContext)))
+        );
 
         if (value || !hasPermissionsSetting) {
-            toggle.checked = valuePre;
+            this._setToggleValue(toggle, valuePre);
             const permissions = this._getRequiredPermissions(toggle);
             try {
                 value = await setPermissionsGranted({permissions}, value);
@@ -100,24 +133,40 @@ export class PermissionsToggleController {
                     // NOP
                 }
             }
-            toggle.checked = value;
+            if (!isCurrent()) { return; }
+            this._setToggleValue(toggle, value);
         }
 
         if (hasPermissionsSetting) {
-            if (optionsContext === null || this._settingsController.getOptionsContext().index !== optionsContext.index) { return; }
+            if (optionsContext === null || !isCurrent()) { return; }
+            this._setToggleValue(toggle, value);
             this._setToggleValid(toggle, true);
             try {
-                const results = await this._settingsController.setProfileSetting(permissionsSetting, value);
+                const results = await this._settingsController.modifySettings([{action: 'set', path: permissionsSetting, value, scope: 'profile', optionsContext, profileId: optionsContext.profileId ?? ''}]);
                 if (!Array.isArray(results) || results.length !== 1 || !results[0] || typeof results[0] !== 'object') {
                     throw new Error('Permission setting update returned an invalid result');
                 }
                 if (results[0].error) { throw ExtensionError.deserialize(results[0].error); }
             } catch (error) {
-                toggle.checked = valuePre;
-                this._setToggleValid(toggle, !valuePre || await hasPermissions({permissions: this._getRequiredPermissions(toggle)}));
+                if (isCurrent()) {
+                    const valid = !valuePre || await hasPermissions({permissions: this._getRequiredPermissions(toggle)});
+                    if (isCurrent()) {
+                        this._setToggleValue(toggle, valuePre);
+                        this._setToggleValid(toggle, valid);
+                    }
+                }
                 throw error;
             }
         }
+    }
+
+    /**
+     * @param {import('settings').OptionsContext2} context
+     * @returns {boolean}
+     */
+    _isContextCurrent(context) {
+        const current = this._settingsController.getOptionsContext();
+        return current.index === context.index && current.profileId === context.profileId;
     }
 
     /**
@@ -133,6 +182,7 @@ export class PermissionsToggleController {
      * @param {import('settings-controller').EventArgument<'permissionsChanged'>} details
      */
     _onPermissionsChanged({permissions}) {
+        ++this._permissionsGeneration;
         const permissions2 = permissions.permissions;
         const permissionsSet = new Set(typeof permissions2 !== 'undefined' ? permissions2 : []);
         for (const toggle of /** @type {NodeListOf<HTMLInputElement>} */ (this._toggles)) {
@@ -143,9 +193,18 @@ export class PermissionsToggleController {
                 const valid = !toggle.checked || hasPermissions2;
                 this._setToggleValid(toggle, valid);
             } else {
-                toggle.checked = hasPermissions2;
+                this._setToggleValue(toggle, hasPermissions2);
             }
         }
+    }
+
+    /**
+     * @param {HTMLInputElement} toggle
+     * @param {boolean} value
+     */
+    _setToggleValue(toggle, value) {
+        toggle.checked = value;
+        toggle.dispatchEvent(new CustomEvent('settingChanged', {detail: {value}}));
     }
 
     /**
@@ -160,7 +219,9 @@ export class PermissionsToggleController {
 
     /** */
     async _updateValidity() {
+        const generation = ++this._permissionsGeneration;
         const permissions = await getAllPermissions();
+        if (generation !== this._permissionsGeneration) { return; }
         this._onPermissionsChanged({permissions});
     }
 

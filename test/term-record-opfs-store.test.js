@@ -1309,7 +1309,14 @@ describe('TermRecordOpfsStore', () => {
         const sidecarFileName = `${fileName}.mbti`;
         fileBytesByName.set(fileName, new Uint8Array([1]));
         fileBytesByName.set(sidecarFileName, new Uint8Array([2]));
-        const state = asShardState({fileName, logicalKey: fileName});
+        const state = store._createShardState(
+            fileName,
+            await recordsDirectoryHandle.getFileHandle(fileName),
+            1,
+            'raw',
+            0,
+            fileName,
+        );
         Reflect.set(store, '_recordsDirectoryHandle', recordsDirectoryHandle);
         Reflect.get(store, '_shardStateByFileName').set(fileName, state);
         Reflect.get(store, '_activeAppendShardStateByKey').set(fileName, state);

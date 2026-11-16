@@ -698,6 +698,10 @@ export class DictionaryImportController {
             });
             return;
         }
+        if (this._modifying && !this._recommendedDictionaryActiveImport) {
+            this._setRecommendedError('A dictionary operation is in progress. Wait for it to finish, then try again.');
+            return;
+        }
         if (this._isRecommendedImportQueuedOrActive(importUrl)) {
             button.disabled = true;
             reportDiagnostics('recommended-dictionaries-import-click-deduplicated', {
@@ -749,16 +753,25 @@ export class DictionaryImportController {
 
                 try {
                     const importProgressTracker = new ImportProgressTracker(this._getUrlImportSteps(), 1);
+                    let importSucceeded = false;
+                    /** @type {Error[]} */
+                    let importErrors = [];
                     await this._runImportWithWatchdog(
                         this._importDictionaries(
                             this._getUrlImportSources([url], importProgressTracker.onProgress.bind(importProgressTracker)),
                             null,
-                            null,
+                            ({ok, errors}) => {
+                                importSucceeded = ok;
+                                importErrors = errors;
+                            },
                             importProgressTracker,
                         ),
                         `Recommended dictionary import (${summarizeUrlForDiagnostics(url)})`,
                         importProgressTracker,
                     );
+                    if (!importSucceeded) {
+                        throw new Error(importErrors.map((error) => this._errorToString(error)).join('\n') || 'Dictionary import failed.');
+                    }
                 } catch (error) {
                     const e2 = toError(error);
                     log.error(e2);
@@ -3394,6 +3407,7 @@ export class DictionaryImportController {
                         },
                         {action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: sourceName, value: title},
                         {action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: sourceName, value: title},
+                        {action: 'setDictionarySelector', profileId, selector: 'popupBlurByFrequencyDictionary', expectedValue: sourceName, value: title},
                     );
                 }
                 if (targets.length > 0) { return await this._modifyGlobalSettings(targets); }
@@ -3442,8 +3456,10 @@ export class DictionaryImportController {
                 } else if (sequenced && options.general.mainDictionary === '') {
                     targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: '', value: title});
                 }
-                if (selectorSourceTitle !== null && options.general.sortFrequencyDictionary === selectorSourceTitle) {
-                    targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: selectorSourceTitle, value: title});
+                for (const selector of /** @type {const} */ (['sortFrequencyDictionary', 'popupBlurByFrequencyDictionary'])) {
+                    if (selectorSourceTitle !== null && options.general[selector] === selectorSourceTitle) {
+                        targets.push({action: 'setDictionarySelector', profileId, selector, expectedValue: selectorSourceTitle, value: title});
+                    }
                 }
             } else {
                 const {name} = profileDictionarySettings[0];
@@ -3462,11 +3478,13 @@ export class DictionaryImportController {
                 ) {
                     targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: options.general.mainDictionary, value: title});
                 }
-                if (
-                    options.general.sortFrequencyDictionary === name ||
-                    (selectorSourceTitle !== null && options.general.sortFrequencyDictionary === selectorSourceTitle)
-                ) {
-                    targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: options.general.sortFrequencyDictionary, value: title});
+                for (const selector of /** @type {const} */ (['sortFrequencyDictionary', 'popupBlurByFrequencyDictionary'])) {
+                    if (
+                        options.general[selector] === name ||
+                        (selectorSourceTitle !== null && options.general[selector] === selectorSourceTitle)
+                    ) {
+                        targets.push({action: 'setDictionarySelector', profileId, selector, expectedValue: options.general[selector], value: title});
+                    }
                 }
             }
         }
@@ -3489,8 +3507,10 @@ export class DictionaryImportController {
             if (general.mainDictionary === dictionaryTitle) {
                 targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: dictionaryTitle, value: '', requireDictionaryUninstalled: dictionaryTitle});
             }
-            if (general.sortFrequencyDictionary === dictionaryTitle) {
-                targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: dictionaryTitle, value: null, requireDictionaryUninstalled: dictionaryTitle});
+            for (const selector of /** @type {const} */ (['sortFrequencyDictionary', 'popupBlurByFrequencyDictionary'])) {
+                if (general[selector] === dictionaryTitle) {
+                    targets.push({action: 'setDictionarySelector', profileId, selector, expectedValue: dictionaryTitle, value: null, requireDictionaryUninstalled: dictionaryTitle});
+                }
             }
         }
         return targets.length > 0 ? await this._modifyGlobalSettings(targets) : [];
@@ -3513,8 +3533,10 @@ export class DictionaryImportController {
             if (general.mainDictionary !== '') {
                 targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: general.mainDictionary, value: '', requireDictionaryUninstalled: general.mainDictionary});
             }
-            if (typeof general.sortFrequencyDictionary === 'string') {
-                targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: general.sortFrequencyDictionary, value: null, requireDictionaryUninstalled: general.sortFrequencyDictionary});
+            for (const selector of /** @type {const} */ (['sortFrequencyDictionary', 'popupBlurByFrequencyDictionary'])) {
+                if (typeof general[selector] === 'string') {
+                    targets.push({action: 'setDictionarySelector', profileId, selector, expectedValue: general[selector], value: null, requireDictionaryUninstalled: general[selector]});
+                }
             }
         }
         return targets.length > 0 ? await this._modifyGlobalSettings(targets) : [];

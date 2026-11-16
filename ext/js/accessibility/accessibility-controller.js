@@ -28,8 +28,8 @@ export class AccessibilityController {
         this._updateGoogleDocsAccessibilityToken = null;
         /** @type {?Promise<void>} */
         this._updateGoogleDocsAccessibilityPromise = null;
-        /** @type {boolean} */
-        this._forceGoogleDocsHtmlRenderingAny = false;
+        /** @type {?boolean} */
+        this._forceGoogleDocsHtmlRenderingAny = null;
     }
 
     /**
@@ -80,22 +80,23 @@ export class AccessibilityController {
     async _updateGoogleDocsAccessibilityInner(forceGoogleDocsHtmlRenderingAny) {
         if (this._forceGoogleDocsHtmlRenderingAny === forceGoogleDocsHtmlRenderingAny) { return; }
 
-        this._forceGoogleDocsHtmlRenderingAny = forceGoogleDocsHtmlRenderingAny;
-
         const id = 'googleDocsAccessibility';
         try {
+            const registered = await isContentScriptRegistered(id);
             if (forceGoogleDocsHtmlRenderingAny) {
-                if (await isContentScriptRegistered(id)) { return; }
-                try {
-                    await this._registerGoogleDocsContentScript(id, false);
-                } catch (e) {
-                    // Firefox doesn't support `world` field and will throw an error.
-                    // In this case, use the xray vision version.
-                    await this._registerGoogleDocsContentScript(id, true);
+                if (!registered) {
+                    try {
+                        await this._registerGoogleDocsContentScript(id, false);
+                    } catch (e) {
+                        // Firefox doesn't support `world` field and will throw an error.
+                        // In this case, use the xray vision version.
+                        await this._registerGoogleDocsContentScript(id, true);
+                    }
                 }
-            } else {
+            } else if (registered) {
                 await unregisterContentScript(id);
             }
+            this._forceGoogleDocsHtmlRenderingAny = forceGoogleDocsHtmlRenderingAny;
         } catch (e) {
             log.error(e);
         }

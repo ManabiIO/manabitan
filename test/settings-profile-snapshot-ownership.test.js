@@ -632,21 +632,24 @@ test('permission prompt completion cannot write its result into a newly selected
             },
         },
     });
-    const setProfileSetting = vi.fn().mockResolvedValue([]);
-    const controller = Object.assign(Object.create(PermissionsToggleController.prototype), {
-        _settingsController: {
-            getOptionsContext: () => ({index: profileIndex}),
-            setProfileSetting,
-        },
+    const modifySettings = vi.fn().mockResolvedValue([{}]);
+    const controller = new PermissionsToggleController(/** @type {any} */ ({
+        getOptionsContext: () => ({index: profileIndex}),
+        modifySettings,
+    }));
+    Object.assign(controller, {
+        _viewContext: {index: profileIndex},
+        _viewRevision: undefined,
         _getRequiredPermissions: () => ['clipboardRead'],
         _setToggleValid: vi.fn(),
     });
     const toggle = {
         checked: true,
         dataset: {permissionsSetting: 'general.enableYomitanApi'},
+        dispatchEvent: vi.fn(),
     };
 
-    const operation = controller._onPermissionsToggleChange({currentTarget: toggle});
+    const operation = controller._onPermissionsToggleChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: toggle})));
     await flush();
     profileIndex = 1;
     if (permissionCallback === null) { throw new Error('Permission request was not started'); }
@@ -654,7 +657,7 @@ test('permission prompt completion cannot write its result into a newly selected
     resolvePermission(true);
     await operation;
 
-    expect(setProfileSetting).not.toHaveBeenCalled();
+    expect(modifySettings).not.toHaveBeenCalled();
 });
 
 for (const [name, method, args] of /** @type {[string, string, unknown[]][]} */ ([
