@@ -5990,28 +5990,7 @@ null;
         if (!(a instanceof Uint8Array) || !(b instanceof Uint8Array)) {
             throw new TypeError('Term content byte comparison requires Uint8Array inputs');
         }
-        if (a.byteLength !== b.byteLength) { return false; }
-        let i = 0;
-        const length = a.byteLength;
-        const unrolledLength = length & ~7;
-        for (; i < unrolledLength; i += 8) {
-            if (
-                a[i] !== b[i] ||
-                a[i + 1] !== b[i + 1] ||
-                a[i + 2] !== b[i + 2] ||
-                a[i + 3] !== b[i + 3] ||
-                a[i + 4] !== b[i + 4] ||
-                a[i + 5] !== b[i + 5] ||
-                a[i + 6] !== b[i + 6] ||
-                a[i + 7] !== b[i + 7]
-            ) {
-                return false;
-            }
-        }
-        for (; i < length; ++i) {
-            if (a[i] !== b[i]) { return false; }
-        }
-        return true;
+        return this._termContentBytesEqualSpan(a, b, 0, b.byteLength);
     }
 
     /**
@@ -6023,21 +6002,32 @@ null;
      */
     _termContentBytesEqualSpan(a, buffer, offset, length) {
         if (a.byteLength !== length) { return false; }
+        if (a[0] !== buffer[offset] && length !== 0) { return false; }
         let i = 0;
         const unrolledLength = length & ~7;
-        for (; i < unrolledLength; i += 8) {
-            const j = offset + i;
-            if (
-                a[i] !== buffer[j] ||
-                a[i + 1] !== buffer[j + 1] ||
-                a[i + 2] !== buffer[j + 2] ||
-                a[i + 3] !== buffer[j + 3] ||
-                a[i + 4] !== buffer[j + 4] ||
-                a[i + 5] !== buffer[j + 5] ||
-                a[i + 6] !== buffer[j + 6] ||
-                a[i + 7] !== buffer[j + 7]
-            ) {
-                return false;
+        // Keep small values allocation-free; amortize views over larger content.
+        if (length >= 256) {
+            if (offset < 0 || offset > buffer.byteLength || length > buffer.byteLength - offset) { return false; }
+            const left = new DataView(a.buffer, a.byteOffset, length);
+            const right = new DataView(buffer.buffer, buffer.byteOffset + offset, length);
+            for (; i < unrolledLength; i += 8) {
+                if (left.getUint32(i) !== right.getUint32(i) || left.getUint32(i + 4) !== right.getUint32(i + 4)) { return false; }
+            }
+        } else {
+            for (; i < unrolledLength; i += 8) {
+                const j = offset + i;
+                if (
+                    a[i] !== buffer[j] ||
+                    a[i + 1] !== buffer[j + 1] ||
+                    a[i + 2] !== buffer[j + 2] ||
+                    a[i + 3] !== buffer[j + 3] ||
+                    a[i + 4] !== buffer[j + 4] ||
+                    a[i + 5] !== buffer[j + 5] ||
+                    a[i + 6] !== buffer[j + 6] ||
+                    a[i + 7] !== buffer[j + 7]
+                ) {
+                    return false;
+                }
             }
         }
         for (; i < length; ++i) {
@@ -6460,11 +6450,33 @@ null;
         const owned = spans.buffer.slice(minimumOffset, maximumEnd);
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.byteLength;
-        for (let i = 0; i < staged.indexes.length; ++i) {
-            const index = staged.indexes[i];
-            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
-            this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
-            this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
+        const firstIndex = staged.indexes[0];
+        const endIndex = firstIndex + staged.indexes.length;
+        let contiguousPublished = (
+            minimumOffset === 0 && publishedCount === staged.indexes.length &&
+            firstIndex >= 0 && spans.offsets instanceof Uint32Array &&
+            endIndex <= this._termEntryContentMetaRecentSourceBatchIdTable.length &&
+            endIndex <= this._termEntryContentMetaRecentSourceOffsetTable.length
+        );
+        if (contiguousPublished) {
+            for (let i = 1; i < staged.indexes.length; ++i) {
+                if (staged.indexes[i] !== firstIndex + i) {
+                    contiguousPublished = false;
+                    break;
+                }
+            }
+        }
+        // This per-call witness stays within the same synchronous publication.
+        if (contiguousPublished) {
+            this._termEntryContentMetaRecentSourceBatchIdTable.fill(batchId, firstIndex, endIndex);
+            this._termEntryContentMetaRecentSourceOffsetTable.set(spans.offsets.subarray(0, staged.indexes.length), firstIndex);
+        } else {
+            for (let i = 0; i < staged.indexes.length; ++i) {
+                const index = staged.indexes[i];
+                if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+                this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
+                this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
+            }
         }
         return owned.byteLength;
     }
