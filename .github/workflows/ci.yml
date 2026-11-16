@@ -68,9 +68,6 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: ./.github/actions/setup
 
-      - name: Build Legal
-        run: npm run license-report:html
-
       - name: Build
         run: |
           if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
@@ -443,11 +440,10 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: ./.github/actions/setup
 
-      - name: Build Chromium test package
+      - name: Build Edge test package
         run: |
-          package_target=chrome-dev
+          package_target=edge
           if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
-            package_target=chrome
             npm run build -- --target "$package_target" --version "$MANABITAN_RELEASE_VERSION"
             node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" "builds/manabitan-$package_target.zip" > builds/release-package.json
           else
@@ -456,13 +452,13 @@ jobs:
           echo "MANABITAN_CHROMIUM_BUILD_TARGET=$package_target" >> "$GITHUB_ENV"
           echo "MANABITAN_E2E_SKIP_BUILD=1" >> "$GITHUB_ENV"
 
-      - name: Retain tested Chromium release package
+      - name: Retain tested Edge release package
         if: inputs.release_version != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: tested-release-edge
           path: |
-            builds/manabitan-chrome.zip
+            builds/manabitan-edge.zip
             builds/release-package.json
           retention-days: 14
           if-no-files-found: error

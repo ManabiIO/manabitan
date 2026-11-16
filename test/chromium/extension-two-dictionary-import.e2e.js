@@ -133,10 +133,10 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
 const dictionaryCacheDir = path.join(root, 'builds', 'e2e-dictionary-cache');
 const buildTarget = process.env.MANABITAN_CHROMIUM_BUILD_TARGET ?? 'chrome-dev';
-if (buildTarget !== 'chrome' && buildTarget !== 'chrome-dev') {
-    throw new Error('MANABITAN_CHROMIUM_BUILD_TARGET must be chrome or chrome-dev');
+if (buildTarget !== 'chrome' && buildTarget !== 'chrome-dev' && buildTarget !== 'edge') {
+    throw new Error('MANABITAN_CHROMIUM_BUILD_TARGET must be chrome, chrome-dev or edge');
 }
-const packageFilename = buildTarget === 'chrome' ? 'manabitan-chrome.zip' : 'manabitan-chrome-dev.zip';
+const packageFilename = `manabitan-${buildTarget}.zip`;
 const wagahaiHtmlPath = path.join(root, 'test', 'firefox', 'data', 'wagahai-neko.html');
 const fallbackJmdictUrl = 'https://github.com/yomidevs/jmdict-yomitan/releases/latest/download/JMdict_english.zip';
 const execFileAsync = promisify(execFile);

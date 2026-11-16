@@ -26,6 +26,8 @@ runs:
       shell: bash
       run: npm ci
 
-    - name: Build third-party libraries
+    - name: Build third-party libraries and license page
       shell: bash
-      run: npm run build:libs
+      run: |
+        npm run build:libs
+        npm run license-report:html
