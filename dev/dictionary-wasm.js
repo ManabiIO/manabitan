@@ -128,15 +128,18 @@ export function loadDictionaryWasm(root = dictionaryWasmRoot) {
  */
 export function copyDictionaryWasm(outputDirectory, root = dictionaryWasmRoot) {
     const modules = loadDictionaryWasm(root);
+    const directoryState = fs.lstatSync(outputDirectory, {throwIfNoEntry: false});
+    if (typeof directoryState !== 'undefined' && !directoryState.isDirectory()) { throw new Error(`Unexpected dictionary WASM output directory: ${outputDirectory}`); }
     fs.mkdirSync(outputDirectory, {recursive: true});
+    // Resolve parent aliases such as macOS /var before writing. Reject a link
+    // at the selected output directory itself, rather than harmless ancestors.
     const realOutputDirectory = fs.realpathSync(outputDirectory);
-    if (realOutputDirectory !== path.resolve(outputDirectory)) { throw new Error(`Linked dictionary WASM output directory is unsupported: ${outputDirectory}`); }
-    for (const [name, bytes] of modules) {
+    for (const name of modules.keys()) {
         const outputPath = path.join(realOutputDirectory, name);
         const state = fs.lstatSync(outputPath, {throwIfNoEntry: false});
         if (typeof state !== 'undefined' && !state.isFile()) { throw new Error(`Unexpected dictionary WASM output: ${outputPath}`); }
-        fs.writeFileSync(outputPath, bytes);
     }
+    for (const [name, bytes] of modules) { fs.writeFileSync(path.join(realOutputDirectory, name), bytes); }
 }
 
 /**

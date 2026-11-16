@@ -1,4 +1,4 @@
-import {mkdtemp, mkdir, readFile, writeFile} from 'node:fs/promises';
+import {mkdtemp, mkdir, readFile, symlink, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {expect, test} from 'vitest';
@@ -18,7 +18,7 @@ async function fixture() {
     const manifest = {format: 1,
         sourceDigest: identity.digest,
         sourceFileCount: identity.count,
-        toolchain: {compilerVersion: '18.1.3', linkerVersion: '18.1.3'},
+        toolchain: {compilerVersion: '21.1.8', linkerVersion: '21.1.8'},
         targets: ['term-bank-parser.wasm', 'term-content-canonical-scan-v1.wasm'].map((name) => ({name, sources: ['ext/js/dictionary/wasm/parser.c'], arguments: ['-O3'], sha256: dictionaryWasmHash(module)}))};
     for (const {name} of manifest.targets) { await writeFile(join(artifacts, name), module); }
     const saveManifest = () => writeFile(join(artifacts, 'manifest.json'), JSON.stringify(manifest));
@@ -30,6 +30,34 @@ test('normal builds copy the recorded WASM bytes without executing a host compil
     const value = await fixture();
     copyDictionaryWasm(value.output, value.root);
     for (const {name} of value.manifest.targets) { expect(await readFile(join(value.output, name))).toEqual(value.module); }
+});
+
+test('normal builds resolve parent directory aliases before copying', async () => {
+    const value = await fixture();
+    const alias = join(value.root, 'parent-alias');
+    await symlink(value.output, alias, 'dir');
+    const output = join(alias, 'generated');
+    copyDictionaryWasm(output, value.root);
+    for (const {name} of value.manifest.targets) { expect(await readFile(join(output, name))).toEqual(value.module); }
+});
+
+test('normal builds reject a linked output directory', async () => {
+    const value = await fixture();
+    const output = join(value.root, 'linked-output');
+    await symlink(value.output, output, 'dir');
+    expect(() => copyDictionaryWasm(output, value.root)).toThrow(/Unexpected dictionary WASM output directory/u);
+});
+
+test('a linked second output preserves the first output and the link target', async () => {
+    const value = await fixture();
+    const first = join(value.output, value.manifest.targets[0].name);
+    const outside = join(value.root, 'outside.wasm');
+    await writeFile(first, 'previous output');
+    await writeFile(outside, 'outside output');
+    await symlink(outside, join(value.output, value.manifest.targets[1].name));
+    expect(() => copyDictionaryWasm(value.output, value.root)).toThrow(/Unexpected dictionary WASM output/u);
+    expect(await readFile(first, 'utf8')).toBe('previous output');
+    expect(await readFile(outside, 'utf8')).toBe('outside output');
 });
 
 test.each(['change', 'addition', 'header', 'uppercase-header'])('native source %s requires explicit regeneration', async (mode) => {
@@ -78,15 +106,15 @@ test('checked-in artifacts match the current native inputs and are valid modules
 });
 
 test.each([
-    {compiler: 'Ubuntu clang version 18.1.3 (1ubuntu1)', linker: 'Ubuntu LLD 18.1.3 (compatible with GNU linkers)', accepted: true},
-    {compiler: 'Apple clang version 21.0.0', linker: 'LLD 18.1.3', accepted: false},
-    {compiler: 'clang version 18.1.3', linker: 'LLD 18.1.8', accepted: false},
-    {compiler: 'clang version 18.1.8', linker: 'LLD 18.1.3', accepted: false},
+    {compiler: 'Ubuntu clang version 21.1.8 (1ubuntu1)', linker: 'Ubuntu LLD 21.1.8 (compatible with GNU linkers)', accepted: true},
+    {compiler: 'Apple clang version 21.0.0', linker: 'LLD 21.1.8', accepted: false},
+    {compiler: 'clang version 21.1.8', linker: 'LLD 21.1.9', accepted: false},
+    {compiler: 'clang version 21.1.9', linker: 'LLD 21.1.8', accepted: false},
 ])('regeneration pins compiler and linker: $compiler / $linker', ({compiler, linker, accepted}) => {
-    const check = () => verifyDictionaryWasmToolchain(compiler, linker, {compilerVersion: '18.1.3', linkerVersion: '18.1.3'});
+    const check = () => verifyDictionaryWasmToolchain(compiler, linker, {compilerVersion: '21.1.8', linkerVersion: '21.1.8'});
     if (accepted) {
         expect(check).not.toThrow();
     } else {
-        expect(check).toThrow(/Clang 18.1.3 and LLD 18.1.3/u);
+        expect(check).toThrow(/Clang 21.1.8 and LLD 21.1.8/u);
     }
 });

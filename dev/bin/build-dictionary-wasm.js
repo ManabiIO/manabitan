@@ -52,8 +52,8 @@ export function main(argv = process.argv.slice(2)) {
     if (values.write && values.check) { throw new Error('Choose --write or --check'); }
     const manifest = getDictionaryWasmManifest();
     if (!values.write) { loadDictionaryWasm(); }
-    const compiler = executable(process.env.MANABITAN_CLANG || 'clang-18');
-    const linker = executable(process.env.MANABITAN_WASM_LD || 'wasm-ld-18');
+    const compiler = executable(process.env.MANABITAN_CLANG || 'clang-21');
+    const linker = executable(process.env.MANABITAN_WASM_LD || 'wasm-ld-21');
     const compilerVersion = execFileSync(compiler, ['--version'], {encoding: 'utf8'});
     const linkerVersion = execFileSync(linker, ['--version'], {encoding: 'utf8'});
     verifyDictionaryWasmToolchain(compilerVersion, linkerVersion, manifest.toolchain);
@@ -63,8 +63,7 @@ export function main(argv = process.argv.slice(2)) {
         const generated = new Map();
         for (const target of manifest.targets) {
             const output = path.join(directory, target.name);
-            const linkerArgument = target.arguments.includes('--target=wasm32-freestanding') ? [`--ld-path=${linker}`] : [];
-            execFileSync(compiler, [...linkerArgument, ...target.arguments, '-o', output, ...target.sources.map((source) => path.join(dictionaryWasmRoot, source))], {stdio: 'inherit'});
+            execFileSync(compiler, [`-fuse-ld=${linker}`, ...target.arguments, '-o', output, ...target.sources.map((source) => path.join(dictionaryWasmRoot, source))], {stdio: 'inherit'});
             const bytes = fs.readFileSync(output);
             if (!WebAssembly.validate(bytes)) { throw new Error(`Compiler produced invalid WASM: ${target.name}`); }
             if (!values.write && dictionaryWasmHash(bytes) !== target.sha256) { throw new Error(`Pinned rebuild differs from checked-in WASM: ${target.name}`); }
