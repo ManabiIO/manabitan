@@ -77,8 +77,13 @@ function verifySize(value, actual, name) {
 function verifyProvenanceSubjects(bytes, expected) {
     const lines = Buffer.from(bytes).toString('utf8').trim()
         .split('\n');
-    if (lines.length !== 1) { throw new Error('Expected one signed provenance envelope'); }
-    const envelope = object(parseJson(lines[0]), 'provenance envelope');
+    if (lines.length !== 1) { throw new Error('Expected one signed provenance document'); }
+    let envelope = object(parseJson(lines[0]), 'provenance envelope');
+    if (typeof envelope.mediaType !== 'undefined' || typeof envelope.dsseEnvelope !== 'undefined') {
+        if (envelope.mediaType !== 'application/vnd.dev.sigstore.bundle.v0.3+json') { throw new Error('Unsupported provenance bundle'); }
+        object(envelope.verificationMaterial, 'provenance verification material');
+        envelope = object(envelope.dsseEnvelope, 'provenance envelope');
+    }
     if (envelope.payloadType !== 'application/vnd.in-toto+json' || typeof envelope.payload !== 'string' ||
     !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(envelope.payload) ||
     !Array.isArray(envelope.signatures) || envelope.signatures.length === 0) { throw new Error('Invalid signed provenance envelope'); }
