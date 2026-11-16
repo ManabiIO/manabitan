@@ -49,6 +49,30 @@ describe('ManifestUtil firefox variants', () => {
     });
 });
 
+describe('variant package exclusions', () => {
+    test('Firefox Android inherits Firefox exclusions', () => {
+        const util = new ManifestUtil();
+        expect(util.getVariantFileExclusions('firefox-android')).toEqual([
+            'sw.js', 'offscreen.html', 'js/background/offscreen.js', 'js/background/offscreen-main.js',
+        ]);
+    });
+
+    test('multi-level Chrome variants inherit the background page exclusion', () => {
+        expect(new ManifestUtil().getVariantFileExclusions('chrome-playwright')).toEqual(['background.html']);
+    });
+
+    test('explicit child exclusions override inherited exclusions without mutating the parent', () => {
+        const util = new ManifestUtil();
+        const child = util.getVariant('firefox-android');
+        if (typeof child === 'undefined') { throw new Error('Missing Android variant'); }
+        child.excludeFiles = [];
+        expect(util.getVariantFileExclusions('firefox-android')).toEqual([]);
+        const parentFiles = util.getVariantFileExclusions('firefox');
+        parentFiles.length = 0;
+        expect(util.getVariantFileExclusions('firefox')).toHaveLength(4);
+    });
+});
+
 describe('dictionary audio content security policy', () => {
     const manifestUtil = new ManifestUtil();
     test.each(manifestUtil.getVariants().map(({name}) => name))('%s permits locally stored blob audio', (variant) => {

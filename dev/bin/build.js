@@ -44,9 +44,10 @@ function hasLinkedLibraries(directory) {
 
 /**
  * @param {string} directory
+ * @param {string[]} excludeFiles
  * @returns {string[]}
  */
-function getPackageFiles(directory) {
+function getPackageFiles(directory, excludeFiles) {
     const files = getAllFiles(directory);
     if (hasLinkedLibraries(directory)) {
         const libraryDirectory = fs.realpathSync(path.join(directory, 'lib'));
@@ -54,7 +55,72 @@ function getPackageFiles(directory) {
             files.push(path.join('lib', fileName));
         }
     }
+    removeItemsFromArray(files, excludeFiles);
     return files;
+}
+
+/**
+ * Keep the previous output intact until the replacement has been built.
+ * @param {string} outputFileName
+ * @param {boolean} isDirectory
+ * @param {(stagedPath: string) => void|Promise<void>} write
+ * @returns {Promise<void>}
+ */
+async function writePackageOutput(outputFileName, isDirectory, write) {
+    outputFileName = path.resolve(outputFileName);
+    const previous = fs.lstatSync(outputFileName, {throwIfNoEntry: false});
+    if (typeof previous !== 'undefined' && (previous.isSymbolicLink() ||
+    (isDirectory ? !previous.isDirectory() : !previous.isFile()))) {
+        throw new Error(`Unexpected build output type: ${outputFileName}`);
+    }
+    const stagingDirectory = fs.mkdtempSync(path.join(path.dirname(outputFileName), `.${path.basename(outputFileName)}-`));
+    const stagedPath = path.join(stagingDirectory, 'new', path.basename(outputFileName));
+    const previousPath = path.join(stagingDirectory, 'previous');
+    let preserveStaging = false;
+    try {
+        fs.mkdirSync(path.dirname(stagedPath));
+        await write(stagedPath);
+        if (!isDirectory) {
+            fs.renameSync(stagedPath, outputFileName);
+            return;
+        }
+        if (typeof previous !== 'undefined') { fs.renameSync(outputFileName, previousPath); }
+        try {
+            fs.renameSync(stagedPath, outputFileName);
+        } catch (error) {
+            if (typeof previous !== 'undefined') {
+                try {
+                    fs.renameSync(previousPath, outputFileName);
+                } catch (rollbackError) {
+                    preserveStaging = true;
+                    throw new AggregateError([error, rollbackError], `Build output rollback failed; previous output retained at ${previousPath}`);
+                }
+            }
+            throw error;
+        }
+    } finally {
+        if (!preserveStaging) { fs.rmSync(stagingDirectory, {recursive: true, force: true}); }
+    }
+}
+
+/**
+ * @param {string} directory
+ * @param {string[]} excludeFiles
+ * @param {string} outputDirectory
+ * @param {boolean} dryRun
+ * @returns {Promise<void>}
+ */
+export async function createDirectory(directory, excludeFiles, outputDirectory, dryRun) {
+    if (dryRun) { return; }
+    const files = getPackageFiles(directory, excludeFiles);
+    await writePackageOutput(outputDirectory, true, (stagedPath) => {
+        fs.mkdirSync(stagedPath);
+        for (const name of files) {
+            const destination = path.join(stagedPath, name);
+            fs.mkdirSync(path.dirname(destination), {recursive: true});
+            fs.copyFileSync(path.join(directory, name), destination);
+        }
+    });
 }
 
 /**
@@ -66,37 +132,35 @@ function getPackageFiles(directory) {
  * @param {boolean} dryRun
  */
 export async function createZip(directory, excludeFiles, outputFileName, sevenZipExes, onUpdate, dryRun) {
-    if (!dryRun) {
-        try {
-            fs.unlinkSync(outputFileName);
-        } catch (e) {
-            // NOP
-        }
+    if (dryRun) {
+        await createJSZip(directory, excludeFiles, outputFileName, onUpdate, true);
+        return;
     }
-
-    if (!dryRun && !hasLinkedLibraries(directory)) {
-        for (const exe of sevenZipExes) {
-            try {
-                const excludeArguments = excludeFiles.map((excludeFilePath) => `-x!${excludeFilePath}`);
-                childProcess.execFileSync(
-                    exe,
-                    [
-                        'a',
-                        outputFileName,
-                        '.',
-                        ...excludeArguments,
-                    ],
-                    {
-                        cwd: directory,
-                    },
-                );
-                return;
-            } catch (e) {
-                // NOP
+    await writePackageOutput(outputFileName, false, async (stagedPath) => {
+        if (!hasLinkedLibraries(directory)) {
+            for (const exe of sevenZipExes) {
+                try {
+                    const excludeArguments = excludeFiles.map((excludeFilePath) => `-x!${excludeFilePath}`);
+                    childProcess.execFileSync(
+                        exe,
+                        [
+                            'a',
+                            stagedPath,
+                            '.',
+                            ...excludeArguments,
+                        ],
+                        {
+                            cwd: directory,
+                        },
+                    );
+                    return;
+                } catch (e) {
+                    // NOP
+                }
             }
         }
-    }
-    await createJSZip(directory, excludeFiles, outputFileName, onUpdate, dryRun);
+        await createJSZip(directory, excludeFiles, stagedPath, onUpdate, false);
+    });
 }
 
 /**
@@ -107,8 +171,7 @@ export async function createZip(directory, excludeFiles, outputFileName, sevenZi
  * @param {boolean} dryRun
  */
 async function createJSZip(directory, excludeFiles, outputFileName, onUpdate, dryRun) {
-    const files = getPackageFiles(directory);
-    removeItemsFromArray(files, excludeFiles);
+    const files = getPackageFiles(directory, excludeFiles);
     const zip = new JSZip();
     for (const fileName of files) {
         zip.file(
@@ -174,7 +237,7 @@ function getIndexOfFilePath(array, item) {
  * @param {boolean} dryRunBuildZip
  * @param {string} yomitanVersion
  */
-async function build(buildDir, extDir, manifestUtil, variantNames, manifestPath, dryRun, dryRunBuildZip, yomitanVersion) {
+export async function build(buildDir, extDir, manifestUtil, variantNames, manifestPath, dryRun, dryRunBuildZip, yomitanVersion) {
     const sevenZipExes = ['7za', '7z'];
 
     // Create build directory
@@ -204,8 +267,7 @@ async function build(buildDir, extDir, manifestUtil, variantNames, manifestPath,
         if (typeof variant === 'undefined' || variant.buildable === false) { continue; }
 
         const {name, fileName, fileCopies} = variant;
-        let {excludeFiles} = variant;
-        if (!Array.isArray(excludeFiles)) { excludeFiles = []; }
+        const excludeFiles = manifestUtil.getVariantFileExclusions(variantName);
 
         process.stdout.write(`Building ${name}...\n`);
 
@@ -232,9 +294,7 @@ async function build(buildDir, extDir, manifestUtil, variantNames, manifestPath,
                     }
                 }
             } else {
-                if (!dryRun) {
-                    fs.cpSync(extDir, fullFileName, {recursive: true});
-                }
+                await createDirectory(extDir, excludeFiles, fullFileName, dryRun);
             }
         }
 
