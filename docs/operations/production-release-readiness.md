@@ -26,7 +26,7 @@ Use Manabitan-owned listings and inspect credential metadata without printing se
 
 Firefox signing identities must match their [manifest variants](../../dev/data/manifest-variants.json). The stable and development Gecko IDs differ; only the development variant uses the offline update feed. Verify the signed package version/ID and the feed hash before qualifying that update channel.
 
-Metadata inspection on 2026-11-06 found no repository-level Actions secrets and only `FF_OFFLINE_EXT_ID` in the `cd` environment. Organization-secret inspection was denied, so this does **not** establish that inherited credentials are absent. An authorized owner must verify the publisher's effective configuration and listing ownership before publication. A development publisher can skip signing/upload when credentials are unavailable; a green skipped run does not prove distribution.
+The [configuration-only probe on 2026-11-16](https://github.com/ManabiIO/manabitan/actions/runs/43838733779) checked effective secrets inside the `cd` environment, including inherited organization secrets available to that job. Only `FF_OFFLINE_EXT_ID` was present, and it matched the development manifest. Chrome, Firefox and Edge publisher credentials and stable listing IDs were unavailable; offline Chrome signing was also unconfigured. The probe disclosed no secret values and attempted no publication. Configure the missing credentials and listing IDs, then repeat this check and verify authentication and listing ownership before publication. A development publisher can skip signing/upload when credentials are unavailable; a green skipped run does not prove distribution.
 
 ## Prepare upgrade guidance and publish deliberately
 
