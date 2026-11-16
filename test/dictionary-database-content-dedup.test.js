@@ -2968,3 +2968,80 @@ describe('TermRecordOpfsStore batch dictionary indexes', () => {
         expect(Reflect.get(store, '_indexByDictionary').has('Other')).toBe(false);
     });
 });
+
+
+describe('recent-source cache metadata mapping', () => {
+    const cases = [
+        {name: 'dense zero-base spans', indexes: [2, 3, 4], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 0], [3, 4], [4, 8]], minimum: 0, end: 10, wrap: false},
+        {name: 'dense relative spans', indexes: [2, 3, 4], offsets: [3, 7, 11, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 0], [3, 4], [4, 8]], minimum: 3, end: 13, wrap: false},
+        {name: 'permuted published slots', indexes: [4, 2, 3], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[4, 0], [2, 4], [3, 8]], minimum: 0, end: 10, wrap: false},
+        {name: 'skipped collision slots', indexes: [4, -1, 1], offsets: [0, 12345, 8, 999], lengths: [2, 99999, 2], unpublished: [], mapping: [[4, 0], [1, 8]], minimum: 0, end: 10, wrap: false},
+        {name: 'unpublished slots', indexes: [2, 3, 4], offsets: [0, 12345, 8, 999], lengths: [2, 99999, 2], unpublished: [3], mapping: [[2, 0], [4, 8]], minimum: 0, end: 10, wrap: false},
+        {name: 'repeated slot fallback', indexes: [2, 2, 4], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 4], [4, 8]], minimum: 0, end: 10, wrap: false},
+        {name: 'dense identifier wrap', indexes: [2, 3, 4], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 0], [3, 4], [4, 8]], minimum: 0, end: 10, wrap: true},
+        {name: 'permuted identifier wrap', indexes: [4, 2, 3], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[4, 0], [2, 4], [3, 8]], minimum: 0, end: 10, wrap: true},
+    ];
+
+    test.each(cases)('preserves owned bytes and exact mappings for $name', (fixture) => {
+        const database = new DictionaryDatabase();
+        const seed = publishSlabMeta(database, Uint8Array.of(42), 0, 1, 10, 20);
+        const published = Reflect.get(database, '_termEntryContentMetaStateTable')[seed.staged.indexes[0]];
+        const cache = Reflect.get(database, '_cacheRecentPublishedTermContentSources');
+        const states = new Uint8Array(8);
+        for (const index of fixture.indexes) {
+            if (index >= 0) { states[index] = published; }
+        }
+        for (const index of fixture.unpublished) { states[index] = published + 1; }
+        const batchIds = new Uint32Array(8).fill(99);
+        const offsets = new Uint32Array(8).fill(77);
+        const owner = {
+            _termEntryContentMetaStateTable: states,
+            _termEntryContentMetaRecentSourceBatchIdTable: batchIds,
+            _termEntryContentMetaRecentSourceOffsetTable: offsets,
+            _recentTermContentSourceBatches: fixture.wrap ? new Map([[99, Uint8Array.of(1)]]) : new Map(),
+            _recentTermContentSourceBatchBytes: fixture.wrap ? 1 : 0,
+            _nextRecentTermContentSourceBatchId: fixture.wrap ? 0x100000000 : 1,
+        };
+        const source = Uint8Array.from({length: 20}, (_, i) => i + 1);
+        const expectedBytes = source.slice(fixture.minimum, fixture.end);
+        const offsetBacking = new Uint32Array(fixture.offsets.length + 2).fill(9999);
+        offsetBacking.set(fixture.offsets, 1);
+        const spans = {buffer: source, offsets: offsetBacking.subarray(1, fixture.offsets.length + 1), lengths: Uint32Array.from(fixture.lengths)};
+        expect(cache.call(owner, {indexes: Int32Array.from(fixture.indexes), active: true}, spans)).toBe(expectedBytes.length);
+        const expectedIds = new Uint32Array(8).fill(fixture.wrap ? 0 : 99);
+        const expectedOffsets = new Uint32Array(8).fill(77);
+        for (const [index, offset] of fixture.mapping) {
+            expectedIds[index] = 1;
+            expectedOffsets[index] = offset;
+        }
+        expect(batchIds).toEqual(expectedIds);
+        expect(offsets).toEqual(expectedOffsets);
+        expect([...spans.offsets]).toEqual(fixture.offsets);
+        expect(owner._recentTermContentSourceBatchBytes).toBe(expectedBytes.length);
+        expect(owner._recentTermContentSourceBatches.size).toBe(1);
+        source.fill(0);
+        expect(owner._recentTermContentSourceBatches.get(1)).toEqual(expectedBytes);
+    });
+
+    test('rejects an invalid later span without publishing any cache mappings', () => {
+        const database = new DictionaryDatabase();
+        const seed = publishSlabMeta(database, Uint8Array.of(42), 0, 1, 10, 20);
+        const published = Reflect.get(database, '_termEntryContentMetaStateTable')[seed.staged.indexes[0]];
+        const owner = {
+            _termEntryContentMetaStateTable: new Uint8Array(2).fill(published),
+            _termEntryContentMetaRecentSourceBatchIdTable: new Uint32Array(2),
+            _termEntryContentMetaRecentSourceOffsetTable: new Uint32Array(2),
+            _recentTermContentSourceBatches: new Map(),
+            _recentTermContentSourceBatchBytes: 0,
+            _nextRecentTermContentSourceBatchId: 1,
+        };
+        const cache = Reflect.get(database, '_cacheRecentPublishedTermContentSources');
+        expect(cache.call(owner, {indexes: new Int32Array([0, 1]), active: true}, {
+            buffer: new Uint8Array(4), offsets: new Uint32Array([0, 3]), lengths: new Uint32Array([2, 2]),
+        })).toBe(0);
+        expect(owner._recentTermContentSourceBatches.size).toBe(0);
+        expect([...owner._termEntryContentMetaRecentSourceBatchIdTable]).toEqual([0, 0]);
+        expect([...owner._termEntryContentMetaRecentSourceOffsetTable]).toEqual([0, 0]);
+        expect(owner._nextRecentTermContentSourceBatchId).toBe(1);
+    });
+});
