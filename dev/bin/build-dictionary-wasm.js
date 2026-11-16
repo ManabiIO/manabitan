@@ -63,7 +63,8 @@ export function main(argv = process.argv.slice(2)) {
         const generated = new Map();
         for (const target of manifest.targets) {
             const output = path.join(directory, target.name);
-            execFileSync(compiler, [`--ld-path=${linker}`, ...target.arguments, '-o', output, ...target.sources.map((source) => path.join(dictionaryWasmRoot, source))], {stdio: 'inherit'});
+            const linkerArgument = target.arguments.includes('--target=wasm32-freestanding') ? [`--ld-path=${linker}`] : [];
+            execFileSync(compiler, [...linkerArgument, ...target.arguments, '-o', output, ...target.sources.map((source) => path.join(dictionaryWasmRoot, source))], {stdio: 'inherit'});
             const bytes = fs.readFileSync(output);
             if (!WebAssembly.validate(bytes)) { throw new Error(`Compiler produced invalid WASM: ${target.name}`); }
             if (!values.write && dictionaryWasmHash(bytes) !== target.sha256) { throw new Error(`Pinned rebuild differs from checked-in WASM: ${target.name}`); }
