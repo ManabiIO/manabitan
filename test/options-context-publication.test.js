@@ -92,6 +92,29 @@ function appliedWidth(owner) {
 }
 
 describe('display options-message navigation ownership', () => {
+    test('the Anki connection identity is applied with its options snapshot', async () => {
+        const {owner, optionsGetProfile} = createOwner('display');
+        if (!(owner instanceof Display)) { throw new Error('Expected display'); }
+        const older = Promise.withResolvers();
+        optionsGetProfile.mockReturnValueOnce(older.promise).mockResolvedValueOnce({profileId: 'profile-b', options: options(700), ankiConnectionIdentity: 'connection-b'});
+        const first = owner.setOptionsContext(a);
+        await owner.setOptionsContext(b);
+        older.resolve({profileId: 'profile-a', options: options(300), ankiConnectionIdentity: 'connection-a'});
+        await first;
+
+        expect(appliedWidth(owner)).toBe(700);
+        expect(owner.getAnkiConnectionIdentity()).toBe('connection-b');
+    });
+
+    test('read-only options rendering accepts a legacy response without a connection identity', async () => {
+        const {owner, optionsGet} = createOwner('display');
+        if (!(owner instanceof Display)) { throw new Error('Expected display'); }
+        optionsGet.mockResolvedValueOnce(options(300));
+        await owner.setOptionsContext(a);
+        expect(appliedWidth(owner)).toBe(300);
+        expect(owner.getAnkiConnectionIdentity()).toBe(null);
+    });
+
     test.each([false, true])('only the newest options message can refresh content (same context=%s)', async (sameContext) => {
         const {owner, optionsGet} = createOwner('display');
         if (!(owner instanceof Display)) { throw new Error('Expected display'); }

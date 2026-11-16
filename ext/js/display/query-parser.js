@@ -20,6 +20,7 @@ import {EventDispatcher} from '../core/event-dispatcher.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
 import {trimTrailingWhitespacePlusSpace} from '../data/string-util.js';
+import {DOMTextScanner} from '../dom/dom-text-scanner.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {convertHiraganaToKatakana, convertKatakanaToHiragana, isStringEntirelyKana} from '../language/ja/japanese.js';
 import {TextScanner} from '../language/text-scanner.js';
@@ -39,6 +40,8 @@ export class QueryParser extends EventDispatcher {
         this._api = api;
         /** @type {import('display').GetSearchContextCallback} */
         this._getSearchContext = getSearchContext;
+        /** @type {?string} */
+        this._profileId = null;
         /** @type {string} */
         this._text = '';
         /** @type {?import('core').TokenObject} */
@@ -106,7 +109,9 @@ export class QueryParser extends EventDispatcher {
     /**
      * @param {import('display').QueryParserOptions} display
      */
-    setOptions({selectedParser, termSpacing, readingMode, useInternalParser, useMecabParser, useAllFrequencyDictionaries, language, scanning}) {
+    setOptions({profileId, selectedParser, termSpacing, readingMode, useInternalParser, useMecabParser, useAllFrequencyDictionaries, language, scanning}) {
+        const profileChanged = this._profileId !== profileId;
+        this._profileId = profileId;
         const previousUseInternalParser = this._useInternalParser;
         const previousUseMecabParser = this._useMecabParser;
         const previousUseAllFrequencyDictionaries = this._useAllFrequencyDictionaries;
@@ -145,6 +150,7 @@ export class QueryParser extends EventDispatcher {
 
         const parsingEnabled = this._useInternalParser || this._useMecabParser;
         const parsingChanged = (
+            profileChanged ||
             previousUseInternalParser !== this._useInternalParser ||
             previousUseMecabParser !== this._useMecabParser ||
             previousUseAllFrequencyDictionaries !== this._useAllFrequencyDictionaries ||
@@ -270,8 +276,12 @@ export class QueryParser extends EventDispatcher {
      * @param {string} value
      */
     async _setSelectedParser(value) {
+        const profileId = this._profileId;
         this._selectedParser = value;
         try {
+            if (typeof profileId !== 'string' || profileId.length === 0) {
+                throw new Error('Search profile identity is unavailable');
+            }
             const optionsContext = this._getOptionsContext();
             /** @type {import('settings-modifications').ScopedModificationSet} */
             const modification = {
@@ -280,12 +290,14 @@ export class QueryParser extends EventDispatcher {
                 value,
                 scope: 'profile',
                 optionsContext,
+                profileId,
             };
             const results = await this._api.modifySettings([modification], 'search');
             for (const {error} of results) {
                 if (typeof error !== 'undefined') { throw ExtensionError.deserialize(error); }
             }
         } catch (error) {
+            if (this._profileId !== profileId) { return; }
             try {
                 log.error(error);
             } catch (e) {
@@ -480,19 +492,29 @@ export class QueryParser extends EventDispatcher {
     _getSentenceOffset(textSource) {
         if (textSource.type === 'range') {
             const {range} = textSource;
-            const sourceOffset = this._textSourceOffsets.get(range.startContainer);
+            let {startContainer, startOffset} = range;
+            if (startContainer.nodeType === Node.ELEMENT_NODE || (startContainer.nodeType === Node.TEXT_NODE && startOffset === startContainer.nodeValue?.length)) {
+                // Resolve child-node and consumed-text boundaries to the next
+                // scanned character, crossing condensed source whitespace and
+                // skipping ruby readings as the actual lookup does.
+                const scanner = new DOMTextScanner(startContainer, startOffset, true, false).seek(1);
+                if (scanner.content.length === 0) { return null; }
+                startContainer = scanner.node;
+                startOffset = scanner.offset - scanner.content.length;
+            }
+            const sourceOffset = this._textSourceOffsets.get(startContainer);
             if (typeof sourceOffset !== 'undefined') {
                 const {offset, leadingNewlinesRemoved} = sourceOffset;
                 // Whitespace is condensed for display, while navigation uses the original full query.
-                return offset + range.startOffset + (range.startOffset > 0 ? leadingNewlinesRemoved : 0);
+                return offset + startOffset + (startOffset > 0 ? leadingNewlinesRemoved : 0);
             }
-            const node = this._getParentElement(range.startContainer);
+            const node = this._getParentElement(startContainer);
             if (node !== null && node instanceof HTMLElement) {
                 const {offset} = node.dataset;
                 if (typeof offset === 'string') {
                     const value = Number.parseInt(offset, 10);
                     if (Number.isFinite(value)) {
-                        return Math.max(0, value) + range.startOffset;
+                        return Math.max(0, value) + startOffset;
                     }
                 }
             }

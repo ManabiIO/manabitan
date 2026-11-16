@@ -870,12 +870,26 @@ export class JsonSchema {
      */
     _validateString(schema, value) {
         const {minLength, maxLength, pattern} = schema;
-        if (typeof minLength === 'number' && value.length < minLength) {
-            throw this._createError('String length too short');
-        }
+        if (typeof minLength === 'number' || typeof maxLength === 'number') {
+            // JSON Schema counts Unicode code points, not UTF-16 code units.
+            // Stop once neither length constraint needs the remaining text.
+            let length = 0;
+            for (let index = 0; index < value.length;) {
+                const codePoint = /** @type {number} */ (value.codePointAt(index));
+                index += codePoint > 0xffff ? 2 : 1;
+                ++length;
+                if (
+                    (typeof minLength !== 'number' || length >= minLength) &&
+                    (typeof maxLength !== 'number' || length > maxLength)
+                ) { break; }
+            }
+            if (typeof minLength === 'number' && length < minLength) {
+                throw this._createError('String length too short');
+            }
 
-        if (typeof maxLength === 'number' && value.length > maxLength) {
-            throw this._createError('String length too long');
+            if (typeof maxLength === 'number' && length > maxLength) {
+                throw this._createError('String length too long');
+            }
         }
 
         if (typeof pattern === 'string') {

@@ -160,7 +160,14 @@ export class SettingsController extends EventDispatcher {
     async setAllSettings(value) {
         this._optionsRevision = this.optionsRevision + 1;
         const profileIndex = value.profileCurrent;
-        await this._application.api.setAllSettings(value, this._source);
+        try {
+            await this._application.api.setAllSettings(value, this._source);
+        } catch (error) {
+            // Rebuild invalidated controls from durable settings after a failed
+            // replacement, including a write whose response may have been lost.
+            await this._onOptionsUpdatedInternal(true);
+            throw error;
+        }
         this._preparedOptionsFull = value;
         const profileId = this._getUniqueProfileId(value.profiles[profileIndex]);
         this._setProfileSelection(profileIndex, profileId, true);

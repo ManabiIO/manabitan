@@ -44,6 +44,16 @@ export class RecommendedSettingsController {
     async prepare() {
         this._languageSelect.addEventListener('change', this._onLanguageSelectChangedEvent.bind(this), false);
         this._applyButton.addEventListener('click', this._onApplyButtonClickedEvent.bind(this), false);
+        this._settingsController.on('optionsContextChanged', this._onOptionsContextChanged.bind(this));
+    }
+
+    /** */
+    _onOptionsContextChanged() {
+        // Recommendations belong to the profile which requested them. The
+        // language select may still display that profile while the next loads.
+        ++this._languageRequestGeneration;
+        this._recommendedSettingsModal.hidden = true;
+        this._recommendedSettings = new Map();
     }
 
     /**
@@ -137,6 +147,7 @@ export class RecommendedSettingsController {
      */
     async _onApplyButtonClicked(e) {
         e.preventDefault();
+        const request = this._languageRequestGeneration;
         /** @type {NodeListOf<HTMLInputElement>} */
         const enabledCheckboxes = querySelectorNotNull(document, '#recommended-settings-list').querySelectorAll('input[type="checkbox"]:checked');
         if (enabledCheckboxes.length === 0) {
@@ -151,6 +162,7 @@ export class RecommendedSettingsController {
             if (typeof setting === 'undefined') { continue; }
             modifications.push(setting.modification);
         }
+        if (modifications.length === 0) { return; }
 
         try {
             const results = await this._settingsController.modifyProfileSettings(modifications);
@@ -159,7 +171,9 @@ export class RecommendedSettingsController {
                     log.error(new Error(`Failed to apply recommended setting: ${JSON.stringify(result)}`));
                 }
             }
+            if (request !== this._languageRequestGeneration) { return; }
             await this._settingsController.refresh();
+            if (request !== this._languageRequestGeneration) { return; }
             this._recommendedSettingsModal.hidden = true;
         } catch (error) {
             log.error(error);

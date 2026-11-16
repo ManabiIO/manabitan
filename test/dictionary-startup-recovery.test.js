@@ -23,10 +23,11 @@ afterEach(() => {
 
 /**
  * @param {string} invalidSummary
+ * @param {string} [filename=':memory:']
  * @returns {{database: DictionaryDatabase, connection: import('@sqlite.org/sqlite-wasm').Database, deleteRecords: import('vitest').MockInstance}}
  */
-function createRecoveryDatabase(invalidSummary) {
-    const connection = new sqlite3.oo1.DB(':memory:');
+function createRecoveryDatabase(invalidSummary, filename = ':memory:') {
+    const connection = new sqlite3.oo1.DB(filename, 'c');
     connections.push(connection);
     connection.exec('CREATE TABLE dictionaries(id INTEGER PRIMARY KEY, title TEXT UNIQUE, version INTEGER, summaryJson TEXT)');
     connection.exec('CREATE TABLE dictionaryStorageHealth(title TEXT PRIMARY KEY, generationId TEXT, reason TEXT)');
@@ -126,6 +127,42 @@ describe('startup recovery preserves authoritative backup storage', () => {
         rename.mockRestore();
         await database._cleanupIncompleteImports();
         expectRestored(connection);
+        expect(deleteRecords).not.toHaveBeenCalled();
+    });
+
+    test('retires a failed discard rollback and preserves the backup for the next startup', async () => {
+        const filename = '/dictionary-startup-rollback-failure.sqlite3';
+        const {database, connection, deleteRecords} = createRecoveryDatabase('{invalid', filename);
+        database._refreshTermRecordStorageNameMappings();
+        const statement = database._getCachedStatement('SELECT 1');
+        const finalize = vi.spyOn(statement, 'finalize');
+        const close = vi.spyOn(connection, 'close');
+        const exec = connection.exec.bind(connection);
+        vi.spyOn(connection, 'exec').mockImplementation((value, ...args) => {
+            if (/** @type {unknown} */ (value) === 'COMMIT') { throw new Error('injected commit failure'); }
+            if (/** @type {unknown} */ (value) === 'ROLLBACK') { throw new Error('injected rollback failure'); }
+            return exec(value, ...args);
+        });
+
+        const report = await database._cleanupIncompleteImports();
+
+        expect(report.failedTitles).toEqual([backupTitle]);
+        expect(database.isPrepared()).toBe(false);
+        expect(close).toHaveBeenCalledOnce();
+        expect(finalize).toHaveBeenCalledOnce();
+        expect(deleteRecords).not.toHaveBeenCalled();
+        // Real SQLite rollback-on-close must keep all last-committed rows,
+        // including the recovery copy's immutable record-storage identity.
+        const reopened = new sqlite3.oo1.DB(filename, 'w');
+        connections.push(reopened);
+        expect(reopened.selectValues('SELECT title FROM dictionaries ORDER BY id')).toEqual([originalTitle, backupTitle, 'Other']);
+        for (const table of metadataTables) {
+            expect(reopened.selectValue(`SELECT COUNT(*) FROM ${table}`)).toBe(3);
+        }
+        Reflect.set(database, '_db', reopened);
+        database._refreshTermRecordStorageNameMappings();
+        await database._cleanupIncompleteImports();
+        expectRestored(reopened);
         expect(deleteRecords).not.toHaveBeenCalled();
     });
 });

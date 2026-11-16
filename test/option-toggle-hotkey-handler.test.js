@@ -21,6 +21,7 @@ function createHarness(getSettings, modifySettings) {
     let context = {index: 0};
     const display = {
         getOptionsContext: () => context,
+        getOptionsProfileId: () => 'profile-0',
         application: {api: {getSettings, modifySettings}},
     };
     const handler = new OptionToggleHotkeyHandler(

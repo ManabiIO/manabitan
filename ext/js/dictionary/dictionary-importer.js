@@ -3709,6 +3709,7 @@ export class DictionaryImporter {
      */
     _assignResolvedImageData(target, source, width, height) {
         const {
+            data,
             path,
             width: preferredWidth,
             height: preferredHeight,
@@ -3725,6 +3726,7 @@ export class DictionaryImporter {
         target.path = path;
         target.width = width;
         target.height = height;
+        if (typeof data === 'object' && data !== null) { target.data = data; }
         if (typeof preferredWidth === 'number') { target.preferredWidth = preferredWidth; }
         if (typeof preferredHeight === 'number') { target.preferredHeight = preferredHeight; }
         if (typeof title === 'string') { target.title = title; }

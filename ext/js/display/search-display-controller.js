@@ -21,6 +21,7 @@ import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {log} from '../core/log.js';
+import {readCodePointsForward} from '../data/string-util.js';
 import {querySelectorNotNull} from '../dom/query-selector.js';
 import {isComposing} from '../language/ime-utilities.js';
 import {convertToKana, convertToKanaIME} from '../language/ja/japanese-wanakana.js';
@@ -552,6 +553,9 @@ export class SearchDisplayController {
 
     /** */
     async _onCopy() {
+        // A copy from this page supersedes clipboard text still being validated.
+        // Retire it before reading the new baseline, which can itself be delayed.
+        ++this._clipboardUpdateSequence;
         // Ignore copy from search page; clipboard access can be denied.
         try {
             this._clipboardMonitor.setPreviousText(document.hasFocus() ? await this._clipboardReaderLike.getText(false) : '');
@@ -613,7 +617,7 @@ export class SearchDisplayController {
         currentQuery !== this._queryInput.value || this._composing || (checkText && !this._clipboardMonitorEnabled)) { return; }
         const {clipboard: {autoSearchContent, maximumSearchLength}} = options;
         if (text.length > maximumSearchLength) {
-            text = text.substring(0, maximumSearchLength);
+            text = readCodePointsForward(text, 0, maximumSearchLength);
         }
         this._queryInput.value = text;
         this._updateSearchHeight(true);
@@ -775,7 +779,8 @@ export class SearchDisplayController {
             if (matchingIndices.length !== 1) {
                 throw new RangeError('Selected search profile is no longer available');
             }
-            await this._setDefaultProfileIndex(matchingIndices[0]);
+            const index = matchingIndices[0];
+            await this._setDefaultProfileIndex(index, profiles[index].id);
         });
         this._profileSelectWriteTail = operation.catch(() => {});
         try {
@@ -788,16 +793,22 @@ export class SearchDisplayController {
 
     /**
      * @param {number} value
+     * @param {string} [profileId]
      */
-    async _setDefaultProfileIndex(value) {
-        /** @type {import('settings-modifications').ScopedModificationSet} */
-        const modification = {
+    async _setDefaultProfileIndex(value, profileId) {
+        // Resolve stable identity again inside the backend mutation queue: a
+        // settings page can reorder or delete profiles after the options read.
+        /** @type {import('settings-modifications').ScopedModificationSet|import('settings-modifications').ScopedModificationSetDefaultProfile} */
+        let modification = {
             action: 'set',
             path: 'profileCurrent',
             value,
             scope: 'global',
             optionsContext: null,
         };
+        if (typeof profileId === 'string' && profileId.length > 0) {
+            modification = {action: 'setDefaultProfile', profileId, scope: 'global', optionsContext: null};
+        }
         const results = await this._display.application.api.modifySettings([modification], 'search');
         if (!Array.isArray(results) || results.length !== 1 || results[0] === null || typeof results[0] !== 'object') {
             throw new Error('Search profile update returned an invalid result');

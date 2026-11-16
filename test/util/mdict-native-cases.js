@@ -805,7 +805,7 @@ describe('actual binary MDX/MDD conversion', () => {
         const fixture = makeMdictFixture([{key: 'link', value: '<a href="entry://%E7%8C%AB%26%E7%8A%AC">animals</a>'}]);
         const {files} = await createMdxImportData('links.mdx', {}, fixture.bytes, []);
         const link = nodes(readRows(files)[0][5], 'a')[0];
-        assert.equal(link?.href, '?query=%E7%8C%AB%26%E7%8A%AC');
+        assert.equal(link?.href, '?query=%E7%8C%AB%26%E7%8A%AC&wildcards=off');
         assert.equal(new URLSearchParams(link.href.slice(1)).get('query'), '猫&犬');
     });
 });

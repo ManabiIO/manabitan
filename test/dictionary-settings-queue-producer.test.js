@@ -141,13 +141,15 @@ describe('dictionary settings producers through the real options queue', () => {
     test('import selector replacement does not overwrite a newer queued user choice', async () => {
         const {backend, settingsController, installed} = await createHarness();
         installed.push('Imported');
+        /** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options.general.popupBlurByFrequencyDictionary = 'Old';
         const staleOptions = await settingsController.getOptionsFull();
         staleOptions.profiles[0].options.general.mainDictionary = 'Old';
         const application = /** @type {import('../ext/js/application.js').Application} */ (Reflect.get(settingsController, '_application'));
         application.api.optionsGetFull = async () => {
-            await settingsController.modifyGlobalSettings([{
-                action: 'set', path: 'profiles[0].options.general.mainDictionary', value: 'User choice',
-            }]);
+            await settingsController.modifyGlobalSettings([
+                {action: 'set', path: 'profiles[0].options.general.mainDictionary', value: 'User choice'},
+                {action: 'set', path: 'profiles[0].options.general.popupBlurByFrequencyDictionary', value: 'User frequency choice'},
+            ]);
             return structuredClone(staleOptions);
         };
         const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
@@ -157,6 +159,67 @@ describe('dictionary settings producers through the real options queue', () => {
             .resolves.toEqual([]);
         const current = /** @type {import('settings').Options} */ (/** @type {unknown} */ (Reflect.get(backend, '_options')));
         expect(current.profiles[0].options.general.mainDictionary).toBe('User choice');
+        expect(current.profiles[0].options.general.popupBlurByFrequencyDictionary).toBe('User frequency choice');
+    });
+
+    test.each(['selector-only', 'captured-rows', 'read-failure'])('dictionary title updates migrate the popup blur selector with %s settings', async (settingsState) => {
+        const {backend, settingsController, installed} = await createHarness();
+        installed.push('Updated frequency');
+        const initial = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        for (const {options} of initial.profiles) {
+            options.general.popupBlurByFrequencyDictionary = 'Old frequency';
+            options.general.mainDictionary = '';
+        }
+        const source = DictionaryController.createDefaultDictionarySettings('Old frequency', true, '');
+        const captured = settingsState === 'selector-only' ?
+            null :
+            Object.fromEntries(initial.profiles.map(({id, options}) => {
+                options.dictionaries = [structuredClone(source)];
+                return [id, [{...source, index: 0}]];
+            }));
+        if (settingsState === 'read-failure') {
+            vi.spyOn(settingsController, 'getOptionsFull').mockRejectedValue(new Error('temporary options read failure'));
+        }
+        const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+        Reflect.set(importer, '_settingsController', settingsController);
+
+        await expect(importer._addDictionarySettings({...importSummary('Updated frequency'), sourceTitle: 'Old frequency'}, captured)).resolves.toEqual([]);
+
+        const saved = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+        expect(saved.profiles.map(({options}) => options.general.popupBlurByFrequencyDictionary)).toEqual(['Updated frequency', 'Updated frequency']);
+    });
+
+    test.each(['delete', 'rollback', 'purge'])('%s cleanup clears removed popup blur selectors while preserving reinstalls and newer choices', async (operation) => {
+        for (const state of ['removed', 'reinstalled', 'new-choice']) {
+            const {backend, settingsController, installed} = await createHarness();
+            const initial = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+            for (const {options} of initial.profiles) {
+                options.general.mainDictionary = '';
+                options.general.popupBlurByFrequencyDictionary = 'Removed frequency';
+            }
+            const snapshot = await settingsController.getOptionsFull();
+            if (state === 'reinstalled') { installed.push('Removed frequency'); }
+            if (state === 'new-choice') {
+                await settingsController.modifyGlobalSettings([{
+                    action: 'set', path: 'profiles[0].options.general.popupBlurByFrequencyDictionary', value: 'User choice',
+                }]);
+            }
+            vi.spyOn(settingsController, 'getOptionsFull').mockResolvedValue(snapshot);
+            if (operation === 'delete') {
+                const controller = /** @type {DictionaryController} */ (Object.create(DictionaryController.prototype));
+                Reflect.set(controller, '_settingsController', settingsController);
+                await controller._deleteDictionarySettings('Removed frequency');
+            } else {
+                const importer = /** @type {DictionaryImportController} */ (Object.create(DictionaryImportController.prototype));
+                Reflect.set(importer, '_settingsController', settingsController);
+                const errors = operation === 'rollback' ? await importer._removeDictionarySettingsByName('Removed frequency') : await importer._clearDictionarySettings();
+                expect(errors).toEqual([]);
+            }
+            const saved = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options'));
+            expect(saved.profiles.map(({options}) => options.general.popupBlurByFrequencyDictionary)).toEqual(
+                state === 'reinstalled' ? ['Removed frequency', 'Removed frequency'] : [state === 'new-choice' ? 'User choice' : null, null],
+            );
+        }
     });
 
     test('selected import enables a disabled row inserted by an earlier queued refresh', async () => {
@@ -771,6 +834,7 @@ describe('dictionary settings producers through the real options queue', () => {
         options.profiles[0].options.general.mainDictionary = 'Old title';
         options.profiles[0].options.general.sortFrequencyDictionary = 'Old title';
         options.profiles[0].options.anki = /** @type {import('settings').AnkiOptions} */ (/** @type {unknown} */ ({cardFormats: [{fields: {Glossary: {value: '{single-glossary-old-title} literal Old title'}}}]}));
+        options.profiles[0].options.general.popupBlurByFrequencyDictionary = 'Old title';
         const replacement = {...importSummary('Fresh title'),
             sourceTitle: 'Fresh title',
             replacedDictionaryTitle: 'Old title',
@@ -784,6 +848,7 @@ describe('dictionary settings producers through the real options queue', () => {
         expect(current.dictionaries).toEqual(sourceRows.map((row) => ({...row, name: 'Fresh title', styles: 'new styles'})));
         expect(current.general.mainDictionary).toBe('Fresh title');
         expect(current.general.sortFrequencyDictionary).toBe('Fresh title');
+        expect(current.general.popupBlurByFrequencyDictionary).toBe('Fresh title');
         expect(current.anki.cardFormats[0].fields.Glossary.value).toBe('{single-glossary-fresh-title} literal Old title');
         await DictionaryController.ensureDictionarySettings(settingsController, [replacement], void 0, true, false);
         expect(/** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options.dictionaries).toEqual(current.dictionaries);
@@ -855,6 +920,7 @@ describe('dictionary settings producers through the real options queue', () => {
         const old = {...DictionaryController.createDefaultDictionarySettings('Old title', false, ''), alias: 'Preserve the live identity'};
         options.profiles[0].options.dictionaries = [old];
         options.profiles[0].options.general.mainDictionary = 'Old title';
+        options.profiles[0].options.general.popupBlurByFrequencyDictionary = 'Old title';
         const replacement = {...importSummary('Fresh title'),
             sourceTitle: 'Fresh title',
             replacedDictionaryTitle: 'Old title',
@@ -880,5 +946,6 @@ describe('dictionary settings producers through the real options queue', () => {
         const current = /** @type {import('settings').Options} */ (Reflect.get(backend, '_options')).profiles[0].options;
         expect(current.dictionaries).toContainEqual(old);
         expect(current.general.mainDictionary).toBe('Old title');
+        expect(current.general.popupBlurByFrequencyDictionary).toBe('Old title');
     });
 });

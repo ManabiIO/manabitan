@@ -120,6 +120,26 @@ test('authoritative corruption discovered by glossary index construction preserv
     expect(connection.selectObjects("SELECT dictionary FROM dictionaryGlossarySearchIndex WHERE dictionary = 'Broken'")).toEqual([]);
 });
 
+test('glossary indexing survives statement-cache eviction between batches', async () => {
+    const {database, connection} = await fixture();
+    let evicted = false;
+    const result = await database.findTermsByGlossary('cat', new Set(['Broken', 'Healthy']), 100, ({processed, total}) => {
+        if (evicted || processed >= total) { return; }
+        evicted = true;
+        // Other lookups can fill the shared LRU while indexing yields. Use
+        // real SQLite finalization at the production cache size.
+        for (let i = 0; i < Reflect.get(database, '_statementCacheMaxEntries'); ++i) {
+            database._getCachedStatement(`SELECT ${i}`).step();
+        }
+    });
+    expect(evicted).toBe(true);
+    expect(result).toHaveLength(100);
+    expect(connection.selectObjects('SELECT dictionary, termCount FROM dictionaryGlossarySearchIndex ORDER BY dictionary')).toEqual([
+        {dictionary: 'Broken', termCount: 401},
+        {dictionary: 'Healthy', termCount: 1},
+    ]);
+});
+
 test.each(['failure', 'cancellation', 'mutation'])('glossary discovery preserves unrelated %s instead of skipping the dictionary', async (mode) => {
     const {database} = await fixture();
     let cancelled = false;

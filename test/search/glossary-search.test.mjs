@@ -32,6 +32,54 @@ test('glossary text includes user-facing structured content but excludes structu
     assert.doesNotMatch(text, /example\.invalid|cat\.png|span/);
 });
 
+test('inline structured formatting keeps words and apostrophes together', () => {
+    const glossary = [{type: 'structured-content',
+        content: {
+            tag: 'span',
+            content: ['run', {tag: 'span', style: {fontWeight: 'bold'}, content: 'ning'}, ' owner', {tag: 'span', content: "'s"}],
+        }}];
+    assert.equal(glossarySearchText(glossary), "running owner's");
+    assert.deepEqual(glossarySearchTokens(glossary), ['running', "owner's"]);
+});
+
+test('tooltip annotations remain searchable without splitting inline words', () => {
+    const glossary = [{type: 'structured-content',
+        content: {
+            tag: 'span',
+            content: ['run', {tag: 'span', title: 'Grammar hint', data: {class: 'hidden-class'}, content: 'ning'}],
+        }}];
+    assert.deepEqual(glossarySearchTokens(glossary), ['running', 'grammar', 'hint']);
+});
+
+test('ruby readings do not split their base words and keep their own inline text together', () => {
+    const glossary = [{type: 'structured-content',
+        content: [
+            {tag: 'ruby', content: ['run', {tag: 'rp', content: '('}, {tag: 'rt', content: ['r', {tag: 'span', content: 'ʌn'}]}, {tag: 'rp', content: ')'}]},
+            'ning',
+        ]}];
+    assert.deepEqual(glossarySearchTokens(glossary), ['running', 'rʌn']);
+});
+
+test('ruby annotations share the same text budget as their base text', () => {
+    const glossary = [{type: 'structured-content',
+        content: [
+            {tag: 'ruby', content: ['word', {tag: 'rt', content: '🐈'.repeat(200000)}]},
+            'unreachable sentinel',
+        ]}];
+    assert.equal(glossarySearchText(glossary), `word ${'🐈'.repeat(16380)}`);
+});
+
+test('separate definitions, block elements, line breaks, and table cells never combine words', () => {
+    for (const glossary of [
+        ['run', 'ning'],
+        [{type: 'structured-content', content: [{tag: 'div', content: 'run'}, {tag: 'div', content: 'ning'}]}],
+        [{type: 'structured-content', content: ['run', {tag: 'br'}, 'ning']}],
+        [{type: 'structured-content', content: {tag: 'tr', content: [{tag: 'td', content: 'run'}, {tag: 'td', content: 'ning'}]}}],
+    ]) {
+        assert.deepEqual(glossarySearchTokens(glossary), ['run', 'ning']);
+    }
+});
+
 test('glossary traversal is bounded even when structured content contains little text', () => {
     const content = Array.from({length: 5000}, (_, index) => ({
         tag: 'span',

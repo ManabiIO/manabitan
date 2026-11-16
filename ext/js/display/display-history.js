@@ -46,15 +46,15 @@ export class DisplayHistory extends EventDispatcher {
 
         /** @type {unknown} */
         const historyState = history.state;
-        const {id, state} = (
+        const {id, state, dictionaryEntriesRestorable} = (
             isObjectNotArray(historyState) ?
             historyState :
-            {id: null, state: null}
+            {id: null, state: null, dictionaryEntriesRestorable: false}
         );
         /** @type {?import('display-history').EntryState} */
         const stateObject = isObjectNotArray(state) ? state : null;
         /** @type {import('display-history').Entry} */
-        this._current = this._createHistoryEntry(id, location.href, stateObject, null, null);
+        this._current = this._createHistoryEntry(id, location.href, stateObject, dictionaryEntriesRestorable === true ? {dictionaryEntriesEvicted: true} : null, null);
     }
 
     /** @type {?import('display-history').EntryState} */
@@ -198,11 +198,14 @@ export class DisplayHistory extends EventDispatcher {
      * @param {boolean} replace
      */
     _updateHistoryFromCurrent(replace) {
-        const {id, state, url} = this._current;
+        const {id, state, content, url} = this._current;
+        // Keep the recovery intent, never the potentially large result set, in
+        // browser history. Reloads and fully pruned entries lose memory caches.
+        const dictionaryEntriesRestorable = Array.isArray(content?.dictionaryEntries) || content?.dictionaryEntriesEvicted === true;
         if (replace) {
-            history.replaceState({id, state}, '', url);
+            history.replaceState({id, state, dictionaryEntriesRestorable}, '', url);
         } else {
-            history.pushState({id, state}, '', url);
+            history.pushState({id, state, dictionaryEntriesRestorable}, '', url);
         }
         this._triggerStateChanged(true);
     }
@@ -212,6 +215,7 @@ export class DisplayHistory extends EventDispatcher {
         /** @type {unknown} */
         let state = history.state;
         let id = null;
+        let dictionaryEntriesRestorable = false;
         if (isObjectNotArray(state)) {
             id = state.id;
             if (typeof id === 'string') {
@@ -223,6 +227,7 @@ export class DisplayHistory extends EventDispatcher {
                 }
             }
             // Partial state recovery
+            dictionaryEntriesRestorable = state.dictionaryEntriesRestorable === true;
             state = state.state;
         } else {
             state = null;
@@ -230,8 +235,9 @@ export class DisplayHistory extends EventDispatcher {
 
         // Fallback
         this._current.id = (typeof id === 'string' ? id : this._generateId());
+        this._current.url = location.href;
         this._current.state = /** @type {import('display-history').EntryState} */ (state);
-        this._current.content = null;
+        this._current.content = dictionaryEntriesRestorable ? {dictionaryEntriesEvicted: true} : null;
         this._clear();
     }
 

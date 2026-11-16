@@ -1166,7 +1166,7 @@ export class DictionaryController {
                 // Complete the same identity-bound settings migration as the
                 // importing page before considering source rows orphaned.
                 targets.push({action: 'replaceDictionaryName', profileId, sourceName, name: replacement.title, styles: replacement.styles, replacementGuard});
-                for (const selector of /** @type {const} */ (['mainDictionary', 'sortFrequencyDictionary'])) {
+                for (const selector of /** @type {const} */ (['mainDictionary', 'sortFrequencyDictionary', 'popupBlurByFrequencyDictionary'])) {
                     targets.push({action: 'setDictionarySelector', profileId, selector, expectedValue: sourceName, value: replacement.title, requireDictionaryUninstalled: sourceName, replacementGuard});
                 }
             }
@@ -2255,8 +2255,10 @@ export class DictionaryController {
             if (general.mainDictionary === dictionaryTitle) {
                 targets.push({action: 'setDictionarySelector', profileId, selector: 'mainDictionary', expectedValue: dictionaryTitle, value: '', requireDictionaryUninstalled: dictionaryTitle});
             }
-            if (general.sortFrequencyDictionary === dictionaryTitle) {
-                targets.push({action: 'setDictionarySelector', profileId, selector: 'sortFrequencyDictionary', expectedValue: dictionaryTitle, value: null, requireDictionaryUninstalled: dictionaryTitle});
+            for (const selector of /** @type {const} */ (['sortFrequencyDictionary', 'popupBlurByFrequencyDictionary'])) {
+                if (general[selector] === dictionaryTitle) {
+                    targets.push({action: 'setDictionarySelector', profileId, selector, expectedValue: dictionaryTitle, value: null, requireDictionaryUninstalled: dictionaryTitle});
+                }
             }
         }
         const results = await this._settingsController.modifyGlobalSettings(targets);

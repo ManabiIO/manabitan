@@ -18,6 +18,7 @@
 import {readFile} from 'node:fs/promises';
 import {afterAll, afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {Application} from '../ext/js/application.js';
+import {Backend} from '../ext/js/background/backend.js';
 import {API} from '../ext/js/comm/api.js';
 import {CrossFrameAPI} from '../ext/js/comm/cross-frame-api.js';
 import {ExtensionError} from '../ext/js/core/extension-error.js';
@@ -321,7 +322,7 @@ describe('Keyboard Event Handling', () => {
         })));
         await new Promise((resolve) => { setTimeout(resolve, 0); });
 
-        expect(setDefaultProfileIndexSpy).toHaveBeenCalledWith(1);
+        expect(setDefaultProfileIndexSpy).toHaveBeenCalledWith(1, 'Mining');
         expect(updateProfileSelectSpy).toHaveBeenCalledOnce();
         expect(logErrorSpy).toHaveBeenCalled();
     });
@@ -368,7 +369,7 @@ describe('Keyboard Event Handling', () => {
         pending.resolve();
         await Promise.all([first, second]);
 
-        expect(saveSpy.mock.calls).toStrictEqual([[1], [0]]);
+        expect(saveSpy.mock.calls).toStrictEqual([[1, 'Mining'], [0, 'Default']]);
     });
 
     test('superseded selection is retired while waiting on profile options', async () => {
@@ -390,7 +391,7 @@ describe('Keyboard Event Handling', () => {
         await Promise.all([first, second]);
 
         expect(saveSpy).toHaveBeenCalledOnce();
-        expect(saveSpy).toHaveBeenCalledWith(0);
+        expect(saveSpy).toHaveBeenCalledWith(0, 'Default');
     });
 
     test('stale search-page profile-select refresh does not overwrite newer options', async () => {
@@ -410,6 +411,24 @@ describe('Keyboard Event Handling', () => {
 
         expect(searchDisplayController._profileSelect.value).toBe('1');
     });
+    test.each([
+        {text: '𠮟る', limit: 1, expected: '𠮟'},
+        {text: '日𠮟る', limit: 2, expected: '日𠮟'},
+        {text: '𠮟る人', limit: 2, expected: '𠮟る'},
+        {text: '日本語', limit: 2, expected: '日本'},
+        {text: '𠮟る', limit: 0, expected: ''},
+    ])('clipboard search limits count complete characters: $text / $limit', async ({text, limit, expected}) => {
+        vi.spyOn(display, 'getOptions').mockReturnValue(/** @type {import('settings').ProfileOptions} */ (/** @type {unknown} */ ({
+            general: {language: 'ja'},
+            clipboard: {autoSearchContent: true, maximumSearchLength: limit},
+        })));
+        const search = vi.spyOn(searchDisplayController, '_search').mockImplementation(() => {});
+        await searchDisplayController._updateSearchFromClipboard(text, false, false);
+
+        expect(queryInput.value).toBe(expected);
+        expect(search).toHaveBeenCalledExactlyOnceWith(false, 'clear', true, ['clipboard']);
+    });
+
     test('delayed clipboard validation cannot replace a query edited by the user', async () => {
         const check = /** @type {PromiseWithResolvers<boolean>} */ (Promise.withResolvers());
         vi.spyOn(display.application.api, 'isTextLookupWorthy').mockReturnValue(check.promise);
@@ -506,7 +525,7 @@ describe('Keyboard Event Handling', () => {
         vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(/** @type {import('settings').Options} */ (/** @type {unknown} */ ({profiles: [other, selected]})));
         const save = vi.spyOn(searchDisplayController, '_setDefaultProfileIndex').mockResolvedValue(void 0);
         await searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {value: '0'}})));
-        expect(save).toHaveBeenCalledExactlyOnceWith(1);
+        expect(save).toHaveBeenCalledExactlyOnceWith(1, withId ? 'selected' : undefined);
     });
 
     test('a replacement at the same index cannot receive a removed rendered selection', async () => {
@@ -518,5 +537,35 @@ describe('Keyboard Event Handling', () => {
             .rejects.toThrow('Selected search profile is no longer available');
         expect(save).not.toHaveBeenCalled();
         expect(refresh).toHaveBeenCalledOnce();
+    });
+
+    test.each(/** @type {[change: 'reorder'|'delete', modification: import('settings-modifications').ScopedModification][]} */ ([
+        ['reorder', {action: 'swapProfiles', profileId1: 'Default', profileId2: 'Mining', scope: 'global', optionsContext: null}],
+        ['delete', {action: 'deleteProfile', profileId: 'Mining', scope: 'global', optionsContext: null}],
+    ]))('search profile selection resolves identity inside the settings mutation after a concurrent %s', async (change, modification) => {
+        const options = createOptions(0);
+        const backend = /** @type {Backend} */ (Object.create(Backend.prototype));
+        Reflect.set(backend, '_options', options);
+        vi.spyOn(backend, '_getModifySettingObject').mockImplementation(() => backend._getOptionsFull(false));
+        vi.spyOn(backend, '_saveOptions').mockImplementation(async (_source, nextOptions) => { Reflect.set(backend, '_options', nextOptions); });
+        Reflect.set(searchDisplayController, '_profileSelectProfiles', structuredClone(options.profiles));
+        vi.spyOn(display.application.api, 'optionsGetFull').mockResolvedValue(structuredClone(options));
+        const refresh = vi.spyOn(searchDisplayController, '_updateProfileSelect').mockResolvedValue();
+        vi.spyOn(display.application.api, 'modifySettings').mockImplementation(async (targets, source) => {
+            const changeResult = await backend._modifySettings([modification], 'settings');
+            expect(changeResult[0]).toEqual({result: true});
+            return await backend._modifySettings(targets, source);
+        });
+
+        const selection = searchDisplayController._onProfileSelectChange(/** @type {Event} */ (/** @type {unknown} */ ({currentTarget: {value: '1'}})));
+        if (change === 'delete') {
+            await expect(selection).rejects.toThrow('Profile identity changed');
+            expect(refresh).toHaveBeenCalledOnce();
+        } else {
+            await selection;
+            expect(refresh).not.toHaveBeenCalled();
+        }
+        const persisted = backend._getOptionsFull(false);
+        expect(persisted.profiles[persisted.profileCurrent].id).toBe(change === 'reorder' ? 'Mining' : 'Default');
     });
 });

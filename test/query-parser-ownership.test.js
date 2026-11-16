@@ -50,6 +50,7 @@ function results(text) {
  */
 function options(overrides = {}) {
     return {
+        profileId: 'profile-a',
         selectedParser: 'scanner',
         termSpacing: false,
         readingMode: 'none',

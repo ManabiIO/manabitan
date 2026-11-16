@@ -313,18 +313,29 @@ export class API {
 
     /**
      * @param {import('api').ApiParam<'addAnkiNote', 'note'>} note
+     * @param {string} ankiConnectionIdentity
      * @returns {Promise<import('api').ApiReturn<'addAnkiNote'>>}
      */
-    addAnkiNote(note) {
-        return this._invoke('addAnkiNote', {note});
+    addAnkiNote(note, ankiConnectionIdentity) {
+        return this._invoke('addAnkiNote', {note, ankiConnectionIdentity});
     }
 
     /**
      * @param {import('api').ApiParam<'updateAnkiNote', 'noteWithId'>} noteWithId
+     * @param {string} ankiConnectionIdentity
      * @returns {Promise<import('api').ApiReturn<'updateAnkiNote'>>}
      */
-    updateAnkiNote(noteWithId) {
-        return this._invoke('updateAnkiNote', {noteWithId});
+    updateAnkiNote(noteWithId, ankiConnectionIdentity) {
+        return this._invoke('updateAnkiNote', {noteWithId, ankiConnectionIdentity});
+    }
+
+    /**
+     * @param {import('api').ApiParam<'getAnkiNotesInfo', 'noteIds'>} noteIds
+     * @param {string} [ankiConnectionIdentity]
+     * @returns {Promise<import('api').ApiReturn<'getAnkiNotesInfo'>>}
+     */
+    getAnkiNotesInfo(noteIds, ankiConnectionIdentity) {
+        return this._invoke('getAnkiNotesInfo', {noteIds, ankiConnectionIdentity});
     }
 
     /**
@@ -344,10 +355,12 @@ export class API {
      * @param {import('api').ApiParam<'injectAnkiNoteMedia', 'screenshotDetails'>} screenshotDetails
      * @param {import('api').ApiParam<'injectAnkiNoteMedia', 'clipboardDetails'>} clipboardDetails
      * @param {import('api').ApiParam<'injectAnkiNoteMedia', 'dictionaryMediaDetails'>} dictionaryMediaDetails
+     * @param {string} [ankiConnectionIdentity]
+     * @param {import('anki').ConnectionConfiguration} [ankiConnectionConfiguration]
      * @returns {Promise<import('api').ApiReturn<'injectAnkiNoteMedia'>>}
      */
-    injectAnkiNoteMedia(timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails) {
-        return this._invoke('injectAnkiNoteMedia', {timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails});
+    injectAnkiNoteMedia(timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity, ankiConnectionConfiguration) {
+        return this._invoke('injectAnkiNoteMedia', {timestamp, definitionDetails, audioDetails, screenshotDetails, clipboardDetails, dictionaryMediaDetails, ankiConnectionIdentity, ankiConnectionConfiguration});
     }
 
     /**
@@ -362,10 +375,11 @@ export class API {
 
     /**
      * @param {import('api').ApiParam<'suspendAnkiCardsForNote', 'noteId'>} noteId
+     * @param {string} ankiConnectionIdentity
      * @returns {Promise<import('api').ApiReturn<'suspendAnkiCardsForNote'>>}
      */
-    suspendAnkiCardsForNote(noteId) {
-        return this._invoke('suspendAnkiCardsForNote', {noteId});
+    suspendAnkiCardsForNote(noteId, ankiConnectionIdentity) {
+        return this._invoke('suspendAnkiCardsForNote', {noteId, ankiConnectionIdentity});
     }
 
     /**
@@ -888,10 +902,11 @@ export class API {
     }
 
     /**
+     * @param {string} ankiConnectionIdentity
      * @returns {Promise<import('api').ApiReturn<'forceSync'>>}
      */
-    forceSync() {
-        return this._invoke('forceSync', void 0);
+    forceSync(ankiConnectionIdentity) {
+        return this._invoke('forceSync', {ankiConnectionIdentity});
     }
 
     /**

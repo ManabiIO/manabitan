@@ -136,7 +136,8 @@ export function createCases(parser, DictionaryImporter, lookup) {
                         // also exercise the non-pass-through materialization path.
                         importer._wasmPassThroughTermContent = passThrough
                         const image = {type: 'image', path: 'picture.png', width: 3, height: 4, alt: 'caption'}
-                        const nested = {type: 'structured-content', content: {tag: 'div', content: [{tag: 'img', path: 'picture.png', border: '1px solid', verticalAlign: 'middle'}]}}
+                        const imageData = {class: 'dictionary-icon', id: 'example-picture'}
+                        const nested = {type: 'structured-content', content: {tag: 'div', content: [{tag: 'img', path: 'picture.png', data: imageData, border: '1px solid', verticalAlign: 'middle'}]}}
                         const glossaries = [['before'], [image], [{type: 'text', text: 'formatted control'}], [nested], ['after']]
                         const bank = glossaries.map((glossary, index) => [`media-${index}`, '', 'noun', '', 1, glossary, index, 'common'])
                         const assets = new Map([['picture.png', {filename: 'picture.png', bytes: Uint8Array.of(1, 2, 3)}]])
@@ -158,7 +159,7 @@ export function createCases(parser, DictionaryImporter, lookup) {
                             ['before'],
                             [{type: 'image', path: 'picture.png', ...dimension, preferredWidth: 3, preferredHeight: 4, alt: 'caption'}],
                             ['formatted control'],
-                            [{type: 'structured-content', content: {tag: 'div', content: [{tag: 'img', path: 'picture.png', ...dimension, verticalAlign: 'middle', border: '1px solid'}]}}],
+                            [{type: 'structured-content', content: {tag: 'div', content: [{tag: 'img', path: 'picture.png', ...dimension, data: imageData, verticalAlign: 'middle', border: '1px solid'}]}}],
                             ['after'],
                         ]
                         equal(entries.map(({termEntryContentBytes}) => JSON.parse(text(termEntryContentBytes)).glossary), expected, 'authoritative resolved glossary')

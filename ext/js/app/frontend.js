@@ -1472,8 +1472,9 @@ export class Frontend {
      * @param {number} searchSuccessAt
      * @param {import('popup').PublicationGuard} [guard]
      * @param {import('translator').DictionaryAvailability[]} [dictionaryAvailability]
+     * @param {import('display').HistoryState['readerLookup']} [readerLookup]
      */
-    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now(), guard, dictionaryAvailability) {
+    _showContent(textSource, focus, dictionaryEntries, type, sentence, documentTitle, optionsContext, pageTheme, searchSuccessAt = safePerformance.now(), guard, dictionaryAvailability, readerLookup) {
         if (guard && !guard.isCurrent()) { return; }
         const query = textSource.text();
         const {url} = optionsContext;
@@ -1486,6 +1487,7 @@ export class Frontend {
         };
         if (sentence !== null) { detailsState.sentence = sentence; }
         if (documentTitle !== null) { detailsState.documentTitle = documentTitle; }
+        if (typeof readerLookup !== 'undefined') { detailsState.readerLookup = {...readerLookup}; }
         const {tabId, frameId} = this._application;
         /** @type {import('display').HistoryParams} */
         const params = {

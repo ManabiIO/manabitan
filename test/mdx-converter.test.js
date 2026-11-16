@@ -17,6 +17,10 @@
 
 import JSZip from 'jszip';
 import {afterEach, describe, expect, test, vi} from 'vitest';
+import {DisplayContentManager} from '../ext/js/display/display-content-manager.js';
+import {StructuredContentGenerator} from '../ext/js/display/structured-content-generator.js';
+import {Display} from '../ext/js/display/display.js';
+import {setupDomTest} from './fixtures/dom-test.js';
 
 /**
  * @typedef {{header: {Title?: string, Description?: string}, entries: Array<{keyText: string, definition: string}>}} MockMdxDictionary
@@ -520,7 +524,7 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['styles/extra.css', 'images/css-bg.png']);
     });
 
-    test('does not lookup or archive sound resources when dictionary audio is disabled', async () => {
+    test('does not navigate, lookup or archive sound resources when dictionary audio is disabled', async () => {
         /** @type {string[]} */
         const lookupKeys = [];
         mockState.onLookupRecord = (_fileName, keyText) => {
@@ -530,7 +534,7 @@ describe('convertMdxToArchive', () => {
             header: {Title: 'Disabled audio fixture', Description: ''},
             entries: [{
                 keyText: 'Read',
-                definition: '<div><a href="sound://audio/read.mp3">play</a></div>',
+                definition: '<div><a href="sound://audio/read.mp3">play</a><a href="entry://related">related</a></div>',
             }],
         });
         mockState.mddFactory = () => [
@@ -557,6 +561,28 @@ describe('convertMdxToArchive', () => {
             materializedReferencedAssetCount: 0,
             missingReferencedAssetCount: 0,
         });
+
+        const testEnv = await setupDomTest();
+        try {
+            const {window} = testEnv;
+            const display = {setContent: vi.fn()};
+            const manager = new DisplayContentManager(/** @type {import('../ext/js/display/display.js').Display} */ (/** @type {unknown} */ (display)));
+            const generator = new StructuredContentGenerator(manager, window.document, /** @type {Window} */ (/** @type {unknown} */ (window)));
+            const content = /** @type {import('structured-content').Content} */ (/** @type {unknown} */ (glossary.content));
+            const node = generator.createStructuredContent(content, 'Disabled audio fixture');
+            window.document.body.appendChild(node);
+            const link = /** @type {HTMLAnchorElement} */ (node.querySelector('.gloss-link'));
+            link.dispatchEvent(new window.MouseEvent('click', {bubbles: true, cancelable: true}));
+            expect(display.setContent).not.toHaveBeenCalled();
+            expect(link.hasAttribute('href')).toBe(false);
+            expect(link.querySelector('.gloss-link-external-icon')).toBeNull();
+            expect(link.textContent).toBe('play');
+            const related = /** @type {HTMLAnchorElement} */ (node.querySelectorAll('.gloss-link')[1]);
+            related.dispatchEvent(new window.MouseEvent('click', {bubbles: true, cancelable: true}));
+            expect(display.setContent).toHaveBeenCalledWith(expect.objectContaining({historyMode: 'new', params: {query: 'related', wildcards: 'off'}}));
+        } finally {
+            await testEnv.teardown(global);
+        }
     });
 
     test('preserves source tag identity without requiring a class or ID', async () => {
@@ -1289,16 +1315,42 @@ describe('convertMdxToArchive', () => {
 
         expect(rootEntry.content).toContainEqual(expect.objectContaining({
             tag: 'a',
-            href: '?query=white%20space%20%26%20%E6%BC%A2%E5%AD%97',
+            href: '?query=white%20space%20%26%20%E6%BC%A2%E5%AD%97&wildcards=off',
         }));
         expect(rootEntry.content).toContainEqual(expect.objectContaining({
             tag: 'a',
-            href: '?query=rock%26roll',
+            href: '?query=rock%26roll&wildcards=off',
         }));
         expect(rootEntry.content).toContainEqual(expect.objectContaining({
             tag: 'a',
-            href: '?query=%E3%81%8B%E3%81%AA%3F',
+            href: '?query=%E3%81%8B%E3%81%AA%3F&wildcards=off',
         }));
+    });
+
+    test('keeps literal stars in dictionary cross-reference targets', async () => {
+        const targets = ['*', '*bher', 'C*', '＊語', '語＊'];
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Literal cross-reference fixture', Description: ''},
+            entries: [{
+                keyText: 'Stars',
+                definition: `<div>${targets.map((target) => `<a href="entry://${encodeURIComponent(target)}">${target}</a>`).join('')}</div>`,
+            }],
+        });
+
+        const result = await convertMdxToArchive('literal-links.mdx', {enableAudio: false}, new Uint8Array([1]), []);
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<{content: import('structured-content').LinkElement[]}>}}} */ (termBank[0][5][0]);
+        const links = glossary.content.content[0].content;
+        expect(links).toHaveLength(targets.length);
+        for (const [i, link] of links.entries()) {
+            const params = new URLSearchParams(link.href.slice(1));
+            const details = Display.prototype._getFindDetails(params.get('query') ?? '', '', params.get('wildcards') !== 'off');
+            expect(details).toEqual({source: targets[i], findDetails: {primaryReading: ''}});
+        }
+        expect(Display.prototype._getFindDetails('*bher', '', true)).toEqual({
+            source: 'bher', findDetails: {primaryReading: '', matchType: 'suffix', deinflect: false},
+        });
     });
 
     test('rewrites source tags inside selector-list pseudo-classes', async () => {
@@ -1504,10 +1556,10 @@ describe('convertMdxToArchive', () => {
         const glossary = /** @type {{content: {content: Array<unknown>}}} */ (termBank[0][5][0]);
         const rootEntry = /** @type {{content: Array<unknown>}} */ (glossary.content.content[0]);
 
-        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2520space'}));
-        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=slash%252Fterm'}));
-        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=encoded%20space'}));
-        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2525'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2520space&wildcards=off'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=slash%252Fterm&wildcards=off'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=encoded%20space&wildcards=off'}));
+        expect(rootEntry.content).toContainEqual(expect.objectContaining({tag: 'a', href: '?query=literal%2525&wildcards=off'}));
     });
 
     test('keeps semicolons inside inline CSS values and rewrites URL functions case-insensitively', async () => {
