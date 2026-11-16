@@ -330,3 +330,20 @@ test('exact pair miss rejects when the selected generation changes during candid
     expect(findPairs).toHaveBeenCalledOnce();
     expect(hydrateRows).not.toHaveBeenCalled();
 });
+
+test('sequence miss rejects when the selected generation changes during candidate selection', async () => {
+    const database = new DictionaryDatabase();
+    vi.spyOn(database, '_requireDb').mockReturnValue(/** @type {ReturnType<DictionaryDatabase['_requireDb']>} */ ({}));
+    vi.spyOn(database, '_ensureDirectTermIndexesLoaded').mockResolvedValue();
+    const findSequence = vi.spyOn(database, '_findDirectTermIdsBySequence').mockImplementation(() => {
+        database._clearBulkImportRuntimeCaches();
+        return [];
+    });
+    const hydrateRows = vi.spyOn(database, '_fetchTermRowsByIds');
+
+    await expect(database.findTermsBySequenceBulk([{dictionary: 'test', query: 404}]))
+        .rejects.toMatchObject({status: 'temporarilyUnavailable'});
+
+    expect(findSequence).toHaveBeenCalledOnce();
+    expect(hydrateRows).not.toHaveBeenCalled();
+});
