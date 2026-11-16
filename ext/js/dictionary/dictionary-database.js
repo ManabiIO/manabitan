@@ -3430,6 +3430,7 @@ null;
             }
             this._assertTermLookupGeneration(generation, dictionaryName);
             if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+            this._assertTermLookupAvailability(generation, [dictionaryName]);
             return;
         }
         const build = (async () => {
@@ -3437,6 +3438,10 @@ null;
             await this._ensureDirectTermIndexesLoaded([dictionaryName]);
             this._assertTermLookupGeneration(generation, dictionaryName);
             if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+            // Direct-index loading may finish in the background with an
+            // unavailable owner. Do not treat its incomplete record count as
+            // authoritative or delete a previously complete glossary index.
+            this._assertTermLookupAvailability(generation, [dictionaryName]);
             const storageName = this._getTermRecordStorageName(dictionaryName);
             const count = this._termRecordStore.getDictionaryRecordCount(storageName);
             const db = this._requireDb();
@@ -3463,6 +3468,7 @@ null;
                 const rows = await this._fetchTermRowsByIds(batch);
                 this._assertTermLookupGeneration(generation, dictionaryName);
                 if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+                this._assertTermLookupAvailability(generation, [dictionaryName]);
                 // Other queries can evict cached statements while hydration or
                 // the previous batch yields. Acquire them only for this
                 // synchronous transaction, after the last asynchronous step.
@@ -3513,10 +3519,13 @@ null;
                 try { onProgress({dictionary: dictionaryName, processed, total: count}); } catch (_) { /* NOP */ }
                 await new Promise((resolve) => { setTimeout(resolve, 0); });
                 this._assertTermLookupGeneration(generation, dictionaryName);
+                if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
+                this._assertTermLookupAvailability(generation, [dictionaryName]);
             }
 
             if (isCancelled()) { throw new DOMException('Glossary search indexing cancelled', 'AbortError'); }
             this._assertTermLookupGeneration(generation, dictionaryName);
+            this._assertTermLookupAvailability(generation, [dictionaryName]);
             db.exec({
                 sql: `
                     INSERT OR REPLACE INTO dictionaryGlossarySearchIndex(dictionary, version, termCount, completedAt)
@@ -3579,9 +3588,16 @@ null;
         if (query === null || dictionaries.size === 0 || limit <= 0) { return []; }
         const generation = this._directTermIndexGeneration;
         const dictionaryNames = this._getDictionaryNames(dictionaries);
-        await this.ensureGlossarySearchIndex(new Set(dictionaryNames), onProgress, isCancelled);
+        if (isCancelled()) { throw new DOMException('Glossary search cancelled', 'AbortError'); }
+        let lookupDictionaryNames = this._getUnquarantinedTermDictionaryNames(dictionaryNames);
+        // Let index construction perform its bounded direct-index load/repair
+        // first. It can recover transiently unavailable owners before search
+        // needs to decide whether their results are complete.
+        await this.ensureGlossarySearchIndex(new Set(lookupDictionaryNames), onProgress, isCancelled);
         this._assertTermLookupGeneration(generation);
-        const lookupDictionaryNames = this._getUnquarantinedTermDictionaryNames(dictionaryNames);
+        if (isCancelled()) { throw new DOMException('Glossary search cancelled', 'AbortError'); }
+        lookupDictionaryNames = this._getUnquarantinedTermDictionaryNames(dictionaryNames);
+        this._assertTermLookupAvailability(generation, lookupDictionaryNames);
         if (isCancelled()) { throw new DOMException('Glossary search cancelled', 'AbortError'); }
         if (lookupDictionaryNames.length === 0) { return []; }
 
@@ -3639,6 +3655,7 @@ null;
         const rows = await this._fetchTermRowsByIds(ids);
         this._assertTermLookupGeneration(generation, lookupDictionaryNames);
         if (isCancelled()) { throw new DOMException('Glossary search cancelled', 'AbortError'); }
+        this._assertTermLookupAvailability(generation, lookupDictionaryNames);
 
         const dictionaryOrder = new Map(dictionaryNames.map((name, index) => [name, index]));
         const ranked = [];

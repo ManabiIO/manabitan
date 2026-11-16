@@ -112,6 +112,89 @@ test('a previously quarantined index cannot consume the healthy glossary candida
     expect(await database.findTermsByGlossary('cat', new Set(['Broken']))).toEqual([]);
 });
 
+test('unavailable owners retain their complete glossary index when lookup count is unknown', async () => {
+    const {database, recordStore, connection} = await fixture();
+    await database.ensureGlossarySearchIndex(new Set(['Broken']));
+    const before = ['termGlossaryTokens', 'termGlossarySearchTerms', 'dictionaryGlossarySearchIndex'].map((table) => (
+        connection.selectObjects(`SELECT * FROM ${table} WHERE dictionary = 'Broken'`)
+    ));
+    recordStore._setDictionaryHealth('physical-broken', 'temporarilyUnavailable', 'Transient storage failure');
+    vi.spyOn(recordStore, 'getDictionaryRecordCount').mockReturnValue(0);
+
+    await expect(database.ensureGlossarySearchIndex(new Set(['Broken'])))
+        .rejects.toMatchObject({status: 'temporarilyUnavailable'});
+
+    const after = ['termGlossaryTokens', 'termGlossarySearchTerms', 'dictionaryGlossarySearchIndex'].map((table) => (
+        connection.selectObjects(`SELECT * FROM ${table} WHERE dictionary = 'Broken'`)
+    ));
+    expect(after).toEqual(before);
+});
+
+test('temporarily unavailable glossary owners fail explicitly before bounded candidate selection', async () => {
+    const {database, recordStore, connection} = await fixture();
+    await database.ensureGlossarySearchIndex(new Set(['Broken', 'Healthy']));
+    const availableResults = await database.findTermsByGlossary('cat', new Set(['Broken', 'Healthy']), 5);
+    // Independent source-fixture oracle: the first five Broken rows all have
+    // the matching glossary and equal score, so their stable ID order wins.
+    expect(availableResults.map(({term}) => term)).toEqual(['term-0', 'term-1', 'term-2', 'term-3', 'term-4']);
+    recordStore._setDictionaryHealth('physical-broken', 'temporarilyUnavailable', 'Transient storage failure');
+    const fetchRows = vi.spyOn(database, '_fetchTermRowsByIds');
+
+    await expect(database.findTermsByGlossary('cat', new Set(['Broken', 'Healthy'])))
+        .rejects.toMatchObject({status: 'temporarilyUnavailable'});
+
+    expect(fetchRows).not.toHaveBeenCalled();
+    expect(connection.selectObjects('SELECT dictionary, termCount FROM dictionaryGlossarySearchIndex ORDER BY dictionary')).toEqual([
+        {dictionary: 'Broken', termCount: 401},
+        {dictionary: 'Healthy', termCount: 1},
+    ]);
+});
+
+test('glossary search lets direct-index loading recover a transiently unavailable owner', async () => {
+    const {database, recordStore} = await fixture();
+    recordStore._setDictionaryHealth('physical-broken', 'temporarilyUnavailable', 'Transient storage failure');
+    const loadIndexes = vi.spyOn(database, '_ensureDirectTermIndexesLoaded').mockImplementation(async (names) => {
+        expect(names).toEqual(['Broken']);
+        recordStore._setDictionaryHealth('physical-broken', 'available');
+    });
+
+    const result = await database.findTermsByGlossary('cat', new Set(['Broken']), 5);
+
+    expect(loadIndexes).toHaveBeenCalledOnce();
+    expect(result.map(({term}) => term)).toEqual(['term-0', 'term-1', 'term-2', 'term-3', 'term-4']);
+    expect(recordStore.isDictionaryAvailable('physical-broken')).toBe(true);
+});
+
+test('a canceled shared glossary-index waiter keeps AbortError when availability changes before resumption', async () => {
+    const {database, recordStore} = await fixture();
+    const buildControl = {resolve: () => {}};
+    /** @type {Promise<void>} */
+    const existingBuild = new Promise((resolve) => { buildControl.resolve = () => resolve(void 0); });
+    Reflect.get(database, '_glossarySearchBuildPromiseByDictionary').set('Broken', existingBuild);
+    let cancelled = false;
+    const waiter = database._ensureGlossarySearchIndexForDictionary('Broken', () => {}, () => cancelled);
+    await Promise.resolve();
+    recordStore._setDictionaryHealth('physical-broken', 'temporarilyUnavailable', 'Transient storage failure');
+    cancelled = true;
+    buildControl.resolve();
+
+    await expect(waiter).rejects.toMatchObject({name: 'AbortError'});
+});
+
+test('glossary search rejects an owner that becomes temporarily unavailable during hydration', async () => {
+    const {database, recordStore} = await fixture();
+    await database.ensureGlossarySearchIndex(new Set(['Broken']));
+    const fetchRows = database._fetchTermRowsByIds.bind(database);
+    vi.spyOn(database, '_fetchTermRowsByIds').mockImplementation(async (ids) => {
+        const rows = await fetchRows(ids);
+        recordStore._setDictionaryHealth('physical-broken', 'temporarilyUnavailable', 'Transient storage failure');
+        return rows;
+    });
+
+    await expect(database.findTermsByGlossary('cat', new Set(['Broken'])))
+        .rejects.toMatchObject({status: 'temporarilyUnavailable'});
+});
+
 test('authoritative corruption discovered by glossary index construction preserves healthy siblings', async () => {
     const {database, recordStore, connection} = await fixture(true);
     const result = await database.findTermsByGlossary('cat', new Set(['Broken', 'Healthy']));
