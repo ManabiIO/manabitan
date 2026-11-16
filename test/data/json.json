@@ -44,6 +44,11 @@
             "type": "PerformanceDictionaryLock"
         },
         {
+            "path": "dev/data/dictionary-wasm/manifest.json",
+            "typeFile": "types/dev/dictionary-wasm.d.ts",
+            "type": "DictionaryWasmManifest"
+        },
+        {
             "path": "dev/data/manifest-variants.json",
             "typeFile": "types/dev/manifest.d.ts",
             "type": "ManifestConfig"

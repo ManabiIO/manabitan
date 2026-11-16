@@ -21,142 +21,15 @@ import standaloneCode from 'ajv/dist/standalone/index.js';
 import esbuild from 'esbuild';
 import fs from 'fs';
 import {createRequire} from 'module';
-import {execFileSync} from 'node:child_process';
-import os from 'os';
 import path from 'path';
 import {fileURLToPath} from 'url';
+import {copyDictionaryWasm} from './dictionary-wasm.js';
 import {parseJson} from './json.js';
 
 const require = createRequire(import.meta.url);
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const extDir = path.join(dirname, '..', 'ext');
-const dictionaryWasmTarget = 'wasm32-freestanding';
-
-/**
- * @typedef {{command: string, args?: string[]}} CompilerCommand
- */
-
-/**
- * @param {string|undefined} value
- * @returns {value is string}
- */
-function isNonEmptyString(value) {
-    return typeof value === 'string' && value.length > 0;
-}
-
-/**
- * @param {string} command
- * @returns {CompilerCommand}
- */
-function createCompilerCommand(command) {
-    const name = path.basename(command).toLowerCase();
-    return (
-        name === 'zig' || name === 'zig.exe' ?
-            {command, args: ['cc']} :
-            {command}
-    );
-}
-
-/**
- * @returns {CompilerCommand[]}
- */
-function getWindowsWingetCompilerCommands() {
-    if (process.platform !== 'win32') { return []; }
-
-    const localAppData = process.env.LOCALAPPDATA;
-    if (!isNonEmptyString(localAppData)) { return []; }
-
-    const packagesDir = path.join(localAppData, 'Microsoft', 'WinGet', 'Packages');
-    if (!fs.existsSync(packagesDir)) { return []; }
-
-    /** @type {CompilerCommand[]} */
-    const commands = [];
-    for (const pkgEntry of fs.readdirSync(packagesDir, {withFileTypes: true})) {
-        if (!pkgEntry.isDirectory() || !pkgEntry.name.toLowerCase().startsWith('zig.zig')) { continue; }
-        const packageDir = path.join(packagesDir, pkgEntry.name);
-        for (const versionEntry of fs.readdirSync(packageDir, {withFileTypes: true})) {
-            if (!versionEntry.isDirectory()) { continue; }
-            const zigPath = path.join(packageDir, versionEntry.name, 'zig.exe');
-            if (fs.existsSync(zigPath)) {
-                commands.push(createCompilerCommand(zigPath));
-            }
-        }
-    }
-    return commands;
-}
-
-/**
- * @param {CompilerCommand} compiler
- * @returns {boolean}
- */
-function canBuildWasmTarget(compiler) {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'manabitan-wasm-'));
-    const sourcePath = path.join(tempDir, 'probe.c');
-    const outputPath = path.join(tempDir, 'probe.wasm');
-    try {
-        fs.writeFileSync(sourcePath, 'void probe(void) {}\n', 'utf8');
-        execFileSync(
-            compiler.command,
-            [
-                ...(compiler.args ?? []),
-                `--target=${dictionaryWasmTarget}`,
-                '-matomics',
-                '-mbulk-memory',
-                '-nostdlib',
-                '-Wl,--no-entry',
-                '-Wl,--shared-memory',
-                '-Wl,--max-memory=4294967296',
-                '-Wl,--export=probe',
-                '-Wl,--strip-all',
-                '-o',
-                outputPath,
-                sourcePath,
-            ],
-            {stdio: 'ignore'},
-        );
-        return true;
-    } catch {
-        return false;
-    } finally {
-        fs.rmSync(tempDir, {recursive: true, force: true});
-    }
-}
-
-/**
- * @returns {CompilerCommand}
- * @throws {Error}
- */
-function getWasmCapableCompiler() {
-    const candidates = /** @type {CompilerCommand[]} */ ([
-        process.env.MANABITAN_CLANG,
-        process.env.CLANG,
-        'clang',
-        'clang-18',
-        'clang-17',
-        'zig',
-        '/opt/homebrew/opt/llvm/bin/clang',
-        '/usr/bin/clang',
-        ...getWindowsWingetCompilerCommands().map(({command}) => command),
-    ]
-        .filter(isNonEmptyString)
-        .map((value) => createCompilerCommand(value)));
-    for (const candidate of candidates) {
-        try {
-            execFileSync(candidate.command, [...(candidate.args ?? []), '--version'], {stdio: 'ignore'});
-        } catch {
-            continue;
-        }
-        if (canBuildWasmTarget(candidate)) {
-            return candidate;
-        }
-    }
-    throw new Error(
-        'Missing a wasm32-capable compiler required to build dictionary wasm assets. ' +
-        `Set MANABITAN_CLANG or CLANG to a compiler that can link --target=${dictionaryWasmTarget}, such as clang or zig.`,
-    );
-}
-
 /**
  * @param {string} out
  */
@@ -199,55 +72,6 @@ async function copyZstdAssets(out) {
 }
 
 /**
- * @param {string} out
- */
-async function buildDictionaryWasm(out) {
-    const wasmSources = [
-        {
-            sourcePath: path.join(extDir, 'js', 'dictionary', 'wasm', 'term-bank-parser.c'),
-            outputPath: path.join(out, 'term-bank-parser.wasm'),
-            exports: ['wasm_reset_heap', 'wasm_alloc', 'wasm_get_last_parse_capacity', 'wasm_get_last_content_capacity', 'inflate_and_join_term_banks', 'inflate_zip_media_batch', 'parse_term_bank', 'parse_term_bank_with_media_hints', 'parse_and_encode_term_bank_token_binary_dedup', 'build_term_string_plan', 'encode_term_lookup_index', 'compact_term_lookup_keys', 'encode_term_content', 'encode_term_content_no_hash', 'encode_term_content_token_binary', 'encode_term_content_token_binary_dedup'],
-        },
-    ];
-
-    const compiler = getWasmCapableCompiler();
-
-    // This kernel imports the ordinary fixed metadata arena. It deliberately
-    // has no shared-memory, atomics, SIMD, inflater, or parser requirements.
-    execFileSync(compiler.command, [...(compiler.args ?? []),
-        '--target=wasm32',
-        '-O3',
-        '-nostdlib',
-        '-Wl,--no-entry',
-        '-Wl,--import-memory',
-        '-Wl,-z,stack-size=65536',
-        '-Wl,--strip-all',
-        '-o',
-        path.join(out, 'term-content-canonical-scan-v1.wasm'),
-        path.join(extDir, 'js', 'dictionary', 'wasm', 'term-content-canonical-scan-v1.c')], {stdio: 'inherit'});
-
-    for (const target of wasmSources) {
-        const args = [
-            `--target=${dictionaryWasmTarget}`,
-            '-O3',
-            '-matomics',
-            '-mbulk-memory',
-            '-msimd128',
-            '-nostdlib',
-            '-Wl,--no-entry',
-            '-Wl,--shared-memory',
-            '-Wl,--max-memory=4294967296',
-        ];
-        for (const exportName of target.exports) {
-            args.push(`-Wl,--export=${exportName}`);
-        }
-        args.push('-Wl,--strip-all', '-o', target.outputPath, target.sourcePath, path.join(extDir, 'js', 'dictionary', 'wasm', 'term-bank-inflate.c'));
-        execFileSync(compiler.command, [...(compiler.args ?? []), ...args], {stdio: 'inherit'});
-    }
-}
-
-
-/**
  * @param {string} scriptPath
  */
 async function buildLib(scriptPath) {
@@ -270,6 +94,7 @@ async function buildLib(scriptPath) {
  * Bundles libraries.
  */
 export async function buildLibs() {
+    copyDictionaryWasm(path.join(extDir, 'lib'));
     const devLibPath = path.join(dirname, 'lib');
     const files = await fs.promises.readdir(devLibPath, {
         withFileTypes: true,
@@ -302,5 +127,4 @@ export async function buildLibs() {
     await copyWasm(path.join(extDir, 'lib'));
     await copySqliteWasm(path.join(extDir, 'lib'));
     await copyZstdAssets(path.join(extDir, 'lib'));
-    await buildDictionaryWasm(path.join(extDir, 'lib'));
 }
