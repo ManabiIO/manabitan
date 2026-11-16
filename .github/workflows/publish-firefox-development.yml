@@ -61,21 +61,7 @@ jobs:
           RELEASE_TAG: ${{ inputs.tag }}
           RELEASE_UPLOAD_URL: ${{ inputs.upload_url }}
         run: |
-          node --input-type=module <<'JAVASCRIPT'
-          const {GITHUB_API_URL, GITHUB_REPOSITORY, GH_TOKEN, RELEASE_TAG, RELEASE_UPLOAD_URL} = process.env;
-          if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(RELEASE_TAG) ||
-              RELEASE_TAG === '0.0.0.0' || RELEASE_TAG.split('.').some((part) => Number(part) > 65535)) {
-            throw new Error('Expected a nonzero four-part release version');
-          }
-          const response = await fetch(`${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/tags/${encodeURIComponent(RELEASE_TAG)}`, {
-            headers: {Authorization: `Bearer ${GH_TOKEN}`, Accept: 'application/vnd.github+json'},
-          });
-          if (!response.ok) { throw new Error(`Release lookup failed: HTTP ${response.status}`); }
-          const release = await response.json();
-          if (release.tag_name !== RELEASE_TAG || release.draft !== false || release.upload_url !== RELEASE_UPLOAD_URL) {
-            throw new Error('Upload destination does not match the selected published release');
-          }
-          JAVASCRIPT
+          node release-source/dev/bin/verify-release-destination.js
 
       - name: Verify Firefox package identity before signing
         if: steps.signingConfig.outputs.enabled == 'true'
