@@ -1,206 +1,81 @@
-# For the Firefox development addon, people install it manually,
-# and updates are distributed via the JSON file created in this
-# action which is stored in the metadata branch of this repo.
-
-name: publish-firefox-development
-on:
-  workflow_dispatch:
-    inputs:
-      upload_url:
-        description: "The upload_url from the release created by create-prerelease-on-tag.yml"
-        required: true
-      tag:
-        description: "Release tag containing the build artifacts"
-        required: true
+name: Publisher configuration readiness (no publication)
+on: workflow_dispatch
 permissions:
   contents: read
-concurrency:
-  group: firefox-development-delivery
-  cancel-in-progress: false
 jobs:
-  build:
+  configuration-only:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     environment: cd
-    permissions:
-      contents: write
-    outputs:
-      hashes: ${{ steps.hash.outputs.hashes }}
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          path: release-source
-
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22.22.0"
-
-      - uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # pin@v1.13
-        with:
-          tag: ${{ inputs.tag }}
-          zipBall: true
-          fileName: "*"
-
-      - name: Check Firefox signing configuration
-        id: signingConfig
+      - name: Check effective credential presence without revealing values
         env:
+          G_CLIENT_ID: ${{ secrets.G_CLIENT_ID }}
+          G_CLIENT_SECRET: ${{ secrets.G_CLIENT_SECRET }}
+          G_REFRESH_TOKEN: ${{ secrets.G_REFRESH_TOKEN }}
+          G_STABLE_EXTENSION_ID: ${{ secrets.G_STABLE_EXTENSION_ID }}
+          G_DEVELOPMENT_EXTENSION_ID: ${{ secrets.G_DEVELOPMENT_EXTENSION_ID }}
+          FF_EXTENSION_ID: ${{ secrets.FF_EXTENSION_ID }}
+          FF_OFFLINE_EXT_ID: ${{ secrets.FF_OFFLINE_EXT_ID }}
           FF_JWT_ISSUER: ${{ secrets.FF_JWT_ISSUER }}
           FF_JWT_SECRET: ${{ secrets.FF_JWT_SECRET }}
-          FF_OFFLINE_EXT_ID: ${{ secrets.FF_OFFLINE_EXT_ID }}
+          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+          CHROME_CRX_PRIVATE_KEY: ${{ secrets.CHROME_CRX_PRIVATE_KEY }}
         run: |
-          if [[ -n "$FF_JWT_ISSUER" && -n "$FF_JWT_SECRET" && -n "$FF_OFFLINE_EXT_ID" ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Firefox signing secrets are not configured; skipping signing and metadata update."
-          fi
-
-      - name: Verify the selected release upload destination
-        if: steps.signingConfig.outputs.enabled == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ inputs.tag }}
-          RELEASE_UPLOAD_URL: ${{ inputs.upload_url }}
-        run: |
-          node --input-type=module <<'JAVASCRIPT'
-          const {GITHUB_API_URL, GITHUB_REPOSITORY, GH_TOKEN, RELEASE_TAG, RELEASE_UPLOAD_URL} = process.env;
-          if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(RELEASE_TAG) ||
-              RELEASE_TAG === '0.0.0.0' || RELEASE_TAG.split('.').some((part) => Number(part) > 65535)) {
-            throw new Error('Expected a nonzero four-part release version');
-          }
-          const response = await fetch(`${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/tags/${encodeURIComponent(RELEASE_TAG)}`, {
-            headers: {Authorization: `Bearer ${GH_TOKEN}`, Accept: 'application/vnd.github+json'},
-          });
-          if (!response.ok) { throw new Error(`Release lookup failed: HTTP ${response.status}`); }
-          const release = await response.json();
-          if (release.tag_name !== RELEASE_TAG || release.draft !== false || release.upload_url !== RELEASE_UPLOAD_URL) {
-            throw new Error('Upload destination does not match the selected published release');
-          }
-          JAVASCRIPT
-
-      - name: Verify Firefox package identity before signing
-        if: steps.signingConfig.outputs.enabled == 'true'
-        env:
-          EXPECTED_ID: ${{ secrets.FF_OFFLINE_EXT_ID }}
-          RELEASE_VERSION: ${{ inputs.tag }}
-        run: |
-          python3 - <<'PYTHON'
-          import json, os, zipfile
-          with zipfile.ZipFile('manabitan-firefox-dev.zip') as package:
-              assert package.namelist().count('manifest.json') == 1
-              manifest = json.loads(package.read('manifest.json'))
-          assert os.environ['EXPECTED_ID'] == '{accbebce-862b-48a9-bb9a-1da9ad1f8702}', 'Configure the Manabitan development signing ID'
-          assert manifest['browser_specific_settings']['gecko']['id'] == os.environ['EXPECTED_ID'], 'Package/signing ID mismatch'
-          assert manifest['version'] == os.environ['RELEASE_VERSION'], 'Package/release version mismatch'
-          PYTHON
-
-      - name: Sign Firefox xpi for offline distribution
-        id: ffSignXpi
-        if: steps.signingConfig.outputs.enabled == 'true'
-        continue-on-error: true
-        uses: cardinalby/webext-buildtools-firefox-sign-xpi-action@0953ef0b8a488a791f17c14fa5b800b131632d34
+          node <<'NODE'
+          const fs = require('node:fs');
+          const groups = {
+            chromeStable: ['G_CLIENT_ID', 'G_CLIENT_SECRET', 'G_REFRESH_TOKEN', 'G_STABLE_EXTENSION_ID'],
+            chromeDevelopment: ['G_CLIENT_ID', 'G_CLIENT_SECRET', 'G_REFRESH_TOKEN', 'G_DEVELOPMENT_EXTENSION_ID'],
+            firefoxStable: ['FF_EXTENSION_ID', 'FF_JWT_ISSUER', 'FF_JWT_SECRET'],
+            firefoxDevelopment: ['FF_OFFLINE_EXT_ID', 'FF_JWT_ISSUER', 'FF_JWT_SECRET'],
+            edgeStable: ['EDGE_PRODUCT_ID', 'EDGE_CLIENT_ID', 'EDGE_API_KEY'],
+            chromeOfflineSigning: ['CHROME_CRX_PRIVATE_KEY'],
+          };
+          const names = [...new Set(Object.values(groups).flat())];
+          const present = Object.fromEntries(names.map((name) => [name, Boolean(process.env[name]?.trim())]));
+          const channels = Object.fromEntries(Object.entries(groups).map(([channel, names]) => [channel, {
+            configured: names.every((name) => present[name]),
+            missing: names.filter((name) => !present[name]),
+          }]));
+          const listingChecks = {
+            chromeStableIdFormatValid: /^[a-p]{32}$/.test(process.env.G_STABLE_EXTENSION_ID ?? ''),
+            chromeDevelopmentIdFormatValid: /^[a-p]{32}$/.test(process.env.G_DEVELOPMENT_EXTENSION_ID ?? ''),
+            firefoxStableMatchesManifest: process.env.FF_EXTENSION_ID === '{1e12d533-8e72-4ec5-9edc-cd50e26d7d43}',
+            firefoxDevelopmentMatchesManifest: process.env.FF_OFFLINE_EXT_ID === '{accbebce-862b-48a9-bb9a-1da9ad1f8702}',
+            edgeIdFormatValid: /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(process.env.EDGE_PRODUCT_ID ?? ''),
+            edgeIsNotUpstreamListing: present.EDGE_PRODUCT_ID && process.env.EDGE_PRODUCT_ID.toLowerCase() !== '18e6c4cd-6383-4f38-95e9-92a629f60817',
+          };
+          const ready = ['chromeStable', 'firefoxStable', 'edgeStable'].every((channel) => channels[channel].configured) &&
+            listingChecks.chromeStableIdFormatValid && listingChecks.firefoxStableMatchesManifest &&
+            listingChecks.edgeIdFormatValid && listingChecks.edgeIsNotUpstreamListing;
+          const report = {
+            status: ready ? 'configuration-present-unverified-authentication' : 'blocked-missing-or-invalid-configuration',
+            checkedAt: new Date().toISOString(),
+            sourceCommit: process.env.GITHUB_SHA,
+            environment: 'cd',
+            present, channels, listingChecks,
+            scope: 'Presence and public manifest identity comparisons only; authentication, ownership, signing, installation and updates are not verified.',
+            publicationAttempted: false,
+          };
+          const output = JSON.stringify(report, null, 2) + '\n';
+          fs.writeFileSync('publisher-readiness.json', output);
+          console.log(output);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, 'Publisher configuration audit: **' + report.status + '**. No signing, upload or publication was attempted.\n\n' +
+            Object.entries(channels).map(([name, state]) => '- ' + name + ': ' + (state.configured ? 'present' : 'missing ' + state.missing.join(', '))).join('\n') + '\n');
+          if (!ready) { process.exitCode = 1; }
+          NODE
+      - name: Retain non-secret readiness report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          approvalTimeoutMs: 1200000
-          validationTimeoutMs: 3600000
-          extensionId: ${{ secrets.FF_OFFLINE_EXT_ID }}
-          zipFilePath: manabitan-firefox-dev.zip
-          sourcesZipFilePath: manabitan-${{ inputs.tag }}.zip
-          xpiFilePath: manabitan-firefox-dev.xpi
-          jwtIssuer: ${{ secrets.FF_JWT_ISSUER }}
-          jwtSecret: ${{ secrets.FF_JWT_SECRET }}
-
-      - name: Abort on sign error
-        if: |
-          steps.signingConfig.outputs.enabled == 'true' &&
-          steps.ffSignXpi.outcome == 'failure'
-        run: |
-          echo 'Signing did not produce a verified XPI. An existing AMO version does not prove release-asset or update-feed publication.' >&2
-          exit 1
-
-      - name: Verify the signed package before upload and update-feed publication
-        id: signedPackage
-        if: steps.ffSignXpi.outcome == 'success'
-        env:
-          EXPECTED_ID: ${{ secrets.FF_OFFLINE_EXT_ID }}
-          RELEASE_VERSION: ${{ inputs.tag }}
-        run: |
-          python3 - <<'PYTHON'
-          import hashlib, json, os, zipfile
-          from pathlib import Path
-          path = Path('manabitan-firefox-dev.xpi')
-          with zipfile.ZipFile(path) as package:
-              assert package.namelist().count('manifest.json') == 1
-              manifest = json.loads(package.read('manifest.json'))
-          assert manifest['browser_specific_settings']['gecko']['id'] == os.environ['EXPECTED_ID'], 'Signed package ID mismatch'
-          assert manifest['version'] == os.environ['RELEASE_VERSION'], 'Signed package version mismatch'
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
-              stream.write('hash=sha256:' + hashlib.sha256(path.read_bytes()).hexdigest() + '\n')
-          PYTHON
-
-      - name: Generate hashes
-        id: hash
-        if: steps.ffSignXpi.outcome == 'success'
-        run: |
-          echo "hashes=$(sha256sum manabitan-firefox-dev.xpi | base64 -w0)" >> "$GITHUB_OUTPUT"
-
-      - name: Upload offline xpi release asset
-        id: uploadReleaseAsset
-        if: steps.ffSignXpi.outcome == 'success'
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ inputs.upload_url }}
-          asset_path: manabitan-firefox-dev.xpi
-          asset_name: manabitan-firefox-dev.xpi
-          asset_content_type: application/x-xpinstall
-
-      # update updates.json so that all people who have the dev version installed get the new update
-
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        id: checkoutMetadata
-        if: steps.ffSignXpi.outcome == 'success'
-        with:
-          ref: metadata
-          path: metadata
-
-      - name: Recreate updates.json
-        if: steps.ffSignXpi.outcome == 'success'
-        working-directory: metadata
-        env:
-          RELEASE_TAG: ${{ inputs.tag }}
-          SIGNED_URL: ${{ steps.uploadReleaseAsset.outputs.browser_download_url }}
-          SIGNED_HASH: ${{ steps.signedPackage.outputs.hash }}
-        run: |
-          node "$GITHUB_WORKSPACE/release-source/dev/bin/update-firefox-development-feed.js" updates.json "$RELEASE_TAG" "$SIGNED_URL" "$SIGNED_HASH"
-
-      - name: Commit files
-        if: steps.ffSignXpi.outcome == 'success'
-        working-directory: metadata
-        env:
-          RELEASE_TAG: ${{ inputs.tag }}
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add updates.json
-          if ! git diff --cached --quiet; then
-            git commit -m "$RELEASE_TAG"
-          fi
-
-      - name: Push changes
-        if: steps.ffSignXpi.outcome == 'success'
-        working-directory: metadata
-        run: git push origin HEAD:metadata
-
-  provenance:
-    needs: [build]
-    if: needs.build.outputs.hashes != ''
-    permissions:
-      actions: read # To read the workflow path.
-      id-token: write # To sign the provenance.
-      contents: write # To add assets to a release.
-    # The generator requires a full version tag for verifier identity validation.
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.build.outputs.hashes }}"
-      upload-assets: true
-      upload-tag-name: ${{ inputs.tag }}
+          name: publisher-readiness
+          path: publisher-readiness.json
+          if-no-files-found: error
+          retention-days: 14
