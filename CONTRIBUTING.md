@@ -89,6 +89,9 @@ Several command line arguments are available for these scripts:
 - `--version <version>` - Sets the version number in the extension manifest. Defaults to 0.0.0.0 if not set.
 
 If no arguments are specified, the command is equivalent to `build.bat --all`.
+Build options alone, such as `--dryRun` or `--version 26.11.16.0`, also apply to all buildable targets.
+Use `--manifest` or `--default` without targets to update the manifest without generating packages.
+Target and manifest selections are validated before libraries, manifests or packages are written.
 
 ### Isolated browser qualification on macOS
 
