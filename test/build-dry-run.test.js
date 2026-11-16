@@ -95,3 +95,49 @@ test('failed native archiving and fallback leave the previous ZIP untouched', as
     await expect(createZip(source, [], output, ['fixture-archiver'], null, false)).rejects.toThrow('fallback source unavailable');
     expect(await readFile(output, 'utf8')).toBe('last good package');
 });
+
+test('a later native archiver never updates a partial archive left by a failed attempt', async () => {
+    const {source, output} = await fixture();
+    await writeFile(output, 'last good package');
+    const partial = await new JSZip().file('obsolete.txt', 'left by failed archiver').generateAsync({type: 'nodebuffer'});
+    const current = await new JSZip().file('native.txt', 'current native output').generateAsync({type: 'nodebuffer'});
+    const contaminated = await new JSZip().file('obsolete.txt', 'left by failed archiver').file('native.txt', 'current native output')
+        .generateAsync({type: 'nodebuffer'});
+    /** @type {string[]} */
+    const paths = [];
+    const archive = vi.spyOn(childProcess, 'execFileSync').mockImplementation((command, args) => {
+        if (!Array.isArray(args)) { throw new Error('Missing archive arguments'); }
+        const staged = args[1];
+        paths.push(staged);
+        expect(fs.readFileSync(output, 'utf8')).toBe('last good package');
+        if (command === 'first-archiver') {
+            fs.writeFileSync(staged, partial);
+            throw new Error('native archive failed after creating partial output');
+        }
+        // 7-Zip's `a` command updates an existing archive and retains entries
+        // absent from the next input set. Model that behavior after a failure.
+        fs.writeFileSync(staged, fs.existsSync(staged) ? contaminated : current);
+        return Buffer.alloc(0);
+    });
+    await createZip(source, [], output, ['first-archiver', 'second-archiver'], null, false);
+    expect(archive).toHaveBeenCalledTimes(2);
+    const zip = await JSZip.loadAsync(await readFile(output), {checkCRC32: true});
+    expect(zip.file('obsolete.txt')).toBeNull();
+    expect(await zip.file('native.txt')?.async('string')).toBe('current native output');
+    expect(new Set(paths).size).toBe(2);
+});
+
+test('JSZip fallback replaces all partial native attempts with the selected source files', async () => {
+    const {source, output} = await fixture();
+    await writeFile(output, 'last good package');
+    vi.spyOn(childProcess, 'execFileSync').mockImplementation((_command, args) => {
+        if (!Array.isArray(args)) { throw new Error('Missing archive arguments'); }
+        fs.writeFileSync(args[1], 'partial native archive');
+        throw new Error('native attempt failed');
+    });
+    await createZip(source, ['excluded.txt'], output, ['first-archiver', 'second-archiver'], null, false);
+    const zip = await JSZip.loadAsync(await readFile(output), {checkCRC32: true});
+    expect(await zip.file('included.txt')?.async('string')).toBe('current source');
+    expect(zip.file('excluded.txt')).toBeNull();
+    expect(Object.keys(zip.files).sort()).toEqual(['included.txt', 'manifest.json']);
+});
