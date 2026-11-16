@@ -35,7 +35,7 @@ const provenanceName = 'multiple.intoto.jsonl';
  */
 function hash(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
-async function fixture() {
+async function fixture(format = /** @type {'legacy'|'bundle'} */ ('legacy')) {
     const directory = await mkdtemp(join(tmpdir(), 'manabitan-staged-release-'));
     const assetsDirectory = join(directory, 'assets');
     const metadataPath = join(directory, 'release.json');
@@ -52,7 +52,8 @@ async function fixture() {
         predicateType: 'https://slsa.dev/provenance/v0.2',
         subject: [...files].map(([name, bytes]) => ({name, digest: {sha256: hash(bytes)}}))};
     const envelope = {payloadType: 'application/vnd.in-toto+json', payload: Buffer.from(JSON.stringify(statement)).toString('base64'), signatures: [{keyid: '', sig: 'fixture-not-a-real-signature'}]};
-    files.set(provenanceName, Buffer.from(JSON.stringify(envelope) + '\n'));
+    const bundle = {mediaType: 'application/vnd.dev.sigstore.bundle.v0.3+json', verificationMaterial: {}, dsseEnvelope: envelope};
+    files.set(provenanceName, Buffer.from(JSON.stringify(format === 'bundle' ? bundle : envelope) + '\n'));
     const release = {id: 123,
         draft: true,
         prerelease: true,
@@ -61,7 +62,21 @@ async function fixture() {
         assets: [...files].map(([name, bytes]) => ({name, size: bytes.length, state: 'uploaded', digest: `sha256:${hash(bytes)}`}))};
     for (const [name, bytes] of files) { await writeFile(join(assetsDirectory, name), bytes); }
     await writeFile(metadataPath, JSON.stringify(release));
-    return {directory, assetsDirectory, metadataPath, files, report, statement, envelope, release};
+    return {directory, assetsDirectory, metadataPath, files, report, statement, envelope, bundle, release};
+}
+
+/**
+ * @param {Awaited<ReturnType<typeof fixture>>} value
+ * @param {unknown} document
+ */
+async function replaceProvenance(value, document) {
+    const bytes = Buffer.from(JSON.stringify(document));
+    await writeFile(join(value.assetsDirectory, provenanceName), bytes);
+    const asset = value.release.assets.find((entry) => entry.name === provenanceName);
+    if (typeof asset === 'undefined') { throw new Error('Missing test provenance'); }
+    asset.size = bytes.length;
+    asset.digest = `sha256:${hash(bytes)}`;
+    await writeFile(value.metadataPath, JSON.stringify(value.release));
 }
 
 /**
@@ -77,6 +92,27 @@ test('verifies the exact staged asset set and explicitly limits signature claims
     const value = await fixture();
     const {stdout} = await verify(value);
     expect(JSON.parse(stdout)).toMatchObject({version, sourceCommit, releaseId: 123, tagCommit: sourceCommit, verifiedAssetCount: 9, cryptographicProvenanceVerified: false});
+});
+
+test('accepts the Sigstore v0.3 DSSE bundle emitted by the pinned provenance generator', async () => {
+    const value = await fixture('bundle');
+    const {stdout} = await verify(value);
+    expect(JSON.parse(stdout)).toMatchObject({verifiedAssetCount: 9, cryptographicProvenanceVerified: false});
+});
+
+test.each(['media-type', 'missing-envelope', 'invalid-envelope', 'missing-material', 'invalid-material'])('rejects a malformed provenance bundle: %s', async (field) => {
+    const value = await fixture('bundle');
+    /** @type {Record<string, unknown>} */
+    const bundle = {...value.bundle};
+    switch (field) {
+        case 'media-type': bundle.mediaType = 'application/vnd.dev.sigstore.bundle.v99+json'; break;
+        case 'missing-envelope': delete bundle.dsseEnvelope; break;
+        case 'invalid-envelope': bundle.dsseEnvelope = []; break;
+        case 'missing-material': delete bundle.verificationMaterial; break;
+        case 'invalid-material': bundle.verificationMaterial = null; break;
+    }
+    await replaceProvenance(value, bundle);
+    await expect(verify(value)).rejects.toThrow(/provenance/u);
 });
 
 test('accepts a branch target only with an independently resolved matching tag commit', async () => {
@@ -134,8 +170,11 @@ test.each(['source', 'version', 'hash', 'duplicate', 'traversal'])('rejects inva
     await expect(verify(value)).rejects.toThrow(/source\/version mismatch|hash\/version mismatch|duplicate package audit path/u);
 });
 
-test.each(['digest', 'missing', 'duplicate', 'traversal', 'unsigned'])('rejects invalid provenance %s', async (field) => {
-    const value = await fixture();
+test.each([
+    ...['digest', 'missing', 'duplicate', 'traversal', 'unsigned'].map((field) => ({field, format: /** @type {const} */ ('legacy')})),
+    ...['digest', 'missing', 'duplicate', 'traversal', 'unsigned'].map((field) => ({field, format: /** @type {const} */ ('bundle')})),
+])('rejects invalid $format provenance $field', async ({field, format}) => {
+    const value = await fixture(format);
     switch (field) {
         case 'digest': value.statement.subject[0].digest.sha256 = '0'.repeat(64); break;
         case 'missing': value.statement.subject.pop(); break;
@@ -144,13 +183,7 @@ test.each(['digest', 'missing', 'duplicate', 'traversal', 'unsigned'])('rejects 
         case 'unsigned': value.envelope.signatures = []; break;
     }
     value.envelope.payload = Buffer.from(JSON.stringify(value.statement)).toString('base64');
-    const bytes = Buffer.from(JSON.stringify(value.envelope));
-    await writeFile(join(value.assetsDirectory, provenanceName), bytes);
-    const asset = value.release.assets.find((entry) => entry.name === provenanceName);
-    if (typeof asset === 'undefined') { throw new Error('Missing test provenance'); }
-    asset.size = bytes.length;
-    asset.digest = `sha256:${hash(bytes)}`;
-    await writeFile(value.metadataPath, JSON.stringify(value.release));
+    await replaceProvenance(value, format === 'bundle' ? value.bundle : value.envelope);
     await expect(verify(value)).rejects.toThrow(/provenance|Provenance|Unsafe asset name/u);
 });
 
