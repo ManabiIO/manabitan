@@ -5,10 +5,14 @@
 
 import {mkdtemp, mkdir, readFile, writeFile, access} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {isAbsolute, join, relative} from 'node:path';
 import JSZip from 'jszip';
-import {expect, test} from 'vitest';
+import fs from 'node:fs';
+import childProcess from 'node:child_process';
+import {afterEach, expect, test, vi} from 'vitest';
 import {createZip} from '../dev/bin/build.js';
+
+afterEach(() => { vi.restoreAllMocks(); });
 
 /** @returns {Promise<{source: string, output: string}>} */
 async function fixture() {
@@ -43,4 +47,51 @@ test('an ordinary ZIP build still replaces the previous package and applies excl
     expect(await zip.file('included.txt')?.async('string')).toBe('current source');
     expect(zip.file('excluded.txt')).toBeNull();
     expect(zip.file('previous.txt')).toBeNull();
+});
+
+test('a source read failure preserves the last good ZIP', async () => {
+    const {source, output} = await fixture();
+    await writeFile(output, 'last good package');
+    vi.spyOn(fs, 'readFileSync').mockImplementationOnce(() => { throw new Error('source unavailable'); });
+    await expect(createZip(source, [], output, [], null, false)).rejects.toThrow('source unavailable');
+    expect(await readFile(output, 'utf8')).toBe('last good package');
+});
+
+test('a ZIP publication failure preserves the last good ZIP', async () => {
+    const {source, output} = await fixture();
+    await writeFile(output, 'last good package');
+    vi.spyOn(fs, 'renameSync').mockImplementationOnce(() => { throw new Error('publication unavailable'); });
+    await expect(createZip(source, [], output, [], null, false)).rejects.toThrow('publication unavailable');
+    expect(await readFile(output, 'utf8')).toBe('last good package');
+});
+
+test('native archiving receives an absolute staging path and preserves the old ZIP until completion', async () => {
+    const {source, output} = await fixture();
+    await writeFile(output, 'last good package');
+    const bytes = await new JSZip().file('native.txt', 'native output').generateAsync({type: 'nodebuffer'});
+    const archive = vi.spyOn(childProcess, 'execFileSync').mockImplementation((_command, args) => {
+        if (!Array.isArray(args)) { throw new Error('Missing archive arguments'); }
+        const staged = args[1];
+        expect(isAbsolute(staged)).toBe(true);
+        expect(staged).not.toBe(output);
+        expect(fs.readFileSync(output, 'utf8')).toBe('last good package');
+        fs.writeFileSync(staged, bytes);
+        return Buffer.alloc(0);
+    });
+    await createZip(source, [], relative(process.cwd(), output), ['fixture-archiver'], null, false);
+    expect(archive).toHaveBeenCalledOnce();
+    expect(await readFile(output)).toEqual(bytes);
+});
+
+test('failed native archiving and fallback leave the previous ZIP untouched', async () => {
+    const {source, output} = await fixture();
+    await writeFile(output, 'last good package');
+    vi.spyOn(childProcess, 'execFileSync').mockImplementation((_command, args) => {
+        if (!Array.isArray(args)) { throw new Error('Missing archive arguments'); }
+        fs.writeFileSync(args[1], 'incomplete archive');
+        throw new Error('native archiving failed');
+    });
+    vi.spyOn(fs, 'readFileSync').mockImplementationOnce(() => { throw new Error('fallback source unavailable'); });
+    await expect(createZip(source, [], output, ['fixture-archiver'], null, false)).rejects.toThrow('fallback source unavailable');
+    expect(await readFile(output, 'utf8')).toBe('last good package');
 });
