@@ -6,6 +6,7 @@
 import {readFileSync} from 'node:fs';
 import {afterEach, expect, vi} from 'vitest';
 import {Backend} from '../ext/js/background/backend.js';
+import {AnkiConnect} from '../ext/js/comm/anki-connect.js';
 import {log} from '../ext/js/core/log.js';
 import {JsonSchema} from '../ext/js/data/json-schema.js';
 import {OptionsUtil} from '../ext/js/data/options-util.js';
@@ -56,6 +57,7 @@ async function setup(context) {
     const backend = /** @type {Backend} */ (Object.assign(Object.create(Backend.prototype), {
         _options: options,
         _optionsUtil: optionsUtil,
+        _anki: new AnkiConnect(),
         _applyOptions: vi.fn(),
         _profileConditionsSchemaCache: [],
     }));

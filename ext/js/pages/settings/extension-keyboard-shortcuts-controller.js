@@ -42,6 +42,8 @@ export class ExtensionKeyboardShortcutController {
         this._os = null;
         /** @type {ExtensionKeyboardShortcutHotkeyEntry[]} */
         this._entries = [];
+        /** @type {Promise<void>} */
+        this._mutationTail = Promise.resolve();
     }
 
     /** @type {HotkeyUtil} */
@@ -67,8 +69,10 @@ export class ExtensionKeyboardShortcutController {
         this._os = os;
         this._hotkeyUtil.os = os;
 
-        const commands = await this._getCommands();
-        this._setupCommands(commands);
+        await this.enqueueMutation(async () => {
+            const commands = await this._getCommands();
+            this._setupCommands(commands);
+        });
     }
 
     /**
@@ -76,33 +80,18 @@ export class ExtensionKeyboardShortcutController {
      * @returns {Promise<{key: ?string, modifiers: import('input').Modifier[]}>}
      */
     async resetCommand(name) {
-        await this._resetCommand(name);
-
-        /** @type {?string} */
-        let key = null;
-        /** @type {import('input').Modifier[]} */
-        let modifiers = [];
-
-        const commands = await this._getCommands();
-        for (const {name: name2, shortcut} of commands) {
-            if (name === name2) {
-                ({key, modifiers} = this._hotkeyUtil.convertCommandToInput(shortcut));
-                break;
-            }
-        }
-
-        return {key, modifiers};
+        return this.enqueueMutation(() => this.resetCommandAndGetInput(name));
     }
 
     /**
      * @param {string} name
      * @param {?string} key
      * @param {import('input').Modifier[]} modifiers
+     * @returns {Promise<void>}
      */
     async updateCommand(name, key, modifiers) {
-        // Firefox-only; uses Promise API
-        const shortcut = this._hotkeyUtil.convertInputToCommand(key, modifiers);
-        await browser.commands.update({name, shortcut});
+        const modifiersCopy = [...modifiers];
+        return this.enqueueMutation(() => this.updateCommandInternal(name, key, modifiersCopy));
     }
 
     /**
@@ -205,40 +194,87 @@ export class ExtensionKeyboardShortcutController {
         listContainer.appendChild(fragment);
     }
 
-    /** */
+    /**
+     * @returns {Promise<void>}
+     */
     async _resetAllCommands() {
-        if (!this.canModifyCommands()) { return; }
-
-        let commands = await this._getCommands();
-        const promises = [];
-
-        for (const {name} of commands) {
-            if (typeof name !== 'string' || name.startsWith('_')) { continue; }
-            promises.push(this._resetCommand(name));
-        }
-
-        await Promise.all(promises);
-
-        commands = await this._getCommands();
-        this._setupCommands(commands);
+        return this.enqueueMutation(async () => {
+            if (!this.canResetCommands()) { return; }
+            const commands = await this._getCommands();
+            await this._runBulkMutation(commands, (name) => this._resetCommand(name));
+            const updatedCommands = await this._getCommands();
+            this._setupCommands(updatedCommands);
+        });
     }
 
-    /** */
+    /**
+     * @returns {Promise<void>}
+     */
     async _clearAllCommands() {
-        if (!this.canModifyCommands()) { return; }
+        return this.enqueueMutation(async () => {
+            if (!this.canModifyCommands()) { return; }
+            const commands = await this._getCommands();
+            await this._runBulkMutation(commands, (name) => this.updateCommandInternal(name, null, []));
+            const updatedCommands = await this._getCommands();
+            this._setupCommands(updatedCommands);
+        });
+    }
 
-        let commands = await this._getCommands();
-        const promises = [];
+    /**
+     * @template T
+     * @param {() => Promise<T>} operation
+     * @returns {Promise<T>}
+     */
+    enqueueMutation(operation) {
+        const result = this._mutationTail.then(operation);
+        this._mutationTail = result.then(() => {}, () => {});
+        return result;
+    }
 
-        for (const {name} of commands) {
-            if (typeof name !== 'string' || name.startsWith('_')) { continue; }
-            promises.push(this.updateCommand(name, null, []));
+    /**
+     * @param {string} name
+     * @returns {Promise<{key: ?string, modifiers: import('input').Modifier[]}>}
+     */
+    async resetCommandAndGetInput(name) {
+        await this._resetCommand(name);
+        const commands = await this._getCommands();
+        for (const {name: commandName, shortcut} of commands) {
+            if (name === commandName) {
+                return this._hotkeyUtil.convertCommandToInput(shortcut);
+            }
         }
+        return {key: null, modifiers: []};
+    }
 
-        await Promise.all(promises);
+    /**
+     * @param {string} name
+     * @param {?string} key
+     * @param {import('input').Modifier[]} modifiers
+     * @returns {Promise<void>}
+     */
+    async updateCommandInternal(name, key, modifiers) {
+        // Firefox-only; uses Promise API
+        const shortcut = this._hotkeyUtil.convertInputToCommand(key, modifiers);
+        await browser.commands.update({name, shortcut});
+    }
 
-        commands = await this._getCommands();
-        this._setupCommands(commands);
+    /**
+     * @param {chrome.commands.Command[]} commands
+     * @param {(name: string) => Promise<void>} mutation
+     */
+    async _runBulkMutation(commands, mutation) {
+        const results = await Promise.allSettled(commands
+            .filter(({name}) => typeof name === 'string' && !name.startsWith('_'))
+            .map(({name}) => mutation(/** @type {string} */ (name))));
+        const failure = results.find((result) => result.status === 'rejected');
+        if (typeof failure !== 'undefined') {
+            try {
+                this._setupCommands(await this._getCommands());
+            } catch (refreshError) {
+                log.error(refreshError);
+            }
+            if (failure.status === 'rejected') { throw failure.reason; }
+        }
     }
 
     /**
@@ -279,6 +315,14 @@ class ExtensionKeyboardShortcutHotkeyEntry {
         this._input = null;
         /** @type {?KeyboardMouseInputField} */
         this._inputField = null;
+        /** @type {number} */
+        this._generation = 0;
+        /** @type {boolean} */
+        this._active = true;
+        /** @type {number} */
+        this._pendingMutations = 0;
+        /** @type {boolean} */
+        this._blurPending = false;
         /** @type {EventListenerCollection} */
         this._eventListeners = new EventListenerCollection();
     }
@@ -311,6 +355,8 @@ class ExtensionKeyboardShortcutHotkeyEntry {
 
     /** */
     cleanup() {
+        this._active = false;
+        this._generation++;
         this._eventListeners.removeAllEventListeners();
         if (this._node.parentNode !== null) {
             this._node.parentNode.removeChild(this._node);
@@ -335,7 +381,11 @@ class ExtensionKeyboardShortcutHotkeyEntry {
 
     /** */
     _onInputFieldBlur() {
-        this._updateInput();
+        if (this._pendingMutations > 0) {
+            this._blurPending = true;
+        } else {
+            this._updateInput();
+        }
     }
 
     /**
@@ -358,9 +408,23 @@ class ExtensionKeyboardShortcutHotkeyEntry {
 
     /** */
     _updateInput() {
-        /** @type {KeyboardMouseInputField} */ (this._inputField).setInput(this._key, this._modifiers);
+        this._inputField?.setInput(this._key, this._modifiers);
         if (this._input !== null) {
             delete this._input.dataset.invalid;
+        }
+    }
+
+    /**
+     * @param {number} generation
+     */
+    _completeMutation(generation) {
+        this._pendingMutations--;
+        if (!this._active) { return; }
+        if (this._pendingMutations === 0 && this._blurPending) {
+            this._blurPending = false;
+            this._updateInput();
+        } else if (generation === this._generation) {
+            this._blurPending = false;
         }
     }
 
@@ -368,39 +432,57 @@ class ExtensionKeyboardShortcutHotkeyEntry {
      * @param {?string} key
      * @param {import('input').Modifier[]} modifiers
      * @param {boolean} updateInput
+     * @returns {Promise<void>}
      */
     async _tryUpdateInput(key, modifiers, updateInput) {
-        let okay = (key === null ? (modifiers.length === 0) : (modifiers.length > 0));
-        if (okay) {
-            try {
-                await this._parent.updateCommand(this._name, key, modifiers);
-            } catch (e) {
-                okay = false;
+        const modifiersCopy = [...modifiers];
+        const generation = ++this._generation;
+        if (!this._active) { return; }
+        this._pendingMutations++;
+        return this._parent.enqueueMutation(async () => {
+            if (!this._active) { return; }
+            let okay = (key === null ? (modifiersCopy.length === 0) : (modifiersCopy.length > 0));
+            if (okay) {
+                try {
+                    await this._parent.updateCommandInternal(this._name, key, modifiersCopy);
+                } catch (e) {
+                    okay = false;
+                }
             }
-        }
 
-        if (okay) {
-            this._key = key;
-            this._modifiers = modifiers;
-            if (this._input !== null) {
-                delete this._input.dataset.invalid;
+            if (!this._active) { return; }
+            if (okay) {
+                this._key = key;
+                this._modifiers = modifiersCopy;
             }
-        } else {
-            if (this._input !== null) {
+            if (generation === this._generation && okay && this._input !== null) {
+                delete this._input.dataset.invalid;
+            } else if (generation === this._generation && !okay && this._input !== null) {
                 this._input.dataset.invalid = 'true';
             }
-        }
 
-        if (updateInput) {
-            this._updateInput();
-        }
+            if (generation === this._generation && updateInput) { this._updateInput(); }
+        }).finally(() => {
+            this._completeMutation(generation);
+        });
     }
 
-    /** */
+    /**
+     * @returns {Promise<void>}
+     */
     async _resetInput() {
-        const {key, modifiers} = await this._parent.resetCommand(this._name);
-        this._key = key;
-        this._modifiers = modifiers;
-        this._updateInput();
+        if (!this._active) { return; }
+        const generation = ++this._generation;
+        this._pendingMutations++;
+        return this._parent.enqueueMutation(async () => {
+            if (!this._active) { return; }
+            const {key, modifiers} = await this._parent.resetCommandAndGetInput(this._name);
+            if (!this._active) { return; }
+            this._key = key;
+            this._modifiers = modifiers;
+            if (generation === this._generation) { this._updateInput(); }
+        }).finally(() => {
+            this._completeMutation(generation);
+        });
     }
 }
