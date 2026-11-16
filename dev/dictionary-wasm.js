@@ -28,14 +28,7 @@ const artifactDirectory = 'dev/data/dictionary-wasm';
 const artifactNames = ['term-bank-parser.wasm', 'term-content-canonical-scan-v1.wasm'];
 const digestPattern = /^[a-f0-9]{64}$/;
 
-/**
- * @typedef {object} DictionaryWasmManifest
- * @property {number} format
- * @property {{compilerVersion: string, linkerVersion: string}} toolchain
- * @property {string} sourceDigest
- * @property {number} sourceFileCount
- * @property {{name: string, sources: string[], arguments: string[], sha256: string}[]} targets
- */
+/** @typedef {import('dev/dictionary-wasm').DictionaryWasmManifest} DictionaryWasmManifest */
 
 /**
  * @param {Uint8Array|string} bytes
