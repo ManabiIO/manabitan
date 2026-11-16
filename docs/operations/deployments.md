@@ -12,7 +12,7 @@ Run the repository validation and the blocking Chromium, Edge, Firefox and Firef
 
 Require CodeQL to pass for the exact active `develop` candidate and review its findings against `main` during promotion qualification. Manually dispatched CI includes four browser lanes; it does not replace CodeQL security analysis.
 
-Build fresh packages with Node 22 and the supported WASM compiler. From the repository root:
+Build fresh packages with Node 22 and the [verified dictionary WASM artifacts](../../dev/data/dictionary-wasm/README.md). Native regeneration uses the pinned compiler and linker. From the repository root:
 
 ```sh
 npm ci
