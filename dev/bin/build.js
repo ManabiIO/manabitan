@@ -228,6 +228,32 @@ function getIndexOfFilePath(array, item) {
 }
 
 /**
+ * @param {import('dev/manifest').ManifestVariant} variant
+ * @returns {boolean}
+ */
+function isBuildableVariant(variant) {
+    return variant.buildable !== false && typeof variant.fileName === 'string' && variant.fileName.length > 0;
+}
+
+/**
+ * Validate the complete request before any target can change an existing output.
+ * @param {ManifestUtil} manifestUtil
+ * @param {string[]} names
+ * @returns {import('dev/manifest').ManifestVariant[]}
+ * @throws {Error}
+ */
+function getBuildVariants(manifestUtil, names) {
+    if (names.length === 0) { throw new Error('No build targets selected'); }
+    return names.map((name) => {
+        const variant = manifestUtil.getVariant(name);
+        if (typeof variant === 'undefined') { throw new Error(`Unknown build target: ${name}`); }
+        if (variant.buildable === false) { throw new Error(`Build target is not buildable: ${name}`); }
+        if (!isBuildableVariant(variant)) { throw new Error(`Build target has no package output: ${name}`); }
+        return variant;
+    });
+}
+
+/**
  * @param {string} buildDir
  * @param {string} extDir
  * @param {ManifestUtil} manifestUtil
@@ -238,6 +264,7 @@ function getIndexOfFilePath(array, item) {
  * @param {string} yomitanVersion
  */
 export async function build(buildDir, extDir, manifestUtil, variantNames, manifestPath, dryRun, dryRunBuildZip, yomitanVersion) {
+    const variants = getBuildVariants(manifestUtil, variantNames);
     const sevenZipExes = ['7za', '7z'];
 
     // Create build directory
@@ -262,12 +289,9 @@ export async function build(buildDir, extDir, manifestUtil, variantNames, manife
 
     process.stdout.write(`Version: ${yomitanVersion}...\n`);
 
-    for (const variantName of variantNames) {
-        const variant = manifestUtil.getVariant(variantName);
-        if (typeof variant === 'undefined' || variant.buildable === false) { continue; }
-
+    for (const variant of variants) {
         const {name, fileName, fileCopies} = variant;
-        const excludeFiles = manifestUtil.getVariantFileExclusions(variantName);
+        const excludeFiles = manifestUtil.getVariantFileExclusions(name);
 
         process.stdout.write(`Building ${name}...\n`);
 
@@ -312,8 +336,13 @@ function ensureFilesExist(directory, files) {
     }
 }
 
-/** */
-export async function main() {
+/**
+ * @param {string[]} argv
+ * @param {ManifestUtil} manifestUtil
+ * @returns {{variantNames: string[], manifestName: ?string, dryRun: boolean, dryRunBuildZip: boolean, yomitanVersion: string}}
+ * @throws {Error} A selected variant cannot be built or restored.
+ */
+export function getBuildPlan(argv, manifestUtil) {
     /** @type {import('util').ParseArgsConfig['options']} */
     const parseArgsConfigOptions = {
         all: {
@@ -344,15 +373,35 @@ export async function main() {
         },
     };
 
-    const argv = process.argv.slice(2);
     const {values: args, positionals: targets} = parseArgs({args: argv, options: parseArgsConfigOptions, allowPositionals: true});
 
     const dryRun = /** @type {boolean} */ (args.dryRun);
     const dryRunBuildZip = /** @type {boolean} */ (args.dryRunBuildZip);
     const yomitanVersion = /** @type {string} */ (args.version);
 
-    const manifestUtil = new ManifestUtil();
+    const manifestOnly = args.all !== true && typeof args.target !== 'string' && targets.length === 0 &&
+    (args.default === true || typeof args.manifest === 'string');
+    const variantNames = (
+        typeof args.target === 'string' ?
+        [args.target] :
+        (args.all === true || (targets.length === 0 && !manifestOnly) ?
+        manifestUtil.getVariants().filter(isBuildableVariant).map(({name}) => name) :
+        targets)
+    );
+    const manifestName = /** @type {?string} */ ((!args.default && typeof args.manifest !== 'undefined') ? args.manifest : null);
+    if (manifestName !== null && typeof manifestUtil.getVariant(manifestName) === 'undefined') {
+        throw new Error(`Unknown manifest variant: ${manifestName}`);
+    }
+    if (!manifestOnly) { getBuildVariants(manifestUtil, variantNames); }
+    return {variantNames, manifestName, dryRun, dryRunBuildZip, yomitanVersion};
+}
 
+/**
+ * @param {string[]} [argv]
+ */
+export async function main(argv = process.argv.slice(2)) {
+    const manifestUtil = new ManifestUtil();
+    const {variantNames, manifestName, dryRun, dryRunBuildZip, yomitanVersion} = getBuildPlan(argv, manifestUtil);
     const rootDir = path.join(dirname, '..', '..');
     const extDir = path.join(rootDir, 'ext');
     const buildDir = path.join(rootDir, 'builds');
@@ -360,17 +409,11 @@ export async function main() {
 
     try {
         await buildLibs();
-        const variantNames = /** @type {string[]} */ ((
-            args.target ?
-            [args.target] :
-            (argv.length === 0 || args.all ?
-            manifestUtil.getVariants().filter(({buildable}) => buildable !== false).map(({name}) => name) :
-            targets)
-        ));
-        await build(buildDir, extDir, manifestUtil, variantNames, manifestPath, dryRun, dryRunBuildZip, yomitanVersion);
+        if (variantNames.length > 0) {
+            await build(buildDir, extDir, manifestUtil, variantNames, manifestPath, dryRun, dryRunBuildZip, yomitanVersion);
+        }
     } finally {
         // Restore manifest
-        const manifestName = /** @type {?string} */ ((!args.default && typeof args.manifest !== 'undefined') ? args.manifest : null);
         const restoreManifest = manifestUtil.getManifest(manifestName);
         process.stdout.write('Restoring manifest...\n');
         if (!dryRun) {
