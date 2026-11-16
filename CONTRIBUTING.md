@@ -65,6 +65,8 @@ Steps to run [playwright](https://playwright.dev/) tests locally:
 
 ## Building
 
+Dictionary WASM modules are copied from verified, source-bound artifacts, so normal builds do not require a native compiler. For intentional C/header or compiler changes, follow the [pinned WASM regeneration instructions](dev/data/dictionary-wasm/README.md). CI rebuilds them with the locked Clang and LLD versions and rejects stale or different bytes.
+
 By default, the development repository is configured for Chrome, and the [ext](ext) directory can be directly
 loaded as an unpacked extension by Chrome. This way, development does not require any additional build steps,
 and most changes will be automatically updated by the browser. Depending on what files were changed,

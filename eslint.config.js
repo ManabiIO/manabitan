@@ -60,6 +60,8 @@ const manabitanHeaderFiles = [
     'dev/bin/run-playwright.js',
     'dev/bin/build-zstd-wasm.js',
     'dev/bin/audit-release-packages.js',
+    'dev/bin/build-dictionary-wasm.js',
+    'dev/dictionary-wasm.js',
     'dev/bin/verify-release-destination.js',
     'dev/perf/**/*.js',
     'dev/lib/zstd-wasm.js',
