@@ -45,6 +45,68 @@ function createDatabase(index = {}) {
 }
 
 describe('DictionaryDatabase direct term indexes', () => {
+    test('mixed equal-text pair requests retain existing candidate order through hydration', async () => {
+        const database = createDatabase({
+            expression: new Map([['a', [8, 7]]]),
+            reading: new Map([['other', [8]]]),
+        });
+        const findTermPairCandidates = vi.fn(() => { throw new Error('Equal-text groups retain the established lookup'); });
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermPairCandidates});
+        Reflect.set(database, '_fetchTermRowsByIds', async () => new Map([
+            [8, {id: 8, reading: 'other'}], [7, {id: 7, reading: 'a'}],
+        ]));
+        expect(await database.findTermsExactBulk([
+            {term: 'a', reading: 'a'}, {term: 'a', reading: 'other'},
+        ], new Set(['Test']))).toEqual([
+            {id: 8, matchSource: 'term', matchType: 'exact', itemIndex: 1},
+            {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 0},
+        ]);
+        expect(findTermPairCandidates).not.toHaveBeenCalled();
+    });
+
+    test('pair lookup skips already-quarantined owners before probing their retained index', async () => {
+        const database = createDatabase();
+        Reflect.set(database, '_getDictionaryNames', () => ['Damaged', 'Test']);
+        const find = vi.fn((dictionary) => {
+            if (dictionary === 'Damaged') { throw new Error('Quarantined index must not be queried'); }
+            return [7];
+        });
+        Object.assign(Reflect.get(database, '_termRecordStore'), {
+            getDictionaryHealth: (/** @type {string} */ name) => ({status: name === 'Damaged' ? 'reimportRequired' : 'available'}),
+            findTermIds: find,
+            findTermPairCandidates: (/** @type {string} */ dictionary) => new Map([['はし', find(dictionary)]]),
+        });
+        Reflect.set(database, '_fetchTermRowsByIds', async () => new Map([[7, {id: 7, reading: 'はし'}]]));
+        expect(await database.findTermsExactBulk([{term: '橋', reading: 'はし'}], new Set(['Damaged', 'Test'])))
+            .toEqual([{id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 0}]);
+        expect(find).toHaveBeenCalledOnce();
+        expect(find.mock.calls[0][0]).toBe('Test');
+    });
+
+    test('pair candidates preserve every request association and authoritative reading checks', async () => {
+        const database = createDatabase();
+        const findTermPairCandidates = vi.fn(() => new Map([['はし', [7, 9]], ['きょう', [8]]]));
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermPairCandidates});
+        Reflect.set(database, '_fetchTermRowsByIds', vi.fn(async () => new Map([
+            [7, {id: 7, reading: 'はし'}],
+            [8, {id: 8, reading: 'きょう'}],
+            [9, {id: 9, reading: 'mismatched candidate'}],
+        ])));
+        const results = await database.findTermsExactBulk([
+            {term: '橋', reading: 'はし'},
+            {term: '橋', reading: 'はし'},
+            {term: '橋', reading: 'きょう'},
+        ], new Set(['Test']));
+        expect(results).toEqual([
+            {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 0},
+            {id: 7, matchSource: 'term', matchType: 'exact', itemIndex: 1},
+            {id: 8, matchSource: 'term', matchType: 'exact', itemIndex: 2},
+        ]);
+        expect(findTermPairCandidates.mock.calls).toEqual([
+            ['Test', '橋', [{reading: 'はし', itemIndex: 0}, {reading: 'はし', itemIndex: 1}, {reading: 'きょう', itemIndex: 2}]],
+        ]);
+    });
+
     test('normalizes dictionary iterables without quadratic duplicate scans', () => {
         const database = new DictionaryDatabase();
         const iterable = {

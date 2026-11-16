@@ -30,6 +30,7 @@ import {
     appendPrefixIdMatches,
     encodePersistedTermLookupIndex,
     encodePersistedTermLookupIndexFromPreinternedPlan,
+    findExactKey,
     findExactRows,
     findPrefixRows,
     findSequenceRows,
@@ -4439,6 +4440,72 @@ export class TermRecordOpfsStore {
             return ids;
         }
         return [...(this.getDictionaryIndex(dictionaryName)[field].get(query) ?? [])];
+    }
+
+    /**
+     * Resolves all requested readings for one expression together. Persistent
+     * indexes verify per-row reading keys, avoiding reading-wide postings and
+     * intersection sets. Record hydration remains the final pair oracle.
+     * @param {string} dictionaryName
+     * @param {string} expression
+     * @param {{reading: string}[]} requests
+     * @returns {Map<string, number[]>}
+     */
+    findTermPairCandidates(dictionaryName, expression, requests) {
+        /** @type {Map<string, number[]>} */
+        const matches = new Map();
+        if (requests.length === 0) { return matches; }
+        const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
+        if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            const expressionBytes = this._textEncoder.encode(expression);
+            const expressionHash = hashTermLookupKeyBytes(expressionBytes);
+            /** @type {Map<string, {bytes: Uint8Array, hash: number}>|null} */
+            let queries = null;
+            for (const chunk of chunks) {
+                const rows = findExactRows(chunk.lookupIndex, expressionBytes, 'expression', expressionHash);
+                if (rows.length === 0) { continue; }
+                if (queries === null) {
+                    queries = new Map();
+                    for (const {reading} of requests) {
+                        if (queries.has(reading)) { continue; }
+                        const bytes = reading === expression ? expressionBytes : this._textEncoder.encode(reading);
+                        queries.set(reading, {bytes, hash: reading === expression ? expressionHash : hashTermLookupKeyBytes(bytes)});
+                    }
+                }
+                // Key IDs belong to one chunk. Resolve only after its expression
+                // hits, so an ordinary miss never encodes or probes readings.
+                const expressionKey = chunk.lookupIndex.expressionKeys[rows[0]];
+                /** @type {Map<string, number>} */
+                const readingKeys = new Map();
+                for (const [reading, {bytes, hash}] of queries) {
+                    const key = reading === expression ? expressionKey : findExactKey(chunk.lookupIndex, bytes, hash);
+                    if (key >= 0) { readingKeys.set(reading, key); }
+                }
+                if (readingKeys.size === 0) { continue; }
+                for (const row of rows) {
+                    const rowReadingKey = chunk.lookupIndex.readingKeys[row];
+                    const actualReadingKey = rowReadingKey === U16_NULL ? expressionKey : rowReadingKey;
+                    for (const [reading, key] of readingKeys) {
+                        if (actualReadingKey !== key) { continue; }
+                        let ids = matches.get(reading);
+                        if (typeof ids === 'undefined') { matches.set(reading, ids = []); }
+                        ids.push(chunk.firstId + row);
+                    }
+                }
+            }
+            return matches;
+        }
+        const index = this.getDictionaryIndex(dictionaryName);
+        const expressionIds = index.expression.get(expression) ?? [];
+        if (expressionIds.length === 0) { return matches; }
+        for (const reading of new Set(requests.map((request) => request.reading))) {
+            // Equal text includes aliased readings omitted from reading postings.
+            // The existing hydrated-record check rejects other readings later.
+            const readingIds = reading === expression ? null : new Set(index.reading.get(reading) ?? []);
+            const ids = readingIds === null ? [...expressionIds] : expressionIds.filter((id) => readingIds.has(id));
+            if (ids.length > 0) { matches.set(reading, ids); }
+        }
+        return matches;
     }
 
     /**

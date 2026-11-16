@@ -3705,19 +3705,27 @@ null;
         }
         /** @type {Map<number, {reading: string, itemIndex: number}[]>} */
         const idMatches = new Map();
+        const findPairs = Reflect.get(this._termRecordStore, 'findTermPairCandidates');
         for (const [term, requests] of requestsByTerm) {
-            for (const dictionaryName of dictionaryNames) {
-                const expressionIds = this._findDirectTermIds(dictionaryName, term, 'expression');
-                if (expressionIds.length === 0) { continue; }
+            const usePairs = typeof findPairs === 'function' && requests.every(({reading}) => reading !== term);
+            for (const dictionaryName of lookupDictionaryNames) {
+                const pairCandidates = usePairs ?
+                    /** @type {Map<string, number[]>} */ (findPairs.call(this._termRecordStore, this._getTermRecordStorageName(dictionaryName), term, requests)) :
+                    null;
+                if (pairCandidates !== null && pairCandidates.size === 0) { continue; }
+                const expressionIds = pairCandidates === null ? this._findDirectTermIds(dictionaryName, term, 'expression') : null;
+                if (expressionIds !== null && expressionIds.length === 0) { continue; }
                 for (const request of requests) {
                     /** @type {Set<number>|null} */
                     let readingIdSet = null;
-                    if (request.reading !== term) {
+                    const candidates = pairCandidates === null ? expressionIds : pairCandidates.get(request.reading);
+                    if (candidates === null || typeof candidates === 'undefined') { continue; }
+                    if (expressionIds !== null && request.reading !== term) {
                         const readingIds = this._findDirectTermIds(dictionaryName, request.reading, 'reading');
                         if (readingIds.length === 0) { continue; }
                         readingIdSet = new Set(readingIds);
                     }
-                    for (const id of expressionIds) {
+                    for (const id of candidates) {
                         if (id <= 0 || (readingIdSet !== null && !readingIdSet.has(id))) { continue; }
                         const existingRequests = idMatches.get(id);
                         if (typeof existingRequests === 'undefined') {
