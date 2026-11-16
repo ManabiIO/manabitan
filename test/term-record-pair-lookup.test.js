@@ -107,6 +107,37 @@ test('persistent pair lookup combines chunk IDs and preserves aliased readings',
     expect(encode.mock.calls).toEqual([['missing']]);
 });
 
+test('reading-only expression keys skip requested-reading encoding', () => {
+    const encoder = new TextEncoder();
+    const lookupIndex = parsePersistedTermLookupIndex(encodePersistedTermLookupIndex([
+        {expressionBytes: encoder.encode('漢字'), readingBytes: encoder.encode('よみ'), sequence: null},
+    ]));
+    const store = new TermRecordOpfsStore();
+    Reflect.get(store, '_persistentIndexLoadedDictionaryNames').add('Test');
+    Reflect.get(store, '_persistentRecordChunksByDictionary').set('Test', [lookupChunk(1, lookupIndex)]);
+    const encode = vi.spyOn(Reflect.get(store, '_textEncoder'), 'encode');
+
+    expect(store.findTermPairCandidates('Test', 'よみ', [{reading: 'not-encoded'}])).toEqual(new Map());
+    expect(encode.mock.calls).toEqual([['よみ']]);
+    encode.mockClear();
+    expect(store.findTermPairCandidates('Test', 'よみ', [])).toEqual(new Map());
+    expect(encode).not.toHaveBeenCalled();
+});
+
+test('pair candidates preserve distinct strings with byte-equivalent UTF-8 encodings', () => {
+    const encoder = new TextEncoder();
+    const lookupIndex = parsePersistedTermLookupIndex(encodePersistedTermLookupIndex([
+        {expressionBytes: encoder.encode('語'), readingBytes: encoder.encode('\uFFFD'), sequence: null},
+    ]));
+    const store = new TermRecordOpfsStore();
+    Reflect.get(store, '_persistentIndexLoadedDictionaryNames').add('Test');
+    Reflect.get(store, '_persistentRecordChunksByDictionary').set('Test', [lookupChunk(1, lookupIndex)]);
+
+    const matches = store.findTermPairCandidates('Test', '語', [{reading: '\uD800'}, {reading: '\uFFFD'}]);
+    expect(matches.get('\uD800')).toEqual([1]);
+    expect(matches.get('\uFFFD')).toEqual([1]);
+});
+
 test('legacy pair candidates retain the established posting intersection and equal-text shortcut', () => {
     const store = new TermRecordOpfsStore();
     vi.spyOn(store, 'getDictionaryIndex').mockReturnValue({

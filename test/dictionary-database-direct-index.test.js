@@ -45,6 +45,55 @@ function createDatabase(index = {}) {
 }
 
 describe('DictionaryDatabase direct term indexes', () => {
+    test.each(partialMatchTypes)('%s miss skips term row hydration', async (matchType) => {
+        const database = createDatabase();
+        const findTermPrefixIdMatchesForDictionaries = vi.fn(() => [{expression: [], reading: []}]);
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermPrefixIdMatchesForDictionaries});
+        const fetchRows = vi.spyOn(database, '_fetchTermRowsByIds')
+            .mockImplementation(DictionaryDatabase.prototype._fetchTermRowsByIds.bind(database));
+        const ensureContentLoaded = vi.spyOn(Reflect.get(database, '_termContentStore'), 'ensureLoadedForRead')
+            .mockRejectedValue(new Error('Content storage is unavailable on an empty lookup'));
+
+        await expect(database.findTermsBulk(['unmatched'], new Set(['Test']), matchType)).resolves.toEqual([]);
+
+        expect(findTermPrefixIdMatchesForDictionaries).toHaveBeenCalledOnce();
+        expect(fetchRows).not.toHaveBeenCalled();
+        expect(ensureContentLoaded).not.toHaveBeenCalled();
+    });
+
+    test('exact pair miss skips term row hydration', async () => {
+        const database = createDatabase();
+        const findTermPairCandidates = vi.fn(() => new Map());
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermPairCandidates});
+        const fetchRows = vi.spyOn(database, '_fetchTermRowsByIds')
+            .mockImplementation(DictionaryDatabase.prototype._fetchTermRowsByIds.bind(database));
+        const ensureContentLoaded = vi.spyOn(Reflect.get(database, '_termContentStore'), 'ensureLoadedForRead')
+            .mockRejectedValue(new Error('Content storage is unavailable on an empty lookup'));
+
+        await expect(database.findTermsExactBulk([{term: 'absent', reading: 'あ'}], new Set(['Test'])))
+            .resolves.toEqual([]);
+
+        expect(findTermPairCandidates).toHaveBeenCalledOnce();
+        expect(fetchRows).not.toHaveBeenCalled();
+        expect(ensureContentLoaded).not.toHaveBeenCalled();
+    });
+
+    test('sequence miss skips term row hydration', async () => {
+        const database = createDatabase();
+        const findTermIdsBySequence = vi.fn(() => []);
+        Object.assign(Reflect.get(database, '_termRecordStore'), {findTermIdsBySequence});
+        const fetchRows = vi.spyOn(database, '_fetchTermRowsByIds')
+            .mockImplementation(DictionaryDatabase.prototype._fetchTermRowsByIds.bind(database));
+        const ensureContentLoaded = vi.spyOn(Reflect.get(database, '_termContentStore'), 'ensureLoadedForRead')
+            .mockRejectedValue(new Error('Content storage is unavailable on an empty lookup'));
+
+        await expect(database.findTermsBySequenceBulk([{dictionary: 'Test', query: 404}])).resolves.toEqual([]);
+
+        expect(findTermIdsBySequence).toHaveBeenCalledOnce();
+        expect(fetchRows).not.toHaveBeenCalled();
+        expect(ensureContentLoaded).not.toHaveBeenCalled();
+    });
+
     test('mixed equal-text pair requests retain existing candidate order through hydration', async () => {
         const database = createDatabase({
             expression: new Map([['a', [8, 7]]]),
