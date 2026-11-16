@@ -36,7 +36,7 @@ function executable(command) {
             const file = path.resolve(directory, command + suffix);
             try {
                 fs.accessSync(file, fs.constants.X_OK);
-                if (fs.statSync(file).isFile()) { return fs.realpathSync(file); }
+                if (fs.statSync(file).isFile()) { return file; }
             } catch { /* Try the next executable location. */ }
         }
     }
