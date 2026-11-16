@@ -17,8 +17,11 @@
 
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
+import {basename} from 'node:path';
+import {isDeepStrictEqual} from 'node:util';
 import JSZip from 'jszip';
 import {parseJson} from '../json.js';
+import {ManifestUtil} from '../manifest-util.js';
 
 const [version, ...paths] = process.argv.slice(2);
 if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version ?? '') ||
@@ -31,12 +34,26 @@ const requiredNativeAssets = new Set([
     'lib/zstd.wasm',
     'lib/term-content-canonical-scan-v1.wasm',
 ]);
+const manifestUtil = new ManifestUtil();
+/** @type {Map<string, string>} */
+const packageVariants = new Map();
+for (const {name, fileName, buildable} of manifestUtil.getVariants()) {
+    if (buildable === false || typeof fileName !== 'string' || fileName.length === 0) { continue; }
+    packageVariants.set(fileName.endsWith('.zip') ? fileName : `${fileName}.zip`, name);
+}
 const packages = [];
 for (const path of paths) {
+    const variant = packageVariants.get(basename(path));
+    if (typeof variant !== 'string') { throw new Error(`Unknown release package name: ${path}`); }
     const bytes = await readFile(path);
     const zip = await JSZip.loadAsync(bytes, {checkCRC32: true});
     const manifest = /** @type {unknown} */ (parseJson(await zip.file('manifest.json')?.async('string') ?? 'null'));
     if (manifest === null || typeof manifest !== 'object' || Array.isArray(manifest) || !('version' in manifest) || manifest.version !== version) { throw new Error(`Package version mismatch: ${path}`); }
+    const expectedManifest = manifestUtil.getManifest(variant);
+    expectedManifest.version = version;
+    if (!('manifest_version' in manifest) || manifest.manifest_version !== 3 || !isDeepStrictEqual(manifest, expectedManifest)) {
+        throw new Error(`Package manifest identity mismatch: ${path}`);
+    }
     const files = Object.values(zip.files).filter((file) => !file.dir).sort((a, b) => a.name.localeCompare(b.name, 'en'));
     const tree = createHash('sha256');
     /** @type {Record<string, string>} */

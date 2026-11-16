@@ -129,6 +129,14 @@ jobs:
       contents: write
 
     steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          path: release-source
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.22.0"
+
       - uses: robinraju/release-downloader@28fc21f50d76778e7023361aa1f863e717d3d56f # pin@v1.13
         with:
           tag: ${{ inputs.tag }}
@@ -136,13 +144,23 @@ jobs:
 
       - name: Check Chrome offline signing configuration
         id: crxConfig
+        env:
+          CHROME_CRX_PRIVATE_KEY: ${{ secrets.CHROME_CRX_PRIVATE_KEY }}
         run: |
-          if [[ -n "${{ secrets.CHROME_CRX_PRIVATE_KEY }}" ]]; then
+          if [[ -n "$CHROME_CRX_PRIVATE_KEY" ]]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
             echo "Chrome offline signing secret is not configured; skipping crx signing."
           fi
+
+      - name: Verify the selected release upload destination
+        if: steps.crxConfig.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_UPLOAD_URL: ${{ inputs.upload_url }}
+        run: node release-source/dev/bin/verify-release-destination.js
 
       - name: Sign Chrome crx for offline distribution
         if: steps.crxConfig.outputs.enabled == 'true'
