@@ -80,6 +80,22 @@ export class ManifestUtil {
     }
 
     /**
+     * Use the nearest explicitly configured exclusion list in the inheritance chain.
+     * @param {string} name
+     * @returns {string[]}
+     */
+    getVariantFileExclusions(name) {
+        const variant = this._variantMap.get(name);
+        if (typeof variant === 'undefined') { return []; }
+        const inheritance = this._getInheritanceChain(variant);
+        for (let i = inheritance.length - 1; i >= 0; --i) {
+            const {excludeFiles} = inheritance[i];
+            if (Array.isArray(excludeFiles)) { return [...excludeFiles]; }
+        }
+        return [];
+    }
+
+    /**
      * @param {import('dev/manifest').Manifest} manifest
      * @returns {string}
      */
