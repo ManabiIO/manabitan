@@ -756,6 +756,8 @@ export class DictionaryImporter {
         this._ignoreCancellation = false;
         /** @type {DictionaryZipReadScope|null} */
         this._directZipReads = null;
+        /** @type {boolean} */
+        this._importInProgress = false;
         /** @type {import('dictionary-importer').ProgressData} */
         this._progressData = this._createProgressData();
         /** @type {number} */
@@ -840,8 +842,12 @@ export class DictionaryImporter {
      * @throws {Error} If import setup throws before returning a structured import error.
      */
     async importDictionary(dictionaryDatabase, archiveContent, details) {
+        // This instance owns mutable cancellation, progress, parser and read
+        // state before the database acquires its separate bulk-import owner.
+        if (this._importInProgress) { throw new Error('Dictionary importer already has an active import'); }
         const archiveOwnership = new DictionaryArchiveOwnership();
         const directZipReads = new DictionaryZipReadScope(() => { this._throwIfCancelled(); });
+        this._importInProgress = true;
         this._directZipReads = directZipReads;
         try {
             let result;
@@ -870,6 +876,8 @@ export class DictionaryImporter {
                 );
             }
             throw error;
+        } finally {
+            this._importInProgress = false;
         }
     }
 

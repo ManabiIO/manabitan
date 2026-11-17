@@ -370,3 +370,18 @@ describe('term-record repair scheduling', () => {
         await expect(store.ensureDictionariesLoaded([], {repairMode: /** @type {'await'} */ ('invalid')})).rejects.toThrow('Invalid dictionary repair mode');
     });
 });
+
+
+test.each(/** @type {const} */ (['await', 'background']))('missing authoritative shards stay quarantined after %s repair settles', async (repairMode) => {
+    const {store} = fixture(['Healthy']);
+    await store.ensureDictionariesLoaded(['Missing', 'Healthy'], {repairMode});
+    await store._awaitPersistentIndexRepairs();
+    expect(store.getDictionaryHealth('Missing')).toEqual({status: 'reimportRequired', reason: 'Dictionary record data is missing'});
+    expect(store.isDictionaryAvailable('Missing')).toBe(false);
+    expect(store.isDictionaryAvailable('Healthy')).toBe(true);
+    expect(Reflect.get(store, '_persistentIndexRepairRetryByDictionary').has('Missing')).toBe(false);
+    const repair = vi.spyOn(store, '_repairPersistentDictionaryIndex');
+    await store.ensureDictionariesLoaded(['Missing'], {repairMode});
+    await store._awaitPersistentIndexRepairs();
+    expect(repair).not.toHaveBeenCalled();
+});

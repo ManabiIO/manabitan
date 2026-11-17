@@ -4094,7 +4094,7 @@ export class TermRecordOpfsStore {
         }
         const states = this._getDictionaryShardStates(dictionaryName);
         if (states.length === 0) {
-            this._setDictionaryHealth(dictionaryName, 'reimportRequired', 'Dictionary record data is missing');
+            this.markDictionaryReimportRequired(dictionaryName, 'Dictionary record data is missing');
             return false;
         }
         const globalGeneration = this._persistentLookupGeneration;
