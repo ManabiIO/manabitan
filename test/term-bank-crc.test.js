@@ -31,6 +31,7 @@ let wasm
 /** @type {string | undefined} */
 let outputDirectory
 const sourceDirectory = path.resolve('ext/js/dictionary/wasm')
+const compilerTimeoutMs = 60_000
 
 
 beforeAll(async () => {
@@ -58,11 +59,11 @@ beforeAll(async () => {
         '-o',
         outputPath,
         path.join(sourceDirectory, 'term-bank-parser.c'),
-        path.join(sourceDirectory, 'term-bank-inflate.c')], {stdio: 'inherit'})
+        path.join(sourceDirectory, 'term-bank-inflate.c')], {stdio: 'inherit', timeout: compilerTimeoutMs})
     const module = await WebAssembly.compile(readFileSync(outputPath))
     expect(WebAssembly.Module.imports(module)).toEqual([])
     wasm = /** @type {Exports} */ (/** @type {unknown} */ ((await WebAssembly.instantiate(module)).exports))
-})
+}, 90_000)
 
 afterAll(() => {
     if (!outputDirectory || !existsSync(outputDirectory)) { return }
