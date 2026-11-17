@@ -152,3 +152,41 @@ test('legacy pair candidates retain the established posting intersection and equ
     expect(findPairs(store, 'Legacy', 'a', 'missing')).toEqual([]);
     expect(findPairs(store, 'Legacy', 'missing', 'reading')).toEqual([]);
 });
+
+
+test('single-reading and repeated-reading pair routes agree across chunks and UTF-8 aliases', () => {
+    const encoder = new TextEncoder();
+    const store = new TermRecordOpfsStore();
+    const rows = [
+        {expression: '語', reading: '\uFFFD'},
+        {expression: '語', reading: null},
+        {expression: '語', reading: 'ご'},
+        {expression: '別', reading: 'ご'},
+        {expression: '語', reading: 'ご'},
+    ];
+    const chunks = [rows, [
+        {expression: '先', reading: 'さき'},
+        {expression: '語', reading: 'ご'},
+        {expression: '語', reading: null},
+        {expression: '語', reading: '\uFFFD'},
+        {expression: '別', reading: 'ご'},
+        {expression: '語', reading: 'ご'},
+    ]].map((chunkRows, index) => lookupChunk(index === 0 ? 3 : 100, parsePersistedTermLookupIndex(encodePersistedTermLookupIndex(chunkRows.map(({expression, reading}) => ({
+        expressionBytes: encoder.encode(expression),
+        readingBytes: reading === null ? null : encoder.encode(reading),
+        sequence: null,
+    }))))));
+    Reflect.get(store, '_persistentIndexLoadedDictionaryNames').add('Test');
+    Reflect.get(store, '_persistentRecordChunksByDictionary').set('Test', chunks);
+    expect(findPairs(store, 'Test', '語', 'ご')).toEqual([5, 7, 101, 105]);
+    expect(findPairs(store, 'Test', '語', '語')).toEqual([4, 102]);
+    for (const expression of ['語', '別', '先', 'missing', '']) {
+        for (const reading of ['語', 'ご', '\uD800', '\uFFFD', 'missing', '']) {
+            const single = store.findTermPairCandidates('Test', expression, [{reading}]);
+            const repeated = store.findTermPairCandidates('Test', expression, [{reading}, {reading}]);
+            expect([...single]).toEqual([...repeated]);
+            single.get(reading)?.push(999);
+            expect([...store.findTermPairCandidates('Test', expression, [{reading}])]).toEqual([...repeated]);
+        }
+    }
+});
