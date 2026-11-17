@@ -596,6 +596,39 @@ describe('term-bank WASM parser', () => {
         expect(result.contentMetaList?.buffer).not.toBe(heap.buffer);
     });
 
+    maybeTest('uses the native slab extent for a complete group and row extents for partial chunks', async () => {
+        const bank = (/** @type {string} */ glossary) => textEncoder.encode(JSON.stringify([
+            ['語', 'ご', '', '', 0, [glossary], 1, ''],
+        ]));
+        // The final row repeats the first definition; the last new payload
+        // belongs to an earlier row.
+        const sources = [bank('short'), bank('longer definition'), bank('short')];
+        const options = {emitContentSlab: true, emitTokenBinaryContent: true};
+        /** @type {number[]} */
+        const chunkLengths = [];
+        await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
+            if (chunk.contentMetaList === undefined) { throw new Error('Missing slab metadata'); }
+            let extent = 0;
+            for (let i = 0; i < chunk.contentMetaList.length; i += 4) {
+                extent = Math.max(extent, chunk.contentMetaList[i] + chunk.contentMetaList[i + 1]);
+            }
+            expect(chunk.contentBytesLength).toBe(extent);
+            const useRowExtents = {...chunk, contentBytesLength: undefined};
+            expect(copyWasmBackedColumnChunk(chunk).contentBytesBuffer).toEqual(
+                copyWasmBackedColumnChunk(useRowExtents).contentBytesBuffer,
+            );
+        }, 16, options);
+        await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
+            expect(chunk.contentBytesLength).toBeUndefined();
+            const copied = copyWasmBackedColumnChunk(chunk).contentBytesBuffer;
+            if (copied === undefined) { throw new Error('Missing copied slab'); }
+            chunkLengths.push(copied.byteLength);
+        }, 1, options);
+        expect(chunkLengths).toHaveLength(3);
+        expect(chunkLengths[0]).toBe(chunkLengths[2]);
+        expect(chunkLengths[0]).toBeLessThan(chunkLengths[1]);
+    });
+
     test('owns record metadata while borrowing only the explicitly fenced content slab', () => {
         const heap = new Uint8Array(new SharedArrayBuffer(256));
         heap.set([1, 2, 3, 4], 192);
