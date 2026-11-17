@@ -183,6 +183,187 @@ describe('DictionaryWorkerClient', () => {
         await expectation;
         expect(FakeWorker.instances).toHaveLength(1);
         expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
+
+        const recovered = client.invoke('findTermsOffscreen', {text: '日本'});
+        const recoveredResult = expect(recovered).resolves.toEqual({ok: true});
+        expect(FakeWorker.instances).toHaveLength(2);
+        expect(FakeWorker.instances[1].postMessage).toHaveBeenCalledWith(
+            {id: 2, action: 'findTermsOffscreen', params: {text: '日本'}},
+            [],
+        );
+        FakeWorker.instances[1].emit('message', {data: {id: 2, result: {ok: true}}});
+        await recoveredResult;
+        expect(FakeWorker.instances[1].postMessage).not.toHaveBeenCalledWith(
+            expect.objectContaining({action: 'deleteDictionaryOffscreen'}),
+            expect.anything(),
+        );
+    });
+
+    test.each(['findTermsOffscreen', 'getDictionaryCountsOffscreen'])(
+        'a timed-out %s does not terminate a longer-lived mutation owner',
+        async (action) => {
+            vi.useFakeTimers();
+            const client = new DictionaryWorkerClient('/dictionary-worker.js');
+            const worker = FakeWorker.instances[0];
+            const mutation = client.invoke('deleteDictionaryOffscreen', {dictionaryTitle: 'Test'});
+            const mutationResult = expect(mutation).resolves.toEqual({deleted: true});
+            const request = client.invoke(action, {dictionaryTitle: 'Test'});
+            const requestError = expect(request).rejects.toThrow(new RegExp(`${action}.*30000ms`));
+
+            await vi.advanceTimersByTimeAsync(30_000);
+            await requestError;
+            expect(worker.terminate).not.toHaveBeenCalled();
+            expect(Reflect.get(client, '_responseHandlers').size).toBe(1);
+
+            worker.emit('message', {data: {id: 2, result: {tooLate: true}}});
+            expect(worker.terminate).not.toHaveBeenCalled();
+            expect(reportDiagnostics).not.toHaveBeenCalledWith('dictionary-worker-unmatched-response', expect.anything());
+            worker.emit('message', {data: {id: 1, result: {deleted: true}}});
+            await mutationResult;
+            expect(worker.terminate).not.toHaveBeenCalled();
+        },
+    );
+
+    test('protects a worker only for the actual remaining longer mutation deadline', async () => {
+        vi.useFakeTimers();
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const worker = FakeWorker.instances[0];
+        const mutation = client.invoke('deleteDictionaryOffscreen', {});
+        const mutationError = expect(mutation).rejects.toThrow(/deleteDictionaryOffscreen.*300000ms/);
+        await vi.advanceTimersByTimeAsync(269_999);
+        const read = client.invoke('getDictionaryCountsOffscreen', {});
+        const readError = expect(read).rejects.toThrow(/getDictionaryCountsOffscreen.*30000ms/);
+
+        await vi.advanceTimersByTimeAsync(30_000);
+        await readError;
+        expect(worker.terminate).not.toHaveBeenCalled();
+        expect(Reflect.get(client, '_responseHandlers').size).toBe(1);
+        worker.emit('message', {data: {id: 2, result: {tooLate: true}}});
+        await vi.advanceTimersByTimeAsync(1);
+        await mutationError;
+        expect(worker.terminate).toHaveBeenCalledOnce();
+        expect(Reflect.get(client, '_responseHandlers').size).toBe(0);
+    });
+
+    test('a staggered read swarm cannot keep an unresponsive worker alive indefinitely', async () => {
+        vi.useFakeTimers();
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const firstWorker = FakeWorker.instances[0];
+        const first = client.invoke('getDictionaryCountsOffscreen', {});
+        const firstError = expect(first).rejects.toThrow(/getDictionaryCountsOffscreen.*30000ms/);
+        await vi.advanceTimersByTimeAsync(10_000);
+        const second = client.invoke('getDictionaryInfoOffscreen', {});
+        const secondError = expect(second).rejects.toThrow(/Timed out waiting for Dictionary worker response/);
+        await vi.advanceTimersByTimeAsync(10_000);
+        const third = client.invoke('getDictionaryTermProbeOffscreen', {});
+        const thirdError = expect(third).rejects.toThrow(/Timed out waiting for Dictionary worker response/);
+
+        await vi.advanceTimersByTimeAsync(10_000);
+        await Promise.all([firstError, secondError, thirdError]);
+        expect(firstWorker.terminate).toHaveBeenCalledOnce();
+        expect(Reflect.get(client, '_responseHandlers').size).toBe(0);
+
+        const recovered = client.invoke('getDictionaryCountsOffscreen', {});
+        const recoveredResult = expect(recovered).resolves.toEqual({ok: true});
+        expect(FakeWorker.instances).toHaveLength(2);
+        FakeWorker.instances[1].emit('message', {data: {id: 4, result: {ok: true}}});
+        await recoveredResult;
+    });
+
+    test('a lookup-only import status timeout cannot terminate an active streamed import', async () => {
+        vi.useFakeTimers();
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const worker = FakeWorker.instances[0];
+        const importPort = {};
+        const importRequest = client.invoke('importDictionaryOffscreen', {operationId: 'import-A'}, [importPort]);
+        const importResult = expect(importRequest).resolves.toEqual({imported: true});
+        const statusRequest = client.invoke('cancelDictionaryImportOffscreen', {operationId: 'import-A', lookupOnly: true});
+        const statusError = expect(statusRequest).rejects.toThrow(/cancelDictionaryImportOffscreen.*30000ms/);
+
+        await vi.advanceTimersByTimeAsync(30_000);
+        await statusError;
+        expect(worker.terminate).not.toHaveBeenCalled();
+        expect(Reflect.get(client, '_responseHandlers').size).toBe(1);
+        worker.emit('message', {data: {id: 2, result: {lateStatus: true}}});
+        expect(worker.terminate).not.toHaveBeenCalled();
+        worker.emit('message', {data: {id: 1, result: {imported: true}}});
+        await importResult;
+
+        expect(worker.terminate).not.toHaveBeenCalled();
+        expect(Reflect.get(client, '_responseHandlers').size).toBe(0);
+        expect(vi.getTimerCount()).toBe(0);
+        expect(worker.postMessage).toHaveBeenCalledTimes(2);
+        expect(worker.postMessage).toHaveBeenCalledWith(
+            {id: 1, action: 'importDictionaryOffscreen', params: {operationId: 'import-A'}},
+            [importPort],
+        );
+        expect(reportDiagnostics).not.toHaveBeenCalledWith('dictionary-worker-request-retry', expect.anything());
+    });
+
+    test('an actual import-cancel timeout can terminate a hung import worker', async () => {
+        vi.useFakeTimers();
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const worker = FakeWorker.instances[0];
+        const importRequest = client.invoke('importDictionaryOffscreen', {operationId: 'import-A'}, [{}]);
+        const importError = expect(importRequest).rejects.toThrow(/cancelDictionaryImportOffscreen.*30000ms/);
+        const cancelRequest = client.invoke('cancelDictionaryImportOffscreen', {operationId: 'import-A'});
+        const cancelError = expect(cancelRequest).rejects.toThrow(/cancelDictionaryImportOffscreen.*30000ms/);
+
+        await vi.advanceTimersByTimeAsync(30_000);
+        await Promise.all([importError, cancelError]);
+        expect(worker.terminate).toHaveBeenCalledOnce();
+        expect(Reflect.get(client, '_responseHandlers').size).toBe(0);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    test('retired timed-out response IDs remain bounded and their late replies are ignored', () => {
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        Reflect.set(client, '_requestId', 300);
+        const retire = Reflect.get(client, '_retireResponseId');
+        for (let id = 1; id <= 300; ++id) { retire.call(client, id); }
+        expect(Reflect.get(client, '_retiredResponseIds').size).toBe(256);
+        expect(Reflect.get(client, '_retiredResponseIdFloor')).toBe(44);
+
+        FakeWorker.instances[0].emit('message', {data: {id: 1, result: {tooLate: true}}});
+        expect(FakeWorker.instances[0].terminate).not.toHaveBeenCalled();
+        expect(reportDiagnostics).toHaveBeenCalledWith('dictionary-worker-late-response', expect.objectContaining({id: 1}));
+        expect(reportDiagnostics).not.toHaveBeenCalledWith('dictionary-worker-unmatched-response', expect.anything());
+    });
+
+    test.each([0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1, 2])('rejects malformed or unissued response ID %s before retired-ID handling', async (id) => {
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        const request = client.invoke('findTermsOffscreen', {text: '日本'});
+        const requestResult = expect(request).resolves.toEqual({ok: true});
+        const worker = FakeWorker.instances[0];
+        worker.emit('message', {data: {id, result: {unexpected: true}}});
+
+        await vi.waitFor(() => expect(FakeWorker.instances).toHaveLength(2));
+        expect(worker.terminate).toHaveBeenCalledOnce();
+        FakeWorker.instances[1].emit('message', {data: {id: 2, result: {ok: true}}});
+        await requestResult;
+    });
+
+    test('does not let malformed IDs pass after retirement overflow or worker recreation', async () => {
+        const client = new DictionaryWorkerClient('/dictionary-worker.js');
+        Reflect.set(client, '_requestId', 300);
+        const retire = Reflect.get(client, '_retireResponseId');
+        for (let id = 1; id <= 300; ++id) { retire.call(client, id); }
+        const firstWorker = FakeWorker.instances[0];
+        const firstPending = client.invoke('findTermsOffscreen', {text: '日本'});
+        const firstResult = expect(firstPending).resolves.toEqual({ok: true});
+        firstWorker.emit('message', {data: {id: 0, result: {unexpected: true}}});
+        await vi.waitFor(() => expect(FakeWorker.instances).toHaveLength(2));
+        FakeWorker.instances[1].emit('message', {data: {id: 302, result: {ok: true}}});
+        await firstResult;
+
+        const secondPending = client.invoke('findKanjiOffscreen', {text: '日'});
+        const secondResult = expect(secondPending).rejects.toThrow('returned a response without a request id');
+        FakeWorker.instances[1].emit('error', {message: 'recreate'});
+        await vi.waitFor(() => expect(FakeWorker.instances).toHaveLength(3));
+        const replacement = FakeWorker.instances[2];
+        replacement.emit('message', {data: {id: 2, result: {oldGeneration: true}}});
+        await secondResult;
+        expect(replacement.terminate).toHaveBeenCalledOnce();
     });
 
     test('does not retry a structured application error', async () => {
@@ -223,7 +404,7 @@ describe('DictionaryWorkerClient', () => {
         await expect(pendingLookup).resolves.toEqual({dictionaryEntries: [1]});
 
         const nextLookup = client.invoke('findKanjiOffscreen', {text: '日'});
-        worker.emit('message', {data: {id: 3, result: {dictionaryEntries: [2]}}});
+        worker.emit('message', {data: {id: 2, result: {dictionaryEntries: [2]}}});
         await expect(nextLookup).resolves.toEqual({dictionaryEntries: [2]});
         expect(FakeWorker.instances).toHaveLength(1);
     });

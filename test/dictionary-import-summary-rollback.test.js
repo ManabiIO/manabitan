@@ -130,9 +130,18 @@ test.each(['create', 'cleanup'])('failed summary %s rollback cannot poison the r
     ])
     expect.soft(prepare).toHaveBeenCalledOnce()
     expect(database._requireDb().selectValue("SELECT summaryJson FROM dictionaries WHERE title = 'Healthy'")).toBe(originalSummary)
+    const recordStore = database._termRecordStore
+    const loadDictionary = vi.spyOn(recordStore, 'ensureDictionariesLoaded').mockImplementation(async (names) => {
+        expect(names).toEqual(['Healthy'])
+        // This Node fixture keeps its complete record state in memory and has
+        // no OPFS directory. Substitute only that storage-discovery boundary.
+        expect(recordStore.getDictionaryRecordCount('Healthy')).toBe(1)
+        expect(recordStore.getDictionaryIdBatch('Healthy', 0, 1)).toEqual([1])
+    })
     await expect.soft(database.findTermsByGlossary('cat', new Set(['Healthy']))).resolves.toEqual([
         expect.objectContaining({term: 'healthy-term'}),
     ])
+    expect(loadDictionary).toHaveBeenCalledOnce()
     expect((await runImport(worker, false)).find(({type}) => type !== 'progress')).toMatchObject({
         type: 'complete',
         result: {result: {title: 'Faulty', importSuccess: true}, errors: []},

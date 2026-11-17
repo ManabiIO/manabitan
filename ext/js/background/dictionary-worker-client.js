@@ -25,6 +25,7 @@ const timeoutByClass = Object.freeze({
     'maintenance': 300_000,
     'streamed-import': null,
 });
+const MAX_RETIRED_RESPONSE_IDS = 256;
 
 /**
  * Serialization failures occur before a request is delivered. They are local
@@ -64,10 +65,16 @@ export class DictionaryWorkerClient {
         this._onFatalError = options.onFatalError ?? null;
         /** @type {Worker} */
         this._worker = /** @type {Worker} */ (/** @type {unknown} */ (null));
-        /** @type {Map<number, {action: string, resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
+        /** @type {Map<number, {action: string, deadline: number|null, interruptsOnTimeout: boolean, resolve: (value: unknown) => void, reject: (reason?: unknown) => void}>} */
         this._responseHandlers = new Map();
         /** @type {Set<number>} */
         this._oneWayRequestIds = new Set();
+        /** @type {Set<number>} */
+        this._retiredResponseIds = new Set();
+        /** @type {number} */
+        this._retiredResponseIdFloor = 0;
+        /** @type {number} */
+        this._workerRequestIdStart = 1;
         /** @type {number} */
         this._requestId = 0;
         /** @type {number} */
@@ -97,6 +104,9 @@ export class DictionaryWorkerClient {
         // the prior fatal state intact so the next independent request retries.
         this._worker = worker;
         this._fatalError = null;
+        this._retiredResponseIds.clear();
+        this._retiredResponseIdFloor = 0;
+        this._workerRequestIdStart = this._requestId + 1;
         ++this._generation;
     }
 
@@ -168,6 +178,8 @@ export class DictionaryWorkerClient {
             let timeoutId = null;
             this._responseHandlers.set(id, {
                 action,
+                deadline: timeoutMs === null ? null : globalThis.performance.now() + timeoutMs,
+                interruptsOnTimeout: action === 'cancelDictionaryImportOffscreen' && params.lookupOnly !== true,
                 resolve: (value) => {
                     if (timeoutId !== null) { globalThis.clearTimeout(timeoutId); }
                     resolve(/** @type {TReturn} */ (value));
@@ -179,19 +191,14 @@ export class DictionaryWorkerClient {
             });
             if (timeoutMs !== null) {
                 timeoutId = globalThis.setTimeout(() => {
-                    if (!this._responseHandlers.has(id)) { return; }
-                    this._setFatalError(
-                        new DictionaryWorkerTransportError(
-                            `Timed out waiting for ${this._context} response to ${action} after ${String(timeoutMs)}ms`,
-                        ),
-                        worker,
-                    );
+                    this._onRequestTimeout(id, action, timeoutMs, worker);
                 }, timeoutMs);
             }
             try {
                 worker.postMessage({id, action, params}, transferables);
             } catch (error) {
                 this._responseHandlers.delete(id);
+                if (this._requestId === id) { --this._requestId; }
                 if (timeoutId !== null) {
                     globalThis.clearTimeout(timeoutId);
                 }
@@ -205,6 +212,64 @@ export class DictionaryWorkerClient {
                 reject(transportError);
             }
         });
+    }
+
+    /**
+     * A short deadline must not terminate a worker that still owns a
+     * longer-lived operation. Retire just the timed-out request and ignore its
+     * eventual response; tracking stays bounded if many reads time out.
+     * @param {number} id
+     * @param {string} action
+     * @param {number} timeoutMs
+     * @param {Worker} worker
+     */
+    _onRequestTimeout(id, action, timeoutMs, worker) {
+        const handler = this._responseHandlers.get(id);
+        if (typeof handler === 'undefined') { return; }
+        const error = new DictionaryWorkerTransportError(
+            `Timed out waiting for ${this._context} response to ${action} after ${String(timeoutMs)}ms`,
+        );
+        if (handler.interruptsOnTimeout) {
+            this._setFatalError(error, worker);
+            return;
+        }
+        const currentTimeout = timeoutByClass[getDictionaryRuntimeActionPolicy(action).timeoutClass];
+        const hasLongerOwner = [...this._responseHandlers].some(([otherId, other]) => {
+            if (otherId === id) { return false; }
+            const otherTimeout = timeoutByClass[getDictionaryRuntimeActionPolicy(other.action).timeoutClass];
+            const longerLivedAction = otherTimeout === null || (
+                currentTimeout !== null && otherTimeout > currentTimeout
+            );
+            return longerLivedAction && (other.deadline === null || (
+                other.deadline > (handler.deadline ?? -Infinity) &&
+                other.deadline > globalThis.performance.now()
+            ));
+        });
+        if (!hasLongerOwner) {
+            this._setFatalError(error, worker);
+            return;
+        }
+
+        this._responseHandlers.delete(id);
+        this._retireResponseId(id);
+        handler.reject(error);
+        reportDiagnostics('dictionary-worker-request-timeout-isolated', {
+            context: this._context,
+            action,
+            generation: this._generation,
+            timeoutMs,
+        });
+    }
+
+    /** @param {number} id */
+    _retireResponseId(id) {
+        this._retiredResponseIds.add(id);
+        while (this._retiredResponseIds.size > MAX_RETIRED_RESPONSE_IDS) {
+            const oldest = this._retiredResponseIds.values().next().value;
+            if (typeof oldest !== 'number') { break; }
+            this._retiredResponseIds.delete(oldest);
+            this._retiredResponseIdFloor = Math.max(this._retiredResponseIdFloor, oldest);
+        }
     }
 
     /**
@@ -223,6 +288,7 @@ export class DictionaryWorkerClient {
             worker.postMessage({id, action, params}, transferables);
         } catch (error) {
             this._oneWayRequestIds.delete(id);
+            if (this._requestId === id) { --this._requestId; }
             const transportError = new DictionaryWorkerTransportError(
                 `${this._context} failed to send ${action}`,
                 {cause: error, retryable: false},
@@ -276,14 +342,22 @@ export class DictionaryWorkerClient {
      */
     _onMessage(worker, event) {
         if (worker !== this._worker || this._fatalError !== null) { return; }
-        const id = typeof event.data?.id === 'number' ? event.data.id : null;
-        if (id === null) {
+        const id = event.data?.id;
+        if (typeof id !== 'number' || !Number.isSafeInteger(id) || id <= 0 || id < this._workerRequestIdStart || id > this._requestId) {
             this._setFatalError(new DictionaryWorkerTransportError(`${this._context} returned a response without a request id`), worker);
             return;
         }
         if (this._oneWayRequestIds.delete(id)) { return; }
         const handler = this._responseHandlers.get(id);
         if (typeof handler === 'undefined') {
+            if (id <= this._retiredResponseIdFloor || this._retiredResponseIds.delete(id)) {
+                reportDiagnostics('dictionary-worker-late-response', {
+                    context: this._context,
+                    generation: this._generation,
+                    id,
+                });
+                return;
+            }
             reportDiagnostics('dictionary-worker-unmatched-response', {
                 context: this._context,
                 reason: 'unknown-id',

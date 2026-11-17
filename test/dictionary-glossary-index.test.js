@@ -18,6 +18,17 @@ function fixture() {
 }
 
 describe('glossary index publication', () => {
+    test('an available zero-term dictionary can publish a complete empty index', async () => {
+        const {database, exec} = fixture();
+        vi.spyOn(Reflect.get(database, '_termRecordStore'), 'getDictionaryRecordCount').mockReturnValue(0);
+
+        await expect(database.ensureGlossarySearchIndex(new Set(['Empty']))).resolves.toBeUndefined();
+
+        expect(exec.mock.calls.some(([value]) => (
+            typeof value === 'object' && value.sql.includes('INSERT OR REPLACE INTO dictionaryGlossarySearchIndex') && value.bind.$termCount === 0
+        ))).toBe(true);
+    });
+
     test('missing authoritative row cannot publish a complete index', async () => {
         const {database, exec} = fixture();
         vi.spyOn(database, '_fetchTermRowsByIds').mockResolvedValue(new Map());
