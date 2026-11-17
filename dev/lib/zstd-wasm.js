@@ -291,7 +291,7 @@ export function compressSpansUsingDictWithPrefix(
  * @param {number} prefixBytes
  * @param {number} [level=3]
  * @param {boolean} [writeBlockEnvelope=false]
- * @returns {{context: number, buffers: ReturnType<typeof ensureContextBuffers>, contentBytes: number, dictionaryBytes: number, prefixBytes: number, level: number, writeBlockEnvelope: boolean}}
+ * @returns {{context: number, buffers: ReturnType<typeof ensureContextBuffers>, sourcePointer: number, contentBytes: number, dictionaryBytes: number, prefixBytes: number, level: number, writeBlockEnvelope: boolean}}
  * @throws {Error} If a span is invalid or allocation fails.
  */
 export function prepareSpanCompression(
@@ -323,7 +323,24 @@ export function prepareSpanCompression(
     if (!Number.isSafeInteger(destinationSize)) {
         throw new RangeError('Zstd output buffer size exceeds the safe integer range');
     }
-    const buffers = ensureContextBuffers(context, contentBytes, destinationSize, dictionary.byteLength);
+    const useAlignedSharedCopy = (
+        contentBytes >= 1024 &&
+        sourceOffsets.length > 0 &&
+        typeof SharedArrayBuffer !== 'undefined' &&
+        source.buffer instanceof SharedArrayBuffer &&
+        !(module.HEAPU8.buffer instanceof SharedArrayBuffer)
+    );
+    const sourceSize = contentBytes + (useAlignedSharedCopy ? 7 : 0);
+    if (sourceSize > 0xffffffff) {
+        throw new RangeError('Zstd source allocation exceeds the WASM address range');
+    }
+    const buffers = ensureContextBuffers(context, sourceSize, destinationSize, dictionary.byteLength);
+    const heap = module.HEAPU8;
+    // Align the first contiguous run by choosing an address within the retained
+    // allocation. Later runs may require a different alignment.
+    const sourcePointer = buffers.source + (
+        useAlignedSharedCopy ? (source.byteOffset + sourceOffsets[0] - heap.byteOffset - buffers.source) & 7 : 0
+    );
     let outputOffset = 0;
     for (let i = 0; i < sourceOffsets.length;) {
         const runOffset = sourceOffsets[i];
@@ -347,14 +364,8 @@ export function prepareSpanCompression(
             ++runSpanCount;
             ++i;
         } while (i < sourceOffsets.length);
-        const heap = module.HEAPU8;
-        const destinationOffset = buffers.source + outputOffset;
-        const prefix = (
-            runLength >= 1024 &&
-            typeof SharedArrayBuffer !== 'undefined' &&
-            source.buffer instanceof SharedArrayBuffer &&
-            !(heap.buffer instanceof SharedArrayBuffer)
-        ) ?
+        const destinationOffset = sourcePointer + outputOffset;
+        const prefix = useAlignedSharedCopy && runLength >= 1024 ?
             (heap.byteOffset + destinationOffset - source.byteOffset - runOffset) & 7 :
             0;
         if (prefix === 0) {
@@ -375,18 +386,18 @@ export function prepareSpanCompression(
     if (prefixBytes > 0) {
         module.HEAPU8.fill(0, buffers.destination, buffers.destination + prefixBytes);
     }
-    const prepared = {context, buffers, contentBytes, dictionaryBytes: dictionary.byteLength, prefixBytes, level, writeBlockEnvelope};
+    const prepared = {context, buffers, sourcePointer, contentBytes, dictionaryBytes: dictionary.byteLength, prefixBytes, level, writeBlockEnvelope};
     buffers.prepared = prepared;
     return prepared;
 }
 
 /**
- * @param {{context: number, buffers: ReturnType<typeof ensureContextBuffers>, contentBytes: number, dictionaryBytes: number, prefixBytes: number, level: number, writeBlockEnvelope: boolean}} prepared
+ * @param {{context: number, buffers: ReturnType<typeof ensureContextBuffers>, sourcePointer: number, contentBytes: number, dictionaryBytes: number, prefixBytes: number, level: number, writeBlockEnvelope: boolean}} prepared
  * @returns {Uint8Array}
  * @throws {Error} If the prepared buffers are stale or compression fails.
  */
 export function finishPreparedSpanCompression(prepared) {
-    const {context, buffers, contentBytes, dictionaryBytes, prefixBytes, level, writeBlockEnvelope} = prepared;
+    const {context, buffers, sourcePointer, contentBytes, dictionaryBytes, prefixBytes, level, writeBlockEnvelope} = prepared;
     const module = getModule();
     if (contextBuffers.get(context) !== buffers || buffers.prepared !== prepared) {
         throw new Error('Prepared Zstd span buffers are no longer active');
@@ -397,7 +408,7 @@ export function finishPreparedSpanCompression(prepared) {
         context,
         buffers.destination + prefixBytes,
         buffers.destinationCapacity - prefixBytes,
-        buffers.source,
+        sourcePointer,
         contentBytes,
         buffers.dictionary,
         dictionaryBytes,

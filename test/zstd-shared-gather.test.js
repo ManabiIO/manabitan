@@ -85,17 +85,24 @@ describe('stable shared spans gathered into compression memory', () => {
                     const allocations = length === 0 ? [512, 1024] : [131072 + destinationAlignment, 512, 1024]
                     module._malloc.mockImplementation(() => allocations.shift())
                     const prepared = api.prepareSpanCompression(23, source, new Uint32Array([5]), new Uint32Array([length]), length, new Uint8Array([31, 32]), 12)
-                    const start = prepared.buffers.source
+                    const start = prepared.sourcePointer
                     equalBytes(heap.subarray(start, start + length), expected)
                     equalBytes(source, before)
                     if (length > 0) {
+                        const sharedAlignment = shared && length >= 1024
+                        if (sharedAlignment) {
+                            expect((heap.byteOffset + start) & 7).toBe((source.byteOffset + 5) & 7)
+                        }
+                        expect(module._malloc).toHaveBeenCalledWith(length + (sharedAlignment ? 7 : 0))
                         equalBytes(heap.subarray(start - 16, start), new Uint8Array(16).fill(165))
                         equalBytes(heap.subarray(start + length, start + length + 16), new Uint8Array(16).fill(165))
                     }
                     source.fill(0)
                     equalBytes(heap.subarray(start, start + length), expected)
                     expect(module._ZSTD_compress_usingDict).not.toHaveBeenCalled()
+                    module._free.mockClear()
                     api.freeCCtx(23)
+                    if (length > 0) { expect(module._free).toHaveBeenNthCalledWith(1, 131072 + destinationAlignment) }
                 }
             }
         }
@@ -116,18 +123,18 @@ describe('stable shared spans gathered into compression memory', () => {
         const allocations = [4099, 512, 1024]
         module._malloc.mockImplementation(() => allocations.shift())
         const prepared = api.prepareSpanCompression(23, source, new Uint32Array(offsets), new Uint32Array(lengths), expected.length, new Uint8Array([42]), 12)
-        equalBytes(heap.subarray(prepared.buffers.source, prepared.buffers.source + expected.length), expected)
-        expect(heap[prepared.buffers.source - 1]).toBe(165)
-        expect(heap[prepared.buffers.source + expected.length]).toBe(165)
+        equalBytes(heap.subarray(prepared.sourcePointer, prepared.sourcePointer + expected.length), expected)
+        expect(heap[prepared.sourcePointer - 1]).toBe(165)
+        expect(heap[prepared.sourcePointer + expected.length]).toBe(165)
         source.fill(0)
-        equalBytes(heap.subarray(prepared.buffers.source, prepared.buffers.source + expected.length), expected)
+        equalBytes(heap.subarray(prepared.sourcePointer, prepared.sourcePointer + expected.length), expected)
     })
 
     test('bounds each source and destination word at actual backing-buffer ends', async () => {
         for (let alignment = 0; alignment < 8; ++alignment) {
             for (const length of [1024, 1025, 1031, 8193]) {
                 vi.resetModules()
-                const heap = new Uint8Array(2048 + alignment + length)
+                const heap = new Uint8Array(2048 + alignment + length + 7)
                 const module = fakeModule(heap)
                 const allocations = [2048 + alignment, 512]
                 module._malloc.mockImplementation(() => allocations.shift())
@@ -139,8 +146,9 @@ describe('stable shared spans gathered into compression memory', () => {
                 heap.fill(165)
                 const expected = Uint8Array.from(source)
                 const prepared = api.prepareSpanCompression(23, source, new Uint32Array([0]), new Uint32Array([length]), length, new Uint8Array(), 0)
-                equalBytes(heap.subarray(prepared.buffers.source), expected)
-                expect(heap[prepared.buffers.source - 1]).toBe(165)
+                equalBytes(heap.subarray(prepared.sourcePointer, prepared.sourcePointer + length), expected)
+                equalBytes(heap.subarray(prepared.sourcePointer + length), new Uint8Array(7).fill(165))
+                expect(heap[prepared.sourcePointer - 1]).toBe(165)
             }
         }
     })
@@ -159,7 +167,7 @@ describe('stable shared spans gathered into compression memory', () => {
             const api = await import('../dev/lib/zstd-wasm.js')
             await api.init()
             const prepared = api.prepareSpanCompression(23, source, new Uint32Array([0]), new Uint32Array([source.length]), source.length, new Uint8Array(), 0)
-            equalBytes(heap.subarray(prepared.buffers.source, prepared.buffers.source + source.length), expected)
+            equalBytes(heap.subarray(prepared.sourcePointer, prepared.sourcePointer + source.length), expected)
         }
     })
 
@@ -183,8 +191,8 @@ describe('stable shared spans gathered into compression memory', () => {
         await api.init()
         const prepared = api.prepareSpanCompression(23, source, new Uint32Array([0]), new Uint32Array([source.length]), source.length, new Uint8Array(), 0)
         source.fill(0)
-        equalBytes(heap.subarray(prepared.buffers.source, prepared.buffers.source + expected.length), expected)
-        expect(heap[prepared.buffers.source + expected.length]).toBe(165)
+        equalBytes(heap.subarray(prepared.sourcePointer, prepared.sourcePointer + expected.length), expected)
+        expect(heap[prepared.sourcePointer + expected.length]).toBe(165)
     })
 
     test('preserves rejection of invalid metadata before compression', async () => {
