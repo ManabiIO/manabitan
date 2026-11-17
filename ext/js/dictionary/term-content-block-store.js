@@ -1527,14 +1527,24 @@ function packContentSpansIntoSlabs(sourceBytes, sourceOffsets, sourceLengths, ta
         const packedIndex = packedChunks.length;
         const output = new Uint8Array(totalBytes);
         let outputOffset = 0;
+        // Keep per-entry references while copying adjacent source spans together.
+        let runStart = sourceOffsets[startIndex];
+        let runEnd = runStart;
+        let runOutputOffset = 0;
         for (let i = startIndex; i < endIndex; ++i) {
             const sourceOffset = sourceOffsets[i];
             const length = sourceLengths[i];
             sourceChunkIndices[i] = packedIndex;
             sourceChunkLocalOffsets[i] = outputOffset;
-            output.set(sourceBytes.subarray(sourceOffset, sourceOffset + length), outputOffset);
+            if (sourceOffset !== runEnd) {
+                if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
+                runStart = sourceOffset;
+                runOutputOffset = outputOffset;
+            }
+            runEnd = sourceOffset + length;
             outputOffset += length;
         }
+        if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
         packedChunks.push(output);
         startIndex = endIndex;
     }

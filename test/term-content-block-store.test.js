@@ -419,36 +419,37 @@ describe('TermContentBlockStore', () => {
         expect(blockStore.getDiagnostics()).toMatchObject({cacheEntries: 2, cacheBytes: 9});
     });
 
-    test('appends logical entries directly from a shared byte slab', async () => {
+    test('packs adjacent, empty, and out-of-order spans with the original block layout', async () => {
+        const compress = vi.mocked(compressWrappedTermContentZstdBatch);
+        compress.mockClear();
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore, {
             blockTargetBytes: 5,
             referencePackTargetBytes: 56,
             minInputBytes: 0,
         });
-        const source = new Uint8Array([99, 1, 2, 3, 88, 4, 5, 77, 6, 7, 8, 9]);
-        const offsets = new Uint32Array([1, 5, 8]);
-        const lengths = new Uint32Array([3, 2, 4]);
+        const source = new Uint8Array([255, 99, 1, 2, 3, 88, 4, 5, 77, 6, 7, 8, 9, 255]).subarray(1, 13);
+        const offsets = new Uint32Array([1, 4, 4, 12, 2, 6, 8, 5]);
+        const lengths = new Uint32Array([3, 0, 1, 0, 1, 1, 4, 2]);
 
         const result = await blockStore.tryAppendSpans(source, offsets, lengths, null, true);
 
-        expect(result).not.toBeNull();
         if (result === null) { throw new Error('Expected appended content'); }
-        expect(await blockStore.read(
-            result.contentOffsets[0],
-            result.contentLengths[0],
-            result.contentDictName,
-        )).toStrictEqual(new Uint8Array([1, 2, 3]));
-        expect(await blockStore.read(
-            result.contentOffsets[1],
-            result.contentLengths[1],
-            result.contentDictName,
-        )).toStrictEqual(new Uint8Array([4, 5]));
-        expect(await blockStore.read(
-            result.contentOffsets[2],
-            result.contentLengths[2],
-            result.contentDictName,
-        )).toStrictEqual(new Uint8Array([6, 7, 8, 9]));
+        expect(compress).toHaveBeenCalledOnce();
+        expect(compress.mock.calls[0][0]).toStrictEqual([
+            new Uint8Array([1, 2, 3, 88, 2]),
+            new Uint8Array([5, 6, 7, 8, 9]),
+            new Uint8Array([4, 5]),
+        ]);
+        expect(result.contentLengths).toStrictEqual(lengths);
+        for (let i = 0; i < lengths.length; ++i) {
+            const expected = lengths[i] === 0 ? null : source.slice(offsets[i], offsets[i] + lengths[i]);
+            expect(await blockStore.read(
+                result.contentOffsets[i],
+                result.contentLengths[i],
+                result.contentDictName,
+            )).toStrictEqual(expected);
+        }
     });
 
     test('compresses shared parser spans without a main-thread packing copy', async () => {
