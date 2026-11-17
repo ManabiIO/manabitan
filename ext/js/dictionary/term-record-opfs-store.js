@@ -4457,6 +4457,12 @@ export class TermRecordOpfsStore {
         if (requests.length === 0) { return matches; }
         const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
         if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            if (requests.length === 1) {
+                const {reading} = requests[0];
+                const ids = this._findSingleReadingTermPairCandidates(chunks, expression, reading);
+                if (typeof ids !== 'undefined') { matches.set(reading, ids); }
+                return matches;
+            }
             const expressionBytes = this._textEncoder.encode(expression);
             const expressionHash = hashTermLookupKeyBytes(expressionBytes);
             /** @type {Map<string, {bytes: Uint8Array, hash: number}>|null} */
@@ -4510,6 +4516,49 @@ export class TermRecordOpfsStore {
             if (ids.length > 0) { matches.set(reading, ids); }
         }
         return matches;
+    }
+
+    /**
+     * Select one reading without building per-query/per-chunk maps. The batch
+     * path uses the same validated chunk-local reading keys and row ordering.
+     * @param {PersistentRecordChunk[]} chunks
+     * @param {string} expression
+     * @param {string} reading
+     * @returns {number[]|undefined}
+     */
+    _findSingleReadingTermPairCandidates(chunks, expression, reading) {
+        const expressionBytes = this._textEncoder.encode(expression);
+        const expressionHash = hashTermLookupKeyBytes(expressionBytes);
+        /** @type {Uint8Array|null} */
+        let readingBytes = null;
+        let readingHash = 0;
+        /** @type {number[]|undefined} */
+        let ids;
+        for (const chunk of chunks) {
+            const expressionKey = findExactKey(chunk.lookupIndex, expressionBytes, expressionHash);
+            if (expressionKey < 0) { continue; }
+            const {expressionPostingOffsets, expressionPostingRows} = chunk.lookupIndex;
+            const start = expressionPostingOffsets[expressionKey];
+            const end = expressionPostingOffsets[expressionKey + 1];
+            if (start === end) { continue; }
+            let readingKey = expressionKey;
+            if (reading !== expression) {
+                if (readingBytes === null) {
+                    readingBytes = this._textEncoder.encode(reading);
+                    readingHash = hashTermLookupKeyBytes(readingBytes);
+                }
+                readingKey = findExactKey(chunk.lookupIndex, readingBytes, readingHash);
+                if (readingKey < 0) { continue; }
+            }
+            for (let index = start; index < end; ++index) {
+                const row = expressionPostingRows[index];
+                const rowReadingKey = chunk.lookupIndex.readingKeys[row];
+                if ((rowReadingKey === U16_NULL ? expressionKey : rowReadingKey) !== readingKey) { continue; }
+                if (typeof ids === 'undefined') { ids = []; }
+                ids.push(chunk.firstId + row);
+            }
+        }
+        return ids;
     }
 
     /**
