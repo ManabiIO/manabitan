@@ -2949,10 +2949,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         expression_indexes[row_count] = string_indexes[0];
         reading_indexes[row_count] = string_indexes[1];
         reading_equals[row_count] = reading_equals_expression ? 1u : 0u;
+        // The row parser already validated the JSON grammar of both numbers.
         uint32_t score_end = 0u;
         int32_t score = 0;
         if (
-            !parse_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
+            !scan_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
             !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||
             // Integer storage cannot preserve a negative zero score. Use the
             // ordinary number-preserving path, even in otherwise integer banks.
@@ -2966,7 +2967,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         if (parsed_row->sequence_start != 0xffffffffu) {
             uint32_t sequence_end = 0u;
             if (
-                !parse_scalar_span(src, source.end, parsed_row->sequence_start, &sequence_end) ||
+                !scan_scalar_span(src, source.end, parsed_row->sequence_start, &sequence_end) ||
                 !parse_int32_token(src, parsed_row->sequence_start, sequence_end, -1, &sequence)
             ) {
                 *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
