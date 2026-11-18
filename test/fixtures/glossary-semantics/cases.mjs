@@ -110,5 +110,38 @@ export function createCases(parser) {
             })
         }
     }
+    add('column-token: adjacent long glossary preserves media and separate tags', async () => {
+        const glossary = [{type: 'structured-content',
+            content: [
+                {tag: 'div', content: '語'.repeat(200)}, {tag: 'img', path: 'cat.png'},
+            ]}]
+        const first = encoder.encode(JSON.stringify([['猫', 'ねこ', 'tag1', '', 3, glossary, 41, '']]))
+        const second = encoder.encode(JSON.stringify([['ねこ', 'ねこ', 'tag2', '', 2, glossary, 42, '']]))
+        let dispatched = 0
+        await parser.parseTermBankWithWasmColumnChunks([first, second], 3, (chunk) => {
+            ++dispatched
+            equal(chunk.rowCount, 2, 'row count')
+            const tags = []
+            for (let i = 0; i < chunk.rowCount; ++i) {
+                const start = chunk.contentBytesBaseOffset + chunk.contentMetaList[i * 4]
+                const end = start + chunk.contentMetaList[i * 4 + 1]
+                const content = chunk.contentBytesBuffer.subarray(start, end)
+                equal(decodeContent(content), glossary, 'glossary')
+                tags.push(JSON.parse(decoder.decode(Uint8Array.from(content)).split('\0')[1]))
+            }
+            equal(tags, ['tag1', 'tag2'], 'definitions retain their own tags')
+            equal(chunk.mediaRows.map((row) => row.index), [0, 1], 'media hints from both banks')
+        }, 8192, {
+            mediaHintFastScan: true,
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            singleChunk: true,
+            validateGlossaryTypes: true,
+            experimentalValidatedGlossaryReuse: true,
+        })
+        equal(dispatched, 1, 'fused chunk count')
+        const result = parser.consumeLastTermBankWasmParseProfile()
+        equal(result?.validatedGlossaryReuseCount, 1, 'reuse by exact equality across bank boundary')
+    })
     return cases
 }

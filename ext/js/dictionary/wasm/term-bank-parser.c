@@ -31,6 +31,7 @@
 #define EXPERIMENT_FAST_GLOSSARY_NORMALIZATION 16u
 #define VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET 4u
 #define VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES 4u
+#define VALIDATED_GLOSSARY_REUSE_MIN_PREVIOUS_BYTES 512u
 /* Key lengths use every uint16 value; the null sentinel applies to IDs only. */
 #define MAX_INTERNED_KEY_BYTES 0xffffu
 #ifndef RECENT_CONTENT_DEDUP_WINDOW
@@ -56,7 +57,7 @@ void* memcpy(void* dest, const void* source, unsigned long count) {
 int32_t term_bank_inflate(const uint8_t* input, uint32_t input_length, uint8_t* output, uint32_t output_length);
 static uint32_t crc32_table[16][256];
 static uint32_t crc32_table_initialized = 0u;
-#define CRC32_FOUR_SPAN_THRESHOLD 262144u
+#define CRC32_BRAID_THRESHOLD 262144u
 
 static uint32_t crc32_read_u32_le(const uint8_t* data) {
     return
@@ -104,65 +105,57 @@ static __attribute__((always_inline)) inline uint32_t crc32_bytes_serial(const u
     return ~crc;
 }
 
-static uint32_t crc32_matrix_times(const uint32_t* matrix, uint32_t vector) {
-    uint32_t sum = 0u;
-    uint32_t index = 0u;
-    while (vector != 0u) {
-        if ((vector & 1u) != 0u) { sum ^= matrix[index]; }
-        vector >>= 1u;
-        ++index;
-    }
-    return sum;
+/* Each lane tracks interleaved eight-byte words. The table advances a
+ * lane past the other lanes' words. Merge the final words in source order
+ * using the ordinary slicing table to reconstruct the IEEE CRC. */
+#define CRC32_BRAIDS 8u
+static uint32_t crc32_braid_table[8][256];
+static uint32_t crc32_braid_initialized;
+
+static inline uint32_t crc32_word8(uint64_t word, uint32_t table[8][256]) {
+    return table[7][(word >> 0u) & 0xffu] ^
+        table[6][(word >> 8u) & 0xffu] ^
+        table[5][(word >> 16u) & 0xffu] ^
+        table[4][(word >> 24u) & 0xffu] ^
+        table[3][(word >> 32u) & 0xffu] ^
+        table[2][(word >> 40u) & 0xffu] ^
+        table[1][(word >> 48u) & 0xffu] ^
+        table[0][word >> 56u];
 }
 
-static void crc32_matrix_square(uint32_t* square, const uint32_t* matrix) {
-    for (uint32_t i = 0u; i < 32u; ++i) {
-        square[i] = crc32_matrix_times(matrix, matrix[i]);
-    }
-}
-
-/* Each parser instance owns its memory and synchronous CRC calls. Retain the
- * IEEE byte-shift powers across heap resets, as for the slicing tables above. */
-static uint32_t crc32_shift_powers[32][32];
-static uint32_t crc32_shift_powers_initialized = 0u;
-
-static void crc32_initialize_shift_powers(void) {
-    if (crc32_shift_powers_initialized != 0u) { return; }
-    uint32_t one_bit[32];
-    uint32_t two_bits[32];
-    uint32_t four_bits[32];
-    uint32_t row = 1u;
-    one_bit[0] = 0xedb88320u;
-    for (uint32_t i = 1u; i < 32u; ++i) {
-        one_bit[i] = row;
-        row <<= 1u;
-    }
-    crc32_matrix_square(two_bits, one_bit);
-    crc32_matrix_square(four_bits, two_bits);
-    crc32_matrix_square(crc32_shift_powers[0], four_bits);
-    for (uint32_t i = 1u; i < 32u; ++i) {
-        crc32_matrix_square(crc32_shift_powers[i], crc32_shift_powers[i - 1u]);
-    }
-    crc32_shift_powers_initialized = 1u;
-}
-
-static uint32_t crc32_shift_finalized(uint32_t crc, uint32_t length) {
-    if (length == 0u) { return crc; }
-    crc32_initialize_shift_powers();
-    uint32_t power = 0u;
-    while (length != 0u) {
-        if ((length & 1u) != 0u) {
-            crc = crc32_matrix_times(crc32_shift_powers[power], crc);
+static uint32_t crc32_bytes_braided(const uint8_t* data, uint32_t length) {
+    const uint32_t step = CRC32_BRAIDS * 8u;
+    if (crc32_braid_initialized == 0u) {
+        for (uint32_t i = 0u; i < 8u; ++i) {
+            for (uint32_t j = 0u; j < 256u; ++j) {
+                uint32_t crc = crc32_table[i][j];
+                for (uint32_t k = 8u; k < step; ++k) {
+                    crc = (crc >> 8u) ^ crc32_table[0][crc & 0xffu];
+                }
+                crc32_braid_table[i][j] = crc;
+            }
         }
-        length >>= 1u;
-        ++power;
+        crc32_braid_initialized = 1u;
     }
-    return crc;
-}
-
-static uint32_t crc32_combine(uint32_t first, uint32_t second, uint32_t second_length) {
-    if (second_length == 0u) { return first; }
-    return crc32_shift_finalized(first, second_length) ^ second;
+    uint32_t state[CRC32_BRAIDS] = {0xffffffffu};
+    const uint32_t final_group = (length / step - 1u) * step;
+    for (uint32_t offset = 0u; offset < final_group; offset += step) {
+        for (uint32_t i = 0u; i < CRC32_BRAIDS; ++i) {
+            uint64_t word;
+            __builtin_memcpy(&word, data + offset + i * 8u, sizeof(word));
+            state[i] = crc32_word8(word ^ state[i], crc32_braid_table);
+        }
+    }
+    uint32_t crc = 0u;
+    for (uint32_t i = 0u; i < CRC32_BRAIDS; ++i) {
+        uint64_t word;
+        __builtin_memcpy(&word, data + final_group + i * 8u, sizeof(word));
+        crc = crc32_word8(word ^ state[i] ^ crc, crc32_table);
+    }
+    for (uint32_t offset = final_group + step; offset < length; ++offset) {
+        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset]) & 0xffu];
+    }
+    return ~crc;
 }
 
 static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
@@ -183,50 +176,17 @@ static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
         crc32_table_initialized = 1u;
     }
 
-    if (length < CRC32_FOUR_SPAN_THRESHOLD) {
+    if (length < CRC32_BRAID_THRESHOLD) {
         return crc32_bytes_serial(data, length);
     }
 
-    const uint32_t span_length = (length / 64u) * 16u;
-    const uint32_t second_span_offset = span_length * 2u;
-    const uint32_t tail_offset = span_length * 4u;
-    uint32_t first_crc = 0xffffffffu;
-    uint32_t second_crc = 0xffffffffu;
-    uint32_t third_crc = 0xffffffffu;
-    uint32_t fourth_crc = 0xffffffffu;
-    for (uint32_t offset = 0u; offset < span_length; offset += 16u) {
-        first_crc = crc32_step16(data + offset, first_crc);
-        second_crc = crc32_step16(data + span_length + offset, second_crc);
-        third_crc = crc32_step16(data + second_span_offset + offset, third_crc);
-        fourth_crc = crc32_step16(data + second_span_offset + span_length + offset, fourth_crc);
-    }
-    first_crc = ~first_crc;
-    second_crc = ~second_crc;
-    third_crc = ~third_crc;
-    fourth_crc = ~fourth_crc;
-    const uint32_t first_pair = crc32_combine(first_crc, second_crc, span_length);
-    const uint32_t second_pair = crc32_combine(third_crc, fourth_crc, span_length);
-    uint32_t crc = ~crc32_combine(first_pair, second_pair, span_length * 2u);
-    for (uint32_t offset = tail_offset; offset < length; ++offset) {
-        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset]) & 0xffu];
-    }
-    return ~crc;
+    return crc32_bytes_braided(data, length);
 }
 
 #if defined(TERM_BANK_CRC_TEST)
 __attribute__((visibility("default")))
 uint32_t term_bank_crc32_test(uint32_t data_ptr, uint32_t length) {
     return crc32_bytes((const uint8_t*)(uintptr_t)data_ptr, length);
-}
-
-__attribute__((visibility("default")))
-uint32_t term_bank_crc32_combine_test(uint32_t first, uint32_t second, uint32_t second_length) {
-    return crc32_combine(first, second, second_length);
-}
-
-__attribute__((visibility("default")))
-uint32_t term_bank_crc32_shift_test(uint32_t crc, uint32_t length) {
-    return crc32_shift_finalized(crc, length);
 }
 #endif
 
@@ -696,6 +656,19 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
     return COMMON_STRUCTURED_KEY_NONE;
 }
 
+/* A single ASCII space is common after a structured-content delimiter.
+ * Preserve the normalization hint before consuming it. */
+static __attribute__((always_inline)) inline uint32_t advance_glossary_delimiter(
+    const uint8_t* src, uint32_t len, uint32_t at, uint32_t* normalization_hint
+) {
+    uint32_t next = at + 1u;
+    if (next < len && src[next] == ' ') {
+        if (normalization_hint != 0) { *normalization_hint = 1u; }
+        ++next;
+    }
+    return next;
+}
+
 static int parse_composite_span_impl(
     const uint8_t* src,
     uint32_t len,
@@ -773,7 +746,7 @@ static int parse_composite_span_impl(
                 // without redispatching it through the object state machine.
                 if (s_end < len && src[s_end] == ':') {
                     state = OBJECT_VALUE;
-                    i = s_end + 1u;
+                    i = advance_glossary_delimiter(src, len, s_end, normalization_hint);
                     continue;
                 }
                 state = OBJECT_COLON;
@@ -800,7 +773,7 @@ static int parse_composite_span_impl(
             // Keys still require a colon; whitespace retains normal hint handling.
             if (!object_key && i < len && src[i] == ',') {
                 state = state == OBJECT_AFTER_VALUE ? OBJECT_KEY : ARRAY_VALUE;
-                ++i;
+                i = advance_glossary_delimiter(src, len, i, normalization_hint);
             }
             continue;
         }
@@ -823,13 +796,13 @@ static int parse_composite_span_impl(
             if (state == ARRAY_AFTER_VALUE) { state = ARRAY_VALUE; }
             else if (state == OBJECT_AFTER_VALUE) { state = OBJECT_KEY; }
             else { return 0; }
-            ++i;
+            i = advance_glossary_delimiter(src, len, i, normalization_hint);
             continue;
         }
         if (c == ':') {
             if (state != OBJECT_COLON) { return 0; }
             state = OBJECT_VALUE;
-            ++i;
+            i = advance_glossary_delimiter(src, len, i, normalization_hint);
             continue;
         }
         uint8_t next_state;
@@ -1085,10 +1058,10 @@ static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*,
 static int reuse_validated_glossary(
     const uint8_t* src, uint32_t end, uint32_t start,
     const TermRowMeta* rows, uint32_t row_count,
-    TermRowMeta* meta, uint32_t* value_end, uint32_t* witness
+    TermRowMeta* meta, uint32_t* value_end, uint32_t* witness, uint32_t lookback
 ) {
     if (start >= end || (src[start] != '[' && src[start] != '{')) { return 0; }
-    const uint32_t first = row_count > RECENT_CONTENT_DEDUP_WINDOW ? row_count - RECENT_CONTENT_DEDUP_WINDOW : 0u;
+    const uint32_t first = row_count > lookback ? row_count - lookback : 0u;
     for (uint32_t k = row_count; k > first;) {
         const TermRowMeta* prior = &rows[--k];
         const uint32_t n = prior->glossary_length;
@@ -1118,6 +1091,7 @@ static int parse_row_single_pass(
     const TermRowMeta* prior_rows,
     uint32_t prior_count,
     uint32_t* glossary_witness,
+    uint32_t glossary_lookback,
     int validate_glossary_types
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
@@ -1143,7 +1117,7 @@ static int parse_row_single_pass(
             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
             if (
                 !(glossary_witness != 0 && reuse_validated_glossary(
-                    src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_witness
+                    src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_witness, glossary_lookback
                 )) &&
                 !parse_value_span_with_glossary_hints(
                     src,
@@ -1758,7 +1732,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, validate_glossary_types)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
             return -1;
         }
         ++row_count;
@@ -1796,7 +1770,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, validate_glossary_types)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
             return -1;
         }
         ++row_count;
@@ -2833,8 +2807,18 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         }
         uint32_t row_end = 0u;
         uint32_t glossary_witness = 0xffffffffu;
+        uint32_t glossary_lookback = 0u;
+        if (validated_glossary_reuse_enabled && row_count > 0u) {
+            if (glossary_reuse_probe_budget > 0u) {
+                glossary_lookback = RECENT_CONTENT_DEDUP_WINDOW;
+            } else if (rows[row_count - 1u].glossary_length >= VALIDATED_GLOSSARY_REUSE_MIN_PREVIOUS_BYTES) {
+                // Adjacent spelling variants can have different tags yet
+                // reuse the same long glossary and its validation result.
+                glossary_lookback = 1u;
+            }
+        }
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, validated_glossary_reuse_enabled && glossary_reuse_probe_budget > 0u ? &glossary_witness : 0, validate_glossary_types != 0u)) {
+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u)) {
             return -1;
         }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
@@ -3020,9 +3004,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
 #endif
         }
         if (recent_match != 0xffffffffu) {
-            // Admit probing only after the existing exact-content deduper
-            // demonstrates a dense duplicate run. All reuse still requires
-            // full glossary equality; this signal only budgets comparisons.
+            // A dense duplicate run enables probing farther back. The
+            // preceding long glossary can be checked independently, and
+            // every reuse still requires full byte equality.
             if (validated_glossary_reuse_enabled &&
                 (recent_content_match_streak >= VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES ||
                     ++recent_content_match_streak >= VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES)) {
