@@ -82,6 +82,16 @@ describe('adjacent common-key colons', () => {
         expect(parseGlossary(glossary, false).count).toBeLessThan(0)
     })
 
+    test.each(['a', 'div', 'li', 'rt', 'ruby', 'span', 'ul'])('preserves the next field after a literal %s tag', (tag) => {
+        for (const space of ['', ' ', '\t']) {
+            const glossary = `[{"tag":${space}"${tag}",${space}"content":{"tag":"img"}}]`
+            const result = parseGlossary(glossary)
+            expect(result.count).toBe(1)
+            expect(result.metadata.slice(14)).toEqual([1, space.length === 0 ? 0 : 1, 0])
+        }
+        expect(parseGlossary(`[{"tag":"${tag}",}]`).count).toBeLessThan(0)
+    })
+
     test('keeps nested media and text normalization hints', () => {
         const result = parseGlossary('[{"content":[{"tag":"img"},{"content":{"type":"text","text":"value"}}]}]')
         expect(result.count).toBe(1)
