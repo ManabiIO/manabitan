@@ -2993,6 +2993,20 @@ describe('TermRecordOpfsStore batch dictionary indexes', () => {
 
 
 describe('recent-source cache metadata mapping', () => {
+    test.each([
+        [null, 48],
+        [4, 48],
+        [8, 96],
+    ])('sets the import cache budget for a device reporting %s GiB', (memoryGiB, expectedMiB) => {
+        const detectMemory = vi.spyOn(DictionaryDatabase.prototype, '_getApproximateDeviceMemoryGiB').mockReturnValue(memoryGiB);
+        try {
+            const database = new DictionaryDatabase();
+            expect(Reflect.get(database, '_recentTermContentSourceCacheMaxBytes')).toBe(expectedMiB * 1024 * 1024);
+        } finally {
+            detectMemory.mockRestore();
+        }
+    });
+
     const cases = [
         {name: 'dense zero-base spans', indexes: [2, 3, 4], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 0], [3, 4], [4, 8]], minimum: 0, end: 10, wrap: false},
         {name: 'dense relative spans', indexes: [2, 3, 4], offsets: [3, 7, 11, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 0], [3, 4], [4, 8]], minimum: 3, end: 13, wrap: false},
@@ -3022,6 +3036,7 @@ describe('recent-source cache metadata mapping', () => {
             _termEntryContentMetaRecentSourceOffsetTable: offsets,
             _recentTermContentSourceBatches: fixture.wrap ? new Map([[99, Uint8Array.of(1)]]) : new Map(),
             _recentTermContentSourceBatchBytes: fixture.wrap ? 1 : 0,
+            _recentTermContentSourceCacheMaxBytes: 48 * 1024 * 1024,
             _nextRecentTermContentSourceBatchId: fixture.wrap ? 0x100000000 : 1,
         };
         const source = Uint8Array.from({length: 20}, (_, i) => i + 1);
@@ -3055,6 +3070,7 @@ describe('recent-source cache metadata mapping', () => {
             _termEntryContentMetaRecentSourceOffsetTable: new Uint32Array(2),
             _recentTermContentSourceBatches: new Map(),
             _recentTermContentSourceBatchBytes: 0,
+            _recentTermContentSourceCacheMaxBytes: 48 * 1024 * 1024,
             _nextRecentTermContentSourceBatchId: 1,
         };
         const cache = Reflect.get(database, '_cacheRecentPublishedTermContentSources');
