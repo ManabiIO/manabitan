@@ -25,14 +25,13 @@ import {afterAll, beforeAll, describe, expect, test} from 'vitest'
 import {moveFixtureToTrash} from './util/move-fixture-to-trash.js'
 import {findCompiler} from './util/wasm-compiler.js'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number, term_bank_crc32_combine_test: (first: number, second: number, length: number) => number, term_bank_crc32_shift_test: (crc: number, length: number) => number}} Exports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, inflate_and_join_term_banks: (...args: number[]) => number, term_bank_crc32_test: (input: number, length: number) => number}} Exports */
 /** @type {Exports} */
 let wasm
 /** @type {string | undefined} */
 let outputDirectory
 const sourceDirectory = path.resolve('ext/js/dictionary/wasm')
 const compilerTimeoutMs = 60_000
-
 
 beforeAll(async () => {
     outputDirectory = mkdtempSync(path.join(tmpdir(), 'manabitan-term-bank-crc-'))
@@ -52,8 +51,6 @@ beforeAll(async () => {
         '-Wl,--export=wasm_alloc',
         '-Wl,--export=inflate_and_join_term_banks',
         '-Wl,--export=term_bank_crc32_test',
-        '-Wl,--export=term_bank_crc32_combine_test',
-        '-Wl,--export=term_bank_crc32_shift_test',
         '-DTERM_BANK_CRC_TEST',
         '-Wl,--strip-all',
         '-o',
@@ -119,21 +116,6 @@ function candidateCrc(bytes, alignment = 0) {
     return wasm.term_bank_crc32_test(writeBytes(bytes, alignment), bytes.length) >>> 0
 }
 
-/**
- * Independent bit-at-a-time zero-byte operator used to validate every CRC basis bit.
- * @param {number} crc
- * @param {number} length
- * @returns {number}
- */
-function referenceShift(crc, length) {
-    for (let i = 0; i < length; ++i) {
-        for (let bit = 0; bit < 8; ++bit) {
-            crc = (crc >>> 1) ^ ((crc & 1) !== 0 ? 0xedb88320 : 0)
-        }
-    }
-    return crc >>> 0
-}
-
 describe('term bank CRC32', () => {
     test('matches published, short, alignment, threshold, and large-buffer vectors', () => {
         expect(candidateCrc(new TextEncoder().encode('123456789'))).toBe(0xcbf43926)
@@ -142,36 +124,11 @@ describe('term bank CRC32', () => {
             const bytes = randomBytes(length, 0x4d595df4 ^ length)
             expect(candidateCrc(bytes)).toBe(crc32(bytes) >>> 0)
         }
-        for (const length of [63, 64, 65, 127, 128, 129, 65535, 65536, 65537, 131071, 131072, 131073, 262143, 262144, 262145, 1048576]) {
+        for (const length of [63, 64, 65, 127, 128, 129, 65535, 65536, 65537, 131071, 131072, 131073, 262143, 262144, 262145, 262207, 262208, 262209, 1048576, 1048639]) {
             const bytes = randomBytes(length, 0x9e3779b9 ^ length)
             const expected = crc32(bytes) >>> 0
             for (let alignment = 0; alignment < 16; ++alignment) {
                 expect(candidateCrc(bytes, alignment)).toBe(expected)
-            }
-        }
-    })
-
-    test('combines independent CRCs for arbitrary split lengths and zero-length suffixes', () => {
-        const bytes = randomBytes(1048576, 0x12345678)
-        const splits = [0, 1, 2, 15, 16, 63, 64, 65, 255, 256, 4095, 4096, 65535, 65536, 65537, bytes.length]
-        const next = makeRandom(0xabcdef01)
-        for (let i = 0; i < 96; ++i) { splits.push(next() * 4097 % (bytes.length + 1)) }
-        for (const split of splits) {
-            const first = bytes.subarray(0, split)
-            const second = bytes.subarray(split)
-            const combined = wasm.term_bank_crc32_combine_test(crc32(first), crc32(second), second.length) >>> 0
-            expect(combined).toBe(crc32(bytes) >>> 0)
-            expect(wasm.term_bank_crc32_combine_test(0x12345678, 0xffffffff, 0) >>> 0).toBe(0x12345678)
-        }
-    })
-
-    test('shifts all 32 CRC basis bits and their complements with the IEEE polynomial', () => {
-        for (const length of [0, 1, 2, 3, 15, 16, 64, 65536]) {
-            for (let bit = 0; bit < 32; ++bit) {
-                const value = (1 << bit) >>> 0
-                expect(wasm.term_bank_crc32_shift_test(value, length) >>> 0).toBe(referenceShift(value, length))
-                const complement = (~value) >>> 0
-                expect(wasm.term_bank_crc32_shift_test(complement, length) >>> 0).toBe(referenceShift(complement, length))
             }
         }
     })
@@ -210,7 +167,7 @@ describe('term bank CRC32', () => {
     test.each([
         {label: 'small', bytes: new TextEncoder().encode('["日本語","crc"]')},
         {
-            label: 'large four-span',
+            label: 'large braided',
             bytes: (() => {
                 const bytes = new Uint8Array(262144).fill(0x20)
                 bytes[0] = 0x5b
