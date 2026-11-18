@@ -23,14 +23,19 @@ function run(body, pullRequest = {}) {
     let exitCode = 0;
     let error = '';
     vm.runInNewContext(runScript, {
-        process: {env: {
-            PR_BODY: body,
-            PR_AUTHOR_ID: pullRequest.authorId ?? '12345',
-            PR_HEAD_REPOSITORY_ID: pullRequest.headRepositoryId ?? '1165902460',
-            PR_BASE_REPOSITORY_ID: pullRequest.baseRepositoryId ?? '1165902460',
-            REPOSITORY_ID: '1165902460',
-        }, exit(/** @type {number} */ code) { exitCode = code; }},
-        console: {error(/** @type {string} */ message) { error = message; }},
+        process: {
+            env: {
+                PR_BODY: body,
+                PR_AUTHOR_ID: pullRequest.authorId ?? '12345',
+                PR_HEAD_REPOSITORY_ID: pullRequest.headRepositoryId ?? '1165902460',
+                PR_BASE_REPOSITORY_ID: pullRequest.baseRepositoryId ?? '1165902460',
+                REPOSITORY_ID: '1165902460',
+            },
+            exit(/** @type {number} */ code) { exitCode = code; },
+        },
+        console: {
+            error(/** @type {string} */ message) { error = message; },
+        },
     });
     return {exitCode, error};
 }
