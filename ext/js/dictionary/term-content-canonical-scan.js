@@ -67,14 +67,14 @@ export function compileCanonicalScanModule() {
  * @property {number} lastUniqueIndex
  * @property {boolean} persistedLookupRequired
  * @property {boolean} reserveMetadata
- * @property {(batch: PendingBatch, complete: () => void) => void} adoptPendingColumns
+ * @property {(batch: PendingBatch, complete: () => undefined) => undefined} adoptPendingColumns Copies borrowed columns synchronously before the next scan.
  * @property {() => number} getPendingCount
  * @property {(import('./dictionary-database.js').PendingContentDescriptor & {existingMeta: TermContentMeta})[]} exactCandidates
  * @property {() => Promise<void>} resolveExactCandidates
  * @typedef {object} ScanHooks Internal test-only fault dependencies; never user settings.
  * @property {number} [trapAfter]
  * @property {(state: {a: Arena, beforeDense: number, beforePending: number}) => void} [beforeNative]
- * @property {(state: {header: Uint32Array, a: Arena, column: number}) => void} [beforeOutputCopy]
+ * @property {(state: {header: Uint32Array, a: Arena, column: number}) => void} [beforeOutputView]
  * @property {(state: PendingBatch & {plan: DedupPlan}) => void} [beforeAdopt]
  * @property {(state: {plan: DedupPlan, planStart: number}) => void} [afterPendingCopy]
  * @property {(state: {unique: number}) => void} [afterExactDescriptor]
@@ -96,8 +96,8 @@ export const CANONICAL_SCAN_METRICS = Object.freeze({
 
 /**
  * Stateless with respect to database/arena lifetime. Compiled immutable code is
- * single-flight; instances are weakly keyed by fixed memory. Segment outputs
- * are owned before exact-byte matching can await.
+ * single-flight; instances are weakly keyed by fixed memory. Segment views
+ * are copied into the pending owner before exact-byte matching can await.
  */
 export class NativeCanonicalScanner {
     /** @param {{loadModule?: () => Promise<WebAssembly.Module>, hooks?: ScanHooks}} [dependencies] */
@@ -308,14 +308,13 @@ export class NativeCanonicalScanner {
                 if (stop < 0) {
                     throw new Error(`Native canonical scan error ${stop}`);
                 }
-                // Six constant-count copies, never a JS per-pending loop/scatter. Own all
-                // outputs before entering the exact await.
+                // The pending owner copies these views before we await exact matching
+                // or let another scan reuse the native scratch.
                 /** @type {Uint32Array[]} */
                 const columns = [];
                 for (let column = 0; column < 6; ++column) {
-                    this._hooks.beforeOutputCopy?.({header, a, column});
-                    columns.push(new Uint32Array(buffer, OUT + column * MAX * 4, header[2]).slice());
-                    stats.copiedOutputBytes += columns[column].byteLength;
+                    this._hooks.beforeOutputView?.({header, a, column});
+                    columns.push(new Uint32Array(buffer, OUT + column * MAX * 4, header[2]));
                 }
                 const exact = new Uint32Array(buffer, EXACT, header[3] * 2).slice();
                 const next = header[1],

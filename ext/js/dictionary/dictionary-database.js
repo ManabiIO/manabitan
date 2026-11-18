@@ -8557,7 +8557,7 @@ null :
             const firstUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowStart);
             const lastUniqueIndex = lowerBoundUint32(uniqueRowIndexes, contentRowEnd);
             const maximumPendingContentCount = lastUniqueIndex - firstUniqueIndex;
-            // The native helper adopts owned typed columns; fallback appends normally.
+            // The native helper copies typed columns in bulk; fallback appends normally.
             /** @type {number[]|Uint32Array} */
             let pendingCanonicalUniqueIndexes = pendingPlanUniqueIndexes;
             // These hash words already have Uint32 semantics. Allocate only
@@ -8651,12 +8651,13 @@ null :
                 ++pendingContentCount;
             };
             /**
-             * Atomically adopts one native segment's owned columns. Only the
+             * Atomically copies one native segment's borrowed columns. Only the
              * newly appended tail is touched; accepted segments remain owned by
              * the ordinary outer rollback. The native scanner restores hash
              * metadata on failure and this helper clears any copied IDs.
              * @param {{columns: Uint32Array[], planStart: number}} batch
-             * @param {() => void} complete Build bounded exact descriptors before committing the segment.
+             * @param {() => undefined} complete Build bounded exact descriptors before committing the segment.
+             * @returns {undefined} The native scratch views are consumed synchronously.
              * @throws {RangeError} If the native batch cannot fit the canonical pending owner.
              */
             const adoptPendingColumns = (batch, complete) => {
@@ -8694,6 +8695,7 @@ null :
                     if (stagedIndexes !== null) { stagedIndexes.fill(-1, base, base + size); }
                     throw error;
                 }
+                return void 0;
             };
             const resolveExactCandidates = async () => {
                 if (exactCandidates.length === 0) { return; }
