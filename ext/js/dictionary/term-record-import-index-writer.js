@@ -99,7 +99,10 @@ export class SyncImportIndexWriter {
         await this._enqueue(() => this._writeBytes(bytes));
     }
 
-    /** @param {Uint8Array[]} chunks */
+    /**
+     * The caller retains the immutable chunk bytes until the write settles.
+     * @param {Uint8Array[]} chunks
+     */
     async writeChunks(chunks) {
         if (!Array.isArray(chunks)) { throw new TypeError('Import index chunks must be an array'); }
         const ownedChunks = [...chunks];
@@ -116,24 +119,38 @@ export class SyncImportIndexWriter {
                 return;
             }
             if (total === 0) { return; }
-            const scratch = new Uint8Array(Math.min(MAX_WRITE_BYTES, total));
+            /** @type {Uint8Array|null} */
+            let scratch = null;
             let sourceIndex = 0;
             let sourceOffset = 0;
             for (let completed = 0; completed < total;) {
-                const length = Math.min(scratch.byteLength, total - completed);
-                let filled = 0;
-                while (filled < length) {
-                    const source = ownedChunks[sourceIndex];
-                    const count = Math.min(source.byteLength - sourceOffset, length - filled);
-                    scratch.set(source.subarray(sourceOffset, sourceOffset + count), filled);
-                    sourceOffset += count;
-                    filled += count;
-                    if (sourceOffset === source.byteLength) {
-                        ++sourceIndex;
-                        sourceOffset = 0;
-                    }
+                const length = Math.min(MAX_WRITE_BYTES, total - completed);
+                while (ownedChunks[sourceIndex].byteLength === sourceOffset) {
+                    ++sourceIndex;
+                    sourceOffset = 0;
                 }
-                await this._writeBytes(scratch.subarray(0, length));
+                const first = ownedChunks[sourceIndex];
+                if (first.byteLength - sourceOffset >= length) {
+                    // The queued chunks own these bytes until the batch finishes.
+                    // Keep each OPFS request the same size as a coalesced write.
+                    await this._writeBytes(first.subarray(sourceOffset, sourceOffset + length));
+                    sourceOffset += length;
+                } else {
+                    scratch ??= new Uint8Array(Math.min(MAX_WRITE_BYTES, total));
+                    let filled = 0;
+                    while (filled < length) {
+                        const source = ownedChunks[sourceIndex];
+                        const count = Math.min(source.byteLength - sourceOffset, length - filled);
+                        scratch.set(source.subarray(sourceOffset, sourceOffset + count), filled);
+                        sourceOffset += count;
+                        filled += count;
+                        if (sourceOffset === source.byteLength) {
+                            ++sourceIndex;
+                            sourceOffset = 0;
+                        }
+                    }
+                    await this._writeBytes(scratch.subarray(0, length));
+                }
                 completed += length;
                 if (completed < total) { await this._yieldIfNeeded(); }
             }

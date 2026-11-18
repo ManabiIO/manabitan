@@ -669,6 +669,32 @@ static __attribute__((always_inline)) inline uint32_t advance_glossary_delimiter
     return next;
 }
 
+/* Short literal tags can consume their colon and following comma together. */
+static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t len, uint32_t start) {
+    if (start >= len || src[start] != ':') { return 0u; }
+    uint32_t value = start + 1u;
+    if (value < len && src[value] == ' ') { ++value; }
+    if (len - value < 4u) { return 0u; }
+    uint32_t prefix;
+    __builtin_memcpy(&prefix, src + value, sizeof(prefix));
+    switch (prefix) {
+        case UINT32_C(0x76696422): /* "div */
+            return len - value >= 6u && src[value + 4u] == '"' && src[value + 5u] == ',' ? value + 6u : 0u;
+        case UINT32_C(0x61707322): /* "spa */
+            return len - value >= 7u && src[value + 4u] == 'n' && src[value + 5u] == '"' && src[value + 6u] == ',' ? value + 7u : 0u;
+        case UINT32_C(0x62757222): /* "rub */
+            return len - value >= 7u && src[value + 4u] == 'y' && src[value + 5u] == '"' && src[value + 6u] == ',' ? value + 7u : 0u;
+        case UINT32_C(0x22747222): /* "rt" */
+        case UINT32_C(0x226c7522): /* "ul" */
+        case UINT32_C(0x22696c22): /* "li" */
+            return len - value >= 5u && src[value + 4u] == ',' ? value + 5u : 0u;
+        case UINT32_C(0x2c226122): /* "a", */
+            return value + 4u;
+        default:
+            return 0u;
+    }
+}
+
 static int parse_composite_span_impl(
     const uint8_t* src,
     uint32_t len,
@@ -723,6 +749,16 @@ static int parse_composite_span_impl(
                 if (!parse_string_span(src, len, i, &s_end)) { return 0; }
             }
             if (object_key) {
+                if (common_key_kind == COMMON_STRUCTURED_KEY_TAG) {
+                    const uint32_t tag_end = common_structured_tag_end(src, len, s_end);
+                    if (tag_end != 0u) {
+                        if (normalization_hint != 0 && src[s_end + 1u] == ' ') { *normalization_hint = 1u; }
+                        if (validate_top_level_objects && depth == 2u) { glossary_key = 0u; }
+                        state = OBJECT_KEY;
+                        i = advance_glossary_delimiter(src, len, tag_end - 1u, normalization_hint);
+                        continue;
+                    }
+                }
                 if (validate_top_level_objects && depth == 2u) {
                     glossary_key = common_key_kind != COMMON_STRUCTURED_KEY_NONE ?
                         (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT ? GLOSSARY_CONTENT_FIELD : 0u) :
@@ -2986,21 +3022,32 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
         } else {
 #if RECENT_CONTENT_DEDUP_WINDOW > 0
-            const uint32_t raw_content_signature = raw_term_content_quick_signature(src, parsed_row);
-            const uint32_t recent_start = row_count > RECENT_CONTENT_DEDUP_WINDOW ?
-                row_count - RECENT_CONTENT_DEDUP_WINDOW :
-                0u;
-            for (uint32_t candidate = row_count; candidate > recent_start;) {
-                --candidate;
-                if (
-                    recent_content_signatures[candidate % RECENT_CONTENT_DEDUP_WINDOW] == raw_content_signature &&
-                    raw_term_content_tokens_equal(src, parsed_row, &rows[candidate], candidate == glossary_witness)
-                ) {
-                    recent_match = candidate;
-                    break;
+            // The glossary witness is the newest matching raw glossary. If the
+            // remaining fields match too, it is the newest full-content match.
+            if (
+                glossary_witness != 0xffffffffu &&
+                raw_term_content_tokens_equal(src, parsed_row, &rows[glossary_witness], 1)
+            ) {
+                recent_match = glossary_witness;
+                recent_content_signatures[row_count % RECENT_CONTENT_DEDUP_WINDOW] =
+                    recent_content_signatures[glossary_witness % RECENT_CONTENT_DEDUP_WINDOW];
+            } else {
+                const uint32_t raw_content_signature = raw_term_content_quick_signature(src, parsed_row);
+                const uint32_t recent_start = row_count > RECENT_CONTENT_DEDUP_WINDOW ?
+                    row_count - RECENT_CONTENT_DEDUP_WINDOW :
+                    0u;
+                for (uint32_t candidate = row_count; candidate > recent_start;) {
+                    --candidate;
+                    if (
+                        recent_content_signatures[candidate % RECENT_CONTENT_DEDUP_WINDOW] == raw_content_signature &&
+                        raw_term_content_tokens_equal(src, parsed_row, &rows[candidate], candidate == glossary_witness)
+                    ) {
+                        recent_match = candidate;
+                        break;
+                    }
                 }
+                recent_content_signatures[row_count % RECENT_CONTENT_DEDUP_WINDOW] = raw_content_signature;
             }
-            recent_content_signatures[row_count % RECENT_CONTENT_DEDUP_WINDOW] = raw_content_signature;
 #endif
         }
         if (recent_match != 0xffffffffu) {

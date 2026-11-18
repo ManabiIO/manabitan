@@ -118,6 +118,26 @@ describe('fresh import index writer', () => {
         expect(timer).toHaveBeenCalled();
     });
 
+    test('uses owned views for complete blocks and coalesces only crossing blocks', async () => {
+        const blockBytes = 512 * 1024;
+        const first = new Uint8Array(blockBytes + 3).fill(17);
+        const second = new Uint8Array(blockBytes + 7).fill(31);
+        const file = memoryFile({shortWrite: blockBytes / 2});
+        const write = file.access.write;
+        /** @type {boolean[]} */
+        const direct = [];
+        file.access.write = (view, position) => {
+            direct.push(view.buffer === first.buffer || view.buffer === second.buffer);
+            return write(view, position);
+        };
+        const writer = await writerFor(file);
+        await writer.writeChunks([new Uint8Array(0), first, new Uint8Array(0), second]);
+        await writer.close();
+        expect(direct).toEqual([true, true, false, false, true]);
+        expect(file.calls.writes.map(({at}) => at)).toEqual([0, blockBytes / 2, blockBytes, blockBytes * 1.5, blockBytes * 2]);
+        expect(Buffer.compare(file.bytes, Buffer.concat([first, second]))).toBe(0);
+    });
+
     test('bounds a single large view and preserves its bytes', async () => {
         const file = memoryFile();
         const writer = await writerFor(file);
