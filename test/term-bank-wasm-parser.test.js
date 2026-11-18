@@ -297,6 +297,38 @@ describe('term-bank WASM parser', () => {
         ]);
     });
 
+    maybeTest.each([[2000, 0, 10000], [2600, 1, 40000]])(
+        'sizes structured banks with %i rows and reports %i fused fallbacks',
+        async (rowsPerBank, expectedFallbacks, expectedCapacity) => {
+            const glossary = '[{"type": "structured-content", "content": {"tag": "div", "content": "' + 'x'.repeat(600) + '"}}]';
+            const sources = Array.from({length: 4}, (_, bank) => {
+                const rows = Array.from({length: rowsPerBank}, (_, row) => {
+                    const sequence = bank * rowsPerBank + row + 1;
+                    return `["term-${sequence}", "", "", "", -3, ${glossary}, ${sequence}, ""]`;
+                });
+                return createCompressedTermBankSource(`[${rows.join(', ')}]`, 8);
+            });
+            const preloadedSource = await inflateCompressedTermBankSourcesWasm(sources);
+            let seen = 0;
+            let scoreSum = 0;
+            let sequenceSum = 0;
+            await parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => {
+                seen += chunk.rowCount;
+                for (const score of chunk.scoreList) { scoreSum += score; }
+                for (const sequence of chunk.sequenceList) { sequenceSum += sequence; }
+            }, 8192, {emitContentSlab: true, emitTokenBinaryContent: true, validateGlossaryTypes: true, preloadedSource});
+
+            const rows = 4 * rowsPerBank;
+            expect(seen).toBe(rows);
+            expect(scoreSum).toBe(-3 * rows);
+            expect(sequenceSum).toBe(rows * (rows + 1) / 2);
+            const profile = consumeLastTermBankWasmParseProfile();
+            expect(profile?.fusedParseAttempts).toBe(1);
+            expect(profile?.fusedParseFallbacks ?? 0).toBe(expectedFallbacks);
+            expect(profile?.metaCapacity).toBe(expectedCapacity);
+        },
+    );
+
     maybeTest('inflates binary ZIP media with exact lengths and CRCs', async () => {
         const media = [
             createCompressedTermBankSource('PNG\u0000image bytes', 8),
