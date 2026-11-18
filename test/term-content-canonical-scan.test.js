@@ -74,10 +74,10 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
             failedExactAppendRows: 0,
             snapshotBytes: 0,
             adoptedColumnBytes: 0,
-            adoptedPlanBytes: 0,
             synchronousRollbacks: 0,
         };
     function collect(controller) {
+        assert.equal(controller.stats.snapshotBytes, 0);
         for (const key of Object.keys(totals)) {
             totals[key] += controller.stats[key];
         }
@@ -462,9 +462,9 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
                     throw new Error('copy fault');
                 }
             },
-            afterPlanWrite() {
+            afterPendingCopy() {
                 if (fault === 'scatter') {
-                    throw new Error('post-plan fault');
+                    throw new Error('pending copy fault');
                 }
             },
         });
@@ -747,7 +747,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         'staged-partial',
         'hash1-partial',
         'hash2-partial',
-        'after-plan',
+        'after-pending-copy',
         'exact-descriptor',
     ]) {
         const f = fixture(40, {existing: true});
@@ -795,8 +795,8 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
                     };
                 }
             },
-            afterPlanWrite() {
-                if (fault === 'after-plan') {
+            afterPendingCopy() {
+                if (fault === 'after-pending-copy') {
                     fired = true;
                     throw new Error(fault);
                 }
@@ -843,7 +843,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         'late-row',
         'trap',
         'copy-second',
-        'after-plan',
+        'after-pending-copy',
         'exact-descriptor',
     ]) {
         const f = fixture(4101);
@@ -892,8 +892,8 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
                     throw new Error(fault);
                 }
             },
-            afterPlanWrite() {
-                if (fault === 'after-plan' && wave === 1) {
+            afterPendingCopy() {
+                if (fault === 'after-pending-copy' && wave === 1) {
                     fired = true;
                     throw new Error(fault);
                 }
@@ -917,7 +917,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         assert.equal(f.db._termEntryContentMetaHashPairPendingCount, 0);
         assert.equal(f.db._termEntryContentMetaFreeIndexes.length, 1);
         assert.equal(f.db._getTermEntryContentMetaByHashPair(2, f.chunk.contentMetaList[7]).offset, 104);
-        if (['copy-second', 'after-plan', 'exact-descriptor'].includes(fault)) {
+        if (['copy-second', 'after-pending-copy', 'exact-descriptor'].includes(fault)) {
             assert.ok(fired);
         }
         collect(c);

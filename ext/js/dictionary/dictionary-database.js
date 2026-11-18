@@ -8653,9 +8653,9 @@ null :
             /**
              * Atomically adopts one native segment's owned columns. Only the
              * newly appended tail is touched; accepted segments remain owned by
-             * the ordinary outer rollback. The helper restores plan snapshots
-             * and its insertion journal if any synchronous step throws.
-             * @param {{columns: Uint32Array[], planStart: number, epochs: Uint32Array, indexes: Uint32Array}} batch
+             * the ordinary outer rollback. The native scanner restores hash
+             * metadata on failure and this helper clears any copied IDs.
+             * @param {{columns: Uint32Array[], planStart: number}} batch
              * @param {() => void} complete Build bounded exact descriptors before committing the segment.
              * @throws {RangeError} If the native batch cannot fit the canonical pending owner.
              */
@@ -8744,7 +8744,7 @@ null :
                     persistedLookupRequired,
                     reserveMetadata,
                     adoptPendingColumns,
-                    getPendingState: () => ({pendingBase: pendingContentCount, pendingEpoch: pendingPlanEpoch}),
+                    getPendingCount: () => pendingContentCount,
                     exactCandidates,
                     resolveExactCandidates,
                 }, nativeScanMetrics);

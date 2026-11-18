@@ -56,8 +56,8 @@ uint32_t canonical_prefix_bytes(void) { return PREFIX; }
 // resolved count, dense count, reserved. The journal count is volatile so a
 // trap cannot hide an insertion from the synchronous JS rollback owner.
 // Config at 1088: pointers x10, capacity, dense, rowCount, first, last, cursor,
-// contentRowStart, baseOffset, bufferLength, lookup, reserve, trapAfter,
-// pendingBase, epoch. trapAfter is used only by internal fault tests.
+// contentRowStart, baseOffset, bufferLength, lookup, reserve, trapAfter. The
+// old projection slots are reserved. trapAfter is for internal fault tests.
 __attribute__((export_name("scan_canonical")))
 int32_t scan_canonical(void) {
     volatile uint32_t *h = (volatile uint32_t *)(uintptr_t)1024u;
@@ -86,7 +86,6 @@ int32_t scan_canonical(void) {
     const uint32_t *meta = U32(META), *identity = U32(IDENT), *rows = U32(ROWS), *sigs = U32(SIGS);
     const uint8_t *flags = U8(FLAGS);
     uint32_t *out = U32(OUT), *journal = U32(JOURNAL), *exact = U32(EXACT);
-    uint32_t *epochs = U32(EPOCHS), *indexes = U32(INDEXES);
     const uint32_t n = c[14] - c[13], mask = c[1] - 1;
     for (uint32_t i = c[15]; i < n; ++i) {
         const uint32_t unique = c[13] + i, global = rows[i];
@@ -155,8 +154,6 @@ int32_t scan_canonical(void) {
         out[3u * MAX_ROWS + j] = m[3];
         out[4u * MAX_ROWS + j] = unique;
         out[5u * MAX_ROWS + j] = staged;
-        epochs[i] = c[23];
-        indexes[i] = c[22] + j;
     }
     return 0;
 }
